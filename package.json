@@ -1,0 +1,22 @@
+{
+  "name": "ololord.js",
+  "version": "0.1.0-pa",
+  "description": "Imageboard engine in JavaScript to rule them all",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ololoepepe/ololord.js.git"
+  },
+  "keywords": [
+    "imageboard"
+  ],
+  "author": "Andrey Bogdanov",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/ololoepepe/ololord.js/issues"
+  },
+  "homepage": "https://github.com/ololoepepe/ololord.js"
+}
