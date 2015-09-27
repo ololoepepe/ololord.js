@@ -2,7 +2,7 @@
   "name": "ololord.js",
   "version": "0.1.0-pa",
   "description": "Imageboard engine in JavaScript to rule them all",
-  "main": "main.js",
+  "main": "bin/ololord.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,5 +18,19 @@
   "bugs": {
     "url": "https://github.com/ololoepepe/ololord.js/issues"
   },
-  "homepage": "https://github.com/ololoepepe/ololord.js"
+  "homepage": "https://github.com/ololoepepe/ololord.js",
+  "dependencies": {
+    "enforce": "^0.1.6",
+    "express": "^4.13.3",
+    "handlebars": "^4.0.2",
+    "localize": "^0.4.7",
+    "node-getopt": "^0.2.3",
+    "orm": "^2.1.27",
+    "orm-transaction": "0.0.2",
+    "q": "^1.4.1",
+    "q-io": "^1.13.1",
+    "q-orm": "0.0.3",
+    "sequelize": "^3.9.0",
+    "sqlite3": "^3.1.0"
+  }
 }

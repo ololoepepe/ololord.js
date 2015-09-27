@@ -1,0 +1,14 @@
+{
+    "server": {
+        "port": 8080
+    },
+    "site": {
+        "protocol": "http",
+        "domain": "localhost:8080"
+    },
+    "board": {
+        "b": {
+            "captchaQuota": 10
+        }
+    }
+}

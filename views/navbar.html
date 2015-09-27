@@ -1,0 +1,30 @@
+<div class="navbar">
+    {{#each boards}}
+        <span class="navbarItem navbarItemBoard">[<a href="/{{sitePathPrefix}}{{this.name}}"
+              title="{{this.title}}">{{this.name}}</a>] </span>
+    {{/each}}
+    {{#xunless mode.name "==" "ascetic"}}
+        <span class="navbarItem">[<a href="/{{sitePathPrefix}}playlist"
+                                     title="{{toPlaylistPageText}}"><img src="/{{sitePathPrefix}}img/playlist.png"></a>]</span>
+    {{/xunless}}
+    <span class="navbarItem">[<a href="/{{sitePathPrefix}}markup"
+                                 title="{{toMarkupPageText}}"><img src="/{{sitePathPrefix}}img/markup.png"></a>]</span>
+    <span class="navbarItem">[<a href="/{{sitePathPrefix}}"
+                                 title="{{toHomePageText}}"><img src="/{{sitePathPrefix}}img/homepage.png"></a>]</span>
+    <span class="navbarItem">[<a href="/{{sitePathPrefix}}frame?path={{path}}" target="_top"
+                                 title="{{framedVersionText}}"><img src="/{{sitePathPrefix}}img/frame.png"></a>]</span>
+    <span class="navbarItem">[<a href="/{{sitePathPrefix}}faq"
+                                 title="{{toFaqPageText}}"><img src="/{{sitePathPrefix}}img/question.png"></a>]</span>
+    {{#xif moder ">=" 1}}
+        <span class="navbarItem">[<a href="/{{sitePathPrefix}}manage"
+                                     title="{{toManagePageText}}"><img src="/{{sitePathPrefix}}img/manage.png"></a>]</span>
+    {{/xif}}
+    {{#each customLinks}}
+        {{#if this.imgUrl}}
+            <span class="navbarItem">[<a href="{{this.url}}" target="{{this.target}}"
+                                         title="{{this.text}}"><img src="{{this.imgUrl}}"></a>]</span>
+        {{else}}
+            <span class="navbarItem">[<a href="{{this.url}}" target="{{this.target}}">{{this.text}}</a>]</span>
+        {{/if}}
+    {{/each}}
+</div>
