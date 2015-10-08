@@ -1,0 +1,37 @@
+<div class="navbar">
+    {{~it.boards :board}}
+        <span class="navbarItem navbarItemBoard">[<a href="/{{=it.site.pathPrefix}}{{=board.name}}"
+              title="{{=board.title}}">{{=board.name}}</a>] </span>
+    {{~}}
+    {{? it.mode.name != "ascetic"}}
+        <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}playlist"
+                                     title="{{=it.tr.toPlaylistPageText}}"><img src="/{{=it.site.pathPrefix}}img/playlist.png"
+                                                                                width="16" height="16"></a>]</span>
+    {{?}}
+    <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}markup"
+                                 title="{{=it.tr.toMarkupPageText}}"><img src="/{{=it.site.pathPrefix}}img/markup.png"
+                                                                          width="16" height="16"></a>]</span>
+    <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}"
+                                 title="{{=it.tr.toHomePageText}}"><img src="/{{=it.site.pathPrefix}}img/homepage.png"
+                                                                        width="16" height="16"></a>]</span>
+    <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}frame?path={{=it.path}}" target="_top"
+                                 title="{{=it.tr.framedVersionText}}"><img src="/{{=it.site.pathPrefix}}img/frame.png"
+                                                                           width="16" height="16"></a>]</span>
+    <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}faq"
+                                 title="{{=it.tr.toFaqPageText}}"><img src="/{{=it.site.pathPrefix}}img/question.png"
+                                                                       width="16" height="16"></a>]</span>
+    {{? it.userLevel >= "MODER"}}
+        <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}manage"
+                                     title="{{=it.tr.toManagePageText}}"><img src="/{{=it.site.pathPrefix}}img/manage.png"
+                                                                              width="16" height="16"></a>]</span>
+    {{?}}
+    {{~ it.customLinks :link}}
+        {{? link.imgUrl}}
+            <span class="navbarItem">[<a href="{{=link.url}}" target="{{=link.target}}"
+                                         title="{{=link.text}}"><img src="{{=link.imgUrl}}"
+                                                                    width="16" height="16"></a>]</span>
+        {{??}}
+            <span class="navbarItem">[<a href="{{=link.url}}" target="{{=link.target}}">{{=link.text}}</a>]</span>
+        {{?}}
+    {{~}}
+</div>

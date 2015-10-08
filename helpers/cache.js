@@ -1,15 +1,7 @@
-var Q = require("q");
-
 var cache = {};
 
 var get = function(key, def) {
     return cache.hasOwnProperty(key) ? cache[key].data : def;
-};
-
-var getp = function(key, def) {
-    var deferred = Q.defer();
-    deferred.resolve(get(key, def));
-    return deferred.promise;
 };
 
 var set = function(key, value, group) {
@@ -23,6 +15,5 @@ var set = function(key, value, group) {
 
 module.exports = {
     "set": set,
-    "get": get,
-    "getp": getp
+    "get": get
 };

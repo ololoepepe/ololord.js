@@ -1,8 +1,9 @@
 var Localize = require("localize");
+var Promise = require("promise");
+var promisify = require("promisify-node");
 
+var Cache = require("../helpers/cache");
 var config = require("../helpers/config");
-var Database = require("../helpers/database");
-var promisify = require("../helpers/promisify.js");
 var Tools = require("../helpers/tools");
 
 //var loc = new Localize("../translations");
@@ -22,12 +23,15 @@ var captchaQuota = {};
 var Board = function(name, title, options) {
     Object.defineProperty(this, "name", { value: name });
     Object.defineProperty(this, "title", { value: title });
+    Object.defineProperty(this, "defaultUserName", { value: ((options && options.defaultUserName)
+        ? options.defaultUserName : "Anonymous") });
     defineSetting(this, "archiveLimit", 0);
     defineSetting(this, "bumpLimit", 500);
     defineSetting(this, "captchaQuota", 0);
     defineSetting(this, "draftsEnabled", true);
     defineSetting(this, "enabled", true);
     defineSetting(this, "hidden", false);
+    defineSetting(this, "maxLastPosts", 3);
     defineSetting(this, "postingEnabled", true);
     defineSetting(this, "postLimit", 1000);
     defineSetting(this, "showWhois", false);
@@ -45,77 +49,72 @@ var Board = function(name, title, options) {
         return files[Tools.randomInt(0, files.length - 1)];
     };
     if (banners[this.name])
-        return promisify.proxy(randomFile(banners[this.name]));
+        return Promise.resolve(randomFile(banners[this.name]));
     return QFS.readdir(__dirname + "/../public/img/banners/" + this.name).then(function(files) {
         banners[this.name] = files;
-        return promisify.proxy(files);
+        return Promise.resolve(files);
     });
 };
 
 /*public*/ Board.prototype.getUserCaptchaQuota = function(userIp) {
     var _this = this;
-    return Database.getModel(Database.ModelType.CaptchaQuota).then(function(model) {
-        return model.findOne({
+    return Database.CaptchaQuota.findOne({
+        boardName: _this.name,
+        userIp: userIp
+    });
+};
+
+/*public*/ Board.prototype.captchaSolved = function(userIp) {
+    var _this = this;
+    var _previous;
+    return Database.CaptchaQuota.db.transaction(function(t) {
+        return Database.getOrCreate(Database.CaptchaQuota, {
             boardName: _this.name,
             userIp: userIp
+        }).then(function(item) {
+            if (!item)
+                return Promise.reject("Internal database error");
+            _previous = item.quota;
+            item.quota = _this.captchaQuota;
+            return item.save();
         });
+    }).then(function() {
+        return Promise.resolve(_previous);
     });
 };
 
-/*public*/ Board.prototype.captchaSolved = function(userIp, transaction) {
+/*public*/ Board.prototype.captchaUsed = function(userIp) {
     var _this = this;
     var _model;
     var _previous;
-    var _t;
-    return Database.getModel(Database.ModelType.CaptchaQuota).then(function(model) {
-        _model = model;
-        if (transaction)
-            return promisify.proxy(transaction);
-        return model.db.transaction();
-    }).then(function(t) {
-        _t = t;
-        return Database.getOrCreate(_model, {
+    return model.db.transaction(function(t) {
+        return Database.CaptchaQuota.findOne({
             boardName: _this.name,
             userIp: userIp
-        }, { transaction: _t });
-    }).then(function(item) {
-        if (!item)
-            return promisify.error("Internal database error");
-        _previous = item.quota;
-        item.quota = _this.captchaQuota;
-        return item.save({ transaction: _t });
+        }).then(function(item) {
+            if (!item) {
+                _previous = null;
+                return Promise.resolve();
+            }
+            _previous = item.quota;
+            --item.quota;
+            return (item.quota > 0) ? item.save() : item.remove();
+        });
     }).then(function() {
-        return promisify.proxy(_previous);
+        return Promise.resolve(_previous);
     });
 };
 
-/*public*/ Board.prototype.captchaUsed = function(userIp, transaction) {
-    var _this = this;
-    var _model;
-    var _previous;
-    var _t;
-    return Database.getModel(Database.ModelType.CaptchaQuota).then(function(model) {
-        _model = model;
-        if (transaction)
-            return promisify.proxy(transaction);
-        return model.db.transaction();
-    }).then(function(t) {
-        _t = t;
-        return _model.findOne({
-            boardName: _this.name,
-            userIp: userIp
-        }, { transaction: _t });
-    }).then(function(item) {
-        if (!item) {
-            _previous = null;
-            return promisify.proxy();
-        }
-        _previous = item.quota;
-        --item.quota;
-        return (item.quota > 0) ? item.save({ transaction: _t }) : item.remove({ transaction: _t });
-    }).then(function() {
-        return promisify.proxy(_previous);
-    });
+/*public*/ Board.prototype.isCaptchaEngineSupported = function(engineName) {
+    if (typeof engineName != "string")
+        return;
+    return Tools.contains(this.supportedCaptchaEngines, engineName);
+};
+
+/*public*/ Board.prototype.isFileTypeSupported = function(fileType) {
+    if (typeof fileType != "string")
+        return;
+    return Tools.contains(this.supportedFileTypes, fileType);
 };
 
 Board.board = function(name) {
@@ -152,12 +151,21 @@ Board.boardNames = function(includeHidden) {
     return list;
 };
 
-/*public*/ /*lord.PopupMessage.prototype.show = function() {
-    if (this.hideTimer)
-        return;
-    document.body.appendChild(this.msg);
-    lord.popups.push(this);
-    this.hideTimer = setTimeout(this.hide.bind(this), this.timeout);
-};*/
+Board.sortThreadsByDate = function(a, b) {
+    if (a.fixed == b.fixed) {
+        if (a.updatedAt < b.updatedAt)
+            return 1;
+        else if (a.updatedAt > b.updatedAt)
+            return -1;
+        else
+            return 0;
+    } else if (a.fixed) {
+        return -1;
+    } else {
+        return 1;
+    }
+};
 
 module.exports = Board;
+
+var Database = require("../helpers/database");

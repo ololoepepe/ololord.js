@@ -3,7 +3,6 @@ var express = require("express");
 //var cache = require("../helpers/cache");
 var config = require("../helpers/config");
 var controller = require("../helpers/controller");
-var promisify = require("../helpers/promisify.js");
 var homepage = require("../models/homepage");
 
 var router = express.Router();

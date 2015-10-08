@@ -1,0 +1,252 @@
+<div id="post{{=post.number}}" class="{{? post.isOp}}opPost{{??}}post{{?}}{{? post.ownIp}} ownIp{{?}}{{? post.opIp}} opIp{{?}}{{=it.shrinkPostsClass}}">
+    <a id="{{=post.number}}"></a>
+    <input name="rawHtml" type="hidden" value="{{=post.rawHtml}}" />
+    <input name="email" type="hidden" value="{{=post.email}}" />
+    <input name="name" type="hidden" value="{{=post.rawName}}" />
+    <input name="subject" type="hidden" value="{{=post.rawSubject}}" />
+    <input name="draft" type="hidden" value="{{=post.draft}}" />
+    <input name="markupMode" type="hidden" value="{{=post.markupMode}}" />
+    <div class="postHeader">
+        {{? post.isOp}}
+            {{? thread.fixed}}
+                <img src="/{{=it.site.pathPrefix}}img/fixed.png" title="{{=it.fixedText}}">
+            {{?}}
+            {{? thread.closed}}
+                <img src="/{{=it.site.pathPrefix}}img/closed.png" title="{{=it.closedText}}">
+            {{?}}
+            {{? thread.postLimitReached}}
+                <img src="/{{=it.site.pathPrefix}}img/postlimit.png" title="{{=it.postLimitReachedText}}">
+            {{?? thread.bumpLimitReached}}
+                <img src="/{{=it.site.pathPrefix}}img/bumplimit.png" title="{{=it.bumpLimitReachedText}}">
+            {{?}}
+        {{?}}
+        {{? post.draft}}
+            <img src="/{{=it.site.pathPrefix}}img/edit.png" title="{{=it.draftText}}" />
+        {{?}}
+        <span class="postSubject{{? !post.subject}} defaultPostSubject{{?}} {{=it.deviceType}}">
+            {{=post.subject}}
+        </span>
+        {{? post.showTripcode && post.userLevel >= "USER"}}
+            <img src="/{{=it.site.pathPrefix}}img/registered.png" title="{{=it.registeredText}}">
+        {{?}}
+        <span class="someName {{=it.deviceType}}">
+            {{? post.email}}
+                <a class="mailtoName" href="mailto:{{=post.email}}">{{=post.name}}</a>
+            {{??}}
+                {{? !post.name}}
+                    <span class="userName defaultUserName">{{=it.defaultUserName}}</span>
+                {{??}}
+                    {{? post.userLevel >= "ADMIN"}}
+                        {{{this.name}}} <!--TODO-->
+                    {{?? post.userLevel >= "MODER"}}
+                        <span class="moderName">{{=post.name}}</span>
+                    {{??}}
+                        <span class="userName">{{=post.name}}</span>
+                    {{?}}
+                {{?}}
+            {{?}}
+        </span>
+        {{? post.ownIp && post.signAsOp}}
+            <span class="opSign">[OP]</span>
+        {{?}}
+        {{? post.showTripcode && post.tripcode}}
+            <span class="tripcode {{=it.deviceType}}">{{=post.tripcode}}</span>
+        {{?}}
+        {{? it.showWhois && post.flagName}}
+            {{? post.cityName}}
+                <img src="/{{=it.site.pathPrefix}}img/flag/{{=post.flagName}}"
+                     title="{{=post.cityName}}, {{=post.countryName}}">
+            {{??}}
+                <img src="/{{=it.site.pathPrefix}}img/flag/{{=post.flagName}}" title="{{=post.countryName}}">
+            {{?}}
+        {{?}}
+        <span name="dateTime" class="postDateTime {{=it.deviceType}}">{{=post.createdAt}}</span>
+        {{? it.threads}}
+            #<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/thread/{{=thread.opPost.number}}.html#{{? thread.postingEnabled}}i{{?}}{{=post.number}}"
+                name="number" {{? it.user.level >= "MODER"}}title="{{=post.posterIp}}"{{?}}>{{=post.number}}</a>
+        {{??}}
+            #<a href="#{{=post.number}}" {{? it.user.level >= "MODER"}}title="{{=post.posterIp}}"{{?}}
+                {{? thread.postingEnabled}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}}
+                name="number">{{=post.number}}</a>
+        {{?}}
+        <span class="postSequenceNumber">{{=post.sequenceNumber}}</span>
+        {{? it.cookies.mode != "ascetic" && thread.postingEnabled && thread.postLimitReached}}
+            [<a href="javascript:lord.quickReply({{=post.number}});" title="{{=it.quickReplyText}}"
+                name="quickReply">&gt;&gt;</a>]
+        {{?}}
+        {{? it.mode != "ascetic" || it.loggedIn}}
+            <span class="{{=it.deviceType}} postActions">
+                <img src="/{{=it.site.pathPrefix}}img/post_actions.png" title="{{=it.postActionsText}}">
+                {{? (it.user.level >= "MODER" || post.draft) && (post.fileInfos.length < it.maxFileCount)}}
+                    <a name="addFileButton" target="_blank"
+                       href="/{{=it.site.pathPrefix}}add_file?board={{=it.board.name}}&post={{=post.number}}"
+                       {{? it.mode != "ascetic"}}onclick="lord.addFile('{{=it.board.name}}', {{=post.number}}); return false;"{{?}}>
+                        <img src="/{{=it.site.pathPrefix}}img/add.png" title="{{=it.addFileText}}" /></a>
+                {{?}}
+                {{? it.user.level >= "MODER" || post.draft}}
+                    <a name="editButton" target="_blank"
+                       href="/{{=it.site.pathPrefix}}edit_post?board={{=it.board.name}}&post={{=post.number}}"
+                       {{? it.mode != "ascetic"}}onclick="lord.editPost('{{=it.board.name}}', {{=post.number}});"{{?}}>
+                        <img src="/{{=it.site.pathPrefix}}img/edit.png" title="{{=it.editPostText}}" /></a>
+                {{?}}
+                {{? it.user.level >= "MODER" && post.isOp}}
+                    {{? it.mode != "ascetic"}}
+                        <a name="fixButton"
+                           onclick="lord.setThreadFixed('{{=it.board.name}}', {{=post.number}}, {{=!thread.fixed}}); return false;">
+                            <img src="/{{=it.site.pathPrefix}}img/{{? thread.fixed}}unfix{{??}}fixed{{?}}.png"
+                                 title="{{? thread.fixed}}{{=it.unfixThreadText}}{{??}}{{=it.fixThreadText}}{{?}}" /></a>
+                        <a name="closeButton"
+                           onclick="lord.setThreadOpened('{{=it.board.name}}', {{=post.number}}, {{=thread.closed}}); return false;">
+                            <img src="/{{=it.site.pathPrefix}}img/{{? thread.closed}}open{{??}}closed{{?}}.png"
+                                 title="{{? thread.closed}}{{=it.openThreadText}}{{??}}{{=it.closeThreadText}}{{?}}" /></a>
+                    {{??}}
+                        <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
+                              action="/{{=it.site.pathPrefix}}action/set_thread_fixed">
+                            <input type="hidden" name="boardName" value="{{=it.board.name}}" />
+                            <input type="hidden" name="threadNumber" value="{{=post.number}}" />
+                            <input type="hidden" name="fixed" value="{{=!thread.fixed}}" />
+                            <input type="image" name="deleteFileButton"
+                                   src="/{{=it.site.pathPrefix}}img/{{? thread.fixed}}unfix{{??}}fixed{{?}}.png"
+                                   title="{{? thread.fixed}}{{=it.unfixThreadText}}{{??}}{{=it.fixThreadText}}{{?}}" />
+                        </form>
+                        <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
+                              action="/{{=it.site.pathPrefix}}action/set_thread_opened">
+                                <input type="hidden" name="boardName" value="{{=it.board.name}}" />
+                                <input type="hidden" name="threadNumber" value="{{=post.number}}" />
+                                <input type="hidden" name="opened" value="{{=thread.closed}}" />
+                                <input type="image" name="deleteFileButton"
+                                       src="/{{=it.site.pathPrefix}}img/{{? thread.closed}}open{{??}}closed{{?}}.png"
+                                       title="{{? thread.cosed}}{{=it.openThreadText}}{{??}}{{=it.closeThreadText}}{{?}}" />
+                        </form>
+                    {{?}}
+                    <a name="moveButton" target="_blank"
+                       href="/{{=it.site.pathPrefix}}move_thread?board={{=it.board.name}}&thread={{=post.number}}">
+                       {{? it.mode != "ascetic"}}onclick="lord.moveThread('{{=it.board.name}}', {{=post.number}}); return false;"{{?}}
+                        <img src="/{{=it.site.pathPrefix}}img/move.png" title="{{=it.moveThreadText}}" /></a>
+                {{?}}
+                {{? it.user.level >= "MODER" }}
+                    {{? it.mode != "ascetic"}}
+                        <a name="ipButton"
+                           href="javascript:void(prompt('IP:', '{{post.user.ip}}'));">
+                            <img src="/{{=it.site.pathPrefix}}img/ip.png" title="{{=it.showUserIpText}}" /></a>
+                    {{?}}
+                    <a name="banButton" target="_blank"
+                       href="/{{=it.site.pathPrefix}}ban_user?board={{=it.board.name}}&post={{=post.number}}"
+                       {{? it.mode != "ascetic"}}onclick="lord.banUser('{{=it.board.name}}', {{=post.number}}); return false;"{{?}}>
+                            <img src="/{{=it.site.pathPrefix}}img/ban.png" title="{{=it.banUserText}}" /></a>
+                {{?}}
+                {{? it.mode != "ascetic"}}
+                    {{? post.isOp}}
+                        {{? it.thread}}
+                            <a name="downloadButton" onclick="lord.downloadThread(); return false;">
+                                <img src="/{{=it.site.pathPrefix}}img/download.png"
+                                     title="{{=it.downloadThreadText}}" /></a>
+                        {{?}}
+                        <a name="addToFavoritesButton">
+                            <img src="/{{=it.site.pathPrefix}}img/favorite.png"
+                                 title="{{=it.addThreadToFavoritesText}}" /></a>
+                    {{?}}
+                    <a name="complainButton" onclick="lord.complain(); return false;">
+                        <img src="/{{=it.site.pathPrefix}}img/complain.png" title="{{=it.complainText}}" /></a>
+                {{?}}
+                {{? it.mode != "ascetic"}}
+                    <a name="deleteButton"
+                       onclick="lord.deletePost('{{=it.board.name}}', {{=post.number}}, true); return false;"> <!--TODO: last parameter, 'fromThread'-->
+                        <img src="/{{=it.site.pathPrefix}}img/delete.png"
+                             title="{{? post.isOp}}{{=it.deleteThreadText}}{{??}}{{=it.deletePostText}}{{?}}" /></a>
+                {{??}}
+                    <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/delete_post"
+                          enctype="multipart/form-data" class="inlineForm">
+                        <input type="hidden" name="boardName" value="{{=it.board.name}}" />
+                        <input type="hidden" name="postNumber" value="{{=post.number}}" />
+                        <input type="image" name="deleteFileButton" src="/{{=it.site.pathPrefix}}img/delete.png"
+                               title="{{? post.isOp}}{{=it.deleteThreadText}}{{??}}{{=it.deletePostText}}{{?}}" />
+                    </form>
+                {{?}}
+                {{? it.mode != "ascetic"}}
+                    <a name="hideButton" id="hidePost{{=post.number}}"
+                       onclick="lord.setPostHidden('{{=it.board.name}}', {{=post.number}}); return false;">
+                        <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.showHidePostText}}" /></a>
+                {{?}}
+            </sppan>
+        {{?}}
+        {{? post.isOp}}
+            <span name="toThread" class="postToThread {{=it.deviceType}}">
+                {{? it.deviceType != "mobile"}}
+                    [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"
+                        name="toThreadLink">{{=it.toThread}}</a>]
+                {{??}}
+                    <a name="toThreadLink"
+                       href="/{{=it.site.pathPrefix}}{{=post.board.name}}/res/{{=post.number}}.html"><button class="button">{{=it.toThread}}</button></a>
+                {{?}}
+            </span>
+        {{?}}
+    </div>
+    <table class="threadPost">
+        <tbody>
+            {{? it.customBodyPart && it.customBodyPart[0]}}
+                {{ out += it.customBodyPart[0](it, thread, post); }}
+            {{?}}
+            <tr>
+                {{~post.fileInfos :fileInfo}}
+                    {{#def.postFile}}
+                {{~}}
+                {{? (it.deviceType != "mobile" && post.fileInfos.length < 2) || it.deviceType == "mobile" && post.fileInfos.length < 1}}
+                    <td class="postText">
+                        <blockquote id="post{{=post.number}}Text"
+                                    {{? it.thread}}class="blockquoteThread"{{?}}>{{=post.text}}</blockquote>
+                    </td>
+                {{??}}
+                    <td class="shrink"></td>
+                {{?}}
+            </tr>
+            {{? it.customBodyPart && it.customBodyPart[1]}}
+                {{ out += it.customBodyPart[1](it, thread, post); }}
+            {{?}}
+            {{? post.fileInfos.length >= 2 || (it.deviceType == "mobile" && post.fileInfos.length >= 1)}}
+                <tr>
+                    <td colspan="{{ out += (post.fileInfos.length + 2); }}">
+                        <blockquote id="post{{=post.number}}Text"
+                                    {{? it.thread}}class="blockquoteThread"{{?}}>{{=post.text}}</blockquote>
+                    </td>
+                </tr>
+            {{?}}
+            {{? it.customBodyPart && it.customBodyPart[2]}}
+                {{ out += it.customBodyPart[2](it, thread, post); }}
+            {{?}}
+            {{? post.updatedAt}}
+                <tr>
+                    <td colspan="{{ out += (post.fileInfos.length + 2); }}">
+                        <span class="modificationDateTime">{{=it.modificationDateTimeText}} {{=post.updatedAt}}</span>
+                    </td>
+                </tr>
+            {{?}}
+            {{? it.customBodyPart && it.customBodyPart[3]}}
+                {{ out += it.customBodyPart[3](it, thread, post); }}
+            {{?}}
+            {{? post.bannedFor}}
+                <tr>
+                    <td colspan="{{ out += (post.fileInfos.length + 2); }}">
+                        <span class="bannedFor">{{=it.bannedForText}}</span>
+                    <td>
+                </tr>
+            {{?}}
+            {{? it.customBodyPart && it.customBodyPart[4]}}
+                {{ out += it.customBodyPart[4](it, thread, post); }}
+            {{?}}
+            <tr name="referencedByTr" {{? post.referringPosts.length < 1}}style="display: none;"{{?}}>
+                <td colspan="{{ out += (post.referringPosts.length + 2); }}">
+                    <span name="referencedBy" class="referencedBy">
+                        {{=it.referencedByText}}
+                        {{~post.referringPosts :reference}}
+                            {{#def.postReference}}
+                        {{~}}
+                    </span>
+                <td>
+            </tr>
+            {{? it.customBodyPart && it.customBodyPart[5]}}
+                {{ out += it.customBodyPart[5](it, thread, post); }}
+            {{?}}
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{#def.head}}
+<body>
+{{#def.navbar}}
+{{~it.threads :thread}}
+    <hr />
+    <div id="thread{{=thread.opPost.number}}" class="thread">
+        {{~[thread.opPost] :post}}
+            {{#def.post}}
+        {{~}}
+    </div>
+    {{? thread.omittedPosts > 0}}
+        <div id="threadOmitted{{=thread.opPost.number}}" class="omittedPosts">
+            {{=it.omittedPostsText}} {{=thread.omittedPosts}}
+        </div>
+    {{?}}
+    <div id="threadPosts{{=thread.opPost.number}}" class="threadPosts">
+        {{~thread.lastPosts :post}}
+            {{#def.post}}
+        {{~}}
+    </div>
+{{~}}
+</body>
+</html>

@@ -1,2 +1,8 @@
+db
 db.sqlite
 node_modules
+public/*
+!public/css
+!public/img
+!public/js
+!public/video

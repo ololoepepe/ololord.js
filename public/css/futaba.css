@@ -1,0 +1,990 @@
+/*
+    Base
+*/
+
+body {
+    background-color: #FFFFEE;
+    color: #800000;
+}
+
+body.mobile {
+    -moz-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    /*text-size-adjust: 100%;*/
+    font-size: 14px;
+}
+
+a {
+    color: #0000EE;
+}
+
+a.expandCollapse {
+    color: #444444;
+    cursor: pointer;
+}
+
+a:hover {
+    color: #DD0000
+}
+
+a.expandCollapse:hover {
+    color: #666666;
+    cursor: pointer
+}
+
+audio {
+    width: 500px;
+}
+
+hr {
+    color: #808080; /*IE*/
+    background-color: #808080; /*Firefox, Opera, Safari*/
+    border: 0px none;
+    height: 1px;
+    clear: both;
+}
+
+.select {
+    background: #FBFBEA;
+    cursor: pointer;
+}
+
+.input {
+}
+
+.button {
+    background: #FBFBEA;
+    cursor: pointer;
+}
+
+.checkbox {
+    background: #FBFBEA;
+    cursor: pointer;
+}
+
+.popup {
+    background-color: #F0E0D6;
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    z-index: 9950;
+    vertical-align: middle;
+    text-align: center;
+    padding: 5px 5px 5px 5px;
+}
+
+.critical {
+    color: red;
+    border: 1px dotted red;
+}
+
+.warning {
+    color: orange;
+    border: 1px dotted orange;
+}
+
+.favorites {
+    background-color: #F0E0D6;
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    max-width: 90%;
+    max-height: 90%;
+    z-index: 9980;
+    padding: 2px 2px 2px 2px;
+}
+
+.favorites > div {
+    background-color: #FBFBEA;
+    padding: 2px 2px 2px 2px;
+}
+
+.favorites > span {
+    position: absolute;
+    bottom: 10px;
+    right: 20px;
+}
+
+.centerForm {
+    /*width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;*/
+}
+
+.inlineForm {
+    display: inline;
+}
+
+.scrollAreaH60 {
+    overflow: auto;
+    max-height: 60px;
+    border: 1px solid #800000;
+}
+
+.hidePostformRulesButton {
+    text-decoration: none;
+    margin-left: 30px;
+    cursor: pointer;
+}
+
+.hidePostformMarkupButton {
+    text-decoration: none;
+    text-align: right;
+    font-size: 0.7em;
+    margin-left: auto;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.hiddenPostLink {
+    text-decoration: line-through;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+.postSequenceNumber {
+    color: red;
+    font-size: 75%;
+}
+
+.hiddenPostList > div:nth-child(even) {
+    background-color: #FFFFEE;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
+/*
+    Ban
+*/
+
+.ban {
+    background-color: #F0E0D6;
+    margin-left: 80px;
+    margin-right: 80px;
+}
+
+/*
+    Banner
+*/
+
+.banner {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+/*
+    Board
+*/
+
+#postForm {
+    overflow-x: auto;
+}
+
+blockquote {
+    margin-top: 14.4px;
+    margin-left: 25px;
+    margin-right: 25px;
+    margin-bottom: 14.4px;
+    padding-top: 10px;
+    overflow-y: auto;
+    overflow-x: auto;
+    max-height: 300px;
+    box-sizing: border-box;
+    max-width: 1200px;
+    word-wrap: break-word;
+}
+
+blockquote.expand {
+    max-height: none;
+}
+
+span.spoiler, span.spoiler a, span.spoiler .cspoilerTitle {
+    background: #F0D0B6;
+    color: #F0D0B6;
+}
+
+span.spoiler:hover {
+    color: #800000;
+}
+
+span.spoiler:hover a {
+    color: #DD0000;
+}
+
+span.spoiler:hover .cspoilerTitle {
+    color: #E08060;
+}
+
+span.tooltip {
+    color: #E08060;
+    cursor: help;
+}
+
+span.newPostCount {
+    color: red;
+    font-size: 75%;
+}
+
+.postLimitReached {
+    color: red;
+}
+
+.bumpLimitReached {
+    color: olive;
+}
+
+.pages {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 70%;
+}
+
+.pagesItem {
+    white-space: nowrap;
+}
+
+.postingDisabledMessage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.postformMarkup {
+    text-align: left;
+	font-size: 0.7em;
+}
+
+.postformRules {
+    text-align: left;
+	font-size: 0.7em;
+	max-width: 400px;
+}
+
+.quotation {
+    color: #789922;
+}
+
+.fileByLinkButton {
+    cursor: pointer;
+}
+
+.cspoilerTitle {
+    cursor: pointer;
+    color: #E08060;
+}
+
+.cspoilerBody {
+    background-color: #F0D0B6;
+}
+
+/*
+    Catalog
+*/
+
+.catalogContainer {
+    box-sizing: border-box;
+    color: #800000;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+    text-align: center;
+}
+
+.catalogItem {
+    background-color: #F0E0D6;
+    box-sizing: border-box;
+    color: #800000;
+    display: inline-block;
+    height: 450px;
+    min-height: 450px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    overflow: hidden;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    position: relative;
+    text-align: center;
+    vertical-align:top;
+    width: 240px;
+    word-wrap: break-word;
+}
+
+.catalogItem:hover {
+    height: auto;
+}
+
+/*
+    Board image
+*/
+
+.theImage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+/*
+    Board video
+*/
+
+.theVideo {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+/*
+    Board /mlp/
+*/
+
+.theButton {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.hiddenVideo {
+    display: none;
+}
+
+.hiddenButton {
+    display: none;
+}
+
+.hiddenImage {
+    display: none;
+}
+
+/*
+    Create action
+*/
+
+.createAction {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.createAction > div {
+    display: inline-block;
+}
+
+.createAction > div > div {
+    display: block;
+}
+
+.postFormVisible {
+    display: block;
+}
+
+.postFormTextarea {
+    font-size: 14px;
+}
+
+.postFormTable {
+    display: inline;
+}
+
+.postformLabel {
+    text-align: right;
+}
+
+.postformField {
+    text-align: left;
+}
+
+.symbolCounter {
+    font-size: 0.8em;
+    position: absolute;
+    right: 12px;
+    bottom: 7px;
+    color: #333333;
+    opacity: 0.6;
+    /*filter: alpha(opacity=60);*/
+}
+
+.symbolCounterContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.opSign {
+    color: red;
+}
+
+/*
+    Create action /pr/
+*/
+
+.codechaContainer {
+    /**/
+}
+
+/*
+    Error
+*/
+
+.error {
+    background-color: #F0E0D6;
+    color: #800000;
+    margin-left: 80px;
+    margin-right: 80px;
+    text-align: center;
+}
+
+/*
+    Home
+*/
+
+.rules {
+    background-color: #F0E0D6;
+    margin-left: 5%;
+    margin-right: 5%;
+    padding-top: 10px;
+    padding-left: 10px;
+}
+
+.news {
+    background-color: #F0E0D6;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.sectionHeader {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/*
+    IP ban
+*/
+
+.ipBan {
+    background-color: #F0E0D6;
+    margin-left: 80px;
+    margin-right: 80px;
+}
+
+/*
+    Navbar
+*/
+
+.navbar {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 70%;
+}
+
+.navbar.navbarFrame {
+    text-align: left;
+    margin-left: 4px;
+    font-size: 0.8em;
+}
+
+.navbarItem {
+    white-space: nowrap;
+}
+
+/*
+    Not found
+*/
+
+/*.theImage <- Board image*/
+
+/*
+    Post
+*/
+
+.post {
+    background-color: #F0E0D6;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-top: 10px;
+    padding-left: 10px;
+    width: 100%
+    overflow-x: auto;
+}
+
+.opPost {
+    overflow-x: auto;
+}
+
+.newPost {
+    background-color: #CCCCCC;
+}
+
+.hiddenPost > .threadPost {
+    display: none;
+}
+
+.opPost.hiddenPost ~ .post {
+    display: none;
+}
+
+.selectedPost {
+    background-color: #AAFF99;
+}
+
+.post.temporary {
+    border: 1px solid #000000;
+}
+
+.omittedPosts.hiddenPosts {
+    display: none;
+}
+
+.threadPosts.hiddenPosts {
+    display: none;
+}
+
+.postHeader, .postFileName, .postFileSize {
+    white-space: nowrap;
+}
+
+.postFileSize {
+    font-size: 0.8em;
+    color: #800000;
+}
+
+.postFileSize.mobile {
+    font-size: 0.6em;
+}
+
+/*.postFileFile.mobile {
+    -moz-transform: scale(0.7, 0.7);
+    -ms-transform: scale(0.7, 0.7);
+    -webkit-transform: scale(0.7, 0.7);
+    -o-transform: scale(0.7, 0.7);
+    transform: scale(0.7, 0.7);
+}*/
+
+.postFileFile > a > img.mumWatching:not(:hover) {
+    opacity: 0.05;
+    /*filter: alpha(opacity=5);*/
+}
+
+.postHeader > a > img, .postFileSearch > a > img, .postHeader > span > a > img, .postFileSearch > form,
+.postHeader > span > form {
+    opacity: 0.65;
+    /*filter: alpha(opacity=65);*/
+}
+
+.postHeader > a:not(.disabled) > img:hover, .postFileSearch > a:not(.disabled) > img:hover,
+.postHeader > span > a:not(.disabled) > img:hover, .postFileSearch > form:hover, .postHeader > span > form:hover {
+    opacity: 1;
+    /*filter: alpha(opacity=100);*/
+}
+
+.postToThread > a > button {
+    font-size: 1.2em;
+}
+
+.desktop.postActions > a, .desktop.postActions > form {
+    display: none;
+}
+
+.postActions > img {
+    opacity: 0.65;
+    /*filter: alpha(opacity=65);*/
+}
+
+.desktop.postActions:hover > a, .desktop.postActions:hover > form {
+    display: inline;
+}
+
+.desktop.postActions:hover > img {
+    display: none;
+}
+
+.mobile.postActions > img {
+    display: none;
+}
+
+.threadPost {
+    text-align: left; /*WAS: horizontal-align*/
+}
+
+.postFile {
+    vertical-align: top;
+    width: 0px;
+}
+
+.shrink {
+    width: 100%;
+}
+
+.postFile ~ .postFile {
+    padding-left: 20px;
+}
+
+.postText {
+    vertical-align: top;
+}
+
+.bannedFor {
+    color: red;
+}
+
+.modificationDateTime {
+    font-style: italic;
+}
+
+.postSubject {
+    font-weight: bold;
+    color: #CC1105;
+}
+
+.postSubject.mobile {
+    font-size: 0.8em;
+    display: block;
+}
+
+.tripcode {
+    color: green;
+}
+
+.tripcode.mobile {
+    font-size: 0.8em;
+}
+
+.postDateTime.mobile {
+    font-size: 0.8em;
+}
+
+.moderName {
+    font-weight: bold;
+    color: blue;
+}
+
+.userName {
+    font-weight: bold;
+    color: #117743;
+}
+
+.someName.mobile {
+    font-size: 0.8em;
+}
+
+.navigationButton {
+    position: fixed;
+    right: 20px;
+    z-index: 9910;
+    opacity: 0.5;
+    /*filter: alpha(opacity=50);*/
+}
+
+.navigationButton:hover {
+    opacity: 1;
+    /*filter: alpha(opacity=100);*/
+}
+
+.navigationButtonBottom {
+    bottom: 30px;
+}
+
+.navigationButtonTop {
+    top: 30px;
+}
+
+.leafButton {
+    position: fixed;
+    top: 50%;
+    z-index: 9910;
+    opacity: 0.5;
+    /*filter: alpha(opacity=50);*/
+}
+
+.leafButton:hover {
+    opacity: 1;
+    /*filter: alpha(opacity=100);*/
+}
+
+.leafButtonPrevious {
+    left: 20px;
+}
+
+.leafButtonNext {
+    right: 20px;
+}
+
+.movableImage {
+    position: fixed;
+    z-index: 9905;
+    border: 5px solid #777777;
+    padding: 0;
+    line-height: 0;
+}
+
+.postformFile {
+    border: 1px dashed #777777;
+    text-align: justify;
+}
+
+.postformFile.drag {
+    background-color: #F0E0D6;
+    border: 1px dashed #555555;
+}
+
+.postformFile ~ .postformFile {
+    margin-top: 5px;
+}
+
+.postformFilePreview {
+    max-width: 100px;
+    max-height: 100px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.postformFileInput {
+    display: inline-block;
+    position: absolute;
+    left: -10px;
+    top: -10px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    /*filter: alpha(opacity=0);*/
+}
+
+.postformFileText {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.postformFileRemoveButton {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.postformFileRemoveImage {
+    display: inline;
+    vertical-align: top;
+}
+
+.referencedBy {
+    font-size: 0.8em;
+    color: #707070;
+}
+
+ul.tabWidget > li {
+    display: inline;
+    background-color: #F0E0D6;
+    padding: 5px 10px 5px 10px;
+}
+
+ul.tabWidget > li > a {
+    color: #800000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+ul.tabWidget > li.activated {
+    background-color: #FFFFEE;
+}
+
+/*
+    Rules
+*/
+
+/*.rules <- Home*/
+
+/*
+    Search action
+*/
+
+.searchAction {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: right;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+/*
+    Settings bar
+*/
+
+.settingsBar {
+    display: block;
+    font-size: 0.9em;
+    padding-bottom: 5px;
+    text-align: left;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+/*
+    Thread
+*/
+
+/*blockquote <- Board*/
+
+blockquote.blockquoteThread {
+    max-height: 800px;
+}
+
+blockquote.blockquoteThread.expand {
+    max-height: none;
+}
+
+.codeBlock {
+    /**/
+}
+
+progress.progressBlocking {
+    position: fixed;
+    z-index: 9970;
+    width: 600px;
+    height: 50px;
+}
+
+a.progressBlocking {
+    position: fixed;
+    z-index: 9980;
+}
+
+/*span.spoiler, span.spoiler a <- Board*/
+
+/*span.spoiler:hover <- Board*/
+
+/*span.spoiler:hover a <- Board*/
+
+.theMessage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.threadActions {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.noNewPostsPopup {
+    height: 40px;
+    line-height: 40px;
+    width: 200px;
+}
+
+/*
+    Thread echo
+*/
+
+.externalThreadFrame {
+    width: 300px;
+    height: 400px;
+    float: right;
+    position: fixed;
+    top: 200px;
+    right: 0px;
+    z-index: 9920;
+}
+
+.externalThreadFrame.mobile {
+    width: 120px;
+    height: 240px;
+}
+
+.externalThreadFrame:hover {
+    width: 90%;
+    height: 100%;
+    top: 0px;
+}
+
+/*
+    Title
+*/
+
+.theTitle {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+/* Vote */
+
+.vote {
+    background-color: #F0D0B6;
+}
+
+.voteText {
+    font-weight: bold;
+}
+
+.voteCount {
+    font-style: italic;
+}
+
+/* Settings dialog */
+
+.settingsDialog {
+    /*width: 400px;
+    height: 200px;*/
+}
+
+/* Playlist */
+
+.track {
+    background-color: #F0E0D6;
+    padding: 2px 2px 2px 2px;
+}
+
+.track ~ .track {
+    margin-top: 5px;
+}
+
+.track > audio {
+    width: 600px;
+}
+
+/*#recaptcha_response_field {
+    color: #698CC0;
+}*/
+
+#recaptcha_image_cell {
+    background-color: inherit;
+}
+
+#recaptcha_response_field {
+    background-color: inherit;
+}
+
+.shrinkedPost {
+    display: table;
+}

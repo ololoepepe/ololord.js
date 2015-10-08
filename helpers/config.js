@@ -1,4 +1,4 @@
-var FS = require("fs");
+var FS = require("q-io/fs");
 
 var config = require("../config.json");
 
@@ -29,7 +29,7 @@ c.set = function(key, value) {
     var p = parts.shift();
     var prev = o[p];
     o[p] = value;
-    FS.writeFile(__dirname + "/../config.json", JSON.stringify(config, null, 4), "utf8");
+    FS.write(__dirname + "/../config.json", JSON.stringify(config, null, 4));
     return prev;
 };
 
@@ -49,7 +49,7 @@ c.remove = function(key) {
     var p = parts.shift();
     var prev = o[p];
     delete o[p];
-    FS.writeFile(__dirname + "/../config.json", JSON.stringify(config, null, 4), "utf8");
+    FS.write(__dirname + "/../config.json", JSON.stringify(config, null, 4), "utf8");
     return prev;
 };
 

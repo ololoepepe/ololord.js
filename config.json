@@ -1,14 +1,29 @@
 {
+    "system": {
+        "workerCount": 2
+    },
     "server": {
         "port": 8080
     },
     "site": {
+        "locale": "ru",
         "protocol": "http",
         "domain": "localhost:8080"
     },
     "board": {
         "b": {
             "captchaQuota": 10
+        }
+    },
+    "ddos": {
+        "defaultWeight": 1,
+        "weights": {
+            "/b/": 300
+        },
+        "ip": {
+            "maxWeight": 1000,
+            "flushInterval": 1000,
+            "checkInterval": 1100
         }
     }
 }
