@@ -117,7 +117,7 @@ module.exports.initialize = function() {
         });
     }).then(function() {
         var promises = Board.boardNames().map(function(boardName) {
-            var query = { boardName: boardName, draft: false };
+            var query = { boardName: boardName, "options.draft": false };
             return Collections.threads.find(query).sort({ updatedAt: -1 }).limit(1).then(function(threads) {
                 if (!threads || threads.length < 1) {
                     return Promise.resolve({
