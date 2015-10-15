@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{#def.head}}
+<body class="{{=it.deviceType}}"
+      {{#def.baseData}}>
+{{? it.customHeader}}
+    {{#def.customheader}}
+{{?}}
+<div class="theTitle">
+    <h1>
+        {{=it.title}}
+    </h1>
+</div>
+<div class="login">
+    <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/login"
+          enctype="application/x-www-form-urlencoded" class="inlineForm">
+        <input type="hidden" name="source" value="{{=it.source}}" />
+        <input type="password" class="input" name="hashpass" placeholder="{{=it.tr.loginPlaceholderText}}" size="43"
+               autofocus="true" />
+        <input type="submit" class="button" name="submit" value="{{=it.tr.loginText}}" />
+    </form>
+</div>
+<div class="loginDescription">
+    {{=it.tr.loginSystemDescriptionText}}
+</div>
+{{? it.customFooter}}
+    {{#def.customFooter}}
+{{?}}
+</body>
+</html>

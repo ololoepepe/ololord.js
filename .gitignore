@@ -1,3 +1,5 @@
+cache/*
+config-dev.json
 db
 db.sqlite
 node_modules

@@ -1,0 +1,5 @@
+"Log in", you say? On an imageboard? I am out!
+
+Please, wait a sec. The login systyem does NOT store any data on the server. It only stores a cookie on your PC to allow post editing, deleting, etc. without entering password every time, and nothing else.
+
+Well, actually, the admin may register someone manually (if he is a fag), but there is no way to register through the web.

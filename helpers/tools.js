@@ -1,10 +1,15 @@
 var equal = require("deep-equal");
 var FS = require("q-io/fs");
+var FSSync = require("fs");
+var Localize = require("localize");
+var merge = require("merge");
 var Promise = require("promise");
 
-var flags = {};
+var config = require("./config");
 
-module.exports.forIn = function(obj, f) {
+var _strings = {};
+
+var forIn = function(obj, f) {
     if (!obj || typeof f != "function")
         return;
     for (var x in obj) {
@@ -12,6 +17,73 @@ module.exports.forIn = function(obj, f) {
             f(obj[x], x);
     }
 };
+
+//NOTE: node-localize does not allow to exclude dirs, so searching for translations manually, excluding some dirs
+
+var getStrings = function(dir) {
+    var files = FSSync.readdirSync(dir);
+    var strings = {};
+    files.forEach(function(file) {
+        var sl = file.split(".");
+        if (sl.length != 2 || sl.pop() != "txt")
+            return;
+        var name = sl.shift();
+        strings[name] = { def: FSSync.readFileSync(dir + "/" + file, "utf8") };
+    });
+    files.forEach(function(file) {
+        var sl = file.split(".");
+        if (sl.length != 3 || sl.pop() != "txt")
+            return;
+        var name = sl.shift();
+        if (!strings.hasOwnProperty(name))
+            return;
+        var locale = sl.shift();
+        strings[name][locale] = FSSync.readFileSync(dir + "/" + file, "utf8");
+    });
+    return strings;
+};
+
+var getTranslations = function(dir, exclude) {
+    exclude = exclude || [];
+    var files = FSSync.readdirSync(dir);
+    return files.reduce(function(obj, file) {
+        var stat = FSSync.statSync(dir + "/" + file);
+        if (!stat)
+            return obj;
+        if (stat.isFile() && file == "translations.json") {
+            return merge.recursive(obj, require(dir + "/" + file));
+        } else if (stat.isDirectory() && "translations" == file) {
+            var strings = getStrings(dir + "/" + file);
+            _strings = merge.recursive(_strings, strings);
+            var o = {};
+            forIn(strings, function(s) {
+                o[s.def] = {};
+                forIn(s, function(tr, loc) {
+                    o[s.def][loc] = tr;
+                });
+            });
+            return merge.recursive(obj, o);
+        } else if (stat.isDirectory() && (exclude.indexOf(file) < 0)) {
+            return merge.recursive(obj, getTranslations(dir + "/" + file));
+        }
+        return obj;
+    }, {});
+};
+
+var flags = {};
+var loc = new Localize(getTranslations(__dirname + "/..", [".git", "node_modules"]));
+forIn(_strings, function(s, name) {
+    loc.strings[name] = s.def;
+});
+loc.translateWrapper = loc.translate;
+loc.setLocale(config("site.locale", "en"));
+
+Object.defineProperty(module.exports, "Billion", { value: (2 * 1000 * 1000 * 1000) });
+Object.defineProperty(module.exports, "Second", { value: 1000 });
+Object.defineProperty(module.exports, "Minute", { value: (60 * 1000) });
+Object.defineProperty(module.exports, "Hour", { value: (60 * 60 * 1000) });
+
+module.exports.forIn = forIn;
 
 module.exports.randomInt = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -76,4 +148,28 @@ module.exports.flagName = function(countryCode) {
             flags[fn] = true;
         return Promise.resolve(exists ? fn : "");
     });
+};
+
+module.exports.translate = function(what) {
+    try {
+        return loc.translateWrapper(what);
+    } catch (err) {
+        return what;
+    }
+};
+
+module.exports.translateVar = function(what) {
+    try {
+        return loc.translateWrapper(loc.strings[what]);
+    } catch (err) {
+        return what;
+    }
+};
+
+module.exports.setLocale = function(locale) {
+    loc.setLocale(locale);
+};
+
+module.exports.now = function() {
+    return new Date();
 };

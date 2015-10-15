@@ -39,6 +39,11 @@ var Board = function(name, title, options) {
     defineSetting(this, "supportedFileTypes", []); //TODO
     defineSetting(this, "threadLimit", 200);
     defineSetting(this, "threadsPerPage", 20);
+    Object.defineProperty(this, "launchDate", {
+        get: function() {
+            return new Date(config("board." + name + ".launchDate", config("board.launchDate")));
+        }
+    });
     //Object.defineProperty(this, "title", { value: title });
 };
 

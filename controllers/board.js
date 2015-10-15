@@ -8,8 +8,63 @@ var boardModel = require("../models/board");
 var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
+var Tools = require("../helpers/tools");
 
 var router = express.Router();
+
+var postingSpeedString = function(board, lastPostNumber) {
+    var msecs = board.launchDate.valueOf();
+    if (isNaN(msecs))
+        return "-";
+    var zeroSpeedString = function(nonZero) {
+        if (lastPostNumber && msecs)
+            return "1 " + nonZero;
+        else
+            return "0 " + Tools.translate("p./hour.");
+    };
+    var speedString = function(duptime) {
+        var d = lastPostNumber / duptime;
+        var ss = "" + d.toFixed(1);
+        return (ss.split(".").pop() != "0") ? ss : ss.split(".").shift();
+    };
+    var uptimeMsecs = (new Date()).valueOf() - msecs;
+    var duptime = uptimeMsecs / Tools.Hour;
+    var uptime = Math.floor(duptime);
+    var shour = Tools.translate("p./hour.");
+    if (!uptime) {
+        return zeroSpeedString(shour);
+    } else if (Math.floor(lastPostNumber / uptime) > 0) {
+        return speedString(duptime) + " " + shour;
+    } else {
+        duptime /= 24;
+        uptime = Math.floor(duptime);
+        var sday = Tools.translate("p./day.");
+        if (!uptime) {
+            return zeroSpeedString(sday);
+        } else if (Math.floor(speed.postCount / uptime) > 0) {
+            return speedString(duptime) + " " + sday;
+        } else {
+            duptime /= (365.0 / 12.0);
+            uptime = Math.floor(duptime);
+            var smonth = Tools.translate("p./month.");
+            if (!uptime) {
+                return zeroSpeedString(smonth);
+            } else if (Math.floor(speed.postCount / uptime) > 0) {
+                return speedString(duptime) + " " + smonth;
+            } else {
+                duptime /= 12.0;
+                uptime = Math.floor(duptime);
+                var syear = Tools.translate("p./year.");
+                if (!uptime)
+                    return zeroSpeedString(syear);
+                else if (Math.floor(speed.postCount / uptime) > 0)
+                    return speedString(duptime) + " " + syear;
+                else
+                    return "0 " + syear;
+            }
+        }
+    }
+};
 
 var renderFileInfo = function(fi) {
     fi.sizeKB = fi.size / 1024;
@@ -44,14 +99,10 @@ var renderPost = function(post, board, req, opPost) {
     post.fileInfos.forEach(function(fileInfo) {
         renderFileInfo(fileInfo);
     });
-    if (post.number == post.threadNumber)
-        post.isOp = true;
-    if (req.ip == post.user.ip)
-        post.ownIp = true;
-    if (req.hashpass == post.user.hashpass)
-        post.ownHashpass = true;
-    if (post.user.ip == opPost.user.ip)
-        post.opIp = true;
+    post.isOp = (post.number == post.threadNumber);
+    post.ownIp = (req.ip == post.user.ip);
+    post.ownHashpass = (req.hashpass == post.user.hashpass);
+    post.opIp = (post.user.ip == opPost.user.ip);
     if (req.level < Database.Moder)
         post.user.ip = "";
     if (post.user.level >= "USER") {
@@ -60,37 +111,30 @@ var renderPost = function(post, board, req, opPost) {
         post.tripcode = "!" + md5.digest("base64").substr(0, 10);
     }
     post.user.hashpass = "";
-    return Promise.resolve().then(function() {
-        if (!board.showWhois)
-            return Promise.resolve();
-        return Tools.flagName(post.countryCode).then(function(flagName) {
-            if (!flagName)
-                post.flagName = "default.png";
-            if (!post.countryName)
-                post.countryName = "Unknown country";
-            return Promise.resolve();
-        });
+    if (!board.showWhois)
+        return Promise.resolve();
+    return Tools.flagName(post.countryCode).then(function(flagName) {
+        if (!flagName)
+            post.flagName = "default.png";
+        if (!post.countryName)
+            post.countryName = "Unknown country";
+        return Promise.resolve();
     });
 };
 
 var renderPage = function(model, board, req, json) {
     var promises = model.threads.map(function(thread) {
         return renderPost(thread.opPost, board, req, thread.opPost).then(function() {
-            Promise.all(thread.lastPosts.map(function(post) {
+            return Promise.all(thread.lastPosts.map(function(post) {
                 return renderPost(post, board, req, thread.opPost);
             }));
         });
     });
     return Promise.all(promises).then(function() {
-        model = merge(model, controller.headModel(board, req));
-        model = merge(model, controller.navbarModel());
-        model.defaultUserName = board.defaultUserName;
-        model.showWhois = board.showWhois;
-        model.board = {
-            name: board.name
-        };
-        model.loggedIn = !!req.hashpass;
-        model.maxAllowedRating = req.maxAllowedRating;
+        model = merge.recursive(model, controller.headModel(board, req));
+        model = merge.recursive(model, controller.navbarModel());
+        model = merge.recursive(model, controller.boardModel(board));
+        model.board.postingSpeed = postingSpeedString(board, model.lastPostNumber);
         if (!json || json.translations)
             model.tr = controller.translationsModel();
         model.isSpecialThumbName = function(thumbName) {
@@ -110,16 +154,12 @@ var renderThread = function(model, board, req, json) {
     var promises = model.thread.posts.map(function(post) {
         return renderPost(post, board, req, model.thread.opPost);
     });
+    promises.unshift(renderPost(model.thread.opPost, board, req, model.thread.opPost));
     return Promise.all(promises).then(function() {
-        model = merge(model, controller.headModel(board, req));
-        model = merge(model, controller.navbarModel());
-        model.defaultUserName = board.defaultUserName;
-        model.showWhois = board.showWhois;
-        model.board = {
-            name: board.name
-        };
-        model.loggedIn = !!req.hashpass;
-        model.maxAllowedRating = req.maxAllowedRating;
+        model = merge.recursive(model, controller.headModel(board, req));
+        model = merge.recursive(model, controller.navbarModel());
+        model = merge.recursive(model, controller.boardModel(board));
+        model.board.postingSpeed = postingSpeedString(board, model.lastPostNumber);
         if (!json || json.translations)
             model.tr = controller.translationsModel();
         model.isSpecialThumbName = function(thumbName) {
@@ -142,6 +182,7 @@ router.get("/:boardName", function(req, res) {
     } else {
         boardModel.getPage(board, req.hashpass).then(function(model) {
             console.time("render");
+            model.currentPage = 0;
             return renderPage(model, board, req);
         }).then(function(data) {
             console.timeEnd("render");
@@ -158,6 +199,7 @@ router.get("/:boardName/:page.html", function(req, res) {
         res.send("No such board: " + req.params.boardName);
     } else {
         boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
+            model.currentPage = req.params.page;
             return renderPage(model, board, req);
         }).then(function(data) {
             res.send(data);

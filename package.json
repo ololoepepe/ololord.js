@@ -20,13 +20,16 @@
   },
   "homepage": "https://github.com/ololoepepe/ololord.js",
   "dependencies": {
+    "body-parser": "^1.14.1",
     "cookie-parser": "^1.4.0",
     "ddos": "^0.1.7",
     "deep-equal": "^1.0.1",
     "deepcopy": "^0.5.0",
+    "dimas-parallel": "^1.1.2",
     "dot": "^1.0.3",
     "enforce": "^0.1.6",
     "express": "^4.13.3",
+    "express-cluster": "0.0.4",
     "express-device": "^0.4.2",
     "handlebars": "^4.0.2",
     "localize": "^0.4.7",
@@ -34,6 +37,7 @@
     "node-getopt": "^0.2.3",
     "orm": "^2.1.27",
     "orm-transaction": "0.0.2",
+    "pmongo-lock": "^0.1.0",
     "promise": "^7.0.4",
     "promised-mongo": "^1.2.0",
     "promisify-node": "^0.2.1",
@@ -42,9 +46,11 @@
     "q-orm": "0.0.3",
     "readline-sync": "^1.2.21",
     "redis": "^2.1.0",
+    "rimraf": "^2.4.3",
     "sequelize": "^3.9.0",
     "sequelize-cache": "0.0.1",
     "sqlite3": "^3.1.0",
-    "tingodb": "^0.4.1"
+    "tingodb": "^0.4.1",
+    "uuid": "^2.0.1"
   }
 }

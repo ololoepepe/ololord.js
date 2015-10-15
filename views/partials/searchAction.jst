@@ -1,0 +1,19 @@
+<div class="searchAction">
+    <form method="get" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}search" enctype="multipart/form-data"
+          class="inlineForm">
+        <input id="searchFormInputQuery" type="text" class="input" maxlength="{{=it.maxSearchQueryLength}}"
+               name="query" size="43" onkeypress="lord.searchKeyPress(event);"
+               placeholder="{{=it.tr.searchInputPlaceholder}}" />
+        <select id="searchFormSelectBoard" name="board" class="select">
+            <option value="*" selected="true">[*] {{=it.tr.allBoardsText}}</option>
+            {{~it.boards :brd}}
+                <option value="<%= board.name %>">[{{=brd.name}}] {{=brd.title}}</option>
+            {{~}}
+        </select>
+        {{? it.settings.mode.name != "ascetic"}}
+            <button class="button" onclick="lord.doSearch();">{{=it.tr.searchButtonText}}</button>
+        {{??}}
+            <input type="submit" class="button" value="{{=it.tr.searchButtonText}}" />
+        {{?}}
+    </form>
+</div>

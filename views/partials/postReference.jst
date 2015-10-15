@@ -1,3 +1,5 @@
 <a href="/{{=it.site.pathPrefix}}{{=reference.boardName}}/thread/{{=reference.threadNumber}}.html#{{=reference.postNumber}}"
-    onmouseover="lord.viewPost(this, '{{=reference.boardName}}', {{=reference.postNumber}});"
-    onmouseout="lord.noViewPost();">&gt;&gt;{{? reference.boardName != it.board.name}}/{{=reference.boardName}}/{{?}}{{=reference.postNumber}}</a>
+   onmouseover="lord.viewPost(this);"
+   onmouseout="lord.noViewPost();"
+   data-board-name="{{=reference.boardName}}"
+   data-post-number="{{=reference.postNumber}}">&gt;&gt;{{? reference.boardName != it.board.name}}/{{=reference.boardName}}/{{?}}{{=reference.postNumber}}</a>

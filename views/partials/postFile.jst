@@ -1,10 +1,15 @@
-<td id="file{{=fileInfo.name}}" class="postFile">
+<td id="file{{=fileInfo.name}}" class="postFile"
+    data-file-name="{{=fileInfo.name}}"
+    data-mime-type="{{=fileInfo.mimeType}}"
+    data-size-k-b="{{=fileInfo.sizeKB}}"
+    data-width="{{ out += fileInfo.dimensions ? fileInfo.dimensions.width : 0; }}"
+    data-height="{{ out += fileInfo.dimensions ? fileInfo.dimensions.height : 0; }}"
     {{? fileInfo.mimeType.substr(0, 6) == "audio/"}}
-        <input type="hidden" name="audioTagAlbum" value="{ {=fileInfo.extraData.album} }" />
-        <input type="hidden" name="audioTagArtist" value="{ {=fileInfo.extraData.artist} }" />
-        <input type="hidden" name="audioTagTitle" value="{ {=fileInfo.extraData.title} }>" />
-        <input type="hidden" name="audioTagYear" value="{ {=fileInfo.extraData.year} }" />
-    {{?}}
+        data-audio-tag-album="{{=fileInfo.extraData.album}}"
+        data-audio-tag-artist="{{=fileInfo.extraData.artist}}"
+        data-audio-tag-title="{{=fileInfo.extraData.title}}"
+        data-audio-tag-year="{{=fileInfo.extraData.year}}"
+    {{?}}>
     <div class="postFileName">
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}" target="_blank">{{=fileInfo.name}}</a>
     </div>
@@ -12,60 +17,53 @@
         ({{=fileInfo.sizeText}})
     </div>
     <div class="postFileSearch">
-        {{? it.mode != "ascetic"}}
-            <a name="deleteFileButton"
-               href="javascript:lord.deleteFile('{{=it.board.name}}', {{=post.number}}, '{{=fileInfo.name}}');">
-                <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.deleteFileText}}" /></a>
+        {{? it.settings.mode.name != "ascetic"}}
+            <a name="deleteFileButton" onclick="lord.deleteFile(this); return false;">
+                <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.deleteFileText}}" /></a>
             {{? fileInfo.mimeType.substr(0, 6) == "image/"}}
                 <a name="hideByImageButton" onclick="lord.hideByImage(this); return false;">
-                    <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.hideByImageText}}" /></a>
+                    <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}" /></a>
             {{?}}
-        {{?? it.loggedIn}}
+        {{?? it.user.loggedIn}}
             <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/delete_file"
                   enctype="multipart/form-data" class="inlineForm">
                 <input type="hidden" name="boardName" value="{{=it.board.name}}" />
                 <input type="hidden" name="postNumber" value="{{=post.number}}" />
                 <input type="hidden" name="fileName" value="{{=fileInfo.name}}" />
                 <input type="image" name="deleteFileButton" src="/{{=it.site.pathPrefix}}img/delete.png"
-                       title="{{=it.deleteFileText}}" />
+                       title="{{=it.tr.deleteFileText}}" />
            </form>
         {{?}}
         {{? fileInfo.mimeType.substr(0, 6) == "image/"}}
             <a href="//www.google.com/searchbyimage?image_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-               title="{{=it.findSourceWithGoogleText}}" target="_blank">
+               title="{{=it.tr.findSourceWithGoogleText}}" target="_blank">
                 <img src="/{{=it.site.pathPrefix}}img/google.png"></a>
             <a href="http://iqdb.org/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-               title="{{=it.findSourceWithIqdbText}}" target="_blank">
+               title="{{=it.tr.findSourceWithIqdbText}}" target="_blank">
                 <img src="/{{=it.site.pathPrefix}}img/iqdb.png"></a>
         {{?}}
         {{? fileInfo.mimeType.substr(0, 6) == "audio/"}}
-            {{? it.mode != "ascetic"}}
-                <a href="javascript:lord.editAudioTags('{{=it.board.name}}', {{=post.number}}, '{{=fileInfo.name}}');"
-                   title="{{=it.editAudioTagsText}}">
+            {{? it.settings.mode.name != "ascetic"}}
+                <a onclick="lord.editAudioTags(this); return false" title="{{=it.tr.editAudioTagsText}}">
                     <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
-                <a href="javascript:lord.addToPlaylist('{{=it.board.name}}', '{{=fileInfo.name}}');"
-                   title="{{=it.addToPlaylistText}}">
+                <a onclick="lord.addToPlaylist(this); return false;" title="{{=it.tr.addToPlaylistText}}">
                     <img src="/{{=it.site.pathPrefix}}img/playlist_add.png"></a>
             {{??}}
                 <a href="/{{=it.site.pathPrefix}}edit_audio_tags?board={{=it.board.name}}&post={{=post.number}}&fileName={{=fileInfo.name}}"
-                   target="_blank" title="{{=it.editAudioTagsText}}">
+                   target="_blank" title="{{=it.tr.editAudioTagsText}}">
                     <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
             {{?}}
         {{?}}
     </div>
     <div class="postFileFile {{=it.deviceType}}">
-        <input name="type" type="hidden" value="{{=fileInfo.type}}" />
-        <input name="sizeKB" type="hidden" value="{{=fileInfo.sizeKB}}" />
-        <input name="sizeX" type="hidden" value="{{ out += fileInfo.dimensions ? fileInfo.dimensions.width : 0; }}" />
-        <input name="sizeY" type="hidden" value="{{ out += fileInfo.dimensions ? fileInfo.dimensions.height : 0; }}" />
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-           onclick="return lord.showImage('/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}', '{{=fileInfo.mimeType}}', {{ out += fileInfo.dimensions ? fileInfo.dimensions.width : 0; }}, {{ out += fileInfo.dimensions ? fileInfo.dimensions.height : 0;}});">
-            {{? it.maxAllowedRating < fileInfo.rating}}
-                {{? fileInfo.rating >= "R-18G"}}
+           onclick="lord.showImage(this); return false;">
+            {{? it.compareRatings(it.user.maxAllowedRating, fileInfo.rating) < 0}}
+                {{? "R-18G" == fileInfo.rating}}
                     <img src="/{{=it.site.pathPrefix}}img/r-18g.png" width="200" height="200">
-                {{?? fileInfo.rating >= "R-18"}}
+                {{?? "R-18" == fileInfo.rating}}
                     <img src="/{{=it.site.pathPrefix}}img/r-18.png" width="200" height="200">
-                {{?? fileInfo.rating >= "R-15"}}
+                {{?? "R-15" == fileInfo.rating}}
                     <img src="/{{=it.site.pathPrefix}}img/r-15.png" width="200" height="200">
                 {{?}}
             {{?? it.isSpecialThumbName(fileInfo.thumb.name)}}

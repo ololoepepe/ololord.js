@@ -1,5 +1,6 @@
 var FS = require("fs");
 var pmongo = require("promised-mongo");
+var pmongoLock = require("pmongo-lock");
 var Promise = require("promise");
 var promisify = require("promisify-node");
 
@@ -22,10 +23,15 @@ MarkupModes["ExtandedWakabaMarkAndBBCode"] = "EWM_AND_BBC";
 MarkupModes["None"] = "NONE";
 
 var db = pmongo("ololord");
-var lastPostNumbers = {};
-var userDraftMap = {};
+
+var Lock = pmongoLock(db);
 
 module.exports.db = db;
+module.exports.Lock = Lock;
+
+var threadCollection = function(boardName, threadNumber) {
+    return db.collection("thread/" + boardName + "/" + threadNumber);
+};
 
 var _defineModel = function(modelName, f, collectionName) {
     var model = f();
@@ -43,12 +49,18 @@ var _defineModel = function(modelName, f, collectionName) {
     Models[modelName] = model;
     collectionName = collectionName || (modelName.substr(0, 1).toLowerCase() + modelName.substr(1) + "s");
     var collection = db.collection(collectionName);
-    //promisify(collection);
     Object.defineProperty(module.exports, collectionName, { value: collection });
     Collections[collectionName] = collection;
     model.collection = collection;
     collection.model = model;
 };
+
+_defineModel("PostCounter", function() {
+    var model = function() {
+        //
+    };
+    return model;
+});
 
 _defineModel("Thread", function() {
     var model = function() {
@@ -85,6 +97,13 @@ _defineModel("BannedUser", function() {
     return model;
 });
 
+_defineModel("UserDraft", function() {
+    var model = function() {
+        //
+    };
+    return model;
+});
+
 Object.defineProperty(module.exports, "Collections", { value: Collections });
 Object.defineProperty(module.exports, "Models", { value: Models });
 Object.defineProperty(module.exports, "RegisteredUserLevels", { value: RegisteredUserLevels });
@@ -105,7 +124,7 @@ module.exports.initialize = function() {
             number: 1,
             "user.hashpass": 1,
             "user.level": 1
-        })
+        });
     }).then(function() {
         return Collections.threads.createIndex({
             boardName: 1,
@@ -116,44 +135,41 @@ module.exports.initialize = function() {
             updatedAt: 1
         });
     }).then(function() {
-        var promises = Board.boardNames().map(function(boardName) {
-            var query = { boardName: boardName, "options.draft": false };
-            return Collections.threads.find(query).sort({ updatedAt: -1 }).limit(1).then(function(threads) {
-                if (!threads || threads.length < 1) {
-                    return Promise.resolve({
-                        boardName: boardName,
-                        lastPostNumber: 0
-                    });
-                }
-                var collectionName = "thread/" + boardName + "/" + threads[0].number;
-                return db.collection(collectionName).find({ "options.draft": false }).sort({ number: -1 }).limit(1).then(function(posts) {
-                    return Promise.resolve({
-                        boardName: boardName,
-                        lastPostNumber: ((posts && posts.length > 0) ? posts[0].number : 0)
-                    });
-                });
-            });
+        return Collections.postCounters.createIndex({
+            boardName: 1
         });
-        return Promise.all(promises);
-    }).then(function(results) {
-        Tools.forIn(results, function(result) {
-            lastPostNumbers[result.boardName] = result.lastPostNumber;
-        });
+    }).then(function() {
         return Collections.threads.find({});
     }).then(function(threads) {
         var promises = threads.map(function(thread) {
-            if (thread.options.draft)
-                userDraftMap[thread.boardName + "/" + thread.user.hashpass] = true;
-            var collectionName = "thread/" + thread.boardName + "/" + thread.number;
-            return db.collection(collectionName).find({ "options.draft": true });
+            var collection = threadCollection(thread.boardName, thread.number);
+            return collection.createIndex({
+                number: 1,
+                "options.draft": 1,
+                "user.hashpass": 1,
+                "user.level": 1
+            }).then(function() {
+                return collection.createIndex({
+                    "options.draft": 1,
+                    "user.hashpass": 1,
+                    "user.level": 1
+                });
+            }).then(function() {
+                return collection.createIndex({
+                    draft: 1
+                });
+            }).then(function() {
+                return collection.createIndex({
+                    number: 1
+                });
+            })
         });
-        return Promise.all(promises);
-    }).then(function(results) {
-        results.forEach(function(posts) {
-            posts.forEach(function(post) {
-                userDraftMap[post.boardName + "/" + post.user.hashpass] = true;
-            });
+        return Promise.resolve(promises);
+    }).then(function() {
+        return Collections.userDrafts.createIndex({
+            hashpass: 1
         });
+    }).then(function() {
         return Promise.resolve();
     });
 };
@@ -179,7 +195,7 @@ module.exports.registeredUser = function(reqOrHashpass) {
         reqOrHashpass = Tools.hashpass(reqOrHashpass);
     if (!reqOrHashpass)
         return Promise.resolve(null);
-    return Collections.registeredUser.findOne({ hashpass: reqOrHashpass });
+    return Collections.registeredUsers.findOne({ hashpass: reqOrHashpass });
 };
 
 module.exports.registeredUserLevel = function(reqOrHashpass) {
@@ -215,14 +231,18 @@ module.exports.moderOnBoard = function(reqOrHashpass, boardName1, boardName2) {
 
 module.exports.lastPostNumber = function(boardName) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return null;
-    return lastPostNumbers[boardName];
+        return Promise.reject("Invalid board name");
+    return Collections.postCounters.findOne({ boardName: boardName }).then(function(postCounter) {
+        return Promise.resolve(postCounter ? postCounter.lastPostNumber : 0);
+    });
 };
 
-module.exports.hasDrafts = function(boardName, hashpass) {
-    if (!Tools.contains(Board.boardNames(), boardName))
-        return false;
+module.exports.getUserDrafts = function(boardName, hashpass) {
     if (typeof hashpass != "string" || !hashpass.match(/([0-9a-fA-F]){40}/))
-        return false;
-    return userDraftMap.hasOwnProperty(boardName + "/" + hashpass);
+        return Promise.resolve([]);
+    return Collections.userDrafts.findOne({ hashpass: hashpass }).then(function(drafts) {
+        return Promise.resolve(drafts ? drafts.drafts : []);
+    });
 };
+
+module.exports.threadCollection = threadCollection;

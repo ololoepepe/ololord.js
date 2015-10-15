@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<body>
+<body {{#def.basicData}}>
 {{#def.navbar}}
+{{~["Top"] :position}}
+    {{#def.createAction}}
+{{~}}
 {{~[it.thread] :thread}}
     {{~[thread.opPost] :post}}
         {{#def.post}}
@@ -10,6 +13,9 @@
     {{~thread.posts :post}}
         {{#def.post}}
     {{~}}
+{{~}}
+{{~["Top"] :position}}
+    {{#def.createAction}}
 {{~}}
 </body>
 </html>

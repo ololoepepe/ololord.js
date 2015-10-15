@@ -534,28 +534,65 @@ span.newPostCount {
     font-size: 1.2em;
 }
 
-.mobile.postActions {
+.postToThread {
+    margin-left: 20px;
+}
+
+.postToThread.mobile {
     display: block;
 }
 
-.desktop.postActions > a, .desktop.postActions > form {
-    display: none;
+.postActions {
+    position: relative;
+    outline: 0;
+}
+
+.postActions, .postActions:active, .postActions:visited {
+    color: #000000;
+}
+
+.postActions.mobile {
+    display: block;
 }
 
 .postActions > img {
     opacity: 0.65;
 }
 
-.desktop.postActions:hover > a, .desktop.postActions:hover > form {
-    display: inline;
+.postActions:hover > img {
+    opacity: 1;
 }
 
-.desktop.postActions:hover > img {
-    display: none;
+.postActionsMenu {
+    list-style-type: none;
+    margin-left: 0px;
+    padding: 4px 4px 4px 4px;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.2s,opacity 0.2s linear;
+    position: absolute;
+    z-index: 9999;
+    background-color: #D6DAF0;
+    border: 1px solid #BBBBBB;
+    margin-top: 0px;
+    top: 100%;
+    left: 0%;
 }
 
-.mobile.postActions > img {
-    display: none;
+.postActions:focus > .postActionsMenu {
+    visibility: visible;
+    opacity: 1;
+}
+
+.postActionsMenu > li > a {
+    text-decoration: none;
+    color: #000000;
+}
+
+.postActionsMenu > li > a:hover {
+    display: block;
+    color: #FFFFFF;
+    background-color: #666666;
 }
 
 .threadPost {
@@ -741,7 +778,7 @@ ul.tabWidget > li.activated {
     overflow-x: auto;
 }
 
-.settingsBar {
+.toolbar {
     border-bottom: 1px solid #CCCCCC;
     display: block;
     font-size: 0.9em;
@@ -869,4 +906,19 @@ a.progressBlocking {
 
 .shrinkedPost {
     display: table;
+}
+
+.login {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.loginDescription {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.loginDescription.desktop {
+    max-width: 80%;
+    margin-left: 10%;
 }

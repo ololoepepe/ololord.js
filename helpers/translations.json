@@ -28,5 +28,425 @@
 	},
 	"Unknown title": {
 		"ru": "Неизвестное название"
+	},
+	"Hide by image hash": {
+		"ru": "Скрывать по хешу картинки"
+	},
+	"Answer": {
+		"ru": "Ответ"
+	},
+	"Create thread": {
+		"ru": "Создать тред"
+	},
+	"Answer in this thread": {
+		"ru": "Ответить в тред"
+	},
+	"Answers:": {
+		"ru": "Ответы:"
+	},
+	"Fixed": {
+		"ru": "Закрепленный"
+	},
+	"The thread is closed": {
+		"ru": "Тред закрыт"
+	},
+	"Draft": {
+		"ru": "Черновик"
+	},
+	"This user is registered": {
+		"ru": "Этот пользователь зарегистрирован"
+	},
+	"Post limit reached": {
+		"ru": "Достигнут лимит постов"
+	},
+	"Bump limit reached": {
+		"ru": "Достигнут бамплимит"
+	},
+	"Quick reply": {
+		"ru": "Быстрый ответ"
+	},
+	"Post actions": {
+		"ru": "Действия над постом"
+	},
+	"Add file": {
+		"ru": "Добавить файл"
+	},
+	"Edit post": {
+		"ru": "Редактировать пост"
+	},
+	"Fix thread": {
+		"ru": "Закрепить тред"
+	},
+	"Unfix thread": {
+		"ru": "Открепить тред"
+	},
+	"Close thread": {
+		"ru": "Закрыть тред"
+	},
+	"Open thread": {
+		"ru": "Открыть тред"
+	},
+	"Move thread": {
+		"ru": "Перенести тред"
+	},
+	"Show user IP": {
+		"ru": "Показать IP-адрес пользователя"
+	},
+	"Ban user": {
+		"ru": "Забанить пользователя"
+	},
+	"Download all thread files as a .zip archive": {
+		"ru": "Скачать все файлы из треда в виде .zip-архива"
+	},
+	"Complain": {
+		"ru": "Пожаловаться"
+	},
+	"Add thread to favorites": {
+		"ru": "Добавить тред в избранные"
+	},
+	"Delete thread": {
+		"ru": "Удалить тред"
+	},
+	"Delete post": {
+		"ru": "Удалить пост"
+	},
+	"Hide/show": {
+		"ru": "Скрыть/показать"
+	},
+	"Last modified:": {
+		"ru": "Последнее изменение:"
+	},
+	"User was banned for this post": {
+		"ru": "Потребитель был запрещен для этого столба"
+	},
+	"Delete file": {
+		"ru": "Удалить файл"
+	},
+	"Find source with Iqdb": {
+		"ru": "Найти соус с помощью Iqdb"
+	},
+	"Find source with Google": {
+		"ru": "Найти соус с помощью Google"
+	},
+	"Edit audio file tags": {
+		"ru": "Редактировать теги аудиофайла"
+	},
+	"Add to playlist": {
+		"ru": "Добавить в плей-лист"
+	},
+	"Borad rules": {
+		"ru": "Правила доски"
+	},
+	"Threads catalog": {
+		"ru": "Каталог тредов"
+	},
+	"RSS feed": {
+		"ru": "Лента RSS"
+	},
+	"Posting is disabled for this board": {
+		"ru": "На этой доске постинг запрещен"
+	},
+	"Posting is disabled for this thread": {
+		"ru": "В этом треде постинг запрещен"
+	},
+	"Previous page": {
+		"ru": "Предыдущая страница"
+	},
+	"Next page": {
+		"ru": "Следующая страница"
+	},
+	"Posting speed:": {
+		"ru": "Скорость постинга:"
+	},
+	"Posts omitted:": {
+		"ru": "Пропущено постов:"
+	},
+	"Scroll to the top": {
+		"ru": "Отмотать наверх"
+	},
+	"Scroll to the bottom": {
+		"ru": "Отмотать вниз"
+	},
+	"Search: possible +required -excluded": {
+		"ru": "Поиск: возможно +обязательно -исключается"
+	},
+	"All boards": {
+		"ru": "Все доски"
+	},
+	"Search": {
+		"ru": "Искать"
+	},
+	"files omitted:": {
+		"ru": "файлов пропущено:"
+	},
+	"Settings": {
+		"ru": "Настройки"
+	},
+	"Favorites": {
+		"ru": "Избранное"
+	},
+	"Mum is watching me!": {
+		"ru": "Мамка в комнате!"
+	},
+	"Log out": {
+		"ru": "Разлогиниться"
+	},
+	"Log in": {
+		"ru": "Залогиниться"
+	},
+	"Password/hashpass": {
+		"ru": "Пароль/хешпасс"
+	},
+	"Show password": {
+		"ru": "Показать пароль"
+	},
+	"Previous page/file": {
+		"ru": "Предыдущая страница/файл"
+	},
+	"Next page/file": {
+		"ru": "Следующая страница/файл"
+	},
+	"Hide post/thread": {
+		"ru": "Скрыть пост/тред"
+	},
+	"Go to thread": {
+		"ru": "Перейти к треду"
+	},
+	"Expand thread": {
+		"ru": "Развернуть тред"
+	},
+	"Expand post file": {
+		"ru": "Развернуть файл в посте"
+	},
+	"Submit reply": {
+		"ru": "Отправить пост"
+	},
+	"Show favorite threads": {
+		"ru": "Показать избранные треды"
+	},
+	"Show settings": {
+		"ru": "Показать настройки"
+	},
+	"Bold text": {
+		"ru": "Жирный текст"
+	},
+	"Italics": {
+		"ru": "Курсив"
+	},
+	"Striked out text": {
+		"ru": "Зачеркнутый текст"
+	},
+	"Underlined text": {
+		"ru": "Подчеркнутый текст"
+	},
+	"Spoiler": {
+		"ru": "Спойлер"
+	},
+	"Quote selected text": {
+		"ru": "Цитировать выделенный текст"
+	},
+	"Code block": {
+		"ru": "Блок кода"
+	},
+	"Previous thread on board/post in thread": {
+		"ru": "Предыдущий тред на доске/пост в треде"
+	},
+	"Next thread on board/post in thread": {
+		"ru": "Следующий тред на доске/пост в треде"
+	},
+	"Previous post in thread/on board": {
+		"ru": "Предыдущий пост в треде/на доске"
+	},
+	"Next post in thread/on board": {
+		"ru": "Следующий пост в треде/на доске"
+	},
+	"Update thread": {
+		"ru": "Обновить тред"
+	},
+	"General settings": {
+		"ru": "Общие настройки"
+	},
+	"Mode:": {
+		"ru": "Режим:"
+	},
+	"Style:": {
+		"ru": "Стиль:"
+	},
+	"Shrink posts:": {
+		"ru": "Скукоживать посты:"
+	},
+	"Time:": {
+		"ru": "Время:"
+	},
+	"Server": {
+		"ru": "Серверное"
+	},
+	"Local": {
+		"ru": "Местное"
+	},
+	"Offset:": {
+		"ru": "Коррекция:"
+	},
+	"Captcha:": {
+		"ru": "Captcha:"
+	},
+	"Maximum allowed rating:": {
+		"ru": "Максимальный разрешенный рейтинг:"
+	},
+	"Mark posts as drafts by default:": {
+		"ru": "По умолчанию отмечать посты как черновики:"
+	},
+	"Hide postform rules:": {
+		"ru": "Скрывать правила под формой ответа:"
+	},
+	"Use minimalistic post form:": {
+		"ru": "Использовать минималистичную форму ответа:"
+	},
+	"Hide boards:": {
+		"ru": "Скрыть доски:"
+	},
+	"This option may be ignored on some boards": {
+		"ru": "Эта опция может игнорироваться на некоторых досках"
+	},
+	"Script settings": {
+		"ru": "Настройки скрипта"
+	},
+	"Posts and threads": {
+		"ru": "Посты и треды"
+	},
+	"Files": {
+		"ru": "Файлы"
+	},
+	"Postform and posting": {
+		"ru": "Форма и постинг"
+	},
+	"Hiding": {
+		"ru": "Скрытие"
+	},
+	"Other": {
+		"ru": "Прочее"
+	},
+	"Auto update threads by default:": {
+		"ru": "По умолчанию автоматически обновлять треды:"
+	},
+	"Auto update interval (sec):": {
+		"ru": "Интервал автообновленияы (сек):"
+	},
+	"Show auto update timer:": {
+		"ru": "Показывать таймер автообновления:"
+	},
+	"Show desktop notifications:": {
+		"ru": "Показывать уведомления на рабочем столе:"
+	},
+	"Mark OP post links:": {
+		"ru": "Помечать ссылки на ОП-посты:"
+	},
+	"Mark own post links:": {
+		"ru": "Помечать ссылки на собственные посты:"
+	},
+	"Show file leaf buttons:": {
+		"ru": "Показывать кнопки пролистывания файлов:"
+	},
+	"Leaf through images only:": {
+		"ru": "Пролистывать только картинки:"
+	},
+	"Image zoom sensitivity, %:": {
+		"ru": "Чувствительность зума картинок, %:"
+	},
+	"Default audio and video files volume:": {
+		"ru": "Громкость аудио- и видеофайлов по умолчанию:"
+	},
+	"Remember volume:": {
+		"ru": "Запоминать громкость:"
+	},
+	"Play audio and video files immediately:": {
+		"ru": "Проигрывать аудио- и видеофайлы сразу же:"
+	},
+	"Loop audio and video files:": {
+		"ru": "Зацикливать аудио- и видеофайлы:"
+	},
+	"Quick reply outside thread:": {
+		"ru": "Быстрый ответ вне треда:"
+	},
+	"Redirects to thread": {
+		"ru": "Перенаправляет в тред"
+	},
+	"Leaves page unmodified": {
+		"ru": "Оставляет страницу не измененной"
+	},
+	"Appends a new post": {
+		"ru": "Добавляет новый пост"
+	},
+	"Move to post after replying in thread:": {
+		"ru": "Перемещаться к посту после ответа в треде:"
+	},
+	"Check if attached file exists on server:": {
+		"ru": "Проверять, есть ли прикрепленный файл на сервере:"
+	},
+	"Show previews when attaching files:": {
+		"ru": "Показывать превью прикрепляемых файлов:"
+	},
+	"Add thread to favorites on reply:": {
+		"ru": "Добавлять тред в избранное при ответе:"
+	},
+	"Hide postform markup:": {
+		"ru": "Скрывать разметку под формой ответа:"
+	},
+	"Strip EXIF from JPEG files:": {
+		"ru": "Удалять EXIF из файлов JPEG:"
+	},
+	"Hide tripcodes:": {
+		"ru": "Скрывать трипкоды:"
+	},
+	"Hide user names:": {
+		"ru": "Скрывать имена пользователей:"
+	},
+	"Strike out links to hidden posts:": {
+		"ru": "Зачеркивать ссылки на скрытые посты:"
+	},
+	"Edit": {
+		"ru": "Редактировать"
+	},
+	"Show hidden post/thread list": {
+		"ru": "Показать список скрытых постов/тредов"
+	},
+	"Maximum simultaneous AJAX requests:": {
+		"ru": "Максимум одновременных AJAX-запросов:"
+	},
+	"Show new post count near board names:": {
+		"ru": "Показывать количество новых постов рядом с именами борд:"
+	},
+	"Show titles of YouTube videos:": {
+		"ru": "Показывать названия видео с YouTube:"
+	},
+	"Hotkeys:": {
+		"ru": "Горячие клавиши:"
+	},
+	"Spells (command-based post hiding):": {
+		"ru": "Спеллы (скрытие постов на основе команд):"
+	},
+	"User CSS:": {
+		"ru": "Пользовательские CSS:"
+	},
+	"Normal": {
+		"ru": "MISSING TRANSLATION"
+	},
+	"Ascetic": {
+		"ru": "MISSING TRANSLATION"
+	},
+	"Cancel": {
+		"ru": "Отмена"
+	},
+	"Confirm": {
+		"ru": "Подтвердить"
+	},
+	"FOUND VARIABLE INPUT: translate(\"Auto update interval (sec": {
+		"ru": "MISSING TRANSLATION"
+	},
+	"FOUND VARIABLE INPUT: translate(\"Image zoom sensitivity": {
+		"ru": "MISSING TRANSLATION"
+	},
+	"FOUND VARIABLE INPUT: translate(\"Spells (command-based post hiding": {
+		"ru": "MISSING TRANSLATION"
 	}
 }

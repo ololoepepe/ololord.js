@@ -101,6 +101,9 @@ lord.Hour = 60 * lord.Minute;
 lord.Day = 24 * lord.Hour;
 lord.Year = 365 * lord.Day;
 lord.Billion = 2 * 1000 * 1000 * 1000;
+lord.SettingsStoredInCookies = ["mode", "style", "shrinkPosts", "currentTime", "timeZoneOffset", "captchaEngine",
+                                "maxAllowedRating", "draftsByDefault", "hidePostformRules", "minimalisticPostform",
+                                "hiddenBoards"];
 
 lord._defineEnum = function(constName, value) {
     if (typeof constName != "string")
@@ -147,6 +150,8 @@ lord.leftChain = [];
 lord.rightChain = [];
 lord._ajaxRequestQueue = [];
 lord._ajaxRequestActive = 0;
+lord.models = {};
+lord.templates = {};
 
 /*Functions*/
 
@@ -162,10 +167,10 @@ lord.isVideoType = function(type) {
     return type in {"video/mp4": true, "video/ogg": true, "video/webm": true};
 };
 
-lord.getCookie = function(name) {
+lord.getCookie = function(name, defValue) {
     var matches = document.cookie.match(
         new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
-    return matches ? decodeURIComponent(matches[1]) : undefined;
+    return matches ? decodeURIComponent(matches[1]) : defValue;
 };
 
 lord.setCookie = function(name, value, options) {
@@ -534,62 +539,66 @@ lord.showNotification = function(title, body, icon) {
     });
 };
 
-lord.showDialog = function(title, label, body, callback, afterShow) {
-    var root = lord.node("div");
-    if (!!title || !!label) {
-        var div = lord.node("div");
-        if (!!title) {
-            var c = lord.node("center");
-            var t = lord.node("b");
-            t.appendChild(lord.node("text", title));
-            c.appendChild(t);
-            div.appendChild(c);
-            div.appendChild(lord.node("br"));
+lord.showDialog = function(title, label, body, afterShow) {
+    return lord.getModel("misc/tr").then(function(model) {
+        var root = lord.node("div");
+        if (!!title || !!label) {
+            var div = lord.node("div");
+            if (!!title) {
+                var c = lord.node("center");
+                var t = lord.node("b");
+                t.appendChild(lord.node("text", title));
+                c.appendChild(t);
+                div.appendChild(c);
+                div.appendChild(lord.node("br"));
+            }
+            if (!!label) {
+                div.appendChild(lord.node("text", label));
+                div.appendChild(lord.node("br"));
+            }
+            root.appendChild(div);
+            root.appendChild(lord.node("br"));
         }
-        if (!!label) {
-            div.appendChild(lord.node("text", label));
-            div.appendChild(lord.node("br"));
+        if (!!body) {
+            root.appendChild(body);
+            root.appendChild(lord.node("br"));
         }
-        root.appendChild(div);
-        root.appendChild(lord.node("br"));
-    }
-    if (!!body) {
-        root.appendChild(body);
-        root.appendChild(lord.node("br"));
-    }
-    var div2 = lord.node("div");
-    var dialog = null;
-    var cancel = lord.node("button");
-    cancel.onclick = function() {
-        dialog.close();
-    };
-    cancel.innerHTML = lord.text("cancelButtonText");
-    div2.appendChild(cancel);
-    var ok = lord.node("button");
-    ok.onclick = function() {
-        if (!!callback)
-            callback();
-        dialog.close();
-    };
-    ok.innerHTML = lord.text("confirmButtonText");
-    div2.appendChild(ok);
-    root.appendChild(div2);
-    dialog = picoModal({
-        "content": root,
-        "modalStyles": function (styles) {
-            styles.maxHeight = "80%";
-            styles.maxWidth = "80%";
-            styles.overflow = "auto";
-            styles.border = "1px solid #777777";
-            return styles;
-        }
-    }).afterShow(function(modal) {
-        if (!!afterShow)
-            afterShow();
-    }).afterClose(function(modal) {
-        modal.destroy();
+        var div2 = lord.node("div");
+        var dialog = null;
+        var cancel = lord.node("button");
+        var d = $.Deferred();
+        cancel.onclick = function() {
+            dialog.close();
+            d.resolve(false);
+        };
+        cancel.appendChild(lord.node("text", model.tr.cancelButtonText));
+        div2.appendChild(cancel);
+        var ok = lord.node("button");
+        ok.onclick = function() {
+            d.resolve(true);
+            dialog.close();
+        };
+        ok.appendChild(lord.node("text", model.tr.confirmButtonText));
+        div2.appendChild(ok);
+        root.appendChild(div2);
+        dialog = picoModal({
+            "content": root,
+            "modalStyles": function (styles) {
+                styles.maxHeight = "80%";
+                styles.maxWidth = "80%";
+                styles.overflow = "auto";
+                styles.border = "1px solid #777777";
+                return styles;
+            }
+        }).afterShow(function(modal) {
+            if (!!afterShow)
+                afterShow();
+        }).afterClose(function(modal) {
+            modal.destroy();
+        });
+        dialog.show();
+        return d;
     });
-    dialog.show();
 };
 
 lord.ajaxRequest = function(method, params, id, callback, errorCallback) {
@@ -884,4 +893,112 @@ lord.createUuid = function() {
 
 lord.hash = function() {
     return window.location.hash.substr(1, window.location.hash.length - 1);
+};
+
+lord.data = function(key, el) {
+    el = el || document.body;
+    while (el) {
+        if (key in el.dataset)
+            return el.dataset[key];
+        el = el.parentNode;
+    }
+    return undefined;
+};
+
+lord.getTemplate = function(templateName) {
+    var d = $.Deferred();
+    if (lord.templates.hasOwnProperty(templateName)) {
+        d.resolve(lord.templates[templateName]);
+    } 
+    $.ajax("/" + lord.data("sitePathPrefix") + "templates/" + templateName + ".jst").then(function(result) {
+        var template = doT.template(result);
+        lord.templates[templateName] = template;
+        d.resolve(template);
+    });
+    return d;
+};
+
+lord.getModel = function(modelName) {
+    var d = $.Deferred();
+    if (lord.models.hasOwnProperty(modelName)) {
+        d.resolve(lord.models[modelName]);
+    } else {
+        $.ajax("/" + lord.data("sitePathPrefix") + modelName + ".json").then(function(result) {
+            lord.models[modelName] = result;
+            d.resolve(result);
+        });
+    }
+    return d.promise();
+};
+
+lord.now = function() {
+    return new Date();
+};
+
+lord.settings = function() {
+    return {
+        mode: {
+            name: lord.getCookie("mode", "normal")
+        },
+        style: {
+            name: lord.getCookie("style", "photon")
+        },
+        shrinkPosts: (lord.getCookie("shrinkPosts", "true") == "true"),
+        currentTime: lord.getCookie("currentTime", "server"),
+        timeZoneOffset: lord.getCookie("timeZoneOffset", -lord.now().getTimezoneOffset()),
+        captchaEngine: {
+            id: lord.getCookie("captchaEngine", "google-recaptcha")
+        },
+        maxAllowedRating: lord.getCookie("maxAllowedRating", "R-18G"),
+        draftsByDefault: (lord.getCookie("draftsByDefault", "false") == "true"),
+        hidePostformRules: (lord.getCookie("hidePostformRules", "false") == "true"),
+        minimalisticPostform: (lord.getCookie("minimalisticPostform", "false") == "true"),
+        hiddenBoards: lord.getCookie("hiddenBoards", "").split("|"),
+        autoUpdateThreadsByDefault: lord.getLocalObject("autoUpdateThreadsByDefault", false),
+        autoUpdateInterval: lord.getLocalObject("autoUpdateInterval", 15),
+        showAutoUpdateTimer: lord.getLocalObject("showAutoUpdateTimer", true),
+        showAutoUpdateDesktopNotifications: lord.getLocalObject("showAutoUpdateDesktopNotifications", true),
+        signOpPostLinks: lord.getLocalObject("signOpPostLinks", true),
+        signOwnPostLinks: lord.getLocalObject("signOwnPostLinks", true),
+        showLeafButtons: lord.getLocalObject("showLeafButtons", true),
+        leafThroughImagesOnly: lord.getLocalObject("leafThroughImagesOnly", false),
+        imageZoomSensitivity: lord.getLocalObject("imageZoomSensitivity", 25),
+        defaultAudioVideoVolume: lord.getLocalObject("defaultAudioVideoVolume", 100),
+        rememberAudioVideoVolume: lord.getLocalObject("rememberAudioVideoVolume", true),
+        playAudioVideoImmediately: lord.getLocalObject("playAudioVideoImmediately", true),
+        loopAudioVideo: lord.getLocalObject("loopAudioVideo", true),
+        quickReplyAction: lord.getLocalObject("quickReplyAction", "goto_thread"),
+        moveToPostOnReplyInThread: lord.getLocalObject("moveToPostOnReplyInThread", false),
+        checkFileExistence: lord.getLocalObject("checkFileExistence", true),
+        showAttachedFilePreview: lord.getLocalObject("showAttachedFilePreview", true),
+        addToFavoritesOnReply: lord.getLocalObject("addToFavoritesOnReply", false),
+        hidePostformMarkup: lord.getLocalObject("hidePostformMarkup", false),
+        stripExifFromJpeg: lord.getLocalObject("stripExifFromJpeg", true),
+        hideTripcodes: lord.getLocalObject("hideTripcodes", false),
+        hideUserNames: lord.getLocalObject("hideUserNames", false),
+        strikeOutHiddenPostLinks: lord.getLocalObject("strikeOutHiddenPostLinks", true),
+        spellsEnabled: lord.getLocalObject("spellsEnabled", true),
+        maxSimultaneousAjax: lord.getLocalObject("maxSimultaneousAjax", 2),
+        showNewPosts: lord.getLocalObject("showNewPosts", true),
+        showYoutubeVideosTitles: lord.getLocalObject("showYoutubeVideosTitles", true),
+        hotkeysEnabled: lord.getLocalObject("hotkeysEnabled", true),
+        userCssEnabled: lord.getLocalObject("userCssEnabled", true)
+    };
+};
+
+lord.setSettings = function(model) {
+    if (!model)
+        return;
+    lord.forIn(model, function(val, key) {
+        if (lord.SettingsStoredInCookies.indexOf(key) >= 0) {
+            if ("hiddenBoards" == key)
+                val = val.join("|");
+            lord.setCookie(key, val, {
+                "expires": lord.Billion,
+                "path": "/"
+            });
+        } else {
+            lord.setLocalObject(key, val);
+        }
+    });
 };

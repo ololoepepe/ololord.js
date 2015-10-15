@@ -2,6 +2,8 @@ var FS = require("q-io/fs");
 
 var config = require("../config.json");
 
+var setHooks = {};
+
 var c = function(key, def) {
     var parts = key.split(".");
     var o = config;
@@ -29,6 +31,9 @@ c.set = function(key, value) {
     var p = parts.shift();
     var prev = o[p];
     o[p] = value;
+    var hook = setHooks[key];
+    if (hook)
+        hook(value, key);
     FS.write(__dirname + "/../config.json", JSON.stringify(config, null, 4));
     return prev;
 };
@@ -51,6 +56,19 @@ c.remove = function(key) {
     delete o[p];
     FS.write(__dirname + "/../config.json", JSON.stringify(config, null, 4), "utf8");
     return prev;
+};
+
+c.setConfigFile = function(fileName) {
+    config = require(fileName);
+    for (var key in setHooks) {
+        if (!setHooks.hasOwnProperty(key))
+            return;
+        setHooks[key](c(key));
+    }
+};
+
+c.installSetHook = function(key, hook) {
+    setHooks[key] = hook;
 };
 
 module.exports = c;

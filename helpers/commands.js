@@ -124,7 +124,7 @@ _installHandler("register-user", function() {
         if (!_password) {
             var sha1 = Crypto.createHash("sha1");
             sha1.update(_pwd);
-            _password = sha1.digest();
+            _password = sha1.digest("hex");
         }
         var availableBoardNames = Board.boardNames();
         _boardNames.forEach(function (boardName) {

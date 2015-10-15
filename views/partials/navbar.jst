@@ -3,7 +3,7 @@
         <span class="navbarItem navbarItemBoard">[<a href="/{{=it.site.pathPrefix}}{{=board.name}}"
               title="{{=board.title}}">{{=board.name}}</a>] </span>
     {{~}}
-    {{? it.mode.name != "ascetic"}}
+    {{? it.settings.mode.name != "ascetic"}}
         <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}playlist"
                                      title="{{=it.tr.toPlaylistPageText}}"><img src="/{{=it.site.pathPrefix}}img/playlist.png"
                                                                                 width="16" height="16"></a>]</span>
