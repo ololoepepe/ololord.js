@@ -143,10 +143,13 @@ var renderPage = function(model, board, req, json) {
         model.specialThumbName = function(thumbName) {
             return thumbName.replace("/", "_");
         };
+        model.minimalisticPostform = function() {
+            return "mobile" == this.deviceType || this.settings.minimalisticPostform;
+        };
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
-            return controller(req, "boardPage/main", model);
+            return controller(req, "boardPage/main", model, board);
     });
 };
 
@@ -168,10 +171,13 @@ var renderThread = function(model, board, req, json) {
         model.specialThumbName = function(thumbName) {
             return thumbName.replace("/", "_");
         };
+        model.minimalisticPostform = function() {
+            return "mobile" == this.deviceType || this.settings.minimalisticPostform;
+        };
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
-            return controller(req, "thread/main", model);
+            return controller(req, "thread/main", model, board);
     });
 };
 

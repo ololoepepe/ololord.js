@@ -40,7 +40,7 @@ var spawnCluster = function() {
         });
 
         app.use(express.static(__dirname + "/public"));
-        app.use(ddos.express);
+        //app.use(ddos.express);
         app.use(cookieParser());
         app.use(device.capture());
         require("./middlewares")(app);
@@ -71,70 +71,18 @@ var spawnCluster = function() {
 };
 
 if (cluster.isMaster) {
-    var populate = function(skip) {
-        if (skip)
-            return Database.Lock.drop();
-        console.log("Populating database...");
-        var Tools = require("./helpers/tools");
-        return Database.dropDatabase().then(function() {
-            var data = require("/home/darkangel/tmp/db.json");
-            var promises = [];
-            for (var x in data) {
-                if (!data.hasOwnProperty(x))
-                    continue;
-                var arr = data[x];
-                if (arr.length < 1)
-                    continue;
-                if (x === "posts") {
-                    var threads = {};
-                    arr.forEach(function(post) {
-                        var key = post.boardName + "/" + post.threadNumber;
-                        if (!threads[key]) {
-                            threads[key] = {
-                                boardName: post.boardName,
-                                number: post.threadNumber,
-                                posts: []
-                            };
-                        }
-                        var thread = threads[key];
-                        thread.posts.push(post);
-                    });
-                    Tools.forIn(threads, function(thread) {
-                        var collection = Database.threadCollection(thread.boardName, thread.number);
-                        promises.push(collection.insert(thread.posts));
-                    });
-                } else {
-                    var i = 0;
-                    while (i < arr.length) {
-                        promises.push(Database[x].insert(arr.slice(i, i + 1000)));
-                        i += 1000;
-                    }
-                }
+    console.log("Spawning workers, please, wait...");
+    spawnCluster();
+    var ready = 0;
+    cluster.on("online", function(worker) {
+        worker.process.on("message", function(msg) {
+            if (msg == "ready")
+                ++ready;
+            if (ready == count) {
+                var commands = require("./helpers/commands");
+                var rl = commands();
             }
-            return Promise.all(promises);
-        }).then(function() {
-            console.log("Database populated!");
-            return Promise.resolve();
         });
-    };
-    populate(!Tools.contains(process.argv.slice(2), "--populate-db")).then(function() {
-        return Database.initialize();
-    }).then(function() {
-        console.log("Spawning workers, please, wait...");
-        spawnCluster();
-        var ready = 0;
-        cluster.on("online", function(worker) {
-            worker.process.on("message", function(msg) {
-                if (msg == "ready")
-                    ++ready;
-                if (ready == count) {
-                    var commands = require("./helpers/commands");
-                    var rl = commands();
-                }
-            });
-        });
-    }).catch(function(err) {
-        console.log(err);
     });
 } else {
     spawnCluster();

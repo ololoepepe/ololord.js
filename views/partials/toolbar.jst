@@ -1,4 +1,4 @@
-<div class="toolbar nowrap">
+<div class="toolbar{{? it.settings.stickyToolbar}} sticky{{?}} nowrap">
 {{=it.site.pathPrefix}}
     {{? it.settings.mode.name != "ascetic"}}
         <input type="image" name="settingsButton" title="{{=it.tr.settingsButtonText}}"

@@ -6,44 +6,34 @@ var promisify = require("promisify-node");
 
 var Board = require("../boards/board");
 var Cache = require("./cache");
+var Captcha = require("../captchas");
 var config = require("./config");
+var Database = require("./database");
 var Tools = require("./tools");
 
 var partials = {};
 
-var controller = function(req, templateName, modelData) {
+var controller = function(req, templateName, modelData, board) {
     var baseModelData = merge.recursive(controller.baseModel(req), controller.settingsModel(req));
     baseModelData = merge.recursive(baseModelData, controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
     baseModelData.path = req.path;
-    baseModelData.compareRatings = function(r1, r2) {
-        switch (r1) {
-        case "SFW":
-            return (r1 == r2) ? 0 : -1;
-        case "R-15":
-            if (r1 == r2)
-                return 0;
-            return ("SFW" == r2) ? 1 : -1;
-        case "R-18":
-            if (r1 == r2)
-                return 0;
-            return ("R-18G" == r2) ? -1 : 1;
-        case "R-18G":
-            return (r1 == r2) ? 0 : 1;
-        default:
-            throw "Invalid rating";
-        }
-    };
+    baseModelData.compareRatings = Database.compareRatings;
     if (!modelData)
         modelData = {};
     var template = Cache.get("template/" + templateName, "");
-    if (template)
-        return Promise.resolve(template(merge.recursive(baseModelData, modelData)));
+    if (template) {
+        modelData = merge.recursive(baseModelData, modelData);
+        modelData.req = req;
+        return Promise.resolve(template(modelData));
+    }
     return FS.read(__dirname + "/../views/" + templateName + ".jst").then(function(data) {
         return Promise.resolve(dot.template(data, null, partials));
     }).then(function(template) {
         Cache.set("template/" + templateName, template);
-        return Promise.resolve(template(merge.recursive(baseModelData, modelData)));
+        modelData = merge.recursive(baseModelData, modelData);
+        modelData.req = req;
+        return Promise.resolve(template(modelData));
     });
 };
 
@@ -57,8 +47,7 @@ controller.baseModel = function(req) {
         user: {
             ip: req.ip,
             level: req.level,
-            loggedIn: !!req.hashpass,
-            maxAllowedRating: req.maxAllowedRating
+            loggedIn: !!req.hashpass
         },
         modes: [
             {
@@ -96,20 +85,69 @@ controller.boardsModel = function() {
             title: board.title,
             defaultUserName: board.defaultUserName,
             showWhois: board.showWhois,
-            postingEnabled: board.postingEnabled
+            postingEnabled: board.postingEnabled,
+            draftsEnabled: board.draftsEnabled,
+            captchaEnabled: board.captchaEnabled,
+            maxEmailFieldLength: board.maxEmailFieldLength,
+            maxNameFieldLength: board.maxNameFieldLength,
+            maxSubjectFieldLength: board.maxSubjectFieldLength,
+            maxTextLength: board.maxTextLength,
+            maxPasswordFieldLength: board.maxPasswordFieldLength,
+            maxFileCount: board.maxFileCount,
+            maxFileSize: board.maxFileSize,
+            maxLastPosts: board.maxLastPosts,
+            markupElements: board.markupElements,
+            supportedFileTypes: board.supportedFileTypes,
+            supportedCaptchaEngines: board.supportedCaptchaEngines
         };
     });
     return { boards: boards };
 };
 
-controller.settingsModel = function(req) {
+controller.boardModel = function(board) {
+    if (typeof board == "string") {
+        if (!Tools.contains(Board.boardNames(), board))
+            return null;
+        board = Board.board(board);
+    }
     return {
-        settings: {
-            mode: req.mode,
-            style: req.style,
-            shrinkPosts: req.shrinkPosts
+        board: {
+            name: board.name,
+            title: board.title,
+            defaultUserName: board.defaultUserName,
+            showWhois: board.showWhois,
+            postingEnabled: board.postingEnabled,
+            draftsEnabled: board.draftsEnabled,
+            captchaEnabled: board.captchaEnabled,
+            maxEmailFieldLength: board.maxEmailFieldLength,
+            maxNameFieldLength: board.maxNameFieldLength,
+            maxSubjectFieldLength: board.maxSubjectFieldLength,
+            maxTextLength: board.maxTextLength,
+            maxPasswordFieldLength: board.maxPasswordFieldLength,
+            maxFileCount: board.maxFileCount,
+            maxFileSize: board.maxFileSize,
+            maxLastPosts: board.maxLastPosts,
+            markupElements: board.markupElements,
+            supportedFileTypes: board.supportedFileTypes,
+            supportedCaptchaEngines: board.supportedCaptchaEngines
         }
     };
+};
+
+controller.headModel = function(board, req) {
+    return {
+        title: board.title
+    };
+};
+
+controller.navbarModel = function() {
+    return {
+        boards: Board.boardInfos()
+    };
+};
+
+controller.settingsModel = function(req) {
+    return { settings: req.settings };
 };
 
 controller.translationsModel = function() {
@@ -209,6 +247,7 @@ controller.translationsModel = function() {
             modeLabelText: Tools.translate("Mode:"),
             styleLabelText: Tools.translate("Style:"),
             postShrinkingLabelText: Tools.translate("Shrink posts:"),
+            stickyToolbarLabelText: Tools.translate("Sticky toolbar:"),
             timeLabelText: Tools.translate("Time:"),
             timeServerText: Tools.translate("Server"),
             timeLocalText: Tools.translate("Local"),
@@ -263,53 +302,70 @@ controller.translationsModel = function() {
             editUserCssText: Tools.translate("Edit"),
             userCssLabelText: Tools.translate("User CSS:"),
             cancelButtonText: Tools.translate("Cancel"),
-            confirmButtonText: Tools.translate("Confirm")
-        }
-    };
-};
-
-controller.headModel = function(board, req) {
-    return {
-        title: board.title
-    };
-};
-
-controller.navbarModel = function() {
-    return {
-        boards: Board.boardInfos()
-    };
-};
-
-controller.boardModel = function(board) {
-    if (typeof board == "string") {
-        if (!Tools.contains(Board.boardNames(), board))
-            return null;
-        board = Board.board(board);
-    }
-    return {
-        board: {
-            name: board.name,
-            title: board.title,
-            defaultUserName: board.defaultUserName,
-            showWhois: board.showWhois,
-            postingEnabled: board.postingEnabled
+            confirmButtonText: Tools.translate("Confirm"),
+            showPostFormText: Tools.translate("Show post form"),
+            hidePostFormText: Tools.translate("Hide post form"),
+            postFormPlaceholderEmail: Tools.translate("E-mail"),
+            postFormButtonSubmit: Tools.translate("Submit"),
+            postFormLabelEmail: Tools.translate("E-mail:"),
+            postFormPlaceholderName: Tools.translate("Name"),
+            postFormLabelName: Tools.translate("Name:"),
+            postFormPlaceholderSubject: Tools.translate("Subject"),
+            postFormLabelSubject: Tools.translate("Subject:"),
+            postFormTextPlaceholder: Tools.translate("Comment. Max length:"),
+            postFormLabelText: Tools.translate("Post:"),
+            markupBold: Tools.translate("Bold text"),
+            markupItalics: Tools.translate("Italics"),
+            markupStrikedOut: Tools.translate("Striked out text"),
+            markupUnderlined: Tools.translate("Underlined text"),
+            markupSpoiler: Tools.translate("Spoiler"),
+            markupQuotation: Tools.translate("Quote selected text"),
+            markupCodeLang: Tools.translate("Code block syntax"),
+            markupCode: Tools.translate("Code block"),
+            markupSubscript: Tools.translate("Subscript"),
+            markupSuperscript: Tools.translate("Superscript"),
+            markupUrl: Tools.translate("URL (external link)"),
+            postFormLabelMarkupMode: Tools.translate("Markup mode:"),
+            postFormLabelOptions: Tools.translate("Options:"),
+            postFormLabelRaw: Tools.translate("Raw HTML:"),
+            postFormLabelSignAsOp: Tools.translate("OP:"),
+            postFormLabelTripcode: Tools.translate("Tripcode:"),
+            postFormLabelDraft: Tools.translate("Draft:"),
+            postFormInputFile: Tools.translate("File(s):"),
+            selectFileText: Tools.translate("Select file"),
+            removeFileText: Tools.translate("Remove this file"),
+            ratingLabelText: Tools.translate("Rating:"),
+            attachFileByLinkText: Tools.translate("Specify file URL"),
+            postFormPlaceholderPassword: Tools.translate("Password"),
+            postFormLabelPassword: Tools.translate("Password:"),
+            postFormLabelCaptcha: Tools.translate("Captcha:"),
+            noCaptchaText: Tools.translate("You don't have to enter captcha"),
+            captchaQuotaText: Tools.translate("Posts left:"),
+            showPostformRulesText: Tools.translate("Show rules"),
+            hidePostformRulesText: Tools.translate("Hide rules")
         }
     };
 };
 
 controller.initialize = function() {
-    var path = __dirname + "/../views/partials";
-    return FS.list(path).then(function(fileNames) {
-        var promises = fileNames.map(function(fileName) {
-            FS.read(__dirname + "/../views/partials/" + fileName).then(function(data) {
-                partials[fileName.split(".").shift()] = data;
+    var path1 = __dirname + "/../views/partials";
+    var path2 = __dirname + "/../public/templates/partials";
+    var c = {};
+    return FS.list(path1).then(function(fileNames) {
+        c.fileNames = fileNames.map(function(fileName) {
+            return path1 + "/" + fileName;
+        });
+        return FS.list(path2);
+    }).then(function(fileNames) {
+        c.fileNames = c.fileNames.concat(fileNames.map(function(fileName) {
+            return path2 + "/" + fileName;
+        }));
+        var promises = c.fileNames.map(function(fileName) {
+            FS.read(fileName).then(function(data) {
+                partials[fileName.split("/").pop().split(".").shift()] = data;
                 return Promise.resolve();
             });
         });
-        promises.push(FS.read(__dirname + "/../public/templates/post.jst").then(function(data) {
-            partials["post"] = data;
-            return Promise.resolve();
-        }));
         return Promise.all(promises);
     });
 };

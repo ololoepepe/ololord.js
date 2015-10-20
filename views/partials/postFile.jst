@@ -58,7 +58,7 @@
     <div class="postFileFile {{=it.deviceType}}">
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
            onclick="lord.showImage(this); return false;">
-            {{? it.compareRatings(it.user.maxAllowedRating, fileInfo.rating) < 0}}
+            {{? it.compareRatings(it.settings.maxAllowedRating, fileInfo.rating) < 0}}
                 {{? "R-18G" == fileInfo.rating}}
                     <img src="/{{=it.site.pathPrefix}}img/r-18g.png" width="200" height="200">
                 {{?? "R-18" == fileInfo.rating}}

@@ -3,6 +3,7 @@ var Promise = require("promise");
 var promisify = require("promisify-node");
 
 var Cache = require("../helpers/cache");
+var Captcha = require("../captchas");
 var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
 
@@ -27,16 +28,66 @@ var Board = function(name, title, options) {
         ? options.defaultUserName : "Anonymous") });
     defineSetting(this, "archiveLimit", 0);
     defineSetting(this, "bumpLimit", 500);
+    Object.defineProperty(this, "captchaEnabled", {
+        get: function() {
+            return config("board.captchaEnabled", true) && config("board." + name + ".captchaEnabled", true);
+        }
+    });
     defineSetting(this, "captchaQuota", 0);
     defineSetting(this, "draftsEnabled", true);
     defineSetting(this, "enabled", true);
     defineSetting(this, "hidden", false);
+    defineSetting(this, "maxEmailFieldLength", 150);
+    defineSetting(this, "maxNameFieldLength", 50);
+    defineSetting(this, "maxSubjectFieldLength", 150);
+    defineSetting(this, "maxTextLength", 15000);
+    defineSetting(this, "maxPasswordFieldLength", 50);
+    defineSetting(this, "maxFileCount", 1);
+    defineSetting(this, "maxFileSize", 10 * 1024 * 1024);
     defineSetting(this, "maxLastPosts", 3);
+    defineSetting(this, "markupElements", [
+        Board.MarkupElements.BoldMarkupElement,
+        Board.MarkupElements.ItalicsMarkupElement,
+        Board.MarkupElements.StrikedOutMarkupElement,
+        Board.MarkupElements.UnderlinedMarkupElement,
+        Board.MarkupElements.SpoilerMarkupElement,
+        Board.MarkupElements.QuotationMarkupElement,
+        Board.MarkupElements.SubscriptMarkupElement,
+        Board.MarkupElements.SuperscriptMarkupElement,
+        Board.MarkupElements.UrlMarkupElement
+    ]);
     defineSetting(this, "postingEnabled", true);
     defineSetting(this, "postLimit", 1000);
     defineSetting(this, "showWhois", false);
-    defineSetting(this, "supportedCaptchaEngines", []); //TODO
-    defineSetting(this, "supportedFileTypes", []); //TODO
+    Object.defineProperty(this, "supportedCaptchaEngines", {
+        get: function() {
+            var ids = config("board." + name + ".supportedCaptchaEngines",
+                config("board.supportedCaptchaEngines", Captcha.captchaIds()));
+            var list = [];
+            if (!(ids instanceof Array))
+                ids = [];
+            ids.forEach(function(id) {
+                var captcha = Captcha.captcha(id);
+                list.push({
+                    id: captcha.id,
+                    title: captcha.title
+                });
+            });
+            return list;
+        }
+    });
+    defineSetting(this, "supportedFileTypes", [
+        "application/pdf",
+        "audio/mpeg",
+        "audio/ogg",
+        "audio/wav",
+        "image/gif",
+        "image/jpeg",
+        "image/png",
+        "video/mp4",
+        "video/ogg",
+        "video/webm"
+    ]);
     defineSetting(this, "threadLimit", 200);
     defineSetting(this, "threadsPerPage", 20);
     Object.defineProperty(this, "launchDate", {
@@ -120,6 +171,19 @@ var Board = function(name, title, options) {
     if (typeof fileType != "string")
         return;
     return Tools.contains(this.supportedFileTypes, fileType);
+};
+
+Board.MarkupElements = {
+    BoldMarkupElement: "BOLD",
+    ItalicsMarkupElement: "ITALICS",
+    StrikedOutMarkupElement: "STRIKED_OUT",
+    UnderlinedMarkupElement: "UNDERLINED",
+    SpoilerMarkupElement: "SPOILER",
+    QuotationMarkupElement: "QUOTATION",
+    SubscriptMarkupElement: "SUBSCRIPT",
+    SuperscriptMarkupElement: "SUPERSCRIPT",
+    UrlMarkupElement: "URL",
+    CodeMarkupElement: "CODE"
 };
 
 Board.board = function(name) {

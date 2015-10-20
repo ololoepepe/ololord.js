@@ -1,248 +1,252 @@
-<% if ( content.mode.name != "ascetic" ) %>
-    <form id="postForm" method="post" accept-charset="utf-8" action="/<%= sitePathPrefix %>action/<%= action %>"
-          enctype="multipart/form-data" onsubmit="return lord.submitted(event, this);">
-<% else %>
-    <form id="postForm" method="post" accept-charset="utf-8" action="/<%= sitePathPrefix %>action/<%= action %>"
-          enctype="multipart/form-data">
-<% end %>
-    <input type="hidden" value="<%= currentBoard.name %>" name="board" />
-    <% if ( content.currentThread > 0 ) %>
-        <input type="hidden" value="<%= currentThread %>" name="thread" />
-    <% end %>
-    <input type="hidden" value="<%= currentCaptchaEngine.id %>" name="captchaEngine" />
+<form id="postForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
+      action="/{{=it.site.pathPrefix}}action/{{? it.thread}}createPost{{??}}createThread{{?}}"
+      {{? it.settings.mode.name != "ascetic"}}onsubmit="return lord.submitted(event, this);"{{?}}>
+    <input type="hidden" name="board" value="{{=it.board.name}}" />
+    {{? it.thread}}
+        <input type="hidden" name="thread" value="{{=it.thread.number}}" />
+    {{?}}
+    <input type="hidden" name="captchaEngine" value="{{=it.settings.captchaEngine.id}}" />
     <input type="hidden" value="" name="fileHashes" />
     <table class="postFormTable">
         <tbody>
-            <% include customPostFormField0() %>
+            {{? it.customPostFormField && it.customPostFormField[0]}}
+                {{ out += it.customPostFormField[0](it); }}
+            {{?}}
             <tr>
-                <% if ( content.deviceType == "mobile" || content.minimalisticPostform ) %>
+                {{? it.minimalisticPostform()}}
                     <td class="postformField nowrap" colspan="2">
-                        <input type="text" maxlength="<%= maxEmailLength %>" name="email" size="27"
-                               placeholder="<%= postFormPlaceholderEmail %>" />
-                        <input type="submit" name="submit" value="<%= postFormButtonSubmit %>" />
+                        <input type="text" maxlength="{{=it.board.maxEmailLength}}" name="email" size="27"
+                               placeholder="{{=it.tr.postFormPlaceholderEmail}}" />
+                        <input type="submit" name="submit" value="{{=it.tr.postFormButtonSubmit}}" />
                     </td>
-                <% else %>
+                {{??}}
                     <td class="postformLabel">
-                        <b><%= postFormLabelEmail %></b>
+                        <b>{{=it.tr.postFormLabelEmail}}</b>
                     </td>
                     <td class="postformField">
-                        <input type="text" maxlength="<%= maxEmailLength %>" name="email" size="30" />
-                        <input type="submit" name="submit" value="<%= postFormButtonSubmit %>" />
+                        <input type="text" maxlength="{{=it.board.maxEmailLength}}" name="email" size="30" />
+                        <input type="submit" name="submit" value="{{=it.tr.postFormButtonSubmit}}" />
                     </td>
-                <% end %>
+                {{?}}
             </tr>
-            <% include customPostFormField1() %>
+            {{? it.customPostFormField && it.customPostFormField[10]}}
+                {{ out += it.customPostFormField[10](it); }}
+            {{?}}
             <tr>
-                <% if ( content.deviceType == "mobile" || content.minimalisticPostform ) %>
+                {{? it.minimalisticPostform()}}
                     <td class="postformField" colspan="2">
-                        <input type="text" maxlength="<%= maxNameLength %>" name="name" size="40"
-                               placeholder="<%= postFormPlaceholderName %>" />
+                        <input type="text" maxlength="{{=it.board.maxNameLength}}" name="name" size="40"
+                               placeholder="{{=it.tr.postFormPlaceholderName}}" />
                     </td>
-                <% else %>
+                {{??}}
                     <td class="postformLabel">
-                        <b><%= postFormLabelName %></b>
+                        <b>{{=it.tr.postFormLabelName}}</b>
                     </td>
                     <td class="postformField">
-                        <input type="text" maxlength="<%= maxNameLength %>" name="name" size="43" />
+                        <input type="text" maxlength="{{=it.board.maxNameLength}}" name="name" size="43" />
                     </td>
-                <% end %>
+                {{?}}
             </tr>
-            <% include customPostFormField2() %>
+            {{? it.customPostFormField && it.customPostFormField[20]}}
+                {{ out += it.customPostFormField[20](it); }}
+            {{?}}
             <tr>
-                <% if ( content.deviceType == "mobile" || content.minimalisticPostform ) %>
+                {{? it.minimalisticPostform()}}
                     <td class="postformField" colspan="2">
-                        <input type="text" maxlength="<%= maxSubjectLength %>" name="subject" size="40"
-                               placeholder="<%= postFormPlaceholderSubject %>" />
+                        <input type="text" maxlength="{{=it.board.maxSubjectLength}}" name="subject" size="40"
+                               placeholder="{{=it.tr.postFormPlaceholderSubject}}" />
                     </td>
-                <% else %>
+                {{??}}
                     <td class="postformLabel">
-                        <b><%= postFormLabelSubject %></b>
+                        <b>{{=it.tr.postFormLabelSubject}}</b>
                     </td>
                     <td class="postformField">
-                        <input type="text" maxlength="<%= maxSubjectLength %>" name="subject" size="43" />
+                        <input type="text" maxlength="{{=it.board.maxSubjectLength}}" name="subject" size="43" />
                     </td>
-                <% end %>
+                {{?}}
             </tr>
-            <% include customPostFormField3() %>
+            {{? it.customPostFormField && it.customPostFormField[30]}}
+                {{ out += it.customPostFormField[30](it); }}
+            {{?}}
             <tr>
-                <% if ( content.deviceType == "mobile" || content.minimalisticPostform ) %>
+                {{? it.minimalisticPostform()}}
                     <td class="postformField" colspan="2">
                         <div class="symbolCounterContainer">
-                            <textarea name="text" rows="10" cols="41" placeholder="<%= postFormTextPlaceholder %>"
+                            <textarea name="text" rows="10" cols="41"
+                                      placeholder="{{=it.tr.postFormTextPlaceholder}} {{=it.board.maxTextLength}}"
                                       class="postFormTextarea"></textarea>
                         </div>
                     </td>
-                <% else %>
+                {{??}}
                     <td class="postformLabel">
-                        <b><%= postFormLabelText %></b>
+                        <b>{{=it.tr.postFormLabelText}}</b>
                     </td>
                     <td class="postformField">
                         <div class="symbolCounterContainer">
-                            <% if ( content.mode.name != "ascetic" ) %>
-                                <span class="symbolCounter"><span name="used">0</span>/<%= maxTextLength %></span>
-                                <textarea name="text" rows="10" cols="43" placeholder="<%= postFormTextPlaceholder %>"
-                                          class="postFormTextarea" onkeyup="lord.countSymbols(this);"></textarea>
-                            <% else %>
-                                <textarea name="text" rows="10" cols="43" placeholder="<%= postFormTextPlaceholder %>"
-                                          class="postFormTextarea" onkeyup="lord.countSymbols(this);"></textarea>
-                            <% end %>
+                            {{? it.settings.mode.name != "ascetic"}}
+                                <span class="symbolCounter"><span name="used">0</span>/{{=it.board.maxTextLength}}</span>
+                            {{?}}
+                            <textarea name="text" rows="10" cols="43" class="postFormTextarea"
+                                      placeholder="{{=it.tr.postFormTextPlaceholder}} {{=it.board.maxTextLength}}"
+                                      onkeyup="lord.countSymbols(this);"></textarea>
                         </div>
                     </td>
-                <% end %>
+                {{?}}
             </tr>
-            <% if ( content.mode.name != "ascetic" && content.deviceType != "mobile" && !content.minimalisticPostform ) %>
+            {{? !it.minimalisticPostform() && it.settings.mode.name != "ascetic"}}
                 <tr>
                     <td>
                         <a class="hidePostformMarkupButton" />
                     </td>
                     <td class="postformMarkup">
                         <span>
-                            <% if ( content.markupElements & AbstractBoard::BoldMarkupElement ) %>
+                            {{? it.board.markupElements.indexOf("BOLD") >= 0}}
                                 <button class="button" onclick="lord.markup('b'); return false;" name="markupBold"
-                                        title="<%= markupBold %>"><b>B</b></button>
-                            <% end %>
-                            <% if ( content.markupElements & AbstractBoard::ItalicsMarkupElement ) %>
+                                        title="{{=it.tr.markupBold}}"><b>B</b></button>
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("ITALICS") >= 0}}
                                 <button class="button" onclick="lord.markup('i'); return false;" name="markupItalics"
-                                        title="<%= markupItalics %>"><i>i</i></button>
-                            <% end %>
-                            <% if ( content.markupElements & AbstractBoard::StrikedOutMarkupElement ) %>
-                                <button class="button" onclick="lord.markup('s'); return false;" name="markupStrikedOut"
-                                        title="<%= markupStrikedOut %>"><s>S</s></button>
-                            <% end %>
-                            <% if ( content.markupElements & AbstractBoard::UnderlinedMarkupElement ) %>
-                                <button class="button" onclick="lord.markup('u'); return false;" name="markupUnderlined"
-                                        title="<%= markupUnderlined %>"><u>U</u></button>
-                            <% end %>
-                            <% if ( content.markupElements & AbstractBoard::SpoilerMarkupElement ) %>
-                                <button class="button" onclick="lord.markup('spoiler'); return false;" name="markupSpoiler"
-                                        title="<%= markupSpoiler %>"><span class="spoiler">------</span></button>
-                            <% end %>
-                            <% if ( content.markupElements & AbstractBoard::QuotationMarkupElement ) %>
-                                <button class="button" onclick="lord.markup('>'); return false;" name="markupQuotation"
-                                        title="<%= markupQuotation %>"><span class="quoatation">&gt;</span></button>
-                            <% end %>
-                            <% if ( content.markupElements & AbstractBoard::CodeMarkupElement ) %>
-                                <select name="langSelect" class="select" title="<%= markupLang %>"
-                                        onchange="lord.changeLastCodeLang();">
+                                        title="{{=it.tr.markupItalics}}"><i>i</i></button>
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("STRIKED_OUT") >= 0}}
+                                <button class="button" onclick="lord.markup('s'); return false;"
+                                        name="markupStrikedOut" title="{{=it.tr.markupStrikedOut}}"><s>S</s></button>
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("UNDERLINED") >= 0}}
+                                <button class="button" onclick="lord.markup('u'); return false;"
+                                        name="markupUnderlined" title="{{=it.tr.markupUnderlined}}"><u>U</u></button>
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("SPOILER") >= 0}}
+                                <button class="button" onclick="lord.markup('spoiler'); return false;"
+                                        name="markupSpoiler"
+                                        title="{{=it.tr.markupSpoiler}}"><span class="spoiler">------</span></button>
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("QUOTATION") >= 0}}
+                                <button class="button" onclick="lord.markup('>'); return false;"
+                                        title="{{=it.tr.markupQuotation}}"
+                                        name="markupQuotation"><span class="quoatation">&gt;</span></button>
+                            {{?}}
+                            
+                            {{? it.board.markupElements.indexOf("CODE") >= 0}}
+                                <select name="codeLang" class="select" title="{{=it.tr.markupCodeLang}}"
+                                        onchange="lord.changeLastCodeLang(this);">
                                     <option value="-" selected="true">-----</option>
-                                    <% foreach lang in availableLangs %>
-                                        <% item %>
-                                            <option value="<%= lang.id %>"><%= lang.name %></option>
-                                        <% end %>
-                                    <% end %>
+                                    {{~it.availableCodeLangs :lang}}
+                                        <option value="{{=lang.id}}">{{=lang.name}}</option>
+                                    {{~}}
                                 </select>
                                 <button class="button" onclick="lord.markup('code'); return false;" name="markupCode"
-                                        title="<%= markupCode %>">[code]</button>
-                            <% end %>
-                            <% if ( content.markupElements & AbstractBoard::SubscriptMarkupElement ) %>
-                                <button class="button" onclick="lord.markup('sub'); return false;" name="markupSubscript"
-                                        title="<%= markupSubscript %>">H<sub>2</sub>O</button>
-                            <% end %>
-                            <% if ( content.markupElements & AbstractBoard::SuperscriptMarkupElement ) %>
-                                <button class="button" onclick="lord.markup('sup'); return false;" name="markupSuperscript"
-                                        title="<%= markupSuperscript %>">X<sup>3</sup></button>
-                            <% end %>
-                            <% if ( content.markupElements & AbstractBoard::UrlMarkupElement ) %>
-                                <button class="button" onclick="lord.markup('url'); return false;" name="markupUrl"
-                                        title="<%= markupUrl %>">http://</button>
-                            <% end %>
+                                        title="{{=it.tr.markupCode}}">[code]</button>
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("SUBSCRIPT") >= 0}}
+                                <button class="button" onclick="lord.markup('sub'); return false;"
+                                        title="{{=it.tr.markupSubscript}}"
+                                        name="markupSubscript">H<sub>2</sub>O</button>
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("SUPERSCRIPT") >= 0}}
+                                <button class="button" onclick="lord.markup('sup'); return false;"
+                                        title="{{=it.tr.markupSuperscript}}"
+                                        name="markupSuperscript">X<sup>3</sup></button>
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("URL") >= 0}}
+                                <button class="button" onclick="lord.markup('url'); return false;"
+                                        title="{{=it.tr.markupUrl}}" name="markupUrl">http://</button>
+                            {{?}}
                         </span>
                     </td>
                 </tr>
-            <% end %>
-            <% include customPostFormField31() %>
+            {{?}}
+            {{? it.customPostFormField && it.customPostFormField[40]}}
+                {{ out += it.customPostFormField[40](it); }}
+            {{?}}
             <tr>
-                <% if ( content.deviceType != "mobile" && !content.minimalisticPostform ) %>
+                {{? !it.minimalisticPostform()}}
                     <td class="postformLabel">
-                        <b><%= postFormLabelMarkupMode %></b>
+                        <b>{{=it.tr.postFormLabelMarkupMode}}</b>
                     </td>
-                <% end %>
-                <% if ( content.deviceType == "mobile" || content.minimalisticPostform ) %>
-                    <td class="postformField" colspan="2">
-                <% else %>
-                    <td class="postformField">
-                <% end %>
+                {{?}}
+                <td class="postformField" {{? it.minimalisticPostform()}}colspan="2"{{?}}>
                     <select name="markupMode" class="select">
-                        <% foreach mode in markupModes %>
-                            <% item %>
-                                <% if ( mode.name == content.currentMarkupMode.name ) %>
-                                    <option value="<%= mode.name %>" selected="true"><%= mode.title %></option>
-                                <% else %>
-                                    <option value="<%= mode.name %>"><%= mode.title %></option>
-                                <% end %>
-                            <% end %>
-                        <% end %>
+                        {{~it.markupModes :mode}}
+                            <option {{? mode.name == it.settings.markupMode}}selected="true"{{?}}
+                                    value="{{=mode.name}}">{{=mode.title}}</option>
+                        {{~}}
                     </select>
                 </td>
             </tr>
-            <% include customPostFormField4() %>
+            {{? it.customPostFormField && it.customPostFormField[50]}}
+                {{ out += it.customPostFormField[50](it); }}
+            {{?}}
             <tr>
-                <% if ( content.deviceType != "mobile" && !content.minimalisticPostform ) %>
+                
+                {{? !it.minimalisticPostform()}}
                     <td class="postformLabel">
-                        <b><%= postFormLabelOptions %></b>
+                        <b>{{=it.tr.postFormLabelOptions}}</b>
                     </td>
-                    <td>
-                <% else %>
-                    <td class="postformField" colspan="2">
-                <% end %>
-                    <% include customPostFormField40() %>
-                    <% if ( content.moder >= 10 ) %>
-                        <b><%= postFormLabelRaw %></b>
+                {{?}}
+                <td class="postformField" {{? it.minimalisticPostform()}}colspan="2"{{?}}>
+                    {{? it.customPostFormOption && it.customPostFormOption[0]}}
+                        {{ out += it.customPostFormOption[0](it); }}
+                    {{?}}
+                    {{? it.user.level >= 10}}
+                        <b>{{=it.tr.postFormLabelRaw}}</b>
                         <input type="checkbox" name="raw" value="true" />
-                    <% end %>
-                    <% include customPostFormField41() %>
-                    <b><%= postFormLabelSignAsOp %></b>
+                    {{?}}
+                    {{? it.customPostFormOption && it.customPostFormOption[10]}}
+                        {{ out += it.customPostFormOption[10](it); }}
+                    {{?}}
+                    <b>{{=it.tr.postFormLabelSignAsOp}}</b>
                     <input type="checkbox" name="signAsOp" value="true" />
-                    <% include customPostFormField42() %>
+                    {{? it.customPostFormOption && it.customPostFormOption[20]}}
+                        {{ out += it.customPostFormOption[20](it); }}
+                    {{?}}
+                    {{? it.user.loggedIn}}
                     <% if ( content.loggedIn ) %>
-                        <b><%= postFormLabelTripcode %></b>
-                        <% if ( content.mode.name != "ascetic" ) %>
-                            <input type="checkbox" name="tripcode" value="true" onclick="lord.switchShowTripcode();" />
-                        <% else %>
-                            <input type="checkbox" name="tripcode" value="true" />
-                        <% end %>
-                    <% end %>
-                    <% include customPostFormField43() %>
-                    <% if ( content.draftsEnabled && content.loggedIn ) %>
-                        <b><%= postFormLabelDraft %></b>
-                        <% if ( content.draftsByDefault ) %>
-                            <input type="checkbox" name="draft" value="true" checked="true" />
-                        <% else %>
-                            <input type="checkbox" name="draft" value="true" />
-                        <% end %>
-                    <% end %>
-                    <% include customPostFormField44() %>
+                        <b>{{=it.tr.postFormLabelTripcode}}</b>
+                        <input type="checkbox" name="tripcode" value="true"
+                               {{? it.settings.mode.name != "ascetic"}}onclick="lord.switchShowTripcode();"{{?}} />
+                    {{?}}
+                    {{? it.customPostFormOption && it.customPostFormOption[30]}}
+                        {{ out += it.customPostFormOption[30](it); }}
+                    {{?}}
+                    {{? it.board.draftsEnabled && it.user.loggedIn}}
+                        <b>{{=it.tr.postFormLabelDraft}}</b>
+                        <input type="checkbox" name="draft" value="true"
+                               {{? it.settings.draftsByDefault}}checked="true"{{?}} />
+                    {{?}}
+                    {{? it.customPostFormOption && it.customPostFormOption[40]}}
+                        {{ out += it.customPostFormOption[40](it); }}
+                    {{?}}
                 </td>
             </tr>
-            <% include customPostFormField5() %>
-            <% if ( content.maxFileCount ) %>
+            {{? it.customPostFormField && it.customPostFormField[60]}}
+                {{ out += it.customPostFormField[60](it); }}
+            {{?}}
+            {{? it.board.maxFileCount > 0}}
                 <tr>
-                    <% if ( content.deviceType != "mobile" && !content.minimalisticPostform ) %>
+                    {{? !it.minimalisticPostform()}}
                         <td class="postformLabel">
-                            <b><%= postFormInputFile %></b>
+                            <b>{{=it.tr.postFormInputFile}}</b>
                         </td>
-                    <% end %>
-                    <% if ( content.deviceType == "mobile" || content.minimalisticPostform ) %>
-                        <td class="postformField" colspan="2">
-                    <% else %>
-                        <td class="postformField">
-                    <% end %>
-                        <% if ( content.mode.name != "ascetic" ) %>
+                    {{?}}
+                    <td class="postformField" {{? it.minimalisticPostform()}}colspan="2"{{?}}>
+                        {{? it.settings.mode.name != "ascetic"}}
                             <div class="postformFile" onclick="lord.browseFile(event, this);"
                                  ondragover="return lord.fileDragOver(event, this);"
                                  ondragleave="return lord.fileDragLeave(event, this);"
-                                 ondrop="return lord.fileDrop(event, this);" title="<%= selectFileText %>">
-                                <img class="postformFilePreview" src="/<%= sitePathPrefix %>img/addfile.png">
+                                 ondrop="return lord.fileDrop(event, this);" title="{{=it.tr.selectFileText}}">
+                                <img class="postformFilePreview" src="/{{=it.site.pathPrefix}}img/addfile.png">
                                 <input type="file" name="file" onchange="lord.fileSelected(this);"
-                                       class="postformFileInput" accept="<%= supportedFileTypes %>" />
+                                       class="postformFileInput"
+                                       accept="{{ out += it.board.supportedFileTypes.join(","); }}" />
                                 <span class="postformFileText"></span>
                                 <a href="javascript:void(0);" style="display: none;" onclick="lord.removeFile(this);"
                                    class="postformFileRemoveButton">
-                                    <img src="/<%= sitePathPrefix %>img/delete.png" title="<%= removeFileText %>"
+                                    <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.removeFileText}}"
                                          class="postformFileRemoveImage"></a>
                                 <div>
                                     <span class="ratingSelectContainer">
-                                        <span><%= ratingLabelText %></span>
+                                        <span>{{=it.tr.ratingLabelText}}</span>
                                         <select name="file_rating">
                                             <option value="SFW" selected="true"
                                                     onclick="return lord.preventOnclick(event);">SFW</option>
@@ -253,106 +257,94 @@
                                             <option value="R-18G"
                                                     onclick="return lord.preventOnclick(event);">R-18G</option>
                                         </select>
-                                        <img src="/<%= sitePathPrefix %>img/question.png" title="<%= ratingTooltip %>">
+                                        <img src="/{{=it.site.pathPrefix}}img/question.png"
+                                             title="{{=it.tr.ratingTooltip}}">
                                     </span>
                                     <a onclick="lord.attachFileByLink(this); return lord.preventOnclick(event);"
-                                       class="fileByLinkButton"><%= attachFileByLinkText %></a>
+                                       class="fileByLinkButton">{{=it.tr.attachFileByLinkText}}</a>
                                 </div>
                             </div>
-                        <% else %>
-                            <% c++ for (int i = 0; i < int(content.maxFileCount); ++i) { %>
-                                <% c++ out() << "<input type=\"file\"" << "\" name=\"file_\" << i << accept=\"content.supportedFileTypes\" />"; %>
-                                <% c++ out() << "<select name=\"file_" << i << "_rating\">"; %>
+                        {{??}}
+                            {{ for (var i = 0; i < it.board.maxFileCount; ++i) { }}
+                                <input type="file" name="file_{{=i}}"
+                                       accept="{{ out += it.board.supportedFileTypes.join(","); }}" />
+                                <select name="file_{{=i}}_rating">
                                     <option value="SFW" selected="true">SFW</option>
                                     <option value="R-15">R-15</option>
                                     <option value="R-18">R-18</option>
                                     <option value="R-18G">R-18G</option>
                                 </select>
-                                <img src="/<%= sitePathPrefix %>img/question.png" title="<%= ratingTooltip %>">
-                                <% c++ if (i < int(content.maxFileCount - 1)) {%>
+                                <img src="/{{=it.site.pathPrefix}}img/question.png" title="{{=it.tr.ratingTooltip}}">
+                                {{? i < (it.board.maxFileCount - 1)}}
                                     <br />
-                                <% c++ } %>
-                            <% c++ } %>
-                        <% end %>
+                                {{?}}
+                            {{ } }}
+                        {{?}}
                     </td>
                 </tr>
-            <% end %>
-            <% include customPostFormField6() %>
+            {{?}}
+            {{? it.customPostFormField && it.customPostFormField[70]}}
+                {{ out += it.customPostFormField[70](it); }}
+            {{?}}
             <tr>
-                <% if ( content.deviceType == "mobile" || content.minimalisticPostform ) %>
+                {{? it.minimalisticPostform()}}
                     <td class="postformField" colspan="2">
-                        <input type="password" maxlength="<%= maxPasswordLength %>" name="password" size="40"
-                               placeholder="<%= postFormPlaceholderPassword %>" />
+                        <input type="password" maxlength="{{=it.board.maxPasswordLength}}" name="password" size="40"
+                               placeholder="{{=it.tr.postFormPlaceholderPassword}}" />
                     </td>
-                <% else %>
+                {{??}}
                     <td class="postformLabel">
-                        <b><%= postFormLabelPassword %></b>
+                        <b>{{=it.tr.postFormLabelPassword}}</b>
                     </td>
                     <td class="postformField">
-                        <input type="password" maxlength="<%= maxPasswordLength %>" name="password" size="43" />
+                        <input type="password" maxlength="{{=it.board.maxPasswordLength}}" name="password" size="43" />
                     </td>
-                <% end %>
+                {{?}}
             </tr>
-            <% include customPostFormField7() %>
+            {{? it.customPostFormField && it.customPostFormField[80]}}
+                {{ out += it.customPostFormField[80](it); }}
+            {{?}}
             <tr>
-                <% if ( content.deviceType == "mobile" || content.minimalisticPostform ) %>
-                    <td id="captchaContainer" class="postformField">
-                        <% if ( content.captchaEnabled ) %>
-                            <% if ( content.captchaQuota > 0 ) %>
-                                <span class="noCaptchaText"><%= noCaptchaText %>. <%= captchaQuotaText %>
-                                    <%= captchaQuota %></span>
-                            <% else %>
-                                <%= captchaWidgetHtml | raw %>
-                            <% end %>
-                        <% else %>
-                            <span class="noCaptchaText"><%= noCaptchaText %></span>
-                        <% end %>
-                    </td>
-                <% else %>
+                {{? !it.minimalisticPostform()}}
                     <td class="postformLabel">
-                        <b><%= postFormLabelCaptcha %></b>
+                        <b>{{=it.tr.postFormLabelCaptcha}}</b>
                     </td>
-                    <td id="captchaContainer" class="postformField">
-                        <% if ( content.captchaEnabled ) %>
-                            <% if ( content.captchaQuota > 0 ) %>
-                                <span class="noCaptchaText"><%= noCaptchaText %>. <%= captchaQuotaText %>
-                                    <%= captchaQuota %></span>
-                            <% else %>
-                                <%= captchaWidgetHtml | raw %>
-                            <% end %>
-                        <% else %>
-                            <span class="noCaptchaText"><%= noCaptchaText %></span>
-                        <% end %>
-                    </td>
-                <% end %>
+                {{?}}
+                <td id="captchaContainer" class="postformField">
+                    {{? it.board.captchaEnabled}}
+                        {{? it.user.captchaQuota > 0}}
+                            <span class="noCaptchaText">{{=it.tr.noCaptchaText}}. {{=it.tr.captchaQuotaText}}
+                                                        {{=it.user.captchaQuota}}</span>
+                        {{??}}
+                            {{ out += it.settings.captchaEngine.widgetHtml(it.req); }}
+                        {{?}}
+                    {{??}}
+                        <span class="noCaptchaText">{{=it.tr.noCaptchaText}}</span>
+                    {{?}}
+                </td>
             </tr>
-            <% include customPostFormField8() %>
-            <% if ( content.deviceType != "mobile" && !content.minimalisticPostform ) %>
+            {{? it.customPostFormField && it.customPostFormField[90]}}
+                {{ out += it.customPostFormField[90](it); }}
+            {{?}}
+            {{? !it.minimalisticPostform()}}
                 <tr>
                     <td colspan="2" class="postformRules">
-                        <% if ( content.hidePostformRules ) %>
-                            <ul style="display: none;">
-                        <% else %>
-                            <ul>
-                        <% end %>
-                        <% foreach rule in postformRules %>
-                                <% item %>
-                                    <li><%= rule | raw %></li>
-                                <% end %>
-                            <% end %>
+                        <ul {{? it.settings.hidePostformRules}}style="display: none;"{{?}}>
+                            {{~it.board.postformRules: rule}}
+                                <li>{{=rule}}</li>
+                            {{~}}
                         </ul>
-                        <% if ( content.mode.name != "ascetic" ) %>
-                            <% if ( content.hidePostformRules ) %>
-                                <a href="javascript:lord.setPostformRulesVisible(true);"
-                                   class="hidePostformRulesButton"><%= showPostformRulesText %></a>
-                            <% else %>
-                                <a href="javascript:lord.setPostformRulesVisible(false);"
-                                   class="hidePostformRulesButton"><%= hidePostformRulesText %></a>
-                            <% end %>
-                        <% end %>
+                        {{? it.settings.mode.name != "ascetic"}}
+                            <a href="javascript:void(0);"
+                               onclick="lord.setPostformRulesVisible({{=it.settings.hidePostformRules}}); return false;"
+                               class="hidePostformRulesButton">{{? it.settings.hidePostformRules}}{{=it.tr.showPostformRulesText}}{{??}}{{=it.tr.hidePostformRulesText}}{{?}}</a>
+                        {{?}}
                     </td>
                 </tr>
-            <% end %>
+            {{?}}
+            {{? it.customPostFormField && it.customPostFormField[100]}}
+                {{ out += it.customPostFormField[100](it); }}
+            {{?}}
         </tbody>
     </table>
 </form>

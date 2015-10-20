@@ -4,6 +4,7 @@ db
 db.sqlite
 node_modules
 public/*
+tools/*
 !public/css
 !public/img
 !public/js

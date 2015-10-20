@@ -1,193 +1,162 @@
 var FS = require("fs");
-var pmongo = require("promised-mongo");
-var pmongoLock = require("pmongo-lock");
 var Promise = require("promise");
 var promisify = require("promisify-node");
+var redis = require("then-redis");
 
 var Board = require("../boards/board");
 var Cache = require("./cache");
 var Tools = require("./tools");
 
-var Collections = {};
-var Models = {};
-var RegisteredUserLevels = {};
 var MarkupModes = {};
+var Ratings = {};
+var RegisteredUserLevels = {};
+
+var db = redis.createClient();
+
+db.tmp_hmget = db.hmget;
+db.hmget = function(key, hashes) {
+    return db.tmp_hmget.apply(db, [key].concat(hashes));
+};
+
+MarkupModes["ExtandedWakabaMarkOnly"] = "EWM_ONLY";
+MarkupModes["BBCodeOnly"] = "BBC_ONLY";
+MarkupModes["None"] = "NONE";
+MarkupModes["ExtandedWakabaMarkAndBBCode"] = "EWM_AND_BBC";
+
+Ratings["SafeForWork"] = "SFW";
+Ratings["Rating15"] = "R-15";
+Ratings["Rating18"] = "R-18";
+Ratings["Rating18G"] = "R-18G";
 
 RegisteredUserLevels["Admin"] = "ADMIN";
 RegisteredUserLevels["Moder"] = "MODER";
 RegisteredUserLevels["User"] = "USER";
 
-MarkupModes["ExtandedWakabaMarkOnly"] = "EWM_ONLY";
-MarkupModes["BBCodeOnly"] = "BBC_ONLY";
-MarkupModes["ExtandedWakabaMarkAndBBCode"] = "EWM_AND_BBC";
-MarkupModes["None"] = "NONE";
+Object.defineProperty(module.exports, "MarkupModes", { value: MarkupModes });
+Object.defineProperty(module.exports, "Ratings", { value: Ratings });
+Object.defineProperty(module.exports, "RegisteredUserLevels", { value: RegisteredUserLevels });
 
-var db = pmongo("ololord");
-
-var Lock = pmongoLock(db);
-
-module.exports.db = db;
-module.exports.Lock = Lock;
-
-var threadCollection = function(boardName, threadNumber) {
-    return db.collection("thread/" + boardName + "/" + threadNumber);
+module.exports.getThreads = function(boardName, options) {
+    if (!Tools.contains(Board.boardNames(), boardName))
+        return Promise.reject("Invalid board name");
+    var opts = (typeof options == "object");
+    var c = {};
+    var p = db.hgetall("threads:" + boardName).then(function(result) {
+        if (!result)
+            return [];
+        var filter = opts && (typeof options.filterFunction == "function");
+        var limit = (opts && !isNaN(options.limit) && options.limit > 0) ? options.limit : 0; //NOTE: 0 means no limit
+        var i = 0;
+        var threads = [];
+        for (var number in result) {
+            if (!result.hasOwnProperty(number))
+                continue;
+            var thread = JSON.parse(result[number]);
+            if (!filter || options.filterFunction(thread))
+                threads.push(thread);
+            if (limit && threads.length >= limit)
+                break;
+        }
+        return threads;
+    });
+    if (!opts || !options.withPostNumbers)
+        return p;
+    return p.then(function(threads) {
+        c.threads = threads;
+        var promises = threads.map(function(thread) {
+            return db.smembers("threadPostNumbers:" + boardName + ":" + thread.number);
+        });
+        return Promise.all(promises);
+    }).then(function(results) {
+        results.forEach(function(result, i) {
+            if (!result)
+                return;
+            c.threads[i].postNumbers = result;
+        });
+        return c.threads;
+    });
 };
 
-var _defineModel = function(modelName, f, collectionName) {
-    var model = f();
-    model.toInstance = function(document) {
-        if (Array.isArray(document)) {
-            return document.map(function(doc) {
-                doc.__proto__ = model;
-                return doc;
+module.exports.threadPosts = function(boardName, threadNumber, options) {
+    if (!Tools.contains(Board.boardNames(), boardName))
+        return Promise.reject("Invalid board name");
+    if (isNaN(threadNumber) || threadNumber <= 0)
+        return Promise.reject("Invalid threadNumber");
+    var opts = (typeof options == "object");
+    var filter = opts && (typeof options.filterFunction == "function");
+    var limit = (opts && !isNaN(options.limit) && options.limit > 0) ? options.limit : 0; //NOTE: 0 means no limit
+    var reverse = opts && options.reverse;
+    var c = { posts: [] };
+    var p = db.smembers("threadPostNumbers:" + boardName + ":" + threadNumber).then(function(result) {
+        if (!result)
+            result = [];
+        var i = reverse ? (result.length - 1) : 0;
+        var bound = reverse ? (limit ? (result.length - limit - 1) : -1) : (limit ? limit : result.length);
+        if (bound < 0)
+            bound = -1;
+        if (bound > result.length)
+            boudn = result.length;
+        var step = limit ? limit : result.length;
+        var pred = function() {
+            return reverse ? (i > bound) : (i < bound);
+        };
+        var getKeys = function() {
+            var keys = [];
+            var x = 0;
+            for (; pred() && x < step; i += (reverse ? -1 : 1), ++x)
+                keys.push(boardName + ":" + result[i]);
+            return keys;
+        };
+        var getNext = function() {
+            return db.hmget("posts", getKeys()).then(function(posts) {
+                posts = posts.map(JSON.parse);
+                c.posts = c.posts.concat(filter? posts.filter(options.filterFunction) : posts);
+                if (!pred() || (limit && c.posts.length >= limit)) {
+                    if (limit && c.posts.length > limit)
+                        return c.posts.slice(0, limit);
+                    else
+                        return c.posts;
+                }
+                return getNext();
+            });
+        };
+        return getNext();
+    });
+    if (!opts && !options.withFileInfos && !options.withReferences)
+        return p;
+    return p.then(function() {
+        var promises = [];
+        if (options.withFileInfos) {
+            promises = c.posts.map(function(post) {
+                return db.smembers("fileInfos:" + boardName + ":" + post.number).then(function(fileInfos) {
+                    post.fileInfos = fileInfos ? fileInfos.map(JSON.parse) : [];
+                    return Promise.resolve();
+                });
             });
         }
-        document.__proto__ = model;
-        return document;
-    };
-    Object.defineProperty(module.exports, modelName, { value: model });
-    Models[modelName] = model;
-    collectionName = collectionName || (modelName.substr(0, 1).toLowerCase() + modelName.substr(1) + "s");
-    var collection = db.collection(collectionName);
-    Object.defineProperty(module.exports, collectionName, { value: collection });
-    Collections[collectionName] = collection;
-    model.collection = collection;
-    collection.model = model;
-};
-
-_defineModel("PostCounter", function() {
-    var model = function() {
-        //
-    };
-    return model;
-});
-
-_defineModel("Thread", function() {
-    var model = function() {
-        //
-    };
-    return model;
-});
-
-_defineModel("DraftThread", function() {
-    var model = function() {
-        //
-    };
-    return model;
-});
-
-_defineModel("CaptchaQuota", function() {
-    var model = function() {
-        //
-    };
-    return model;
-});
-
-_defineModel("RegisteredUser", function() {
-    var model = function() {
-        //
-    };
-    return model;
-});
-
-_defineModel("BannedUser", function() {
-    var model = function() {
-        //
-    };
-    return model;
-});
-
-_defineModel("UserDraft", function() {
-    var model = function() {
-        //
-    };
-    return model;
-});
-
-Object.defineProperty(module.exports, "Collections", { value: Collections });
-Object.defineProperty(module.exports, "Models", { value: Models });
-Object.defineProperty(module.exports, "RegisteredUserLevels", { value: RegisteredUserLevels });
-Object.defineProperty(module.exports, "MarkupModes", { value: MarkupModes });
-
-module.exports.initialize = function() {
-    return Collections.threads.createIndex({
-        "options.draft": 1,
-        boardName: 1,
-        archived: 1,
-        "user.hashpass": 1,
-        "user.level": 1
-    }).then(function() {
-        return Collections.threads.createIndex({
-            "options.draft": 1,
-            boardName: 1,
-            archived: 1,
-            number: 1,
-            "user.hashpass": 1,
-            "user.level": 1
-        });
-    }).then(function() {
-        return Collections.threads.createIndex({
-            boardName: 1,
-            draft: 1
-        });
-    }).then(function() {
-        return Collections.threads.createIndex({
-            updatedAt: 1
-        });
-    }).then(function() {
-        return Collections.postCounters.createIndex({
-            boardName: 1
-        });
-    }).then(function() {
-        return Collections.threads.find({});
-    }).then(function(threads) {
-        var promises = threads.map(function(thread) {
-            var collection = threadCollection(thread.boardName, thread.number);
-            return collection.createIndex({
-                number: 1,
-                "options.draft": 1,
-                "user.hashpass": 1,
-                "user.level": 1
-            }).then(function() {
-                return collection.createIndex({
-                    "options.draft": 1,
-                    "user.hashpass": 1,
-                    "user.level": 1
+        if (options.withReferences) {
+            promises = promises.concat(c.posts.map(function(post) {
+                return db.smembers("referencedPosts:" + boardName + ":" + post.number).then(function(referencedPosts) {
+                    post.referencedPosts = referencedPosts ? referencedPosts.map(JSON.parse) : [];
+                    return db.smembers("referringPosts:" + boardName + ":" + post.number);
+                }).then(function(referringPosts) {
+                    post.referringPosts = referringPosts ? referringPosts.map(JSON.parse) : [];
+                    return Promise.resolve();
                 });
-            }).then(function() {
-                return collection.createIndex({
-                    draft: 1
-                });
-            }).then(function() {
-                return collection.createIndex({
-                    number: 1
-                });
-            })
-        });
-        return Promise.resolve(promises);
+            }));
+        }
+        return Promise.all(promises);
     }).then(function() {
-        return Collections.userDrafts.createIndex({
-            hashpass: 1
-        });
-    }).then(function() {
-        return Promise.resolve();
+        return c.posts;
     });
 };
 
-module.exports.getCollectionNames = function(cb, cbp) {
-    var promise = db.getCollectionNames();
-    if (!cb)
-        return promise;
-    return promise.then(function(collectionNames) {
-        if (cbp)
-            return cb(collectionNames);
-        cb(collectionNames);
-        return Promise.resolve();
-    });
-};
-
-module.exports.dropDatabase = function() {
-    return db.dropDatabase();
+module.exports.threadPostCount = function(boardName, threadNumber) {
+    if (!Tools.contains(Board.boardNames(), boardName))
+        return Promise.reject("Invalid board name");
+    if (isNaN(threadNumber) || threadNumber <= 0)
+        return Promise.reject("Invalid threadNumber");
+    return db.scard("threadPostNumbers:" + boardName + ":" + threadNumber);
 };
 
 module.exports.registeredUser = function(reqOrHashpass) {
@@ -195,54 +164,100 @@ module.exports.registeredUser = function(reqOrHashpass) {
         reqOrHashpass = Tools.hashpass(reqOrHashpass);
     if (!reqOrHashpass)
         return Promise.resolve(null);
-    return Collections.registeredUsers.findOne({ hashpass: reqOrHashpass });
+    return db.hget("registeredUsers", reqOrHashpass);
 };
 
 module.exports.registeredUserLevel = function(reqOrHashpass) {
     return module.exports.registeredUser(reqOrHashpass).then(function(user) {
-        return Promise.resolve(user ? user.level : null);
+        if (!user)
+            return null;
+        return user.level;
     });
 };
 
 module.exports.registeredUserBoards = function(reqOrHashpass) {
     return module.exports.registeredUser(reqOrHashpass).then(function(user) {
-        return Promise.resolve(user ? user.boardNames : null);
+        if (!user)
+            return null;
+        return user.boardNames;
     });
 };
 
 module.exports.moderOnBoard = function(reqOrHashpass, boardName1, boardName2) {
     return module.exports.registeredUser(reqOrHashpass).then(function(user) {
         if (!user)
-            return Promise.resolve(false);
+            return false;
         if (user.level < RegisteredUserLevels.Moder)
-            return Promise.resolve(false);
+            return false;
         if (user.level >= RegisteredUserLevels.Admin)
-            return Promise.resolve(true);
+            return true;
         var boardNames = user.boardNames;
         if (Tools.contains(boardNames, "*"))
-            return Promise.resolve(true);
+            return true;
         if (Tools.contains(boardNames, boardName1))
-            return Promise.resolve(true);
+            return true;
         if (boardName2 && Tools.contains(boardNames, boardName2))
-            return Promise.resolve(true);
-        return Promise.resolve(false);
+            return true;
+        return false;
     });
 };
 
 module.exports.lastPostNumber = function(boardName) {
     if (!Tools.contains(Board.boardNames(), boardName))
         return Promise.reject("Invalid board name");
-    return Collections.postCounters.findOne({ boardName: boardName }).then(function(postCounter) {
-        return Promise.resolve(postCounter ? postCounter.lastPostNumber : 0);
+    return db.hget("postCounters", boardName).then(function(number) {
+        if (!number)
+            return 0;
+        return number;
     });
 };
 
-module.exports.getUserDrafts = function(boardName, hashpass) {
+/*module.exports.getUserDrafts = function(boardName, hashpass) {
     if (typeof hashpass != "string" || !hashpass.match(/([0-9a-fA-F]){40}/))
         return Promise.resolve([]);
     return Collections.userDrafts.findOne({ hashpass: hashpass }).then(function(drafts) {
         return Promise.resolve(drafts ? drafts.drafts : []);
     });
+};*/
+
+module.exports.compareRatings = function(r1, r2) {
+    if (["SFW", "R-15", "R-18", "R-18G"].indexOf(r2) < 0)
+        throw "Invalid rating r2: " + r2;
+    switch (r1) {
+    case "SFW":
+        return (r1 == r2) ? 0 : -1;
+    case "R-15":
+        if (r1 == r2)
+            return 0;
+        return ("SFW" == r2) ? 1 : -1;
+    case "R-18":
+        if (r1 == r2)
+            return 0;
+        return ("R-18G" == r2) ? -1 : 1;
+    case "R-18G":
+        return (r1 == r2) ? 0 : 1;
+    default:
+        throw "Invalid rating r1: " + r1;
+    }
 };
 
-module.exports.threadCollection = threadCollection;
+module.exports.compareRegisteredUserLevels = function(l1, l2) {
+    if (["ADMIN", "MODER", "USER", null].indexOf(l2) < 0)
+        throw "Invalid registered user level l2: " + l2;
+    switch (l1) {
+    case "ADMIN":
+        return (l1 == l2) ? 0 : 1;
+    case "MODER":
+        if (l1 == l2)
+            return 0;
+        return ("ADMIN" == l2) ? -1 : 1;
+    case "USER":
+        if (l1 == l2)
+            return 0;
+        return (null == l2) ? 1 : -1;
+    case null:
+        return (l1 == l2) ? 0 : -1;
+    default:
+        throw "Invalid reistered user level l1: " + l1;
+    }
+};

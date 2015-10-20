@@ -8,27 +8,6 @@ var Database = require("../helpers/database");
 var FS = require("q-io/fs");
 var Tools = require("../helpers/tools");
 
-var threadOrPostQuery = function(hashpass, level, extra) {
-    var q = {
-        $or: [
-            {
-                "options.draft": false
-            }, {
-                "user.hashpass": null
-            }, {
-                "user.hashpass": hashpass
-            }, {
-                "user.level": {
-                    $lte: level
-                }
-            }
-        ]
-    };
-    if (extra)
-        q = merge.recursive(q, extra);
-    return q;
-};
-
 module.exports.getPage = function(board, hashpass, page) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
@@ -36,122 +15,109 @@ module.exports.getPage = function(board, hashpass, page) {
     if (isNaN(page) || page < 0)
         return Promise.reject("Invalid page number");
     var c = {};
-    return Database.getUserDrafts(hashpass).then(function(drafts) {
-        c.hasDraftsOnBoard = drafts.reduce(function(has, draft) {
-            return has || (draft.boardName == board.name);
-        }, false);
-        if (!c.hasDraftsOnBoard) {
-            var cached = Cache.get("model/board/page/" + board.name + "/" + page);
-            if (cached) {
-                if (config("system.inMemoryCache", false))
-                    return Promise.resolve(cached);
-                var fileName = __dirname + "/../cache/" + process.pid + "/board/page/" + board.name + "/" + page + ".json";
-                return FS.read(fileName).then(function(data) {
-                    return JSON.parse(data);
-                });
+    console.time("registeredUserLevel");
+    return Database.registeredUserLevel(hashpass).then(function(level) {
+        c.level = level;
+        console.timeEnd("registeredUserLevel");
+        console.time("threads");
+        return Database.getThreads(board.name, {
+            filterFunction: function(thread) {
+                if (thread.archived)
+                    return false;
+                if (!thread.options.draft)
+                    return true;
+                if (!thread.user.hashpass)
+                    return true;
+                if (thread.user.hashpass == hashpass)
+                    return true;
+                return Database.compareRegisteredUserLevels(thread.user.level, c.level) < 0;
             }
-        }
-        return Database.moderOnBoard(hashpass, board.name).then(function(moderOnBoard) {
-            c.moderOnBoard = moderOnBoard;
-            return Database.registeredUserLevel(hashpass);
-        }).then(function(level) {
-            c.level = level;
-            console.time("threads");
-            var query = threadOrPostQuery(hashpass, level, {
-                boardName: board.name,
-                archived: false
-            });
-            return Database.threads.find(query);
-        }).then(function(threads) {
-            console.timeEnd("threads");
-            console.log("threads length = " + threads.length);
-            c.threads = threads;
-            c.threads.sort(Board.sortThreadsByDate);
-            c.pageCount = Math.floor(c.threads.length / board.threadsPerPage)
-                + ((c.threads.length % board.threadsPerPage) ? 1 : 0);
-            if (!c.pageCount)
-                c.pageCount = 1;
-            if (page >= c.pageCount)
-                return Promise.reject("Not found");
-            var start = page * board.threadsPerPage;
-            c.threads = c.threads.slice(start, start + board.threadsPerPage);
-            console.time("opPosts");
-            var promises = c.threads.map(function(thread) {
-                var collection = Database.db.collection("thread/" + thread.boardName + "/" + thread.number);
-                return collection.findOne({ number: thread.number });
-            });
-            return Promise.all(promises);
-        }).then(function(opPosts) {
-            console.timeEnd("opPosts");
-            console.log("opPosts length = " + opPosts.length);
-            c.opPosts = opPosts;
-            console.time("lastPosts");
-            var promises = c.threads.map(function(thread, i) {
-                var collection = Database.db.collection("thread/" + thread.boardName + "/" + thread.number);
-                var query = threadOrPostQuery(hashpass, c.level, { number: { $ne: thread.number } });
-                return collection.find(query).sort({ number: -1 }).limit(board.maxLastPosts).sort({ draft: -1 });
-            });
-            return Promise.all(promises);
-        }).then(function(lastPosts) {
-            console.timeEnd("lastPosts");
-            console.log("lastPosts length = " + lastPosts.length);
-            c.lastPosts = lastPosts;
-            var promises = c.threads.map(function(thread) {
-                return Database.db.collection("thread/" + thread.boardName + "/" + thread.number).count({});
-            });
-            return Promise.all(promises);
-        }).then(function(counts) {
-            c.model = {
-                threads: [],
-                pageCount: c.pageCount
-            };
-            c.threads.forEach(function(thread, i) {
-                var opPost = c.opPosts[i];
-                var lastPosts = c.lastPosts[i];
-                var count = counts[i];
-                /*var omitted = lastPosts.slice(0, c.lastPosts.length - board.maxLastPosts - 1);
-                var omittedFilesCount = omitted.reduce(function(n, post) {
-                    return n + post.fileInfos.length;
-                }, 0);*/
-                var threadModel = {
-                    bumpLimit: board.bumpLimit,
-                    postLimit: board.postLimit,
-                    bumpLimitReached: (count >= board.bumpLimit),
-                    postLimitReached: (count >= board.postLimit),
-                    closed: thread.closed,
-                    fixed: thread.fixed,
-                    postCount: count,
-                    postingEnabled: (board.postingEnabled && !thread.closed),
-                    opPost: opPost,
-                    lastPosts: [],
-                    omittedPosts: ((count > board.maxLastPosts) ? (count - board.maxLastPosts) : 0)//,
-                    //omittedFiles: omittedFilesCount
-                };
-                if (lastPosts && lastPosts.length > 0)
-                    threadModel.lastPosts = lastPosts.reverse();
-                c.model.threads.push(threadModel);
-            });
-            console.time("lastPostNumber");
-            return Database.lastPostNumber(board.name);
-        }).then(function(lastPostNumber) {
-            console.timeEnd("lastPostNumber");
-            console.log("last post number = " + lastPostNumber);
-            c.model.lastPostNumber = lastPostNumber;
-            if (!c.hasDraftsOnBoard) {
-                if (config("system.inMemoryCache", false)) {
-                    Cache.set("model/board/page/" + board.name + "/" + page, c.model);
-                } else if (!Cache.get("model/board/page/" + board.name + "/" + page)) {
-                    var path = __dirname + "/../cache/" + process.pid + "/board/page/" + board.name;
-                    var fileName = path + "/" + page + ".json";
-                    FS.makeTree(path).then(function() {
-                        return FS.write(fileName, JSON.stringify(c.model));
-                    }).then(function() {
-                        Cache.set("model/board/page/" + board.name + "/" + page, true);
-                    });
-                }
-            }
-            return Promise.resolve(c.model);
         });
+    }).then(function(threads) {
+        console.timeEnd("threads");
+        c.threads = threads;
+        c.threads.sort(Board.sortThreadsByDate);
+        c.pageCount = Math.ceil(c.threads.length / board.threadsPerPage);
+        if (!c.pageCount)
+            c.pageCount = 1;
+        if (page >= c.pageCount)
+            return Promise.reject("Not found");
+        var start = page * board.threadsPerPage;
+        c.threads = c.threads.slice(start, start + board.threadsPerPage);
+        console.time("threadOpPosts");
+        var promises = c.threads.map(function(thread) {
+            return Database.threadPosts(board.name, thread.number, {
+                limit: 1,
+                withFileInfos: true,
+                withReferences: true
+            }).then(function(posts) {
+                thread.opPost = posts[0];
+                return Promise.resolve();
+            });
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        console.timeEnd("threadOpPosts");
+        console.time("threadLastPosts");
+        var promises = c.threads.map(function(thread) {
+            return Database.threadPosts(board.name, thread.number, {
+                limit: board.maxLastPosts,
+                reverse: true,
+                withFileInfos: true,
+                withReferences: true,
+                filterFunction: function(post) {
+                    if (!post.options.draft)
+                        return true;
+                    if (!post.user.hashpass)
+                        return true;
+                    if (post.user.hashpass == hashpass)
+                        return true;
+                    return Database.compareRegisteredUserLevels(post.user.level, c.level) < 0;
+                }
+            }).then(function(posts) {
+                thread.lastPosts = posts;
+                return Promise.resolve();
+            });
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        console.timeEnd("threadLastPosts");
+        console.time("threadPostCounts");
+        var promises = c.threads.map(function(thread) {
+            return Database.threadPostCount(board.name, thread.number).then(function(postCount) {
+                thread.postCount = postCount;
+                return Promise.resolve();
+            });
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        console.timeEnd("threadPostCounts");
+        c.model = {
+            threads: [],
+            pageCount: c.pageCount
+        };
+        c.threads.forEach(function(thread) {
+            var threadModel = {
+                opPost: thread.opPost,
+                lastPosts: thread.lastPosts.reverse(),
+                postCount: thread.postCount,
+                bumpLimit: board.bumpLimit,
+                postLimit: board.postLimit,
+                bumpLimitReached: (thread.postCount >= board.bumpLimit),
+                postLimitReached: (thread.postCount >= board.postLimit),
+                closed: thread.closed,
+                fixed: thread.fixed,
+                postingEnabled: (board.postingEnabled && !thread.closed),
+                omittedPosts: ((thread.postCount > board.maxLastPosts) ? (thread.postCount - board.maxLastPosts) : 0)
+            };
+            c.model.threads.push(threadModel);
+        });
+        console.time("lastPostNumber");
+        return Database.lastPostNumber(board.name);
+    }).then(function(lastPostNumber) {
+        console.timeEnd("lastPostNumber");
+        c.model.lastPostNumber = lastPostNumber;
+        return Promise.resolve(c.model);
     });
 };
 
@@ -162,84 +128,76 @@ module.exports.getThread = function(board, hashpass, number) {
     if (isNaN(number) || number < 1)
         return Promise.reject("Invalid thread number");
     var c = {};
-    return Database.getUserDrafts(hashpass).then(function(drafts) {
-        c.hasDraftsOnBoard = drafts.reduce(function(has, draft) {
-            return has || (draft.boardName == board.name);
-        }, false);
-        if (!c.hasDraftsOnBoard) {
-            var cached = Cache.get("model/board/thread/" + board.name + "/" + number);
-            if (cached) {
-                if (config("system.inMemoryCache", false))
-                    return Promise.resolve(cached);
-                var fileName = __dirname + "/../cache/" + process.pid + "/board/thread/" + board.name + "/" + number + ".json";
-                return FS.read(fileName).then(function(data) {
-                    return JSON.parse(data);
-                });
+    console.time("registeredUserLevel");
+    return Database.registeredUserLevel(hashpass).then(function(level) {
+        c.level = level;
+        console.timeEnd("registeredUserLevel");
+        console.time("thread");
+        return Database.getThreads(board.name, {
+            limit: 1,
+            withPostNumbers: 1,
+            filterFunction: function(thread) {
+                if (thread.number != number)
+                    return false;
+                if (thread.archived)
+                    return false;
+                if (!thread.options.draft)
+                    return true;
+                if (!thread.user.hashpass)
+                    return true;
+                if (thread.user.hashpass == hashpass)
+                    return true;
+                return Database.compareRegisteredUserLevels(thread.user.level, c.level) < 0;
             }
-        }
-        return Database.moderOnBoard(hashpass, board.name).then(function(moderOnBoard) {
-            c.moderOnBoard = moderOnBoard;
-            return Database.registeredUserLevel(hashpass);
-        }).then(function(level) {
-            c.level = level;
-            console.time("thread");
-            var query = threadOrPostQuery(hashpass, level, {
-                boardName: board.name,
-                archived: false,
-                number: number
-            });
-            return Database.threads.findOne(query);
-        }).then(function(thread) {
-            console.timeEnd("thread");
-            c.thread = thread;
-            console.time("posts");
-            var collection = Database.db.collection("thread/" + c.thread.boardName + "/" + c.thread.number);
-            var query = threadOrPostQuery(hashpass, c.level);
-            return collection.find(query).sort({ number: 1 });
-        }).then(function(posts) {
-            console.timeEnd("posts");
-            console.log("posts length = " + posts.length);
-            c.opPost = posts.splice(0, 1)[0];
-            c.posts = posts;
-            return Database.db.collection("thread/" + c.thread.boardName + "/" + c.thread.number).count({});
-        }).then(function(count) {
-            c.model = {
-                thread: c.thread
-            };
-            var posts = c.posts;
-            var threadModel = {
-                bumpLimit: board.bumpLimit,
-                postLimit: board.postLimit,
-                bumpLimitReached: (count >= board.bumpLimit),
-                postLimitReached: (count >= board.postLimit),
-                closed: c.thread.closed,
-                fixed: c.thread.fixed,
-                postCount: count,
-                postingEnabled: (board.postingEnabled && !c.thread.closed),
-                opPost: c.opPost,
-                posts: posts
-            };
-            c.model.thread = threadModel;
-            console.time("lastPostNumber");
-            return Database.lastPostNumber(board.name);
-        }).then(function(lastPostNumber) {
-            console.timeEnd("lastPostNumber");
-            console.log("last post number = " + lastPostNumber);
-            c.model.lastPostNumber = lastPostNumber;
-            if (!c.hasDraftsOnBoard) {
-                if (config("system.inMemoryCache", false)) {
-                    Cache.set("model/board/thread/" + board.name + "/" + number, c.model);
-                } else if (!Cache.get("model/board/thread/" + board.name + "/" + number)) {
-                    var path = __dirname + "/../cache/" + process.pid + "/board/thread/" + board.name;
-                    var fileName = path + "/" + number + ".json";
-                    FS.makeTree(path).then(function() {
-                        return FS.write(fileName, JSON.stringify(c.model));
-                    }).then(function() {
-                        Cache.set("model/board/thread/" + board.name + "/" + number, true);
-                    });
-                }
-            }
-            return Promise.resolve(c.model);
         });
+    }).then(function(threads) {
+        console.timeEnd("thread");
+        if (threads.length != 1)
+            return Promise.reject("No such thread");
+        c.thread = threads[0];
+        console.time("posts");
+        return Database.threadPosts(board.name, c.thread.number, {
+            withFileInfos: true,
+            withReferences: true,
+            filterFunction: function(post) {
+                if (!post.options.draft)
+                    return true;
+                if (!post.user.hashpass)
+                    return true;
+                if (post.user.hashpass == hashpass)
+                    return true;
+                return Database.compareRegisteredUserLevels(post.user.level, c.level) < 0;
+            }
+        });
+    }).then(function(posts) {
+        console.timeEnd("posts");
+        c.opPost = posts.splice(0, 1)[0];
+        c.posts = posts;
+        console.time("threadPostCount");
+        return Database.threadPostCount(board.name, c.thread.number);
+    }).then(function(postCount) {
+        console.time("threadPostCount");
+        c.model = {
+            thread: c.thread
+        };
+        var threadModel = {
+            bumpLimit: board.bumpLimit,
+            postLimit: board.postLimit,
+            bumpLimitReached: (postCount >= board.bumpLimit),
+            postLimitReached: (postCount >= board.postLimit),
+            closed: c.thread.closed,
+            fixed: c.thread.fixed,
+            postCount: postCount,
+            postingEnabled: (board.postingEnabled && !c.thread.closed),
+            opPost: c.opPost,
+            posts: c.posts
+        };
+        c.model.thread = threadModel;
+        console.time("lastPostNumber");
+        return Database.lastPostNumber(board.name);
+    }).then(function(lastPostNumber) {
+        console.timeEnd("lastPostNumber");
+        c.model.lastPostNumber = lastPostNumber;
+        return Promise.resolve(c.model);
     });
 };

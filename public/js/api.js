@@ -151,6 +151,7 @@ lord.rightChain = [];
 lord._ajaxRequestQueue = [];
 lord._ajaxRequestActive = 0;
 lord.models = {};
+lord.partials = null;
 lord.templates = {};
 
 /*Functions*/
@@ -906,15 +907,36 @@ lord.data = function(key, el) {
 };
 
 lord.getTemplate = function(templateName) {
+    var prefix = lord.data("sitePathPrefix");
     var d = $.Deferred();
-    if (lord.templates.hasOwnProperty(templateName)) {
+    if (lord.templates.hasOwnProperty(templateName))
         d.resolve(lord.templates[templateName]);
-    } 
-    $.ajax("/" + lord.data("sitePathPrefix") + "templates/" + templateName + ".jst").then(function(result) {
-        var template = doT.template(result);
-        lord.templates[templateName] = template;
-        d.resolve(template);
-    });
+    var f = function() {
+        $.ajax("/" + prefix + "templates/" + templateName + ".jst").then(function(result) {
+            var template = doT.template(result, null, lord.partials);
+            lord.templates[templateName] = template;
+            d.resolve(template);
+        });
+    };
+    if (lord.partials) {
+        f();
+    } else {
+        var promises = ["post"].map(function(partialName) {
+            return $.ajax("/" + prefix + "templates/partials/" + partialName + ".jst").then(function(result) {
+                return {
+                    data: result,
+                    name: partialName
+                };
+            });
+        });
+        $.when.apply($, promises).then(function() {
+            lord.partials = {};
+            lord.arr(arguments).forEach(function(partial) {
+                lord.partials[partial.name] = partial.data;
+            });
+            f();
+        });
+    }
     return d;
 };
 
@@ -943,7 +965,8 @@ lord.settings = function() {
         style: {
             name: lord.getCookie("style", "photon")
         },
-        shrinkPosts: (lord.getCookie("shrinkPosts", "true") == "true"),
+        shrinkPosts: (lord.getCookie("shrinkPosts", "true") != "false"),
+        stickyToolbar: (lord.getCookie("stickyToolbar", "true") != "false"),
         currentTime: lord.getCookie("currentTime", "server"),
         timeZoneOffset: lord.getCookie("timeZoneOffset", -lord.now().getTimezoneOffset()),
         captchaEngine: {

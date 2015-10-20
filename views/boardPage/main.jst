@@ -4,6 +4,18 @@
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}
       {{? it.lastPostNumber}}data-last-post-number="{{=it.lastPostNumber}}"{{?}}>
+{{? it.settings.mode.name != "ascetic"}}
+    <div id="hiddenPostForm" style="display: none;">
+        {{#def.postForm}}
+    </div>
+    {{? it.settings.captchaEnabled}}
+        <div id="hiddenCaptcha" style="display: none;">
+            {{? it.user.captchaQuota > 0}}
+                {{=it.settings.captchaEngine.widgetHtml}}
+            {{?}}
+        </div>
+    {{?}}
+{{?}}
 {{? it.customHeader}}
     {{#def.customheader}}
 {{?}}
@@ -98,13 +110,6 @@
         </span>
     {{?}}
 </div>
-
-
-
-<input type="hidden" id="postForm" />
-
-
-
 <hr />
 {{#def.navbar}}
 <hr />

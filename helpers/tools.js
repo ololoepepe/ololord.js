@@ -158,6 +158,8 @@ module.exports.translate = function(what) {
     }
 };
 
+module.exports.translateWrapper = module.exports.translate;
+
 module.exports.translateVar = function(what) {
     try {
         return loc.translateWrapper(loc.strings[what]);

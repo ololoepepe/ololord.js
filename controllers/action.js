@@ -1,9 +1,13 @@
 var BodyParser = require("body-parser");
 var Crypto = require("crypto");
 var express = require("express");
+var Formidable = require("formidable");
+var promisify = require("promisify-node");
 
 var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
+
+var rootRouter = express.Router();
 
 var router = express.Router();
 
@@ -37,4 +41,26 @@ router.post("/logout", function(req, res) {
     res.redirect(req.body.source || ("/" + config("site.pathPrefix", "")));
 });
 
-module.exports = router;
+rootRouter.use(router);
+
+router = express.Router();
+
+router.post("/createPost", function(req, res) {
+    var form = new Formidable.IncomingForm();
+    form.parse(req, function(err, fields, files) {
+        //
+        console.log(fields);
+    });
+});
+
+router.post("/createThread", function(req, res) {
+    var form = new Formidable.IncomingForm();
+    form.parse(req, function(err, fields, files) {
+        //
+        console.log(fields);
+    });
+});
+
+rootRouter.use(router);
+
+module.exports = rootRouter;

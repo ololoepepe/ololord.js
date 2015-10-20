@@ -1203,23 +1203,27 @@ lord.showPasswordDialog = function(title, label, callback) {
     });
 };
 
-lord.showHidePostForm = function(position) {
-    lord.removeQuickReply();
-    var postForm = lord.id("postForm");
-    var theButton = lord.id("showHidePostFormButton" + position);
-    if (lord.postForm.visibility[position]) {
-        theButton.innerHTML = lord.text("showPostFormText");
-        lord.id("hiddenPostForm").appendChild(postForm);
-        lord.postForm.last = "";
-    } else {
-        var p = ("Top" === position) ? "Bottom" : "Top";
-        if (lord.postForm.visibility[p])
-            lord.showHidePostForm(p);
-        theButton.innerHTML = lord.text("hidePostFormText");
-        var t = lord.id("createActionContainer" + position);
-        lord.queryOne("div > div", t).appendChild(postForm);
-    }
-    lord.postForm.visibility[position] = !lord.postForm.visibility[position];
+lord.showHidePostForm = function(el) {
+    lord.getModel("misc/tr").then(function(model) {
+        var tr = model.tr;
+        var position = lord.data("position", el);
+        lord.removeQuickReply();
+        var postForm = lord.id("postForm");
+        var theButton = lord.id("showHidePostFormButton" + position);
+        if (lord.postForm.visibility[position]) {
+            theButton.innerHTML = tr.showPostFormText;
+            lord.id("hiddenPostForm").appendChild(postForm);
+            lord.postForm.last = "";
+        } else {
+            var p = ("Top" === position) ? "Bottom" : "Top";
+            if (lord.postForm.visibility[p])
+                lord.showHidePostForm(p);
+            theButton.innerHTML = tr.hidePostFormText;
+            var t = lord.id("createActionContainer" + position);
+            lord.queryOne("div > div", t).appendChild(postForm);
+        }
+        lord.postForm.visibility[position] = !lord.postForm.visibility[position];
+    });
 };
 
 lord.switchShowTripcode = function() {

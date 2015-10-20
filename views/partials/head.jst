@@ -14,11 +14,11 @@
             {{? it.threads || it.thread}}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base_board.js"></script>
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/lib-typedarrays-min.js"></script>
-                {{? it.captcha && it.captcha.scriptSource}}
-                    <script type="text/javascript" src="{{=it.captcha.scriptSource}}"></script>
+                {{? it.settings.captchaEngine && it.settings.captchaEngine.scriptSource}}
+                    <script type="text/javascript" src="{{=it.settings.captchaEngine.scriptSource(it.req)}}"></script>
                 {{?}}
-                {{? it.captcha && it.captcha.headerHtml}}
-                    {{=it.captcha.headerHtml}}
+                {{? it.settings.captchaEngine && it.settings.captchaEngine.headerHtml}}
+                    {{=it.settings.captchaEngine.headerHtml(it.req)}}
                 {{?}}
             {{?}}
             {{? it.extraScripts}}

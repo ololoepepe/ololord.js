@@ -788,6 +788,13 @@ ul.tabWidget > li.activated {
     overflow-x: auto;
 }
 
+.toolbar.sticky {
+    position: fixed;
+    top: 0px;
+    background-color: #EEF2FF;
+    width: 100%;
+}
+
 blockquote.blockquoteThread {
     max-height: 800px;
 }

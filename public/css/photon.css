@@ -894,6 +894,13 @@ ul.tabWidget > li.activated {
     overflow-x: auto;
 }
 
+.toolbar.sticky {
+    position: fixed;
+    top: 0px;
+    background-color: #EEEEEE;
+    width: 100%;
+}
+
 /*
     Thread
 */
