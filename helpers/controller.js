@@ -1,5 +1,6 @@
 var dot = require("dot");
 var FS = require("q-io/fs");
+var Highlight = require("highlight.js");
 var merge = require("merge");
 var Promise = require("promise");
 var promisify = require("promisify-node");
@@ -73,7 +74,8 @@ controller.baseModel = function(req) {
                 title: "Photon"
             }
         ],
-        deviceType: ((req.device.type == "desktop") ? "desktop" : "mobile")
+        deviceType: ((req.device.type == "desktop") ? "desktop" : "mobile"),
+        availableCodeLangs: Highlight.listLanguages()
     };
 };
 

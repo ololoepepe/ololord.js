@@ -1,6 +1,6 @@
 <form id="postForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
       action="/{{=it.site.pathPrefix}}action/{{? it.thread}}createPost{{??}}createThread{{?}}"
-      {{? it.settings.mode.name != "ascetic"}}onsubmit="return lord.submitted(event, this);"{{?}}>
+      {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.submitted(event, this); return false;"{{?}}>
     <input type="hidden" name="board" value="{{=it.board.name}}" />
     {{? it.thread}}
         <input type="hidden" name="thread" value="{{=it.thread.number}}" />

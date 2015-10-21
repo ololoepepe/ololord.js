@@ -5,6 +5,8 @@ db.sqlite
 node_modules
 public/*
 tools/*
+tmp/*
+!tmp/.placeholder
 !public/css
 !public/img
 !public/js

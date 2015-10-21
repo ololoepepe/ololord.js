@@ -5,9 +5,9 @@ var redis = require("then-redis");
 
 var Board = require("../boards/board");
 var Cache = require("./cache");
+var Markup = require("./markup");
 var Tools = require("./tools");
 
-var MarkupModes = {};
 var Ratings = {};
 var RegisteredUserLevels = {};
 
@@ -18,10 +18,9 @@ db.hmget = function(key, hashes) {
     return db.tmp_hmget.apply(db, [key].concat(hashes));
 };
 
-MarkupModes["ExtandedWakabaMarkOnly"] = "EWM_ONLY";
-MarkupModes["BBCodeOnly"] = "BBC_ONLY";
-MarkupModes["None"] = "NONE";
-MarkupModes["ExtandedWakabaMarkAndBBCode"] = "EWM_AND_BBC";
+var Lock = require("./then-redis-lock")(db);
+
+module.exports.Lock = Lock;
 
 Ratings["SafeForWork"] = "SFW";
 Ratings["Rating15"] = "R-15";
@@ -32,7 +31,6 @@ RegisteredUserLevels["Admin"] = "ADMIN";
 RegisteredUserLevels["Moder"] = "MODER";
 RegisteredUserLevels["User"] = "USER";
 
-Object.defineProperty(module.exports, "MarkupModes", { value: MarkupModes });
 Object.defineProperty(module.exports, "Ratings", { value: Ratings });
 Object.defineProperty(module.exports, "RegisteredUserLevels", { value: RegisteredUserLevels });
 
@@ -81,7 +79,7 @@ module.exports.threadPosts = function(boardName, threadNumber, options) {
     if (!Tools.contains(Board.boardNames(), boardName))
         return Promise.reject("Invalid board name");
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid threadNumber");
+        return Promise.reject("Invalid thread number");
     var opts = (typeof options == "object");
     var filter = opts && (typeof options.filterFunction == "function");
     var limit = (opts && !isNaN(options.limit) && options.limit > 0) ? options.limit : 0; //NOTE: 0 means no limit
@@ -122,7 +120,7 @@ module.exports.threadPosts = function(boardName, threadNumber, options) {
         };
         return getNext();
     });
-    if (!opts && !options.withFileInfos && !options.withReferences)
+    if (!opts || (!options.withFileInfos && !options.withReferences))
         return p;
     return p.then(function() {
         var promises = [];
@@ -148,6 +146,43 @@ module.exports.threadPosts = function(boardName, threadNumber, options) {
         return Promise.all(promises);
     }).then(function() {
         return c.posts;
+    });
+};
+
+module.exports.getPost = function(boardName, postNumber, options) {
+    if (!Tools.contains(Board.boardNames(), boardName))
+        return Promise.reject("Invalid board name");
+    if (isNaN(postNumber) || postNumber <= 0)
+        return Promise.reject("Invalid post number");
+    var opts = (typeof options == "object");
+    var c = {};
+    var key = boardName + ":" + postNumber;
+    var p = db.hget("posts", key).then(function(post) {
+        c.post = post ? JSON.parse(post) : null;
+        return c.post;
+    });
+    if (!opts || (!options.withFileInfos && !options.withReferences))
+        return p;
+    return p.then(function() {
+        var promises = [];
+        if (options.withFileInfos) {
+            promises.push(db.smembers("fileInfos:" + key).then(function(fileInfos) {
+                c.post.fileInfos = fileInfos ? fileInfos.map(JSON.parse) : [];
+                return Promise.resolve();
+            }));
+        }
+        if (options.withReferences) {
+            promises.push(db.smembers("referencedPosts:" + key).then(function(referencedPosts) {
+                c.post.referencedPosts = referencedPosts ? referencedPosts.map(JSON.parse) : [];
+                return db.smembers("referringPosts:" + key);
+            }).then(function(referringPosts) {
+                c.post.referringPosts = referringPosts ? referringPosts.map(JSON.parse) : [];
+                return Promise.resolve();
+            }));
+        }
+        return Promise.all(promises);
+    }).then(function() {
+        return c.post;
     });
 };
 
@@ -212,13 +247,77 @@ module.exports.lastPostNumber = function(boardName) {
     });
 };
 
-/*module.exports.getUserDrafts = function(boardName, hashpass) {
-    if (typeof hashpass != "string" || !hashpass.match(/([0-9a-fA-F]){40}/))
-        return Promise.resolve([]);
-    return Collections.userDrafts.findOne({ hashpass: hashpass }).then(function(drafts) {
-        return Promise.resolve(drafts ? drafts.drafts : []);
+module.exports.nextPostNumber = function(boardName) {
+    if (!Tools.contains(Board.boardNames(), boardName))
+        return Promise.reject("Invalid board name");
+    return db.hincrby("postCounters", boardName, 1).then(function(number) {
+        if (!number)
+            return 0;
+        return number;
     });
-};*/
+};
+
+var createPost = function(board, req, fields, files, date, threadNumber) {
+    var c = {};
+    return board.postExtraData(fields, files).then(function(extraData) {
+        c.extraData = extraData;
+        c.post = {
+            bannedFor: false,
+            boardName: board.name,
+            createdAt: date.toISOString(),
+            email: (fields.email || null),
+            extraData: extraData,
+            //geolocation: TODO
+            /*
+            "geolocation": {
+                "cityName": null,
+                "countryCode": null,
+                "countryName": null
+            },
+            */
+            //markup: TODO
+            /*
+            "markup": [
+                "EXTENDED_WAKABA_MARK",
+                "BBCODE"
+            ],
+            */
+            name: (fields.name || null),
+            //number: TODO
+            options: {
+                //TODO
+            },
+            /*
+            "options": {
+                "draft": false,
+                "rawHtml": false,
+                "showTripcode": false,
+                "signAsOp": false
+            },
+            */
+            rawText: (fields.text || null),
+            //"sequenceNumber": 1, TODO
+            subject: (fields.subject || null),
+            text: (c.text || null),
+            threadNumber: threadNumber,
+            updatedAt: null,
+            user: {
+                hashpass: (req.settings.hashpass || null),
+                ip: (req.ip || null),
+                //level: TODO
+                //password:  TODO
+            }
+        };
+    });
+};
+
+module.exports.createPost = function(req, fields, files) {
+    console.log(fields, files);
+};
+
+module.exports.createThread = function(req, fields, files) {
+    console.log(fields, files);
+};
 
 module.exports.compareRatings = function(r1, r2) {
     if (["SFW", "R-15", "R-18", "R-18G"].indexOf(r2) < 0)
@@ -260,4 +359,8 @@ module.exports.compareRegisteredUserLevels = function(l1, l2) {
     default:
         throw "Invalid reistered user level l1: " + l1;
     }
+};
+
+module.exports.initialize = function() {
+    return Lock.drop();
 };

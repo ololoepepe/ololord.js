@@ -50,8 +50,8 @@ var spawnCluster = function() {
             rimraf.sync(__dirname + "/cache/" + process.pid);
         });
 
-        controller.initialize().then(function() {
-            return Promise.resolve();
+        Database.initialize().then(function() {
+            return controller.initialize();
         }).then(function() {
             app.listen(config("server.port", 8080), function() {
                 console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080) + "...");
@@ -71,7 +71,25 @@ var spawnCluster = function() {
 };
 
 if (cluster.isMaster) {
-    console.log("Spawning workers, please, wait...");
+    //
+    var markup = require("./helpers/markup");
+    markup("b", "``bg``ggg``ggggg``", {
+        markupModes: []
+    }).then(function() {
+        console.time("xxx");
+        return markup("b", "[code lang=c]int x = 0;[/code] >>12088", {
+            //markupModes: []
+        });
+    }).then(function(result) {
+        console.timeEnd("xxx");
+        console.log(result);
+        process.exit(0);
+    }).catch(function(err) {
+        console.log(err);
+        process.exit(0);
+    });
+    //
+    /*console.log("Spawning workers, please, wait...");
     spawnCluster();
     var ready = 0;
     cluster.on("online", function(worker) {
@@ -83,7 +101,7 @@ if (cluster.isMaster) {
                 var rl = commands();
             }
         });
-    });
+    });*/
 } else {
     spawnCluster();
 }

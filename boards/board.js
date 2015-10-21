@@ -173,6 +173,10 @@ var Board = function(name, title, options) {
     return Tools.contains(this.supportedFileTypes, fileType);
 };
 
+/*public*/ Board.prototype.postExtraData = function(fields, files) {
+    return Promise.resove(null);
+};
+
 Board.MarkupElements = {
     BoldMarkupElement: "BOLD",
     ItalicsMarkupElement: "ITALICS",

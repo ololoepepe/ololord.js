@@ -898,7 +898,7 @@ lord.hash = function() {
 
 lord.data = function(key, el) {
     el = el || document.body;
-    while (el) {
+    while (el && el.dataset) {
         if (key in el.dataset)
             return el.dataset[key];
         el = el.parentNode;

@@ -8,6 +8,7 @@ var Promise = require("promise");
 var config = require("./config");
 
 var _strings = {};
+var rootZones = null;
 
 var forIn = function(obj, f) {
     if (!obj || typeof f != "function")
@@ -78,10 +79,21 @@ forIn(_strings, function(s, name) {
 loc.translateWrapper = loc.translate;
 loc.setLocale(config("site.locale", "en"));
 
+var ExternalLinkRegexpPattern = (function() {
+    var schema = "https?:\\/\\/|ftp:\\/\\/";
+    var ip = "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}"
+             "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])";
+    var hostname = "([\\w\\.\\-]+)\\.([a-z]{2,17}\\.?)";
+    var port = ":\\d+";
+    var path = "(\\/[\\w\\.\\-\\!\\?\\=\\+#~&%:\\,\\(\\)]*)*\\/?";
+    return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path + "(?!\\S)";
+})();
+
 Object.defineProperty(module.exports, "Billion", { value: (2 * 1000 * 1000 * 1000) });
 Object.defineProperty(module.exports, "Second", { value: 1000 });
 Object.defineProperty(module.exports, "Minute", { value: (60 * 1000) });
 Object.defineProperty(module.exports, "Hour", { value: (60 * 60 * 1000) });
+Object.defineProperty(module.exports, "ExternalLinkRegexpPattern", { value: ExternalLinkRegexpPattern });
 
 module.exports.forIn = forIn;
 
@@ -174,4 +186,16 @@ module.exports.setLocale = function(locale) {
 
 module.exports.now = function() {
     return new Date();
+};
+
+module.exports.externalLinkRootZoneExists = function(zoneName) {
+    if (rootZones)
+        return rootZones.hasOwnProperty(zoneName);
+    var list = FSSync.readFile(__dirname + "/misc/root-zones.txt", "utf8").split(/\r?\n+/gi);
+    list.forEach(function(zone) {
+        if (!zone)
+            return;
+        rootZones[zone] = true;
+    });
+    return rootZones.hasOwnProperty(zoneName);
 };
