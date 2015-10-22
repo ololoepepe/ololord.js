@@ -124,6 +124,7 @@ router.post("/createThread", function(req, res) {
     form.uploadDir = __dirname + "/../tmp";
     form.parse(req, function(err, fields, files) {
         files = filesToArray(files);
+        console.time("posting");
         var testResult = testParameters(fields, files);
         if (testResult) {
             res.send({ errorMessage: testResult.error });
@@ -131,6 +132,9 @@ router.post("/createThread", function(req, res) {
         }
         Database.createThread(req, fields, files).then(function() {
             //
+            console.timeEnd("posting");
+        }).catch(function(err) {
+            console.log(err);
         });
     });
 });

@@ -72,7 +72,7 @@ var spawnCluster = function() {
 
 if (cluster.isMaster) {
     //
-    var markup = require("./helpers/markup");
+    /*var markup = require("./helpers/markup");
     markup("b", "``bg``ggg``ggggg``", {
         markupModes: []
     }).then(function() {
@@ -87,9 +87,9 @@ if (cluster.isMaster) {
     }).catch(function(err) {
         console.log(err);
         process.exit(0);
-    });
+    });*/
     //
-    /*console.log("Spawning workers, please, wait...");
+    console.log("Spawning workers, please, wait...");
     spawnCluster();
     var ready = 0;
     cluster.on("online", function(worker) {
@@ -101,7 +101,7 @@ if (cluster.isMaster) {
                 var rl = commands();
             }
         });
-    });*/
+    });
 } else {
     spawnCluster();
 }

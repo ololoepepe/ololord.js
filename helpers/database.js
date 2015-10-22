@@ -1,17 +1,20 @@
+var Crypto = require("crypto");
 var FS = require("fs");
 var Promise = require("promise");
 var promisify = require("promisify-node");
 var redis = require("then-redis");
+var SQLite3 = require("sqlite3");
 
 var Board = require("../boards/board");
 var Cache = require("./cache");
-var Markup = require("./markup");
+var markup = require("./markup");
 var Tools = require("./tools");
 
 var Ratings = {};
 var RegisteredUserLevels = {};
 
 var db = redis.createClient();
+var dbGeo = new SQLite3.Database(__dirname + "/../geolocation/ip2location.sqlite");
 
 db.tmp_hmget = db.hmget;
 db.hmget = function(key, hashes) {
@@ -194,13 +197,15 @@ module.exports.threadPostCount = function(boardName, threadNumber) {
     return db.scard("threadPostNumbers:" + boardName + ":" + threadNumber);
 };
 
-module.exports.registeredUser = function(reqOrHashpass) {
-    if (typeof reqOrHashpass == "object" && reqOrHashpass.cookies)
+var registeredUser = function(reqOrHashpass) {
+    if (reqOrHashpass && typeof reqOrHashpass == "object" && reqOrHashpass.cookies)
         reqOrHashpass = Tools.hashpass(reqOrHashpass);
     if (!reqOrHashpass)
         return Promise.resolve(null);
     return db.hget("registeredUsers", reqOrHashpass);
 };
+
+module.exports.registeredUser = registeredUser;
 
 module.exports.registeredUserLevel = function(reqOrHashpass) {
     return module.exports.registeredUser(reqOrHashpass).then(function(user) {
@@ -237,7 +242,7 @@ module.exports.moderOnBoard = function(reqOrHashpass, boardName1, boardName2) {
     });
 };
 
-module.exports.lastPostNumber = function(boardName) {
+var lastPostNumber = function(boardName) {
     if (!Tools.contains(Board.boardNames(), boardName))
         return Promise.reject("Invalid board name");
     return db.hget("postCounters", boardName).then(function(number) {
@@ -247,7 +252,9 @@ module.exports.lastPostNumber = function(boardName) {
     });
 };
 
-module.exports.nextPostNumber = function(boardName) {
+module.exports.lastPostNumber = lastPostNumber;
+
+var nextPostNumber = function(boardName) {
     if (!Tools.contains(Board.boardNames(), boardName))
         return Promise.reject("Invalid board name");
     return db.hincrby("postCounters", boardName, 1).then(function(number) {
@@ -257,66 +264,110 @@ module.exports.nextPostNumber = function(boardName) {
     });
 };
 
-var createPost = function(board, req, fields, files, date, threadNumber) {
+module.exports.nextPostNumber = nextPostNumber;
+
+var createPost = function(req, fields, files, options) {
+    var board = Board.board(fields.board);
+    if (!board)
+        return Promise.reject("Invalid board");
+    var date = (options && (options.date instanceof Date)) ? options.date : Tools.now();
+    var threadNumber = (options && !isNaN(+options.threadNumber) && (+options.threadNumber > 0))
+        ? +options.threadNumber : +fields.threadNumber;
+    if (isNaN(threadNumber) || threadNumber <= 0)
+        return Promise.reject("Invalid thread number");
     var c = {};
-    return board.postExtraData(fields, files).then(function(extraData) {
+    var rawText = (fields.text || null);
+    var markupModes = [];
+    var referencedPosts = {};
+    var password = null;
+    var hashpass = (req.settings.hashpass || null);
+    var ip = (req.ip || null);
+    if (fields.password) {
+        var sha256 = Crypto.createHash("sha256");
+        sha256.update(fields.password);
+        password = sha256.digest("hex");
+    }
+    Tools.forIn(markup.MarkupModes, function(val) {
+        //if (fields.markupMode && fields.markupMode.indexOf(val))
+            markupModes.push(val);
+    });
+    return registeredUser(hashpass).then(function(user) {
+        c.user = user;
+        c.isRaw = compareRegisteredUserLevels(c.user ? c.user.level : null, RegisteredUserLevels.Admin) >= 0;
+        if (c.isRaw)
+            return rawText;
+        return markup(board.name, rawText, {
+            markupModes: markupModes,
+            referencedPosts: referencedPosts
+        });
+    }).then(function(text) {
+        c.text = text;
+        return board.postExtraData(fields, files)
+    }).then(function(extraData) {
         c.extraData = extraData;
+        return getGeolocationInfo(ip);
+    }).then(function(geo) {
+        c.geo = geo;
+        return db.scard("threadPostNumbers:" + board.name + ":" + threadNumber);
+    }).then(function(postCount) {
+        c.postCount = postCount;
+        return nextPostNumber(board.name);
+    }).then(function(postNumber) {
+        c.postNumber = postNumber;
         c.post = {
             bannedFor: false,
             boardName: board.name,
             createdAt: date.toISOString(),
             email: (fields.email || null),
-            extraData: extraData,
-            //geolocation: TODO
-            /*
-            "geolocation": {
-                "cityName": null,
-                "countryCode": null,
-                "countryName": null
-            },
-            */
-            //markup: TODO
-            /*
-            "markup": [
-                "EXTENDED_WAKABA_MARK",
-                "BBCODE"
-            ],
-            */
+            extraData: c.extraData,
+            geolocation: c.geo,
+            markup: markupModes,
             name: (fields.name || null),
-            //number: TODO
+            number: c.postNumber,
             options: {
-                //TODO
+                draft: (hashpass && board.draftsEnabled && fields.draft),
+                rawHtml: c.isRaw,
+                showTripcode: !!fields.showTripcode,
+                signAsOp: !!fields.signAsOp
             },
-            /*
-            "options": {
-                "draft": false,
-                "rawHtml": false,
-                "showTripcode": false,
-                "signAsOp": false
-            },
-            */
-            rawText: (fields.text || null),
-            //"sequenceNumber": 1, TODO
+            rawText: rawText,
+            sequenceNumber: (c.postCount + 1),
             subject: (fields.subject || null),
             text: (c.text || null),
             threadNumber: threadNumber,
             updatedAt: null,
             user: {
-                hashpass: (req.settings.hashpass || null),
-                ip: (req.ip || null),
-                //level: TODO
-                //password:  TODO
+                hashpass: hashpass,
+                ip: ip,
+                level: (c.user ? c.user.level : null),
+                password: password
             }
         };
+        return db.hset("posts", board.name + ":" + postNumber, JSON.stringify(c.post));
+    }).then(function() {
+        return db.sadd("threadPostNumbers:" + board.name + ":" + threadNumber, c.postNumber);
+    }).then(function() {
+        var refs = [];
+        c.refs = [];
+        Tools.forIn(referencedPosts, function(ref) {
+            refs.push(JSON.stringify(ref));
+            c.refs.push(ref);
+        });
+        if (refs.length < 1)
+            return Promise.resolve();
+        return db.sadd("referencedPosts:" + board.name + ":" + c.postNumber, refs);
+    }).then(function() {
+        c.post.referencedPosts = c.refs;
+        return c.post;
     });
 };
 
 module.exports.createPost = function(req, fields, files) {
-    console.log(fields, files);
+    return createPost(req, fields, files);
 };
 
 module.exports.createThread = function(req, fields, files) {
-    console.log(fields, files);
+    return createPost(req, fields, files, {threadNumber: 12089}); //TODO
 };
 
 module.exports.compareRatings = function(r1, r2) {
@@ -340,7 +391,7 @@ module.exports.compareRatings = function(r1, r2) {
     }
 };
 
-module.exports.compareRegisteredUserLevels = function(l1, l2) {
+var compareRegisteredUserLevels = function(l1, l2) {
     if (["ADMIN", "MODER", "USER", null].indexOf(l2) < 0)
         throw "Invalid registered user level l2: " + l2;
     switch (l1) {
@@ -359,6 +410,35 @@ module.exports.compareRegisteredUserLevels = function(l1, l2) {
     default:
         throw "Invalid reistered user level l1: " + l1;
     }
+};
+
+module.exports.compareRegisteredUserLevels = compareRegisteredUserLevels;
+
+var getGeolocationInfo = function(ip) {
+    var info = {
+        cityName: null,
+        countryCode: null,
+        countryName: null
+    };
+    if (!ip)
+        return Promise.resolve(info);
+    var n = Tools.ipNum(ip);
+    if (!n)
+        return Promise.resolve(info);
+    var q = "SELECT FROM ip2location(ipFrom, countryCode, countryName, cityName) WHERE ipTo >= ? LIMIT 1";
+    var stmt = db.prepare(q);
+    stmt.prun = promisify(stmt.run);
+    return stmt.prun(n).then(function(result) {
+        stmt.finalize();
+        if (!result)
+            return info;
+        var ipFrom = +result.ipFrom;
+        if (isNaN(ipFrom) || ipFrom < n)
+            return info;
+        info.cityName = result.cityName;
+        info.countryCode = result.countryCode;
+        info.countryName = result.countryName;
+    });
 };
 
 module.exports.initialize = function() {

@@ -174,7 +174,7 @@ var Board = function(name, title, options) {
 };
 
 /*public*/ Board.prototype.postExtraData = function(fields, files) {
-    return Promise.resove(null);
+    return Promise.resolve(null);
 };
 
 Board.MarkupElements = {

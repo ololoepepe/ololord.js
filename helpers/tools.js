@@ -1,4 +1,5 @@
 var equal = require("deep-equal");
+var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Localize = require("localize");
@@ -83,9 +84,9 @@ var ExternalLinkRegexpPattern = (function() {
     var schema = "https?:\\/\\/|ftp:\\/\\/";
     var ip = "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}"
              "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])";
-    var hostname = "([\\w\\.\\-]+)\\.([a-z]{2,17}\\.?)";
+    var hostname = "([\\w\\p{L}\\.\\-]+)\\.([a-z]{2,17}\\.?)";
     var port = ":\\d+";
-    var path = "(\\/[\\w\\.\\-\\!\\?\\=\\+#~&%:\\,\\(\\)]*)*\\/?";
+    var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:\\,\\(\\)]*)*\\/?";
     return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path + "(?!\\S)";
 })();
 
@@ -191,11 +192,45 @@ module.exports.now = function() {
 module.exports.externalLinkRootZoneExists = function(zoneName) {
     if (rootZones)
         return rootZones.hasOwnProperty(zoneName);
-    var list = FSSync.readFile(__dirname + "/misc/root-zones.txt", "utf8").split(/\r?\n+/gi);
+    var list = FSSync.readFileSync(__dirname + "/../misc/root-zones.txt", "utf8").split(/\r?\n+/gi);
+    rootZones = {};
     list.forEach(function(zone) {
         if (!zone)
             return;
         rootZones[zone] = true;
     });
     return rootZones.hasOwnProperty(zoneName);
+};
+
+module.exports.ipNum = function(ip) {
+    if (typeof ip != "string" || !/^[0-9\.]$/gi.test(ip))
+        return null;
+    var sl = ip.split(".");
+    if (sl.length != 4)
+        return null;
+    var n = +sl[3];
+    if (isNaN(n))
+        return null;
+    var nn = +sl[2];
+    if (isNaN(nn))
+        return null;
+    n += 256 * nn;
+    nn = +sl[1];
+    if (isNaN(nn))
+        return null;
+    n += 256 * 256 * nn;
+    nn = +sl[0];
+    if (isNaN(nn))
+        return null;
+    n += 256 * 256 * 256 * nn;
+    if (!n)
+        return null;
+    return n;
+};
+
+module.exports.toHtml = function(text, replaceSpaces) {
+    text = escapeHtml(text).split("\n").join("<br />");
+    if (replaceSpaces)
+        text = text.split(" ").join("&nbsp;");
+    return text;
 };

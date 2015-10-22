@@ -3,10 +3,12 @@ config-dev.json
 db
 db.sqlite
 node_modules
-public/*
+geolocation/*
 tools/*
+!tools/geolocation.js
 tmp/*
 !tmp/.placeholder
+public/*
 !public/css
 !public/img
 !public/js

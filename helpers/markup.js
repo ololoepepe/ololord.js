@@ -1,5 +1,5 @@
-var escapeHtml = require("escape-html");
 var Highlight = require("highlight.js");
+var XRegExp = require("xregexp");
 
 var Board = require("../boards");
 var config = require("./config");
@@ -248,11 +248,11 @@ ProcessingInfo.prototype.toHtml = function() {
     var last = 0;
     for (var i = 0; i < this.skipList.length; ++i) {
         var inf = this.skipList[i];
-        s += escapeHtml(withoutEscaped(this.text.substr(last, inf.from - last)));
+        s += Tools.toHtml(withoutEscaped(this.text.substr(last, inf.from - last)));
         s += this.text.substr(inf.from, inf.length);
         last = inf.from + inf.length;
     }
-    s += escapeHtml(this.text.substr(last));
+    s += Tools.toHtml(this.text.substr(last));
     s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<li/g, "</li><li");
     s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<\/ul/g, "</li></ul");
     s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<\/ol/g, "</li></ol");
@@ -271,9 +271,8 @@ var getIndE = function(info, rxOp, matchs, rxCl, inds, nestable, escapable, nest
     nested.nested = false;
     if (!nestable)
         return (inds >= 0) ? info.find(rxCl, inds + matchs[0].length, escapable) : -1;
-    var rxOpT = (typeof rxOp == "string") ? rxOp : new RegExp(rxOp.pattern, rxOp.flags);
     if (inds >= 0) {
-        var matchst = info.find(rxOpT, inds + matchs[0].length, escapable);
+        var matchst = info.find(rxOp, inds + matchs[0].length, escapable);
         var matchet = info.find(rxCl, inds + matchs[0].length, escapable);
         var depth = 1;
         while (matchst || matchet) {
@@ -284,7 +283,7 @@ var getIndE = function(info, rxOp, matchs, rxCl, inds, nestable, escapable, nest
                 nested.nested = true;
             if (!depth)
                 return tmp;
-            matchst = info.find(rxOpT, tmp.index + offs, escapable);
+            matchst = info.find(rxOp, tmp.index + offs, escapable);
             matchet = info.find(rxCl, tmp.index + offs, escapable);
         }
     }
@@ -396,7 +395,7 @@ var processStrikedOutShittyWord = function(info) {
 };
 
 var checkLangsMatch = function(info, matchs, matche) {
-    return matchs[1] && matchs[1] == matchce[1];
+    return matchs[1] && matchs[1] == matche[1];
 };
 
 var checkExternalLink = function(info, matchs) {
@@ -417,12 +416,12 @@ var convertMonospace = function(_, text, _, _, options) {
     options.op = "<font face=\"monospace\">";
     options.cl = "</font>";
     options.type = SkipTypes.CodeSkip;
-    return Promise.resolve(escapeHtml(withoutEscaped(text)));
+    return Promise.resolve(Tools.toHtml(withoutEscaped(text)));
 };
 
 var convertNomarkup = function(_, text, _, _, options) {
     options.type = SkipTypes.CodeSkip;
-    return Promise.resolve(escapeHtml(withoutEscaped(text)));
+    return Promise.resolve(Tools.toHtml(withoutEscaped(text)));
 };
 
 var convertPre = function(_, text, _, _, options) {
@@ -456,12 +455,12 @@ var convertExternalLink = function(_, _, matchs, _, options) {
     var href = matchs[0];
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
-    return Promise.resolve("<a href=\"" + href + "\">" + escapeHtml(matchs[0]) + "</a>");
+    return Promise.resolve("<a href=\"" + href + "\">" + Tools.toHtml(matchs[0]) + "</a>");
 };
 
 var convertProtocol = function(_, _, matchs, _, options) {
     options.type = SkipTypes.HtmlSkip;
-    return Promise.resolve("<a href=\"" + matchs[0] + "\">" + escapeHtml(matchs[2]) + "</a>");
+    return Promise.resolve("<a href=\"" + matchs[0] + "\">" + Tools.toHtml(matchs[2]) + "</a>");
 };
 
 var convertTooltipShitty = function(_, _, matchs, _, options) {
@@ -483,7 +482,11 @@ var convertPostLink = function(info, _, matchs, _, options) {
             if (!post)
                 return escaped;
             if (info.referencedPosts)
-                info.referencedPosts[boardName + ":" + postNumber] = post.threadNumber;
+                info.referencedPosts[boardName + ":" + postNumber] = {
+                    boardName: boardName,
+                    postNumber: postNumber,
+                    threadNumber: post.threadNumber
+                };
             var href = "href=\"/" + config("site.pathPrefix", "") + boardName + "/thread/" + post.threadNumber
                 + ".html#" + postNumber + "\"";
             return "<a " + href + ">" + escaped + "</a>";
@@ -496,12 +499,12 @@ var convertPostLink = function(info, _, matchs, _, options) {
 var convertMarkup = function(_, text, matchs, _, options) {
     options.type = SkipTypes.NoSkip;
     if ("----" == matchs[0])
-        return "\u2014";
+        return Promise.resolve("\u2014");
     else if ("--" == matchs[0])
-        return "\u2013";
+        return Promise.resolve("\u2013");
     var tag = MarkupTags[matchs[0]];
     if (!tag)
-        return Promisify("");
+        return Promise.resolve("");
     options.op = tag.op;
     options.cl = tag.cl;
     return Promise.resolve(text);
@@ -509,12 +512,12 @@ var convertMarkup = function(_, text, matchs, _, options) {
 
 var convertUrl = function(_, text, _, _, options) {
     if (!text)
-        return "";
+        return Promise.resolve("");
     options.type = SkipTypes.HtmlSkip;
     var href = text;
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
-    return Promise.resolve("<a href=\"" + href + "\">" + escapeHtml(text) + "</a>");
+    return Promise.resolve("<a href=\"" + href + "\">" + Tools.toHtml(text) + "</a>");
 };
 
 var convertCSpoiler = function(_, text, matchs, _, options) {
@@ -578,6 +581,8 @@ var convertCitation = function(_, text, matchs, matche, options) {
 };
 
 var processPostText = function(boardName, text, options) {
+    if (!text)
+        return Promise.resolve(null);
     var deletedPost = (options && +(options.deletedPost) > 0) ? options.deletedPost : 0;
     var markupModes = (options && options.markupModes) ? options.markupModes : [
         MarkupModes.ExtendedWakabaMark,
@@ -654,7 +659,7 @@ var processPostText = function(boardName, text, options) {
     if (markupModes.indexOf(MarkupModes.ExtendedWakabaMark) >= 0 || markupModes.indexOf(MarkupModes.BBCode) >= 0) {
         p = p.then(function() {
             return process(info, convertExternalLink, {
-                op: new RegExp(Tools.ExternalLinkRegexpPattern, "gi"),
+                op: new XRegExp(Tools.ExternalLinkRegexpPattern, "gi"),
                 cl: null
             }, { checkFunction: checkExternalLink });
         }).then(function() {
