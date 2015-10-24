@@ -1,84 +1,19 @@
+var ChildProcess = require("child_process");
 var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
-var Localize = require("localize");
-var merge = require("merge");
-var Promise = require("promise");
+var Util = require("util");
 
 var config = require("./config");
 
-var _strings = {};
-var rootZones = null;
-
-var forIn = function(obj, f) {
-    if (!obj || typeof f != "function")
-        return;
-    for (var x in obj) {
-        if (obj.hasOwnProperty(x))
-            f(obj[x], x);
-    }
-};
-
-//NOTE: node-localize does not allow to exclude dirs, so searching for translations manually, excluding some dirs
-
-var getStrings = function(dir) {
-    var files = FSSync.readdirSync(dir);
-    var strings = {};
-    files.forEach(function(file) {
-        var sl = file.split(".");
-        if (sl.length != 2 || sl.pop() != "txt")
-            return;
-        var name = sl.shift();
-        strings[name] = { def: FSSync.readFileSync(dir + "/" + file, "utf8") };
-    });
-    files.forEach(function(file) {
-        var sl = file.split(".");
-        if (sl.length != 3 || sl.pop() != "txt")
-            return;
-        var name = sl.shift();
-        if (!strings.hasOwnProperty(name))
-            return;
-        var locale = sl.shift();
-        strings[name][locale] = FSSync.readFileSync(dir + "/" + file, "utf8");
-    });
-    return strings;
-};
-
-var getTranslations = function(dir, exclude) {
-    exclude = exclude || [];
-    var files = FSSync.readdirSync(dir);
-    return files.reduce(function(obj, file) {
-        var stat = FSSync.statSync(dir + "/" + file);
-        if (!stat)
-            return obj;
-        if (stat.isFile() && file == "translations.json") {
-            return merge.recursive(obj, require(dir + "/" + file));
-        } else if (stat.isDirectory() && "translations" == file) {
-            var strings = getStrings(dir + "/" + file);
-            _strings = merge.recursive(_strings, strings);
-            var o = {};
-            forIn(strings, function(s) {
-                o[s.def] = {};
-                forIn(s, function(tr, loc) {
-                    o[s.def][loc] = tr;
-                });
-            });
-            return merge.recursive(obj, o);
-        } else if (stat.isDirectory() && (exclude.indexOf(file) < 0)) {
-            return merge.recursive(obj, getTranslations(dir + "/" + file));
-        }
-        return obj;
-    }, {});
-};
+var translate = require("cute-localize")({
+    locale: config("site.locale", "en")
+});
 
 var flags = {};
-var loc = new Localize(getTranslations(__dirname + "/..", [".git", "node_modules"]));
-forIn(_strings, function(s, name) {
-    loc.strings[name] = s.def;
-});
-loc.translateWrapper = loc.translate;
-loc.setLocale(config("site.locale", "en"));
+var styles = null;
+var codeStyles = null;
 
 var ExternalLinkRegexpPattern = (function() {
     var schema = "https?:\\/\\/|ftp:\\/\\/";
@@ -95,6 +30,15 @@ Object.defineProperty(module.exports, "Second", { value: 1000 });
 Object.defineProperty(module.exports, "Minute", { value: (60 * 1000) });
 Object.defineProperty(module.exports, "Hour", { value: (60 * 60 * 1000) });
 Object.defineProperty(module.exports, "ExternalLinkRegexpPattern", { value: ExternalLinkRegexpPattern });
+
+var forIn = function(obj, f) {
+    if (!obj || typeof f != "function")
+        return;
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x))
+            f(obj[x], x);
+    }
+};
 
 module.exports.forIn = forIn;
 
@@ -163,26 +107,10 @@ module.exports.flagName = function(countryCode) {
     });
 };
 
-module.exports.translate = function(what) {
-    try {
-        return loc.translateWrapper(what);
-    } catch (err) {
-        return what;
-    }
-};
-
-module.exports.translateWrapper = module.exports.translate;
-
-module.exports.translateVar = function(what) {
-    try {
-        return loc.translateWrapper(loc.strings[what]);
-    } catch (err) {
-        return what;
-    }
-};
+module.exports.translate = translate;
 
 module.exports.setLocale = function(locale) {
-    loc.setLocale(locale);
+    translate.setLocale(locale);
 };
 
 module.exports.now = function() {
@@ -233,4 +161,79 @@ module.exports.toHtml = function(text, replaceSpaces) {
     if (replaceSpaces)
         text = text.split(" ").join("&nbsp;");
     return text;
+};
+
+module.exports.styles = function() {
+    if (styles)
+        return styles;
+    styles = [];
+    var path = __dirname + "/../public/css";
+    FSSync.readdirSync(path).forEach(function(fileName) {
+        if (fileName.split(".").pop() != "css")
+            return;
+        var name = fileName.split(".").shift();
+        var str = FSSync.readFileSync(path + "/" + fileName, "utf8");
+        var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(str);
+        var title = match ? match[1] : name;
+        styles.push({
+            name: name,
+            title: title
+        });
+    });
+    return styles;
+};
+
+module.exports.codeStyles = function() {
+    if (codeStyles)
+        return codeStyles;
+    codeStyles = [];
+    var path = __dirname + "/../public/css/3rdparty/highlight.js";
+    FSSync.readdirSync(path).forEach(function(fileName) {
+        if (fileName.split(".").pop() != "css")
+            return;
+        var name = fileName.split(".").shift();
+        var str = FSSync.readFileSync(path + "/" + fileName, "utf8");
+        var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(str);
+        var title = match ? match[1] : name;
+        codeStyles.push({
+            name: name,
+            title: title
+        });
+    });
+    return codeStyles;
+};
+
+module.exports.mimeType = function(fileName) {
+    if (!fileName || !Util.isString(fileName))
+        return null;
+    try {
+        var out = ChildProcess.execSync(`file --brief --mime-type ${fileName}`, {
+            timeout: 1000,
+            encoding: "utf8",
+            stdio: [
+                0,
+                "pipe",
+                null
+            ]
+        });
+        return out ? out.replace(/\r*\n+/g, "") : null;
+    } catch (err) {
+        return null;
+    }
+};
+
+module.exports.isAudioType = function(mimeType) {
+    return mimeType.substr(0, 6) == "audio/";
+};
+
+module.exports.isVideoType = function(mimeType) {
+    return mimeType.substr(0, 6) == "video/";
+};
+
+module.exports.isPdfType = function(mimeType) {
+    return mimeType == "application/pdf";
+};
+
+module.exports.isImageType = function(mimeType) {
+    return mimeType.substr(0, 6) == "image/";
 };

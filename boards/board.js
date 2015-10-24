@@ -1,13 +1,23 @@
+var Canvas = require("canvas");
+var Crypto = require("crypto");
+var ffmpeg = require("fluent-ffmpeg");
+var FS = require("q-io/fs");
+var FSSync = require("fs");
+var Image = Canvas.Image;
 var Localize = require("localize");
+var Path = require("path");
 var Promise = require("promise");
 var promisify = require("promisify-node");
+var Util = require("util");
+var UUID = require("uuid");
 
 var Cache = require("../helpers/cache");
 var Captcha = require("../captchas");
 var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
 
-//var loc = new Localize("../translations");
+var ImageMagick = promisify("imagemagick");
+var musicMetadata = promisify("musicmetadata");
 
 var defineSetting = function(o, name, def) {
     Object.defineProperty(o, name, {
@@ -20,6 +30,50 @@ var defineSetting = function(o, name, def) {
 var boards = {};
 var banners = {};
 var captchaQuota = {};
+
+var generateRandomImage = function(hash, mimeType, thumbPath) {
+    var canvas = new Canvas(200, 200);
+    var list = [
+        { x: 0, y: 0, w: 200, h: 200 },
+        { x: 25, y: 25, w: 50, h: 50 },
+        { x: 125, y: 25, w: 50, h: 50 },
+        { x: 25, y: 125, w: 50, h: 50 },
+        { x: 125, y: 125, w: 50, h: 50 }
+    ];
+    var ctx = canvas.getContext("2d");
+    for (var i = 0; i < 20; i += 4) {
+        var r = parseInt(hash.substr(i, 2), 16);
+        var g = parseInt(hash.substr(i + 2, 2), 16);
+        var b = parseInt(hash.substr(i + 4, 2), 16);
+        var a = i ? 0.7 : 1;
+        var rect = list.shift();
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
+        ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+    }
+    return FS.read(__dirname + "/../public/img/" + mimeType.replace("/", "_") + "_logo.png", "b").then(function(data) {
+        var img = new Image;
+        img.src = data;
+        ctx.drawImage(img, 0, 0, 200, 200);
+        return new Promise(function(resolve, reject) {
+            canvas.pngStream().pipe(FSSync.createWriteStream(thumbPath).on("error", reject).on("finish", resolve));
+        });
+    });
+};
+
+var durationToString = function(duration) {
+    duration = Math.floor(+duration);
+    var hours = "" + Math.floor(duration / 3600);
+    if (hours.length < 2)
+        hours = "0" + hours;
+    duration %= 3600;
+    var minutes = "" + Math.floor(duration / 60);
+    if (minutes.length < 2)
+        minutes = "0" + minutes;
+    var seconds = "" + (duration % 60);
+    if (seconds.length < 2)
+        seconds = "0" + seconds;
+    return hours + ":" + minutes + ":" + seconds;
+};
 
 var Board = function(name, title, options) {
     Object.defineProperty(this, "name", { value: name });
@@ -95,7 +149,6 @@ var Board = function(name, title, options) {
             return new Date(config("board." + name + ".launchDate", config("board.launchDate")));
         }
     });
-    //Object.defineProperty(this, "title", { value: title });
 };
 
 /*public*/ Board.prototype.getBannerFileName = function() {
@@ -177,6 +230,151 @@ var Board = function(name, title, options) {
     return Promise.resolve(null);
 };
 
+/*public*/ Board.prototype.generateFileName = function(file) {
+    var base = Tools.now().valueOf();
+    var ext = Path.extname(file.name);
+    if (Util.isString(ext))
+        ext = ext.substr(1);
+    if (!ext || Board.MimeTypesForExtensions[ext.toLowerCase()] != file.mimeType)
+        ext = Board.DefaultExtensions[file.mimeType];
+    return {
+        name: (base + "." + ext),
+        thumbName: (base + "s." + (Board.ThumbExtensionsForMimeType[file.mimeType] || ext))
+    };
+};
+
+/*public*/ Board.prototype.processFile = function(file) {
+    var p;
+    if (!file.hash) {
+        p = FS.read(file.path, "b").then(function(data) {
+            var sha1 = Crypto.createHash("sha1");
+            sha1.update(data);
+            file.hash = sha1.digest("hex");
+        });
+    } else {
+        p = Promise.resolve();
+    }
+    var thumbPath = Path.dirname(file.path) + "/" + UUID.v1();
+    file.thumbPath = thumbPath;
+    return p.then(function() {
+        if (Tools.isAudioType(file.mimeType)) {
+            file.dimensions = null;
+            file.extraData = {};
+            return new Promise(function(resolve, reject) {
+                ffmpeg.ffprobe(file.path, function(err, metadata) {
+                    if (err)
+                        return reject(err);
+                    resolve(metadata);
+                });
+            }).then(function(metadata) {
+                file.extraData.duration = durationToString(metadata.format.duration);
+                file.extraData.bitrate = Math.floor(+metadata.format.bit_rate / 1024);
+                return musicMetadata(FSSync.createReadStream(file.path));
+            }).then(function(metadata) {
+                file.extraData.album = metadata.album || "";
+                file.extraData.artist = (metadata.artist && metadata.artist.length > 0) ? metadata.artist[0] : "";
+                file.extraData.title = metadata.title || "";
+                file.extraData.year = metadata.year || "";
+                if (metadata.picture && metadata.picture.length > 0)
+                    return FS.write(thumbPath, metadata.picture[0].data);
+                else
+                    return generateRandomImage(file.hash, file.mimeType, thumbPath);
+            }).then(function() {
+                return ImageMagick.identify(thumbPath);
+            }).then(function(info) {
+                if (info.width <= 200 && info.height <= 200)
+                    return Promise.resolve();
+                return ImageMagick.convert([
+                    thumbPath,
+                    "-resize",
+                    "200x200",
+                    thumbPath + ".png"
+                ]);
+            }).then(function() {
+                file.thumbPath += ".png";
+                return ImageMagick.identify(file.thumbPath);
+            }).then(function(info) {
+                file.thumbDimensions = {
+                    width: info.width,
+                    height: info.height
+                };
+            });
+        } else if (Tools.isVideoType(file.mimeType)) {
+            file.extraData = {};
+            return new Promise(function(resolve, reject) {
+                ffmpeg.ffprobe(file.path, function(err, metadata) {
+                    if (err)
+                        return reject(err);
+                    resolve(metadata);
+                });
+            }).then(function(metadata) {
+                file.dimensions = {
+                    width: metadata.streams[0].width,
+                    height: metadata.streams[0].height
+                };
+                file.extraData.duration = durationToString(metadata.format.duration);
+                file.extraData.bitrate = Math.floor(+metadata.format.bitrate / 1024);
+                file.thumbPath += ".png";
+                return new Promise(function(resolve, reject) {
+                    ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
+                })
+            }).then(function() {
+                return ImageMagick.identify(file.thumbPath);
+            }).then(function(info) {
+                file.thumbDimensions = {
+                    width: info.width,
+                    height: info.height
+                };
+            });
+        } else if (Tools.isImageType(file.mimeType)) {
+            file.extraData = null;
+            return ImageMagick.identify(file.path).then(function(info) {
+                file.dimensions = {
+                    width: info.width,
+                    height: info.height
+                };
+                var args = [ file.path + (("image/gif" == file.mimeType) ? "" : "[0]") ];
+                if (info.width > 200 || info.height > 200) {
+                    args.push("-resize");
+                    args.push("200x200");
+                }
+                args.push((("image/gif" == file.mimeType) ? "png:" : "") + thumbPath);
+                return ImageMagick.convert(args);
+            }).then(function() {
+                return ImageMagick.identify(thumbPath);
+            }).then(function(info) {
+                file.thumbDimensions = {
+                    width: info.width,
+                    height: info.height
+                };
+            });
+        } else if (Tools.isPdfType(file.mimeType)) {
+            file.dimensions = null;
+            file.extraData = null;
+            return ImageMagick.convert([
+                "-density",
+                "300",
+                file.path + "[0]",
+                "-quality",
+                "100",
+                "+adjoin",
+                "-resize",
+                "200x200",
+                "png:" + thumbPath
+            ]).then(function() {
+                return ImageMagick.identify(thumbPath);
+            }).then(function(info) {
+                file.thumbDimensions = {
+                    width: info.width,
+                    height: info.height
+                };
+            });
+        } else {
+            return Promise.reject("Unsupported file type");
+        }
+    });
+};
+
 Board.MarkupElements = {
     BoldMarkupElement: "BOLD",
     ItalicsMarkupElement: "ITALICS",
@@ -188,6 +386,36 @@ Board.MarkupElements = {
     SuperscriptMarkupElement: "SUPERSCRIPT",
     UrlMarkupElement: "URL",
     CodeMarkupElement: "CODE"
+};
+
+Board.MimeTypesForExtensions = {};
+Board.DefaultExtensions = {};
+
+var defineMimeTypeExtensions = function(mimeType) {
+    var extensions = Array.prototype.slice.call(arguments, 1);
+    extensions.forEach(function(extension) {
+        Board.MimeTypesForExtensions[extension] = mimeType;
+    });
+    Board.DefaultExtensions[mimeType] = extensions[0];
+};
+
+defineMimeTypeExtensions("application/pdf", "pdf");
+defineMimeTypeExtensions("audio/mpeg", "mpeg", "mp1", "m1a", "mp3", "m2a", "mpa", "mpg");
+defineMimeTypeExtensions("audio/ogg", "ogg");
+defineMimeTypeExtensions("audio/wav", "wav");
+defineMimeTypeExtensions("image/gif", "gif");
+defineMimeTypeExtensions("image/jpeg", "jpeg", "jpg");
+defineMimeTypeExtensions("image/png", "png");
+defineMimeTypeExtensions("video/mp4", "mp4");
+defineMimeTypeExtensions("video/webm", "webm");
+
+Board.ThumbExtensionsForMimeType = {
+    "application/pdf": "png",
+    "audio/mpeg": "png",
+    "audio/ogg": "png",
+    "audio/wav": "png",
+    "video/mp4": "png",
+    "video/webm": "png"
 };
 
 Board.board = function(name) {

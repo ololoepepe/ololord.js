@@ -7,7 +7,7 @@ var router = express.Router();
 
 router.get("/login.html", function(req, res) {
     var model = {
-        title: Tools.translate("Login"),
+        title: Tools.translate("Login", "loginButtonText"),
         source: (req.query.source || "")
     };
     controller(req, "login/main", model).then(function(data) {

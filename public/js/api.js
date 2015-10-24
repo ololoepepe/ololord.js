@@ -101,9 +101,9 @@ lord.Hour = 60 * lord.Minute;
 lord.Day = 24 * lord.Hour;
 lord.Year = 365 * lord.Day;
 lord.Billion = 2 * 1000 * 1000 * 1000;
-lord.SettingsStoredInCookies = ["mode", "style", "shrinkPosts", "currentTime", "timeZoneOffset", "captchaEngine",
-                                "maxAllowedRating", "draftsByDefault", "hidePostformRules", "minimalisticPostform",
-                                "hiddenBoards"];
+lord.SettingsStoredInCookies = ["mode", "style", "codeStyle", "shrinkPosts", "currentTime", "timeZoneOffset",
+                                "captchaEngine", "maxAllowedRating", "draftsByDefault", "hidePostformRules",
+                                "minimalisticPostform", "hiddenBoards"];
 
 lord._defineEnum = function(constName, value) {
     if (typeof constName != "string")
@@ -964,6 +964,9 @@ lord.settings = function() {
         },
         style: {
             name: lord.getCookie("style", "photon")
+        },
+        codeStyle: {
+            name: lord.getCookie("codeStyle", "default")
         },
         shrinkPosts: (lord.getCookie("shrinkPosts", "true") != "false"),
         stickyToolbar: (lord.getCookie("stickyToolbar", "true") != "false"),

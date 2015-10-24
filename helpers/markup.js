@@ -150,22 +150,26 @@ ProcessingInfo.prototype.find = function(rx, from, escapable) {
             }
         }
     } else {
-        var match = rx.exec(this.text, from);
+        rx.lastIndex = from;
+        var match = rx.exec(this.text);
         while (match) {
             var isIn = false;
             for (var i = 0; i < this.skipList.length; ++i) {
                 var inf = this.skipList[i];
                 if (match && match.index >= inf.from && match.index < (inf.from + inf.length)) {
-                    match = rx.exec(this.text, inf.from + inf.length);
+                    rx.lastIndex = inf.from + inf.length;
+                    match = rx.exec(this.text);
                     isIn = true;
                     break;
                 }
             }
             if (!isIn && match) {
-                if (escapable && isEscaped(this.text, match.index))
-                    match = rx.exec(this.text, match.index + 1);
-                else
+                if (escapable && isEscaped(this.text, match.index)) {
+                    rx.lastIndex = match.index + 1;
+                    match = rx.exec(this.text);
+                } else {
                     return match;
+                }
             }
         }
     }
@@ -261,8 +265,9 @@ ProcessingInfo.prototype.toHtml = function() {
     var match = rx.exec(s);
     while (match) {
         var ns = "<ul type=\"" + match[1] + "\"><li";
-        s = s.substr(0, ind) + ns + s.substr(ind + match[0].length);
-        match = rx.exec(s, ns.length);
+        s = s.substr(0, match.index) + ns + s.substr(match.index + match[0].length);
+        rx.lastIndex = ns.length;
+        match = rx.exec(s);
     }
     return s;
 };
@@ -337,10 +342,12 @@ var process = function(info, conversionFunction, regexps, options) {
                     info.insert(matchs.index, options.op);
                 matchs = info.find(rxOp, matchs.index + txt.length + options.op.length + options.cl.length, escapable);
             } else {
-                if (rxCl)
-                    matchs = info.find(rxOp, matche.index + matche[0].length, escapable);
-                else
+                if (rxCl) {
+                    matchs = info.find(rxOp, matche ? (matche.index + matche[0].length)
+                        : (matchs.index + matchs[0].length), escapable);
+                } else {
                     matchs = info.find(rxOp, matchs.index + matchs[0].index, escapable);
+                }
             }
             if (nestable && nested.nested)
                 rerun = true;

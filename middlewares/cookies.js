@@ -3,31 +3,39 @@ var Tools = require("../helpers/tools");
 
 module.exports = function(req, res, next) {
     var modes = {
-        normal: Tools.translate("Normal"),
-        ascetic: Tools.translate("Ascetic")
+        normal: {},
+        ascetic: {}
     };
     var styles = {
-        photon: "Photon",
-        neutron: "Neutron",
-        burichan: "Burichan",
-        futaba: "Futaba"
+        photon: {},
+        neutron: {},
+        burichan: {},
+        futaba: {}
     };
+    var codeStyles = Tools.codeStyles().reduce(function(acc, style) {
+        acc[style.name] = {};
+        return acc;
+    }, {});
     var mode = (req.cookies.mode || "normal");
     if (!modes[mode])
         mode = "normal";
     var style = (req.cookies.style || "photon");
     if (!styles[style])
         style = "photon";
+    var codeStyle = (req.cookies.codeStyle || "agate");
+    if (!codeStyles[codeStyle])
+        codeStyle = "agate";
     req.hashpass = Tools.hashpass(req);
     var captchaEngine = Captcha.captcha(req.cookies.captchaEngine);
     req.settings = {
         mode: {
-            name: mode,
-            title: modes[mode]
+            name: mode
         },
         style: {
-            name: style,
-            title: styles[style]
+            name: style
+        },
+        codeStyle: {
+            name: codeStyle
         },
         shrinkPosts: (req.cookies.shrinkPosts != "false"),
         stickyToolbar: (req.cookies.stickyToolbar != "false"),

@@ -7,7 +7,6 @@
         "port": 8080
     },
     "site": {
-        "locale": "ru",
         "protocol": "http",
         "domain": "localhost:8080"
     },

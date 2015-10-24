@@ -1,9 +1,14 @@
 var Crypto = require("crypto");
-var FS = require("fs");
+var FS = require("q-io/fs");
+var FSSync = require("fs");
+var Path = require("path");
 var Promise = require("promise");
 var promisify = require("promisify-node");
 var redis = require("then-redis");
 var SQLite3 = require("sqlite3");
+var Util = require("util");
+
+var mkpath = promisify("mkpath");
 
 var Board = require("../boards/board");
 var Cache = require("./cache");
@@ -266,6 +271,59 @@ var nextPostNumber = function(boardName) {
 
 module.exports.nextPostNumber = nextPostNumber;
 
+module.exports.getFileInfosByHashes = function(hashes) {
+    if (!hashes)
+        return Promise.resolve([]);
+    if (!Util.isArray(hashes))
+        hashes = [hashes];
+    if (hashes.length < 1)
+        return Promise.resolve([]);
+    return db.hmget("fileHashes", hashes).then(function(fileInfios) {
+        return fileInfos.map(function(fileInfo, i) {
+            fileInfo = JSON.parse(fileInfo);
+            fileInfo.hash = hashes[i];
+            return fileInfo;
+        });
+    });
+};
+
+var processFiles = function(req, fields, files, transaction) {
+    var board = Board.board(fields.board);
+    if (!board)
+        return Promise.reject("Invalid board");
+    var promises = files.map(function(file) {
+        var fn = board.generateFileName(file);
+        var targetFilePath = __dirname + "/../public/" + board.name + "/src/" + fn.name;
+        var targetThumbPath = __dirname + "/../public/" + board.name + "/thumb/" + fn.thumbName;
+        if (file.copy) {
+            var sourceFilePath = __dirname + "/../public/" + file.boardName + "/src/" + file.name;
+            var sourceThumbPath = __dirname + "/../public/" + file.boardName + "/thumb/" + file.thumbName;
+            return FS.copy(sourceFilePath, targetFilePath).then(function() {
+                return FS.copy(sourceThumbPath, targetThumbPath)
+            }).then(function() {
+                return file;
+            });
+        } else {
+            var sourceFilePath = file.path;
+            var c = {};
+            return board.processFile(file).then(function() {
+                return FS.move(sourceFilePath, targetFilePath);
+            }).then(function() {
+                return FS.move(file.thumbPath, targetThumbPath);
+            }).then(function() {
+                file.name = fn.name;
+                file.thumbName = fn.thumbName;
+                return file; //TODO: Return a serialization ready object
+            });
+        }
+    });
+    return mkpath(__dirname + "/../public/" + board.name + "/src").then(function() {
+        return mkpath(__dirname + "/../public/" + board.name + "/thumb");
+    }).then(function() {
+        return Promise.all(promises);
+    });
+};
+
 var createPost = function(req, fields, files, options) {
     var board = Board.board(fields.board);
     if (!board)
@@ -288,7 +346,7 @@ var createPost = function(req, fields, files, options) {
         password = sha256.digest("hex");
     }
     Tools.forIn(markup.MarkupModes, function(val) {
-        //if (fields.markupMode && fields.markupMode.indexOf(val))
+        if (fields.markupMode && fields.markupMode.indexOf(val) >= 0)
             markupModes.push(val);
     });
     return registeredUser(hashpass).then(function(user) {
@@ -362,12 +420,16 @@ var createPost = function(req, fields, files, options) {
     });
 };
 
-module.exports.createPost = function(req, fields, files) {
-    return createPost(req, fields, files);
+module.exports.createPost = function(req, fields, files, transaction) {
+    return processFiles(req, fields, files, transaction).then(function(files) {
+        return createPost(req, fields, files);
+    });
 };
 
-module.exports.createThread = function(req, fields, files) {
-    return createPost(req, fields, files, {threadNumber: 12089}); //TODO
+module.exports.createThread = function(req, fields, files, transaction) {
+    return processFiles(req, fields, files, transaction).then(function(files) {
+        return createPost(req, fields, files, {threadNumber: 12089}); //TODO
+    });
 };
 
 module.exports.compareRatings = function(r1, r2) {
@@ -392,6 +454,10 @@ module.exports.compareRatings = function(r1, r2) {
 };
 
 var compareRegisteredUserLevels = function(l1, l2) {
+    if (!l1)
+        l1 = null;
+    if (!l2)
+        l2 = null;
     if (["ADMIN", "MODER", "USER", null].indexOf(l2) < 0)
         throw "Invalid registered user level l2: " + l2;
     switch (l1) {

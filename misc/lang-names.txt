@@ -1,0 +1,137 @@
+1c              1C
+accesslog       access.log
+actionscript    ActionScript
+apache          Apache
+applescript     AppleScript
+armasm          ARM Assembler
+xml             XML
+asciidoc        AsciiDoc
+aspectj         AspectJ
+autohotkey      AutoHotkey
+autoit          AutoIt
+avrasm          AVR Assembler
+axapta          Axapta
+bash            bash
+brainfuck       Brainfuck
+cal             CAL Actor Language
+capnproto       Cap'n Proto
+ceylon          Ceylon
+clojure         Clojure
+clojure-repl    Clojure REPL
+cmake           CMake
+coffeescript    CoffeeScript
+cpp             C++
+crmsh           crmsh
+crystal         Crystal
+cs              C#
+css             CSS
+d               D
+markdown        Markdown
+dart            Dart
+delphi          Delphi
+diff            diff
+django          Django
+dns             DNS
+dockerfile      Dockerfile
+dos             DOS
+dust            Dust
+elixir          Elixir
+elm             Elm
+ruby            Ruby
+erb             erb
+erlang-repl     Erlang REPL
+erlang          Erlang
+fix             fix
+fortran         Fortran
+fsharp          F#
+gams            GAMS
+gcode           G-code
+gherkin         Gherkin
+glsl            GLSL
+go              GO
+golo            Golo
+gradle          Gradle
+groovy          Groovy
+haml            Haml
+handlebars      Handlebars.js
+haskell         Haskell
+haxe            Haxe
+http            HTTP
+inform7         Inform 7
+ini             .ini
+irpf90          IRPF90
+java            Java
+javascript      JavaScript
+json            JSON
+julia           Julia
+kotlin          Kotlin
+lasso           Lasso
+less            Less.js
+lisp            Lisp
+livecodeserver  LiveCode Server
+livescript      LiveScript
+lua             Lua
+makefile        Makefile
+mathematica     Mathematica
+matlab          MATLAB
+mel             Mel
+mercury         Mercury
+mizar           Mizar
+perl            Perl
+mojolicious     Mojolicious
+monkey          Monkey
+nginx           nginx
+nimrod          Nim
+nix             nix
+nsis            NSIS
+objectivec      Objective-C
+ocaml           OCaml
+openscad        OpenSCAD
+oxygene         Oxygene
+parser3         Parser 3
+pf              PF
+php             PHP
+powershell      PowerShell
+processing      Processing
+profile         profile
+prolog          Prolog
+protobuf        Protocol Buffers
+puppet          Puppet
+python          Python
+q               Q
+r               R
+rib             RIB
+roboconf        Roboconf
+rsl             RSL
+ruleslanguage   Rules
+rust            Rust
+scala           Scala
+scheme          Scheme
+scilab          Scilab
+scss            SCSS
+smali           smali
+smalltalk       Smalltalk
+sml             Standard ML
+sqf             SQF
+sql             SQL
+stata           Stata
+step21          Step 21
+stylus          Stylus
+swift           Swift
+tcl             Tcl
+tex             TeX
+thrift          Thrift
+tp              Transposh
+twig            Twig
+typescript      TypeScript
+vala            Vala
+vbnet           Visual Basic .NET
+vbscript        VBScript
+vbscript-html   VBScript HTML
+verilog         Verilog
+vhdl            VHDL
+vim             Vim
+x86asm          x86 ASM
+xl              XL
+xquery          XQuery
+zephir          Zephir

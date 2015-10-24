@@ -15,7 +15,7 @@ var Captcha = function(id, title, options) {
     Object.defineProperty(this, "id", { value: id });
     Object.defineProperty(this, "title", {
         get: function() {
-            return Tools.translateWrapper(title);
+            return Tools.translate(title);
         }
     });
     defineSetting(this, "privateKey");

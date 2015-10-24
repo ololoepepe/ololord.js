@@ -20,7 +20,7 @@ var postingSpeedString = function(board, lastPostNumber) {
         if (lastPostNumber && msecs)
             return "1 " + nonZero;
         else
-            return "0 " + Tools.translate("p./hour.");
+            return "0 " + Tools.translate("p./hour.", "postingSpeed");
     };
     var speedString = function(duptime) {
         var d = lastPostNumber / duptime;
@@ -30,7 +30,7 @@ var postingSpeedString = function(board, lastPostNumber) {
     var uptimeMsecs = (new Date()).valueOf() - msecs;
     var duptime = uptimeMsecs / Tools.Hour;
     var uptime = Math.floor(duptime);
-    var shour = Tools.translate("p./hour.");
+    var shour = Tools.translate("post(s) per hour.", "postingSpeed");
     if (!uptime) {
         return zeroSpeedString(shour);
     } else if (Math.floor(lastPostNumber / uptime) > 0) {
@@ -38,7 +38,7 @@ var postingSpeedString = function(board, lastPostNumber) {
     } else {
         duptime /= 24;
         uptime = Math.floor(duptime);
-        var sday = Tools.translate("p./day.");
+        var sday = Tools.translate("post(s) per day.", "postingSpeed");
         if (!uptime) {
             return zeroSpeedString(sday);
         } else if (Math.floor(speed.postCount / uptime) > 0) {
@@ -46,7 +46,7 @@ var postingSpeedString = function(board, lastPostNumber) {
         } else {
             duptime /= (365.0 / 12.0);
             uptime = Math.floor(duptime);
-            var smonth = Tools.translate("p./month.");
+            var smonth = Tools.translate("post(s) per month.", "postingSpeed");
             if (!uptime) {
                 return zeroSpeedString(smonth);
             } else if (Math.floor(speed.postCount / uptime) > 0) {
@@ -54,7 +54,7 @@ var postingSpeedString = function(board, lastPostNumber) {
             } else {
                 duptime /= 12.0;
                 uptime = Math.floor(duptime);
-                var syear = Tools.translate("p./year.");
+                var syear = Tools.translate("post(s) per year.", "postingSpeed");
                 if (!uptime)
                     return zeroSpeedString(syear);
                 else if (Math.floor(speed.postCount / uptime) > 0)
