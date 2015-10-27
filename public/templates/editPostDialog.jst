@@ -1,0 +1,108 @@
+<table class="postFormTable">
+    <tbody>
+        {{? it.customEditPostDialogPart && it.customEditPostDialogPart[0]}}
+            {{ out += it.customEditPostDialogPart[0](it, thread, post); }}
+        {{?}}
+        <tr>
+            <td class="postformLabel">
+                <b>{{=it.tr.postFormLabelEmail}}</b>
+            </td>
+            <td class="postformField">
+                <input type="text" maxlength="{{=it.board.maxEmailLength}}" name="email" size="43" />
+            </td>
+        </tr>
+        {{? it.customEditPostDialogPart && it.customEditPostDialogPart[10]}}
+            {{ out += it.customEditPostDialogPart[10](it, thread, post); }}
+        {{?}}
+        <tr>
+            <td class="postformLabel">
+                <b>{{=it.tr.postFormLabelName}}</b>
+            </td>
+            <td class="postformField">
+                <input type="text" maxlength="{{=it.board.maxNameLength}}" name="name" size="43" />
+            </td>
+        </tr>
+        {{? it.customEditPostDialogPart && it.customEditPostDialogPart[20]}}
+            {{ out += it.customEditPostDialogPart[20](it, thread, post); }}
+        {{?}}
+        <tr>
+            <td class="postformLabel">
+                <b>{{=it.tr.postFormLabelSubject}}</b>
+            </td>
+            <td class="postformField">
+                <input type="text" maxlength="{{=it.board.maxSubjectLength}}" name="subject" size="43" />
+            </td>
+        </tr>
+        {{? it.customEditPostDialogPart && it.customEditPostDialogPart[30]}}
+            {{ out += it.customEditPostDialogPart[30](it, thread, post); }}
+        {{?}}
+        <tr>
+            <td class="postformLabel">
+                <b>{{=it.tr.postFormLabelText}}</b>
+            </td>
+            <td class="postformField">
+                <div class="symbolCounterContainer">
+                    <span class="symbolCounter"><span name="used"></span>/{{=it.board.maxTextLength}}></span>
+                    <textarea name="text" rows="10" cols="43" placeholder="{{=it.tr.postFormTextPlaceholder}}"
+                              class="postFormTextarea" onkeyup="lord.countSymbols(this);"></textarea>
+                </div>
+            </td>
+        </tr>
+        {{? it.customEditPostDialogPart && it.customEditPostDialogPart[40]}}
+            {{ out += it.customEditPostDialogPart[40](it, thread, post); }}
+        {{?}}
+        <tr>
+            <td class="postformLabel">
+                <b>{{=it.tr.postFormLabelMarkupMode}}</b>
+            </td>
+            <td class="postformField">
+               <select name="markupMode" class="select">
+                    {{~it.markupModes :mode}}
+                        <option value="{{=mode.name}}">{{=mode.title}}></option>
+                    {{~}}
+                </select>
+            </td>
+        </tr>
+        {{? it.customEditPostDialogPart && it.customEditPostDialogPart[50]}}
+            {{ out += it.customEditPostDialogPart[50](it, thread, post); }}
+        {{?}}
+        <tr>
+            <td class="postformLabel">
+                <b>{{=it.tr.postFormLabelOptions}}</b>
+            </td>
+            <td class="postformField nowrap">
+                {{? it.customEditPostDialogPart && it.customEditPostDialogPart[60]}}
+                    {{ out += it.customEditPostDialogPart[60](it, thread, post); }}
+                {{?}}
+                {{? it.user.level >= 10}}
+                    <b>{{=it.tr.postFormLabelRaw}}</b>
+                    <input type="checkbox" name="raw" value="true" />
+                {{?}}
+                {{? it.customEditPostDialogPart && it.customEditPostDialogPart[70]}}
+                    {{ out += it.customEditPostDialogPart[70](it, thread, post); }}
+                {{?}}
+                {{? it.draftsEnabled && it.user.loggedIn}}
+                    <b>{{=it.tr.postFormLabelDraft}}</b>
+                    <input type="checkbox" name="draft" value="true" />
+                {{?}}
+                {{? it.customEditPostDialogPart && it.customEditPostDialogPart[80]}}
+                    {{ out += it.customEditPostDialogPart[80](it, thread, post); }}
+                {{?}}
+            </td>
+        </tr>
+        {{? it.customEditPostDialogPart && it.customEditPostDialogPart[90]}}
+            {{ out += it.customEditPostDialogPart[90](it, thread, post); }}
+        {{?}}
+        <tr>
+            <td class="postformLabel">
+                <b>{{=it.tr.postFormLabelPassword}}</b>
+            </td>
+            <td class="postformField">
+                <input type="password" maxlength="{{=it.board.maxPasswordLength}}" name="password" size="43" />
+             </td>
+         </tr>
+        {{? it.customEditPostDialogPart && it.customEditPostDialogPart[100]}}
+            {{ out += it.customEditPostDialogPart[100](it, thread, post); }}
+        {{?}}
+    </tbody>
+</table>

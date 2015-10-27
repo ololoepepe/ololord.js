@@ -1,0 +1,6 @@
+<select class="select">
+    {{~it.banLevels :level}}
+        <option value="{{=level.level}}"
+                {{? it.defaultBanLevel == level.level}}selected="true"{{?}}>{{=level.description}}</option>
+    {{~}}
+</select>

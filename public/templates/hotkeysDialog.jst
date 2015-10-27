@@ -1,0 +1,18 @@
+<table>
+    <tbody>
+        {{~["previousPageImage", "nextPageImage", "previousThreadPost", "nextThreadPost", "previousPost", "nextPost",
+            "hidePost", "goToThread", "expandThread", "expandImage", "quickReply", "submitReply", "showFavorites",
+            "showSettings", "updateThread", "markupBold", "markupItalics", "markupStrikedOut", "markupUnderlined",
+            "markupSpoiler", "markupQuotation", "markupCode"] :hotkey}}
+            <tr>
+                <td>
+                    <input type="text" readonly="true" name="{{=hotkey}}"
+                           onkeypress="lord.assignHotkey(event, this);" />
+                </td>
+                <td>
+                    – hotkey{{ out += hotkey[0].toUpperCase() + hotkey.substr(1); }}LabelText
+                </td>
+            </tr>
+        {{~}}
+    </tbody>
+</table>

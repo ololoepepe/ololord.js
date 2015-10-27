@@ -1,0 +1,25 @@
+<div width="400px">
+    <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/add_file"
+          enctype="multipart/form-data">
+        <input name="board" type="hidden" value="{{=it.board.name}}" />
+        <input name="postNumber" type="hidden" value="{{=it.post.number}}" />
+        <input name="fileHashes" type="hidden" value="" />
+        <div>
+            <div class="postformFile" title="{{=it.tr.selectFileText}}"
+                 onclick="lord.browseFile(event, this);"
+                 ondragover="return lord.fileDragOver(event, this);"
+                 ondragleave="return lord.fileDragLeave(event, this);"
+                 ondrop="return lord.fileDrop(event, this);">
+                <img class="postformFilePreview" src="/{{=it.site.pathPrefix}}img/addfile.png">
+                <input type="file" name="file" onchange="lord.fileSelected(this);" class="postformFileInput"
+                       accept="{{out += it.board.supportedFileTypes.join(",");}}" />
+                <span class="postformFileText"></span>
+                <a name="deleteButton" href="javascript:void(0);" style="display: none;"
+                   onclick="lord.removeFile(this);" class="postformFileRemoveButton">
+                    <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.removeFileText}}"
+                         class="postformFileRemoveImage"></a>
+            </div>
+        </div>
+    </form>
+    <input name="additionalCount" type="hidden" value="{{=it.additionalFileCount}}" />
+</div>
