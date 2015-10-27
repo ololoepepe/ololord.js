@@ -4,6 +4,7 @@ var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Util = require("util");
+var XRegExp = require("xregexp");
 
 var config = require("./config");
 
@@ -100,7 +101,7 @@ module.exports.flagName = function(countryCode) {
     var fn = countryCode.toUpperCase() + ".png";
     if (flags.hasOwnProperty(fn))
         return Promise.resolve(fn);
-    FS.exists(__dirname + "/../public/img/flag/" + fn).then(function(exists) {
+    return FS.exists(__dirname + "/../public/img/flag/" + fn).then(function(exists) {
         if (exists)
             flags[fn] = true;
         return Promise.resolve(exists ? fn : "");
@@ -236,4 +237,53 @@ module.exports.isPdfType = function(mimeType) {
 
 module.exports.isImageType = function(mimeType) {
     return mimeType.substr(0, 6) == "image/";
+};
+
+var getWords = function(text) {
+    if (!text)
+        return [];
+    var rx = XRegExp("^\\pL|[0-9]$");
+    var words = [];
+    var word = "";
+    var pos = 0;
+    for (var i = 0; i < text.length; ++i) {
+        var c = text[i];
+        if (rx.test(c)) {
+            word += c;
+        } else if (word.length > 0) {
+            words.push({
+                word: word.toLowerCase(),
+                pos: pos
+            });
+            word = "";
+            ++pos;
+        }
+    }
+    if (word.length > 0) {
+        words.push({
+            word: word.toLowerCase(),
+            pos: pos
+        });
+    }
+    return words;
+};
+
+module.exports.indexPost = function(post, wordIndex) {
+    if (!wordIndex)
+        wordIndex = {};
+    ["rawText", "subject"].forEach(function(source) {
+        var words = getWords(post[source]);
+        for (var i = 0; i < words.length; ++i) {
+            var word = words[i];
+            if (!wordIndex.hasOwnProperty(word.word))
+                wordIndex[word.word] = [];
+            wordIndex[word.word].push(JSON.stringify({
+                boardName: post.boardName,
+                postNumber: post.number,
+                source: source,
+                position: word.pos
+            }));
+        }
+    });
+    return wordIndex;
 };

@@ -1,6 +1,6 @@
 <div class="navbar">
     {{~it.boards :board}}
-        {{? it.settings.hiddenBoards.indexOf(board.name) < 0}}
+        {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
             <span class="navbarItem navbarItemBoard">[<a href="/{{=it.site.pathPrefix}}{{=board.name}}"
                   title="{{=board.title}}">{{=board.name}}</a>] </span>
         {{?}}

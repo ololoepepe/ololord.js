@@ -50,21 +50,22 @@ rootRouter.use(router);
 
 router = express.Router();
 
-var getFiles = function(fields, files) {
+var getFiles = function(fields, files, transaction) {
     var setFileRating = function(file, id) {
         file.rating = "SFW";
         var r = fields["file_" + id + "_rating"];
-        if (["R-15", "R-18", "R-18G"].indexOf(r))
+        if (["R-15", "R-18", "R-18G"].indexOf(r) >= 0)
             file.rating = r;
     };
     var tmpFiles = [];
     Tools.forIn(files, function(file, fieldName) {
         if (file.size < 1)
-            return;
+            return FSSync.unlink(file.path);
         file.fieldName = fieldName;
         file.mimeType = Tools.mimeType(file.path);
         setFileRating(file, file.fieldName.substr(5));
         tmpFiles.push(file);
+        transaction.filePaths.push(file.path);
     });
     var urls = [];
     Tools.forIn(fields, function(url, key) {
@@ -78,6 +79,7 @@ var getFiles = function(fields, files) {
     var promises = urls.map(function(url) {
         var path = __dirname + "/../tmp/upload_" + UUID.v1();
         var ws = FSSync.createWriteStream(path);
+        transaction.filePaths.push(path);
         return new Promise(function(resolve, reject) {
             HTTP.get(url.url, function(response) {
                 response.pipe(ws);
@@ -182,48 +184,60 @@ var parseForm = function(req) {
 
 router.post("/createPost", function(req, res) {
     var c = {};
+    var transaction = new Database.Transaction();
     parseForm(req).then(function(result) {
         c.fields = result.fields;
         c.files = result.files;
-        return getFiles(c.fields, c.files);
+        c.board = Board.board(c.fields.board);
+        if (!board)
+            return Promise.reject("Invalid board");
+        transaction.board = c.fields.board;
+        console.time("posting");
+        return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
-        var testResult = testParameters(c.fields, c.files);
+        var testResult = testParameters(c.fields, c.files) || c.board.testParameters(c.fields, c.files);
         if (testResult) {
             res.send({ errorMessage: testResult.error });
             return;
         }
-        var transaction = {};
         return Database.createPost(req, c.fields, c.files, transaction);
     }).then(function() {
         //
+        console.timeEnd("posting");
     }).catch(function(err) {
         console.log(err);
+        transaction.rollback();
         res.send(err);
     });
 });
 
 router.post("/createThread", function(req, res) {
     var c = {};
+    var transaction = new Database.Transaction();
     parseForm(req).then(function(result) {
         c.fields = result.fields;
         c.files = result.files;
+        c.board = Board.board(c.fields.board);
+        if (!board)
+            return Promise.reject("Invalid board");
+        transaction.board = c.fields.board;
         console.time("posting");
-        return getFiles(c.fields, c.files);
+        return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
-        var testResult = testParameters(c.fields, c.files);
+        var testResult = testParameters(c.fields, c.files, true) || c.board.testParameters(c.fields, c.files, true);
         if (testResult) {
             res.send({ errorMessage: testResult.error });
             return;
         }
-        var transaction = {};
         return Database.createThread(req, c.fields, c.files, transaction);
     }).then(function() {
         //
         console.timeEnd("posting");
     }).catch(function(err) {
         console.log(err);
+        transaction.rollback();
         res.send(err);
     });
 });

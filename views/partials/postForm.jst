@@ -187,7 +187,7 @@
                     {{? it.customPostFormOption && it.customPostFormOption[0]}}
                         {{ out += it.customPostFormOption[0](it); }}
                     {{?}}
-                    {{? it.user.level >= 10}}
+                    {{? it.compareRegisteredUserLevels(it.user.level, "ADMIN") >= 0}}
                         <b>{{=it.tr.postFormLabelRaw}}</b>
                         <input type="checkbox" name="raw" value="true" />
                     {{?}}
@@ -200,7 +200,6 @@
                         {{ out += it.customPostFormOption[20](it); }}
                     {{?}}
                     {{? it.user.loggedIn}}
-                    <% if ( content.loggedIn ) %>
                         <b>{{=it.tr.postFormLabelTripcode}}</b>
                         <input type="checkbox" name="tripcode" value="true"
                                {{? it.settings.mode.name != "ascetic"}}onclick="lord.switchShowTripcode();"{{?}} />

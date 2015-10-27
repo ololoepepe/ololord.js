@@ -182,8 +182,7 @@
     "Anonymous": {
         "defaultUserName": {
             "value": "Аноним"
-        },
-        "_obsolete": true
+        }
     },
     "Internal logic error": {
         "description": {
@@ -312,22 +311,19 @@
         "_obsolete": true
     },
     "/a/nime": {
-        "title": {
+        "boardTitle": {
             "value": "/a/ниме"
-        },
-        "_obsolete": true
+        }
     },
     "Kamina": {
         "defaultUserName": {
             "value": "Камина"
-        },
-        "_obsolete": true
+        }
     },
     "/b/rotherhood": {
-        "title": {
+        "boardTitle": {
             "value": "/b/ратство"
-        },
-        "_obsolete": true
+        }
     },
     "/h/entai": {
         "title": {
@@ -421,12 +417,8 @@
         "_obsolete": true
     },
     "kbps": {
-        "fileSize": {
-            "value": "кбит/с",
-            "_obsolete": true
-        },
         "kbps": {
-            "value": "kbps"
+            "value": "кбит/с"
         }
     },
     "Unknown album": {
@@ -2481,6 +2473,10 @@
             "_obsolete": true
         },
         "createThreadText": {
+            "value": "Answer in this thread",
+            "_obsolete": true
+        },
+        "answerInThreadText": {
             "value": "Answer in this thread"
         }
     },
@@ -2490,6 +2486,10 @@
             "_obsolete": true
         },
         "answerInThreadText": {
+            "value": "Create thread",
+            "_obsolete": true
+        },
+        "createThreadText": {
             "value": "Create thread"
         }
     },
@@ -3693,7 +3693,8 @@
     "p./hour.": {
         "postingSpeed": {
             "value": "p./hour."
-        }
+        },
+        "_obsolete": true
     },
     "files omitted:": {
         "omittedFilesText": {

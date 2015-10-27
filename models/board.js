@@ -22,8 +22,6 @@ module.exports.getPage = function(board, hashpass, page) {
         console.time("threads");
         return Database.getThreads(board.name, {
             filterFunction: function(thread) {
-                if (thread.archived)
-                    return false;
                 if (!thread.options.draft)
                     return true;
                 if (!thread.user.hashpass)
@@ -66,6 +64,8 @@ module.exports.getPage = function(board, hashpass, page) {
                 withFileInfos: true,
                 withReferences: true,
                 filterFunction: function(post) {
+                    if (post.number == thread.number)
+                        return false;
                     if (!post.options.draft)
                         return true;
                     if (!post.user.hashpass)
@@ -139,8 +139,6 @@ module.exports.getThread = function(board, hashpass, number) {
             filterFunction: function(thread) {
                 if (thread.number != number)
                     return false;
-                if (thread.archived)
-                    return false;
                 if (!thread.options.draft)
                     return true;
                 if (!thread.user.hashpass)
@@ -177,10 +175,9 @@ module.exports.getThread = function(board, hashpass, number) {
         return Database.threadPostCount(board.name, c.thread.number);
     }).then(function(postCount) {
         console.time("threadPostCount");
-        c.model = {
-            thread: c.thread
-        };
+        c.model = {};
         var threadModel = {
+            number: c.thread.number,
             bumpLimit: board.bumpLimit,
             postLimit: board.postLimit,
             bumpLimitReached: (postCount >= board.bumpLimit),

@@ -13,7 +13,7 @@
     <div class="postFileName">
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}" target="_blank">{{=fileInfo.name}}</a>
     </div>
-    <div class="postFileSize {{=it.deviceType}}" title="{{=fileInfo.sizeTooltip}}">
+    <div class="postFileSize {{=it.deviceType}}" {{? fileInfo.sizeTooltip}}title="{{=fileInfo.sizeTooltip}}"{{?}}>
         ({{=fileInfo.sizeText}})
     </div>
     <div class="postFileSearch">
@@ -70,7 +70,7 @@
                 <img src="/{{=it.site.pathPrefix}}img/{{ out += it.specialThumbName(fileInfo.thumb.name); }}_logo.png"
                      width="{{=fileInfo.thumb.dimensions.hidth}}" height="{{=fileInfo.thumb.dimensions.height}}">
             {{??}}
-                <img src="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.thumb.name}}"
+                <img src="/{{=it.site.pathPrefix}}{{=it.board.name}}/thumb/{{=fileInfo.thumb.name}}"
                      {{? fileInfo.dimensions && fileInfo.thumb.dimensions.width > 0 && fileInfo.thumb.dimensions.height > 0}}width="{{ out += fileInfo.dimensions ? fileInfo.thumb.dimensions.width : 0; }}" height="{{ fileInfo.dimensions ? fileInfo.thumb.dimensions.height : 0; }}"{{?}}>
             {{?}}
         </a>

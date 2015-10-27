@@ -1,7 +1,7 @@
 var Crypto = require("crypto");
 var express = require("express");
 var merge = require("merge");
-var Promise = require("promise");
+var Util = require("util");
 
 var Board = require("../boards");
 var boardModel = require("../models/board");
@@ -20,7 +20,7 @@ var postingSpeedString = function(board, lastPostNumber) {
         if (lastPostNumber && msecs)
             return "1 " + nonZero;
         else
-            return "0 " + Tools.translate("p./hour.", "postingSpeed");
+            return "0 " + Tools.translate("post(s) per hour.", "postingSpeed");
     };
     var speedString = function(duptime) {
         var d = lastPostNumber / duptime;
@@ -73,7 +73,7 @@ var renderFileInfo = function(fi) {
         if (fi.dimensions)
             fi.sizeText += ", " + fi.dimensions.width + "x" + fi.dimensions.height;
     }
-    var tr = controller.translationsModel();
+    var tr = controller.translationsModel().tr;
     if (fi.mimeType.substr(0, 6) == "audio/" || fi.mimeType.substr(0, 6) == "video/") {
         var ed = fi.extraData;
         if (ed.duration)
@@ -103,21 +103,21 @@ var renderPost = function(post, board, req, opPost) {
     post.ownIp = (req.ip == post.user.ip);
     post.ownHashpass = (req.hashpass == post.user.hashpass);
     post.opIp = (post.user.ip == opPost.user.ip);
-    if (req.level < Database.Moder)
+    if (Database.compareRegisteredUserLevels(req.level, Database.Moder) < 0)
         post.user.ip = "";
-    if (post.user.level >= "USER") {
+    if (Database.compareRegisteredUserLevels(post.user.level, Database.User) >= 0) {
         var md5 = Crypto.createHash("md5");
         md5.update(post.hashpass + config("site.tripcodeSalt", ""));
         post.tripcode = "!" + md5.digest("base64").substr(0, 10);
     }
     post.user.hashpass = "";
+    board.renderPost(post, req, opPost);
     if (!board.showWhois)
         return Promise.resolve();
-    return Tools.flagName(post.countryCode).then(function(flagName) {
-        if (!flagName)
-            post.flagName = "default.png";
-        if (!post.countryName)
-            post.countryName = "Unknown country";
+    return Tools.flagName(post.geolocation.countryCode).then(function(flagName) {
+        post.geolocation.flagName = flagName || "default.png";
+        if (!post.geolocation.countryName)
+            post.geolocation.countryName = "Unknown country";
         return Promise.resolve();
     });
 };
@@ -132,9 +132,9 @@ var renderPage = function(model, board, req, json) {
     });
     return Promise.all(promises).then(function() {
         model = merge.recursive(model, controller.headModel(board, req));
-        model = merge.recursive(model, controller.navbarModel());
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = postingSpeedString(board, model.lastPostNumber);
+        model.extraScripts = board.extraScripts;
         if (!json || json.translations)
             model.tr = controller.translationsModel();
         model.isSpecialThumbName = function(thumbName) {
@@ -146,10 +146,13 @@ var renderPage = function(model, board, req, json) {
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
+        model.customPostBodyPart = {};
+        for (var i = 0; i < 60; i += 10)
+            model.customPostBodyPart[i] = board.customPostBodyPart(i);
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
-            return controller(req, "boardPage/main", model, board);
+            return controller(req, "boardPage", model, board);
     });
 };
 
@@ -160,9 +163,9 @@ var renderThread = function(model, board, req, json) {
     promises.unshift(renderPost(model.thread.opPost, board, req, model.thread.opPost));
     return Promise.all(promises).then(function() {
         model = merge.recursive(model, controller.headModel(board, req));
-        model = merge.recursive(model, controller.navbarModel());
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = postingSpeedString(board, model.lastPostNumber);
+        model.extraScripts = board.extraScripts;
         if (!json || json.translations)
             model.tr = controller.translationsModel();
         model.isSpecialThumbName = function(thumbName) {
@@ -174,10 +177,13 @@ var renderThread = function(model, board, req, json) {
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
+        model.customPostBodyPart = {};
+        for (var i = 0; i < 60; i += 10)
+            model.customPostBodyPart[i] = board.customPostBodyPart(i);
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
-            return controller(req, "thread/main", model, board);
+            return controller(req, "thread", model, board);
     });
 };
 
@@ -186,13 +192,17 @@ router.get("/:boardName", function(req, res) {
     if (!board) {
         res.send("No such board: " + req.params.boardName);
     } else {
-        boardModel.getPage(board, req.hashpass).then(function(model) {
-            console.time("render");
-            model.currentPage = 0;
-            return renderPage(model, board, req);
-        }).then(function(data) {
-            console.timeEnd("render");
-            res.send(data);
+        board.renderBoardPage(req, res).then(function(result) {
+            if (result)
+                return;
+            boardModel.getPage(board, req.hashpass).then(function(model) {
+                console.time("render");
+                model.currentPage = 0;
+                return renderPage(model, board, req);
+            }).then(function(data) {
+                console.timeEnd("render");
+                res.send(data);
+            })
         }).catch(function(err) {
             res.send("Error: " + err);
         });
@@ -204,11 +214,15 @@ router.get("/:boardName/:page.html", function(req, res) {
     if (!board) {
         res.send("No such board: " + req.params.boardName);
     } else {
-        boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
-            model.currentPage = req.params.page;
-            return renderPage(model, board, req);
-        }).then(function(data) {
-            res.send(data);
+        board.renderBoardPage(req, res).then(function(result) {
+            if (result)
+                return;
+            boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
+                model.currentPage = req.params.page;
+                return renderPage(model, board, req);
+            }).then(function(data) {
+                res.send(data);
+            })
         }).catch(function(err) {
             res.send("Error: " + err);
         });
@@ -235,12 +249,16 @@ router.get("/:boardName/res/:threadNumber.html", function(req, res) {
     if (!board) {
         res.send("No such board: " + req.params.boardName);
     } else {
-        boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
-            console.time("renderThread");
-            return renderThread(model, board, req);
-        }).then(function(data) {
-            console.timeEnd("renderThread");
-            res.send(data);
+        board.renderThread(req, res).then(function(result) {
+            if (result)
+                return;
+            boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
+                console.time("renderThread");
+                return renderThread(model, board, req);
+            }).then(function(data) {
+                console.timeEnd("renderThread");
+                res.send(data);
+            })
         }).catch(function(err) {
             res.send("Error: " + err);
         });

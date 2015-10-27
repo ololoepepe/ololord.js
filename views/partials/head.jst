@@ -25,7 +25,11 @@
             {{?}}
             {{? it.extraScripts}}
                 {{~it.extraScripts :script}}
-                    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/{{=script}}"></script>
+                    {{? script.fileName}}
+                        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/{{=script}}"></script>
+                    {{?? script.value}}
+                        <script type="text/javascript">{{=script.value}}</script>
+                    {{?}}
                 {{~}}
             {{?}}
         {{?}}

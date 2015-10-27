@@ -21,9 +21,10 @@ var musicMetadata = promisify("musicmetadata");
 
 var defineSetting = function(o, name, def) {
     Object.defineProperty(o, name, {
-        get: (function(o, name, def) {
+        get: function() {
             return config("board." + o.name + "." + name, config("board." + name, def));
-        }).bind(o, o, name, def)
+        },
+        configurable: true
     });
 };
 
@@ -76,16 +77,30 @@ var durationToString = function(duration) {
 };
 
 var Board = function(name, title, options) {
-    Object.defineProperty(this, "name", { value: name });
-    Object.defineProperty(this, "title", { value: title });
-    Object.defineProperty(this, "defaultUserName", { value: ((options && options.defaultUserName)
-        ? options.defaultUserName : "Anonymous") });
-    defineSetting(this, "archiveLimit", 0);
-    defineSetting(this, "bumpLimit", 500);
+    Object.defineProperty(this, "name", {
+        value: name,
+        configurable: true
+    });
+    Object.defineProperty(this, "title", {
+        get: function() {
+            return Tools.translate(title);
+        },
+        configurable: true
+    });
+    Object.defineProperty(this, "defaultUserName", {
+        get: function() {
+            if (options && options.defaultUserName)
+                return Tools.translate(options && options.defaultUserName);
+            else
+                return Tools.translate("Anonymous", "defaultUserName");
+        },
+        configurable: true
+    });
     Object.defineProperty(this, "captchaEnabled", {
         get: function() {
             return config("board.captchaEnabled", true) && config("board." + name + ".captchaEnabled", true);
-        }
+        },
+        configurable: true
     });
     defineSetting(this, "captchaQuota", 0);
     defineSetting(this, "draftsEnabled", true);
@@ -111,7 +126,6 @@ var Board = function(name, title, options) {
         Board.MarkupElements.UrlMarkupElement
     ]);
     defineSetting(this, "postingEnabled", true);
-    defineSetting(this, "postLimit", 1000);
     defineSetting(this, "showWhois", false);
     Object.defineProperty(this, "supportedCaptchaEngines", {
         get: function() {
@@ -128,7 +142,8 @@ var Board = function(name, title, options) {
                 });
             });
             return list;
-        }
+        },
+        configurable: true
     });
     defineSetting(this, "supportedFileTypes", [
         "application/pdf",
@@ -142,12 +157,16 @@ var Board = function(name, title, options) {
         "video/ogg",
         "video/webm"
     ]);
+    defineSetting(this, "bumpLimit", 500);
+    defineSetting(this, "postLimit", 1000);
     defineSetting(this, "threadLimit", 200);
+    defineSetting(this, "archiveLimit", 0);
     defineSetting(this, "threadsPerPage", 20);
     Object.defineProperty(this, "launchDate", {
         get: function() {
             return new Date(config("board." + name + ".launchDate", config("board.launchDate")));
-        }
+        },
+        configurable: true
     });
 };
 
@@ -226,8 +245,36 @@ var Board = function(name, title, options) {
     return Tools.contains(this.supportedFileTypes, fileType);
 };
 
-/*public*/ Board.prototype.postExtraData = function(fields, files) {
+/*public*/ Board.prototype.postExtraData = function(req, fields, files) {
     return Promise.resolve(null);
+};
+
+/*public*/ Board.prototype.extraScripts = function() {
+    return [];
+};
+
+/*public*/ Board.prototype.customPostBodyPart = function(post, n) {
+    //
+};
+
+/*public*/ Board.prototype.renderBoardPage = function(req, res) {
+    return Promise.resolve(null);
+};
+
+/*public*/ Board.prototype.renderThread = function(req, res) {
+    return Promise.resolve(null);
+};
+
+/*public*/ Board.prototype.testParameters = function(fields, files, creatingThread) {
+    //
+};
+
+/*public*/ Board.prototype.defineSetting = function(name, def) {
+    return defineSetting(this, name, def);
+};
+
+/*public*/ Board.prototype.renderPost = function(post, req, opPost) {
+    //
 };
 
 /*public*/ Board.prototype.generateFileName = function(file) {
@@ -318,6 +365,17 @@ var Board = function(name, title, options) {
                 return new Promise(function(resolve, reject) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
                 })
+            }).then(function() {
+                return ImageMagick.identify(file.thumbPath);
+            }).then(function(info) {
+                if (info.width <= 200 && info.height <= 200)
+                    return Promise.resolve();
+                return ImageMagick.convert([
+                    file.thumbPath,
+                    "-resize",
+                    "200x200",
+                    file.thumbPath
+                ]);
             }).then(function() {
                 return ImageMagick.identify(file.thumbPath);
             }).then(function(info) {
@@ -443,6 +501,7 @@ Board.boardInfos = function(includeHidden) {
 };
 
 Board.boardNames = function(includeHidden) {
+    includeHidden = !!(includeHidden || (typeof includeHidden == "undefined"));
     var list = [];
     Tools.forIn(boards, function(board) {
         if (!board.enabled || (!includeHidden && board.hidden))

@@ -23,6 +23,7 @@ var controller = function(req, templateName, modelData, board) {
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
     baseModelData.path = req.path;
     baseModelData.compareRatings = Database.compareRatings;
+    baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
     if (!modelData)
         modelData = {};
     var template = Cache.get("template/" + templateName, "");
@@ -114,6 +115,7 @@ controller.boardsModel = function() {
             title: board.title,
             defaultUserName: board.defaultUserName,
             showWhois: board.showWhois,
+            hidden: board.hidden,
             postingEnabled: board.postingEnabled,
             draftsEnabled: board.draftsEnabled,
             captchaEnabled: board.captchaEnabled,
@@ -145,6 +147,7 @@ controller.boardModel = function(board) {
             title: board.title,
             defaultUserName: board.defaultUserName,
             showWhois: board.showWhois,
+            hidden: board.hidden,
             postingEnabled: board.postingEnabled,
             draftsEnabled: board.draftsEnabled,
             captchaEnabled: board.captchaEnabled,
@@ -166,12 +169,6 @@ controller.boardModel = function(board) {
 controller.headModel = function(board, req) {
     return {
         title: board.title
-    };
-};
-
-controller.navbarModel = function() {
-    return {
-        boards: Board.boardInfos()
     };
 };
 
@@ -227,8 +224,8 @@ controller.translationsModel = function() {
     translate("Find source with Google", "findSourceWithGoogleText");
     translate("Edit audio file tags", "editAudioTagsText");
     translate("Add to playlist", "addToPlaylistText");
-    translate("Create thread", "answerInThreadText");
-    translate("Answer in this thread", "createThreadText");
+    translate("Answer in this thread", "answerInThreadText");
+    translate("Create thread", "createThreadText");
     translate("Borad rules", "boardRulesLinkText");
     translate("Threads catalog", "boardCatalogLinkText");
     translate("RSS feed", "boardRssLinkText");
