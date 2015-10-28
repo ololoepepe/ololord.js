@@ -676,6 +676,7 @@ var getGeolocationInfo = function(ip) {
         info.cityName = result.cityName;
         info.countryCode = result.countryCode;
         info.countryName = result.countryName;
+        return info;
     });
 };
 
