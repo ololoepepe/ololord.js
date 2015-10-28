@@ -10,8 +10,7 @@ module.exports = function(req, res, next) {
         if (ip)
             req.trueIp = ip;
     }
-    if (config("system.useXRealIp", false)) {
+    if (config("system.useXRealIp", false))
        req.trueIp = req.headers["x-real-ip"];
-    }
     next();
 };

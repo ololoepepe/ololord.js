@@ -120,6 +120,12 @@ module.exports.now = function() {
     return new Date();
 };
 
+module.exports.forever = function() {
+    var date = new Date();
+    date.setTime(date.getTime() + module.exports.Billion * 1000);
+    return date;
+};
+
 module.exports.externalLinkRootZoneExists = function(zoneName) {
     if (rootZones)
         return rootZones.hasOwnProperty(zoneName);

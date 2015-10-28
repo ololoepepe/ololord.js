@@ -1,4 +1,5 @@
 var Captcha = require("../captchas");
+var markup = require("../helpers/markup");
 var Tools = require("../helpers/tools");
 
 module.exports = function(req, res, next) {
@@ -27,6 +28,7 @@ module.exports = function(req, res, next) {
         codeStyle = "agate";
     req.hashpass = Tools.hashpass(req);
     var captchaEngine = Captcha.captcha(req.cookies.captchaEngine);
+    var defMarkupMode = markup.MarkupModes.ExtendedWakabaMark + "," + markup.MarkupModes.BBCode;
     req.settings = {
         mode: {
             name: mode
@@ -44,7 +46,8 @@ module.exports = function(req, res, next) {
         },
         maxAllowedRating: (req.cookies.maxAllowedRating || "R-18G"),
         hiddenBoards: (req.cookies.hiddenBoards ? req.cookies.hiddenBoards.split("|") : []),
-        captchaEngine: (captchaEngine || Captcha.captcha("google-recaptcha"))
+        captchaEngine: (captchaEngine || Captcha.captcha("google-recaptcha")),
+        markupMode: (req.cookies.markupMode || defMarkupMode)
     };
     next();
 };

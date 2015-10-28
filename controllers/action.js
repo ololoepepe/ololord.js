@@ -27,20 +27,16 @@ router.post("/login", function(req, res) {
         sha1.update(hashpass);
         hashpass = sha1.digest("hex");
     }
-    var date = Tools.now();
-    date.setTime(date.getTime() + Tools.Billion * 1000);
     res.cookie("hashpass", hashpass, {
-        expires: date,
+        expires: Tools.forever(),
         path: "/"
     });
     res.redirect(req.body.source || ("/" + config("site.pathPrefix", "")));
 });
 
 router.post("/logout", function(req, res) {
-    var date = Tools.now();
-    date.setTime(date.getTime() + Tools.Billion * 1000);
     res.cookie("hashpass", "", {
-        expires: date,
+        expires: Tools.forever(),
         path: "/"
     });
     res.redirect(req.body.source || ("/" + config("site.pathPrefix", "")));
@@ -182,6 +178,13 @@ var parseForm = function(req) {
     });
 };
 
+var setMarkupModeCookie = function(res, fields) {
+    res.cookie("markupMode", fields.markupMode, {
+        expires: Tools.forever(),
+        path: "/"
+    });
+};
+
 router.post("/createPost", function(req, res) {
     var c = {};
     var transaction = new Database.Transaction();
@@ -204,10 +207,12 @@ router.post("/createPost", function(req, res) {
         return Database.createPost(req, c.fields, c.files, transaction);
     }).then(function(post) {
         console.timeEnd("posting");
+        setMarkupModeCookie(res, c.fields);
         res.send(post);
     }).catch(function(err) {
         console.log(err);
         transaction.rollback();
+        setMarkupModeCookie(res, c.fields);
         res.send(err);
     });
 });
@@ -234,10 +239,12 @@ router.post("/createThread", function(req, res) {
         return Database.createThread(req, c.fields, c.files, transaction);
     }).then(function(thread) {
         console.timeEnd("posting");
+        setMarkupModeCookie(res, c.fields);
         res.send(thread);
     }).catch(function(err) {
         console.log(err);
         transaction.rollback();
+        setMarkupModeCookie(res, c.fields);
         res.send(err);
     });
 });
