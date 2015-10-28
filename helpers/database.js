@@ -663,15 +663,15 @@ var getGeolocationInfo = function(ip) {
     var n = Tools.ipNum(ip);
     if (!n)
         return Promise.resolve(info);
-    var q = "SELECT FROM ip2location(ipFrom, countryCode, countryName, cityName) WHERE ipTo >= ? LIMIT 1";
-    var stmt = db.prepare(q);
-    stmt.prun = promisify(stmt.run);
-    return stmt.prun(n).then(function(result) {
+    var q = "SELECT ipFrom, countryCode, countryName, cityName FROM ip2location WHERE ipTo >= ? LIMIT 1";
+    var stmt = dbGeo.prepare(q);
+    stmt.pget = promisify(stmt.get);
+    return stmt.pget(n).then(function(result) {
         stmt.finalize();
         if (!result)
             return info;
         var ipFrom = +result.ipFrom;
-        if (isNaN(ipFrom) || ipFrom < n)
+        if (isNaN(ipFrom) || ipFrom > n)
             return info;
         info.cityName = result.cityName;
         info.countryCode = result.countryCode;

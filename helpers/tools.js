@@ -134,7 +134,7 @@ module.exports.externalLinkRootZoneExists = function(zoneName) {
 };
 
 module.exports.ipNum = function(ip) {
-    if (typeof ip != "string" || !/^[0-9\.]$/gi.test(ip))
+    if (typeof ip != "string" || !/^([0-9]+\.){3}[0-9]+$/gi.test(ip))
         return null;
     var sl = ip.split(".");
     if (sl.length != 4)
