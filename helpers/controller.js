@@ -66,7 +66,7 @@ controller.baseModel = function(req) {
             pathPrefix: config("site.pathPrefix", "")
         },
         user: {
-            ip: req.ip,
+            ip: req.trueIp,
             level: req.level,
             loggedIn: !!req.hashpass
         },

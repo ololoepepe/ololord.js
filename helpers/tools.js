@@ -98,6 +98,8 @@ module.exports.hashpass = function(req) {
 };
 
 module.exports.flagName = function(countryCode) {
+    if (!countryCode)
+        return Promise.resolve("");
     var fn = countryCode.toUpperCase() + ".png";
     if (flags.hasOwnProperty(fn))
         return Promise.resolve(fn);

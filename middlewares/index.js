@@ -1,4 +1,1 @@
-module.exports = function(app) {
-    app.use([require("./cookies")]);
-    app.use([require("./registered-user")]);
-};
+module.exports = [require("./ip-fix"), require("./cookies"), require("./registered-user")];

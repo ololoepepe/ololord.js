@@ -43,7 +43,7 @@ var spawnCluster = function() {
         //app.use(ddos.express);
         app.use(cookieParser());
         app.use(device.capture());
-        require("./middlewares")(app);
+        app.use(require("./middlewares"));
         app.use(require("./controllers"));
 
         process.on("exit", function(){

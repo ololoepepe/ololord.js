@@ -368,7 +368,7 @@ var createPost = function(req, fields, files, threadNumber, date) {
     var referencedPosts = {};
     var password = null;
     var hashpass = (req.hashpass || null);
-    var ip = (req.ip || null);
+    var ip = (req.trueIp || null);
     if (fields.password) {
         var sha1 = Crypto.createHash("sha1");
         sha1.update(fields.password);
@@ -588,7 +588,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
             },
             user: {
                 hashpass: hashpass,
-                ip: (req.ip || null),
+                ip: (req.trueIp || null),
                 level: c.level,
                 password: password
             }
