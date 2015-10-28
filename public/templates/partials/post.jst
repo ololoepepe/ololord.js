@@ -45,7 +45,7 @@
                 {{?}}
             {{?}}
         </span>
-        {{? post.ownIp && post.signAsOp}}
+        {{? thread.opPost.user.ip == post.user.ip && post.options.signAsOp}}
             <span class="opSign">[OP]</span>
         {{?}}
         {{? post.showTripcode && post.tripcode}}
