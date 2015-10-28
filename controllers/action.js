@@ -200,10 +200,8 @@ router.post("/createPost", function(req, res) {
     }).then(function(files) {
         c.files = files;
         var testResult = testParameters(c.fields, c.files) || c.board.testParameters(c.fields, c.files);
-        if (testResult) {
-            res.send({ errorMessage: testResult.error });
-            return;
-        }
+        if (testResult)
+            return Promise.reject({ errorMessage: testResult.error });
         return Database.createPost(req, c.fields, c.files, transaction);
     }).then(function(post) {
         console.timeEnd("posting");
@@ -232,10 +230,8 @@ router.post("/createThread", function(req, res) {
     }).then(function(files) {
         c.files = files;
         var testResult = testParameters(c.fields, c.files, true) || c.board.testParameters(c.fields, c.files, true);
-        if (testResult) {
-            res.send({ errorMessage: testResult.error });
-            return;
-        }
+        if (testResult)
+            return Promise.reject({ errorMessage: testResult.error });
         return Database.createThread(req, c.fields, c.files, transaction);
     }).then(function(thread) {
         console.timeEnd("posting");
