@@ -40,7 +40,6 @@
     "mkpath": "^0.1.0",
     "musicmetadata": "^2.0.2",
     "promisify-node": "^0.2.1",
-    "q": "^1.4.1",
     "q-io": "^1.13.1",
     "readline-sync": "^1.2.21",
     "rimraf": "^2.4.3",
