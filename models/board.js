@@ -1,5 +1,4 @@
 var merge = require("merge");
-var Promise = require("promise");
 
 var Board = require("../boards/board");
 var Cache = require("../helpers/cache");

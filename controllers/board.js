@@ -41,7 +41,7 @@ var postingSpeedString = function(board, lastPostNumber) {
         var sday = Tools.translate("post(s) per day.", "postingSpeed");
         if (!uptime) {
             return zeroSpeedString(sday);
-        } else if (Math.floor(speed.postCount / uptime) > 0) {
+        } else if (Math.floor(lastPostNumber / uptime) > 0) {
             return speedString(duptime) + " " + sday;
         } else {
             duptime /= (365.0 / 12.0);
@@ -49,7 +49,7 @@ var postingSpeedString = function(board, lastPostNumber) {
             var smonth = Tools.translate("post(s) per month.", "postingSpeed");
             if (!uptime) {
                 return zeroSpeedString(smonth);
-            } else if (Math.floor(speed.postCount / uptime) > 0) {
+            } else if (Math.floor(lastPostNumber / uptime) > 0) {
                 return speedString(duptime) + " " + smonth;
             } else {
                 duptime /= 12.0;
@@ -57,7 +57,7 @@ var postingSpeedString = function(board, lastPostNumber) {
                 var syear = Tools.translate("post(s) per year.", "postingSpeed");
                 if (!uptime)
                     return zeroSpeedString(syear);
-                else if (Math.floor(speed.postCount / uptime) > 0)
+                else if (Math.floor(lastPostNumber / uptime) > 0)
                     return speedString(duptime) + " " + syear;
                 else
                     return "0 " + syear;
@@ -202,7 +202,7 @@ router.get("/:boardName", function(req, res) {
             }).then(function(data) {
                 console.timeEnd("render");
                 res.send(data);
-            })
+            });
         }).catch(function(err) {
             res.send("Error: " + err);
         });
@@ -222,7 +222,7 @@ router.get("/:boardName/:page.html", function(req, res) {
                 return renderPage(model, board, req);
             }).then(function(data) {
                 res.send(data);
-            })
+            });
         }).catch(function(err) {
             res.send("Error: " + err);
         });
@@ -258,7 +258,7 @@ router.get("/:boardName/res/:threadNumber.html", function(req, res) {
             }).then(function(data) {
                 console.timeEnd("renderThread");
                 res.send(data);
-            })
+            });
         }).catch(function(err) {
             res.send("Error: " + err);
         });

@@ -202,9 +202,9 @@ router.post("/createPost", function(req, res) {
             return;
         }
         return Database.createPost(req, c.fields, c.files, transaction);
-    }).then(function() {
-        //
+    }).then(function(post) {
         console.timeEnd("posting");
+        res.send(post);
     }).catch(function(err) {
         console.log(err);
         transaction.rollback();
@@ -232,9 +232,9 @@ router.post("/createThread", function(req, res) {
             return;
         }
         return Database.createThread(req, c.fields, c.files, transaction);
-    }).then(function() {
-        //
+    }).then(function(thread) {
         console.timeEnd("posting");
+        res.send(thread);
     }).catch(function(err) {
         console.log(err);
         transaction.rollback();

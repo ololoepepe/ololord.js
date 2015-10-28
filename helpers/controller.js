@@ -3,7 +3,6 @@ var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Highlight = require("highlight.js");
 var merge = require("merge");
-var Promise = require("promise");
 var promisify = require("promisify-node");
 
 var Board = require("../boards/board");

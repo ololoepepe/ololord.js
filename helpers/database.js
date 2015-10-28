@@ -2,9 +2,8 @@ var Crypto = require("crypto");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Path = require("path");
-var Promise = require("promise");
 var promisify = require("promisify-node");
-var redis = require("then-redis");
+var Redis = require("then-redis");
 var SQLite3 = require("sqlite3");
 var Util = require("util");
 
@@ -18,7 +17,7 @@ var Tools = require("./tools");
 var Ratings = {};
 var RegisteredUserLevels = {};
 
-var db = redis.createClient();
+var db = Redis.createClient();
 var dbGeo = new SQLite3.Database(__dirname + "/../geolocation/ip2location.sqlite");
 
 db.tmp_hmget = db.hmget;
@@ -65,6 +64,14 @@ var getThreads = function(boardName, options) {
                 break;
         }
         return threads;
+    }).then(function(threads) {
+        var promises = threads.map(function(thread) {
+            return db.hget("threadUpdateTimes:" + boardName, thread.number).then(function(time) {
+                thread.updatedAt = time;
+                return thread;
+            });
+        });
+        return Promise.all(promises);
     });
     if (!opts || !options.withPostNumbers)
         return p;
@@ -118,7 +125,9 @@ module.exports.threadPosts = function(boardName, threadNumber, options) {
         };
         var getNext = function() {
             return db.hmget("posts", getKeys()).then(function(posts) {
-                posts = posts.map(JSON.parse);
+                posts = posts.map(function(post) {
+                    return JSON.parse(post);
+                });
                 c.posts = c.posts.concat(filter? posts.filter(options.filterFunction) : posts);
                 if (!pred() || (limit && c.posts.length >= limit)) {
                     if (limit && c.posts.length > limit)
@@ -391,6 +400,7 @@ var createPost = function(req, fields, files, threadNumber, date) {
         }).then(function(threads) {
             if (!threads || threads.length != 1)
                 return Promise.reject("No such thread or no access to thread");
+            c.thread = threads[0];
             return markup(board.name, rawText, {
                 markupModes: markupModes,
                 referencedPosts: referencedPosts
@@ -496,6 +506,8 @@ var createPost = function(req, fields, files, threadNumber, date) {
         });
         return Promise.all(promises);
     }).then(function() {
+        return db.hset("threadUpdateTimes:" + board.name, c.thread.number, date.toISOString());
+    }).then(function() {
         c.post.referencedPosts = c.refs;
         c.fileInfos = files;
         return c.post;
@@ -564,7 +576,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
         return nextPostNumber(board.name);
     }).then(function(threadNumber) {
         c.threadNumber = threadNumber;
-        var thread = {
+        c.thread = {
             archived: false,
             boardName: board.name,
             closed: false,
@@ -574,7 +586,6 @@ module.exports.createThread = function(req, fields, files, transaction) {
             options: {
                 draft: (hashpass && board.draftsEnabled && fields.draft)
             },
-            updatedAt: date.toISOString(),
             user: {
                 hashpass: hashpass,
                 ip: (req.ip || null),
@@ -582,12 +593,14 @@ module.exports.createThread = function(req, fields, files, transaction) {
                 password: password
             }
         };
-        return db.hset("threads:" + board.name, c.threadNumber, JSON.stringify(thread));
+        return db.hset("threads:" + board.name, c.threadNumber, JSON.stringify(c.thread));
     }).then(function() {
         return processFiles(req, fields, files, transaction);
     }).then(function(files) {
         c.files = files;
         return createPost(req, fields, files, c.threadNumber, date);
+    }).then(function() {
+        return c.thread;
     });
 };
 

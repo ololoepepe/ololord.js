@@ -2759,7 +2759,14 @@ lord.posted = function(response) {
         btn.disabled = false;
         btn.value = lord.text("postFormButtonSubmit");
     };
-    var f = function() {
+    lord.resetPostForm();
+    if (o.threadNumber) { //TODO
+        lord.reloadPage();
+    } else if (o.number) { //TODO
+        var href = window.location.href;
+        window.location.href = href + (href.substring(href.length - 1) != "/" ? "/" : "") + "res/" + o.number + ".html";
+    }
+    /*var f = function() {
         if (postNumber) {
             if (lord.postForm.quickReply && !currentThreadNumber) {
                 var action = lord.getLocalObject("quickReplyAction", "goto_thread");
@@ -2822,7 +2829,7 @@ lord.posted = function(response) {
     if (lord.getLocalObject("addToFavoritesOnReply", false) && (postNumber || threadNumber))
         lord.addThreadToFavorites(boardName, threadNumber || lord.nameOne("thread", postForm).value, f, f);
     else
-        f();
+        f();*/
 };
 
 lord.globalOnmouseover = function(e) {

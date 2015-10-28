@@ -1,6 +1,5 @@
 var cluster = require("cluster");
 var Crypto = require("crypto");
-var Promise = require("promise");
 var ReadLine = require("readline");
 var ReadLineSync = require("readline-sync");
 
