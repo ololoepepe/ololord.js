@@ -86,7 +86,7 @@ var getFiles = function(fields, files, transaction) {
                 ws.on("finish", function() {
                     ws.close(function() {
                         var file = {
-                            name: url.split("/").pop(),
+                            name: url.url.split("/").pop(),
                             size: FSSync.statSync(path).size,
                             path: path,
                             mimeType: Tools.mimeType(path)
