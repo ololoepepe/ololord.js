@@ -4,29 +4,14 @@
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}
       {{? it.lastPostNumber}}data-last-post-number="{{=it.lastPostNumber}}"{{?}}>
-{{? it.settings.mode.name != "ascetic"}}
-    <div id="hiddenPostForm" style="display: none;">
-        {{#def.postForm}}
-    </div>
-    {{? it.settings.captchaEnabled}}
-        <div id="hiddenCaptcha" style="display: none;">
-            {{? it.user.captchaQuota > 0}}
-                {{=it.settings.captchaEngine.widgetHtml}}
-            {{?}}
-        </div>
-    {{?}}
-{{?}}
+
 {{? it.customHeader}}
     {{#def.customheader}}
 {{?}}
 {{~["top", "bottom"] :target}}
     {{#def.navigationButton}}
 {{~}}
-{{? it.settings.mode.name != "ascetic"}}
-    {{~["previous", "next"] :target}}
-        {{#def.leafButton}}
-    {{~}}
-{{?}}
+
 <a id="top"></a>
 {{#def.toolbar}}
 <br />
@@ -38,15 +23,7 @@
     {{#def.banner}}
 {{?}}
 <div class="theTitle">
-    <h1>
-        {{=it.board.title}}
-        <sup>[<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/rules.html"
-                 title="{{=it.tr.boardRulesLinkText}}"><img src="/{{=it.site.pathPrefix}}img/question.png"></a>]</sup>
-        <sup>[<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/catalog.html"
-                 title="{{=it.tr.boardCatalogLinkText}}"><img src="/{{=it.site.pathPrefix}}img/catalog.png"></a>]</sup>
-        <sup>[<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/rss.xml" target="_blank"
-                 title="{{=it.tr.boardRssLinkText}}"><img src="/{{=it.site.pathPrefix}}img/rss.png"></a>]</sup>
-    </h1>
+
 </div>
 {{? it.board.postingEnabled}}
     <hr />
@@ -76,39 +53,24 @@
         {{~}}
     </div>
 {{~}}
-{{? it.settings.mode.name != "ascetic" && it.board.postingEnabled}}
-    <hr />
-    {{~["Bottom"] :position}}
-        {{#def.createAction}}
-    {{~}}
-{{?}}
+
 <hr />
 <div class="pages">
     {{? it.currentPage > 0}}
         <span class="pagesItem metaPage">
-            {{? it.currentPage == 1}}
-                [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{=it.tr.toPreviousPageText}}</a>]
-            {{??}}
-                [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/{{out += (it.currentPage - 1);}}.html">{{=it.tr.toPreviousPageText}}</a>] 
-            {{?}}
+
         </span>
     {{?}}
     {{ for (var i = 0; i < it.pageCount; ++i) { }}
         {{? i != it.currentPage}}
-            <span class="pagesItem">
-                [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}{{? i > 0}}/{{=i}}.html{{?}}">{{=i}}</a>]
-                </span>
+
         {{??}}
             <span class="pagesItem currentPage">
                 [<b>{{=i}}</b>]
             </span>
         {{?}}
     {{ } }}
-    {{? it.currentPage < (it.pageCount - 1)}}
-        <span class="pagesItem metaPage">
-            [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/{{out += (it.currentPage + 1);}}.html">{{=it.tr.toNextPageText}}</a>]
-        </span>
-    {{?}}
+
 </div>
 <hr />
 {{#def.navbar}}
