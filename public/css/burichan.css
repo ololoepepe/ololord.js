@@ -946,6 +946,10 @@ a.progressBlocking {
     vertical-align: middle;
 }
 
+.boardSelect {
+    width: 200px;
+}
+
 .boardSelectForm {
     display: inline;
 }

@@ -3,7 +3,7 @@
         <form action="/{{=it.site.pathPrefix}}action/redirect" method="post" accept-charset="utf-8"
               class="boardSelectForm" enctype="application/x-www-form-urlencoded">
     {{?}}
-        <select name="url" class="select" size="12"
+        <select name="url" class="select boardSelect"
                 {{? it.settings.mode.name != "ascetic"}}onchange="location = this.options[this.selectedIndex].value;"{{?}}>
             {{~it.boards :board}}
                 {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
