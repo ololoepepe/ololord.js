@@ -1,3 +1,15 @@
 <div id="createActionContainer{{=position}}" class="createAction">
-
+    {{? it.settings.mode.name != "ascetic"}}
+        <div>
+            <div>[<a id="showHidePostFormButton{{=position}}" href="javascript:void(0);"
+                     data-position="{{=position}}"
+                     onclick="lord.showHidePostForm(this); return false;">{{? it.thread}}{{=it.tr.answerInThreadText}}{{??}}{{=it.tr.createThreadText}}{{?}}</a>]</div>
+        </div>
+    {{??}}
+        <div>
+            <div>
+                {{#def.postForm}}
+            </div>
+        </div>
+    {{?}}
 </div>

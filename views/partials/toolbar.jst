@@ -1,6 +1,16 @@
 <div class="toolbar{{? it.settings.stickyToolbar}} sticky{{?}} nowrap">
 {{=it.site.pathPrefix}}
-
+    {{? it.settings.mode.name != "ascetic"}}
+        <input type="image" name="settingsButton" title="{{=it.tr.settingsButtonText}}"
+               src="/{{=it.site.pathPrefix}}img/settings.png" onclick="lord.showSettings(); return false;" />
+        <input type="image" name="favoritesButton" title="{{=it.tr.showFavoritesText}}"
+               src="/{{=it.site.pathPrefix}}img/favorite.png" onclick="lord.showFavorites(); return false;" />
+        <a onclick="lord.switchMumWatching(); return false;" name="switchMumWatchingButton"
+           title="{{=it.tr.mumWatchingText}}"><img src="/{{=it.site.pathPrefix}}img/mum_not_watching.png"></a>
+    {{??}}
+        <a href="/{{=it.site.pathPrefix}}settings" title="{{=it.tr.settingsButtonText}}"
+           target="_blank"><img src="/{{=it.site.pathPrefix}}img/settings.png"></a>
+    {{?}}
     {{? it.user.loggedIn}}
         {{? it.user.loginMessageText && it.user.loginIconName}}
             <img src="/{{=it.site.pathPrefix}}img/{{=it.user.loginIconName}}" title="{{=it.user.loginMessageText}}">
