@@ -2,13 +2,10 @@
     <title>{{=it.title}}</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <link id="favicon" rel="shortcut icon" href="/{{=it.site.pathPrefix}}favicon.ico">
-    <link rel="stylesheet" type="text/css" href="/{{=it.site.pathPrefix}}css/{{=it.settings.style.name}}.css">
-    <link rel="stylesheet" type="text/css"
-          href="/{{=it.site.pathPrefix}}css/3rdparty/highlight.js/{{=it.settings.codeStyle.name}}.css">
+
     {{? !it.noJavaScript}}
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery-1.11.3.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/api.js"></script>
-        {{? it.settings.mode.name != "ascetic"}}
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/doT.min.js"></script>
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/picoModal-2.1.0.min.js"></script>
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/sha1.js"></script>
