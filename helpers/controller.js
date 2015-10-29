@@ -29,7 +29,6 @@ var controller = function(req, templateName, modelData, board) {
     var template = Cache.get("template/" + templateName, "");
     if (template) {
         modelData = merge.recursive(baseModelData, modelData);
-        console.log(modelData.settings.style, modelData.settings.codeStyle, modelData.settings.mode);
         modelData.req = req;
         return Promise.resolve(template(modelData));
     }
@@ -38,7 +37,6 @@ var controller = function(req, templateName, modelData, board) {
     }).then(function(template) {
         Cache.set("template/" + templateName, template);
         modelData = merge.recursive(baseModelData, modelData);
-        console.log(modelData.settings.style, modelData.settings.codeStyle, modelData.settings.mode);
         modelData.req = req;
         return Promise.resolve(template(modelData));
     });

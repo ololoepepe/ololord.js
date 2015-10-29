@@ -58,7 +58,24 @@
         <h2>{{=it.tr.postingDisabledBoardText}}</h2>
     </div>
 {{?}}
-
+{{~it.threads :thread}}
+    <hr />
+    <div id="thread{{=thread.opPost.number}}" class="thread">
+        {{~[thread.opPost] :post}}
+            {{#def.post}}
+        {{~}}
+    </div>
+    {{? thread.omittedPosts > 0}}
+        <div id="threadOmitted{{=thread.opPost.number}}" class="omittedPosts">
+            {{=it.tr.omittedPostsText}} {{=thread.omittedPosts}}   
+        </div>
+    {{?}}
+    <div id="threadPosts{{=thread.opPost.number}}" class="threadPosts">
+        {{~thread.lastPosts :post}}
+            {{#def.post}}
+        {{~}}
+    </div>
+{{~}}
 {{? it.settings.mode.name != "ascetic" && it.board.postingEnabled}}
     <hr />
     {{~["Bottom"] :position}}
