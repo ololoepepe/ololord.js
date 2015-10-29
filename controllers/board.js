@@ -112,6 +112,7 @@ var renderPost = function(post, board, req, opPost) {
     }
     post.user.hashpass = "";
     board.renderPost(post, req, opPost);
+    console.log(post);
     if (!board.showWhois)
         return Promise.resolve();
     return Tools.flagName(post.geolocation.countryCode).then(function(flagName) {
