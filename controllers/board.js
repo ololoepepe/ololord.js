@@ -205,6 +205,7 @@ router.get("/:boardName", function(req, res) {
             });
         }).catch(function(err) {
             res.send("Error: " + err);
+            console.log(err.stack);
         });
     }
 });
