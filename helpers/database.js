@@ -559,6 +559,8 @@ module.exports.createThread = function(req, fields, files, transaction) {
             }, 10000);
             return db.hdel("archivedThreads:" + board.name, thread.number);
         }).then(function() {
+            return db.hdel("threadUpdateTimes:" + board.name, thread.number);
+        }).then(function() {
             c.thread = c.threads.pop();
             if (board.archiveLimit <= 0) {
                 setTimeout(function() {

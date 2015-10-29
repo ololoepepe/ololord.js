@@ -195,7 +195,7 @@ router.get("/:boardName", function(req, res) {
         board.renderBoardPage(req, res).then(function(result) {
             if (result)
                 return;
-            boardModel.getPage(board, req.hashpass).then(function(model) {
+            return boardModel.getPage(board, req.hashpass).then(function(model) {
                 console.time("render");
                 model.currentPage = 0;
                 return renderPage(model, board, req);
@@ -217,7 +217,7 @@ router.get("/:boardName/:page.html", function(req, res) {
         board.renderBoardPage(req, res).then(function(result) {
             if (result)
                 return;
-            boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
+            return boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
                 model.currentPage = req.params.page;
                 return renderPage(model, board, req);
             }).then(function(data) {
@@ -252,7 +252,7 @@ router.get("/:boardName/res/:threadNumber.html", function(req, res) {
         board.renderThread(req, res).then(function(result) {
             if (result)
                 return;
-            boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
+            return boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
                 console.time("renderThread");
                 return renderThread(model, board, req);
             }).then(function(data) {
