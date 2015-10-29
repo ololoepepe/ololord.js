@@ -29,6 +29,7 @@ var controller = function(req, templateName, modelData, board) {
     var template = Cache.get("template/" + templateName, "");
     if (template) {
         modelData = merge.recursive(baseModelData, modelData);
+        console.log(modelData.board, modelData.boards);
         modelData.req = req;
         return Promise.resolve(template(modelData));
     }
