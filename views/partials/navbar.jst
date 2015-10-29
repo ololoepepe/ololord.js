@@ -1,4 +1,15 @@
 <div class="navbar">
+    {{~it.boards :board}}
+        {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+            <span class="navbarItem navbarItemBoard">[<a href="/{{=it.site.pathPrefix}}{{=board.name}}"
+                  title="{{=board.title}}">{{=board.name}}</a>] </span>
+        {{?}}
+    {{~}}
+    {{? it.settings.mode.name != "ascetic"}}
+        <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}playlist"
+                                     title="{{=it.tr.toPlaylistPageText}}"><img src="/{{=it.site.pathPrefix}}img/playlist.png"
+                                                                                width="16" height="16"></a>]</span>
+    {{?}}
     <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}markup"
                                  title="{{=it.tr.toMarkupPageText}}"><img src="/{{=it.site.pathPrefix}}img/markup.png"
                                                                           width="16" height="16"></a>]</span>
