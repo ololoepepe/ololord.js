@@ -26,6 +26,7 @@ var controller = function(req, templateName, modelData, board) {
     if (!modelData)
         modelData = {};
     var template = Cache.get("template/" + templateName, "");
+    console.log(baseModelData.board);
     if (template) {
         modelData = merge.recursive(baseModelData, modelData);
         modelData.req = req;
