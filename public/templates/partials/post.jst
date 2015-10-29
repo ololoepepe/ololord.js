@@ -60,7 +60,8 @@
                      title="{{=post.geolocation.countryName}}">
             {{?}}
         {{?}}
-        <span name="dateTime" class="postDateTime {{=it.deviceType}}">{{=post.createdAt}}</span>
+        <span class="postDateTime {{=it.deviceType}}"
+              name="dateTime">{{ out += it.formattedDate(post.createdAt); }}</span>
         {{? it.threads}}
             #<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/thread/{{=thread.number}}.html#{{? thread.postingEnabled}}i{{?}}{{=post.number}}"
                 name="number" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.posterIp}}"{{?}}>{{=post.number}}</a>
@@ -251,7 +252,8 @@
             {{? post.updatedAt}}
                 <tr>
                     <td colspan="{{ out += (post.fileInfos.length + 2); }}">
-                        <span class="modificationDateTime">{{=it.tr.modificationDateTimeText}} {{=post.updatedAt}}</span>
+                        <span class="modificationDateTime">{{=it.tr.modificationDateTimeText}}
+                            {{ out += it.formattedDate(post.updatedAt); }}</span>
                     </td>
                 </tr>
             {{?}}

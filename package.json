@@ -38,6 +38,7 @@
     "imagemagick": "^0.1.3",
     "merge": "^1.2.0",
     "mkpath": "^0.1.0",
+    "moment": "^2.10.6",
     "musicmetadata": "^2.0.2",
     "promisify-node": "^0.2.1",
     "q-io": "^1.13.1",

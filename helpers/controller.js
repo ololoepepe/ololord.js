@@ -3,6 +3,7 @@ var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Highlight = require("highlight.js");
 var merge = require("merge");
+var moment = require("moment");
 var Path = require("path");
 var promisify = require("promisify-node");
 var Util = require("util");
@@ -35,6 +36,10 @@ controller = function(req, templateName, modelData) {
     baseModelData.path = req.path;
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
+    baseModelData.formattedDate = function(date) {
+        return moment(date).locale(config("site.locale", "en")).format(config("site.dateFormat",
+            "MM/DD/YYYY hh:mm:ss"));
+    };
     if (!modelData)
         modelData = {};
     var template = Cache.get("template/" + templateName, "");
@@ -131,7 +136,9 @@ controller.baseModel = function(req) {
                 name: (markup.MarkupModes.ExtendedWakabaMark + "," + markup.MarkupModes.BBCode),
                 title: Tools.translate("Extended WakabaMark and bbCode", "markupMode")
             },
-        ]
+        ],
+        locale: config("site.locale", "en"),
+        dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss")
     };
 };
 
