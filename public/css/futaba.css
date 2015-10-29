@@ -1062,3 +1062,7 @@ a.progressBlocking {
 .buttonImage {
     vertical-align: middle;
 }
+
+.boardSelectForm {
+    display: inline;
+}

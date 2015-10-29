@@ -34,6 +34,11 @@ router.post("/login", function(req, res) {
     res.redirect(req.body.source || ("/" + config("site.pathPrefix", "")));
 });
 
+router.post("/redirect", function(req, res) {
+    console.log(req.body.url);
+    res.redirect(req.body.url || ("/" + config("site.pathPrefix", "")));
+});
+
 router.post("/logout", function(req, res) {
     res.cookie("hashpass", "", {
         expires: Tools.forever(),

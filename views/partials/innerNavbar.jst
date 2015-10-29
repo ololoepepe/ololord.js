@@ -1,9 +1,29 @@
-{{~it.boards :board}}
-    {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
-        <span class="navbarItem navbarItemBoard">[<a href="/{{=it.site.pathPrefix}}{{=board.name}}"
-              title="{{=board.title}}">{{=board.name}}</a>] </span>
+{{? "mobile" == it.deviceType}}
+    {{? it.settings.mode.name == "ascetic"}}
+        <form action="/{{=it.site.pathPrefix}}action/redirect" method="post" accept-charset="utf-8"
+              class="boardSelectForm" enctype="application/x-www-form-urlencoded">
     {{?}}
-{{~}}
+        <select name="url" class="select"
+                {{? it.settings.mode.name != "ascetic"}}onchange="location = this.options[this.selectedIndex].value;"{{?}}>
+            {{~it.boards :board}}
+                {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+                    <option {{? it.board && it.board.name == board.name}}selected="true"{{?}}
+                            value="/{{=it.site.pathPrefix}}{{=board.name}}">[{{=board.name}}] {{=board.title}}</option>
+                {{?}}
+            {{~}}
+        </select>
+    {{? it.settings.mode.name == "ascetic"}}
+        <input type="submit" value="{{=it.tr.goText}}" class="button" />
+        </form>
+    {{?}}
+{{??}}
+    {{~it.boards :board}}
+        {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+            <span class="navbarItem navbarItemBoard">[<a href="/{{=it.site.pathPrefix}}{{=board.name}}"
+                  title="{{=board.title}}">{{=board.name}}</a>] </span>
+        {{?}}
+    {{~}}
+{{?}}
 {{? it.settings.mode.name != "ascetic"}}
     <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}playlist"
                                  title="{{=it.tr.toPlaylistPageText}}"><img src="/{{=it.site.pathPrefix}}img/playlist.png"

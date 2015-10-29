@@ -15,7 +15,8 @@
     <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/login"
           enctype="application/x-www-form-urlencoded" class="inlineForm">
         <input type="hidden" name="source" value="{{=it.source}}" />
-        <input type="password" class="input" name="hashpass" placeholder="{{=it.tr.loginPlaceholderText}}" size="43"
+        <input type="password" class="input" name="hashpass" placeholder="{{=it.tr.loginPlaceholderText}}"
+               size="{{? "mobile" == it.deviceType}}30{{??}}43{{?}}"
                autofocus="true" />
         <input type="submit" class="button" name="submit" value="{{=it.tr.loginText}}" />
     </form>

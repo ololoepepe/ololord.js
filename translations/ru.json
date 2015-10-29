@@ -253,13 +253,11 @@
     "Back": {
         "backText": {
             "value": "Назад"
-        },
-        "_obsolete": true
+        }
     },
     "Update thread": {
         "updateThreadText": {
-            "value": "Обновить тред",
-            "_obsolete": true
+            "value": "Обновить тред"
         },
         "hotkeyUpdateThreadLabelText": {
             "value": "Update thread"
@@ -301,8 +299,7 @@
     "Auto update": {
         "autoUpdateText": {
             "value": "Автообновление"
-        },
-        "_obsolete": true
+        }
     },
     "Determines if drafts are enabled on this board.\nThe default is true.": {
         "_default": {
@@ -1093,26 +1090,22 @@
     "Welcome. Again.": {
         "welcomeMessage": {
             "value": "Добро пожаловать. Снова."
-        },
-        "_obsolete": true
+        }
     },
     "News": {
         "newsHeader": {
             "value": "Новости"
-        },
-        "_obsolete": true
+        }
     },
     "Rules": {
         "rulesHeader": {
             "value": "Правила"
-        },
-        "_obsolete": true
+        }
     },
     "Our friends": {
         "friendsHeader": {
             "value": "Наши друзья"
-        },
-        "_obsolete": true
+        }
     },
     "User management": {
         "pageTitle": {
@@ -3797,7 +3790,13 @@
             "value": "ololord.js"
         },
         "welcomeMessage": {
-            "value": "ololord.js"
+            "value": "ololord.js",
+            "_obsolete": true
+        }
+    },
+    "Go": {
+        "goText": {
+            "value": "Перейти"
         }
     }
 }

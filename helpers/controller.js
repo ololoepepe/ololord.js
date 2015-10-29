@@ -416,6 +416,7 @@ controller.translationsModel = function() {
     translate("Back", "backText");
     translate("Update thread", "updateThreadText");
     translate("Auto update", "autoUpdateText");
+    translate("Go", "goText");
     return { tr: tr };
 };
 
