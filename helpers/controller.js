@@ -4,6 +4,7 @@ var FSSync = require("fs");
 var Highlight = require("highlight.js");
 var merge = require("merge");
 var promisify = require("promisify-node");
+var Util = require("util");
 
 var Board = require("../boards/board");
 var Cache = require("./cache");
@@ -26,7 +27,6 @@ var controller = function(req, templateName, modelData, board) {
     if (!modelData)
         modelData = {};
     var template = Cache.get("template/" + templateName, "");
-    console.log(baseModelData.board);
     if (template) {
         modelData = merge.recursive(baseModelData, modelData);
         modelData.req = req;
@@ -136,11 +136,10 @@ controller.boardsModel = function() {
 };
 
 controller.boardModel = function(board) {
-    if (typeof board == "string") {
-        if (!Tools.contains(Board.boardNames(), board))
-            return null;
+    if (Util.isString(board))
         board = Board.board(board);
-    }
+    if (!board)
+        return null;
     return {
         board: {
             name: board.name,

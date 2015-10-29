@@ -78,7 +78,7 @@
             <span tabindex="0" class="{{=it.deviceType}} postActions">
                 <img src="/{{=it.site.pathPrefix}}img/post_actions.png" title="{{=it.tr.postActionsText}}">
                 <ul class="postActionsMenu">
-                    {{? (it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.draft) && (post.fileInfos.length < it.maxFileCount)}}
+                    {{? (it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.draft) && (post.fileInfos.length < it.board.maxFileCount)}}
                         <li>
                             <a name="addFileButton" target="_blank"
                                href="/{{=it.site.pathPrefix}}add_file?board={{=it.board.name}}&post={{=post.number}}"
