@@ -1,0 +1,16 @@
+<div class="threadActions">
+    [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{=it.tr.backText}}</a>]
+    {{? it.settings.mode.name != "ascetic"}}
+        [<a href="javascript:void(0);" onclick="lord.updateThread();"
+            name="updateThreadButton">{{=it.tr.updateThreadText}}</a>]
+    {{?}}
+    {{? "Top" == position}}
+        [<a href="#bottom">{{=it.tr.toBottomText}}</a>]
+    {{??}}
+        [<a href="#top">{{=it.tr.toTopText}}</a>]
+    {{?}}
+    {{? it.settings.mode.name != "ascetic"}}
+        [<input onclick="lord.setAutoUpdateEnabled(this);" id="autoUpdate{{=position}}"
+                type="checkbox" /><span name="autoUpdateText">{{=it.tr.autoUpdateText}}</span>]
+    {{?}}
+</div>

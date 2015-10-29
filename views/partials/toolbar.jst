@@ -1,28 +1,32 @@
 <div class="toolbar{{? it.settings.stickyToolbar}} sticky{{?}} nowrap">
-{{=it.site.pathPrefix}}
     {{? it.settings.mode.name != "ascetic"}}
-        <input type="image" name="settingsButton" title="{{=it.tr.settingsButtonText}}"
+        <input type="image" name="settingsButton" title="{{=it.tr.settingsButtonText}}" class="buttonImage"
                src="/{{=it.site.pathPrefix}}img/settings.png" onclick="lord.showSettings(); return false;" />
-        <input type="image" name="favoritesButton" title="{{=it.tr.showFavoritesText}}"
+        <input type="image" name="favoritesButton" title="{{=it.tr.showFavoritesText}}" class="buttonImage"
                src="/{{=it.site.pathPrefix}}img/favorite.png" onclick="lord.showFavorites(); return false;" />
         <a onclick="lord.switchMumWatching(); return false;" name="switchMumWatchingButton"
-           title="{{=it.tr.mumWatchingText}}"><img src="/{{=it.site.pathPrefix}}img/mum_not_watching.png"></a>
+           title="{{=it.tr.mumWatchingText}}"><img src="/{{=it.site.pathPrefix}}img/mum_not_watching.png"
+                                                   class="buttonImage"></a>
     {{??}}
         <a href="/{{=it.site.pathPrefix}}settings" title="{{=it.tr.settingsButtonText}}"
-           target="_blank"><img src="/{{=it.site.pathPrefix}}img/settings.png"></a>
+           target="_blank"><img class="buttonImage" src="/{{=it.site.pathPrefix}}img/settings.png"></a>
     {{?}}
     {{? it.user.loggedIn}}
         {{? it.user.loginMessageText && it.user.loginIconName}}
-            <img src="/{{=it.site.pathPrefix}}img/{{=it.user.loginIconName}}" title="{{=it.user.loginMessageText}}">
+            <img src="/{{=it.site.pathPrefix}}img/{{=it.user.loginIconName}}" title="{{=it.user.loginMessageText}}"
+                 class="buttonImage">
         {{?}}
         <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/logout"
               enctype="application/x-www-form-urlencoded" class="inlineForm">
             <input type="hidden" name="source" value="{{=it.path}}" />
             <input type="image" name="submit" title="{{=it.tr.logoutText}}"
-                   src="/{{=it.site.pathPrefix}}img/logout.png" />
+                   src="/{{=it.site.pathPrefix}}img/logout.png" class="buttonImage" />
         </form>
     {{??}}
         <a href="/{{=it.site.pathPrefix}}login.html?source={{=it.path}}"><img src="/{{=it.site.pathPrefix}}img/login.png"
+                                                                              class="buttonImage"
                                                                               title="{{=it.tr.loginText}}"></a>
     {{?}}
+    |
+    {{#def.innerNavbar}}
 </div>

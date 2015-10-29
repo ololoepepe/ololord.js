@@ -413,6 +413,9 @@ controller.translationsModel = function() {
     translate("Our friends", "friendsHeader");
     translate("News", "newsHeader");
     translate("Rules", "rulesHeader");
+    translate("Back", "backText");
+    translate("Update thread", "updateThreadText");
+    translate("Auto update", "autoUpdateText");
     return { tr: tr };
 };
 

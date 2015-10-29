@@ -451,6 +451,15 @@ span.newPostCount {
     margin-right: auto;
     text-align: center;
     width: 70%;
+    font-size: 1.2em;
+}
+
+.postingSpeedBar {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 70%;
 }
 
 .navbar.navbarFrame {
@@ -788,6 +797,7 @@ ul.tabWidget > li.activated {
     text-align: left;
     white-space: nowrap;
     overflow-x: auto;
+    font-size: 1.2em;
 }
 
 .toolbar.sticky {
@@ -930,4 +940,8 @@ a.progressBlocking {
 .loginDescription.desktop {
     max-width: 80%;
     margin-left: 10%;
+}
+
+.buttonImage {
+    vertical-align: middle;
 }
