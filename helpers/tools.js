@@ -3,6 +3,7 @@ var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
+var Path = require("path");
 var Util = require("util");
 var XRegExp = require("xregexp");
 
@@ -294,4 +295,107 @@ module.exports.indexPost = function(post, wordIndex) {
         }
     });
     return wordIndex;
+};
+
+var localeBasedFileName = function(fileName, locale) {
+    if (!fileName || !Util.isString(fileName))
+        return Promise.resolve(null);
+    if (!Util.isString(locale))
+        locale = config("site.locale", "en");
+    var ext = Path.extname(fileName);
+    var baseFileName = Path.dirname(fileName) + "/" + Path.basename(fileName, ext);
+    var list = [];
+    list.push(baseFileName + "." + locale + ext);
+    list.push(baseFileName + ".en" + ext);
+    list.push(fileName);
+    var f = function() {
+        var fn = list.shift();
+        return FS.exists(fn).then(function(exists) {
+            return exists ? fn : null;
+        });
+    };
+    return f().then(function(fn) {
+        if (fn)
+            return fn;
+        if (list.length > 0)
+            return f();
+        return null;
+    });
+};
+module.exports.localeBasedFileName = localeBasedFileName;
+
+module.exports.getRules = function(name, locale) {
+    var fileName = __dirname + "/../misc/rules/" + name + "/rules.txt";
+    return localeBasedFileName(fileName, locale).then(function(fileName) {
+        if (!fileName)
+            return null;
+        return FS.read(fileName);
+    }).then(function(data) {
+        if (!data)
+            return [];
+        return data.split(/\r*\n+/gi).filter(function(rule) {
+            return rule;
+        });
+    });
+};
+
+module.exports.splitCommand = function(cmd) {
+    var args = [];
+    var arg = "";
+    var quot = 0;
+    for (var i = 0; i < cmd.length; ++i) {
+        var c = cmd[i];
+        if (/\s/.test(c)) {
+            if (quot) {
+                arg += c;
+            } else if (arg.length > 0) {
+                args.push(arg);
+                arg = "";
+            }
+        } else {
+            if ("\"" == c && (i < 1 || "\\" != cmd[i - 1])) {
+                switch (quot) {
+                case 1:
+                    quot = 0;
+                    break;
+                case -1:
+                    arg += c;
+                    break;
+                case 0:
+                default:
+                    quot = 1;
+                    break;
+                }
+            } else if ("'" == c && (i < 1 || "\\" != cmd[i - 1])) {
+                switch (quot) {
+                case 1:
+                    arg += c;
+                    break;
+                case -1:
+                    quot = 0;
+                    break;
+                case 0:
+                default:
+                    quot = -1;
+                    break;
+                }
+            } else {
+                if (("\"" == c || "'" == c) && (i > 0 || "\\" == cmd[i - 1]) && arg.length > 0)
+                    arg = arg.substring(0, arg.length - 1);
+                arg += c;
+            }
+        }
+    }
+    if (arg.length > 0) {
+        if (quot)
+            return null;
+        args.push(arg);
+    }
+    var command = null;
+    if (args.length > 0)
+        command = args.shift();
+    return {
+        command: command,
+        arguments: args
+    };
 };

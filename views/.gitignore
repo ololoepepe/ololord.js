@@ -1,0 +1,5 @@
+custom/*
+!custom/home
+!custom/footer
+!custom/header
+!custom/.gitignore

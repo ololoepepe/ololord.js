@@ -152,7 +152,7 @@ var renderPage = function(model, board, req, json) {
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
-            return controller(req, "boardPage", model, board);
+            return controller(req, "boardPage", model);
     });
 };
 
@@ -183,7 +183,7 @@ var renderThread = function(model, board, req, json) {
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
-            return controller(req, "thread", model, board);
+            return controller(req, "thread", model);
     });
 };
 

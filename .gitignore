@@ -4,6 +4,7 @@ db
 db.sqlite
 node_modules
 geolocation/*
+!geolocation/.placeholder
 tools/*
 !tools/geolocation.js
 tmp/*
@@ -14,3 +15,4 @@ public/*
 !public/js
 !public/video
 !public/templates
+!public/.gitignore

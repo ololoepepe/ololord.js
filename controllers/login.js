@@ -10,7 +10,7 @@ router.get("/login.html", function(req, res) {
         title: Tools.translate("Login", "loginButtonText"),
         source: (req.query.source || "")
     };
-    controller(req, "login/main", model).then(function(data) {
+    controller(req, "login", model).then(function(data) {
         res.send(data);
     }).catch(function(err) {
         res.send("Error: " + err);

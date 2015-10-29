@@ -1,0 +1,6 @@
+home/*
+footer/*
+header/*
+!home/content.jst
+!footer/content.jst
+!header/content.jst

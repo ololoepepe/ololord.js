@@ -327,63 +327,77 @@
     },
     "/h/entai": {
         "title": {
-            "value": "Хентай"
+            "value": "Хентай",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "/h/entai"
+        }
     },
     "/int/ernational": {
         "title": {
-            "value": "/int/ernational"
+            "value": "/int/ernational",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "/int/ernational"
+        }
     },
     "Vladimir Putin": {
         "defaultUserName": {
             "value": "Владимир Путин"
-        },
-        "_obsolete": true
+        }
     },
     "Refuge": {
         "title": {
-            "value": "Убежище"
+            "value": "Убежище",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "Refuge"
+        }
     },
     "Whiner": {
         "defaultUserName": {
             "value": "Нытик"
-        },
-        "_obsolete": true
+        }
     },
     "Social life": {
         "title": {
-            "value": "Жизнь в обществе"
+            "value": "Жизнь в обществе",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "Social life"
+        }
     },
     "Life of the party": {
         "defaultUserName": {
             "value": "Душа компании"
-        },
-        "_obsolete": true
+        }
     },
     "3D pron": {
         "title": {
-            "value": "3D прон"
+            "value": "3D прон",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "3D pron"
+        }
     },
     "Video games": {
         "title": {
-            "value": "Видеоигры"
+            "value": "Видеоигры",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "Video games"
+        }
     },
     "PC Nobleman": {
         "defaultUserName": {
             "value": "Пекабоярин"
-        },
-        "_obsolete": true
+        }
     },
     "Attempt to create a thread without attaching a file": {
         "error": {
@@ -468,15 +482,17 @@
     },
     "/po/litics": {
         "title": {
-            "value": "Политика"
+            "value": "Политика",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "/po/litics"
+        }
     },
     "Armchair warrior": {
         "defaultUserName": {
             "value": "Диванный эксперт"
-        },
-        "_obsolete": true
+        }
     },
     "Invalid post number": {
         "error": {
@@ -1452,9 +1468,12 @@
     },
     "Console games": {
         "board title": {
-            "value": "Консольные игры"
+            "value": "Консольные игры",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "Console games"
+        }
     },
     "No games": {
         "imageTitle": {
@@ -1557,9 +1576,12 @@
     },
     "Board /d/iscussion": {
         "board title": {
-            "value": "/d/искуссии о борде"
+            "value": "/d/искуссии о борде",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "Board /d/iscussion"
+        }
     },
     "Invalid password": {
         "error": {
@@ -1590,9 +1612,12 @@
     },
     "Boardsphere echo": {
         "board title": {
-            "value": "Эхо бордосферы"
+            "value": "Эхо бордосферы",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "Boardsphere echo"
+        }
     },
     "This board/thread may not be accepted": {
         "description": {
@@ -3240,9 +3265,12 @@
     },
     "My Little Pony": {
         "board title": {
-            "value": "Мой маленький пони"
+            "value": "Мой маленький пони",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "My Little Pony"
+        }
     },
     "Hands off my pony!!!!!11": {
         "buttonText": {
@@ -3264,9 +3292,12 @@
     },
     "/pr/ogramming": {
         "board title": {
-            "value": "Программирование"
+            "value": "Программирование",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "boardTitle": {
+            "value": "/pr/ogramming"
+        }
     },
     "Invalid hashpass": {
         "error": {
@@ -3759,6 +3790,14 @@
     "Code style:": {
         "codeStyleLabelText": {
             "value": "Стиль кода:"
+        }
+    },
+    "ololord.js": {
+        "pageTitle": {
+            "value": "ololord.js"
+        },
+        "welcomeMessage": {
+            "value": "ololord.js"
         }
     }
 }

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{#def.head}}
+<body class="{{=it.deviceType}}" {{#def.baseData}}>
+{{? it.customHeader}}
+    {{#def.customHeader}}
+{{?}}
+{{#def.toolbar}}
+<br />
+{{#def.navbar}}
+<br />
+{{#def.searchAction}}
+<div class="theTitle">
+    <h1>
+        {{=it.tr.welcomeMessage}}
+    </h1>
+</div>
+{{? it.customContent}}
+    {{=it.customContent}}
+{{?}}
+{{? it.friends && it.friends.length > 0}}
+    <div class="sectionHeader">
+        <h3>{{=it.tr.friendsHeader}}</h3>
+    </div>
+    <div class="navbar">
+        {{~it.friends :friend}}
+            <span class="navbarItem">[<a href="{{=friend.url}}" {{? friend.title}}title="{{=friend.title}}"{{?}}
+                  target="_blank">{{=friend.name}}</a>] </span>
+        {{~}}
+    </div>
+{{?}}
+{{? it.rules && it.rules.length > 0}}
+    <div class="sectionHeader">
+        <h3>{{=it.tr.rulesHeader}}</h3>
+    </div>
+    <div class="rules">
+        <ol>
+            {{~it.rules :rule}}
+                <li>{{=rule}}</li>
+            {{~}}
+        </ol>
+    </div>
+{{?}}
+{{? it.news && it.news.length > 0}}
+    <div class="sectionHeader">
+        <h3>{{=it.tr.newsHeader}}</h3>
+    </div>
+    <div class="rules">
+        <ol>
+            {{~it.news :n}}
+                <li>{{=n}}</li>
+            {{~}}
+        </ol>
+    </div>
+{{?}}
+{{? it.customFooter}}
+    {{#def.customFooter}}
+{{?}}
+</body>
+</html>

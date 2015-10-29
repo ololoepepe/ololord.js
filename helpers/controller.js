@@ -3,6 +3,7 @@ var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Highlight = require("highlight.js");
 var merge = require("merge");
+var Path = require("path");
 var promisify = require("promisify-node");
 var Util = require("util");
 
@@ -17,7 +18,17 @@ var Tools = require("./tools");
 var partials = {};
 var langNames = null;
 
-var controller = function(req, templateName, modelData, board) {
+var controller;
+
+var customContent = function(req, name) {
+    return Tools.localeBasedFileName(__dirname + "/../views/custom/" + name + "/content.jst").then(function(fileName) {
+        if (!fileName)
+            return Promise.resolve(null);
+        return controller(req, "custom/" + name + "/" + Path.basename(fileName, ".jst"));
+    });
+};
+
+controller = function(req, templateName, modelData) {
     var baseModelData = merge.recursive(controller.baseModel(req), controller.settingsModel(req));
     baseModelData = merge.recursive(baseModelData, controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
@@ -27,20 +38,37 @@ var controller = function(req, templateName, modelData, board) {
     if (!modelData)
         modelData = {};
     var template = Cache.get("template/" + templateName, "");
-    if (template) {
-        modelData = merge.recursive(baseModelData, modelData);
-        modelData.req = req;
-        return Promise.resolve(template(modelData));
-    }
+    var f = function(template, baseModelData, modelData) {
+        var p;
+        if (templateName.substr(0, 13) == "custom/footer" || templateName.substr(0, 13) == "custom/header"
+            || templateName.substr(0, 11) == "custom/home") {
+            p = Promise.resolve();
+        } else {
+            p = customContent(req, "header").then(function(content) {
+                modelData.customHeader = content;
+                return customContent(req, "footer");
+            }).then(function(content) {
+                modelData.customFooter = content;
+                return Promise.resolve();
+            });
+        }
+        return p.then(function() {
+            modelData = merge.recursive(baseModelData, modelData);
+            modelData.req = req;
+            return Promise.resolve(template(modelData));
+        });
+    };
+    if (template)
+        return f(template, baseModelData, modelData);
     return FS.read(__dirname + "/../views/" + templateName + ".jst").then(function(data) {
         return Promise.resolve(dot.template(data, null, partials));
     }).then(function(template) {
         Cache.set("template/" + templateName, template);
-        modelData = merge.recursive(baseModelData, modelData);
-        modelData.req = req;
-        return Promise.resolve(template(modelData));
+        return f(template, baseModelData, modelData);
     });
 };
+
+controller.customContent = customContent;
 
 controller.baseModel = function(req) {
     if (!langNames) {
@@ -381,6 +409,10 @@ controller.translationsModel = function() {
         + "R-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\n"
         + "R-18G - restricted for 18 years, guidance advised "
         + "(shemale, death, guro, scat, defecation, urination, etc.)", "ratingTooltip");
+    translate("Welcome. Again.", "welcomeMessage");
+    translate("Our friends", "friendsHeader");
+    translate("News", "newsHeader");
+    translate("Rules", "rulesHeader");
     return { tr: tr };
 };
 

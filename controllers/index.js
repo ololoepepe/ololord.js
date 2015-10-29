@@ -6,6 +6,6 @@ router.use("/action", require("./action"));
 router.use("/", require("./login"));
 router.use("/misc", require("./misc"));
 router.use("/", require("./board"));
-router.use("/", require("./homepage"));
+router.use("/", require("./home"));
 
 module.exports = router;

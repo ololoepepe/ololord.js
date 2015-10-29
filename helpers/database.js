@@ -524,7 +524,15 @@ module.exports.createPost = function(req, fields, files, transaction) {
 };
 
 var removeThread = function(boardName, threadNumber, archived) {
-    //
+    var key = (archived ? "archivedThreads:" : "threads:") + boardName;
+    return db.hdel(key, threadNumber).then(function() {
+        return db.hdel("threadUpdateTimes:" + boardName, threadNumber);
+    }).then(function() {
+        setTimeout(function() {
+            //TODO: remove posts, post files, etc.
+        }, 10000);
+        return Promise.resolve();
+    });
 };
 
 module.exports.createThread = function(req, fields, files, transaction) {
@@ -554,19 +562,11 @@ module.exports.createThread = function(req, fields, files, transaction) {
             if (c.archivedThreads.length < board.archiveLimit)
                 return Promise.resolve();
             var thread = c.archivedThreads.pop();
-            setTimeout(function() {
-                removeThread(board.name, thread.number, true);
-            }, 10000);
-            return db.hdel("archivedThreads:" + board.name, thread.number);
-        }).then(function() {
-            return db.hdel("threadUpdateTimes:" + board.name, thread.number);
+            return removeThread(board.name, thread.number, true);
         }).then(function() {
             c.thread = c.threads.pop();
-            if (board.archiveLimit <= 0) {
-                setTimeout(function() {
-                    removeThread(board.name, c.thread.number);
-                }, 10000);
-            }
+            if (board.archiveLimit <= 0)
+                return removeThread(board.name, c.thread.number);
             return db.hdel("threads:" + board.name, thread.number);
         }).then(function() {
             if (board.archiveLimit <= 0)
