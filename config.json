@@ -4,7 +4,12 @@
         "inMemoryCache": true
     },
     "server": {
-        "port": 8080
+        "port": 8080,
+        "rss": {
+            "enabled": true,
+            "ttl": 60,
+            "postCount": 500
+        }
     },
     "site": {
         "protocol": "http",

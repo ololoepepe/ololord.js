@@ -53,6 +53,12 @@ var spawnCluster = function() {
         Database.initialize().then(function() {
             return controller.initialize();
         }).then(function() {
+            if (config("server.rss.enabled", true)) {
+                Database.generateRss();
+                setInterval(function() {
+                    Database.generateRss();
+                }, config("server.rss.ttl", 60) * Tools.Minute);
+            }
             app.listen(config("server.port", 8080), function() {
                 console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080) + "...");
                 process.send("ready");

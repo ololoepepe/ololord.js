@@ -1,16 +1,19 @@
 var Crypto = require("crypto");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
+var moment = require("moment");
 var Path = require("path");
 var promisify = require("promisify-node");
 var Redis = require("then-redis");
 var SQLite3 = require("sqlite3");
 var Util = require("util");
+XML2JS = require("xml2js");
 
 var mkpath = promisify("mkpath");
 
 var Board = require("../boards/board");
 var Cache = require("./cache");
+var config = require("./config");
 var markup = require("./markup");
 var Tools = require("./tools");
 
@@ -25,9 +28,17 @@ db.hmget = function(key, hashes) {
     return db.tmp_hmget.apply(db, [key].concat(hashes));
 };
 
-var Lock = require("./then-redis-lock")(db);
+//var Lock = require("./then-redis-lock")(db);
 
-module.exports.Lock = Lock;
+//module.exports.Lock = Lock;
+
+var rss = {};
+
+Object.defineProperty(module.exports, "rss", {
+    get: function() {
+        return rss;
+    }
+});
 
 Ratings["SafeForWork"] = "SFW";
 Ratings["Rating15"] = "R-15";
@@ -93,7 +104,7 @@ var getThreads = function(boardName, options) {
 
 module.exports.getThreads = getThreads;
 
-module.exports.threadPosts = function(boardName, threadNumber, options) {
+var threadPosts = function(boardName, threadNumber, options) {
     if (!Tools.contains(Board.boardNames(), boardName))
         return Promise.reject("Invalid board name");
     if (isNaN(threadNumber) || threadNumber <= 0)
@@ -107,11 +118,12 @@ module.exports.threadPosts = function(boardName, threadNumber, options) {
         if (!result)
             result = [];
         var i = reverse ? (result.length - 1) : 0;
+        var bound;
         var bound = reverse ? (limit ? (result.length - limit - 1) : -1) : (limit ? limit : result.length);
         if (bound < 0)
             bound = -1;
         if (bound > result.length)
-            boudn = result.length;
+            bound = result.length;
         var step = limit ? limit : result.length;
         var pred = function() {
             return reverse ? (i > bound) : (i < bound);
@@ -168,6 +180,8 @@ module.exports.threadPosts = function(boardName, threadNumber, options) {
         return c.posts;
     });
 };
+
+module.exports.threadPosts = threadPosts;
 
 module.exports.getPost = function(boardName, postNumber, options) {
     if (!Tools.contains(Board.boardNames(), boardName))
@@ -692,7 +706,8 @@ var getGeolocationInfo = function(ip) {
 };
 
 module.exports.initialize = function() {
-    return Lock.drop();
+    return Promise.resolve();
+    //return Lock.drop();
 };
 
 var Transaction = function(boardName) {
@@ -715,3 +730,117 @@ Transaction.prototype.rollback = function() {
 };
 
 module.exports.Transaction = Transaction;
+
+module.exports.generateRss = function() {
+    var site = {
+        protocol: config("site.protocol", "http"),
+        domain: config("site.domain", "localhost:8080"),
+        pathPrefix: config("site.pathPrefix", ""),
+        locale: config("site.locale", "en"),
+        dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss")
+    };
+    var rssPostCount = config("server.rss.postCount", 500);
+    Board.boardNames().forEach(function(boardName) {
+        var board = Board.board(boardName);
+        var title = Tools.translate("Feed", "channelTitle") + " " + site.domain + "/" + site.pathPrefix + boardName;
+        var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName;
+        var description = Tools.translate("Last posts from board", "channelDescription") + " /" + boardName + "/";
+        var atomLink = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/rss.xml";
+        var posts = [];
+        var c = {};
+        var f = function() {
+            if (posts.length >= rssPostCount || c.threads.length < 1)
+                return Promise.resolve();
+            return threadPosts(boardName, c.threads.shift().number, {
+                filterFunction: function(post) {
+                    return !post.draft;
+                },
+                limit: (rssPostCount - posts.length),
+                withFileInfos: true
+            }).then(function(result) {
+                posts = posts.concat(result);
+                return f();
+            });
+        };
+        var doc = {
+            $: {
+                version: "2.0",
+                "xmlns:dc": "http://purl.org/dc/elements/1.1/",
+                "xmlns:atom": "http://www.w3.org/2005/Atom"
+            },
+            channel: {
+                title: title,
+                link: link,
+                description: description,
+                language: site.locale,
+                pubDate: moment(Tools.now()).utc().locale("en").format("ddd, DD MMM YYYY hh:mm:ss +0000"),
+                ttl: ("" + config("server.rss.ttl", 60)),
+                "atom:link": {
+                    $: {
+                        href: atomLink,
+                        rel: "self",
+                        type: "application/rss+xml"
+                    }
+                }
+            }
+        };
+        getThreads(boardName, {
+            filterFunction: function(thread) {
+                return !thread.draft;
+            }
+        }).then(function(threads) {
+            threads.sort(Board.sortThreadsByDate);
+            c.threads = threads;
+            return f();
+        }).then(function() {
+            doc.channel.item = posts.map(function(post) {
+                var title;
+                var isOp = post.number == post.threadNumber;
+                if (isOp)
+                    title = "[" + Tools.translate("New thread", "itemTitle") + "]";
+                else
+                    title = Tools.translate("Reply to thread", "itemTitle");
+                title += " ";
+                if (!post.subject && post.rawText)
+                    post.subject = post.rawText.substr(0, 150);
+                if (post.subject) {
+                    if (!isOp)
+                        title += "\"";
+                    title += post.subject;
+                    if (!isOp)
+                        title += "\"";
+                } else {
+                    title += post.number;
+                }
+                var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/res/"
+                    + post.threadNumber + ".html";
+                var description = "\n" + post.fileInfos.map(function(fileInfo) {
+                    return"<img src=\"" + site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName
+                        + "/thumb/" + fileInfo.thumb.name + "\"><br />";
+                }) + (post.text || "") + "\n";
+                return {
+                    title: title,
+                    link: link,
+                    description: description,
+                    pubDate: moment(post.createdAt).utc().locale("en").format("ddd, DD MMM YYYY hh:mm:ss +0000"),
+                    guid: {
+                        _: link + "#" + post.number,
+                        $: { isPermalink: true }
+                    },
+                    "dc:creator": (post.name || board.defaultUserName)
+                };
+            });
+        }).then(function() {
+            var builder = new XML2JS.Builder({
+                rootName: "rss",
+                renderOpts: {
+                    pretty: true,
+                    indent: "    ",
+                    newline: "\n"
+                },
+                cdata: true
+            });
+            rss[boardName] = builder.buildObject(doc);
+        });
+    });
+};

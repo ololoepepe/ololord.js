@@ -957,28 +957,24 @@
         "_obsolete": true
     },
     "Feed": {
-        "channel title": {
+        "channelTitle": {
             "value": "Лента"
-        },
-        "_obsolete": true
+        }
     },
     "Last posts from board": {
-        "channel description": {
+        "channelDescription": {
             "value": "Последние посты доски"
-        },
-        "_obsolete": true
+        }
     },
     "New thread": {
-        "item title": {
+        "itemTitle": {
             "value": "Новый тред"
-        },
-        "_obsolete": true
+        }
     },
     "Reply to thread": {
-        "item title": {
+        "itemTitle": {
             "value": "Ответ в тред"
-        },
-        "_obsolete": true
+        }
     },
     "Invalid thread number": {
         "error": {

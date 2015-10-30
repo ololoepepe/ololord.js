@@ -264,6 +264,15 @@ router.get("/:boardName/catalog.json", function(req, res) {
     }
 });
 
+router.get("/:boardName/rss.xml", function(req, res) {
+    var board = Board.board(req.params.boardName);
+    if (!board) {
+        res.send("No such board: " + req.params.boardName);
+    } else {
+        res.send(Database.rss[board.name]);
+    }
+});
+
 router.get("/:boardName/:page.html", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board) {
