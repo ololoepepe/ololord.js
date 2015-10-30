@@ -1,0 +1,15 @@
+{{? it.compareRatings(it.settings.maxAllowedRating, fileInfo.rating) < 0}}
+    {{? "R-18G" == fileInfo.rating}}
+        <img src="/{{=it.site.pathPrefix}}img/r-18g.png" width="200" height="200">
+    {{?? "R-18" == fileInfo.rating}}
+        <img src="/{{=it.site.pathPrefix}}img/r-18.png" width="200" height="200">
+    {{?? "R-15" == fileInfo.rating}}
+                    <img src="/{{=it.site.pathPrefix}}img/r-15.png" width="200" height="200">
+    {{?}}
+{{?? it.isSpecialThumbName(fileInfo.thumb.name)}}
+    <img src="/{{=it.site.pathPrefix}}img/{{ out += it.specialThumbName(fileInfo.thumb.name); }}_logo.png"
+         width="{{=fileInfo.thumb.dimensions.hidth}}" height="{{=fileInfo.thumb.dimensions.height}}">
+{{??}}
+    <img src="/{{=it.site.pathPrefix}}{{=it.board.name}}/thumb/{{=fileInfo.thumb.name}}"
+         {{? fileInfo.dimensions && fileInfo.thumb.dimensions.width > 0 && fileInfo.thumb.dimensions.height > 0}}width="{{ out += fileInfo.dimensions ? fileInfo.thumb.dimensions.width : 0; }}" height="{{ fileInfo.dimensions ? fileInfo.thumb.dimensions.height : 0; }}"{{?}}>
+{{?}}

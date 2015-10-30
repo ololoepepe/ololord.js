@@ -933,15 +933,17 @@ lord.getTemplate = function(templateName) {
     if (lord.partials) {
         f();
     } else {
-        var promises = ["post"].map(function(partialName) {
-            return $.ajax("/" + prefix + "templates/partials/" + partialName + ".jst").then(function(result) {
-                return {
-                    data: result,
-                    name: partialName
-                };
+        $.ajax("/" + prefix + "misc/partials.json").then(function(list) {
+            var promises = list.map(function(partialName) {
+                return $.ajax("/" + prefix + "templates/partials/" + partialName + ".jst").then(function(result) {
+                    return {
+                        data: result,
+                        name: partialName
+                    };
+                });
             });
-        });
-        $.when.apply($, promises).then(function() {
+            return $.when.apply($, promises);
+        }).then(function() {
             lord.partials = {};
             lord.arr(arguments).forEach(function(partial) {
                 lord.partials[partial.name] = partial.data;

@@ -22,29 +22,11 @@
         {{? post.draft}}
             <img src="/{{=it.site.pathPrefix}}img/edit.png" title="{{=it.tr.draftText}}" />
         {{?}}
-        <span class="postSubject{{? !post.subject}} defaultPostSubject{{?}} {{=it.deviceType}}">
-            {{? post.subject}}{{? post.subjectIsRaw}}{{=post.subject}}{{??}}{{!post.subject}}{{?}}{{?}}
-        </span>
+        {{#def.postSubject}}
         {{? post.showTripcode && it.compareRegisteredUserLevels(post.user.level, "USER") >= 0}}
             <img src="/{{=it.site.pathPrefix}}img/registered.png" title="{{=it.tr.registeredText}}">
         {{?}}
-        <span class="someName {{=it.deviceType}}">
-            {{? post.email}}
-                <a class="mailtoName" href="mailto:{{=post.email}}">{{? post.name}}{{!post.name}}{{??}}{{!it.board.defaultUserName}}{{?}}</a>
-            {{??}}
-                {{? !post.name}}
-                    <span class="userName defaultUserName">{{!it.board.defaultUserName}}</span>
-                {{??}}
-                    {{? it.compareRegisteredUserLevels(post.user.level, "ADMIN") >= 0}}
-                        {{=post.name}}
-                    {{?? it.compareRegisteredUserLevels(post.user.level, "MODER") >= 0}}
-                        <span class="moderName">{{!post.name}}</span>
-                    {{??}}
-                        <span class="userName">{{!post.name}}</span>
-                    {{?}}
-                {{?}}
-            {{?}}
-        </span>
+        {{#def.postName}}
         {{? thread.opPost.user.ip == post.user.ip && post.options.signAsOp}}
             <span class="opSign">[OP]</span>
         {{?}}
@@ -135,8 +117,8 @@
                         {{?}}
                         <li>
                             <a name="moveButton" target="_blank"
-                               href="/{{=it.site.pathPrefix}}move_thread?board={{=it.board.name}}&thread={{=post.number}}">
-                               {{? it.settings.mode.name != "ascetic"}}onclick="lord.moveThread(this); return false;"{{?}}
+                               href="/{{=it.site.pathPrefix}}move_thread?board={{=it.board.name}}&thread={{=post.number}}"
+                               {{? it.settings.mode.name != "ascetic"}}onclick="lord.moveThread(this); return false;"{{?}}>
                                 <img src="/{{=it.site.pathPrefix}}img/move.png" /> {{=it.tr.moveThreadText}}</a>
                         </li>
                     {{?}}
@@ -272,12 +254,7 @@
             {{?}}
             <tr name="referencedByTr" {{? post.referringPosts.length < 1}}style="display: none;"{{?}}>
                 <td colspan="{{ out += (post.referringPosts.length + 2); }}">
-                    <span name="referencedBy" class="referencedBy">
-                        {{=it.tr.referencedByText}}
-                        {{~post.referringPosts :reference}}
-                            {{#def.postReference}}
-                        {{~}}
-                    </span>
+                    {{#def.postReferringPosts}}
                 <td>
             </tr>
             {{? it.customPostBodyPart && it.customPostBodyPart[50]}}

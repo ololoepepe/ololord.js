@@ -226,6 +226,15 @@ var registeredUser = function(reqOrHashpass) {
 
 module.exports.registeredUser = registeredUser;
 
+module.exports.registerUser = function(hashpass, level, boardNames) {
+    return db.hset("registeredUsers", hashpass, JSON.stringify({
+        hashpass: hashpass,
+        level: level,
+        boardNames: boardNames,
+        createdAt: Tools.now().toISOString()
+    }));
+};
+
 var registeredUserLevel = function(reqOrHashpass) {
     return module.exports.registeredUser(reqOrHashpass).then(function(user) {
         if (!user)

@@ -187,6 +187,30 @@ var renderThread = function(model, board, req, json) {
     });
 };
 
+var renderCatalog = function(model, board, req, json) {
+    var promises = model.threads.map(function(thread) {
+        return renderPost(thread.opPost, board, req, thread.opPost);
+    });
+    return Promise.all(promises).then(function() {
+        model = merge.recursive(model, controller.headModel(board, req));
+        model = merge.recursive(model, controller.boardModel(board));
+        model.board.postingSpeed = postingSpeedString(board, model.lastPostNumber);
+        model.sortMode = req.query.sort || "date";
+        if (!json || json.translations)
+            model.tr = controller.translationsModel();
+        model.isSpecialThumbName = function(thumbName) {
+            return false; //TODO
+        };
+        model.specialThumbName = function(thumbName) {
+            return thumbName.replace("/", "_");
+        };
+        if (json)
+            return Promise.resolve(JSON.stringify(model));
+        else
+            return controller(req, "catalog", model);
+    });
+};
+
 router.get("/:boardName", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board) {
@@ -206,6 +230,36 @@ router.get("/:boardName", function(req, res) {
         }).catch(function(err) {
             res.send("Error: " + err);
             console.log(err.stack);
+        });
+    }
+});
+
+router.get("/:boardName/catalog.html", function(req, res) {
+    var board = Board.board(req.params.boardName);
+    if (!board) {
+        res.send("No such board: " + req.params.boardName);
+    } else {
+        return boardModel.getCatalog(board, req.hashpass, req.query.sort).then(function(model) {
+            return renderCatalog(model, board, req);
+        }).then(function(data) {
+            res.send(data);
+        }).catch(function(err) {
+            res.send("Error: " + err);
+        });
+    }
+});
+
+router.get("/:boardName/catalog.json", function(req, res) {
+    var board = Board.board(req.params.boardName);
+    if (!board) {
+        res.send("No such board: " + req.params.boardName);
+    } else {
+        boardModel.getCatalog(board, req.hashpass, req.query.sort).then(function(model) {
+            return renderCatalog(model, board, req, true);
+        }).then(function(data) {
+            res.send(data);
+        }).catch(function(err) {
+            res.send("Error: " + err);
         });
     }
 });

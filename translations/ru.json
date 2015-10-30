@@ -574,26 +574,22 @@
     "Reply count:": {
         "replyCountLabelText": {
             "value": "Ответов:"
-        },
-        "_obsolete": true
+        }
     },
     "Bump count": {
-        "sortingModeLabelText": {
+        "sortingModeBumpsLabelText": {
             "value": "Количеству бампов"
-        },
-        "_obsolete": true
+        }
     },
     "Creation date": {
-        "sortingModeLabelText": {
+        "sortingModeDateLabelText": {
             "value": "Дате создания"
-        },
-        "_obsolete": true
+        }
     },
     "Sort by:": {
         "sortingModeLabelText": {
             "value": "Сортировать по:"
-        },
-        "_obsolete": true
+        }
     },
     "RSS feed": {
         "boardRssLinkText": {
@@ -644,8 +640,7 @@
     "Last post date": {
         "sortingModeRecentLabelText": {
             "value": "Дате последнего поста"
-        },
-        "_obsolete": true
+        }
     },
     "Private captcha key.\nIs stored locally and does not appear anywhere in any HTML pages or other resources.": {
         "_default": {
@@ -1062,8 +1057,7 @@
     },
     "F.A.Q.": {
         "pageTitle": {
-            "value": "F.A.Q.",
-            "_obsolete": true
+            "value": "F.A.Q."
         },
         "toFaqPageText": {
             "value": "F.A.Q."
@@ -1124,8 +1118,7 @@
     },
     "Markup": {
         "pageTitle": {
-            "value": "Разметка",
-            "_obsolete": true
+            "value": "Разметка"
         },
         "toMarkupPageText": {
             "value": "Разметка"
@@ -1134,206 +1127,167 @@
     "bold text": {
         "boldText": {
             "value": "жирный текст"
-        },
-        "_obsolete": true
+        }
     },
     "Code markup": {
         "codeMarkup": {
             "value": "Разметка кода"
-        },
-        "_obsolete": true
+        }
     },
     "combined text": {
         "combinedText": {
             "value": "комбинированный текст"
-        },
-        "_obsolete": true
+        }
     },
     "italics": {
         "italics": {
             "value": "курсив"
-        },
-        "_obsolete": true
+        }
     },
     "first list item": {
         "listItem1": {
             "value": "первый элемент списка"
-        },
-        "_obsolete": true
+        }
     },
     "second list item": {
         "listItem2": {
             "value": "второй элемент списка"
-        },
-        "_obsolete": true
+        }
     },
     "third list item": {
         "listItem3": {
             "value": "третий элемент списка"
-        },
-        "_obsolete": true
+        }
     },
     "List markup": {
         "listMarkup": {
             "value": "Разметка списков"
-        },
-        "_obsolete": true
+        }
     },
     "spoiler": {
         "spoiler": {
             "value": "спойлер"
-        },
-        "_obsolete": true
+        }
     },
     "striked out text": {
         "strikedoutText": {
             "value": "зачеркнутый текст"
-        },
-        "_obsolete": true
+        }
     },
     "underlined text": {
         "underlinedText": {
             "value": "подчеркнутый текст"
-        },
-        "_obsolete": true
+        }
     },
     "Link to a post on another board": {
         "postBoardLinkDescription": {
             "value": "Ссылка на пост с другой доски"
-        },
-        "_obsolete": true
+        }
     },
     "Link to a post on the same board": {
         "postLinkDescription": {
             "value": "Ссылка на пост с текущей доски"
-        },
-        "_obsolete": true
+        }
     },
     "quotation": {
         "quotation": {
             "value": "цитирование"
-        },
-        "_obsolete": true
+        }
     },
     "Basic markup": {
         "basicMarkup": {
             "value": "Основы разметки"
-        },
-        "_obsolete": true
+        }
     },
     "Preformatted\ntext": {
         "preformattedText": {
             "value": "Преформатированный\nтекст"
-        },
-        "_obsolete": true
+        }
     },
     "tooltip": {
         "tooltip": {
             "value": "всплывающая подсказка"
-        },
-        "_obsolete": true
+        }
     },
     "text with tooltip": {
         "tooltipText": {
             "value": "текст со всплывающей подсказкой"
-        },
-        "_obsolete": true
+        }
     },
     "em dash": {
         "emDash": {
             "value": "длинное тире"
-        },
-        "_obsolete": true
+        }
     },
     "en dash": {
         "enDash": {
             "value": "среднее тире"
-        },
-        "_obsolete": true
+        }
     },
     "Link markup": {
         "linkMarkup": {
             "value": "Разметка ссылок"
-        },
-        "_obsolete": true
+        }
     },
     "Auto replacement": {
         "replacementMarkup": {
             "value": "Автозамена"
-        },
-        "_obsolete": true
+        }
     },
     "double hyphen": {
         "doubleHyphen": {
             "value": "двойной дефис"
-        },
-        "_obsolete": true
+        }
     },
     "quadriple hyphen": {
         "quadripleHyphen": {
             "value": "четырехкратный дефис"
-        },
-        "_obsolete": true
+        }
     },
     "subscript": {
         "subscriptText": {
             "value": "индекс"
-        },
-        "_obsolete": true
+        }
     },
     "superscript": {
         "superscriptText": {
             "value": "верхний индекс"
-        },
-        "_obsolete": true
+        }
     },
     "collapsible spoiler text": {
         "cspoilerText": {
             "value": "текст скрываемого спойлера"
-        },
-        "_obsolete": true
+        }
     },
     "collapsible spoiler title": {
         "cspoilerTitle": {
             "value": "заголовок скрываемого спойлера"
-        },
-        "_obsolete": true
+        }
     },
     "monospace font": {
         "monospace": {
             "value": "моноширинный шрифт"
-        },
-        "_obsolete": true
+        }
     },
     "no markup": {
         "nomarkup": {
             "value": "без разметки"
-        },
-        "_obsolete": true
-    },
-    "monospace \\`` font with escaped \\`` characters": {
-        "monospaceEscaped": {
-            "value": "моноширинный \\'' шрифт с экранированными \\'' символами"
-        },
-        "_obsolete": true
+        }
     },
     "no markup \\'' with escaped \\'' characters": {
         "nomarkupEscaped": {
             "value": "без разметки \\'' с экранированными \\'' символами"
-        },
-        "_obsolete": true
+        }
     },
     "striked out": {
         "strikedoutWord1": {
             "value": "зачеркнутое"
-        },
-        "_obsolete": true
+        }
     },
     "word": {
         "strikedoutWord2": {
             "value": "слово"
-        },
-        "_obsolete": true
+        }
     },
     "Thread number is null": {
         "description": {
@@ -1358,8 +1312,7 @@
     },
     "Playlist": {
         "pageTitle": {
-            "value": "Плей-лист",
-            "_obsolete": true
+            "value": "Плей-лист"
         },
         "toPlaylistPageText": {
             "value": "Плей-лист"
@@ -3714,12 +3667,6 @@
             "value": "Google reCAPTCHA"
         }
     },
-    "p./hour.": {
-        "postingSpeed": {
-            "value": "p./hour."
-        },
-        "_obsolete": true
-    },
     "files omitted:": {
         "omittedFilesText": {
             "value": "files omitted:"
@@ -3727,12 +3674,12 @@
     },
     "Log out": {
         "logoutText": {
-            "value": "Log out"
+            "value": "Разлогиниться"
         }
     },
     "Log in": {
         "loginText": {
-            "value": "Log in"
+            "value": "Залогиниться"
         }
     },
     "Previous thread on board/post in thread": {
@@ -3788,15 +3735,42 @@
     "ololord.js": {
         "pageTitle": {
             "value": "ololord.js"
-        },
-        "welcomeMessage": {
-            "value": "ololord.js",
-            "_obsolete": true
         }
     },
     "Go": {
         "goText": {
             "value": "Перейти"
+        }
+    },
+    "monospace \\`` font with escaped \\`` characters": {
+        "monospaceEscaped": {
+            "value": "моноширинный \\'' шрифт с экранированными \\'' символами"
+        },
+        "_obsolete": true
+    },
+    "logged in as administrator": {
+        "loginMessageText": {
+            "value": "залогинен в качестве администратора"
+        }
+    },
+    "logged in as moderator": {
+        "loginMessageText": {
+            "value": "залогинен в качестве модератора"
+        }
+    },
+    "logged in as user": {
+        "loginMessageText": {
+            "value": "залогинен в качестве пользователя"
+        }
+    },
+    "not registered": {
+        "loginMessageText": {
+            "value": "не зарегистрирован"
+        }
+    },
+    "monospace \\\\`` font with escaped \\\\`` characters": {
+        "monospaceEscaped": {
+            "value": "monospace \\\\`` font with escaped \\\\`` characters"
         }
     }
 }

@@ -198,3 +198,86 @@ module.exports.getThread = function(board, hashpass, number) {
         return Promise.resolve(c.model);
     });
 };
+
+module.exports.getCatalog = function(board, hashpass, sortMode) {
+    if (!(board instanceof Board))
+        return Promise.reject("Invalid board instance");
+    var c = {};
+    console.time("registeredUserLevel");
+    return Database.registeredUserLevel(hashpass).then(function(level) {
+        c.level = level;
+        console.timeEnd("registeredUserLevel");
+        console.time("threads");
+        return Database.getThreads(board.name, {
+            filterFunction: function(thread) {
+                if (!thread.options.draft)
+                    return true;
+                if (!thread.user.hashpass)
+                    return true;
+                if (thread.user.hashpass == hashpass)
+                    return true;
+                return Database.compareRegisteredUserLevels(thread.user.level, c.level) < 0;
+            }
+        });
+    }).then(function(threads) {
+        console.timeEnd("threads");
+        c.threads = threads;
+        console.time("threadOpPosts");
+        var promises = c.threads.map(function(thread) {
+            return Database.threadPosts(board.name, thread.number, {
+                limit: 1,
+                withFileInfos: true,
+                withReferences: true
+            }).then(function(posts) {
+                thread.opPost = posts[0];
+                return Promise.resolve();
+            });
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        console.timeEnd("threadOpPosts");
+        console.time("threadPostCounts");
+        var promises = c.threads.map(function(thread) {
+            return Database.threadPostCount(board.name, thread.number).then(function(postCount) {
+                thread.postCount = postCount;
+                return Promise.resolve();
+            });
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        console.timeEnd("threadPostCounts");
+        c.model = { threads: [] };
+        var sortFunction = Board.sortThreadsByDate;
+        switch ((sortMode || "date").toLowerCase()) {
+        case "recent":
+            sortFunction = Board.sortThreadsByCreationDate;
+            break;
+        case "bumps":
+            sortFunction = Board.sortThreadsByPostCount;
+            break;
+        default:
+            break;
+        }
+        c.threads.sort(sortFunction);
+        c.threads.forEach(function(thread) {
+            var threadModel = {
+                opPost: thread.opPost,
+                postCount: thread.postCount,
+                bumpLimit: board.bumpLimit,
+                postLimit: board.postLimit,
+                bumpLimitReached: (thread.postCount >= board.bumpLimit),
+                postLimitReached: (thread.postCount >= board.postLimit),
+                closed: thread.closed,
+                fixed: thread.fixed,
+                postingEnabled: (board.postingEnabled && !thread.closed)
+            };
+            c.model.threads.push(threadModel);
+        });
+        console.time("lastPostNumber");
+        return Database.lastPostNumber(board.name);
+    }).then(function(lastPostNumber) {
+        console.timeEnd("lastPostNumber");
+        c.model.lastPostNumber = lastPostNumber;
+        return Promise.resolve(c.model);
+    });;
+};

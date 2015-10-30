@@ -119,8 +119,9 @@ _installHandler("register-user", function() {
             + "Your choice: ");
     }).then(function(answer) {
         _boardNames = answer.split(/\s+/gi);
-        _password = Tools.toHashpass(_pwd);
-        if (!_password) {
+        if (_pwd.match(/^([0-9a-fA-F]){40}$/)) {
+            _password = _pwd;
+        } else {
             var sha1 = Crypto.createHash("sha1");
             sha1.update(_pwd);
             _password = sha1.digest("hex");
@@ -130,14 +131,7 @@ _installHandler("register-user", function() {
             if ("*" != boardName && !Tools.contains(availableBoardNames, boardName))
                 throw "Invalid board(s)";
         });
-        return Database.RegisteredUser.db.transaction(function(t) {
-            return Database.RegisteredUser.create({
-                hashpass: _password,
-                level: _level,
-                boardNames: _boardNames.join(","),
-                createdAt: new Date()
-            });
-        });
+        return Database.registerUser(_password, _level, _boardNames);
     }).then(function() {
         console.log("OK");
         rl.resume();

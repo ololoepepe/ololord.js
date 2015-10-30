@@ -34,6 +34,17 @@ controller = function(req, templateName, modelData) {
     baseModelData = merge.recursive(baseModelData, controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
     baseModelData.path = req.path;
+    if (baseModelData.user.loggedIn) {
+        if (Database.compareRegisteredUserLevels(baseModelData.user.level, "ADMIN") >= 0) {
+            baseModelData.loginMessageText = Tools.translate("logged in as administrator", "loginMessageText");
+        } else if (Database.compareRegisteredUserLevels(baseModelData.user.level, "MODER") >= 0) {
+            baseModelData.loginMessageText = Tools.translate("logged in as moderator", "loginMessageText");
+        } else if (Database.compareRegisteredUserLevels(baseModelData.user.level, "USER") >= 0) {
+            baseModelData.loginMessageText = Tools.translate("logged in as user", "loginMessageText");
+        } else {
+            baseModelData.loginMessageText = Tools.translate("not registered", "loginMessageText");
+        }
+    }
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
     baseModelData.formattedDate = function(date) {
@@ -442,6 +453,11 @@ controller.translationsModel = function() {
     translate("Update thread", "updateThreadText");
     translate("Auto update", "autoUpdateText");
     translate("Go", "goText");
+    translate("Sort by:", "sortingModeLabelText");
+    translate("Creation date", "sortingModeDateLabelText");
+    translate("Last post date", "sortingModeRecentLabelText");
+    translate("Bump count", "sortingModeBumpsLabelText");
+    translate("Reply count:", "replyCountLabelText");
     return { tr: tr };
 };
 

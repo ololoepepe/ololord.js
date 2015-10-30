@@ -1,0 +1,17 @@
+<span class="someName {{=it.deviceType}}">
+    {{? post.email}}
+        <a class="mailtoName" href="mailto:{{=post.email}}">{{? post.name}}{{!post.name}}{{??}}{{!it.board.defaultUserName}}{{?}}</a>
+    {{??}}
+        {{? !post.name}}
+            <span class="userName defaultUserName">{{!it.board.defaultUserName}}</span>
+        {{??}}
+            {{? it.compareRegisteredUserLevels(post.user.level, "ADMIN") >= 0}}
+                {{=post.name}}
+            {{?? it.compareRegisteredUserLevels(post.user.level, "MODER") >= 0}}
+                <span class="moderName">{{!post.name}}</span>
+            {{??}}
+                <span class="userName">{{!post.name}}</span>
+            {{?}}
+        {{?}}
+    {{?}}
+</span>

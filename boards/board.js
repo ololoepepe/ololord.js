@@ -524,6 +524,24 @@ Board.sortThreadsByDate = function(a, b) {
     }
 };
 
+Board.sortThreadsByCreationDate = function(a, b) {
+    if (a.createdAt < b.createdAt)
+        return -1;
+    else if (a.createdAt > b.createdAt)
+        return 1;
+    else
+        return 0;
+};
+
+Board.sortThreadsByPostCount = function(a, b) {
+    if (a.postCount > b.postCount)
+        return -1;
+    else if (a.postCount < b.postCount)
+        return 1;
+    else
+        return 0;
+};
+
 module.exports = Board;
 
 var Database = require("../helpers/database");

@@ -1,4 +1,5 @@
 var express = require("express");
+var FS = require("q-io/fs");
 
 var controller = require("../helpers/controller");
 
@@ -22,6 +23,14 @@ router.get("/board/:board.json", function(req, res) {
 router.get("/tr.json", function(req, res) {
     var model = controller.translationsModel();
     res.send(model);
+});
+
+router.get("/partials.json", function(req, res) {
+    FS.list(__dirname + "/../public/templates/partials").then(function(fileNames) {
+        res.send(fileNames.map(function(fileName) {
+            return fileName.split(".").shift();
+        }));
+    });
 });
 
 module.exports = router;

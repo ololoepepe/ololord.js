@@ -12,15 +12,11 @@
             target="_blank"><img class="buttonImage" src="/{{=it.site.pathPrefix}}img/settings.png"></a>]
     {{?}}
     {{? it.user.loggedIn}}
-        {{? it.user.loginMessageText && it.user.loginIconName}}
-            [<img src="/{{=it.site.pathPrefix}}img/{{=it.user.loginIconName}}" title="{{=it.user.loginMessageText}}"
-                  class="buttonImage">]
-        {{?}}
         <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/logout"
               enctype="application/x-www-form-urlencoded" class="inlineForm">
             <input type="hidden" name="source" value="{{=it.path}}" />
-            [<input type="image" name="submit" title="{{=it.tr.logoutText}}"
-                    src="/{{=it.site.pathPrefix}}img/logout.png" class="buttonImage" />]
+            [<input type="image" name="submit" src="/{{=it.site.pathPrefix}}img/logout.png" class="buttonImage"
+                    title="{{=it.tr.logoutText}}{{? it.loginMessageText}} [{{=it.loginMessageText}}]{{?}}" />]
         </form>
     {{??}}
         [<a href="/{{=it.site.pathPrefix}}login.html?source={{=it.path}}"><img src="/{{=it.site.pathPrefix}}img/login.png"
