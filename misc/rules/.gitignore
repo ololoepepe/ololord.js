@@ -1,8 +1,5 @@
 home/*
-board/*
 postform/*
 !home/rules.txt
-!board/rules.txt
-!board/rules.b.txt
 !postform/rules.txt
 !postform/rules.b.txt

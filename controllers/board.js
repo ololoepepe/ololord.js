@@ -137,6 +137,9 @@ var renderPage = function(model, board, req, json) {
         model.extraScripts = board.extraScripts;
         if (!json || json.translations)
             model.tr = controller.translationsModel();
+        return board.postformRules();
+    }).then(function(rules) {
+        model.postformRules = rules;
         model.isSpecialThumbName = function(thumbName) {
             return false; //TODO
         };
@@ -168,6 +171,9 @@ var renderThread = function(model, board, req, json) {
         model.extraScripts = board.extraScripts;
         if (!json || json.translations)
             model.tr = controller.translationsModel();
+        return board.postformRules();
+    }).then(function(rules) {
+        model.postformRules = rules;
         model.isSpecialThumbName = function(thumbName) {
             return false; //TODO
         };

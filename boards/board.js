@@ -275,6 +275,28 @@ var Board = function(name, title, options) {
     //
 };
 
+/*public*/ Board.prototype.postformRules = function() {
+    var c = {};
+    var _this = this;
+    return Tools.getRules("postform").then(function(rules) {
+        c.common = rules;
+        return Tools.getRules("postform", _this.name);
+    }).then(function(rules) {
+        c.specific = rules;
+        for (var i = c.specific.length - 1; i >= 0; --i) {
+            var rule = c.specific[i];
+            if ("#include all" == rule) {
+                Array.prototype.splice.apply(c.specific, [i, 1].concat(c.common));
+            } else if (/^#include\s+\d+$/.test(rule)) {
+                var n = +rule.replace(/#include\s+/, "");
+                if (n >= 0 && n < c.common.length)
+                    c.specific.splice(i, 1, c.common[n]);
+            }
+        };
+        return Promise.resolve((c.specific.length > 0) ? c.specific : c.common);
+    });
+};
+
 /*public*/ Board.prototype.generateFileName = function(file) {
     var base = Tools.now().valueOf();
     var ext = Path.extname(file.name);

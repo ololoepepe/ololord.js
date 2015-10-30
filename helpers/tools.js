@@ -324,8 +324,8 @@ var localeBasedFileName = function(fileName, locale) {
 };
 module.exports.localeBasedFileName = localeBasedFileName;
 
-module.exports.getRules = function(name, locale) {
-    var fileName = __dirname + "/../misc/rules/" + name + "/rules.txt";
+module.exports.getRules = function(name, infix, locale) {
+    var fileName = __dirname + "/../misc/rules/" + name + "/rules" + (infix ? ("." + infix) : "") + ".txt";
     return localeBasedFileName(fileName, locale).then(function(fileName) {
         if (!fileName)
             return null;
