@@ -27,6 +27,8 @@
                                                                                class="buttonImage"
                                                                                title="{{=it.tr.loginText}}"></a>]
     {{?}}
-    |
+    {{? "mobile" != it.deviceType}}
+        |
+    {{?}}
     {{#def.innerNavbar}}
 </div>
