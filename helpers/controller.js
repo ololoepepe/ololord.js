@@ -66,7 +66,19 @@ controller = function(req, templateName, modelData) {
     if (template)
         return f(template, baseModelData, modelData);
     return FS.read(__dirname + "/../views/" + templateName + ".jst").then(function(data) {
-        return Promise.resolve(dot.template(data, null, partials));
+        return Promise.resolve(dot.template(data, {
+            evaluate: /\{\{([\s\S]+?)\}\}/g,
+            interpolate: /\{\{=([\s\S]+?)\}\}/g,
+            encode: /\{\{!([\s\S]+?)\}\}/g,
+            use: /\{\{#([\s\S]+?)\}\}/g,
+            define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
+            conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
+            iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
+            varname: 'it',
+            strip: false,
+            append: true,
+            selfcontained: false
+        }, partials));
     }).then(function(template) {
         Cache.set("template/" + templateName, template);
         return f(template, baseModelData, modelData);

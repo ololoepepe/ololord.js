@@ -913,7 +913,19 @@ lord.getTemplate = function(templateName) {
         d.resolve(lord.templates[templateName]);
     var f = function() {
         $.ajax("/" + prefix + "templates/" + templateName + ".jst").then(function(result) {
-            var template = doT.template(result, null, lord.partials);
+            var template = doT.template(result, {
+                evaluate: /\{\{([\s\S]+?)\}\}/g,
+                interpolate: /\{\{=([\s\S]+?)\}\}/g,
+                encode: /\{\{!([\s\S]+?)\}\}/g,
+                use: /\{\{#([\s\S]+?)\}\}/g,
+                define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
+                conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
+                iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
+                varname: 'it',
+                strip: false,
+                append: true,
+                selfcontained: false
+            }, lord.partials);
             lord.templates[templateName] = template;
             d.resolve(template);
         });
