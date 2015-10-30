@@ -519,6 +519,14 @@ span.newPostCount {
     width: 70%;
 }
 
+.friendsBar {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 70%;
+}
+
 .navbar.navbarFrame {
     text-align: left;
     margin-left: 4px;
@@ -1073,10 +1081,15 @@ a.progressBlocking {
 
 .buttonImage {
     vertical-align: middle;
+    opacity: 0.65;
+}
+
+.buttonImage:hover {
+    opacity: 1;
 }
 
 .boardSelect {
-    width: 120px;
+    width: 80px;
 }
 
 .boardSelectForm {

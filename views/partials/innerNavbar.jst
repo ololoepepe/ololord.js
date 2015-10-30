@@ -13,7 +13,8 @@
             {{~}}
         </select>
     {{? it.settings.mode.name == "ascetic"}}
-        <input type="submit" value="{{=it.tr.goText}}" class="button" />
+        <input type="image" name="submit" title="{{=it.tr.goText}}"
+                   src="/{{=it.site.pathPrefix}}img/go.png" class="buttonImage" />
         </form>
     {{?}}
 {{??}}
