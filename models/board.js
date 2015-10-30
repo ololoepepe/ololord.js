@@ -247,10 +247,10 @@ module.exports.getCatalog = function(board, hashpass, sortMode) {
     }).then(function() {
         console.timeEnd("threadPostCounts");
         c.model = { threads: [] };
-        var sortFunction = Board.sortThreadsByDate;
+        var sortFunction = Board.sortThreadsByCreationDate;
         switch ((sortMode || "date").toLowerCase()) {
         case "recent":
-            sortFunction = Board.sortThreadsByCreationDate;
+            sortFunction = Board.sortThreadsByDate;
             break;
         case "bumps":
             sortFunction = Board.sortThreadsByPostCount;
