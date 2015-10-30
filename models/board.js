@@ -107,7 +107,8 @@ module.exports.getPage = function(board, hashpass, page) {
                 closed: thread.closed,
                 fixed: thread.fixed,
                 postingEnabled: (board.postingEnabled && !thread.closed),
-                omittedPosts: ((thread.postCount > board.maxLastPosts) ? (thread.postCount - board.maxLastPosts) : 0)
+                omittedPosts: ((thread.postCount > (board.maxLastPosts + 1))
+                    ? (thread.postCount - board.maxLastPosts - 1) : 0)
             };
             c.model.threads.push(threadModel);
         });

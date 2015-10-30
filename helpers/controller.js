@@ -92,7 +92,6 @@ controller.baseModel = function(req) {
             langNames[lang] = name;
         });
     }
-    var markupModes = [];
     return {
         site: {
             protocol: config("site.protocol", "http"),
@@ -138,7 +137,14 @@ controller.baseModel = function(req) {
             },
         ],
         locale: config("site.locale", "en"),
-        dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss")
+        dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss"),
+        supportedCaptchaEngines: Captcha.captchaIds().map(function(id) {
+            var captcha = Captcha.captcha(id);
+            return {
+                id: captcha.id,
+                title: captcha.title
+            };
+        })
     };
 };
 

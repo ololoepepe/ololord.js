@@ -78,7 +78,7 @@
                     </td>
                     <td>
                         <select name="captchaEngine" class="select">
-                            {{~it.board.supportedCaptchaEngines :engine}}
+                            {{~it.supportedCaptchaEngines :engine}}
                                 <option value="{{=engine.id}}"
                                         {{? engine.id == it.settings.captchaEngine.id}}selected="true"{{?}}>
                                     {{=engine.title}}

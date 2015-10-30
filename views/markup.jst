@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{#def.head}}
+<body class="{{=it.deviceType}}" {{#def.baseData}}>
+{{? it.customHeader}}
+    {{#def.customHeader}}
+{{?}}
+{{#def.toolbar}}
+<br />
+{{#def.searchAction}}
+<div class="theTitle">
+    <h1>
+        {{=it.title}}
+    </h1>
+</div>
+<div class="sectionHeader">
+    <h3>{{=it.tr.basicMarkup}}</h3>
+</div>
+<div class="rules">
+    **<b>{{=it.tr.boldText}}</b>**
+    <br />
+    __<b>{{=it.tr.boldText}}</b>__
+    <br />
+    [b]<b>{{=it.tr.boldText}}</b>[/b]
+    <br /><br />
+    *<i>{{=it.tr.italics}}</i>*
+    <br />
+    _<i>{{=it.tr.italics}}</i>_
+    <br />
+    ///<i>{{=it.tr.italics}}</i>///
+    <br />
+    [i]<i>{{=it.tr.italics}}</i>[/i]
+    <br /><br />
+    ---<s>{{=it.tr.strikedoutText}}</s>---
+    <br />
+    <s>{{=it.tr.strikedoutText}}</s>{{=it.strikedoutTextWakaba}}
+    <br />
+    [s]<s>{{=it.tr.strikedoutText}}</s>[/s]
+    <br /><br />
+    {{=it.tr.strikedoutWord1}} <s>{{=it.tr.strikedoutWord2}}</s>^W
+    <br /><br />
+    ***<u>{{=it.tr.underlinedText}}</u>***
+    <br />
+    ___<u>{{=it.tr.underlinedText}}</u>___
+    <br />
+    [u]<u>{{=it.tr.underlinedText}}</u>[/u]
+    <br /><br />
+    ``<font face="monospace">{{=it.tr.monospace}}</font>``
+    <br />
+    [m]<font face="monospace">{{=it.tr.monospace}}</font>[/m]
+    <br /><br />
+    ''[b]{{=it.tr.nomarkup}}[/b]''
+    <br />
+    [n]**{{=it.tr.nomarkup}}**[/n]
+    <br /><br />
+    ``<font face="monospace">{{=it.tr.monospaceEscaped}}</font>``
+    <br /><br />
+    ''[b]{{=it.tr.nomarkupEscaped}}[/b]''
+    <br /><br />
+    /--pre
+    <pre>{{=it.tr.preformattedText}}</pre>
+    \--
+    <br /><br />
+    [pre]
+    <pre>{{=it.tr.preformattedText}}</pre>
+    [/pre]
+    <br /><br />
+    %%<span class="spoiler">{{=it.tr.spoiler}}</span>%%
+    <br />
+    [spoiler]<span class="spoiler">{{=it.tr.spoiler}}</span>[/spoiler]
+    <br /><br />
+    %%%<span class="cspoiler"><span class="cspoilerTitle" onclick="lord.expandCollapseSpoiler(this);">Spoiler</span><span class="cspoilerBody" style="display: none;">{{=it.tr.cspoilerText}}</span></span>%%%
+    <br />
+    [cspoiler title="{{=it.tr.cspoilerTitle}}"]<span class="cspoiler"><span class="cspoilerTitle" title="Spoiler" onclick="lord.expandCollapseSpoiler(this);">{{=it.tr.cspoilerTitle}}</span><span class="cspoilerBody" style="display: none;">{{=it.tr.cspoilerText}}</span></span>[/cspoiler]
+    <br /><br />
+    {{=it.tr.tooltipText}}???"{{=it.tr.tooltip}}" —&gt;
+    <span class="tooltip" title="{{=it.tr.tooltip}}">{{=it.tr.tooltipText}}</span>
+    <br /><br />
+    [tooltip value="{{=it.tr.tooltip}}"]<span class="tooltip" title="{{=it.tr.tooltip}}">{{=it.tr.tooltipText}}</span>[/tooltip]
+    <br /><br />
+    %%_[b]<span class="spoiler"><i><b>{{=it.tr.combinedText}}</b></i></span>[/b]_%%
+    <br />
+    [spoiler][i]**<span class="spoiler"><i><b>{{=it.tr.combinedText}}</b></i></span>**[/i][/spoiler]
+    <br /><br />
+    <span class="quotation">&gt;{{=it.tr.quotation}}</span>
+    <br /><br />
+    [sub]<sub>{{=it.tr.subscript}}</sub>[/sub] (H<sub>2</sub>O)
+    <br /><br />
+    [sup]<sup>{{=it.tr.superscript}}</sup>[/sup] (x<sup>3</sup> + y<sup>2</sup>)
+</div>
+<div class="sectionHeader">
+    <h3>{{=it.tr.linkMarkup}}</h3>
+ </div>
+<div class="rules">
+    <a href="javascript:void(0);">&gt;&gt;1675284</a> {{=it.tr.postLinkDescription}}
+    <br /><br />
+    <a href="javascript:void(0);">&gt;&gt;/h/127154</a> {{=it.tr.postBoardLinkDescription}}
+    <br /><br />
+    example.com —&gt; <a href="http://example.com">example.com</a>
+    <br /><br />
+    example1.com, (example2.com) —&gt; <a href="http://example1.com,">example1.com,</a> (<a href="http://example2.com)">example2.com)</a>
+    <br /><br />
+    [url]example1.com[/url], ([url]example2.com[/url]) —&gt; <a href="http://example.com">example1.com</a>, (<a href="http://example.com">example2.com</a>)
+    <br /><br />
+    mailto:user@example.com —&gt; <a href="mailto:user@example.com">user@example.com</a>
+    <br /><br />
+    irc:#some_channel —&gt; <a href="irc:#some_channel">#some_channel</a>
+</div>
+<div class="sectionHeader">
+    <h3>{{=it.tr.replacementMarkup}}</h3>
+</div>
+<div class="rules">
+    -- ({{=it.tr.doubleHyphen}}) —&gt; – ({{=it.tr.enDash}})
+    <br /><br />
+    ---- ({{=it.tr.quadripleHyphen}}) —&gt; — ({{=it.tr.emDash}})
+</div>
+<div class="sectionHeader">
+    <h3>{{=it.tr.codeMarkup}}</h3>
+</div>
+<div class="rules">
+    /--code c++<br />static const int = 0;<br />\--
+    <br /><br />
+    [code lang=&quot;cpp&quot;]{{=it.codeToMarkup}}[/code]
+    <br /></br />
+    [c++]{{=it.codeToMarkup}}[/c++]
+    <br /><br />
+    {{=it.markedUpCode}}
+</div>
+<div class="sectionHeader">
+    <h3>{{=it.tr.listMarkup}}</h3>
+</div>
+<div class="rules">
+    <table>
+        <tr>
+            <td>
+                [ul type="disc"][li]{{=it.tr.listItem1}}[/li]
+                <br />[li]{{=it.tr.listItem2}}[/li]
+                <br />[li]{{=it.tr.listItem3}}[/li][/ul]
+            </td>
+            <td>
+                <ul type="disc">
+                    <li>{{=it.tr.listItem1}}</li>
+                    <li>{{=it.tr.listItem2}}</li>
+                    <li>{{=it.tr.listItem3}}</li>
+                </ul>
+             </td>
+        </tr>
+        <tr>
+             <td>
+                [ul type=circle]
+                <br />
+                [li]{{=it.tr.listItem1}}[/li]
+                <br />
+                [li]{{=it.tr.listItem2}}[/li]
+                <br />
+                [li]{{=it.tr.listItem3}}[/li]
+                <br />
+                [/ul]
+            </td>
+            <td>
+                <ul type="circle">
+                    <li>{{=it.tr.listItem1}}</li>
+                    <li>{{=it.tr.listItem2}}</li>
+                    <li>{{=it.tr.listItem3}}</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                [ul type=s]
+                <br />
+                [li]{{=it.tr.listItem1}}[/li]
+                <br />
+                [li]{{=it.tr.listItem2}}[/li]
+                <br />
+                [li]{{=it.tr.listItem3}}[/li]
+                <br />
+                [/ul]
+            </td>
+            <td>
+                <ul type="square">
+                    <li>{{=it.tr.listItem1}}</li>
+                    <li>{{=it.tr.listItem2}}</li>
+                    <li>{{=it.tr.listItem3}}</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                [ol]
+                <br />
+                [li value=1]{{=it.tr.listItem1}}[/li]
+                <br />
+                [li]{{=it.tr.listItem2}}[/li]
+                <br />
+                [li value=5]{{=it.tr.listItem3}}[/li]
+                <br />
+                [/ol]
+            </td>
+            <td>
+                <ol>
+                    <li value="1">{{=it.tr.listItem1}}</li>
+                    <li value="2">{{=it.tr.listItem2}}</li>
+                    <li value="5">{{=it.tr.listItem3}}</li>
+                </ol>
+            </td>
+        </tr>
+    </table>
+</div>
+{{? it.customFooter}}
+    {{#def.customFooter}}
+{{?}}
+</body>
+</html>

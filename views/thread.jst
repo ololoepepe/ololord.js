@@ -67,8 +67,10 @@
         {{#def.createAction}}
     {{~}}
 {{?}}
-<hr />
-{{#def.navbar}}
+{{? !it.settings.stickyToolbar}}
+    <hr />
+    {{#def.navbar}}
+{{?}}
 <a id="bottom"></a>
 {{? it.customFooter}}
     {{#def.customFooter}}
