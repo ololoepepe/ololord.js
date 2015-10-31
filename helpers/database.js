@@ -376,7 +376,7 @@ var processFiles = function(req, fields, files, transaction) {
     });
 };
 
-var createPost = function(req, fields, files, threadNumber, date) {
+var createPost = function(req, fields, files, transaction, threadNumber, date) {
     var board = Board.board(fields.board);
     if (!board)
         return Promise.reject("Invalid board");
@@ -475,6 +475,7 @@ var createPost = function(req, fields, files, threadNumber, date) {
                 password: password
             }
         };
+        transaction.postNumber = c.postNumber;
         return db.hset("posts", board.name + ":" + postNumber, JSON.stringify(c.post));
     }).then(function() {
         return db.sadd("threadPostNumbers:" + board.name + ":" + threadNumber, c.postNumber);
@@ -505,9 +506,10 @@ var createPost = function(req, fields, files, threadNumber, date) {
             return JSON.stringify(fileInfo);
         }));
     }).then(function() {
+        c.hashes = [];
         if (files.length < 1)
             return Promise.resolve();
-        return db.hmset("fileHashes", files.reduce(function(acc, fileInfo) {
+        c.hashes = files.reduce(function(acc, fileInfo) {
             acc[fileInfo.hash] = JSON.stringify({
                 name: fileInfo.name,
                 thumb: { name: fileInfo.thumb.name },
@@ -516,16 +518,27 @@ var createPost = function(req, fields, files, threadNumber, date) {
                 mimeType: fileInfo.mimeType,
                 rating: fileInfo.rating
             });
-        }), {});
+            return acc;
+        }, {});
+        return db.hmset("fileHashes", c.hashes);
     }).then(function() {
         var promises = [];
-        for (var word in Tools.indexPost({
+        Tools.forIn(c.hashes, function(_, hash) {
+            promises.push(db.sadd("fileHashesExtra:" + hash, JSON.stringify({
+                boardName: board.name,
+                postNumber: c.postNumber
+            })));
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        var promises = [];
+        Tools.forIn(Tools.indexPost({
             boardName: board.name,
             number: c.postNumber,
             rawText: rawText,
             subject: (fields.subject || null)
         }), function(index, word) {
-            promises.push(db.sadd("postSearchIndex:" + word, index));
+            promises.push(db.sadd("postSearchIndex:" + word, index[0]));
         });
         return Promise.all(promises);
     }).then(function() {
@@ -542,21 +555,94 @@ module.exports.createPost = function(req, fields, files, transaction) {
     if (isNaN(threadNumber) || threadNumber <= 0)
         return Promise.reject("Invalid thread number");
     return processFiles(req, fields, files, transaction).then(function(files) {
-        return createPost(req, fields, files);
+        return createPost(req, fields, files, transaction);
     });
 };
+
+var removePost = function(boardName, postNumber) {
+    var c = {};
+    return db.hdel("posts", boardName + ":" + postNumber).then(function() {
+        return db.del("referencedPosts:" + boardName + ":" + postNumber);
+    }).then(function() {
+        return db.del("referringPosts:" + boardName + ":" + postNumber);
+    }).then(function() {
+        return db.smembers("fileInfos:" + boardName + ":" + postNumber);
+    }).then(function(fileInfos) {
+        c.hashes = [];
+        c.paths = [];
+        fileInfos.forEach(function(fileInfo) {
+            if (!fileInfo)
+                return;
+            fileInfo = JSON.parse(fileInfo);
+            c.hashes.push(fileInfo.hash);
+            c.paths.push(__dirname + "/../public/" + boardName + "/src/" + fileInfo.name);
+            c.paths.push(__dirname + "/../public/" + boardName + "/thumb/" + fileInfo.thumb.name);
+        });
+        return db.del("fileInfos:" + boardName + ":" + postNumber);
+    }).then(function() {
+        var promises = c.hashes.map(function(hash) {
+            return db.srem("fileHashesExtra:" + hash, JSON.stringify({
+                boardName: boardName,
+                postNumber: postNumber
+            })).then(function() {
+                return db.smembers("fileHashesExtra:" + hash);
+            }).then(function(list) {
+                if (list && list.length > 0)
+                    return Promise.resolve();
+                return db.hdel("fileHashes", hash).then(function() {
+                    return db.del("fileHashesExtra:" + hash);
+                });
+            });
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        var promises = [];
+        Tools.forIn(Tools.indexPost({
+            boardName: boardName,
+            number: postNumber,
+            rawText: rawText,
+            subject: (fields.subject || null)
+        }), function(index, word) {
+            promises.push(db.srem("postSearchIndex:" + word, JSON.parse(index[0])));
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        var promises = c.paths.map(function(path) {
+            return FS.remove(path);
+        });
+        return Promise.all(promises);
+    });
+};
+
+module.exports.removePost = removePost;
 
 var removeThread = function(boardName, threadNumber, archived) {
     var key = (archived ? "archivedThreads:" : "threads:") + boardName;
     return db.hdel(key, threadNumber).then(function() {
         return db.hdel("threadUpdateTimes:" + boardName, threadNumber);
     }).then(function() {
+        return db.hset("threadsPlannedForDeletion:" + boardName + ":" + threadNumber, JSON.stringify({
+            boardName: boardName,
+            threadNumber: threadNumber
+        }));
+    }).then(function() {
         setTimeout(function() {
-            //TODO: remove posts, post files, etc.
+            var c = {};
+            db.smembers("threadPostNumbers:" + boardName + ":" + threadNumber).then(function(result) {
+                c.postNumbers = result;
+                return db.del("threadPostNumbers:" + boardName + ":" + threadNumber);
+            }).then(function() {
+                var promises = c.postNumbers.map(function(postNumber) {
+                    return removePost(boardName, postNumber);
+                });
+                return Promise.all(promises);
+            });
         }, 10000);
         return Promise.resolve();
     });
 };
+
+module.exports.removeThread = removeThread;
 
 module.exports.createThread = function(req, fields, files, transaction) {
     var board = Board.board(fields.board);
@@ -618,12 +704,13 @@ module.exports.createThread = function(req, fields, files, transaction) {
                 password: password
             }
         };
+        transaction.threadNumber = c.threadNumber;
         return db.hset("threads:" + board.name, c.threadNumber, JSON.stringify(c.thread));
     }).then(function() {
         return processFiles(req, fields, files, transaction);
     }).then(function(files) {
         c.files = files;
-        return createPost(req, fields, files, c.threadNumber, date);
+        return createPost(req, fields, files, transaction, c.threadNumber, date);
     }).then(function() {
         return c.thread;
     });
@@ -710,23 +797,25 @@ module.exports.initialize = function() {
     //return Lock.drop();
 };
 
-var Transaction = function(boardName) {
+var Transaction = function() {
     this.filePaths = [];
-    this.boardName = boardName;
+    this.board = null;
     this.postNumber = 0;
     this.threadNumber = 0;
-    this.referencedPosts = [];
-    this.referringPosts = [];
 };
 
 Transaction.prototype.rollback = function() {
     this.filePaths.forEach(function(path) {
-        try {
-            FSSync.unlink(path);
-        } catch (err) {
-            //
-        }
+        FS.exists(path).then(function(exists) {
+            if (!exists)
+                return;
+            FS.remove(path);
+        });
     });
+    if (this.threadNumber > 0)
+        removeThread(this.board.name, this.threadNumber);
+    if (this.postNumber > 0)
+        removePost(this.board.name, this.postNumber);
 };
 
 module.exports.Transaction = Transaction;
@@ -841,6 +930,83 @@ module.exports.generateRss = function() {
                 cdata: true
             });
             rss[boardName] = builder.buildObject(doc);
+        });
+    });
+};
+
+var toMap = function(index, boardName) {
+    if (!index || index.length < 1)
+        return {};
+    var map = {};
+    index.forEach(function(post) {
+        post = JSON.parse(post);
+        if (boardName && post.boardName != boardName)
+            return;
+        map[post.boardName + ":" + post.postNumber + ":" + post.source] = post;
+    });
+    return map;
+};
+
+var findPhrase = function(phrase, boardName) {
+    var promises = Tools.getWords(phrase).map(function(word) {
+        return db.smembers("postSearchIndex:" + word.word);
+    });
+    return Promise.all(promises).then(function(results) {
+        if (results.length < 1)
+            return {};
+        var first = toMap(results[0], boardName);
+        for (var i = 1; i < results.length; ++i) {
+            var next = toMap(results[i]);
+            for (var key in first) {
+                if (!first.hasOwnProperty(key))
+                    continue;
+                if (!next.hasOwnProperty(key)) {
+                    delete first[key];
+                    continue;
+                }
+                var firstPost = first[key];
+                var nextPost = next[key];
+                ++firstPost.position;
+                if (nextPost.position != firstPost.position)
+                    delete first[key];
+            }
+        }
+        return first;
+    });
+};
+
+module.exports.findPosts = function(query, boardName) {
+    var c = {};
+    var promises = query.possiblePhrases.map(function(phrase) {
+        return findPhrase(phrase, boardName).then(function(m) {
+            c.map = Tools.sum(c.map || {}, m);
+        });
+    });
+    return Promise.all(promises).then(function() {
+        var promises = query.requiredPhrases.map(function(phrase) {
+            return findPhrase(phrase, boardName).then(function(m) {
+                c.map = Tools.intersection(c.map, m);
+            });
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        var promises = query.excludedPhrases.map(function(phrase) {
+            return findPhrase(phrase, boardName).then(function(m) {
+                c.map = Tools.complement(c.map, m);
+            });
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        var keys = [];
+        Tools.forIn(c.map, function(post) {
+            keys.push(post.boardName + ":" + post.postNumber);
+        });
+        if (keys.length < 1)
+            return Promise.resolve([]);
+        return db.hmget("posts", keys);
+    }).then(function(posts) {
+        return posts.map(function(post) {
+            return JSON.parse(post);
         });
     });
 };

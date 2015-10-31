@@ -9,7 +9,7 @@ var router = express.Router();
 router.get("/", function(req, res) {
     var model = {};
     model.title = Tools.translate("ololord.js", "pageTitle");
-    return controller.customContent(req, "home").then(function(customContent) {
+    controller.customContent(req, "home").then(function(customContent) {
         model.customContent = customContent;
         return Tools.getRules("home");
     }).then(function(rules) {

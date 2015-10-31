@@ -8,7 +8,7 @@ var router = express.Router();
 router.get("/faq.html", function(req, res) {
     var model = {};
     model.title = Tools.translate("F.A.Q.", "pageTitle");
-    return controller.customContent(req, "faq").then(function(customContent) {
+    controller.customContent(req, "faq").then(function(customContent) {
         model.faqContent = customContent;
         return controller(req, "faq", model);
     }).then(function(data) {

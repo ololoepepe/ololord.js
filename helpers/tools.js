@@ -3,6 +3,7 @@ var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
+var merge = require("merge");
 var Path = require("path");
 var Util = require("util");
 var XRegExp = require("xregexp");
@@ -76,6 +77,18 @@ module.exports.contains = function(s, subs) {
     }
     return false;
 };
+
+var hasOwnProperties = function(obj) {
+    if (!obj)
+        return false;
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x))
+            return true;
+    }
+    return false;
+};
+
+module.exports.hasOwnProperties = hasOwnProperties;
 
 module.exports.replace = function(where, what, withWhat) {
     if (typeof where != "string" || (typeof what != "string" && !(what instanceof RegExp)) || typeof withWhat != "string")
@@ -277,6 +290,8 @@ var getWords = function(text) {
     return words;
 };
 
+module.exports.getWords = getWords;
+
 module.exports.indexPost = function(post, wordIndex) {
     if (!wordIndex)
         wordIndex = {};
@@ -295,6 +310,28 @@ module.exports.indexPost = function(post, wordIndex) {
         }
     });
     return wordIndex;
+};
+
+module.exports.complement = function(map1, map2) {
+    var map = {};
+    forIn(map1, function(value, key) {
+        if (!map2.hasOwnProperty(key))
+            map[key] = value;
+    });
+    return map;
+};
+
+module.exports.intersection = function(map1, map2) {
+    var map = {};
+    forIn(map1, function(value, key) {
+        if (map2.hasOwnProperty(key))
+            map[key] = value;
+    });
+    return hasOwnProperties(map1) ? map : map2;
+}
+
+module.exports.sum = function(map1, map2) {
+    return merge.recursive(map1, map2);
 };
 
 var localeBasedFileName = function(fileName, locale) {

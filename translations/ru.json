@@ -1344,8 +1344,7 @@
     "Search results": {
         "resultsMessage": {
             "value": "Результаты поиска"
-        },
-        "_obsolete": true
+        }
     },
     "Nothing found": {
         "nothingFoundMessage": {

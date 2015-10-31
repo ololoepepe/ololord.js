@@ -56,7 +56,7 @@ router.get("/markup.html", function(req, res) {
     });
     var result = Highlight.highlight("cpp", model.codeToMarkup, true);
     model.markedUpCode = "<div class=\"codeBlock cpp hljs\">" + Highlight.fixMarkup(result.value) + "</div>";
-    return controller(req, "markup", model).then(function(data) {
+    controller(req, "markup", model).then(function(data) {
         res.send(data);
     }).catch(function(err) {
         res.send("Error: " + err);

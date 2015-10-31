@@ -8,6 +8,7 @@ router.use("/", require("./faq"));
 router.use("/", require("./login"));
 router.use("/", require("./markup"));
 router.use("/", require("./playlist"));
+router.use("/", require("./search"));
 
 router.use("/misc", require("./misc"));
 
