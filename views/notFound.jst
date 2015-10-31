@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{#def.head}}
+<body class="{{=it.deviceType}}" {{#def.baseData}}>
+{{? it.customHeader}}
+    {{#def.customHeader}}
+{{?}}
+{{#def.toolbar}}
+<br />
+{{#def.searchAction}}
+<div class="theTitle">
+    <h1>{{=it.notFoundMessage}}</h1>
+</div>
+{{? it.imageFileName}}
+    <div class="theImage">
+        <img src="/{{=it.site.pathPrefix}}img/404/{{=it.imageFileName}}">
+    </div>
+{{?}}
+{{? it.customFooter}}
+    {{#def.customFooter}}
+{{?}}
+</body>
+</html>

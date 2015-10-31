@@ -13,7 +13,7 @@ router.get("/login.html", function(req, res) {
     controller(req, "login", model).then(function(data) {
         res.send(data);
     }).catch(function(err) {
-        res.send("Error: " + err);
+        controller.error(req, res, err);
     });
 });
 

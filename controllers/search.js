@@ -17,10 +17,18 @@ router.get("/search.html", function(req, res) {
         boardName = "";
     model.searchQuery = query;
     model.searchBoard = boardName;
+    model.searchPage = true;
+    var phrases = Tools.splitCommand(query);
+    if (!phrases || !phrases.command) {
+        model.error = true;
+        model.errorMessage = Tools.translate("Invalid search query", "error");
+        return controller(req, "search", model).then(function(data) {
+            res.send(data);
+        }).catch(function(err) {
+            controller.error(req, res, err);
+        });
+    }
     Promise.resolve().then(function() {
-        var phrases = Tools.splitCommand(query);
-        if (!phrases)
-            return Promise.reject(Tools.translate("Invalid search query", "error"));
         phrases = [phrases.command].concat(phrases.arguments);
         query = {
             requiredPhrases: [],
@@ -65,8 +73,7 @@ router.get("/search.html", function(req, res) {
     }).then(function(data) {
         res.send(data);
     }).catch(function(err) {
-        res.send("Error: " + err);
-        console.log(err.stack);
+        controller.error(req, res, err);
     });
 });
 

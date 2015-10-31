@@ -3,7 +3,7 @@
           class="inlineForm">
         <input type="text" class="input" maxlength="{{=it.maxSearchQueryLength}}" name="query" size="43"
                onkeypress="lord.searchKeyPress(event);" placeholder="{{=it.tr.searchInputPlaceholder}}"
-               value="{{? it.searchQuery}}{{=it.searchQuery}}{{?}}" />
+               value="{{? it.searchQuery}}{{=it.searchQuery}}{{?}}" {{? it.searchPage}}autofocus="true"{{?}} />
         <select name="board" class="select">
             <option value="*" {{? !it.searchBoard}}selected="true"{{?}}>[*] {{=it.tr.allBoardsText}}</option>
             {{~it.boards :brd}}

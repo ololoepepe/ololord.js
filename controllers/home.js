@@ -58,8 +58,7 @@ router.get("/", function(req, res) {
     }).then(function(data) {
         res.send(data);
     }).catch(function(err) {
-        res.send("Error: " + err);
-        console.log(err.stack);
+        controller.error(req, res, err);
     });
 });
 

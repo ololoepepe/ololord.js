@@ -9,10 +9,3 @@ tools/*
 !tools/geolocation.js
 tmp/*
 !tmp/.placeholder
-public/*
-!public/css
-!public/img
-!public/js
-!public/video
-!public/templates
-!public/.gitignore

@@ -11,8 +11,7 @@ router.get("/playlist.html", function(req, res) {
     controller(req, "playlist", model).then(function(data) {
         res.send(data);
     }).catch(function(err) {
-        res.send("Error: " + err);
-        console.log(err.stack);
+        controller.error(req, res, err);
     });
 });
 

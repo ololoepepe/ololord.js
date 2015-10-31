@@ -28,10 +28,6 @@ db.hmget = function(key, hashes) {
     return db.tmp_hmget.apply(db, [key].concat(hashes));
 };
 
-//var Lock = require("./then-redis-lock")(db);
-
-//module.exports.Lock = Lock;
-
 var rss = {};
 
 Object.defineProperty(module.exports, "rss", {
@@ -54,7 +50,7 @@ Object.defineProperty(module.exports, "RegisteredUserLevels", { value: Registere
 
 var getThreads = function(boardName, options) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board name");
+        return Promise.reject("Invalid board");
     var opts = (typeof options == "object");
     var c = {};
     var key = ((options && options.archived) ? "archivedThreads" : "threads") + ":" + boardName;
@@ -106,9 +102,9 @@ module.exports.getThreads = getThreads;
 
 var threadPosts = function(boardName, threadNumber, options) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board name");
+        return Promise.reject("Invalid board");
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread number");
+        return Promise.reject("Invalid thread");
     var opts = (typeof options == "object");
     var filter = opts && (typeof options.filterFunction == "function");
     var limit = (opts && !isNaN(options.limit) && options.limit > 0) ? options.limit : 0; //NOTE: 0 means no limit
@@ -185,9 +181,9 @@ module.exports.threadPosts = threadPosts;
 
 module.exports.getPost = function(boardName, postNumber, options) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board name");
+        return Promise.reject("Invalid board");
     if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject("Invalid post number");
+        return Promise.reject("Invalid post");
     var opts = (typeof options == "object");
     var c = {};
     var key = boardName + ":" + postNumber;
@@ -222,9 +218,9 @@ module.exports.getPost = function(boardName, postNumber, options) {
 
 module.exports.threadPostCount = function(boardName, threadNumber) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board name");
+        return Promise.reject("Invalid board");
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid threadNumber");
+        return Promise.reject("Invalid thread");
     return db.scard("threadPostNumbers:" + boardName + ":" + threadNumber);
 };
 
@@ -288,7 +284,7 @@ module.exports.moderOnBoard = function(reqOrHashpass, boardName1, boardName2) {
 
 var lastPostNumber = function(boardName) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board name");
+        return Promise.reject("Invalid board");
     return db.hget("postCounters", boardName).then(function(number) {
         if (!number)
             return 0;
@@ -300,7 +296,7 @@ module.exports.lastPostNumber = lastPostNumber;
 
 var nextPostNumber = function(boardName) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board name");
+        return Promise.reject("Invalid board");
     return db.hincrby("postCounters", boardName, 1).then(function(number) {
         if (!number)
             return 0;
@@ -553,7 +549,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
 module.exports.createPost = function(req, fields, files, transaction) {
     var threadNumber = +fields.thread;
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread number");
+        return Promise.reject("Invalid thread");
     return processFiles(req, fields, files, transaction).then(function(files) {
         return createPost(req, fields, files, transaction);
     });
@@ -792,11 +788,6 @@ var getGeolocationInfo = function(ip) {
     });
 };
 
-module.exports.initialize = function() {
-    return Promise.resolve();
-    //return Lock.drop();
-};
-
 var Transaction = function() {
     this.filePaths = [];
     this.board = null;
@@ -1008,5 +999,34 @@ module.exports.findPosts = function(query, boardName) {
         return posts.map(function(post) {
             return JSON.parse(post);
         });
+    });
+};
+
+
+module.exports.getUserCaptchaQuota = function(boardName, userIp) {
+    var board = Board.board(boardName);
+    if (!board)
+        return Promise.reject("Invalid board");
+    return db.hget("captchaQuotas", boardName + ":" + userIp);
+};
+
+module.exports.captchaSolved = function(boardName, userIp) {
+    var board = Board.board(boardName);
+    if (!board)
+        return Promise.reject("Invalid board");
+    var quota = board.captchaQuota;
+    if (quota < 1)
+        return Promise.resolve(0);
+    return db.hincrby("captchaQuotas", boardName + ":" + userIp, quota);
+};
+
+module.exports.captchaUsed = function(boardName, userIp) {
+    var board = Board.board(boardName);
+    if (!board)
+        return Promise.reject("Invalid board");
+    return db.hincrby("captchaQuotas", boardName + ":" + userIp, -1).then(function(quota) {
+        if (qouta < 0)
+            return db.hset("captchaQuotas", boardName + ":" + userIp, 0);
+        return (quota < 0) ? 0 : quota;
     });
 };

@@ -12,13 +12,10 @@ module.exports.getPage = function(board, hashpass, page) {
         return Promise.reject("Invalid board instance");
     page = +(page || 0);
     if (isNaN(page) || page < 0)
-        return Promise.reject("Invalid page number");
+        return Promise.reject(404);
     var c = {};
-    console.time("registeredUserLevel");
     return Database.registeredUserLevel(hashpass).then(function(level) {
         c.level = level;
-        console.timeEnd("registeredUserLevel");
-        console.time("threads");
         return Database.getThreads(board.name, {
             filterFunction: function(thread) {
                 if (!thread.options.draft)
@@ -31,17 +28,15 @@ module.exports.getPage = function(board, hashpass, page) {
             }
         });
     }).then(function(threads) {
-        console.timeEnd("threads");
         c.threads = threads;
         c.threads.sort(Board.sortThreadsByDate);
         c.pageCount = Math.ceil(c.threads.length / board.threadsPerPage);
         if (!c.pageCount)
             c.pageCount = 1;
         if (page >= c.pageCount)
-            return Promise.reject("Not found");
+            return Promise.reject(404);
         var start = page * board.threadsPerPage;
         c.threads = c.threads.slice(start, start + board.threadsPerPage);
-        console.time("threadOpPosts");
         var promises = c.threads.map(function(thread) {
             return Database.threadPosts(board.name, thread.number, {
                 limit: 1,
@@ -54,8 +49,6 @@ module.exports.getPage = function(board, hashpass, page) {
         });
         return Promise.all(promises);
     }).then(function() {
-        console.timeEnd("threadOpPosts");
-        console.time("threadLastPosts");
         var promises = c.threads.map(function(thread) {
             return Database.threadPosts(board.name, thread.number, {
                 limit: board.maxLastPosts,
@@ -80,8 +73,6 @@ module.exports.getPage = function(board, hashpass, page) {
         });
         return Promise.all(promises);
     }).then(function() {
-        console.timeEnd("threadLastPosts");
-        console.time("threadPostCounts");
         var promises = c.threads.map(function(thread) {
             return Database.threadPostCount(board.name, thread.number).then(function(postCount) {
                 thread.postCount = postCount;
@@ -90,7 +81,6 @@ module.exports.getPage = function(board, hashpass, page) {
         });
         return Promise.all(promises);
     }).then(function() {
-        console.timeEnd("threadPostCounts");
         c.model = {
             threads: [],
             pageCount: c.pageCount
@@ -112,10 +102,8 @@ module.exports.getPage = function(board, hashpass, page) {
             };
             c.model.threads.push(threadModel);
         });
-        console.time("lastPostNumber");
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
-        console.timeEnd("lastPostNumber");
         c.model.lastPostNumber = lastPostNumber;
         return Promise.resolve(c.model);
     });
@@ -126,13 +114,10 @@ module.exports.getThread = function(board, hashpass, number) {
         return Promise.reject("Invalid board instance");
     number = +(number || 0);
     if (isNaN(number) || number < 1)
-        return Promise.reject("Invalid thread number");
+        return Promise.reject("Invalid thread");
     var c = {};
-    console.time("registeredUserLevel");
     return Database.registeredUserLevel(hashpass).then(function(level) {
         c.level = level;
-        console.timeEnd("registeredUserLevel");
-        console.time("thread");
         return Database.getThreads(board.name, {
             limit: 1,
             withPostNumbers: 1,
@@ -149,11 +134,9 @@ module.exports.getThread = function(board, hashpass, number) {
             }
         });
     }).then(function(threads) {
-        console.timeEnd("thread");
         if (threads.length != 1)
-            return Promise.reject("No such thread");
+            return Promise.reject(404);
         c.thread = threads[0];
-        console.time("posts");
         return Database.threadPosts(board.name, c.thread.number, {
             withFileInfos: true,
             withReferences: true,
@@ -168,13 +151,10 @@ module.exports.getThread = function(board, hashpass, number) {
             }
         });
     }).then(function(posts) {
-        console.timeEnd("posts");
         c.opPost = posts.splice(0, 1)[0];
         c.posts = posts;
-        console.time("threadPostCount");
         return Database.threadPostCount(board.name, c.thread.number);
     }).then(function(postCount) {
-        console.time("threadPostCount");
         c.model = {};
         var threadModel = {
             number: c.thread.number,
@@ -190,10 +170,8 @@ module.exports.getThread = function(board, hashpass, number) {
             posts: c.posts
         };
         c.model.thread = threadModel;
-        console.time("lastPostNumber");
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
-        console.timeEnd("lastPostNumber");
         c.model.lastPostNumber = lastPostNumber;
         return Promise.resolve(c.model);
     });
@@ -203,11 +181,8 @@ module.exports.getCatalog = function(board, hashpass, sortMode) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     var c = {};
-    console.time("registeredUserLevel");
     return Database.registeredUserLevel(hashpass).then(function(level) {
         c.level = level;
-        console.timeEnd("registeredUserLevel");
-        console.time("threads");
         return Database.getThreads(board.name, {
             filterFunction: function(thread) {
                 if (!thread.options.draft)
@@ -220,9 +195,7 @@ module.exports.getCatalog = function(board, hashpass, sortMode) {
             }
         });
     }).then(function(threads) {
-        console.timeEnd("threads");
         c.threads = threads;
-        console.time("threadOpPosts");
         var promises = c.threads.map(function(thread) {
             return Database.threadPosts(board.name, thread.number, {
                 limit: 1,
@@ -235,8 +208,6 @@ module.exports.getCatalog = function(board, hashpass, sortMode) {
         });
         return Promise.all(promises);
     }).then(function() {
-        console.timeEnd("threadOpPosts");
-        console.time("threadPostCounts");
         var promises = c.threads.map(function(thread) {
             return Database.threadPostCount(board.name, thread.number).then(function(postCount) {
                 thread.postCount = postCount;
@@ -245,7 +216,6 @@ module.exports.getCatalog = function(board, hashpass, sortMode) {
         });
         return Promise.all(promises);
     }).then(function() {
-        console.timeEnd("threadPostCounts");
         c.model = { threads: [] };
         var sortFunction = Board.sortThreadsByCreationDate;
         switch ((sortMode || "date").toLowerCase()) {
@@ -273,10 +243,8 @@ module.exports.getCatalog = function(board, hashpass, sortMode) {
             };
             c.model.threads.push(threadModel);
         });
-        console.time("lastPostNumber");
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
-        console.timeEnd("lastPostNumber");
         c.model.lastPostNumber = lastPostNumber;
         return Promise.resolve(c.model);
     });;

@@ -6,6 +6,7 @@ var OS = require("os");
 var rimraf = require("rimraf");
 
 var config = require("./helpers/config");
+var controller = require("./helpers/controller");
 var Database = require("./helpers/database");
 var Tools = require("./helpers/tools");
 
@@ -45,14 +46,15 @@ var spawnCluster = function() {
         app.use(device.capture());
         app.use(require("./middlewares"));
         app.use(require("./controllers"));
+        app.use("*", function(req, res) {
+            controller.notFound(req, res);
+        });
 
         process.on("exit", function(){
             rimraf.sync(__dirname + "/cache/" + process.pid);
         });
 
-        Database.initialize().then(function() {
-            return controller.initialize();
-        }).then(function() {
+        controller.initialize().then(function() {
             if (config("server.rss.enabled", true)) {
                 Database.generateRss();
                 setInterval(function() {
@@ -77,24 +79,6 @@ var spawnCluster = function() {
 };
 
 if (cluster.isMaster) {
-    //
-    /*var markup = require("./helpers/markup");
-    markup("b", "``bg``ggg``ggggg``", {
-        markupModes: []
-    }).then(function() {
-        console.time("xxx");
-        return markup("b", "[code lang=c]int x = 0;[/code] >>12088", {
-            //markupModes: []
-        });
-    }).then(function(result) {
-        console.timeEnd("xxx");
-        console.log(result);
-        process.exit(0);
-    }).catch(function(err) {
-        console.log(err);
-        process.exit(0);
-    });*/
-    //
     console.log("Spawning workers, please, wait...");
     spawnCluster();
     var ready = 0;

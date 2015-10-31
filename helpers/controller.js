@@ -6,6 +6,7 @@ var merge = require("merge");
 var moment = require("moment");
 var Path = require("path");
 var promisify = require("promisify-node");
+var random = require("random-js")();
 var Util = require("util");
 
 var Board = require("../boards/board");
@@ -97,6 +98,70 @@ controller = function(req, templateName, modelData) {
 };
 
 controller.customContent = customContent;
+
+controller.error = function(req, res, error, ajax) {
+    if (!ajax && Util.isNumber(error) && 404 == error)
+        return controller.notFound(req, res);
+    var f = function(error) {
+        var model = {};
+        model.title = Tools.translate("Error", "pageTitle");
+        if (Util.isError(error)) {
+            if (Tools.contains(process.argv.slice(2), "--dev-mode"))
+                console.log(error.stack);
+            model.errorMessage = Tools.translate("Internal error", "errorMessage");
+            model.errorDescription = error.message;
+        } else if (Util.isObject(error) && error.error) {
+            model.errorMesage = error.description ? error.error : Tools.translate("Error", "errorMessage");
+            model.errorDescription = error.description || error.error;
+        } else {
+            model.errorMesage = Tools.translate("Error", "errorMessage");
+            model.errorDescription = (error && Util.isString(error)) ? error : "";
+        }
+        return model;
+    };
+    var g = function(error) {
+        try {
+            res.send(f(error));
+        } catch (err) {
+            return Promise.reject(err);
+        }
+        return Promise.resolve();
+    };
+    return ajax ? g(error) : controller(req, "error", f(error)).then(function(data) {
+        res.send(data);
+    }).catch(g);
+};
+
+controller.notFound = function(req, res) {
+    var model = {};
+    model.title = Tools.translate("Error 404", "pageTitle");
+    model.notFoundMessage = Tools.translate("Page or file not found", "notFoundMessage");
+    var path = __dirname + "/../public/img/404";
+    return FS.list(path).then(function(fileNames) {
+        var promises = fileNames.map(function(fileName) {
+            return FS.stat(path + "/" + fileName).then(function(stats) {
+                return {
+                    fileName: fileName,
+                    stats: stats
+                };
+            });
+        });
+        return Promise.all(promises);
+    }).then(function(results) {
+        var fileNames = results.filter(function(result) {
+            return result.stats.isFile() && result.fileName != ".placeholder";
+        }).map(function(result) {
+            return result.fileName;
+        });
+        if (fileNames.length > 0)
+            model.imageFileName = fileNames[random.integer(0, fileNames.length - 1)];
+        return controller(req, "notFound", model);
+    }).then(function(data) {
+        res.send(data);
+    }).catch(function(err) {
+        controller.error(req, res, err);
+    });
+};
 
 controller.baseModel = function(req) {
     if (!langNames) {

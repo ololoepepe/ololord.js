@@ -219,135 +219,114 @@ var renderCatalog = function(model, board, req, json) {
 
 router.get("/:boardName", function(req, res) {
     var board = Board.board(req.params.boardName);
-    if (!board) {
-        res.send("No such board: " + req.params.boardName);
-    } else {
-        board.renderBoardPage(req, res).then(function(result) {
-            if (result)
-                return;
-            return boardModel.getPage(board, req.hashpass).then(function(model) {
-                console.time("render");
-                model.currentPage = 0;
-                return renderPage(model, board, req);
-            }).then(function(data) {
-                console.timeEnd("render");
-                res.send(data);
-            });
-        }).catch(function(err) {
-            res.send("Error: " + err);
-            console.log(err.stack);
+    if (!board)
+        return controller.error(req, res, 404);
+    board.renderBoardPage(req, res).then(function(result) {
+        if (result)
+            return;
+        return boardModel.getPage(board, req.hashpass).then(function(model) {
+            model.currentPage = 0;
+            return renderPage(model, board, req);
+        }).then(function(data) {
+            res.send(data);
         });
-    }
+    }).catch(function(err) {
+        controller.error(req, res, err);
+    });
 });
 
 router.get("/:boardName/catalog.html", function(req, res) {
     var board = Board.board(req.params.boardName);
-    if (!board) {
-        res.send("No such board: " + req.params.boardName);
-    } else {
-        return boardModel.getCatalog(board, req.hashpass, req.query.sort).then(function(model) {
-            return renderCatalog(model, board, req);
-        }).then(function(data) {
-            res.send(data);
-        }).catch(function(err) {
-            res.send("Error: " + err);
-        });
-    }
+    if (!board)
+        return controller.error(req, res, 404);
+    return boardModel.getCatalog(board, req.hashpass, req.query.sort).then(function(model) {
+        return renderCatalog(model, board, req);
+    }).then(function(data) {
+        res.send(data);
+    }).catch(function(err) {
+        controller.error(req, res, err);
+    });
 });
 
 router.get("/:boardName/catalog.json", function(req, res) {
     var board = Board.board(req.params.boardName);
-    if (!board) {
-        res.send("No such board: " + req.params.boardName);
-    } else {
-        boardModel.getCatalog(board, req.hashpass, req.query.sort).then(function(model) {
-            return renderCatalog(model, board, req, true);
-        }).then(function(data) {
-            res.send(data);
-        }).catch(function(err) {
-            res.send("Error: " + err);
-        });
-    }
+    if (!board)
+        return controller.error(req, res, 404, true);
+    boardModel.getCatalog(board, req.hashpass, req.query.sort).then(function(model) {
+        return renderCatalog(model, board, req, true);
+    }).then(function(data) {
+        res.send(data);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
 });
 
 router.get("/:boardName/rss.xml", function(req, res) {
     var board = Board.board(req.params.boardName);
-    if (!board) {
-        res.send("No such board: " + req.params.boardName);
-    } else {
-        res.send(Database.rss[board.name]);
-    }
+    if (!board)
+        return controller.error(req, res, 404);
+    res.send(Database.rss[board.name]);
 });
 
 router.get("/:boardName/:page.html", function(req, res) {
     var board = Board.board(req.params.boardName);
-    if (!board) {
-        res.send("No such board: " + req.params.boardName);
-    } else {
-        board.renderBoardPage(req, res).then(function(result) {
-            if (result)
-                return;
-            return boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
-                model.currentPage = req.params.page;
-                return renderPage(model, board, req);
-            }).then(function(data) {
-                res.send(data);
-            });
-        }).catch(function(err) {
-            res.send("Error: " + err);
+    if (!board)
+        return controller.error(req, res, 404);
+    board.renderBoardPage(req, res).then(function(result) {
+        if (result)
+            return;
+        return boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
+            model.currentPage = req.params.page;
+            return renderPage(model, board, req);
+        }).then(function(data) {
+            res.send(data);
         });
-    }
+    }).catch(function(err) {
+        controller.error(req, res, err);
+    });
 });
 
 router.get("/:boardName/:page.json", function(req, res) {
     var board = Board.board(req.params.boardName);
-    if (!board) {
-        res.send("No such board: " + req.params.boardName);
-    } else {
-        boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
-            return renderPage(model, board, req, true);
-        }).then(function(data) {
-            res.send(data);
-        }).catch(function(err) {
-            res.send("Error: " + err);
-        });
-    }
+    if (!board)
+        return controller.error(req, res, 404, true);
+    boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
+        return renderPage(model, board, req, true);
+    }).then(function(data) {
+        res.send(data);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
 });
 
 router.get("/:boardName/res/:threadNumber.html", function(req, res) {
     var board = Board.board(req.params.boardName);
-    if (!board) {
-        res.send("No such board: " + req.params.boardName);
-    } else {
-        board.renderThread(req, res).then(function(result) {
-            if (result)
-                return;
-            return boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
-                console.time("renderThread");
-                return renderThread(model, board, req);
-            }).then(function(data) {
-                console.timeEnd("renderThread");
-                res.send(data);
-            });
-        }).catch(function(err) {
-            res.send("Error: " + err);
+    if (!board)
+        return controller.error(req, res, 404);
+    board.renderThread(req, res).then(function(result) {
+        if (result)
+            return;
+        return boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
+            return renderThread(model, board, req);
+        }).then(function(data) {
+            res.send(data);
         });
-    }
+    }).catch(function(err) {
+        controller.error(req, res, err);
+    });
 });
 
 router.get("/:boardName/res/:threadNumber.json", function(req, res) {
     var board = Board.board(req.params.boardName);
-    if (!board) {
-        res.send("No such board: " + req.params.boardName);
-    } else {
-        boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
-            return renderThread(model, board, req, true);
-        }).then(function(data) {
-            res.send(data);
-        }).catch(function(err) {
-            res.send("Error: " + err);
-        });
-    }
+    if (!board)
+        return controller.error(req, res, 404, true);
+    boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
+        return renderThread(model, board, req, true);
+    }).then(function(data) {
+        res.send(data);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
 });
 
 module.exports = router;

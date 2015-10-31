@@ -28,7 +28,6 @@ var defineSetting = function(o, name, def) {
 
 var boards = {};
 var banners = {};
-var captchaQuota = {};
 
 var generateRandomImage = function(hash, mimeType, thumbPath) {
     var canvas = new Canvas(200, 200);
@@ -179,55 +178,6 @@ var Board = function(name, title, options) {
     return QFS.readdir(__dirname + "/../public/img/banners/" + this.name).then(function(files) {
         banners[this.name] = files;
         return Promise.resolve(files);
-    });
-};
-
-/*public*/ Board.prototype.getUserCaptchaQuota = function(userIp) {
-    var _this = this;
-    return Database.CaptchaQuota.findOne({
-        boardName: _this.name,
-        userIp: userIp
-    });
-};
-
-/*public*/ Board.prototype.captchaSolved = function(userIp) {
-    var _this = this;
-    var _previous;
-    return Database.CaptchaQuota.db.transaction(function(t) {
-        return Database.getOrCreate(Database.CaptchaQuota, {
-            boardName: _this.name,
-            userIp: userIp
-        }).then(function(item) {
-            if (!item)
-                return Promise.reject("Internal database error");
-            _previous = item.quota;
-            item.quota = _this.captchaQuota;
-            return item.save();
-        });
-    }).then(function() {
-        return Promise.resolve(_previous);
-    });
-};
-
-/*public*/ Board.prototype.captchaUsed = function(userIp) {
-    var _this = this;
-    var _model;
-    var _previous;
-    return model.db.transaction(function(t) {
-        return Database.CaptchaQuota.findOne({
-            boardName: _this.name,
-            userIp: userIp
-        }).then(function(item) {
-            if (!item) {
-                _previous = null;
-                return Promise.resolve();
-            }
-            _previous = item.quota;
-            --item.quota;
-            return (item.quota > 0) ? item.save() : item.remove();
-        });
-    }).then(function() {
-        return Promise.resolve(_previous);
     });
 };
 

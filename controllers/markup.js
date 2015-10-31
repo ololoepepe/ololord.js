@@ -59,8 +59,7 @@ router.get("/markup.html", function(req, res) {
     controller(req, "markup", model).then(function(data) {
         res.send(data);
     }).catch(function(err) {
-        res.send("Error: " + err);
-        console.log(err.stack);
+        controller.error(req, res, err);
     });
 });
 

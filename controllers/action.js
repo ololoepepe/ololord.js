@@ -9,6 +9,7 @@ var UUID = require("uuid");
 
 var Board = require("../boards");
 var config = require("../helpers/config");
+var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
 
@@ -124,7 +125,7 @@ var getFiles = function(fields, files, transaction) {
 var testParameters = function(fields, files, creatingThread) {
     var board = Board.board(fields.board);
     if (!board)
-        return { error: Tools.translate("No such board", "error") };
+        return { error: 404 };
     var email = fields.email || "";
     var name = fields.name || "";
     var subject = fields.subject || "";
@@ -200,23 +201,20 @@ router.post("/createPost", function(req, res) {
         if (!board)
             return Promise.reject("Invalid board");
         transaction.board = c.fields.board;
-        console.time("posting");
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
         var testResult = testParameters(c.fields, c.files) || c.board.testParameters(c.fields, c.files);
         if (testResult)
-            return Promise.reject({ errorMessage: testResult.error });
+            return Promise.reject(testResult.error);
         return Database.createPost(req, c.fields, c.files, transaction);
     }).then(function(post) {
-        console.timeEnd("posting");
         setMarkupModeCookie(res, c.fields);
         res.send(post);
     }).catch(function(err) {
-        console.log(err);
         transaction.rollback();
         setMarkupModeCookie(res, c.fields);
-        res.send(err);
+        controller.error(req, res, err);
     });
 });
 
@@ -230,23 +228,20 @@ router.post("/createThread", function(req, res) {
         if (!board)
             return Promise.reject("Invalid board");
         transaction.board = c.fields.board;
-        console.time("posting");
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
         var testResult = testParameters(c.fields, c.files, true) || c.board.testParameters(c.fields, c.files, true);
         if (testResult)
-            return Promise.reject({ errorMessage: testResult.error });
+            return Promise.reject(testResult.error);
         return Database.createThread(req, c.fields, c.files, transaction);
     }).then(function(thread) {
-        console.timeEnd("posting");
         setMarkupModeCookie(res, c.fields);
         res.send(thread);
     }).catch(function(err) {
-        console.log(err);
         transaction.rollback();
         setMarkupModeCookie(res, c.fields);
-        res.send(err);
+        controller.error(req, res, err);
     });
 });
 

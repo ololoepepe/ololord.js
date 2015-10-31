@@ -16,7 +16,7 @@
     {{?}}
 </div>
 {{? !it.error}}
-    {{? it.searchResults.length > 0}}
+    {{? it.searchResults && it.searchResults.length > 0}}
         <ol>
             {{~it.searchResults :result}}
                 <li>
@@ -38,10 +38,6 @@
             <h3>{{=it.nothingFoundMessage}}</h3>
         </div>
     {{?}}
-{{??}}
-    <div class="error">
-        {{=it.errorDescription}}
-    </div>
 {{?}}
 {{? it.customFooter}}
     {{#def.customFooter}}

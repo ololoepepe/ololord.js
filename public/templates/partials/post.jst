@@ -80,13 +80,13 @@
                     {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 && post.isOp}}
                         {{? it.settings.mode.name != "ascetic"}}
                             <li>
-                                <a name="fixButton"
+                                <a name="fixButton" href="javascript:void(0);"
                                    onclick="lord.setThreadFixed(this); return false;">
                                     <img src="/{{=it.site.pathPrefix}}img/{{? thread.fixed}}unfix{{??}}fixed{{?}}.png" />
                                     {{? thread.fixed}}{{=it.tr.unfixThreadText}}{{??}}{{=it.tr.fixThreadText}}{{?}}</a>
                             </li>
                             <li>
-                                <a name="closeButton"
+                                <a name="closeButton" href="javascript:void(0);"
                                    onclick="lord.setThreadOpened(this); return false;">
                                     <img src="/{{=it.site.pathPrefix}}img/{{? thread.closed}}open{{??}}closed{{?}}.png" />
                                     {{? thread.closed}}{{=it.tr.openThreadText}}{{??}}{{=it.tr.closeThreadText}}{{?}}</a>
@@ -125,7 +125,8 @@
                     {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
                         {{? it.settings.mode.name != "ascetic"}}
                             <li>
-                                <a name="ipButton" onclick="lord.showUserIp(this); return false;">
+                                <a name="ipButton" href="javascript:void(0);"
+                                   onclick="lord.showUserIp(this); return false;">
                                     <img src="/{{=it.site.pathPrefix}}img/ip.png" /> {{=it.tr.showUserIpText}}</a>
                             </li>
                         {{?}}
@@ -140,25 +141,27 @@
                         {{? post.isOp}}
                             {{? it.thread}}
                                 <li>
-                                    <a name="downloadButton" onclick="lord.downloadThread(this); return false;">
+                                    <a name="downloadButton" href="javascript:void(0);"
+                                       onclick="lord.downloadThread(this); return false;">
                                         <img src="/{{=it.site.pathPrefix}}img/download.png" />
                                         {{=it.tr.downloadThreadText}}</a>
                                 </li>
                             {{?}}
                             <li>
-                                <a name="addToFavoritesButton">
+                                <a name="addToFavoritesButton" href="javascript:void(0);">
                                     <img src="/{{=it.site.pathPrefix}}img/favorite.png" />
                                     {{=it.tr.addThreadToFavoritesText}}</a>
                             </li>
                         {{?}}
                         <li>
-                            <a name="complainButton" onclick="lord.complain(this); return false;">
+                            <a href="javascript:void(0);"
+                               name="complainButton" onclick="lord.complain(this); return false;">
                                 <img src="/{{=it.site.pathPrefix}}img/complain.png" /> {{=it.tr.complainText}}</a>
                         </li>
                     {{?}}
                     {{? it.settings.mode.name != "ascetic"}}
                         <li>
-                            <a name="deleteButton"
+                            <a name="deleteButton" href="javascript:void(0);"
                                onclick="lord.deletePost(this); return false;">
                                 <img src="/{{=it.site.pathPrefix}}img/delete.png" />
                                 {{? post.isOp}}{{=it.tr.deleteThreadText}}{{??}}{{=it.tr.deletePostText}}{{?}}</a>
@@ -176,7 +179,7 @@
                     {{?}}
                     {{? it.settings.mode.name != "ascetic"}}
                         <li>
-                            <a name="hideButton" id="hidePost{{=post.number}}"
+                            <a name="hideButton" href="javascript:void(0);"
                                onclick="lord.setPostHidden(this); return false;">
                                 <img src="/{{=it.site.pathPrefix}}img/hide.png" /> {{=it.tr.showHidePostText}}</a>
                         </li>
