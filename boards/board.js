@@ -515,5 +515,3 @@ Board.sortThreadsByPostCount = function(a, b) {
 };
 
 module.exports = Board;
-
-var Database = require("../helpers/database");

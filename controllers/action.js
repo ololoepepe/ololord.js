@@ -2,8 +2,9 @@ var BodyParser = require("body-parser");
 var Crypto = require("crypto");
 var express = require("express");
 var Formidable = require("formidable");
+var FS = require("q-io/fs");
 var FSSync = require("fs");
-var HTTP = require("http");
+var HTTP = require("q-io/http");
 var promisify = require("promisify-node");
 var UUID = require("uuid");
 
@@ -80,27 +81,29 @@ var getFiles = function(fields, files, transaction) {
     });
     var promises = urls.map(function(url) {
         var path = __dirname + "/../tmp/upload_" + UUID.v1();
-        var ws = FSSync.createWriteStream(path);
         transaction.filePaths.push(path);
-        return new Promise(function(resolve, reject) {
-            HTTP.get(url.url, function(response) {
-                response.pipe(ws);
-                ws.on("finish", function() {
-                    ws.close(function() {
-                        var file = {
-                            name: url.url.split("/").pop(),
-                            size: FSSync.statSync(path).size,
-                            path: path,
-                            mimeType: Tools.mimeType(path)
-                        };
-                        setFileRating(file, url.formFieldName.substr(9));
-                        resolve(file);
-                    });
-                });
-            }).on("error", function(err) {
-                FSSync.unlink(path);
-                reject(err);
-            });
+        var c = {};
+        return HTTP.request({
+            url: url.url,
+            timeout: Tools.Minute
+        }).then(function(response) {
+            if (response.status != 200)
+                return Promise.reject("Failed to download file");
+            return response.body.read();
+        }).then(function(data) {
+            c.size = data.length;
+            if (c.size < 1)
+                return Promise.reject("File is empty");
+            return FS.write(path, data);
+        }).then(function() {
+            var file = {
+                name: url.url.split("/").pop(),
+                size: c.size,
+                path: path,
+                mimeType: Tools.mimeType(path)
+            };
+            setFileRating(file, url.formFieldName.substr(9));
+            return Promise.resolve(file);
         });
     });
     return Promise.all(promises).then(function(downloadedFiles) {
