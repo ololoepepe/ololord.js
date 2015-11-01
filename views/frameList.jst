@@ -68,10 +68,10 @@
         <br />
         {{? it.deviceType != "mobile"}}
             <img src="/{{=it.site.pathPrefix}}img/question.png" class="buttonImage" width="16" height="16">
-            <a href="/{{=it.site.pathPrefix}}" target="page">{{=it.tr.toFaqPageText}}</a>
+            <a href="/{{=it.site.pathPrefix}}faq.html" target="page">{{=it.tr.toFaqPageText}}</a>
         {{??}}
             <span class="nowrap">
-            [<a href="/{{=it.site.pathPrefix}}" target="page"
+            [<a href="/{{=it.site.pathPrefix}}faq.html" target="page"
                 title="{{=it.tr.toFaqPageText}}"><img src="/{{=it.site.pathPrefix}}img/question.png"
                                                       class="buttonImage" width="16" height="16"></a>]</span>
         {{?}}
