@@ -1,3 +1,4 @@
+var Crypto = require("crypto");
 var dot = require("dot");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
@@ -546,6 +547,108 @@ controller.initialize = function() {
             });
         });
         return Promise.all(promises);
+    });
+};
+
+controller.postingSpeedString = function(board, lastPostNumber) {
+    var msecs = board.launchDate.valueOf();
+    if (isNaN(msecs))
+        return "-";
+    var zeroSpeedString = function(nonZero) {
+        if (lastPostNumber && msecs)
+            return "1 " + nonZero;
+        else
+            return "0 " + Tools.translate("post(s) per hour.", "postingSpeed");
+    };
+    var speedString = function(duptime) {
+        var d = lastPostNumber / duptime;
+        var ss = "" + d.toFixed(1);
+        return (ss.split(".").pop() != "0") ? ss : ss.split(".").shift();
+    };
+    var uptimeMsecs = (new Date()).valueOf() - msecs;
+    var duptime = uptimeMsecs / Tools.Hour;
+    var uptime = Math.floor(duptime);
+    var shour = Tools.translate("post(s) per hour.", "postingSpeed");
+    if (!uptime) {
+        return zeroSpeedString(shour);
+    } else if (Math.floor(lastPostNumber / uptime) > 0) {
+        return speedString(duptime) + " " + shour;
+    } else {
+        duptime /= 24;
+        uptime = Math.floor(duptime);
+        var sday = Tools.translate("post(s) per day.", "postingSpeed");
+        if (!uptime) {
+            return zeroSpeedString(sday);
+        } else if (Math.floor(lastPostNumber / uptime) > 0) {
+            return speedString(duptime) + " " + sday;
+        } else {
+            duptime /= (365.0 / 12.0);
+            uptime = Math.floor(duptime);
+            var smonth = Tools.translate("post(s) per month.", "postingSpeed");
+            if (!uptime) {
+                return zeroSpeedString(smonth);
+            } else if (Math.floor(lastPostNumber / uptime) > 0) {
+                return speedString(duptime) + " " + smonth;
+            } else {
+                duptime /= 12.0;
+                uptime = Math.floor(duptime);
+                var syear = Tools.translate("post(s) per year.", "postingSpeed");
+                if (!uptime)
+                    return zeroSpeedString(syear);
+                else if (Math.floor(lastPostNumber / uptime) > 0)
+                    return speedString(duptime) + " " + syear;
+                else
+                    return "0 " + syear;
+            }
+        }
+    }
+};
+
+var renderFileInfo = function(fi) {
+    fi.sizeKB = fi.size / 1024;
+    fi.sizeText = fi.sizeKB.toFixed(2) + "KB";
+    if (fi.mimeType.substr(0, 6) == "image/" || fi.mimeType.substr(0, 6) == "video/") {
+        if (fi.dimensions)
+            fi.sizeText += ", " + fi.dimensions.width + "x" + fi.dimensions.height;
+    }
+    var tr = controller.translationsModel().tr;
+    if (fi.mimeType.substr(0, 6) == "audio/" || fi.mimeType.substr(0, 6) == "video/") {
+        var ed = fi.extraData;
+        if (ed.duration)
+            fi.sizeText += ", " + ed.duration;
+        if (fi.mimeType.substr(0, 6) == "audio/") {
+            if (ed.bitrate)
+                fi.sizeText += ", " + ed.bitrate + tr.kbps;
+            fi.sizeTooltip = ed.artist ? ed.artist : tr.unknownArtist;
+            fi.sizeTooltip += " - ";
+            fi.sizeTooltip += ed.title ? ed.title : tr.unknownTitle;
+            fi.sizeTooltip += " [";
+            fi.sizeTooltip += ed.album ? ed.album : tr.unknownAlbum;
+            fi.sizeTooltip += "]";
+            if (ed.year)
+                fi.sizeTooltip += " (" + ed.year + ")";
+        } else if (fi.mimeType.substr(0, 6) == "video/") {
+            fi.sizeTooltip = ed.bitrate + tr.kbps;
+        }
+    }
+};
+
+controller.renderPost = function(post, board, req, opPost) {
+    post.fileInfos.forEach(function(fileInfo) {
+        renderFileInfo(fileInfo);
+    });
+    post.isOp = (post.number == post.threadNumber);
+    post.ownIp = (req.ip == post.user.ip);
+    post.ownHashpass = (req.hashpass == post.user.hashpass);
+    post.opIp = (post.user.ip == opPost.user.ip);
+    board.renderPost(post, req);
+    if (!board.showWhois)
+        return Promise.resolve();
+    return Tools.flagName(post.geolocation.countryCode).then(function(flagName) {
+        post.geolocation.flagName = flagName || "default.png";
+        if (!post.geolocation.countryName)
+            post.geolocation.countryName = "Unknown country";
+        return Promise.resolve();
     });
 };
 

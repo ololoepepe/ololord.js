@@ -16,8 +16,9 @@ board.postExtraData = function(req, fields, files) {
     return link;
 };
 
-board.renderPost = function(post, req, opPost) {
-    if (!post.isOp)
+board.renderPost = function(post, req) {
+    Board.prototype.renderPost.apply(board, arguments);
+    if (post.number != post.threadNumber)
         return;
     post.subject = `<a href="${post.extraData}" target="_blank">${post.subject || post.link}</a>`;
     post.subjectIsRaw = true;

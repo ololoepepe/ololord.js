@@ -1,4 +1,3 @@
-var Crypto = require("crypto");
 var express = require("express");
 var merge = require("merge");
 var Util = require("util");
@@ -12,128 +11,18 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-var postingSpeedString = function(board, lastPostNumber) {
-    var msecs = board.launchDate.valueOf();
-    if (isNaN(msecs))
-        return "-";
-    var zeroSpeedString = function(nonZero) {
-        if (lastPostNumber && msecs)
-            return "1 " + nonZero;
-        else
-            return "0 " + Tools.translate("post(s) per hour.", "postingSpeed");
-    };
-    var speedString = function(duptime) {
-        var d = lastPostNumber / duptime;
-        var ss = "" + d.toFixed(1);
-        return (ss.split(".").pop() != "0") ? ss : ss.split(".").shift();
-    };
-    var uptimeMsecs = (new Date()).valueOf() - msecs;
-    var duptime = uptimeMsecs / Tools.Hour;
-    var uptime = Math.floor(duptime);
-    var shour = Tools.translate("post(s) per hour.", "postingSpeed");
-    if (!uptime) {
-        return zeroSpeedString(shour);
-    } else if (Math.floor(lastPostNumber / uptime) > 0) {
-        return speedString(duptime) + " " + shour;
-    } else {
-        duptime /= 24;
-        uptime = Math.floor(duptime);
-        var sday = Tools.translate("post(s) per day.", "postingSpeed");
-        if (!uptime) {
-            return zeroSpeedString(sday);
-        } else if (Math.floor(lastPostNumber / uptime) > 0) {
-            return speedString(duptime) + " " + sday;
-        } else {
-            duptime /= (365.0 / 12.0);
-            uptime = Math.floor(duptime);
-            var smonth = Tools.translate("post(s) per month.", "postingSpeed");
-            if (!uptime) {
-                return zeroSpeedString(smonth);
-            } else if (Math.floor(lastPostNumber / uptime) > 0) {
-                return speedString(duptime) + " " + smonth;
-            } else {
-                duptime /= 12.0;
-                uptime = Math.floor(duptime);
-                var syear = Tools.translate("post(s) per year.", "postingSpeed");
-                if (!uptime)
-                    return zeroSpeedString(syear);
-                else if (Math.floor(lastPostNumber / uptime) > 0)
-                    return speedString(duptime) + " " + syear;
-                else
-                    return "0 " + syear;
-            }
-        }
-    }
-};
-
-var renderFileInfo = function(fi) {
-    fi.sizeKB = fi.size / 1024;
-    fi.sizeText = fi.sizeKB.toFixed(2) + "KB";
-    if (fi.mimeType.substr(0, 6) == "image/" || fi.mimeType.substr(0, 6) == "video/") {
-        if (fi.dimensions)
-            fi.sizeText += ", " + fi.dimensions.width + "x" + fi.dimensions.height;
-    }
-    var tr = controller.translationsModel().tr;
-    if (fi.mimeType.substr(0, 6) == "audio/" || fi.mimeType.substr(0, 6) == "video/") {
-        var ed = fi.extraData;
-        if (ed.duration)
-            fi.sizeText += ", " + ed.duration;
-        if (fi.mimeType.substr(0, 6) == "audio/") {
-            if (ed.bitrate)
-                fi.sizeText += ", " + ed.bitrate + tr.kbps;
-            fi.sizeTooltip = ed.artist ? ed.artist : tr.unknownArtist;
-            fi.sizeTooltip += " - ";
-            fi.sizeTooltip += ed.title ? ed.title : tr.unknownTitle;
-            fi.sizeTooltip += " [";
-            fi.sizeTooltip += ed.album ? ed.album : tr.unknownAlbum;
-            fi.sizeTooltip += "]";
-            if (ed.year)
-                fi.sizeTooltip += " (" + ed.year + ")";
-        } else if (fi.mimeType.substr(0, 6) == "video/") {
-            fi.sizeTooltip = ed.bitrate + tr.kbps;
-        }
-    }
-};
-
-var renderPost = function(post, board, req, opPost) {
-    post.fileInfos.forEach(function(fileInfo) {
-        renderFileInfo(fileInfo);
-    });
-    post.isOp = (post.number == post.threadNumber);
-    post.ownIp = (req.ip == post.user.ip);
-    post.ownHashpass = (req.hashpass == post.user.hashpass);
-    post.opIp = (post.user.ip == opPost.user.ip);
-    if (Database.compareRegisteredUserLevels(req.level, Database.Moder) < 0)
-        post.user.ip = "";
-    if (Database.compareRegisteredUserLevels(post.user.level, Database.User) >= 0) {
-        var md5 = Crypto.createHash("md5");
-        md5.update(post.hashpass + config("site.tripcodeSalt", ""));
-        post.tripcode = "!" + md5.digest("base64").substr(0, 10);
-    }
-    post.user.hashpass = "";
-    board.renderPost(post, req, opPost);
-    if (!board.showWhois)
-        return Promise.resolve();
-    return Tools.flagName(post.geolocation.countryCode).then(function(flagName) {
-        post.geolocation.flagName = flagName || "default.png";
-        if (!post.geolocation.countryName)
-            post.geolocation.countryName = "Unknown country";
-        return Promise.resolve();
-    });
-};
-
 var renderPage = function(model, board, req, json) {
     var promises = model.threads.map(function(thread) {
-        return renderPost(thread.opPost, board, req, thread.opPost).then(function() {
+        return controller.renderPost(thread.opPost, board, req, thread.opPost).then(function() {
             return Promise.all(thread.lastPosts.map(function(post) {
-                return renderPost(post, board, req, thread.opPost);
+                return controller.renderPost(post, board, req, thread.opPost);
             }));
         });
     });
     return Promise.all(promises).then(function() {
         model = merge.recursive(model, controller.headModel(board, req));
         model = merge.recursive(model, controller.boardModel(board));
-        model.board.postingSpeed = postingSpeedString(board, model.lastPostNumber);
+        model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
         model.extraScripts = board.extraScripts;
         if (!json || json.translations)
             model.tr = controller.translationsModel();
@@ -161,13 +50,13 @@ var renderPage = function(model, board, req, json) {
 
 var renderThread = function(model, board, req, json) {
     var promises = model.thread.posts.map(function(post) {
-        return renderPost(post, board, req, model.thread.opPost);
+        return controller.renderPost(post, board, req, model.thread.opPost);
     });
-    promises.unshift(renderPost(model.thread.opPost, board, req, model.thread.opPost));
+    promises.unshift(controller.renderPost(model.thread.opPost, board, req, model.thread.opPost));
     return Promise.all(promises).then(function() {
         model = merge.recursive(model, controller.headModel(board, req));
         model = merge.recursive(model, controller.boardModel(board));
-        model.board.postingSpeed = postingSpeedString(board, model.lastPostNumber);
+        model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
         model.extraScripts = board.extraScripts;
         if (!json || json.translations)
             model.tr = controller.translationsModel();
@@ -200,7 +89,7 @@ var renderCatalog = function(model, board, req, json) {
     return Promise.all(promises).then(function() {
         model = merge.recursive(model, controller.headModel(board, req));
         model = merge.recursive(model, controller.boardModel(board));
-        model.board.postingSpeed = postingSpeedString(board, model.lastPostNumber);
+        model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
         model.sortMode = req.query.sort || "date";
         if (!json || json.translations)
             model.tr = controller.translationsModel();

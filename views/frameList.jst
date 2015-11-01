@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{#def.head}}
+<body class="{{=it.deviceType}}" {{#def.baseData}}>
+<div class="theTitle">
+    <img src="/{{=it.site.pathPrefix}}favicon.ico" title="{{=it.title}}">
+</div>
+<br />
+<div>
+    <div class="navbar navbarFrame {{=it.deviceType}}">
+        {{~it.boards :board}}
+            {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+                {{? it.deviceType != "mobile"}}
+                    <span class="navbarItem navbarItemBoard">
+                        [{{=board.name}}]
+                        <a href="/{{=it.site.pathPrefix}}{{=board.name}}" target="page"
+                           data-board="{{=board.name}}">{{=board.title}}</a></span>
+                    <br />
+                {{??}}
+                    <span class="navbarItem navbarItemBoard">
+                        [<a href="/{{=it.site.pathPrefix}}{{=board.name}}" target="page"
+                            title="{{=board.title}}" data-board="{{=board.name}}">{{=board.name}}</a>]</span>
+                    <br />
+                {{?}}
+            {{?}}
+        {{~}}
+        {{? it.settings.mode.name != "ascetic"}}
+            {{? it.deviceType != "mobile"}}
+                <img src="/{{=it.site.pathPrefix}}img/playlist.png" class="buttonImage" width="16" height="16">
+                <a href="/{{=it.site.pathPrefix}}playlist.html" target="page">{{=it.tr.toPlaylistPageText}}</a>
+            {{??}}
+                <span class="nowrap">
+                [<a href="/{{=it.site.pathPrefix}}playlist.html" target="page"
+                    title="{{=it.tr.toPlaylistPageText}}"><img src="/{{=it.site.pathPrefix}}img/playlist.png"
+                                                               class="buttonImage" width="16" height="16"></a>]</span>
+            {{?}}
+            <br />
+        {{?}}
+        {{? it.deviceType != "mobile"}}
+            <img src="/{{=it.site.pathPrefix}}img/markup.png" class="buttonImage" width="16" height="16">
+            <a href="/{{=it.site.pathPrefix}}markup.html" target="page">{{=it.tr.toMarkupPageText}}</a>
+        {{??}}
+            <span class="nowrap">
+            [<a href="/{{=it.site.pathPrefix}}markup.html" target="page"
+                title="{{=it.tr.toMarkupPageText}}"><img src="/{{=it.site.pathPrefix}}img/markup.png"
+                                                         class="buttonImage" width="16" height="16"></a>]</span>
+        {{?}}
+        <br />
+        {{? it.deviceType != "mobile"}}
+            <img src="/{{=it.site.pathPrefix}}img/homepage.png" class="buttonImage" width="16" height="16">
+            <a href="/{{=it.site.pathPrefix}}" target="page">{{=it.tr.toHomePageText}}</a>
+        {{??}}
+            <span class="nowrap">
+            [<a href="/{{=it.site.pathPrefix}}" target="page"
+                title="{{=it.tr.toHomePageText}}"><img src="/{{=it.site.pathPrefix}}img/homepage.png"
+                                                       class="buttonImage" width="16" height="16"></a>]</span>
+        {{?}}
+        <br />
+        {{? it.deviceType != "mobile"}}
+            <img src="/{{=it.site.pathPrefix}}img/noframe.png" class="buttonImage" width="16" height="16">
+            <a href="/{{=it.site.pathPrefix}}" target="_top">{{=it.tr.normalVersionText}}</a>
+        {{??}}
+            <span class="nowrap">
+            [<a href="/{{=it.site.pathPrefix}}" target="_top"
+                title="{{=it.tr.normalVersionText}}"><img src="/{{=it.site.pathPrefix}}img/noframe.png"
+                                                          class="buttonImage" width="16" height="16"></a>]</span>
+        {{?}}
+        <br />
+        {{? it.deviceType != "mobile"}}
+            <img src="/{{=it.site.pathPrefix}}img/question.png" class="buttonImage" width="16" height="16">
+            <a href="/{{=it.site.pathPrefix}}" target="page">{{=it.tr.toFaqPageText}}</a>
+        {{??}}
+            <span class="nowrap">
+            [<a href="/{{=it.site.pathPrefix}}" target="page"
+                title="{{=it.tr.toFaqPageText}}"><img src="/{{=it.site.pathPrefix}}img/question.png"
+                                                      class="buttonImage" width="16" height="16"></a>]</span>
+        {{?}}
+        <br />
+        {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+            {{? it.deviceType != "mobile"}}
+                <img src="/{{=it.site.pathPrefix}}img/manage.png" class="buttonImage" width="16" height="16">
+                <a href="/{{=it.site.pathPrefix}}manage.html" target="page">{{=it.tr.toManagePageText}}</a>
+            {{??}}
+                <span class="nowrap">
+                [<a href="/{{=it.site.pathPrefix}}manage.html" target="page"
+                    title="{{=it.tr.toManagePageText}}"><img src="/{{=it.site.pathPrefix}}img/manage.png"
+                                                             class="buttonImage" width="16" height="16"></a>]</span>
+            {{?}}
+            <br />
+        {{?}}
+    </div>
+</div>
+</body>
+</html>

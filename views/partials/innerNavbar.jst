@@ -21,7 +21,7 @@
     {{~it.boards :board}}
         {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
             <span class="navbarItem navbarItemBoard">[<a href="/{{=it.site.pathPrefix}}{{=board.name}}"
-                  title="{{=board.title}}">{{=board.name}}</a>] </span>
+                  title="{{=board.title}}" data-board="{{=board.name}}">{{=board.name}}</a>] </span>
         {{?}}
     {{~}}
 {{?}}
@@ -39,7 +39,7 @@
                              title="{{=it.tr.toHomePageText}}"><img src="/{{=it.site.pathPrefix}}img/homepage.png"
                                                                     class="buttonImage"
                                                                     width="16" height="16"></a>]</span>
-<span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}frame?path={{=it.path}}" target="_top"
+<span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}frame.html?path={{=it.path}}" target="_top"
                              title="{{=it.tr.framedVersionText}}"><img src="/{{=it.site.pathPrefix}}img/frame.png"
                                                                        class="buttonImage"
                                                                        width="16" height="16"></a>]</span>
@@ -47,18 +47,9 @@
                              title="{{=it.tr.toFaqPageText}}"><img src="/{{=it.site.pathPrefix}}img/question.png"
                                                                    class="buttonImage"
                                                                    width="16" height="16"></a>]</span>
-{{? it.userLevel >= 10}}
-    <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}manage"
+{{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+    <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}manage.html"
                                  title="{{=it.tr.toManagePageText}}"><img src="/{{=it.site.pathPrefix}}img/manage.png"
                                                                           class="buttonImage"
                                                                           width="16" height="16"></a>]</span>
 {{?}}
-{{~ it.customLinks :link}}
-    {{? link.imgUrl}}
-        <span class="navbarItem">[<a href="{{=link.url}}" target="{{=link.target}}"
-                                     title="{{=link.text}}"><img src="{{=link.imgUrl}}" class="buttonImage"
-                                                                 width="16" height="16"></a>]</span>
-    {{??}}
-        <span class="navbarItem">[<a href="{{=link.url}}" target="{{=link.target}}">{{=link.text}}</a>]</span>
-    {{?}}
-{{~}}

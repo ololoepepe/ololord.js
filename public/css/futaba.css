@@ -519,7 +519,13 @@ span.newPostCount {
 .navbar.navbarFrame {
     text-align: left;
     margin-left: 4px;
-    font-size: 0.8em;
+    font-size: 1em;
+}
+
+.navbar.navbarFrame.mobile {
+    text-align: left;
+    margin-left: 4px;
+    font-size: 1.2em;
 }
 
 .navbarItem {

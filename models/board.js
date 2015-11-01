@@ -7,6 +7,32 @@ var Database = require("../helpers/database");
 var FS = require("q-io/fs");
 var Tools = require("../helpers/tools");
 
+module.exports.getPosts = function(posts, hashpass) {
+    var c = {};
+    return Database.registeredUserLevel(hashpass).then(function(level) {
+        c.level = level;
+        var promises = posts.map(function(post) {
+            return Database.getPost(post.boardName, post.postNumber, {
+                withFileInfos: true,
+                withReferences: true
+            });
+        });
+        return Promise.all(promises);
+    }).then(function(posts) {
+        return posts.filter(function(post) {
+            if (!post)
+                return true;
+            if (!post.options.draft)
+                return true;
+            if (!post.user.hashpass)
+                return true;
+            if (post.user.hashpass == hashpass)
+                return true;
+            return Database.compareRegisteredUserLevels(post.user.level, c.level) < 0;
+        });
+    });
+};
+
 module.exports.getPage = function(board, hashpass, page) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");

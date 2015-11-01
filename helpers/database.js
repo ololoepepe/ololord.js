@@ -194,6 +194,8 @@ module.exports.getPost = function(boardName, postNumber, options) {
     if (!opts || (!options.withFileInfos && !options.withReferences))
         return p;
     return p.then(function() {
+        if (!c.post)
+            return Promise.resolve();
         var promises = [];
         if (options.withFileInfos) {
             promises.push(db.smembers("fileInfos:" + key).then(function(fileInfos) {
@@ -534,7 +536,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             rawText: rawText,
             subject: (fields.subject || null)
         }), function(index, word) {
-            promises.push(db.sadd("postSearchIndex:" + word, index[0]));
+            promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
         return Promise.all(promises);
     }).then(function() {
@@ -599,7 +601,7 @@ var removePost = function(boardName, postNumber) {
             rawText: rawText,
             subject: (fields.subject || null)
         }), function(index, word) {
-            promises.push(db.srem("postSearchIndex:" + word, JSON.parse(index[0])));
+            promises.push(db.srem("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
         return Promise.all(promises);
     }).then(function() {

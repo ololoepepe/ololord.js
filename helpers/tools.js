@@ -301,12 +301,12 @@ module.exports.indexPost = function(post, wordIndex) {
             var word = words[i];
             if (!wordIndex.hasOwnProperty(word.word))
                 wordIndex[word.word] = [];
-            wordIndex[word.word].push(JSON.stringify({
+            wordIndex[word.word].push({
                 boardName: post.boardName,
                 postNumber: post.number,
                 source: source,
                 position: word.pos
-            }));
+            });
         }
     });
     return wordIndex;

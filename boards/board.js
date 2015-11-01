@@ -221,8 +221,16 @@ var Board = function(name, title, options) {
     return defineSetting(this, name, def);
 };
 
-/*public*/ Board.prototype.renderPost = function(post, req, opPost) {
-    //
+/*public*/ Board.prototype.renderPost = function(post, req) {
+    if (Database.compareRegisteredUserLevels(req.level, Database.Moder) < 0)
+        delete post.user.ip;
+    if (post.showTripcode && Database.compareRegisteredUserLevels(post.user.level, Database.User) >= 0) {
+        var md5 = Crypto.createHash("md5");
+        md5.update(post.hashpass + config("site.tripcodeSalt", ""));
+        post.tripcode = "!" + md5.digest("base64").substr(0, 10);
+    }
+    delete post.user.hashpass;
+    delete post.user.password;
 };
 
 /*public*/ Board.prototype.postformRules = function() {
@@ -515,3 +523,5 @@ Board.sortThreadsByPostCount = function(a, b) {
 };
 
 module.exports = Board;
+
+var Database = require("../helpers/database");
