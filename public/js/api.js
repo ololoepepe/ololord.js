@@ -105,43 +105,6 @@ lord.SettingsStoredInCookies = ["mode", "style", "codeStyle", "stickyToolbar", "
                                 "timeZoneOffset", "captchaEngine", "maxAllowedRating", "draftsByDefault",
                                 "hidePostformRules", "minimalisticPostform", "hiddenBoards"];
 
-lord._defineEnum = function(constName, value) {
-    if (typeof constName != "string")
-        return;
-    if (value) {
-        lord[constName] = value;
-        lord._lastEnumValue = value;
-    } else if (typeof lord._lastEnumValue == "number") {
-        lord._lastEnumValue += 1;
-        lord[constName] = lord._lastEnumValue;
-    }
-};
-
-lord._defineEnum("RpcBanPosterId", 1);
-lord._defineEnum("RpcBanUserId");
-lord._defineEnum("RpcDeleteFileId");
-lord._defineEnum("RpcDeletePostId");
-lord._defineEnum("RpcEditAudioTagsId");
-lord._defineEnum("RpcEditPostId");
-lord._defineEnum("RpcGetBoardsId");
-lord._defineEnum("RpcGetCaptchaQuotaId");
-lord._defineEnum("RpcGetCoubVideoInfoId");
-lord._defineEnum("RpcGetFileExistenceId");
-lord._defineEnum("RpcGetFileMetaDataId");
-lord._defineEnum("RpcGetNewPostCountId");
-lord._defineEnum("RpcGetNewPostCountExId");
-lord._defineEnum("RpcGetNewPostsId");
-lord._defineEnum("RpcGetPostId");
-lord._defineEnum("RpcGetThreadNumbersId");
-lord._defineEnum("RpcGetUserBanInfoId");
-lord._defineEnum("RpcGetYandexCaptchaImageId");
-lord._defineEnum("RpcMoveThreadId");
-lord._defineEnum("RpcSetThreadFixedId");
-lord._defineEnum("RpcSetThreadOpenedId");
-lord._defineEnum("RpcSetVoteOpenedId");
-lord._defineEnum("RpcUnvoteId");
-lord._defineEnum("RpcVoteId");
-
 /*Variables*/
 
 lord.popups = [];
@@ -896,75 +859,76 @@ lord.hash = function() {
     return window.location.hash.substr(1, window.location.hash.length - 1);
 };
 
-lord.data = function(key, el) {
+lord.data = function(key, el, bubble) {
     el = el || document.body;
     while (el && el.dataset) {
         if (key in el.dataset)
             return el.dataset[key];
-        el = el.parentNode;
+        el = bubble ? el.parentNode : undefined;
     }
     return undefined;
 };
 
 lord.getTemplate = function(templateName) {
     var prefix = lord.data("sitePathPrefix");
-    var d = $.Deferred();
-    if (lord.templates.hasOwnProperty(templateName))
-        d.resolve(lord.templates[templateName]);
-    var f = function() {
-        $.ajax("/" + prefix + "templates/" + templateName + ".jst").then(function(result) {
-            var template = doT.template(result, {
-                evaluate: /\{\{([\s\S]+?)\}\}/g,
-                interpolate: /\{\{=([\s\S]+?)\}\}/g,
-                encode: /\{\{!([\s\S]+?)\}\}/g,
-                use: /\{\{#([\s\S]+?)\}\}/g,
-                define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
-                conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
-                iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
-                varname: 'it',
-                strip: false,
-                append: true,
-                selfcontained: false
-            }, lord.partials);
-            lord.templates[templateName] = template;
-            d.resolve(template);
-        });
-    };
-    if (lord.partials) {
-        f();
-    } else {
-        $.ajax("/" + prefix + "misc/partials.json").then(function(list) {
-            var promises = list.map(function(partialName) {
-                return $.ajax("/" + prefix + "templates/partials/" + partialName + ".jst").then(function(result) {
-                    return {
-                        data: result,
-                        name: partialName
-                    };
-                });
+    return new Promise(function(resolve, reject) {
+        if (lord.templates.hasOwnProperty(templateName))
+            return resolve(lord.templates[templateName]);
+        var f = function() {
+            $.ajax("/" + prefix + "templates/" + templateName + ".jst").then(function(result) {
+                var template = doT.template(result, {
+                    evaluate: /\{\{([\s\S]+?)\}\}/g,
+                    interpolate: /\{\{=([\s\S]+?)\}\}/g,
+                    encode: /\{\{!([\s\S]+?)\}\}/g,
+                    use: /\{\{#([\s\S]+?)\}\}/g,
+                    define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
+                    conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
+                    iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
+                    varname: 'it',
+                    strip: false,
+                    append: true,
+                    selfcontained: false
+                }, lord.partials);
+                lord.templates[templateName] = template;
+                resolve(template);
             });
-            return $.when.apply($, promises);
-        }).then(function() {
-            lord.partials = {};
-            lord.arr(arguments).forEach(function(partial) {
-                lord.partials[partial.name] = partial.data;
-            });
+        };
+        if (lord.partials) {
             f();
-        });
-    }
-    return d;
+        } else {
+            $.ajax("/" + prefix + "misc/partials.json").then(function(list) {
+                var promises = list.map(function(partialName) {
+                    return $.ajax("/" + prefix + "templates/partials/" + partialName + ".jst").then(function(result) {
+                        return {
+                            data: result,
+                            name: partialName
+                        };
+                    });
+                });
+                return $.when.apply($, promises);
+            }).then(function() {
+                lord.partials = {};
+                lord.arr(arguments).forEach(function(partial) {
+                    lord.partials[partial.name] = partial.data;
+                });
+                f();
+            });
+        }
+    });
 };
 
-lord.getModel = function(modelName) {
-    var d = $.Deferred();
-    if (lord.models.hasOwnProperty(modelName)) {
-        d.resolve(lord.models[modelName]);
-    } else {
-        $.ajax("/" + lord.data("sitePathPrefix") + modelName + ".json").then(function(result) {
-            lord.models[modelName] = result;
-            d.resolve(result);
-        });
-    }
-    return d.promise();
+lord.getModel = function(modelName, query) {
+    query = query ? ("?" + query) : "";
+    return new Promise(function(resolve, reject) {
+        if (!query && lord.models.hasOwnProperty(modelName)) {
+            resolve(lord.models[modelName]);
+        } else {
+            $.ajax("/" + lord.data("sitePathPrefix") + modelName + ".json" + query).then(function(result) {
+                lord.models[modelName] = result;
+                resolve(result);
+            });
+        }
+    });
 };
 
 lord.now = function() {

@@ -21,7 +21,7 @@
     {{~it.boards :board}}
         {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
             <span class="navbarItem navbarItemBoard">[<a href="/{{=it.site.pathPrefix}}{{=board.name}}"
-                  title="{{=board.title}}" data-board="{{=board.name}}">{{=board.name}}</a>] </span>
+                  title="{{=board.title}}" data-board-name="{{=board.name}}">{{=board.name}}</a>] </span>
         {{?}}
     {{~}}
 {{?}}

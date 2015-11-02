@@ -221,7 +221,42 @@ var Board = function(name, title, options) {
     return defineSetting(this, name, def);
 };
 
-/*public*/ Board.prototype.renderPost = function(post, req) {
+var renderFileInfo = function(fi) {
+    fi.sizeKB = fi.size / 1024;
+    fi.sizeText = fi.sizeKB.toFixed(2) + "KB";
+    if (fi.mimeType.substr(0, 6) == "image/" || fi.mimeType.substr(0, 6) == "video/") {
+        if (fi.dimensions)
+            fi.sizeText += ", " + fi.dimensions.width + "x" + fi.dimensions.height;
+    }
+    if (fi.mimeType.substr(0, 6) == "audio/" || fi.mimeType.substr(0, 6) == "video/") {
+        var ed = fi.extraData;
+        if (ed.duration)
+            fi.sizeText += ", " + ed.duration;
+        if (fi.mimeType.substr(0, 6) == "audio/") {
+            if (ed.bitrate)
+                fi.sizeText += ", " + ed.bitrate + Tools.translate("kbps", "kbps");
+            fi.sizeTooltip = ed.artist ? ed.artist : Tools.translate("Unknown artist", "unknownArtist");
+            fi.sizeTooltip += " - ";
+            fi.sizeTooltip += ed.title ? ed.title : Tools.translate("Unknown title", "unknownTitle");
+            fi.sizeTooltip += " [";
+            fi.sizeTooltip += ed.album ? ed.album : Tools.translate("Unknown album", "unknownAlbum");
+            fi.sizeTooltip += "]";
+            if (ed.year)
+                fi.sizeTooltip += " (" + ed.year + ")";
+        } else if (fi.mimeType.substr(0, 6) == "video/") {
+            fi.sizeTooltip = ed.bitrate + Tools.translate("kbps", "kbps");
+        }
+    }
+};
+
+/*public*/ Board.prototype.renderPost = function(post, req, opPost) {
+    post.fileInfos.forEach(function(fileInfo) {
+        renderFileInfo(fileInfo);
+    });
+    post.isOp = (post.number == post.threadNumber);
+    post.ownIp = (req.ip == post.user.ip);
+    post.ownHashpass = (req.hashpass == post.user.hashpass);
+    post.opIp = (opPost && post.user.ip == opPost.user.ip);
     if (Database.compareRegisteredUserLevels(req.level, Database.Moder) < 0)
         delete post.user.ip;
     if (post.showTripcode && Database.compareRegisteredUserLevels(post.user.level, Database.User) >= 0) {
@@ -231,6 +266,14 @@ var Board = function(name, title, options) {
     }
     delete post.user.hashpass;
     delete post.user.password;
+    if (!this.showWhois)
+        return Promise.resolve(post);
+    return Tools.flagName(post.geolocation.countryCode).then(function(flagName) {
+        post.geolocation.flagName = flagName || "default.png";
+        if (!post.geolocation.countryName)
+            post.geolocation.countryName = "Unknown country";
+        return Promise.resolve(post);
+    });
 };
 
 /*public*/ Board.prototype.postformRules = function() {

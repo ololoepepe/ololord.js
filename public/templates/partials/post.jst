@@ -1,6 +1,7 @@
 <div id="post{{=post.number}}"
      class="{{? post.isOp}}opPost{{??}}post{{?}}{{? post.ownIp}} ownIp{{?}}{{? post.opIp}} opIp{{?}}{{? it.settings.shrinkPosts}} shrinkedPost{{?}}"
      data-number="{{=post.number}}"
+     data-thread-number="{{=post.threadNumber}}"
      {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 && it.settings.mode.name != "ascetic"}}
         data-user-ip="{{post.user.ip}}"
      {{?}}>
@@ -27,7 +28,7 @@
             <img src="/{{=it.site.pathPrefix}}img/registered.png" title="{{=it.tr.registeredText}}">
         {{?}}
         {{#def.postName}}
-        {{? thread.opPost.user.ip == post.user.ip && post.options.signAsOp}}
+        {{? post.opIp && post.options.signAsOp}}
             <span class="opSign">[OP]</span>
         {{?}}
         {{? post.showTripcode && post.tripcode}}
@@ -45,16 +46,16 @@
         <span class="postDateTime {{=it.deviceType}}"
               name="dateTime">{{ out += it.formattedDate(post.createdAt); }}</span>
         {{? it.threads}}
-            #<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/thread/{{=thread.number}}.html#{{? thread.postingEnabled}}i{{?}}{{=post.number}}"
+            #<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.threadNumber}}.html#{{? thread.postingEnabled}}i{{?}}{{=post.number}}"
                 name="number" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.posterIp}}"{{?}}>{{=post.number}}</a>
         {{??}}
             #<a href="#{{=post.number}}" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.posterIp}}"{{?}}
-                {{? thread.postingEnabled}}onclick="lord.insertPostNumber(this); return false;"{{?}}
+                {{? thread.postingEnabled}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}}
                 name="number">{{=post.number}}</a>
         {{?}}
         <span class="postSequenceNumber">{{=post.sequenceNumber}}</span>
         {{? it.settings.mode.name != "ascetic" && thread.postingEnabled && !thread.postLimitReached}}
-            [<a onclick="lord.quickReply(this); return false;" title="{{=it.tr.quickReplyText}}"
+            [<a href="javascript:void(0);" onclick="lord.quickReply(this); return false;" title="{{=it.tr.quickReplyText}}"
                 name="quickReply">&gt;&gt;</a>]
         {{?}}
         {{? it.settings.mode.name != "ascetic" || it.user.loggedIn}}

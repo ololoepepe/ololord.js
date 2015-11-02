@@ -61,20 +61,13 @@ lord.changeLocale = function() {
     lord.reloadPage();
 };
 
-lord.doLogin = function() {
-    var pwd = lord.text("loginInput");
-    hashpass = lord.isHashpass(pwd) ? pwd : lord.toHashpass(pwd);
-    lord.setCookie("hashpass", hashpass, {
-        "expires": lord.Billion, "path": "/"
-    });
-    lord.reloadPage();
-};
-
-lord.doLogout = function() {
+lord.doLogout = function(event, form) {
+    event.preventDefault();
     lord.setCookie("hashpass", "", {
-        "expires": lord.Billion, "path": "/"
+        expires: lord.Billion,
+        path: "/"
     });
-    lord.reloadPage();
+    window.location = lord.nameOne("source", form).value;
 };
 
 lord.switchShowLogin = function() {
@@ -335,36 +328,37 @@ lord.checkFavoriteThreads = function() {
 
 lord.showNewPosts = function() {
     var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
-    var currentBoardName = lord.text("currentBoardName");
-    var numbers = {};
-    var navbar = lord.query(".navbar").shift();
-    lord.query(".navbarItemBoard", navbar).forEach(function(item) {
-        var a = lord.queryOne("a", item);
-        var boardName = a.childNodes[0].nodeValue;
-        if (currentBoardName == boardName)
-            return;
-        numbers[boardName] = +lastPostNumbers[boardName];
-        if (isNaN(numbers[boardName]))
-            numbers[boardName] = 0;
-    });
-    lord.ajaxRequest("get_new_post_count_ex", [numbers], lord.RpcGetNewPostCountExId, function(res) {
-        if (!res)
-            return;
-        lord.query(".navbar").forEach(function(navbar) {
-            lord.query(".navbarItemBoard", navbar).forEach(function(item) {
+    var currentBoardName = lord.data("boardName");
+    $.ajax("/" + lord.data("sitePathPrefix") + "api/lastPostNumbers.json").then(function(result) {
+        if (result.errorMessage)
+            return Promise.reject(ersult.errorMessage);
+        lastPostNumbers[currentBoardName]
+        lord.query(".navbar, .toolbar").forEach(function(navbar) {
+            lord.query(".navbarItem", navbar).forEach(function(item) {
                 var a = lord.queryOne("a", item);
-                var boardName = a.childNodes[0].nodeValue;
-                var npc = res[boardName];
-                if (!npc)
+                if (!a)
+                    return;
+                var boardName = lord.data("boardName", a);
+                if (!boardName || currentBoardName == boardName || !result[boardName])
+                    return;
+                var lastPostNumber = lastPostNumbers[boardName];
+                if (!lastPostNumber)
+                    lastPostNumber = 0;
+                var newPostCount = result[boardName] - lastPostNumber;
+                if (newPostCount <= 0)
                     return;
                 var span = lord.node("span");
                 lord.addClass(span, "newPostCount");
-                span.appendChild(lord.node("text", "+" + npc));
+                span.appendChild(lord.node("text", "+" + newPostCount));
                 var parent = a.parentNode;
                 parent.insertBefore(span, a);
                 parent.insertBefore(lord.node("text", " "), a);
             });
         });
+        if (typeof result[currentBoardName] == "number") {
+            lastPostNumbers[currentBoardName] = result[currentBoardName];
+            lord.setLocalObject("lastPostNumbers", lastPostNumbers);
+        }
     });
 };
 

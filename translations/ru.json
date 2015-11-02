@@ -2433,32 +2433,6 @@
             "value": "Этот пользователь зарегистрирован"
         }
     },
-    "Answer in this thread": {
-        "showPostFormText": {
-            "value": "Ответить в тред",
-            "_obsolete": true
-        },
-        "createThreadText": {
-            "value": "Answer in this thread",
-            "_obsolete": true
-        },
-        "answerInThreadText": {
-            "value": "Answer in this thread"
-        }
-    },
-    "Create thread": {
-        "showPostFormText": {
-            "value": "Создать тред",
-            "_obsolete": true
-        },
-        "answerInThreadText": {
-            "value": "Create thread",
-            "_obsolete": true
-        },
-        "createThreadText": {
-            "value": "Create thread"
-        }
-    },
     "Unfix thread": {
         "unfixThreadText": {
             "value": "Открепить тред"
@@ -3704,7 +3678,7 @@
     },
     "Show post form": {
         "showPostFormText": {
-            "value": "Show post form"
+            "value": "Показать форму постинга"
         }
     },
     "Submit": {

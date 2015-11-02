@@ -10,6 +10,8 @@
           href="/{{=it.site.pathPrefix}}css/3rdparty/highlight.js/{{=it.settings.codeStyle.name}}.css">
     {{? !it.noJavaScript}}
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery-1.11.3.min.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/merge.min.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/Promise.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/api.js"></script>
         {{? it.settings.mode.name != "ascetic"}}
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/doT.min.js"></script>
@@ -19,7 +21,7 @@
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/sha1.js"></script>
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base.js"></script>
             {{? it.threads || it.thread}}
-                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base_board.js"></script>
+                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/board.js"></script>
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/lib-typedarrays-min.js"></script>
                 {{? it.settings.captchaEngine && it.settings.captchaEngine.scriptSource}}
                     <script type="text/javascript" src="{{=it.settings.captchaEngine.scriptSource(it.req)}}"></script>
@@ -31,7 +33,7 @@
             {{? it.extraScripts}}
                 {{~it.extraScripts :script}}
                     {{? script.fileName}}
-                        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/{{=script}}"></script>
+                        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/{{=script.fileName}}"></script>
                     {{?? script.value}}
                         <script type="text/javascript">{{=script.value}}</script>
                     {{?}}

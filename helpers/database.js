@@ -290,7 +290,7 @@ var lastPostNumber = function(boardName) {
     return db.hget("postCounters", boardName).then(function(number) {
         if (!number)
             return 0;
-        return number;
+        return +number;
     });
 };
 

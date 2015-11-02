@@ -10,14 +10,7 @@ lord.lastPostPreviewTimer = null;
 lord.images = {};
 lord.img = null;
 lord.imgWrapper = null;
-lord.postForm = {
-    "visibility": {
-        "Top": false,
-        "Bottom": false
-    },
-    "last": "",
-    "quickReply": false
-};
+lord.lastPostFormPosition = "";
 lord.complainVideo = null;
 lord.files = null;
 lord.filesMap = null;
@@ -293,479 +286,86 @@ lord.traverseChildren = function(elem) {
     return children;
 };
 
-lord.createPostFile = function(f, boardName, postNumber) {
-    if (!f || !boardName || isNaN(+postNumber))
-        return null;
-    var sitePrefix = lord.text("sitePathPrefix");
-    if (!boardName)
-        boardName = lord.text("currentBoardName");
-    var file = lord.node("td");
-    file.id = "file" + f["sourceName"];
-    lord.addClass(file, "postFile");
-    if (lord.isAudioType(f["type"])) {
-        ["Album", "Artist", "Title", "Year"].forEach(function(key) {
-            var inp = lord.node("input");
-            inp.type = "hidden";
-            inp.name = "audioTag" + key;
-            inp.value = f["audioTag" + key];
-            file.appendChild(inp);
-        });
-    }
-    var divFileName = lord.node("div");
-    lord.addClass(divFileName, "postFileName");
-    var aFileName = lord.node("a");
-    aFileName.href = "/" + sitePrefix + boardName + "/" + f["sourceName"];
-    aFileName.target = "_blank";
-    aFileName.appendChild(lord.node("text", f["sourceName"]));
-    divFileName.appendChild(aFileName);
-    file.appendChild(divFileName);
-    var divFileSize = lord.node("div");
-    lord.addClass(divFileSize, "postFileSize");
-    lord.addClass(divFileSize, lord.text("deviceType"));
-    divFileSize.appendChild(lord.node("text", "(" + f["size"] + ")"));
-    divFileSize.title = f["sizeTooltip"];
-    file.appendChild(divFileSize);
-    var divFileSearch = lord.node("div");
-    lord.addClass(divFileSearch, "postFileSearch");
-    var a = lord.node("a");
-    a.href = "javascript:lord.deleteFile('" + boardName + "', " + postNumber + ", '" + f["sourceName"] + "');";
-    a.title = lord.text("deleteFileText");
-    var logo = lord.node("img");
-    logo.src = "/" + sitePrefix + "img/delete.png";
-    a.appendChild(logo);
-    divFileSearch.appendChild(a);
-    if (lord.isImageType(f["type"])) {
-        var a = lord.node("a");
-        a.onclick = lord.hideByImage.bind(lord, a);
-        a.title = lord.text("hideByImageText");
-        var logo = lord.node("img");
-        logo.src = "/" + sitePrefix + "img/hide.png";
-        a.appendChild(logo);
-        divFileSearch.appendChild(lord.node("text", " "));
-        divFileSearch.appendChild(a);
-        [{
-            "link": "//www.google.com/searchbyimage?image_url=",
-            "text": lord.text("findSourceWithGoogleText"),
-            "img": "google.png"
-        }, {
-            "link": "http://iqdb.org/?url=",
-            "text": lord.text("findSourceWithIqdbText"),
-            "img": "iqdb.png"
-        }].forEach(function(el) {
-            var a = lord.node("a");
-            a.href = el.link + location.origin + "/" + sitePrefix + boardName + "/" + f["sourceName"];
-            a.title = el.text;
-            a.target = "_blank";
-            var logo = lord.node("img");
-            logo.src = "/" + sitePrefix + "img/" + el.img;
-            a.appendChild(logo);
-            divFileSearch.appendChild(lord.node("text", " "));
-            divFileSearch.appendChild(a);
-        });
-    }
-    if (lord.isAudioType(f["type"])) {
-        var a = lord.node("a");
-        a.href = "javascript:lord.editAudioTags('" + boardName + "', " + postNumber + ", '" + f["sourceName"] + "');";
-        a.title = lord.text("editAudioTagsText");
-        var logo = lord.node("img");
-        logo.src = "/" + sitePrefix + "img/audio_edit_tags.png";
-        a.appendChild(logo);
-        divFileSearch.appendChild(lord.node("text", " "));
-        divFileSearch.appendChild(a);
-        a = lord.node("a");
-        a.href = "javascript:lord.addToPlaylist('" + boardName + "', '" + f["sourceName"] + "');";
-        a.title = lord.text("addToPlaylistText");
-        logo = lord.node("img");
-        logo.src = "/" + sitePrefix + "img/playlist_add.png";
-        a.appendChild(logo);
-        divFileSearch.appendChild(lord.node("text", " "));
-        divFileSearch.appendChild(a);
-    }
-    file.appendChild(divFileSearch);
-    var divImage = lord.node("div");
-    lord.addClass(divImage, "postFileFile");
-    lord.addClass(divImage, lord.text("deviceType"));
-    var inpType = lord.node("input");
-    inpType.type = "hidden";
-    inpType.name = "type";
-    inpType.value = f["type"];
-    divImage.appendChild(inpType);
-    var inpSizeKB = lord.node("input");
-    inpSizeKB.type = "hidden";
-    inpSizeKB.name = "sizeKB";
-    inpSizeKB.value = f["sizeKB"];
-    divImage.appendChild(inpSizeKB);
-    var inpSizeX = lord.node("input");
-    inpSizeX.type = "hidden";
-    inpSizeX.name = "sizeX";
-    inpSizeX.value = f["sizeX"];
-    divImage.appendChild(inpSizeX);
-    var inpSizeY = lord.node("input");
-    inpSizeY.type = "hidden";
-    inpSizeY.name = "sizeY";
-    inpSizeY.value = f["sizeY"];
-    divImage.appendChild(inpSizeY);
-    var aImage = lord.node("a");
-    aImage.href = "/" + sitePrefix + boardName + "/" + f["sourceName"];
-    (function(a, href, type, sizeX, sizeY) {
-        a.onclick = function(e) {
-            e.preventDefault();
-            lord.showImage(href, type, sizeX, sizeY);
-            return false;
-        };
-    })(aImage, "/" + sitePrefix + boardName + "/" + f["sourceName"], f["type"], f["sizeX"], f["sizeY"]);
-    var image = lord.node("img");
-    var maxRatingS = lord.getCookie("maxAllowedRating") || "R-18G";
-    var maxRating = 180;
-    if ("SFW" == maxRatingS)
-        maxRating = 0;
-    else if ("R-18" == maxRatingS)
-        maxRating = 18;
-    else if ("R-15" == maxRatingS)
-        maxRating = 15;
-    if (f["rating"] > maxRating) {
-        image.width = 200;
-        image.height = 200;
-        var ratingMap = {
-            15: "r-15",
-            18: "r-18",
-            180: "r-18g"
-        };
-        image.src = "/" + sitePrefix + "img/" + ratingMap[+f["rating"]] + ".png";
-    } else {
-        var thumbSizeX = +f["thumbSizeX"];
-        var thumbSizeY = +f["thumbSizeY"];
-        if (!isNaN(thumbSizeX) && thumbSizeX > 0)
-            image.width = thumbSizeX;
-        if (!isNaN(thumbSizeY) && thumbSizeY > 0)
-            image.height = thumbSizeY;
-        if (lord.isSpecialThumbName(f["thumbName"])) {
-            image.src = "/" + sitePrefix + "img/" + f["thumbName"].replace("/", "_") + "_logo.png";
-        } else {
-            image.src = "/" + sitePrefix + boardName + "/" + f["thumbName"];
-        }
-    }
-    aImage.appendChild(image);
-    divImage.appendChild(aImage);
-    file.appendChild(divImage);
-    return file;
-};
-
-lord.createPostNode = function(res, permanent, boardName) {
-    if (!res)
-        return null;
-    post = lord.id("postTemplate");
-    if (!post)
-        return null;
-    post = post.cloneNode(true);
-    post.id = !!permanent ? ("post" + res["number"]) : "";
-    post.style.display = "";
-    post["fromAjax"] = true;
-    if (!boardName)
-        boardName = lord.text("currentBoardName");
-    var fixed = lord.nameOne("fixed", post);
-    if (!!res["fixed"])
-        fixed.style.display = "";
-    else
-        fixed.parentNode.removeChild(fixed);
-    var closed = lord.nameOne("closed", post);
-    if (!!res["closed"])
-        closed.style.display = "";
-    else
-        closed.parentNode.removeChild(closed);
-    var bumpLimit = lord.nameOne("bumpLimit", post);
-    if (!!res["bumpLimitReached"])
-        bumpLimit.style.display = "";
-    else
-        bumpLimit.parentNode.removeChild(bumpLimit);
-    var postLimit = lord.nameOne("postLimit", post);
-    if (!!res["postLimitReached"])
-        postLimit.style.display = "";
-    else
-        postLimit.parentNode.removeChild(postLimit);
-    var draftIndicator = lord.nameOne("draftIndicator", post);
-    if (!!res["draft"])
-        draftIndicator.style.display = "";
-    else
-        draftIndicator.parentNode.removeChild(draftIndicator);    
-    var opSign = lord.nameOne("opSign", post);
-    if (!res["signAsOp"] || !res["opIp"])
-        opSign.parentNode.removeChild(opSign);
-    var postSubject = lord.nameOne("postSubject", post);
-    postSubject.appendChild(lord.node("text", res["subject"]));
-    if (res["subject"].length < 1)
-        lord.addClass(postSubject, "defaultPostSubject");
-    if (res["opIp"])
-        lord.addClass(post, "opIp");
-    if (res["ownIp"])
-        lord.addClass(post, "ownIp");
-    if (+lord.text("shrinkPosts"))
-        lord.addClass(post, "shrinkedPost");
-    var registered = lord.nameOne("registered", post);
-    if (!!res["showRegistered"] && !!res["showTripcode"])
-        registered.style.display = "";
-    else
-        registered.parentNode.removeChild(registered);
-    var name = lord.nameOne("someName", post);
-    if (!!lord.getLocalObject("hideUserNames", false))
-        name.style.display = "none";
-    if (!!res["email"])
-        name.innerHTML = "<a class='mailtoName' href='mailto:" + res["email"] + "'>" + res["nameRaw"] + "</a>";
-    else
-        name.innerHTML = res["name"];
-    var tripcode = lord.nameOne("tripcode", post);
-    if (!!res["showTripcode"] && "" !== res["tripcode"]) {
-        if (!lord.getLocalObject("hideTripcodes", false))
-            tripcode.style.display = "";
-        tripcode.appendChild(lord.node("text", res["tripcode"]));
-    } else {
-        tripcode.parentNode.removeChild(tripcode);
-    }
-    var whois = lord.nameOne("whois", post);
-    var sitePathPrefix = lord.text("sitePathPrefix");
-    if (!!res["flagName"]) {
-        whois.style.display = "";
-        whois.src = whois.src.replace("%flagName%", res["flagName"]);
-        whois.title = res["countryName"];
-        if (!!res["cityName"])
-            whois.title = res["cityName"] + ", " + whois.title;
-    } else {
-        whois.parentNode.removeChild(whois);
-    }
-    lord.nameOne("dateTime", post).appendChild(lord.node("text", res["dateTime"]));
-    var moder = (lord.text("moder") === "true");
-    var number = lord.nameOne("number", post);
-    number.appendChild(lord.node("text", res["number"]));
-    if (moder)
-        number.title = res["ip"];
-    var postingEnabled = (lord.text("postingEnabled") === "true");
-    var inp = lord.id("currentThreadNumber");
-    if (!!inp && +inp.value === res["threadNumber"]) {
-        number.href = "#" + res["number"];
-    } else {
-        number.href = "/" + sitePathPrefix + boardName + "/thread/" + res["threadNumber"] + ".html#"
-        if (postingEnabled)
-            number.href += "i";
-        number.href += res["number"];
-    }
-    var files = lord.nameOne("files", post);
-    if (!!res["files"]) {
-        post.ajaxFiles = {};
-        for (var i = 0; i < res["files"].length; ++i) {
-            var file = lord.createPostFile(res["files"][i], boardName, res["number"]);
-            if (!!file)
-                files.insertBefore(file, files.children[files.children.length - 1]);
-            post.ajaxFiles[res["files"][i]["thumbName"]] = res["files"][i];
-        }
-    }
-    var blockquoteThread = !!lord.id("currentThreadNumber");
-    var modificationDateTimeTd = lord.nameOne("modificationDateTimeTd", post);
-    var bannedForTd = lord.nameOne("bannedForTd", post);
-    var referencedByTd = lord.nameOne("referencedByTd", post);
-    var oneFileTr = lord.nameOne("files", post);
-    var manyFilesTr = lord.nameOne("manyFilesTr", post);
-    var textOneFile = lord.nameOne("textOneFile", post);
-    var textManyFiles = lord.nameOne("textManyFiles", post);
-    if ((lord.text("deviceType") != "mobile" && res["files"].length < 2)
-        || (lord.text("deviceType") == "mobile" && res["files"].length < 1)) {
-        manyFilesTr.parentNode.removeChild(manyFilesTr);
-        textOneFile.innerHTML = res["text"];
-        if (blockquoteThread)
-            lord.addClass(textOneFile, "blockquoteThread");
-    } else {
-        var oneFileTd = lord.nameOne("oneFileTd", post);
-        oneFileTd.removeChild(textOneFile);
-        lord.addClass(oneFileTd, "shrink");
-        lord.nameOne("manyFilesTd", post).colSpan = res["files"].length + 2;
-        lord.nameOne("textManyFiles", post).innerHTML = res["text"];
-        if (blockquoteThread)
-            lord.addClass(textManyFiles, "blockquoteThread");
-        modificationDateTimeTd.colSpan = res["files"].length + 2;
-        bannedForTd.colSpan = res["files"].length + 2;
-        referencedByTd.colSpan = res["files"].length + 2;
-    }
-    var modificationDateTime = lord.nameOne("modificationDateTime", post);
-    if ("" !== res["modificationDateTime"]) {
-        modificationDateTime.style.display = "";
-        modificationDateTime.childNodes[0].nodeValue += " " + res["modificationDateTime"];
-    } else {
-        modificationDateTime.parentNode.removeChild(modificationDateTime);
-    }
-    var bannedFor = lord.nameOne("bannedFor", post);
-    if (!!res["bannedFor"])
-        bannedFor.style.display = "";
-    else
-        bannedFor.parentNode.removeChild(bannedFor);
-    var referencedBy = lord.nameOne("referencedBy", post);
-    if (!!res["referencedBy"] && res["referencedBy"].length > 0) {
-        lord.nameOne("referencedByTr", post).style.display = "";
-        for (var i = 0; i < res["referencedBy"].length; ++i) {
-            var ref = res["referencedBy"][i];
-            var bn = ref["boardName"]
-            var pn = ref["postNumber"];
-            var tn = ref["threadNumber"];
-            var a = lord.node("a");
-            a.href = "/" + sitePathPrefix + bn + "/thread/" + tn + ".html#" + pn;
-            referencedBy.appendChild(lord.node("text", " "));
-            a.appendChild(lord.node("text", ">>" + (bn !== boardName ? ("/" + bn + "/") : "") + pn));
-            referencedBy.appendChild(a);
-        }
-    }
-    if (lord.createPostNodeCustom)
-        lord.createPostNodeCustom(post, res, permanent, boardName);
-    if (res["sequenceNumber"]) {
-        var seqNum = lord.queryOne(".postSequenceNumber", post);
-        seqNum.appendChild(lord.node("text", res["sequenceNumber"]));
-    }
-    var perm = lord.nameOne("permanent", post);
-    if (!permanent) {
-        perm.parentNode.removeChild(perm);
-        lord.addClass(post, "temporary");
-        return post;
-    }
-    lord.nameOne("postAnchor", post).id = res["number"];
-    var quickReply = lord.nameOne("quickReply", post);
-    quickReply.href = quickReply.href.replace("%postNumber%", res["number"]);
-    lord.removeReferences(res["number"]);
-    if (!!res["refersTo"]) {
-        var refersTo = {};
-        for (var i = 0; i < res["refersTo"].length; ++i) {
-            var v = res["refersTo"][i];
-            refersTo[v["boardName"] + "/" + v["postNumber"]] = v["threadNumber"];
-        }
-        lord.addReferences(res["number"], refersTo);
-    }
-    lord.addClass(post, "newPost");
-    post.onmouseover = function() {
-        lord.removeClass(this, "newPost");
-        this.onmouseover = null;
-    }
-    if (res["number"] === res["threadNumber"]) {
-        lord.removeClass(post, "post");
-        lord.addClass(post, "opPost");
-    }
-    perm.style.display = "";
-    if (+lord.text("currentThreadNumber") > 0) {
-        var anumber = lord.node("a");
-        number.parentNode.insertBefore(anumber, number);
-        number.parentNode.removeChild(number);
-        anumber.title = number.title;
-        anumber.setAttribute("name", "number");
-        anumber.appendChild(number.firstChild);
-        anumber.href = "#" + res["number"];
-        (function(pn) {
-            if (postingEnabled) {
-                anumber.onclick = function(e) {
-                    e.preventDefault();
-                    lord.insertPostNumber(pn);
-                    return false;
-                };
+lord.createPostNode = function(post, permanent) {
+    var c = {};
+    return lord.getModel("misc/base").then(function(model) {
+        c.model = model;
+        c.locale = model.site.locale;
+        c.dateFormat = model.site.dateFormat;
+        c.model.settings = lord.settings();
+        return lord.getModel("misc/tr");
+    }).then(function(model) {
+        c.model = merge.recursive(c.model, model);
+        return lord.getModel("misc/boards");
+    }).then(function(model) {
+        c.model = merge.recursive(c.model, model);
+        return lord.getModel("misc/board", "boardName=" + post.boardName);
+    }).then(function(model) {
+        c.model = merge.recursive(c.model, model);
+        return lord.getModel("api/threadInfo", "boardName=" + post.boardName + "&threadNumber=" + post.threadNumber);
+    }).then(function(thread) {
+        c.model.thread = thread;
+        c.model.post = post;
+        c.model.compareRatings = function(r1, r2) {
+            if (["SFW", "R-15", "R-18", "R-18G"].indexOf(r2) < 0)
+                throw "Invalid rating r2: " + r2;
+            switch (r1) {
+            case "SFW":
+                return (r1 == r2) ? 0 : -1;
+            case "R-15":
+                if (r1 == r2)
+                    return 0;
+                return ("SFW" == r2) ? 1 : -1;
+            case "R-18":
+                if (r1 == r2)
+                    return 0;
+                return ("R-18G" == r2) ? -1 : 1;
+            case "R-18G":
+                return (r1 == r2) ? 0 : 1;
+            default:
+                throw "Invalid rating r1: " + r1;
             }
-        })(res["number"]);
-    }
-    var deleteButton = lord.nameOne("deleteButton", post);
-    deleteButton.href = deleteButton.href.replace("%postNumber%", res["number"]);
-    var rawTextButton = lord.nameOne("rawTextButton", post);
-    rawTextButton.href = rawTextButton.href.replace("%postNumber%", res["number"]);
-    var hideButton = lord.nameOne("hideButton", post);
-    hideButton.id = hideButton.id.replace("%postNumber%", res["number"]);
-    hideButton.href = hideButton.href.replace("%postNumber%", res["number"]);
-    var addFileButton = lord.nameOne("addFileButton", post);
-    var editButton = lord.nameOne("editButton", post);
-    var fixButton = lord.nameOne("fixButton", post);
-    var unfixButton = lord.nameOne("unfixButton", post);
-    var openButton = lord.nameOne("openButton", post);
-    var closeButton = lord.nameOne("closeButton", post);
-    var moveButton = lord.nameOne("moveButton", post);
-    var banButton = lord.nameOne("banButton", post);
-    var ipButton = lord.nameOne("ipButton", post);
-    var downloadButton = lord.nameOne("downloadButton", post);
-    var favButton = lord.nameOne("addToFavoritesButton", post);
-    var rawText = lord.nameOne("rawText", post);
-    var rawHtml = lord.nameOne("rawHtml", post);
-    if (res["rawHtml"])
-        rawHtml.value = "true";
-    lord.nameOne("markupMode", post).value = res["markupMode"];
-    lord.nameOne("draft", post).value = res["draft"];
-    if ((moder || res["draft"]) && (res["files"].length < +lord.text("maxFileCount"))) {
-        addFileButton.href = addFileButton.href.replace("%postNumber%", res["number"]);
-    } else {
-        addFileButton.parentNode.parentNode.removeChild(addFileButton.parentNode);
-    }
-    if (moder || res["draft"]) {
-        editButton.href = editButton.href.replace("%postNumber%", res["number"]);
-        rawText.value = res["rawPostText"];
-        lord.nameOne("email", post).value = res["email"];
-        lord.nameOne("name", post).value = res["rawName"];
-        lord.nameOne("subject", post).value = res["rawSubject"];
-    } else {
-        editButton.parentNode.parentNode.removeChild(editButton.parentNode);
-    }
-    if (res["number"] != res["threadNumber"] || !inp || +inp.value !== res["threadNumber"])
-        downloadButton.parentNode.parentNode.removeChild(downloadButton.parentNode);
-    if (res["number"] == res["threadNumber"]) {
-        var fav = lord.getLocalObject("favoriteThreads", {});
-        if (fav.hasOwnProperty(boardName + "/" + res["number"])) {
-            var img = lord.queryOne("img", favButton);
-            img.title = lord.text("removeFromFavoritesText");
-            img.src = img.src.replace("favorite.png", "favorite_active.png");
-            favButton.onclick = lord.removeThreadFromFavorites.bind(lord, boardName, res["number"]);
-        } else {
-            favButton.onclick = lord.addThreadToFavorites.bind(lord, boardName, res["number"]);
+        };
+        c.model.compareRegisteredUserLevels = function(l1, l2) {
+            if (!l1)
+                l1 = null;
+            if (!l2)
+                l2 = null;
+            if (["ADMIN", "MODER", "USER", null].indexOf(l2) < 0)
+                throw "Invalid registered user level l2: " + l2;
+            switch (l1) {
+            case "ADMIN":
+                return (l1 == l2) ? 0 : 1;
+            case "MODER":
+                if (l1 == l2)
+                    return 0;
+                return ("ADMIN" == l2) ? -1 : 1;
+            case "USER":
+                if (l1 == l2)
+                    return 0;
+                return (null == l2) ? 1 : -1;
+            case null:
+                return (l1 == l2) ? 0 : -1;
+            default:
+                throw "Invalid reistered user level l1: " + l1;
+            }
+        };
+        c.model.formattedDate = function(date) {
+            return moment(date).locale(c.locale).format(c.dateFormat);
+        };
+        return lord.getTemplate("post");
+    }).then(function(template) {
+        var nodes = $.parseHTML(template(c.model));
+        var node = (nodes.length > 1) ? nodes[1] : nodes[0];
+        if (!permanent) {
+            var actions = lord.queryOne(".postActions", node);
+            actions.parentNode.removeChild(actions);
+            lord.removeClass(node, "opPost");
+            lord.addClass(node, "post");
+            lord.addClass(node, "temporary");
         }
-    } else {
-        favButton.parentNode.parentNode.removeChild(favButton.parentNode);
-    }
-    if (!moder) {
-        fixButton.parentNode.parentNode.removeChild(fixButton.parentNode);
-        unfixButton.parentNode.parentNode.removeChild(unfixButton.parentNode);
-        openButton.parentNode.parentNode.removeChild(openButton.parentNode);
-        closeButton.parentNode.parentNode.removeChild(closeButton.parentNode);
-        moveButton.parentNode.parentNode.removeChild(moveButton.parentNode);
-        ipButton.parentNode.parentNode.removeChild(ipButton.parentNode);
-        banButton.parentNode.parentNode.removeChild(banButton.parentNode);
-        return post;
-    }
-    var toThread = lord.nameOne("toThread", post);
-    if (res["number"] === res["threadNumber"]) {
-        if (!!res["fixed"]) {
-            unfixButton.style.display = "";
-            unfixButton.href = unfixButton.href.replace("%postNumber%", res["number"]);
-            fixButton.parentNode.parentNode.removeChild(fixButton.parentNode);
-        } else {
-            fixButton.style.display = "";
-            fixButton.href = fixButton.href.replace("%postNumber%", res["number"]);
-            unfixButton.parentNode.parentNode.removeChild(unfixButton.parentNode);
-        }
-        if (!!res["closed"]) {
-            openButton.style.display = "";
-            openButton.href = openButton.href.replace("%postNumber%", res["number"]);
-            closeButton.parentNode.parentNode.removeChild(closeButton.parentNode);
-        } else {
-            closeButton.style.display = "";
-            closeButton.href = closeButton.href.replace("%postNumber%", res["number"]);
-            openButton.parentNode.parentNode.removeChild(openButton.parentNode);
-        }
-        moveButton.parentNode.parentNode.removeChild(moveButton.parentNode);
-        moveButton.href = moveButton.href.replace("%postNumber%", res["number"]);
-        if (!inp) {
-            toThread.style.display = "";
-            var toThreadLink = lord.nameOne("toThreadLink", post);
-            toThreadLink.href = toThreadLink.href.replace("%postNumber%", res["number"]);
-        } else {
-            toThread.parentNode.removeChild(toThread);
-        }
-    } else {
-        fixButton.parentNode.parentNode.removeChild(fixButton.parentNode);
-        unfixButton.parentNode.parentNode.removeChild(unfixButton.parentNode);
-        openButton.parentNode.parentNode.removeChild(openButton.parentNode);
-        closeButton.parentNode.parentNode.removeChild(closeButton.parentNode);
-        moveButton.parentNode.parentNode.removeChild(moveButton.parentNode);
-        toThread.parentNode.removeChild(toThread);
-    }
-    ipButton.href = ipButton.href.replace("%postIp%", res["ip"]);
-    banButton.href = banButton.href.replace("%postNumber%", res["number"]);
-    return post;
+        return node;
+    });
 };
 
 lord.updatePost = function(boardName, postNumber, post) {
@@ -840,19 +440,19 @@ lord.getFileHashes = function(div) {
 };
 
 lord.getAdditionalCount = function(el) {
-    if (!el)    
+    if (!el)
         return 0;
     el = el.parentNode;
-    if (!el)    
+    if (!el)
         return 0;
     el = el.parentNode;
-    if (!el)    
+    if (!el)
         return 0;
     el = el.parentNode;
-    if (!el)    
+    if (!el)
         return 0;
     el = el.parentNode;
-    if (!el)    
+    if (!el)
         return 0;
     el = lord.nameOne("additionalCount", el);
     return el ? el.value : 0;
@@ -1204,25 +804,69 @@ lord.showPasswordDialog = function(title, label, callback) {
 };
 
 lord.showHidePostForm = function(el) {
-    lord.getModel("misc/tr").then(function(model) {
-        var tr = model.tr;
-        var position = lord.data("position", el);
-        lord.removeQuickReply();
-        var postForm = lord.id("postForm");
-        var theButton = lord.id("showHidePostFormButton" + position);
-        if (lord.postForm.visibility[position]) {
-            theButton.innerHTML = tr.showPostFormText;
-            lord.id("hiddenPostForm").appendChild(postForm);
-            lord.postForm.last = "";
-        } else {
-            var p = ("Top" === position) ? "Bottom" : "Top";
-            if (lord.postForm.visibility[p])
-                lord.showHidePostForm(p);
-            theButton.innerHTML = tr.hidePostFormText;
-            var t = lord.id("createActionContainer" + position);
-            lord.queryOne("div > div", t).appendChild(postForm);
+    var postForm = lord.id("postForm");
+    var position = lord.data("position", el);
+    var container = postForm.parentNode;
+    var hide = ("postFormContainer" + position) == container.id;
+    lord.hidePostForm();
+    if (hide) {
+        lord.lastPostFormPosition = "";
+    } else {
+        lord.id("postFormContainer" + position).appendChild(postForm);
+        lord.lastPostFormPosition = position;
+        lord.getModel("misc/tr").then(function(model) {
+            lord.id("showHidePostFormButton" + position).innerHTML = model.tr.hidePostFormText;
+        });
+    }
+};
+
+lord.quickReply = function(el) {
+    var postNumber = +lord.data("number", el, true);
+    if (isNaN(postNumber) || postNumber <= 0)
+        return;
+    var post = lord.id("post" + postNumber);
+    if (!post)
+        return;
+    var postForm = lord.id("postForm");
+    var targetContainer = post.parentNode;
+    var same = (postForm.parentNode == targetContainer);
+    var selection = document.getSelection().toString();
+    lord.hidePostForm();
+    if (same)
+        return;
+    var inputThread = lord.nameOne("thread", postForm);
+    if (!inputThread) {
+        inputThread = lord.node("input");
+        inputThread.type = "hidden";
+        inputThread.name = "thread";
+        inputThread.value = lord.data("threadNumber", el, true);
+        postForm.appendChild(inputThread);
+        postForm.action = postForm.action.replace("create_thread", "create_post");
+    }
+    if (post.nextSibling)
+        targetContainer.insertBefore(postForm, post.nextSibling);
+    else
+        targetContainer.appendChild(postForm);
+    lord.insertPostNumber(postNumber);
+    lord.quoteSelectedText(selection);
+};
+
+lord.hidePostForm = function() {
+    var postForm = lord.id("postForm");
+    if (!lord.data("threadNumber")) {
+        var inputThread = lord.nameOne("thread", postForm);
+        if (inputThread)
+            inputThread.parentNode.removeChild(inputThread);
+        postForm.action = postForm.action.replace("create_post", "create_thread");
+    }
+    var container = postForm.parentNode;
+    lord.id("hiddenPostForm").appendChild(postForm);
+    ["Top", "Bottom"].forEach(function(position) {
+        if (("postFormContainer" + position) == container.id) {
+            lord.getModel("misc/tr").then(function(model) {
+                lord.id("showHidePostFormButton" + position).innerHTML = model.tr.showPostFormText;
+            });
         }
-        lord.postForm.visibility[position] = !lord.postForm.visibility[position];
     });
 };
 
@@ -1516,47 +1160,6 @@ lord.insertPostNumber = function(postNumber) {
     }
 };
 
-lord.quickReply = function(postNumber) {
-    var selection = document.getSelection().toString();
-    var postForm = lord.id("postForm");
-    if (lord.postForm.quickReply) {
-        var prev = postForm.previousSibling;
-        prev = prev ? prev.id.replace("post", "") : 0;
-        lord.removeQuickReply();
-        if (prev == postNumber)
-            return;
-    }
-    postNumber = +postNumber;
-    if (isNaN(postNumber) || postNumber <= 0)
-        return;
-    var post = lord.id("post" + postNumber);
-    if (!post)
-        return;
-    var parent = post.parentNode;
-    var thread = lord.nameOne("thread", postForm);
-    if (!thread) {
-        var inp = lord.node("input");
-        inp.type = "hidden";
-        inp.name = "thread";
-        inp.value = parent.id.replace("threadPosts", "").replace("thread", "");
-        postForm.appendChild(inp);
-        postForm.action = postForm.action.replace("create_thread", "create_post");
-    }
-    ["Top", "Bottom"].forEach(function(pos) {
-        if (lord.postForm.visibility[pos]) {
-            lord.showHidePostForm(pos);
-            lord.postForm.last = pos;
-        }
-    });
-    if (post.nextSibling)
-        parent.insertBefore(postForm, post.nextSibling);
-    else
-        parent.appendChild(postForm);
-    lord.insertPostNumber(postNumber);
-    lord.quoteSelectedText(selection);
-    lord.postForm.quickReply = true;
-};
-
 lord.addFile = function(boardName, postNumber) {
     if (!boardName || isNaN(+postNumber))
         return;
@@ -1722,10 +1325,10 @@ lord.setPostHidden = function(boardName, postNumber) {
                 list[bn + "/" + pn].threadNumber = res["threadNumber"];
                 lord.setLocalObject("hiddenPosts", list);
             });
-        })(boardName, postNumber);        
+        })(boardName, postNumber);
     }
     else if (list[boardName + "/" + postNumber])
-        delete list[boardName + "/" + postNumber];          
+        delete list[boardName + "/" + postNumber];
     lord.setLocalObject("hiddenPosts", list);
     lord.strikeOutHiddenPostLinks();
 };
@@ -1820,126 +1423,62 @@ lord.addToPlaylist = function(boardName, fileName) {
     lord.setLocalObject("playlist/tracks", tracks);
 };
 
-lord.viewPostStage2 = function(link, boardName, postNumber, post) {
-    post.onmouseout = function(event) {
-        var next = post;
-        while (!!next) {
-            var list = lord.traverseChildren(next);
-            var e = event.toElement || event.relatedTarget;
-            if (list.indexOf(e) >= 0)
-                return;
-            next = next.nextPostPreview;
-        }
-        if (!!post.parentNode)
-            post.parentNode.removeChild(post);
-        if (post.previousPostPreview)
-            post.previousPostPreview.onmouseout(event);
-    };
-    post.onmouseover = function(event) {
-        post.mustHide = false;
-    };
-    if (!lord.postPreviews[boardName + "/" + postNumber])
-        lord.postPreviews[boardName + "/" + postNumber] = post;
-    else
-        post.style.display = "";
-    post.previousPostPreview = lord.lastPostPreview;
-    if (!!lord.lastPostPreview)
-        lord.lastPostPreview.nextPostPreview = post;
-    lord.lastPostPreview = post;
-    post.mustHide = true;
-    if (!!lord.lastPostPreviewTimer) {
-        clearTimeout(lord.lastPostPreviewTimer);
-        lord.lastPostPreviewTimer = null;
-    }
-    document.body.appendChild(post);
-    post.style.position = "absolute";
-    var doc = document.documentElement;
-    var coords = link.getBoundingClientRect();
-    var linkCenter = coords.left + (coords.right - coords.left) / 2;
-    if (linkCenter < 0.6 * doc.clientWidth) {
-        post.style.maxWidth = doc.clientWidth - linkCenter + "px";
-        post.style.left = linkCenter + "px";
-    } else {
-        post.style.maxWidth = linkCenter + "px";
-        post.style.left = linkCenter - post.scrollWidth + "px";
-    }
-    var scrollTop = doc.scrollTop;
-    if (!scrollTop) //NOTE: Workaround for Chrome/Safari. I really HATE you, HTML/CSS/JS!
-        scrollTop = document.body.scrollTop;
-    post.style.top = (doc.clientHeight - coords.bottom >= post.scrollHeight)
-        ? (scrollTop + coords.bottom - 4 + "px")
-        : (scrollTop + coords.top - post.scrollHeight - 4 + "px");
-    post.style.zIndex = 9001;
-};
-
-lord.viewPost = function(link, boardName, postNumber) {
-    if (lord.text("deviceType") == "mobile")
-        return;
-    postNumber = +postNumber;
-    if (!link || !boardName || isNaN(postNumber) || postNumber <= 0)
-        return;
-    var currentBoardName = lord.text("currentBoardName");
-    var post = null;
-    if (boardName === currentBoardName)
-        post = lord.id("post" + postNumber);
-    if (!post)
-        post = lord.postPreviews[boardName + "/" + postNumber];
-    if (!post) {
-        lord.ajaxRequest("get_post", [boardName, +postNumber], lord.RpcGetPostId, function(res) {
-            post = lord.createPostNode(res, false, boardName);
-            if (!post)
-                return;
-            if (!!lord.getLocalObject("strikeOutHiddenPostLinks", true))
-                lord.strikeOutHiddenPostLinks(post);
-            if (!!lord.getLocalObject("signOpPostLinks", true))
-                lord.signOpPostLinks(post);
-            if (!!lord.getLocalObject("signOwnPostLinks", true))
-                lord.signOwnPostLinks(post);
-            lord.viewPostStage2(link, boardName, postNumber, post);
-        });
-    } else {
-        var fromAjax = !!post.fromAjax;
-        if (fromAjax)
-            var ajaxFiles = post.ajaxFiles;
-        post = post.cloneNode(true);
-        lord.removeClass(post, "newPost selectedPost");
-        lord.addClass(post, "temporary");
-        if (fromAjax) {
-            post.addEventListener("click", function(e) {
-                var img = e.target;
-                if (img.tagName != "IMG")
+lord.viewPost = function(a, boardName, postNumber) {
+    lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
+        if (!post)
+            return Promise.reject("Failed to get post");
+        if (post.errorMessage)
+            return Promise.reject(Post.errorMessage);
+        return lord.createPostNode(post, false, boardName);
+    }).then(function(post) {
+        post.onmouseout = function(event) {
+            var next = post;
+            while (next) {
+                var list = lord.traverseChildren(next);
+                var e = event.toElement || event.relatedTarget;
+                if (list.indexOf(e) >= 0)
                     return;
-                if (!ajaxFiles)
-                    return;
-                var ajaxFile = ajaxFiles[img.src.split("/").pop()];
-                if (!ajaxFile)
-                    return;
-                var ind = img.src.lastIndexOf("/");
-                var href = img.src.substring(0, ind) + "/" + ajaxFile["sourceName"];
-                e.preventDefault();
-                lord.showImage(href, ajaxFile["type"], ajaxFile["sizeX"], ajaxFile["sizeY"]);
-            });
-        }
-        lord.removeClass(post, "opPost");
-        lord.addClass(post, "post");
-        var list = lord.traverseChildren(post);
-        for (var i = 0; i < list.length; ++i) {
-            switch (list[i].name) {
-            case "editButton":
-            case "fixButton":
-            case "closeButton":
-            case "banButton":
-            case "deleteButton":
-            case "hideButton":
-                list[i].parentNode.removeChild(list[i]);
-                break;
-            default:
-                break;
+                next = next.nextPostPreview;
             }
-            list[i].id = "";
+            if (!!post.parentNode)
+                post.parentNode.removeChild(post);
+            if (post.previousPostPreview)
+                post.previousPostPreview.onmouseout(event);
+        };
+        post.onmouseover = function(event) {
+            post.mustHide = false;
+        };
+        post.previousPostPreview = lord.lastPostPreview;
+        if (lord.lastPostPreview)
+            lord.lastPostPreview.nextPostPreview = post;
+        lord.lastPostPreview = post;
+        post.mustHide = true;
+        if (lord.lastPostPreviewTimer) {
+            clearTimeout(lord.lastPostPreviewTimer);
+            lord.lastPostPreviewTimer = null;
         }
-        lord.viewPostStage2(link, boardName, postNumber, post);
-    }
+        document.body.appendChild(post);
+        post.style.position = "absolute";
+        var doc = document.documentElement;
+        var coords = a.getBoundingClientRect();
+        var linkCenter = coords.left + (coords.right - coords.left) / 2;
+        if (linkCenter < 0.6 * doc.clientWidth) {
+            post.style.maxWidth = doc.clientWidth - linkCenter + "px";
+            post.style.left = linkCenter + "px";
+        } else {
+            post.style.maxWidth = linkCenter + "px";
+            post.style.left = linkCenter - post.scrollWidth + "px";
+        }
+        var scrollTop = doc.scrollTop;
+        if (!scrollTop) //NOTE: Workaround for Chrome/Safari. I really HATE you, HTML/CSS/JS!
+            scrollTop = document.body.scrollTop;
+        post.style.top = (doc.clientHeight - coords.bottom >= post.scrollHeight)
+            ? (scrollTop + coords.bottom - 4 + "px")
+            : (scrollTop + coords.top - post.scrollHeight - 4 + "px");
+        post.style.zIndex = 9001;
+    }).catch(function(err) {
+        console.log(err);
+    });
 };
 
 lord.noViewPost = function() {
@@ -2246,7 +1785,7 @@ lord.removeFile = function(current) {
         var c = parent.children[0];
         if (!c.fileHash && lord.queryOne("input", c).value === "" && !c.droppedFile)
             c.querySelector("a").style.display = "none";
-    } 
+    }
     if (parent.children.length < 1) {
         div.querySelector("a").style.display = "none";
         div.innerHTML = div.innerHTML; //NOTE: Workaround since we can't clear it other way
@@ -2712,19 +2251,7 @@ lord.submitted = function(event, form) {
     return false;
 };
 
-lord.removeQuickReply = function() {
-    if (!lord.postForm.quickReply)
-        return;
-    var postForm = lord.id("postForm");
-    if (!lord.text("currentThreadNumber")) {
-        postForm.removeChild(lord.nameOne("thread", postForm));
-        postForm.action = postForm.action.replace("create_post", "create_thread");
-    }
-    lord.id("hiddenPostForm").appendChild(postForm);
-    lord.postForm.quickReply = false;
-    if (lord.postForm.last)
-        lord.showHidePostForm(lord.postForm.last);
-};
+
 
 lord.resetPostForm = function() {
     var postForm = lord.id("postForm");
@@ -2834,21 +2361,26 @@ lord.posted = function(response) {
 
 lord.globalOnmouseover = function(e) {
     var a = e.target;
-    if (a.tagName != "A" || a.innerHTML == a.innerHTML.replace("&gt;&gt;", ""))
+    if (a.tagName != "A")
         return;
-    var pn = +a.href.split("#").pop();
-    if (isNaN(pn) || pn <= 0)
+    var boardName = lord.data("boardName", a);
+    if (!boardName)
         return;
-    var bn = a.href.replace(/\/thread\/\d+\.html#\d+$/, "").split("/").pop();
-    lord.viewPost(a, bn, pn);
+    var postNumber = +lord.data("postNumber", a);
+    if (isNaN(postNumber) || postNumber <= 0)
+        return;
+    lord.viewPost(a, boardName, postNumber);
 };
 
 lord.globalOnmouseout = function(e) {
     var a = e.target;
-    if (a.tagName != "A" || a.innerHTML == a.innerHTML.replace("&gt;&gt;", ""))
+    if (a.tagName != "A")
         return;
-    var pn = +a.href.split("#").pop();
-    if (isNaN(pn) || pn <= 0)
+    var boardName = lord.data("boardName", a);
+    if (!boardName)
+        return;
+    var postNumber = +lord.data("postNumber", a);
+    if (isNaN(postNumber) || postNumber <= 0)
         return;
     lord.noViewPost();
 };
@@ -3233,8 +2765,10 @@ lord.hotkey_markupCode = function() {
 
 lord.initializeOnLoadBaseBoard = function() {
     document.body.onclick = lord.globalOnclick;
-    document.body.onmouseover = lord.globalOnmouseover;
-    document.body.onmouseout = lord.globalOnmouseout;
+    if (lord.text("deviceType") != "mobile") {
+        document.body.onmouseover = lord.globalOnmouseover;
+        document.body.onmouseout = lord.globalOnmouseout;
+    }
     if (lord.getLocalObject("mumWatching", false)) {
         var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
         img.src = "/" + lord.text("sitePathPrefix") + "img/mum_watching.png";

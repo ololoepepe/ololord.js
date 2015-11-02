@@ -185,7 +185,9 @@ controller.baseModel = function(req) {
         site: {
             protocol: config("site.protocol", "http"),
             domain: config("site.domain", "localhost:8080"),
-            pathPrefix: config("site.pathPrefix", "")
+            pathPrefix: config("site.pathPrefix", ""),
+            locale: config("site.locale", "en"),
+            locale: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss")
         },
         user: {
             ip: req.trueIp,
@@ -295,12 +297,6 @@ controller.boardModel = function(board) {
     };
 };
 
-controller.headModel = function(board, req) {
-    return {
-        title: board.title
-    };
-};
-
 controller.settingsModel = function(req) {
     return { settings: req.settings };
 };
@@ -316,10 +312,6 @@ controller.translationsModel = function() {
     translate("Framed version", "framedVersionText");
     translate("F.A.Q.", "toFaqPageText");
     translate("User management", "toManagePageText");
-    translate("kbps", "kbps");
-    translate("Unknown album", "unknownAlbum");
-    translate("Unknown artist", "unknownArtist");
-    translate("Unknown title", "unknownTitle");
     translate("Hide by image hash", "hideByImageText");
     translate("Answer", "toThread");
     translate("Answers:", "referencedByText");
@@ -602,54 +594,6 @@ controller.postingSpeedString = function(board, lastPostNumber) {
             }
         }
     }
-};
-
-var renderFileInfo = function(fi) {
-    fi.sizeKB = fi.size / 1024;
-    fi.sizeText = fi.sizeKB.toFixed(2) + "KB";
-    if (fi.mimeType.substr(0, 6) == "image/" || fi.mimeType.substr(0, 6) == "video/") {
-        if (fi.dimensions)
-            fi.sizeText += ", " + fi.dimensions.width + "x" + fi.dimensions.height;
-    }
-    var tr = controller.translationsModel().tr;
-    if (fi.mimeType.substr(0, 6) == "audio/" || fi.mimeType.substr(0, 6) == "video/") {
-        var ed = fi.extraData;
-        if (ed.duration)
-            fi.sizeText += ", " + ed.duration;
-        if (fi.mimeType.substr(0, 6) == "audio/") {
-            if (ed.bitrate)
-                fi.sizeText += ", " + ed.bitrate + tr.kbps;
-            fi.sizeTooltip = ed.artist ? ed.artist : tr.unknownArtist;
-            fi.sizeTooltip += " - ";
-            fi.sizeTooltip += ed.title ? ed.title : tr.unknownTitle;
-            fi.sizeTooltip += " [";
-            fi.sizeTooltip += ed.album ? ed.album : tr.unknownAlbum;
-            fi.sizeTooltip += "]";
-            if (ed.year)
-                fi.sizeTooltip += " (" + ed.year + ")";
-        } else if (fi.mimeType.substr(0, 6) == "video/") {
-            fi.sizeTooltip = ed.bitrate + tr.kbps;
-        }
-    }
-};
-
-controller.renderPost = function(post, board, req, opPost) {
-    post.fileInfos.forEach(function(fileInfo) {
-        renderFileInfo(fileInfo);
-    });
-    post.isOp = (post.number == post.threadNumber);
-    post.ownIp = (req.ip == post.user.ip);
-    post.ownHashpass = (req.hashpass == post.user.hashpass);
-    post.opIp = (post.user.ip == opPost.user.ip);
-    board.renderPost(post, req);
-    if (!board.showWhois)
-        return Promise.resolve();
-    return Tools.flagName(post.geolocation.countryCode).then(function(flagName) {
-        post.geolocation.flagName = flagName || "default.png";
-        if (!post.geolocation.countryName)
-            post.geolocation.countryName = "Unknown country";
-        return Promise.resolve();
-    });
 };
 
 module.exports = controller;

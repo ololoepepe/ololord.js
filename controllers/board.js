@@ -13,14 +13,14 @@ var router = express.Router();
 
 var renderPage = function(model, board, req, json) {
     var promises = model.threads.map(function(thread) {
-        return controller.renderPost(thread.opPost, board, req, thread.opPost).then(function() {
+        return board.renderPost(thread.opPost, req, thread.opPost).then(function() {
             return Promise.all(thread.lastPosts.map(function(post) {
-                return controller.renderPost(post, board, req, thread.opPost);
+                return board.renderPost(post, req, thread.opPost);
             }));
         });
     });
     return Promise.all(promises).then(function() {
-        model = merge.recursive(model, controller.headModel(board, req));
+        model.title = board.title;
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
         model.extraScripts = board.extraScripts;
@@ -29,12 +29,6 @@ var renderPage = function(model, board, req, json) {
         return board.postformRules();
     }).then(function(rules) {
         model.postformRules = rules;
-        model.isSpecialThumbName = function(thumbName) {
-            return false; //TODO
-        };
-        model.specialThumbName = function(thumbName) {
-            return thumbName.replace("/", "_");
-        };
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
@@ -50,11 +44,11 @@ var renderPage = function(model, board, req, json) {
 
 var renderThread = function(model, board, req, json) {
     var promises = model.thread.posts.map(function(post) {
-        return controller.renderPost(post, board, req, model.thread.opPost);
+        return board.renderPost(post,req, model.thread.opPost);
     });
-    promises.unshift(controller.renderPost(model.thread.opPost, board, req, model.thread.opPost));
+    promises.unshift(board.renderPost(model.thread.opPost, req, model.thread.opPost));
     return Promise.all(promises).then(function() {
-        model = merge.recursive(model, controller.headModel(board, req));
+        model.title = board.title;
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
         model.extraScripts = board.extraScripts;
@@ -63,12 +57,6 @@ var renderThread = function(model, board, req, json) {
         return board.postformRules();
     }).then(function(rules) {
         model.postformRules = rules;
-        model.isSpecialThumbName = function(thumbName) {
-            return false; //TODO
-        };
-        model.specialThumbName = function(thumbName) {
-            return thumbName.replace("/", "_");
-        };
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
@@ -84,21 +72,15 @@ var renderThread = function(model, board, req, json) {
 
 var renderCatalog = function(model, board, req, json) {
     var promises = model.threads.map(function(thread) {
-        return renderPost(thread.opPost, board, req, thread.opPost);
+        return board.renderPost(thread.opPost, req, thread.opPost);
     });
     return Promise.all(promises).then(function() {
-        model = merge.recursive(model, controller.headModel(board, req));
+        model.title = board.title;
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
         model.sortMode = req.query.sort || "date";
         if (!json || json.translations)
             model.tr = controller.translationsModel();
-        model.isSpecialThumbName = function(thumbName) {
-            return false; //TODO
-        };
-        model.specialThumbName = function(thumbName) {
-            return thumbName.replace("/", "_");
-        };
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else

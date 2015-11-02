@@ -1,4 +1,5 @@
 var merge = require("merge");
+var Util = require("util");
 
 var Board = require("../boards/board");
 var Cache = require("../helpers/cache");
@@ -7,11 +8,22 @@ var Database = require("../helpers/database");
 var FS = require("q-io/fs");
 var Tools = require("../helpers/tools");
 
+module.exports.getLastPostNumbers = function(boardNames) {
+    if (!Util.isArray(boardNames))
+        return Promise.resolve([]);
+    var promises = boardNames.map(function(boardName) {
+        return Database.lastPostNumber(boardName);
+    });
+    return Promise.all(promises);
+};
+
 module.exports.getPosts = function(posts, hashpass) {
     var c = {};
     return Database.registeredUserLevel(hashpass).then(function(level) {
         c.level = level;
         var promises = posts.map(function(post) {
+            if (!post)
+                return Promise.resolve(null);
             return Database.getPost(post.boardName, post.postNumber, {
                 withFileInfos: true,
                 withReferences: true
@@ -200,6 +212,36 @@ module.exports.getThread = function(board, hashpass, number) {
     }).then(function(lastPostNumber) {
         c.model.lastPostNumber = lastPostNumber;
         return Promise.resolve(c.model);
+    });
+};
+
+module.exports.getThreadInfo = function(board, hashpass, number) {
+    if (!(board instanceof Board))
+        return Promise.reject("Invalid board instance");
+    number = +(number || 0);
+    if (isNaN(number) || number < 1)
+        return Promise.reject("Invalid thread");
+    var c = {};
+    return Database.registeredUserLevel(hashpass).then(function(level) {
+        c.level = level;
+        return Database.getThreads(board.name, {
+            limit: 1,
+            filterFunction: function(thread) {
+                if (thread.number != number)
+                    return false;
+                if (!thread.options.draft)
+                    return true;
+                if (!thread.user.hashpass)
+                    return true;
+                if (thread.user.hashpass == hashpass)
+                    return true;
+                return Database.compareRegisteredUserLevels(thread.user.level, c.level) < 0;
+            }
+        });
+    }).then(function(threads) {
+        if (threads.length != 1)
+            return Promise.reject(404);
+        return Promise.resolve(threads[0]);
     });
 };
 

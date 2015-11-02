@@ -13,7 +13,8 @@
 </div>
 <div class="login">
     <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/login"
-          enctype="application/x-www-form-urlencoded" class="inlineForm">
+          enctype="application/x-www-form-urlencoded" class="inlineForm"
+          {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.doLogin(event, this); return false;"{{?}}>
         <input type="hidden" name="source" value="{{=it.source}}" />
         <input type="password" class="input" name="hashpass" placeholder="{{=it.tr.loginPlaceholderText}}"
                size="{{? "mobile" == it.deviceType}}30{{??}}43{{?}}"
