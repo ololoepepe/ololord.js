@@ -213,7 +213,10 @@ router.post("/createPost", function(req, res) {
         return Database.createPost(req, c.fields, c.files, transaction);
     }).then(function(post) {
         setMarkupModeCookie(res, c.fields);
-        res.send(post);
+        res.send({
+            boardName: post.boardName,
+            postNumber: post.number
+        });
     }).catch(function(err) {
         transaction.rollback();
         setMarkupModeCookie(res, c.fields);
@@ -240,7 +243,10 @@ router.post("/createThread", function(req, res) {
         return Database.createThread(req, c.fields, c.files, transaction);
     }).then(function(thread) {
         setMarkupModeCookie(res, c.fields);
-        res.send(thread);
+        res.send({
+            boardName: thread.boardName,
+            threadNumber: thread.number
+        });
     }).catch(function(err) {
         transaction.rollback();
         setMarkupModeCookie(res, c.fields);
