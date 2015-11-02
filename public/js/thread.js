@@ -38,7 +38,7 @@ var lord = lord || {};
     this.updateTimer = setInterval((function() {
         var boardName = lord.text("currentBoardName");
         var threadNumber = lord.text("currentThreadNumber");
-        lord.updateThread(boardName, threadNumber, true);
+        lord.updateThread(true);
         if (this.countdownTimer) {
             clearInterval(this.countdownTimer);
             this.createCountdownTimer();
@@ -132,122 +132,128 @@ lord.blinkFaviconNewMessage = function() {
         link.href = link.href.replace("img/favicon_newmessage.ico", "favicon.ico");
 };
 
-lord.updateThread = function(boardName, threadNumber, autoUpdate, extraCallback) {
-    if (!boardName || isNaN(+threadNumber))
-        return;
+lord.updateThread = function(silent) {
+    var boardName = lord.data("boardName");
+    var threadNumber = +lord.data("threadNumber");
     var posts = lord.query(".opPost:not(.temporary), .post:not(.temporary)");
     if (!posts)
         return;
     var lastPost = posts[posts.length - 1];
-    var lastPostN = lastPost.id.replace("post", "");
-    var seqNum = +lord.queryOne(".postSequenceNumber", lastPost).textContent;
-    (function() {
-        var span = lord.node("span");
-        if (!lord.loadingImage) {
-            lord.loadingImage = lord.node("img");
-            lord.loadingImage.src = "/" + lord.text("sitePathPrefix") + "img/loading.gif";
+    var lastPostNumber = +lord.data("number", lastPost);
+    var popup;
+    var c = {};
+    var query = "boardName=" + boardName + "&threadNumber=" + threadNumber + "&lastPostNumber=" + lastPostNumber;
+    return lord.getModel("misc/tr").then(function(model) {
+        c.tr = model.tr;
+        if (!silent) {
+            var span = lord.node("span");
+            if (!lord.loadingImage) {
+                lord.loadingImage = lord.node("img");
+                lord.loadingImage.src = "/" + lord.data("sitePathPrefix") + "img/loading.gif";
+            }
+            span.appendChild(lord.loadingImage.cloneNode(true));
+            span.appendChild(lord.node("text", " " + c.tr.loadingPostsText));
+            popup = lord.showPopup(span, {
+                type: "node",
+                classNames: "noNewPostsPopup",
+                timeout: lord.Billion
+            });
         }
-        span.appendChild(lord.loadingImage.cloneNode(true));
-        span.appendChild(lord.node("text", " " + lord.text("loadingPostsText")));
-        var popup = !autoUpdate ? lord.showPopup(span, {
-            "type": "node",
-            "classNames": "noNewPostsPopup",
-            "timeout": lord.Billion
-        }) : 0;
-        lord.ajaxRequest("get_new_posts", [boardName, +threadNumber, +lastPostN], lord.RpcGetNewPostsId, function(res) {
-            if (!res) {
-                if (popup)
-                    popup.hide();
-                return;
-            }
-            var txt = lord.text((res.length >= 1) ? "newPostsText" : "noNewPostsText");
-            if (res.length >= 1)
-                txt += " " + res.length;
-            if (popup) {
-                popup.resetText(txt, {"classNames": "noNewPostsPopup"});
-                popup.resetTimeout();
-            }
-            if (res.length < 1)
-                return;
-            var before = lord.id("afterAllPosts");
-            if (!before)
-                return;
-            for (var i = 0; i < res.length; ++i) {
-                var post = lord.createPostNode(res[i], true);
-                if (!post)
-                    continue;
-                if (lord.id(post.id))
-                    continue;
-                if (!isNaN(seqNum))
-                    lord.queryOne(".postSequenceNumber", post).appendChild(lord.node("text", ++seqNum));
-                document.body.insertBefore(post, before);
-                lord.postNodeInserted(post);
-            }
-            var bumpLimitReached = seqNum >= +lord.text("bumpLimit");
-            var postLimitReached = seqNum >= +lord.text("postLimit");
-            if (postLimitReached) {
-                var pl = lord.nameOne("insteadOfPostLimitReached");
-                if (pl) {
-                    var div = lord.node("div");
-                    div.className = "theMessage";
-                    var h2 = lord.node("h2");
-                    h2.className = "postLimitReached";
-                    h2.appendChild(lord.node("text", lord.text("postLimitReachedText")));
-                    div.appendChild(h2);
-                    pl.parentNode.replaceChild(div, pl);
-                }
-                var bl = lord.nameOne("insteadOfBumpLimitReached");
-                if (bl)
-                    bl.parentNode.removeChild(bl);
-                bl = lord.nameOne("bumpLimitReached");
-                if (bl)
-                    bl.parentNode.removeChild(bl);
-                lord.query(".createAction").forEach(function(act) {
-                    act.parentNode.removeChild(act);
-                });
-            }
-            if (!postLimitReached && bumpLimitReached) {
-                var bl = lord.nameOne("insteadOfBumpLimitReached");
-                if (bl) {
-                    var div = lord.node("div");
-                    div.className = "theMessage";
-                    div.setAttribute("name", "bumpLimitReached");
-                    var h3 = lord.node("h3");
-                    h3.className = "bumpLimitReached";
-                    h3.appendChild(lord.node("text", lord.text("bumpLimitReachedText")));
-                    div.appendChild(h3);
-                    bl.parentNode.replaceChild(div, bl);
-                }
-            }
-            if ("hidden" == lord.pageVisible) {
-                if (!lord.blinkTimer) {
-                    lord.blinkTimer = setInterval(lord.blinkFaviconNewMessage, 500);
-                    document.title = "* " + document.title;
-                }
-                if (lord.notificationsEnabled()) {
-                    var subject = lord.queryOne(".theTitle > h1").textContent;
-                    var title = "[" + subject + "] " + lord.text("newPostsText") + " " + res.length;
-                    var sitePathPrefix = lord.text("sitePathPrefix");
-                    var icon = "/" + sitePathPrefix + "favicon.ico";
-                    var p = res[0];
-                    if (p.files && p.files.length > 0)
-                        icon = "/" + sitePathPrefix + lord.text("currentBoardName") + "/" + p.files[0].thumbName;
-                    lord.showNotification(title, p.rawPostText.substr(0, 300), icon);
-                }
-            }
-            if (!!extraCallback)
-                extraCallback();
-        }, function() {
-            if (popup)
-                popup.hide();
+        return lord.getModel("api/lastPosts", query);
+    }).then(function(posts) {
+        if (posts.errorMessage)
+            return Promise.reject(post.errorMessage);
+        if (popup) {
+            var txt = (posts.length >= 1) ? c.tr.newPostsText : c.tr.noNewPostsText;
+            if (posts.length >= 1)
+                txt += " " + posts.length;
+            popup.resetText(txt, {classNames: "noNewPostsPopup"});
+            popup.resetTimeout();
+        }
+        if (posts.length < 1)
+            return;
+        c.sequenceNumber = posts[posts.length - 1].sequenceNumber;
+        var promises = posts.map(function(post) {
+            return lord.createPostNode(post, true);
         });
-    })();
+        return Promise.all(promises);
+    }).then(function(posts) {
+        if (!posts)
+            return;
+        var before = lord.id("afterAllPosts");
+        posts.forEach(function(post) {
+            if (lord.id(post.id))
+                return;
+            document.body.insertBefore(post, before);
+        });
+        return lord.getModel("misc/board/" + boardName);
+    }).then(function(model) {
+        if (!model)
+            return;
+        var board = model.board;
+        var bumpLimitReached = c.sequenceNumber >= board.bumpLimit;
+        var postLimitReached = c.sequenceNumber >= board.postLimit;
+        if (postLimitReached) {
+            var pl = lord.nameOne("insteadOfPostLimitReached");
+            if (pl) {
+                var div = lord.node("div");
+                div.className = "theMessage";
+                var h2 = lord.node("h2");
+                h2.className = "postLimitReached";
+                h2.appendChild(lord.node("text", c.tr.postLimitReachedText));
+                div.appendChild(h2);
+                pl.parentNode.replaceChild(div, pl);
+            }
+            var bl = lord.nameOne("insteadOfBumpLimitReached");
+            if (bl)
+                bl.parentNode.removeChild(bl);
+            bl = lord.nameOne("bumpLimitReached");
+            if (bl)
+                bl.parentNode.removeChild(bl);
+            lord.query(".createAction").forEach(function(act) {
+                act.parentNode.removeChild(act);
+            });
+        }
+        if (!postLimitReached && bumpLimitReached) {
+            var bl = lord.nameOne("insteadOfBumpLimitReached");
+            if (bl) {
+                var div = lord.node("div");
+                div.className = "theMessage";
+                div.setAttribute("name", "bumpLimitReached");
+                var h3 = lord.node("h3");
+                h3.className = "bumpLimitReached";
+                h3.appendChild(lord.node("text", c.tr.bumpLimitReachedText));
+                div.appendChild(h3);
+                bl.parentNode.replaceChild(div, bl);
+            }
+        }
+        if ("hidden" == lord.pageVisible) {
+            if (!lord.blinkTimer) {
+                lord.blinkTimer = setInterval(lord.blinkFaviconNewMessage, 500);
+                document.title = "* " + document.title;
+            }
+            if (lord.notificationsEnabled()) {
+                var subject = lord.queryOne(".theTitle > h1").textContent;
+                var title = "[" + subject + "] " + c.tr.newPostsText + " " + res.length;
+                var sitePathPrefix = lord.data("sitePathPrefix");
+                var icon = "/" + sitePathPrefix + "favicon.ico";
+                var p = res[0];
+                if (p.files && p.files.length > 0)
+                    icon = "/" + sitePathPrefix + boardName + "/" + p.files[0].thumbName;
+                lord.showNotification(title, p.rawPostText.substr(0, 300), icon);
+            }
+        }
+    }).catch(function(err) {
+        if (popup)
+            popup.hide();
+        console.log(err);
+    });
 };
 
 lord.setAutoUpdateEnabled = function(cbox) {
     var enabled = !!cbox.checked;
-    lord.id("autoUpdate_top").checked = enabled;
-    lord.id("autoUpdate_bottom").checked = enabled;
+    lord.id("autoUpdateTop").checked = enabled;
+    lord.id("autoUpdateBottom").checked = enabled;
     if (enabled) {
         var intervalSeconds = lord.getLocalObject("autoUpdateInterval", 15);
         var showCountdown = lord.getLocalObject("showAutoUpdateTimer", true);
@@ -335,7 +341,7 @@ lord.initializeOnLoadThread = function() {
     lord.addVisibilityChangeListener(lord.visibilityChangeListener);
     var enabled = lord.getLocalObject("autoUpdate", {})[lord.text("currentThreadNumber")];
     if (true === enabled || (false !== enabled && lord.getLocalObject("autoUpdateThreadsByDefault", false))) {
-        var cbox = lord.id("autoUpdate_top");
+        var cbox = lord.id("autoUpdateTop");
         cbox.checked = true;
         lord.setAutoUpdateEnabled(cbox);
     }

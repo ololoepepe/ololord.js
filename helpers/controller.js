@@ -187,7 +187,7 @@ controller.baseModel = function(req) {
             domain: config("site.domain", "localhost:8080"),
             pathPrefix: config("site.pathPrefix", ""),
             locale: config("site.locale", "en"),
-            locale: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss")
+            dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss")
         },
         user: {
             ip: req.trueIp,
@@ -261,7 +261,9 @@ controller.boardsModel = function() {
             maxLastPosts: board.maxLastPosts,
             markupElements: board.markupElements,
             supportedFileTypes: board.supportedFileTypes,
-            supportedCaptchaEngines: board.supportedCaptchaEngines
+            supportedCaptchaEngines: board.supportedCaptchaEngines,
+            bumpLimit: board.bumpLimit,
+            postLimit: board.postLimit
         };
     });
     return { boards: boards };
@@ -292,7 +294,9 @@ controller.boardModel = function(board) {
             maxLastPosts: board.maxLastPosts,
             markupElements: board.markupElements,
             supportedFileTypes: board.supportedFileTypes,
-            supportedCaptchaEngines: board.supportedCaptchaEngines
+            supportedCaptchaEngines: board.supportedCaptchaEngines,
+            bumpLimit: board.bumpLimit,
+            postLimit: board.postLimit
         }
     };
 };
@@ -516,6 +520,9 @@ controller.translationsModel = function() {
     translate("Last post date", "sortingModeRecentLabelText");
     translate("Bump count", "sortingModeBumpsLabelText");
     translate("Reply count:", "replyCountLabelText");
+    translate("Loading posts...", "loadingPostsText");
+    translate("New posts:", "newPostsText");
+    translate("No new posts", "noNewPostsText");
     return { tr: tr };
 };
 

@@ -3,7 +3,8 @@
 {{#def.head}}
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}
-      {{? it.lastPostNumber}}data-last-post-number="{{=it.lastPostNumber}}"{{?}}>
+      {{? it.lastPostNumber}}data-last-post-number="{{=it.lastPostNumber}}"{{?}}
+      data-youtube-api-key="{{=it.site.youtubeApiKey}}">
 {{? it.settings.mode.name != "ascetic"}}
     <div id="hiddenPostForm" style="display: none;">
         {{#def.postForm}}

@@ -1,0 +1,6 @@
+{{~[it.reference] :reference}}
+    <a href="/{{=it.site.pathPrefix}}{{=reference.boardName}}/thread/{{=reference.threadNumber}}.html#{{=reference.postNumber}}"
+       data-board-name="{{=reference.boardName}}"
+       data-thread-number="{{=reference.threadNumber}}"
+       data-post-number="{{=reference.postNumber}}">&gt;&gt;{{? reference.boardName != it.board.name}}/{{=reference.boardName}}/{{?}}{{=reference.postNumber}}</a>
+{{~}}

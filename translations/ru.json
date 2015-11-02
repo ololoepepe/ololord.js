@@ -266,14 +266,12 @@
     "No new posts": {
         "noNewPostsText": {
             "value": "Нет новых постов"
-        },
-        "_obsolete": true
+        }
     },
     "New posts:": {
         "newPostsText": {
             "value": "Новых постов:"
-        },
-        "_obsolete": true
+        }
     },
     "KB": {
         "fileSize": {
@@ -2683,8 +2681,7 @@
     "Loading posts...": {
         "loadingPostsText": {
             "value": "Загрузка постов..."
-        },
-        "_obsolete": true
+        }
     },
     "Invalid spell order": {
         "noTokenInTableErrorText": {

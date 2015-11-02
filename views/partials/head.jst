@@ -22,6 +22,9 @@
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base.js"></script>
             {{? it.threads || it.thread}}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/board.js"></script>
+                {{? it.thread}}
+                    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/thread.js"></script>
+                {{?}}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/lib-typedarrays-min.js"></script>
                 {{? it.settings.captchaEngine && it.settings.captchaEngine.scriptSource}}
                     <script type="text/javascript" src="{{=it.settings.captchaEngine.scriptSource(it.req)}}"></script>

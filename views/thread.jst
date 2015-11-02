@@ -3,7 +3,8 @@
 {{#def.head}}
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}
-      data-thread-number="{{=it.thread.number}}">
+      data-thread-number="{{=it.thread.number}}"
+      data-youtube-api-key="{{=it.site.youtubeApiKey}}">
 {{? it.settings.mode.name != "ascetic"}}
     <div id="hiddenPostForm" style="display: none;">
         {{#def.postForm}}
@@ -35,15 +36,26 @@
     <br />
     {{#def.banner}}
 {{?}}
-{{? it.thread.postingEnabled}}
-    <hr />
-    {{~["Top"] :position}}
-        {{#def.createAction}}
-    {{~}}
-{{??}}
+{{? !it.thread.postingEnabled}}
     <div class="postingDisabledMessage">
         <h2>{{=it.tr.postingDisabledThreadText}}</h2>
     </div>
+{{?? it.thread.postLimit <= (it.thread.posts.length - 1)}}
+    <div class="theMessage">
+        <h2 class="postLimitReached">{{=it.tr.postLimitReachedText}}</h2>
+    </div>
+{{??}}
+    <hr name="insteadOfPostLimitReached" />
+    {{~["Top"] :position}}
+        {{#def.createAction}}
+    {{~}}
+{{?}}
+{{? it.thread.postLimit > (it.thread.posts.length - 1) && it.thread.bumpLimit <= (it.thread.posts.length - 1)}}
+    <div class="theMessage" name="bumpLimitReached">
+        <h3 class="bumpLimitReached">{{=it.tr.bumpLimitReachedText}}</h3>
+    </div>
+{{??}}
+    <span name="insteadOfBumpLimitReached" style="display: none;"></span>
 {{?}}
 <hr />
 {{~["Top"] :position}}
@@ -57,6 +69,7 @@
         {{#def.post}}
     {{~}}
 {{~}}
+<input id="afterAllPosts" type="hidden" />
 <hr />
 {{~["Bottom"] :position}}
     {{#def.threadActions}}

@@ -254,7 +254,7 @@ var renderFileInfo = function(fi) {
         renderFileInfo(fileInfo);
     });
     post.isOp = (post.number == post.threadNumber);
-    post.ownIp = (req.ip == post.user.ip);
+    post.ownIp = (req.trueIp == post.user.ip);
     post.ownHashpass = (req.hashpass == post.user.hashpass);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
     if (Database.compareRegisteredUserLevels(req.level, Database.Moder) < 0)

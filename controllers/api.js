@@ -95,6 +95,20 @@ router.get("/threadInfo.json", function(req, res) {
     });
 });
 
+router.get("/lastPosts.json", function(req, res) {
+    var board = Board.board(req.query.boardName);
+    var threadNumber = +req.query.threadNumber;
+    var lastPostNumber = +req.query.lastPostNumber;
+    boardModel.getLastPosts(board, req.hashpass, threadNumber, lastPostNumber).then(function(posts) {
+        var promises = posts.map(renderPost.bind(null, req));
+        return Promise.all(promises);
+    }).then(function(posts) {
+        res.send(posts);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
 router.get("/lastPostNumbers.json", function(req, res) {
     var boardNames = req.query.boardNames;
     if (boardNames && !Util.isArray(boardNames))

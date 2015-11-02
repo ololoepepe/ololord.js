@@ -215,6 +215,55 @@ module.exports.getThread = function(board, hashpass, number) {
     });
 };
 
+module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNumber) {
+    if (!(board instanceof Board))
+        return Promise.reject("Invalid board instance");
+    threadNumber = +(threadNumber || 0);
+    if (isNaN(threadNumber) || threadNumber < 1)
+        return Promise.reject("Invalid thread");
+    lastPostNumber = +(lastPostNumber || 0);
+    if (isNaN(lastPostNumber) || lastPostNumber < 0)
+        return Promise.reject("Invalid postNumber");
+    var c = {};
+    return Database.registeredUserLevel(hashpass).then(function(level) {
+        c.level = level;
+        return Database.getThreads(board.name, {
+            limit: 1,
+            withPostNumbers: 1,
+            filterFunction: function(thread) {
+                if (thread.number != threadNumber)
+                    return false;
+                if (!thread.options.draft)
+                    return true;
+                if (!thread.user.hashpass)
+                    return true;
+                if (thread.user.hashpass == hashpass)
+                    return true;
+                return Database.compareRegisteredUserLevels(thread.user.level, c.level) < 0;
+            }
+        });
+    }).then(function(threads) {
+        if (threads.length != 1)
+            return Promise.reject(404);
+        c.thread = threads[0];
+        return Database.threadPosts(board.name, c.thread.number, {
+            withFileInfos: true,
+            withReferences: true,
+            filterFunction: function(post) {
+                if (post.number <= lastPostNumber)
+                    return false;
+                if (!post.options.draft)
+                    return true;
+                if (!post.user.hashpass)
+                    return true;
+                if (post.user.hashpass == hashpass)
+                    return true;
+                return Database.compareRegisteredUserLevels(post.user.level, c.level) < 0;
+            }
+        });
+    });
+};
+
 module.exports.getThreadInfo = function(board, hashpass, number) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
@@ -241,7 +290,21 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
     }).then(function(threads) {
         if (threads.length != 1)
             return Promise.reject(404);
-        return Promise.resolve(threads[0]);
+        c.thread = threads[0];
+        return Database.threadPostCount(board.name, c.thread.number);
+    }).then(function(postCount) {
+        var threadModel = {
+            number: c.thread.number,
+            bumpLimit: board.bumpLimit,
+            postLimit: board.postLimit,
+            bumpLimitReached: (postCount >= board.bumpLimit),
+            postLimitReached: (postCount >= board.postLimit),
+            closed: c.thread.closed,
+            fixed: c.thread.fixed,
+            postCount: postCount,
+            postingEnabled: (board.postingEnabled && !c.thread.closed)
+        };
+        return Promise.resolve(threadModel);
     });
 };
 

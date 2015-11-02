@@ -482,7 +482,6 @@ var convertPostLink = function(info, _, matchs, _, options) {
     options.type = SkipTypes.HtmlSkip;
     var boardName = (matchs.length > 2) ? matchs[1] : info.boardName;
     var postNumber = matchs[(matchs.length > 2) ? 2 : 1];
-    var threadNumber = 0;
     var escaped = matchs[0].split(">").join("&gt;");
     if (postNumber && (postNumber != info.deletedPost)) {
         return Database.getPost(boardName, postNumber).then(function(post) {
@@ -497,7 +496,7 @@ var convertPostLink = function(info, _, matchs, _, options) {
             var href = "href=\"/" + config("site.pathPrefix", "") + boardName + "/thread/" + post.threadNumber
                 + ".html#" + postNumber + "\"";
             return "<a " + href + " data-board-name=\"" + boardName + "\" data-post-number=\"" + postNumber
-                + "\" data-thread-number=\"" + threadNumber + "\">" + escaped + "</a>";
+                + "\" data-thread-number=\"" + post.threadNumber + "\">" + escaped + "</a>";
         });
     } else {
         return Promise.resolve(escaped);
