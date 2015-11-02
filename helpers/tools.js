@@ -11,12 +11,14 @@ var XRegExp = require("xregexp");
 var config = require("./config");
 
 var translate = require("cute-localize")({
-    locale: config("site.locale", "en")
+    locale: config("site.locale", "en"),
+    silent: true
 });
 
 var flags = {};
 var styles = null;
 var codeStyles = null;
+var rootZones = null;
 
 var ExternalLinkRegexpPattern = (function() {
     var schema = "https?:\\/\\/|ftp:\\/\\/";

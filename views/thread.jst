@@ -40,7 +40,7 @@
     <div class="postingDisabledMessage">
         <h2>{{=it.tr.postingDisabledThreadText}}</h2>
     </div>
-{{?? it.thread.postLimit <= (it.thread.posts.length - 1)}}
+{{?? it.thread.postLimitReached}}
     <div class="theMessage">
         <h2 class="postLimitReached">{{=it.tr.postLimitReachedText}}</h2>
     </div>
@@ -50,7 +50,7 @@
         {{#def.createAction}}
     {{~}}
 {{?}}
-{{? it.thread.postLimit > (it.thread.posts.length - 1) && it.thread.bumpLimit <= (it.thread.posts.length - 1)}}
+{{? !it.thread.postLimitReached && it.thread.bumpLimitReached}}
     <div class="theMessage" name="bumpLimitReached">
         <h3 class="bumpLimitReached">{{=it.tr.bumpLimitReachedText}}</h3>
     </div>

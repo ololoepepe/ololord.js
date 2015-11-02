@@ -92,7 +92,16 @@ var getThreads = function(boardName, options) {
         results.forEach(function(result, i) {
             if (!result)
                 return;
-            c.threads[i].postNumbers = result;
+            c.threads[i].postNumbers = result.sort(function(a, b) {
+                a = +a;
+                b = +b;
+                if (a < b)
+                    return -1;
+                else if (a > b)
+                    return 1;
+                else
+                    return 0;
+            });
         });
         return c.threads;
     });
@@ -113,6 +122,16 @@ var threadPosts = function(boardName, threadNumber, options) {
     var p = db.smembers("threadPostNumbers:" + boardName + ":" + threadNumber).then(function(result) {
         if (!result)
             result = [];
+        result = result.sort(function(a, b) {
+            a = +a;
+            b = +b;
+            if (a < b)
+                return -1;
+            else if (a > b)
+                return 1;
+            else
+                return 0;
+        });
         var i = reverse ? (result.length - 1) : 0;
         var bound;
         var bound = reverse ? (limit ? (result.length - limit - 1) : -1) : (limit ? limit : result.length);

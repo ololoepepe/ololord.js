@@ -312,7 +312,7 @@ var process = function(info, conversionFunction, regexps, options) {
         if (!matchs || (rxCl && matche && matche.index <= matchs.index))
             return Promise.resolve();
         if (checkFunction && !checkFunction(info, matchs, matche)) {
-            if (rxCl)
+            if (rxCl && matche)
                 matchs = info.find(rxOp, matche.index + matche[0].length, escapable);
             else
                 matchs = info.find(rxOp, matchs.index + matchs[0].length, escapable);
@@ -358,7 +358,14 @@ var process = function(info, conversionFunction, regexps, options) {
     };
     return f().then(function() {
         if (rerun)
-            return process(info, conversionFunction, rxOp, rxCl, nestable, escapable, checkFunction);
+            return process(info, conversionFunction, {
+                op: rxOp,
+                cl: rxCl
+            }, {
+                nestable: nestable,
+                escapable: escapable,
+                checkFunction: checkFunction
+            });
         return Promise.resolve();
     })
 };
@@ -402,7 +409,7 @@ var processStrikedOutShittyWord = function(info) {
 };
 
 var checkLangsMatch = function(info, matchs, matche) {
-    return matchs[1] && matchs[1] == matche[1];
+    return matchs && matche && matchs[1] && matchs[1] == matche[1];
 };
 
 var checkExternalLink = function(info, matchs) {
