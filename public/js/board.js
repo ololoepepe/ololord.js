@@ -2045,10 +2045,10 @@ lord.showImage = function(a, mimeType, width, height) {
             lord.imgWrapper = lord.node("div");
             lord.addClass(lord.imgWrapper, "movableImage");
             if (lord.imgWrapper.addEventListener) {
-            	lord.imgWrapper.addEventListener("mousewheel", wheelHandler, false); //IE9, Chrome, Safari, Opera
-    	        lord.imgWrapper.addEventListener("DOMMouseScroll", wheelHandler, false); //Firefox
+            	lord.imgWrapper.addEventListener("mousewheel", lord.fileWheelHandler, false); //IE9, Chrome, Safari, Opera
+    	        lord.imgWrapper.addEventListener("DOMMouseScroll", lord.fileWheelHandler, false); //Firefox
             } else {
-                lord.imgWrapper.attachEvent("onmousewheel", wheelHandler); //IE 6/7/8
+                lord.imgWrapper.attachEvent("onmousewheel", lord.fileWheelHandler); //IE 6/7/8
             }
             lord.imgWrapper.onmousedown = lord.fileWrapperOnmousedown;
             lord.imgWrapper.onmouseup = lord.fileWrapperOnmouseup;
