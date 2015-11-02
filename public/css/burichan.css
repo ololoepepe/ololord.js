@@ -15,7 +15,7 @@ body.mobile {
     -ms-text-size-adjust: 100%;
     font-size: 14px;
 }
-
+.to
 a {
     color: #000;
 }
@@ -810,9 +810,10 @@ ul.tabWidget > li.activated {
     font-size: 0.9em;
     padding-bottom: 5px;
     text-align: left;
-    white-space: nowrap;
     overflow-x: auto;
     font-size: 1.2em;
+    position: relative;
+    top: -8px;
 }
 
 .toolbar.sticky {
