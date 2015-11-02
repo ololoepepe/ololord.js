@@ -329,10 +329,10 @@ lord.createPostNode = function(post, permanent) {
             var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
             lastPostNumbers[post.boardName] = post.number;
             lord.setLocalObject("lastPostNumbers", lastPostNumbers);
-            /*lord.files = null;
+            lord.files = null;
             lord.filesMap = null;
             lord.initFiles();
-            var youtube = lord.getLocalObject("showYoutubeVideosTitles", true);
+            /*var youtube = lord.getLocalObject("showYoutubeVideosTitles", true);
             var p = lord.getPostData(c.node, youtube);
             if (p) {
                 youtube = youtube ? { "apiKey": lord.data("youtubeApiKey") } : undefined;
@@ -519,18 +519,18 @@ lord.initFiles = function() {
         return;
     lord.files = [];
     lord.filesMap = {};
-    lord.query(".postFileFile").forEach(function(div) {
-        var href = lord.queryOne("a", div).href;
-        var type = lord.nameOne("type", div).value;
-        if ("application/pdf" == type)
+    lord.query(".postFile").forEach(function(td) {
+        var href = lord.data("href", td);
+        var mimeType = lord.data("mimeType", td);
+        if ("application/pdf" == mimeType)
             return;
-        if (lord.getLocalObject("leafThroughImagesOnly", false) && !lord.isImageType(type))
+        if (lord.getLocalObject("leafThroughImagesOnly", false) && !lord.isImageType(mimeType))
             return;
         lord.files.push({
             "href": href,
-            "type": type,
-            "sizeX": +lord.nameOne("sizeX", div).value,
-            "sizeY": +lord.nameOne("sizeY", div).value
+            "mimeType": mimeType,
+            "width": +lord.data("width", td),
+            "height": +lord.data("height", td)
         });
         lord.filesMap[href] = lord.files.length - 1;
     });
@@ -1929,212 +1929,221 @@ lord.setPostformMarkupVisible = function(visible) {
     return false;
 };
 
-lord.showImage = function(href, type, sizeHintX, sizeHintY) {
-    lord.hideImage();
-    if (!href || !type)
-        return true;
-    if (lord.isAudioType(type)) {
-        sizeHintX = 0;
-        sizeHintY = 0;
+lord.fileWheelHandler = function(e) {
+    var e = window.event || e; //NOTE: Old IE support
+    e.preventDefault();
+    var delta = lord.getLocalObject("imageZoomSensitivity", 25);
+    if ((e.wheelDelta || -e.detail) < 0)
+        delta *= -1;
+    var k = 1;
+    if (delta < 0) {
+        while ((lord.imgWrapper.scale + (delta / k)) <= 0)
+            k *= 10;
+    } else {
+        //NOTE: This is shitty, because floating point calculations are shitty
+        var s = parseFloat((lord.imgWrapper.scale / (delta / k)).toString().substr(0, 5));
+        while (!lord.nearlyEqual(s - Math.floor(s), 0, 1 / 1000000)) {
+            k *= 10;
+            s = parseFloat((lord.imgWrapper.scale / (delta / k)).toString().substr(0, 5));
+        }
     }
-    lord.img = lord.images[href];
-    if (!!lord.img) {
-        lord.removeChildren(lord.imgWrapper);
-        lord.imgWrapper.appendChild(lord.img);
-        if (lord.isAudioType(type)) {
-            if (lord.text("deviceType") == "mobile")
+    lord.imgWrapper.scale += (delta / k);
+    lord.resetScale(lord.imgWrapper);
+};
+
+lord.fileWrapperOnmousedown = function(e) {
+    if (e.button)
+        return;
+    e.preventDefault();
+    if (lord.isAudioType(lord.img.mimeType))
+        return;
+    if (lord.isVideoType(lord.img.mimeType) && (lord.img.height - e.offsetY < 35))
+        return;
+    lord.img.moving = true;
+    lord.img.wasPaused = lord.img.paused;
+    lord.img.coord.x = e.clientX;
+    lord.img.coord.y = e.clientY;
+    lord.img.initialCoord.x = e.clientX;
+    lord.img.initialCoord.y = e.clientY;
+};
+
+lord.fileWrapperOnmouseup = function(e) {
+    if (e.button)
+        return;
+    e.preventDefault();
+    if (!lord.img.moving)
+        return;
+    lord.img.moving = false;
+    if (lord.img.initialCoord.x === e.clientX && lord.img.initialCoord.y === e.clientY) {
+        if (lord.isAudioType(lord.img.mimeType) || lord.isVideoType(lord.img.mimeType)) {
+            lord.img.pause();
+            lord.img.currentTime = 0;
+        }
+        lord.imgWrapper.style.display = "none";
+        lord.query(".leafButton").forEach(function(a) {
+            a.style.display = "none";
+        });
+    } else if (!lord.img.wasPaused) {
+        setTimeout(function() {
+            if (lord.img.paused)
+                lord.img.play();
+        }, 10);
+    }
+};
+
+lord.fileWrapperOnmousemove = function(e) {
+    if (!lord.img.moving)
+        return;
+    e.preventDefault();
+    var dx = e.clientX - lord.img.coord.x;
+    var dy = e.clientY - lord.img.coord.y;
+    lord.imgWrapper.style.left = (lord.imgWrapper.offsetLeft + dx) + "px";
+    lord.imgWrapper.style.top = (lord.imgWrapper.offsetTop + dy) + "px";
+    lord.img.coord.x = e.clientX;
+    lord.img.coord.y = e.clientY;
+};
+
+lord.showImage = function(a, mimeType, width, height) {
+    lord.hideImage();
+    lord.getModel("misc/base").then(function(model) {
+        var href = a;
+        if (typeof a != "string") {
+            href = model.site.protocol + "://" + model.site.domain + "/" + model.site.pathPrefix
+                + lord.data("boardName", a, true) + "/src/" + lord.data("fileName", a, true);
+            mimeType = lord.data("mimeType", a, true);
+            width = lord.data("width", a, true);
+            height = lord.data("height", a, true);
+        }
+        lord.img = lord.images[href];
+        if (lord.img) {
+            lord.removeChildren(lord.imgWrapper);
+            lord.imgWrapper.appendChild(lord.img);
+            if (lord.isAudioType(mimeType)) {
+                if (lord.data("deviceType") == "mobile")
+                    lord.imgWrapper.scale = 60;
+                else
+                    lord.imgWrapper.scale = 100;
+            }
+            lord.setInitialScale(lord.imgWrapper, width, height);
+            lord.resetScale(lord.imgWrapper);
+            lord.imgWrapper.style.display = "";
+            lord.toCenter(lord.imgWrapper, width, height, 3);
+            if (lord.isAudioType(lord.img.mimeType) || lord.isVideoType(lord.img.mimeType)) {
+                setTimeout(function() {
+                    lord.img.play();
+                }, 500);
+            }
+            if (lord.getLocalObject("showLeafButtons", true)) {
+                lord.query(".leafButton").forEach(function(a) {
+                    a.style.display = "";
+                });
+            }
+            return Promise.resolve();
+        }
+        var append = false;
+        if (!lord.imgWrapper) {
+            lord.imgWrapper = lord.node("div");
+            lord.addClass(lord.imgWrapper, "movableImage");
+            if (lord.imgWrapper.addEventListener) {
+            	lord.imgWrapper.addEventListener("mousewheel", wheelHandler, false); //IE9, Chrome, Safari, Opera
+    	        lord.imgWrapper.addEventListener("DOMMouseScroll", wheelHandler, false); //Firefox
+            } else {
+                lord.imgWrapper.attachEvent("onmousewheel", wheelHandler); //IE 6/7/8
+            }
+            lord.imgWrapper.onmousedown = lord.fileWrapperOnmousedown;
+            lord.imgWrapper.onmouseup = lord.fileWrapperOnmouseup;
+            lord.imgWrapper.onmousemove = lord.fileWrapperOnmousemove;
+            append = true;
+        } else {
+            lord.removeChildren(lord.imgWrapper);
+        }
+        if (lord.isAudioType(mimeType)) {
+            width = (lord.data("deviceType") == "mobile") ? 500 : 400;
+            lord.img = lord.node("audio");
+            lord.img.width = width + "px";
+            lord.img.controls = true;
+            if (lord.getLocalObject("loopAudioVideo", false))
+                lord.img.loop = true;
+            if (lord.data("deviceType") == "mobile")
                 lord.imgWrapper.scale = 60;
             else
                 lord.imgWrapper.scale = 100;
+            var defVol = lord.getLocalObject("defaultAudioVideoVolume", 100) / 100;
+            var remember = lord.getLocalObject("rememberAudioVideoVolume", false);
+            lord.img.volume = remember ? lord.getLocalObject("audioVideoVolume", defVol) : defVol;
+            var src = lord.node("source");
+            src.src = href;
+            src.type = mimeType;
+            lord.img.appendChild(src);
+        } else if (lord.isImageType(mimeType)) {
+            if (width <= 0 || height <= 0)
+                return;
+            lord.img = lord.node("img");
+            lord.img.width = width;
+            lord.img.height = height;
+            lord.img.src = href;
+        } else if (lord.isVideoType(mimeType)) {
+            lord.img = lord.node("video");
+            lord.img.controls = true;
+            if (lord.getLocalObject("loopAudioVideo", false))
+                lord.img.loop = true;
+            var defVol = lord.getLocalObject("defaultAudioVideoVolume", 100) / 100;
+            var remember = lord.getLocalObject("rememberAudioVideoVolume", false);
+            lord.img.volume = remember ? lord.getLocalObject("audioVideoVolume", defVol) : defVol;
+            var src = lord.node("source");
+            src.src = href;
+            src.type = mimeType;
+            lord.img.appendChild(src);
         }
-        lord.setInitialScale(lord.imgWrapper, sizeHintX, sizeHintY);
+        lord.img.mimeType = mimeType;
+        lord.img.width = width;
+        lord.img.height = height;
+        lord.imgWrapper.appendChild(lord.img);
+        lord.setInitialScale(lord.imgWrapper, width, height);
         lord.resetScale(lord.imgWrapper);
-        lord.imgWrapper.style.display = "";
-        lord.toCenter(lord.imgWrapper, sizeHintX, sizeHintY, 3);
-        if (lord.isAudioType(lord.img.fileType) || lord.isVideoType(lord.img.fileType)) {
+        lord.img.moving = false;
+        lord.img.coord = {
+            "x": 0,
+            "y": 0
+        };
+        lord.img.initialCoord = {
+            "x": 0,
+            "y": 0
+        };
+        var wheelHandler = lord.fileWheelHandler;
+        if (append) {
+            document.body.appendChild(lord.imgWrapper);
+        } else {
+            lord.imgWrapper.style.display = "";
+        }
+        lord.toCenter(lord.imgWrapper, width, height, 3);
+        if ((lord.isAudioType(lord.img.mimeType) || lord.isVideoType(lord.img.mimeType))
+            && lord.getLocalObject("playAudioVideoImmediately", true)) {
             setTimeout(function() {
                 lord.img.play();
             }, 500);
         }
+        lord.images[href] = lord.img;
         if (lord.getLocalObject("showLeafButtons", true)) {
             lord.query(".leafButton").forEach(function(a) {
                 a.style.display = "";
             });
         }
-        return false;
-    }
-    var append = false;
-    if (!lord.imgWrapper) {
-        lord.imgWrapper = lord.node("div");
-        lord.addClass(lord.imgWrapper, "movableImage");
-        append = true;
-    } else {
-        lord.removeChildren(lord.imgWrapper);
-    }
-    if (lord.isAudioType(type)) {
-        sizeHintX = (lord.text("deviceType") == "mobile") ? 500 : 400;
-        lord.img = lord.node("audio");
-        lord.img.width = sizeHintX + "px";
-        lord.img.controls = true;
-        if (lord.getLocalObject("loopAudioVideo", false))
-            lord.img.loop = true;
-        if (lord.text("deviceType") == "mobile")
-            lord.imgWrapper.scale = 60;
-        else
-            lord.imgWrapper.scale = 100;
-        var defVol = lord.getLocalObject("defaultAudioVideoVolume", 100) / 100;
-        var remember = lord.getLocalObject("rememberAudioVideoVolume", false);
-        lord.img.volume = remember ? lord.getLocalObject("audioVideoVolume", defVol) : defVol;
-        var src = lord.node("source");
-        src.src = href;
-        src.type = type;
-        lord.img.appendChild(src);
-    } else if (lord.isImageType(type)) {
-        if (!sizeHintX || !sizeHintY || sizeHintX <= 0 || sizeHintY <= 0)
-            return true;
-        lord.img = lord.node("img");
-        lord.img.width = sizeHintX;
-        lord.img.height = sizeHintY;
-        lord.img.src = href;
-    } else if (lord.isVideoType(type)) {
-        lord.img = lord.node("video");
-        lord.img.controls = true;
-        if (lord.getLocalObject("loopAudioVideo", false))
-            lord.img.loop = true;
-        var defVol = lord.getLocalObject("defaultAudioVideoVolume", 100) / 100;
-        var remember = lord.getLocalObject("rememberAudioVideoVolume", false);
-        lord.img.volume = remember ? lord.getLocalObject("audioVideoVolume", defVol) : defVol;
-        var src = lord.node("source");
-        src.src = href;
-        src.type = type;
-        lord.img.appendChild(src);
-    }
-    lord.img.fileType = type;
-    lord.img.sizeHintX = sizeHintX;
-    lord.img.sizeHintY = sizeHintY;
-    lord.imgWrapper.appendChild(lord.img);
-    lord.setInitialScale(lord.imgWrapper, sizeHintX, sizeHintY);
-    lord.resetScale(lord.imgWrapper);
-    lord.img.moving = false;
-    lord.img.coord = {
-        "x": 0,
-        "y": 0
-    };
-    lord.img.initialCoord = {
-        "x": 0,
-        "y": 0
-    };
-    var wheelHandler = function(e) {
-        var e = window.event || e; //Old IE support
-        e.preventDefault();
-        var delta = lord.getLocalObject("imageZoomSensitivity", 25);
-        if ((e.wheelDelta || -e.detail) < 0)
-            delta *= -1;
-        var k = 1;
-        if (delta < 0) {
-            while ((lord.imgWrapper.scale + (delta / k)) <= 0)
-                k *= 10;
-        } else {
-            //This is shitty, because floating point calculations are shitty
-            var s = parseFloat((lord.imgWrapper.scale / (delta / k)).toString().substr(0, 5));
-            while (!lord.nearlyEqual(s - Math.floor(s), 0, 1 / 1000000)) {
-                k *= 10;
-                s = parseFloat((lord.imgWrapper.scale / (delta / k)).toString().substr(0, 5));
-            }
-        }
-        lord.imgWrapper.scale += (delta / k);
-        lord.resetScale(lord.imgWrapper);
-    };
-    if (append) {
-        if (lord.imgWrapper.addEventListener) {
-        	lord.imgWrapper.addEventListener("mousewheel", wheelHandler, false); //IE9, Chrome, Safari, Opera
-	        lord.imgWrapper.addEventListener("DOMMouseScroll", wheelHandler, false); //Firefox
-        } else {
-            lord.imgWrapper.attachEvent("onmousewheel", wheelHandler); //IE 6/7/8
-        }
-        if (lord.isImageType(type) || lord.isVideoType(type)) {
-            lord.imgWrapper.onmousedown = function(e) {
-                if (!!e.button)
-                    return;
-                e.preventDefault();
-                if (lord.isAudioType(lord.img.fileType))
-                    return;
-                if (lord.isVideoType(lord.img.fileType) && (lord.img.sizeHintY - e.offsetY < 35))
-                    return;
-                lord.img.moving = true;
-                lord.img.wasPaused = lord.img.paused;
-                lord.img.coord.x = e.clientX;
-                lord.img.coord.y = e.clientY;
-                lord.img.initialCoord.x = e.clientX;
-                lord.img.initialCoord.y = e.clientY;
-            };
-            lord.imgWrapper.onmouseup = function(e) {
-                if (!!e.button)
-                    return;
-                e.preventDefault();
-                if (!lord.img.moving)
-                    return;
-                lord.img.moving = false;
-                if (lord.img.initialCoord.x === e.clientX && lord.img.initialCoord.y === e.clientY) {
-                    if (lord.isAudioType(type) || lord.isVideoType(type)) {
-                        lord.img.pause();
-                        lord.img.currentTime = 0;
-                    }
-                    lord.imgWrapper.style.display = "none";
-                    lord.query(".leafButton").forEach(function(a) {
-                        a.style.display = "none";
-                    });
-                } else if (!lord.img.wasPaused) {
-                    setTimeout(function() {
-                        if (lord.img.paused)
-                            lord.img.play();
-                    }, 10);
-                }
-            };
-            lord.imgWrapper.onmousemove = function(e) {
-                if (!lord.img.moving)
-                    return;
-                e.preventDefault();
-                var dx = e.clientX - lord.img.coord.x;
-                var dy = e.clientY - lord.img.coord.y;
-                lord.imgWrapper.style.left = (lord.imgWrapper.offsetLeft + dx) + "px";
-                lord.imgWrapper.style.top = (lord.imgWrapper.offsetTop + dy) + "px";
-                lord.img.coord.x = e.clientX;
-                lord.img.coord.y = e.clientY;
-            };
-        }
-        document.body.appendChild(lord.imgWrapper);
-    } else {
-        lord.imgWrapper.style.display = "";
-    }
-    lord.toCenter(lord.imgWrapper, sizeHintX, sizeHintY, 3);
-    if ((lord.isAudioType(lord.img.fileType) || lord.isVideoType(lord.img.fileType))
-        && lord.getLocalObject("playAudioVideoImmediately", true)) {
-        setTimeout(function() {
-            lord.img.play();
-        }, 500);
-    }
-    lord.images[href] = lord.img;
-    if (lord.getLocalObject("showLeafButtons", true)) {
-        lord.query(".leafButton").forEach(function(a) {
-            a.style.display = "";
-        });
-    }
-    return false;
+    });
 };
 
 lord.previousFile = function() {
     var f = lord.nextOrPreviousFile(true);
     if (!f)
         return;
-    lord.showImage(f.href, f.type, f.sizeX, f.sizeY);
+    lord.showImage(f.href, f.mimeType, f.width, f.height);
 };
 
 lord.nextFile = function() {
     var f = lord.nextOrPreviousFile(false);
     if (!f)
         return;
-    lord.showImage(f.href, f.type, f.sizeX, f.sizeY);
+    lord.showImage(f.href, f.mimeType, f.width, f.height);
 };
 
 lord.addThreadToFavorites = function(boardName, threadNumber, callback, callbackError) {
@@ -2637,18 +2646,18 @@ lord.hotkey_expandImage = function() {
     if (lord.img && lord.img.style.display != "none") {
         lord.hideImage();
     } else {
-        var f = lord.query(".postFileFile", p);
+        var f = lord.query(".postFile", p);
         if (!f)
             return;
         f = f[0];
-        var href = lord.queryOne("a", f).href;
-        var type = lord.nameOne("type", f).value;
-        if ("application/pdf" == type) {
+        var href = lord.data("href", f);
+        var mimeType = lord.data("mimeType", f);
+        if ("application/pdf" == mimeType) {
             window.open(href, '_blank').focus();
         } else {
-            var sizeX = lord.nameOne("sizeX", f).value;
-            var sizeY = lord.nameOne("sizeY", f).value;
-            lord.showImage(href, type, sizeX, sizeY);
+            var width = +lord.data("width", f);
+            var height = +lord.data("height", f);
+            lord.showImage(href, mimeType, width, height);
         }
     }
     return false;
@@ -2816,19 +2825,19 @@ lord.initializeOnLoadBaseBoard = function() {
         var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
         lastPostNumbers[lord.text("currentBoardName")] = +lord.text("lastPostNumber");
         lord.setLocalObject("lastPostNumbers", lastPostNumbers);
-    }
+    }*/
     lord.initFiles();
     lord.hashChangedHandler(lord.hash());
-    lord.scrollHandler();*/
+    lord.scrollHandler();
 };
 
 lord.hashChangedHandler = function(hash) {
     if (lord.lastSelectedElement)
         lord.removeClass(lord.lastSelectedElement, "selectedPost");
-    var pn = +hash;
-    if (isNaN(pn))
+    var postNumber = +hash;
+    if (isNaN(postNumber) || postNumber <= 0)
         return;
-    var post = lord.id("post" + pn);
+    var post = lord.id("post" + postNumber);
     if (!post)
         return;
     lord.lastSelectedElement = post;
