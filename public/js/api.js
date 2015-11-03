@@ -301,57 +301,50 @@ lord.equal = function(x, y) {
     return true;
 };
 
-lord.gently = function(obj, f, delay, n, after) {
+lord.gently = function(obj, f, options) {
     if (!obj || typeof f != "function")
-        return;
-    delay = +delay;
-    n = +n;
+        return Promise.reject("Invalid arguments");
+    var delay = options ? +options.delay : undefined;
+    var n = options ? +options.n : undefined;
     if (isNaN(delay) || delay < 1)
         delay = 1;
     if (isNaN(n) || n < 1)
         n = 1;
-    if (Array.isArray(obj)) {
-        (function(arr, f, delay, n, after) {
+    return new Promise(function(resolve, reject) {
+        if (Array.isArray(obj)) {
+            var arr = obj;
             var ind = 0;
             var g = function() {
-                if (ind >= arr.length) {
-                    if (typeof after == "function")
-                        after();
-                    return;
-                }
+                if (ind >= arr.length)
+                    return resolve();
                 for (var i = ind; i < Math.min(ind + n, arr.length); ++i)
                     f(arr[i], i);
                 ind += n;
                 setTimeout(g, delay);
             };
             g();
-        })(obj, f, delay, n, after);
-    } else {
-        var arr = [];
-        for (var x in obj) {
-            if (obj.hasOwnProperty(x)) {
-                arr.push({
-                    "key": x,
-                    "value": obj[x]
-                });
+        } else {
+            var arr = [];
+            for (var x in obj) {
+                if (obj.hasOwnProperty(x)) {
+                    arr.push({
+                        "key": x,
+                        "value": obj[x]
+                    });
+                }
             }
-        }
-        (function(arr, f, delay, n, after) {
             var ind = 0;
             var g = function() {
-                if (ind >= arr.length) {
-                    if (typeof after == "function")
-                        after();
-                    return;
-                }
+                if (ind >= arr.length)
+                    return resolve();
                 for (var i = ind; i < Math.min(ind + n, arr.length); ++i)
                     f(arr[i].value, arr[i].key);
                 ind += n;
                 setTimeout(g, delay);
             };
             g();
-        })(arr, f, delay, n, after);
-    }
+        }
+    });
 };
 
 lord.regexp = function(s) {

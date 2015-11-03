@@ -113,7 +113,10 @@ lord.processPosts = function(spells, youtube) {
                     "spells": spells
                 }
             }); //No way to transfer an object with subobjects
-        }, 10, 10);
+        }, {
+            delay: 10,
+            n: 10
+        });
     })(spells, youtube);
 };
 
@@ -381,11 +384,11 @@ lord.createPostNode = function(post, permanent) {
                 referencedBy.appendChild(lord.node("text", " "));
                 referencedBy.appendChild(a);
                 if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
-                    lord.strikeOutHiddenPostLink(a);
+                    lord.strikeOutHiddenPostLinks(targetPost);
                 if (lord.getLocalObject("signOpPostLinks", true))
-                    lord.signOpPostLink(a);
+                    lord.signOpPostLinks(targetPost);
                 if (lord.getLocalObject("signOwnPostLinks", true))
-                    lord.signOwnPostLink(a);
+                    lord.signOwnPostLinks(targetPost);
                 return Promise.resolve();
             });
             return Promise.all(promises);
@@ -2368,8 +2371,10 @@ lord.strikeOutHiddenPostLink = function(a, list) {
         lord.removeClass(a, "hiddenPostLink");
 };
 
-lord.signOpPostLink = function(a) {
+lord.signOpPostLink = function(a, data) {
     if (!a)
+        return;
+    if (a.textContent.indexOf("(OP)") >= 0)
         return;
     var boardName = lord.data("boardName", a);
     if (!boardName)
@@ -2380,20 +2385,21 @@ lord.signOpPostLink = function(a) {
     var post = lord.id("post" + postNumber);
     if (lord.data("boardName", post) != boardName)
         post = null;
-    var p;
-    if (post)
-        p = Promise.resolve({ isOp: lord.data("isOp", post) });
-    else
-        p = lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber);
-    p.then(function(post) {
-        if (!post || !post.isOp || a.textContent.indexOf("(OP)") >= 0)
-            return;
-        a.appendChild(lord.node("text", " (OP)"));
-    });
+    if (post || data) {
+        if (post ? lord.data("isOp", post) : data.isOp)
+            a.appendChild(lord.node("text", " (OP)"));
+        return;
+    }
+    return {
+        boardName: boardName,
+        postNumber: postNumber
+    };
 };
 
-lord.signOwnPostLink = function(a) {
+lord.signOwnPostLink = function(a, data) {
     if (!a)
+        return;
+    if (a.textContent.indexOf("(You)") >= 0)
         return;
     var boardName = lord.data("boardName", a);
     if (!boardName)
@@ -2404,16 +2410,15 @@ lord.signOwnPostLink = function(a) {
     var post = lord.id("post" + postNumber);
     if (lord.data("boardName", post) != boardName)
         post = null;
-    var p;
-    if (post)
-        p = Promise.resolve({ ownIp: lord.data("ownIp", post) });
-    else
-        p = lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber);
-    p.then(function(post) {
-        if (!post || !post.ownIp || a.textContent.indexOf("(You)") >= 0)
-            return;
-        a.appendChild(lord.node("text", " (You)"));
-    });
+    if (post || data) {
+        if (post ? lord.data("ownIp", post) : data.ownIp)
+            a.appendChild(lord.node("text", " (You)"));
+        return;
+    }
+    return {
+        boardName: boardName,
+        postNumber: postNumber
+    };
 };
 
 lord.strikeOutHiddenPostLinks = function(parent) {
@@ -2422,29 +2427,74 @@ lord.strikeOutHiddenPostLinks = function(parent) {
     var list = lord.getLocalObject("hiddenPosts", {});
     lord.gently(lord.query("a", parent), function(a) {
         lord.strikeOutHiddenPostLink(a, list);
-    }, 10, 20);
+    }, {
+        delay: 10,
+        n: 20
+    });
 };
 
 lord.signOpPostLinks = function(parent) {
     if (!parent)
         parent = document;
-    (function() {
-        var cbn = lord.data("boardName");
-        lord.gently(lord.query("a", parent), function(a) {
-            lord.signOpPostLink(a, cbn);
-        }, 10, 20);
-    })();
+    var list = [];
+    lord.gently(lord.query("a", parent), function(a) {
+        var post = lord.signOpPostLink(a);
+        if (!post)
+            return;
+        list.push({
+            a: a,
+            boardName: post.boardName,
+            postNumber: post.postNumber
+        });
+    }, {
+        delay: 10,
+        n: 20
+    }).then(function() {
+        if (list.length < 0)
+            return [];
+        var query = "posts=" + list[0].boardName + ":" + list[0].postNumber;
+        for (var i = 1; i < list.length; ++i)
+            query += "&posts=" + list[i].boardName + ":" + list[i].postNumber;
+        return lord.getModel("api/posts", query);
+    }).then(function(posts) {
+        posts.forEach(function(post, i) {
+            if (!post)
+                return;
+            lord.signOpPostLink(list[i].a, post);
+        });
+    });
 };
 
 lord.signOwnPostLinks = function(parent) {
     if (!parent)
         parent = document;
-    (function() {
-        var cbn = lord.data("boardName");
-        lord.gently(lord.query("a", parent), function(a) {
-            lord.signOwnPostLink(a, cbn);
-        }, 10, 20);
-    })();
+    var list = [];
+    lord.gently(lord.query("a", parent), function(a) {
+        var post = lord.signOwnPostLink(a);
+        if (!post)
+            return;
+        list.push({
+            a: a,
+            boardName: post.boardName,
+            postNumber: post.postNumber
+        });
+    }, {
+        delay: 10,
+        n: 20
+    }).then(function() {
+        if (list.length < 0)
+            return [];
+        var query = "posts=" + list[0].boardName + ":" + list[0].postNumber;
+        for (var i = 1; i < list.length; ++i)
+            query += "&posts=" + list[i].boardName + ":" + list[i].postNumber;
+        return lord.getModel("api/posts", query);
+    }).then(function(posts) {
+        posts.forEach(function(post, i) {
+            if (!post)
+                return;
+            lord.signOwnPostLink(list[i].a, post);
+        });
+    });
 };
 
 lord.hotkey_previousPageImage = function() {
@@ -2633,7 +2683,10 @@ lord.hotkey_expandThread = function() {
                     lord.queryOne(".postSequenceNumber", newPost).appendChild(lord.node("text", ++seqNum));
                 posts.appendChild(newPost);
                 lord.postNodeInserted(newPost);
-            }, 10, 10);
+            }, {
+                delay: 10,
+                n: 10
+            });
         });
     })(tn, posts);
     return false;
@@ -2782,7 +2835,10 @@ lord.initializeOnLoadBaseBoard = function() {
     } else if (lord.getLocalObject("showYoutubeVideosTitles", true)) {
         lord.processPosts(null, true);
     } else {
-        lord.gently(lord.query(".post:not(#postTemplate), .opPost"), lord.tryHidePost(post), 10, 10);
+        lord.gently(lord.query(".post:not(#postTemplate), .opPost"), lord.tryHidePost(post), {
+            delay: 10,
+            n: 10
+        });
     }
     lord.query(".opPost").forEach(function(opPost) {
         var threadNumber = +opPost.id.replace("post", "");
@@ -2907,7 +2963,10 @@ lord.message_postsProcessed = function(data) {
                 if (post.hidden)
                     lord.addPostToHidden(post.board, post.number);
                 lord.tryHidePost(p);
-            }, 10, 10);
+            }, {
+                delay: 10,
+                n: 10
+            });
         })(posts);
     } else if (data.error) {
         var txt = lord.text(data.error.text);
