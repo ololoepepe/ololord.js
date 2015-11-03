@@ -1412,13 +1412,23 @@ lord.editAudioTags = function(boardName, postNumber, fileName) {
     });
 };
 
-lord.addToPlaylist = function(boardName, fileName) {
-    if (!boardName || !fileName)
-        return;
+lord.addToPlaylist = function(a) {
+    var boardName = lord.data("boardName", a, true);
+    var fileName = lord.data("fileName", a, true);
     var tracks = lord.getLocalObject("playlist/tracks", {});
-    if (tracks[boardName + "/" + fileName])
+    if (tracks.hasOwnProperty(boardName + "/" + fileName))
         return;
-    tracks[boardName + "/" + fileName] = {};
+    tracks[boardName + "/" + fileName] = {
+        boardName: boardName,
+        fileName: fileName,
+        mimeType: lord.data("mimeType", a, true),
+        bitrate: lord.data("bitrate", a, true),
+        duration: lord.data("duration", a, true),
+        album: lord.data("audioTagAlbum", a, true),
+        artist: lord.data("audioTagArtist", a, true),
+        title: lord.data("audioTagTitle", a, true),
+        year: lord.data("audioTagYear", a, true)
+    };
     lord.setLocalObject("playlist/tracks", tracks);
 };
 

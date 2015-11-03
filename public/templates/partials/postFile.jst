@@ -5,11 +5,16 @@
     data-size-k-b="{{=fileInfo.sizeKB}}"
     data-width="{{ out += fileInfo.dimensions ? fileInfo.dimensions.width : 0; }}"
     data-height="{{ out += fileInfo.dimensions ? fileInfo.dimensions.height : 0; }}"
-    {{? fileInfo.mimeType.substr(0, 6) == "audio/"}}
-        data-audio-tag-album="{{=fileInfo.extraData.album}}"
-        data-audio-tag-artist="{{=fileInfo.extraData.artist}}"
-        data-audio-tag-title="{{=fileInfo.extraData.title}}"
-        data-audio-tag-year="{{=fileInfo.extraData.year}}"
+    {{? fileInfo.mimeType.substr(0, 6) == "audio/" && fileInfo.extraData}}
+        {{? fileInfo.extraData.duration}}data-duration="{{=fileInfo.extraData.duration}}"{{?}}
+        {{? fileInfo.extraData.bitrate}}data-bitrate="{{=fileInfo.extraData.bitrate}}"{{?}}
+        {{? fileInfo.extraData.album}}data-audio-tag-album="{{=fileInfo.extraData.album}}"{{?}}
+        {{? fileInfo.extraData.artist}}data-audio-tag-artist="{{=fileInfo.extraData.artist}}"{{?}}
+        {{? fileInfo.extraData.title}}data-audio-tag-title="{{=fileInfo.extraData.title}}"{{?}}
+        {{? fileInfo.extraData.year}}data-audio-tag-year="{{=fileInfo.extraData.year}}"{{?}}
+    {{?? fileInfo.mimeType.substr(0, 6) == "video/" && fileInfo.extraData}}
+        {{? fileInfo.extraData.duration}}data-duration="{{=fileInfo.extraData.duration}}"{{?}}
+        {{? fileInfo.extraData.bitrate}}data-bitrate="{{=fileInfo.extraData.bitrate}}"{{?}}
     {{?}}>
     <div class="postFileName">
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}" target="_blank">{{=fileInfo.name}}</a>
@@ -45,9 +50,11 @@
         {{?}}
         {{? fileInfo.mimeType.substr(0, 6) == "audio/"}}
             {{? it.settings.mode.name != "ascetic"}}
-                <a onclick="lord.editAudioTags(this); return false" title="{{=it.tr.editAudioTagsText}}">
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false"
+                   title="{{=it.tr.editAudioTagsText}}">
                     <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
-                <a onclick="lord.addToPlaylist(this); return false;" title="{{=it.tr.addToPlaylistText}}">
+                <a href="javascript:void(0);" onclick="lord.addToPlaylist(this); return false;"
+                   title="{{=it.tr.addToPlaylistText}}">
                     <img src="/{{=it.site.pathPrefix}}img/playlist_add.png"></a>
             {{??}}
                 <a href="/{{=it.site.pathPrefix}}edit_audio_tags?board={{=it.board.name}}&post={{=post.number}}&fileName={{=fileInfo.name}}"

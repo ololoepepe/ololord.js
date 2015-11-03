@@ -1315,14 +1315,12 @@
     "Remove from playlist": {
         "removeFromPlaylistText": {
             "value": "Удалить из плей-листа"
-        },
-        "_obsolete": true
+        }
     },
     "Download file": {
         "downloadPlaylistFileText": {
             "value": "Скачать файл"
-        },
-        "_obsolete": true
+        }
     },
     "Invalid search query": {
         "error": {

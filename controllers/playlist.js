@@ -8,6 +8,7 @@ var router = express.Router();
 router.get("/playlist.html", function(req, res) {
     var model = {};
     model.title = Tools.translate("Playlist", "pageTitle");
+    model.extraScripts = [ { fileName: "playlist.js" } ];
     controller(req, "playlist", model).then(function(data) {
         res.send(data);
     }).catch(function(err) {

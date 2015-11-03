@@ -523,6 +523,9 @@ controller.translationsModel = function() {
     translate("Loading posts...", "loadingPostsText");
     translate("New posts:", "newPostsText");
     translate("No new posts", "noNewPostsText");
+    translate("kbps", "kbps");
+    translate("Download file", "downloadPlaylistFileText");
+    translate("Remove from playlist", "removeFromPlaylistText");
     return { tr: tr };
 };
 
