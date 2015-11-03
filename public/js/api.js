@@ -840,14 +840,6 @@ lord.nearlyEqual = function(a, b, epsilon) {
     }
 };
 
-lord.createUuid = function() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-        var r = (Math.random() * 16) | 0;
-        var v = (c == "x") ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-};
-
 lord.hash = function() {
     return window.location.hash.substr(1, window.location.hash.length - 1);
 };

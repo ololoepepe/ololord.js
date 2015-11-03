@@ -279,8 +279,7 @@
         },
         "kilobytesText": {
             "value": "КБ"
-        },
-        "_obsolete": true
+        }
     },
     "Unknown country": {
         "countryName": {
@@ -2609,8 +2608,7 @@
     "This file exists on server. It will NOT be uploaded, but WILL be copied.": {
         "fileExistsOnServerText": {
             "value": "Этот файл существует на сервере. Он НЕ будет загружен, но БУДЕТ скопирован."
-        },
-        "_obsolete": true
+        }
     },
     "Draft": {
         "draftText": {
@@ -2716,14 +2714,12 @@
     "URL:": {
         "linkLabelText": {
             "value": "Ссылка:"
-        },
-        "_obsolete": true
+        }
     },
     "Selected file is too large": {
         "fileTooLargeWarningText": {
             "value": "Выбранный файл слишком большой"
-        },
-        "_obsolete": true
+        }
     },
     "E-mail": {
         "postFormPlaceholderEmail": {

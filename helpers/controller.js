@@ -551,6 +551,12 @@ controller.translationsModel = function() {
     translate("kbps", "kbps");
     translate("Download file", "downloadPlaylistFileText");
     translate("Remove from playlist", "removeFromPlaylistText");
+    translate("URL:", "linkLabelText");
+    translate("This file exists on server. It will NOT be uploaded, but WILL be copied.", "fileExistsOnServerText");
+    translate("Selected file is too large", "fileTooLargeWarningText");
+    translate("MB", "megabytesText");
+    translate("KB", "kilobytesText");
+    translate("Byte(s)", "bytesText ");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

@@ -425,8 +425,8 @@ lord.updatePost = function(boardName, postNumber, post) {
 
 lord.clearFileInput = function(div) {
     var preview = div.querySelector("img");
-    if (!!preview && div == preview.parentNode)
-        preview.src = "/" + lord.text("sitePathPrefix") + "img/addfile.png";
+    if (preview && div == preview.parentNode)
+        preview.src = "/" + lord.data("sitePathPrefix") + "img/addfile.png";
     var span = div.querySelector("span");
     if (!!span && div == span.parentNode) {
         while (span.firstChild)
@@ -444,21 +444,23 @@ lord.clearFileInput = function(div) {
 lord.readableSize = function(sz) {
     sz = +sz;
     if (isNaN(sz))
-        return "";
-    if (sz / 1024 >= 1) {
-        sz /= 1024;
+        return Promise.resolve("");
+    return lord.getModel("misc/tr").then(function(model) {
         if (sz / 1024 >= 1) {
-            sz = (sz / 1024).toFixed(1);
-            sz += " " + lord.text("megabytesText");
+            sz /= 1024;
+            if (sz / 1024 >= 1) {
+                sz = (sz / 1024).toFixed(1);
+                sz += " " + model.tr.megabytesText;
+            } else {
+                sz = sz.toFixed(1);
+                sz += " " + model.tr.kilobytesText;
+            }
         } else {
-            sz = sz.toFixed(1);
-            sz += " " + lord.text("kilobytesText");
+            sz = sz.toString();
+            sz += " " + model.tr.bytesText;
         }
-    } else {
-        sz = sz.toString();
-        sz += " " + lord.text("bytesText");
-    }
-    return sz;
+        return Promise.resolve(sz);
+    });
 };
 
 lord.getFileHashes = function(div) {
@@ -1532,52 +1534,50 @@ lord.fileAddedCommon = function(div, file) {
     if (!inp)
         return;
     var warn = function() {
-        var txt = lord.text("fileTooLargeWarningText") + " (>" + lord.readableSize(+lord.text("maxFileSize")) + ")";
-        lord.showPopup(txt, {type: "warning"});
+        var c = {};
+        lord.getModel("misc/tr").then(function(model) {
+            c.txt = model.tr.fileTooLargeWarningText + " (>";
+            return lord.readableSize(+lord.data("maxFileSize"));
+        }).then(function(txt) {
+            c.txt += txt + ")";
+            lord.showPopup(txt, {type: "warning"});
+        });
     };
     var fileName = file ? file.name : div.fileUrl.split("/").pop();
-    var txt = fileName;
+    var p;
     if (file) {
-        txt += " (" + lord.readableSize(file.size) + ")";
-        if (+file.size > +lord.text("maxFileSize"))
+        p = lord.readableSize(file.size).then(function(txt) {
+            return Promise.resolve("(" + txt + ")");
+        });
+        if (+file.size > +lord.data("maxFileSize"))
             warn();
     } else {
-        txt += " [URL]";
-        /*var xhr = new XMLHttpRequest();
-        xhr.open("HEAD", div.fileUrl, true);
-        xhr.onreadystatechange = (function(div, fn) {
-            if (this.readyState != this.DONE)
-                return;
-            var sz = +this.getResponseHeader("Content-Length");
-            if (isNaN(sz))
-                return;
-            if (sz > +lord.text("maxFileSize"))
-                warn();
-            var txt = fn + " (" + lord.readableSize(sz) + ") [URL]";
-            var t = lord.queryOne(".postformFileText", div);
-            lord.removeChildren(t);
-            t.appendChild(lord.node("text", txt));
-        }).bind(xhr, div, fileName);
-        xhr.send();*/
+        p = promise.resolve("[URL]");
+        //TODO: get size
     }
-    lord.queryOne(".postformFileText", div).appendChild(lord.node("text", txt));
-    var uuid = lord.createUuid();
-    lord.queryOne("input", div).name = "file_" + uuid;
-    div.droppedFileName = "file_" + (div.fileUrl ? "url_" : "") + uuid;
-    lord.queryOne(".ratingSelectContainer > select").name = "file_" + uuid + "_rating";
+    p.then(function(txt) {
+        txt = fileName + " " + txt;
+        lord.queryOne(".postformFileText", div).appendChild(lord.node("text", txt));
+    });
+    var _uuid = uuid.v1();
+    lord.queryOne("input", div).name = "file_" + _uuid;
+    div.droppedFileName = "file_" + (div.fileUrl ? "url_" : "") + _uuid;
+    lord.queryOne(".ratingSelectContainer > select").name = "file_" + _uuid + "_rating";
     lord.removeFileHash(div);
     var binaryReader = new FileReader();
-    var prefix = lord.text("sitePathPrefix");
+    var prefix = lord.data("sitePathPrefix");
     binaryReader.onload = function(e) {
         var wordArray = CryptoJS.lib.WordArray.create(e.target.result);
-        var currentBoardName = lord.text("currentBoardName");
+        var currentBoardName = lord.data("boardName");
         var fileHash = lord.toHashpass(wordArray);
-        lord.ajaxRequest("get_file_existence", [currentBoardName, fileHash], lord.RpcGetFileExistenceId, function(res) {
+        /*lord.ajaxRequest("get_file_existence", [currentBoardName, fileHash], lord.RpcGetFileExistenceId, function(res) {
             if (!res)
                 return;
             var img = lord.node("img");
             img.src = "/" + prefix + "img/storage.png";
-            img.title = lord.text("fileExistsOnServerText");
+            lord.getModel("misc/tr").then(function(model) {
+                img.title = model.tr.fileExistsOnServerText;
+            });
             div.querySelector("span").appendChild(lord.node("text", " "));
             div.querySelector("span").appendChild(img);
             var fileHashes = lord.getFileHashes(div);
@@ -1590,7 +1590,7 @@ lord.fileAddedCommon = function(div, file) {
             div.fileHash = fileHash;
             if (div.droppedFile)
                 delete div.droppedFile;
-        });
+        });*/
     };
     if (file && lord.getLocalObject("checkFileExistence", true))
         binaryReader.readAsArrayBuffer(file);
@@ -1673,10 +1673,7 @@ lord.fileAddedCommon = function(div, file) {
     inp.value = "";
     inp.onchange = f;
     div.querySelector("a").style.display = "inline";
-    var inpMax = lord.id("maxFileCount");
-    if (!inpMax)
-        return;
-    var maxCount = +inpMax.value;
+    var maxCount = +lord.data("maxFileCount");
     var additionalCount = lord.getAdditionalCount(inp);
     if (additionalCount)
         maxCount -= +additionalCount;
@@ -1746,16 +1743,18 @@ lord.attachFileByLink = function(a) {
     div = div.parentNode;
     if (!div)
         return;
-    var url = prompt(lord.text("linkLabelText"));
-    if (null === url)
-        return;
-    if (div.droppedFile)
-        delete div.droppedFile;
-    var inp = lord.queryOne("input", div);
-    inp.parentNode.replaceChild(inp.cloneNode(true), inp);
-    lord.clearFileInput(div);
-    div.fileUrl = url;
-    lord.fileAddedCommon(div);
+    lord.getModel("misc/tr").then(function(model) {
+        var url = prompt(model.tr.linkLabelText);
+        if (null === url)
+            return;
+        if (div.droppedFile)
+            delete div.droppedFile;
+        var inp = lord.queryOne("input", div);
+        inp.parentNode.replaceChild(inp.cloneNode(true), inp);
+        lord.clearFileInput(div);
+        div.fileUrl = url;
+        lord.fileAddedCommon(div);
+    });
 };
 
 lord.removeFile = function(current) {
