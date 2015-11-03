@@ -18,7 +18,7 @@ rl.setPrompt("ololord.js> ");
 rl.tmp_question = rl.question;
 rl.question = function(question) {
     return new Promise(function(resolve, reject) {
-        rl.tmp_question.apply(rl, question, resolve);
+        rl.tmp_question.apply(rl, [question, resolve]);
     });
 };
 
