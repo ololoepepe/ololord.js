@@ -188,29 +188,33 @@
                         {{ out += it.customPostFormOption[0](it); }}
                     {{?}}
                     {{? it.compareRegisteredUserLevels(it.user.level, "ADMIN") >= 0}}
-                        <b>{{=it.tr.postFormLabelRaw}}</b>
-                        <input type="checkbox" name="raw" value="true" />
+                        <input id="checkboxRawHtml" type="checkbox" name="raw" value="true"
+                               class="imageCheckBox" /><label title="{{!it.tr.postFormLabelRaw}}"
+                                                              for="checkboxRawHtml"></label>
                     {{?}}
                     {{? it.customPostFormOption && it.customPostFormOption[10]}}
                         {{ out += it.customPostFormOption[10](it); }}
                     {{?}}
-                    <b>{{=it.tr.postFormLabelSignAsOp}}</b>
-                    <input type="checkbox" name="signAsOp" value="true" />
+                    <input id="checkboxOp" type="checkbox" name="signAsOp" value="true"
+                           class="imageCheckBox" /><label title="{{!it.tr.postFormLabelSignAsOp}}"
+                                                          for="checkboxOp"></label>
                     {{? it.customPostFormOption && it.customPostFormOption[20]}}
                         {{ out += it.customPostFormOption[20](it); }}
                     {{?}}
                     {{? it.user.loggedIn}}
-                        <b>{{=it.tr.postFormLabelTripcode}}</b>
-                        <input type="checkbox" name="tripcode" value="true"
-                               {{? it.settings.mode.name != "ascetic"}}onclick="lord.switchShowTripcode();"{{?}} />
+                        <input id="checkboxTripcode" type="checkbox" name="tripcode" value="true"
+                               {{? it.settings.mode.name != "ascetic"}}onclick="lord.switchShowTripcode();"{{?}}
+                               class="imageCheckBox" /><label title="{{!it.tr.postFormLabelTripcode}}"
+                                                              for="checkboxTripcode"></label>
                     {{?}}
                     {{? it.customPostFormOption && it.customPostFormOption[30]}}
                         {{ out += it.customPostFormOption[30](it); }}
                     {{?}}
                     {{? it.board.draftsEnabled && it.user.loggedIn}}
-                        <b>{{=it.tr.postFormLabelDraft}}</b>
-                        <input type="checkbox" name="draft" value="true"
-                               {{? it.settings.draftsByDefault}}checked="true"{{?}} />
+                        <input id="checkboxDraft" type="checkbox" name="draft" value="true"
+                               {{? it.settings.draftsByDefault}}checked="true"{{?}}
+                               class="imageCheckBox" /><label title="{{!it.tr.postFormLabelDraft}}"
+                                                              for="checkboxDraft"></label>
                     {{?}}
                     {{? it.customPostFormOption && it.customPostFormOption[40]}}
                         {{ out += it.customPostFormOption[40](it); }}

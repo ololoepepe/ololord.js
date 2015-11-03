@@ -509,10 +509,10 @@ controller.translationsModel = function() {
     translate("URL (external link)", "markupUrl");
     translate("Markup mode:", "postFormLabelMarkupMode");
     translate("Options:", "postFormLabelOptions");
-    translate("Raw HTML:", "postFormLabelRaw");
-    translate("OP:", "postFormLabelSignAsOp");
-    translate("Tripcode:", "postFormLabelTripcode");
-    translate("Draft:", "postFormLabelDraft");
+    translate("Raw HTML", "postFormLabelRaw");
+    translate("Sign as OP", "postFormLabelSignAsOp");
+    translate("Enable tripcode", "postFormLabelTripcode");
+    translate("Draft", "postFormLabelDraft");
     translate("File(s):", "postFormInputFile");
     translate("Select file", "selectFileText");
     translate("Remove this file", "removeFileText");

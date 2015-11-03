@@ -515,9 +515,9 @@
             "value": "Редактировать пост"
         }
     },
-    "Draft:": {
+    "Draft": {
         "postFormLabelDraft": {
-            "value": "Черновик:"
+            "value": "Черновик"
         }
     },
     "E-mail:": {
@@ -530,9 +530,9 @@
             "value": "Имя:"
         }
     },
-    "Raw HTML:": {
+    "Raw HTML": {
         "postFormLabelRaw": {
-            "value": "\"Сырой\" HTML:"
+            "value": "\"Сырой\" HTML"
         }
     },
     "Subject:": {
@@ -2755,14 +2755,14 @@
             "value": "Опции:"
         }
     },
-    "OP:": {
+    "Sign as OP": {
         "postFormLabelSignAsOp": {
-            "value": "ОП:"
+            "value": "ОП треда"
         }
     },
-    "Tripcode:": {
+    "Enable tripcode": {
         "postFormLabelTripcode": {
-            "value": "Трипкод:"
+            "value": "Включить трипкод"
         }
     },
     "Posts left:": {
