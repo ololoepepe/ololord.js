@@ -489,8 +489,8 @@ lord.getAdditionalCount = function(el) {
 };
 
 lord.hideImage = function() {
-    if (!!lord.img) {
-        if (lord.isAudioType(lord.img.fileType) || lord.isVideoType(lord.img.fileType)) {
+    if (lord.img) {
+        if (lord.isAudioType(lord.img.mimeType) || lord.isVideoType(lord.img.mimeType)) {
             lord.setLocalObject("audioVideoVolume", +lord.img.volume);
             lord.img.pause();
             lord.img.load();
@@ -1494,7 +1494,7 @@ lord.noViewPost = function() {
     lord.lastPostPreviewTimer = setTimeout(function() {
         if (!lord.lastPostPreview)
             return;
-        if (!!lord.lastPostPreview.mustHide && !!lord.lastPostPreview.parentNode)
+        if (lord.lastPostPreview.mustHide && lord.lastPostPreview.parentNode)
             lord.lastPostPreview.parentNode.removeChild(lord.lastPostPreview);
     }, 500);
 };

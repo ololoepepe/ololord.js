@@ -500,7 +500,7 @@ var convertPostLink = function(info, _, matchs, _, options) {
                     postNumber: postNumber,
                     threadNumber: post.threadNumber
                 };
-            var href = "href=\"/" + config("site.pathPrefix", "") + boardName + "/thread/" + post.threadNumber
+            var href = "href=\"/" + config("site.pathPrefix", "") + boardName + "/res/" + post.threadNumber
                 + ".html#" + postNumber + "\"";
             return "<a " + href + " data-board-name=\"" + boardName + "\" data-post-number=\"" + postNumber
                 + "\" data-thread-number=\"" + post.threadNumber + "\">" + escaped + "</a>";
