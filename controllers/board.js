@@ -23,7 +23,7 @@ var renderPage = function(model, board, req, json) {
         model.title = board.title;
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
-        model.extraScripts = board.extraScripts;
+        model.extraScripts = board.extraScripts();
         if (!json || json.translations)
             model.tr = controller.translationsModel();
         return board.postformRules();
@@ -58,7 +58,7 @@ var renderThread = function(model, board, req, json) {
         model.title = board.title;
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
-        model.extraScripts = board.extraScripts;
+        model.extraScripts = board.extraScripts();
         if (!json || json.translations)
             model.tr = controller.translationsModel();
         return board.postformRules();

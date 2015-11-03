@@ -11,8 +11,9 @@ XML2JS = require("xml2js");
 
 var mkpath = promisify("mkpath");
 
-var Board = require("../boards/board");
+var Board = require("../boards");
 var Cache = require("./cache");
+var Captcha = require("../captchas");
 var config = require("./config");
 var markup = require("./markup");
 var Tools = require("./tools");
@@ -567,11 +568,42 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     });
 };
 
+var checkCaptcha = function(req, fields) {
+    var board = Board.board(fields.board);
+    if (!board)
+        return Promise.reject("Invalid board");
+    if (!board.captchaEnabled)
+        return Promise.resolve();
+    var ip = req.trueIp;
+    return getUserCaptchaQuota(board.name, ip).then(function(quota) {
+        if (board.captchaQuota > 0 && +quota > 0)
+            return captchaUsed(board.name, ip);
+        var supportedCaptchaEngines = board.supportedCaptchaEngines;
+        if (supportedCaptchaEngines.length < 1)
+            return Promise.reject("Internal error");
+        var ceid = fields.captchaEngine;
+        if (!ceid || supportedCaptchaEngines.indexOf(ceid) < 0) {
+            if (supportedCaptchaEngines.indexOf("google-recaptcha"))
+                ceid = "google-recaptcha";
+            else
+                ceid = supportedCaptchaEngines[0];
+        }
+        var captcha = Captcha.captcha(ceid);
+        if (!captcha)
+            return Promise.reject("Invalid captcha engine");
+        return captcha.checkCaptcha(req, fields).then(function() {
+            return captchaSolved(board.name, ip);
+        });
+    });
+};
+
 module.exports.createPost = function(req, fields, files, transaction) {
     var threadNumber = +fields.thread;
     if (isNaN(threadNumber) || threadNumber <= 0)
         return Promise.reject("Invalid thread");
-    return processFiles(req, fields, files, transaction).then(function(files) {
+    return checkCaptcha(req, fields).then(function() {
+        return processFiles(req, fields, files, transaction);
+    }).then(function(files) {
         return createPost(req, fields, files, transaction);
     });
 };
@@ -674,7 +706,9 @@ module.exports.createThread = function(req, fields, files, transaction) {
         sha1.update(fields.password);
         password = sha1.digest("hex");
     }
-    return registeredUserLevel(hashpass).then(function(level) {
+    return checkCaptcha(req, fields).then(function() {
+        return registeredUserLevel(hashpass);
+    }).then(function(level) {
         c.level = level;
         return getThreads(board.name);
     }).then(function(threads) {
@@ -1023,15 +1057,16 @@ module.exports.findPosts = function(query, boardName) {
     });
 };
 
-
-module.exports.getUserCaptchaQuota = function(boardName, userIp) {
+var getUserCaptchaQuota = function(boardName, userIp) {
     var board = Board.board(boardName);
     if (!board)
         return Promise.reject("Invalid board");
     return db.hget("captchaQuotas", boardName + ":" + userIp);
 };
 
-module.exports.captchaSolved = function(boardName, userIp) {
+module.exports.getUserCaptchaQuota = getUserCaptchaQuota;
+
+var captchaSolved = function(boardName, userIp) {
     var board = Board.board(boardName);
     if (!board)
         return Promise.reject("Invalid board");
@@ -1041,16 +1076,22 @@ module.exports.captchaSolved = function(boardName, userIp) {
     return db.hincrby("captchaQuotas", boardName + ":" + userIp, quota);
 };
 
-module.exports.captchaUsed = function(boardName, userIp) {
+module.exports.captchaSolved = captchaSolved;
+
+var captchaUsed = function(boardName, userIp) {
     var board = Board.board(boardName);
     if (!board)
         return Promise.reject("Invalid board");
+    if (board.captchaQuota < 1)
+        return Promise.resolve(0);
     return db.hincrby("captchaQuotas", boardName + ":" + userIp, -1).then(function(quota) {
-        if (qouta < 0)
+        if (quota < 0)
             return db.hset("captchaQuotas", boardName + ":" + userIp, 0);
         return (quota < 0) ? 0 : quota;
     });
 };
+
+module.exports.captchaUsed = captchaUsed;
 
 var rerenderPost = function(boardName, postNumber) {
     var key = boardName + ":" + postNumber;

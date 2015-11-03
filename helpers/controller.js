@@ -10,6 +10,8 @@ var promisify = require("promisify-node");
 var random = require("random-js")();
 var Util = require("util");
 
+var config = require("./config");
+
 var partials = {};
 var templates = {};
 var langNames = null;
@@ -22,6 +24,13 @@ var customContent = function(req, name) {
             return Promise.resolve(null);
         return controller(req, "custom/" + name + "/" + Path.basename(fileName, ".jst"));
     });
+};
+
+var formattedDate = function(date) {
+    var offset = config("site.timeOffset", 0);
+    var locale = config("site.locale", "en");
+    var format = config("site.dateFormat", "MM/DD/YYYY HH:mm:ss");
+    return moment(date).utcOffset(offset).locale(locale).format(format);
 };
 
 controller = function(req, templateName, modelData) {
@@ -42,10 +51,7 @@ controller = function(req, templateName, modelData) {
     }
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
-    baseModelData.formattedDate = function(date) {
-        return moment(date).locale(config("site.locale", "en")).format(config("site.dateFormat",
-            "MM/DD/YYYY hh:mm:ss"));
-    };
+    baseModelData.formattedDate = formattedDate;
     if (!modelData)
         modelData = {};
     var template = templates[templateName];
@@ -111,10 +117,7 @@ controller.sync = function(req, templateName, modelData) {
     }
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
-    baseModelData.formattedDate = function(date) {
-        return moment(date).locale(config("site.locale", "en")).format(config("site.dateFormat",
-            "MM/DD/YYYY hh:mm:ss"));
-    };
+    baseModelData.formattedDate = formattedDate;
     if (!modelData)
         modelData = {};
     var template = templates[templateName];
@@ -212,7 +215,8 @@ controller.baseModel = function(req) {
             domain: config("site.domain", "localhost:8080"),
             pathPrefix: config("site.pathPrefix", ""),
             locale: config("site.locale", "en"),
-            dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss")
+            dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss"),
+            timeOffset: config("site.timeOffset", 0)
         },
         user: {
             ip: req.trueIp,

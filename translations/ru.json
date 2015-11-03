@@ -2487,8 +2487,7 @@
     "MB": {
         "megabytesText": {
             "value": "МБ"
-        },
-        "_obsolete": true
+        }
     },
     "Select file": {
         "selectFileText": {
@@ -2498,8 +2497,7 @@
     "Byte(s)": {
         "bytesText": {
             "value": "Байт(а)"
-        },
-        "_obsolete": true
+        }
     },
     "Answers:": {
         "referencedByText": {

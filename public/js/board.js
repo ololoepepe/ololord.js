@@ -251,6 +251,7 @@ lord.createPostNode = function(post, permanent) {
         c.model = model;
         c.locale = model.site.locale;
         c.dateFormat = model.site.dateFormat;
+        c.timeOffset = model.site.timeOffset;
         c.model.settings = lord.settings();
         return lord.getModel("misc/tr");
     }).then(function(model) {
@@ -310,7 +311,7 @@ lord.createPostNode = function(post, permanent) {
             }
         };
         c.model.formattedDate = function(date) {
-            return moment(date).locale(c.locale).format(c.dateFormat);
+            return moment(date).utcOffset(c.timeOffset).locale(c.locale).format(c.dateFormat);
         };
         return lord.getTemplate("post");
     }).then(function(template) {
