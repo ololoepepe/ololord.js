@@ -201,7 +201,15 @@ var Board = function(name, title, options) {
     return [];
 };
 
-/*public*/ Board.prototype.customPostBodyPart = function(post, n) {
+/*public*/ Board.prototype.customPostBodyPart = function(n, req) {
+    //
+};
+
+/*public*/ Board.prototype.customPostFormField = function(n, req, thread) {
+    //
+};
+
+/*public*/ Board.prototype.customPostFormOption = function(n, req, thread) {
     //
 };
 
@@ -219,6 +227,10 @@ var Board = function(name, title, options) {
 
 /*public*/ Board.prototype.defineSetting = function(name, def) {
     return defineSetting(this, name, def);
+};
+
+/*public*/ Board.prototype.addTranslations = function(translate) {
+    //
 };
 
 var renderFileInfo = function(fi) {

@@ -1580,8 +1580,7 @@
     "Thread link:": {
         "postFormLabelLink": {
             "value": "Ссылка на тред:"
-        },
-        "_obsolete": true
+        }
     },
     "Attempt to edit link of non-OP post": {
         "error": {
@@ -3437,14 +3436,12 @@
     "Add variant": {
         "addVoteVariantText": {
             "value": "Добавить вариант"
-        },
-        "_obsolete": true
+        }
     },
     "Multiple variants allowed:": {
         "multipleVoteVariantsText": {
             "value": "Разрешено несколько вариантов:"
-        },
-        "_obsolete": true
+        }
     },
     "Remove variant": {
         "removeVoteVariantText": {
@@ -3455,32 +3452,27 @@
     "Vote:": {
         "postFormLabelVote": {
             "value": "Голосование:"
-        },
-        "_obsolete": true
+        }
     },
     "Vote": {
         "voteActionText": {
             "value": "Проголосовать"
-        },
-        "_obsolete": true
+        }
     },
     "Text:": {
         "voteTextText": {
             "value": "Текст:"
-        },
-        "_obsolete": true
+        }
     },
-    "voted:": {
-        "votedText": {
+    "vote count:": {
+        "voteCountText": {
             "value": "проголосовало:"
-        },
-        "_obsolete": true
+        }
     },
     "Take vote back": {
         "unvoteActionText": {
             "value": "Забрать голос"
-        },
-        "_obsolete": true
+        }
     },
     "Attempt to attach voting while not being the OP": {
         "description": {
@@ -3491,20 +3483,17 @@
     "Close voting": {
         "closeVoteActionText": {
             "value": "Закрыть голосование"
-        },
-        "_obsolete": true
+        }
     },
     "Open voting": {
         "openVoteActionText": {
             "value": "Открыть голосование"
-        },
-        "_obsolete": true
+        }
     },
     "Voting is closed": {
         "voteClosedText": {
             "value": "Голосование закрыто"
-        },
-        "_obsolete": true
+        }
     },
     "Attempt to edit voting while not being the OP": {
         "error": {

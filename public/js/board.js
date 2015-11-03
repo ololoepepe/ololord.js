@@ -2213,6 +2213,10 @@ lord.complain = function() {
     lord.complainVideo.play();
 };
 
+lord.showUserIp = function(a) {
+    prompt("IP:", lord.data("userIp", a, true));
+};
+
 lord.submitted = function(event, form) {
     if (event)
         event.preventDefault();
@@ -2255,7 +2259,7 @@ lord.submitted = function(event, form) {
     }).then(function(result) {
         resetButton();
         if (result.errorMessage)
-            return console.log(result.errorMessage);
+            return Promise.reject(result.errorMessage);
         if (result.postNumber) {
             c.post = true;
             return lord.getModel("api/post", "boardName=" + result.boardName + "&postNumber=" + result.postNumber);

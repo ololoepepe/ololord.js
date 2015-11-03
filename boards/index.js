@@ -34,11 +34,7 @@ Board.addBoard(board);
 Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"),
     { defaultUserName: Tools.translate.noop("Whiner", "defaultUserName") }));
 
-board = new Board("rpg", Tools.translate.noop("Role-playing games", "boardTitle"));
-board.extraScripts = function() {
-    return [ { fileName: "rpg.js" } ];
-};
-Board.addBoard(board);
+Board.addBoard(require("./rpg"));
 
 Board.addBoard(new Board("soc", Tools.translate.noop("Social life", "boardTitle"),
     { defaultUserName: Tools.translate.noop("Life of the party", "defaultUserName") }));

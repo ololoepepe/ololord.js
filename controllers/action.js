@@ -220,7 +220,7 @@ router.post("/createPost", function(req, res) {
     }).catch(function(err) {
         transaction.rollback();
         setMarkupModeCookie(res, c.fields);
-        controller.error(req, res, err);
+        controller.error(req, res, err, req.settings.mode.name != "ascetic");
     });
 });
 
@@ -250,7 +250,7 @@ router.post("/createThread", function(req, res) {
     }).catch(function(err) {
         transaction.rollback();
         setMarkupModeCookie(res, c.fields);
-        controller.error(req, res, err);
+        controller.error(req, res, err, req.settings.mode.name != "ascetic");
     });
 });
 

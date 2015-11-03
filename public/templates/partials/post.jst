@@ -1,12 +1,12 @@
 <div id="post{{=post.number}}"
      class="{{? post.isOp}}opPost{{??}}post{{?}}{{? post.ownIp}} ownIp{{?}}{{? post.opIp}} opIp{{?}}{{? it.settings.shrinkPosts}} shrinkedPost{{?}}"
-     data-board-name={{=post.boardName}}
+     data-board-name="{{=post.boardName}}"
      data-number="{{=post.number}}"
      data-thread-number="{{=post.threadNumber}}"
      {{? post.isOp}}data-is-op="true"{{?}}
      {{? post.ownIp}}data-own-ip="true"{{?}}
      {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 && it.settings.mode.name != "ascetic"}}
-        data-user-ip="{{post.user.ip}}"
+        data-user-ip="{{=post.user.ip}}"
      {{?}}>
     <a id="{{=post.number}}"></a>
     <div class="postHeader">

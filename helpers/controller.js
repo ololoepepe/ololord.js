@@ -10,15 +10,8 @@ var promisify = require("promisify-node");
 var random = require("random-js")();
 var Util = require("util");
 
-var Board = require("../boards/board");
-var Cache = require("./cache");
-var Captcha = require("../captchas");
-var config = require("./config");
-var Database = require("./database");
-var markup = require("./markup");
-var Tools = require("./tools");
-
 var partials = {};
+var templates = {};
 var langNames = null;
 
 var controller;
@@ -55,50 +48,82 @@ controller = function(req, templateName, modelData) {
     };
     if (!modelData)
         modelData = {};
-    var template = Cache.get("template/" + templateName, "");
-    var f = function(template, baseModelData, modelData) {
-        var p;
-        if (templateName.substr(0, 13) == "custom/footer" || templateName.substr(0, 13) == "custom/header"
-            || templateName.substr(0, 11) == "custom/home") {
+    var template = templates[templateName];
+    var p;
+    if (templateName.substr(0, 13) == "custom/footer" || templateName.substr(0, 13) == "custom/header"
+        || templateName.substr(0, 11) == "custom/home") {
+        if (template) {
             p = Promise.resolve();
         } else {
-            p = customContent(req, "header").then(function(content) {
-                modelData.customHeader = content;
-                return customContent(req, "footer");
-            }).then(function(content) {
-                modelData.customFooter = content;
+            p = FS.read(__dirname + "/../views/" + templateName + ".jst").then(function(data) {
+                template = dot.template(data, {
+                    evaluate: /\{\{([\s\S]+?)\}\}/g,
+                    interpolate: /\{\{=([\s\S]+?)\}\}/g,
+                    encode: /\{\{!([\s\S]+?)\}\}/g,
+                    use: /\{\{#([\s\S]+?)\}\}/g,
+                    define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
+                    conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
+                    iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
+                    varname: 'it',
+                    strip: false,
+                    append: true,
+                    selfcontained: false
+                }, partials);
+                templates[templateName] = template;
                 return Promise.resolve();
             });
         }
-        return p.then(function() {
-            modelData = merge.recursive(baseModelData, modelData);
-            modelData.req = req;
-            return Promise.resolve(template(modelData));
+    } else {
+        if (!template)
+            return Promise.reject("Invalid template");
+        p = customContent(req, "header").then(function(content) {
+            modelData.customHeader = content;
+            return customContent(req, "footer");
+        }).then(function(content) {
+            modelData.customFooter = content;
+            return Promise.resolve();
         });
-    };
-    if (template)
-        return f(template, baseModelData, modelData);
-    return FS.read(__dirname + "/../views/" + templateName + ".jst").then(function(data) {
-        return Promise.resolve(dot.template(data, {
-            evaluate: /\{\{([\s\S]+?)\}\}/g,
-            interpolate: /\{\{=([\s\S]+?)\}\}/g,
-            encode: /\{\{!([\s\S]+?)\}\}/g,
-            use: /\{\{#([\s\S]+?)\}\}/g,
-            define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
-            conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
-            iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
-            varname: 'it',
-            strip: false,
-            append: true,
-            selfcontained: false
-        }, partials));
-    }).then(function(template) {
-        Cache.set("template/" + templateName, template);
-        return f(template, baseModelData, modelData);
+    }
+    return p.then(function() {
+        modelData = merge.recursive(baseModelData, modelData);
+        modelData.req = req;
+        return Promise.resolve(template(modelData));
     });
 };
 
 controller.customContent = customContent;
+
+controller.sync = function(req, templateName, modelData) {
+    var baseModelData = merge.recursive(controller.baseModel(req), controller.settingsModel(req));
+    baseModelData = merge.recursive(baseModelData, controller.translationsModel());
+    baseModelData = merge.recursive(baseModelData, controller.boardsModel());
+    baseModelData.path = req.path;
+    if (baseModelData.user.loggedIn) {
+        if (Database.compareRegisteredUserLevels(baseModelData.user.level, "ADMIN") >= 0) {
+            baseModelData.loginMessageText = Tools.translate("logged in as administrator", "loginMessageText");
+        } else if (Database.compareRegisteredUserLevels(baseModelData.user.level, "MODER") >= 0) {
+            baseModelData.loginMessageText = Tools.translate("logged in as moderator", "loginMessageText");
+        } else if (Database.compareRegisteredUserLevels(baseModelData.user.level, "USER") >= 0) {
+            baseModelData.loginMessageText = Tools.translate("logged in as user", "loginMessageText");
+        } else {
+            baseModelData.loginMessageText = Tools.translate("not registered", "loginMessageText");
+        }
+    }
+    baseModelData.compareRatings = Database.compareRatings;
+    baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
+    baseModelData.formattedDate = function(date) {
+        return moment(date).locale(config("site.locale", "en")).format(config("site.dateFormat",
+            "MM/DD/YYYY hh:mm:ss"));
+    };
+    if (!modelData)
+        modelData = {};
+    var template = templates[templateName];
+    if (!template)
+        return null;
+    modelData = merge.recursive(baseModelData, modelData);
+    modelData.req = req;
+    return template(modelData);
+};
 
 controller.error = function(req, res, error, ajax) {
     if (!ajax && Util.isNumber(error) && 404 == error)
@@ -112,10 +137,10 @@ controller.error = function(req, res, error, ajax) {
             model.errorMessage = Tools.translate("Internal error", "errorMessage");
             model.errorDescription = error.message;
         } else if (Util.isObject(error) && error.error) {
-            model.errorMesage = error.description ? error.error : Tools.translate("Error", "errorMessage");
+            model.errorMessage = error.description ? error.error : Tools.translate("Error", "errorMessage");
             model.errorDescription = error.description || error.error;
         } else {
-            model.errorMesage = Tools.translate("Error", "errorMessage");
+            model.errorMessage = Tools.translate("Error", "errorMessage");
             model.errorDescription = (error && Util.isString(error)) ? error : "";
         }
         return model;
@@ -526,6 +551,9 @@ controller.translationsModel = function() {
     translate("kbps", "kbps");
     translate("Download file", "downloadPlaylistFileText");
     translate("Remove from playlist", "removeFromPlaylistText");
+    Board.boardNames().forEach(function(boardName) {
+        Board.board(boardName).addTranslations(translate);
+    });
     return { tr: tr };
 };
 
@@ -545,6 +573,40 @@ controller.initialize = function() {
         var promises = c.fileNames.map(function(fileName) {
             FS.read(fileName).then(function(data) {
                 partials[fileName.split("/").pop().split(".").shift()] = data;
+                return Promise.resolve();
+            });
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        path1 = __dirname + "/../views";
+        path2 = __dirname + "/../public/templates";
+        return FS.list(path1).then(function(fileNames) {
+            c.fileNames = fileNames.map(function(fileName) {
+                return path1 + "/" + fileName;
+            });
+            return FS.list(path2);
+        });
+    }).then(function(fileNames) {
+        c.fileNames = c.fileNames.concat(fileNames.map(function(fileName) {
+            return path2 + "/" + fileName;
+        })).filter(function(fileName) {
+            return fileName.split(".").pop() == "jst";
+        });
+        var promises = c.fileNames.map(function(fileName) {
+            FS.read(fileName).then(function(data) {
+                templates[fileName.split("/").pop().split(".").shift()] = dot.template(data, {
+                    evaluate: /\{\{([\s\S]+?)\}\}/g,
+                    interpolate: /\{\{=([\s\S]+?)\}\}/g,
+                    encode: /\{\{!([\s\S]+?)\}\}/g,
+                    use: /\{\{#([\s\S]+?)\}\}/g,
+                    define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
+                    conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
+                    iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
+                    varname: 'it',
+                    strip: false,
+                    append: true,
+                    selfcontained: false
+                }, partials);
                 return Promise.resolve();
             });
         });
@@ -607,3 +669,10 @@ controller.postingSpeedString = function(board, lastPostNumber) {
 };
 
 module.exports = controller;
+
+var Board = require("../boards/board");
+var Captcha = require("../captchas");
+var config = require("./config");
+var Database = require("./database");
+var markup = require("./markup");
+var Tools = require("./tools");

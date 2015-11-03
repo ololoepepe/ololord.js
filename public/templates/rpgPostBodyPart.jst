@@ -1,0 +1,62 @@
+<tr>
+    <td colspan="{{=it.post.fileInfos.length + 2}}" class="vote">
+        <div name="voteText" class="voteText">
+            {{? it.disabled}}
+                <img name="voteClosedImg" src="/{{=it.site.pathPrefix}}img/closed.png" title="{{=it.tr.voteClosedText}}">
+            {{?}}
+            {{=it.text}}</div>
+        <div name="voteVariants">
+            {{? it.settings.mode.name == "ascetic" && it.disabled && !it.post.ownIp}}
+                <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
+                      action="/{{=it.site.pathPrefix}}action/{{? it.voted}}unvote{{??}}vote{{?}}">
+            {{?}}
+            <input type="hidden" value="{{? it.multiple}}true{{??}}false{{?}}" />
+            {{ for (var i = 0; i < it.variants.length; ++i) { }}
+                {{ var variant = it.variants[i]; }}
+                {{? it.multiple}}
+                    <input type="checkbox" name="voteVariant{{=variant.id}}"
+                {{??}}
+                    <input type="radio" name="voteGroup" value="{{=variant.id}}"
+                {{?}}
+                {{? it.post.ownIp || it.disabled || it.voted}}
+                    disabled="true"
+                {{?}}
+                {{~variant.users :ip}}
+                    {{? ip == it.user.ip}}
+                        checked="true"
+                        {{ break; }}
+                    {{?}}
+                {{~}}
+                /> {{=variant.text}} <span class="voteCount">({{=it.tr.voteCountText}} {{=variant.voteCount}})</span></br />
+            {{ } }}
+        </div>
+        {{? !it.post.ownIp}}
+            {{? !it.disabled}}
+                {{? it.settings.mode.name != "ascetic"}}
+                    <button onclick="lord.{{? !it.voted}}vote{{??}}unvote{{?}}(this);"
+                            name="button{{? !it.voted}}Vote{{??}}Unvote{{?}}">{{? !it.voted}}{{=it.tr.voteActionText}}{{??}}{{=it.tr.unvoteActionText}}{{?}}</button>
+                {{??}}
+                        <input type="hidden" name="postNumber" value="{{=it.post.number}}" />
+                        <input type="submit" name="submit"
+                               value="{{? !it.voted}}{{=it.tr.voteActionText}}{{??}}{{=it.tr.unvoteActionText}}{{?}}" />
+                    </form>
+                {{?}}
+            {{??}}
+                <button name="button{{? !it.voted}}Vote{{??}}Unvote{{?}}"
+                        disabled="true">{{? !it.voted}}{{=it.tr.voteActionText}}{{??}}{{=it.tr.unvoteActionText}}{{?}}</button>
+            {{?}}
+        {{?}}
+        {{? it.settings.mode.name != "ascetic"}}
+            <button onclick="lord.setVoteOpened(this, {{? !it.disabled}}false{{??}}true{{?}});"
+                    name="buttonSetVote{{? !it.disabled}}Closed{{??}}Opened{{?}}">{{? !it.disabled}}{{=it.tr.closeVoteActionText}}{{??}}{{=it.tr.openVoteActionText}}{{?}}</button>
+        {{?? it.user.loggedIn}}
+            <form method="post" accept-charset="utf-8" action="{{=it.site.pathPrefix}}action/setVoteOpened"
+                  enctype="multipart/form-data" class="inlineForm">
+                <input type="hidden" name="postNumber" value="{{=it.post.number}}" />
+                <input type="hidden" name="opened" value="{{? !it.disabled}}false{{??}}true{{?}}" />
+                <input type="submit" name="submit"
+                       value="{{? !it.disabled}}{{=it.tr.closeVoteActionText}}{{??}}{{=it.tr.openVoteActionText}}{{?}}" />
+            </form>
+        {{?}}
+    </td>
+</tr>

@@ -1,0 +1,30 @@
+<tr>
+    {{? it.minimalisticPostform()}}
+        <td class="postformField" colspan="2">
+    {{??}}
+        <td class="postformLabel">
+            <b>{{=it.tr.postFormLabelVote}}</b>
+        </td>
+        <td class="postformField">
+    {{?}}
+        <div>{{=it.tr.voteTextText}} <input type="text" name="voteText" size="36" /></div>
+        <div>{{=it.tr.multipleVoteVariantsText}}
+             <input type="checkbox" name="multipleVoteVariants" value="true" /></div>
+        {{? it.settings.mode.name != "ascetic"}}
+            <div name="voteVariants"></div>
+            <a href="javascript:void(0);" onclick="lord.addVoteVariant(); return false;">
+                <img src="/{{=it.site.pathPrefix}}img/add.png" title="{{=it.tr.addVoteVariantText}}"></a>
+            <input type="hidden" name="voteVariantCount" value="0" />
+        {{??}}
+            <div name="voteVariants">
+                {{ for (var i = 0; i < 10; ++i) { }}
+                    <input type="text" name="voteVariant{{ out += (i + 1); }}" size="43" />
+                    {{? i < 9}}
+                        <br />
+                    {{?}}
+                {{ } }}
+            </div>
+            <input type="hidden" name="voteVariantCount" value="10" />
+        {{?}} 
+    </td>
+</tr>

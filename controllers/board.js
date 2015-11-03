@@ -34,7 +34,13 @@ var renderPage = function(model, board, req, json) {
         };
         model.customPostBodyPart = {};
         for (var i = 0; i < 60; i += 10)
-            model.customPostBodyPart[i] = board.customPostBodyPart(i);
+            model.customPostBodyPart[i] = board.customPostBodyPart(i, req);
+        model.customPostFormField = {};
+        for (var i = 0; i < 110; i += 10)
+            model.customPostFormField[i] = board.customPostFormField(i, req);
+        model.customPostFormOption = {};
+        for (var i = 0; i < 50; i += 10)
+            model.customPostFormOption[i] = board.customPostFormOption(i, req);
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
@@ -43,6 +49,7 @@ var renderPage = function(model, board, req, json) {
 };
 
 var renderThread = function(model, board, req, json) {
+    var thread = merge.clone(model.thread);
     var promises = model.thread.posts.map(function(post) {
         return board.renderPost(post,req, model.thread.opPost);
     });
@@ -62,7 +69,13 @@ var renderThread = function(model, board, req, json) {
         };
         model.customPostBodyPart = {};
         for (var i = 0; i < 60; i += 10)
-            model.customPostBodyPart[i] = board.customPostBodyPart(i);
+            model.customPostBodyPart[i] = board.customPostBodyPart(i, req);
+        model.customPostFormField = {};
+        for (var i = 0; i < 110; i += 10)
+            model.customPostFormField[i] = board.customPostFormField(i, req, thread);
+        model.customPostFormOption = {};
+        for (var i = 0; i < 50; i += 10)
+            model.customPostFormOption[i] = board.customPostFormOption(i, req, thread);
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
