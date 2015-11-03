@@ -50,9 +50,9 @@
               name="dateTime">{{ out += it.formattedDate(post.createdAt); }}</span>
         {{? it.threads}}
             #<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.threadNumber}}.html#{{? thread.postingEnabled}}i{{?}}{{=post.number}}"
-                name="number" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.posterIp}}"{{?}}>{{=post.number}}</a>
+                name="number" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.user.ip}}"{{?}}>{{=post.number}}</a>
         {{??}}
-            #<a href="#{{=post.number}}" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.posterIp}}"{{?}}
+            #<a href="#{{=post.number}}" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.user.ip}}"{{?}}
                 {{? thread.postingEnabled}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}}
                 name="number">{{=post.number}}</a>
         {{?}}
