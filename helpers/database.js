@@ -1051,3 +1051,61 @@ module.exports.captchaUsed = function(boardName, userIp) {
         return (quota < 0) ? 0 : quota;
     });
 };
+
+var rerenderPost = function(boardName, postNumber) {
+    var key = boardName + ":" + postNumber;
+    var c = {};
+    console.log(`Rendering post: [${boardName}] ${postNumber}`);
+    return db.hget("posts", key).then(function(post) {
+        c.post = JSON.parse(post);
+        return markup(c.post.boardName, c.post.rawText, { markupModes: c.post.markup });
+    }).then(function(text) {
+        if (!c.post.options.rawHtml)
+            c.post.text = text;
+        return db.hset("posts", key, JSON.stringify(c.post));
+    });
+};
+
+var rerenderBoardPosts = function(boardName, posts) {
+    if (posts.length < 1)
+        return Promise.resolve();
+    var p = rerenderPost(boardName, posts[0]);
+    for (var i = 1; i < posts.length; ++i) {
+        (function(i) {
+            p = p.then(function() {
+                return rerenderPost(boardName, posts[i]);
+            });
+        })(i);
+    }
+    return p;
+};
+
+module.exports.rerenderPosts = function(boardNames) {
+    var posts = {};
+    return db.hkeys("posts").then(function(keys) {
+        keys.forEach(function(key) {
+            var boardName = key.split(":").shift();
+            var postNumber = +key.split(":").pop();
+            if (!posts.hasOwnProperty(boardName))
+                posts[boardName] = [];
+            posts[boardName].push(postNumber);
+        });
+        var postList = boardNames.map(function(boardName) {
+            return {
+                boardName: boardName,
+                posts: (posts.hasOwnProperty(boardName) ? posts[boardName] : [])
+            };
+        });
+        if (postList.length < 1)
+            return Promise.resolve();
+        var p = rerenderBoardPosts(postList[0].boardName, postList[0].posts);
+        for (var i = 1; i < postList.length; ++i) {
+            (function(i) {
+                p = p.then(function() {
+                    return rerenderBoardPosts(postList[i].boardName, postList[i].posts);
+                });
+            })(i);
+        }
+        return p;
+    });
+};

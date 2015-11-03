@@ -133,6 +133,21 @@ _installHandler("register-user", function() {
     });
 });
 
+_installHandler("rerender-posts", function(args) {
+    var boards = Board.boardNames();
+    if (args) {
+        if (boards.indexOf(args) < 0)
+            return Promise.reject("Invalid board");
+        boards = [args];
+    }
+    return rl.question("Are you sure? [Yes/no] ").then(function(answer) {
+        answer = answer.toLowerCase();
+        if (answer && answer != "yes" && answer != "y")
+            return Promise.resolve();
+        return Database.rerenderPosts(boards);
+    });
+});
+
 var init = function() {
     console.log("Type 'help' for commands");
     rl.prompt();
@@ -157,7 +172,7 @@ var init = function() {
             rl.resume();
             rl.prompt();
         }).catch(function(err) {
-            console.log(err);
+            console.log(err.stack ? err.stack : err);
             rl.resume();
             rl.prompt();
         });
