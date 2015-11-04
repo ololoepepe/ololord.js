@@ -24,16 +24,16 @@ board.postExtraData = function(req, fields, files) {
 };
 
 board.renderPost = function(post, req) {
-    return Board.prototype.renderPost.apply(board, arguments).then(function() {
+    return Board.prototype.renderPost.apply(board, arguments).then(function(post) {
         if (post.number != post.threadNumber)
-            return Promise.resolve();
+            return Promise.resolve(post);
         var model = {
             href: post.extraData,
             link: (post.subject || post.extraData)
         };
         post.subject = controller.sync(req, "echoPostSubject", model);
         post.subjectIsRaw = true;
-        return Promise.resolve();
+        return Promise.resolve(post);
     });
 };
 

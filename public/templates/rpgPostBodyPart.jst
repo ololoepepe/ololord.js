@@ -21,13 +21,12 @@
                 {{? it.post.ownIp || it.disabled || it.voted}}
                     disabled="true"
                 {{?}}
-                {{~variant.users :ip}}
-                    {{? ip == it.user.ip}}
-                        checked="true"
-                        {{ break; }}
-                    {{?}}
-                {{~}}
-                /> {{=variant.text}} <span class="voteCount">({{=it.tr.voteCountText}} {{=variant.voteCount}})</span></br />
+                {{? variant.ownIp}}
+                    checked="true"
+                {{?}}
+                />
+                {{=variant.text}}
+                <span class="voteCount">({{=it.tr.voteCountText}} {{ out += (variant.voteCount || 0); }})</span></br />
             {{ } }}
         </div>
         {{? !it.post.ownIp}}

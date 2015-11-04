@@ -27,6 +27,26 @@ board.postExtraData = function(req, fields, files) {
     return Promise.resolve();
 };
 
+board.renderPost = function(post, req) {
+    return Board.prototype.renderPost.apply(board, arguments).then(function(post) {
+        if (!post.extraData)
+            return Promise.resolve(post);
+        return Promise.resolve(post);
+        post.extraData.variants.forEach(function(variant) {
+            if (!variant.users)
+                return;
+            for (var i = 0; i < variant.users.length; ++i) {
+                if (variant.users[i].ip == req.trueIp) {
+                    variant.ownIp = true;
+                    break;
+                }
+            }
+            delete variant.users;
+        });
+        return Promise.resolve(post);
+    });
+};
+
 board.customPostBodyPart = function(n, _) {
     if (20 != n)
         return;
