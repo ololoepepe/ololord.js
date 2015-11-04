@@ -83,10 +83,21 @@ var getFiles = function(fields, files, transaction) {
         var path = __dirname + "/../tmp/upload_" + UUID.v1();
         transaction.filePaths.push(path);
         var c = {};
-        return HTTP.request({
-            url: url.url,
-            timeout: Tools.Minute
-        }).then(function(response) {
+        var proxy = config("system.fileDownloadProxy");
+        var p;
+        if (proxy) {
+            p = HTTP.request({
+                host: proxy,
+                path: url.url,
+                timeout: Tools.Minute
+            });
+        } else {
+            p = HTTP.request({
+                url: url.url,
+                timeout: Tools.Minute
+            });
+        }
+        return p.then(function(response) {
             if (response.status != 200)
                 return Promise.reject("Failed to download file");
             return response.body.read();

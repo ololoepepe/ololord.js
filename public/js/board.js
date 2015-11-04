@@ -1553,7 +1553,7 @@ lord.fileAddedCommon = function(div, file) {
         if (+file.size > +lord.data("maxFileSize"))
             warn();
     } else {
-        p = promise.resolve("[URL]");
+        p = Promise.resolve("[URL]");
         //TODO: get size
     }
     p.then(function(txt) {

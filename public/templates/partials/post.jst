@@ -50,11 +50,12 @@
               name="dateTime">{{ out += it.formattedDate(post.createdAt); }}</span>
         {{? it.threads}}
             #<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.threadNumber}}.html#{{? thread.postingEnabled}}i{{?}}{{=post.number}}"
-                name="number" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.user.ip}}"{{?}}>{{=post.number}}</a>
+                name="number" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.user.ip}}"{{?}}
+                data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}" data-thread-number="{{=post.threadNumber}}">{{=post.number}}</a>
         {{??}}
             #<a href="#{{=post.number}}" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.user.ip}}"{{?}}
-                {{? thread.postingEnabled}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}}
-                name="number">{{=post.number}}</a>
+                {{? thread.postingEnabled}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}} name="number"
+                data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}" data-thread-number="{{=post.threadNumber}}">{{=post.number}}</a>
         {{?}}
         <span class="postSequenceNumber">{{=post.sequenceNumber}}</span>
         {{? it.settings.mode.name != "ascetic" && thread.postingEnabled && !thread.postLimitReached}}
