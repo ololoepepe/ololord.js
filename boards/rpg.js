@@ -31,17 +31,21 @@ board.renderPost = function(post, req) {
     return Board.prototype.renderPost.apply(board, arguments).then(function(post) {
         if (!post.extraData)
             return Promise.resolve(post);
-        post.extraData.variants.forEach(function(variant) {
-            if (!variant.users)
-                return;
-            for (var i = 0; i < variant.users.length; ++i) {
-                if (variant.users[i].ip == req.trueIp) {
-                    variant.ownIp = true;
-                    break;
+        if (post.extraData.variants) {
+            post.extraData.variants.forEach(function(variant) {
+                if (!variant.users)
+                    return;
+                for (var i = 0; i < variant.users.length; ++i) {
+                    if (variant.users[i].ip == req.trueIp) {
+                        variant.ownIp = true;
+                        break;
+                    }
                 }
-            }
-            delete variant.users;
-        });
+                delete variant.users;
+            });
+        }
+        if (post.extraData.users)
+            delete post.extraData.users;
         return Promise.resolve(post);
     });
 };
