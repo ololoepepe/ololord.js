@@ -199,7 +199,7 @@ lord.reloadCaptchaFunction = function() {
 
 lord.resetCaptcha = function() {
     var captcha = lord.id("captcha");
-    if (!!captcha) {
+    if (captcha) {
         var boardName = lord.text("currentBoardName");
         lord.ajaxRequest("get_captcha_quota", [boardName], lord.RpcGetCaptchaQuotaId, function(res) {
             res = +res;
@@ -222,7 +222,7 @@ lord.resetCaptcha = function() {
             } else {
                 lord.id("captchaContainer").appendChild(captcha);
             }
-            if (!!lord.reloadCaptchaFunction && "hiddenCaptcha" !== captcha.parentNode.id)
+            if (lord.reloadCaptchaFunction && "hiddenCaptcha" !== captcha.parentNode.id)
                 lord.reloadCaptchaFunction();
         });
     }
@@ -2339,6 +2339,7 @@ lord.submitted = function(event, form) {
         return Promise.resolve();
     }).catch(function(err) {
         resetButton();
+        lord.resetCaptcha();
         console.log(err);
     });
 };
