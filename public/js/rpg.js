@@ -127,7 +127,7 @@ lord.createPostNodeCustom = function(post, res, permanent, boardName) {
         } else {
             btnClose.onclick = lord.setVoteOpened.bind(lord, res["number"], false);
             btnOpen.parentNode.removeChild(btnOpen);
-        }  
+        }
         if (!res["ownIp"]) {
             if (!voted) {
                 if (!disabled)
@@ -258,5 +258,17 @@ lord.setVoteOpened = function(postNumber, opened) {
         lord.ajaxRequest("set_vote_opened", [postNumber, !!opened, pwd], lord.RpcSetVoteOpenedId, function() {
             lord.updatePost("rpg", postNumber, post);
         });
+    });
+};
+
+lord.custmomPostBodyPart[20] = function() {
+    return lord.getTemplate("rpgPostBodyPart").then(function(template) {
+        return function(it, thread, post) {
+            if (!post.extraData)
+                return "";
+            var model = merge.clone(post.extraData);
+            model.post = post;
+            return template(model);
+        };
     });
 };

@@ -4,6 +4,10 @@ var Tools = require("../helpers/tools");
 
 var board = new Board("d", Tools.translate.noop("Board /d/iscussion", "boardTitle"));
 
+board.extraScripts = function() {
+    return [ { fileName: "d.js" } ];
+};
+
 board.postExtraData = function(req, fields, files) {
     return req.headers["user-agent"] || null;
 };

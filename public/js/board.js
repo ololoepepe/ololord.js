@@ -18,6 +18,7 @@ lord.spells = null;
 lord.worker = new Worker("/js/worker.js");
 lord.youtubeApplied = false;
 lord.lastSelectedElement = null;
+lord.customPostBodyPart = {};
 
 /*Functions*/
 
@@ -313,6 +314,29 @@ lord.createPostNode = function(post, permanent) {
         c.model.formattedDate = function(date) {
             return moment(date).utcOffset(c.timeOffset).locale(c.locale).format(c.dateFormat);
         };
+        var indexes = [];
+        for (var i = 0; i < 60; i += 10)
+            indexes.push(i);
+        var promises = indexes.map(function(index) {
+            if (!lord.customPostBodyPart[index])
+                return Promise.resolve(null);
+            return lord.customPostBodyPart[index]().then(function(part) {
+                if (!part)
+                    return Promise.resolve(null);
+                return Promise.resolve({
+                    index: index,
+                    part: part
+                });
+            });
+        });
+        return Promise.all(promises);
+    }).then(function(parts) {
+        c.model.customPostBodyPart = {};
+        parts.forEach(function(part) {
+            if (!part)
+                return;
+            c.model.customPostBodyPart[part.index] = part.part;
+        });
         return lord.getTemplate("post");
     }).then(function(template) {
         var nodes = $.parseHTML(template(c.model));

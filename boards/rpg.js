@@ -31,7 +31,6 @@ board.renderPost = function(post, req) {
     return Board.prototype.renderPost.apply(board, arguments).then(function(post) {
         if (!post.extraData)
             return Promise.resolve(post);
-        return Promise.resolve(post);
         post.extraData.variants.forEach(function(variant) {
             if (!variant.users)
                 return;
