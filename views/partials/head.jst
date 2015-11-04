@@ -27,10 +27,10 @@
                     <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/thread.js"></script>
                 {{?}}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/lib-typedarrays-min.js"></script>
-                {{? it.settings.captchaEngine && it.settings.captchaEngine.scriptSource}}
+                {{? it.settings.captchaEngine && it.settings.captchaEngine.scriptSource && it.settings.captchaEngine.scriptSource(it.req)}}
                     <script type="text/javascript" src="{{=it.settings.captchaEngine.scriptSource(it.req)}}"></script>
                 {{?}}
-                {{? it.settings.captchaEngine && it.settings.captchaEngine.headerHtml}}
+                {{? it.settings.captchaEngine && it.settings.captchaEngine.headerHtml && it.settings.captchaEngine.headerHtml(it.req)}}
                     {{=it.settings.captchaEngine.headerHtml(it.req)}}
                 {{?}}
             {{?}}

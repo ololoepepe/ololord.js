@@ -29,6 +29,9 @@ var renderPage = function(model, board, req, json) {
         return board.postformRules();
     }).then(function(rules) {
         model.postformRules = rules;
+        return req.settings.captchaEngine.prepare(req);
+    }).then(function(captchaPrepared) {
+        model.captchaPrepared = captchaPrepared;
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
@@ -64,6 +67,9 @@ var renderThread = function(model, board, req, json) {
         return board.postformRules();
     }).then(function(rules) {
         model.postformRules = rules;
+        return req.settings.captchaEngine.prepare(req);
+    }).then(function(captchaPrepared) {
+        model.captchaPrepared = captchaPrepared;
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };

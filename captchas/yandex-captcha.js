@@ -1,16 +1,21 @@
 var HTTP = require("q-io/http");
+var XML2JS = require("xml2js");
 
 var Captcha = require("./captcha");
+var config = require("../helpers/config");
+var controller = require("../helpers/controller");
 var Tools = require("../helpers/tools");
 
-var googleRecaptcha = new Captcha("google-recaptcha", Tools.translate.noop("Google reCAPTCHA"));
-
-googleRecaptcha.checkCaptcha = function(req, fields) {
-    var captcha = fields["g-recaptcha-response"];
-    if (!captcha)
-        return Promise.reject("Captcha is empty");
-    var query = `secret=${this.privateKey}&response=${captcha}&remoteip=${req.trueIp}`;
-    var url = "https://www.google.com/recaptcha/api/siteverify?" + query;
+var checkCaptcha = function(req, fields) {
+    var challenge = fields.yandexCaptchaChallenge;
+    var response = fields.yandexCaptchaResponse;
+    if (!challenge)
+        return Promise.reject("Captcha challenge is empty");
+    if (!response)
+        return Promise.reject("Captcha is empty", "error");
+    var query = `key=${encodeURIComponent(this.privateKey)}&captcha=${encodeURIComponent(challenge)}`
+        + `&value=${encodeURIComponent(response)}`;
+    var url = "http://cleanweb-api.yandex.ru/1.0/check-captcha?" + query;
     return HTTP.request({
         url: url,
         timeout: (15 * Tools.Second)
@@ -19,28 +24,81 @@ googleRecaptcha.checkCaptcha = function(req, fields) {
             return Promise.reject("Failed to check captcha");
         return response.body.read("utf8");
     }).then(function(data) {
-        var reply = JSON.parse(data.toString());
-        if (!reply.success) {
-            if (reply["error-codes"].indexOf("missing-input-secret") >= 0)
-                return Promise.reject("The secret parameter is missing");
-            else if (reply["error-codes"].indexOf("invalid-input-secret") >= 0)
-                return Promise.reject("The secret parameter is invalid or malformed");
-            else if (reply["error-codes"].indexOf("missing-input-response") >= 0)
-                return Promise.reject("The response parameter is missing");
-            else if (reply["error-codes"].indexOf("invalid-input-response") >= 0)
-                return Promise.reject("The response parameter is invalid or malformed");
-            else
-                return Promise.reject("Invalid captcha");
-        }
+        var parser = new XML2JS.Parser();
+        return new Promise(function(resolve, reject) {
+            parser.parseString(data.toString(), function(err, result) {
+                if (err)
+                    return resolve({ error: err });
+                if (result && result["check-captcha-result"]) {
+                    result = result["check-captcha-result"];
+                    if (result.ok)
+                        return resolve();
+                }
+                reject("Invalid captcha");
+            });
+        });
     });
 };
 
-googleRecaptcha.widgetHtml = function(req) {
-    return "<div id=\"captcha\" class=\"g-recaptcha\" data-sitekey=\"" + this.publicKey + "\"></div>";
+var scriptSource = function(req) {
+    if ("ascetic" == req.settings.mode.name)
+        return;
+    return "/" + config("site.pathPrefix", "") + "js/yandex-captcha-script.js";
 };
 
-googleRecaptcha.scriptSource = function(req) {
-    return "https://www.google.com/recaptcha/api.js";
+var widgetHtml = function(req, prepared) {
+    return controller.sync(req, "yandexCaptchaWidget", prepared);
 };
 
-module.exports = googleRecaptcha;
+var prepare = function(req, fromApi) {
+    if (!fromApi && "ascetic" != req.settings.mode.name)
+        return Promise.resolve();
+    var captcha = req.settings.captchaEngine;
+    var type = this.id.split("-").pop();
+    var query = `key=${encodeURIComponent(this.privateKey)}&type=${type}`;
+    var url = "http://cleanweb-api.yandex.ru/1.0/get-captcha?" + query;
+    return HTTP.request({
+        url: url,
+        timeout: (15 * Tools.Second)
+    }).then(function(response) {
+        if (response.status != 200)
+            return Promise.reject("Failed to check captcha");
+        return response.body.read("utf8");
+    }).then(function(data) {
+        var parser = new XML2JS.Parser();
+        return new Promise(function(resolve, reject) {
+            parser.parseString(data.toString(), function(err, result) {
+                if (err)
+                    return resolve({ error: err });
+                if (result && result["get-captcha-result"]) {
+                    result = result["get-captcha-result"];
+                    if (result.captcha && result.captcha.length > 0 && result.url && result.url.length > 0) {
+                        return resolve({
+                            challenge: result.captcha[0],
+                            url: result.url[0].replace("https://", "").replace("http://", "")
+                        });
+                    } else {
+                        return resolve({ error: "Captcha server error" });
+                    }
+                } else {
+                    return resolve({ error: "Captcha server error" });
+                }
+            });
+        });
+    });
+};
+
+var yandexElatmCaptcha = new Captcha("yandex-captcha-elatm", Tools.translate.noop("Yandex captcha (Latin)"));
+var yandexEstdCaptcha = new Captcha("yandex-captcha-estd", Tools.translate.noop("Yandex captcha (digits)"));
+var yandexRusCaptcha = new Captcha("yandex-captcha-rus", Tools.translate.noop("Yandex captcha (Cyrillic)"));
+
+var captchas = [yandexElatmCaptcha, yandexEstdCaptcha, yandexRusCaptcha];
+
+captchas.forEach(function(captcha) {
+    captcha.checkCaptcha = checkCaptcha;
+    captcha.scriptSource = scriptSource;
+    captcha.widgetHtml = widgetHtml;
+    captcha.prepare = prepare;
+});
+
+module.exports = captchas;

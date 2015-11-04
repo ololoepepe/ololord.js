@@ -582,8 +582,15 @@ var checkCaptcha = function(req, fields) {
         if (supportedCaptchaEngines.length < 1)
             return Promise.reject("Internal error");
         var ceid = fields.captchaEngine;
-        if (!ceid || supportedCaptchaEngines.indexOf(ceid) < 0) {
-            if (supportedCaptchaEngines.indexOf("google-recaptcha"))
+        var isSupported = function(id) {
+            for (var i = 0; i < supportedCaptchaEngines.length; ++i) {
+                if (supportedCaptchaEngines[i].id == id)
+                    return supportedCaptchaEngines[i];
+            }
+            return false;
+        };
+        if (!ceid || !isSupported(ceid)) {
+            if (isSupported("google-recaptcha"))
                 ceid = "google-recaptcha";
             else
                 ceid = supportedCaptchaEngines[0];

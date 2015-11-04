@@ -5,6 +5,10 @@ var Util = require("util");
 
 var Board = require("../boards");
 var boardModel = require("../models/board");
+var yandexCaptchas = require("../captchas/yandex-captcha").reduce(function(acc, captcha) {
+    acc[captcha.id.split("-").pop()] = captcha;
+    return acc;
+}, {});
 var controller = require("../helpers/controller");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");
@@ -129,6 +133,17 @@ router.get("/lastPostNumbers.json", function(req, res) {
 router.get("/lastPostNumber.json", function(req, res) {
     boardModel.getLastPostNumbers([req.query.boardName]).then(function(lastPostNumbers) {
         res.send(lastPostNumbers[0]);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
+router.get("/yandexCaptchaImage.json", function(req, res) {
+    var captcha = yandexCaptchas[req.query.type];
+    if (!captcha)
+        return controller.error(req, res, "Invalid captcha type", true);
+    captcha.prepare(req, true).then(function(result) {
+        res.send(result);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

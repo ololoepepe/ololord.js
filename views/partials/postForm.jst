@@ -318,7 +318,7 @@
                             <span class="noCaptchaText">{{=it.tr.noCaptchaText}}. {{=it.tr.captchaQuotaText}}
                                                         {{=it.user.captchaQuota}}</span>
                         {{??}}
-                            {{ out += it.settings.captchaEngine.widgetHtml(it.req); }}
+                            {{ out += it.settings.captchaEngine.widgetHtml(it.req, it.captchaPrepared); }}
                         {{?}}
                     {{??}}
                         <span class="noCaptchaText">{{=it.tr.noCaptchaText}}</span>

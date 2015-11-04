@@ -888,6 +888,8 @@ lord.getTemplate = function(templateName) {
                             data: result,
                             name: partialName
                         };
+                    }).fail(function(err) {
+                        reject(err);
                     });
                 });
                 return $.when.apply($, promises);
@@ -911,6 +913,8 @@ lord.getModel = function(modelName, query) {
             $.ajax("/" + lord.data("sitePathPrefix") + modelName + ".json" + query).then(function(result) {
                 lord.models[modelName] = result;
                 resolve(result);
+            }).fail(function(err) {
+                reject(err);
             });
         }
     });

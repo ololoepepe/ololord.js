@@ -22,6 +22,10 @@ var Captcha = function(id, title, options) {
     defineSetting(this, "publicKey");
 };
 
+/*public*/ Captcha.prototype.prepare = function(req) {
+    return Promise.resolve();
+};
+
 Captcha.captcha = function(id) {
     return captchas[id];
 };

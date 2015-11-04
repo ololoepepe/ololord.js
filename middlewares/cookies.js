@@ -41,9 +41,6 @@ module.exports = function(req, res, next) {
         },
         shrinkPosts: (req.cookies.shrinkPosts != "false"),
         stickyToolbar: (req.cookies.stickyToolbar != "false"),
-        captchaEngine: {
-            id: (req.cookies.captchaEngine || "google-recaptcha")
-        },
         maxAllowedRating: (req.cookies.maxAllowedRating || "R-18G"),
         hiddenBoards: (req.cookies.hiddenBoards ? req.cookies.hiddenBoards.split("|") : []),
         captchaEngine: (captchaEngine || Captcha.captcha("google-recaptcha")),
