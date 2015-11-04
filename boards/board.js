@@ -269,9 +269,10 @@ var renderFileInfo = function(fi) {
     post.ownIp = (req.trueIp == post.user.ip);
     post.ownHashpass = (req.hashpass == post.user.hashpass);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
-    if (Database.compareRegisteredUserLevels(req.level, Database.Moder) < 0)
+    if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0)
         delete post.user.ip;
-    if (post.showTripcode && Database.compareRegisteredUserLevels(post.user.level, Database.User) >= 0) {
+    if (post.showTripcode
+        && Database.compareRegisteredUserLevels(post.user.level, Database.RegisteredUserLevels.User) >= 0) {
         var md5 = Crypto.createHash("md5");
         md5.update(post.hashpass + config("site.tripcodeSalt", ""));
         post.tripcode = "!" + md5.digest("base64").substr(0, 10);
