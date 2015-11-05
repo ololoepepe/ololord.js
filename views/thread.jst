@@ -11,7 +11,7 @@
     {{? it.settings.captchaEnabled}}
         <div id="hiddenCaptcha" style="display: none;">
             {{? it.user.captchaQuota > 0}}
-                {{=it.settings.captchaEngine.widgetHtml}}
+                {{ out += it.captchaEngine.widgetHtml(it.req, it.captchaPrepared); }}
             {{?}}
         </div>
     {{?}}

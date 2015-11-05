@@ -1,13 +1,18 @@
 <div class="threadActions">
-    [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{=it.tr.backText}}</a>]
+    [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}"
+        title="{{=it.tr.backText}}"><img class="buttonImage" width="24" height="24"
+                                         src="/{{=it.site.pathPrefix}}img/thread_back.png"></a>]
     {{? it.settings.mode.name != "ascetic"}}
-        [<a href="javascript:void(0);" onclick="lord.updateThread();"
-            name="updateThreadButton">{{=it.tr.updateThreadText}}</a>]
+        [<a href="javascript:void(0);" onclick="lord.updateThread();" title="{{=it.tr.updateThreadText}}"
+            name="updateThreadButton"><img class="buttonImage" width="24" height="24"
+                                           src="/{{=it.site.pathPrefix}}img/thread_update.png"></a>]
     {{?}}
     {{? "Top" == position}}
-        [<a href="#bottom">{{=it.tr.toBottomText}}</a>]
+        [<a href="#bottom" title="{{=it.tr.toBottomText}}"><img class="buttonImage" width="24" height="24"
+                                                                src="/{{=it.site.pathPrefix}}img/thread_down.png"></a>]
     {{??}}
-        [<a href="#top">{{=it.tr.toTopText}}</a>]
+        [<a href="#top" title="{{=it.tr.toTopText}}"><img class="buttonImage" width="24" height="24"
+                                                          src="/{{=it.site.pathPrefix}}img/thread_up.png"></a>]
     {{?}}
     {{? it.settings.mode.name != "ascetic"}}
         [<input onclick="lord.setAutoUpdateEnabled(this);" id="autoUpdate{{=position}}"

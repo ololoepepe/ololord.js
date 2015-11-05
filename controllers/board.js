@@ -3,6 +3,7 @@ var merge = require("merge");
 var Util = require("util");
 
 var Board = require("../boards");
+var Captcha = require("../captchas");
 var boardModel = require("../models/board");
 var config = require("../helpers/config");
 var controller = require("../helpers/controller");
@@ -10,6 +11,28 @@ var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
 
 var router = express.Router();
+
+var selectCaptchaEngine = function(req, board) {
+    var captcha = req.settings.captchaEngine;
+    var supportedCaptchaEngines = board.supportedCaptchaEngines;
+    if (supportedCaptchaEngines.length < 1)
+        return null;
+    var ceid = captcha ? captcha.id : null;
+    var isSupported = function(id) {
+        for (var i = 0; i < supportedCaptchaEngines.length; ++i) {
+            if (supportedCaptchaEngines[i].id == id)
+                return true;
+        }
+        return false;
+    };
+    if (!ceid || !isSupported(ceid)) {
+        if (isSupported("google-recaptcha"))
+            ceid = "google-recaptcha";
+        else
+            ceid = supportedCaptchaEngines[0].id;
+    }
+    return Captcha.captcha(ceid);
+};
 
 var renderPage = function(model, board, req, json) {
     var promises = model.threads.map(function(thread) {
@@ -29,7 +52,8 @@ var renderPage = function(model, board, req, json) {
         return board.postformRules();
     }).then(function(rules) {
         model.postformRules = rules;
-        return req.settings.captchaEngine.prepare(req);
+        model.captchaEngine = selectCaptchaEngine(req, board);
+        return model.captchaEngine.prepare(req);
     }).then(function(captchaPrepared) {
         model.captchaPrepared = captchaPrepared;
         model.minimalisticPostform = function() {
@@ -67,7 +91,8 @@ var renderThread = function(model, board, req, json) {
         return board.postformRules();
     }).then(function(rules) {
         model.postformRules = rules;
-        return req.settings.captchaEngine.prepare(req);
+        model.captchaEngine = selectCaptchaEngine(req, board);
+        return model.captchaEngine.prepare(req);
     }).then(function(captchaPrepared) {
         model.captchaPrepared = captchaPrepared;
         model.minimalisticPostform = function() {

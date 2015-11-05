@@ -584,7 +584,7 @@ var checkCaptcha = function(req, fields) {
         var isSupported = function(id) {
             for (var i = 0; i < supportedCaptchaEngines.length; ++i) {
                 if (supportedCaptchaEngines[i].id == id)
-                    return supportedCaptchaEngines[i];
+                    return true;
             }
             return false;
         };
@@ -592,7 +592,7 @@ var checkCaptcha = function(req, fields) {
             if (isSupported("google-recaptcha"))
                 ceid = "google-recaptcha";
             else
-                ceid = supportedCaptchaEngines[0];
+                ceid = supportedCaptchaEngines[0].id;
         }
         var captcha = Captcha.captcha(ceid);
         if (!captcha)

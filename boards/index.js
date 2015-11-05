@@ -1,4 +1,5 @@
 var Board = require("./board");
+var Captcha = require("../captchas");
 var Tools = require("../helpers/tools");
 
 Board.addBoard(new Board("3dpd", Tools.translate.noop("3D pron", "boardTitle")));
@@ -24,8 +25,16 @@ Board.addBoard(new Board("mlp", Tools.translate.noop("My Little Pony", "boardTit
 Board.addBoard(new Board("po", Tools.translate.noop("/po/litics", "boardTitle"),
     { defaultUserName: Tools.translate.noop("Armchair warrior", "defaultUserName") }));
 
+var codecha = Captcha.captcha("codecha");
 board = new Board("pr", Tools.translate.noop("/pr/ogramming", "boardTitle"));
-Object.defineProperty(board, "supportedCaptchaEngines", { value: "codecha" });
+Object.defineProperty(board, "supportedCaptchaEngines", {
+    get: function() {
+        return [{
+            id: codecha.id,
+            title: codecha.title
+        }];
+    }
+});
 board.extraScripts = function() {
     return [ { value: "var lord = lord || {}; lord.reloadCaptchaFunction = function() { lord.reloadPage(); };" } ];
 };
