@@ -1,4 +1,5 @@
 var HTTP = require("q-io/http");
+var QueryString = require("querystring");
 
 var Captcha = require("./captcha");
 var controller = require("../helpers/controller");
@@ -13,11 +14,16 @@ codecha.checkCaptcha = function(req, fields) {
         return Promise.reject("Captcha challenge is empty");
     if (!response)
         return Promise.reject("Captcha is empty", "error");
-    var query = `challenge=${challenge}&response=${response}&remoteip=${req.trueIp}&privatekey=${this.privateKey}`;
-    var url = "http://codecha.org/api/verify?" + query;
+    var body = `challenge=${challenge}&response=${response}&remoteip=${req.trueIp}&privatekey=${this.privateKey}`;
+    var url = "http://codecha.org/api/verify";
     return HTTP.request({
         url: url,
         method: "POST",
+        body: [body],
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Length": Buffer.byteLength(body)
+        },
         timeout: (15 * Tools.Second)
     }).then(function(response) {
         if (response.status != 200)
@@ -25,7 +31,6 @@ codecha.checkCaptcha = function(req, fields) {
         return response.body.read("utf8");
     }).then(function(data) {
         var result = data.toString();
-        console.log(result);
         if (result.replace("true") == result)
             return Promise.reject("Invalid captcha");
         return Promise.resolve();
