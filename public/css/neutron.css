@@ -921,6 +921,7 @@ ul.tabWidget > li.activated {
     font-size: 1.2em;
     position: relative;
     top: -8px;
+    z-index: 1;
 }
 
 .toolbar.sticky {

@@ -172,7 +172,7 @@ lord.addVoteVariant = function() {
     lord.addClass(div, "nowrap");
     var inp = lord.node("input");
     inp.type = "text";
-    inp.name = "voteVariant" + (lastN + 1);
+    inp.name = "voteVariant_" + (lastN + 1);
     inp.size = "43";
     div.appendChild(inp);
     var a = lord.node("a");
@@ -261,12 +261,13 @@ lord.setVoteOpened = function(postNumber, opened) {
     });
 };
 
-lord.custmomPostBodyPart[20] = function() {
+lord.customPostBodyPart[20] = function() {
     return lord.getTemplate("rpgPostBodyPart").then(function(template) {
         return function(it, thread, post) {
             if (!post.extraData)
                 return "";
-            var model = merge.clone(post.extraData);
+            var model = merge.recursive(it, post.extraData);
+            model.thread = thread;
             model.post = post;
             return template(model);
         };

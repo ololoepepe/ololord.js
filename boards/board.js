@@ -193,8 +193,8 @@ var Board = function(name, title, options) {
     return Tools.contains(this.supportedFileTypes, fileType);
 };
 
-/*public*/ Board.prototype.postExtraData = function(req, fields, files) {
-    return Promise.resolve(null);
+/*public*/ Board.prototype.postExtraData = function(req, fields, files, oldPost) {
+    return Promise.resolve(oldPost ? oldPost.extraData : null);
 };
 
 /*public*/ Board.prototype.extraScripts = function() {

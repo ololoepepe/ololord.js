@@ -1,7 +1,9 @@
 var merge = require("merge");
+var uuid = require("uuid");
 
 var Board = require("./board");
 var controller = require("../helpers/controller");
+var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
 
 board = new Board("rpg", Tools.translate.noop("Role-playing games", "boardTitle"));
@@ -23,8 +25,82 @@ board.addTranslations = function(translate) {
     translate("Add variant", "addVoteVariantText");
 };
 
-board.postExtraData = function(req, fields, files) {
-    return Promise.resolve();
+var extraData = function(req, fields, edit) {
+    var variants = [];
+    Tools.forIn(fields, function(value, key) {
+        if (key.substr(0, 12) != "voteVariant_")
+            return;
+        if (!value)
+            return;
+        var id = key.substr(12);
+        variants.push({
+            text: value,
+            id: ((edit && id) ? id : null)
+        });
+    });
+    if (variants.length < 1)
+        return Promise.resolve(null);
+    var p;
+    if (fields.thread) {
+        p = Database.getPost(fields.board, +fields.thread);
+    } else {
+        p = Promise.resolve();
+    }
+    return p.then(function(opPost) {
+        if (opPost && (req.trueIp != opPost.user.ip && (!req.hashpass || req.hashpass != opPost.user.hashpass)))
+            return Promise.reject("Attempt to attach voting while not being the OP");
+        if (!fields.voteText)
+            return Promise.reject("No vote text provided");
+        return Promise.resolve({
+            variants: variants,
+            multiple: ("true" == fields.multipleVoteVariants),
+            text: fields.voteText
+        });
+    });
+};
+
+board.postExtraData = function(req, fields, files, oldPost) {
+    var oldData = oldPost ? oldPost.extraData : null;
+    var newData;
+    return extraData(req, fields).then(function(data) {
+        newData = data;
+        if (!newData)
+            return Promise.resolve(null);
+        if (!oldData)
+            return Promise.resolve(newData);
+        var variants = [];
+        var ids = [];
+        for (var i = 0; i < newData.variants.length; ++i) {
+            var variant = newData.variants[i];
+            var id = variant.id;
+            if (id) {
+                var text = oldData.variants.reduce(function(text, oldVariant) {
+                    if (text)
+                        return text;
+                    return (oldVariant.id == variant.id) ? oldVariant.text : "";
+                }, "");
+                if (!text)
+                    return Promise.reject("Invalid vote ID");
+            } else {
+                id = uuid.v1();
+                variants.push({
+                    text: variant.text,
+                    id: id
+                });
+            }
+            ids.push(id);
+        }
+        variants = oldData.variants.concat(variants);
+        for (var i = variants.length - 1; i >= 0; --i) {
+            if (ids.indexOf(variants[i].id) < 0)
+                variants.splice(i, 1);
+        }
+        if (variants.length < 1)
+            return Promise.resolve(null);
+        newData.variants = variants;
+        newData.users = oldData.users;
+        return Promise.resolve(newData);
+    });
 };
 
 board.renderPost = function(post, req) {
@@ -82,8 +158,8 @@ board.customPostFormField = function(n, req, thread) {
     };
 };
 
-board.testParameters = function(fields, files, creatingThread) {
+/*board.testParameters = function(fields, files, creatingThread) {
     //
-};
+};*/
 
 module.exports = board;

@@ -14,9 +14,9 @@ board.addTranslations = function(translate) {
     translate("Thread link:", "postFormLabelLink");
 };
 
-board.postExtraData = function(req, fields, files) {
+board.postExtraData = function(req, fields, files, oldPost) {
     if (fields.thread)
-        return Promise.reject("No post link provided");
+        return Promise.resolve(oldPost ? oldPost.extraData : null);
     var link = fields.link;
     if (!link.substr(0, 4) != "http")
         link = "http://" + link;
