@@ -200,10 +200,8 @@ lord.reloadCaptchaFunction = function() {
 lord.resetCaptcha = function() {
     var captcha = lord.id("captcha");
     if (captcha) {
-        var boardName = lord.text("currentBoardName");
-        lord.ajaxRequest("get_captcha_quota", [boardName], lord.RpcGetCaptchaQuotaId, function(res) {
-            res = +res;
-            if (isNaN(res))
+        lord.getModel("api/captchaQuota", "boardName=" + lord.data("boardName")).then(function(quota) {
+            if (isNaN(quota))
                 return;
             var hiddenCaptcha = lord.id("hiddenCaptcha");
             var td = lord.id("captchaContainer");
@@ -212,13 +210,15 @@ lord.resetCaptcha = function() {
                     continue;
                 td.removeChild(td.children[i]);
             }
-            if (res > 0) {
-                hiddenCaptcha.appendChild(captcha);
-                var span = lord.node("span");
-                lord.addClass(span, "noCaptchaText");
-                var text = lord.text("noCaptchaText") + ". " + lord.text("captchaQuotaText") + " " + res;
-                span.appendChild(lord.node("text", text));
-                td.appendChild(span);
+            if (quota > 0) {
+                lord.getModel("misc/tr").then(function(mode) {
+                    hiddenCaptcha.appendChild(captcha);
+                    var span = lord.node("span");
+                    lord.addClass(span, "noCaptchaText");
+                    var text = model.tr.noCaptchaText + ". " + model.tr.captchaQuotaText + " " + res;
+                    span.appendChild(lord.node("text", text));
+                    td.appendChild(span);
+                });
             } else {
                 lord.id("captchaContainer").appendChild(captcha);
             }

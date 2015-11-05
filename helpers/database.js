@@ -1068,7 +1068,9 @@ var getUserCaptchaQuota = function(boardName, userIp) {
     var board = Board.board(boardName);
     if (!board)
         return Promise.reject("Invalid board");
-    return db.hget("captchaQuotas", boardName + ":" + userIp);
+    return db.hget("captchaQuotas", boardName + ":" + userIp).then(function(quota) {
+        return Promise.resolve((+quota > 0) ? +quota : 0);
+    });
 };
 
 module.exports.getUserCaptchaQuota = getUserCaptchaQuota;
@@ -1092,7 +1094,7 @@ var captchaUsed = function(boardName, userIp) {
     if (board.captchaQuota < 1)
         return Promise.resolve(0);
     return db.hincrby("captchaQuotas", boardName + ":" + userIp, -1).then(function(quota) {
-        if (quota < 0)
+        if (+quota < 0)
             return db.hset("captchaQuotas", boardName + ":" + userIp, 0);
         return (quota < 0) ? 0 : quota;
     });

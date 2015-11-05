@@ -132,7 +132,15 @@ router.get("/lastPostNumbers.json", function(req, res) {
 
 router.get("/lastPostNumber.json", function(req, res) {
     boardModel.getLastPostNumbers([req.query.boardName]).then(function(lastPostNumbers) {
-        res.send(lastPostNumbers[0]);
+        res.json(lastPostNumbers[0]);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
+router.get("/captchaQuota.json", function(req, res) {
+    Database.getUserCaptchaQuota(req.query.boardName, req.trueIp).then(function(quota) {
+        res.json(quota);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

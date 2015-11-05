@@ -31,12 +31,14 @@ googleRecaptcha.checkCaptcha = function(req, fields) {
                 return Promise.reject("The response parameter is invalid or malformed");
             else
                 return Promise.reject("Invalid captcha");
+        } else {
+            return Promise.resolve();
         }
     });
 };
 
-googleRecaptcha.widgetHtml = function(req) {
-    return "<div id=\"captcha\" class=\"g-recaptcha\" data-sitekey=\"" + this.publicKey + "\"></div>";
+googleRecaptcha.widgetHtml = function(req, _) {
+    return `<div id="captcha" class="g-recaptcha" data-sitekey="${this.publicKey}"></div>`;
 };
 
 googleRecaptcha.scriptSource = function(req) {
