@@ -25,6 +25,7 @@ codecha.checkCaptcha = function(req, fields) {
         return response.body.read("utf8");
     }).then(function(data) {
         var result = data.toString();
+        console.log(result);
         if (result.replace("true") == result)
             return Promise.reject("Invalid captcha");
         return Promise.resolve();
@@ -34,10 +35,6 @@ codecha.checkCaptcha = function(req, fields) {
 codecha.widgetHtml = function(req, _) {
     var model = { publicKey: this.publicKey };
     return controller.sync(req, "codechaWidget", model);
-};
-
-codecha.scriptSource = function(req) {
-    return "https://www.google.com/recaptcha/api.js";
 };
 
 module.exports = codecha;
