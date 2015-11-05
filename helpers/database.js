@@ -49,6 +49,25 @@ RegisteredUserLevels["User"] = "USER";
 Object.defineProperty(module.exports, "Ratings", { value: Ratings });
 Object.defineProperty(module.exports, "RegisteredUserLevels", { value: RegisteredUserLevels });
 
+var threadPostNumbers = function(boardName, threadNumber) {
+    return db.smembers("threadPostNumbers:" + boardName + ":" + threadNumber).then(function(list) {
+        if (!list)
+            return Promise.resolve([]);
+        return Promise.resolve(list.map(function(number) {
+            return +number;
+        }).sort(function(a, b) {
+            a = +a;
+            b = +b;
+            if (a < b)
+                return -1;
+            else if (a > b)
+                return 1;
+            else
+                return 0;
+        }));
+    });
+};
+
 var getThreads = function(boardName, options) {
     if (!Tools.contains(Board.boardNames(), boardName))
         return Promise.reject("Invalid board");
@@ -86,23 +105,12 @@ var getThreads = function(boardName, options) {
     return p.then(function(threads) {
         c.threads = threads;
         var promises = threads.map(function(thread) {
-            return db.smembers("threadPostNumbers:" + boardName + ":" + thread.number);
+            return threadPostNumbers(boardName, thread.number);
         });
         return Promise.all(promises);
     }).then(function(results) {
         results.forEach(function(result, i) {
-            if (!result)
-                return;
-            c.threads[i].postNumbers = result.sort(function(a, b) {
-                a = +a;
-                b = +b;
-                if (a < b)
-                    return -1;
-                else if (a > b)
-                    return 1;
-                else
-                    return 0;
-            });
+            c.threads[i].postNumbers = result;
         });
         return c.threads;
     });
@@ -120,19 +128,7 @@ var threadPosts = function(boardName, threadNumber, options) {
     var limit = (opts && !isNaN(options.limit) && options.limit > 0) ? options.limit : 0; //NOTE: 0 means no limit
     var reverse = opts && options.reverse;
     var c = { posts: [] };
-    var p = db.smembers("threadPostNumbers:" + boardName + ":" + threadNumber).then(function(result) {
-        if (!result)
-            result = [];
-        result = result.sort(function(a, b) {
-            a = +a;
-            b = +b;
-            if (a < b)
-                return -1;
-            else if (a > b)
-                return 1;
-            else
-                return 0;
-        });
+    var p = threadPostNumbers(boardName, threadNumber).then(function(result) {
         var i = reverse ? (result.length - 1) : 0;
         var bound;
         var bound = reverse ? (limit ? (result.length - limit - 1) : -1) : (limit ? limit : result.length);
@@ -154,7 +150,9 @@ var threadPosts = function(boardName, threadNumber, options) {
         var getNext = function() {
             return db.hmget("posts", getKeys()).then(function(posts) {
                 posts = posts.map(function(post) {
-                    return JSON.parse(post);
+                    post = JSON.parse(post);
+                    post.sequenceNumber = result.indexOf(post.number) + 1;
+                    return post;
                 });
                 c.posts = c.posts.concat(filter? posts.filter(options.filterFunction) : posts);
                 if (!pred() || (limit && c.posts.length >= limit)) {
@@ -216,6 +214,11 @@ module.exports.getPost = function(boardName, postNumber, options) {
     return p.then(function() {
         if (!c.post)
             return Promise.resolve();
+        return threadPostNumbers(c.post.boardName, c.post.threadNumber);
+    }).then(function(postNumbers) {
+        if (!c.post)
+            return Promise.resolve();
+        c.post.sequenceNumber = postNumbers.indexOf(c.post.number) + 1;
         var promises = [];
         if (options.withFileInfos) {
             promises.push(db.smembers("fileInfos:" + key).then(function(fileInfos) {
@@ -455,9 +458,6 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         return getGeolocationInfo(ip);
     }).then(function(geo) {
         c.geo = geo;
-        return db.scard("threadPostNumbers:" + board.name + ":" + threadNumber);
-    }).then(function(postCount) {
-        c.postCount = postCount;
         if (c.postNumber)
             return Promise.resolve(c.postNumber);
         else
@@ -481,7 +481,6 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
                 signAsOp: !!fields.signAsOp
             },
             rawText: rawText,
-            sequenceNumber: (c.postCount + 1),
             subject: (fields.subject || null),
             text: (c.text || null),
             threadNumber: threadNumber,
