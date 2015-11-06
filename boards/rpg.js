@@ -35,7 +35,7 @@ var extraData = function(req, fields, edit) {
         var id = key.substr(12);
         variants.push({
             text: value,
-            id: ((edit && id) ? id : null)
+            id: ((edit && id && isNaN(+id)) ? id : null)
         });
     });
     if (variants.length < 1)
@@ -62,7 +62,7 @@ var extraData = function(req, fields, edit) {
 board.postExtraData = function(req, fields, files, oldPost) {
     var oldData = oldPost ? oldPost.extraData : null;
     var newData;
-    return extraData(req, fields).then(function(data) {
+    return extraData(req, fields, oldPost).then(function(data) {
         newData = data;
         if (!newData)
             return Promise.resolve(null);
@@ -74,12 +74,15 @@ board.postExtraData = function(req, fields, files, oldPost) {
             var variant = newData.variants[i];
             var id = variant.id;
             if (id) {
-                var text = oldData.variants.reduce(function(text, oldVariant) {
-                    if (text)
-                        return text;
-                    return (oldVariant.id == variant.id) ? oldVariant.text : "";
-                }, "");
-                if (!text)
+                var exists = oldData.variants.reduce(function(exists, oldVariant) {
+                    if (exists)
+                        return exists;
+                    if (oldVariant.id != variant.id)
+                        return false;
+                    oldVariant.text = variant.text;
+                    return true;
+                }, false);
+                if (!exists)
                     return Promise.reject("Invalid vote ID");
             } else {
                 id = uuid.v1();
@@ -157,9 +160,5 @@ board.customPostFormField = function(n, req, thread) {
         return controller.sync(it.req, "rpgPostFormField", model);
     };
 };
-
-/*board.testParameters = function(fields, files, creatingThread) {
-    //
-};*/
 
 module.exports = board;

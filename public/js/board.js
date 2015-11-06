@@ -1191,7 +1191,7 @@ lord.addFile = function(boardName, postNumber) {
                     document.body.removeChild(progress);
                     var response = xhr.responseText;
                     var err = response.error;
-                    if (!!err)
+                    if (err)
                         return lord.showPopup(err, {type: "critical"});
                     lord.updatePost(postNumber, post);
                 } else {
