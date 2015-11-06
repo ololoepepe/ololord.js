@@ -60,10 +60,10 @@
                     </td>
                     <td class="nowrap">
                         <select name="time" class="select">
-                            <option value="server" {{? it.settings.currentTime != "local"}}selected="true"{{?}}>
+                            <option value="server" {{? it.settings.time != "local"}}selected="true"{{?}}>
                                 {{=it.tr.timeServerText}}
                             </option>
-                            <option value="local" {{? it.settings.currentTime == "local"}}selected="true"{{?}}>
+                            <option value="local" {{? it.settings.time == "local"}}selected="true"{{?}}>
                                 {{=it.tr.timeLocalText}}
                             </option>
                         </select>

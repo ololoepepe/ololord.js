@@ -29,6 +29,9 @@ module.exports = function(req, res, next) {
     req.hashpass = Tools.hashpass(req);
     var captchaEngine = Captcha.captcha(req.cookies.captchaEngine);
     var defMarkupMode = markup.MarkupModes.ExtendedWakabaMark + "," + markup.MarkupModes.BBCode;
+    var timeZoneOffset = +req.cookies.timeZoneOffset;
+    if (isNaN(timeZoneOffset) || timeZoneOffset < -720 || timeZoneOffset > 840)
+        timeZoneOffset = 0;
     req.settings = {
         mode: {
             name: mode
@@ -44,7 +47,9 @@ module.exports = function(req, res, next) {
         maxAllowedRating: (req.cookies.maxAllowedRating || "R-18G"),
         hiddenBoards: (req.cookies.hiddenBoards ? req.cookies.hiddenBoards.split("|") : []),
         captchaEngine: (captchaEngine || Captcha.captcha("google-recaptcha")),
-        markupMode: (req.cookies.markupMode || defMarkupMode)
+        markupMode: (req.cookies.markupMode || defMarkupMode),
+        time: (["server", "local"].indexOf(req.cookies.time) >= 0) ? req.cookies.time : "server",
+        timeZoneOffset: timeZoneOffset
     };
     next();
 };

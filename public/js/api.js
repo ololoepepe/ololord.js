@@ -102,7 +102,7 @@ lord.Day = 24 * lord.Hour;
 lord.Year = 365 * lord.Day;
 lord.Billion = 2 * 1000 * 1000 * 1000;
 lord.SettingsStoredInCookies = ["mode", "style", "codeStyle", "stickyToolbar", "shrinkPosts", "markupMode",
-                                "currentTime", "timeZoneOffset", "captchaEngine", "maxAllowedRating",
+                                "time", "timeZoneOffset", "captchaEngine", "maxAllowedRating",
                                 "draftsByDefault", "hidePostformRules", "minimalisticPostform", "hiddenBoards"];
 
 /*Variables*/
@@ -959,7 +959,7 @@ lord.settings = function() {
         shrinkPosts: (lord.getCookie("shrinkPosts", "true") != "false"),
         markupMode: lord.getCookie("markupMode", "EXTENDED_WAKABA_MARK,BB_CODE"),
         stickyToolbar: (lord.getCookie("stickyToolbar", "true") != "false"),
-        currentTime: lord.getCookie("currentTime", "server"),
+        time: lord.getCookie("time", "server"),
         timeZoneOffset: lord.getCookie("timeZoneOffset", -lord.now().getTimezoneOffset()),
         captchaEngine: {
             id: lord.getCookie("captchaEngine", "google-recaptcha")

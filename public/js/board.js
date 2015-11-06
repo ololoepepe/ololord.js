@@ -262,11 +262,12 @@ lord.createPostNode = function(post, permanent) {
             query: "boardName=" + post.boardName + "&threadNumber=" + post.threadNumber
         }
     ], true).then(function(model) {
+        var settings = lord.settings();
         c.model = model;
         c.locale = model.site.locale;
         c.dateFormat = model.site.dateFormat;
-        c.timeOffset = model.site.timeOffset;
-        c.model.settings = lord.settings();
+        c.timeOffset = ("local" == settings.time) ? settings.timeZoneOffset : model.site.timeOffset;
+        c.model.settings = settings;
         return lord.getModel("api/threadInfo", "boardName=" + post.boardName + "&threadNumber=" + post.threadNumber);
     }).then(function(thread) {
         c.model.thread = thread;

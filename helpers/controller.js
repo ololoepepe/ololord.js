@@ -26,8 +26,8 @@ var customContent = function(req, name) {
     });
 };
 
-var formattedDate = function(date) {
-    var offset = config("site.timeOffset", 0);
+var formattedDate = function(date, req) {
+    var offset = ("local" == req.settings.time) ? req.settings.timeZoneOffset : config("site.timeOffset", 0);
     var locale = config("site.locale", "en");
     var format = config("site.dateFormat", "MM/DD/YYYY HH:mm:ss");
     return moment(date).utcOffset(offset).locale(locale).format(format);
