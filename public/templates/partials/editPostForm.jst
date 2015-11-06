@@ -1,6 +1,6 @@
 <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
       action="/{{=it.site.pathPrefix}}action/editPost">
-    <input type="hidden" name="board" value="{{=post.boardName}}" />
+    <input type="hidden" name="boardName" value="{{=post.boardName}}" />
     <input type="hidden" name="postNumber" value="{{=post.number}}" />
     <table class="postFormTable">
         <tbody>
@@ -92,9 +92,8 @@
                     {{? it.customEditPostDialogPart && it.customEditPostDialogPart[70]}}
                         {{ out += it.customEditPostDialogPart[70](it, thread, post); }}
                     {{?}}
-                    {{? it.board.draftsEnabled && it.user.loggedIn}}
-                        <input id="checkboxDraftEdit" type="checkbox" name="draft" value="true"
-                               {{? post.options.draft}}checked="true"{{?}}
+                    {{? it.board.draftsEnabled && it.user.loggedIn && post.options.draft}}
+                        <input id="checkboxDraftEdit" type="checkbox" name="draft" value="true" checked="true"
                                class="imageCheckBox" /><label title="{{!it.tr.postFormLabelDraft}}"
                                                               for="checkboxDraftEdit"></label>
                     {{?}}

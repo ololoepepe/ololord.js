@@ -103,11 +103,11 @@ var Board = function(name, title, options) {
     defineSetting(this, "draftsEnabled", true);
     defineSetting(this, "enabled", true);
     defineSetting(this, "hidden", false);
-    defineSetting(this, "maxEmailFieldLength", 150);
-    defineSetting(this, "maxNameFieldLength", 50);
-    defineSetting(this, "maxSubjectFieldLength", 150);
+    defineSetting(this, "maxEmailLength", 150);
+    defineSetting(this, "maxNameLength", 50);
+    defineSetting(this, "maxSubjectLength", 150);
     defineSetting(this, "maxTextLength", 15000);
-    defineSetting(this, "maxPasswordFieldLength", 50);
+    defineSetting(this, "maxPasswordLength", 50);
     defineSetting(this, "maxFileCount", 1);
     defineSetting(this, "maxFileSize", 10 * 1024 * 1024);
     defineSetting(this, "maxLastPosts", 3);

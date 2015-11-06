@@ -23,7 +23,7 @@
                 <img src="/{{=it.site.pathPrefix}}img/bumplimit.png" title="{{=it.tr.bumpLimitReachedText}}">
             {{?}}
         {{?}}
-        {{? post.draft}}
+        {{? post.options.draft}}
             <img src="/{{=it.site.pathPrefix}}img/edit.png" title="{{=it.tr.draftText}}" />
         {{?}}
         {{#def.postSubject}}
@@ -66,7 +66,7 @@
             <span tabindex="0" class="{{=it.deviceType}} postActions">
                 <img src="/{{=it.site.pathPrefix}}img/post_actions.png" title="{{=it.tr.postActionsText}}">
                 <ul class="postActionsMenu">
-                    {{? (it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.draft) && (post.fileInfos.length < it.board.maxFileCount)}}
+                    {{? (it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.options.draft) && (post.fileInfos.length < it.board.maxFileCount)}}
                         <li>
                             <a name="addFileButton" target="_blank"
                                href="/{{=it.site.pathPrefix}}add_file?board={{=it.board.name}}&post={{=post.number}}"
@@ -74,7 +74,7 @@
                                 <img src="/{{=it.site.pathPrefix}}img/add.png" /> {{=it.tr.addFileText}}</a>
                         </li>
                     {{?}}
-                    {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.draft}}
+                    {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.options.draft}}
                         <li>
                             <a name="editButton" target="_blank"
                                href="/{{=it.site.pathPrefix}}edit_post?board={{=it.board.name}}&post={{=post.number}}"

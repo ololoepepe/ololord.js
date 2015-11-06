@@ -137,7 +137,7 @@ var getFiles = function(fields, files, transaction) {
 };
 
 var testParameters = function(fields, files, creatingThread) {
-    var board = Board.board(fields.board);
+    var board = Board.board(fields.boardName);
     if (!board)
         return { error: 404 };
     var email = fields.email || "";
@@ -149,15 +149,15 @@ var testParameters = function(fields, files, creatingThread) {
     var fileCount = files.length + fileHashes.length;
     var maxFileSize = board.maxFileSize;
     var maxFileCount = board.maxFileCount;
-    if (email.length > board.maxEmailFieldLength)
+    if (email.length > board.maxEmailLength)
         return { error: Tools.translate("E-mail is too long", "error") };
-    if (name.length > board.maxNameFieldLength)
+    if (name.length > board.maxNameLength)
         return { error: Tools.translate("Name is too long", "error") };
-    if (subject.length > board.maxSubjectFieldLength)
+    if (subject.length > board.maxSubjectLength)
         return { error: Tools.translate("Subject is too long", "error") };
     if (text.length > board.maxTextFieldLength)
         return { error: Tools.translate("Comment is too long", "error") };
-    if (password.length > board.maxPasswordFieldLength)
+    if (password.length > board.maxPasswordLength)
         return { error: Tools.translate("Password is too long", "error") };
     if (creatingThread && maxFileCount && !fileCount)
         return { error: Tools.translate("Attempt to create a thread without attaching a file", "error") };
@@ -211,10 +211,10 @@ router.post("/createPost", function(req, res) {
     parseForm(req).then(function(result) {
         c.fields = result.fields;
         c.files = result.files;
-        c.board = Board.board(c.fields.board);
+        c.board = Board.board(c.fields.boardName);
         if (!board)
             return Promise.reject("Invalid board");
-        transaction.board = c.fields.board;
+        transaction.board = board;
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
@@ -241,10 +241,10 @@ router.post("/createThread", function(req, res) {
     parseForm(req).then(function(result) {
         c.fields = result.fields;
         c.files = result.files;
-        c.board = Board.board(c.fields.board);
+        c.board = Board.board(c.fields.boardName);
         if (!board)
             return Promise.reject("Invalid board");
-        transaction.board = c.fields.board;
+        transaction.board = board;
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
@@ -266,20 +266,26 @@ router.post("/createThread", function(req, res) {
 });
 
 router.post("/editPost", function(req, res) {
-    var c = {};
     parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        c.board = Board.board(c.fields.board);
-        if (!board)
-            return Promise.reject("Invalid board");
-        res.send({ errorMessage: "pipirka" });
+        return Database.editPost(req, result.fields);
+    }).then(function(result) {
+        res.send({});
+    }).catch(function(err) {
+        controller.error(req, res, err, req.settings.mode.name != "ascetic");
+    });
+});
+
+router.post("/deletePost", function(req, res) {
+    parseForm(req).then(function(result) {
+        return Database.deletePost(req, result.fields);
+    }).then(function(result) {
+        res.send({});
     }).catch(function(err) {
         controller.error(req, res, err, req.settings.mode.name != "ascetic");
     });
 });
 
 router.post("/editAudioTags", function(req, res) {
-    var c = {};
     parseForm(req).then(function(result) {
         return Database.editAudioTags(req, result.fields);
     }).then(function(result) {

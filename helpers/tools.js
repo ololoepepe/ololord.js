@@ -1,4 +1,5 @@
 var ChildProcess = require("child_process");
+var Crypto = require("crypto");
 var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
@@ -438,3 +439,11 @@ module.exports.splitCommand = function(cmd) {
         arguments: args
     };
 };
+
+module.exports.password = function(pwd) {
+    if (!pwd)
+        return null;
+    var sha1 = Crypto.createHash("sha1");
+    sha1.update(pwd);
+    return sha1.digest("hex");
+}

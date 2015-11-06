@@ -386,7 +386,7 @@ module.exports.getFileInfosByHashes = function(hashes) {
 };
 
 var processFiles = function(req, fields, files, transaction) {
-    var board = Board.board(fields.board);
+    var board = Board.board(fields.boardName);
     if (!board)
         return Promise.reject("Invalid board");
     var promises = files.map(function(file) {
@@ -436,7 +436,7 @@ var processFiles = function(req, fields, files, transaction) {
 };
 
 var createPost = function(req, fields, files, transaction, threadNumber, date) {
-    var board = Board.board(fields.board);
+    var board = Board.board(fields.boardName);
     if (!board)
         return Promise.reject("Invalid board");
     date = date || Tools.now();
@@ -444,18 +444,13 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     if (threadNumber)
         c.postNumber = threadNumber;
     else
-        threadNumber = +fields.thread;
+        threadNumber = +fields.threadNumber;
     var rawText = (fields.text || null);
     var markupModes = [];
     var referencedPosts = {};
-    var password = null;
+    var password = Tools.password(fields.password);
     var hashpass = (req.hashpass || null);
     var ip = (req.trueIp || null);
-    if (fields.password) {
-        var sha1 = Crypto.createHash("sha1");
-        sha1.update(fields.password);
-        password = sha1.digest("hex");
-    }
     Tools.forIn(markup.MarkupModes, function(val) {
         if (fields.markupMode && fields.markupMode.indexOf(val) >= 0)
             markupModes.push(val);
@@ -546,12 +541,13 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         return db.sadd("referencedPosts:" + board.name + ":" + c.postNumber, refs);
     }).then(function() {
         var promises = [];
+        var selfRef = JSON.stringify({
+            boardName: board.name,
+            threadNumber: threadNumber,
+            postNumber: c.postNumber,
+        });
         Tools.forIn(referencedPosts, function(ref) {
-            promises.push(db.sadd("referringPosts:" + ref.boardName + ":" + ref.postNumber, JSON.stringify({
-                boardName: board.name,
-                threadNumber: threadNumber,
-                postNumber: c.postNumber,
-            })));
+            promises.push(db.sadd("referringPosts:" + ref.boardName + ":" + ref.postNumber, selfRef));
         });
         return Promise.all(promises);
     }).then(function() {
@@ -610,7 +606,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
 };
 
 var checkCaptcha = function(req, fields) {
-    var board = Board.board(fields.board);
+    var board = Board.board(fields.boardName);
     if (!board)
         return Promise.reject("Invalid board");
     if (!board.captchaEnabled)
@@ -646,7 +642,7 @@ var checkCaptcha = function(req, fields) {
 };
 
 module.exports.createPost = function(req, fields, files, transaction) {
-    var threadNumber = +fields.thread;
+    var threadNumber = +fields.threadNumber;
     if (isNaN(threadNumber) || threadNumber <= 0)
         return Promise.reject("Invalid thread");
     return checkCaptcha(req, fields).then(function() {
@@ -658,10 +654,26 @@ module.exports.createPost = function(req, fields, files, transaction) {
 
 var removePost = function(boardName, postNumber) {
     var c = {};
-    return db.hdel("posts", boardName + ":" + postNumber).then(function() {
+    return db.sadd("postsPlannedForDeletion", boardName + ":" + postNumber).then(function() {
+        return getPost(boardName, postNumber, { withReferences: true });
+    }).then(function(post) {
+        c.post = post;
+        return db.srem("threadPostNumbers:" + boardName + ":" + post.threadNumber, postNumber);
+    }).then(function() {
+        return db.hdel("posts", boardName + ":" + postNumber);
+    }).then(function() {
         return db.del("referencedPosts:" + boardName + ":" + postNumber);
     }).then(function() {
-        return db.del("referringPosts:" + boardName + ":" + postNumber);
+        c.selfRef = JSON.stringify({
+            boardName: board.name,
+            threadNumber: c.post.threadNumber,
+            postNumber: c.post.number,
+        });
+        var promises = [];
+        Tools.forIn(c.post.referencedPosts, function(ref) {
+            promises.push(db.srem("referringPosts:" + ref.boardName + ":" + ref.postNumber, c.selfRef));
+        });
+        return Promise.all(promises);
     }).then(function() {
         return postFileInfoNames(boardName, postNumber);
     }).then(function(names) {
@@ -706,8 +718,8 @@ var removePost = function(boardName, postNumber) {
         Tools.forIn(Tools.indexPost({
             boardName: boardName,
             number: postNumber,
-            rawText: rawText,
-            subject: (fields.subject || null)
+            rawText: c.post.rawText,
+            subject: c.post.subject
         }), function(index, word) {
             promises.push(db.srem("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
@@ -717,6 +729,8 @@ var removePost = function(boardName, postNumber) {
             return FS.remove(path);
         });
         return Promise.all(promises);
+    }).then(function() {
+        return db.srem("postsPlannedForDeletion", boardName + ":" + postNumber);
     });
 };
 
@@ -724,13 +738,12 @@ module.exports.removePost = removePost;
 
 var removeThread = function(boardName, threadNumber, archived) {
     var key = (archived ? "archivedThreads:" : "threads:") + boardName;
-    return db.hdel(key, threadNumber).then(function() {
+    return db.sadd("threadsPlannedForDeletion", boardName + ":" + threadNumber).then(function() {
+        return db.hdel(key, threadNumber);
+    }).then(function() {
         return db.hdel("threadUpdateTimes:" + boardName, threadNumber);
     }).then(function() {
-        return db.hset("threadsPlannedForDeletion:" + boardName + ":" + threadNumber, JSON.stringify({
-            boardName: boardName,
-            threadNumber: threadNumber
-        }));
+
     }).then(function() {
         setTimeout(function() {
             var c = {};
@@ -742,6 +755,8 @@ var removeThread = function(boardName, threadNumber, archived) {
                     return removePost(boardName, postNumber);
                 });
                 return Promise.all(promises);
+            }).then(function() {
+                return db.srem("threadsPlannedForDeletion", boardName + ":" + threadNumber);
             });
         }, 10000);
         return Promise.resolve();
@@ -751,18 +766,13 @@ var removeThread = function(boardName, threadNumber, archived) {
 module.exports.removeThread = removeThread;
 
 module.exports.createThread = function(req, fields, files, transaction) {
-    var board = Board.board(fields.board);
+    var board = Board.board(fields.boardName);
     if (!board)
         return Promise.reject("Invalid board");
     var c = {};
     var date = Tools.now();
     var hashpass = req.hashpass || null;
-    var password = null;
-    if (fields.password) {
-        var sha1 = Crypto.createHash("sha1");
-        sha1.update(fields.password);
-        password = sha1.digest("hex");
-    }
+    var password = Tools.password(fields.password);
     return checkCaptcha(req, fields).then(function() {
         return registeredUserLevel(hashpass);
     }).then(function(level) {
@@ -1210,8 +1220,147 @@ module.exports.rerenderPosts = function(boardNames) {
     });
 };
 
+module.exports.editPost = function(req, fields) {
+    var board = Board.board(fields.boardName);
+    if (!board)
+        return Promise.reject("Invalid board");
+    var date = Tools.now();
+    var c = {};
+    var postNumber = +fields.postNumber;
+    if (isNaN(postNumber) || postNumber <= 0)
+        return Promise.reject("Invalid post number");
+    var rawText = fields.text || null;
+    var email = fields.email || null;
+    var name = fields.name || null;
+    var subject = fields.subject || null;
+    var isRaw = fields.raw && compareRegisteredUserLevels(req.level, RegisteredUserLevels.Admin) >= 0;
+    var markupModes = [];
+    var referencedPosts = {};
+    var password = Tools.password(fields.password);
+    Tools.forIn(markup.MarkupModes, function(val) {
+        if (fields.markupMode && fields.markupMode.indexOf(val) >= 0)
+            markupModes.push(val);
+    });
+    return getPost(board.name, postNumber, { withReferences: true }).then(function(post) {
+        if ((!password || password != post.user.password)
+            && (!req.hashpass || req.hashpass != post.user.hashpass)
+            && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
+            return Promise.reject("Not enough rights");
+        }
+        c.post = post;
+        c.draft = post.options.draft && fields.draft;
+        return postFileInfoNames(post.boardName, post.number);
+    }).then(function(numbers) {
+        if (!rawText && numbers.length < 1)
+            return Promise.reject("Both file and comment are missing");
+        if (rawText && rawText.length > board.maxTextLength)
+            return Promise.reject("Text is too long");
+        if (email && email.length > board.maxEmailLength)
+            return Promise.reject("E-mail is too long");
+        if (name && name.length > board.maxNameLength)
+            return Promise.reject("Name is too long");
+        if (subject && subject.length > board.maxSubjectLength)
+            return Promise.reject("Subject is too long");
+        if (isRaw)
+            return Promise.resolve(rawText);
+        return markup(board.name, rawText, {
+            markupModes: markupModes,
+            referencedPosts: referencedPosts
+        });
+    }).then(function(text) {
+        c.text = text;
+        return board.postExtraData(req, fields, null, c.post)
+    }).then(function(extraData) {
+        c.extraData = extraData;
+        return db.del("referencedPosts:" + board.name + ":" + c.post.number);
+    }).then(function() {
+        c.selfRef = JSON.stringify({
+            boardName: board.name,
+            threadNumber: c.post.threadNumber,
+            postNumber: c.post.number,
+        });
+        var promises = [];
+        Tools.forIn(c.post.referencedPosts, function(ref) {
+            promises.push(db.srem("referringPosts:" + ref.boardName + ":" + ref.postNumber, c.selfRef));
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        var promises = [];
+        Tools.forIn(Tools.indexPost({
+            boardName: c.post.boardName,
+            number: c.post.number,
+            rawText: c.post.rawText,
+            subject: c.post.subject
+        }), function(index, word) {
+            promises.push(db.srem("postSearchIndex:" + word, JSON.stringify(index[0])));
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        c.post.email = email || null;
+        c.post.extraData = !Util.isNullOrUndefined(c.extraData) ? c.extraData : null;
+        c.post.markup = markupModes;
+        c.post.name = name || null;
+        c.post.options.rawHtml = isRaw;
+        c.post.options.draft = c.draft;
+        c.post.rawText = rawText;
+        c.post.subject = subject || null;
+        c.post.text = c.text || null;
+        c.post.updatedAt = date.toISOString();
+        return db.hset("posts", board.name + ":" + c.post.number, JSON.stringify(c.post));
+    }).then(function() {
+        var refs = [];
+        c.refs = [];
+        Tools.forIn(referencedPosts, function(ref) {
+            refs.push(JSON.stringify(ref));
+            c.refs.push(ref);
+        });
+        if (refs.length < 1)
+            return Promise.resolve();
+        return db.sadd("referencedPosts:" + board.name + ":" + c.post.number, refs);
+    }).then(function() {
+        var promises = [];
+        Tools.forIn(referencedPosts, function(ref) {
+            promises.push(db.sadd("referringPosts:" + ref.boardName + ":" + ref.postNumber, c.selfRef));
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        var promises = [];
+        Tools.forIn(Tools.indexPost({
+            boardName: board.name,
+            number: c.post.number,
+            rawText: rawText,
+            subject: subject
+        }), function(index, word) {
+            promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        c.post.referencedPosts = c.refs;
+        return c.post;
+    });
+};
+
+module.exports.deletePost = function(req, fields) {
+    var board = Board.board(fields.boardName);
+    if (!board)
+        return Promise.reject("Invalid board");
+    var postNumber = +fields.postNumber;
+    if (isNaN(postNumber) || postNumber <= 0)
+        return Promise.reject("Invalid post number");
+    var password = Tools.password(fields.password);
+    return getPost(board.name, postNumber).then(function(post) {
+        if ((!password || password != post.user.password)
+            && (!req.hashpass || req.hashpass != post.user.hashpass)
+            && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
+            return Promise.reject("Not enough rights");
+        }
+        return removePost(board.name, postNumber);
+    })
+};
+
 module.exports.editAudioTags = function(req, fields) {
     var c = {};
+    var password = Tools.password(fields.password);
     return getFileInfo(fields.fileName).then(function(fileInfo) {
         if (!fileInfo)
             return Promise.reject("No such file info");
@@ -1220,7 +1369,7 @@ module.exports.editAudioTags = function(req, fields) {
         c.fileInfo = fileInfo;
         return getPost(fileInfo.boardName, fileInfo.postNumber);
     }).then(function(post) {
-        if ((!fields.password || fields.password != post.user.password)
+        if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
             return Promise.reject("Not enough rights");
