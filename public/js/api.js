@@ -931,7 +931,8 @@ lord.getModel = function(modelName, query) {
                 resolve(lord.models[modelName]);
             } else {
                 $.ajax("/" + lord.data("sitePathPrefix") + modelName + ".json" + query).then(function(result) {
-                    lord.models[modelName] = result;
+                    if (!query)
+                        lord.models[modelName] = result;
                     resolve(result);
                 }).fail(function(err) {
                     reject(err);

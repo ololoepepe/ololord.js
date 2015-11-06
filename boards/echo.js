@@ -22,10 +22,27 @@ board.addTranslations = function(translate) {
     translate("Thread link:", "postFormLabelLink");
 };
 
+var testLink = function(link) {
+    if (!link)
+        return { error: "Thread link is empty" };
+    if (link.length > board.maxLinkLength)
+        return { error: "Thread link is too long" };
+    for (var i = 0; i < board.acceptedExternalBoardLinks.length; ++i) {
+        if ((new XRegExp(board.acceptedExternalBoardLinks[i])).test(link))
+            return;
+    }
+    return { error: "This board/thread may not be accepted" };
+};
+
 board.postExtraData = function(req, fields, files, oldPost) {
     if (fields.thread)
-        return Promise.resolve(oldPost ? oldPost.extraData : null);
+        return Promise.resolve(null);
+    if (!oldPost || !oldPost.extraData)
+        return Promise.resolve(null);
     var link = fields.link;
+    var result = testLink(link);
+    if (result)
+        return Promise.reject(result);
     if (!link.substr(0, 4) != "http")
         link = "http://" + link;
     return Promise.resolve(link);
@@ -76,15 +93,7 @@ board.customPostFormField = function(n, _, thread) {
 board.testParameters = function(fields, files, creatingThread) {
     if (!creatingThread)
         return;
-    if (!fields.link)
-        return { error: "Thread link is empty" };
-    if (fields.link.length > this.maxLinkLength)
-        return { error: "Thread link is too long" };
-    for (var i = 0; i < this.acceptedExternalBoardLinks.length; ++i) {
-        if ((new XRegExp(this.acceptedExternalBoardLinks[i])).test(fields.link))
-            return;
-    }
-    return { error: "This board/thread may not be accepted" };
+    return testLink(fields.link);
 };
 
 module.exports = board;
