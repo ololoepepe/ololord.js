@@ -1415,22 +1415,10 @@ lord.deleteFile = function(boardName, postNumber, fileName) {
 };
 
 lord.editAudioTags = function(el) {
-    var boardName = lord.data("boardName", el, true);
-    var postNumber = +lord.data("number", el, true);
     var fileName = lord.data("fileName", el, true);
     var c = {};
-    lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
-        var fileInfo = post.fileInfos.reduce(function(result, fileInfo) {
-            if (result)
-                return result;
-            return (fileInfo.name == fileName) ? fileInfo : null;
-        }, null);
-        if (!fileInfo)
-            return Promise.reject("No such file");
-        c.model = {
-            post: post,
-            fileInfo: fileInfo
-        };
+    lord.getModel("api/fileInfo", "fileName=" + fileName).then(function(fileInfo) {
+        c.model = { fileInfo: fileInfo };
         return lord.getModel(["misc/base", "misc/tr"], true);
     }).then(function(model) {
         c.model = merge.recursive(c.model, model);
@@ -1452,7 +1440,7 @@ lord.editAudioTags = function(el) {
     }).then(function(result) {
         if (typeof result == "undefined")
             return Promise.resolve();
-        return lord.updatePost(boardName, postNumber);
+        return lord.updatePost(lord.data("boardName", el, true), lord.data("postNumber", el, true));
     }).catch(function(err) {
         console.log(err);
     });

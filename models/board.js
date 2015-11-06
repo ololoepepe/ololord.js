@@ -45,6 +45,26 @@ module.exports.getPosts = function(posts, hashpass) {
     });
 };
 
+module.exports.getFileInfos = function(fileNames, hashpass) {
+    var promises = fileNames.map(function(fileName) {
+        return Database.getFileInfo(fileName).then(function(fileInfo) {
+            var p;
+            if (fileInfo) {
+                p = Database.getPost(fileInfo.boardName, fileInfo.postNumber).then(function(post) {
+                    if (!post.draft || !post.user.hashpass || post.user.hashpass == hashpass)
+                        return Promise.resolve(fileInfo);
+                    else
+                        return Promise.resolve(null);
+                });
+            } else {
+                p = Promise.resolve(null);
+            }
+            return p;
+        });
+    });
+    return Promise.all(promises);
+};
+
 module.exports.getPage = function(board, hashpass, page) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");

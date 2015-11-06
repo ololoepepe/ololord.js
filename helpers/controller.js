@@ -568,7 +568,11 @@ controller.translationsModel = function() {
     translate("Selected file is too large", "fileTooLargeWarningText");
     translate("MB", "megabytesText");
     translate("KB", "kilobytesText");
-    translate("Byte(s)", "bytesText ");
+    translate("Byte(s)", "bytesText");
+    translate("Album:", "audioTagAlbumText");
+    translate("Artist:", "audioTagArtistText");
+    translate("Title:", "audioTagTitleText");
+    translate("Year:", "audioTagYearText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

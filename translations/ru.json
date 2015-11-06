@@ -1027,26 +1027,22 @@
     "Album:": {
         "audioTagAlbumText": {
             "value": "Альбом:"
-        },
-        "_obsolete": true
+        }
     },
     "Artist:": {
         "audioTagArtistText": {
             "value": "Исполнитель:"
-        },
-        "_obsolete": true
+        }
     },
     "Title:": {
         "audioTagTitleText": {
             "value": "Название:"
-        },
-        "_obsolete": true
+        }
     },
     "Year:": {
         "audioTagYearText": {
             "value": "Год:"
-        },
-        "_obsolete": true
+        }
     },
     "F.A.Q.": {
         "pageTitle": {

@@ -220,7 +220,7 @@ var threadPosts = function(boardName, threadNumber, options) {
 
 module.exports.threadPosts = threadPosts;
 
-module.exports.getPost = function(boardName, postNumber, options) {
+var getPost = function(boardName, postNumber, options) {
     if (!Tools.contains(Board.boardNames(), boardName))
         return Promise.reject("Invalid board");
     if (isNaN(postNumber) || postNumber <= 0)
@@ -268,6 +268,16 @@ module.exports.getPost = function(boardName, postNumber, options) {
         return c.post;
     });
 };
+
+module.exports.getPost = getPost;
+
+var getFileInfo = function(fileName) {
+    return db.hget("fileInfos", fileName).then(function(fileInfo) {
+        return Promise.resolve(fileInfo ? JSON.parse(fileInfo) : null);
+    });
+};
+
+module.exports.getFileInfo = getFileInfo;
 
 module.exports.threadPostCount = function(boardName, threadNumber) {
     if (!Tools.contains(Board.boardNames(), boardName))
@@ -548,6 +558,8 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         if (files.length < 1)
             return Promise.resolve();
         return Promise.all(files.map(function(fileInfo) {
+            fileInfo.boardName = board.name;
+            fileInfo.postNumber = c.postNumber;
             return db.hset("fileInfos", fileInfo.name, JSON.stringify(fileInfo)).then(function() {
                 return db.sadd("postFileInfoNames:" + board.name + ":" + c.postNumber, fileInfo.name);
             });
@@ -1195,5 +1207,31 @@ module.exports.rerenderPosts = function(boardNames) {
             })(i);
         }
         return p;
+    });
+};
+
+module.exports.editAudioTags = function(req, fields) {
+    var c = {};
+    return getFileInfo(fields.fileName).then(function(fileInfo) {
+        if (!fileInfo)
+            return Promise.reject("No such file info");
+        if (fileInfo.mimeType.substr(0, 6) != "audio/")
+            return Promise.reject("Invalid file type");
+        c.fileInfo = fileInfo;
+        return getPost(fileInfo.boardName, fileInfo.postNumber);
+    }).then(function(post) {
+        if ((!fields.password || fields.password != post.user.password)
+            && (!req.hashpass || req.hashpass != post.user.hashpass)
+            && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
+            return Promise.reject("Not enough rights");
+        }
+        ["album", "artist", "title", "year"].forEach(function(tag) {
+            if (fields[tag]) {
+                c.fileInfo.extraData[tag] = fields[tag];
+            } else if (c.fileInfo.extraData[tag]) {
+                delete c.fileInfo.extraData[tag];
+            }
+        });
+        return db.hset("fileInfos", c.fileInfo.name, JSON.stringify(c.fileInfo));
     });
 };

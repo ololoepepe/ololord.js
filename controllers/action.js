@@ -281,11 +281,9 @@ router.post("/editPost", function(req, res) {
 router.post("/editAudioTags", function(req, res) {
     var c = {};
     parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        c.board = Board.board(c.fields.board);
-        if (!board)
-            return Promise.reject("Invalid board");
-        res.send({ errorMessage: "pipirka" });
+        return Database.editAudioTags(req, result.fields);
+    }).then(function(result) {
+        res.send({});
     }).catch(function(err) {
         controller.error(req, res, err, req.settings.mode.name != "ascetic");
     });
