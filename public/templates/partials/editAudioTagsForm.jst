@@ -1,0 +1,54 @@
+<form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
+      action="/{{=it.site.pathPrefix}}action/editAudioTags">
+    <input type="hidden" name="board" value="{{=it.post.boardName}}" />
+    <input type="hidden" name="postNumber" value="{{=it.post.number}}" />
+    <input type="hidden" name="fileName" value="{{=it.fileInfo.name}}" />
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    <b>{{=it.tr.audioTagAlbumText}}</b>
+                </td>
+                <td>
+                    <input type="text" name="album" size="43"
+                           value="{{? it.fileInfo.extraData.album}}{{=it.fileInfo.extraData.album}}{{?}}" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>{{=it.tr.audioTagArtistText}}</b>
+                </td>
+                <td>
+                    <input type="text" name="artist" size="43"
+                           value="{{? it.fileInfo.extraData.artist}}{{=it.fileInfo.extraData.artist}}{{?}}" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>{{=it.tr.audioTagTitleText}}</b>
+                </td>
+                <td>
+                    <input type="text" name="title" size="43"
+                           value="{{? it.fileInfo.extraData.title}}{{=it.fileInfo.extraData.title}}{{?}}" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>{{=it.tr.audioTagYearText}}</b>
+                </td>
+                <td>
+                    <input type="text" name="year" size="43"
+                           value="{{? it.fileInfo.extraData.year}}{{=it.fileInfo.extraData.year}}{{?}}" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>{{=it.tr.postFormLabelPassword}}</b>
+                </td>
+                <td>
+                    <input type="password" name="password" size="43" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</form>

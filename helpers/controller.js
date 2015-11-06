@@ -271,7 +271,7 @@ controller.baseModel = function(req) {
 controller.boardsModel = function() {
     var boards = Board.boardNames().map(function(boardName) {
         var board = Board.board(boardName);
-        return {
+        var model = {
             name: board.name,
             title: board.title,
             defaultUserName: board.defaultUserName,
@@ -294,6 +294,10 @@ controller.boardsModel = function() {
             bumpLimit: board.bumpLimit,
             postLimit: board.postLimit
         };
+        board.customBoardInfoFields().forEach(function(field) {
+            model[field] = board[field];
+        });
+        return model;
     });
     return { boards: boards };
 };
@@ -303,7 +307,7 @@ controller.boardModel = function(board) {
         board = Board.board(board);
     if (!board)
         return null;
-    return {
+    var model = {
         board: {
             name: board.name,
             title: board.title,
@@ -328,6 +332,10 @@ controller.boardModel = function(board) {
             postLimit: board.postLimit
         }
     };
+    board.customBoardInfoFields().forEach(function(field) {
+        model.board[field] = board[field];
+    });
+    return model;
 };
 
 controller.settingsModel = function(req) {

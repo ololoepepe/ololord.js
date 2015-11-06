@@ -113,20 +113,11 @@ lord.showSettings = function() {
         c.model = {
             settings: lord.settings()
         };
-        return lord.getModel("misc/tr");
+        return lord.getModel(["misc/tr", "misc/base", "misc/board" + lord.data("boardName"), "misc/boards"]);
     }).then(function(model) {
-        $.extend(c.model, model);
-        return lord.getModel("misc/base");
-    }).then(function(model) {
-        $.extend(c.model, model);
-        return lord.getModel("misc/board/" + lord.data("boardName"));
-    }).then(function(model) {
-        $.extend(c.model, model);
-        return lord.getModel("misc/boards");
-    }).then(function(model) {
-        $.extend(c.model, model);
+        c.model = merge.recursive(c.model, model);
         c.div = $.parseHTML(c.template(c.model))[0];
-        return lord.showDialog("settings", null, c.div);
+        return lord.showDialog("settingsDialogTitle", null, c.div);
     }).then(function(accepted) {
         if (!accepted)
             return;

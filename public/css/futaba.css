@@ -1108,7 +1108,7 @@ a.progressBlocking {
     box-shadow: inset 0 1px 5px #800000;
 }
 
-#checkboxRawHtml + label {
+#checkboxRawHtml + label, #checkboxRawHtmlEdit + label {
     background: url("../img/checkbox_raw_html.png") center no-repeat;
 }
 
@@ -1120,6 +1120,6 @@ a.progressBlocking {
     background: url("../img/checkbox_tripcode.png") center no-repeat;
 }
 
-#checkboxDraft + label {
+#checkboxDraft + label, #checkboxDraftEdit + label {
     background: url("../img/checkbox_draft.png") center no-repeat;
 }

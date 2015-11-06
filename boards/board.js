@@ -167,6 +167,10 @@ var Board = function(name, title, options) {
     });
 };
 
+/*public*/ Board.prototype.customBoardInfoFields = function() {
+    return [];
+};
+
 /*public*/ Board.prototype.getBannerFileName = function() {
     var randomFile = function(files) {
         if (!files || !files.length || files.length < 1)
@@ -265,6 +269,7 @@ var renderFileInfo = function(fi) {
     post.fileInfos.forEach(function(fileInfo) {
         renderFileInfo(fileInfo);
     });
+    post.rawSubject = post.subject;
     post.isOp = (post.number == post.threadNumber);
     post.ownIp = (req.trueIp == post.user.ip);
     post.ownHashpass = (req.hashpass == post.user.hashpass);

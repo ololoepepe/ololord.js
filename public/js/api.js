@@ -499,9 +499,11 @@ lord.showNotification = function(title, body, icon) {
 lord.showDialog = function(title, label, body, afterShow) {
     return lord.getModel("misc/tr").then(function(model) {
         var root = lord.node("div");
-        if (!!title || !!label) {
+        title = model.tr[title];
+        label = model.tr[label];
+        if (title || label) {
             var div = lord.node("div");
-            if (!!title) {
+            if (title) {
                 var c = lord.node("center");
                 var t = lord.node("b");
                 t.appendChild(lord.node("text", title));
@@ -509,52 +511,52 @@ lord.showDialog = function(title, label, body, afterShow) {
                 div.appendChild(c);
                 div.appendChild(lord.node("br"));
             }
-            if (!!label) {
+            if (label) {
                 div.appendChild(lord.node("text", label));
                 div.appendChild(lord.node("br"));
             }
             root.appendChild(div);
             root.appendChild(lord.node("br"));
         }
-        if (!!body) {
+        if (body) {
             root.appendChild(body);
             root.appendChild(lord.node("br"));
         }
         var div2 = lord.node("div");
         var dialog = null;
         var cancel = lord.node("button");
-        var d = $.Deferred();
-        cancel.onclick = function() {
-            dialog.close();
-            d.resolve(false);
-        };
-        cancel.appendChild(lord.node("text", model.tr.cancelButtonText));
-        div2.appendChild(cancel);
-        var ok = lord.node("button");
-        ok.onclick = function() {
-            d.resolve(true);
-            dialog.close();
-        };
-        ok.appendChild(lord.node("text", model.tr.confirmButtonText));
-        div2.appendChild(ok);
-        root.appendChild(div2);
-        dialog = picoModal({
-            "content": root,
-            "modalStyles": function (styles) {
-                styles.maxHeight = "80%";
-                styles.maxWidth = "80%";
-                styles.overflow = "auto";
-                styles.border = "1px solid #777777";
-                return styles;
-            }
-        }).afterShow(function(modal) {
-            if (!!afterShow)
-                afterShow();
-        }).afterClose(function(modal) {
-            modal.destroy();
+        return new Promise(function(resolve, reject) {
+            cancel.onclick = function() {
+                dialog.close();
+            };
+            cancel.appendChild(lord.node("text", model.tr.cancelButtonText));
+            div2.appendChild(cancel);
+            var ok = lord.node("button");
+            ok.onclick = function() {
+                resolve(true);
+                dialog.close();
+            };
+            ok.appendChild(lord.node("text", model.tr.confirmButtonText));
+            div2.appendChild(ok);
+            root.appendChild(div2);
+            dialog = picoModal({
+                "content": root,
+                "modalStyles": function (styles) {
+                    styles.maxHeight = "80%";
+                    styles.maxWidth = "80%";
+                    styles.overflow = "auto";
+                    styles.border = "1px solid #777777";
+                    return styles;
+                }
+            }).afterShow(function(modal) {
+                if (afterShow)
+                    afterShow();
+            }).afterClose(function(modal) {
+                modal.destroy();
+                resolve(false);
+            });
+            dialog.show();
         });
-        dialog.show();
-        return d;
     });
 };
 
@@ -905,19 +907,34 @@ lord.getTemplate = function(templateName) {
 };
 
 lord.getModel = function(modelName, query) {
-    query = query ? ("?" + query) : "";
-    return new Promise(function(resolve, reject) {
-        if (!query && lord.models.hasOwnProperty(modelName)) {
-            resolve(lord.models[modelName]);
-        } else {
-            $.ajax("/" + lord.data("sitePathPrefix") + modelName + ".json" + query).then(function(result) {
-                lord.models[modelName] = result;
-                resolve(result);
-            }).fail(function(err) {
-                reject(err);
-            });
-        }
-    });
+    if (Array.isArray(modelName)) {
+        var promises = modelName.map(function(modelName) {
+            if (typeof modelName == "string")
+                return lord.getModel(modelName);
+            else
+                return lord.getModel(modelName.name, modelName.query);
+        });
+        return Promise.all(promises).then(function(models) {
+            var model = (models.length > 0) ? models[0] : {};
+            for (var i = 1; i < models.length; ++i)
+                model = merge.recursive(model, models[i]);
+            return Promise.resolve(model);
+        });
+    } else {
+        query = query ? ("?" + query) : "";
+        return new Promise(function(resolve, reject) {
+            if (!query && lord.models.hasOwnProperty(modelName)) {
+                resolve(lord.models[modelName]);
+            } else {
+                $.ajax("/" + lord.data("sitePathPrefix") + modelName + ".json" + query).then(function(result) {
+                    lord.models[modelName] = result;
+                    resolve(result);
+                }).fail(function(err) {
+                    reject(err);
+                });
+            }
+        });
+    }
 };
 
 lord.now = function() {

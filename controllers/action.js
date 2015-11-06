@@ -265,6 +265,32 @@ router.post("/createThread", function(req, res) {
     });
 });
 
+router.post("/editPost", function(req, res) {
+    var c = {};
+    parseForm(req).then(function(result) {
+        c.fields = result.fields;
+        c.board = Board.board(c.fields.board);
+        if (!board)
+            return Promise.reject("Invalid board");
+        res.send({ errorMessage: "pipirka" });
+    }).catch(function(err) {
+        controller.error(req, res, err, req.settings.mode.name != "ascetic");
+    });
+});
+
+router.post("/editAudioTags", function(req, res) {
+    var c = {};
+    parseForm(req).then(function(result) {
+        c.fields = result.fields;
+        c.board = Board.board(c.fields.board);
+        if (!board)
+            return Promise.reject("Invalid board");
+        res.send({ errorMessage: "pipirka" });
+    }).catch(function(err) {
+        controller.error(req, res, err, req.settings.mode.name != "ascetic");
+    });
+});
+
 rootRouter.use(router);
 
 module.exports = rootRouter;

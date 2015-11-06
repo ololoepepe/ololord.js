@@ -8,7 +8,15 @@ var Tools = require("../helpers/tools");
 var board = new Board("echo", Tools.translate.noop("Boardsphere echo", "boardTitle"));
 
 board.defineSetting("acceptedExternalBoardLinks", []);
-board.defineSetting("maxLinkeLength", 150);
+board.defineSetting("maxLinkLength", 150);
+
+board.customBoardInfoFields = function() {
+    return ["maxLinkLength"];
+};
+
+board.extraScripts = function() {
+    return [ { fileName: "echo.js" } ];
+};
 
 board.addTranslations = function(translate) {
     translate("Thread link:", "postFormLabelLink");

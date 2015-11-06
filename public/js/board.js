@@ -19,6 +19,7 @@ lord.worker = new Worker("/js/worker.js");
 lord.youtubeApplied = false;
 lord.lastSelectedElement = null;
 lord.customPostBodyPart = {};
+lord.customEditPostDialogPart = {};
 
 /*Functions*/
 
@@ -248,21 +249,24 @@ lord.createPostNode = function(post, permanent) {
     if (typeof permanent == "undefined")
         permanent = true;
     var c = {};
-    return lord.getModel("misc/base").then(function(model) {
+    return lord.getModel([
+        "misc/base",
+        "misc/tr",
+        "misc/boards",
+        {
+            name: "misc/board",
+            query: "boardName=" + post.boardName
+        },
+        {
+            name: "api/threadInfo",
+            query: "boardName=" + post.boardName + "&threadNumber=" + post.threadNumber
+        }
+    ]).then(function(model) {
         c.model = model;
         c.locale = model.site.locale;
         c.dateFormat = model.site.dateFormat;
         c.timeOffset = model.site.timeOffset;
         c.model.settings = lord.settings();
-        return lord.getModel("misc/tr");
-    }).then(function(model) {
-        c.model = merge.recursive(c.model, model);
-        return lord.getModel("misc/boards");
-    }).then(function(model) {
-        c.model = merge.recursive(c.model, model);
-        return lord.getModel("misc/board", "boardName=" + post.boardName);
-    }).then(function(model) {
-        c.model = merge.recursive(c.model, model);
         return lord.getModel("api/threadInfo", "boardName=" + post.boardName + "&threadNumber=" + post.threadNumber);
     }).then(function(thread) {
         c.model.thread = thread;
@@ -423,7 +427,7 @@ lord.createPostNode = function(post, permanent) {
     });
 };
 
-lord.updatePost = function(boardName, postNumber, post) {
+lord.updatePost = function(boardName, postNumber) {
     postNumber = +postNumber;
     if (!boardName || !post || isNaN(postNumber) || postNumber <= 0)
         return;
@@ -1240,84 +1244,94 @@ lord.addFile = function(boardName, postNumber) {
     });
 };
 
-lord.editPost = function(boardName, postNumber) {
-    if (!boardName || isNaN(+postNumber))
-        return;
-    var post = lord.id("post" + postNumber);
-    if (!post)
-        return;
-    var stage2 = function(boardName, postNumber, post, rawPostText) {
-        var title = lord.text("editPostText");
-        var form = lord.id("editPostTemplate").cloneNode(true);
-        form.id = "";
-        form.style.display = "";
-        var email = lord.nameOne("email", form);
-        var name = lord.nameOne("name", form);
-        var subject = lord.nameOne("subject", form);
-        var text = lord.nameOne("text", form);
-        var used = lord.queryOne(".symbolCounter", form);
-        used = lord.nameOne("used", used);
-        email.value = lord.nameOne("email", post).value;
-        name.value = lord.nameOne("name", post).value;
-        subject.value = lord.nameOne("subject", post).value;
-        text.appendChild(lord.node("text", rawPostText));
-        used.appendChild(lord.node("text", text.value.length.toString()));
-        var markupModeSelect = lord.nameOne("markupMode", form);
-        lord.queryOne("[value='" + lord.nameOne("markupMode", post).value + "']", markupModeSelect).selected = true;
-        var moder = (lord.text("moder") === "true");
-        var draftField = lord.nameOne("draft", form);
-        var rawField = lord.nameOne("raw", form);
-        if (!!draftField) {
-            if (lord.nameOne("draft", post).value == "true")
-                draftField.checked = true;
-            else
-                draftField.parentNode.parentNode.style.display = "none";
-        }
-        if (!!rawField && lord.nameOne("rawHtml", post).value == "true")
-            rawField.checked = true;
-        if (lord.customEditFormSet)
-            lord.customEditFormSet(form, post, !!draftField, !!rawField);
-        lord.showDialog(title, null, form, function() {
-            var pwd = lord.nameOne("password", form).value;
-            if (pwd.length < 1) {
-                if (!lord.getCookie("hashpass"))
-                    return lord.showPopup(lord.text("notLoggedInText"), {type: "critical"});
-            } else if (!lord.isHashpass(pwd)) {
-                pwd = lord.toHashpass(pwd);
+lord.editPost = function(el) {
+    var boardName = lord.data("boardName", el, true);
+    var postNumber = +lord.data("number", el, true);
+    var c = {};
+    lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
+        c.model = { post: post };
+        return lord.getModel("api/threadInfo", "boardName=" + post.boardName + "&threadNumber=" + post.threadNumber);
+    }).then(function(thread) {
+        c.model.thread = thread;
+        return lord.getModel([
+            "misc/base",
+            "misc/tr",
+            {
+                name: "misc/board",
+                query: "boardName=" + boardName
             }
-            var markupMode = markupModeSelect.options[markupModeSelect.selectedIndex].value;
-            lord.setCookie("markupMode", markupMode, {
-                "expires": lord.Billion, "path": "/"
-            });
-            lord.queryOne("[value='" + markupMode + "']", lord.id("postForm")).selected = true;
-            var params = {
-                "boardName": boardName,
-                "postNumber": +postNumber,
-                "text": text.value,
-                "email": email.value,
-                "name": name.value,
-                "subject": subject.value,
-                "raw": !!rawField ? form.querySelector("[name='raw']").checked : false,
-                "draft": !!draftField ? draftField.checked : false,
-                "markupMode": markupMode,
-                "password": pwd,
-                "userData": null
-            };
-            if (lord.customEditFormGet)
-                params["userData"] = lord.customEditFormGet(form, params);
-            lord.ajaxRequest("edit_post", [params], lord.RpcEditPostId, function() {
-                lord.updatePost(boardName, postNumber, post);
+        ]);
+    }).then(function(model) {
+        c.model = merge.recursive(c.model, model);
+        c.model.compareRegisteredUserLevels = function(l1, l2) {
+            if (!l1)
+                l1 = null;
+            if (!l2)
+                l2 = null;
+            if (["ADMIN", "MODER", "USER", null].indexOf(l2) < 0)
+                throw "Invalid registered user level l2: " + l2;
+            switch (l1) {
+            case "ADMIN":
+                return (l1 == l2) ? 0 : 1;
+            case "MODER":
+                if (l1 == l2)
+                    return 0;
+                return ("ADMIN" == l2) ? -1 : 1;
+            case "USER":
+                if (l1 == l2)
+                    return 0;
+                return (null == l2) ? 1 : -1;
+            case null:
+                return (l1 == l2) ? 0 : -1;
+            default:
+                throw "Invalid reistered user level l1: " + l1;
+            }
+        };
+        var indexes = [];
+        for (var i = 0; i < 110; i += 10)
+            indexes.push(i);
+        var promises = indexes.map(function(index) {
+            if (!lord.customEditPostDialogPart[index])
+                return Promise.resolve(null);
+            return lord.customEditPostDialogPart[index]().then(function(part) {
+                if (!part)
+                    return Promise.resolve(null);
+                return Promise.resolve({
+                    index: index,
+                    part: part
+                });
             });
         });
-    };
-    var rawPostText = lord.nameOne("rawText", post);
-    if (rawPostText) {
-        stage2(boardName, postNumber, post, rawPostText.value);
-    } else {
-        lord.ajaxRequest("get_post", [boardName, +postNumber], lord.RpcGetPostId, function(res) {
-            stage2(boardName, postNumber, post, res["rawPostText"]);
+        return Promise.all(promises);
+    }).then(function(parts) {
+        c.model.customEditPostDialogPart = {};
+        parts.forEach(function(part) {
+            if (!part)
+                return;
+            c.model.customEditPostDialogPart[part.index] = part.part;
         });
-    }
+        return lord.getTemplate("editPostDialog");
+    }).then(function(template) {
+        c.div = $.parseHTML(template(c.model))[0];
+        return lord.showDialog("editPostText", null, c.div);
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", c.div);
+        var formData = new FormData(form);
+        return $.ajax(form.action, {
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false
+        });
+    }).then(function(result) {
+        if (typeof result == "undefined")
+            return Promise.resolve();
+        return lord.updatePost(boardName, postNumber);
+    }).catch(function(err) {
+        console.log(err);
+    });
 };
 
 lord.setPostHidden = function(boardName, postNumber) {
@@ -1400,42 +1414,47 @@ lord.deleteFile = function(boardName, postNumber, fileName) {
     });
 };
 
-lord.editAudioTags = function(boardName, postNumber, fileName) {
-    if (!boardName || isNaN(+postNumber) || !fileName)
-        return;
-    var post = lord.id("post" + postNumber);
-    if (!post)
-        return;
-    var dlgTitle = lord.text("editAudioTagsText");
-    var table = lord.id("editAudioTagsTemplate").cloneNode(true);
-    table.id = "";
-    table.style.display = "";
-    var f = lord.id("file" + fileName);
-    var album = lord.nameOne("album", table);
-    var artist = lord.nameOne("artist", table);
-    var title = lord.nameOne("title", table);
-    var year = lord.nameOne("year", table);
-    album.value = lord.nameOne("audioTagAlbum", f).value;
-    artist.value = lord.nameOne("audioTagArtist", f).value;
-    title.value = lord.nameOne("audioTagTitle", f).value;
-    year.value = lord.nameOne("audioTagYear", f).value;
-    lord.showDialog(dlgTitle, null, table, function() {
-        var pwd = lord.nameOne("password", table).value;
-        if (pwd.length < 1) {
-            if (!lord.getCookie("hashpass"))
-                return lord.showPopup(lord.text("notLoggedInText"), {type: "critical"});
-        } else if (!lord.isHashpass(pwd)) {
-            pwd = lord.toHashpass(pwd);
-        }
-        var tags = {
-            "album": album.value,
-            "artist": artist.value,
-            "title": title.value,
-            "year": year.value
+lord.editAudioTags = function(el) {
+    var boardName = lord.data("boardName", el, true);
+    var postNumber = +lord.data("number", el, true);
+    var fileName = lord.data("fileName", el, true);
+    var c = {};
+    lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
+        var fileInfo = post.fileInfos.reduce(function(result, fileInfo) {
+            if (result)
+                return result;
+            return (fileInfo.name == fileName) ? fileInfo : null;
+        }, null);
+        if (!fileInfo)
+            return Promise.reject("No such file");
+        c.model = {
+            post: post,
+            fileInfo: fileInfo
         };
-        lord.ajaxRequest("edit_audio_tags", [boardName, fileName, pwd, tags], lord.RpcEditAudioTagsId, function() {
-            lord.updatePost(boardName, postNumber, post);
+        return lord.getModel(["misc/base", "misc/tr"]);
+    }).then(function(model) {
+        c.model = merge.recursive(c.model, model);
+        return lord.getTemplate("editAudioTagsDialog");
+    }).then(function(template) {
+        c.div = $.parseHTML(template(c.model))[0];
+        return lord.showDialog("editAudioTagsText", null, c.div);
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", c.div);
+        var formData = new FormData(form);
+        return $.ajax(form.action, {
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false
         });
+    }).then(function(result) {
+        if (typeof result == "undefined")
+            return Promise.resolve();
+        return lord.updatePost(boardName, postNumber);
+    }).catch(function(err) {
+        console.log(err);
     });
 };
 
