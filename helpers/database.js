@@ -68,6 +68,23 @@ var threadPostNumbers = function(boardName, threadNumber) {
     });
 };
 
+var postFileInfoNames = function(boardName, postNumber) {
+    return db.smembers("postFileInfoNames:" + boardName + ":" + postNumber).then(function(list) {
+        if (!list)
+            return Promise.resolve([]);
+        return Promise.resolve(list.sort(function(a, b) {
+            a = +a.split(".").shift();
+            b = +b.split(".").shift();
+            if (a < b)
+                return -1;
+            else if (a > b)
+                return 1;
+            else
+                return 0;
+        }));
+    });
+};
+
 var getThreads = function(boardName, options) {
     if (!Tools.contains(Board.boardNames(), boardName))
         return Promise.reject("Invalid board");
@@ -172,8 +189,14 @@ var threadPosts = function(boardName, threadNumber, options) {
         var promises = [];
         if (options.withFileInfos) {
             promises = c.posts.map(function(post) {
-                return db.smembers("fileInfos:" + boardName + ":" + post.number).then(function(fileInfos) {
-                    post.fileInfos = fileInfos ? fileInfos.map(JSON.parse) : [];
+                return postFileInfoNames(boardName, post.number).then(function(names) {
+                    return Promise.all(names.map(function(name) {
+                        return db.hget("fileInfos", name);
+                    }));
+                }).then(function(fileInfos) {
+                    post.fileInfos = fileInfos ? fileInfos.map(function(fileInfo) {
+                        return JSON.parse(fileInfo);
+                    }) : [];
                     return Promise.resolve();
                 });
             });
@@ -221,9 +244,14 @@ module.exports.getPost = function(boardName, postNumber, options) {
         c.post.sequenceNumber = postNumbers.indexOf(c.post.number) + 1;
         var promises = [];
         if (options.withFileInfos) {
-            promises.push(db.smembers("fileInfos:" + key).then(function(fileInfos) {
-                c.post.fileInfos = fileInfos ? fileInfos.map(JSON.parse) : [];
-                return Promise.resolve();
+            promises.push(postFileInfoNames(boardName, postNumber).then(function(names) {
+                return Promise.all(names.map(function(name) {
+                    return db.hget("fileInfos", name);
+                }));
+            }).then(function(fileInfos) {
+                return Promise.resolve(c.post.fileInfos = fileInfos ? fileInfos.map(function(fileInfo) {
+                    return JSON.parse(fileInfo);
+                }) : []);
             }));
         }
         if (options.withReferences) {
@@ -519,8 +547,10 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     }).then(function() {
         if (files.length < 1)
             return Promise.resolve();
-        return db.sadd("fileInfos:" + board.name + ":" + c.postNumber, files.map(function(fileInfo) {
-            return JSON.stringify(fileInfo);
+        return Promise.all(files.map(function(fileInfo) {
+            return db.hset("fileInfos", fileInfo.name, JSON.stringify(fileInfo)).then(function() {
+                return db.sadd("postFileInfoNames:" + board.name + ":" + c.postNumber, fileInfo.name);
+            });
         }));
     }).then(function() {
         c.hashes = [];
@@ -621,7 +651,12 @@ var removePost = function(boardName, postNumber) {
     }).then(function() {
         return db.del("referringPosts:" + boardName + ":" + postNumber);
     }).then(function() {
-        return db.smembers("fileInfos:" + boardName + ":" + postNumber);
+        return postFileInfoNames(boardName, postNumber);
+    }).then(function(names) {
+        c.fileInfoNames = names;
+        return Promise.all(names.map(function(name) {
+            return db.hget("fileInfos", name);
+        }));
     }).then(function(fileInfos) {
         c.hashes = [];
         c.paths = [];
@@ -633,7 +668,11 @@ var removePost = function(boardName, postNumber) {
             c.paths.push(__dirname + "/../public/" + boardName + "/src/" + fileInfo.name);
             c.paths.push(__dirname + "/../public/" + boardName + "/thumb/" + fileInfo.thumb.name);
         });
-        return db.del("fileInfos:" + boardName + ":" + postNumber);
+        return db.del("postFileInfoNames" + boardName + ":" + postNumber);
+    }).then(function() {
+        return Promise.all(c.fileInfoNames.map(function(name) {
+            return db.hdel("fileInfos", name);
+        }));
     }).then(function() {
         var promises = c.hashes.map(function(hash) {
             return db.srem("fileHashesExtra:" + hash, JSON.stringify({

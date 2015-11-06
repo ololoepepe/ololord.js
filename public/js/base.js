@@ -113,7 +113,7 @@ lord.showSettings = function() {
         c.model = {
             settings: lord.settings()
         };
-        return lord.getModel(["misc/tr", "misc/base", "misc/board" + lord.data("boardName"), "misc/boards"]);
+        return lord.getModel(["misc/tr", "misc/base", "misc/board" + lord.data("boardName"), "misc/boards"], true);
     }).then(function(model) {
         c.model = merge.recursive(c.model, model);
         c.div = $.parseHTML(c.template(c.model))[0];

@@ -99,6 +99,22 @@ router.get("/threadInfo.json", function(req, res) {
     });
 });
 
+router.get("/fileInfos.json", function(req, res) {
+    boardModel.getFileInfos(req.query.fileNames, req.hashpass).then(function(fileInfos) {
+        res.send(fileInfos);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
+router.get("/fileInfo.json", function(req, res) {
+    boardModel.getFileInfos([req.query.fileName], req.hashpass).then(function(fileInfos) {
+        res.send(fileInfos[0]);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
 router.get("/lastPosts.json", function(req, res) {
     var board = Board.board(req.query.boardName);
     var threadNumber = +req.query.threadNumber;

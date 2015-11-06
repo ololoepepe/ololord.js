@@ -915,10 +915,14 @@ lord.getModel = function(modelName, query) {
                 return lord.getModel(modelName.name, modelName.query);
         });
         return Promise.all(promises).then(function(models) {
-            var model = (models.length > 0) ? models[0] : {};
-            for (var i = 1; i < models.length; ++i)
-                model = merge.recursive(model, models[i]);
-            return Promise.resolve(model);
+            if (query) {
+                var model = (models.length > 0) ? models[0] : {};
+                for (var i = 1; i < models.length; ++i)
+                    model = merge.recursive(model, models[i]);
+                return Promise.resolve(model);
+            } else {
+                return Promise.resolve(models);
+            }
         });
     } else {
         query = query ? ("?" + query) : "";

@@ -261,7 +261,7 @@ lord.createPostNode = function(post, permanent) {
             name: "api/threadInfo",
             query: "boardName=" + post.boardName + "&threadNumber=" + post.threadNumber
         }
-    ]).then(function(model) {
+    ], true).then(function(model) {
         c.model = model;
         c.locale = model.site.locale;
         c.dateFormat = model.site.dateFormat;
@@ -1260,7 +1260,7 @@ lord.editPost = function(el) {
                 name: "misc/board",
                 query: "boardName=" + boardName
             }
-        ]);
+        ], true);
     }).then(function(model) {
         c.model = merge.recursive(c.model, model);
         c.model.compareRegisteredUserLevels = function(l1, l2) {
@@ -1431,7 +1431,7 @@ lord.editAudioTags = function(el) {
             post: post,
             fileInfo: fileInfo
         };
-        return lord.getModel(["misc/base", "misc/tr"]);
+        return lord.getModel(["misc/base", "misc/tr"], true);
     }).then(function(model) {
         c.model = merge.recursive(c.model, model);
         return lord.getTemplate("editAudioTagsDialog");
