@@ -1,5 +1,7 @@
 var express = require("express");
 
+var Board = require("../boards");
+
 var router = express.Router();
 
 router.use("/action", require("./action"));
@@ -13,6 +15,12 @@ router.use("/", require("./search"));
 
 router.use("/api", require("./api"));
 router.use("/misc", require("./misc"));
+
+Board.boardNames().forEach(function(name) {
+    Board.board(name).routes().forEach(function(route) {
+        router[route.method](route.path, route.handler);
+    });
+});
 
 router.use("/", require("./board"));
 

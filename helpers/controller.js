@@ -57,7 +57,7 @@ controller = function(req, templateName, modelData) {
     var template = templates[templateName];
     var p;
     if (templateName.substr(0, 13) == "custom/footer" || templateName.substr(0, 13) == "custom/header"
-        || templateName.substr(0, 11) == "custom/home") {
+        || templateName.substr(0, 11) == "custom/home" || templateName.substr(0, 10) == "custom/faq") {
         if (template) {
             p = Promise.resolve();
         } else {
@@ -317,11 +317,11 @@ controller.boardModel = function(board) {
             postingEnabled: board.postingEnabled,
             draftsEnabled: board.draftsEnabled,
             captchaEnabled: board.captchaEnabled,
-            maxEmailFieldLength: board.maxEmailFieldLength,
-            maxNameFieldLength: board.maxNameFieldLength,
-            maxSubjectFieldLength: board.maxSubjectFieldLength,
+            maxEmailLength: board.maxEmailLength,
+            maxNameLength: board.maxNameLength,
+            maxSubjectLength: board.maxSubjectLength,
             maxTextLength: board.maxTextLength,
-            maxPasswordFieldLength: board.maxPasswordFieldLength,
+            maxPasswordLength: board.maxPasswordLength,
             maxFileCount: board.maxFileCount,
             maxFileSize: board.maxFileSize,
             maxLastPosts: board.maxLastPosts,

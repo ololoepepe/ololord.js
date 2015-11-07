@@ -88,13 +88,33 @@ var prepare = function(req, fromApi) {
     });
 };
 
+var captchaMap = {};
+
 var yandexElatmCaptcha = new Captcha("yandex-captcha-elatm", Tools.translate.noop("Yandex captcha (Latin)"));
 var yandexEstdCaptcha = new Captcha("yandex-captcha-estd", Tools.translate.noop("Yandex captcha (digits)"));
 var yandexRusCaptcha = new Captcha("yandex-captcha-rus", Tools.translate.noop("Yandex captcha (Cyrillic)"));
 
+yandexElatmCaptcha.apiRoutes = function() {
+    return [{
+        method: "get",
+        path: "/yandexCaptchaImage.json",
+        handler: function(req, res) {
+            var captcha = captchaMap[req.query.type];
+            if (!captcha)
+                return controller.error(req, res, "Invalid captcha type", true);
+            captcha.prepare(req, true).then(function(result) {
+                res.send(result);
+            }).catch(function(err) {
+                controller.error(req, res, err, true);
+            });
+        }
+    }];
+};
+
 var captchas = [yandexElatmCaptcha, yandexEstdCaptcha, yandexRusCaptcha];
 
 captchas.forEach(function(captcha) {
+    captchaMap[captcha.id.split("-").pop()] = captcha;
     captcha.checkCaptcha = checkCaptcha;
     captcha.scriptSource = scriptSource;
     captcha.widgetHtml = widgetHtml;

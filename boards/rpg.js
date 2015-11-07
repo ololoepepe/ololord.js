@@ -9,6 +9,184 @@ var Tools = require("../helpers/tools");
 
 board = new Board("rpg", Tools.translate.noop("Role-playing games", "boardTitle"));
 
+board.routes = function() {
+    return [{
+        method: "get",
+        path: "/openVoting.html",
+        handler: function(req, res) {
+            var model = {};
+            model.title = Tools.translate("Open voting", "pageTitle");
+            model.opened = true;
+            model.postNumber = req.query.postNumber;
+            model.showSubmitButton = true;
+            model = merge.recursive(model, controller.boardModel("rpg"));
+            controller(req, "openCloseVoting", model).then(function(data) {
+                res.send(data);
+            }).catch(function(err) {
+                controller.error(req, res, err);
+            });
+        }
+    },
+    {
+        method: "get",
+        path: "/closeVoting.html",
+        handler: function(req, res) {
+            var model = {};
+            model.title = Tools.translate("Close voting", "pageTitle");
+            model.opened = false;
+            model.postNumber = req.query.postNumber;
+            model.showSubmitButton = true;
+            model = merge.recursive(model, controller.boardModel("rpg"));
+            controller(req, "openCloseVoting", model).then(function(data) {
+                res.send(data);
+            }).catch(function(err) {
+                controller.error(req, res, err);
+            });
+        }
+    }];
+};
+
+var contains = function(variants, id) {
+    for (var i = 0; i < variants.length; ++i) {
+        if (variants[i].id == id)
+            return true;
+    }
+    return false;
+};
+
+board.actionRoutes = function() {
+    return [{
+        method: "post",
+        path: "/vote",
+        handler: function(req, res) {
+            var c = {};
+            Tools.parseForm(req).then(function(result) {
+                c.postNumber = +result.fields.postNumber;
+                c.fields = result.fields;
+                return Board.prototype.loadExtraData.call(board, c.postNumber);
+            }).then(function(extraData) {
+                if (!extraData)
+                    return Promise.reject("This post does not have voting");
+                if (extraData.disabled)
+                    return Promise.reject("This voting is disabled");
+                c.extraData = extraData;
+                return Database.db.sismember("voteUsers:" + c.postNumber, req.trueIp);
+            }).then(function(isMember) {
+                if (isMember)
+                    return Promise.reject("You have already voted");
+                var variants = [];
+                if (c.extraData.multiple) {
+                    var err = false;
+                    Tools.forIn(c.fields, function(_, name) {
+                        if (err)
+                            return;
+                        if (name.substr(0, 12) != "voteVariant_")
+                            return;
+                        var id = name.substr(12);
+                        if (!contains(c.extraData.variants, id)) {
+                            err = true;
+                            return;
+                        }
+                        variants.push(id);
+                    });
+                    if (err)
+                        return Promise.reject("Invalid variant");
+                } else {
+                    var id = c.fields.voteGroup;
+                    if (!contains(c.extraData.variants, id))
+                        return Promise.reject("Invalid variant");
+                    variants.push(id);
+                }
+                if (variants.length < 1)
+                    return Promise.reject("No variant selected");
+                variants = variants.filter(function(id, index) {
+                    return variants.indexOf(id) == index;
+                });
+                var promises = variants.map(function(id) {
+                    return Database.db.sadd("voteVariantUsers:" + c.postNumber + ":" + id, req.trueIp);
+                });
+                return Promise.all(promises);
+            }).then(function() {
+                return Database.db.sadd("voteUsers:" + c.postNumber, req.trueIp);
+            }).then(function() {
+                res.send({});
+            }).catch(function(err) {
+                controller.error(req, res, err, req.settings.mode.name != "ascetic");
+            });
+        }
+    },
+    {
+        method: "post",
+        path: "/unvote",
+        handler: function(req, res) {
+            var c = {};
+            Tools.parseForm(req).then(function(result) {
+                c.postNumber = +result.fields.postNumber;
+                c.fields = result.fields;
+                return board.loadExtraData(c.postNumber);
+            }).then(function(extraData) {
+                if (!extraData)
+                    return Promise.reject("This post does not have voting");
+                if (extraData.disabled)
+                    return Promise.reject("This voting is disabled");
+                c.extraData = extraData;
+                return Database.db.sismember("voteUsers:" + c.postNumber, req.trueIp);
+            }).then(function(isMember) {
+                if (!isMember)
+                    return Promise.reject("You have not voted yet");
+                var variants = [];
+                c.extraData.variants.forEach(function(variant) {
+                    if (!variant.users)
+                        return;
+                    if (variant.users.indexOf(req.trueIp) >= 0)
+                        variants.push(variant.id);
+                });
+                if (variants.length < 1)
+                    return Promise.reject("Internal error");
+                var promises = variants.map(function(id) {
+                    return Database.db.srem("voteVariantUsers:" + c.postNumber + ":" + id, req.trueIp);
+                });
+                return Promise.all(promises);
+            }).then(function() {
+                return Database.db.srem("voteUsers:" + c.postNumber, req.trueIp);
+            }).then(function() {
+                res.send({});
+            }).catch(function(err) {
+                controller.error(req, res, err, req.settings.mode.name != "ascetic");
+            });
+        }
+    },
+    {
+        method: "post",
+        path: "/setVotingOpened",
+        handler: function(req, res) {
+            var c = {};
+            Tools.parseForm(req).then(function(result) {
+                c.password = Tools.password(result.fields.password);
+                c.opened = "true" == result.fields.opened;
+                return Database.getPost("rpg", +result.fields.postNumber);
+            }).then(function(post) {
+                c.post = post;
+                if ((!c.password || c.password != post.user.password)
+                    && (!req.hashpass || req.hashpass != post.user.hashpass)
+                    && (Database.compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
+                    return Promise.reject("Not enough rights");
+                }
+                return Board.prototype.loadExtraData.call(board, post.number);
+            }).then(function(extraData) {
+                if (!extraData)
+                    return Promise.reject("This post does not have voting");
+                extraData.disabled = !c.opened;
+                return Board.prototype.storeExtraData.call(board, c.post.number, extraData);
+            }).then(function(result) {
+                res.send({});
+            }).catch(function(err) {
+                controller.error(req, res, err, req.settings.mode.name != "ascetic");
+            });
+        }
+    }];
+};
+
 board.extraScripts = function() {
     return [ { fileName: "rpg.js" } ];
 };
@@ -182,18 +360,17 @@ board.renderPost = function(post, req) {
             post.extraData.variants.forEach(function(variant) {
                 if (!variant.users)
                     return;
-                for (var i = 0; i < variant.users.length; ++i) {
-                    if (variant.users[i].ip == req.trueIp) {
-                        variant.ownIp = true;
-                        break;
-                    }
-                }
+                if (variant.users.indexOf(req.trueIp) >= 0)
+                    variant.ownIp = true;
                 variant.voteCount = variant.users.length;
                 delete variant.users;
             });
         }
-        if (post.extraData.users)
+        if (post.extraData.users) {
+            if (post.extraData.users.indexOf(req.trueIp) >= 0)
+                post.extraData.voted = true;
             delete post.extraData.users;
+        }
         return Promise.resolve(post);
     });
 };

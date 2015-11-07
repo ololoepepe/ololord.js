@@ -1,0 +1,25 @@
+<form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/setVotingOpened"
+      enctype="multipart/form-data" class="inlineForm">
+    <input type="hidden" name="postNumber" value="{{=it.postNumber}}" />
+    <input type="hidden" name="opened" value="{{? it.opened}}true{{??}}false{{?}}" />
+    <table class="postFormTable">
+        <tbody>
+            <tr>
+                <td class="postformLabel">
+                    <b>{{=it.tr.postFormLabelPassword}}</b>
+                </td>
+                <td class="postformField">
+                    <input type="password" maxlength="{{=it.board.maxPasswordLength}}" name="password" size="43" />
+                 </td>
+             </tr>
+             {{? it.showSubmitButton}}
+                 <tr>
+                    <td class="postformField" colspan="2">
+                        <input type="submit" name="submit"
+                               value="{{? !it.disabled}}{{=it.tr.closeVoteActionText}}{{??}}{{=it.tr.openVoteActionText}}{{?}}" />
+                 </td>
+                </tr>
+             {{?}}
+        </tbody>
+    </table>
+</form>

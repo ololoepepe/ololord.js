@@ -2,6 +2,7 @@ var ChildProcess = require("child_process");
 var Crypto = require("crypto");
 var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
+var Formidable = require("formidable");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
 var merge = require("merge");
@@ -447,3 +448,21 @@ module.exports.password = function(pwd) {
     sha1.update(pwd);
     return sha1.digest("hex");
 }
+
+module.exports.parseForm = function(req) {
+    var form = new Formidable.IncomingForm();
+    form.uploadDir = __dirname + "/../tmp";
+    form.hash = "sha1";
+    return new Promise(function(resolve, reject) {
+        form.parse(req, function(err, fields, files) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({
+                    fields: fields,
+                    files: files
+                });
+            }
+        });
+    });
+};

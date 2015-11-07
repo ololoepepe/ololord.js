@@ -5,10 +5,7 @@ var Util = require("util");
 
 var Board = require("../boards");
 var boardModel = require("../models/board");
-var yandexCaptchas = require("../captchas/yandex-captcha").reduce(function(acc, captcha) {
-    acc[captcha.id.split("-").pop()] = captcha;
-    return acc;
-}, {});
+var Captcha = require("../captchas");
 var controller = require("../helpers/controller");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");
@@ -162,14 +159,15 @@ router.get("/captchaQuota.json", function(req, res) {
     });
 });
 
-router.get("/yandexCaptchaImage.json", function(req, res) {
-    var captcha = yandexCaptchas[req.query.type];
-    if (!captcha)
-        return controller.error(req, res, "Invalid captcha type", true);
-    captcha.prepare(req, true).then(function(result) {
-        res.send(result);
-    }).catch(function(err) {
-        controller.error(req, res, err, true);
+Captcha.captchaIds().forEach(function(id) {
+    Captcha.captcha(id).apiRoutes().forEach(function(route) {
+        router[route.method](route.path, route.handler);
+    });
+});
+
+Board.boardNames().forEach(function(name) {
+    Board.board(name).apiRoutes().forEach(function(route) {
+        router[route.method](route.path, route.handler);
     });
 });
 

@@ -26,6 +26,14 @@ var Captcha = function(id, title, options) {
     return Promise.resolve();
 };
 
+/*public*/ Captcha.prototype.apiRoutes = function() {
+    return []; //[ { method, path, handler }, ... ]
+};
+
+/*public*/ Captcha.prototype.actionRoutes = function() {
+    return []; //[ { method, path, handler }, ... ]
+};
+
 Captcha.captcha = function(id) {
     return captchas[id];
 };

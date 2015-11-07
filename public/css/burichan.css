@@ -964,8 +964,16 @@ a.progressBlocking {
     opacity: 0.65;
 }
 
+.buttonImage:disabled {
+    opacity: 0.4;
+}
+
 .buttonImage:hover {
     opacity: 1;
+}
+
+.buttonImage:disabled:hover {
+    opacity: 0.4;
 }
 
 .boardSelect {

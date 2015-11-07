@@ -52,65 +52,55 @@ lord.removeVoteVariant = function(el) {
     });
 };
 
-lord.vote = function(postNumber) {
-    postNumber = +postNumber;
-    if (isNaN(postNumber) || postNumber <= 0)
-        return;
-    var post = lord.id("post" + postNumber);
-    if (!post)
-        return;
-    var votes = [];
-    var variants = lord.nameOne("voteVariants", post);
-    var multiple = ("true" == lord.queryOne("input[type='hidden']", variants).value);
-    if (multiple) {
-        lord.query("input[type='checkbox']").forEach(function(inp) {
-            if (!!inp.checked)
-                votes.push(inp.name.replace("voteVariant", ""));
-        });
-    } else {
-        lord.query("input[type='radio']").forEach(function(inp) {
-            if (!!inp.checked)
-                votes.push(inp.value);
-        });
-    }
-    lord.ajaxRequest("vote", [postNumber, votes], lord.RpcVoteId, function() {
-        lord.updatePost("rpg", postNumber, post);
+lord.vote = function(event, form) {
+    event.preventDefault();
+    var formData = new FormData(form);
+    return $.ajax(form.action, {
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false
+    }).then(function(result) {
+        if (result.errorMessage)
+            return Promise.reject(result.errorMessage);
+        return lord.updatePost(lord.data("number", form, true));
+    }).fail(function(err) {
+        console.log(err);
     });
 };
 
-lord.unvote = function(postNumber) {
-    postNumber = +postNumber;
-    if (isNaN(postNumber) || postNumber <= 0)
-        return;
-    var post = lord.id("post" + postNumber);
-    if (!post)
-        return;
-    lord.ajaxRequest("unvote", [postNumber], lord.RpcUnvoteId, function() {
-        lord.updatePost("rpg", postNumber, post);
-    });
-};
-
-lord.setVoteOpened = function(postNumber, opened) {
-    postNumber = +postNumber;
-    if (isNaN(postNumber) || postNumber <= 0)
-        return;
-    var post = lord.id("post" + postNumber);
-    if (!post)
-        return;
-    var title = lord.text("enterPasswordTitle");
-    var label = lord.text("enterPasswordText");
-    lord.showPasswordDialog(title, label, function(pwd) {
-        if (null === pwd)
-            return;
-        if (pwd.length < 1) {
-            if (!lord.getCookie("hashpass"))
-                return lord.showPopup(lord.text("notLoggedInText"), {type: "critical"});
-        } else if (!lord.isHashpass(pwd)) {
-            pwd = lord.toHashpass(pwd);
-        }
-        lord.ajaxRequest("set_vote_opened", [postNumber, !!opened, pwd], lord.RpcSetVoteOpenedId, function() {
-            lord.updatePost("rpg", postNumber, post);
+lord.setVotingOpened = function(el, opened) {
+    var c = {};
+    var postNumber = +lord.data("number", el, true);
+    lord.getModel("misc/board", "boardName=rpg").then(function(model) {
+        c.model = model;
+        return lord.getModel(["misc/base", "misc/tr"], true);
+    }).then(function(model) {
+        c.model = merge.recursive(c.model, model);
+        return lord.getTemplate("setVotingOpenedDialog");
+    }).then(function(template) {
+        c.model.showSubmitButton = false;
+        c.model.opened = opened;
+        c.model.postNumber = postNumber;
+        c.div = $.parseHTML(template(c.model))[0];
+        return lord.showDialog(open ? "openVotingText" : "closeVotingText", null, c.div);
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", c.div);
+        var formData = new FormData(form);
+        return $.ajax(form.action, {
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false
         });
+    }).then(function(result) {
+        if (typeof result == "undefined")
+            return Promise.resolve();
+        return lord.updatePost(postNumber);
+    }).catch(function(err) {
+        console.log(err);
     });
 };
 

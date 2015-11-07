@@ -218,6 +218,18 @@ var Board = function(name, title, options) {
     return Database.db.hdel("postExtraData", this.name + ":" + postNumber);
 };
 
+/*public*/ Board.prototype.apiRoutes = function() {
+    return []; //[ { method, path, handler }, ... ]
+};
+
+/*public*/ Board.prototype.routes = function() {
+    return []; //[ { method, path, handler }, ... ]
+};
+
+/*public*/ Board.prototype.actionRoutes = function() {
+    return []; //[ { method, path, handler }, ... ]
+};
+
 /*public*/ Board.prototype.extraScripts = function() {
     return [];
 };

@@ -1,7 +1,6 @@
 var BodyParser = require("body-parser");
 var Crypto = require("crypto");
 var express = require("express");
-var Formidable = require("formidable");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
 var HTTP = require("q-io/http");
@@ -9,6 +8,7 @@ var promisify = require("promisify-node");
 var UUID = require("uuid");
 
 var Board = require("../boards");
+var Captcha = require("../captchas");
 var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
@@ -180,24 +180,6 @@ var testParameters = function(fields, files, creatingThread) {
     //NOTE: Yep, return nothing
 };
 
-var parseForm = function(req) {
-    var form = new Formidable.IncomingForm();
-    form.uploadDir = __dirname + "/../tmp";
-    form.hash = "sha1";
-    return new Promise(function(resolve, reject) {
-        form.parse(req, function(err, fields, files) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve({
-                    fields: fields,
-                    files: files
-                });
-            }
-        });
-    });
-};
-
 var setMarkupModeCookie = function(res, fields) {
     res.cookie("markupMode", fields.markupMode, {
         expires: Tools.forever(),
@@ -208,7 +190,7 @@ var setMarkupModeCookie = function(res, fields) {
 router.post("/createPost", function(req, res) {
     var c = {};
     var transaction = new Database.Transaction();
-    parseForm(req).then(function(result) {
+    Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
         c.files = result.files;
         c.board = Board.board(c.fields.boardName);
@@ -238,7 +220,7 @@ router.post("/createPost", function(req, res) {
 router.post("/createThread", function(req, res) {
     var c = {};
     var transaction = new Database.Transaction();
-    parseForm(req).then(function(result) {
+    Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
         c.files = result.files;
         c.board = Board.board(c.fields.boardName);
@@ -266,7 +248,7 @@ router.post("/createThread", function(req, res) {
 });
 
 router.post("/editPost", function(req, res) {
-    parseForm(req).then(function(result) {
+    Tools.parseForm(req).then(function(result) {
         return Database.editPost(req, result.fields);
     }).then(function(result) {
         res.send({});
@@ -276,7 +258,7 @@ router.post("/editPost", function(req, res) {
 });
 
 router.post("/deletePost", function(req, res) {
-    parseForm(req).then(function(result) {
+    Tools.parseForm(req).then(function(result) {
         return Database.deletePost(req, result.fields);
     }).then(function(result) {
         res.send({});
@@ -286,12 +268,24 @@ router.post("/deletePost", function(req, res) {
 });
 
 router.post("/editAudioTags", function(req, res) {
-    parseForm(req).then(function(result) {
+    Tools.parseForm(req).then(function(result) {
         return Database.editAudioTags(req, result.fields);
     }).then(function(result) {
         res.send({});
     }).catch(function(err) {
         controller.error(req, res, err, req.settings.mode.name != "ascetic");
+    });
+});
+
+Captcha.captchaIds().forEach(function(id) {
+    Captcha.captcha(id).actionRoutes().forEach(function(route) {
+        router[route.method](route.path, route.handler);
+    });
+});
+
+Board.boardNames().forEach(function(name) {
+    Board.board(name).actionRoutes().forEach(function(route) {
+        router[route.method](route.path, route.handler);
     });
 });
 
