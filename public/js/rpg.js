@@ -1,5 +1,3 @@
-/*Functions*/
-
 lord.customResetForm = function(form) {
     var parent = lord.nameOne("voteVariants", form);
     if (!parent)
@@ -21,22 +19,15 @@ lord.addVoteVariant = function(el) {
             return;
         ++lastN;
     });
-    var div = lord.node("div");
-    lord.addClass(div, "nowrap");
-    var inp = lord.node("input");
-    inp.type = "text";
-    inp.name = "voteVariant_" + (lastN + 1);
-    inp.size = "43";
-    div.appendChild(inp);
-    var a = lord.node("a");
-    a.onclick = lord.removeVoteVariant.bind(lord, a);
-    var img = lord.node("img");
-    img.src = "/" + lord.text("sitePathPrefix") + "img/delete.png";
-    img.title = lord.text("removeVoteVariantText");
-    lord.addClass(img, "buttonImage");
-    a.appendChild(img);
-    div.appendChild(a);
-    parent.appendChild(div);
+    var c = {};
+    lord.getModel(["misc/base", "misc/tr"], true).then(function(model) {
+        c.model = model;
+        c.model.number = lastN + 1;
+        return lord.getTemplate("voteVariant");
+    }).then(function(template) {
+        var div = $.parseHTML(template(c.model))[0];
+        parent.appendChild(div);
+    });
 };
 
 lord.removeVoteVariant = function(el) {
