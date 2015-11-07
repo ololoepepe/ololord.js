@@ -361,8 +361,11 @@ lord.createPostNode = function(post, permanent) {
             lord.addClass(c.node, "temporary");
         } else {
             var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
-            lastPostNumbers[post.boardName] = post.number;
-            lord.setLocalObject("lastPostNumbers", lastPostNumbers);
+            var lastPostNumber = lastPostNumbers[post.boardName];
+            if (isNaN(lastPostNumber) || post.number > lastPostNumber) {
+                lastPostNumbers[post.boardName] = post.number;
+                lord.setLocalObject("lastPostNumbers", lastPostNumbers);
+            }
             lord.files = null;
             lord.filesMap = null;
             lord.initFiles();
