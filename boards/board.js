@@ -9,7 +9,6 @@ var promisify = require("promisify-node");
 var Util = require("util");
 var UUID = require("uuid");
 
-var Cache = require("../helpers/cache");
 var Captcha = require("../captchas");
 var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
@@ -199,6 +198,24 @@ var Board = function(name, title, options) {
 
 /*public*/ Board.prototype.postExtraData = function(req, fields, files, oldPost) {
     return Promise.resolve(oldPost ? oldPost.extraData : null);
+};
+
+/*public*/ Board.prototype.storeExtraData = function(postNumber, extraData) {
+    if (Util.isNullOrUndefined(extraData))
+        return Promise.resolve();
+    return Database.db.hset("postExtraData", this.name + ":" + postNumber, JSON.stringify(extraData));
+};
+
+/*public*/ Board.prototype.loadExtraData = function(postNumber) {
+    return Database.db.hget("postExtraData", this.name + ":" + postNumber).then(function(extraData) {
+        if (Util.isNullOrUndefined(extraData))
+            return Promise.resolve(null);
+        return JSON.parse(extraData);
+    });
+};
+
+/*public*/ Board.prototype.removeExtraData = function(postNumber) {
+    return Database.db.hdel("postExtraData", this.name + ":" + postNumber);
 };
 
 /*public*/ Board.prototype.extraScripts = function() {

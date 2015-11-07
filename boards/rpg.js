@@ -1,4 +1,5 @@
 var merge = require("merge");
+var Util = require("util");
 var uuid = require("uuid");
 
 var Board = require("./board");
@@ -106,6 +107,73 @@ board.postExtraData = function(req, fields, files, oldPost) {
     });
 };
 
+board.storeExtraData = function(postNumber, extraData) {
+    if (Util.isNullOrUndefined(extraData))
+        return Promise.resolve();
+    var users = extraData.users;
+    if (extraData.users)
+        delete extraData.users;
+    var variantUsers = {};
+    Tools.forIn(extraData.variants, function(variant) {
+        if (!variant.users)
+            return;
+        variantUsers[variant.id] = variant.users;
+        delete variant.users;
+    });
+    return Board.prototype.storeExtraData.apply(board, arguments).then(function() {
+        if (!users)
+            return Promise.resolve();
+        return Database.db.sadd("voteUsers:" + postNumber, users);
+    }).then(function() {
+        var promises = [];
+        Tools.forIn(variantUsers, function(list, id) {
+            if (!list || list.length < 1)
+                return;
+            promises.push(Database.db.sadd("voteVariantUsers:" + postNumber + ":" + id, list));
+        });
+        return Promise.all(promises);
+    });
+};
+
+board.loadExtraData = function(postNumber) {
+    var c = {};
+    return Board.prototype.loadExtraData.apply(board, arguments).then(function(extraData) {
+        c.extraData = extraData;
+        return Database.db.smembers("voteUsers:" + postNumber);
+    }).then(function(users) {
+        if (c.extraData && users)
+            c.extraData.users = users;
+        var promises = [];
+        Tools.forIn(c.extraData ? c.extraData.variants : {}, function(variant) {
+            var key = "voteVariantUsers:" + postNumber + ":" + variant.id;
+            promises.push(Database.db.smembers(key).then(function(list) {
+                if (list)
+                    variant.users = list;
+                return Promise.resolve();
+            }));
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        return Promise.resolve(c.extraData);
+    });
+};
+
+board.removeExtraData = function(postNumber) {
+    var c = {};
+    return Board.prototype.loadExtraData.apply(board, arguments).then(function(extraData) {
+        c.extraData = extraData;
+        return Database.db.del("voteUsers:" + postNumber);
+    }).then(function() {
+        var promises = [];
+        Tools.forIn(c.extraData ? c.extraData.variants : {}, function(_, id) {
+            promises.push(Database.db.del("voteVariantUsers:" + postNumber + ":" + id));
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        return Board.prototype.removeExtraData.apply(board, arguments);
+    });
+};
+
 board.renderPost = function(post, req) {
     return Board.prototype.renderPost.apply(board, arguments).then(function(post) {
         if (!post.extraData)
@@ -120,6 +188,7 @@ board.renderPost = function(post, req) {
                         break;
                     }
                 }
+                variant.voteCount = variant.users.length;
                 delete variant.users;
             });
         }

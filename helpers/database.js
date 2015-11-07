@@ -24,6 +24,8 @@ var RegisteredUserLevels = {};
 var db = Redis.createClient();
 var dbGeo = new SQLite3.Database(__dirname + "/../geolocation/ip2location.sqlite");
 
+module.exports.db = db;
+
 db.tmp_hmget = db.hmget;
 db.hmget = function(key, hashes) {
     return db.tmp_hmget.apply(db, [key].concat(hashes));
@@ -48,6 +50,18 @@ RegisteredUserLevels["User"] = "USER";
 
 Object.defineProperty(module.exports, "Ratings", { value: Ratings });
 Object.defineProperty(module.exports, "RegisteredUserLevels", { value: RegisteredUserLevels });
+
+var sortReferensces = function(a, b) {
+    if (a.boardName < b.boardName)
+        return -1;
+    if (a.boardName > b.boardName)
+        return 1;
+    if (a.postNumber < b.postNumber)
+        return -1;
+    if (a.postNumber > b.postNumber)
+        return 1;
+    return 0;
+};
 
 var threadPostNumbers = function(boardName, threadNumber) {
     return db.smembers("threadPostNumbers:" + boardName + ":" + threadNumber).then(function(list) {
@@ -136,7 +150,8 @@ var getThreads = function(boardName, options) {
 module.exports.getThreads = getThreads;
 
 var threadPosts = function(boardName, threadNumber, options) {
-    if (!Tools.contains(Board.boardNames(), boardName))
+    var board = Board.board(boardName);
+    if (!board)
         return Promise.reject("Invalid board");
     if (isNaN(threadNumber) || threadNumber <= 0)
         return Promise.reject("Invalid thread");
@@ -183,7 +198,7 @@ var threadPosts = function(boardName, threadNumber, options) {
         };
         return getNext();
     });
-    if (!opts || (!options.withFileInfos && !options.withReferences))
+    if (!opts || (!options.withFileInfos && !options.withReferences && !options.withExtraData))
         return p;
     return p.then(function() {
         var promises = [];
@@ -204,12 +219,25 @@ var threadPosts = function(boardName, threadNumber, options) {
         if (options.withReferences) {
             promises = promises.concat(c.posts.map(function(post) {
                 return db.smembers("referencedPosts:" + boardName + ":" + post.number).then(function(referencedPosts) {
-                    post.referencedPosts = referencedPosts ? referencedPosts.map(JSON.parse) : [];
+                    post.referencedPosts = referencedPosts ? referencedPosts.map(function(ref) {
+                        return JSON.parse(ref);
+                    }).sort(sortReferensces) : [];
                     return db.smembers("referringPosts:" + boardName + ":" + post.number);
                 }).then(function(referringPosts) {
-                    post.referringPosts = referringPosts ? referringPosts.map(JSON.parse) : [];
+                    post.referringPosts = referringPosts ? referringPosts.map(function(ref) {
+                        return JSON.parse(ref);
+                    }).sort(sortReferensces) : [];
                     return Promise.resolve();
                 });
+            }));
+        }
+        if (options.withExtraData) {
+            promises = promises.concat(c.posts.map(function(post) {
+                return board.loadExtraData(post.number).then(function(extraData) {
+                    if (!Util.isNullOrUndefined(extraData))
+                        post.extraData = extraData;
+                    return Promise.resolve();
+                })
             }));
         }
         return Promise.all(promises);
@@ -221,7 +249,8 @@ var threadPosts = function(boardName, threadNumber, options) {
 module.exports.threadPosts = threadPosts;
 
 var getPost = function(boardName, postNumber, options) {
-    if (!Tools.contains(Board.boardNames(), boardName))
+    var board = Board.board(boardName);
+    if (!board)
         return Promise.reject("Invalid board");
     if (isNaN(postNumber) || postNumber <= 0)
         return Promise.reject("Invalid post");
@@ -232,7 +261,7 @@ var getPost = function(boardName, postNumber, options) {
         c.post = post ? JSON.parse(post) : null;
         return c.post;
     });
-    if (!opts || (!options.withFileInfos && !options.withReferences))
+    if (!opts || (!options.withFileInfos && !options.withReferences && !options.withExtraData))
         return p;
     return p.then(function() {
         if (!c.post)
@@ -256,10 +285,21 @@ var getPost = function(boardName, postNumber, options) {
         }
         if (options.withReferences) {
             promises.push(db.smembers("referencedPosts:" + key).then(function(referencedPosts) {
-                c.post.referencedPosts = referencedPosts ? referencedPosts.map(JSON.parse) : [];
+                c.post.referencedPosts = referencedPosts ? referencedPosts.map(function(ref) {
+                    return JSON.parse(ref);
+                }).sort(sortReferensces) : [];
                 return db.smembers("referringPosts:" + key);
             }).then(function(referringPosts) {
-                c.post.referringPosts = referringPosts ? referringPosts.map(JSON.parse) : [];
+                c.post.referringPosts = referringPosts ? referringPosts.map(function(ref) {
+                    return JSON.parse(ref);
+                }).sort(sortReferensces) : [];
+                return Promise.resolve();
+            }));
+        }
+        if (options.withExtraData) {
+            promises.push(board.loadExtraData(postNumber).then(function(extraData) {
+                if (!Util.isNullOrUndefined(extraData))
+                    c.post.extraData = extraData;
                 return Promise.resolve();
             }));
         }
@@ -502,7 +542,6 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             boardName: board.name,
             createdAt: date.toISOString(),
             email: (fields.email || null),
-            extraData: c.extraData,
             geolocation: c.geo,
             markup: markupModes,
             name: (fields.name || null),
@@ -526,9 +565,9 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             }
         };
         transaction.postNumber = c.postNumber;
-        return db.hset("posts", board.name + ":" + postNumber, JSON.stringify(c.post));
+        return db.hset("posts", board.name + ":" + c.postNumber, JSON.stringify(c.post));
     }).then(function() {
-        return db.sadd("threadPostNumbers:" + board.name + ":" + threadNumber, c.postNumber);
+        return board.storeExtraData(c.postNumber, c.extraData);
     }).then(function() {
         var refs = [];
         c.refs = [];
@@ -543,8 +582,8 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         var promises = [];
         var selfRef = JSON.stringify({
             boardName: board.name,
-            threadNumber: threadNumber,
             postNumber: c.postNumber,
+            threadNumber: threadNumber
         });
         Tools.forIn(referencedPosts, function(ref) {
             promises.push(db.sadd("referringPosts:" + ref.boardName + ":" + ref.postNumber, selfRef));
@@ -596,6 +635,8 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
         return Promise.all(promises);
+    }).then(function() {
+        return db.sadd("threadPostNumbers:" + board.name + ":" + threadNumber, c.postNumber);
     }).then(function() {
         return db.hset("threadUpdateTimes:" + board.name, c.thread.number, date.toISOString());
     }).then(function() {
@@ -653,6 +694,9 @@ module.exports.createPost = function(req, fields, files, transaction) {
 };
 
 var removePost = function(boardName, postNumber) {
+    var board = Board.board(boardName);
+    if (!board)
+        return Promise.reject("Invalid board");
     var c = {};
     return db.sadd("postsPlannedForDeletion", boardName + ":" + postNumber).then(function() {
         return getPost(boardName, postNumber, { withReferences: true });
@@ -666,8 +710,8 @@ var removePost = function(boardName, postNumber) {
     }).then(function() {
         c.selfRef = JSON.stringify({
             boardName: board.name,
-            threadNumber: c.post.threadNumber,
             postNumber: c.post.number,
+            threadNumber: c.post.threadNumber
         });
         var promises = [];
         Tools.forIn(c.post.referencedPosts, function(ref) {
@@ -713,6 +757,8 @@ var removePost = function(boardName, postNumber) {
             });
         });
         return Promise.all(promises);
+    }).then(function() {
+        return board.removeExtraData(postNumber);
     }).then(function() {
         var promises = [];
         Tools.forIn(Tools.indexPost({
@@ -1241,7 +1287,10 @@ module.exports.editPost = function(req, fields) {
         if (fields.markupMode && fields.markupMode.indexOf(val) >= 0)
             markupModes.push(val);
     });
-    return getPost(board.name, postNumber, { withReferences: true }).then(function(post) {
+    return getPost(board.name, postNumber, {
+        withReferences: true,
+        withExtraData: true
+    }).then(function(post) {
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
@@ -1276,8 +1325,8 @@ module.exports.editPost = function(req, fields) {
     }).then(function() {
         c.selfRef = JSON.stringify({
             boardName: board.name,
-            threadNumber: c.post.threadNumber,
             postNumber: c.post.number,
+            threadNumber: c.post.threadNumber
         });
         var promises = [];
         Tools.forIn(c.post.referencedPosts, function(ref) {
@@ -1297,7 +1346,6 @@ module.exports.editPost = function(req, fields) {
         return Promise.all(promises);
     }).then(function() {
         c.post.email = email || null;
-        c.post.extraData = !Util.isNullOrUndefined(c.extraData) ? c.extraData : null;
         c.post.markup = markupModes;
         c.post.name = name || null;
         c.post.options.rawHtml = isRaw;
@@ -1307,6 +1355,10 @@ module.exports.editPost = function(req, fields) {
         c.post.text = c.text || null;
         c.post.updatedAt = date.toISOString();
         return db.hset("posts", board.name + ":" + c.post.number, JSON.stringify(c.post));
+    }).then(function() {
+        return board.removeExtraData(c.post.number);
+    }).then(function() {
+        return board.storeExtraData(c.post.number, c.extraData);
     }).then(function() {
         var refs = [];
         c.refs = [];
@@ -1354,7 +1406,8 @@ module.exports.deletePost = function(req, fields) {
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
             return Promise.reject("Not enough rights");
         }
-        return removePost(board.name, postNumber);
+        return (post.threadNumber == post.number) ? removeThread(board.name, postNumber)
+            : removePost(board.name, postNumber);
     })
 };
 

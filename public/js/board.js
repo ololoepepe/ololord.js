@@ -931,7 +931,16 @@ lord.deletePost = function(el) {
         var post = lord.id("post" + postNumber);
         if (!post)
             return Promise.reject("No such post");
-        post.parentNode.removeChild(post);
+        if (lord.data("isOp", post)) {
+            if (!isNaN(+lord.data("threadNumber"))) {
+                window.location = c.model.site.protocol + "://" + c.model.site.domain + "/" + c.model.site.pathPrefix
+                    + lord.data("boardName");
+            } else {
+                lord.reloadPage();
+            }
+        } else {
+            post.parentNode.removeChild(post);
+        }
         //TODO
         /*lord.removeReferences(postNumber);
         var postLinks = lord.query("a");

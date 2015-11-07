@@ -26,7 +26,8 @@ module.exports.getPosts = function(posts, hashpass) {
                 return Promise.resolve(null);
             return Database.getPost(post.boardName, post.postNumber, {
                 withFileInfos: true,
-                withReferences: true
+                withReferences: true,
+                withExtraData: true
             });
         });
         return Promise.all(promises);
@@ -99,7 +100,8 @@ module.exports.getPage = function(board, hashpass, page) {
             return Database.threadPosts(board.name, thread.number, {
                 limit: 1,
                 withFileInfos: true,
-                withReferences: true
+                withReferences: true,
+                withExtraData: true
             }).then(function(posts) {
                 thread.opPost = posts[0];
                 return Promise.resolve();
@@ -113,6 +115,7 @@ module.exports.getPage = function(board, hashpass, page) {
                 reverse: true,
                 withFileInfos: true,
                 withReferences: true,
+                withExtraData: true,
                 filterFunction: function(post) {
                     if (post.number == thread.number)
                         return false;
@@ -198,6 +201,7 @@ module.exports.getThread = function(board, hashpass, number) {
         return Database.threadPosts(board.name, c.thread.number, {
             withFileInfos: true,
             withReferences: true,
+            withExtraData: true,
             filterFunction: function(post) {
                 if (!post.options.draft)
                     return true;
@@ -269,6 +273,7 @@ module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNu
         return Database.threadPosts(board.name, c.thread.number, {
             withFileInfos: true,
             withReferences: true,
+            withExtraData: true,
             filterFunction: function(post) {
                 if (post.number <= lastPostNumber)
                     return false;
