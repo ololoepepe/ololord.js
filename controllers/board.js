@@ -136,7 +136,9 @@ router.get("/:boardName", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
-    board.renderBoardPage(req, res).then(function(result) {
+    controller.checkBan(req, res, board.name).then(function() {
+        return board.renderBoardPage(req, res);
+    }).then(function(result) {
         if (result)
             return;
         return boardModel.getPage(board, req.hashpass).then(function(model) {

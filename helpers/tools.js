@@ -20,13 +20,16 @@ var translate = require("cute-localize")({
 var flags = {};
 var styles = null;
 var codeStyles = null;
-var rootZones = null;
+var rootZones = require("../misc/root-zones.json").reduce(function(acc, zone) {
+    acc[zone] = {};
+    return acc;
+}, {});
 
 var ExternalLinkRegexpPattern = (function() {
     var schema = "https?:\\/\\/|ftp:\\/\\/";
     var ip = "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}"
              "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])";
-    var hostname = "([\\w\\p{L}\\.\\-]+)\\.([a-z]{2,17}\\.?)";
+    var hostname = "([\\w\\p{L}\\.\\-]+)\\.([\\p{L}]{2,17}\\.?)";
     var port = ":\\d+";
     var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:\\,\\(\\)]*)*\\/?";
     return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path + "(?!\\S)";
@@ -145,15 +148,7 @@ module.exports.forever = function() {
 };
 
 module.exports.externalLinkRootZoneExists = function(zoneName) {
-    if (rootZones)
-        return rootZones.hasOwnProperty(zoneName);
-    var list = FSSync.readFileSync(__dirname + "/../misc/root-zones.txt", "utf8").split(/\r?\n+/gi);
-    rootZones = {};
-    list.forEach(function(zone) {
-        if (!zone)
-            return;
-        rootZones[zone] = true;
-    });
+    console.log(zoneName, rootZones.hasOwnProperty(zoneName));
     return rootZones.hasOwnProperty(zoneName);
 };
 

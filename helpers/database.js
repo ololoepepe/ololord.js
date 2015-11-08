@@ -1437,3 +1437,11 @@ module.exports.editAudioTags = function(req, fields) {
         return db.hset("fileInfos", c.fileInfo.name, JSON.stringify(c.fileInfo));
     });
 };
+
+module.exports.userBans = function(ip) {
+    return db.hget("bannedUsers", ip).then(function(bans) {
+        if (!bans)
+            return Promise.resolve([]);
+        return Promise.resolve(JSON.parse(bans));
+    });
+};

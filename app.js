@@ -41,7 +41,7 @@ var spawnCluster = function() {
         });
 
         app.use(express.static(__dirname + "/public"));
-        //app.use(ddos.express);
+        app.use(ddos.express);
         app.use(cookieParser());
         app.use(device.capture());
         app.use(require("./middlewares"));

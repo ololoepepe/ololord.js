@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{#def.head}}
+<body class="{{=it.deviceType}}" {{#def.baseData}}>
+{{? it.customHeader}}
+    {{#def.customHeader}}
+{{?}}
+{{#def.toolbar}}
+<br />
+{{#def.searchAction}}
+<div class="theTitle">
+    <h1>
+        {{=it.title}}
+    </h1>
+</div>
+<div class="ban">
+    <table>
+        <tr>
+            <td>
+                <b>{{=it.tr.banBoardLabel}}:</b>
+            </td>
+            <td>
+                {{=it.ban.boardName}}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <b>{{=it.tr.banLevelLabel}}:</b>
+            </td>
+            <td>
+                {{? "READ_ONLY" == it.ban.level}}
+                    {{=it.tr.postingRestrictedtext}}
+                {{??}}
+                    {{=it.tr.readingAndPostingRestrictedtext}}
+                {{?}}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <b>{{=it.tr.banDateTimeLabel}}:</b>
+            </td>
+            <td>
+                {{ out += it.formattedDate(it.ban.createdAt, it.req); }}
+            </td>
+        </tr>
+        {{? it.ban.reason}}
+            <tr>
+                <td>
+                    <b>{{=it.tr.banReasonLabel}}:</b>
+                </td>
+                <td>
+                    {{=it.ban.reason}}
+                </td>
+            </tr>
+        {{?}}
+        {{? it.ban.expiresAt}}
+            <tr>
+                <td>
+                    <b>{{=it.tr.banExpiresLabel}}:</b>
+                </td>
+                <td>
+                    {{ out += it.formattedDate(ban.expiresAt, it.req); }}
+                </td>
+            </tr>
+        {{?}}
+    </table>
+</div>
+{{? it.customFooter}}
+    {{#def.customFooter}}
+{{?}}
+</body>
+</html>

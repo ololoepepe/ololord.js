@@ -35,8 +35,22 @@ Object.defineProperty(board, "supportedCaptchaEngines", {
         }];
     }
 });
+Object.defineProperty(board, "markupElements", {
+    value: [
+        Board.MarkupElements.BoldMarkupElement,
+        Board.MarkupElements.ItalicsMarkupElement,
+        Board.MarkupElements.StrikedOutMarkupElement,
+        Board.MarkupElements.UnderlinedMarkupElement,
+        Board.MarkupElements.SpoilerMarkupElement,
+        Board.MarkupElements.QuotationMarkupElement,
+        Board.MarkupElements.CodeMarkupElement,
+        Board.MarkupElements.SubscriptMarkupElement,
+        Board.MarkupElements.SuperscriptMarkupElement,
+        Board.MarkupElements.UrlMarkupElement
+    ]
+});
 board.extraScripts = function() {
-    return [ { value: "var lord = lord || {}; lord.reloadCaptchaFunction = function() { lord.reloadPage(); };" } ];
+    return [ { value: "lord.reloadCaptchaFunction = function() { lord.reloadPage(); };" } ];
 };
 Board.addBoard(board);
 

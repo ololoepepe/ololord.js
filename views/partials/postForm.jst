@@ -126,18 +126,6 @@
                                         title="{{=it.tr.markupQuotation}}"
                                         name="markupQuotation"><span class="quoatation">&gt;</span></button>
                             {{?}}
-                            
-                            {{? it.board.markupElements.indexOf("CODE") >= 0}}
-                                <select name="codeLang" class="select" title="{{=it.tr.markupCodeLang}}"
-                                        onchange="lord.changeLastCodeLang(this);">
-                                    <option value="-" selected="true">-----</option>
-                                    {{~it.availableCodeLangs :lang}}
-                                        <option value="{{=lang.id}}">{{=lang.name}}</option>
-                                    {{~}}
-                                </select>
-                                <button class="button" onclick="lord.markup('code'); return false;" name="markupCode"
-                                        title="{{=it.tr.markupCode}}">[code]</button>
-                            {{?}}
                             {{? it.board.markupElements.indexOf("SUBSCRIPT") >= 0}}
                                 <button class="button" onclick="lord.markup('sub'); return false;"
                                         title="{{=it.tr.markupSubscript}}"
@@ -151,6 +139,18 @@
                             {{? it.board.markupElements.indexOf("URL") >= 0}}
                                 <button class="button" onclick="lord.markup('url'); return false;"
                                         title="{{=it.tr.markupUrl}}" name="markupUrl">http://</button>
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("CODE") >= 0}}
+                                <br />
+                                <select name="codeLang" class="select" title="{{=it.tr.markupCodeLang}}"
+                                        onchange="lord.changeLastCodeLang(this);">
+                                    <option value="-" selected="true">-----</option>
+                                    {{~it.availableCodeLangs :lang}}
+                                        <option value="{{=lang.id}}">{{=lang.name}}</option>
+                                    {{~}}
+                                </select>
+                                <button class="button" onclick="lord.markup('code'); return false;" name="markupCode"
+                                        title="{{=it.tr.markupCode}}">[code]</button>
                             {{?}}
                         </span>
                     </td>

@@ -255,6 +255,7 @@ span.newPostCount {
 .postformMarkup {
     text-align: left;
     font-size: 0.7em;
+    white-space: normal;
 }
 
 .postformRules {
@@ -407,7 +408,7 @@ span.newPostCount {
 }
 
 .codechaContainer {
-    
+    white-space: normal;
 }
 
 .error {

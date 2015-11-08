@@ -14,7 +14,7 @@ var config = require("./config");
 
 var partials = {};
 var templates = {};
-var langNames = null;
+var langNames = require("../misc/lang-names.json");
 
 var controller;
 
@@ -156,9 +156,26 @@ controller.error = function(req, res, error, ajax) {
         }
         return Promise.resolve();
     };
-    return ajax ? g(error) : controller(req, "error", f(error)).then(function(data) {
-        res.send(data);
-    }).catch(g);
+    var h = function(error) {
+        try {
+            res.send(error);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+        return Promise.resolve();
+    };
+    if (Util.isObject(error) && error.ban) {
+        var model = {};
+        model.title = Tools.translate("Ban", "pageTitle");
+        model.ban = error.ban;
+        return ajax ? h(error) : controller(req, "ban", model).then(function(data) {
+            res.send(data);
+        }).catch(h);
+    } else {
+        return ajax ? g(error) : controller(req, "error", f(error)).then(function(data) {
+            res.send(data);
+        }).catch(g);
+    }
 };
 
 controller.notFound = function(req, res) {
@@ -192,23 +209,32 @@ controller.notFound = function(req, res) {
     });
 };
 
+controller.checkBan = function(req, res, boardName, write) {
+    /*return Promise.reject({ ban: {
+        boardName: "b",
+        level: "READ_ONLY",
+        createdAt: "2015-11-06T13:08:30.821Z",
+        reason: "хуисас)))0"
+    } });*/
+    return Database.userBans(req.trueIp).then(function(bans) {
+        if (bans.length < 1)
+            return Promise.resolve();
+        var ban = bans.reduce(function(result, ban) {
+            if (result)
+                return result;
+            if (ban.boardName != boardName)
+                return null;
+            if (write)
+                return ban;
+            return ("NO_ACCESS" == ban.level) ? ban : null;
+        }, null);
+        if (!ban)
+            return Promise.resolve();
+        return Promise.reject({ ban: ban });
+    });
+};
+
 controller.baseModel = function(req) {
-    if (!langNames) {
-        var list = FSSync.readFileSync(__dirname + "/../misc/lang-names.txt", "utf8").split(/\r?\n+/gi);
-        langNames = {};
-        list.forEach(function(pair) {
-            if (!pair)
-                return;
-            var sl = pair.split(/\s+/gi);
-            if (sl.length != 2)
-                return;
-            var lang = sl[0];
-            var name = sl[1];
-            if (!lang || !name)
-                return;
-            langNames[lang] = name;
-        });
-    }
     return {
         site: {
             protocol: config("site.protocol", "http"),
@@ -573,6 +599,8 @@ controller.translationsModel = function() {
     translate("Artist:", "audioTagArtistText");
     translate("Title:", "audioTagTitleText");
     translate("Year:", "audioTagYearText");
+    translate("posting is restricted (read-only access)", "postingRestrictedtext");
+    translate("reading and posting are restricted", "readingAndPostingRestrictedtext");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });
