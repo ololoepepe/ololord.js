@@ -925,13 +925,14 @@ lord.getModel = function(modelName, query) {
             }
         });
     } else {
-        query = query ? ("?" + query) : "";
+        var cache = !query || (typeof query != "boolean" && typeof query != "string");
+        query = (query && typeof query == "string") ? ("?" + query) : "";
         return new Promise(function(resolve, reject) {
             if (!query && lord.models.hasOwnProperty(modelName)) {
                 resolve(lord.models[modelName]);
             } else {
                 $.ajax("/" + lord.data("sitePathPrefix") + modelName + ".json" + query).then(function(result) {
-                    if (!query)
+                    if (cache)
                         lord.models[modelName] = result;
                     resolve(result);
                 }).fail(function(err) {

@@ -62,7 +62,7 @@ var prepare = function(req, fromApi) {
         timeout: (15 * Tools.Second)
     }).then(function(response) {
         if (response.status != 200)
-            return Promise.reject("Failed to check captcha");
+            return Promise.reject("Failed to prepare captcha");
         return response.body.read("utf8");
     }).then(function(data) {
         var parser = new XML2JS.Parser();

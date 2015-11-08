@@ -2,6 +2,7 @@ var HTTP = require("q-io/http");
 var QueryString = require("querystring");
 
 var Captcha = require("./captcha");
+var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Tools = require("../helpers/tools");
 
@@ -37,9 +38,47 @@ codecha.checkCaptcha = function(req, fields) {
     });
 };
 
-codecha.widgetHtml = function(req, _) {
-    var model = { publicKey: this.publicKey };
+codecha.scriptSource = function(req) {
+    return "/" + config("site.pathPrefix", "") + "js/codecha-script.js";
+};
+
+codecha.widgetHtml = function(req, prepared) {
+    var model = {
+        publicKey: this.publicKey,
+        challenge: prepared
+    };
     return controller.sync(req, "codechaWidget", model);
+};
+
+codecha.prepare = function(req) {
+    var url = `http://codecha.org/api/challenge?k=${this.publicKey}`;
+    return HTTP.request({
+        url: url,
+        timeout: (15 * Tools.Second)
+    }).then(function(response) {
+        if (response.status != 200)
+            return Promise.reject("Failed to prepare captcha");
+        return response.body.read("utf8");
+    }).then(function(data) {
+        var match = /codecha.setChallenge\("([^"]+)"/gi.exec(data.toString());
+        if (!match)
+            return Promise.reject("Captcha server error");
+        return Promise.resolve(match[1]);
+    });
+};
+
+codecha.apiRoutes = function() {
+    return [{
+        method: "get",
+        path: "/codechaChallenge.json",
+        handler: function(req, res) {
+            codecha.prepare(req).then(function(result) {
+                res.send(result);
+            }).catch(function(err) {
+                controller.error(req, res, err, true);
+            });
+        }
+    }];
 };
 
 module.exports = codecha;

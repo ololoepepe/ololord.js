@@ -54,7 +54,7 @@ Captcha.captchaIds = function() {
 
 //NOTE: Must implement the following methods:
 //checkCaptcha(req, fields) -> {ok: boolean, message: string}
-//widgetHtml(req) -> string
+//widgetHtml(req, prepared) -> string
 //NOTE: May implement the following methods:
 //headerHtml(req) -> string
 //scriptSource(req) -> string

@@ -49,9 +49,6 @@ Object.defineProperty(board, "markupElements", {
         Board.MarkupElements.UrlMarkupElement
     ]
 });
-board.extraScripts = function() {
-    return [ { value: "lord.reloadCaptchaFunction = function() { lord.reloadPage(); };" } ];
-};
 Board.addBoard(board);
 
 Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"),
