@@ -49,7 +49,10 @@ module.exports = function(req, res, next) {
         captchaEngine: (captchaEngine || Captcha.captcha("google-recaptcha")),
         markupMode: (req.cookies.markupMode || defMarkupMode),
         time: (["server", "local"].indexOf(req.cookies.time) >= 0) ? req.cookies.time : "server",
-        timeZoneOffset: timeZoneOffset
+        timeZoneOffset: timeZoneOffset,
+        draftsByDefault: (req.cookies.draftsByDefault == "true"),
+        hidePostformRules: (req.cookies.hidePostformRules == "true"),
+        minimalisticPostform: (req.cookies.minimalisticPostform == "true")
     };
     next();
 };

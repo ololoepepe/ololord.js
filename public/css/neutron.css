@@ -579,7 +579,7 @@ span.newPostCount {
     background-color: #3C3C3C;
 }
 
-.hiddenPost > .threadPost {
+.hiddenPost > .postBody {
     display: none;
 }
 
@@ -706,8 +706,8 @@ span.newPostCount {
     background-color: #666666;
 }
 
-.threadPost {
-    text-align: left; /*WAS: horizontal-align*/
+.postBody {
+    text-align: left;
 }
 
 .postFile {

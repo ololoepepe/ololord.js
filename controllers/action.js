@@ -277,6 +277,33 @@ router.post("/editAudioTags", function(req, res) {
     });
 });
 
+router.post("/changeSettings", function(req, res) {
+    Tools.parseForm(req).then(function(result) {
+        var textCookies = ["mode", "style", "codeStyle", "stickyToolbar", "shrinkPosts", "markupMode", "time",
+            "timeZoneOffset", "captchaEngine", "maxAllowedRating", "draftsByDefault", "hidePostformRules",
+            "minimalisticPostform"];
+        var hiddenBoards = [];
+        Tools.forIn(result.fields, function(value, name) {
+            if (name.substr(0, 6) == "board_") {
+                hiddenBoards.push(name.substr(6));
+            } else if (textCookies.indexOf(name) >= 0) {
+                res.cookie(name, value, {
+                    expires: Tools.forever(),
+                    path: "/"
+                });
+            }
+        });
+        res.cookie("hiddenBoards", hiddenBoards.join("|"), {
+            expires: Tools.forever(),
+            path: "/"
+        });
+    }).then(function(result) {
+        res.redirect("/" + config("site.pathPrefix", "") + "settings.html");
+    }).catch(function(err) {
+        controller.error(req, res, err, req.settings.mode.name != "ascetic");
+    });
+});
+
 Captcha.captchaIds().forEach(function(id) {
     Captcha.captcha(id).actionRoutes().forEach(function(route) {
         router[route.method](route.path, route.handler);

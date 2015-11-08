@@ -249,7 +249,6 @@ lord.createPostNode = function(post, permanent) {
     if (typeof permanent == "undefined")
         permanent = true;
     var c = {};
-    console.log(c);
     return lord.getModel([
         "misc/base",
         "misc/tr",

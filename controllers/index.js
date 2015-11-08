@@ -12,6 +12,7 @@ router.use("/", require("./login"));
 router.use("/", require("./markup"));
 router.use("/", require("./playlist"));
 router.use("/", require("./search"));
+router.use("/", require("./settings"));
 
 router.use("/api", require("./api"));
 router.use("/misc", require("./misc"));
