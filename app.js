@@ -31,10 +31,10 @@ var spawnCluster = function() {
 
         var app = express();
         var ddos = new DDoS({
-            maxcount: 30,
-            burst: 5,
-            limit: (5 * 4),
-            maxexpiry: 120,
+            maxcount: 50,
+            burst: 10,
+            limit: (10 * 4),
+            maxexpiry: 30,
             checkinterval: 1,
             silentStart: true,
             errormessage: "<html><head></head><body><img src='http://i3.kym-cdn.com/photos/images/masonry/000/112/322/130221984383.png'></body></html>"
