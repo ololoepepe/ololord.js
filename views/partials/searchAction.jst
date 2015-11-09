@@ -2,7 +2,7 @@
     <form method="get" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}search.html" enctype="multipart/form-data"
           class="inlineForm">
         <input type="text" class="input" maxlength="{{=it.maxSearchQueryLength}}" name="query"
-               size="{{? it.deviceType != "mobile"}}43{{??}}26{{?}}"
+               size="{{? it.deviceType != "mobile"}}43{{??}}25{{?}}"
                onkeypress="lord.searchKeyPress(event);"
                {{? it.deviceType != "mobile"}}placeholder="{{=it.tr.searchInputPlaceholder}}"{{?}}
                value="{{? it.searchQuery}}{{=it.searchQuery}}{{?}}" {{? it.searchPage}}autofocus="true"{{?}} />
