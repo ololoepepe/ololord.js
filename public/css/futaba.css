@@ -890,6 +890,10 @@ ul.tabWidget > li.activated {
     overflow-x: auto;
 }
 
+.searchAction.mobile {
+    text-align: left;
+}
+
 /*
     Settings bar
 */

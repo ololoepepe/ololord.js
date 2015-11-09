@@ -1,4 +1,4 @@
-<div class="searchAction">
+<div class="searchAction {{=it.deviceType}}">
     <form method="get" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}search.html" enctype="multipart/form-data"
           class="inlineForm">
         <input type="text" class="input" maxlength="{{=it.maxSearchQueryLength}}" name="query"

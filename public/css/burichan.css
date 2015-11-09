@@ -805,6 +805,10 @@ ul.tabWidget > li.activated {
     overflow-x: auto;
 }
 
+.searchAction.mobile {
+    text-align: left;
+}
+
 .toolbar {
     border-bottom: 1px solid #CCCCCC;
     display: block;
