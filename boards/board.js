@@ -301,7 +301,7 @@ var renderFileInfo = function(fi) {
     post.rawSubject = post.subject;
     post.isOp = (post.number == post.threadNumber);
     post.ownIp = (req.trueIp == post.user.ip);
-    post.ownHashpass = (req.hashpass == post.user.hashpass);
+    post.ownHashpass = (req.hashpass && req.hashpass == post.user.hashpass);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
     if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0)
         delete post.user.ip;

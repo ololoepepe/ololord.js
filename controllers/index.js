@@ -9,6 +9,7 @@ router.use("/action", require("./action"));
 router.use("/", require("./faq"));
 router.use("/", require("./frame"));
 router.use("/", require("./login"));
+router.use("/", require("./manage"));
 router.use("/", require("./markup"));
 router.use("/", require("./playlist"));
 router.use("/", require("./search"));

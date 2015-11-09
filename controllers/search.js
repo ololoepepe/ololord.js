@@ -11,6 +11,7 @@ router.get("/search.html", function(req, res) {
     model.title = Tools.translate("Search", "pageTitle");
     model.resultsMessage = Tools.translate("Search results", "resultsMessage");
     model.nothingFoundMessage = Tools.translate("Nothing found", "nothingFoundMessage");
+    model.maxSearchQueryLength = 100;
     var query = req.query.query || "";
     var boardName = req.query.board || "";
     if ("*" == boardName)

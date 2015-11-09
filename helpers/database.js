@@ -1438,10 +1438,51 @@ module.exports.editAudioTags = function(req, fields) {
     });
 };
 
-module.exports.userBans = function(ip) {
-    return db.hget("bannedUsers", ip).then(function(bans) {
-        if (!bans)
-            return Promise.resolve([]);
-        return Promise.resolve(JSON.parse(bans));
+module.exports.bannedUser = function(ip) {
+    return db.hget("bannedUsers", ip).then(function(user) {
+        if (!user)
+            return Promise.resolve(null);
+        return Promise.resolve({
+            bans: JSON.parse(user),
+            ip: ip
+        });
     });
+};
+
+module.exports.bannedUsers = function() {
+    return db.hgetall("bannedUsers").then(function(result) {
+        var users = [];
+        Tools.forIn(result, function(user, ip) {
+            users.push({
+                bans: JSON.parse(user),
+                ip: ip
+            });
+        });
+        return Promise.resolve(users);
+    });
+};
+
+module.exports.banUser = function(req, ip, bans) {
+    if (!ip)
+        return Promise.reject("Invalid IP");
+    var err = bans.reduce(function(err, ban) {
+        if (err)
+            return err;
+        if (!ban.boardName || !Board.board(ban.boardName))
+            return "Invalid board";
+        if (["NO_ACCESS", "READ_ONLY"].indexOf(ban.level) < 0)
+            return "Invalid level";
+        return null;
+    }, null);
+    if (err)
+        return Promise.resolve(err);
+    if (bans.length < 1)
+        return db.hdel("bannedUsers", ip);
+    var date = Tools.now();
+    bans = bans.reduce(function(acc, ban) {
+        ban.createdAt = date;
+        acc[ban.boardName] = ban;
+        return acc;
+    }, {});
+    return db.hset("bannedUsers", ip, JSON.stringify(bans));
 };

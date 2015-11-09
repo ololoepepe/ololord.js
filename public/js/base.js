@@ -78,19 +78,6 @@ lord.switchShowLogin = function() {
         inp.type = "password";
 };
 
-lord.doSearch = function() {
-    var query = lord.text("searchFormInputQuery");
-    if ("" === query)
-        return;
-    var sel = lord.id("searchFormSelectBoard");
-    var board = sel.options[sel.selectedIndex].value;
-    var prefix = lord.text("sitePathPrefix");
-    var href = window.location.href.split("/").shift() + "/" + prefix + "search?query=" + encodeURIComponent(query);
-    if ("*" !== board)
-        href = href + "&board=" + board;
-    window.location.href = href;
-};
-
 lord.searchKeyPress = function(e) {
     e = e || window.event;
     if (e.keyCode != 13)

@@ -20,6 +20,7 @@ module.exports = function(req, res, next) {
     var mode = (req.cookies.mode || "normal");
     if (!modes[mode])
         mode = "normal";
+    req.ascetic = ("ascetic" == mode);
     var style = (req.cookies.style || "photon");
     if (!styles[style])
         style = "photon";

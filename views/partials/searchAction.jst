@@ -1,20 +1,20 @@
 <div class="searchAction">
     <form method="get" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}search.html" enctype="multipart/form-data"
           class="inlineForm">
-        <input type="text" class="input" maxlength="{{=it.maxSearchQueryLength}}" name="query" size="43"
-               onkeypress="lord.searchKeyPress(event);" placeholder="{{=it.tr.searchInputPlaceholder}}"
+        <input type="text" class="input" maxlength="{{=it.maxSearchQueryLength}}" name="query"
+               size="{{? it.deviceType != "mobile"}}43{{??}}28{{?}}"
+               onkeypress="lord.searchKeyPress(event);"
+               {{? it.deviceType != "mobile"}}placeholder="{{=it.tr.searchInputPlaceholder}}"{{?}}
                value="{{? it.searchQuery}}{{=it.searchQuery}}{{?}}" {{? it.searchPage}}autofocus="true"{{?}} />
-        <select name="board" class="select">
+        <select name="board" class="select{{? it.deviceType == "mobile"}} searchSelect{{?}}">
             <option value="*" {{? !it.searchBoard}}selected="true"{{?}}>[*] {{=it.tr.allBoardsText}}</option>
             {{~it.boards :brd}}
-                <option value="{{=brd.name}}"
-                        {{? it.searchBoard && it.searchBoard == brd.name}}selected="true"{{?}}>[{{=brd.name}}] {{=brd.title}}</option>
+                <option {{? it.searchBoard && it.searchBoard == brd.name}}selected="true"{{?}}
+                        value="{{=brd.name}}">[{{=brd.name}}] {{=brd.title}}</option>
             {{~}}
         </select>
-        {{? it.settings.mode.name != "ascetic"}}
-            <button class="button" onclick="lord.doSearch();">{{=it.tr.searchButtonText}}</button>
-        {{??}}
-            <input type="submit" class="button" value="{{=it.tr.searchButtonText}}" />
-        {{?}}
+        <input style="background: url(/{{=it.site.pathPrefix}}img/search.png) no-repeat; border: solid 0px; width: 16; height: 16px;"
+               type="submit" title="{{=it.tr.searchButtonText}}" height="16"
+               class="buttonImage" value="" />
     </form>
 </div>

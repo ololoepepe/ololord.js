@@ -1,0 +1,62 @@
+<form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
+      action="/{{=it.site.pathPrefix}}action/banUser"
+      {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.banUser(event, this); return false;"{{?}}>
+    <input type="text" name="userIp"
+           {{? typeof user != "undefined"}}value="{{=user.ip}}" readonly="true"{{??}}placeholder="IP: <127.0.0.1>"{{?}} />
+    <br />
+    {{ var banLevels = []; }}
+    {{ banLevels.push({ level: "NONE", description: it.tr.banLevelNoneDescription} ); }}
+    {{ banLevels.push({ level: "READ_ONLY", description: it.tr.banLevelReadOnlyDescription} ); }}
+    {{ banLevels.push({ level: "NO_ACCESS", description: it.tr.banLevelNoAccessDescription} ); }}
+    {{~it.boards :board}}
+        {{? typeof user != "undefined"}}
+            {{ var ban = user ? user.bans[board.name] : undefined; }}
+        {{?}}
+        <div class="nowrap">
+            <input type="hidden" name="banBoard_{{=board.name}}" value="{{=board.name}}" />
+            [{{=board.name}}]{{? it.deviceType != "mobile"}} {{=board.title}}{{?}}
+            <select name="banLevel_{{=board.name}}" class="select">
+                {{~banLevels :level}}
+                    <option {{? (typeof ban != "undefined" && ban.level == level.level) || (typeof ban == "undefined" && "NONE" == level.level)}}selected="true"{{?}}
+                            value="{{=level.level}}">{{=level.description}}</option>
+                {{~}}
+            </select>
+            <input type="text" name="banExpires_{{=board.name}}" size="23"
+                   {{? typeof ban != "undefined" && ban.expiresAt}}value="{{=ban.expiresAt}}"{{?}}
+                   placeholder="{{=it.tr.banExpiresLabelText}} <DD.MM.YYYY:HH>" />
+            <input type="text" name="banReason_{{=board.name}}" size="33"
+                   {{? typeof ban != "undefined" && ban.reason}}value="{{=ban.reason}}"{{?}}
+                   placeholder="{{=it.tr.banReasonLabelText}} [...]" />
+        </div>
+    {{~}}
+    {{? it.settings.mode.name != "ascetic"}}
+        <br />
+        <input type="submit" name="submit" value="{{=it.tr.selectAllText}}"
+               onclick="lord.bansSelectAll(event, this); return false;" />
+        <select name="level" class="select">
+            {{~banLevels :level}}
+                <option {{? "NONE" == level.level}}selected="true"{{?}}
+                        value="{{=level.level}}">{{=level.description}}</option>
+            {{~}}
+        </select>
+        <input type="text" name="expires" size="23" placeholder="{{=it.tr.banExpiresLabelText}} <dd.MM.yyyy:hh>" />
+        <input type="text" name="reason" size="33" placeholder="{{=it.tr.banReasonLabelText}} [...]" />
+        <br />
+    {{?}}
+    <br />
+    <input type="submit" name="submit" value="{{=it.tr.confirmButtonText}}" />
+</form>
+<br />
+<form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
+      action="/{{=it.site.pathPrefix}}action/delall"
+      {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.delall(event, this); return false;"{{?}}>
+    <input name="userIp"
+           {{? typeof user != "undefined"}}value="{{=user.ip}}" type="hidden"{{??}}type="text" placeholder="IP: <127.0.0.1>"{{?}} />
+    <select name="board" class="select">
+        <option value="*" selected="true">[*] {{=it.tr.allBoardsText}}</option>
+        {{~it.boards :board}}
+            <option value="{{=board.name}}">[{{=board.name}}] {{=board.title}}</option>
+        {{~}}
+    </select>
+    <input type="submit" name="submit" value="{{=it.tr.delallButtonText}}" />
+</form>

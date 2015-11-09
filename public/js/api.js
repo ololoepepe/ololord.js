@@ -1,3 +1,15 @@
+$._ajax = $.ajax;
+$.ajax = function() {
+    var _arguments = arguments;
+    return new Promise(function(resolve, reject) {
+        $._ajax.apply($, _arguments).then(function(data) {
+            resolve(data);
+        }).fail(function(err) {
+            reject(err);
+        });
+    });
+};
+
 /*ololord global object*/
 
 var lord = lord || {};
@@ -890,17 +902,17 @@ lord.getTemplate = function(templateName) {
                             data: result,
                             name: partialName
                         };
-                    }).fail(function(err) {
-                        reject(err);
                     });
                 });
-                return $.when.apply($, promises);
-            }).then(function() {
+                return Promise.all(promises);
+            }).then(function(partials) {
                 lord.partials = {};
-                lord.arr(arguments).forEach(function(partial) {
+                partials.forEach(function(partial) {
                     lord.partials[partial.name] = partial.data;
                 });
                 f();
+            }).catch(function(err) {
+                reject(err);
             });
         }
     });
@@ -935,7 +947,7 @@ lord.getModel = function(modelName, query) {
                     if (cache)
                         lord.models[modelName] = result;
                     resolve(result);
-                }).fail(function(err) {
+                }).catch(function(err) {
                     reject(err);
                 });
             }

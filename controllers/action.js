@@ -4,6 +4,7 @@ var express = require("express");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
 var HTTP = require("q-io/http");
+var moment = require("moment");
 var promisify = require("promisify-node");
 var UUID = require("uuid");
 
@@ -206,14 +207,18 @@ router.post("/createPost", function(req, res) {
         return Database.createPost(req, c.fields, c.files, transaction);
     }).then(function(post) {
         setMarkupModeCookie(res, c.fields);
-        res.send({
-            boardName: post.boardName,
-            postNumber: post.number
-        });
+        if (req.ascetic) {
+            //
+        } else {
+            res.send({
+                boardName: post.boardName,
+                postNumber: post.number
+            });
+        }
     }).catch(function(err) {
         transaction.rollback();
         setMarkupModeCookie(res, c.fields);
-        controller.error(req, res, err, req.settings.mode.name != "ascetic");
+        controller.error(req, res, err, !req.ascetic);
     });
 });
 
@@ -236,14 +241,18 @@ router.post("/createThread", function(req, res) {
         return Database.createThread(req, c.fields, c.files, transaction);
     }).then(function(thread) {
         setMarkupModeCookie(res, c.fields);
-        res.send({
-            boardName: thread.boardName,
-            threadNumber: thread.number
-        });
+        if (req.ascetic) {
+            //
+        } else {
+            res.send({
+                boardName: thread.boardName,
+                threadNumber: thread.number
+            });
+        }
     }).catch(function(err) {
         transaction.rollback();
         setMarkupModeCookie(res, c.fields);
-        controller.error(req, res, err, req.settings.mode.name != "ascetic");
+        controller.error(req, res, err, !req.ascetic);
     });
 });
 
@@ -253,7 +262,7 @@ router.post("/editPost", function(req, res) {
     }).then(function(result) {
         res.send({});
     }).catch(function(err) {
-        controller.error(req, res, err, req.settings.mode.name != "ascetic");
+        controller.error(req, res, err, !req.ascetic);
     });
 });
 
@@ -263,7 +272,7 @@ router.post("/deletePost", function(req, res) {
     }).then(function(result) {
         res.send({});
     }).catch(function(err) {
-        controller.error(req, res, err, req.settings.mode.name != "ascetic");
+        controller.error(req, res, err, !req.ascetic);
     });
 });
 
@@ -273,7 +282,35 @@ router.post("/editAudioTags", function(req, res) {
     }).then(function(result) {
         res.send({});
     }).catch(function(err) {
-        controller.error(req, res, err, req.settings.mode.name != "ascetic");
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
+router.post("/banUser", function(req, res) {
+    if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
+        return controller.error(req, res, "Not enough rights", !req.ascetic);
+    Tools.parseForm(req).then(function(result) {
+        var bans = [];
+        Tools.forIn(result.fields, function(value, name) {
+            if (name.substr(0, 9) != "banBoard_")
+                return;
+            var level = result.fields["banLevel_" + value];
+            if ("NONE" == level)
+                return;
+            var expiresAt = result.fields["banExpires_" + value];
+            expiresAt = expiresAt? moment(expiresAt, "DD.MM.YYYY:HH") : null;
+            bans.push({
+                boardName: value,
+                expiresAt: +expiresAt ? expiresAt : null,
+                level: level,
+                reason: result.fields["banReason_" + value],
+            });
+        });
+        return Database.banUser(req, result.fields.userIp, bans);
+    }).then(function(result) {
+        res.send({});
+    }).catch(function(err) {
+        controller.error(req, res, err, !req.ascetic);
     });
 });
 
@@ -300,7 +337,7 @@ router.post("/changeSettings", function(req, res) {
     }).then(function(result) {
         res.redirect("/" + config("site.pathPrefix", "") + "settings.html");
     }).catch(function(err) {
-        controller.error(req, res, err, req.settings.mode.name != "ascetic");
+        controller.error(req, res, err, !req.ascetic);
     });
 });
 

@@ -15,6 +15,7 @@ var config = require("./config");
 var partials = {};
 var templates = {};
 var langNames = require("../misc/lang-names.json");
+var ipBans = require("../misc/bans.json");
 
 var controller;
 
@@ -210,27 +211,18 @@ controller.notFound = function(req, res) {
 };
 
 controller.checkBan = function(req, res, boardName, write) {
-    /*return Promise.reject({ ban: {
-        boardName: "b",
-        level: "READ_ONLY",
-        createdAt: "2015-11-06T13:08:30.821Z",
-        reason: "хуисас)))0"
-    } });*/
-    return Database.userBans(req.trueIp).then(function(bans) {
-        if (bans.length < 1)
+    var ban = ipBans[req.trueIp];
+    if (ban && (write || "NO_ACCESS" == ban.level))
+        return Promise.reject({ ban: ban });
+    return Database.bannedUser(req.trueIp).then(function(user) {
+        if (!user || !user.bans || user.bans.length < 1)
             return Promise.resolve();
-        var ban = bans.reduce(function(result, ban) {
-            if (result)
-                return result;
-            if (ban.boardName != boardName)
-                return null;
-            if (write)
-                return ban;
-            return ("NO_ACCESS" == ban.level) ? ban : null;
-        }, null);
+        var ban = user.bans[boardName];
         if (!ban)
             return Promise.resolve();
-        return Promise.reject({ ban: ban });
+        if (write)
+            return Promise.reject({ ban: ban });
+        return ("NO_ACCESS" == ban.level) ? Promise.reject({ ban: ban }) : Promise.resolve();
     });
 };
 
@@ -282,8 +274,6 @@ controller.baseModel = function(req) {
                 title: Tools.translate("Extended WakabaMark and bbCode", "markupMode")
             },
         ],
-        locale: config("site.locale", "en"),
-        dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss"),
         supportedCaptchaEngines: Captcha.captchaIds().map(function(id) {
             var captcha = Captcha.captcha(id);
             return {
@@ -601,6 +591,12 @@ controller.translationsModel = function() {
     translate("Year:", "audioTagYearText");
     translate("posting is restricted (read-only access)", "postingRestrictedtext");
     translate("reading and posting are restricted", "readingAndPostingRestrictedtext");
+    translate("Not banned", "banLevelNoneDescription");
+    translate("Posting prohibited", "banLevelReadOnlyDescription");
+    translate("Posting and reading prohibited", "banLevelNoAccessDescription");
+    translate("Expires:", "banExpiresLabelText");
+    translate("Reason:", "banReasonLabelText");
+    translate("Delete all user posts on selected board", "delallButtonText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

@@ -1132,3 +1132,7 @@ a.progressBlocking {
 #checkboxDraft + label, #checkboxDraftEdit + label {
     background: url("../img/checkbox_draft.png") center no-repeat;
 }
+
+.searchSelect {
+    width: 120px;
+}

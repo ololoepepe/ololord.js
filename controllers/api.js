@@ -159,6 +159,22 @@ router.get("/captchaQuota.json", function(req, res) {
     });
 });
 
+router.get("/bannedUser.json", function(req, res) {
+    Database.bannedUser(req.query.ip).then(function(user) {
+        res.json(user);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
+router.get("/bannedUsers.json", function(req, res) {
+    Database.bannedUsers().then(function(users) {
+        res.send(users);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
 Captcha.captchaIds().forEach(function(id) {
     Captcha.captcha(id).apiRoutes().forEach(function(route) {
         router[route.method](route.path, route.handler);
