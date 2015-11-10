@@ -6,6 +6,9 @@ var router = express.Router();
 
 router.use("/action", require("./action"));
 
+router.use("/", require("./ban-user"));
+router.use("/", require("./delete-post"));
+router.use("/", require("./edit-post"));
 router.use("/", require("./faq"));
 router.use("/", require("./frame"));
 router.use("/", require("./login"));

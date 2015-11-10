@@ -1096,8 +1096,7 @@
     "Select all": {
         "selectAllText": {
             "value": "Выбрать все"
-        },
-        "_obsolete": true
+        }
     },
     "Markup": {
         "pageTitle": {

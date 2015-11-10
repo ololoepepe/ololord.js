@@ -77,7 +77,7 @@
                     {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.options.draft}}
                         <li>
                             <a name="editButton" target="_blank"
-                               href="/{{=it.site.pathPrefix}}edit_post?board={{=it.board.name}}&post={{=post.number}}"
+                               href="/{{=it.site.pathPrefix}}editPost.html?boardName={{=it.board.name}}&postNumber={{=post.number}}"
                                {{? it.settings.mode.name != "ascetic"}}onclick="lord.editPost(this); return false;"{{?}}>
                                 <img src="/{{=it.site.pathPrefix}}img/edit.png" /> {{=it.tr.editPostText}}</a>
                         </li>
@@ -137,7 +137,7 @@
                         {{?}}
                         <li>
                             <a name="banButton" target="_blank"
-                               href="/{{=it.site.pathPrefix}}ban_user?board={{=it.board.name}}&post={{=post.number}}"
+                               href="/{{=it.site.pathPrefix}}banUser.html?boardName={{=it.board.name}}&postNumber={{=post.number}}&userIp={{=post.user.ip}}"
                                {{? it.settings.mode.name != "ascetic"}}onclick="lord.banUser(this); return false;"{{?}}>
                                 <img src="/{{=it.site.pathPrefix}}img/ban.png" /> {{=it.tr.banUserText}}</a>
                         </li>
@@ -164,24 +164,12 @@
                                 <img src="/{{=it.site.pathPrefix}}img/complain.png" /> {{=it.tr.complainText}}</a>
                         </li>
                     {{?}}
-                    {{? it.settings.mode.name != "ascetic"}}
-                        <li>
-                            <a name="deleteButton" href="javascript:void(0);"
-                               onclick="lord.deletePost(this); return false;">
-                                <img src="/{{=it.site.pathPrefix}}img/delete.png" />
-                                {{? post.isOp}}{{=it.tr.deleteThreadText}}{{??}}{{=it.tr.deletePostText}}{{?}}</a>
-                        </li>
-                    {{??}}
-                        <li>
-                            <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/delete_post"
-                                  enctype="multipart/form-data" class="inlineForm">
-                                <input type="hidden" name="boardName" value="{{=it.board.name}}" />
-                                <input type="hidden" name="postNumber" value="{{=post.number}}" />
-                                <input type="image" name="deleteFileButton" src="/{{=it.site.pathPrefix}}img/delete.png" />
-                                {{? post.isOp}}{{=it.tr.deleteThreadText}}{{??}}{{=it.tr.deletePostText}}{{?}}
-                            </form>
-                        </li>
-                    {{?}}
+                    <li>
+                        <a name="deleteButton" target="_blank"
+                           href="/{{=it.site.pathPrefix}}deletePost.html?boardName={{=it.board.name}}&postNumber={{=post.number}}"
+                           {{? it.settings.mode.name != "ascetic"}}onclick="lord.deletePost(this); return false;"{{?}}>
+                            <img src="/{{=it.site.pathPrefix}}img/delete.png" /> {{=it.tr.deletePostText}}</a>
+                    </li>
                     {{? it.settings.mode.name != "ascetic"}}
                         <li>
                             <a name="hideButton" href="javascript:void(0);"

@@ -597,6 +597,7 @@ controller.translationsModel = function() {
     translate("Expires:", "banExpiresLabelText");
     translate("Reason:", "banReasonLabelText");
     translate("Delete all user posts on selected board", "delallButtonText");
+    translate("Select all", "selectAllText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

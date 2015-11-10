@@ -1,14 +1,16 @@
-$._ajax = $.ajax;
-$.ajax = function() {
-    var _arguments = arguments;
-    return new Promise(function(resolve, reject) {
-        $._ajax.apply($, _arguments).then(function(data) {
-            resolve(data);
-        }).fail(function(err) {
-            reject(err);
+if (typeof $ != "undefined") {
+    $._ajax = $.ajax;
+    $.ajax = function() {
+        var _arguments = arguments;
+        return new Promise(function(resolve, reject) {
+            $._ajax.apply($, _arguments).then(function(data) {
+                resolve(data);
+            }).fail(function(err) {
+                reject(err);
+            });
         });
-    });
-};
+    };
+}
 
 /*ololord global object*/
 

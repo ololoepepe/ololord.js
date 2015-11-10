@@ -1,8 +1,18 @@
 <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
       action="/{{=it.site.pathPrefix}}action/banUser"
       {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.banUser(event, this); return false;"{{?}}>
-    <input type="text" name="userIp"
-           {{? typeof user != "undefined"}}value="{{=user.ip}}" readonly="true"{{??}}placeholder="IP: <127.0.0.1>"{{?}} />
+    {{? it.boardName}}
+        <input type="hidden" name="boardName" value="{{=it.boardName}}" />
+    {{?}}
+    {{? it.postNumber}}
+        <input type="hidden" name="postNumber" value="{{=it.postNumber}}" />
+    {{?}}
+    {{? !it.userIp}}
+        <input type="text" name="userIp"
+               {{? typeof user != "undefined"}}value="{{=user.ip}}" readonly="true"{{??}}placeholder="IP: <127.0.0.1>"{{?}} />
+    {{??}}
+        <input type="text" name="userIp" value="{{=it.userIp}}" readonly="true" />
+    {{?}}
     <br />
     {{ var banLevels = []; }}
     {{ banLevels.push({ level: "NONE", description: it.tr.banLevelNoneDescription} ); }}
@@ -14,6 +24,11 @@
         {{?}}
         <div class="nowrap">
             <input type="hidden" name="banBoard_{{=board.name}}" value="{{=board.name}}" />
+            {{? it.postNumber && it.boardName == board.name}}
+                <input type="hidden" name="banPostNumber_{{=board.name}}" value="{{=it.postNumber}}" />
+            {{?? (typeof ban != "undefined" && ban.postNumber)}}
+                <input type="hidden" name="banPostNumber_{{=board.name}}" value="{{=ban.postNumber}}" />
+            {{?}}
             [{{=board.name}}]{{? it.deviceType != "mobile"}} {{=board.title}}{{?}}
             <select name="banLevel_{{=board.name}}" class="select">
                 {{~banLevels :level}}
@@ -50,8 +65,12 @@
 <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
       action="/{{=it.site.pathPrefix}}action/delall"
       {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.delall(event, this); return false;"{{?}}>
-    <input name="userIp"
-           {{? typeof user != "undefined"}}value="{{=user.ip}}" type="hidden"{{??}}type="text" placeholder="IP: <127.0.0.1>"{{?}} />
+    {{? !it.userIp}}
+        <input name="userIp"
+               {{? typeof user != "undefined"}}value="{{=user.ip}}" type="hidden"{{??}}type="text" placeholder="IP: <127.0.0.1>"{{?}} />
+    {{??}}
+        <input type="hidden" name="userIp" value="{{=it.userIp}}" />
+    {{?}}
     <select name="board" class="select">
         <option value="*" selected="true">[*] {{=it.tr.allBoardsText}}</option>
         {{~it.boards :board}}

@@ -1023,3 +1023,7 @@ a.progressBlocking {
 .searchSelect {
     width: 100px;
 }
+
+.alignCenter {
+    text-align: center;
+}

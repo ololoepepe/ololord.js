@@ -257,10 +257,18 @@ router.post("/createThread", function(req, res) {
 });
 
 router.post("/editPost", function(req, res) {
+    var c = {};
     Tools.parseForm(req).then(function(result) {
+        c.boardName = result.fields.boardName;
+        c.postNumber = +result.fields.postNumber;
         return Database.editPost(req, result.fields);
     }).then(function(result) {
-        res.send({});
+        if (req.ascetic) {
+            res.redirect("/" + config("site.pathPrefix", "")
+                + `editPost.html?boardName=${c.boardName}&postNumber=${c.postNumber}`);
+        } else {
+            res.send({});
+        }
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });
@@ -270,7 +278,14 @@ router.post("/deletePost", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         return Database.deletePost(req, result.fields);
     }).then(function(result) {
-        res.send({});
+        if (req.ascetic) {
+            var path = result.boardName;
+            if (result.threadNumber)
+                path += "/res/" + result.threadNumber + ".html";
+            res.redirect("/" + config("site.pathPrefix", "") + path);
+        } else {
+            res.send({});
+        }
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });
@@ -289,8 +304,12 @@ router.post("/editAudioTags", function(req, res) {
 router.post("/banUser", function(req, res) {
     if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
         return controller.error(req, res, "Not enough rights", !req.ascetic);
+    var c = {};
     Tools.parseForm(req).then(function(result) {
         var bans = [];
+        c.boardName = result.fields.boardName;
+        c.postNumber = +result.fields.postNumber;
+        c.userIp = result.fields.userIp;
         Tools.forIn(result.fields, function(value, name) {
             if (name.substr(0, 9) != "banBoard_")
                 return;
@@ -304,11 +323,17 @@ router.post("/banUser", function(req, res) {
                 expiresAt: +expiresAt ? expiresAt : null,
                 level: level,
                 reason: result.fields["banReason_" + value],
+                postNumber: +result.fields["banPostNumber_" + value] || null
             });
         });
         return Database.banUser(req, result.fields.userIp, bans);
     }).then(function(result) {
-        res.send({});
+        if (req.ascetic) {
+            res.redirect("/" + config("site.pathPrefix", "")
+                + `banUser.html?boardName=${c.boardName}&postNumber=${c.postNumber}&userIp=${c.userIp}`);
+        } else {
+            res.send({});
+        }
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });

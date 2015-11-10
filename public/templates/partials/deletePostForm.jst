@@ -12,6 +12,13 @@
                     <input type="password" name="password" size="43" />
                 </td>
             </tr>
+            {{? it.showSubmitButton}}
+                <tr>
+                    <td class="postformField" colspan="2">
+                        <input type="submit" name="submit" value="{{=it.tr.confirmButtonText}}" />
+                    </td>
+                </tr>
+            {{?}}
         </tbody>
     </table>
 </form>

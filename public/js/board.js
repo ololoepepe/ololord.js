@@ -1005,140 +1005,47 @@ lord.moveThread = function(boardName, threadNumber) {
     });
 };
 
-lord.banUser = function(boardName, postNumber) {
-    if (!boardName || isNaN(+postNumber))
+lord.banUser = function(el) {
+    var boardName = lord.data("boardName", el, true);
+    var postNumber = +lord.data("number", el, true);
+    var userIp = lord.data("userIp", el, true);
+    if (!boardName || isNaN(postNumber) || postNumber <= 0 || !userIp)
         return;
-    var post = lord.id("post" + postNumber);
-    if (!post)
-        return;
-    var ip = lord.nameOne("number", post);
-    if (!ip)
-        return;
-    ip = ip.title;
-    if (!ip)
-        return;
-    lord.ajaxRequest("get_user_ban_info", [ip], lord.RpcGetUserBanInfoId, function(res) {
-        if (!res)
-            return;
-        var title = lord.text("banUserText");
-        var div = lord.node("div");
-        var div1 = lord.node("div");
-        lord.forIn(lord.availableBoards(), function(bt, bn) {
-            var div2 = lord.node("div");
-            lord.addClass(div2, "nowrap");
-            var binp = lord.node("input");
-            binp.type = "hidden";
-            binp.setAttribute("name", "boardName");
-            binp.value = bn;
-            div2.appendChild(binp);
-            div2.appendChild(lord.node("text", "[" + bn + "] " + bt + " "));
-            var selLevel = lord.id("banLevelsSelect").cloneNode(true);
-            selLevel.style.display = "";
-            selLevel.setAttribute("name", "level");
-            if (res[bn]) {
-                for (var i = 0; i < selLevel.options.length; ++i) {
-                    if (+selLevel.options[i] == res[bn].level) {
-                        selLevel.selectedIndex = i;
-                        break;
-                    }
-                }
-            } else {
-                selLevel.selectedIndex = 0;
-            }
-            div2.appendChild(selLevel);
-            div2.appendChild(lord.node("text", " "));
-            var expires = lord.node("input");
-            expires.type = "text";
-            expires.setAttribute("name", "expires");
-            expires.size = "23";
-            expires.placeholder = lord.text("banExpiresLabelText") + " <dd.MM.yyyy:hh>";
-            if (res[bn])
-                expires.value = res[bn].expires;
-            div2.appendChild(expires);
-            div2.appendChild(lord.node("text", " "));
-            var reason = lord.node("input");
-            reason.type = "text";
-            reason.placeholder = lord.text("banReasonLabelText") + " [...]";
-            reason.setAttribute("name", "reason");
-            reason.size = "33";
-            if (res[bn])
-                reason.value = res[bn].reason;
-            div2.appendChild(reason);
-            div1.appendChild(div2);
+    var c = {};
+    lord.getModel(["misc/base", "misc/tr", "misc/boards"], true).then(function(model) {
+        c.model = model;
+        c.model.settings = lord.settings();
+        return lord.getModel("api/bannedUser", "ip=" + userIp);
+    }).then(function(model) {
+        if (model)
+            c.model.bannedUser = model;
+        c.model.boardName = boardName;
+        c.model.postNumber = postNumber;
+        c.model.userIp = userIp;
+        return lord.getTemplate("userBan");
+    }).then(function(template) {
+        var nodes = $.parseHTML(template(c.model));
+        c.div = (nodes.length > 1) ? nodes[1] : nodes[0];
+        return lord.showDialog("banUserText", null, c.div);
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", c.div);
+        var formData = new FormData(form);
+        return $.ajax(form.action, {
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false
         });
-        div.appendChild(div1);
-        div.appendChild(lord.node("br"));
-        var div2 = lord.node("div");
-        var btnSel = lord.node("button");
-        btnSel.appendChild(lord.node("text", lord.text("selectAllText")));
-        btnSel.onclick = function() {
-            var levelInd = lord.nameOne("level", div2).selectedIndex;
-            var expires = lord.nameOne("expires", div2).value;
-            var reason = lord.nameOne("reason", div2).value;
-            lord.query("div", div1).forEach(function(d) {
-                lord.nameOne("level", d).selectedIndex = levelInd;
-                lord.nameOne("expires", d).value = expires;
-                lord.nameOne("reason", d).value = reason;
-            });
-        };
-        div2.appendChild(btnSel);
-        div2.appendChild(lord.node("text", " "));
-        var selLevel = lord.id("banLevelsSelect").cloneNode(true);
-        selLevel.style.display = "";
-        selLevel.setAttribute("name", "level");
-        selLevel.selectedIndex = 0;
-        div2.appendChild(selLevel);
-        div2.appendChild(lord.node("text", " "));
-        var expires = lord.node("input");
-        expires.type = "text";
-        expires.setAttribute("name", "expires");
-        expires.placeholder = lord.text("banExpiresLabelText") + " <dd.MM.yyyy:hh>";
-        expires.size = "23";
-        div2.appendChild(expires);
-        div2.appendChild(lord.node("text", " "));
-        var reason = lord.node("input");
-        reason.type = "text";
-        reason.placeholder = lord.text("banReasonLabelText") + " [...]";
-        reason.setAttribute("name", "reason");
-        reason.size = "33";
-        div2.appendChild(reason);
-        div.appendChild(div2);
-        div.appendChild(lord.node("br"));
-        var div3 = lord.node("div");
-        var selBoards = lord.id("availableBoardsSelect").cloneNode(true);
-        selBoards.style.display = "";
-        div3.appendChild(selBoards);
-        div3.appendChild(lord.node("text", " "));
-        var btnDel = lord.node("button");
-        btnDel.appendChild(lord.node("text", lord.text("delallButtonText")));
-        btnDel.onclick = function() {
-            var bn = selBoards.options[selBoards.selectedIndex].value;
-            lord.ajaxRequest("delall", [ip, bn], lord.RpcBanPosterId, function(res) {
-                lord.reloadPage();
-            });
-        };
-        div3.appendChild(btnDel);
-        div.appendChild(div3);
-        lord.showDialog(title, null, div, function() {
-            var bans = [];
-            lord.query("div", div1).forEach(function(d) {
-                var selLevel = lord.nameOne("level", d);
-                bans.push({
-                    "boardName": lord.nameOne("boardName", d).value,
-                    "level": +selLevel.options[selLevel.selectedIndex].value,
-                    "expires": lord.nameOne("expires", d).value,
-                    "reason": lord.nameOne("reason", d).value
-                });
-            });
-            var params = {
-                "boardName": boardName,
-                "postNumber": +postNumber,
-                "bans": bans
-            };
-            lord.ajaxRequest("ban_poster", [params], lord.RpcBanPosterId, function(res) {
-                lord.reloadPage();
-            });
-        });
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        if (result.errorMessage)
+            return Promise.reject(result);
+        lord.updatePost(postNumber);
+    }).catch(function(err) {
+        console.log(err);
     });
 };
 
@@ -1300,6 +1207,8 @@ lord.editPost = function(el) {
             contentType: false
         });
     }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
         if (result.errorMessage)
             return Promise.reject(result.errorMessage);
         return lord.updatePost(postNumber);
@@ -1308,8 +1217,10 @@ lord.editPost = function(el) {
     });
 };
 
-lord.setPostHidden = function(boardName, postNumber) {
-    if (!boardName || isNaN(+postNumber))
+lord.setPostHidden = function(el) {
+    var boardName = lord.data("boardName", el, true);
+    var postNumber = +lord.data("postNumber", el, true);
+    if (!boardName || isNaN(postNumber) || postNumber <= 1)
         return;
     var post = lord.id("post" + postNumber);
     if (!post)
@@ -1328,21 +1239,18 @@ lord.setPostHidden = function(boardName, postNumber) {
     }
     if (!hidden) {
         list[boardName + "/" + postNumber] = {};
-        (function(bn, pn) {
-            lord.ajaxRequest("get_post", [bn, +pn], lord.RpcGetPostId, function(res) {
-                if (!res)
-                    return;
-                var list = lord.getLocalObject("hiddenPosts", {});
-                if (!list[bn + "/" + pn])
-                    return;
-                list[bn + "/" + pn].subject = (res["subject"] ? res["subject"] : res["text"]).substring(0, 150);
-                list[bn + "/" + pn].threadNumber = res["threadNumber"];
-                lord.setLocalObject("hiddenPosts", list);
-            });
-        })(boardName, postNumber);
-    }
-    else if (list[boardName + "/" + postNumber])
+        lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(model) {
+            var list = lord.getLocalObject("hiddenPosts", {});
+            var key = boardName + "/" + postNumber;
+            if (!list[key])
+                return;
+            list[key].subject = (model.subject ? model.subject : model.text).substring(0, 150);
+            list[key].threadNumber = model.threadNumber;
+            lord.setLocalObject("hiddenPosts", list);
+        });
+    } else if (list[boardName + "/" + postNumber]) {
         delete list[boardName + "/" + postNumber];
+    }
     lord.setLocalObject("hiddenPosts", list);
     lord.strikeOutHiddenPostLinks();
 };
@@ -2358,6 +2266,8 @@ lord.globalOnmouseover = function(e) {
     var postNumber = +lord.data("postNumber", a);
     if (isNaN(postNumber) || postNumber <= 0)
         return;
+    if (!/^>>.*$/gi.test(a.textContent))
+        return;
     lord.viewPost(a, boardName, postNumber);
 };
 
@@ -2470,7 +2380,7 @@ lord.signOpPostLinks = function(parent) {
         delay: 10,
         n: 20
     }).then(function() {
-        if (list.length < 0)
+        if (list.length <= 0)
             return [];
         var query = "posts=" + list[0].boardName + ":" + list[0].postNumber;
         for (var i = 1; i < list.length; ++i)
@@ -2502,7 +2412,7 @@ lord.signOwnPostLinks = function(parent) {
         delay: 10,
         n: 20
     }).then(function() {
-        if (list.length < 0)
+        if (list.length <= 0)
             return [];
         var query = "posts=" + list[0].boardName + ":" + list[0].postNumber;
         for (var i = 1; i < list.length; ++i)
@@ -2660,7 +2570,7 @@ lord.hotkey_hidePost = function() {
     var p = lord.currentPost();
     if (!p)
         return;
-    lord.setPostHidden(lord.text("currentBoardName"), p.id.replace("post", ""));
+    lord.setPostHidden(p);
     return false;
 };
 

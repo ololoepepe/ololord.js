@@ -1,5 +1,5 @@
 {{~[it.bannedUser] :user}}
-    <div id="user{{=user.ip}}">
+    <div id="user{{? it.userIp}}{{=it.userIp}}{{??}}{{=user.ip}}{{?}}">
         {{#def.userBan}}
         <br />
     </div>

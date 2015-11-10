@@ -149,6 +149,17 @@ var getThreads = function(boardName, options) {
 
 module.exports.getThreads = getThreads;
 
+var bannedFor = function(boardName, postNumber, userIp) {
+    return db.hget("bannedUsers", userIp).then(function(result) {
+        if (!result)
+            return Promise.resolve(false);
+        var ban = JSON.parse(result).bans[boardName];
+        if (!ban)
+            return Promise.resolve(false);
+        return Promise.resolve(ban.postNumber == postNumber);
+    });
+};
+
 var threadPosts = function(boardName, threadNumber, options) {
     var board = Board.board(boardName);
     if (!board)
@@ -197,6 +208,14 @@ var threadPosts = function(boardName, threadNumber, options) {
             });
         };
         return getNext();
+    }).then(function() {
+        var promises = c.posts.map(function(post) {
+            return bannedFor(boardName, post.number, post.user.ip).then(function(banned) {
+                post.bannedFor = banned;
+                return Promise.resolve();
+            });
+        });
+        return Promise.all(promises);
     });
     if (!opts || (!options.withFileInfos && !options.withReferences && !options.withExtraData))
         return p;
@@ -260,6 +279,13 @@ var getPost = function(boardName, postNumber, options) {
     var p = db.hget("posts", key).then(function(post) {
         c.post = post ? JSON.parse(post) : null;
         return c.post;
+    }).then(function(post) {
+        if (!post)
+            return Promise.resolve(post);
+        return bannedFor(boardName, post.number, post.user.ip).then(function(banned) {
+            post.bannedFor = banned;
+            return Promise.resolve();
+        });
     });
     if (!opts || (!options.withFileInfos && !options.withReferences && !options.withExtraData))
         return p;
@@ -1212,6 +1238,7 @@ var rerenderPost = function(boardName, postNumber) {
     var key = boardName + ":" + postNumber;
     var c = {};
     console.log(`Rendering post: [${boardName}] ${postNumber}`);
+    //TODO: references
     return db.hget("posts", key).then(function(post) {
         c.post = JSON.parse(post);
         return markup(c.post.boardName, c.post.rawText, { markupModes: c.post.markup });
@@ -1354,6 +1381,7 @@ module.exports.editPost = function(req, fields) {
         c.post.subject = subject || null;
         c.post.text = c.text || null;
         c.post.updatedAt = date.toISOString();
+        delete c.post.bannedFor;
         return db.hset("posts", board.name + ":" + c.post.number, JSON.stringify(c.post));
     }).then(function() {
         return board.removeExtraData(c.post.number);
@@ -1400,7 +1428,9 @@ module.exports.deletePost = function(req, fields) {
     if (isNaN(postNumber) || postNumber <= 0)
         return Promise.reject("Invalid post number");
     var password = Tools.password(fields.password);
+    var c = {};
     return getPost(board.name, postNumber).then(function(post) {
+        c.post = post;
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
@@ -1408,7 +1438,12 @@ module.exports.deletePost = function(req, fields) {
         }
         return (post.threadNumber == post.number) ? removeThread(board.name, postNumber)
             : removePost(board.name, postNumber);
-    })
+    }).then(function() {
+        return {
+            boardName: board.name,
+            threadNumber: ((c.post.threadNumber != c.post.number) ? c.post.threadNumber : 0)
+        };
+    });
 };
 
 module.exports.editAudioTags = function(req, fields) {
@@ -1442,10 +1477,7 @@ module.exports.bannedUser = function(ip) {
     return db.hget("bannedUsers", ip).then(function(user) {
         if (!user)
             return Promise.resolve(null);
-        return Promise.resolve({
-            bans: JSON.parse(user),
-            ip: ip
-        });
+        return Promise.resolve(JSON.parse(user));
     });
 };
 
@@ -1453,10 +1485,7 @@ module.exports.bannedUsers = function() {
     return db.hgetall("bannedUsers").then(function(result) {
         var users = [];
         Tools.forIn(result, function(user, ip) {
-            users.push({
-                bans: JSON.parse(user),
-                ip: ip
-            });
+            users.push(JSON.parse(user));
         });
         return Promise.resolve(users);
     });
@@ -1484,5 +1513,8 @@ module.exports.banUser = function(req, ip, bans) {
         acc[ban.boardName] = ban;
         return acc;
     }, {});
-    return db.hset("bannedUsers", ip, JSON.stringify(bans));
+    return db.hset("bannedUsers", ip, JSON.stringify({
+        ip: ip,
+        bans: bans
+    }));
 };

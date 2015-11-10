@@ -148,7 +148,6 @@ module.exports.forever = function() {
 };
 
 module.exports.externalLinkRootZoneExists = function(zoneName) {
-    console.log(zoneName, rootZones.hasOwnProperty(zoneName));
     return rootZones.hasOwnProperty(zoneName);
 };
 

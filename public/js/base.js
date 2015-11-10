@@ -544,6 +544,13 @@ window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
     lord.initializeOnLoadSettings();
     lord.checkFavoriteThreads();
+    lord.getTemplate("post").then(function() {
+        return lord.getTemplate("settingsDialog");
+    }).then(function() {
+        return lord.getTemplate("editPostDialog");
+    }).catch(function(err) {
+        console.log(err);
+    });
 }, false);
 
 window.addEventListener("beforeunload", function unload() {
