@@ -127,7 +127,12 @@ _installHandler("register-user", function() {
             if ("*" != boardName && !Tools.contains(availableBoardNames, boardName))
                 return Promise.reject("Invalid board(s)");
         }
-        return Database.registerUser(password, c.level, c.boardNames);
+        return rl.question("Enter user IP (zero, one or more, separated by commas):\n"
+            + "[ip][,ip]...\n"
+            + "List: ");
+    }).then(function(answer) {
+        c.ips = answer ? answer.split(".") : [];
+        return Database.registerUser(password, c.level, c.boardNames, c.ips);
     }).then(function() {
         return Promise.resolve("OK");
     });

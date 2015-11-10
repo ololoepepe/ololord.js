@@ -365,13 +365,18 @@ var registeredUser = function(reqOrHashpass) {
 
 module.exports.registeredUser = registeredUser;
 
-module.exports.registerUser = function(hashpass, level, boardNames) {
+module.exports.registerUser = function(hashpass, level, boardNames, ips) {
     return db.hset("registeredUsers", hashpass, JSON.stringify({
         hashpass: hashpass,
         level: level,
         boardNames: boardNames,
         createdAt: Tools.now().toISOString()
-    }));
+    })).then(function() {
+        var promises = ips.map(function(ip) {
+            return db.hset("registeredUserHashes", ip, hashpass);
+        });
+        return Promise.resolve(promises);
+    });
 };
 
 var registeredUserLevel = function(reqOrHashpass) {
@@ -719,6 +724,21 @@ module.exports.createPost = function(req, fields, files, transaction) {
     });
 };
 
+var removeReferencedPosts = function(boardName, postNumber, threadNumber, referencedPosts) {
+    return db.del("referencedPosts:" + boardName + ":" + postNumber).then(function() {
+        c.selfRef = JSON.stringify({
+            boardName: boardName,
+            postNumber: postNumber,
+            threadNumber: threadNumber
+        });
+        var promises = [];
+        Tools.forIn(referencedPosts, function(ref) {
+            promises.push(db.srem("referringPosts:" + ref.boardName + ":" + ref.postNumber, selfRef));
+        });
+        return Promise.all(promises);
+    });
+};
+
 var removePost = function(boardName, postNumber) {
     var board = Board.board(boardName);
     if (!board)
@@ -732,18 +752,7 @@ var removePost = function(boardName, postNumber) {
     }).then(function() {
         return db.hdel("posts", boardName + ":" + postNumber);
     }).then(function() {
-        return db.del("referencedPosts:" + boardName + ":" + postNumber);
-    }).then(function() {
-        c.selfRef = JSON.stringify({
-            boardName: board.name,
-            postNumber: c.post.number,
-            threadNumber: c.post.threadNumber
-        });
-        var promises = [];
-        Tools.forIn(c.post.referencedPosts, function(ref) {
-            promises.push(db.srem("referringPosts:" + ref.boardName + ":" + ref.postNumber, c.selfRef));
-        });
-        return Promise.all(promises);
+        return removeReferencedPosts(boardName, postNumber, c.post.threadNumber, c.post.referencedPosts);
     }).then(function() {
         return postFileInfoNames(boardName, postNumber);
     }).then(function(names) {
@@ -1238,7 +1247,6 @@ var rerenderPost = function(boardName, postNumber) {
     var key = boardName + ":" + postNumber;
     var c = {};
     console.log(`Rendering post: [${boardName}] ${postNumber}`);
-    //TODO: references
     return db.hget("posts", key).then(function(post) {
         c.post = JSON.parse(post);
         return markup(c.post.boardName, c.post.rawText, { markupModes: c.post.markup });
@@ -1494,6 +1502,8 @@ module.exports.bannedUsers = function() {
 module.exports.banUser = function(req, ip, bans) {
     if (!ip)
         return Promise.reject("Invalid IP");
+    if (ip == req.trueIp)
+        return Promise.reject("Not enough rights");
     var err = bans.reduce(function(err, ban) {
         if (err)
             return err;
@@ -1504,17 +1514,26 @@ module.exports.banUser = function(req, ip, bans) {
         return null;
     }, null);
     if (err)
-        return Promise.resolve(err);
-    if (bans.length < 1)
-        return db.hdel("bannedUsers", ip);
-    var date = Tools.now();
-    bans = bans.reduce(function(acc, ban) {
-        ban.createdAt = date;
-        acc[ban.boardName] = ban;
-        return acc;
-    }, {});
-    return db.hset("bannedUsers", ip, JSON.stringify({
-        ip: ip,
-        bans: bans
-    }));
+        return Promise.reject(err);
+    return db.hget("registeredUserHashes", ip).then(function(hash) {
+        if (!hash)
+            return Promise.resolve();
+        return db.hget("registeredUsers", hash);
+    }).then(function(user) {
+        user = user ? JSON.parse(user) : null;
+        if (user && compareRegisteredUserLevels(req.level, user.level) <= 0)
+            return Promise.reject("Not enough rights");
+        if (bans.length < 1)
+            return db.hdel("bannedUsers", ip);
+        var date = Tools.now();
+        bans = bans.reduce(function(acc, ban) {
+            ban.createdAt = date;
+            acc[ban.boardName] = ban;
+            return acc;
+        }, {});
+        return db.hset("bannedUsers", ip, JSON.stringify({
+            ip: ip,
+            bans: bans
+        }));
+    });
 };
