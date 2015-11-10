@@ -407,4 +407,15 @@ board.customPostFormField = function(n, req, thread) {
     };
 };
 
+board.customEditPostDialogPart = function(n, req) {
+    if (50 != n)
+        return;
+    return function(it, thread, post) {
+        var model = post.extraData ? merge.clone(post.extraData) : {};
+        model.thread = thread;
+        model.post = post;
+        return controller.sync(it.req, "rpgEditPostDialogPart", model);
+    };
+};
+
 module.exports = board;

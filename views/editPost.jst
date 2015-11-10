@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
+{{? it.settings.mode.name != "ascetic"}}
+    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/merge.min.js"></script>
+    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/uuid.js"></script>
+    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/moment-with-locales.min.js"></script>
+    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base.js"></script>
+    {{? it.extraScripts}}
+        {{~it.extraScripts :script}}
+            {{? script.fileName}}
+                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/{{=script.fileName}}"></script>
+            {{?? script.value}}
+                <script type="text/javascript">{{=script.value}}</script>
+            {{?}}
+        {{~}}
+    {{?}}
+{{?}}
 <body class="{{=it.deviceType}}" {{#def.baseData}}>
 {{? it.customHeader}}
     {{#def.customHeader}}

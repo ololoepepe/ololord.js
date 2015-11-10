@@ -246,6 +246,10 @@ var Board = function(name, title, options) {
     //
 };
 
+/*public*/ Board.prototype.customEditPostDialogPart = function(n, req) {
+    //
+};
+
 /*public*/ Board.prototype.renderBoardPage = function(req, res) {
     return Promise.resolve(null);
 };

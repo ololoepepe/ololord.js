@@ -13,10 +13,18 @@
                     <div class="nowrap">
                         {{ var variant = it.variants[i]; }}
                         <input type="text" name="voteVariant_{{=variant.id}}" value="{{=variant.text}}"
-                               size="43" /><a href="javascript:void(0);" title="{{=it.tr.removeVoteVariantText}}"
-                                              onclick="lord.removeVoteVariant(this);"><img src="/{{=it.site.pathPrefix}}img/delete.png"
-                                                                                           class="buttonImage"></a>
+                               size="43" />{{? it.settings.mode.name != "ascetic"}}<a href="javascript:void(0);" title="{{=it.tr.removeVoteVariantText}}"
+                                                                                      onclick="lord.removeVoteVariant(this);"><img src="/{{=it.site.pathPrefix}}img/delete.png"
+                                                                                                                                   class="buttonImage"></a>{{?}}
                     </div>
+                {{ } }}
+            {{?}}
+            {{? it.settings.mode.name == "ascetic"}}
+                {{ for (var i = (it.variants ? it.variants.length : 0); i < 10; ++i) { }}
+                    <input type="text" name="voteVariant_{{ out += (i + 1); }}" size="43" />
+                    {{? i < 9}}
+                        <br />
+                    {{?}}
                 {{ } }}
             {{?}}
         </div>

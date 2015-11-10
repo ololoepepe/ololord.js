@@ -18,6 +18,7 @@ router.get("/editPost.html", function(req, res) {
         return controller.error(req, res, "Invalid post number");
     var model = {};
     model.title = Tools.translate("Edit post", "pageTitle");
+    model.extraScripts = board.extraScripts();
     Database.getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
         model.post = post;
         return boardModel.getThreadInfo(board, req.hashpass, post.threadNumber);
@@ -25,6 +26,9 @@ router.get("/editPost.html", function(req, res) {
         model.thread = thread;
         model.showSubmitButton = true;
         model = merge.recursive(model, controller.boardModel(board));
+        model.customEditPostDialogPart = {};
+        for (var i = 0; i < 110; i += 10)
+            model.customEditPostDialogPart[i] = board.customEditPostDialogPart(i, req);
         return controller(req, "editPost", model);
     }).then(function(data) {
         res.send(data);
