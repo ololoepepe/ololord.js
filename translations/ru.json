@@ -2759,11 +2759,10 @@
             "value": "Осталось постов:"
         }
     },
-    "Raw post text": {
-        "rawPostTextText": {
+    "Post source text": {
+        "postSourceText": {
             "value": "Исходный текст поста"
-        },
-        "_obsolete": true
+        }
     },
     "This is ololord. Enter \"help --all\" to see full Help": {
         "_default": {

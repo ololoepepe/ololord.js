@@ -82,6 +82,14 @@
                                 <img src="/{{=it.site.pathPrefix}}img/edit.png" /> {{=it.tr.editPostText}}</a>
                         </li>
                     {{?}}
+                    {{? post.rawText}}
+                        <li>
+                            <a name="sourceTextButton" target="_blank"
+                               href="/{{=it.site.pathPrefix}}postSourceText.html?boardName={{=it.board.name}}&postNumber={{=post.number}}"
+                               {{? it.settings.mode.name != "ascetic"}}onclick="lord.showPostSourceText(this); return false;"{{?}}>
+                                <img src="/{{=it.site.pathPrefix}}img/source_text.png" /> {{=it.tr.postSourceTextText}}</a>
+                        </li>
+                    {{?}}
                     {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 && post.isOp}}
                         {{? it.settings.mode.name != "ascetic"}}
                             <li>

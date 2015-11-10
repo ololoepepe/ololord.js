@@ -885,24 +885,19 @@ lord.countSymbols = function(textarea) {
     span.appendChild(lord.node("text", textarea.value.length.toString()));
 };
 
-lord.getRawPostText = function(boardName, postNumber) {
-    if (!boardName || isNaN(+postNumber))
+lord.showPostSourceText = function(el) {
+    var boardName = lord.data("boardName", el, true);
+    var postNumber = +lord.data("number", el, true);
+    if (!boardName || isNaN(postNumber) || postNumber <= 0)
         return;
-    var stage2 = function(text) {
-        var ta = lord.node("textarea");
-        ta.value = text;
-        ta.style.height = "400px";
-        ta.style.width = "400px";
-        lord.showDialog(lord.text("rawPostTextText"), null, ta);
-    };
-    if (lord.text("currntBoardName") == boardName) {
-        var post = lord.id("post" + postNumber);
-        var rawPostText = lord.nameOne("rawText", post);
-        if (rawPostText)
-            return stage2(rawPostText.value);
-    }
-    lord.ajaxRequest("get_post", [boardName, +postNumber], lord.RpcGetPostId, function(res) {
-        return stage2(res["rawPostText"]);
+    lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
+        var textArea = lord.node("textarea");
+        textArea.value = post.rawText;
+        textArea.rows = "30";
+        textArea.cols = "56";
+        return lord.showDialog("postSourceText", null, textArea);
+    }).catch(function(err) {
+        console.log(err);
     });
 };
 
