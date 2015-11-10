@@ -284,7 +284,7 @@ var getPost = function(boardName, postNumber, options) {
             return Promise.resolve(post);
         return bannedFor(boardName, post.number, post.user.ip).then(function(banned) {
             post.bannedFor = banned;
-            return Promise.resolve();
+            return Promise.resolve(c.post);
         });
     });
     if (!opts || (!options.withFileInfos && !options.withReferences && !options.withExtraData))
