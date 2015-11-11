@@ -1,14 +1,14 @@
-<div id="post{{=post.number}}"
+<div id="{{=post.number}}"
      class="{{? post.isOp}}opPost{{??}}post{{?}}{{? post.ownIp}} ownIp{{?}}{{? post.opIp}} opIp{{?}}{{? it.settings.shrinkPosts}} shrinkedPost{{?}}"
      data-board-name="{{=post.boardName}}"
      data-number="{{=post.number}}"
      data-thread-number="{{=post.threadNumber}}"
+     data-file-count={{=post.fileInfos.length}}
      {{? post.isOp}}data-is-op="true"{{?}}
      {{? post.ownIp}}data-own-ip="true"{{?}}
      {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 && it.settings.mode.name != "ascetic"}}
         data-user-ip="{{=post.user.ip}}"
      {{?}}>
-    <a id="{{=post.number}}"></a>
     <div class="postHeader">
         {{? post.isOp}}
             {{? thread.fixed}}
@@ -69,8 +69,8 @@
                     {{? (it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.options.draft) && (post.fileInfos.length < it.board.maxFileCount)}}
                         <li>
                             <a name="addFileButton" target="_blank"
-                               href="/{{=it.site.pathPrefix}}add_file?board={{=it.board.name}}&post={{=post.number}}"
-                               {{? it.settings.mode.name != "ascetic"}}onclick="lord.addFile(this); return false;"{{?}}>
+                               href="/{{=it.site.pathPrefix}}addFiles.html?boardName={{=it.board.name}}&postNumber={{=post.number}}"
+                               {{? it.settings.mode.name != "ascetic"}}onclick="lord.addFiles(this); return false;"{{?}}>
                                 <img src="/{{=it.site.pathPrefix}}img/add.png" /> {{=it.tr.addFileText}}</a>
                         </li>
                     {{?}}
@@ -176,7 +176,8 @@
                         <a name="deleteButton" target="_blank"
                            href="/{{=it.site.pathPrefix}}deletePost.html?boardName={{=it.board.name}}&postNumber={{=post.number}}"
                            {{? it.settings.mode.name != "ascetic"}}onclick="lord.deletePost(this); return false;"{{?}}>
-                            <img src="/{{=it.site.pathPrefix}}img/delete.png" /> {{=it.tr.deletePostText}}</a>
+                            <img src="/{{=it.site.pathPrefix}}img/delete.png" />
+                            {{? post.number == post.threadNumber}}{{=it.tr.deleteThreadText}}{{??}}{{=it.tr.deletePostText}}{{?}}</a>
                     </li>
                     {{? it.settings.mode.name != "ascetic"}}
                         <li>

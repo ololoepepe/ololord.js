@@ -1,8 +1,18 @@
 <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
-      action="/{{=it.site.pathPrefix}}action/deleteFile">
-    <input type="hidden" name="fileName" value="{{=it.fileName}}" />
+      action="/{{=it.site.pathPrefix}}action/addFiles"
+      data-max-file-count="{{=it.board.maxFileCount}}" data-file-count="{{=it.fileCount}}">
+    <input type="hidden" name="boardName" value="{{=it.boardName}}" />
+    <input type="hidden" name="postNumber" value="{{=it.postNumber}}" />
     <table>
         <tbody>
+            <tr>
+                <td class="postformLabel">
+                    <b>{{=it.tr.postFormInputFile}}</b>
+                </td>
+                <td class="postformField">
+                    {{#def.fileInputs}}
+                </td>
+            </tr>
             <tr>
                 <td>
                     <b>{{=it.tr.postFormLabelPassword}}</b>

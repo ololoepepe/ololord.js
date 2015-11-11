@@ -17,7 +17,6 @@ lord.filesMap = null;
 lord.spells = null;
 lord.worker = new Worker("/js/worker.js");
 lord.youtubeApplied = false;
-lord.lastSelectedElement = null;
 lord.customPostBodyPart = {};
 lord.customEditPostDialogPart = {};
 
@@ -395,9 +394,9 @@ lord.createPostNode = function(post, permanent) {
         };
         return lord.getTemplate("postReference").then(function(template) {
             var promises = post.referencedPosts.filter(function(reference) {
-                return reference.boardName == lord.data("boardName") && lord.id("post" + reference.postNumber);
+                return reference.boardName == lord.data("boardName") && lord.id(reference.postNumber);
             }).map(function(reference) {
-                var targetPost = lord.id("post" + reference.postNumber);
+                var targetPost = lord.id(reference.postNumber);
                 lord.nameOne("referencedByTr", targetPost).style.display = "";
                 var referencedBy = lord.nameOne("referencedBy", targetPost);
                 var list = lord.query("a", referencedBy);
@@ -432,7 +431,7 @@ lord.createPostNode = function(post, permanent) {
 };
 
 lord.updatePost = function(postNumber) {
-    var post = lord.id("post" + postNumber);
+    var post = lord.id(postNumber);
     if (!post)
         return Promise.reject("No such post");
     var boardName = lord.data("boardName");
@@ -490,25 +489,6 @@ lord.getFileHashes = function(div) {
     if (fhs)
         return fhs;
     return parent.parentNode.parentNode.parentNode.querySelector("[name='fileHashes']");
-};
-
-lord.getAdditionalCount = function(el) {
-    if (!el)
-        return 0;
-    el = el.parentNode;
-    if (!el)
-        return 0;
-    el = el.parentNode;
-    if (!el)
-        return 0;
-    el = el.parentNode;
-    if (!el)
-        return 0;
-    el = el.parentNode;
-    if (!el)
-        return 0;
-    el = lord.nameOne("additionalCount", el);
-    return el ? el.value : 0;
 };
 
 lord.hideImage = function() {
@@ -789,13 +769,11 @@ lord.tryHidePost = function(post, list) {
         list = lord.getLocalObject("hiddenPosts", {});
     if (!list[boardName + "/" + postNumber])
         return;
-    lord.addClass(post, "hiddenPost");
+    lord.addClass(post, "hidden");
     var thread = lord.id("thread" + postNumber);
     if (!thread)
         return;
-    lord.addClass(thread, "hiddenThread");
-    lord.addClass(lord.id("threadOmitted" + postNumber), "hiddenPosts");
-    lord.addClass(lord.id("threadPosts" + postNumber), "hiddenPosts");
+    lord.addClass(thread, "hidden");
     lord.strikeOutHiddenPostLinks();
 };
 
@@ -820,7 +798,7 @@ lord.quickReply = function(el) {
     var postNumber = +lord.data("number", el, true);
     if (isNaN(postNumber) || postNumber <= 0)
         return;
-    var post = lord.id("post" + postNumber);
+    var post = lord.id(postNumber);
     if (!post)
         return;
     var postForm = lord.id("postForm");
@@ -926,7 +904,7 @@ lord.deletePost = function(el) {
     }).then(function(result) {
         if (result.errorMessage)
             return Promise.reject(result.errorMessage);
-        var post = lord.id("post" + postNumber);
+        var post = lord.id(postNumber);
         if (!post)
             return Promise.reject("No such post");
         if (lord.data("isOp", post)) {
@@ -1066,22 +1044,36 @@ lord.insertPostNumber = function(postNumber) {
     }
 };
 
-lord.addFile = function(boardName, postNumber) {
-    if (!boardName || isNaN(+postNumber))
+lord.addFiles = function(el) {
+    var postNumber = +lord.data("number", el, true);
+    if (isNaN(postNumber) || postNumber <= 0)
         return;
-    var post = lord.id("post" + postNumber);
+    var post = lord.id(postNumber);
     if (!post)
         return;
-    var title = lord.text("addFileText");
-    var div = lord.id("addFileTemplate").cloneNode(true);
-    var form = lord.queryOne("form", div);
-    div.id = "";
-    div.style.display = "";
-    lord.nameOne("additionalCount", div).value = lord.query(".postFile", post).length;
-    lord.showDialog(title, null, div, function() {
-        if (!lord.getCookie("hashpass"))
-            return lord.showPopup(lord.text("notLoggedInText"), {type: "critical"});
-        lord.nameOne("postNumber", form).value = postNumber;
+    var boardName = lord.data("boardName");
+    var c = {};
+    lord.getModel([
+        "misc/base",
+        "misc/tr",
+        {
+            name: "misc/board",
+            query: "boardName=" + boardName
+        }
+    ], true).then(function(model) {
+        c.model = model;
+        c.model.settings = lord.settings();
+        c.model.boardName = boardName;
+        c.model.postNumber = postNumber;
+        c.model.fileCount = +lord.data("fileCount", el, true);
+        return lord.getTemplate("addFilesDialog");
+    }).then(function(template) {
+        c.div = $.parseHTML(template(c.model))[0];
+        return lord.showDialog("addFilesText", null, c.div);
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", c.div);
         var formData = new FormData(form);
         lord.query(".postformFile", form).forEach(function(div) {
             if (div.droppedFile)
@@ -1089,34 +1081,28 @@ lord.addFile = function(boardName, postNumber) {
             else if (div.fileUrl)
                 formData.append(div.droppedFileName, div.fileUrl);
         });
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", form.action);
-        var progress = lord.node("progress");
-        lord.addClass(progress, "progressBlocking");
-        progress.max = 100;
-        progress.value = 0;
-        document.body.appendChild(progress);
-        lord.toCenter(progress, progress.offsetWidth, progress.offsetHeight);
-        xhr.upload.onprogress = function(e) {
-            progress.value = Math.floor(100 * (e.loaded / e.total));
-        };
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    document.body.removeChild(progress);
-                    var response = xhr.responseText;
-                    var err = response.error;
-                    if (err)
-                        return lord.showPopup(err, {type: "critical"});
-                    lord.updatePost(postNumber, post);
-                } else {
-                    document.body.removeChild(progress);
-                    lord.showPopup(lord.text("ajaxErrorText") + " " + xhr.status, {type: "critical"});
-                }
-            }
-        };
-        xhr.send(formData);
-        return false;
+        return $.ajax(form.action, {
+            type: "POST",
+            data: formData,
+            xhr: function() {
+                var xhr = new XMLHttpRequest();
+                c.progressBar = new lord.OverlayProgressBar({ xhr: xhr });
+                c.progressBar.show();
+                return xhr;
+            },
+            processData: false,
+            contentType: false,
+        });
+    }).then(function(result) {
+        c.progressBar.hide();
+        if (!result)
+            return Promise.resolve();
+        if (result.errorMessage)
+            return Promise.reject(result.errorMessage);
+        return lord.updatePost(postNumber);
+    }).catch(function(err) {
+        c.progressBar.hide();
+        console.log(err);
     });
 };
 
@@ -1217,20 +1203,16 @@ lord.setPostHidden = function(el) {
     var postNumber = +lord.data("postNumber", el, true);
     if (!boardName || isNaN(postNumber) || postNumber <= 1)
         return;
-    var post = lord.id("post" + postNumber);
+    var post = lord.id(postNumber);
     if (!post)
         return;
     var thread = lord.id("thread" + postNumber);
     var list = lord.getLocalObject("hiddenPosts", {});
-    var hidden = lord.hasClass(post, "hiddenPost");
+    var hidden = lord.hasClass(post, "hidden");
     var f = !hidden ? lord.addClass : lord.removeClass;
-    f(post, "hiddenPost");
+    f(post, "hidden");
     if (thread) {
-        var omitted = lord.id("threadOmitted" + postNumber);
-        var posts = lord.id("threadPosts" + postNumber);
-        f(thread, "hiddenThread");
-        f(omitted, "hiddenPosts");
-        f(posts, "hiddenPosts");
+        f(thread, "hidden");
     }
     if (!hidden) {
         list[boardName + "/" + postNumber] = {};
@@ -1268,26 +1250,32 @@ lord.hideByImage = function(a) {
     });
 };
 
-lord.deleteFile = function(boardName, postNumber, fileName) {
-    if (!boardName || isNaN(+postNumber) || !fileName)
-        return;
-    var title = lord.text("enterPasswordTitle");
-    var label = lord.text("enterPasswordText");
-    var post = lord.id("post" + postNumber);
-    if (!post)
-        return;
-    lord.showPasswordDialog(title, label, function(pwd) {
-        if (null === pwd)
-            return;
-        if (pwd.length < 1) {
-            if (!lord.getCookie("hashpass"))
-                return lord.showPopup(lord.text("notLoggedInText"), {type: "critical"});
-        } else if (!lord.isHashpass(pwd)) {
-            pwd = lord.toHashpass(pwd);
-        }
-        lord.ajaxRequest("delete_file", [boardName, fileName, pwd], lord.RpcDeleteFileId, function() {
-            lord.updatePost(postNumber, post);
+lord.deleteFile = function(el) {
+    var c = {};
+    lord.getModel(["misc/base", "misc/tr"], true).then(function(model) {
+        c.model = model;
+        c.model.fileName = lord.data("fileName", el, true);
+        return lord.getTemplate("deleteFileDialog");
+    }).then(function(template) {
+        c.div = $.parseHTML(template(c.model))[0];
+        return lord.showDialog("enterPasswordTitle", "enterPasswordText", c.div);
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", c.div);
+        var formData = new FormData(form);
+        return $.ajax(form.action, {
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false
         });
+    }).then(function(result) {
+        if (result.errorMessage)
+            return Promise.reject(result.errorMessage);
+        return lord.updatePost(+lord.data("number", el, true));
+    }).catch(function(err) {
+        console.log(err);
     });
 };
 
@@ -1583,10 +1571,8 @@ lord.fileAddedCommon = function(div, file) {
     inp.onchange = f;
     div.querySelector("a").style.display = "inline";
     var maxCount = +lord.data("maxFileCount");
-    var additionalCount = lord.getAdditionalCount(inp);
-    if (additionalCount)
-        maxCount -= +additionalCount;
-    if (isNaN(maxCount))
+    maxCount -= +lord.data("fileCount", div, true) || 0;
+    if (maxCount <= 0)
         return;
     var parent = div.parentNode;
     if (parent.children.length >= maxCount)
@@ -1676,20 +1662,19 @@ lord.removeFile = function(current) {
     lord.clearFileInput(div);
     if (div.droppedFile)
         delete div.droppedFile;
-    if (parent.children.length > 1) {
+    if (parent.children.length > 0) {
         for (var i = 0; i < parent.children.length; ++i) {
             var c = parent.children[i];
-            if (!c.fileHash && lord.queryOne("input", c).value === "" && !c.droppedFile)
-                return;
+            if (!c.fileHash && lord.queryOne("input", c).value === "" && !c.droppedFile) {
+                if (parent.children.length > 0)
+                    return;
+                else
+                    c.querySelector("a").style.display = "none";
+            }
         }
-        var inp = lord.id("maxFileCount");
-        if (!inp)
-            return;
-        var maxCount = +inp.value;
-        var additionalCount = lord.getAdditionalCount(current);
-        if (additionalCount)
-            maxCount -= +additionalCount;
-        if (isNaN(maxCount))
+        var maxCount = +lord.data("maxFileCount");
+        maxCount -= +lord.data("fileCount", div, true) || 0;
+        if (maxCount <= 0)
             return;
         if (parent.children.length >= maxCount)
             return;
@@ -1697,11 +1682,6 @@ lord.removeFile = function(current) {
         div.querySelector("a").style.display = "none";
         div.innerHTML = div.innerHTML; //NOTE: Workaround since we can't clear it other way
         parent.appendChild(div);
-    }
-    if (parent.children.length > 0) {
-        var c = parent.children[0];
-        if (!c.fileHash && lord.queryOne("input", c).value === "" && !c.droppedFile)
-            c.querySelector("a").style.display = "none";
     }
     if (parent.children.length < 1) {
         div.querySelector("a").style.display = "none";
@@ -2093,7 +2073,7 @@ lord.addThreadToFavorites = function(boardName, threadNumber, callback, callback
             "previousLastPostNumber": pn,
             "subject": (opPost["subject"] ? opPost["subject"] : opPost["text"]).substring(0, 150)
         };
-        var opPost = lord.id("post" + threadNumber);
+        var opPost = lord.id(threadNumber);
         var btn = lord.nameOne("addToFavoritesButton", opPost);
         var img = lord.queryOne("img", btn);
         img.title = lord.text("removeFromFavoritesText");
@@ -2151,7 +2131,8 @@ lord.submitted = function(event, form) {
         c.tr = model.tr;
         return $.ajax(form.action, {
             type: "POST",
-            breforeSend: function(xhr) {
+            xhr: function() {
+                var xhr = new XMLHttpRequest();
                 xhr.upload.onprogress = function(e) {
                     var percent = Math.floor(100 * (e.loaded / e.total));
                     if (100 == percent)
@@ -2159,12 +2140,16 @@ lord.submitted = function(event, form) {
                     else
                         btn.value = lord.text("postFormButtonSubmitSending") + " " + percent + "%";
                 };
+                c.progressBar = new lord.OverlayProgressBar({ xhr: xhr });
+                c.progressBar.show();
+                return xhr;
             },
             data: formData,
             processData: false,
             contentType: false
         });
     }).then(function(result) {
+        c.progressBar.hide();
         resetButton();
         if (result.errorMessage)
             return Promise.reject(result.errorMessage);
@@ -2222,6 +2207,7 @@ lord.submitted = function(event, form) {
         }
         return Promise.resolve();
     }).catch(function(err) {
+        c.progressBar.hide();
         resetButton();
         lord.resetCaptcha();
         console.log(err);
@@ -2307,7 +2293,7 @@ lord.signOpPostLink = function(a, data) {
     var postNumber = +lord.data("postNumber", a);
     if (!postNumber)
         return;
-    var post = lord.id("post" + postNumber);
+    var post = lord.id(postNumber);
     if (lord.data("boardName", post) != boardName)
         post = null;
     if (post || data) {
@@ -2332,7 +2318,7 @@ lord.signOwnPostLink = function(a, data) {
     var postNumber = +lord.data("postNumber", a);
     if (!postNumber)
         return;
-    var post = lord.id("post" + postNumber);
+    var post = lord.id(postNumber);
     if (lord.data("boardName", post) != boardName)
         post = null;
     if (post || data) {
@@ -2808,21 +2794,7 @@ lord.initializeOnLoadBaseBoard = function() {
         lord.setLocalObject("lastPostNumbers", lastPostNumbers);
     }*/
     lord.initFiles();
-    lord.hashChangedHandler(lord.hash());
     lord.scrollHandler();
-};
-
-lord.hashChangedHandler = function(hash) {
-    if (lord.lastSelectedElement)
-        lord.removeClass(lord.lastSelectedElement, "selectedPost");
-    var postNumber = +hash;
-    if (isNaN(postNumber) || postNumber <= 0)
-        return;
-    var post = lord.id("post" + postNumber);
-    if (!post)
-        return;
-    lord.lastSelectedElement = post;
-    lord.addClass(post, "selectedPost");
 };
 
 lord.scrollHandler = function(e) {
@@ -2836,10 +2808,6 @@ lord.scrollHandler = function(e) {
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
     lord.initializeOnLoadBaseBoard();
-}, false);
-
-window.addEventListener("hashchange", function(e) {
-    lord.hashChangedHandler(lord.hash());
 }, false);
 
 window.addEventListener("scroll", lord.scrollHandler, false);

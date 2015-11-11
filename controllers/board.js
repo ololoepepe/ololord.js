@@ -44,6 +44,7 @@ var renderPage = function(model, board, req, json) {
     });
     return Promise.all(promises).then(function() {
         model.title = board.title;
+        model.includeBoardScripts = true;
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
         model.extraScripts = board.extraScripts();
@@ -83,6 +84,8 @@ var renderThread = function(model, board, req, json) {
     promises.unshift(board.renderPost(model.thread.opPost, req, model.thread.opPost));
     return Promise.all(promises).then(function() {
         model.title = board.title;
+        model.includeBoardScripts = true;
+        model.includeThreadScripts = true;
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
         model.extraScripts = board.extraScripts();
@@ -120,6 +123,7 @@ var renderCatalog = function(model, board, req, json) {
     });
     return Promise.all(promises).then(function() {
         model.title = board.title;
+        model.includeBoardScripts = true;
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
         model.sortMode = req.query.sort || "date";

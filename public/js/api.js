@@ -107,6 +107,81 @@ var lord = lord || {};
     }
 };
 
+/*constructor*/ lord.OverlayProgressBar = function(options) {
+    this.visible = false;
+    this.max = (options && +options.max >= 0) ? +options.max : 100;
+    this.value = (options && +options.value <= this.max) ? +options.value : 0;
+    this.mask = lord.node("div");
+    lord.addClass(this.mask, "overlayMask");
+    this.progressBar = lord.node("progress");
+    this.progressBar.max = this.max;
+    this.progressBar.value = this.value;
+    lord.addClass(this.progressBar, "overlayProgressBar");
+    var _this = this;
+    var createCancelButton = function(callback) {
+        _this.cancelButton = lord.node("button");
+        lord.addClass(_this.cancelButton, "button overlayProgressBarCancelButton");
+        _this.cancelButton.onclick = callback;
+        _this.cancelButton.appendChild(lord.node("text", "Cancel"));
+        lord.getModel("misc/tr").then(function(model) {
+            lord.removeChildren(_this.cancelButton);
+            _this.cancelButton.appendChild(lord.node("text", model.tr.cancelButtonText));
+        });
+    };
+    if (options && typeof options.cancelCallback == "function")
+        createCancelButton(options.cancelCallback);
+    else
+        this.cancelButton = null;
+    if (options && typeof options.finishCallback == "function") {
+        this.finishCallback = options.finishCallback;
+    } else {
+        this.finishCallback = function() {
+            _this.hide();
+        };
+    }
+    if (options && options.xhr) {
+        if (!this.cancelButton)
+            createCancelButton(options.xhr.abort);
+        options.xhr.upload.onprogress = function(e) {
+            if (!e.lengthComputable)
+                return;
+            _this.max = e.total;
+            _this.progressBar.max = _this.max;
+            _this.progress(e.loaded);
+        };
+    }
+};
+
+/*public*/ lord.OverlayProgressBar.prototype.progress = function(value) {
+    value = +value;
+    if (isNaN(value) || value < 0 || value > this.max)
+        return;
+    this.value = value;
+    this.progressBar.value = value;
+    if (value == this.max)
+        this.finishCallback();
+};
+
+/*public*/ lord.OverlayProgressBar.prototype.show = function() {
+    if (this.visible)
+        return;
+    this.visible = true;
+    document.body.appendChild(this.mask);
+    document.body.appendChild(this.progressBar);
+    if (this.cancelButton)
+        document.body.appendChild(this.cancelButton);
+};
+
+/*public*/ lord.OverlayProgressBar.prototype.hide = function() {
+    if (!this.visible)
+        return;
+    this.visible = false;
+    if (this.cancelButton)
+        document.body.removeChild(this.cancelButton);
+    document.body.removeChild(this.progressBar);
+    document.body.removeChild(this.mask);
+};
+
 /*Constants*/
 
 lord.Second = 1000;
@@ -371,7 +446,7 @@ lord.regexp = function(s) {
 };
 
 lord.id = function(id) {
-    if (typeof id != "string")
+    if (typeof id != "string" && typeof id != "number")
         return null;
     return document.getElementById(id);
 };

@@ -239,7 +239,7 @@ lord.removeThreadFromFavorites = function(boardName, threadNumber) {
     var fav = lord.getLocalObject("favoriteThreads", {});
     delete fav[boardName + "/" + threadNumber];
     lord.setLocalObject("favoriteThreads", fav);
-    var opPost = lord.id("post" + threadNumber);
+    var opPost = lord.id(threadNumber);
     if (!opPost)
         return false;
     var btn = lord.nameOne("addToFavoritesButton", opPost);

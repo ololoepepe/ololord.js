@@ -9,7 +9,7 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/editPost.html", function(req, res) {
+router.get("/addFiles.html", function(req, res) {
     var board = Board.board(req.query.boardName);
     if (!board)
         return controller.error(req, res, "Invalid board");
@@ -17,20 +17,15 @@ router.get("/editPost.html", function(req, res) {
     if (isNaN(postNumber) || postNumber <= 0)
         return controller.error(req, res, "Invalid post number");
     var model = {};
-    model.title = Tools.translate("Edit post", "pageTitle");
-    model.extraScripts = board.extraScripts();
+    model.title = Tools.translate("Add files", "pageTitle");
     model.includeBoardScripts = true;
-    Database.getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
-        model.post = post;
-        return boardModel.getThreadInfo(board, req.hashpass, post.threadNumber);
-    }).then(function(thread) {
-        model.thread = thread;
+    Database.getPost(board.name, postNumber, { withFileInfos: true }).then(function(post) {
         model.showSubmitButton = true;
         model = merge.recursive(model, controller.boardModel(board));
-        model.customEditPostDialogPart = {};
-        for (var i = 0; i < 110; i += 10)
-            model.customEditPostDialogPart[i] = board.customEditPostDialogPart(i, req);
-        return controller(req, "editPost", model);
+        model.boardName = board.name;
+        model.postNumber = postNumber;
+        model.fileCount = post.fileInfos.length;
+        return controller(req, "addFiles", model);
     }).then(function(data) {
         res.send(data);
     }).catch(function(err) {

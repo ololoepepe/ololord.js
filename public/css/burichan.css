@@ -13,7 +13,7 @@ body.mobile {
     -moz-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
-    font-size: 14px;
+    font-size: 14px;s
 }
 .to
 a {
@@ -341,15 +341,7 @@ span.newPostCount {
     text-align: center;
 }
 
-.hiddenVideo {
-    display: none;
-}
-
-.hiddenButton {
-    display: none;
-}
-
-.hiddenImage {
+.hiddenElement {
     display: none;
 }
 
@@ -506,15 +498,15 @@ span.newPostCount {
     background-color: #CDCDCD;
 }
 
-.hiddenPost > .postBody {
+.hidden > .postBody {
     display: none;
 }
 
-.opPost.hiddenPost ~ .post {
+.opPost.hidden ~ .post {
     display: none;
 }
 
-.selectedPost {
+.post:target, .opPost:target {
     background-color: #B0B0FF;
 }
 
@@ -522,11 +514,11 @@ span.newPostCount {
     border: 1px solid #000000;
 }
 
-.omittedPosts.hiddenPosts {
+.thread.hidden > .omittedPosts {
     display: none;
 }
 
-.threadPosts.hiddenPosts {
+.thread.hidden > .threadPosts {
     display: none;
 }
 
@@ -841,18 +833,6 @@ blockquote.blockquoteThread.expand {
     
 }
 
-progress.progressBlocking {
-    position: fixed;
-    z-index: 9970;
-    width: 600px;
-    height: 50px;
-}
-
-a.progressBlocking {
-    position: fixed;
-    z-index: 9980;
-}
-
 .theMessage {
     display: block;
     margin-left: auto;
@@ -1026,4 +1006,37 @@ a.progressBlocking {
 
 .alignCenter {
     text-align: center;
+}
+
+.overlayMask {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index: 100500;
+    background-color: #000000;
+    opacity: 0.6;
+}
+
+.overlayProgressBar {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 400px;
+    height: 50px;
+    margin-top: -25px;
+    margin-left: -200px;
+    z-index: 100501;        
+}
+
+.overlayProgressBarCancelButton {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    margin-top: -15px;
+    margin-left: -40px;
+    width: 80px;
+    height: 30px;
+    z-index: 100502;
 }

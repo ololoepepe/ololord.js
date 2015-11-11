@@ -217,6 +217,10 @@ ProcessingInfo.prototype.insert = function(from, txt, type) {
     if (!found && SkipTypes.NoSkip != type)
         this.skipList.unshift(info);
     this.text = this.text.substr(0, from) + txt + this.text.substr(from);
+    Tools.forIn(this.referencedPosts, function(ref) {
+        if (ref.position >= from)
+            ref.position += txt.length;
+    });
 };
 
 ProcessingInfo.prototype.replace = function(from, length, txt, correction, type) {
@@ -245,6 +249,10 @@ ProcessingInfo.prototype.replace = function(from, length, txt, correction, type)
     if (!found && SkipTypes.NoSkip != type)
         this.skipList.unshift(info);
     this.text = this.text.substr(0, from) + txt + this.text.substr(from + length);
+    Tools.forIn(this.referencedPosts, function(ref) {
+        if (ref.position >= from)
+            ref.position += (txt.length - length);
+    });
 };
 
 ProcessingInfo.prototype.toHtml = function() {
@@ -498,7 +506,9 @@ var convertPostLink = function(info, _, matchs, _, options) {
                 info.referencedPosts[boardName + ":" + postNumber] = {
                     boardName: boardName,
                     postNumber: postNumber,
-                    threadNumber: post.threadNumber
+                    threadNumber: post.threadNumber,
+                    createdAt: Tools.now(),
+                    position: matchs.index
                 };
             var href = "href=\"/" + config("site.pathPrefix", "") + boardName + "/res/" + post.threadNumber
                 + ".html#" + postNumber + "\"";

@@ -38,7 +38,6 @@ router.post("/login", function(req, res) {
 });
 
 router.post("/redirect", function(req, res) {
-    console.log(req.body.url);
     res.redirect(req.body.url || ("/" + config("site.pathPrefix", "")));
 });
 
@@ -208,7 +207,8 @@ router.post("/createPost", function(req, res) {
     }).then(function(post) {
         setMarkupModeCookie(res, c.fields);
         if (req.ascetic) {
-            //
+            res.redirect("/" + config("site.pathPrefix", "")
+                + `${c.board.name}/res/${post.threadNumber}#${post.number}`);
         } else {
             res.send({
                 boardName: post.boardName,
@@ -242,7 +242,7 @@ router.post("/createThread", function(req, res) {
     }).then(function(thread) {
         setMarkupModeCookie(res, c.fields);
         if (req.ascetic) {
-            //
+            res.redirect("/" + config("site.pathPrefix", "") + `${c.board.name}/res/${thread.number}`);
         } else {
             res.send({
                 boardName: thread.boardName,
@@ -274,6 +274,57 @@ router.post("/editPost", function(req, res) {
     });
 });
 
+router.post("/addFiles", function(req, res) {
+    var c = {};
+    var transaction = new Database.Transaction();
+    Tools.parseForm(req).then(function(result) {
+        c.fields = result.fields;
+        c.files = result.files;
+        c.board = Board.board(c.fields.boardName);
+        if (!board)
+            return Promise.reject("Invalid board");
+        transaction.board = board;
+        return getFiles(c.fields, c.files, transaction);
+    }).then(function(files) {
+        c.files = files;
+        var fileHashes = c.fields.fileHashes ? c.fields.fileHashes.split(",") : [];
+        var fileCount = c.files.length + fileHashes.length;
+        if (fileCount < 1)
+            return Promise.reject("No file specified");
+        var maxFileSize = c.board.maxFileSize;
+        var maxFileCount = c.board.maxFileCount;
+        if (fileCount > maxFileCount) {
+            return Promise.reject(Tools.translate("Too many files", "error"));
+        } else {
+            var err = c.files.reduce(function(err, file) {
+                if (err)
+                    return err;
+                if (file.size > maxFileSize)
+                    return Tools.translate("File is too big", "error");
+                if (c.board.supportedFileTypes.indexOf(file.mimeType) < 0)
+                    return Tools.translate("File type is not supported", "error");
+            }, "");
+            if (err)
+                return Promise.reject(err);
+        }
+        return Database.addFiles(req, c.fields, c.files, transaction);
+    }).then(function(result) {
+        if (req.ascetic) {
+            res.redirect("/" + config("site.pathPrefix", "")
+                + `${c.board.name}/res/${result.threadNumber}#${result.postNumber}`);
+        } else {
+            res.send({
+                boardName: result.boardName,
+                postNumber: result.postNumber,
+                threadNumber: result.threadNumber
+            });
+        }
+    }).catch(function(err) {
+        transaction.rollback();
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
 router.post("/deletePost", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         return Database.deletePost(req, result.fields);
@@ -282,6 +333,23 @@ router.post("/deletePost", function(req, res) {
             var path = result.boardName;
             if (result.threadNumber)
                 path += "/res/" + result.threadNumber + ".html";
+            res.redirect("/" + config("site.pathPrefix", "") + path);
+        } else {
+            res.send({});
+        }
+    }).catch(function(err) {
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
+router.post("/deleteFile", function(req, res) {
+    Tools.parseForm(req).then(function(result) {
+        return Database.deleteFile(req, result.fields);
+    }).then(function(result) {
+        if (req.ascetic) {
+            var path = result.boardName + "/res/" + result.threadNumber + ".html";
+            if (result.threadNumber != result.postNumber)
+                path += "#" + result.postNumber;
             res.redirect("/" + config("site.pathPrefix", "") + path);
         } else {
             res.send({});

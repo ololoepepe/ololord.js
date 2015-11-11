@@ -6,7 +6,9 @@ var router = express.Router();
 
 router.use("/action", require("./action"));
 
+router.use("/", require("./add-files"));
 router.use("/", require("./ban-user"));
+router.use("/", require("./delete-file"));
 router.use("/", require("./delete-post"));
 router.use("/", require("./edit-post"));
 router.use("/", require("./faq"));

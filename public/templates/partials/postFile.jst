@@ -23,22 +23,12 @@
         ({{=fileInfo.sizeText}})
     </div>
     <div class="postFileSearch">
-        {{? it.settings.mode.name != "ascetic"}}
-            <a name="deleteFileButton" onclick="lord.deleteFile(this); return false;">
-                <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.deleteFileText}}" /></a>
-            {{? fileInfo.mimeType.substr(0, 6) == "image/"}}
-                <a name="hideByImageButton" onclick="lord.hideByImage(this); return false;">
-                    <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}" /></a>
-            {{?}}
-        {{?? it.user.loggedIn}}
-            <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/delete_file"
-                  enctype="multipart/form-data" class="inlineForm">
-                <input type="hidden" name="boardName" value="{{=it.board.name}}" />
-                <input type="hidden" name="postNumber" value="{{=post.number}}" />
-                <input type="hidden" name="fileName" value="{{=fileInfo.name}}" />
-                <input type="image" name="deleteFileButton" src="/{{=it.site.pathPrefix}}img/delete.png"
-                       title="{{=it.tr.deleteFileText}}" />
-           </form>
+        <a href="/{{=it.site.pathPrefix}}deleteFile.html?fileName={{=fileInfo.name}}" name="deleteFileButton"
+           target="_blank" {{? it.settings.mode.name != "ascetic"}}onclick="lord.deleteFile(this); return false;"{{?}}>
+           <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.deleteFileText}}" /></a>
+        {{? it.settings.mode.name != "ascetic" && fileInfo.mimeType.substr(0, 6) == "image/"}}
+            <a name="hideByImageButton" onclick="lord.hideByImage(this); return false;">
+                <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}" /></a>
         {{?}}
         {{? fileInfo.mimeType.substr(0, 6) == "image/"}}
             <a href="//www.google.com/searchbyimage?image_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"

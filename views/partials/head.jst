@@ -21,9 +21,9 @@
             <script type="text/javascript"
                     src="/{{=it.site.pathPrefix}}js/3rdparty/moment-with-locales.min.js"></script>
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base.js"></script>
-            {{? it.threads || it.thread}}
+            {{? it.includeBoardScripts}}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/board.js"></script>
-                {{? it.thread}}
+                {{? it.includeThreadScripts}}
                     <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/thread.js"></script>
                 {{?}}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/lib-typedarrays-min.js"></script>
