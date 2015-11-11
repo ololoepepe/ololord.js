@@ -1094,14 +1094,15 @@ lord.addFiles = function(el) {
             contentType: false,
         });
     }).then(function(result) {
-        c.progressBar.hide();
         if (!result)
             return Promise.resolve();
+        c.progressBar.hide();
         if (result.errorMessage)
             return Promise.reject(result.errorMessage);
         return lord.updatePost(postNumber);
     }).catch(function(err) {
-        c.progressBar.hide();
+        if (c.progressBar)
+            c.progressBar.hide();
         console.log(err);
     });
 };

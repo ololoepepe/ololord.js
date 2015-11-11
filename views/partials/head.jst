@@ -24,6 +24,10 @@
             {{? it.includeBoardScripts}}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/board.js"></script>
                 {{? it.includeThreadScripts}}
+                    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jszip.min.js"></script>
+                    <script type="text/javascript"
+                            src="/{{=it.site.pathPrefix}}js/3rdparty/jszip-utils.min.js"></script>
+                    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/FileSaver.min.js"></script>
                     <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/thread.js"></script>
                 {{?}}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/lib-typedarrays-min.js"></script>

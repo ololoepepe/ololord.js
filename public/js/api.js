@@ -121,7 +121,10 @@ var lord = lord || {};
     var createCancelButton = function(callback) {
         _this.cancelButton = lord.node("button");
         lord.addClass(_this.cancelButton, "button overlayProgressBarCancelButton");
-        _this.cancelButton.onclick = callback;
+        _this.cancelButton.onclick = function() {
+            _this.cancelButton.disabled = true;
+            callback();
+        };
         _this.cancelButton.appendChild(lord.node("text", "Cancel"));
         lord.getModel("misc/tr").then(function(model) {
             lord.removeChildren(_this.cancelButton);

@@ -68,7 +68,6 @@ var lord = lord || {};
 lord.autoUpdateTimer = null;
 lord.blinkTimer = null;
 lord.pageVisible = "visible";
-lord.isDownloading = false;
 lord.loadingImage = null;
 
 /*Functions*/
@@ -270,41 +269,25 @@ lord.setAutoUpdateEnabled = function(cbox) {
 };
 
 lord.downloadThread = function() {
-    if (lord.isDownloading)
-        return;
     var as = lord.query(".postFile > .postFileFile > a");
     if (!as || as.length < 1)
         return;
-    var dlButton = lord.nameOne("downloadButton");
-    if (!dlButton)
-        return;
-    lord.isDownloading = true;
-    lord.addClass(dlButton, "disabled");
-    var progress = lord.node("progress");
-    lord.addClass(progress, "progressBlocking");
-    progress.max = as.length;
-    progress.value = 0;
-    var cButton = lord.node("a");
-    lord.addClass(cButton, "progressBlocking");
-    cButton.href = "javascript:void(0);";
     var cancel = false;
-    cButton.onclick = function() {
-        cancel = true;
-        document.body.removeChild(cButton);
-        document.body.removeChild(progress);
-    };
-    cButton.appendChild(lord.node("text", lord.text("cancelButtonText")));
-    document.body.appendChild(progress);
-    document.body.appendChild(cButton);
-    lord.toCenter(progress, progress.offsetWidth, progress.offsetHeight);
-    lord.toCenter(cButton, cButton.offsetWidth, cButton.offsetHeight);
     var zip = new JSZip();
+    var progressBar = new lord.OverlayProgressBar({
+        max: as.length,
+        cancelCallback: function() {
+            cancel = true;
+        },
+        finishCallback: function() {
+            progressBar.hide();
+            saveAs(zip.generate({ "type": "blob" }), document.title + ".zip");
+        }
+    });
     var last = 0;
-    var completed = 0;
     var append = function(i) {
         if (cancel) {
-            lord.isDownloading = false;
-            lord.removeClass(dlButton, "disabled");
+            progressBar.hide();
             return;
         }
         var a = as[i];
@@ -314,24 +297,12 @@ lord.downloadThread = function() {
                     "binary": true
                 });
             }
-            ++completed;
-            progress.value = +progress.value + 1;
-            if (completed == as.length) {
-                var content = zip.generate({
-                    "type": "blob"
-                });
-                if (!cancel) {
-                    document.body.removeChild(cButton);
-                    document.body.removeChild(progress);
-                }
-                saveAs(content, document.title + ".zip");
-                lord.isDownloading = false;
-                lord.removeClass(dlButton, "disabled");
-            }
+            progressBar.progress(progressBar.value + 1);
             if (last < as.length - 1)
                 append(++last);
         });
     };
+    progressBar.show();
     append(last);
     if (as.length > 1)
         append(++last);
