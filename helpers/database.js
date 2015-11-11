@@ -1065,7 +1065,7 @@ module.exports.generateRss = function() {
                 return Promise.resolve();
             return threadPosts(boardName, c.threads.shift().number, {
                 filterFunction: function(post) {
-                    return !post.draft;
+                    return !post.options.draft;
                 },
                 limit: (rssPostCount - posts.length),
                 withFileInfos: true
@@ -1349,7 +1349,7 @@ module.exports.addFiles = function(req, fields, files, transaction) {
     if (isNaN(postNumber) || postNumber <= 0)
         return Promise.reject("Invalid post number");
     return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
-        if (!post.draft && compareRegisteredUserLevels(req.level, "MODER") < 0)
+        if (!post.options.draft && compareRegisteredUserLevels(req.level, "MODER") < 0)
             return Promise.reject("Not enough rights");
         if ((!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
@@ -1419,7 +1419,7 @@ module.exports.editPost = function(req, fields) {
             markupModes.push(val);
     });
     return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
-        if (!post.draft && compareRegisteredUserLevels(req.level, "MODER") < 0)
+        if (!post.options.draft && compareRegisteredUserLevels(req.level, "MODER") < 0)
             return Promise.reject("Not enough rights");
         if ((!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
@@ -1491,6 +1491,64 @@ module.exports.editPost = function(req, fields) {
             promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
         return Promise.all(promises);
+    }).then(function() {
+        return Promise.resolve();
+    });
+};
+
+module.exports.setThreadFixed = function(req, fields) {
+    if (compareRegisteredUserLevels(req.level, "MODER") < 0)
+        return Promise.reject("Not enough rights");
+    var board = Board.board(fields.boardName);
+    if (!board)
+        return Promise.reject("Invalid board");
+    var date = Tools.now();
+    var c = {};
+    var threadNumber = +fields.threadNumber;
+    if (isNaN(threadNumber) || threadNumber <= 0)
+        return Promise.reject("Invalid thread number");
+    return db.hget("threads:" + board.name, threadNumber).then(function(thread) {
+        if (!thread)
+            return Promise.reject("No such thread");
+        thread = JSON.parse(thread);
+        if ((!req.hashpass || req.hashpass != thread.user.hashpass)
+            && (compareRegisteredUserLevels(req.level, thread.user.level) <= 0)) {
+            return Promise.reject("Not enough rights");
+        }
+        var fixed = (fields.fixed == "true");
+        if (thread.fixed == fixed)
+            return Promise.resolve();
+        thread.fixed = fixed;
+        db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
+    }).then(function() {
+        return Promise.resolve();
+    });
+};
+
+module.exports.setThreadClosed = function(req, fields) {
+    if (compareRegisteredUserLevels(req.level, "MODER") < 0)
+        return Promise.reject("Not enough rights");
+    var board = Board.board(fields.boardName);
+    if (!board)
+        return Promise.reject("Invalid board");
+    var date = Tools.now();
+    var c = {};
+    var threadNumber = +fields.threadNumber;
+    if (isNaN(threadNumber) || threadNumber <= 0)
+        return Promise.reject("Invalid thread number");
+    return db.hget("threads:" + board.name, threadNumber).then(function(thread) {
+        if (!thread)
+            return Promise.reject("No such thread");
+        thread = JSON.parse(thread);
+        if ((!req.hashpass || req.hashpass != thread.user.hashpass)
+            && (compareRegisteredUserLevels(req.level, thread.user.level) <= 0)) {
+            return Promise.reject("Not enough rights");
+        }
+        var closed = (fields.closed == "true");
+        if (thread.closed == closed)
+            return Promise.resolve();
+        thread.closed = closed;
+        db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
         return Promise.resolve();
     });

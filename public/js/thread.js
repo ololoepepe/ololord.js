@@ -245,7 +245,7 @@ lord.updateThread = function(silent) {
     }).catch(function(err) {
         if (popup)
             popup.hide();
-        console.log(err);
+        lord.handleError(err);
     });
 };
 

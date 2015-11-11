@@ -434,6 +434,38 @@ router.post("/changeSettings", function(req, res) {
     });
 });
 
+router.post("/setThreadFixed", function(req, res) {
+    var c = {};
+    Tools.parseForm(req).then(function(result) {
+        c.boardName = result.fields.boardName;
+        c.threadNumber = +result.fields.threadNumber;
+        return Database.setThreadFixed(req, result.fields);
+    }).then(function(result) {
+        if (req.ascetic)
+            res.redirect("/" + config("site.pathPrefix", "") + `${c.boardName}/res/${c.threadNumber}.html`);
+        else
+            res.send({});
+    }).catch(function(err) {
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
+router.post("/setThreadClosed", function(req, res) {
+    var c = {};
+    Tools.parseForm(req).then(function(result) {
+        c.boardName = result.fields.boardName;
+        c.threadNumber = +result.fields.threadNumber;
+        return Database.setThreadClosed(req, result.fields);
+    }).then(function(result) {
+        if (req.ascetic)
+            res.redirect("/" + config("site.pathPrefix", "") + `${c.boardName}/res/${c.threadNumber}.html`);
+        else
+            res.send({});
+    }).catch(function(err) {
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
 Captcha.captchaIds().forEach(function(id) {
     Captcha.captcha(id).actionRoutes().forEach(function(route) {
         router[route.method](route.path, route.handler);

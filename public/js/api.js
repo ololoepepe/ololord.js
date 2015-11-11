@@ -1111,3 +1111,23 @@ lord.setSettings = function(model) {
         }
     });
 };
+
+lord.checkError = function(result) {
+    return typeof result != "object" || result.errorMessage;
+};
+
+lord.handleError = function(error) {
+    var text;
+    if (error) {
+        if (error.errorMessage) {
+            text = error.errorMessage;
+            if (error.errorDescription)
+                text += ": " + errorDescription;
+        } else {
+            text = error;
+        }
+    } else {
+        text = "Unknown error";
+    }
+    lord.showPopup(text, {type: "critical"});
+};

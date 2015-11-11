@@ -874,9 +874,7 @@ lord.showPostSourceText = function(el) {
         textArea.rows = "30";
         textArea.cols = "56";
         return lord.showDialog("postSourceText", null, textArea);
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
 lord.deletePost = function(el) {
@@ -902,7 +900,7 @@ lord.deletePost = function(el) {
             contentType: false
         });
     }).then(function(result) {
-        if (result.errorMessage)
+        if (lord.checkError(result))
             return Promise.reject(result.errorMessage);
         var post = lord.id(postNumber);
         if (!post)
@@ -929,25 +927,41 @@ lord.deletePost = function(el) {
                 link.parentNode.replaceChild(lord.node("text", text), link);
             }
         }*/
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
-lord.setThreadFixed = function(boardName, postNumber, fixed) {
-    if (!boardName || isNaN(+postNumber))
-        return;
-    if (!lord.getCookie("hashpass"))
-        return lord.showPopup(lord.text("notLoggedInText"), {type: "critical"});
-    lord.ajaxRequest("set_thread_fixed", [boardName, +postNumber, !!fixed], lord.RpcSetThreadFixedId, lord.reloadPage);
+lord.setThreadFixed = function(el, fixed) {
+    var formData = new FormData();
+    formData.append("boardName", lord.data("boardName"));
+    formData.append("threadNumber", lord.data("number", el, true));
+    formData.append("fixed", fixed);
+    $.ajax("/" + lord.data("sitePathPrefix") + "action/setThreadFixed", {
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false
+    }).then(function(result) {
+        if (lord.checkError(result))
+            return Promise.reject(result);
+        lord.reloadPage();
+    }).catch(lord.handleError);
 };
 
-lord.setThreadOpened = function(boardName, postNumber, opened) {
-    if (!boardName || isNaN(+postNumber))
-        return;
-    if (!lord.getCookie("hashpass"))
-        return lord.showPopup(lord.text("notLoggedInText"), {type: "critical"});
-    lord.ajaxRequest("set_thread_opened", [boardName, +postNumber, !!opened], lord.RpcSetThreadOpenedId, lord.reloadPage);
+lord.setThreadClosed = function(el, closed) {
+    var formData = new FormData();
+    formData.append("boardName", lord.data("boardName"));
+    formData.append("threadNumber", lord.data("number", el, true));
+    formData.append("closed", closed);
+    $.ajax("/" + lord.data("sitePathPrefix") + "action/setThreadClosed", {
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false
+    }).then(function(result) {
+        if (lord.checkError(result))
+            return Promise.reject(result);
+        lord.reloadPage();
+    }).catch(lord.handleError);
 };
 
 lord.moveThread = function(boardName, threadNumber) {
@@ -1014,12 +1028,10 @@ lord.banUser = function(el) {
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
-        if (result.errorMessage)
+        if (lord.checkError(result))
             return Promise.reject(result);
         lord.updatePost(postNumber);
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
 lord.insertPostNumber = function(postNumber) {
@@ -1097,13 +1109,13 @@ lord.addFiles = function(el) {
         if (!result)
             return Promise.resolve();
         c.progressBar.hide();
-        if (result.errorMessage)
+        if (lord.checkError(result))
             return Promise.reject(result.errorMessage);
         return lord.updatePost(postNumber);
     }).catch(function(err) {
         if (c.progressBar)
             c.progressBar.hide();
-        console.log(err);
+        lord.handleError(err);
     });
 };
 
@@ -1191,12 +1203,10 @@ lord.editPost = function(el) {
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
-        if (result.errorMessage)
+        if (lord.checkError(result))
             return Promise.reject(result.errorMessage);
         return lord.updatePost(postNumber);
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
 lord.setPostHidden = function(el) {
@@ -1272,12 +1282,10 @@ lord.deleteFile = function(el) {
             contentType: false
         });
     }).then(function(result) {
-        if (result.errorMessage)
+        if (lord.checkError(result))
             return Promise.reject(result.errorMessage);
         return lord.updatePost(+lord.data("number", el, true));
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
 lord.editAudioTags = function(el) {
@@ -1307,9 +1315,7 @@ lord.editAudioTags = function(el) {
         if (typeof result == "undefined")
             return Promise.resolve();
         return lord.updatePost(+lord.data("number", el, true));
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
 lord.addToPlaylist = function(a) {
@@ -1385,9 +1391,7 @@ lord.viewPost = function(a, boardName, postNumber) {
             ? (scrollTop + coords.bottom - 4 + "px")
             : (scrollTop + coords.top - post.scrollHeight - 4 + "px");
         post.style.zIndex = 9001;
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
 lord.noViewPost = function() {
@@ -2152,7 +2156,7 @@ lord.submitted = function(event, form) {
     }).then(function(result) {
         c.progressBar.hide();
         resetButton();
-        if (result.errorMessage)
+        if (lord.checkError(result))
             return Promise.reject(result.errorMessage);
         if (result.postNumber) {
             c.post = true;
@@ -2192,9 +2196,7 @@ lord.submitted = function(event, form) {
                     lord.createPostNode(result, true).then(function(post) {
                         var lastPost = lord.query(".post, .opPost", parent).pop();
                         parent.appendChild(post, parent.lastChild);
-                    }).catch(function(err) {
-                        console.log(err);
-                    });
+                    }).catch(lord.handleError);
                 } else {
                     //The default
                     window.location = "/" + lord.data("sitePathPrefix") + result.boardName + "/res/"
@@ -2211,7 +2213,7 @@ lord.submitted = function(event, form) {
         c.progressBar.hide();
         resetButton();
         lord.resetCaptcha();
-        console.log(err);
+        lord.handleError(err);
     });
 };
 

@@ -308,8 +308,8 @@ lord.showNewPosts = function() {
     var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
     var currentBoardName = lord.data("boardName");
     $.ajax("/" + lord.data("sitePathPrefix") + "api/lastPostNumbers.json").then(function(result) {
-        if (result.errorMessage)
-            return Promise.reject(ersult.errorMessage);
+        if (lord.checkError(result))
+            return Promise.reject(result);
         lastPostNumbers[currentBoardName]
         lord.query(".navbar, .toolbar").forEach(function(navbar) {
             lord.query(".navbarItem", navbar).forEach(function(item) {
@@ -337,7 +337,7 @@ lord.showNewPosts = function() {
             lastPostNumbers[currentBoardName] = result[currentBoardName];
             lord.setLocalObject("lastPostNumbers", lastPostNumbers);
         }
-    });
+    }).catch(lord.handleError);
 };
 
 lord.editHotkeys = function() {
@@ -548,9 +548,7 @@ window.addEventListener("load", function load() {
         return lord.getTemplate("settingsDialog");
     }).then(function() {
         return lord.getTemplate("editPostDialog");
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 }, false);
 
 window.addEventListener("beforeunload", function unload() {

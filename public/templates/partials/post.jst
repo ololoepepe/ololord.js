@@ -94,35 +94,35 @@
                         {{? it.settings.mode.name != "ascetic"}}
                             <li>
                                 <a name="fixButton" href="javascript:void(0);"
-                                   onclick="lord.setThreadFixed(this); return false;">
+                                   onclick="lord.setThreadFixed(this, {{=!thread.fixed}}); return false;">
                                     <img src="/{{=it.site.pathPrefix}}img/{{? thread.fixed}}unfix{{??}}fixed{{?}}.png" />
                                     {{? thread.fixed}}{{=it.tr.unfixThreadText}}{{??}}{{=it.tr.fixThreadText}}{{?}}</a>
                             </li>
                             <li>
                                 <a name="closeButton" href="javascript:void(0);"
-                                   onclick="lord.setThreadOpened(this); return false;">
+                                   onclick="lord.setThreadClosed(this, {{=!thread.closed}}); return false;">
                                     <img src="/{{=it.site.pathPrefix}}img/{{? thread.closed}}open{{??}}closed{{?}}.png" />
                                     {{? thread.closed}}{{=it.tr.openThreadText}}{{??}}{{=it.tr.closeThreadText}}{{?}}</a>
                             </li>
                         {{??}}
                             <li>
                                 <form method="post" accept-charset="utf-8" enctype="multipart/form-data"
-                                      class="inlineForm" action="/{{=it.site.pathPrefix}}action/set_thread_fixed">
+                                      class="inlineForm" action="/{{=it.site.pathPrefix}}action/setThreadFixed">
                                     <input type="hidden" name="boardName" value="{{=it.board.name}}" />
                                     <input type="hidden" name="threadNumber" value="{{=post.number}}" />
                                     <input type="hidden" name="fixed" value="{{=!thread.fixed}}" />
-                                    <input type="image" name="deleteFileButton"
+                                    <input type="image" name="submit"
                                            src="/{{=it.site.pathPrefix}}img/{{? thread.fixed}}unfix{{??}}fixed{{?}}.png" />
                                     {{? thread.fixed}}{{=it.tr.unfixThreadText}}{{??}}{{=it.tr.fixThreadText}}{{?}}
                                 </form>
                             </li>
                             <li>
-                                <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
-                                      action="/{{=it.site.pathPrefix}}action/set_thread_opened">
+                                <form method="post" accept-charset="utf-8" enctype="multipart/form-data"
+                                      class="inlineForm" action="/{{=it.site.pathPrefix}}action/setThreadClosed">
                                     <input type="hidden" name="boardName" value="{{=it.board.name}}" />
                                     <input type="hidden" name="threadNumber" value="{{=post.number}}" />
-                                    <input type="hidden" name="opened" value="{{=thread.closed}}" />
-                                    <input type="image" name="deleteFileButton"
+                                    <input type="hidden" name="closed" value="{{=!thread.closed}}" />
+                                    <input type="image" name="submit"
                                            src="/{{=it.site.pathPrefix}}img/{{? thread.closed}}open{{??}}closed{{?}}.png" />
                                     {{? thread.cosed}}{{=it.tr.openThreadText}}{{??}}{{=it.tr.closeThreadText}}{{?}}
                             </form>
