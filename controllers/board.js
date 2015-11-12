@@ -57,6 +57,10 @@ var renderPage = function(model, board, req, json) {
         return model.captchaEngine.prepare(req);
     }).then(function(captchaPrepared) {
         model.captchaPrepared = captchaPrepared;
+        return board.getBannerFileName();
+    }).then(function(bannerFileName) {
+        if (bannerFileName)
+            model.board.bannerFileName = bannerFileName;
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
@@ -98,6 +102,10 @@ var renderThread = function(model, board, req, json) {
         return model.captchaEngine.prepare(req);
     }).then(function(captchaPrepared) {
         model.captchaPrepared = captchaPrepared;
+        return board.getBannerFileName();
+    }).then(function(bannerFileName) {
+        if (bannerFileName)
+            model.board.bannerFileName = bannerFileName;
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
@@ -127,6 +135,10 @@ var renderCatalog = function(model, board, req, json) {
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
         model.sortMode = req.query.sort || "date";
+        return board.getBannerFileName();
+    }).then(function(bannerFileName) {
+        if (bannerFileName)
+            model.board.bannerFileName = bannerFileName;
         if (!json || json.translations)
             model.tr = controller.translationsModel();
         if (json)

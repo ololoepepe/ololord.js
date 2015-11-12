@@ -70,7 +70,7 @@ board.actionRoutes = function() {
                 if (extraData.disabled)
                     return Promise.reject("This voting is disabled");
                 c.extraData = extraData;
-                return Database.db.sismember("voteUsers:" + c.postNumber, req.trueIp);
+                return Database.db.sismember("voteUsers:" + c.postNumber, req.ip);
             }).then(function(isMember) {
                 if (isMember)
                     return Promise.reject("You have already voted");
@@ -103,11 +103,11 @@ board.actionRoutes = function() {
                     return variants.indexOf(id) == index;
                 });
                 var promises = variants.map(function(id) {
-                    return Database.db.sadd("voteVariantUsers:" + c.postNumber + ":" + id, req.trueIp);
+                    return Database.db.sadd("voteVariantUsers:" + c.postNumber + ":" + id, req.ip);
                 });
                 return Promise.all(promises);
             }).then(function() {
-                return Database.db.sadd("voteUsers:" + c.postNumber, req.trueIp);
+                return Database.db.sadd("voteUsers:" + c.postNumber, req.ip);
             }).then(function() {
                 res.send({});
             }).catch(function(err) {
@@ -130,7 +130,7 @@ board.actionRoutes = function() {
                 if (extraData.disabled)
                     return Promise.reject("This voting is disabled");
                 c.extraData = extraData;
-                return Database.db.sismember("voteUsers:" + c.postNumber, req.trueIp);
+                return Database.db.sismember("voteUsers:" + c.postNumber, req.ip);
             }).then(function(isMember) {
                 if (!isMember)
                     return Promise.reject("You have not voted yet");
@@ -138,17 +138,17 @@ board.actionRoutes = function() {
                 c.extraData.variants.forEach(function(variant) {
                     if (!variant.users)
                         return;
-                    if (variant.users.indexOf(req.trueIp) >= 0)
+                    if (variant.users.indexOf(req.ip) >= 0)
                         variants.push(variant.id);
                 });
                 if (variants.length < 1)
                     return Promise.reject("Internal error");
                 var promises = variants.map(function(id) {
-                    return Database.db.srem("voteVariantUsers:" + c.postNumber + ":" + id, req.trueIp);
+                    return Database.db.srem("voteVariantUsers:" + c.postNumber + ":" + id, req.ip);
                 });
                 return Promise.all(promises);
             }).then(function() {
-                return Database.db.srem("voteUsers:" + c.postNumber, req.trueIp);
+                return Database.db.srem("voteUsers:" + c.postNumber, req.ip);
             }).then(function() {
                 res.send({});
             }).catch(function(err) {
@@ -226,7 +226,7 @@ var extraData = function(req, fields, edit) {
         p = Promise.resolve();
     }
     return p.then(function(opPost) {
-        if (opPost && (req.trueIp != opPost.user.ip && (!req.hashpass || req.hashpass != opPost.user.hashpass)))
+        if (opPost && (req.ip != opPost.user.ip && (!req.hashpass || req.hashpass != opPost.user.hashpass)))
             return Promise.reject("Attempt to attach voting while not being the OP");
         if (!fields.voteText)
             return Promise.reject("No vote text provided");
@@ -360,14 +360,14 @@ board.renderPost = function(post, req) {
             post.extraData.variants.forEach(function(variant) {
                 if (!variant.users)
                     return;
-                if (variant.users.indexOf(req.trueIp) >= 0)
+                if (variant.users.indexOf(req.ip) >= 0)
                     variant.ownIp = true;
                 variant.voteCount = variant.users.length;
                 delete variant.users;
             });
         }
         if (post.extraData.users) {
-            if (post.extraData.users.indexOf(req.trueIp) >= 0)
+            if (post.extraData.users.indexOf(req.ip) >= 0)
                 post.extraData.voted = true;
             delete post.extraData.users;
         }
@@ -392,7 +392,7 @@ board.customPostFormField = function(n, req, thread) {
         return;
     if (thread) {
         var user = thread.opPost.user;
-        if (user.ip != req.trueIp && (!req.hashpass || user.hashpass != req.hashpass))
+        if (user.ip != req.ip && (!req.hashpass || user.hashpass != req.hashpass))
             return;
     }
     var _this = this;

@@ -12,7 +12,7 @@ googleRecaptcha.checkCaptcha = function(req, fields) {
         return Promise.reject("Captcha challenge is empty");
     if (!response)
         return Promise.reject("Captcha is empty", "error");
-    var query = `privatekey=${this.privateKey}&remoteip=${req.trueIp}&challenge=${encodeURIComponent(challenge)}`
+    var query = `privatekey=${this.privateKey}&remoteip=${req.ip}&challenge=${encodeURIComponent(challenge)}`
         + `&response=${encodeURIComponent(response)}`;
     var url = "https://www.google.com/recaptcha/api/verify?" + query;
     return HTTP.request({

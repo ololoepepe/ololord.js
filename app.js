@@ -22,28 +22,12 @@ var spawnCluster = function() {
     expressCluster(function(worker) {
         console.log("[" + process.pid + "] Initializing...");
 
-        var cookieParser = require("cookie-parser");
-        var DDoS = require("ddos");
-        var device = require("express-device");
         var express = require("express");
 
         var controller = require("./helpers/controller");
 
         var app = express();
-        var ddos = new DDoS({
-            maxcount: 50,
-            burst: 10,
-            limit: (10 * 4),
-            maxexpiry: 30,
-            checkinterval: 1,
-            silentStart: true,
-            errormessage: "<html><head></head><body><img src='http://i3.kym-cdn.com/photos/images/masonry/000/112/322/130221984383.png'></body></html>"
-        });
 
-        app.use(express.static(__dirname + "/public"));
-        app.use(ddos.express);
-        app.use(cookieParser());
-        app.use(device.capture());
         app.use(require("./middlewares"));
         app.use(require("./controllers"));
         app.use("*", function(req, res) {

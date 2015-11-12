@@ -178,10 +178,17 @@ var Board = function(name, title, options) {
     };
     if (banners[this.name])
         return Promise.resolve(randomFile(banners[this.name]));
-    return QFS.readdir(__dirname + "/../public/img/banners/" + this.name).then(function(files) {
+    var path = __dirname + "/../public/img/banners/" + this.name;
+    return FS.exists(path).then(function(exists) {
+        if (!exists)
+            return Promise.resolve([]);
+        return FS.list(path);
+    }).then(function(files) {
+        if (files.length < 1)
+            return Promise.resolve(null);
         banners[this.name] = files;
-        return Promise.resolve(files);
-    });
+        return Promise.resolve(randomFile(files));
+    });;
 };
 
 /*public*/ Board.prototype.isCaptchaEngineSupported = function(engineName) {
@@ -304,7 +311,7 @@ var renderFileInfo = function(fi) {
     });
     post.rawSubject = post.subject;
     post.isOp = (post.number == post.threadNumber);
-    post.ownIp = (req.trueIp == post.user.ip);
+    post.ownIp = (req.ip == post.user.ip);
     post.ownHashpass = (req.hashpass && req.hashpass == post.user.hashpass);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
     if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0)

@@ -152,7 +152,7 @@ router.get("/lastPostNumber.json", function(req, res) {
 });
 
 router.get("/captchaQuota.json", function(req, res) {
-    Database.getUserCaptchaQuota(req.query.boardName, req.trueIp).then(function(quota) {
+    Database.getUserCaptchaQuota(req.query.boardName, req.ip).then(function(quota) {
         res.json(quota);
     }).catch(function(err) {
         controller.error(req, res, err, true);

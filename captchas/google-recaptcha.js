@@ -9,7 +9,7 @@ googleRecaptcha.checkCaptcha = function(req, fields) {
     var captcha = fields["g-recaptcha-response"];
     if (!captcha)
         return Promise.reject("Captcha is empty");
-    var query = `secret=${this.privateKey}&response=${captcha}&remoteip=${req.trueIp}`;
+    var query = `secret=${this.privateKey}&response=${captcha}&remoteip=${req.ip}`;
     var url = "https://www.google.com/recaptcha/api/siteverify?" + query;
     return HTTP.request({
         url: url,

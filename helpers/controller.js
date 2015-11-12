@@ -211,10 +211,10 @@ controller.notFound = function(req, res) {
 };
 
 controller.checkBan = function(req, res, boardName, write) {
-    var ban = ipBans[req.trueIp];
+    var ban = ipBans[req.ip];
     if (ban && (write || "NO_ACCESS" == ban.level))
         return Promise.reject({ ban: ban });
-    return Database.bannedUser(req.trueIp).then(function(user) {
+    return Database.bannedUser(req.ip).then(function(user) {
         if (!user || !user.bans || user.bans.length < 1)
             return Promise.resolve();
         var ban = user.bans[boardName];
@@ -237,7 +237,7 @@ controller.baseModel = function(req) {
             timeOffset: config("site.timeOffset", 0)
         },
         user: {
-            ip: req.trueIp,
+            ip: req.ip,
             level: req.level,
             loggedIn: !!req.hashpass
         },

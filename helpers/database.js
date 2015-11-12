@@ -551,7 +551,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     var referencedPosts = {};
     var password = Tools.password(fields.password);
     var hashpass = (req.hashpass || null);
-    var ip = (req.trueIp || null);
+    var ip = (req.ip || null);
     Tools.forIn(markup.MarkupModes, function(val) {
         if (fields.markupMode && fields.markupMode.indexOf(val) >= 0)
             markupModes.push(val);
@@ -694,7 +694,7 @@ var checkCaptcha = function(req, fields) {
         return Promise.reject("Invalid board");
     if (!board.captchaEnabled)
         return Promise.resolve();
-    var ip = req.trueIp;
+    var ip = req.ip;
     return getUserCaptchaQuota(board.name, ip).then(function(quota) {
         if (board.captchaQuota > 0 && +quota > 0)
             return captchaUsed(board.name, ip);
@@ -927,7 +927,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
             },
             user: {
                 hashpass: hashpass,
-                ip: (req.trueIp || null),
+                ip: (req.ip || null),
                 level: c.level,
                 password: password
             }
@@ -1683,7 +1683,7 @@ module.exports.bannedUsers = function() {
 module.exports.banUser = function(req, ip, bans) {
     if (!ip)
         return Promise.reject("Invalid IP");
-    if (ip == req.trueIp)
+    if (ip == req.ip)
         return Promise.reject("Not enough rights");
     var err = bans.reduce(function(err, ban) {
         if (err)

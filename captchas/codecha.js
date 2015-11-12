@@ -15,7 +15,7 @@ codecha.checkCaptcha = function(req, fields) {
         return Promise.reject("Captcha challenge is empty");
     if (!response)
         return Promise.reject("Captcha is empty", "error");
-    var body = `challenge=${challenge}&response=${response}&remoteip=${req.trueIp}&privatekey=${this.privateKey}`;
+    var body = `challenge=${challenge}&response=${response}&remoteip=${req.ip}&privatekey=${this.privateKey}`;
     var url = "http://codecha.org/api/verify";
     return HTTP.request({
         url: url,
