@@ -49,30 +49,27 @@
         },
         "_obsolete": true
     },
-    "Posting is disabled for this board": {
-        "description": {
-            "value": "На этой доске постинг запрещен",
-            "_obsolete": true
-        },
-        "postingDisabledText": {
-            "value": "На этой доске постинг запрещен",
-            "_obsolete": true
-        },
+    "Posting is disabled at this board": {
         "postingDisabledBoardText": {
-            "value": "Posting is disabled for this board"
+            "value": "На этой доске постинг запрещен"
         }
     },
     "Internal error": {
         "error": {
-            "value": "Внутренняя ошибка"
+            "value": "Внутренняя ошибка",
+            "_obsolete": true
         },
         "internalErrorText": {
-            "value": "Внутренняя ошибка"
+            "value": "Внутренняя ошибка",
+            "_obsolete": true
         },
         "_default": {
-            "value": "Внутренняя ошибка"
+            "value": "Внутренняя ошибка",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "errorMessage": {
+            "value": "Internal error"
+        }
     },
     "Internal database error": {
         "description": {
@@ -275,7 +272,8 @@
     },
     "KB": {
         "fileSize": {
-            "value": "Кб"
+            "value": "Кб",
+            "_obsolete": true
         },
         "kilobytesText": {
             "value": "КБ"
@@ -320,19 +318,11 @@
         }
     },
     "/h/entai": {
-        "title": {
-            "value": "Хентай",
-            "_obsolete": true
-        },
         "boardTitle": {
-            "value": "/h/entai"
+            "value": "Хентай"
         }
     },
     "/int/ernational": {
-        "title": {
-            "value": "/int/ernational",
-            "_obsolete": true
-        },
         "boardTitle": {
             "value": "/int/ernational"
         }
@@ -343,12 +333,8 @@
         }
     },
     "Refuge": {
-        "title": {
-            "value": "Убежище",
-            "_obsolete": true
-        },
         "boardTitle": {
-            "value": "Refuge"
+            "value": "Убежище"
         }
     },
     "Whiner": {
@@ -357,12 +343,8 @@
         }
     },
     "Social life": {
-        "title": {
-            "value": "Жизнь в обществе",
-            "_obsolete": true
-        },
         "boardTitle": {
-            "value": "Social life"
+            "value": "Жизнь в обществе"
         }
     },
     "Life of the party": {
@@ -371,21 +353,13 @@
         }
     },
     "3D pron": {
-        "title": {
-            "value": "3D прон",
-            "_obsolete": true
-        },
         "boardTitle": {
-            "value": "3D pron"
+            "value": "3D прон"
         }
     },
     "Video games": {
-        "title": {
-            "value": "Видеоигры",
-            "_obsolete": true
-        },
         "boardTitle": {
-            "value": "Video games"
+            "value": "Видеоигры"
         }
     },
     "PC Nobleman": {
@@ -475,12 +449,8 @@
         "_obsolete": true
     },
     "/po/litics": {
-        "title": {
-            "value": "Политика",
-            "_obsolete": true
-        },
         "boardTitle": {
-            "value": "/po/litics"
+            "value": "Политика"
         }
     },
     "Armchair warrior": {
@@ -508,14 +478,16 @@
     },
     "Edit post": {
         "pageTitle": {
-            "value": "Редактировать пост",
-            "_obsolete": true
+            "value": "Редактировать пост"
         },
         "editPostText": {
             "value": "Редактировать пост"
         }
     },
     "Draft": {
+        "draftText": {
+            "value": "Черновик"
+        },
         "postFormLabelDraft": {
             "value": "Черновик"
         }
@@ -711,7 +683,8 @@
     "No such board": {
         "error": {
             "value": "Нет такой доски"
-        }
+        },
+        "_obsolete": true
     },
     "Invalid captcha type": {
         "error": {
@@ -856,8 +829,7 @@
     },
     "Ban user": {
         "pageTitle": {
-            "value": "Забанить пользователя",
-            "_obsolete": true
+            "value": "Забанить пользователя"
         },
         "banUserText": {
             "value": "Забанить пользователя"
@@ -877,7 +849,8 @@
             "value": "Истекает:"
         },
         "errorDescription": {
-            "value": "Истекает:"
+            "value": "Истекает:",
+            "_obsolete": true
         }
     },
     "Level:": {
@@ -906,7 +879,8 @@
             "value": "Причина:"
         },
         "banReasonLabel": {
-            "value": "Причина:"
+            "value": "Причина:",
+            "_obsolete": true
         }
     },
     "Board:": {
@@ -925,9 +899,12 @@
     },
     "Codecha - programmers' CAPTCHA": {
         "title": {
-            "value": "Codecha - программистская CAPTCHA"
+            "value": "Codecha - программистская CAPTCHA",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "_default": {
+            "value": "Codecha - programmers' CAPTCHA"
+        }
     },
     "Invalid ip": {
         "error": {
@@ -1086,8 +1063,7 @@
     },
     "User management": {
         "pageTitle": {
-            "value": "Управление пользователями",
-            "_obsolete": true
+            "value": "Управление пользователями"
         },
         "toManagePageText": {
             "value": "Управление пользователями"
@@ -1313,13 +1289,11 @@
     "Invalid search query": {
         "error": {
             "value": "Недействительный поисковый запрос"
-        },
-        "_obsolete": true
+        }
     },
     "Search": {
         "pageTitle": {
-            "value": "Поиск",
-            "_obsolete": true
+            "value": "Поиск"
         },
         "searchButtonText": {
             "value": "Искать"
@@ -1333,8 +1307,7 @@
     "Nothing found": {
         "nothingFoundMessage": {
             "value": "Ничего не найдено"
-        },
-        "_obsolete": true
+        }
     },
     "Query error": {
         "error": {
@@ -1344,8 +1317,7 @@
     },
     "Settings": {
         "pageTitle": {
-            "value": "Настройки",
-            "_obsolete": true
+            "value": "Настройки"
         },
         "settingsButtonText": {
             "value": "Настройки"
@@ -1392,12 +1364,8 @@
         "_obsolete": true
     },
     "Console games": {
-        "board title": {
-            "value": "Консольные игры",
-            "_obsolete": true
-        },
         "boardTitle": {
-            "value": "Console games"
+            "value": "Консольные игры"
         }
     },
     "No games": {
@@ -1500,12 +1468,8 @@
         "_obsolete": true
     },
     "Board /d/iscussion": {
-        "board title": {
-            "value": "/d/искуссии о борде",
-            "_obsolete": true
-        },
         "boardTitle": {
-            "value": "Board /d/iscussion"
+            "value": "/d/искуссии о борде"
         }
     },
     "Invalid password": {
@@ -1536,12 +1500,8 @@
         "_obsolete": true
     },
     "Boardsphere echo": {
-        "board title": {
-            "value": "Эхо бордосферы",
-            "_obsolete": true
-        },
         "boardTitle": {
-            "value": "Boardsphere echo"
+            "value": "Эхо бордосферы"
         }
     },
     "This board/thread may not be accepted": {
@@ -1816,12 +1776,8 @@
         }
     },
     "Favorites": {
-        "showFavoriteText": {
-            "value": "Избранное",
-            "_obsolete": true
-        },
         "showFavoritesText": {
-            "value": "Favorites"
+            "value": "Избранное"
         }
     },
     "Close": {
@@ -2397,13 +2353,9 @@
             "value": "Пароль:"
         }
     },
-    "Posting is disabled for this thread": {
-        "postingDisabledText": {
-            "value": "В этом треде постинг запрещен",
-            "_obsolete": true
-        },
+    "Posting is disabled in this thread": {
         "postingDisabledThreadText": {
-            "value": "Posting is disabled for this thread"
+            "value": "В этом треде постинг запрещен"
         }
     },
     "Post limit reached": {
@@ -2516,6 +2468,9 @@
     "Delete post": {
         "deletePostText": {
             "value": "Удалить пост"
+        },
+        "pageTitle": {
+            "value": "Delete post"
         }
     },
     "Delete thread": {
@@ -2526,6 +2481,9 @@
     "Delete file": {
         "deleteFileText": {
             "value": "Удалить файл"
+        },
+        "pageTitle": {
+            "value": "Delete file"
         }
     },
     "Sending:": {
@@ -2595,11 +2553,6 @@
     "This file exists on server. It will NOT be uploaded, but WILL be copied.": {
         "fileExistsOnServerText": {
             "value": "Этот файл существует на сервере. Он НЕ будет загружен, но БУДЕТ скопирован."
-        }
-    },
-    "Draft": {
-        "draftText": {
-            "value": "Черновик"
         }
     },
     "Next file": {
@@ -2760,8 +2713,11 @@
         }
     },
     "Post source text": {
-        "postSourceText": {
+        "postSourceTextText": {
             "value": "Исходный текст поста"
+        },
+        "pageTitle": {
+            "value": "Post source text"
         }
     },
     "This is ololord. Enter \"help --all\" to see full Help": {
@@ -3155,12 +3111,8 @@
         "_obsolete": true
     },
     "My Little Pony": {
-        "board title": {
-            "value": "Мой маленький пони",
-            "_obsolete": true
-        },
         "boardTitle": {
-            "value": "My Little Pony"
+            "value": "Мой маленький пони"
         }
     },
     "Hands off my pony!!!!!11": {
@@ -3182,12 +3134,8 @@
         "_obsolete": true
     },
     "/pr/ogramming": {
-        "board title": {
-            "value": "Программирование",
-            "_obsolete": true
-        },
         "boardTitle": {
-            "value": "/pr/ogramming"
+            "value": "Программирование"
         }
     },
     "Invalid hashpass": {
@@ -3213,21 +3161,29 @@
     },
     "reading and posting are restricted": {
         "pageTitle": {
-            "value": "запрещены чтение и постинг"
+            "value": "запрещены чтение и постинг",
+            "_obsolete": true
         },
         "errorDescription": {
-            "value": "запрещены чтение и постинг"
+            "value": "запрещены чтение и постинг",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "readingAndPostingRestrictedtext": {
+            "value": "reading and posting are restricted"
+        }
     },
     "posting is restricted (read-only access)": {
         "pageTitle": {
-            "value": "запрещен постинг (доступ ридонли)"
+            "value": "запрещен постинг (доступ ридонли)",
+            "_obsolete": true
         },
         "errorDescription": {
-            "value": "запрещен постинг (доступ ридонли)"
+            "value": "запрещен постинг (доступ ридонли)",
+            "_obsolete": true
         },
-        "_obsolete": true
+        "postingRestrictedtext": {
+            "value": "posting is restricted (read-only access)"
+        }
     },
     "no action is restricted": {
         "pageTitle": {
@@ -3240,12 +3196,12 @@
     },
     "Ban": {
         "banBoard": {
-            "value": "Бан"
+            "value": "Бан",
+            "_obsolete": true
         },
         "pageTitle": {
             "value": "Бан"
-        },
-        "_obsolete": true
+        }
     },
     "Board": {
         "banBoardLabel": {
@@ -3304,8 +3260,7 @@
         },
         "errorMessage": {
             "value": "Ошибка"
-        },
-        "_obsolete": true
+        }
     },
     "Your IP address is in the ban list. You are not allowed to read or make posts.": {
         "banDescription": {
@@ -3330,18 +3285,18 @@
             "value": "Страница или файл не найдены"
         },
         "errorDescription": {
-            "value": "Страница или файл не найдены"
-        },
-        "_obsolete": true
+            "value": "Страница или файл не найдены",
+            "_obsolete": true
+        }
     },
     "Error 404": {
         "pageTitle": {
             "value": "Ошибка 404"
         },
         "errorMessage": {
-            "value": "Ошибка 404"
-        },
-        "_obsolete": true
+            "value": "Ошибка 404",
+            "_obsolete": true
+        }
     },
     "Writing posts:": {
         "message": {
@@ -3410,10 +3365,9 @@
         "_obsolete": true
     },
     "Role-playing games": {
-        "board title": {
+        "boardTitle": {
             "value": "Ролевые игры"
-        },
-        "_obsolete": true
+        }
     },
     "Add variant": {
         "addVoteVariantText": {
@@ -3465,11 +3419,17 @@
     "Close voting": {
         "closeVoteActionText": {
             "value": "Закрыть голосование"
+        },
+        "pageTitle": {
+            "value": "Close voting"
         }
     },
     "Open voting": {
         "openVoteActionText": {
             "value": "Открыть голосование"
+        },
+        "pageTitle": {
+            "value": "Open voting"
         }
     },
     "Voting is closed": {
@@ -3706,6 +3666,41 @@
     "monospace \\\\`` font with escaped \\\\`` characters": {
         "monospaceEscaped": {
             "value": "monospace \\\\`` font with escaped \\\\`` characters"
+        }
+    },
+    "Google reCAPTCHA v1": {
+        "_default": {
+            "value": "Google reCAPTCHA v1"
+        }
+    },
+    "Yandex captcha (Latin)": {
+        "_default": {
+            "value": "Yandex captcha (Latin)"
+        }
+    },
+    "Yandex captcha (digits)": {
+        "_default": {
+            "value": "Yandex captcha (digits)"
+        }
+    },
+    "Yandex captcha (Cyrillic)": {
+        "_default": {
+            "value": "Yandex captcha (Cyrillic)"
+        }
+    },
+    "Add files": {
+        "pageTitle": {
+            "value": "Add files"
+        }
+    },
+    "Answer in this thread": {
+        "answerInThreadText": {
+            "value": "Answer in this thread"
+        }
+    },
+    "Create thread": {
+        "createThreadText": {
+            "value": "Create thread"
         }
     }
 }

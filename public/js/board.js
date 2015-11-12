@@ -1711,18 +1711,20 @@ lord.browseFile = function(e, div) {
 
 lord.setPostformRulesVisible = function(visible) {
     var hide = !visible;
-    lord.setCookie("hidePostformRules", hide, {
-        "expires": lord.Billion, "path": "/"
-    });
-    lord.query(".postformRules > ul").forEach(function(ul) {
-        ul.style.display = hide ? "none" : "";
-    });
-    var a = lord.queryOne("a.hidePostformRulesButton");
-    var aa = lord.node("a");
-    lord.addClass(aa, "hidePostformRulesButton");
-    aa.onclick = lord.setPostformRulesVisible.bind(lord, hide);
-    aa.appendChild(lord.node("text", lord.text(hide ? "showPostformRulesText" : "hidePostformRulesText")));
-    a.parentNode.replaceChild(aa, a);
+    lord.getModel("misc/tr").then(function(model) {
+        lord.setCookie("hidePostformRules", hide, {
+            "expires": lord.Billion, "path": "/"
+        });
+        lord.query(".postformRules > ul").forEach(function(ul) {
+            ul.style.display = hide ? "none" : "";
+        });
+        var a = lord.queryOne("a.hidePostformRulesButton");
+        var aa = lord.node("a");
+        lord.addClass(aa, "hidePostformRulesButton");
+        aa.onclick = lord.setPostformRulesVisible.bind(lord, hide);
+        aa.appendChild(lord.node("text", hide ? model.tr.showPostformRulesText : model.tr.hidePostformRulesText));
+        a.parentNode.replaceChild(aa, a);
+    }).catch(lord.handleError);
 };
 
 lord.quoteSelectedText = function(selection) {
@@ -2730,7 +2732,7 @@ lord.initializeOnLoadBaseBoard = function() {
             btn.title = btn.title + " (" + key(s) + ")";
         });
         lord.query("[name='updateThreadButton']").forEach(function(a) {
-            a.title = "(" + key("updateThread") + ")";
+            a.title = a.title + " (" + key("updateThread") + ")";
         });
         lord.nameOne("submit", lord.id("postForm")).title = "(" + key("submitReply") + ")";
     }

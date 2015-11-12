@@ -407,8 +407,8 @@ controller.translationsModel = function() {
     translate("Borad rules", "boardRulesLinkText");
     translate("Threads catalog", "boardCatalogLinkText");
     translate("RSS feed", "boardRssLinkText");
-    translate("Posting is disabled for this board", "postingDisabledBoardText");
-    translate("Posting is disabled for this thread", "postingDisabledThreadText");
+    translate("Posting is disabled at this board", "postingDisabledBoardText");
+    translate("Posting is disabled in this thread", "postingDisabledThreadText");
     translate("Previous page", "toPreviousPageText");
     translate("Next page", "toNextPageText");
     translate("Posting speed:", "postingSpeedText");
