@@ -141,9 +141,13 @@ controller.error = function(req, res, error, ajax) {
             model.errorMessage = Tools.translate("Internal error", "errorMessage");
             model.errorDescription = error.message;
         } else if (Util.isObject(error) && error.error) {
+            if (Tools.contains(process.argv.slice(2), "--dev-mode"))
+                console.log(error);
             model.errorMessage = error.description ? error.error : Tools.translate("Error", "errorMessage");
             model.errorDescription = error.description || error.error;
         } else {
+            if (Tools.contains(process.argv.slice(2), "--dev-mode"))
+                console.log(error);
             model.errorMessage = Tools.translate("Error", "errorMessage");
             model.errorDescription = (error && Util.isString(error)) ? error : "";
         }

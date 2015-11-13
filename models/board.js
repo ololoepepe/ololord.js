@@ -46,9 +46,9 @@ module.exports.getPosts = function(posts, hashpass) {
     });
 };
 
-module.exports.getFileInfos = function(fileNames, hashpass) {
-    var promises = fileNames.map(function(fileName) {
-        return Database.getFileInfo(fileName).then(function(fileInfo) {
+module.exports.getFileInfos = function(list, hashpass) {
+    var promises = list.map(function(file) {
+        return Database.getFileInfo(file).then(function(fileInfo) {
             var p;
             if (fileInfo) {
                 p = Database.getPost(fileInfo.boardName, fileInfo.postNumber).then(function(post) {

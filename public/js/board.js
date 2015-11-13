@@ -1493,9 +1493,9 @@ lord.fileAddedCommon = function(div, file) {
     binaryReader.onload = function(e) {
         var wordArray = CryptoJS.lib.WordArray.create(e.target.result);
         var currentBoardName = lord.data("boardName");
-        var fileHash = lord.toHashpass(wordArray);
-        /*lord.ajaxRequest("get_file_existence", [currentBoardName, fileHash], lord.RpcGetFileExistenceId, function(res) {
-            if (!res)
+        var fileHash = CryptoJS.SHA1(wordArray).toString(CryptoJS.enc.Hex);
+        lord.getModel("api/fileInfo", "fileHash=" + fileHash).then(function(fileInfo) {
+            if (!fileInfo)
                 return;
             var img = lord.node("img");
             img.src = "/" + prefix + "img/storage.png";
@@ -1514,7 +1514,7 @@ lord.fileAddedCommon = function(div, file) {
             div.fileHash = fileHash;
             if (div.droppedFile)
                 delete div.droppedFile;
-        });*/
+        });
     };
     if (file && lord.getLocalObject("checkFileExistence", true))
         binaryReader.readAsArrayBuffer(file);
@@ -1527,31 +1527,22 @@ lord.fileAddedCommon = function(div, file) {
             div.querySelector("img").src = e.target.result;
         };
     };
-    if (!!fileName.match(/\.(jpe?g|png|gif)$/i) && lord.getLocalObject("showAttachedFilePreview", true)) {
+    if (fileName.match(/\.(jpe?g|png|gif)$/i) && lord.getLocalObject("showAttachedFilePreview", true)) {
         if (!fileName.match(/\.(jpe?g)$/i) || !lord.getLocalObject("stripExifFromJpeg", true))
             preview();
-    } else if (!!fileName.match(/\.(jpe?g)$/i)) {
-        div.querySelector("img").src = "/" + prefix + "img/jpeg_file.png";
-    } else if (!!fileName.match(/\.(png)$/i)) {
-        div.querySelector("img").src = "/" + prefix + "img/png_file.png";
-    } else if (!!fileName.match(/\.(gif)$/i)) {
-        div.querySelector("img").src = "/" + prefix + "img/gif_file.png";
-    } else if (!!fileName.match(/\.(mp3)$/i)) {
-        div.querySelector("img").src = "/" + prefix + "img/mp3_file.png";
-    } else if (!!fileName.match(/\.(mp4)$/i)) {
-        div.querySelector("img").src = "/" + prefix + "img/mp4_file.png";
-    } else if (!!fileName.match(/\.(ogg|ogv)$/i)) {
-        div.querySelector("img").src = "/" + prefix + "img/ogg_file.png";
-    } else if (!!fileName.match(/\.(webm)$/i)) {
-        div.querySelector("img").src = "/" + prefix + "img/webm_file.png";
-    } else if (!!fileName.match(/\.(wav)$/i)) {
-        div.querySelector("img").src = "/" + prefix + "img/wav_file.png";
-    } else if (!!fileName.match(/\.(pdf)$/i)) {
-        div.querySelector("img").src = "/" + prefix + "img/pdf_file.png";
     } else {
-        div.querySelector("img").src = "/" + prefix + "img/file.png";
+        var match = fileName.match(/\.(jpe?g|png|gif|mpeg|mp1|m1a|m2a|mpa|mp3|mpg|mp4|ogg|ogv|webm|wav|pdf)$/i);
+        if (match) {
+            var extension = match[1].replace("jpg", "jpeg").replace("ogv", "ogg");
+            ["mpeg", "mp1", "m1a", "m2a", "mpa", "mpg"].forEach(function(alias) {
+                extension = extension.replace(alias, "mp3");
+            });
+            div.querySelector("img").src = "/" + prefix + "img/" + extension + "_file.png";
+        } else {
+            div.querySelector("img").src = "/" + prefix + "img/file.png";
+        }
     }
-    if (file && !!fileName.match(/\.(jpe?g)$/i) && lord.getLocalObject("stripExifFromJpeg", true)) {
+    if (file && fileName.match(/\.(jpe?g)$/i) && lord.getLocalObject("stripExifFromJpeg", true)) {
         var fr = new FileReader();
         fr.onload = function() {
             var dv = new DataView(fr.result);

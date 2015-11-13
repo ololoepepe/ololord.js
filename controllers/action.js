@@ -145,8 +145,7 @@ var testParameters = function(fields, files, creatingThread) {
     var subject = fields.subject || "";
     var text = fields.text || "";
     var password = fields.password || "";
-    var fileHashes = fields.fileHashes ? fields.fileHashes.split(",") : [];
-    var fileCount = files.length + fileHashes.length;
+    var fileCount = files.length;
     var maxFileSize = board.maxFileSize;
     var maxFileCount = board.maxFileCount;
     if (email.length > board.maxEmailLength)
@@ -287,8 +286,7 @@ router.post("/addFiles", function(req, res) {
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
-        var fileHashes = c.fields.fileHashes ? c.fields.fileHashes.split(",") : [];
-        var fileCount = c.files.length + fileHashes.length;
+        var fileCount = c.files.length;
         if (fileCount < 1)
             return Promise.reject("No file specified");
         var maxFileSize = c.board.maxFileSize;

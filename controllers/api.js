@@ -97,7 +97,18 @@ router.get("/threadInfo.json", function(req, res) {
 });
 
 router.get("/fileInfos.json", function(req, res) {
-    boardModel.getFileInfos(req.query.fileNames, req.hashpass).then(function(fileInfos) {
+    var list = [];
+    if (Util.isArray(req.query.fileNames)) {
+        req.query.fileNames.forEach(function(fileName) {
+            list.push({ fileName: fileName });
+        });
+    }
+    if (Util.isArray(req.query.fileHashes)) {
+        req.query.fileHashes.forEach(function(fileHashes) {
+            list.push({ fileHash: fileHash });
+        });
+    }
+    boardModel.getFileInfos(list, req.hashpass).then(function(fileInfos) {
         res.send(fileInfos);
     }).catch(function(err) {
         controller.error(req, res, err, true);
@@ -105,7 +116,10 @@ router.get("/fileInfos.json", function(req, res) {
 });
 
 router.get("/fileInfo.json", function(req, res) {
-    boardModel.getFileInfos([req.query.fileName], req.hashpass).then(function(fileInfos) {
+    boardModel.getFileInfos([{
+        fileName: req.query.fileName,
+        fileHash: req.query.fileHash
+    }], req.hashpass).then(function(fileInfos) {
         res.send(fileInfos[0]);
     }).catch(function(err) {
         controller.error(req, res, err, true);

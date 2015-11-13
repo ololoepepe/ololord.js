@@ -743,14 +743,6 @@ lord.isHashpass = function(s) {
     return !!s.match(/([0-9a-fA-F]{8}\-){4}[0-9a-fA-F]{8}/g);
 };
 
-lord.toHashpass = function(s) {
-    if (!s)
-        return "";
-    var hash = CryptoJS.SHA1(s).toString(CryptoJS.enc.Hex);
-    var parts = hash.match(/.{1,8}/g);
-    return parts.join("-");
-};
-
 lord.generateImageHash = function(imageData, sizeX, sizeY) {
     sizeX = +sizeX;
     sizeY = +sizeY;

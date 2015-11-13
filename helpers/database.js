@@ -347,8 +347,20 @@ var getPost = function(boardName, postNumber, options) {
 
 module.exports.getPost = getPost;
 
-var getFileInfo = function(fileName) {
-    return db.hget("fileInfos", fileName).then(function(fileInfo) {
+var getFileInfo = function(file) {
+    var p;
+    if (file.fileName) {
+        p = Promise.resolve(file.fileName);
+    } else {
+        p = db.hget("fileHashes", file.fileHash).then(function(fileInfo) {
+            if (!fileInfo)
+                return Promise.resolve(null);
+            return Promise.resolve(JSON.parse(fileInfo).name);
+        });
+    }
+    return p.then(function(fileName) {
+        return db.hget("fileInfos", fileName);
+    }).then(function(fileInfo) {
         return Promise.resolve(fileInfo ? JSON.parse(fileInfo) : null);
     });
 };
@@ -457,7 +469,7 @@ module.exports.getFileInfosByHashes = function(hashes) {
         hashes = [hashes];
     if (hashes.length < 1)
         return Promise.resolve([]);
-    return db.hmget("fileHashes", hashes).then(function(fileInfios) {
+    return db.hmget("fileHashes", hashes).then(function(fileInfos) {
         return fileInfos.map(function(fileInfo, i) {
             fileInfo = JSON.parse(fileInfo);
             fileInfo.hash = hashes[i];
@@ -478,7 +490,18 @@ var processFile = function(board, file, transaction) {
         return FS.copy(sourceFilePath, targetFilePath).then(function() {
             return FS.copy(sourceThumbPath, targetThumbPath)
         }).then(function() {
-            return file;
+            return getFileInfo({ fileName: file.name });
+        }).then(function(fileInfo) {
+            return {
+                dimensions: fileInfo.dimensions,
+                extraData: fileInfo.extraData,
+                hash: fileInfo.hash,
+                mimeType: fileInfo.mimeType,
+                name: fn.name,
+                rating: file.rating,
+                size: fileInfo.size,
+                thumb: fileInfo.thumb
+            };
         });
     } else {
         var sourceFilePath = file.path;
@@ -1369,8 +1392,7 @@ module.exports.addFiles = function(req, fields, files, transaction) {
         c.post = post;
         return postFileInfoNames(board.name, c.post.number);
     }).then(function(names) {
-        var fileHashes = fields.fileHashes ? fields.fileHashes.split(",") : [];
-        if (names.length + files.length + fileHashes.length > board.maxFileCount)
+        if (names.length + files.length > board.maxFileCount)
             return Promise.reject("Too many files");
         return processFiles(req, fields, files, transaction);
     }).then(function(files) {
@@ -1649,7 +1671,7 @@ module.exports.deleteFile = function(req, fields) {
 module.exports.editAudioTags = function(req, fields) {
     var c = {};
     var password = Tools.password(fields.password);
-    return getFileInfo(fields.fileName).then(function(fileInfo) {
+    return getFileInfo({ fileName: fields.fileName }).then(function(fileInfo) {
         if (!fileInfo)
             return Promise.reject("No such file info");
         if (fileInfo.mimeType.substr(0, 6) != "audio/")
