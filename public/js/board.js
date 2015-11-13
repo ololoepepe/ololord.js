@@ -49,11 +49,11 @@ lord.getPostData = function(post, youtube) {
         lord.query(".postFile", post).forEach(function(file) {
             var img = lord.queryOne(".postFileFile > a > img", file);
             var f = {
-                "type": +lord.nameOne("type", file).value,
-                "size": +lord.nameOne("sizeKB", file).value,
-                "sizeText": lord.getPlainText(lord.queryOne(".postFileSize", file)),
-                "width": +lord.nameOne("sizeX", file).value,
-                "height": +lord.nameOne("sizeY", file).value,
+                "mimeType": lord.data("mimeType", file, true),
+                "size": +lord.data("sizeKB", file, true),
+                "sizeText": lord.data("sizeText", file, true),
+                "width": +lord.nameOne("width", file, true),
+                "height": +lord.nameOne("height", file, true),
                 "thumb": {
                     "width": +img.width,
                     "height": +img.height,
@@ -105,7 +105,7 @@ lord.processPosts = function(spells, youtube) {
             var p = lord.getPostData(post, youtube);
             if (!p)
                 return;
-            youtube = youtube ? { "apiKey": lord.text("youtubeApiKey") } : undefined;
+            youtube = youtube ? { "apiKey": lord.data("youtubeApiKey") } : undefined;
             lord.worker.postMessage({
                 "type": "processPosts",
                 "data": {
@@ -745,26 +745,24 @@ lord.addPostToHidden = function(boardName, postNumber) {
     var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
     hiddenPosts[boardName + "/" + postNumber] = {};
     lord.setLocalObject("hiddenPosts", hiddenPosts);
-    (function(boardName, postNumber) {
-        lord.ajaxRequest("get_post", [boardName, +postNumber], lord.RpcGetPostId, function(res) {
-            if (!res)
-                return;
-            var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
-            if (!hiddenPosts[boardName + "/" + postNumber])
-                return;
-            var subject = (res["subject"] ? res["subject"] : res["text"]).substring(0, 150);
-                hiddenPosts[boardName + "/" + postNumber].subject = subject;
-        });
-    })(boardName, postNumber);
+    lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
+        if (!post)
+            return;
+        var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
+        if (!hiddenPosts[boardName + "/" + postNumber])
+            return;
+        var subject = (post.subject || post.text).substring(0, 150);
+            hiddenPosts[boardName + "/" + postNumber].subject = subject;
+    }).catch(lord.handleError);
 };
 
 lord.tryHidePost = function(post, list) {
     if (!post)
         return;
-    var postNumber = post.id.replace("post", "");
+    var postNumber = +post.id;
     if (isNaN(+postNumber))
         return;
-    var boardName = lord.text("currentBoardName");
+    var boardName = lord.data("boardName");
     if (!list)
         list = lord.getLocalObject("hiddenPosts", {});
     if (!list[boardName + "/" + postNumber])
@@ -964,7 +962,7 @@ lord.setThreadClosed = function(el, closed) {
     }).catch(lord.handleError);
 };
 
-lord.moveThread = function(boardName, threadNumber) {
+/*lord.moveThread = function(boardName, threadNumber) {
     if (!boardName || isNaN(+threadNumber))
         return;
     if (!lord.getCookie("hashpass"))
@@ -990,7 +988,7 @@ lord.moveThread = function(boardName, threadNumber) {
             location.href = href;
         });
     });
-};
+};*/
 
 lord.banUser = function(el) {
     var boardName = lord.data("boardName", el, true);
@@ -1233,8 +1231,8 @@ lord.editPost = function(el) {
 
 lord.setPostHidden = function(el) {
     var boardName = lord.data("boardName", el, true);
-    var postNumber = +lord.data("postNumber", el, true);
-    if (!boardName || isNaN(postNumber) || postNumber <= 1)
+    var postNumber = +lord.data("number", el, true);
+    if (!boardName || isNaN(postNumber) || postNumber < 1)
         return;
     var post = lord.id(postNumber);
     if (!post)
@@ -1244,9 +1242,8 @@ lord.setPostHidden = function(el) {
     var hidden = lord.hasClass(post, "hidden");
     var f = !hidden ? lord.addClass : lord.removeClass;
     f(post, "hidden");
-    if (thread) {
+    if (thread)
         f(thread, "hidden");
-    }
     if (!hidden) {
         list[boardName + "/" + postNumber] = {};
         lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(model) {
@@ -2067,43 +2064,32 @@ lord.nextFile = function() {
     lord.showImage(f.href, f.mimeType, f.width, f.height);
 };
 
-lord.addThreadToFavorites = function(boardName, threadNumber, callback, callbackError) {
-    threadNumber = +threadNumber;
-    if (!boardName || isNaN(threadNumber)) {
-        if (typeof callbackError == "function")
-            callbackError();
-        return false;
-    }
+lord.addThreadToFavorites = function(boardName, threadNumber) {
     var fav = lord.getLocalObject("favoriteThreads", {});
-    if (fav.hasOwnProperty(boardName + "/" + threadNumber)) {
-        if (typeof callbackError == "function")
-            callbackError();
-        return false;
-    }
-    lord.ajaxRequest("get_new_posts", [boardName, threadNumber, 0], lord.RpcGetNewPostsId, function(res) {
-        if (!res || res.length < 1) {
-            if (typeof callbackError == "function")
-                callbackError();
-            return false;
-        }
-        var pn = res.pop()["number"];
-        var opPost = res.shift();
+    if (fav.hasOwnProperty(boardName + "/" + threadNumber))
+        return Promise.reject("Already in favorites");
+    lord.getModel("api/lastPosts", "boardName=" + boardName + "&threadNumber=" + threadNumber).then(function(posts) {
+        if (!posts || posts.length < 1)
+            return Promise.reject("Internal error");
+        var postNumber = posts.pop().number;
+        var opPost = posts.shift();
         fav[boardName + "/" + threadNumber] = {
-            "lastPostNumber": pn,
-            "previousLastPostNumber": pn,
-            "subject": (opPost["subject"] ? opPost["subject"] : opPost["text"]).substring(0, 150)
+            "lastPostNumber": postNumber,
+            "previousLastPostNumber": postNumber,
+            "subject": (opPost.subject || opPost.text || "[NO TEXT]").substring(0, 150)
         };
         var opPost = lord.id(threadNumber);
         var btn = lord.nameOne("addToFavoritesButton", opPost);
         var img = lord.queryOne("img", btn);
-        img.title = lord.text("removeFromFavoritesText");
+        lord.getModel("misc/tr").then(function(model) {
+            var span = lord.queryOne("span", btn);
+            lord.removeChildren(span);
+            span.appendChild(lord.node("text", model.tr.removeThreadFromFavoritesText));
+        }).catch(lord.handleError);
         img.src = img.src.replace("favorite.png", "favorite_active.png");
-        btn.onclick = lord.removeThreadFromFavorites.bind(lord, boardName, threadNumber);
         lord.setLocalObject("favoriteThreads", fav);
-        if (typeof callback == "function")
-            callback();
-    });
-    return false;
+        return Promise.resolve();
+    }).catch(lord.handleError);
 };
 
 lord.complain = function() {
@@ -2595,15 +2581,16 @@ lord.hotkey_expandThread = function() {
         posts.parentNode.insertBefore(div, posts);
         var lastPost = lord.query(".post", posts).pop();
         var seqNum = 1;
-        lord.ajaxRequest("get_new_posts", [lord.text("currentBoardName"), tn, tn], lord.RpcGetNewPostsId, function(res) {
-            if (!res || res.length < 1)
+        lord.getModel("api/lastPosts", "boardName=" + lord.data("boardName") + "&threadNumber=" + tn
+            + "lastPostNumber=" + tn).then(function(list) {
+            if (!list || list.length < 1)
                 return;
             lord.removeChildren(posts);
             var omitted = lord.id("threadOmitted" + tn);
             if (omitted)
                 omitted.parentNode.removeChild(omitted);
             div.parentNode.removeChild(div);
-            lord.gently(lord.arr(res), function(ps) {
+            lord.gently(list, function(ps) {
                 var newPost = lord.createPostNode(ps, true);
                 if (!newPost)
                     return;
@@ -2616,7 +2603,7 @@ lord.hotkey_expandThread = function() {
                 delay: 10,
                 n: 10
             });
-        });
+        }).catch(lord.handleError);
     })(tn, posts);
     return false;
 };
@@ -2703,6 +2690,16 @@ lord.hotkey_markupCode = function() {
     return lord.hotkey_markupCommon("code");
 };
 
+lord.addToOrRemoveFromFavorites = function(el) {
+    var fav = lord.getLocalObject("favoriteThreads", {});
+    var currentBoardName = lord.data("boardName");
+    var threadNumber = +lord.data("number", el, true);
+    if (fav.hasOwnProperty(currentBoardName + "/" + threadNumber))
+        lord.removeThreadFromFavorites(currentBoardName, threadNumber);
+    else
+        lord.addThreadToFavorites(currentBoardName, threadNumber);
+};
+
 lord.initializeOnLoadBaseBoard = function() {
     document.body.onclick = lord.globalOnclick;
     if (lord.text("deviceType") != "mobile") {
@@ -2754,8 +2751,8 @@ lord.initializeOnLoadBaseBoard = function() {
         var sw = lord.nameOne("tripcode", postForm);
         sw.checked = true;
     }
-    /*var fav = lord.getLocalObject("favoriteThreads", {});
-    var currentBoardName = lord.text("currentBoardName");
+    var fav = lord.getLocalObject("favoriteThreads", {});
+    var currentBoardName = lord.data("boardName");
     if (lord.getLocalObject("spellsEnabled", true)) {
         lord.worker.postMessage({
             "type": "parseSpells",
@@ -2770,15 +2767,16 @@ lord.initializeOnLoadBaseBoard = function() {
         });
     }
     lord.query(".opPost").forEach(function(opPost) {
-        var threadNumber = +opPost.id.replace("post", "");
+        var threadNumber = +opPost.id;
         var btn = lord.nameOne("addToFavoritesButton", opPost);
         if (fav.hasOwnProperty(currentBoardName + "/" + threadNumber)) {
             var img = lord.queryOne("img", btn);
-            img.title = lord.text("removeFromFavoritesText");
+            lord.getModel("misc/tr").then(function(model) {
+                var span = lord.queryOne("span", btn);
+                lord.removeChildren(span);
+                span.appendChild(lord.node("text", model.tr.removeThreadFromFavoritesText));
+            }).catch(lord.handleError);
             img.src = img.src.replace("favorite.png", "favorite_active.png");
-            btn.onclick = lord.removeThreadFromFavorites.bind(lord, currentBoardName, threadNumber);
-        } else {
-            btn.onclick = lord.addThreadToFavorites.bind(lord, currentBoardName, threadNumber);
         }
     });
     if (!!lord.getLocalObject("hideTripcodes", false)) {
@@ -2799,18 +2797,18 @@ lord.initializeOnLoadBaseBoard = function() {
                 opt.selected = true;
         });
     }
-    lord.setPostformMarkupVisible(!lord.getLocalObject("hidePostformMarkup", false));*/
+    lord.setPostformMarkupVisible(!lord.getLocalObject("hidePostformMarkup", false));
     if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
         lord.strikeOutHiddenPostLinks();
     if (lord.getLocalObject("signOpPostLinks", true))
         lord.signOpPostLinks();
     if (lord.getLocalObject("signOwnPostLinks", true))
         lord.signOwnPostLinks();
-    /*if (!lord.text("currentThreadNumber")) {
+    if (!lord.data("threadNumber")) {
         var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
-        lastPostNumbers[lord.text("currentBoardName")] = +lord.text("lastPostNumber");
+        lastPostNumbers[currentBoardName] = +lord.data("lastPostNumber");
         lord.setLocalObject("lastPostNumbers", lastPostNumbers);
-    }*/
+    }
     lord.initFiles();
     lord.scrollHandler();
 };

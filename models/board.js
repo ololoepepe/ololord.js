@@ -247,7 +247,7 @@ module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNu
         return Promise.reject("Invalid thread");
     lastPostNumber = +(lastPostNumber || 0);
     if (isNaN(lastPostNumber) || lastPostNumber < 0)
-        return lastPostNumber = 0;
+        lastPostNumber = 0;
     var c = {};
     return Database.registeredUserLevel(hashpass).then(function(level) {
         c.level = level;

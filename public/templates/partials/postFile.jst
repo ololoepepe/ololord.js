@@ -3,6 +3,7 @@
     data-file-name="{{=fileInfo.name}}"
     data-mime-type="{{=fileInfo.mimeType}}"
     data-size-k-b="{{=fileInfo.sizeKB}}"
+    data-size-text="{{=fileInfo.sizeText}}"
     data-width="{{ out += fileInfo.dimensions ? fileInfo.dimensions.width : 0; }}"
     data-height="{{ out += fileInfo.dimensions ? fileInfo.dimensions.height : 0; }}"
     {{? fileInfo.mimeType.substr(0, 6) == "audio/" && fileInfo.extraData}}

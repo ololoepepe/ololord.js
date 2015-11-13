@@ -79,6 +79,7 @@ lord.getYoutubeVideoInfo = function(href, apiKey) {
     try {
         response = JSON.parse(xhr.responseText);
     } catch (ex) {
+        console.log(7);
         return null;
     }
     var info = response.items[0].snippet;

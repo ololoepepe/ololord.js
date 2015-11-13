@@ -1786,11 +1786,10 @@
         },
         "_obsolete": true
     },
-    "Remove from favorites": {
-        "removeFromFavoritesText": {
+    "Remove thread from favorites": {
+        "removeThreadFromFavoritesText": {
             "value": "Удалить из избранных"
-        },
-        "_obsolete": true
+        }
     },
     "Favorite threads": {
         "favoriteThreadsText": {

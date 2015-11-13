@@ -238,7 +238,8 @@ controller.baseModel = function(req) {
             pathPrefix: config("site.pathPrefix", ""),
             locale: config("site.locale", "en"),
             dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss"),
-            timeOffset: config("site.timeOffset", 0)
+            timeOffset: config("site.timeOffset", 0),
+            youtubeApiKey: config("site.youtubeApiKey", "")
         },
         user: {
             ip: req.ip,
@@ -396,6 +397,7 @@ controller.translationsModel = function() {
     translate("Download all thread files as a .zip archive", "downloadThreadText");
     translate("Complain", "complainText");
     translate("Add thread to favorites", "addThreadToFavoritesText");
+    translate("Remove thread from favorites", "removeThreadFromFavoritesText");
     translate("Delete thread", "deleteThreadText");
     translate("Delete post", "deletePostText");
     translate("Hide/show", "showHidePostText");

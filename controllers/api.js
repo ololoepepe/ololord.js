@@ -1,5 +1,3 @@
-//var BodyParser = require("body-parser");
-//var Crypto = require("crypto");
 var express = require("express");
 var Util = require("util");
 
@@ -12,8 +10,6 @@ var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
 
 var router = express.Router();
-
-//router.use(BodyParser.json());
 
 var postIdentifiers = function(req, single) {
     if (!single) {

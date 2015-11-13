@@ -233,9 +233,6 @@ lord.expandCollapseSpoiler = function(titleSpan) {
 };
 
 lord.removeThreadFromFavorites = function(boardName, threadNumber) {
-    threadNumber = +threadNumber;
-    if (!boardName || isNaN(threadNumber))
-        return false;
     var fav = lord.getLocalObject("favoriteThreads", {});
     delete fav[boardName + "/" + threadNumber];
     lord.setLocalObject("favoriteThreads", fav);
@@ -245,9 +242,11 @@ lord.removeThreadFromFavorites = function(boardName, threadNumber) {
     var btn = lord.nameOne("addToFavoritesButton", opPost);
     var img = lord.queryOne("img", btn);
     img.src = img.src.replace("favorite_active.png", "favorite.png");
-    img.title = lord.text("addThreadToFavoritesText");
-    btn.onclick = lord.addThreadToFavorites.bind(lord, boardName, threadNumber);
-    return false;
+    lord.getModel("misc/tr").then(function(model) {
+        var span = lord.queryOne("span", btn);
+        lord.removeChildren(span);
+        span.appendChild(lord.node("text", model.tr.addThreadToFavoritesText));
+    }).catch(lord.handleError);
 };
 
 lord.checkFavoriteThreads = function() {

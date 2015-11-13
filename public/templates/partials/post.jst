@@ -161,9 +161,10 @@
                                 </li>
                             {{?}}
                             <li>
-                                <a name="addToFavoritesButton" href="javascript:void(0);">
-                                    <img src="/{{=it.site.pathPrefix}}img/favorite.png" />
-                                    {{=it.tr.addThreadToFavoritesText}}</a>
+                                <a name="addToFavoritesButton" href="javascript:void(0);"
+                                   onclick="lord.addToOrRemoveFromFavorites(this); return false;">
+                                    <img src="/{{=it.site.pathPrefix}}img/favorite.png">
+                                    <span>{{=it.tr.addThreadToFavoritesText}}</span></a>
                             </li>
                         {{?}}
                         <li>
