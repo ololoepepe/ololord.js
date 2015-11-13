@@ -632,6 +632,8 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     }).then(function() {
         return addReferencedPosts(board.name, c.postNumber, threadNumber, referencedPosts);
     }).then(function() {
+        return db.sadd("userPostNumbers:" + ip + ":" + board.name, c.postNumber);
+    }).then(function() {
         if (files.length < 1)
             return Promise.resolve();
         return Promise.all(files.map(function(fileInfo) {
@@ -783,6 +785,8 @@ var removePost = function(boardName, postNumber) {
     }).then(function() {
         return removeReferencedPosts(boardName, postNumber, c.post.threadNumber, c.post.referencedPosts);
     }).then(function() {
+        return db.srem("userPosts:" + board.name, postNumber);
+    }).then(function() {
         return postFileInfoNames(boardName, postNumber);
     }).then(function(names) {
         c.fileInfoNames = names;
@@ -835,11 +839,11 @@ var removePost = function(boardName, postNumber) {
         });
         return Promise.all(promises);
     }).then(function() {
-        var promises = c.paths.map(function(path) {
-            return FS.remove(path);
+        c.paths.forEach(function(path) {
+            return FS.remove(path).catch(function(err) {
+                console.log(err);
+            });
         });
-        return Promise.all(promises);
-    }).then(function() {
         return db.srem("postsPlannedForDeletion", boardName + ":" + postNumber);
     });
 };
@@ -861,12 +865,17 @@ var removeThread = function(boardName, threadNumber, archived) {
                 c.postNumbers = result;
                 return db.del("threadPostNumbers:" + boardName + ":" + threadNumber);
             }).then(function() {
-                var promises = c.postNumbers.map(function(postNumber) {
-                    return removePost(boardName, postNumber);
+                var p = Promise.resolve();
+                c.postNumbers.forEach(function(postNumber) {
+                    p = p.then(function() {
+                        return removePost(boardName, postNumber);
+                    });
                 });
-                return Promise.all(promises);
+                return p;
             }).then(function() {
                 return db.srem("threadsPlannedForDeletion", boardName + ":" + threadNumber);
+            }).catch(function(err) {
+                console.log(err);
             });
         }, 10000);
         return Promise.resolve();
@@ -1032,7 +1041,9 @@ Transaction.prototype.rollback = function() {
         FS.exists(path).then(function(exists) {
             if (!exists)
                 return;
-            FS.remove(path);
+            FS.remove(path).catch(function(err) {
+                console.log(err);
+            });
         });
     });
     if (this.threadNumber > 0)
@@ -1622,11 +1633,11 @@ module.exports.deleteFile = function(req, fields) {
         paths = [];
         paths.push(__dirname + "/../public/" + c.post.boardName + "/src/" + c.fileInfo.name);
         paths.push(__dirname + "/../public/" + c.post.boardName + "/thumb/" + c.fileInfo.thumb.name);
-        var promises = paths.map(function(path) {
-            return FS.remove(path);
+        paths.forEach(function(path) {
+            FS.remove(path).catch(function(err) {
+                console.log(err);
+            });
         });
-        return Promise.all(promises);
-    }).then(function() {
         return {
             boardName: c.post.boardName,
             postNumber: c.post.number,
@@ -1716,5 +1727,49 @@ module.exports.banUser = function(req, ip, bans) {
             ip: ip,
             bans: bans
         }));
+    });
+};
+
+module.exports.delall = function(req, fields) {
+    var ip = fields.userIp;
+    var boards = ("*" == fields.boardName) ? Board.boardNames().map(function(boardName) {
+        return Board.board(boardName);
+    }) : [Board.board(fields.boardName)];
+    var err = boards.reduce(function(err, board) {
+        if (err)
+            return err;
+        return !board;
+    }, false);
+    if (err)
+        return Promise.reject("Invalid board");
+    if (!ip)
+        return Promise.reject("Invalid IP");
+    if (ip == req.ip)
+        return Promise.reject("Not enough rights");
+    var posts = [];
+    return db.hget("registeredUserHashes", ip).then(function(hash) {
+        if (!hash)
+            return Promise.resolve();
+        return db.hget("registeredUsers", hash);
+    }).then(function(user) {
+        user = user ? JSON.parse(user) : null;
+        if (user && compareRegisteredUserLevels(req.level, user.level) <= 0)
+            return Promise.reject("Not enough rights");
+        var promises = boards.map(function(board) {
+            return db.smembers("userPostNumbers:" + ip + ":" + board.name).then(function(numbers) {
+                return Promise.all(numbers.map(function(postNumber) {
+                    return getPost(board.name, postNumber).then(function(post) {
+                        posts.push(post);
+                        return Promise.resolve();
+                    });
+                }));
+            });
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        var promises = posts.map(function(post) {
+            return (post.threadNumber == post.number) ? removeThread(post.boardName, post.number)
+                : removePost(post.boardName, post.number);
+        });
     });
 };

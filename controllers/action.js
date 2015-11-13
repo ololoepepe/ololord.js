@@ -407,6 +407,27 @@ router.post("/banUser", function(req, res) {
     });
 });
 
+router.post("/delall", function(req, res) {
+    if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
+        return controller.error(req, res, "Not enough rights", !req.ascetic);
+    var c = {};
+    Tools.parseForm(req).then(function(result) {
+        c.fields = result.fields;
+        return Database.delall(req, result.fields);
+    }).then(function(result) {
+        if (req.ascetic) {
+            var path = "/" + config("site.pathPrefix", "");
+            if (c.fields.boardName != "*")
+                path += c.fields.boardName;
+            res.redirect(path);
+        } else {
+            res.send({});
+        }
+    }).catch(function(err) {
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
 router.post("/changeSettings", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         var textCookies = ["mode", "style", "codeStyle", "stickyToolbar", "shrinkPosts", "markupMode", "time",

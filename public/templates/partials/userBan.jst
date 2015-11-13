@@ -59,7 +59,9 @@
         <br />
     {{?}}
     <br />
-    <input type="submit" name="submit" value="{{=it.tr.confirmButtonText}}" />
+    {{? it.showSubmitButton}}
+        <input type="submit" name="submit" value="{{=it.tr.confirmButtonText}}" />
+    {{?}}
 </form>
 <br />
 <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
@@ -71,7 +73,7 @@
     {{??}}
         <input type="hidden" name="userIp" value="{{=it.userIp}}" />
     {{?}}
-    <select name="board" class="select">
+    <select name="boardName" class="select">
         <option value="*" selected="true">[*] {{=it.tr.allBoardsText}}</option>
         {{~it.boards :board}}
             <option value="{{=board.name}}">[{{=board.name}}] {{=board.title}}</option>

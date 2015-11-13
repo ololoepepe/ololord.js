@@ -19,6 +19,7 @@ router.get("/banUser.html", function(req, res) {
         return controller.error(req, res, "Invalid user IP");
     var model = {};
     model.title = Tools.translate("Ban user", "pageTitle");
+    model.showSubmitButton = true;
     Database.bannedUser(userIp).then(function(user) {
         if (user)
             model.bannedUser = user;

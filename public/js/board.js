@@ -1030,7 +1030,29 @@ lord.banUser = function(el) {
             return Promise.resolve();
         if (lord.checkError(result))
             return Promise.reject(result);
-        lord.updatePost(postNumber);
+        return lord.updatePost(postNumber);
+    }).catch(lord.handleError);
+};
+
+lord.delall = function(e, form) {
+    e.preventDefault();
+    var boardName = lord.nameOne("boardName", form);
+    boardName = boardName.options[boardName.selectedIndex].value;
+    if (!boardName)
+        return;
+    var formData = new FormData(form);
+    $.ajax(form.action, {
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        if (lord.checkError(result))
+            return Promise.reject(result);
+        window.location = "/" + lord.data("sitePathPrefix") + (("*" != boardName) ? boardName : "");
+        return Promise.resolve();
     }).catch(lord.handleError);
 };
 
