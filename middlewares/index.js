@@ -12,7 +12,7 @@ var ddos = new DDoS({
     maxexpiry: 60,
     checkinterval: 1,
     silentStart: true,
-    errormessage: "<html><head></head><body><img src='http://i3.kym-cdn.com/photos/images/masonry/000/112/322/130221984383.png'></body></html>"
+    errormessage: "<html><head></head><body><img src='http://i3.kym-cdn.com/photos/images/masonry/000/112/322/130221984383.png' /></body></html>"
 });
 
 module.exports = [

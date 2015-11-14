@@ -62,10 +62,6 @@ var lord = lord || {};
     if (this.countdownTimer) {
         clearInterval(this.countdownTimer);
         this.countdownTimer = null;
-        /*["Top", "Bottom"].forEach(function(position) {
-            $("#autoUpdate" + position).trigger("configure", { max: 10 });
-            $("#autoUpdate" + position).val(5).trigger("change");
-        });*/
     }
     this.secondsLeft = 0;
     this.update();
@@ -258,6 +254,9 @@ lord.updateThread = function(silent) {
 };
 
 lord.setAutoUpdateEnabled = function(enabled) {
+    ["Top", "Bottom"].forEach(function(position) {
+        //$("#autoUpdate" + position).parent().find("canvas").css({ boxShadow: (enabled ? "inset 0 1px 5px #555555" : "") });
+    });
     if (enabled) {
         var intervalSeconds = lord.getLocalObject("autoUpdateInterval", 15);
         var showCountdown = lord.getLocalObject("showAutoUpdateTimer", true);
