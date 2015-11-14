@@ -1014,6 +1014,7 @@ lord.checkError = function(result) {
 };
 
 lord.handleError = function(error) {
+    console.log(error);
     var text;
     if (error) {
         if (error.errorMessage) {

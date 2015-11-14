@@ -326,14 +326,19 @@ lord.initializeOnLoadThread = function() {
         $("#autoUpdate" + position).val(1).trigger("change");
         var parent = $("#autoUpdate" + position).parent();
         parent.addClass("buttonImage");
-        parent.find("canvas").click(function(e) {
+        var canvas = parent.find("canvas");
+        canvas.click(function(e) {
             var list = lord.getLocalObject("autoUpdate", {});
             var threadNumber = +lord.data("threadNumber");
             var enabled = !list[threadNumber];
             list[threadNumber] = enabled;
             lord.setLocalObject("autoUpdate", list);
             lord.setAutoUpdateEnabled(enabled);
-        }).css({ marginBottom: -5 });
+        });
+        canvas.css({ marginBottom: -5 });
+        lord.getModel("misc/tr").then(function(model) {
+            parent.attr("title", model.tr.autoUpdateText);
+        }).catch(lord.handleError);
     });
     lord.addVisibilityChangeListener(lord.visibilityChangeListener);
     var enabled = lord.getLocalObject("autoUpdate", {})[+lord.data("threadNumber")];
