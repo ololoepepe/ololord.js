@@ -372,6 +372,7 @@ controller.translationsModel = function() {
     translate("Markup", "toMarkupPageText");
     translate("Home", "toHomePageText");
     translate("Framed version", "framedVersionText");
+    translate("Framed version", "normalVersionText");
     translate("F.A.Q.", "toFaqPageText");
     translate("User management", "toManagePageText");
     translate("Hide by image hash", "hideByImageText");
