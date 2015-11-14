@@ -396,13 +396,13 @@ lord.createPostNode = function(post, permanent) {
             lord.initFiles();
         }
         var youtube = lord.getLocalObject("showYoutubeVideosTitles", true);
-        var data = lord.getPostData(post);
+        var data = lord.getPostData(c.node);
         lord.doWork("processPosts", {
             youtube: youtube ? { "apiKey": lord.data("youtubeApiKey") } : null,
             posts: [data],
             spells: lord.spells
         }).then(function(list) {
-            lord.processPost(post, (list && list.length > 0) ? list[0] : null);
+            lord.processPost(c.node, (list && list.length > 0) ? list[0] : null);
         }).catch(lord.handleError);
         if (!post.referencedPosts || post.referencedPosts.length < 1)
             return Promise.resolve();

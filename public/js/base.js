@@ -349,13 +349,16 @@ lord.editHotkeys = function() {
     lord.forIn(lord.DefaultHotkeys.dir, function(key, name) {
         lord.nameOne(name, table).value = hotkeys.dir[name] || key;
     });
-    lord.showDialog(null, null, table, function() {
+    lord.showDialog(null, null, table).then(function(result) {
+        if (!result)
+            return Promise.resolve();
         lord.forIn(lord.DefaultHotkeys.dir, function(key, name) {
             key = lord.nameOne(name, table).value || key;
             hotkeys.dir[name] = key;
             hotkeys.rev[key] = name;
         });
         lord.setLocalObject("hotkeys", hotkeys);
+        return Promise.resolve();
     });
 };
 
@@ -394,7 +397,9 @@ lord.editSpells = function() {
     ta.rows = 10;
     ta.cols = 43;
     ta.value = lord.getLocalObject("spells", lord.DefaultSpells);
-    lord.showDialog(null, null, ta, function() {
+    lord.showDialog(null, null, ta).then(function(result) {
+        if (!result)
+            return Promise.resolve();
         lord.setLocalObject("spells", ta.value);
         if (!lord.worker || !lord.getLocalObject("spellsEnabled", true))
             return;
@@ -402,6 +407,7 @@ lord.editSpells = function() {
             "type": "parseSpells",
             "data": lord.getLocalObject("spells", lord.DefaultSpells)
         });
+        return Promise.resolve();
     });
 };
 
@@ -461,8 +467,11 @@ lord.showHiddenPostList = function() {
             f("ERROR", x);
         });
     });
-    lord.showDialog(title, null, div, function() {
+    lord.showDialog(title, null, div).then(function(result) {
+        if (!result)
+            return Promise.resolve();
         lord.setLocalObject("hiddenPosts", list);
+        return Promise.resolve();
     });
 };
 
@@ -471,8 +480,11 @@ lord.editUserCss = function() {
     ta.rows = 10;
     ta.cols = 43;
     ta.value = lord.getLocalObject("userCss", "");
-    lord.showDialog(null, null, ta, function() {
+    lord.showDialog(null, null, ta).then(function(result) {
+        if (!result)
+            return Promise.resolve();
         lord.setLocalObject("userCss", ta.value);
+        return Promise.resolve();
     });
 };
 
