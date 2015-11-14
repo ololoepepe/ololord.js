@@ -460,3 +460,16 @@ module.exports.parseForm = function(req) {
         });
     });
 };
+
+module.exports.proxy = function() {
+    var proxy = config("system.fileDownloadProxy");
+    if (!proxy)
+        return null;
+    var parts = proxy.split(":");
+    var auth = config("system.fileDownloadProxyAuth");
+    return {
+        host: parts[0],
+        port: (parts[1] ? +parts[1] : null),
+        auth: (auth ? ("Basic " + new Buffer(auth).toString("base64")) : null)
+    };
+};

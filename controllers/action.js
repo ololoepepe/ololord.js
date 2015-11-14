@@ -83,11 +83,13 @@ var getFiles = function(fields, files, transaction) {
         var path = __dirname + "/../tmp/upload_" + UUID.v1();
         transaction.filePaths.push(path);
         var c = {};
-        var proxy = config("system.fileDownloadProxy");
+        var proxy = Tools.proxy();
         var p;
         if (proxy) {
             p = HTTP.request({
-                host: proxy,
+                host: proxy.host,
+                port: proxy.port,
+                headers: { "Proxy-Authorization": proxy.auth },
                 path: url.url,
                 timeout: Tools.Minute
             });

@@ -15,7 +15,6 @@
                                                           src="/{{=it.site.pathPrefix}}img/thread_up.png"></a>]
     {{?}}
     {{? it.settings.mode.name != "ascetic"}}
-        [<input onclick="lord.setAutoUpdateEnabled(this);" id="autoUpdate{{=position}}"
-                type="checkbox" /><span name="autoUpdateText">{{=it.tr.autoUpdateText}}</span>]
+        [<input id="autoUpdate{{=position}}" type="text" style="display: none;" />]
     {{?}}
 </div>

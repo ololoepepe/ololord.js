@@ -203,8 +203,6 @@ lord.popups = [];
 lord.unloading = false;
 lord.leftChain = [];
 lord.rightChain = [];
-lord._ajaxRequestQueue = [];
-lord._ajaxRequestActive = 0;
 lord.models = {};
 lord.partials = null;
 lord.templates = {};
@@ -454,11 +452,6 @@ lord.id = function(id) {
     return document.getElementById(id);
 };
 
-lord.text = function(id) {
-    var input = lord.id(id);
-    return input ? input.value : "";
-};
-
 lord.query = function(query, parent) {
     if (typeof query != "string")
         return null;
@@ -650,93 +643,6 @@ lord.showDialog = function(title, label, body, afterShow) {
             dialog.show();
         });
     });
-};
-
-lord.ajaxRequest = function(method, params, id, callback, errorCallback) {
-    var req = {
-        "method": method,
-        "params": params,
-        "id": id,
-        "callback": callback,
-        "errorCallback": errorCallback
-    };
-    var f = function() {
-        if (lord._ajaxRequestQueue.length < 1)
-            return;
-        ++lord._ajaxRequestActive;
-        var req = lord._ajaxRequestQueue.shift();
-        var xhr = new XMLHttpRequest();
-        xhr.withCredentials = true;
-        var prefix = lord.text("sitePathPrefix");
-        xhr.open("post", "/" + prefix + "api");
-        xhr.setRequestHeader("Content-Type", "application/json");
-        var request = {
-            "method": req.method,
-            "params": req.params,
-            "id": req.id
-        };
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    var err = response.error;
-                    if (!!err) {
-                        var show = true;
-                        for (var i = 0; i < lord.popups.length; ++i) {
-                            if (lord.popups[i].text == err) {
-                                show = false;
-                                break;
-                            }
-                        }
-                        if (show)
-                            lord.showPopup(err, {type: "critical"});
-                        --lord._ajaxRequestActive;
-                        f();
-                        if (typeof req.errorCallback == "function")
-                            req.errorCallback(err);
-                        return;
-                    }
-                    --lord._ajaxRequestActive;
-                    f();
-                    if (typeof req.callback == "function")
-                        req.callback(response.result);
-                } else {
-                    if (!lord.unloading) {
-                        var text = lord.text("ajaxErrorText") + " " + xhr.status;
-                        switch (+xhr.status) {
-                        case 413:
-                            text = lord.text("error" + xhr.status + "Text");
-                            break;
-                        default:
-                            break;
-                        }
-                        var show = true;
-                        for (var i = 0; i < lord.popups.length; ++i) {
-                            if (lord.popups[i].text == text) {
-                                show = false;
-                                break;
-                            }
-                        }
-                        if (show)
-                            lord.showPopup(text, {type: "critical"});
-                        --lord._ajaxRequestActive;
-                        f();
-                        if (typeof req.errorCallback == "function")
-                            req.errorCallback(text);
-                    }
-                }
-            }
-        };
-        xhr.send(JSON.stringify(request));
-    };
-    lord._ajaxRequestQueue.push(req);
-    var ms = lord.getLocalObject("maxSimultaneousAjax", 2);
-    if (isNaN(ms) || ms <= 0)
-        ms = 2;
-    if (lord._ajaxRequestActive < ms)
-        f();
-    if (lord._ajaxRequestActive < ms)
-        f();
 };
 
 lord.isHashpass = function(s) {
@@ -1079,7 +985,6 @@ lord.settings = function() {
         hideUserNames: lord.getLocalObject("hideUserNames", false),
         strikeOutHiddenPostLinks: lord.getLocalObject("strikeOutHiddenPostLinks", true),
         spellsEnabled: lord.getLocalObject("spellsEnabled", true),
-        maxSimultaneousAjax: lord.getLocalObject("maxSimultaneousAjax", 2),
         showNewPosts: lord.getLocalObject("showNewPosts", true),
         showYoutubeVideosTitles: lord.getLocalObject("showYoutubeVideosTitles", true),
         hotkeysEnabled: lord.getLocalObject("hotkeysEnabled", true),
@@ -1114,7 +1019,7 @@ lord.handleError = function(error) {
         if (error.errorMessage) {
             text = error.errorMessage;
             if (error.errorDescription)
-                text += ": " + errorDescription;
+                text += ": " + error.errorDescription;
         } else {
             text = error;
         }

@@ -18,26 +18,30 @@ var lord = lord || {};
         this.secondsLeft -= 1;
         if (this.secondsLeft <= 0)
             this.secondsLeft = this.intervalSeconds;
+        var _this = this;
+        ["Top", "Bottom"].forEach(function(position) {
+            $("#autoUpdate" + position).trigger("configure", { max: _this.intervalSeconds });
+            $("#autoUpdate" + position).val(_this.intervalSeconds).trigger("change");
+        });
         this.update();
     }).bind(this), lord.Second);
 };
 
 /*private*/ lord.AutoUpdateTimer.prototype.update = function() {
-    lord.name("autoUpdateText").forEach((function(span) {
-        lord.removeChildren(span);
-        var txt = lord.text("autoUpdateText");
-        if (this.countdownTimer)
-            txt += ": " + this.secondsLeft;
-        span.appendChild(lord.node("text", txt));
-    }).bind(this));
+    if (this.secondsLeft <= 0)
+        return;
+    var _this = this;
+    ["Top", "Bottom"].forEach(function(position) {
+        $("#autoUpdate" + position).val(_this.secondsLeft).trigger("change");
+    });
 };
 
 /*public*/ lord.AutoUpdateTimer.prototype.start = function() {
     if (this.updateTimer)
         return;
     this.updateTimer = setInterval((function() {
-        var boardName = lord.text("currentBoardName");
-        var threadNumber = lord.text("currentThreadNumber");
+        var boardName = lord.data("boardName");
+        var threadNumber = +lord.data("threadNumber");
         lord.updateThread(true);
         if (this.countdownTimer) {
             clearInterval(this.countdownTimer);
@@ -58,6 +62,10 @@ var lord = lord || {};
     if (this.countdownTimer) {
         clearInterval(this.countdownTimer);
         this.countdownTimer = null;
+        /*["Top", "Bottom"].forEach(function(position) {
+            $("#autoUpdate" + position).trigger("configure", { max: 10 });
+            $("#autoUpdate" + position).val(5).trigger("change");
+        });*/
     }
     this.secondsLeft = 0;
     this.update();
@@ -160,8 +168,8 @@ lord.updateThread = function(silent) {
         }
         return lord.getModel("api/lastPosts", query);
     }).then(function(posts) {
-        if (posts.errorMessage)
-            return Promise.reject(post.errorMessage);
+        if (lord.checkError(posts))
+            return Promise.reject(posts);
         if (popup) {
             var txt = (posts.length >= 1) ? c.tr.newPostsText : c.tr.noNewPostsText;
             if (posts.length >= 1)
@@ -249,10 +257,7 @@ lord.updateThread = function(silent) {
     });
 };
 
-lord.setAutoUpdateEnabled = function(cbox) {
-    var enabled = !!cbox.checked;
-    lord.id("autoUpdateTop").checked = enabled;
-    lord.id("autoUpdateBottom").checked = enabled;
+lord.setAutoUpdateEnabled = function(enabled) {
     if (enabled) {
         var intervalSeconds = lord.getLocalObject("autoUpdateInterval", 15);
         var showCountdown = lord.getLocalObject("showAutoUpdateTimer", true);
@@ -263,7 +268,7 @@ lord.setAutoUpdateEnabled = function(cbox) {
         lord.autoUpdateTimer = null;
     }
     var list = lord.getLocalObject("autoUpdate", {});
-    var threadNumber = lord.text("currentThreadNumber");
+    var threadNumber = +lord.data("threadNumber");
     list[threadNumber] = enabled;
     lord.setLocalObject("autoUpdate", list);
 };
@@ -309,13 +314,31 @@ lord.downloadThread = function() {
 };
 
 lord.initializeOnLoadThread = function() {
+    ["Top", "Bottom"].forEach(function(position) {
+        $("#autoUpdate" + position).knob({
+            readOnly: true,
+            thickness: 0.5,
+            displayInput: false,
+            max: 1,
+            height: 22,
+            width: 22
+        });
+        $("#autoUpdate" + position).val(1).trigger("change");
+        var parent = $("#autoUpdate" + position).parent();
+        parent.addClass("buttonImage");
+        parent.find("canvas").click(function(e) {
+            var list = lord.getLocalObject("autoUpdate", {});
+            var threadNumber = +lord.data("threadNumber");
+            var enabled = !list[threadNumber];
+            list[threadNumber] = enabled;
+            lord.setLocalObject("autoUpdate", list);
+            lord.setAutoUpdateEnabled(enabled);
+        }).css({ marginBottom: -5 });
+    });
     lord.addVisibilityChangeListener(lord.visibilityChangeListener);
-    var enabled = lord.getLocalObject("autoUpdate", {})[lord.text("currentThreadNumber")];
-    if (true === enabled || (false !== enabled && lord.getLocalObject("autoUpdateThreadsByDefault", false))) {
-        var cbox = lord.id("autoUpdateTop");
-        cbox.checked = true;
-        lord.setAutoUpdateEnabled(cbox);
-    }
+    var enabled = lord.getLocalObject("autoUpdate", {})[+lord.data("threadNumber")];
+    if (true === enabled || (false !== enabled && lord.getLocalObject("autoUpdateThreadsByDefault", false)))
+        lord.setAutoUpdateEnabled(true);
     var hash = lord.hash();
     if (hash.substring(0, 1) === "i") {
         hash = hash.substring(1);

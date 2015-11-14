@@ -605,6 +605,11 @@ controller.translationsModel = function() {
     translate("Delete all user posts on selected board", "delallButtonText");
     translate("Select all", "selectAllText");
     translate("Post source text", "postSourceTextText");
+    translate("Expand video", "expandVideoText");
+    translate("Collapse video", "collapseVideoText");
+    translate("Favorite threads", "favoriteThreadsText");
+    translate("Go complain to your mum, you whiner!", "complainMessage");
+    translate("Auto update", "autoUpdateText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

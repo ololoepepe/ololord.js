@@ -1,4 +1,5 @@
 var express = require("express");
+var HTTP = require("q-io/http");
 var Util = require("util");
 
 var Board = require("../boards");
@@ -180,6 +181,65 @@ router.get("/bannedUser.json", function(req, res) {
 router.get("/bannedUsers.json", function(req, res) {
     Database.bannedUsers().then(function(users) {
         res.send(users);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
+router.get("/coubVideoInfo.json", function(req, res) {
+    var url = "https://coub.com/api/oembed.json?url=coub.com/view/" + (req.query.videoId || "");
+    var proxy = config("system.fileDownloadProxy");
+    var p;
+    if (proxy) {
+        p = HTTP.request({
+            host: proxy.host,
+            port: proxy.port,
+            headers: { "Proxy-Authorization": proxy.auth },
+            path: url,
+            timeout: Tools.Minute
+        });
+    } else {
+        p = HTTP.request({
+            url: url,
+            timeout: Tools.Minute
+        });
+    }
+    return p.then(function(response) {
+        if (response.status != 200)
+            return Promise.reject("Failed to get Coub video info");
+        return response.body.read();
+    }).then(function(data) {
+        res.send(data);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
+router.get("/fileHeaders.json", function(req, res) {
+    if (!req.query.url)
+        return controller.error(req, res, "Invalid url", true);
+    var proxy = Tools.proxy();
+    var p;
+    if (proxy) {
+        p = HTTP.request({
+            method: "HEAD",
+            host: proxy.host,
+            port: proxy.port,
+            headers: { "Proxy-Authorization": proxy.auth },
+            path: req.query.url,
+            timeout: Tools.Minute
+        });
+    } else {
+        p = HTTP.request({
+            method: "HEAD",
+            url: req.query.url,
+            timeout: Tools.Minute
+        });
+    }
+    return p.then(function(response) {
+        if (response.status != 200)
+            return Promise.reject("Failed to get file headers");
+        res.send(response.headers);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

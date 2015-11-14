@@ -42,16 +42,6 @@ lord._defineHotkey("markupCode", "Alt+C");
 
 /*Functions*/
 
-lord.availableBoards = function() {
-    if (lord.availableBoards._boards)
-        return lord.availableBoards._boards;
-    lord.availableBoards._boards = {};
-    lord.arr(lord.text("availableBoards").split(";")).forEach(function(brd) {
-        lord.availableBoards._boards[brd.split("|").shift()] = brd.split("|").pop();
-    });
-    return lord.availableBoards._boards;
-};
-
 lord.changeLocale = function() {
     var sel = lord.id("localeChangeSelect");
     var ln = sel.options[sel.selectedIndex].value;
@@ -152,8 +142,8 @@ lord.showFavorites = function() {
     };
     span.appendChild(clBtn);
     div.appendChild(span);
-    var sitePathPrefix = lord.text("sitePathPrefix");
-    var f = function(res, x) {
+    var sitePathPrefix = lord.data("sitePathPrefix");
+    var f = function(post, x) {
         var postDiv = lord.node("div");
         postDiv.id = "favorite/" + x;
         var a = lord.node("a");
@@ -162,12 +152,12 @@ lord.showFavorites = function() {
         a.href = "/" + sitePathPrefix + boardName + "/thread/" + threadNumber + ".html";
         var txt = "";
         var fav = lord.getLocalObject("favoriteThreads", {});
-        if (typeof res != "string") {
-            txt = (res["subject"] ? res["subject"] : res["text"]).substring(0, 150);
+        if (typeof post != "string") {
+            txt = (post.subject || post.text || "[NO TEXT]").substring(0, 150);
             fav[x].subject = txt;
             lord.setLocalObject("favoriteThreads", fav);
         } else {
-            txt = fav[x].subject ? fav[x].subject : ("[" + res + "]");
+            txt = fav[x].subject ? fav[x].subject : ("[" + post + "]");
         }
         a.appendChild(lord.node("text", "[" + x + "] " + txt.substring(0, 50)));
         a.title = txt;
@@ -196,10 +186,13 @@ lord.showFavorites = function() {
     lord.forIn(fav, function(_, x) {
         var boardName = x.split("/").shift();
         var threadNumber = x.split("/").pop();
-        lord.ajaxRequest("get_post", [boardName, +threadNumber], lord.RpcGetPostId, function(res) {
-            f(res, x);
-        }, function(err) {
-            f(err, x);
+        lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
+            if (lord.checkError(post))
+                return Promise.reject(post);
+            f(post, x);
+        }).catch(function(err) {
+            lord.handleError(err);
+            f("ERROR", x);
         });
     });
     document.body.appendChild(div);
@@ -209,7 +202,7 @@ lord.showFavorites = function() {
 lord.switchMumWatching = function() {
     var watching = lord.getLocalObject("mumWatching", false);
     var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
-    img.src = "/" + lord.text("sitePathPrefix") + "img/mum" + (watching ? "_not" : "") + "_watching.png";
+    img.src = "/" + lord.data("sitePathPrefix") + "img/mum" + (watching ? "_not" : "") + "_watching.png";
     lord.query(".postFileFile > a > img").forEach(function(img) {
         if (watching)
             lord.removeClass(img, "mumWatching");
@@ -255,23 +248,28 @@ lord.checkFavoriteThreads = function() {
     lord.forIn(fav, function(o, x) {
         var boardName = x.split("/").shift();
         var threadNumber = x.split("/").pop();
-        lord.ajaxRequest("get_new_posts", [boardName, +threadNumber, o.lastPostNumber], lord.RpcGetNewPostsId, function(res) {
-            if (!res || res.length < 1)
+        lord.getModel("api/lastPosts", "boardName=" + boardName + "&threadNumber=" + threadNumber
+            + "&lastPostNumber=" + o.lastPostNumber).then(function(posts) {
+            if (lord.checkError(posts))
+                return Promise.reject(posts);
+            if (!posts || posts.length < 1)
                 return;
-            o.lastPostNumber = res[res.length - 1]["number"];
+            o.lastPostNumber = posts.pop().number;
             nfav[x] = o;
-        });
+        }).catch(lord.handleError);
     });
     if (lord.notificationsEnabled() && lord.hasOwnProperties(nfav)) {
-        var title = lord.text("favoriteThreadsText");
-        var sitePathPrefix = lord.text("sitePathPrefix");
-        var icon = "/" + sitePathPrefix + "favicon.ico";
-        var text = "";
-        lord.forIn(nfav, function(v, k) {
-            text += k + ", ";
-        });
-        text = text.substr(0, text.length - 2);
-        lord.showNotification(title, text.substr(0, 300), icon);
+        lord.getModel("misc/tr").then(function(model) {
+            var title = model.tr.favoriteThreadsText;
+            var sitePathPrefix = lord.data("sitePathPrefix");
+            var icon = "/" + sitePathPrefix + "favicon.ico";
+            var text = "";
+            lord.forIn(nfav, function(v, k) {
+                text += k + ", ";
+            });
+            text = text.substr(0, text.length - 2);
+            lord.showNotification(title, text.substr(0, 300), icon);
+        }).catch(lord.handleError);
     }
     setTimeout(function() {
         fav = lord.getLocalObject("favoriteThreads", {});
@@ -290,10 +288,10 @@ lord.checkFavoriteThreads = function() {
                     fnt.appendChild(lord.node("text", "+" + (o.lastPostNumber - o.previousLastPostNumber)));
             });
         } else {
-            var threadNumber = lord.text("currentThreadNumber");
+            var threadNumber = +lord.data("threadNumber");
             lord.forIn(fav, function(o, x) {
                 if (o.lastPostNumber > o.previousLastPostNumber) {
-                    if (threadNumber && x.split("/").pop() == threadNumber)
+                    if (threadNumber && +x.split("/").pop() == threadNumber)
                         return;
                     lord.showFavorites();
                 }
@@ -412,21 +410,21 @@ lord.showHiddenPostList = function() {
     var div = lord.node("div");
     lord.addClass(div, "hiddenPostList");
     var list = lord.getLocalObject("hiddenPosts", {});
-    var sitePathPrefix = lord.text("sitePathPrefix");
-    var f = function(res, x) {
+    var sitePathPrefix = lord.data("sitePathPrefix");
+    var f = function(post, x) {
         var postDiv = lord.node("div");
         lord.addClass(postDiv, "nowrap");
         postDiv.id = "hidden/" + x;
         var boardName = x.split("/").shift();
         var postNumber = x.split("/").pop();
         var txt = "[" + x + "]";
-        if (typeof res != "string") {
-            txt = (res["subject"] ? res["subject"] : res["text"]).substring(0, 150);
+        if (typeof post != "string") {
+            txt = (post.subject || post.text || "[NO TEXT]").substring(0, 150);
             list[x].subject = txt;
-            list[x].threadNumber = res["threadNumber"];
+            list[x].threadNumber = post.threadNumber;
             lord.setLocalObject("hiddenPosts", list);
         } else {
-            txt = list[x].subject ? list[x].subject : ("[" + res + "]");
+            txt = list[x].subject ? list[x].subject : ("[" + post + "]");
         }
         if (list[x].threadNumber) {
             var a = lord.node("a");
@@ -454,10 +452,13 @@ lord.showHiddenPostList = function() {
     lord.forIn(list, function(_, x) {
         var boardName = x.split("/").shift();
         var postNumber = x.split("/").pop();
-        lord.ajaxRequest("get_post", [boardName, +postNumber], lord.RpcGetPostId, function(res) {
-            f(res, x);
-        }, function(err) {
-            f(err, x);
+        lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
+            if (lord.checkError(post))
+                return Promise.reject(post);
+            f(post, x);
+        }).catch(function(err) {
+            lord.handleError(err);
+            f("ERROR", x);
         });
     });
     lord.showDialog(title, null, div, function() {
@@ -513,7 +514,7 @@ lord.interceptHotkey = function(e) {
 lord.initializeOnLoadSettings = function() {
     if (lord.getCookie("show_tripcode") === "true")
         lord.id("showTripcodeCheckbox").checked = true;
-    if (lord.getLocalObject("hotkeysEnabled", true) && lord.text("deviceType") != "mobile") {
+    if (lord.getLocalObject("hotkeysEnabled", true) && lord.data("deviceType") != "mobile") {
         document.body.addEventListener("keypress", lord.interceptHotkey, false);
         var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
         var key = function(name) {

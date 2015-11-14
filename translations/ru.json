@@ -1794,8 +1794,7 @@
     "Favorite threads": {
         "favoriteThreadsText": {
             "value": "Избранные треды"
-        },
-        "_obsolete": true
+        }
     },
     "Request entity too large": {
         "error413Text": {
@@ -2421,8 +2420,7 @@
     "Go complain to your mum, you whiner!": {
         "complainMessage": {
             "value": "Мамке своей пожалуйся, нытик!"
-        },
-        "_obsolete": true
+        }
     },
     "MB": {
         "megabytesText": {
@@ -2519,14 +2517,12 @@
     "Collapse video": {
         "collapseVideoText": {
             "value": "Свернуть видео"
-        },
-        "_obsolete": true
+        }
     },
     "Expand video": {
         "expandVideoText": {
             "value": "Развернуть видео"
-        },
-        "_obsolete": true
+        }
     },
     "Add to playlist": {
         "addToPlaylistText": {
