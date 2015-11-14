@@ -1783,8 +1783,7 @@
     "Close": {
         "closeButtonText": {
             "value": "Закрыть"
-        },
-        "_obsolete": true
+        }
     },
     "Remove thread from favorites": {
         "removeThreadFromFavoritesText": {

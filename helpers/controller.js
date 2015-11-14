@@ -610,6 +610,7 @@ controller.translationsModel = function() {
     translate("Favorite threads", "favoriteThreadsText");
     translate("Go complain to your mum, you whiner!", "complainMessage");
     translate("Auto update", "autoUpdateText");
+    translate("Close", "closeButtonText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

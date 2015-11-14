@@ -121,82 +121,75 @@ lord.showFavorites = function() {
     var div = lord.id("favorites");
     if (div)
         return;
-    div = lord.node("div");
-    div.id = "favorites";
-    lord.addClass(div, "favorites");
-    var h = lord.node("h1");
-    h.appendChild(lord.node("text", lord.text("favoriteThreadsText")));
-    div.appendChild(h);
     var fav = lord.getLocalObject("favoriteThreads", {});
-    var span = lord.node("span");
-    var clBtn = lord.node("button");
-    clBtn.appendChild(lord.node("text", lord.text("closeButtonText")));
-    clBtn.onclick = function() {
-        fav = lord.getLocalObject("favoriteThreads", {});
-        lord.forIn(fav, function(o, x) {
-            o.previousLastPostNumber = o.lastPostNumber;
-            fav[x] = o;
-        });
-        lord.setLocalObject("favoriteThreads", fav);
-        document.body.removeChild(div);
-    };
-    span.appendChild(clBtn);
-    div.appendChild(span);
-    var sitePathPrefix = lord.data("sitePathPrefix");
-    var f = function(post, x) {
-        var postDiv = lord.node("div");
-        postDiv.id = "favorite/" + x;
-        var a = lord.node("a");
-        var boardName = x.split("/").shift();
-        var threadNumber = x.split("/").pop();
-        a.href = "/" + sitePathPrefix + boardName + "/thread/" + threadNumber + ".html";
-        var txt = "";
-        var fav = lord.getLocalObject("favoriteThreads", {});
-        if (typeof post != "string") {
-            txt = (post.subject || post.text || "[NO TEXT]").substring(0, 150);
-            fav[x].subject = txt;
-            lord.setLocalObject("favoriteThreads", fav);
-        } else {
-            txt = fav[x].subject ? fav[x].subject : ("[" + post + "]");
-        }
-        a.appendChild(lord.node("text", "[" + x + "] " + txt.substring(0, 50)));
-        a.title = txt;
-        a.target = "_blank";
-        postDiv.appendChild(a);
-        postDiv.appendChild(lord.node("text", " "));
-        var fnt = lord.node("font");
-        fnt.color = "green";
-        postDiv.appendChild(fnt);
-        div.insertBefore(postDiv, span);
-        var p = fav[x];
-        if (p["lastPostNumber"] > p["previousLastPostNumber"]) {
-            fnt.appendChild(lord.node("text", "+" + (p["lastPostNumber"] - p["previousLastPostNumber"])));
-        }
-        var rmBtn = lord.node("a");
-        rmBtn.onclick = function() {
-            postDiv.parentNode.removeChild(postDiv);
-            lord.removeThreadFromFavorites(x.split("/")[0], x.split("/")[1]);
-        };
-        rmBtn.title = lord.text("removeFromFavoritesText");
-        var img = lord.node("img");
-        img.src = "/" + sitePathPrefix + "img/delete.png";
-        rmBtn.appendChild(img);
-        postDiv.appendChild(rmBtn);
-    };
+    var list = [];
     lord.forIn(fav, function(_, x) {
-        var boardName = x.split("/").shift();
-        var threadNumber = x.split("/").pop();
-        lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
-            if (lord.checkError(post))
-                return Promise.reject(post);
-            f(post, x);
-        }).catch(function(err) {
-            lord.handleError(err);
-            f("ERROR", x);
+        list.push({
+            boardName: x.split("/").shift(),
+            threadNumber: x.split("/").pop()
         });
     });
-    document.body.appendChild(div);
-    lord.toCenter(div, null, null, 1);
+    var c = {};
+    var promises = list.map(function(item) {
+        var boardName = item.boardName;
+        var threadNumber = item.threadNumber;
+        return lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + threadNumber).then(function(post) {
+            if (lord.checkError(post))
+                return Promise.reject(post);
+            return Promise.resolve(post);
+        }).catch(function(err) {
+            lord.handleError(err);
+            return Promise.resolve(boardName + "/" + threadNumber + " (404)");
+        }).then(function(post) {
+            var txt = "";
+            var fav = lord.getLocalObject("favoriteThreads", {});
+            var x = boardName + "/" + threadNumber;
+            if (typeof post != "string") {
+                txt = (post.subject || post.text || (boardName + "/" + threadNumber)).substring(0, 150);
+                fav[x].subject = txt;
+                lord.setLocalObject("favoriteThreads", fav);
+            } else {
+                txt = fav[x].subject ? fav[x].subject : ("[" + post + "]");
+            }
+            var data = {
+                boardName: boardName,
+                threadNumber: threadNumber,
+                text: txt
+            };
+            var p = fav[x];
+            if (p.lastPostNumber > p.previousLastPostNumber)
+                data.newPostCount = p.lastPostNumber - p.previousLastPostNumber;
+            return Promise.resolve(data);
+        });
+    });
+    Promise.all(promises).then(function(list) {
+        c.list = list;
+        return lord.getModel(["misc/base", "misc/tr"], true);
+    }).then(function(model) {
+        c.model = model;
+        c.model.favorites = c.list;
+        return lord.getTemplate("favoritesDialog");
+    }).then(function(template) {
+        div = $.parseHTML(template(c.model))[0];
+        document.body.appendChild(div);
+        lord.toCenter(div, null, null, 1);
+    }).catch(lord.handleError);
+};
+
+lord.closeFavorites = function() {
+    var fav = lord.getLocalObject("favoriteThreads", {});
+    lord.forIn(fav, function(o, x) {
+        o.previousLastPostNumber = o.lastPostNumber;
+        fav[x] = o;
+    });
+    lord.setLocalObject("favoriteThreads", fav);
+    document.body.removeChild(lord.id("favorites"));
+};
+
+lord.removeFavorite = function(el) {
+    var div = el.parentNode;
+    div.parentNode.removeChild(div);
+    lord.removeThreadFromFavorites(lord.data("boardName", el, true), +lord.data("threadNumber", el, true));
 };
 
 lord.switchMumWatching = function() {
