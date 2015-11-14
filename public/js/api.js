@@ -1021,6 +1021,8 @@ lord.handleError = function(error) {
             text = error.errorMessage;
             if (error.errorDescription)
                 text += ": " + error.errorDescription;
+        } else if (error.hasOwnProperty("readyState") && 0 == error.readyState) {
+            text = "No connection with server";
         } else {
             text = error;
         }
