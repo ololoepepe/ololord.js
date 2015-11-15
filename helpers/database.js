@@ -12,7 +12,6 @@ XML2JS = require("xml2js");
 var mkpath = promisify("mkpath");
 
 var Board = require("../boards");
-var Cache = require("./cache");
 var Captcha = require("../captchas");
 var config = require("./config");
 var markup = require("./markup");

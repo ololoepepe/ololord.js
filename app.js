@@ -3,7 +3,6 @@
 var cluster = require("cluster");
 var expressCluster = require("express-cluster");
 var OS = require("os");
-var rimraf = require("rimraf");
 
 var config = require("./helpers/config");
 var controller = require("./helpers/controller");
@@ -32,10 +31,6 @@ var spawnCluster = function() {
         app.use(require("./controllers"));
         app.use("*", function(req, res) {
             controller.notFound(req, res);
-        });
-
-        process.on("exit", function(){
-            rimraf.sync(__dirname + "/cache/" + process.pid);
         });
 
         controller.initialize().then(function() {

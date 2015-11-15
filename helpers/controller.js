@@ -6,7 +6,6 @@ var Highlight = require("highlight.js");
 var merge = require("merge");
 var moment = require("moment");
 var Path = require("path");
-var promisify = require("promisify-node");
 var random = require("random-js")();
 var Util = require("util");
 

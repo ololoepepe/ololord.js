@@ -5,7 +5,6 @@ var FS = require("q-io/fs");
 var FSSync = require("fs");
 var HTTP = require("q-io/http");
 var moment = require("moment");
-var promisify = require("promisify-node");
 var UUID = require("uuid");
 
 var Board = require("../boards");

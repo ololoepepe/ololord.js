@@ -2,7 +2,6 @@ var merge = require("merge");
 var Util = require("util");
 
 var Board = require("../boards/board");
-var Cache = require("../helpers/cache");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");
 var FS = require("q-io/fs");

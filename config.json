@@ -1,10 +1,12 @@
 {
     "system": {
-        "workerCount": 2,
-        "inMemoryCache": true
+        "workerCount": 1,
+        "fileDownloadProxy": "",
+        "fileDownloadProxyAuth": ""
     },
     "server": {
         "port": 8080,
+        "ddosProtection": true,
         "rss": {
             "enabled": true,
             "ttl": 60,
@@ -12,13 +14,64 @@
         }
     },
     "site": {
+        "locale": "en",
         "protocol": "http",
-        "domain": "localhost:8080"
+        "domain": "localhost:8080",
+        "dateFormat": "MM/DD/YYYY HH:mm:ss",
+        "timeOffset": 0,
+        "youtubeApiKey": ""
     },
     "board": {
+        "captchaQuota": 10,
+        "launchDate": "",
+        "maxFileSize": 15728640,
         "b": {
-            "captchaQuota": 10,
-            "launchDate": "2015-02-12T21:00:00"
+            "captchaQuota": 0
+        },
+        "soc": {
+            "hidden": true,
+            "launchDate": ""
+        },
+        "int": {
+            "showWhois": true
+        },
+        "rf": {
+            "postingEnabled": false
+        },
+        "3dpd": {
+            "maxFileCount": 3
+        },
+        "echo": {
+            "acceptedExternalBoardLinks": [
+                "http://iichan.hk/[a-z]+/res/\\d+\\.html",
+                "http://dobrochan.ru/[a-z]+/res/\\d+\\.xhtml",
+                "https?://410chan.org/[a-z]+/res/\\d+\\.html",
+                "https://boards.4chan.org/[a-z]+/thread/\\d+/[a-zA-Z0-9\\-_]+",
+                "https?://2ch.hk/[a-z]+/res/\\d+\\.html"
+            ]
+        }
+    },
+    "captcha": {
+        "google-recaptcha": {
+            "privateKey": "",
+            "publicKey": ""
+        },
+        "google-recaptcha-v1": {
+            "privateKey": "",
+            "publicKey": ""
+        },
+        "yandex-captcha-elatm": {
+            "privateKey": ""
+        },
+        "yandex-captcha-estd": {
+            "privateKey": ""
+        },
+        "yandex-captcha-rus": {
+            "privateKey": ""
+        },
+        "codecha": {
+            "privateKey": "",
+            "publicKey": ""
         }
     }
 }
