@@ -1,8 +1,37 @@
-<div class="toolbar" style="margin-top: 0px;{{? it.settings.stickyToolbar}} z-index: -1;{{?}}">
-    {{#def.innerToolbar}}
-</div>
 {{? it.settings.stickyToolbar}}
+    <br />
+    <br />
     <div class="toolbar sticky">
-        {{#def.innerToolbar}}
-    </div>
+{{??}}
+    <div class="toolbar" style="margin-top: 0px;">
 {{?}}
+    {{? it.settings.mode.name != "ascetic"}}
+        [<input type="image" name="settingsButton" title="{{=it.tr.settingsButtonText}}" class="buttonImage"
+                src="/{{=it.site.pathPrefix}}img/settings.png" onclick="lord.showSettings(); return false;" />]
+        [<input type="image" name="favoritesButton" title="{{=it.tr.showFavoritesText}}" class="buttonImage"
+                src="/{{=it.site.pathPrefix}}img/favorite.png" onclick="lord.showFavorites(); return false;" />]
+        [<a onclick="lord.switchMumWatching(); return false;" name="switchMumWatchingButton"
+            title="{{=it.tr.mumWatchingText}}"><img src="/{{=it.site.pathPrefix}}img/mum_not_watching.png"
+                                                    class="buttonImage"></a>]
+    {{??}}
+        [<a href="/{{=it.site.pathPrefix}}settings.html" title="{{=it.tr.settingsButtonText}}"
+            target="_blank"><img class="buttonImage" src="/{{=it.site.pathPrefix}}img/settings.png"></a>]
+    {{?}}
+    {{? it.user.loggedIn}}
+        <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/logout"
+              enctype="application/x-www-form-urlencoded" class="inlineForm"
+              {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.doLogout(event, this); return false;"{{?}}>
+            <input type="hidden" name="source" value="{{=it.path}}" />
+            [<input type="image" name="submit" src="/{{=it.site.pathPrefix}}img/logout.png" class="buttonImage"
+                    title="{{=it.tr.logoutText}}{{? it.loginMessageText}} [{{=it.loginMessageText}}]{{?}}" />]
+        </form>
+    {{??}}
+        [<a href="/{{=it.site.pathPrefix}}login.html?source={{=it.path}}"><img src="/{{=it.site.pathPrefix}}img/login.png"
+                                                                               class="buttonImage"
+                                                                               title="{{=it.tr.loginText}}"></a>]
+    {{?}}
+    {{? "mobile" != it.deviceType}}
+        |
+    {{?}}
+    {{#def.innerNavbar}}
+</div>
