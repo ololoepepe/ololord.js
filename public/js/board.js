@@ -7,6 +7,7 @@ var lord = lord || {};
 lord.postPreviews = {};
 lord.lastPostPreview = null;
 lord.lastPostPreviewTimer = null;
+lord.postPreviewMask = null;
 lord.images = {};
 lord.img = null;
 lord.imgWrapper = null;
@@ -522,15 +523,36 @@ lord.hideImage = function() {
 };
 
 lord.globalOnclick = function(e) {
-    if (!!e.button)
+    if (e.button)
         return;
     var t = e.target;
-    if (!!t && !!lord.img && t == lord.img)
+    if (t && lord.img && t == lord.img)
         return;
-    while (!!t) {
-        if (t.tagName === "A" && (!!t.onclick || !!t.onmousedown || !!t.href))
+    while (t) {
+        if ("mobile" == lord.data("deviceType") && "A" == t.tagName) {
+            var boardName = lord.data("boardName", t);
+            var postNumber = +lord.data("postNumber", t);
+            if (!isNaN(postNumber) && postNumber > 0 && /^>>.*$/gi.test(t.textContent)) {
+                e.preventDefault();
+                lord.viewPost(t, boardName, postNumber);
+                return false;
+            }
+        }
+        if (t.tagName === "A" && (t.onclick || t.onmousedown || t.href))
             return;
         t = t.parentNode;
+    }
+    if ("mobile" == lord.data("deviceType")) {
+        var post = lord.lastPostPreview;
+        if (post && post.parentNode) {
+            post.parentNode.removeChild(post);
+            lord.lastPostPreview = post.previousPostPreview || null;
+            if (!lord.lastPostPreview) {
+                document.body.removeChild(lord.postPreviewMask);
+                lord.postPreviewMask = null;
+            }
+            return;
+        }
     }
     lord.hideImage();
 };
@@ -1391,23 +1413,25 @@ lord.viewPost = function(a, boardName, postNumber) {
             return Promise.reject("Failed to get post");
         return lord.createPostNode(post, false, boardName);
     }).then(function(post) {
-        post.onmouseout = function(event) {
-            var next = post;
-            while (next) {
-                var list = lord.traverseChildren(next);
-                var e = event.toElement || event.relatedTarget;
-                if (list.indexOf(e) >= 0)
-                    return;
-                next = next.nextPostPreview;
-            }
-            if (!!post.parentNode)
-                post.parentNode.removeChild(post);
-            if (post.previousPostPreview)
-                post.previousPostPreview.onmouseout(event);
-        };
-        post.onmouseover = function(event) {
-            post.mustHide = false;
-        };
+        if ("mobile" != lord.data("deviceType")) {
+            post.onmouseout = function(event) {
+                var next = post;
+                while (next) {
+                    var list = lord.traverseChildren(next);
+                    var e = event.toElement || event.relatedTarget;
+                    if (list.indexOf(e) >= 0)
+                        return;
+                    next = next.nextPostPreview;
+                }
+                if (post.parentNode)
+                    post.parentNode.removeChild(post);
+                if (post.previousPostPreview)
+                    post.previousPostPreview.onmouseout(event);
+            };
+            post.onmouseover = function(event) {
+                post.mustHide = false;
+            };
+        }
         post.previousPostPreview = lord.lastPostPreview;
         if (lord.lastPostPreview)
             lord.lastPostPreview.nextPostPreview = post;
@@ -1418,34 +1442,36 @@ lord.viewPost = function(a, boardName, postNumber) {
             lord.lastPostPreviewTimer = null;
         }
         document.body.appendChild(post);
-        post.style.position = "absolute";
-        var doc = document.documentElement;
-        var coords = a.getBoundingClientRect();
-        var linkCenter = coords.left + (coords.right - coords.left) / 2;
-        if (linkCenter < 0.6 * doc.clientWidth) {
-            post.style.maxWidth = doc.clientWidth - linkCenter + "px";
-            post.style.left = linkCenter + "px";
+        if ("mobile" != lord.data("deviceType")) {
+            post.style.position = "absolute";
+            var doc = document.documentElement;
+            var coords = a.getBoundingClientRect();
+            var linkCenter = coords.left + (coords.right - coords.left) / 2;
+            if (linkCenter < 0.6 * doc.clientWidth) {
+                post.style.maxWidth = doc.clientWidth - linkCenter + "px";
+                post.style.left = linkCenter + "px";
+            } else {
+                post.style.maxWidth = linkCenter + "px";
+                post.style.left = linkCenter - post.scrollWidth + "px";
+            }
+            var scrollTop = doc.scrollTop;
+            if (!scrollTop) //NOTE: Workaround for Chrome/Safari. I really HATE you, HTML/CSS/JS!
+                scrollTop = document.body.scrollTop;
+            post.style.top = (doc.clientHeight - coords.bottom >= post.scrollHeight)
+                ? (scrollTop + coords.bottom - 4 + "px")
+                : (scrollTop + coords.top - post.scrollHeight - 4 + "px");
+            post.style.zIndex = 9001;
         } else {
-            post.style.maxWidth = linkCenter + "px";
-            post.style.left = linkCenter - post.scrollWidth + "px";
+            post.style.position = "fixed";
+            lord.toCenter(post, null, null, 1);
+            post.style.zIndex = 9001;
+            if (!lord.postPreviewMask) {
+                lord.postPreviewMask = lord.node("div");
+                lord.postPreviewMask.className = "temporaryPostOverlayMask";
+                document.body.appendChild(lord.postPreviewMask);
+            }
         }
-        var scrollTop = doc.scrollTop;
-        if (!scrollTop) //NOTE: Workaround for Chrome/Safari. I really HATE you, HTML/CSS/JS!
-            scrollTop = document.body.scrollTop;
-        post.style.top = (doc.clientHeight - coords.bottom >= post.scrollHeight)
-            ? (scrollTop + coords.bottom - 4 + "px")
-            : (scrollTop + coords.top - post.scrollHeight - 4 + "px");
-        post.style.zIndex = 9001;
     }).catch(lord.handleError);
-};
-
-lord.noViewPost = function() {
-    lord.lastPostPreviewTimer = setTimeout(function() {
-        if (!lord.lastPostPreview)
-            return;
-        if (lord.lastPostPreview.mustHide && lord.lastPostPreview.parentNode)
-            lord.lastPostPreview.parentNode.removeChild(lord.lastPostPreview);
-    }, 500);
 };
 
 lord.fileDragOver = function(e, div) {
@@ -2332,20 +2358,27 @@ lord.globalOnmouseout = function(e) {
     var postNumber = +lord.data("postNumber", a);
     if (isNaN(postNumber) || postNumber <= 0)
         return;
-    lord.noViewPost();
+    lord.lastPostPreviewTimer = setTimeout(function() {
+        if (!lord.lastPostPreview)
+            return;
+        if (lord.lastPostPreview.mustHide && lord.lastPostPreview.parentNode)
+            lord.lastPostPreview.parentNode.removeChild(lord.lastPostPreview);
+    }, 500);
 };
 
 lord.strikeOutHiddenPostLink = function(a, list) {
     if (!a)
         return;
-    if (!list)
-        list = lord.getLocalObject("hiddenPosts", {});
     var boardName = lord.data("boardName", a);
     if (!boardName)
         return;
     var postNumber = +lord.data("postNumber", a);
     if (!postNumber)
         return;
+    if (!/^>>.*$/gi.test(a.textContent))
+        return;
+    if (!list)
+        list = lord.getLocalObject("hiddenPosts", {});
     if (list[boardName + "/" + postNumber])
         lord.addClass(a, "hiddenPostLink");
     else

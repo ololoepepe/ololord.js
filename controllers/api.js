@@ -77,7 +77,7 @@ router.get("/post.json", function(req, res) {
     boardModel.getPosts(postIdentifiers(req, true), req.hashpass).then(function(posts) {
         return renderPost(req, posts[0]);
     }).then(function(post) {
-        res.send(post);
+        res.json(post);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
