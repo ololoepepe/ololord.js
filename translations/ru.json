@@ -517,12 +517,6 @@
             "value": "Пост:"
         }
     },
-    "Comment. Max length %1": {
-        "postFormTextPlaceholder": {
-            "value": "Комментарий. Макс. длина %1"
-        },
-        "_obsolete": true
-    },
     "Attached file error": {
         "error": {
             "value": "Ошибка прикрепленного файла"
@@ -2335,11 +2329,10 @@
             "value": "Открыть тред"
         }
     },
-    "Send": {
+    "Submit": {
         "postFormButtonSubmit": {
             "value": "Отправить"
-        },
-        "_obsolete": true
+        }
     },
     "Password:": {
         "postFormLabelPassword": {
@@ -3597,14 +3590,9 @@
             "value": "Показать форму постинга"
         }
     },
-    "Submit": {
-        "postFormButtonSubmit": {
-            "value": "Submit"
-        }
-    },
     "Comment. Max length:": {
         "postFormTextPlaceholder": {
-            "value": "Comment. Max length:"
+            "value": "Комментарий. Макс. длина:"
         }
     },
     "\"Log in\", you say? On an imageboard? I am out!\n\nPlease, wait a sec. The login systyem does NOT store any data on the server. It only stores a cookie on your PC to allow post editing, deleting, etc. without entering password every time, and nothing else.\n\nWell, actually, the admin may register someone manually (if he is a fag), but there is no way to register through the web.": {

@@ -2262,7 +2262,8 @@ lord.submitted = function(event, form) {
         if (c.post) {
             var parent = postForm.parentNode;
             lord.resetPostForm();
-            lord.hidePostForm();
+            if (["postFormContainerTop", "postFormContainerBottom"].indexOf(form.parentNode.id) < 0)
+                lord.hidePostForm();
             lord.resetCaptcha();
             var currentThreadNumber = lord.data("threadNumber");
             if (currentThreadNumber) {
