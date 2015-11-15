@@ -1,5 +1,5 @@
 <div id="{{=post.number}}"
-     class="{{? post.isOp}}opPost{{??}}post{{?}}{{? post.ownIp}} ownIp{{?}}{{? post.opIp}} opIp{{?}}{{? it.settings.shrinkPosts}} shrinkedPost{{?}}"
+     class="{{? post.isOp}}opPost{{??}}post{{?}}{{? post.ownIp}} ownIp{{?}}{{? post.opIp}} opIp{{?}}{{? !it.settings.shrinkPosts}} stretchedPost{{?}}"
      data-board-name="{{=post.boardName}}"
      data-number="{{=post.number}}"
      data-thread-number="{{=post.threadNumber}}"
@@ -190,15 +190,10 @@
                 </ul>
             </span>
         {{?}}
-        {{? post.isOp && !it.thread}}
+        {{? post.isOp && !it.thread && "mobile" != it.deviceType}}
             <span name="toThread" class="postToThread {{=it.deviceType}}">
-                {{? it.deviceType != "mobile"}}
-                    [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"
-                        name="toThreadLink">{{=it.tr.toThread}}</a>]
-                {{??}}
-                    <a name="toThreadLink"
-                       href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"><button class="button">{{=it.tr.toThread}}</button></a>
-                {{?}}
+                [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"
+                    name="toThreadLink">{{=it.tr.toThread}}</a>]
             </span>
         {{?}}
     </div>
@@ -268,4 +263,10 @@
             {{?}}
         </tbody>
     </table>
+    {{? post.isOp && !it.thread && "mobile" == it.deviceType}}
+        <span name="toThread" class="postToThread {{=it.deviceType}}">
+            <a name="toThreadLink"
+               href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"><button class="button">{{=it.tr.toThread}}</button></a>
+        </span>
+    {{?}}
 </div>

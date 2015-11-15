@@ -15,7 +15,7 @@ body.mobile {
     -ms-text-size-adjust: 100%;
     font-size: 14px;s
 }
-.to
+
 a {
     color: #000;
 }
@@ -488,10 +488,12 @@ span.newPostCount {
     padding-top: 10px;
     padding-left: 10px;
     overflow-x: auto;
+    display: table;
 }
 
 .opPost {
     overflow-x: auto;
+    display: table;
 }
 
 .newPost {
@@ -553,10 +555,6 @@ span.newPostCount {
     font-size: 1.2em;
 }
 
-.postToThread {
-    margin-left: 20px;
-}
-
 .postToThread.mobile {
     display: block;
 }
@@ -568,10 +566,6 @@ span.newPostCount {
 
 .postActions, .postActions:active, .postActions:visited {
     color: #000000;
-}
-
-.postActions.mobile {
-    display: block;
 }
 
 .postActions > img {
@@ -671,6 +665,7 @@ span.newPostCount {
 
 .someName.mobile {
     font-size: 0.8em;
+    display: block;
 }
 
 .navigationButton {
@@ -925,8 +920,8 @@ blockquote.blockquoteThread.expand {
     background-color: inherit;
 }
 
-.shrinkedPost {
-    display: table;
+.stretchedPost {
+    width: 99%;
 }
 
 .login {
