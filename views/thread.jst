@@ -8,7 +8,7 @@
     <div id="hiddenPostForm" style="display: none;">
         {{#def.postForm}}
     </div>
-    {{? it.settings.captchaEnabled}}
+    {{? it.board.captchaEnabled}}
         <div id="hiddenCaptcha" style="display: none;">
             {{? it.user.captchaQuota > 0}}
                 {{ out += it.captchaEngine.widgetHtml(it.req, it.captchaPrepared); }}

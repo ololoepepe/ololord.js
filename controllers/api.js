@@ -67,7 +67,7 @@ router.get("/posts.json", function(req, res) {
         var promises = posts.map(renderPost.bind(null, req));
         return Promise.all(promises);
     }).then(function(posts) {
-        res.send(posts);
+        res.json(posts);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
@@ -87,7 +87,7 @@ router.get("/threadInfo.json", function(req, res) {
     var board = Board.board(req.query.boardName);
     var threadNumber = +req.query.threadNumber;
     boardModel.getThreadInfo(board, req.hashpass, threadNumber).then(function(thread) {
-        res.send(thread);
+        res.json(thread);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
@@ -106,7 +106,7 @@ router.get("/fileInfos.json", function(req, res) {
         });
     }
     boardModel.getFileInfos(list, req.hashpass).then(function(fileInfos) {
-        res.send(fileInfos);
+        res.json(fileInfos);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
@@ -117,7 +117,7 @@ router.get("/fileInfo.json", function(req, res) {
         fileName: req.query.fileName,
         fileHash: req.query.fileHash
     }], req.hashpass).then(function(fileInfos) {
-        res.send(fileInfos[0]);
+        res.json(fileInfos[0]);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
@@ -131,7 +131,7 @@ router.get("/lastPosts.json", function(req, res) {
         var promises = posts.map(renderPost.bind(null, req));
         return Promise.all(promises);
     }).then(function(posts) {
-        res.send(posts);
+        res.json(posts);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
@@ -148,7 +148,7 @@ router.get("/lastPostNumbers.json", function(req, res) {
         lastPostNumbers.forEach(function(lastPostNumber, i) {
             r[boardNames[i]] = lastPostNumber;
         });
-        res.send(r);
+        res.json(r);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
@@ -180,7 +180,7 @@ router.get("/bannedUser.json", function(req, res) {
 
 router.get("/bannedUsers.json", function(req, res) {
     Database.bannedUsers().then(function(users) {
-        res.send(users);
+        res.json(users);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
@@ -209,7 +209,7 @@ router.get("/coubVideoInfo.json", function(req, res) {
             return Promise.reject("Failed to get Coub video info");
         return response.body.read();
     }).then(function(data) {
-        res.send(data);
+        res.json(data);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
@@ -239,7 +239,7 @@ router.get("/fileHeaders.json", function(req, res) {
     return p.then(function(response) {
         if (response.status != 200)
             return Promise.reject("Failed to get file headers");
-        res.send(response.headers);
+        res.json(response.headers);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

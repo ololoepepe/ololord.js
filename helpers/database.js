@@ -759,6 +759,19 @@ module.exports.createPost = function(req, fields, files, transaction) {
     });
 };
 
+var rerenderReferringPosts = function(boardName, postNumber) {
+    return db.hgetall("referringPosts:" + boardName + ":" + postNumber).then(function(referringPosts) {
+        if (!referringPosts)
+            return Promise.resolve();
+        var promises = [];
+        Tools.forIn(referringPosts, function(ref) {
+            ref = JSON.parse(ref);
+            promises.push(rerenderPost(ref.boardName, ref.postNumber, true));
+        });
+        return Promise.all(promises);
+    });
+};
+
 var removeReferencedPosts = function(boardName, postNumber) {
     var key = boardName + ":" + postNumber;
     return db.hgetall("referencedPosts:" + key).then(function(referencedPosts) {
@@ -804,6 +817,8 @@ var removePost = function(boardName, postNumber) {
         return db.srem("threadPostNumbers:" + boardName + ":" + post.threadNumber, postNumber);
     }).then(function() {
         return db.hdel("posts", boardName + ":" + postNumber);
+    }).then(function() {
+        return rerenderReferringPosts(boardName, postNumber);
     }).then(function() {
         return removeReferencedPosts(boardName, postNumber, c.post.threadNumber, c.post.referencedPosts);
     }).then(function() {
@@ -1305,10 +1320,11 @@ var captchaUsed = function(boardName, userIp) {
 
 module.exports.captchaUsed = captchaUsed;
 
-var rerenderPost = function(boardName, postNumber) {
+var rerenderPost = function(boardName, postNumber, silent) {
     var key = boardName + ":" + postNumber;
     var c = {};
-    console.log(`Rendering post: [${boardName}] ${postNumber}`);
+    if (!silent)
+        console.log(`Rendering post: [${boardName}] ${postNumber}`);
     var referencedPosts = {};
     return getPost(boardName, postNumber).then(function(post) {
         c.post = post;

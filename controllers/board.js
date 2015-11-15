@@ -57,6 +57,9 @@ var renderPage = function(model, board, req, json) {
         return model.captchaEngine.prepare(req);
     }).then(function(captchaPrepared) {
         model.captchaPrepared = captchaPrepared;
+        return Database.getUserCaptchaQuota(board.name, req.ip);
+    }).then(function(quota) {
+        model.user = { captchaQuota: quota };
         return board.getBannerFileName();
     }).then(function(bannerFileName) {
         if (bannerFileName)
@@ -102,6 +105,9 @@ var renderThread = function(model, board, req, json) {
         return model.captchaEngine.prepare(req);
     }).then(function(captchaPrepared) {
         model.captchaPrepared = captchaPrepared;
+        return Database.getUserCaptchaQuota(board.name, req.ip);
+    }).then(function(quota) {
+        model.user = { captchaQuota: quota };
         return board.getBannerFileName();
     }).then(function(bannerFileName) {
         if (bannerFileName)

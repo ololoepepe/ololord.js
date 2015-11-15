@@ -232,19 +232,19 @@ lord.resetCaptcha = function() {
                 td.removeChild(td.children[i]);
             }
             if (quota > 0) {
-                lord.getModel("misc/tr").then(function(mode) {
+                lord.getModel("misc/tr").then(function(model) {
                     hiddenCaptcha.appendChild(captcha);
                     var span = lord.node("span");
                     lord.addClass(span, "noCaptchaText");
-                    var text = model.tr.noCaptchaText + ". " + model.tr.captchaQuotaText + " " + res;
+                    var text = model.tr.noCaptchaText + ". " + model.tr.captchaQuotaText + " " + quota;
                     span.appendChild(lord.node("text", text));
                     td.appendChild(span);
                 });
             } else {
                 lord.id("captchaContainer").appendChild(captcha);
+                if (lord.reloadCaptchaFunction && "hiddenCaptcha" !== captcha.parentNode.id)
+                    lord.reloadCaptchaFunction();
             }
-            if (lord.reloadCaptchaFunction && "hiddenCaptcha" !== captcha.parentNode.id)
-                lord.reloadCaptchaFunction();
         });
     }
 };

@@ -1019,7 +1019,7 @@ lord.setSettings = function(model) {
 };
 
 lord.checkError = function(result) {
-    return typeof result != "object" || (result && result.errorMessage);
+    return (["object", "number", "boolean"].indexOf(typeof result) < 0) || (result && result.errorMessage);
 };
 
 lord.handleError = function(error) {
