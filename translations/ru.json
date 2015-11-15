@@ -2294,14 +2294,12 @@
     "If password is empty, current hashpass will be used": {
         "enterPasswordText": {
             "value": "Если пароль пуст, будет использован текущий хешпасс"
-        },
-        "_obsolete": true
+        }
     },
     "Enter password": {
         "enterPasswordTitle": {
             "value": "Введите пароль"
-        },
-        "_obsolete": true
+        }
     },
     "Fixed": {
         "fixedText": {

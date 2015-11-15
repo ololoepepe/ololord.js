@@ -614,6 +614,8 @@ controller.translationsModel = function() {
     translate("Remove from hidden post/thread list", "removeFromHiddenPostListText");
     translate("Hidden posts/threads", "hiddenPostListText");
     translate("Settings", "settingsDialogTitle");
+    translate("If password is empty, current hashpass will be used ", "enterPasswordText");
+    translate("Enter password ", "enterPasswordTitle");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });
