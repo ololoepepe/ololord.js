@@ -1322,8 +1322,7 @@
             "value": "Настройки"
         },
         "settingsDialogTitle": {
-            "value": "Настройки",
-            "_obsolete": true
+            "value": "Настройки"
         }
     },
     "No such post": {
@@ -2183,14 +2182,12 @@
     "Hidden posts/threads": {
         "hiddenPostListText": {
             "value": "Скрытые посты/треды"
-        },
-        "_obsolete": true
+        }
     },
     "Remove from hidden post/thread list": {
         "removeFromHiddenPostListText": {
             "value": "Убрать из списка скрытых постов/тредов"
-        },
-        "_obsolete": true
+        }
     },
     "Show hidden post/thread list": {
         "showHiddenPostListText": {

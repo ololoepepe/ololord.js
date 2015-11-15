@@ -121,9 +121,8 @@ lord.showFavorites = function() {
     var div = lord.id("favorites");
     if (div)
         return;
-    var fav = lord.getLocalObject("favoriteThreads", {});
     var list = [];
-    lord.forIn(fav, function(_, x) {
+    lord.forIn(lord.getLocalObject("favoriteThreads", {}), function(_, x) {
         list.push({
             boardName: x.split("/").shift(),
             threadNumber: x.split("/").pop()
@@ -145,7 +144,7 @@ lord.showFavorites = function() {
             var fav = lord.getLocalObject("favoriteThreads", {});
             var x = boardName + "/" + threadNumber;
             if (typeof post != "string") {
-                txt = (post.subject || post.text || (boardName + "/" + threadNumber)).substring(0, 150);
+                txt = (post.subject || post.rawText || (boardName + "/" + threadNumber)).substring(0, 150);
                 fav[x].subject = txt;
                 lord.setLocalObject("favoriteThreads", fav);
             } else {
@@ -154,7 +153,8 @@ lord.showFavorites = function() {
             var data = {
                 boardName: boardName,
                 threadNumber: threadNumber,
-                text: txt
+                text: txt,
+                shortText: txt.substr(0, 50)
             };
             var p = fav[x];
             if (p.lastPostNumber > p.previousLastPostNumber)
@@ -405,67 +405,64 @@ lord.editSpells = function() {
 };
 
 lord.showHiddenPostList = function() {
-    var title = lord.text("hiddenPostListText");
-    var div = lord.node("div");
-    lord.addClass(div, "hiddenPostList");
-    var list = lord.getLocalObject("hiddenPosts", {});
-    var sitePathPrefix = lord.data("sitePathPrefix");
-    var f = function(post, x) {
-        var postDiv = lord.node("div");
-        lord.addClass(postDiv, "nowrap");
-        postDiv.id = "hidden/" + x;
-        var boardName = x.split("/").shift();
-        var postNumber = x.split("/").pop();
-        var txt = "[" + x + "]";
-        if (typeof post != "string") {
-            txt = (post.subject || post.text || "[NO TEXT]").substring(0, 150);
-            list[x].subject = txt;
-            list[x].threadNumber = post.threadNumber;
-            lord.setLocalObject("hiddenPosts", list);
-        } else {
-            txt = list[x].subject ? list[x].subject : ("[" + post + "]");
-        }
-        if (list[x].threadNumber) {
-            var a = lord.node("a");
-            a.href = "/" + sitePathPrefix + boardName + "/thread/" + list[x].threadNumber + ".html#" + postNumber;
-            a.title = txt;
-            a.target = "_blank";
-            a.appendChild(lord.node("text", "[" + x + "] " + txt.substring(0, 50) + " "));
-            postDiv.appendChild(a);
-        } else {
-            postDiv.title = txt;
-            postDiv.appendChild(lord.node("text", "[" + x + "] " + txt.substring(0, 50) + " "));
-        }
-        var rmBtn = lord.node("a");
-        rmBtn.onclick = function() {
-            postDiv.parentNode.removeChild(postDiv);
-            delete list[x];
-        };
-        rmBtn.title = lord.text("removeFromHiddenPostListText");
-        var img = lord.node("img");
-        img.src = "/" + sitePathPrefix + "img/delete.png";
-        rmBtn.appendChild(img);
-        postDiv.appendChild(rmBtn);
-        div.appendChild(postDiv);
-    };
-    lord.forIn(list, function(_, x) {
-        var boardName = x.split("/").shift();
-        var postNumber = x.split("/").pop();
-        lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
-            if (lord.checkError(post))
-                return Promise.reject(post);
-            f(post, x);
-        }).catch(function(err) {
-            lord.handleError(err);
-            f("ERROR", x);
+    var list = [];
+    lord.forIn(lord.getLocalObject("hiddenPosts", {}), function(_, x) {
+        list.push({
+            boardName: x.split("/").shift(),
+            postNumber: x.split("/").pop()
         });
     });
-    lord.showDialog(title, null, div).then(function(result) {
-        if (!result)
-            return Promise.resolve();
-        lord.setLocalObject("hiddenPosts", list);
-        return Promise.resolve();
+    var c = {};
+    var promises = list.map(function(item) {
+        var boardName = item.boardName;
+        var postNumber = item.postNumber;
+        var threadNumber = 0;
+        return lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
+            if (lord.checkError(post))
+                return Promise.reject(post);
+            return Promise.resolve(post);
+        }).catch(function(err) {
+            lord.handleError(err);
+            return Promise.resolve(boardName + "/" + postNumber + " (404)");
+        }).then(function(post) {
+            var txt = "";
+            var hidden = lord.getLocalObject("hiddenPosts", {});
+            var x = boardName + "/" + postNumber;
+            if (typeof post != "string") {
+                txt = (post.subject || post.rawText || (boardName + "/" + postNumber)).substring(0, 150);
+                hidden[x].subject = txt;
+                lord.setLocalObject("hiddenPosts", hidden);
+                threadNumber = post.threadNumber;
+            } else {
+                txt = hidden[x].subject ? hidden[x].subject : ("[" + post + "]");
+            }
+            return Promise.resolve( {
+                boardName: boardName,
+                postNumber: postNumber,
+                threadNumber: threadNumber,
+                text: txt,
+                shortText: txt.substr(0, 50)
+            });
+        });
     });
+    Promise.all(promises).then(function(list) {
+        c.list = list;
+        return lord.getModel(["misc/base", "misc/tr"], true);
+    }).then(function(model) {
+        c.model = model;
+        c.model.hiddenPosts = c.list;
+        return lord.getTemplate("hiddenPostList");
+    }).then(function(template) {
+        var div = $.parseHTML(template(c.model))[0];
+        return lord.showDialog("hiddenPostListText", null, div);
+    }).catch(lord.handleError);
+};
+
+lord.removeHidden = function(el) {
+    var div = el.parentNode;
+    div.parentNode.removeChild(div);
+    var list = lord.getLocalObject("hiddenPosts", {});
+    delete list[lord.data("boardName", div) + "/" + lord.data("postNumber", div)];
 };
 
 lord.editUserCss = function() {

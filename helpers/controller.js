@@ -612,6 +612,9 @@ controller.translationsModel = function() {
     translate("Go complain to your mum, you whiner!", "complainMessage");
     translate("Auto update", "autoUpdateText");
     translate("Close", "closeButtonText");
+    translate("Remove from hidden post/thread list", "removeFromHiddenPostListText");
+    translate("Hidden posts/threads", "hiddenPostListText");
+    translate("Settings", "settingsDialogTitle");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

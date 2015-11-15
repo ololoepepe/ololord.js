@@ -1169,3 +1169,7 @@ blockquote.blockquoteThread.expand {
     height: 30px;
     z-index: 100502;
 }
+
+.numberSize3 {
+    width: 40px;
+}

@@ -581,11 +581,20 @@ lord.showNotification = function(title, body, icon) {
     });
 };
 
+lord.text = function(model, id) {
+    if (!model)
+        return id;
+    var text = model.tr[id];
+    if (text)
+        return text;
+    return id;
+};
+
 lord.showDialog = function(title, label, body, afterShow) {
     return lord.getModel("misc/tr").then(function(model) {
         var root = lord.node("div");
-        title = model.tr[title];
-        label = model.tr[label];
+        title = lord.text(model, title);
+        label = lord.text(model, label);
         if (title || label) {
             var div = lord.node("div");
             if (title) {

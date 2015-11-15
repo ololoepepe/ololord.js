@@ -1,7 +1,7 @@
 <div id="favorite/{{=favorite.boardName}}/{{=favorite.threadNumber}}"
      data-board-name="{{=favorite.boardName}}" data-thread-number="{{=favorite.threadNumber}}">
     <a href="/{{=it.site.pathPrefix}}{{=favorite.boardName}}/res/{{=favorite.threadNumber}}.html"
-       title="{{=favorite.text}}" target="_blank">[{{ out += favorite.text.substr(0, 50); }}]</a>
+       title="{{=favorite.text}}" target="_blank">[{{!favorite.shortText}}]</a>
     <font color="green">{{? favorite.newPostCount > 0}}+{{=favorite.newPostCount}}{{?}}</font>
     <a href="javascript:void(0);" title="{{=it.tr.removeThreadFromFavoritesText}}"
        onclick="lord.removeFavorite(this); return false;"><img src="/{{=it.site.pathPrefix}}img/delete.png"></a>
