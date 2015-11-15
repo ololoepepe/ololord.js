@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{#def.head}}
+<body class="{{=it.deviceType}}"
+      {{#def.baseData}}
+      data-thread-number="{{=it.thread.number}}">
+{{? it.settings.mode.name != "ascetic"}}
+    <div id="hiddenPostForm" style="display: none;">
+        {{#def.postForm}}
+    </div>
+    {{? it.settings.captchaEnabled}}
+        <div id="hiddenCaptcha" style="display: none;">
+            {{? it.user.captchaQuota > 0}}
+                {{ out += it.captchaEngine.widgetHtml(it.req, it.captchaPrepared); }}
+            {{?}}
+        </div>
+    {{?}}
+{{?}}
+{{? it.customHeader}}
+    {{#def.customHeader}}
+{{?}}
+{{~["top", "bottom"] :target}}
+    {{#def.navigationButton}}
+{{~}}
+{{? it.settings.mode.name != "ascetic"}}
+    {{~["previous", "next"] :target}}
+        {{#def.leafButton}}
+    {{~}}
+{{?}}
+<a id="top"></a>
+{{#def.toolbar}}
+<br />
+{{#def.searchAction}}
+{{? it.board.bannerFileName}}
+    <br />
+    {{#def.banner}}
+{{?}}
+{{? !it.thread.postingEnabled}}
+    <div class="postingDisabledMessage">
+        <h2>{{=it.tr.postingDisabledThreadText}}</h2>
+    </div>
+{{?? it.thread.postLimitReached}}
+    <div class="theMessage">
+        <h2 class="postLimitReached">{{=it.tr.postLimitReachedText}}</h2>
+    </div>
+{{??}}
+    <hr name="insteadOfPostLimitReached" />
+    {{~["Top"] :position}}
+        {{#def.createAction}}
+    {{~}}
+{{?}}
+{{? !it.thread.postLimitReached && it.thread.bumpLimitReached}}
+    <div class="theMessage" name="bumpLimitReached">
+        <h3 class="bumpLimitReached">{{=it.tr.bumpLimitReachedText}}</h3>
+    </div>
+{{??}}
+    <span name="insteadOfBumpLimitReached" style="display: none;"></span>
+{{?}}
+<hr />
+{{~["Top"] :position}}
+    {{#def.threadActions}}
+{{~}}
+<hr />
+{{~[it.thread] :thread}}
+    {{~[thread.opPost] :post}}
+        {{#def.post}}
+    {{~}}
+    {{~thread.posts :post}}
+        {{#def.post}}
+    {{~}}
+{{~}}
+<input id="afterAllPosts" type="hidden" />
+<hr />
+{{~["Bottom"] :position}}
+    {{#def.threadActions}}
+{{~}}
+{{? it.settings.mode.name != "ascetic" && it.board.postingEnabled}}
+    <hr />
+    {{~["Bottom"] :position}}
+        {{#def.createAction}}
+    {{~}}
+{{?}}
+{{? !it.settings.stickyToolbar}}
+    <hr />
+    {{#def.navbar}}
+{{?}}
+<a id="bottom"></a>
+{{? it.customFooter}}
+    {{#def.customFooter}}
+{{?}}
+</body>
+</html>

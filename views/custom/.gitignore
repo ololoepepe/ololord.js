@@ -1,0 +1,8 @@
+faq/*
+footer/*
+header/*
+home/*
+!faq/content.jst
+!footer/content.jst
+!header/content.jst
+!home/content.jst

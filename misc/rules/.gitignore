@@ -1,0 +1,5 @@
+home/*
+postform/*
+!home/rules.txt
+!postform/rules.txt
+!postform/rules.b.txt

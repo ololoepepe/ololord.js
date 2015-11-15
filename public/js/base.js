@@ -1,0 +1,559 @@
+/*ololord global object*/
+
+var lord = lord || {};
+
+/*Constants*/
+
+lord.DefaultSpells = "#wipe(samelines,samewords,longwords,symbols,capslock,numbers,whitespace)";
+lord.DefaultHotkeys = {
+    "dir": {},
+    "rev": {}
+};
+
+lord._defineHotkey = function(name, key) {
+    if (typeof name != "string" || typeof key != "string")
+        return;
+    lord.DefaultHotkeys.dir[name] = key;
+    lord.DefaultHotkeys.rev[key] = name;
+};
+
+lord._defineHotkey("previousPageImage", "Ctrl+Left");
+lord._defineHotkey("nextPageImage", "Ctrl+Right");
+lord._defineHotkey("previousThreadPost", "Ctrl+Up");
+lord._defineHotkey("nextThreadPost", "Ctrl+Down");
+lord._defineHotkey("previousPost", "Ctrl+Shift+Up");
+lord._defineHotkey("nextPost", "Ctrl+Shift+Down");
+lord._defineHotkey("hidePost", "H");
+lord._defineHotkey("goToThread", "V");
+lord._defineHotkey("expandThread", "E");
+lord._defineHotkey("expandImage", "I");
+lord._defineHotkey("quickReply", "R");
+lord._defineHotkey("submitReply", "Alt+Enter");
+lord._defineHotkey("showFavorites", "Alt+F");
+lord._defineHotkey("showSettings", "Alt+T");
+lord._defineHotkey("updateThread", "U");
+lord._defineHotkey("markupBold", "Alt+B");
+lord._defineHotkey("markupItalics", "Alt+I");
+lord._defineHotkey("markupStrikedOut", "Alt+S");
+lord._defineHotkey("markupUnderlined", "Alt+U");
+lord._defineHotkey("markupSpoiler", "Alt+P");
+lord._defineHotkey("markupQuotation", "Alt+Q");
+lord._defineHotkey("markupCode", "Alt+C");
+
+/*Functions*/
+
+lord.changeLocale = function() {
+    var sel = lord.id("localeChangeSelect");
+    var ln = sel.options[sel.selectedIndex].value;
+    lord.setCookie("locale", ln, {
+        "expires": lord.Billion, "path": "/"
+    });
+    lord.reloadPage();
+};
+
+lord.doLogout = function(event, form) {
+    event.preventDefault();
+    lord.setCookie("hashpass", "", {
+        expires: lord.Billion,
+        path: "/"
+    });
+    window.location = lord.nameOne("source", form).value;
+};
+
+lord.switchShowLogin = function() {
+    var inp = lord.id("loginInput");
+    if (inp.type === "password")
+        inp.type = "text";
+    else if (inp.type === "text")
+        inp.type = "password";
+};
+
+lord.searchKeyPress = function(e) {
+    e = e || window.event;
+    if (e.keyCode != 13)
+        return;
+    lord.doSearch();
+};
+
+lord.preventOnclick = function(event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    return false;
+};
+
+lord.showSettings = function() {
+    var c = {};
+    lord.getTemplate("settingsDialog").then(function(template) {
+        c.template = template;
+        c.model = {
+            settings: lord.settings()
+        };
+        return lord.getModel(["misc/tr", "misc/base", "misc/board" + lord.data("boardName"), "misc/boards"], true);
+    }).then(function(model) {
+        c.model = merge.recursive(c.model, model);
+        c.div = $.parseHTML(c.template(c.model))[0];
+        return lord.showDialog("settingsDialogTitle", null, c.div);
+    }).then(function(accepted) {
+        if (!accepted)
+            return;
+        var model = {};
+        model.hiddenBoards = [];
+        lord.query("input, select", c.div).forEach(function(el) {
+            var key = el.name;
+            var val;
+            if (el.tagName == "select")
+                val = el.options[el.selectedIndex].value;
+            else if (el.name.substr(0, 6) != "board_")
+                val = ("checkbox" == el.type) ? !!el.checked : el.value;
+            else if (el.checked)
+                model.hiddenBoards.push(el.name.substr(6));
+            if (typeof val != undefined)
+                model[key] = val;
+        });
+        lord.setSettings(model);
+        lord.reloadPage();
+    });
+};
+
+lord.showFavorites = function() {
+    var div = lord.id("favorites");
+    if (div)
+        return;
+    var list = [];
+    lord.forIn(lord.getLocalObject("favoriteThreads", {}), function(_, x) {
+        list.push({
+            boardName: x.split("/").shift(),
+            threadNumber: x.split("/").pop()
+        });
+    });
+    var c = {};
+    var promises = list.map(function(item) {
+        var boardName = item.boardName;
+        var threadNumber = item.threadNumber;
+        return lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + threadNumber).then(function(post) {
+            if (lord.checkError(post))
+                return Promise.reject(post);
+            return Promise.resolve(post);
+        }).catch(function(err) {
+            lord.handleError(err);
+            return Promise.resolve(boardName + "/" + threadNumber + " (404)");
+        }).then(function(post) {
+            var txt = "";
+            var fav = lord.getLocalObject("favoriteThreads", {});
+            var x = boardName + "/" + threadNumber;
+            if (typeof post != "string") {
+                txt = (post.subject || post.rawText || (boardName + "/" + threadNumber)).substring(0, 150);
+                fav[x].subject = txt;
+                lord.setLocalObject("favoriteThreads", fav);
+            } else {
+                txt = fav[x].subject ? fav[x].subject : ("[" + post + "]");
+            }
+            var data = {
+                boardName: boardName,
+                threadNumber: threadNumber,
+                text: txt,
+                shortText: txt.substr(0, 50)
+            };
+            var p = fav[x];
+            if (p.lastPostNumber > p.previousLastPostNumber)
+                data.newPostCount = p.lastPostNumber - p.previousLastPostNumber;
+            return Promise.resolve(data);
+        });
+    });
+    Promise.all(promises).then(function(list) {
+        c.list = list;
+        return lord.getModel(["misc/base", "misc/tr"], true);
+    }).then(function(model) {
+        c.model = model;
+        c.model.favorites = c.list;
+        return lord.getTemplate("favoritesDialog");
+    }).then(function(template) {
+        div = $.parseHTML(template(c.model))[0];
+        document.body.appendChild(div);
+        lord.toCenter(div, null, null, 1);
+    }).catch(lord.handleError);
+};
+
+lord.closeFavorites = function() {
+    var fav = lord.getLocalObject("favoriteThreads", {});
+    lord.forIn(fav, function(o, x) {
+        o.previousLastPostNumber = o.lastPostNumber;
+        fav[x] = o;
+    });
+    lord.setLocalObject("favoriteThreads", fav);
+    document.body.removeChild(lord.id("favorites"));
+};
+
+lord.removeFavorite = function(el) {
+    var div = el.parentNode;
+    div.parentNode.removeChild(div);
+    lord.removeThreadFromFavorites(lord.data("boardName", el, true), +lord.data("threadNumber", el, true));
+};
+
+lord.switchMumWatching = function() {
+    var watching = lord.getLocalObject("mumWatching", false);
+    var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
+    img.src = "/" + lord.data("sitePathPrefix") + "img/mum" + (watching ? "_not" : "") + "_watching.png";
+    lord.query(".postFileFile > a > img").forEach(function(img) {
+        if (watching)
+            lord.removeClass(img, "mumWatching");
+        else
+            lord.addClass(img, "mumWatching");
+    });
+    lord.setLocalObject("mumWatching", !watching);
+};
+
+lord.expandCollapseSpoiler = function(titleSpan) {
+    if (!titleSpan)
+        return;
+    var span = titleSpan.parentNode;
+    if (!span)
+        return;
+    var bodySpan = lord.queryOne(".cspoilerBody", span);
+    if (!bodySpan)
+        return;
+    var expanded = (bodySpan.style.display != "none");
+    bodySpan.style.display = expanded ? "none" : "block";
+};
+
+lord.removeThreadFromFavorites = function(boardName, threadNumber) {
+    var fav = lord.getLocalObject("favoriteThreads", {});
+    delete fav[boardName + "/" + threadNumber];
+    lord.setLocalObject("favoriteThreads", fav);
+    var opPost = lord.id(threadNumber);
+    if (!opPost)
+        return false;
+    var btn = lord.nameOne("addToFavoritesButton", opPost);
+    var img = lord.queryOne("img", btn);
+    img.src = img.src.replace("favorite_active.png", "favorite.png");
+    lord.getModel("misc/tr").then(function(model) {
+        var span = lord.queryOne("span", btn);
+        lord.removeChildren(span);
+        span.appendChild(lord.node("text", model.tr.addThreadToFavoritesText));
+    }).catch(lord.handleError);
+};
+
+lord.checkFavoriteThreads = function() {
+    var fav = lord.getLocalObject("favoriteThreads", {});
+    var nfav = {};
+    lord.forIn(fav, function(o, x) {
+        var boardName = x.split("/").shift();
+        var threadNumber = x.split("/").pop();
+        lord.getModel("api/lastPosts", "boardName=" + boardName + "&threadNumber=" + threadNumber
+            + "&lastPostNumber=" + o.lastPostNumber).then(function(posts) {
+            if (lord.checkError(posts))
+                return Promise.reject(posts);
+            if (!posts || posts.length < 1)
+                return;
+            o.lastPostNumber = posts.pop().number;
+            nfav[x] = o;
+        }).catch(lord.handleError);
+    });
+    if (lord.notificationsEnabled() && lord.hasOwnProperties(nfav)) {
+        lord.getModel("misc/tr").then(function(model) {
+            var title = model.tr.favoriteThreadsText;
+            var sitePathPrefix = lord.data("sitePathPrefix");
+            var icon = "/" + sitePathPrefix + "favicon.ico";
+            var text = "";
+            lord.forIn(nfav, function(v, k) {
+                text += k + ", ";
+            });
+            text = text.substr(0, text.length - 2);
+            lord.showNotification(title, text.substr(0, 300), icon);
+        }).catch(lord.handleError);
+    }
+    setTimeout(function() {
+        fav = lord.getLocalObject("favoriteThreads", {});
+        lord.forIn(nfav, function(o, x) {
+            fav[x].lastPostNumber = o.lastPostNumber;
+        });
+        lord.setLocalObject("favoriteThreads", fav);
+        var div = lord.id("favorites");
+        if (div) {
+            lord.forIn(fav, function(o, x) {
+                var postDiv = lord.id("favorite/" + x);
+                var fnt = lord.queryOne("font", postDiv);
+                if (fnt.childNodes.length > 0)
+                    fnt.removeChild(fnt.childNodes[0]);
+                if (o.lastPostNumber > o.previousLastPostNumber)
+                    fnt.appendChild(lord.node("text", "+" + (o.lastPostNumber - o.previousLastPostNumber)));
+            });
+        } else {
+            var threadNumber = +lord.data("threadNumber");
+            lord.forIn(fav, function(o, x) {
+                if (o.lastPostNumber > o.previousLastPostNumber) {
+                    if (threadNumber && +x.split("/").pop() == threadNumber)
+                        return;
+                    lord.showFavorites();
+                }
+            });
+        }
+        setTimeout(lord.checkFavoriteThreads, 15 * lord.Second);
+    }, 5 * lord.Second);
+};
+
+lord.showNewPosts = function() {
+    var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
+    var currentBoardName = lord.data("boardName");
+    $.ajax("/" + lord.data("sitePathPrefix") + "api/lastPostNumbers.json").then(function(result) {
+        if (lord.checkError(result))
+            return Promise.reject(result);
+        lastPostNumbers[currentBoardName]
+        lord.query(".navbar, .toolbar").forEach(function(navbar) {
+            lord.query(".navbarItem", navbar).forEach(function(item) {
+                var a = lord.queryOne("a", item);
+                if (!a)
+                    return;
+                var boardName = lord.data("boardName", a);
+                if (!boardName || currentBoardName == boardName || !result[boardName])
+                    return;
+                var lastPostNumber = lastPostNumbers[boardName];
+                if (!lastPostNumber)
+                    lastPostNumber = 0;
+                var newPostCount = result[boardName] - lastPostNumber;
+                if (newPostCount <= 0)
+                    return;
+                var span = lord.node("span");
+                lord.addClass(span, "newPostCount");
+                span.appendChild(lord.node("text", "+" + newPostCount));
+                var parent = a.parentNode;
+                parent.insertBefore(span, a);
+                parent.insertBefore(lord.node("text", " "), a);
+            });
+        });
+        if (typeof result[currentBoardName] == "number") {
+            lastPostNumbers[currentBoardName] = result[currentBoardName];
+            lord.setLocalObject("lastPostNumbers", lastPostNumbers);
+        }
+    }).catch(lord.handleError);
+};
+
+lord.editHotkeys = function() {
+    var table = lord.id("hotkeysDialogTemplate").cloneNode(true);
+    table.id = "";
+    table.style.display = "";
+    var hotkeys = lord.getLocalObject("hotkeys", {});
+    if (!hotkeys.dir)
+        hotkeys.dir = {};
+    if (!hotkeys.rev)
+        hotkeys.rev = {};
+    lord.forIn(lord.DefaultHotkeys.dir, function(key, name) {
+        lord.nameOne(name, table).value = hotkeys.dir[name] || key;
+    });
+    lord.showDialog(null, null, table).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        lord.forIn(lord.DefaultHotkeys.dir, function(key, name) {
+            key = lord.nameOne(name, table).value || key;
+            hotkeys.dir[name] = key;
+            hotkeys.rev[key] = name;
+        });
+        lord.setLocalObject("hotkeys", hotkeys);
+        return Promise.resolve();
+    });
+};
+
+lord.assignHotkey = function(e, inp) {
+    if (!e || e.type != "keypress" || !inp)
+        return;
+    var name = inp.name;
+    var key = e.key;
+    if (key.length == 1)
+        key = key.toUpperCase();
+    if (e.metaKey)
+        key = "Meta+" + key;
+    if (e.altKey)
+        key = "Alt+" + key;
+    if (e.shiftKey)
+        key = "Shift+" + key;
+    if (e.ctrlKey)
+        key = "Ctrl+" + key;
+    var hotkeys = lord.getLocalObject("hotkeys", {});
+    if (!hotkeys.dir)
+        hotkeys.dir = {};
+    if (!hotkeys.rev)
+        hotkeys.rev = {};
+    var curr = hotkeys.dir[name];
+    if (curr)
+        delete hotkeys.rev[curr];
+    hotkeys.dir[name] = key;
+    hotkeys.rev[key] = name;
+    inp.value = key;
+    e.preventDefault();
+    return false;
+};
+
+lord.editSpells = function() {
+    var ta = lord.node("textarea");
+    ta.rows = 10;
+    ta.cols = 43;
+    ta.value = lord.getLocalObject("spells", lord.DefaultSpells);
+    lord.showDialog(null, null, ta).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        lord.setLocalObject("spells", ta.value);
+        if (!lord.worker || !lord.getLocalObject("spellsEnabled", true))
+            return;
+        lord.worker.postMessage({
+            "type": "parseSpells",
+            "data": lord.getLocalObject("spells", lord.DefaultSpells)
+        });
+        return Promise.resolve();
+    });
+};
+
+lord.showHiddenPostList = function() {
+    var list = [];
+    lord.forIn(lord.getLocalObject("hiddenPosts", {}), function(_, x) {
+        list.push({
+            boardName: x.split("/").shift(),
+            postNumber: x.split("/").pop()
+        });
+    });
+    var c = {};
+    var promises = list.map(function(item) {
+        var boardName = item.boardName;
+        var postNumber = item.postNumber;
+        var threadNumber = 0;
+        return lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
+            if (lord.checkError(post))
+                return Promise.reject(post);
+            return Promise.resolve(post);
+        }).catch(function(err) {
+            lord.handleError(err);
+            return Promise.resolve(boardName + "/" + postNumber + " (404)");
+        }).then(function(post) {
+            var txt = "";
+            var hidden = lord.getLocalObject("hiddenPosts", {});
+            var x = boardName + "/" + postNumber;
+            if (typeof post != "string") {
+                txt = (post.subject || post.rawText || (boardName + "/" + postNumber)).substring(0, 150);
+                hidden[x].subject = txt;
+                lord.setLocalObject("hiddenPosts", hidden);
+                threadNumber = post.threadNumber;
+            } else {
+                txt = hidden[x].subject ? hidden[x].subject : ("[" + post + "]");
+            }
+            return Promise.resolve( {
+                boardName: boardName,
+                postNumber: postNumber,
+                threadNumber: threadNumber,
+                text: txt,
+                shortText: txt.substr(0, 50)
+            });
+        });
+    });
+    Promise.all(promises).then(function(list) {
+        c.list = list;
+        return lord.getModel(["misc/base", "misc/tr"], true);
+    }).then(function(model) {
+        c.model = model;
+        c.model.hiddenPosts = c.list;
+        return lord.getTemplate("hiddenPostList");
+    }).then(function(template) {
+        var div = $.parseHTML(template(c.model))[0];
+        return lord.showDialog("hiddenPostListText", null, div);
+    }).catch(lord.handleError);
+};
+
+lord.removeHidden = function(el) {
+    var div = el.parentNode;
+    div.parentNode.removeChild(div);
+    var list = lord.getLocalObject("hiddenPosts", {});
+    delete list[lord.data("boardName", div) + "/" + lord.data("postNumber", div)];
+};
+
+lord.editUserCss = function() {
+    var ta = lord.node("textarea");
+    ta.rows = 10;
+    ta.cols = 43;
+    ta.value = lord.getLocalObject("userCss", "");
+    lord.showDialog(null, null, ta).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        lord.setLocalObject("userCss", ta.value);
+        return Promise.resolve();
+    });
+};
+
+lord.hotkey_showFavorites = function() {
+    lord.showFavorites();
+    return false;
+};
+
+lord.hotkey_showSettings = function() {
+    lord.showSettings();
+    return false;
+};
+
+lord.interceptHotkey = function(e) {
+    if (e.target.tagName && !e.metaKey && !e.altKey && !e.ctrlKey
+        && lord.in(["TEXTAREA", "INPUT", "BUTTON"], e.target.tagName))
+        return;
+    var hotkeys = lord.getLocalObject("hotkeys", {});
+    var key = e.key;
+    if (key.length == 1)
+        key = key.toUpperCase();
+    if (e.metaKey)
+        key = "Meta+" + key;
+    if (e.altKey)
+        key = "Alt+" + key;
+    if (e.shiftKey)
+        key = "Shift+" + key;
+    if (e.ctrlKey)
+        key = "Ctrl+" + key;
+    var name = hotkeys.rev ? (hotkeys.rev[key] || lord.DefaultHotkeys.rev[key]) : lord.DefaultHotkeys.rev[key];
+    if (!name || !lord["hotkey_" + name])
+        return;
+    if (lord["hotkey_" + name]() !== false)
+        return;
+    e.preventDefault();
+    return false;
+};
+
+lord.initializeOnLoadSettings = function() {
+    if (lord.getCookie("show_tripcode") === "true")
+        lord.id("showTripcodeCheckbox").checked = true;
+    if (lord.getLocalObject("hotkeysEnabled", true) && lord.data("deviceType") != "mobile") {
+        document.body.addEventListener("keypress", lord.interceptHotkey, false);
+        var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
+        var key = function(name) {
+            if (!hotkeys)
+                return lord.DefaultHotkeys.dir[name];
+            return hotkeys[name] || lord.DefaultHotkeys.dir[name];
+        };
+        lord.queryOne("[name='settingsButton']").title = "(" + key("showSettings") + ")";
+        lord.queryOne("[name='favoritesButton']").title = "(" + key("showFavorites") + ")";
+    }
+    if (lord.getLocalObject("showNewPosts", true))
+        lord.showNewPosts();
+    if (lord.getLocalObject("userCssEnabled", false)) {
+        var css = lord.getLocalObject("userCss", "");
+        var head = lord.queryOne("head");
+        var style = lord.node("style");
+        style.type = "text/css";
+        if (style.styleSheet)
+            style.styleSheet.cssText = css;
+        else
+            style.appendChild(lord.node("text", css));
+        head.appendChild(style);
+    }
+};
+
+window.addEventListener("load", function load() {
+    window.removeEventListener("load", load, false);
+    lord.initializeOnLoadSettings();
+    lord.checkFavoriteThreads();
+    lord.getTemplate("post").then(function() {
+        return lord.getTemplate("settingsDialog");
+    }).then(function() {
+        return lord.getTemplate("editPostDialog");
+    }).catch(lord.handleError);
+}, false);
+
+window.addEventListener("beforeunload", function unload() {
+    window.removeEventListener("beforeunload", unload, false);
+    lord.unloading = true;
+}, false);

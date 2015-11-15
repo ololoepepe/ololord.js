@@ -1,0 +1,1046 @@
+/*Burichan*/
+
+body  {
+    background-color: #EEF2FF;
+    font-family: Verdana,sans-serif;
+}
+
+body.desktop {
+    font-size: 14.4px;
+}
+
+body.mobile {
+    -moz-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    font-size: 14px;s
+}
+.to
+a {
+    color: #000;
+}
+
+a.expandCollapse {
+    color: #D6DAF0;
+    cursor: pointer;
+}
+
+a:hover {
+    color: #0066FF;
+}
+
+a.expandCollapse:hover {
+    color: #666666;
+    cursor: pointer
+}
+
+audio {
+    width: 500px;
+}
+
+hr {
+    color: #D6DAF0;
+    background-color: #D6DAF0;
+    border: 0px none;
+    height: 1px;
+    clear: both;
+}
+
+.select {
+    background: #9988EE;
+    border: 1px solid #CCCCCC;
+    cursor: pointer;
+}
+
+.input {
+    border: 1px solid #CCCCCC;
+}
+
+.button {
+    background: #EAEAEA;
+    border: 1px solid #CCCCCC;
+    cursor: pointer;
+}
+
+.checkbox {
+    background: #EAEAEA;
+    border: 1px solid #CCCCCC;
+    cursor: pointer;
+}
+
+.popup {
+    background-color: #D6DAF0;
+    border: 1px solid #BBBBBB;
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    z-index: 9950;
+    vertical-align: middle;
+    text-align: center;
+    padding: 5px 5px 5px 5px;
+}
+
+.critical {
+    color: red;
+    border: 1px dotted red;
+}
+
+.warning {
+    color: orange;
+    border: 1px dotted orange;
+}
+
+.favorites {
+    background-color: #D6DAF0;
+    border: 1px solid #AAAAAA;
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    max-width: 90%;
+    max-height: 90%;
+    z-index: 9980;
+    padding: 2px 2px 2px 2px;
+}
+
+.favorites > div {
+    background-color: #D6DAF0;
+    border: 1px solid #CCCCCC;
+    padding: 2px 2px 2px 2px;
+}
+
+.favorites > span {
+    position: absolute;
+    bottom: 10px;
+    right: 20px;
+}
+
+.centerForm {
+    
+}
+
+.inlineForm {
+    display: inline;
+}
+
+.scrollAreaH60 {
+    overflow: auto;
+    max-height: 60px;
+    border: 1px solid #CCCCCC;
+}
+
+.hidePostformRulesButton {
+    text-decoration: none;
+    margin-left: 30px;
+    cursor: pointer;
+}
+
+.hidePostformMarkupButton {
+    text-decoration: none;
+    text-align: right;
+    font-size: 0.7em;
+    margin-left: auto;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.hiddenPostLink {
+    text-decoration: line-through;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+.postSequenceNumber {
+    color: green;
+    font-size: 75%;
+}
+
+.hiddenPostList > div:nth-child(even) {
+    background-color: #D6DAF0;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
+.ban {
+    background-color: #D6DAF0;
+    margin-left: 80px;
+    margin-right: 80px;
+}
+
+.banner {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+#postForm {
+    overflow-x: auto;
+}
+
+blockquote {
+    margin-top: 14.4px;
+    margin-left: 25px;
+    margin-right: 25px;
+    margin-bottom: 14.4px;
+    padding-top: 10px;
+    overflow-y: auto;
+    overflow-x: auto;
+    max-height: 300px;
+    box-sizing: border-box;
+    max-width: 1200px;
+    word-wrap: break-word;
+}
+
+blockquote.expand {
+    max-height: none;
+}
+
+span.spoiler, span.spoiler a, span.spoiler .cspoilerTitle {
+    background: #9AD2F6;
+    color: #9AD2F6;
+}
+
+span.spoiler:hover {
+    color: #333333;
+}
+
+span.spoiler:hover a {
+    color: #000000;
+}
+
+span.spoiler:hover .cspoilerTitle {
+    color: #304070;
+}
+
+span.tooltip {
+    color: #304070;
+    cursor: help;
+}
+
+span.newPostCount {
+    color: green;
+    font-size: 75%;
+}
+
+.postLimitReached {
+    color: red;
+}
+
+.bumpLimitReached {
+    color: olive;
+}
+
+.pages {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 70%;
+}
+
+.pagesItem {
+    white-space: nowrap;
+}
+
+.postingDisabledMessage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.postformMarkup {
+    text-align: left;
+    font-size: 0.7em;
+    white-space: normal;
+}
+
+.postformRules {
+    text-align: left;
+    font-size: 0.7em;
+    max-width: 400px;
+    white-space: normal;
+}
+
+.quotation {
+    color: #789922;
+}
+
+.fileByLinkButton {
+    cursor: pointer;
+}
+
+.cspoilerTitle {
+    cursor: pointer;
+    color: #304070;
+}
+
+.cspoilerBody {
+    background-color: #D6DAF0;
+    border: 1px solid #CCCCCC;
+}
+
+.catalogContainer {
+    box-sizing: border-box;
+    color: #333333;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+    text-align: center;
+}
+
+.catalogItem {
+    background-color: #D6DAF0;
+    box-sizing: border-box;
+    color: #333333;
+    display: inline-block;
+    height: 450px;
+    min-height: 450px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    overflow: hidden;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    position: relative;
+    text-align: center;
+    vertical-align: top;
+    width: 240px;
+    word-wrap: break-word;
+}
+
+.catalogItem:hover {
+    height: auto;
+}
+
+.theImage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.theVideo {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.theButton {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.hiddenElement {
+    display: none;
+}
+
+.createAction {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.createAction > div {
+    display: inline-block;
+}
+
+.createAction > div > div {
+    display: block;
+}
+
+.postFormVisible {
+    display: block;
+}
+
+.postFormTextarea {
+    font-size: 14px;
+}
+
+.postFormTable {
+    display: inline;
+}
+
+.postformLabel {
+    text-align: right;
+}
+
+.postformField {
+    text-align: left;
+}
+
+.symbolCounter {
+    font-size: 0.8em;
+    position: absolute;
+    right: 12px;
+    bottom: 7px;
+    color: #333333;
+    opacity: 0.6;
+}
+
+.symbolCounterContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.opSign {
+    color: green;
+}
+
+.codechaContainer {
+    white-space: normal;
+}
+
+.error {
+    background-color: #D6DAF0;
+    margin-left: 80px;
+    margin-right: 80px;
+    text-align: center;
+}
+
+.rules {
+    background-color: #D6DAF0;
+    border: 1px solid #CCCCCC;
+    margin-left: 5%;
+    margin-right: 5%;
+    padding-top: 10px;
+    padding-left: 10px;
+}
+
+.news {
+    background-color: #D6DAF0;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.sectionHeader {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.ipBan {
+    background-color: #D6DAF0;
+    margin-left: 80px;
+    margin-right: 80px;
+}
+
+.navbar {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 70%;
+    font-size: 1.2em;
+}
+
+.postingSpeedBar {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 70%;
+}
+
+.friendsBar {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 70%;
+}
+
+.navbar.navbarFrame {
+    text-align: left;
+    margin-left: 4px;
+    font-size: 1em;
+}
+
+.navbar.navbarFrame.mobile {
+    text-align: left;
+    margin-left: 4px;
+    font-size: 1.2em;
+}
+
+.navbarItem {
+    white-space: nowrap;
+}
+
+.post {
+    background-color: #D6DAF0;
+    border: 1px solid #CCCCCC;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-top: 10px;
+    padding-left: 10px;
+    overflow-x: auto;
+}
+
+.opPost {
+    overflow-x: auto;
+}
+
+.newPost {
+    background-color: #CDCDCD;
+}
+
+.hidden > .postBody {
+    display: none;
+}
+
+.opPost.hidden ~ .post {
+    display: none;
+}
+
+.post:target, .opPost:target {
+    background-color: #B0B0FF;
+}
+
+.post.temporary {
+    border: 1px solid #000000;
+}
+
+.thread.hidden > .omittedPosts {
+    display: none;
+}
+
+.thread.hidden > .threadPosts {
+    display: none;
+}
+
+.postHeader, .postFileName, .postFileSize {
+    white-space: nowrap;
+}
+
+.postFileSize {
+    font-size: 0.8em;
+    color: #444444;
+}
+
+.postFileSize.mobile {
+    font-size: 0.6em;
+}
+
+.postFileFile > a > img.mumWatching:not(:hover) {
+    opacity: 0.05;
+}
+
+.postHeader > a > img, .postFileSearch > a > img, .postHeader > span > a > img, .postFileSearch > form,
+.postHeader > span > form {
+    opacity: 0.65;
+}
+
+.postHeader > a:not(.disabled) > img:hover, .postFileSearch > a:not(.disabled) > img:hover,
+.postHeader > span > a:not(.disabled) > img:hover, .postFileSearch > form:hover, .postHeader > span > form:hover {
+    opacity: 1;
+}
+
+.postToThread > a > button {
+    font-size: 1.2em;
+}
+
+.postToThread {
+    margin-left: 20px;
+}
+
+.postToThread.mobile {
+    display: block;
+}
+
+.postActions {
+    position: relative;
+    outline: 0;
+}
+
+.postActions, .postActions:active, .postActions:visited {
+    color: #000000;
+}
+
+.postActions.mobile {
+    display: block;
+}
+
+.postActions > img {
+    opacity: 0.65;
+}
+
+.postActions:hover > img {
+    opacity: 1;
+}
+
+.postActionsMenu {
+    list-style-type: none;
+    margin-left: 0px;
+    padding: 4px 4px 4px 4px;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.2s,opacity 0.2s linear;
+    position: absolute;
+    z-index: 9999;
+    background-color: #D6DAF0;
+    border: 1px solid #BBBBBB;
+    margin-top: 0px;
+    top: 100%;
+    left: 0%;
+}
+
+.postActions:focus > .postActionsMenu {
+    visibility: visible;
+    opacity: 1;
+}
+
+.postActionsMenu > li > a {
+    text-decoration: none;
+    color: #000000;
+}
+
+.postActionsMenu > li > a:hover {
+    display: block;
+    color: #FFFFFF;
+    background-color: #666666;
+}
+
+.postBody {
+    text-align: left;
+}
+
+.postFile {
+    vertical-align: top;
+    width: 0px;
+}
+
+.shrink {
+    width: 100%;
+}
+
+.postFile ~ .postFile {
+    padding-left: 20px;
+}
+
+.postText {
+    vertical-align: top;
+}
+
+.bannedFor {
+    color: red;
+}
+
+.modificationDateTime {
+    font-style: italic;
+}
+
+.postSubject {
+    font-weight: bold;
+}
+
+.postSubject.mobile {
+    font-size: 0.8em;
+    display: block;
+}
+
+.tripcode {
+    color: green;
+}
+
+.tripcode.mobile {
+    font-size: 0.8em;
+}
+
+.postDateTime.mobile {
+    font-size: 0.8em;
+}
+
+.moderName {
+    font-weight: bold;
+    color: blue;
+}
+
+.someName.mobile {
+    font-size: 0.8em;
+}
+
+.navigationButton {
+    position: fixed;
+    right: 20px;
+    z-index: 9910;
+    opacity: 0.5;
+}
+
+.navigationButton:hover {
+    opacity: 1;
+}
+
+.navigationButtonBottom {
+    bottom: 30px;
+}
+
+.navigationButtonTop {
+    top: 30px;
+}
+
+.leafButton {
+    position: fixed;
+    top: 50%;
+    z-index: 9910;
+    opacity: 0.5;
+}
+
+.leafButton:hover {
+    opacity: 1;
+}
+
+.leafButtonPrevious {
+    left: 20px;
+}
+
+.leafButtonNext {
+    right: 20px;
+}
+
+.movableImage {
+    position: fixed;
+    z-index: 9905;
+    border: 5px solid #777777;
+    padding: 0;
+    line-height: 0;
+}
+
+.postformFile {
+    border: 1px dashed #777777;
+    text-align: justify;
+}
+
+.postformFile.drag {
+    background-color: #DDDDDD;
+    border: 1px dashed #555555;
+}
+
+.postformFile ~ .postformFile {
+    margin-top: 5px;
+}
+
+.postformFilePreview {
+    max-width: 100px;
+    max-height: 100px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.postformFileInput {
+    display: inline-block;
+    position: absolute;
+    left: -10px;
+    top: -10px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.postformFileText {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.postformFileRemoveButton {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.postformFileRemoveImage {
+    display: inline;
+    vertical-align: top;
+}
+
+.referencedBy {
+    font-size: 0.8em;
+    color: #555555;
+}
+
+ul.tabWidget > li {
+    display: inline;
+    background-color: #DDDDDD;
+    padding: 5px 10px 5px 10px;
+    border: 1px solid #CCCCCC;
+    border-left: none;
+}
+
+ul.tabWidget > li > a {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+ul.tabWidget > li.activated {
+    background-color: #AAAAAA;
+}
+
+.searchAction {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: right;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.searchAction.mobile {
+    text-align: left;
+}
+
+.toolbar {
+    border-bottom: 1px solid #CCCCCC;
+    display: block;
+    font-size: 0.9em;
+    padding-bottom: 5px;
+    text-align: left;
+    overflow-x: auto;
+    font-size: 1.2em;
+    position: relative;
+    top: -8px;
+    z-index: 1;
+}
+
+.toolbar.sticky {
+    position: fixed;
+    top: 0px;
+    background-color: #EEF2FF;
+    width: 100%;
+}
+
+blockquote.blockquoteThread {
+    max-height: 800px;
+}
+
+blockquote.blockquoteThread.expand {
+    max-height: none;
+}
+
+.codeBlock {
+    
+}
+
+.theMessage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.threadActions {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.noNewPostsPopup {
+    height: 40px;
+    line-height: 40px;
+    width: 200px;
+}
+
+.externalThreadFrame {
+    width: 300px;
+    height: 400px;
+    float: right;
+    position: fixed;
+    top: 200px;
+    right: 0px;
+    z-index: 9920;
+}
+
+.externalThreadFrame.mobile {
+    width: 120px;
+    height: 240px;
+}
+
+.externalThreadFrame:hover {
+    width: 90%;
+    height: 100%;
+    top: 0px;
+}
+
+.theTitle {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.vote {
+    background-color: #CCCCCC;
+    border: 1px solid #BBBBBB;
+}
+
+.voteText {
+    font-weight: bold;
+}
+
+.voteCount {
+    font-style: italic;
+}
+
+.settingsDialog {
+    
+}
+
+.track {
+    background-color: #DDDDDD;
+    border: 1px solid #CCCCCC;
+    padding: 2px 2px 2px 2px;
+}
+
+.track ~ .track {
+    margin-top: 5px;
+}
+
+.track > audio {
+    width: 600px;
+}
+
+#recaptcha_image_cell {
+    background-color: inherit;
+}
+
+#recaptcha_response_field {
+    background-color: inherit;
+}
+
+.shrinkedPost {
+    display: table;
+}
+
+.login {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.loginDescription {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.loginDescription.desktop {
+    max-width: 80%;
+    margin-left: 10%;
+}
+
+.buttonImage {
+    vertical-align: middle;
+    opacity: 0.65;
+}
+
+.buttonImage:disabled {
+    opacity: 0.4;
+}
+
+.buttonImage:hover {
+    opacity: 1;
+}
+
+.buttonImage:disabled:hover {
+    opacity: 0.4;
+}
+
+.boardSelect {
+    width: 60px;
+}
+
+.boardSelectForm {
+    display: inline;
+}
+
+.imageCheckBox {
+    display: none;
+}
+
+.imageCheckBox + label {
+    height: 32px;
+    width: 32px;
+    display: inline-block;
+    padding: 0 0 0 0px;
+}
+
+.imageCheckBox:checked + label {
+    box-shadow: inset 0 1px 5px #555555;
+}
+
+#checkboxRawHtml + label, #checkboxRawHtmlEdit + label {
+    background: url("../img/checkbox_raw_html.png") center no-repeat;
+}
+
+#checkboxOp + label {
+    background: url("../img/checkbox_op.png") center no-repeat;
+}
+
+#checkboxTripcode + label {
+    background: url("../img/checkbox_tripcode.png") center no-repeat;
+}
+
+#checkboxDraft + label, #checkboxDraftEdit + label {
+    background: url("../img/checkbox_draft.png") center no-repeat;
+}
+
+.searchSelect {
+    width: 100px;
+}
+
+.alignCenter {
+    text-align: center;
+}
+
+.overlayMask {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index: 100500;
+    background-color: #000000;
+    opacity: 0.6;
+}
+
+.overlayProgressBar {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 400px;
+    height: 50px;
+    margin-top: -25px;
+    margin-left: -200px;
+    z-index: 100501;        
+}
+
+.overlayProgressBarCancelButton {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    margin-top: -15px;
+    margin-left: -40px;
+    width: 80px;
+    height: 30px;
+    z-index: 100502;
+}
+
+.numberSize3 {
+    width: 40px;
+}

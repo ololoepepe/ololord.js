@@ -1,0 +1,63 @@
+<td id="file{{=fileInfo.name}}" class="postFile"
+    data-href="{{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=post.boardName}}/src/{{=fileInfo.name}}"
+    data-file-name="{{=fileInfo.name}}"
+    data-mime-type="{{=fileInfo.mimeType}}"
+    data-size-k-b="{{=fileInfo.sizeKB}}"
+    data-size-text="{{=fileInfo.sizeText}}"
+    data-width="{{ out += fileInfo.dimensions ? fileInfo.dimensions.width : 0; }}"
+    data-height="{{ out += fileInfo.dimensions ? fileInfo.dimensions.height : 0; }}"
+    {{? fileInfo.mimeType.substr(0, 6) == "audio/" && fileInfo.extraData}}
+        {{? fileInfo.extraData.duration}}data-duration="{{=fileInfo.extraData.duration}}"{{?}}
+        {{? fileInfo.extraData.bitrate}}data-bitrate="{{=fileInfo.extraData.bitrate}}"{{?}}
+        {{? fileInfo.extraData.album}}data-audio-tag-album="{{=fileInfo.extraData.album}}"{{?}}
+        {{? fileInfo.extraData.artist}}data-audio-tag-artist="{{=fileInfo.extraData.artist}}"{{?}}
+        {{? fileInfo.extraData.title}}data-audio-tag-title="{{=fileInfo.extraData.title}}"{{?}}
+        {{? fileInfo.extraData.year}}data-audio-tag-year="{{=fileInfo.extraData.year}}"{{?}}
+    {{?? fileInfo.mimeType.substr(0, 6) == "video/" && fileInfo.extraData}}
+        {{? fileInfo.extraData.duration}}data-duration="{{=fileInfo.extraData.duration}}"{{?}}
+        {{? fileInfo.extraData.bitrate}}data-bitrate="{{=fileInfo.extraData.bitrate}}"{{?}}
+    {{?}}>
+    <div class="postFileName">
+        <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}" target="_blank">{{=fileInfo.name}}</a>
+    </div>
+    <div class="postFileSize {{=it.deviceType}}" {{? fileInfo.sizeTooltip}}title="{{=fileInfo.sizeTooltip}}"{{?}}>
+        ({{=fileInfo.sizeText}})
+    </div>
+    <div class="postFileSearch">
+        <a href="/{{=it.site.pathPrefix}}deleteFile.html?fileName={{=fileInfo.name}}" name="deleteFileButton"
+           target="_blank" {{? it.settings.mode.name != "ascetic"}}onclick="lord.deleteFile(this); return false;"{{?}}>
+           <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.deleteFileText}}" /></a>
+        {{? it.settings.mode.name != "ascetic" && fileInfo.mimeType.substr(0, 6) == "image/"}}
+            <a name="hideByImageButton" onclick="lord.hideByImage(this); return false;">
+                <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}" /></a>
+        {{?}}
+        {{? fileInfo.mimeType.substr(0, 6) == "image/"}}
+            <a href="//www.google.com/searchbyimage?image_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+               title="{{=it.tr.findSourceWithGoogleText}}" target="_blank">
+                <img src="/{{=it.site.pathPrefix}}img/google.png"></a>
+            <a href="http://iqdb.org/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+               title="{{=it.tr.findSourceWithIqdbText}}" target="_blank">
+                <img src="/{{=it.site.pathPrefix}}img/iqdb.png"></a>
+        {{?}}
+        {{? fileInfo.mimeType.substr(0, 6) == "audio/"}}
+            {{? it.settings.mode.name != "ascetic"}}
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false"
+                   title="{{=it.tr.editAudioTagsText}}">
+                    <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
+                <a href="javascript:void(0);" onclick="lord.addToPlaylist(this); return false;"
+                   title="{{=it.tr.addToPlaylistText}}">
+                    <img src="/{{=it.site.pathPrefix}}img/playlist_add.png"></a>
+            {{??}}
+                <a href="/{{=it.site.pathPrefix}}edit_audio_tags?board={{=it.board.name}}&post={{=post.number}}&fileName={{=fileInfo.name}}"
+                   target="_blank" title="{{=it.tr.editAudioTagsText}}">
+                    <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
+            {{?}}
+        {{?}}
+    </div>
+    <div class="postFileFile {{=it.deviceType}}">
+        <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+           onclick="lord.showImage(this); return false;">
+            {{#def.postFileThumb}}
+        </a>
+    </div>
+</td>

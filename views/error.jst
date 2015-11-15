@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{#def.head}}
+<body class="{{=it.deviceType}}" {{#def.baseData}}>
+{{? it.customHeader}}
+    {{#def.customHeader}}
+{{?}}
+{{#def.toolbar}}
+<br />
+{{#def.searchAction}}
+<div class="theTitle">
+    <h1 id="errorMessage">{{=it.errorMessage}}</h1>
+</div>
+<div class="error" id="errorDescription">
+    {{=it.errorDescription}}
+</div>
+{{? it.customFooter}}
+    {{#def.customFooter}}
+{{?}}
+</body>
+</html>
