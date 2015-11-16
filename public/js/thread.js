@@ -226,6 +226,7 @@ lord.updateThread = function(silent) {
         posts.forEach(function(post) {
             if (lord.id(post.id))
                 return;
+            lord.addClass(post, "newPost");
             document.body.insertBefore(post, before);
         });
         return lord.getModel("misc/board/" + boardName);
