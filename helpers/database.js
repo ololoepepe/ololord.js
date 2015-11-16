@@ -1474,6 +1474,7 @@ module.exports.editPost = function(req, fields) {
             return Promise.reject("Not enough rights");
         }
         c.post = post;
+        c.wasDraft = post.options.draft;
         c.draft = post.options.draft && fields.draft;
         return postFileInfoNames(post.boardName, post.number);
     }).then(function(numbers) {
@@ -1517,7 +1518,8 @@ module.exports.editPost = function(req, fields) {
         c.post.rawText = rawText;
         c.post.subject = subject || null;
         c.post.text = c.text || null;
-        c.post.updatedAt = date.toISOString();
+        if (!c.wasDraft)
+            c.post.updatedAt = date.toISOString();
         delete c.post.bannedFor;
         return db.hset("posts", board.name + ":" + c.post.number, JSON.stringify(c.post));
     }).then(function() {
