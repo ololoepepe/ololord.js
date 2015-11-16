@@ -1155,10 +1155,7 @@ lord.addFiles = function(el) {
     lord.getModel([
         "misc/base",
         "misc/tr",
-        {
-            name: "misc/board",
-            query: "boardName=" + boardName
-        }
+        "misc/board/" + boardName
     ], true).then(function(model) {
         c.model = model;
         c.model.settings = lord.settings();
