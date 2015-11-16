@@ -873,7 +873,7 @@ lord.quickReply = function(el) {
         return;
     var postForm = lord.id("postForm");
     var targetContainer = post.parentNode;
-    var same = (postForm.parentNode == targetContainer);
+    var same = (post.nextSibling && postForm.nextSibling == post.nextSibling.nextSibling);
     var selection = document.getSelection().toString();
     lord.hidePostForm();
     if (same)
