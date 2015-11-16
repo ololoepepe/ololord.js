@@ -239,8 +239,10 @@ module.exports.getThread = function(board, hashpass, number) {
 };
 
 module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNumber) {
-    if (!board)
+    if (!board) {
+        console.log("sooqa");
         return Promise.reject("Invalid board instance");
+    }
     threadNumber = +(threadNumber || 0);
     if (isNaN(threadNumber) || threadNumber < 1)
         return Promise.reject("Invalid thread");
