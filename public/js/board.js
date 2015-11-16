@@ -1222,10 +1222,7 @@ lord.editPost = function(el) {
         return lord.getModel([
             "misc/base",
             "misc/tr",
-            {
-                name: "misc/board",
-                query: "boardName=" + boardName
-            }
+            "misc/board/" + boardName
         ], true);
     }).then(function(model) {
         c.model = merge.recursive(c.model, model);
