@@ -136,6 +136,7 @@ router.get("/lastPosts.json", function(req, res) {
             if (isNaN(threadNumber) || threadNumber <= 0)
                 return Promise.resolve(null);
             var lastPostNumber = +thread.split(":").pop();
+            console.log("aaa");
             return boardModel.getLastPosts(board, req.hashpass, threadNumber, lastPostNumber);
         });
         Promise.all(promises).then(function(results) {
@@ -152,6 +153,7 @@ router.get("/lastPosts.json", function(req, res) {
         var board = Board.board(req.query.boardName);
         var threadNumber = +req.query.threadNumber;
         var lastPostNumber = +req.query.lastPostNumber;
+        console.log("bbb", req.query.boardName);
         boardModel.getLastPosts(board, req.hashpass, threadNumber, lastPostNumber).then(function(posts) {
             var promises = posts.map(renderPost.bind(null, req));
             return Promise.all(promises);
