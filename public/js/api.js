@@ -1024,6 +1024,8 @@ lord.checkError = function(result) {
 
 lord.handleError = function(error) {
     console.log(error);
+    if (lord.unloading)
+        return;
     var text;
     if (error) {
         if (error.errorMessage) {
@@ -1031,6 +1033,7 @@ lord.handleError = function(error) {
             if (error.errorDescription)
                 text += ": " + error.errorDescription;
         } else if (error.hasOwnProperty("readyState")) {
+            //TODO: error status
             if (500 == error.status)
                 text = "Temporarily banned or internal server error";
             else if (0 == error.readyState)

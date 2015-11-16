@@ -122,48 +122,46 @@ lord.showFavorites = function() {
     if (div)
         return;
     var list = [];
-    lord.forIn(lord.getLocalObject("favoriteThreads", {}), function(_, x) {
+    lord.forIn(lord.getLocalObject("favoriteThreads", {}), function(_, key) {
         list.push({
-            boardName: x.split("/").shift(),
-            threadNumber: x.split("/").pop()
+            boardName: key.split("/").shift(),
+            threadNumber: key.split("/").pop()
         });
     });
+    var query = list.reduce(function(query, item) {
+        return query + (query ? "&" : "") + "posts=" + item.boardName + ":" + item.threadNumber;
+    }, "");
     var c = {};
-    var promises = list.map(function(item) {
-        var boardName = item.boardName;
-        var threadNumber = item.threadNumber;
-        return lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + threadNumber).then(function(post) {
-            if (lord.checkError(post))
-                return Promise.reject(post);
-            return Promise.resolve(post);
-        }).catch(function(err) {
-            lord.handleError(err);
-            return Promise.resolve(boardName + "/" + threadNumber + " (404)");
-        }).then(function(post) {
-            var txt = "";
-            var fav = lord.getLocalObject("favoriteThreads", {});
-            var x = boardName + "/" + threadNumber;
-            if (typeof post != "string") {
-                txt = (post.subject || post.rawText || (boardName + "/" + threadNumber)).substring(0, 150);
-                fav[x].subject = txt;
-                lord.setLocalObject("favoriteThreads", fav);
-            } else {
-                txt = fav[x].subject ? fav[x].subject : ("[" + post + "]");
-            }
+    lord.getModel("api/posts", query).then(function(posts) {
+        if (lord.checkError(posts))
+            return Promise.reject(posts);
+        return Promise.resolve(posts);
+    }).catch(function(err) {
+        lord.handleError(err);
+        return Promise.resolve(list);
+    }).then(function(posts) {
+        var fav = lord.getLocalObject("favoriteThreads", {});
+        c.list = posts.map(function(post, i) {
+            var item = post || list[i];
+            var boardName = post.boardName;
+            var threadNumber = post.threadNumber;
+            var key = boardName + "/" + threadNumber;
+            var txt = (post.subject || post.rawText || (boardName + "/" + threadNumber)).substring(0, 150);
+            if (!post)
+                txt += " (404)";
+            fav[key].subject = txt;
             var data = {
                 boardName: boardName,
                 threadNumber: threadNumber,
                 text: txt,
                 shortText: txt.substr(0, 50)
             };
-            var p = fav[x];
+            var p = fav[key];
             if (p.lastPostNumber > p.previousLastPostNumber)
                 data.newPostCount = p.lastPostNumber - p.previousLastPostNumber;
-            return Promise.resolve(data);
+            return data;
         });
-    });
-    Promise.all(promises).then(function(list) {
-        c.list = list;
+        lord.setLocalObject("favoriteThreads", fav);
         return lord.getModel(["misc/base", "misc/tr"], true);
     }).then(function(model) {
         c.model = model;
@@ -237,43 +235,46 @@ lord.removeThreadFromFavorites = function(boardName, threadNumber) {
 
 lord.checkFavoriteThreads = function() {
     var fav = lord.getLocalObject("favoriteThreads", {});
-    var nfav = {};
-    lord.forIn(fav, function(o, x) {
-        var boardName = x.split("/").shift();
-        var threadNumber = x.split("/").pop();
-        lord.getModel("api/lastPosts", "boardName=" + boardName + "&threadNumber=" + threadNumber
-            + "&lastPostNumber=" + o.lastPostNumber).then(function(posts) {
-            if (lord.checkError(posts))
-                return Promise.reject(posts);
-            if (!posts || posts.length < 1)
-                return;
-            o.lastPostNumber = posts.pop().number;
-            nfav[x] = o;
-        }).catch(lord.handleError);
+    var list = [];
+    lord.forIn(fav, function(o, key) {
+        list.push({
+            boardName: key.split("/").shift(),
+            threadNumber: key.split("/").pop(),
+            lastPostNumber: o.lastPostNumber
+        });
     });
-    if (lord.notificationsEnabled() && lord.hasOwnProperties(nfav)) {
-        lord.getModel("misc/tr").then(function(model) {
-            var title = model.tr.favoriteThreadsText;
-            var sitePathPrefix = lord.data("sitePathPrefix");
-            var icon = "/" + sitePathPrefix + "favicon.ico";
-            var text = "";
-            lord.forIn(nfav, function(v, k) {
-                text += k + ", ";
-            });
-            text = text.substr(0, text.length - 2);
-            lord.showNotification(title, text.substr(0, 300), icon);
-        }).catch(lord.handleError);
-    }
-    setTimeout(function() {
+    var query = list.reduce(function(query, item) {
+        return query + (query ? "&" : "") + "threads=" + item.boardName + ":" + item.threadNumber
+            + (item.lastPostNumber ? (":" + item.lastPostNumber) : "");
+    }, "");
+    lord.getModel("api/lastPosts", query).then(function(results) {
+        if (lord.checkError(results))
+            return Promise.reject(results);
+        return Promise.resolve(results);
+    }).catch(function(err) {
+        lord.handleError(err);
+        return Promise.resolve(list);
+    }).then(function(results) {
         fav = lord.getLocalObject("favoriteThreads", {});
-        lord.forIn(nfav, function(o, x) {
-            fav[x].lastPostNumber = o.lastPostNumber;
+        var newPosts = [];
+        results.forEach(function(result, i) {
+            var item = (result && result.boardName) || list[i];
+            var key = item.boardName + "/" + item.threadNumber;
+            if (!result || result.length <= 0)
+                return;
+            fav[key].lastPostNumber = result.pop().number;
+            newPosts.push({
+                boardName: item.boardName,
+                threadNumber: item.threadNumber
+            });
         });
         lord.setLocalObject("favoriteThreads", fav);
         var div = lord.id("favorites");
         if (div) {
-            lord.forIn(fav, function(o, x) {
-                var postDiv = lord.id("favorite/" + x);
+            lord.forIn(fav, function(o, key) {
+                var postDiv = lord.id("favorite/" + key);
+                if (!postDiv)
+                    return;
                 var fnt = lord.queryOne("font", postDiv);
                 if (fnt.childNodes.length > 0)
                     fnt.removeChild(fnt.childNodes[0]);
@@ -282,16 +283,28 @@ lord.checkFavoriteThreads = function() {
             });
         } else {
             var threadNumber = +lord.data("threadNumber");
-            lord.forIn(fav, function(o, x) {
+            lord.forIn(fav, function(o, key) {
                 if (o.lastPostNumber > o.previousLastPostNumber) {
-                    if (threadNumber && +x.split("/").pop() == threadNumber)
+                    if (threadNumber && +key.split("/").pop() == threadNumber)
                         return;
                     lord.showFavorites();
                 }
             });
         }
+        if (newPosts.length > 0 && lord.notificationsEnabled()) {
+            lord.getModel("misc/tr").then(function(model) {
+                var title = model.tr.favoriteThreadsText;
+                var sitePathPrefix = lord.data("sitePathPrefix");
+                var icon = "/" + sitePathPrefix + "favicon.ico";
+                var text = newPosts.reduce(function(text, post) {
+                    return text + (text ? ", " : "") + post.boardName + "/" + post.threadNumber;
+                }, "");
+                text = text.substr(0, text.length - 2);
+                lord.showNotification(title, text.substr(0, 300), icon);
+            }).catch(lord.handleError);
+        }
         setTimeout(lord.checkFavoriteThreads, 15 * lord.Second);
-    }, 5 * lord.Second);
+    });
 };
 
 lord.showNewPosts = function() {
@@ -412,41 +425,37 @@ lord.showHiddenPostList = function() {
             postNumber: x.split("/").pop()
         });
     });
+    var query = list.reduce(function(query, item) {
+        return query + (query ? "&" : "") + "posts=" + item.boardName + ":" + item.postNumber;
+    }, "");
     var c = {};
-    var promises = list.map(function(item) {
-        var boardName = item.boardName;
-        var postNumber = item.postNumber;
-        var threadNumber = 0;
-        return lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
-            if (lord.checkError(post))
-                return Promise.reject(post);
-            return Promise.resolve(post);
-        }).catch(function(err) {
-            lord.handleError(err);
-            return Promise.resolve(boardName + "/" + postNumber + " (404)");
-        }).then(function(post) {
-            var txt = "";
-            var hidden = lord.getLocalObject("hiddenPosts", {});
-            var x = boardName + "/" + postNumber;
-            if (typeof post != "string") {
-                txt = (post.subject || post.rawText || (boardName + "/" + postNumber)).substring(0, 150);
-                hidden[x].subject = txt;
-                lord.setLocalObject("hiddenPosts", hidden);
-                threadNumber = post.threadNumber;
-            } else {
-                txt = hidden[x].subject ? hidden[x].subject : ("[" + post + "]");
-            }
-            return Promise.resolve( {
+    lord.getModel("api/posts", query).then(function(posts) {
+        if (lord.checkError(posts))
+            return Promise.reject(posts);
+        return Promise.resolve(posts);
+    }).catch(function(err) {
+        lord.handleError(err);
+        return Promise.resolve(list);
+    }).then(function(posts) {
+        var hidden = lord.getLocalObject("hiddenPosts", {});
+        c.list = posts.map(function(post, i) {
+            var item = post || list[i];
+            var boardName = post.boardName;
+            var postNumber = post.number || post.postNumber;
+            var key = boardName + "/" + postNumber;
+            var txt = (post.subject || post.rawText || (boardName + "/" + postNumber)).substring(0, 150);
+            if (!post)
+                txt += " (404)";
+            hidden[key].subject = txt;
+            return {
                 boardName: boardName,
                 postNumber: postNumber,
-                threadNumber: threadNumber,
+                threadNumber: post.threadNumber,
                 text: txt,
                 shortText: txt.substr(0, 50)
-            });
+            };
         });
-    });
-    Promise.all(promises).then(function(list) {
-        c.list = list;
+        lord.setLocalObject("hiddenPosts", hidden);
         return lord.getModel(["misc/base", "misc/tr"], true);
     }).then(function(model) {
         c.model = model;

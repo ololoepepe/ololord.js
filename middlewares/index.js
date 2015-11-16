@@ -4,15 +4,19 @@ var device = require("express-device");
 var express = require("express");
 
 var config = require("../helpers/config");
+var Tools = require("../helpers/tools");
 
 module.exports = [
     require("./ip-fix"),
-    express.static(__dirname + "/../public"),
-    /*function(req, res, next) {
+    express.static(__dirname + "/../public")
+];
+
+if (Tools.contains(process.argv.slice(2), "--dev-mode")) {
+    module.exports.push(function(req, res, next) {
         console.log(req.path);
         next();
-    },*/
-];
+    });
+}
 
 if (config("server.ddosProtection", true)) {
     var burst = 6;

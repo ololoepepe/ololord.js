@@ -140,7 +140,7 @@ lord.processPost = function(post, data) {
             });
         }
         if (data.hidden)
-            lord.addPostToHidden(data.boardName, data.postNumber);
+            lord.addPostToHidden(data.boardName, data.postNumber, false);
     }
     lord.tryHidePost(post);
 }
@@ -789,24 +789,37 @@ lord.addCoubButton = function(post, coub) {
     });
 };
 
-lord.addPostToHidden = function(boardName, postNumber) {
+lord.addPostToHidden = function(boardName, postNumber, getText) {
     postNumber = +postNumber;
     if (!boardName || isNaN(postNumber))
         return;
-    var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
-    hiddenPosts[boardName + "/" + postNumber] = {};
-    lord.setLocalObject("hiddenPosts", hiddenPosts);
-    lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
-        if (lord.checkError(post))
-            return Promise.reject(post);
-        if (!post)
-            return Promise.resolve();
+    getText = (typeof getText != undefined) ? getText : true;
+    var key = boardName + "/" + postNumber;
+    var fallback = function() {
         var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
-        if (hiddenPosts[boardName + "/" + postNumber])
-            return Promise.resolve();
-        var subject = (post.subject || post.rawText).substring(0, 150);
-        hiddenPosts[boardName + "/" + postNumber].subject = subject;
-    }).catch(lord.handleError);
+        if (hiddenPosts[key])
+            return;
+        hiddenPosts[key] = { subject: (boardName + "/" + postNumber) };
+        lord.setLocalObject("hiddenPosts", hiddenPosts);
+    };
+    if (getText) {
+        lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
+            if (lord.checkError(post))
+                return Promise.reject(post);
+            if (!post) {
+                fallback();
+                return Promise.resolve();
+            }
+            var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
+            if (hiddenPosts[key])
+                return Promise.resolve();
+            var subject = (post.subject || post.rawText || (boardName + "/" + postNumber)).substring(0, 150);
+            hiddenPosts[key] = { subject: subject };
+            lord.setLocalObject("hiddenPosts", hiddenPosts);
+        }).catch(lord.handleError);
+    } else {
+        fallback();
+    }
 };
 
 lord.tryHidePost = function(post, list) {
@@ -2134,14 +2147,14 @@ lord.nextFile = function() {
 };
 
 lord.addThreadToFavorites = function(boardName, threadNumber) {
-    var fav = lord.getLocalObject("favoriteThreads", {});
-    if (fav.hasOwnProperty(boardName + "/" + threadNumber))
-        return Promise.reject("Already in favorites");
     lord.getModel("api/lastPosts", "boardName=" + boardName + "&threadNumber=" + threadNumber).then(function(posts) {
         if (lord.checkError(posts))
             return Promise.resolve(posts);
         if (!posts || posts.length < 1)
             return Promise.reject("Internal error");
+        var fav = lord.getLocalObject("favoriteThreads", {});
+        if (fav.hasOwnProperty(boardName + "/" + threadNumber))
+            return Promise.reject("Already in favorites");
         var postNumber = posts.pop().number;
         var opPost = posts.shift();
         var txt = opPost.subject || opPost.rawText || (boardName + "/" + threadNumber);
