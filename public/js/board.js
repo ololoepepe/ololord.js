@@ -1430,7 +1430,7 @@ lord.viewPost = function(a, boardName, postNumber) {
             return Promise.reject(post);
         if (!post)
             return Promise.reject("Failed to get post");
-        return lord.createPostNode(post, false, boardName);
+        return lord.createPostNode(post, false);
     }).then(function(post) {
         if ("mobile" != lord.data("deviceType")) {
             post.onmouseout = function(event) {
@@ -1460,6 +1460,7 @@ lord.viewPost = function(a, boardName, postNumber) {
             clearTimeout(lord.lastPostPreviewTimer);
             lord.lastPostPreviewTimer = null;
         }
+        post.style.width = "auto";
         document.body.appendChild(post);
         if ("mobile" != lord.data("deviceType")) {
             post.style.position = "absolute";
