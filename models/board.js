@@ -66,7 +66,7 @@ module.exports.getFileInfos = function(list, hashpass) {
 };
 
 module.exports.getPage = function(board, hashpass, page) {
-    if (!(board instanceof Board))
+    if (!board)
         return Promise.reject("Invalid board instance");
     page = +(page || 0);
     if (isNaN(page) || page < 0)
@@ -170,7 +170,7 @@ module.exports.getPage = function(board, hashpass, page) {
 };
 
 module.exports.getThread = function(board, hashpass, number) {
-    if (!(board instanceof Board))
+    if (!board)
         return Promise.reject("Invalid board instance");
     number = +(number || 0);
     if (isNaN(number) || number < 1)
@@ -239,7 +239,7 @@ module.exports.getThread = function(board, hashpass, number) {
 };
 
 module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNumber) {
-    if (!(board instanceof Board))
+    if (!board)
         return Promise.reject("Invalid board instance");
     threadNumber = +(threadNumber || 0);
     if (isNaN(threadNumber) || threadNumber < 1)
@@ -289,7 +289,7 @@ module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNu
 };
 
 module.exports.getThreadInfo = function(board, hashpass, number) {
-    if (!(board instanceof Board))
+    if (!board)
         return Promise.reject("Invalid board instance");
     number = +(number || 0);
     if (isNaN(number) || number < 1)
@@ -333,7 +333,7 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
 };
 
 module.exports.getCatalog = function(board, hashpass, sortMode) {
-    if (!(board instanceof Board))
+    if (!board)
         return Promise.reject("Invalid board instance");
     var c = {};
     return Database.registeredUserLevel(hashpass).then(function(level) {
