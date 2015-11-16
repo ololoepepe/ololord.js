@@ -243,6 +243,8 @@ lord.checkFavoriteThreads = function() {
             lastPostNumber: o.lastPostNumber
         });
     });
+    if (list.length < 1)
+        return;
     var query = list.reduce(function(query, item) {
         return query + (query ? "&" : "") + "threads=" + item.boardName + ":" + item.threadNumber
             + (item.lastPostNumber ? (":" + item.lastPostNumber) : "");

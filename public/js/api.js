@@ -906,7 +906,6 @@ lord.getTemplate = function(templateName) {
 };
 
 lord.getModel = function(modelName, query) {
-    console.log(modelName, query);
     if (Array.isArray(modelName)) {
         var promises = modelName.map(function(modelName) {
             if (typeof modelName == "string")
