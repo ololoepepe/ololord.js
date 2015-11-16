@@ -153,7 +153,7 @@ router.get("/lastPosts.json", function(req, res) {
         var board = Board.board(req.query.boardName);
         var threadNumber = +req.query.threadNumber;
         var lastPostNumber = +req.query.lastPostNumber;
-        console.log("bbb", req.query.boardName);
+        console.log("bbb", req.query.boardName, req.query);
         boardModel.getLastPosts(board, req.hashpass, threadNumber, lastPostNumber).then(function(posts) {
             var promises = posts.map(renderPost.bind(null, req));
             return Promise.all(promises);
