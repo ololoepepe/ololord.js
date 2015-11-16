@@ -15,11 +15,6 @@ router.get("/boards.json", function(req, res) {
     res.send(model);
 });
 
-router.get("/board.json", function(req, res) {
-    var model = controller.boardModel(req.query.boardName);
-    res.send(model);
-});
-
 router.get("/board/:board.json", function(req, res) {
     var model = controller.boardModel(req.params.board);
     res.send(model);

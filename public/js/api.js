@@ -1046,3 +1046,11 @@ lord.handleError = function(error) {
     }
     lord.showPopup(text, {type: "critical"});
 };
+
+lord.toMap = function(arr, keyGenerator) {
+    var map = {};
+    arr.forEach(function(item) {
+        map[keyGenerator(item)] = item;
+    });
+    return map;
+};

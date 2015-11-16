@@ -262,7 +262,7 @@ lord.checkFavoriteThreads = function() {
         results.forEach(function(result, i) {
             var item = (result && result.boardName) || list[i];
             var key = item.boardName + "/" + item.threadNumber;
-            if (!result || result.length <= 0)
+            if (!result || !result.length || result.length <= 0)
                 return;
             fav[key].lastPostNumber = result.pop().number;
             newPosts.push({

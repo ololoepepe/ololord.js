@@ -670,6 +670,11 @@ span.newPostCount {
     left: 0%;
 }
 
+.postActionsMenu.mobile {
+    left: auto;
+    right: 100%;
+}
+
 .postActions:focus > .postActionsMenu {
     visibility: visible;
     opacity: 1;

@@ -265,7 +265,7 @@ lord.traverseChildren = function(elem) {
     return children;
 };
 
-lord.createPostNode = function(post, permanent) {
+lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
     if (typeof permanent == "undefined")
         permanent = true;
     var c = {};
@@ -273,14 +273,7 @@ lord.createPostNode = function(post, permanent) {
         "misc/base",
         "misc/tr",
         "misc/boards",
-        {
-            name: "misc/board",
-            query: "boardName=" + post.boardName
-        },
-        {
-            name: "api/threadInfo",
-            query: "boardName=" + post.boardName + "&threadNumber=" + post.threadNumber
-        }
+        "misc/board/" + post.boardName
     ], true).then(function(model) {
         var settings = lord.settings();
         c.model = model;
@@ -288,6 +281,8 @@ lord.createPostNode = function(post, permanent) {
         c.dateFormat = model.site.dateFormat;
         c.timeOffset = ("local" == settings.time) ? settings.timeZoneOffset : model.site.timeOffset;
         c.model.settings = settings;
+        if (threadInfo)
+            return Promise.resolve(threadInfo);
         return lord.getModel("api/threadInfo", "boardName=" + post.boardName + "&threadNumber=" + post.threadNumber);
     }).then(function(thread) {
         if (lord.checkError(thread))
@@ -371,9 +366,14 @@ lord.createPostNode = function(post, permanent) {
         if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
             lord.strikeOutHiddenPostLinks(c.node);
         if (lord.getLocalObject("signOpPostLinks", true))
-            lord.signOpPostLinks(c.node);
-        if (lord.getLocalObject("signOwnPostLinks", true))
-            lord.signOwnPostLinks(c.node);
+            postInfos = lord.signOpPostLinks(c.node, postInfos);
+        else
+            postInfos = Promise.resolve(postInfos);
+        if (lord.getLocalObject("signOwnPostLinks", true)) {
+            postInfos = postInfos.then(function(infos) {
+                return lord.signOwnPostLinks(c.node, infos);
+            });
+        }
         if (!permanent) {
             var actions = lord.queryOne(".postActions", c.node);
             actions.parentNode.removeChild(actions);
@@ -431,10 +431,16 @@ lord.createPostNode = function(post, permanent) {
                 referencedBy.appendChild(a);
                 if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
                     lord.strikeOutHiddenPostLinks(targetPost);
-                if (lord.getLocalObject("signOpPostLinks", true))
-                    lord.signOpPostLinks(targetPost);
-                if (lord.getLocalObject("signOwnPostLinks", true))
-                    lord.signOwnPostLinks(targetPost);
+                if (lord.getLocalObject("signOpPostLinks", true)) {
+                    postInfos = postInfos.then(function(infos) {
+                        return lord.signOpPostLinks(targetPost, infos);
+                    });
+                }
+                if (lord.getLocalObject("signOwnPostLinks", true)) {
+                    postInfos.then(function(infos) {
+                        return lord.signOwnPostLinks(targetPost, infos);
+                    });
+                }
                 return Promise.resolve();
             });
             return Promise.all(promises);
@@ -2461,11 +2467,11 @@ lord.strikeOutHiddenPostLinks = function(parent) {
     });
 };
 
-lord.signOpPostLinks = function(parent) {
+lord.signOpPostLinks = function(parent, postInfos) {
     if (!parent)
         parent = document;
     var list = [];
-    lord.gently(lord.query("a", parent), function(a) {
+    return lord.gently(lord.query("a", parent), function(a) {
         var post = lord.signOpPostLink(a);
         if (!post)
             return;
@@ -2480,6 +2486,11 @@ lord.signOpPostLinks = function(parent) {
     }).then(function() {
         if (list.length <= 0)
             return [];
+        if (postInfos) {
+            return list.map(function(item) {
+                return postInfos[item.boardName + ":" + item.postNumber];
+            });
+        }
         var query = "posts=" + list[0].boardName + ":" + list[0].postNumber;
         for (var i = 1; i < list.length; ++i)
             query += "&posts=" + list[i].boardName + ":" + list[i].postNumber;
@@ -2487,19 +2498,29 @@ lord.signOpPostLinks = function(parent) {
     }).then(function(posts) {
         if (lord.checkError(posts))
             return Promise.reject(posts);
+        var populate = !postInfos;
+        if (populate)
+            postInfos = {};
         posts.forEach(function(post, i) {
             if (!post)
                 return;
+            if (populate)
+                postInfos[post.boardName + ":" + post.number] = post;
             lord.signOpPostLink(list[i].a, post);
         });
-    }).catch(lord.handleError);
+    }).catch(function(err) {
+        lord.handleError(err);
+        return Promise.resolve(postInfos);
+    }).then(function() {
+        return postInfos;
+    });
 };
 
-lord.signOwnPostLinks = function(parent) {
+lord.signOwnPostLinks = function(parent, postInfos) {
     if (!parent)
         parent = document;
     var list = [];
-    lord.gently(lord.query("a", parent), function(a) {
+    return lord.gently(lord.query("a", parent), function(a) {
         var post = lord.signOwnPostLink(a);
         if (!post)
             return;
@@ -2514,17 +2535,32 @@ lord.signOwnPostLinks = function(parent) {
     }).then(function() {
         if (list.length <= 0)
             return [];
+        if (postInfos) {
+            return list.map(function(item) {
+                return postInfos[item.boardName + ":" + item.postNumber];
+            });
+        }
         var query = "posts=" + list[0].boardName + ":" + list[0].postNumber;
         for (var i = 1; i < list.length; ++i)
             query += "&posts=" + list[i].boardName + ":" + list[i].postNumber;
         return lord.getModel("api/posts", query);
     }).then(function(posts) {
+        var populate = !postInfos;
+        if (populate)
+            postInfos = {};
         posts.forEach(function(post, i) {
             if (!post)
                 return;
+            if (populate)
+                postInfos[post.boardName + ":" + post.number] = post;
             lord.signOwnPostLink(list[i].a, post);
         });
-    }).catch(lord.handleError);
+    }).catch(function(err) {
+        lord.handleError(err);
+        return Promise.resolve(postInfos);
+    }).then(function() {
+        return postInfos;
+    });
 };
 
 lord.hotkey_previousPageImage = function() {
@@ -2949,10 +2985,16 @@ lord.initializeOnLoadBaseBoard = function() {
     lord.setPostformMarkupVisible(!lord.getLocalObject("hidePostformMarkup", false));
     if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
         lord.strikeOutHiddenPostLinks();
+    var postInfos;
     if (lord.getLocalObject("signOpPostLinks", true))
-        lord.signOpPostLinks();
-    if (lord.getLocalObject("signOwnPostLinks", true))
-        lord.signOwnPostLinks();
+        postInfos = lord.signOpPostLinks();
+    else
+        postInfos = Promise.resolve();
+    if (lord.getLocalObject("signOwnPostLinks", true)) {
+        postInfos.then(function(infos) {
+            return lord.signOwnPostLinks(document.body, infos);
+        })
+    }
     if (!lord.data("threadNumber")) {
         var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
         lastPostNumbers[currentBoardName] = +lord.data("lastPostNumber");

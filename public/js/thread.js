@@ -146,8 +146,9 @@ lord.updateThread = function(silent) {
     var popup;
     var c = {};
     var query = "boardName=" + boardName + "&threadNumber=" + threadNumber + "&lastPostNumber=" + lastPostNumber;
-    return lord.getModel("misc/tr").then(function(model) {
-        c.tr = model.tr;
+    //misc/base, misc/boards and misc/board/<boardName> are just cached for lord.createPostNode, not used
+    return lord.getModel(["misc/base", "misc/tr", "misc/boards", "misc/board/" + boardName]).then(function(models) {
+        c.tr = models[1].tr;
         if (!silent) {
             var span = lord.node("span");
             if (!lord.loadingImage) {
@@ -174,14 +175,50 @@ lord.updateThread = function(silent) {
             popup.resetTimeout();
         }
         if (posts.length < 1)
-            return;
-        c.sequenceNumber = posts[posts.length - 1].sequenceNumber;
-        var promises = posts.map(function(post) {
-            return lord.createPostNode(post, true);
+            return Promise.resolve();
+        c.posts = posts;
+        return lord.getModel("api/threadInfo", "boardName=" + boardName + "&threadNumber=" + threadNumber);
+    }).then(function(threadInfo) {
+        if (!c.posts)
+            return Promise.resolve();
+        if (lord.checkError(threadInfo))
+            return Promise.reject(threadInfo);
+        c.threadInfo = threadInfo;
+        c.sequenceNumber = c.posts[c.posts.length - 1].sequenceNumber;
+        var refs = [];
+        c.posts.forEach(function(post) {
+            if (post.referencedPosts)
+                refs = refs.concat(post.referencedPosts);
+            if (post.referringPosts)
+                refs = refs.concat(post.referringPosts);
+        });
+        var map = lord.toMap(refs, function(ref) {
+            return ref.boardName + ":" + ref.postNumber;
+        });
+        var postMap = lord.toMap(c.posts, function(post) {
+            return post.boardName + ":" + post.number;
+        });
+        var query = "";
+        c.postInfos = {};
+        lord.forIn(map, function(_, key) {
+            var post = postMap[key];
+            if (post)
+                c.postInfos[key] = post;
+            else
+                query = query + (query ? "&" : "") + "posts=" + key;
+        });
+        return lord.getModel("api/posts", query);
+    }).then(function(posts) {
+        posts.forEach(function(post) {
+            if (post)
+                c.postInfos[post.boardName + ":" + post.number] = post;
+        });
+        var promises = c.posts.map(function(post) {
+            return lord.createPostNode(post, true, c.threadInfo, c.postInfos);
         });
         return Promise.all(promises);
     }).then(function(posts) {
-        if (!posts)
+        if (!posts || !posts.length || posts.length < 1)
             return;
         var before = lord.id("afterAllPosts");
         posts.forEach(function(post) {

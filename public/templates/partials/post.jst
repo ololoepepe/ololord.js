@@ -65,7 +65,7 @@
         {{? it.settings.mode.name != "ascetic" || it.user.loggedIn}}
             <span tabindex="0" class="{{=it.deviceType}} postActions">
                 <img src="/{{=it.site.pathPrefix}}img/post_actions.png" title="{{=it.tr.postActionsText}}">
-                <ul class="postActionsMenu">
+                <ul class="postActionsMenu {{=it.deviceType}}">
                     {{? (it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.options.draft) && (post.fileInfos.length < it.board.maxFileCount)}}
                         <li>
                             <a name="addFileButton" target="_blank"
