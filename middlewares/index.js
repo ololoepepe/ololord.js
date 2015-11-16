@@ -13,7 +13,7 @@ module.exports = [
 
 if (Tools.contains(process.argv.slice(2), "--dev-mode")) {
     module.exports.push(function(req, res, next) {
-        console.log(req.path);
+        console.log(req.ip, req.path);
         next();
     });
 }
