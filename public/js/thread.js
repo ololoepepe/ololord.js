@@ -209,6 +209,8 @@ lord.updateThread = function(silent) {
         });
         return lord.getModel("api/posts", query);
     }).then(function(posts) {
+        if (!c.posts)
+            return Promise.resolve();
         posts.forEach(function(post) {
             if (post)
                 c.postInfos[post.boardName + ":" + post.number] = post;
@@ -219,7 +221,7 @@ lord.updateThread = function(silent) {
         return Promise.all(promises);
     }).then(function(posts) {
         if (!posts || !posts.length || posts.length < 1)
-            return;
+            return Promise.resolve();
         var before = lord.id("afterAllPosts");
         posts.forEach(function(post) {
             if (lord.id(post.id))
@@ -229,7 +231,7 @@ lord.updateThread = function(silent) {
         return lord.getModel("misc/board/" + boardName);
     }).then(function(model) {
         if (!model)
-            return;
+            return Promise.resolve();
         var board = model.board;
         var bumpLimitReached = c.sequenceNumber >= board.bumpLimit;
         var postLimitReached = c.sequenceNumber >= board.postLimit;
