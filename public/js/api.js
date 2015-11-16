@@ -175,7 +175,19 @@ var lord = lord || {};
         document.body.appendChild(this.cancelButton);
 };
 
+/*public*/ lord.OverlayProgressBar.prototype.showDelayed = function(delay) {
+    var _this = this;
+    this.mustShow = true;
+    setTimeout(function() {
+        if (!_this.mustShow)
+            return;
+        _this.show();
+    }, delay || 0);
+};
+
 /*public*/ lord.OverlayProgressBar.prototype.hide = function() {
+    this.mustShow = false;
+    this.mustHide = false;
     if (!this.visible)
         return;
     this.visible = false;
@@ -183,6 +195,16 @@ var lord = lord || {};
         document.body.removeChild(this.cancelButton);
     document.body.removeChild(this.progressBar);
     document.body.removeChild(this.mask);
+};
+
+/*public*/ lord.OverlayProgressBar.prototype.hideDelayed = function(delay) {
+    var _this = this;
+    this.mustHide = true;
+    setTimeout(function() {
+        if (!_this.mustHide)
+            return;
+        _this.hide();
+    }, delay || 0);
 };
 
 /*Constants*/

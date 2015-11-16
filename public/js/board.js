@@ -2251,7 +2251,7 @@ lord.submitted = function(event, form) {
                         btn.value = percent + "%";
                 };
                 c.progressBar = new lord.OverlayProgressBar({ xhr: xhr });
-                c.progressBar.show();
+                c.progressBar.showDelayed(500);
                 return xhr;
             },
             data: formData,
@@ -2259,7 +2259,7 @@ lord.submitted = function(event, form) {
             contentType: false
         });
     }).then(function(result) {
-        c.progressBar.hide();
+        c.progressBar.hideDelayed(200);
         resetButton();
         if (lord.checkError(result))
             return Promise.reject(result);
@@ -2318,7 +2318,7 @@ lord.submitted = function(event, form) {
         }
         return Promise.resolve();
     }).catch(function(err) {
-        c.progressBar.hide();
+        c.progressBar.hideDelayed(200);
         resetButton();
         lord.resetCaptcha();
         lord.handleError(err);

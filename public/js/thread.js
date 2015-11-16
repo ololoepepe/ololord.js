@@ -227,6 +227,9 @@ lord.updateThread = function(silent) {
             if (lord.id(post.id))
                 return;
             lord.addClass(post, "newPost");
+            post.onmouseover = function() {
+                lord.removeClass(post, "newPost");
+            };
             document.body.insertBefore(post, before);
         });
         return lord.getModel("misc/board/" + boardName);
