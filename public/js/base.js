@@ -310,7 +310,7 @@ lord.checkFavoriteThreads = function() {
 lord.showNewPosts = function() {
     var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
     var currentBoardName = lord.data("boardName");
-    $.ajax("/" + lord.data("sitePathPrefix") + "api/lastPostNumbers.json").then(function(result) {
+    lord.getModel("api/lastPostNumbers").then(function(result) {
         if (lord.checkError(result))
             return Promise.reject(result);
         lastPostNumbers[currentBoardName]
