@@ -1328,6 +1328,8 @@ var rerenderPost = function(boardName, postNumber, silent) {
     var referencedPosts = {};
     return getPost(boardName, postNumber).then(function(post) {
         c.post = post;
+        if (c.post.rawHtml)
+            return Promise.resolve();
         return markup(c.post.boardName, c.post.rawText, {
             markupModes: c.post.markup,
             referencedPosts: referencedPosts

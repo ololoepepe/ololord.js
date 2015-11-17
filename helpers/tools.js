@@ -52,6 +52,31 @@ var forIn = function(obj, f) {
 
 module.exports.forIn = forIn;
 
+module.exports.mapIn = function(obj, f) {
+    if (!obj || typeof f != "function")
+        return;
+    var arr = [];
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x))
+            arr.push(f(obj[x], x));
+    }
+    return arr;
+};
+
+module.exports.filterIn = function(obj, f) {
+    if (!obj || typeof f != "function")
+        return;
+    var nobj = {};
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x)) {
+            var item = obj[x];
+            if (f(item, x))
+                nobj[x] = item;
+        }
+    }
+    return nobj;
+};
+
 module.exports.randomInt = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
@@ -226,20 +251,25 @@ module.exports.codeStyles = function() {
 
 module.exports.mimeType = function(fileName) {
     if (!fileName || !Util.isString(fileName))
-        return null;
+        return Promise.resolve(null);
     try {
-        var out = ChildProcess.execSync(`file --brief --mime-type ${fileName}`, {
-            timeout: 1000,
-            encoding: "utf8",
-            stdio: [
-                0,
-                "pipe",
-                null
-            ]
+        return new Promise(function(resolve, reject) {
+            var out = ChildProcess.exec(`file --brief --mime-type ${fileName}`, {
+                timeout: 5000,
+                encoding: "utf8",
+                stdio: [
+                    0,
+                    "pipe",
+                    null
+                ]
+            }, function(err, out) {
+                if (err)
+                    reject(err);
+                resolve(out ? out.replace(/\r*\n+/g, "") : null);
+            });
         });
-        return out ? out.replace(/\r*\n+/g, "") : null;
     } catch (err) {
-        return null;
+        return Promise.resolve(null);
     }
 };
 

@@ -59,66 +59,79 @@ var getFiles = function(fields, files, transaction) {
         if (["R-15", "R-18", "R-18G"].indexOf(r) >= 0)
             file.rating = r;
     };
-    var tmpFiles = [];
-    Tools.forIn(files, function(file, fieldName) {
-        if (file.size < 1)
-            return FSSync.unlink(file.path);
-        file.fieldName = fieldName;
-        file.mimeType = Tools.mimeType(file.path);
-        setFileRating(file, file.fieldName.substr(5));
-        tmpFiles.push(file);
-        transaction.filePaths.push(file.path);
-    });
-    var urls = [];
-    Tools.forIn(fields, function(url, key) {
-        if (key.substr(0, 9) != "file_url_")
-            return;
-        urls.push({
-            url: url,
-            formFieldName: key
-        });
-    });
-    var promises = urls.map(function(url) {
-        var path = __dirname + "/../tmp/upload_" + UUID.v1();
-        transaction.filePaths.push(path);
-        var c = {};
-        var proxy = Tools.proxy();
-        var p;
-        if (proxy) {
-            p = HTTP.request({
-                host: proxy.host,
-                port: proxy.port,
-                headers: { "Proxy-Authorization": proxy.auth },
-                path: url.url,
-                timeout: Tools.Minute
+    var tmpFiles = Tools.filterIn(files, function(file) {
+        if (file.size < 1) {
+            FS.remove(file.path).catch(function(err) {
+                console.log(err.stack);
             });
-        } else {
-            p = HTTP.request({
-                url: url.url,
-                timeout: Tools.Minute
-            });
+            return false;
         }
-        return p.then(function(response) {
-            if (response.status != 200)
-                return Promise.reject("Failed to download file");
-            return response.body.read();
-        }).then(function(data) {
-            c.size = data.length;
-            if (c.size < 1)
-                return Promise.reject("File is empty");
-            return FS.write(path, data);
-        }).then(function() {
-            var file = {
-                name: url.url.split("/").pop(),
-                size: c.size,
-                path: path,
-                mimeType: Tools.mimeType(path)
-            };
-            setFileRating(file, url.formFieldName.substr(9));
+        return true;
+    });
+    var promises = Tools.mapIn(tmpFiles, function(file, fieldName) {
+        file.fieldName = fieldName;
+        setFileRating(file, file.fieldName.substr(5));
+        transaction.filePaths.push(file.path);
+        return Tools.mimeType(file.path).then(function(mimeType) {
+            file.mimeType = mimeType;
             return Promise.resolve(file);
         });
     });
-    return Promise.all(promises).then(function(downloadedFiles) {
+    return Promise.all(promises).then(function(files) {
+        tmpFiles = files;
+        var urls = [];
+        Tools.forIn(fields, function(url, key) {
+            if (key.substr(0, 9) != "file_url_")
+                return;
+            urls.push({
+                url: url,
+                formFieldName: key
+            });
+        });
+        promises = urls.map(function(url) {
+            var path = __dirname + "/../tmp/upload_" + UUID.v1();
+            transaction.filePaths.push(path);
+            var c = {};
+            var proxy = Tools.proxy();
+            var p;
+            if (proxy) {
+                p = HTTP.request({
+                    host: proxy.host,
+                    port: proxy.port,
+                    headers: { "Proxy-Authorization": proxy.auth },
+                    path: url.url,
+                    timeout: Tools.Minute
+                });
+            } else {
+                p = HTTP.request({
+                    url: url.url,
+                    timeout: Tools.Minute
+                });
+            }
+            return p.then(function(response) {
+                if (response.status != 200)
+                    return Promise.reject("Failed to download file");
+                return response.body.read();
+            }).then(function(data) {
+                c.size = data.length;
+                if (c.size < 1)
+                    return Promise.reject("File is empty");
+                return FS.write(path, data);
+            }).then(function() {
+                c.file = {
+                    name: url.url.split("/").pop(),
+                    size: c.size,
+                    path: path
+                };
+                setFileRating(c.file, url.formFieldName.substr(9));
+                return Tools.mimeType(path);
+            }).then(function(mimeType) {
+                c.file.mimeType = mimeType;
+                return Promise.resolve(c.file);
+            });
+        });
+        return Promise.all(promises);
+    }).then(function(downloadedFiles) {
         tmpFiles = tmpFiles.concat(downloadedFiles);
         var hashes = fields.fileHashes ? fields.fileHashes.split(",") : [];
         return Database.getFileInfosByHashes(hashes);

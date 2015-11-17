@@ -116,10 +116,11 @@ var withoutEscaped = function(text) {
     return text;
 };
 
-var ProcessingInfo = function(text, boardName, referencedPosts, deletedPost) {
+var ProcessingInfo = function(text, boardName, referencedPosts, deletedPost, referencesToReplace) {
     this.boardName = boardName;
     this.deletedPost = deletedPost;
     this.referencedPosts = referencedPosts;
+    this.referencesToReplace = referencesToReplace;
     this.text = text;
     this.skipList = [];
 };
@@ -217,10 +218,6 @@ ProcessingInfo.prototype.insert = function(from, txt, type) {
     if (!found && SkipTypes.NoSkip != type)
         this.skipList.unshift(info);
     this.text = this.text.substr(0, from) + txt + this.text.substr(from);
-    Tools.forIn(this.referencedPosts, function(ref) {
-        if (ref.position >= from)
-            ref.position += txt.length;
-    });
 };
 
 ProcessingInfo.prototype.replace = function(from, length, txt, correction, type) {
@@ -232,6 +229,7 @@ ProcessingInfo.prototype.replace = function(from, length, txt, correction, type)
         length: txt.length,
         type: type
     };
+    var dlength = txt.length - length;
     var found = false;
     for (var i = this.skipList.length - 1; i >= 0; --i) {
         var inf = this.skipList[i];
@@ -244,15 +242,11 @@ ProcessingInfo.prototype.replace = function(from, length, txt, correction, type)
         if (inf.from < (from + length))
             inf.from -= correction;
         else
-            inf.from += (txt.length - length);
+            inf.from += dlength;
     }
     if (!found && SkipTypes.NoSkip != type)
         this.skipList.unshift(info);
     this.text = this.text.substr(0, from) + txt + this.text.substr(from + length);
-    Tools.forIn(this.referencedPosts, function(ref) {
-        if (ref.position >= from)
-            ref.position += (txt.length - length);
-    });
 };
 
 ProcessingInfo.prototype.toHtml = function() {
@@ -502,14 +496,17 @@ var convertPostLink = function(info, _, matchs, _, options) {
         return Database.getPost(boardName, postNumber).then(function(post) {
             if (!post)
                 return escaped;
-            if (info.referencedPosts)
-                info.referencedPosts[boardName + ":" + postNumber] = {
-                    boardName: boardName,
-                    postNumber: postNumber,
-                    threadNumber: post.threadNumber,
-                    createdAt: Tools.now(),
-                    position: matchs.index
-                };
+            if (info.referencedPosts) {
+                var key = boardName + ":" + postNumber;
+                if (!info.referencedPosts[key]) {
+                    info.referencedPosts[key] = {
+                        boardName: boardName,
+                        postNumber: postNumber,
+                        threadNumber: post.threadNumber,
+                        createdAt: Tools.now()
+                    };
+                }
+            }
             var href = "href=\"/" + config("site.pathPrefix", "") + boardName + "/res/" + post.threadNumber
                 + ".html#" + postNumber + "\"";
             return "<a " + href + " data-board-name=\"" + boardName + "\" data-post-number=\"" + postNumber
@@ -628,7 +625,8 @@ var processPostText = function(boardName, text, options) {
     langs.splice(langs.indexOf("fsharp") + 1, 0, "f#");
     langs = langs.join("|").split("+").join("\\+").split("-").join("\\-").split(".").join("\\.");
     text = text.replace(/\r+\n/g, "\n").replace(/\r/g, "\n");
-    var info = new ProcessingInfo(text, boardName, options ? options.referencedPosts : null, deletedPost);
+    var info = new ProcessingInfo(text, boardName, options ? options.referencedPosts : null, deletedPost,
+        options ? options.referencesToReplace : null);
     var p = Promise.resolve();
     if (markupModes.indexOf(MarkupModes.ExtendedWakabaMark) >= 0) {
         p = p.then(function() {

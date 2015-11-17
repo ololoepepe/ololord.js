@@ -228,6 +228,7 @@ lord.updateThread = function(silent) {
                 return;
             lord.addClass(post, "newPost");
             post.onmouseover = function() {
+                post.onmouseover = undefined;
                 lord.removeClass(post, "newPost");
             };
             document.body.insertBefore(post, before);
