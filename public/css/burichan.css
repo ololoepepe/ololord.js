@@ -1071,5 +1071,6 @@ blockquote.blockquoteThread.expand {
 }
 
 .submitContainer > input {
+    font-size: 1.4em;
     width: 60%;
 }

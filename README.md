@@ -80,6 +80,6 @@ Path: ```/action/redirect```
 
 Fields:
 
-* url -- the url to redirect to
+* ```url``` -- the url to redirect to
 
 Result: redirects to the page specified.
