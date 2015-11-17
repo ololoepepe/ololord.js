@@ -99,6 +99,9 @@
                         {{? it.settings.mode.name != "ascetic"}}
                             <a class="hidePostformMarkupButton" />
                         {{?}}
+                        <a href="javascript:void(0);"
+                           onclick="lord.setPostformRulesVisible({{=it.settings.hidePostformRules}}); return false;"
+                           class="hidePostformRulesButton">{{? it.settings.hidePostformRules}}{{=it.tr.showPostformRulesText}}{{??}}{{=it.tr.hidePostformRulesText}}{{?}}</a>
                     </td>
                 {{?}}
                 <td {{? it.minimalisticPostform()}}colspan="2"{{?}} class="postformField submitContainer">
@@ -302,11 +305,6 @@
                                 <li>{{=rule}}</li>
                             {{~}}
                         </ul>
-                        {{? it.settings.mode.name != "ascetic"}}
-                            <a href="javascript:void(0);"
-                               onclick="lord.setPostformRulesVisible({{=it.settings.hidePostformRules}}); return false;"
-                               class="hidePostformRulesButton">{{? it.settings.hidePostformRules}}{{=it.tr.showPostformRulesText}}{{??}}{{=it.tr.hidePostformRulesText}}{{?}}</a>
-                        {{?}}
                     </td>
                 </tr>
             {{?}}
