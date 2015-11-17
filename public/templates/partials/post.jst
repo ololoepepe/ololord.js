@@ -71,7 +71,7 @@
                             <a name="addFileButton" target="_blank"
                                href="/{{=it.site.pathPrefix}}addFiles.html?boardName={{=it.board.name}}&postNumber={{=post.number}}"
                                {{? it.settings.mode.name != "ascetic"}}onclick="lord.addFiles(this); return false;"{{?}}>
-                                <img src="/{{=it.site.pathPrefix}}img/add.png" /> {{=it.tr.addFileText}}</a>
+                                <img src="/{{=it.site.pathPrefix}}img/add.png" /> {{=it.tr.addFilesText}}</a>
                         </li>
                     {{?}}
                     {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.options.draft}}

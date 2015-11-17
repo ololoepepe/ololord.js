@@ -812,13 +812,12 @@
         },
         "_obsolete": true
     },
-    "Add file": {
+    "Add files": {
         "pageTitle": {
-            "value": "Добавить файл",
-            "_obsolete": true
+            "value": "Добавить файлы"
         },
-        "addFileText": {
-            "value": "Добавить файл"
+        "addFilesText": {
+            "value": "Добавить файлы"
         }
     },
     "Ban user": {
@@ -3662,11 +3661,6 @@
     "Yandex captcha (Cyrillic)": {
         "_default": {
             "value": "Yandex captcha (Cyrillic)"
-        }
-    },
-    "Add files": {
-        "pageTitle": {
-            "value": "Add files"
         }
     },
     "Answer in this thread": {

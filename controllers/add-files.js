@@ -19,6 +19,9 @@ router.get("/addFiles.html", function(req, res) {
     var model = {};
     model.title = Tools.translate("Add files", "pageTitle");
     model.includeBoardScripts = true;
+    model.minimalisticPostform = function() {
+        return "mobile" == this.deviceType || this.settings.minimalisticPostform;
+    };
     Database.getPost(board.name, postNumber, { withFileInfos: true }).then(function(post) {
         model.showSubmitButton = true;
         model = merge.recursive(model, controller.boardModel(board));

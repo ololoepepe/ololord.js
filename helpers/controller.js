@@ -385,7 +385,6 @@ controller.translationsModel = function() {
     translate("Bump limit reached", "bumpLimitReachedText");
     translate("Quick reply", "quickReplyText");
     translate("Post actions", "postActionsText");
-    translate("Add file", "addFileText");
     translate("Edit post", "editPostText");
     translate("Fix thread", "fixThreadText");
     translate("Unfix thread", "unfixThreadText");
@@ -614,8 +613,10 @@ controller.translationsModel = function() {
     translate("Remove from hidden post/thread list", "removeFromHiddenPostListText");
     translate("Hidden posts/threads", "hiddenPostListText");
     translate("Settings", "settingsDialogTitle");
-    translate("If password is empty, current hashpass will be used ", "enterPasswordText");
-    translate("Enter password ", "enterPasswordTitle");
+    translate("If password is empty, current hashpass will be used", "enterPasswordText");
+    translate("Enter password", "enterPasswordTitle");
+    translate("Add files", "addFilesText");
+    //
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

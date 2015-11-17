@@ -13,16 +13,18 @@
             <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.removeFileText}}"
                  class="postformFileRemoveImage"></a>
         <div>
-            <span class="ratingSelectContainer">
-                <span>{{=it.tr.ratingLabelText}}</span>
-                <select name="file_rating">
-                    <option value="SFW" selected="true" onclick="return lord.preventOnclick(event);">SFW</option>
-                    <option value="R-15" onclick="return lord.preventOnclick(event);">R-15</option>
-                    <option value="R-18" onclick="return lord.preventOnclick(event);">R-18</option>
-                    <option value="R-18G" onclick="return lord.preventOnclick(event);">R-18G</option>
-                </select>
-                <img src="/{{=it.site.pathPrefix}}img/question.png" title="{{=it.tr.ratingTooltip}}">
-            </span>
+            {{? !it.minimalisticPostform()}}
+                <span class="ratingSelectContainer">
+                    <span>{{=it.tr.ratingLabelText}}</span>
+                    <select name="file_rating">
+                        <option value="SFW" selected="true" onclick="return lord.preventOnclick(event);">SFW</option>
+                        <option value="R-15" onclick="return lord.preventOnclick(event);">R-15</option>
+                        <option value="R-18" onclick="return lord.preventOnclick(event);">R-18</option>
+                        <option value="R-18G" onclick="return lord.preventOnclick(event);">R-18G</option>
+                    </select>
+                    <img src="/{{=it.site.pathPrefix}}img/question.png" title="{{=it.tr.ratingTooltip}}">
+                </span>
+            {{?}}
             <a onclick="lord.attachFileByLink(this); return lord.preventOnclick(event);"
                class="fileByLinkButton">{{=it.tr.attachFileByLinkText}}</a>
         </div>
@@ -30,13 +32,15 @@
 {{??}}
     {{ for (var i = 0; i < maxFileCount; ++i) { }}
         <input type="file" name="file_{{=i}}" accept="{{ out += it.board.supportedFileTypes.join(","); }}" />
-            <select name="file_{{=i}}_rating">
-                <option value="SFW" selected="true">SFW</option>
-                <option value="R-15">R-15</option>
-                <option value="R-18">R-18</option>
-                <option value="R-18G">R-18G</option>
-            </select>
-            <img src="/{{=it.site.pathPrefix}}img/question.png" title="{{=it.tr.ratingTooltip}}">
+            {{? !it.minimalisticPostform()}}
+                <select name="file_{{=i}}_rating">
+                    <option value="SFW" selected="true">SFW</option>
+                    <option value="R-15">R-15</option>
+                    <option value="R-18">R-18</option>
+                    <option value="R-18G">R-18G</option>
+                </select>
+                <img src="/{{=it.site.pathPrefix}}img/question.png" title="{{=it.tr.ratingTooltip}}">
+            {{?}}
             {{? i < (maxFileCount - 1)}}
                 <br />
             {{?}}

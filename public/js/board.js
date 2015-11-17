@@ -873,7 +873,8 @@ lord.quickReply = function(el) {
         return;
     var postForm = lord.id("postForm");
     var targetContainer = post.parentNode;
-    var same = (post.nextSibling && postForm.nextSibling == post.nextSibling.nextSibling);
+    var same = (postForm.parentNode == targetContainer
+            && post.nextSibling && postForm.nextSibling == post.nextSibling.nextSibling);
     var selection = document.getSelection().toString();
     lord.hidePostForm();
     if (same)
@@ -1162,6 +1163,9 @@ lord.addFiles = function(el) {
         c.model.boardName = boardName;
         c.model.postNumber = postNumber;
         c.model.fileCount = +lord.data("fileCount", el, true);
+        c.model.minimalisticPostform = function() {
+            return "mobile" == this.deviceType || this.settings.minimalisticPostform;
+        };
         return lord.getTemplate("addFilesDialog");
     }).then(function(template) {
         c.div = $.parseHTML(template(c.model))[0];
@@ -1562,7 +1566,9 @@ lord.fileAddedCommon = function(div, file) {
     var _uuid = uuid.v1();
     lord.queryOne("input", div).name = "file_" + _uuid;
     div.droppedFileName = "file_" + (div.fileUrl ? "url_" : "") + _uuid;
-    lord.queryOne(".ratingSelectContainer > select").name = "file_" + _uuid + "_rating";
+    var ratingSelect = lord.queryOne(".ratingSelectContainer > select");
+    if (ratingSelect)
+        ratingSelect.name = "file_" + _uuid + "_rating";
     lord.removeFileHash(div);
     var binaryReader = new FileReader();
     var prefix = lord.data("sitePathPrefix");
