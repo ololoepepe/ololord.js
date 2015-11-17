@@ -5,11 +5,9 @@
          ondragleave="return lord.fileDragLeave(event, this);"
          ondrop="return lord.fileDrop(event, this);" title="{{=it.tr.selectFileText}}">
         <img class="postformFilePreview" src="/{{=it.site.pathPrefix}}img/addfile.png">
-        {{? !it.minimalisticPostform()}}
-            <a onclick="lord.attachFileByLink(this); return lord.preventOnclick(event);" class="fileByLinkButton"
-               title="{{=it.tr.attachFileByLinkText}}"><img class="buttonImage" width="32" height="32"
-                                                            src="/{{=it.site.pathPrefix}}img/addfile_link.png"></a>
-        {{?}}
+        <a onclick="lord.attachFileByLink(this); return lord.preventOnclick(event);" class="fileByLinkButton"
+           title="{{=it.tr.attachFileByLinkText}}"><img class="buttonImage" width="32" height="32"
+                                                        src="/{{=it.site.pathPrefix}}img/addfile_link.png"></a>
         <input type="file" name="file" onchange="lord.fileSelected(this);" class="postformFileInput"
                accept="{{ out += it.board.supportedFileTypes.join(","); }}" />
         <span class="postformFileText"></span>
