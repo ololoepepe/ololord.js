@@ -466,11 +466,11 @@ lord.updatePost = function(postNumber) {
 };
 
 lord.clearFileInput = function(div) {
-    var preview = div.querySelector("img");
+    var preview = lord.queryOne("img", div);
     if (preview && div == preview.parentNode)
         preview.src = "/" + lord.data("sitePathPrefix") + "img/addfile.png";
-    var span = div.querySelector("span");
-    if (!!span && div == span.parentNode) {
+    var span = lord.queryOne("span", div);
+    if (span && div == span.parentNode) {
         while (span.firstChild)
             span.removeChild(span.firstChild);
     }
@@ -507,10 +507,10 @@ lord.readableSize = function(sz) {
 
 lord.getFileHashes = function(div) {
     var parent = div.parentNode.parentNode;
-    var fhs = parent.querySelector("[name='fileHashes']");
+    var fhs = lord.nameOne("fileHashes", parent);
     if (fhs)
         return fhs;
-    return parent.parentNode.parentNode.parentNode.querySelector("[name='fileHashes']");
+    return lord.nameOne("fileHashes", parent.parentNode.parentNode.parentNode);
 };
 
 lord.hideImage = function() {
@@ -1566,7 +1566,7 @@ lord.fileAddedCommon = function(div, file) {
     var _uuid = uuid.v1();
     lord.queryOne("input", div).name = "file_" + _uuid;
     div.droppedFileName = "file_" + (div.fileUrl ? "url_" : "") + _uuid;
-    var ratingSelect = lord.queryOne(".ratingSelectContainer > select");
+    var ratingSelect = lord.queryOne("[name='ratingSelectContainer'] > select");
     if (ratingSelect)
         ratingSelect.name = "file_" + _uuid + "_rating";
     lord.removeFileHash(div);
@@ -1586,8 +1586,8 @@ lord.fileAddedCommon = function(div, file) {
             lord.getModel("misc/tr").then(function(model) {
                 img.title = model.tr.fileExistsOnServerText;
             });
-            div.querySelector("span").appendChild(lord.node("text", " "));
-            div.querySelector("span").appendChild(img);
+            lord.queryOne("span", div).appendChild(lord.node("text", " "));
+            lord.queryOne("span", div).appendChild(img);
             var fileHashes = lord.getFileHashes(div);
             if (fileHashes.value.indexOf(fileHash) < 0)
                 fileHashes.value = fileHashes.value + (fileHashes.value.length > 0 ? "," : "") + fileHash;
@@ -1608,7 +1608,7 @@ lord.fileAddedCommon = function(div, file) {
         var reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = function(e) {
-            div.querySelector("img").src = e.target.result;
+            lord.queryOne("img", div).src = e.target.result;
         };
     };
     if (fileName.match(/\.(jpe?g|png|gif)$/i) && lord.getLocalObject("showAttachedFilePreview", true)) {
@@ -1621,9 +1621,9 @@ lord.fileAddedCommon = function(div, file) {
             ["mpeg", "mp1", "m1a", "m2a", "mpa", "mpg"].forEach(function(alias) {
                 extension = extension.replace(alias, "mp3");
             });
-            div.querySelector("img").src = "/" + prefix + "img/" + extension + "_file.png";
+            lord.queryOne("img", div).src = "/" + prefix + "img/" + extension + "_file.png";
         } else {
-            div.querySelector("img").src = "/" + prefix + "img/file.png";
+            lord.queryOne("img", div).src = "/" + prefix + "img/file.png";
         }
     }
     if (file && fileName.match(/\.(jpe?g)$/i) && lord.getLocalObject("stripExifFromJpeg", true)) {
@@ -1671,7 +1671,7 @@ lord.fileAddedCommon = function(div, file) {
     delete inp.onchange;
     inp.value = "";
     inp.onchange = f;
-    div.querySelector("a").style.display = "inline";
+    lord.queryOne("a.postformFileRemoveButton", div).style.display = "inline";
     var maxCount = +lord.data("maxFileCount");
     maxCount -= +lord.data("fileCount", div, true) || 0;
     if (maxCount <= 0)
@@ -1681,14 +1681,14 @@ lord.fileAddedCommon = function(div, file) {
         return;
     for (var i = 0; i < parent.children.length; ++i) {
         var c = parent.children[i];
-        if (!c.fileHash && lord.queryOne("input", c).value === "" && !c.droppedFile)
+        if (!c.fileHash && lord.queryOne("input", c).value === "" && !c.droppedFile && !c.fileUrl)
             return;
-        c.querySelector("a").style.display = "inline";
+        lord.queryOne("a.postformFileRemoveButton", c).style.display = "inline";
     }
     (function(div) {
         div = div.cloneNode(true);
         var span = lord.queryOne(".postformFileText", div);
-        div.querySelector("a").style.display = "none";
+        lord.queryOne("a.postformFileRemoveButton", div).style.display = "none";
         div.innerHTML = div.innerHTML; //NOTE: Workaround since we can't clear it other way
         lord.clearFileInput(div);
         parent.appendChild(div);
@@ -1737,9 +1737,6 @@ lord.attachFileByLink = function(a) {
     var div = a.parentNode;
     if (!div)
         return;
-    div = div.parentNode;
-    if (!div)
-        return;
     lord.getModel("misc/tr").then(function(model) {
         var url = prompt(model.tr.linkLabelText, div.fileUrl);
         if (null === url)
@@ -1771,7 +1768,7 @@ lord.removeFile = function(current) {
                 if (parent.children.length > 0)
                     return;
                 else
-                    c.querySelector("a").style.display = "none";
+                    lord.queryOne("a.postformFileRemoveButton", c).style.display = "none";
             }
         }
         var maxCount = +lord.data("maxFileCount");
@@ -1781,19 +1778,19 @@ lord.removeFile = function(current) {
         if (parent.children.length >= maxCount)
             return;
         div = div.cloneNode(true);
-        div.querySelector("a").style.display = "none";
+        lord.queryOne("a.postformFileRemoveButton", div).style.display = "none";
         div.innerHTML = div.innerHTML; //NOTE: Workaround since we can't clear it other way
         parent.appendChild(div);
     }
     if (parent.children.length < 1) {
-        div.querySelector("a").style.display = "none";
+        lord.queryOne("a.postformFileRemoveButton", div).style.display = "none";
         div.innerHTML = div.innerHTML; //NOTE: Workaround since we can't clear it other way
         parent.appendChild(div);
     }
 };
 
 lord.browseFile = function(e, div) {
-    var inp = div.querySelector("input");
+    var inp = lord.queryOne("input", div);
     if (!inp)
         return;
     var e = window.event || e;

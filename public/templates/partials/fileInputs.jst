@@ -5,6 +5,11 @@
          ondragleave="return lord.fileDragLeave(event, this);"
          ondrop="return lord.fileDrop(event, this);" title="{{=it.tr.selectFileText}}">
         <img class="postformFilePreview" src="/{{=it.site.pathPrefix}}img/addfile.png">
+        {{? !it.minimalisticPostform()}}
+            <a onclick="lord.attachFileByLink(this); return lord.preventOnclick(event);" class="fileByLinkButton"
+               title="{{=it.tr.attachFileByLinkText}}"><img class="buttonImage" width="32" height="32"
+                                                            src="/{{=it.site.pathPrefix}}img/addfile_link.png"></a>
+        {{?}}
         <input type="file" name="file" onchange="lord.fileSelected(this);" class="postformFileInput"
                accept="{{ out += it.board.supportedFileTypes.join(","); }}" />
         <span class="postformFileText"></span>
@@ -12,22 +17,18 @@
            class="postformFileRemoveButton">
             <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.removeFileText}}"
                  class="postformFileRemoveImage"></a>
-        <div>
-            {{? !it.minimalisticPostform()}}
-                <span class="ratingSelectContainer">
-                    <span>{{=it.tr.ratingLabelText}}</span>
-                    <select name="file_rating">
-                        <option value="SFW" selected="true" onclick="return lord.preventOnclick(event);">SFW</option>
-                        <option value="R-15" onclick="return lord.preventOnclick(event);">R-15</option>
-                        <option value="R-18" onclick="return lord.preventOnclick(event);">R-18</option>
-                        <option value="R-18G" onclick="return lord.preventOnclick(event);">R-18G</option>
-                    </select>
-                    <img src="/{{=it.site.pathPrefix}}img/question.png" title="{{=it.tr.ratingTooltip}}">
-                </span>
-            {{?}}
-            <a onclick="lord.attachFileByLink(this); return lord.preventOnclick(event);"
-               class="fileByLinkButton">{{=it.tr.attachFileByLinkText}}</a>
-        </div>
+        {{? !it.minimalisticPostform()}}
+            <div name="ratingSelectContainer">
+                <span>{{=it.tr.ratingLabelText}}</span>
+                <select name="file_rating">
+                    <option value="SFW" selected="true" onclick="return lord.preventOnclick(event);">SFW</option>
+                    <option value="R-15" onclick="return lord.preventOnclick(event);">R-15</option>
+                    <option value="R-18" onclick="return lord.preventOnclick(event);">R-18</option>
+                    <option value="R-18G" onclick="return lord.preventOnclick(event);">R-18G</option>
+                </select>
+                <img src="/{{=it.site.pathPrefix}}img/question.png" title="{{=it.tr.ratingTooltip}}">
+            </div>
+        {{?}}
     </div>
 {{??}}
     {{ for (var i = 0; i < maxFileCount; ++i) { }}
