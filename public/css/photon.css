@@ -403,6 +403,8 @@ span.newPostCount {
 
 .postFormTextarea {
     font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .postFormTable {
@@ -424,7 +426,6 @@ span.newPostCount {
     bottom: 7px;
     color: #333333;
     opacity: 0.6;
-    /*filter: alpha(opacity=60);*/
 }
 
 .symbolCounterContainer {
@@ -1186,4 +1187,17 @@ blockquote.blockquoteThread.expand {
 
 .numberSize3 {
     width: 40px;
+}
+
+.postFormInput {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.submitContainer {
+    text-align: center;
+}
+
+.submitContainer > input {
+    width: 60%;
 }

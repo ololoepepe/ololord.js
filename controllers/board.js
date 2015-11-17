@@ -71,7 +71,7 @@ var renderPage = function(model, board, req, json) {
         for (var i = 0; i < 60; i += 10)
             model.customPostBodyPart[i] = board.customPostBodyPart(i, req);
         model.customPostFormField = {};
-        for (var i = 0; i < 110; i += 10)
+        for (var i = 0; i < 120; i += 10)
             model.customPostFormField[i] = board.customPostFormField(i, req);
         model.customPostFormOption = {};
         for (var i = 0; i < 50; i += 10)
@@ -119,7 +119,7 @@ var renderThread = function(model, board, req, json) {
         for (var i = 0; i < 60; i += 10)
             model.customPostBodyPart[i] = board.customPostBodyPart(i, req);
         model.customPostFormField = {};
-        for (var i = 0; i < 110; i += 10)
+        for (var i = 0; i < 120; i += 10)
             model.customPostFormField[i] = board.customPostFormField(i, req, thread);
         model.customPostFormOption = {};
         for (var i = 0; i < 50; i += 10)

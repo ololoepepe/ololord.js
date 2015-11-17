@@ -616,7 +616,8 @@ controller.translationsModel = function() {
     translate("If password is empty, current hashpass will be used", "enterPasswordText");
     translate("Enter password", "enterPasswordTitle");
     translate("Add files", "addFilesText");
-    //
+    translate("Show markup", "showPostformMarkupText");
+    translate("Hide markup", "hidePostformMarkupText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

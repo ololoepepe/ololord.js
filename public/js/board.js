@@ -1919,12 +1919,12 @@ lord.changeLastCodeLang = function() {
 };
 
 lord.setPostformMarkupVisible = function(visible) {
-    var span = lord.queryOne(".postformMarkup > span");
-    if (!span)
+    var tr = lord.nameOne("postformMarkup");
+    if (!tr)
         return false;
     var hide = !visible;
     lord.setLocalObject("hidePostformMarkup", hide);
-    span.style.display = hide ? "none" : "";
+    tr.style.display = hide ? "none" : "";
     var a = lord.queryOne("a.hidePostformMarkupButton");
     if (!a)
         return false;

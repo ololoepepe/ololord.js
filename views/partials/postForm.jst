@@ -15,17 +15,16 @@
             <tr>
                 {{? it.minimalisticPostform()}}
                     <td class="postformField nowrap" colspan="2">
-                        <input type="text" maxlength="{{=it.board.maxEmailLength}}" name="email" size="27"
-                               placeholder="{{=it.tr.postFormPlaceholderEmail}}" />
-                        <input type="submit" name="submit" value="{{=it.tr.postFormButtonSubmit}}" />
+                       <input type="text" maxlength="{{=it.board.maxEmailLength}}" name="email" class="postFormInput"
+                              placeholder="{{=it.tr.postFormPlaceholderEmail}}" />
                     </td>
                 {{??}}
                     <td class="postformLabel">
                         <b>{{=it.tr.postFormLabelEmail}}</b>
                     </td>
                     <td class="postformField">
-                        <input type="text" maxlength="{{=it.board.maxEmailLength}}" name="email" size="30" />
-                        <input type="submit" name="submit" value="{{=it.tr.postFormButtonSubmit}}" />
+                        <input type="text" maxlength="{{=it.board.maxEmailLength}}" name="email"
+                               class="postFormInput" />
                     </td>
                 {{?}}
             </tr>
@@ -35,7 +34,7 @@
             <tr>
                 {{? it.minimalisticPostform()}}
                     <td class="postformField" colspan="2">
-                        <input type="text" maxlength="{{=it.board.maxNameLength}}" name="name" size="40"
+                        <input type="text" maxlength="{{=it.board.maxNameLength}}" name="name" class="postFormInput"
                                placeholder="{{=it.tr.postFormPlaceholderName}}" />
                     </td>
                 {{??}}
@@ -43,7 +42,7 @@
                         <b>{{=it.tr.postFormLabelName}}</b>
                     </td>
                     <td class="postformField">
-                        <input type="text" maxlength="{{=it.board.maxNameLength}}" name="name" size="43" />
+                        <input type="text" maxlength="{{=it.board.maxNameLength}}" name="name" class="postFormInput" />
                     </td>
                 {{?}}
             </tr>
@@ -53,15 +52,16 @@
             <tr>
                 {{? it.minimalisticPostform()}}
                     <td class="postformField" colspan="2">
-                        <input type="text" maxlength="{{=it.board.maxSubjectLength}}" name="subject" size="40"
-                               placeholder="{{=it.tr.postFormPlaceholderSubject}}" />
+                        <input type="text" maxlength="{{=it.board.maxSubjectLength}}" name="subject"
+                               class="postFormInput" placeholder="{{=it.tr.postFormPlaceholderSubject}}" />
                     </td>
                 {{??}}
                     <td class="postformLabel">
                         <b>{{=it.tr.postFormLabelSubject}}</b>
                     </td>
                     <td class="postformField">
-                        <input type="text" maxlength="{{=it.board.maxSubjectLength}}" name="subject" size="43" />
+                        <input type="text" maxlength="{{=it.board.maxSubjectLength}}" name="subject"
+                               class="postFormInput" />
                     </td>
                 {{?}}
             </tr>
@@ -71,7 +71,7 @@
             <tr>
                 {{? it.minimalisticPostform()}}
                     <td class="postformField" colspan="2">
-                        <div class="symbolCounterContainer">
+                        <div class="symbolCounterContainer postFormInput">
                             <textarea name="text" rows="10" cols="41"
                                       placeholder="{{=it.tr.postFormTextPlaceholder}} {{=it.board.maxTextLength}}"
                                       class="postFormTextarea"></textarea>
@@ -82,7 +82,7 @@
                         <b>{{=it.tr.postFormLabelText}}</b>
                     </td>
                     <td class="postformField">
-                        <div class="symbolCounterContainer">
+                        <div class="symbolCounterContainer postFormInput">
                             {{? it.settings.mode.name != "ascetic"}}
                                 <span class="symbolCounter"><span name="used">0</span>/{{=it.board.maxTextLength}}</span>
                             {{?}}
@@ -93,10 +93,24 @@
                     </td>
                 {{?}}
             </tr>
+            <tr>
+                {{? !it.minimalisticPostform()}}
+                    <td class="postformLabel">
+                        {{? it.settings.mode.name != "ascetic"}}
+                            <a class="hidePostformMarkupButton" />
+                        {{?}}
+                    </td>
+                {{?}}
+                <td {{? it.minimalisticPostform()}}colspan="2"{{?}} class="postformField submitContainer">
+                    <input type="submit" name="submit" class="button" value="{{=it.tr.postFormButtonSubmit}}" />
+                </td>
+            </tr>
+            {{? it.customPostFormField && it.customPostFormField[40]}}
+                {{ out += it.customPostFormField[40](it); }}
+            {{?}}
             {{? !it.minimalisticPostform() && it.settings.mode.name != "ascetic"}}
-                <tr>
-                    <td>
-                        <a class="hidePostformMarkupButton" />
+                <tr name="postformMarkup">
+                    <td class="postformLabel">
                     </td>
                     <td class="postformMarkup">
                         <span>
@@ -156,8 +170,8 @@
                     </td>
                 </tr>
             {{?}}
-            {{? it.customPostFormField && it.customPostFormField[40]}}
-                {{ out += it.customPostFormField[40](it); }}
+            {{? it.customPostFormField && it.customPostFormField[50]}}
+                {{ out += it.customPostFormField[50](it); }}
             {{?}}
             <tr>
                 {{? !it.minimalisticPostform()}}
@@ -174,8 +188,8 @@
                     </select>
                 </td>
             </tr>
-            {{? it.customPostFormField && it.customPostFormField[50]}}
-                {{ out += it.customPostFormField[50](it); }}
+            {{? it.customPostFormField && it.customPostFormField[60]}}
+                {{ out += it.customPostFormField[60](it); }}
             {{?}}
             <tr>
                 {{? !it.minimalisticPostform()}}
@@ -221,8 +235,8 @@
                     {{?}}
                 </td>
             </tr>
-            {{? it.customPostFormField && it.customPostFormField[60]}}
-                {{ out += it.customPostFormField[60](it); }}
+            {{? it.customPostFormField && it.customPostFormField[70]}}
+                {{ out += it.customPostFormField[70](it); }}
             {{?}}
             {{? it.board.maxFileCount > 0}}
                 <tr>
@@ -236,26 +250,27 @@
                     </td>
                 </tr>
             {{?}}
-            {{? it.customPostFormField && it.customPostFormField[70]}}
-                {{ out += it.customPostFormField[70](it); }}
+            {{? it.customPostFormField && it.customPostFormField[80]}}
+                {{ out += it.customPostFormField[80](it); }}
             {{?}}
             <tr>
                 {{? it.minimalisticPostform()}}
                     <td class="postformField" colspan="2">
-                        <input type="password" maxlength="{{=it.board.maxPasswordLength}}" name="password" size="40"
-                               placeholder="{{=it.tr.postFormPlaceholderPassword}}" />
+                        <input type="password" maxlength="{{=it.board.maxPasswordLength}}" name="password"
+                               class="postFormInput" placeholder="{{=it.tr.postFormPlaceholderPassword}}" />
                     </td>
                 {{??}}
                     <td class="postformLabel">
                         <b>{{=it.tr.postFormLabelPassword}}</b>
                     </td>
                     <td class="postformField">
-                        <input type="password" maxlength="{{=it.board.maxPasswordLength}}" name="password" size="43" />
+                        <input type="password" maxlength="{{=it.board.maxPasswordLength}}" name="password"
+                               class="postFormInput" />
                     </td>
                 {{?}}
             </tr>
-            {{? it.customPostFormField && it.customPostFormField[80]}}
-                {{ out += it.customPostFormField[80](it); }}
+            {{? it.customPostFormField && it.customPostFormField[90]}}
+                {{ out += it.customPostFormField[90](it); }}
             {{?}}
             <tr>
                 {{? !it.minimalisticPostform()}}
@@ -276,8 +291,8 @@
                     {{?}}
                 </td>
             </tr>
-            {{? it.customPostFormField && it.customPostFormField[90]}}
-                {{ out += it.customPostFormField[90](it); }}
+            {{? it.customPostFormField && it.customPostFormField[100]}}
+                {{ out += it.customPostFormField[100](it); }}
             {{?}}
             {{? !it.minimalisticPostform()}}
                 <tr>
@@ -295,8 +310,8 @@
                     </td>
                 </tr>
             {{?}}
-            {{? it.customPostFormField && it.customPostFormField[100]}}
-                {{ out += it.customPostFormField[100](it); }}
+            {{? it.customPostFormField && it.customPostFormField[110]}}
+                {{ out += it.customPostFormField[110](it); }}
             {{?}}
         </tbody>
     </table>

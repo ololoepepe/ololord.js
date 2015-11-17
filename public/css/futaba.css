@@ -391,6 +391,8 @@ span.newPostCount {
 
 .postFormTextarea {
     font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .postFormTable {
@@ -1173,4 +1175,17 @@ blockquote.blockquoteThread.expand {
 
 .numberSize3 {
     width: 40px;
+}
+
+.postFormInput {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.submitContainer {
+    text-align: center;
+}
+
+.submitContainer > input {
+    width: 60%;
 }
