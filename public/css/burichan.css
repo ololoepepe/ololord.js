@@ -830,7 +830,10 @@ blockquote.blockquoteThread.expand {
 }
 
 .codeBlock {
-    
+    font-family: monospace;
+    white-space: pre;
+    padding-left: 20px !important;
+    border: 1px solid #AAAAAA;
 }
 
 .theMessage {
