@@ -256,8 +256,7 @@ controller.baseModel = function(req) {
         ],
         styles: Tools.styles(),
         codeStyles: Tools.codeStyles(),
-        deviceType: "mobile",
-        //deviceType: ((req.device.type == "desktop") ? "desktop" : "mobile"),
+        deviceType: ((req.device.type == "desktop") ? "desktop" : "mobile"),
         availableCodeLangs: Highlight.listLanguages().map(function(lang) {
             return {
                 id: lang,
