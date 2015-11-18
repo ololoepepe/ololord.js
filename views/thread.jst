@@ -37,9 +37,9 @@
 {{?}}
 <div class="theTitle">
     {{? it.thread.title}}
-        {{!it.thread.title}}
+        <h1>{{!it.thread.title}}</h1>
     {{??}}
-        {{=it.board.title}} — {{=it.thread.number}}
+        <h1>{{=it.board.title}} — {{=it.thread.number}}</h1>
     {{?}}
 </div>
 {{? !it.thread.postingEnabled}}
