@@ -99,11 +99,15 @@ router.get("/fileInfos.json", function(req, res) {
         req.query.fileNames.forEach(function(fileName) {
             list.push({ fileName: fileName });
         });
+    } else if (req.query.fileNames) {
+        list.push({ fileName: req.query.fileNames });
     }
     if (Util.isArray(req.query.fileHashes)) {
         req.query.fileHashes.forEach(function(fileHashes) {
             list.push({ fileHash: fileHash });
         });
+    } else if (req.query.fileHashes) {
+        list.push({ fileHash: req.query.fileHashes });
     }
     boardModel.getFileInfos(list, req.hashpass).then(function(fileInfos) {
         res.json(fileInfos);
