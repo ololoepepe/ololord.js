@@ -401,6 +401,15 @@ var renderFileInfo = function(fi) {
                 file.extraData.artist = (metadata.artist && metadata.artist.length > 0) ? metadata.artist[0] : "";
                 file.extraData.title = metadata.title || "";
                 file.extraData.year = metadata.year || "";
+                return Promise.resolve(metadata);
+            }).catch(function(err) {
+                console.log(err.stack ? err.stack : err);
+                file.extraData.album = "";
+                file.extraData.artist = "";
+                file.extraData.title = "";
+                file.extraData.year = "";
+                return Promise.resolve();
+            }).then(function(metadata) {
                 if (metadata.picture && metadata.picture.length > 0)
                     return FS.write(thumbPath, metadata.picture[0].data);
                 else
@@ -414,10 +423,9 @@ var renderFileInfo = function(fi) {
                     thumbPath,
                     "-resize",
                     "200x200",
-                    thumbPath + ".png"
+                    thumbPath
                 ]);
             }).then(function() {
-                file.thumbPath += ".png";
                 return ImageMagick.identify(file.thumbPath);
             }).then(function(info) {
                 file.thumbDimensions = {
