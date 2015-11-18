@@ -679,8 +679,7 @@ span.newPostCount {
 }
 
 .postActionsMenu.mobile {
-    left: auto;
-    right: 100%;
+    left: -250px;
 }
 
 .postActions:focus > .postActionsMenu {
