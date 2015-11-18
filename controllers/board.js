@@ -90,7 +90,7 @@ var renderThread = function(model, board, req, json) {
     });
     promises.unshift(board.renderPost(model.thread.opPost, req, model.thread.opPost));
     return Promise.all(promises).then(function() {
-        model.title = board.title;
+        model.title = model.thread.title || (board.title + " — " + model.thread.number);
         model.includeBoardScripts = true;
         model.includeThreadScripts = true;
         model = merge.recursive(model, controller.boardModel(board));

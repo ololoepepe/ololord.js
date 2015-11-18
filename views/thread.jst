@@ -35,6 +35,13 @@
     <br />
     {{#def.banner}}
 {{?}}
+<div class="theTitle">
+    {{? it.thread.title}}
+        {{!it.thread.title}}
+    {{??}}
+        {{=it.board.title}} — {{=it.thread.number}}
+    {{?}}
+</div>
 {{? !it.thread.postingEnabled}}
     <div class="postingDisabledMessage">
         <h2>{{=it.tr.postingDisabledThreadText}}</h2>

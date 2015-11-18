@@ -217,7 +217,11 @@ module.exports.getThread = function(board, hashpass, number) {
         return Database.threadPostCount(board.name, c.thread.number);
     }).then(function(postCount) {
         c.model = {};
+        var title = (c.opPost.subject || c.opPost.rawText || "").replace(/\r*\n+/gi, "");
+        if (title.length > 50)
+            title = title.substr(0, 47) + "...";
         var threadModel = {
+            title: title || null,
             number: c.thread.number,
             bumpLimit: board.bumpLimit,
             postLimit: board.postLimit,
