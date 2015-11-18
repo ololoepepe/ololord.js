@@ -324,8 +324,11 @@ var renderFileInfo = function(fi) {
     }
     delete post.user.hashpass;
     delete post.user.password;
-    if (!this.showWhois)
+    if (!this.showWhois) {
+        if (post.geolocation)
+            delete post.geolocation;
         return Promise.resolve(post);
+    }
     return Tools.flagName(post.geolocation.countryCode).then(function(flagName) {
         post.geolocation.flagName = flagName || "default.png";
         if (!post.geolocation.countryName)
@@ -410,7 +413,7 @@ var renderFileInfo = function(fi) {
                 file.extraData.year = "";
                 return Promise.resolve();
             }).then(function(metadata) {
-                if (metadata.picture && metadata.picture.length > 0)
+                if (metadata && metadata.picture && metadata.picture.length > 0)
                     return FS.write(thumbPath, metadata.picture[0].data);
                 else
                     return generateRandomImage(file.hash, file.mimeType, thumbPath);

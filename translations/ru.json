@@ -560,39 +560,23 @@
         }
     },
     "No markup": {
-        "markupMode name": {
-            "value": "Без разметки",
-            "_obsolete": true
-        },
         "markupMode": {
-            "value": "No markup"
+            "value": "Без разметки"
         }
     },
     "Extended WakabaMark only": {
-        "markupMode name": {
-            "value": "Только расширенная WakabaMark",
-            "_obsolete": true
-        },
         "markupMode": {
-            "value": "Extended WakabaMark only"
+            "value": "Только расширенная WakabaMark"
         }
     },
     "bbCode only": {
-        "markupMode name": {
-            "value": "Только bbCode",
-            "_obsolete": true
-        },
         "markupMode": {
-            "value": "bbCode only"
+            "value": "Только bbCode"
         }
     },
     "Extended WakabaMark and bbCode": {
-        "markupMode name": {
-            "value": "Расширенная WakabaMark и bbCode",
-            "_obsolete": true
-        },
         "markupMode": {
-            "value": "Extended WakabaMark and bbCode"
+            "value": "Расширенная WakabaMark и bbCode"
         }
     },
     "Markup mode:": {
@@ -1805,21 +1789,13 @@
         "_obsolete": true
     },
     "Normal": {
-        "mode title": {
-            "value": "Нормальный",
-            "_obsolete": true
-        },
         "_default": {
-            "value": "Normal"
+            "value": "Нормальный"
         }
     },
     "Ascetic": {
-        "mode title": {
-            "value": "Аскетичный",
-            "_obsolete": true
-        },
         "_default": {
-            "value": "Ascetic"
+            "value": "Аскетичный"
         }
     },
     "Mode:": {
