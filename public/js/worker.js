@@ -102,7 +102,7 @@ lord.getCoubVideoInfo = function(href) {
         return Promise.resolve(null);
     var xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
-    xhr.open("post", "../api/coubVideoInfo.json?videoId=" + videoId, true);
+    xhr.open("get", "../api/coubVideoInfo.json?videoId=" + videoId, true);
     xhr.setRequestHeader("Content-Type", "application/json");
     return new Promise(function(resolve, reject) {
         xhr.onreadystatechange = function() {
@@ -116,9 +116,8 @@ lord.getCoubVideoInfo = function(href) {
             } catch (ex) {
                 return resolve(null);
             }
-            if (!response.result)
+            if (!response)
                 return resolve(null);
-            response = response.result;
             var info = {
                 "videoTitle": response.title,
                 "authorName": response.author_name,
