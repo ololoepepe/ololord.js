@@ -1,9 +1,5 @@
 #!/usr/bin/env node
 
-process.on("uncaughtException", function(err) {
-    console.log(err);
-});
-
 var cluster = require("cluster");
 var expressCluster = require("express-cluster");
 var OS = require("os");
