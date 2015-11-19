@@ -218,28 +218,19 @@ router.get("/bannedUsers.json", function(req, res) {
 
 router.get("/coubVideoInfo.json", function(req, res) {
     var url = "https://coub.com/api/oembed.json?url=coub.com/view/" + (req.query.videoId || "");
-    var proxy = config("system.fileDownloadProxy");
-    var p;
-    if (proxy) {
-        p = HTTP.request({
-            host: proxy.host,
-            port: proxy.port,
-            headers: { "Proxy-Authorization": proxy.auth },
-            path: url,
-            timeout: Tools.Minute
-        });
-    } else {
-        p = HTTP.request({
-            url: url,
-            timeout: Tools.Minute
-        });
-    }
-    return p.then(function(response) {
+    HTTP.request({
+        url: url,
+        timeout: Tools.Minute
+    }).then(function(response) {
         if (response.status != 200)
             return Promise.reject("Failed to get Coub video info");
         return response.body.read();
     }).then(function(data) {
-        res.json(data);
+        try {
+            res.json(JSON.parse(data.toString()));
+        } catch (err) {
+            return Promise.reject(err);
+        }
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

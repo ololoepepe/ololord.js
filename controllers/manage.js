@@ -12,6 +12,7 @@ router.get("/manage.html", function(req, res) {
     var model = {};
     model.title = Tools.translate("User management", "pageTitle");
     model.extraScripts = [ { fileName: "manage.js" } ];
+    model.showSubmitButton = true;
     Database.bannedUsers().then(function(bannedUsers) {
         model.bannedUsers = bannedUsers;
         return controller(req, "manage", model);
