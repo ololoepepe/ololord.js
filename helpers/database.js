@@ -1883,6 +1883,7 @@ module.exports.editAudioTags = function(req, fields) {
         c.fileInfo = fileInfo;
         return getPost(fileInfo.boardName, fileInfo.postNumber);
     }).then(function(post) {
+        c.post = post;
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
@@ -1896,6 +1897,12 @@ module.exports.editAudioTags = function(req, fields) {
             }
         });
         return db.hset("fileInfos", c.fileInfo.name, JSON.stringify(c.fileInfo));
+    }).then(function() {
+        return {
+            boardName: c.post.boardName,
+            threadNumber: c.post.threadNumber,
+            postNumber: c.post.number
+        };
     });
 };
 

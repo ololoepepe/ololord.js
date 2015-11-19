@@ -347,7 +347,7 @@ router.post("/deletePost", function(req, res) {
                 path += "/res/" + result.threadNumber + ".html";
             res.redirect("/" + config("site.pathPrefix", "") + path);
         } else {
-            res.send({});
+            res.send(result);
         }
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
@@ -364,7 +364,7 @@ router.post("/deleteFile", function(req, res) {
                 path += "#" + result.postNumber;
             res.redirect("/" + config("site.pathPrefix", "") + path);
         } else {
-            res.send({});
+            res.send(result);
         }
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
@@ -390,7 +390,14 @@ router.post("/editAudioTags", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         return Database.editAudioTags(req, result.fields);
     }).then(function(result) {
-        res.send({});
+        if (req.ascetic) {
+            var path = result.boardName + "/res/" + result.threadNumber + ".html";
+            if (result.threadNumber != result.postNumber)
+                path += "#" + result.postNumber;
+            res.redirect("/" + config("site.pathPrefix", "") + path);
+        } else {
+            res.send(result);
+        }
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });
@@ -424,8 +431,12 @@ router.post("/banUser", function(req, res) {
         return Database.banUser(req, result.fields.userIp, bans);
     }).then(function(result) {
         if (req.ascetic) {
-            res.redirect("/" + config("site.pathPrefix", "")
-                + `banUser.html?boardName=${c.boardName}&postNumber=${c.postNumber}&userIp=${c.userIp}`);
+            var path;
+            if (c.boardName && c.postNumber)
+                path = `banUser.html?userIp=${c.userIp}&boardName=${c.boardName}&postNumber=${c.postNumber}`;
+            else
+                path = `manage.html`;
+            res.redirect("/" + config("site.pathPrefix", "") + path);
         } else {
             res.send({});
         }
@@ -476,7 +487,10 @@ router.post("/changeSettings", function(req, res) {
             path: "/"
         });
     }).then(function(result) {
-        res.redirect("/" + config("site.pathPrefix", "") + "settings.html");
+        if (req.ascetic)
+            res.redirect("/" + config("site.pathPrefix", "") + "settings.html");
+        else
+            res.send({});
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });
@@ -492,7 +506,7 @@ router.post("/setThreadFixed", function(req, res) {
         if (req.ascetic)
             res.redirect("/" + config("site.pathPrefix", "") + `${c.boardName}/res/${c.threadNumber}.html`);
         else
-            res.send({});
+            res.send(result);
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });
@@ -508,7 +522,7 @@ router.post("/setThreadClosed", function(req, res) {
         if (req.ascetic)
             res.redirect("/" + config("site.pathPrefix", "") + `${c.boardName}/res/${c.threadNumber}.html`);
         else
-            res.send({});
+            res.send(result);
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });
