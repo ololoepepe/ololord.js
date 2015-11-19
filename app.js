@@ -17,6 +17,10 @@ var count = config("system.workerCount", OS.cpus().length);
 if (count <= 0)
     count = OS.cpus().length;
 
+cluster.on("exit", function(worker, code, signal) {
+    console.log("!!!!!!worker " + worker.process.pid + " died");
+});
+
 var spawnCluster = function() {
     expressCluster(function(worker) {
         console.log("[" + process.pid + "] Initializing...");
@@ -72,15 +76,5 @@ if (cluster.isMaster) {
         });
     });
 } else {
-    var Domain = require("domain");
-
-    var domain = Domain.create();
-
-    domain.on("error", function(err) {
-        console.error(err.stack || err);
-    });
-
-    domain.run(function() {
-        spawnCluster();
-    });
+    spawnCluster();
 }
