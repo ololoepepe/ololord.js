@@ -72,5 +72,15 @@ if (cluster.isMaster) {
         });
     });
 } else {
-    spawnCluster();
+    var Domain = require("domain");
+
+    var domain = Domain.create();
+
+    domain.on("error", function(err) {
+        console.error(err.stack || err);
+    });
+
+    domain.run(function() {
+        spawnCluster();
+    });
 }
