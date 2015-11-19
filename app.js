@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
+process.on("uncaughtException", function(err) {
+    console.log(err);
+});
+
 var cluster = require("cluster");
-var errorHandler = require("errorhandler");
 var expressCluster = require("express-cluster");
 var OS = require("os");
 
@@ -33,11 +36,6 @@ var spawnCluster = function() {
         app.use("*", function(req, res) {
             controller.notFound(req, res);
         });
-        app.use(errorHandler({
-            log: function(err, str, _, _) {
-                console.log(err.stack || err || str);
-            }
-        }));
 
         controller.initialize().then(function() {
             if (config("server.rss.enabled", true)) {
