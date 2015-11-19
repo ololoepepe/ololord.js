@@ -595,6 +595,7 @@
         },
         "_obsolete": true
     },
+    
     "Public captcha key.\nApperas in the HTML pages.": {
         "_default": {
             "value": "Открытый ключ сервиса капчи.\nПоявляется в HTML-страницах."
@@ -3645,6 +3646,11 @@
     "Create thread": {
         "createThreadText": {
             "value": "Create thread"
+        }
+    },
+    "Target board": {
+        "targetBoardLabelText": {
+            "value": "Целевая доска"
         }
     }
 }

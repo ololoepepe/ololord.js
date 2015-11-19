@@ -130,7 +130,7 @@
                         {{?}}
                         <li>
                             <a name="moveButton" target="_blank"
-                               href="/{{=it.site.pathPrefix}}move_thread?board={{=it.board.name}}&thread={{=post.number}}"
+                               href="/{{=it.site.pathPrefix}}moveThread.html?boardName={{=it.board.name}}&threadNumber={{=post.threadNumber}}"
                                {{? it.settings.mode.name != "ascetic"}}onclick="lord.moveThread(this); return false;"{{?}}>
                                 <img src="/{{=it.site.pathPrefix}}img/move.png" /> {{=it.tr.moveThreadText}}</a>
                         </li>

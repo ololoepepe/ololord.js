@@ -30,6 +30,11 @@ db.hmget = function(key, hashes) {
     return db.tmp_hmget.apply(db, [key].concat(hashes));
 };
 
+db.tmp_sadd = db.sadd;
+db.sadd = function(key, members) {
+    return db.tmp_sadd.apply(db, [key].concat(members));
+};
+
 var rss = {};
 
 Object.defineProperty(module.exports, "rss", {
@@ -449,10 +454,13 @@ var lastPostNumber = function(boardName) {
 
 module.exports.lastPostNumber = lastPostNumber;
 
-var nextPostNumber = function(boardName) {
+var nextPostNumber = function(boardName, incrby) {
     if (!Tools.contains(Board.boardNames(), boardName))
         return Promise.reject("Invalid board");
-    return db.hincrby("postCounters", boardName, 1).then(function(number) {
+    incrby = +incrby;
+    if (isNaN(incrby) || incrby < 1)
+        incrby = 1;
+    return db.hincrby("postCounters", boardName, incrby).then(function(number) {
         if (!number)
             return 0;
         return number;
@@ -805,7 +813,7 @@ var addReferencedPosts = function(boardName, postNumber, threadNumber, reference
     });
 };
 
-var removePost = function(boardName, postNumber) {
+var removePost = function(boardName, postNumber, leaveFileInfos) {
     var board = Board.board(boardName);
     if (!board)
         return Promise.reject("Invalid board");
@@ -822,7 +830,7 @@ var removePost = function(boardName, postNumber) {
     }).then(function() {
         return removeReferencedPosts(boardName, postNumber, c.post.threadNumber, c.post.referencedPosts);
     }).then(function() {
-        return db.srem("userPosts:" + board.name, postNumber);
+        return db.srem("userPostNumbers:" + c.post.user.ip + ":" + board.name, postNumber);
     }).then(function() {
         return postFileInfoNames(boardName, postNumber);
     }).then(function(names) {
@@ -831,6 +839,8 @@ var removePost = function(boardName, postNumber) {
             return db.hget("fileInfos", name);
         }));
     }).then(function(fileInfos) {
+        if (leaveFileInfos)
+            return Promise.resolve();
         c.hashes = [];
         c.paths = [];
         fileInfos.forEach(function(fileInfo) {
@@ -843,10 +853,14 @@ var removePost = function(boardName, postNumber) {
         });
         return db.del("postFileInfoNames:" + boardName + ":" + postNumber);
     }).then(function() {
+        if (leaveFileInfos)
+            return Promise.resolve();
         return Promise.all(c.fileInfoNames.map(function(name) {
             return db.hdel("fileInfos", name);
         }));
     }).then(function() {
+        if (leaveFileInfos)
+            return Promise.resolve();
         var promises = c.hashes.map(function(hash) {
             return db.srem("fileHashesExtra:" + hash, JSON.stringify({
                 boardName: boardName,
@@ -876,18 +890,20 @@ var removePost = function(boardName, postNumber) {
         });
         return Promise.all(promises);
     }).then(function() {
-        c.paths.forEach(function(path) {
-            return FS.remove(path).catch(function(err) {
-                console.log(err);
+        if (!leaveFileInfos) {
+            c.paths.forEach(function(path) {
+                return FS.remove(path).catch(function(err) {
+                    console.log(err);
+                });
             });
-        });
+        }
         return db.srem("postsPlannedForDeletion", boardName + ":" + postNumber);
     });
 };
 
 module.exports.removePost = removePost;
 
-var removeThread = function(boardName, threadNumber, archived) {
+var removeThread = function(boardName, threadNumber, archived, leaveFileInfos) {
     var key = (archived ? "archivedThreads:" : "threads:") + boardName;
     return db.sadd("threadsPlannedForDeletion", boardName + ":" + threadNumber).then(function() {
         return db.hdel(key, threadNumber);
@@ -905,7 +921,7 @@ var removeThread = function(boardName, threadNumber, archived) {
                 var p = Promise.resolve();
                 c.postNumbers.forEach(function(postNumber) {
                     p = p.then(function() {
-                        return removePost(boardName, postNumber);
+                        return removePost(boardName, postNumber, leaveFileInfos);
                     });
                 });
                 return p;
@@ -914,7 +930,7 @@ var removeThread = function(boardName, threadNumber, archived) {
             }).catch(function(err) {
                 console.log(err);
             });
-        }, 10000);
+        }, 5000);
         return Promise.resolve();
     });
 };
@@ -1628,6 +1644,175 @@ module.exports.deletePost = function(req, fields) {
         return {
             boardName: board.name,
             threadNumber: ((c.post.threadNumber != c.post.number) ? c.post.threadNumber : 0)
+        };
+    });
+};
+
+module.exports.moveThread = function(req, fields) {
+    var sourceBoard = Board.board(fields.boardName);
+    var targetBoard = Board.board(fields.targetBoardName);
+    if (!sourceBoard || !targetBoard)
+        return Promise.reject("Invalid board");
+    if (fields.boardName == fields.targetBoardName)
+        return Promise.reject("Source and target boards are the same");
+    var threadNumber = +fields.threadNumber;
+    if (isNaN(threadNumber) || threadNumber <= 0)
+        return Promise.reject("Invalid thread number");
+    if (compareRegisteredUserLevels(req.level, RegisteredUserLevels.Moder) < 0)
+        return Promise.reject("Not enough rights");
+    var password = Tools.password(fields.password);
+    var c = {};
+    var sourcePath = __dirname + "/../public/" + sourceBoard.name + "/src"
+    var sourceThumbPath = __dirname + "/../public/" + sourceBoard.name + "/thumb";
+    var targetPath = __dirname + "/../public/" + targetBoard.name + "/src"
+    var targetThumbPath = __dirname + "/../public/" + targetBoard.name + "/thumb";
+    return getThreads(sourceBoard.name, {
+        withPostNumbers: true,
+        filterFunction: function(thread) {
+            return thread && threadNumber == thread.number;
+        }
+    }).then(function(thread) {
+        if (!thread || thread.length != 1)
+            return Promise.reject("No such thread");
+        c.thread = thread[0];
+        if ((!password || password != c.thread.user.password)
+            && (!req.hashpass || req.hashpass != c.thread.user.hashpass)
+            && (compareRegisteredUserLevels(req.level, c.thread.user.level) <= 0)) {
+            return Promise.reject("Not enough rights");
+        }
+        delete c.thread.updatedAt;
+        c.postNumbers = c.thread.postNumbers;
+        delete c.thread.postNumbers;
+        var promises = c.postNumbers.map(function(postNumber) {
+            return getPost(sourceBoard.name, postNumber, {
+                withFileInfos: true,
+                withReferences: true,
+                withExtraData: true
+            });
+        });
+        return Promise.all(promises);
+    }).then(function(posts) {
+        c.posts = posts;
+        return nextPostNumber(targetBoard.name, c.posts.length);
+    }).then(function(lastPostNumber) {
+        lastPostNumber = lastPostNumber - c.posts.length + 1;
+        c.thread.number = lastPostNumber;
+        c.postNumberMap = {};
+        c.posts.forEach(function(post, i) {
+            c.postNumberMap[post.number] = lastPostNumber;
+            ++lastPostNumber;
+        });
+        return mkpath(targetPath);
+    }).then(function() {
+        return mkpath(targetThumbPath);
+    }).then(function() {
+        var promises = c.posts.map(function(post) {
+            post.number = c.postNumberMap[post.number];
+            post.threadNumber = c.thread.number;
+            post.boardName = targetBoard.name;
+            var referencedPosts = post.referencedPosts;
+            referencedPosts.forEach(function(ref) {
+                if (ref.boardName != sourceBoard.name)
+                    return;
+                var newPostNumber = c.postNumberMap[ref.postNumber];
+                if (!newPostNumber)
+                    return;
+                ref.postNumber = newPostNumber;
+                ref.threadNumber = c.thread.number;
+            });
+            delete post.referencedPosts;
+            var extraData = post.extraData;
+            delete post.extraData;
+            delete post.referringPosts;
+            var fileInfos = post.fileInfos;
+            fileInfos.forEach(function(fileInfo) {
+                fileInfo.boardName = targetBoard.name;
+                fileInfo.postNumber = post.number;
+            });
+            delete post.fileInfos;
+            if (post.rawText) {
+                Tools.forIn(c.postNumberMap, function(newPostNumber, previousPostNumber) {
+                    var rx = new RegExp(`>>/${sourceBoard.name}/${previousPostNumber}`, "g");
+                    post.rawText = post.rawText.replace(rx, `>>/${targetBoard.name}/${newPostNumber}`);
+                    rx = new RegExp(`>>${previousPostNumber}`, "g");
+                    post.rawText = post.rawText.replace(rx, `>>${newPostNumber}`);
+                });
+            }
+            return db.hset("posts", targetBoard.name + ":" + post.number, JSON.stringify(post)).then(function() {
+                return targetBoard.storeExtraData(post.number, extraData);
+            }).then(function() {
+                return addReferencedPosts(targetBoard.name, post.number, c.thread.number, referencedPosts);
+            }).then(function() {
+                return db.sadd("userPostNumbers:" + post.user.ip + ":" + targetBoard.name, post.number);
+            }).then(function() {
+                if (fileInfos.length < 1)
+                    return Promise.resolve();
+                return Promise.all(fileInfos.map(function(fileInfo) {
+                    return db.hset("fileInfos", fileInfo.name, JSON.stringify(fileInfo)).then(function() {
+                        return db.sadd("postFileInfoNames:" + targetBoard.name + ":" + post.number, fileInfo.name);
+                    }).then(function() {
+                        return FS.move(sourcePath + "/" + fileInfo.name, targetPath + "/" + fileInfo.name);
+                    }).then(function() {
+                        return FS.move(sourceThumbPath + "/" + fileInfo.thumb.name,
+                            targetThumbPath + "/" + fileInfo.thumb.name);
+                    });
+                }));
+            }).then(function() {
+                c.hashes = [];
+                if (fileInfos.length < 1)
+                    return Promise.resolve();
+                c.hashes = fileInfos.reduce(function(acc, fileInfo) {
+                    acc[fileInfo.hash] = JSON.stringify({
+                        name: fileInfo.name,
+                        thumb: { name: fileInfo.thumb.name },
+                        size: fileInfo.size,
+                        boardName: fileInfo.boardName,
+                        mimeType: fileInfo.mimeType,
+                        rating: fileInfo.rating
+                    });
+                    return acc;
+                }, {});
+                return db.hmset("fileHashes", c.hashes);
+            }).then(function() {
+                var promises = [];
+                Tools.forIn(c.hashes, function(_, hash) {
+                    promises.push(db.sadd("fileHashesExtra:" + hash, JSON.stringify({
+                        boardName: targetBoard.name,
+                        postNumber: post.number
+                    })));
+                });
+                return Promise.all(promises);
+            }).then(function() {
+                var promises = [];
+                Tools.forIn(Tools.indexPost({
+                    boardName: targetBoard.name,
+                    number: post.number,
+                    rawText: post.rawText,
+                    subject: (post.subject || null)
+                }), function(index, word) {
+                    promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
+                });
+                return Promise.all(promises);
+            });
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        var promises = c.posts.map(function(post) {
+            return rerenderPost(targetBoard.name, post.number, true);
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        return db.hset("threads:" + targetBoard.name, c.thread.number, JSON.stringify(c.thread));
+    }).then(function() {
+        return db.hset("threadUpdateTime:" + targetBoard.name, c.thread.number, Tools.now().toISOString());
+    }).then(function() {
+        return db.sadd("threadPostNumbers:" + targetBoard.name + ":" + c.thread.number, Tools.toArray(c.postNumberMap));
+    }).then(function() {
+        return removeThread(sourceBoard.name, threadNumber, false, true);
+    }).then(function() {
+        return {
+            boardName: targetBoard.name,
+            threadNumber: c.thread.number
         };
     });
 };

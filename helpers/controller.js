@@ -618,6 +618,7 @@ controller.translationsModel = function() {
     translate("Add files", "addFilesText");
     translate("Show markup", "showPostformMarkupText");
     translate("Hide markup", "hidePostformMarkupText");
+    translate("Target board", "targetBoardLabelText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

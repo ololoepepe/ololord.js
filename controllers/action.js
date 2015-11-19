@@ -371,6 +371,21 @@ router.post("/deleteFile", function(req, res) {
     });
 });
 
+router.post("/moveThread", function(req, res) {
+    Tools.parseForm(req).then(function(result) {
+        return Database.moveThread(req, result.fields);
+    }).then(function(result) {
+        if (req.ascetic) {
+            var path = result.boardName + "/res/" + result.threadNumber + ".html";
+            res.redirect("/" + config("site.pathPrefix", "") + path);
+        } else {
+            res.send(result);
+        }
+    }).catch(function(err) {
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
 router.post("/editAudioTags", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         return Database.editAudioTags(req, result.fields);

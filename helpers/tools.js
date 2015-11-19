@@ -77,6 +77,16 @@ module.exports.filterIn = function(obj, f) {
     return nobj;
 };
 
+module.exports.toArray = function(obj) {
+    var arr = [];
+    var i = 0;
+    forIn(obj, function(val) {
+        arr[i] = val;
+        ++i;
+    });
+    return arr;
+};
+
 module.exports.randomInt = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 };

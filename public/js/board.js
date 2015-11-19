@@ -1028,33 +1028,40 @@ lord.setThreadClosed = function(el, closed) {
     }).catch(lord.handleError);
 };
 
-/*lord.moveThread = function(boardName, threadNumber) {
-    if (!boardName || isNaN(+threadNumber))
+lord.moveThread = function(el) {
+    var boardName = lord.data("boardName");
+    var threadNumber = +lord.data("threadNumber", el, true);
+    if (!boardName || isNaN(threadNumber) || threadNumber <= 0)
         return;
-    if (!lord.getCookie("hashpass"))
-        return lord.showPopup(lord.text("notLoggedInText"), {type: "critical"});
-    var title = lord.text("moveThreadText");
-    var div = lord.node("div");
-    div.appendChild(lord.node("text", lord.text("boardLabelText")));
-    var selBoard = lord.id("availableBoardsSelect").cloneNode(true);
-    var b = lord.queryOne("[value='" + boardName + "']", selBoard);
-    b.parentNode.removeChild(b);
-    b = lord.queryOne("[value='*']", selBoard);
-    b.parentNode.removeChild(b);
-    selBoard.style.display = "block";
-    div.appendChild(selBoard);
-    div.appendChild(lord.node("text", lord.text("moveThreadWarningText")));
-    lord.showDialog(title, null, div, function() {
-        var targetBoardName = selBoard.options[selBoard.selectedIndex].value;
-        lord.ajaxRequest("move_thread", [boardName, +threadNumber, targetBoardName], lord.RpcMoveThreadId, function(res) {
-            var href = location.href.split("/" + boardName).shift();
-            if (href[href.length - 1] != "/")
-                href += "/";
-            href += targetBoardName + "/thread/" + res + ".html";
-            location.href = href;
+    var c = {};
+    lord.getModel(["misc/base", "misc/boards", "misc/tr"], true).then(function(model) {
+        c.model = model;
+        c.model.boardName = boardName;
+        c.model.threadNumber = threadNumber;
+        return lord.getTemplate("moveThreadDialog");
+    }).then(function(template) {
+        c.div = $.parseHTML(template(c.model))[0];
+        return lord.showDialog("moveThreadText", null, c.div);
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", c.div);
+        var formData = new FormData(form);
+        return $.ajax(form.action, {
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false
         });
-    });
-};*/
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        if (lord.checkError(result))
+            return Promise.reject(result);
+        window.location = "/" + lord.data("sitePathPrefix") + result.boardName + "/res/" + result.threadNumber
+            + ".html";
+    }).catch(lord.handleError);
+};
 
 lord.banUser = function(el) {
     var boardName = lord.data("boardName", el, true);

@@ -16,6 +16,7 @@ router.use("/", require("./frame"));
 router.use("/", require("./login"));
 router.use("/", require("./manage"));
 router.use("/", require("./markup"));
+router.use("/", require("./move-thread"));
 router.use("/", require("./playlist"));
 router.use("/", require("./post-source-text"));
 router.use("/", require("./search"));
