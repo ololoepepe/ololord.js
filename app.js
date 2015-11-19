@@ -17,10 +17,6 @@ var count = config("system.workerCount", OS.cpus().length);
 if (count <= 0)
     count = OS.cpus().length;
 
-cluster.on("exit", function(worker, code, signal) {
-    console.log("!!!!!!worker " + worker.process.pid + " died", code, signal);
-});
-
 var spawnCluster = function() {
     expressCluster(function(worker) {
         console.log("[" + process.pid + "] Initializing...");
