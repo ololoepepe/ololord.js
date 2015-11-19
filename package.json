@@ -27,6 +27,7 @@
     "ddos": "^0.1.7",
     "deep-equal": "^1.0.1",
     "dot": "^1.0.3",
+    "errorhandler": "^1.4.2",
     "escape-html": "^1.0.3",
     "express": "^4.13.3",
     "express-cluster": "0.0.4",
