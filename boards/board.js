@@ -1,3 +1,4 @@
+var Address6 = require("ip-address").Address6;
 var Canvas = require("canvas");
 var Crypto = require("crypto");
 var ffmpeg = require("fluent-ffmpeg");
@@ -314,8 +315,14 @@ var renderFileInfo = function(fi) {
     post.ownIp = (req.ip == post.user.ip);
     post.ownHashpass = (req.hashpass && req.hashpass == post.user.hashpass);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
-    if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0)
+    if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0) {
         delete post.user.ip;
+    } else {
+        var address = new Address6(post.user.ip);
+        var ipv4 = address.to4();
+        if (ipv4.isValid())
+            post.user.ipv4 = ipv4.correctForm();
+    }
     if (post.showTripcode
         && Database.compareRegisteredUserLevels(post.user.level, Database.RegisteredUserLevels.User) >= 0) {
         var md5 = Crypto.createHash("md5");

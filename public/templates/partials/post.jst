@@ -8,6 +8,9 @@
      {{? post.ownIp}}data-own-ip="true"{{?}}
      {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 && it.settings.mode.name != "ascetic"}}
         data-user-ip="{{=post.user.ip}}"
+        {{? post.user.ipv4}}
+            data-user-ipv4="{{=post.user.ipv4}}"
+        {{?}}
      {{?}}>
     <div class="postHeader">
         {{? post.isOp}}
@@ -50,10 +53,10 @@
               name="dateTime">{{ out += it.formattedDate(post.createdAt, it.req); }}</span>
         {{? it.threads}}
             #<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.threadNumber}}.html#{{? thread.postingEnabled}}i{{?}}{{=post.number}}"
-                name="number" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.user.ip}}"{{?}}
+                name="number" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{ out += (post.user.ipv4 || post.user.ip); }}"{{?}}
                 data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}" data-thread-number="{{=post.threadNumber}}">{{=post.number}}</a>
         {{??}}
-            #<a href="#{{=post.number}}" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.user.ip}}"{{?}}
+            #<a href="#{{=post.number}}" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{ out += (post.user.ipv4 || post.user.ip); }}"{{?}}
                 {{? thread.postingEnabled}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}} name="number"
                 data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}" data-thread-number="{{=post.threadNumber}}">{{=post.number}}</a>
         {{?}}

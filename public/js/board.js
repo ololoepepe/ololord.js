@@ -2222,7 +2222,7 @@ lord.complain = function() {
 };
 
 lord.showUserIp = function(a) {
-    prompt("IP:", lord.data("userIp", a, true));
+    prompt("IP:", lord.data("userIpv4", a, true) || lord.data("userIp", a, true));
 };
 
 lord.submitted = function(event, form) {
