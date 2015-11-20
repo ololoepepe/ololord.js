@@ -7,6 +7,7 @@ var Tools = require("../helpers/tools");
 
 module.exports = function(req, res, next) {
     console.log("request!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    return res.send("some text");
     var trueIp = req.ip;
     if (!trueIp)
         return res.sendStatus(500);
