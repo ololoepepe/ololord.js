@@ -43,39 +43,31 @@ var renderPage = function(model, board, req, json) {
             }));
         });
     });
-    console.log(1);
     return Promise.all(promises).then(function() {
         model.title = board.title;
         model.includeBoardScripts = true;
         model = merge.recursive(model, controller.boardModel(board));
         model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
         model.extraScripts = board.extraScripts();
-        console.log(2);
         if (!json || json.translations)
             model.tr = controller.translationsModel();
-        console.log(3);
         return board.postformRules();
     }).then(function(rules) {
-        console.log(4);
         model.postformRules = rules;
         model.captchaEngine = selectCaptchaEngine(req, board);
         return model.captchaEngine.prepare(req);
     }).then(function(captchaPrepared) {
-        console.log(5);
         model.captchaPrepared = captchaPrepared;
         return Database.getUserCaptchaQuota(board.name, req.ip);
     }).then(function(quota) {
-        console.log(6);
         model.user = { captchaQuota: quota };
         return board.getBannerFileName();
     }).then(function(bannerFileName) {
-        console.log(7);
         if (bannerFileName)
             model.board.bannerFileName = bannerFileName;
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
-        console.log(8);
         model.customPostBodyPart = {};
         for (var i = 0; i < 60; i += 10)
             model.customPostBodyPart[i] = board.customPostBodyPart(i, req);
@@ -83,10 +75,8 @@ var renderPage = function(model, board, req, json) {
         for (var i = 0; i < 120; i += 10)
             model.customPostFormField[i] = board.customPostFormField(i, req);
         model.customPostFormOption = {};
-        console.log(9);
         for (var i = 0; i < 50; i += 10)
             model.customPostFormOption[i] = board.customPostFormOption(i, req);
-        console.log(10, json);
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
@@ -218,12 +208,15 @@ router.get("/:boardName/rss.xml", function(req, res) {
 });
 
 router.get("/:boardName/:page.html", function(req, res) {
+    console.log("x");
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
+    console.log("y");
     board.renderBoardPage(req, res, false).then(function(result) {
         if (result)
             return;
+        console.log("z");
         return boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
             return renderPage(model, board, req);
         }).then(function(data) {
