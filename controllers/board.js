@@ -211,7 +211,7 @@ router.get("/:boardName/:page.html", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
-    board.renderBoardPage(req, res).then(function(result) {
+    board.renderBoardPage(req, res, false).then(function(result) {
         if (result)
             return;
         return boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
@@ -228,10 +228,14 @@ router.get("/:boardName/:page.json", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404, true);
-    boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
-        return renderPage(model, board, req, true);
-    }).then(function(data) {
-        res.send(data);
+    board.renderBoardPage(req, res, true).then(function(result) {
+        if (result)
+            return;
+        return boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
+            return renderPage(model, board, req, true);
+        }).then(function(data) {
+            res.send(data);
+        });
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

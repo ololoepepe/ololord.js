@@ -258,7 +258,7 @@ var Board = function(name, title, options) {
     //
 };
 
-/*public*/ Board.prototype.renderBoardPage = function(req, res) {
+/*public*/ Board.prototype.renderBoardPage = function(req, res, ajax) {
     return Promise.resolve(null);
 };
 
