@@ -279,7 +279,7 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
         c.model = model;
         c.locale = model.site.locale;
         c.dateFormat = model.site.dateFormat;
-        c.timeOffset = ("local" == settings.time) ? settings.timeZoneOffset : model.site.timeOffset;
+        c.timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
         c.model.settings = settings;
         if (threadInfo)
             return Promise.resolve(threadInfo);

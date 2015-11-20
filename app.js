@@ -2,12 +2,34 @@
 
 var cluster = require("cluster");
 var expressCluster = require("express-cluster");
+var Heapdump = require("heapdump");
+var memwatch = require("memwatch-next");
 var OS = require("os");
 
 var config = require("./helpers/config");
 var controller = require("./helpers/controller");
 var Database = require("./helpers/database");
 var Tools = require("./helpers/tools");
+
+var heapDump;
+
+memwatch.on("leak", function(info) {
+    console.error(info);
+    if (!heapDump) {
+        heapDump = new memwatch.HeapDiff();
+    } else {
+        var diff = heapDump.end();
+        console.error(util.inspect(diff, true, null));
+        heapDump = null;
+    }
+    var file = `/tmp/myapp-${process.pid}-${Tools.now()}.heapsnapshot`;
+    heapdump.writeSnapshot(file, function(err) {
+        if (err)
+            console.error(err);
+        else
+            console.error(`Wrote snapshot: ${file}`);
+    });
+});
 
 config.installSetHook("site.locale", Tools.setLocale);
 if (Tools.contains(process.argv.slice(2), "--dev-mode"))
