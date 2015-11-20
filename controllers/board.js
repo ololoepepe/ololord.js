@@ -245,7 +245,7 @@ router.get("/:boardName/res/:threadNumber.html", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
-    board.renderThread(req, res).then(function(result) {
+    board.renderThread(req, res, false).then(function(result) {
         if (result)
             return;
         return boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
@@ -262,10 +262,14 @@ router.get("/:boardName/res/:threadNumber.json", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404, true);
-    boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
-        return renderThread(model, board, req, true);
-    }).then(function(data) {
-        res.send(data);
+    board.renderThread(req, res, true).then(function(result) {
+        if (result)
+            return;
+        return boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
+            return renderThread(model, board, req, true);
+        }).then(function(data) {
+            res.send(data);
+        });
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

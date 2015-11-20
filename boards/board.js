@@ -262,7 +262,7 @@ var Board = function(name, title, options) {
     return Promise.resolve(null);
 };
 
-/*public*/ Board.prototype.renderThread = function(req, res) {
+/*public*/ Board.prototype.renderThread = function(req, res, ajax) {
     return Promise.resolve(null);
 };
 
