@@ -1600,7 +1600,10 @@ module.exports.setThreadFixed = function(req, fields) {
         thread.fixed = fixed;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
-        return Promise.resolve();
+        return Promise.resolve({
+            boardName: board.name,
+            threadNumber: threadNumber
+        });
     });
 };
 
@@ -1629,7 +1632,10 @@ module.exports.setThreadClosed = function(req, fields) {
         thread.closed = closed;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
-        return Promise.resolve();
+        return Promise.resolve({
+            boardName: board.name,
+            threadNumber: threadNumber
+        });
     });
 };
 
