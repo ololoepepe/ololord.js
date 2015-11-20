@@ -1933,6 +1933,7 @@ module.exports.bannedUsers = function() {
 };
 
 module.exports.banUser = function(req, ip, bans) {
+    ip = (new Address6(ip)).correctForm();
     if (!ip)
         return Promise.reject("Invalid IP");
     if (ip == req.ip)
@@ -1972,7 +1973,7 @@ module.exports.banUser = function(req, ip, bans) {
 };
 
 module.exports.delall = function(req, fields) {
-    var ip = fields.userIp;
+    var ip = (new Address6(ifields.userIp)).correctForm();
     var boards = ("*" == fields.boardName) ? Board.boardNames().map(function(boardName) {
         return Board.board(boardName);
     }) : [Board.board(fields.boardName)];

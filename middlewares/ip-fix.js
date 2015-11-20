@@ -7,45 +7,30 @@ var Tools = require("../helpers/tools");
 
 module.exports = function(req, res, next) {
     var trueIp = req.ip;
-    console.log(req.ip);
     if (!trueIp)
         return res.sendStatus(500);
-    console.log(1);
     if (config("system.detectRealIp", true)) {
-        console.log(2);
         var ip = req.headers["x-forwarded-for"];
-        console.log(ip);
         if (!ip)
             ip = req.headers["x-client-ip"];
-        console.log(ip);
         if (ip) {
-            console.log(ip);
             var address = new Address6(ip);
-            console.log(address);
             if (!address.isValid())
                 address = Address6.fromAddress4(ip);
-            console.log(address);
             if (!address.isValid())
                 return res.sendStatus(500);
             trueIp = address.correctForm();
         }
-        console.log(3);
     }
     if (config("system.useXRealIp", false)) {
-        console.log(4);
         var ip = req.headers["x-real-ip"];
         var address = new Address6(ip);
-        console.log(5);
         if (!address.isValid())
             address = Address6.fromAddress4(ip);
-        console.log(6);
-        if (!address.isValid()) {
-            console.log("aaa");
+        if (!address.isValid())
             return res.sendStatus(500);
-        }
         trueIp = address.correctForm();
     }
-    console.log(trueIp);
     Object.defineProperty(req, "ip", { value: trueIp });
     next();
 };
