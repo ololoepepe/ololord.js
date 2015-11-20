@@ -1073,7 +1073,7 @@ var getGeolocationInfo = function(ip) {
     var q = "SELECT ipFrom, countryCode, countryName, cityName FROM ip2location WHERE ipTo >= ? LIMIT 1";
     var stmt = dbGeo.prepare(q);
     stmt.pget = promisify(stmt.get);
-    address = bigInt(address);
+    address = bigInt(new Address6(address).bigInteger().toString());
     return stmt.pget(address.toString()).then(function(result) {
         stmt.finalize();
         if (!result)
