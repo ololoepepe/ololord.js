@@ -7,5 +7,8 @@ module.exports = function(req, res, next) {
             req.boards = user.boards;
         }
         next();
+    }).catch(function(err) {
+        console.log(err.stack || err);
+        next();
     });
 };
