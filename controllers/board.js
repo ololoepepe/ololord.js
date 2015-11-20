@@ -208,15 +208,12 @@ router.get("/:boardName/rss.xml", function(req, res) {
 });
 
 router.get("/:boardName/:page.html", function(req, res) {
-    console.log("x");
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
-    console.log("y");
     board.renderBoardPage(req, res, false).then(function(result) {
         if (result)
             return;
-        console.log("z");
         return boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
             return renderPage(model, board, req);
         }).then(function(data) {
