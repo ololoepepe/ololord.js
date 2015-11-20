@@ -55,7 +55,7 @@ lord.vote = function(event, form) {
         if (result.errorMessage)
             return Promise.reject(result.errorMessage);
         return lord.updatePost(lord.data("number", form, true));
-    }).fail(function(err) {
+    }).catch(function(err) {
         console.log(err);
     });
 };

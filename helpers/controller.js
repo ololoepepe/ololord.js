@@ -241,8 +241,8 @@ controller.baseModel = function(req) {
             youtubeApiKey: config("site.youtubeApiKey", "")
         },
         user: {
-            ip: req.ip,
-            level: req.level,
+            ip: req.ip || null,
+            level: req.level || null,
             loggedIn: !!req.hashpass
         },
         modes: [
@@ -256,7 +256,7 @@ controller.baseModel = function(req) {
         ],
         styles: Tools.styles(),
         codeStyles: Tools.codeStyles(),
-        deviceType: ((req.device.type == "desktop") ? "desktop" : "mobile"),
+        deviceType: ((req.device && req.device.type == "desktop") ? "desktop" : "mobile"),
         availableCodeLangs: Highlight.listLanguages().map(function(lang) {
             return {
                 id: lang,
