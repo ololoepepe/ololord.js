@@ -8,7 +8,7 @@ var Tools = require("../helpers/tools");
 module.exports = function(req, res, next) {
     console.log("request!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     setTimeout(function() {
-        try {
+        /*try {
         var trueIp = req.ip;
         if (!trueIp)
             return res.sendStatus(500);
@@ -30,7 +30,7 @@ module.exports = function(req, res, next) {
                 return res.sendStatus(500);
             trueIp = address;
         }
-        Object.defineProperty(req, "ip", { value: trueIp });
+        Object.defineProperty(req, "ip", { value: trueIp });*/
         next();
     } catch (err) {
         console.log(err);
