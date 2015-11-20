@@ -1,3 +1,5 @@
+var Address4 = require("ip-address").Address4;
+var Address6 = require("ip-address").Address6;
 var ChildProcess = require("child_process");
 var Crypto = require("crypto");
 var equal = require("deep-equal");
@@ -486,4 +488,13 @@ module.exports.proxy = function() {
         port: (parts[1] ? +parts[1] : null),
         auth: (auth ? ("Basic " + new Buffer(auth).toString("base64")) : null)
     };
+};
+
+module.exports.correctAddress = function(ip) {
+    var address = new Address6(ip);
+    if (!address.isValid())
+        address = Address6.fromAddress4(ip);
+    if (!address.isValid())
+        return null;
+    return address.correctForm();
 };

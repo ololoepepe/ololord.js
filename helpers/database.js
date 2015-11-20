@@ -401,12 +401,10 @@ module.exports.registerUser = function(hashpass, level, boardNames, ips) {
         createdAt: Tools.now().toISOString()
     })).then(function() {
         var promises = ips.map(function(ip) {
-            var address = new Address6(ip);
-            if (!address.isValid())
-                address = Address6.fromAddress4(ip);
-            if (!address.isValid())
+            var address = Tools.correctAddress(ip);
+            if (!address)
                 return Promise.reject("Invalid IP address");
-            return db.hset("registeredUserHashes", address.correctForm(), hashpass);
+            return db.hset("registeredUserHashes", address, hashpass);
         });
         return Promise.resolve(promises);
     });
@@ -1069,13 +1067,13 @@ var getGeolocationInfo = function(ip) {
     };
     if (!ip)
         return Promise.resolve(info);
-    var address = new Address6(ip);
-    if (!address.isValid())
+    var address = Tools.correctAddress(ip);
+    if (!address)
         return Promise.resolve(info);
     var q = "SELECT ipFrom, countryCode, countryName, cityName FROM ip2location WHERE ipTo >= ? LIMIT 1";
     var stmt = dbGeo.prepare(q);
     stmt.pget = promisify(stmt.get);
-    address = bigInt(address.bigInteger().toString());
+    address = bigInt(address);
     return stmt.pget(address.toString()).then(function(result) {
         stmt.finalize();
         if (!result)
@@ -1938,10 +1936,10 @@ module.exports.bannedUsers = function() {
 };
 
 module.exports.banUser = function(req, ip, bans) {
-    ip = (new Address6(ip)).correctForm();
-    if (!ip)
+    var address = Tools.correctAddress(ip);
+    if (!address)
         return Promise.reject("Invalid IP");
-    if (ip == req.ip)
+    if (address == req.ip)
         return Promise.reject("Not enough rights");
     var err = bans.reduce(function(err, ban) {
         if (err)
@@ -1954,7 +1952,7 @@ module.exports.banUser = function(req, ip, bans) {
     }, null);
     if (err)
         return Promise.reject(err);
-    return db.hget("registeredUserHashes", ip).then(function(hash) {
+    return db.hget("registeredUserHashes", address).then(function(hash) {
         if (!hash)
             return Promise.resolve();
         return db.hget("registeredUsers", hash);
@@ -1963,22 +1961,22 @@ module.exports.banUser = function(req, ip, bans) {
         if (user && compareRegisteredUserLevels(req.level, user.level) <= 0)
             return Promise.reject("Not enough rights");
         if (bans.length < 1)
-            return db.hdel("bannedUsers", ip);
+            return db.hdel("bannedUsers", address);
         var date = Tools.now();
         bans = bans.reduce(function(acc, ban) {
             ban.createdAt = date;
             acc[ban.boardName] = ban;
             return acc;
         }, {});
-        return db.hset("bannedUsers", ip, JSON.stringify({
-            ip: ip,
+        return db.hset("bannedUsers", address, JSON.stringify({
+            ip: address,
             bans: bans
         }));
     });
 };
 
 module.exports.delall = function(req, fields) {
-    var ip = (new Address6(ifields.userIp)).correctForm();
+    var address = Tools.correctAddress(fields.userIp);
     var boards = ("*" == fields.boardName) ? Board.boardNames().map(function(boardName) {
         return Board.board(boardName);
     }) : [Board.board(fields.boardName)];
@@ -1989,12 +1987,12 @@ module.exports.delall = function(req, fields) {
     }, false);
     if (err)
         return Promise.reject("Invalid board");
-    if (!ip)
+    if (!address)
         return Promise.reject("Invalid IP");
-    if (ip == req.ip)
+    if (address == req.ip)
         return Promise.reject("Not enough rights");
     var posts = [];
-    return db.hget("registeredUserHashes", ip).then(function(hash) {
+    return db.hget("registeredUserHashes", address).then(function(hash) {
         if (!hash)
             return Promise.resolve();
         return db.hget("registeredUsers", hash);
@@ -2003,7 +2001,7 @@ module.exports.delall = function(req, fields) {
         if (user && compareRegisteredUserLevels(req.level, user.level) <= 0)
             return Promise.reject("Not enough rights");
         var promises = boards.map(function(board) {
-            return db.smembers("userPostNumbers:" + ip + ":" + board.name).then(function(numbers) {
+            return db.smembers("userPostNumbers:" + address + ":" + board.name).then(function(numbers) {
                 return Promise.all(numbers.map(function(postNumber) {
                     return getPost(board.name, postNumber).then(function(post) {
                         posts.push(post);

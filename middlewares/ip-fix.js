@@ -14,22 +14,18 @@ module.exports = function(req, res, next) {
         if (!ip)
             ip = req.headers["x-client-ip"];
         if (ip) {
-            var address = new Address6(ip);
-            if (!address.isValid())
-                address = Address6.fromAddress4(ip);
-            if (!address.isValid())
+            var address = Tools.correctAddress(ip);
+            if (!address)
                 return res.sendStatus(500);
-            trueIp = address.correctForm();
+            trueIp = address;
         }
     }
     if (config("system.useXRealIp", false)) {
         var ip = req.headers["x-real-ip"];
-        var address = new Address6(ip);
-        if (!address.isValid())
-            address = Address6.fromAddress4(ip);
-        if (!address.isValid())
+        var address = Tools.correctAddress(ip);
+        if (!address)
             return res.sendStatus(500);
-        trueIp = address.correctForm();
+        trueIp = address;
     }
     Object.defineProperty(req, "ip", { value: trueIp });
     next();
