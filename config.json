@@ -1,12 +1,23 @@
 {
     "system": {
         "workerCount": 1,
+        "middlewareLog": {
+            "before": "",
+            "verbosity": "ip"
+        },
         "fileDownloadProxy": "",
         "fileDownloadProxyAuth": ""
     },
     "server": {
         "port": 8080,
-        "ddosProtection": true,
+        "ddosProtection": {
+            "enabled": true,
+            "static": false,
+            "errorMessage": "Not so fast!",
+            "burst": 6,
+            "maxExpiry": 60,
+            "checkInterval": 1
+        },
         "rss": {
             "enabled": true,
             "ttl": 60,
