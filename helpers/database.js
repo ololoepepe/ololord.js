@@ -401,7 +401,12 @@ module.exports.registerUser = function(hashpass, level, boardNames, ips) {
         createdAt: Tools.now().toISOString()
     })).then(function() {
         var promises = ips.map(function(ip) {
-            return db.hset("registeredUserHashes", ip, hashpass);
+            var address = new Address6(ip);
+            if (!address.isValid())
+                address = Address6.fromAddress4(ip);
+            if (!address.isValid())
+                return Promise.reject("Invalid IP address");
+            return db.hset("registeredUserHashes", address.correctForm(), hashpass);
         });
         return Promise.resolve(promises);
     });
