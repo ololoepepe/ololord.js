@@ -35,6 +35,7 @@ var selectCaptchaEngine = function(req, board) {
 };
 
 var renderPage = function(model, board, req, json) {
+    model.currentPage = +(req.params.page || 0);
     var promises = model.threads.map(function(thread) {
         return board.renderPost(thread.opPost, req, thread.opPost).then(function() {
             return Promise.all(thread.lastPosts.map(function(post) {
@@ -164,7 +165,6 @@ router.get("/:boardName", function(req, res) {
         if (result)
             return;
         return boardModel.getPage(board, req.hashpass).then(function(model) {
-            model.currentPage = 0;
             return renderPage(model, board, req);
         }).then(function(data) {
             res.send(data);
@@ -215,7 +215,6 @@ router.get("/:boardName/:page.html", function(req, res) {
         if (result)
             return;
         return boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
-            model.currentPage = req.params.page;
             return renderPage(model, board, req);
         }).then(function(data) {
             res.send(data);
