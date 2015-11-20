@@ -9,7 +9,7 @@ module.exports = function(req, res, next) {
     var trueIp = req.ip;
     console.log(req.ip);
     if (!trueIp)
-        return res.send(500);
+        return res.sendStatus(500);
     console.log(1);
     if (config("system.detectRealIp", true)) {
         console.log(2);
@@ -23,11 +23,11 @@ module.exports = function(req, res, next) {
             var address = new Address6(ip);
             console.log(address);
             if (!address.isValid())
-                address = Address6.fromAddress4(new Address4(ip));
+                address = Address6.fromAddress4(ip);
             console.log(address);
             if (!address.isValid())
-                return res.send(500);
-            trueIp = address.group();
+                return res.sendStatus(500);
+            trueIp = address.correctForm();
         }
         console.log(3);
     }
@@ -37,14 +37,15 @@ module.exports = function(req, res, next) {
         var address = new Address6(ip);
         console.log(5);
         if (!address.isValid())
-            address = Address6.fromAddress4(new Address4(ip));
+            address = Address6.fromAddress4(ip);
         console.log(6);
         if (!address.isValid()) {
             console.log("aaa");
-            return res.send(500);
+            return res.sendStatus(500);
         }
-        trueIp = address.group();
+        trueIp = address.correctForm();
     }
+    console.log(trueIp);
     Object.defineProperty(req, "ip", { value: trueIp });
     next();
 };
