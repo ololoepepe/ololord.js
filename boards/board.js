@@ -455,6 +455,10 @@ var renderFileInfo = function(fi) {
                 return new Promise(function(resolve, reject) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
                 })
+            }).catch(function(err) {
+                console.log(err.stack ? err.stack : err);
+                file.thumbPath = thumbPath;
+                return generateRandomImage(file.hash, file.mimeType, thumbPath);
             }).then(function() {
                 return ImageMagick.identify(file.thumbPath);
             }).then(function(info) {

@@ -1,3 +1,5 @@
+var Address6 = require("ip-address").Address6;
+var bigInt = require("big-integer");
 var Crypto = require("crypto");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
@@ -1062,18 +1064,24 @@ var getGeolocationInfo = function(ip) {
     };
     if (!ip)
         return Promise.resolve(info);
-    var n = Tools.ipNum(ip);
-    if (!n)
+    var address = new Address6(ip);
+    if (!address.isValid())
         return Promise.resolve(info);
     var q = "SELECT ipFrom, countryCode, countryName, cityName FROM ip2location WHERE ipTo >= ? LIMIT 1";
     var stmt = dbGeo.prepare(q);
     stmt.pget = promisify(stmt.get);
-    return stmt.pget(n).then(function(result) {
+    address = bigInt(address.bigInteger().toString());
+    return stmt.pget(address.toString()).then(function(result) {
         stmt.finalize();
         if (!result)
             return info;
-        var ipFrom = +result.ipFrom;
-        if (isNaN(ipFrom) || ipFrom > n)
+        var ipFrom;
+        try {
+            ipFrom = bigInt(result.ipFrom);
+        } catch (err) {
+            return info;
+        }
+        if (ipFrom.greater(address))
             return info;
         info.cityName = result.cityName;
         info.countryCode = result.countryCode;

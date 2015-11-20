@@ -18,6 +18,7 @@ lord.banUser = function(e, form) {
     }).then(function(model) {
         c.model.settings = lord.settings();
         c.model.bannedUser = model;
+        c.model.showSubmitButton = true;
         return lord.getTemplate("userBan");
     }).then(function(template) {
         var parent = lord.id("bannedUsers");

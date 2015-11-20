@@ -22,7 +22,7 @@ memwatch.on("leak", function(info) {
         console.error(util.inspect(diff, true, null));
         heapDump = null;
     }
-    var file = `/tmp/myapp-${process.pid}-${Tools.now()}.heapsnapshot`;
+    var file = `/tmp/ololord.js-${process.pid}-${Tools.now()}.heapsnapshot`;
     heapdump.writeSnapshot(file, function(err) {
         if (err)
             console.error(err);

@@ -186,32 +186,6 @@ module.exports.externalLinkRootZoneExists = function(zoneName) {
     return rootZones.hasOwnProperty(zoneName);
 };
 
-module.exports.ipNum = function(ip) {
-    if (typeof ip != "string" || !/^([0-9]+\.){3}[0-9]+$/gi.test(ip))
-        return null;
-    var sl = ip.split(".");
-    if (sl.length != 4)
-        return null;
-    var n = +sl[3];
-    if (isNaN(n))
-        return null;
-    var nn = +sl[2];
-    if (isNaN(nn))
-        return null;
-    n += 256 * nn;
-    nn = +sl[1];
-    if (isNaN(nn))
-        return null;
-    n += 256 * 256 * nn;
-    nn = +sl[0];
-    if (isNaN(nn))
-        return null;
-    n += 256 * 256 * 256 * nn;
-    if (!n)
-        return null;
-    return n;
-};
-
 module.exports.toHtml = function(text, replaceSpaces) {
     text = escapeHtml(text).split("\n").join("<br />");
     if (replaceSpaces)
