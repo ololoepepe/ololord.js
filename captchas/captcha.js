@@ -46,8 +46,10 @@ Captcha.addCaptcha = function(captcha) {
 
 Captcha.captchaIds = function() {
     var list = [];
-    Tools.forIn(captchas, function(_, id) {
-        list.push(id);
+    Tools.toArray(captchas).sort(function(c1, c2) {
+        return (c1.id < c2.id) ? -1 : 1;
+    }).forEach(function(captcha) {
+        list.push(captcha.id);
     });
     return list;
 };

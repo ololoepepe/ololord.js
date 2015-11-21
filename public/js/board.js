@@ -12,7 +12,6 @@ lord.images = {};
 lord.img = null;
 lord.imgWrapper = null;
 lord.lastPostFormPosition = "";
-lord.complainVideo = null;
 lord.files = null;
 lord.filesMap = null;
 lord.spells = null;
@@ -2202,23 +2201,6 @@ lord.addThreadToFavorites = function(boardName, threadNumber) {
         lord.setLocalObject("favoriteThreads", fav);
         return Promise.resolve();
     }).catch(lord.handleError);
-};
-
-lord.complain = function() {
-    lord.getModel("misc/tr").then(function(model) {
-        lord.showPopup(model.tr.complainMessage, {type: "critical"});
-    }).catch(lord.handleError);
-    if (!lord.complainVideo) {
-        lord.complainVideo = lord.node("video");
-        lord.complainVideo.style.display = "none";
-        var src = lord.node("source");
-        src.src = "/" + lord.data("sitePathPrefix") + "video/fail.webm";
-        src.type = "video/webm";
-        lord.complainVideo.appendChild(src);
-        lord.complainVideo.volume = 0.5;
-        document.body.appendChild(lord.complainVideo);
-    }
-    lord.complainVideo.play();
 };
 
 lord.showUserIp = function(a) {

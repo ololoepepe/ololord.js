@@ -121,7 +121,7 @@ lord.visibilityChangeListener = function(e) {
     var link = lord.id("favicon");
     var finame = link.href.split("/").pop();
     if ("favicon.ico" != finame)
-        link.href = link.href.replace("img/favicon_newmessage.ico", "favicon.ico");
+        link.href = link.href.replace("favicon_newmessage.ico", "favicon.ico");
     if (document.title.substring(0, 2) == "* ")
         document.title = document.title.substring(2);
 };
@@ -130,9 +130,9 @@ lord.blinkFaviconNewMessage = function() {
     var link = lord.id("favicon");
     var finame = link.href.split("/").pop();
     if ("favicon.ico" == finame)
-        link.href = link.href.replace("favicon.ico", "img/favicon_newmessage.ico");
+        link.href = link.href.replace("favicon.ico", "favicon_newmessage.ico");
     else
-        link.href = link.href.replace("img/favicon_newmessage.ico", "favicon.ico");
+        link.href = link.href.replace("favicon_newmessage.ico", "favicon.ico");
 };
 
 lord.updateThread = function(silent) {
@@ -146,7 +146,7 @@ lord.updateThread = function(silent) {
     var popup;
     var c = {};
     var query = "boardName=" + boardName + "&threadNumber=" + threadNumber + "&lastPostNumber=" + lastPostNumber;
-    //misc/base, misc/boards and misc/board/<boardName> are just cached for lord.createPostNode, not used
+    //NOTE: misc/base, misc/boards and misc/board/<boardName> are just cached for lord.createPostNode, not used
     return lord.getModel(["misc/base", "misc/tr", "misc/boards", "misc/board/" + boardName]).then(function(models) {
         c.tr = models[1].tr;
         if (!silent) {

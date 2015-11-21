@@ -590,7 +590,9 @@ Board.addBoard = function(board) {
 Board.boardInfos = function(includeHidden) {
     includeHidden = !!(includeHidden || (typeof includeHidden == "undefined"));
     var list = [];
-    Tools.forIn(boards, function(board) {
+    Tools.toArray(boards).sort(function(b1, b2) {
+        return (b1.name < b2.name) ? -1 : 1;
+    }).forEach(function(board) {
         if (!board.enabled || (!includeHidden && board.hidden))
             return;
         list.push({
@@ -604,7 +606,9 @@ Board.boardInfos = function(includeHidden) {
 Board.boardNames = function(includeHidden) {
     includeHidden = !!(includeHidden || (typeof includeHidden == "undefined"));
     var list = [];
-    Tools.forIn(boards, function(board) {
+    Tools.toArray(boards).sort(function(b1, b2) {
+        return (b1.name < b2.name) ? -1 : 1;
+    }).forEach(function(board) {
         if (!board.enabled || (!includeHidden && board.hidden))
             return;
         list.push(board.name);

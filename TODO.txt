@@ -1,1 +1,2 @@
 * Hotkeys
+* Captcha public keys

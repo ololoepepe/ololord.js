@@ -16,6 +16,7 @@ var config = require("./config");
 
 var translate = require("cute-localize")({
     locale: config("site.locale", "en"),
+    extraLocations: __dirname + "/../translations/custom",
     silent: true
 });
 
@@ -161,7 +162,7 @@ module.exports.flagName = function(countryCode) {
     var fn = countryCode.toUpperCase() + ".png";
     if (flags.hasOwnProperty(fn))
         return Promise.resolve(fn);
-    return FS.exists(__dirname + "/../public/img/flag/" + fn).then(function(exists) {
+    return FS.exists(__dirname + "/../public/img/flags/" + fn).then(function(exists) {
         if (exists)
             flags[fn] = true;
         return Promise.resolve(exists ? fn : "");
