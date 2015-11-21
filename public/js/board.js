@@ -2551,7 +2551,7 @@ lord.signOwnPostLinks = function(parent, postInfos) {
 };
 
 lord.hotkey_previousPageImage = function() {
-    if (!!lord.img) {
+    if (lord.img) {
         lord.previousFile();
         return false;
     }
@@ -2568,7 +2568,7 @@ lord.hotkey_previousPageImage = function() {
 };
 
 lord.hotkey_nextPageImage = function() {
-    if (!!lord.img) {
+    if (lord.img) {
         lord.nextFile();
         return false;
     }
@@ -2703,6 +2703,7 @@ lord.hotkey_goToThread = function() {
         return;
     var opPost = lord.queryOne(".opPost", t);
     window.open(lord.queryOne(".postHeader > [name='toThreadLink']", opPost).href, '_blank').focus();
+    return false;
 };
 
 lord.hotkey_expandThread = function() {
@@ -2791,7 +2792,7 @@ lord.hotkey_updateThread = function() {
     var tn = +lord.data("threadNumber");
     if (isNaN(tn))
         return;
-    lord.updateThread(lord.data("boardName"), tn);
+    lord.updateThread();
     return false;
 };
 

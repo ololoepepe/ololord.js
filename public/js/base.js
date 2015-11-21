@@ -499,13 +499,14 @@ lord.hotkey_showSettings = function() {
 };
 
 lord.interceptHotkey = function(e) {
-    if (e.target.tagName && !e.metaKey && !e.altKey && !e.ctrlKey
-        && lord.in(["TEXTAREA", "INPUT", "BUTTON"], e.target.tagName))
+    if (!e || e.type != "keyup" || (e.target.tagName && !e.metaKey && !e.altKey && !e.ctrlKey
+        && lord.in(["TEXTAREA", "INPUT", "BUTTON"], e.target.tagName))) {
         return;
+    }
     var hotkeys = lord.getLocalObject("hotkeys", {});
-    var key = e.key;
-    if (key.length == 1)
-        key = key.toUpperCase();
+    var key = lord.keyboardMap[e.which || e.keyCode || e.key];
+    if (!key)
+        return;
     if (e.metaKey)
         key = "Meta+" + key;
     if (e.altKey)
@@ -527,7 +528,7 @@ lord.initializeOnLoadSettings = function() {
     if (lord.getCookie("show_tripcode") === "true")
         lord.id("showTripcodeCheckbox").checked = true;
     if (lord.getLocalObject("hotkeysEnabled", true) && lord.data("deviceType") != "mobile") {
-        document.body.addEventListener("keypress", lord.interceptHotkey, false);
+        document.body.addEventListener("keyup", lord.interceptHotkey, false);
         var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
         var key = function(name) {
             if (!hotkeys)
