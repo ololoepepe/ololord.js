@@ -42,10 +42,10 @@
         {{?}}
         {{? it.board.showWhois && post.geolocation.flagName}}
             {{? post.geolocation.cityName}}
-                <img src="/{{=it.site.pathPrefix}}img/flag/{{=post.geolocation.flagName}}"
+                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}"
                      title="{{=post.geolocation.cityName}}, {{=post.geolocation.countryName}}">
             {{??}}
-                <img src="/{{=it.site.pathPrefix}}img/flag/{{=post.geolocation.flagName}}"
+                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}"
                      title="{{=post.geolocation.countryName}}">
             {{?}}
         {{?}}
