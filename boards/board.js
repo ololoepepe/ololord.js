@@ -319,10 +319,9 @@ var renderFileInfo = function(fi) {
     if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0) {
         delete post.user.ip;
     } else {
-        var address = new Address6(post.user.ip);
-        var ipv4 = address.to4();
-        if (ipv4.isValid())
-            post.user.ipv4 = ipv4.correctForm();
+        var ipv4 = Tools.preferIPv4(post.user.ip);
+        if (ipv4 && ipv4 != post.user.ip)
+            post.user.ipv4 = ipv4;
     }
     if (post.showTripcode
         && Database.compareRegisteredUserLevels(post.user.level, Database.RegisteredUserLevels.User) >= 0) {

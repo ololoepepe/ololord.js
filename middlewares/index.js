@@ -10,13 +10,13 @@ var log = function(req, res, next) {
     var args;
     switch (config("system.middlewareLog.verbosity", "")) {
     case "all":
-        args = [req.ip, req.path, req.query];
+        args = [Tools.preferIPv4(req.ip), req.path, req.query];
         break;
     case "path":
-        args = [req.ip, req.path];
+        args = [Tools.preferIPv4(req.ip), req.path];
         break;
     case "ip":
-        args = [req.ip];
+        args = [Tools.preferIPv4(req.ip)];
         break;
     default:
         break;

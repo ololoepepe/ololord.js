@@ -499,3 +499,15 @@ module.exports.correctAddress = function(ip) {
         return null;
     return address.correctForm();
 };
+
+module.exports.preferIPv4 = function(ip) {
+    var address = new Address6(ip);
+    var ipv4 = address.to4();
+    if (ipv4.isValid()) {
+        ipv4 = ipv4.correctForm();
+        return ("0.0.0.1" == ipv4) ? "127.0.0.1" : ipv4;
+    }
+    if (address.isValid())
+        return address.correctForm();
+    return ip;
+};
