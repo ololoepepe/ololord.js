@@ -282,7 +282,8 @@ controller.baseModel = function(req) {
             var captcha = Captcha.captcha(id);
             return {
                 id: captcha.id,
-                title: captcha.title
+                title: captcha.title,
+                publicKey: captcha.publicKey
             };
         })
     };

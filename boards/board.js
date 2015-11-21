@@ -135,7 +135,8 @@ var Board = function(name, title, options) {
                 var captcha = Captcha.captcha(id);
                 list.push({
                     id: captcha.id,
-                    title: captcha.title
+                    title: captcha.title,
+                    publicKey: captcha.publicKey
                 });
             });
             return list;
