@@ -4,9 +4,8 @@ var lord = lord || {};
 
 /*Classes*/
 
-/*constructor*/ lord.AutoUpdateTimer = function(intervalSeconds, showCountdown) {
+/*constructor*/ lord.AutoUpdateTimer = function(intervalSeconds) {
     this.intervalSeconds = intervalSeconds;
-    this.showCountdown = showCountdown;
     this.updateTimer = null;
     this.countdownTimer = null;
     this.secondsLeft = 0;
@@ -49,8 +48,7 @@ var lord = lord || {};
         }
         this.update();
     }).bind(this), this.intervalSeconds * lord.Second);
-    if (this.showCountdown)
-        this.createCountdownTimer();
+    this.createCountdownTimer();
     this.update();
 };
 
@@ -303,8 +301,7 @@ lord.setAutoUpdateEnabled = function(enabled) {
     });
     if (enabled) {
         var intervalSeconds = lord.getLocalObject("autoUpdateInterval", 15);
-        var showCountdown = lord.getLocalObject("showAutoUpdateTimer", true);
-        lord.autoUpdateTimer = new lord.AutoUpdateTimer(intervalSeconds, showCountdown);
+        lord.autoUpdateTimer = new lord.AutoUpdateTimer(intervalSeconds);
         lord.autoUpdateTimer.start();
     } else if (lord.autoUpdateTimer) {
         lord.autoUpdateTimer.stop();

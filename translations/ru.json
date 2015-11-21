@@ -255,9 +255,6 @@
     "Update thread": {
         "updateThreadText": {
             "value": "Обновить тред"
-        },
-        "hotkeyUpdateThreadLabelText": {
-            "value": "Update thread"
         }
     },
     "No new posts": {
@@ -2003,8 +2000,7 @@
     "Previous thread (on board)/post (in thread)": {
         "hotkeyPreviousThreadPostLabelText": {
             "value": "Предыдущий тред (на доске)/пост (в треде)"
-        },
-        "_obsolete": true
+        }
     },
     "Next page/file": {
         "hotkeyNextPageImageLabelText": {
@@ -2014,8 +2010,7 @@
     "Next thread (on board)/post (in thread)": {
         "hotkeyNextThreadPostLabelText": {
             "value": "Следующий тред (на доске)/пост (в треде)"
-        },
-        "_obsolete": true
+        }
     },
     "Hotkeys:": {
         "hotkeysLabelText": {
@@ -2025,14 +2020,12 @@
     "Previous post (in thread/on board)": {
         "hotkeyPreviousPostLabelText": {
             "value": "Предыдущий пост (в треде/на доске)"
-        },
-        "_obsolete": true
+        }
     },
     "Next post (inthread/on board)": {
         "hotkeyNextPostLabelText": {
             "value": "Следующий пост (в треде/на доске)"
-        },
-        "_obsolete": true
+        }
     },
     "Expand thread": {
         "hotkeyExpandThreadLabelText": {
@@ -2087,7 +2080,7 @@
         }
     },
     "Quote selected text": {
-        "hotkeyMarkupQutationLabelText": {
+        "hotkeyMarkupQuotationLabelText": {
             "value": "Цитировать выделенный текст"
         },
         "markupQuotation": {
@@ -2121,8 +2114,7 @@
     "Update thread (in thread only)": {
         "hotkeyUpdateThreadLabelText": {
             "value": "Обновить тред (только в треде)"
-        },
-        "_obsolete": true
+        }
     },
     "Show favorite threads": {
         "hotkeyShowFavoritesLabelText": {
@@ -3530,26 +3522,6 @@
     "Log in": {
         "loginText": {
             "value": "Залогиниться"
-        }
-    },
-    "Previous thread on board/post in thread": {
-        "hotkeyPreviousThreadPostLabelText": {
-            "value": "Previous thread on board/post in thread"
-        }
-    },
-    "Next thread on board/post in thread": {
-        "hotkeyNextThreadPostLabelText": {
-            "value": "Next thread on board/post in thread"
-        }
-    },
-    "Previous post in thread/on board": {
-        "hotkeyPreviousPostLabelText": {
-            "value": "Previous post in thread/on board"
-        }
-    },
-    "Next post in thread/on board": {
-        "hotkeyNextPostLabelText": {
-            "value": "Next post in thread/on board"
         }
     },
     "Sticky toolbar:": {

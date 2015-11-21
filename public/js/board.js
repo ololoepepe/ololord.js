@@ -2863,17 +2863,17 @@ lord.initializeOnLoadBaseBoard = function() {
             return hotkeys[name] || lord.DefaultHotkeys.dir[name];
         };
         var btn = lord.queryOne(".leafButton.leafButtonPrevious");
-        btn.title = btn.title + " (" + key("previousPageImage") + ")";
+        btn.title += " (" + key("previousPageImage") + ")";
         btn = lord.queryOne(".leafButton.leafButtonNext");
-        btn.title = btn.title + " (" + key("nextPageImage") + ")";
+        btn.title += " (" + key("nextPageImage") + ")";
         lord.query("[name='quickReply']").forEach(function(a) {
-            a.title = a.title + " (" + key("quickReply") + ")";
+            a.title += " (" + key("quickReply") + ")";
         });
         lord.query("[name='toThreadLink']").forEach(function(a) {
-            a.title = "(" + key("goToThread") + ")";
+            a.title += " (" + key("goToThread") + ")";
         });
         lord.query("[name='hideButton'] > img").forEach(function(img) {
-            img.title = img.title + " (" + key("hidePost") + ")";
+            img.title += " (" + key("hidePost") + ")";
         });
         var table = lord.queryOne(".postformMarkup");
         ["Bold", "Italics", "StrikedOut", "Underlined", "Spoiler", "Quotation", "Code"].forEach(function(s) {
@@ -2881,12 +2881,12 @@ lord.initializeOnLoadBaseBoard = function() {
             var btn = lord.nameOne(s, table);
             if (!btn)
                 return;
-            btn.title = btn.title + " (" + key(s) + ")";
+            btn.title += " (" + key(s) + ")";
         });
         lord.query("[name='updateThreadButton']").forEach(function(a) {
-            a.title = a.title + " (" + key("updateThread") + ")";
+            a.title += " (" + key("updateThread") + ")";
         });
-        lord.nameOne("submit", lord.id("postForm")).title = "(" + key("submitReply") + ")";
+        lord.nameOne("submit", lord.id("postForm")).title += " (" + key("submitReply") + ")";
     }
     if (lord.getLocalObject("showTripcode", false)) {
         var postForm = lord.id("postForm");

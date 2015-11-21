@@ -346,37 +346,43 @@ lord.showNewPosts = function() {
 };
 
 lord.editHotkeys = function() {
-    var table = lord.id("hotkeysDialogTemplate").cloneNode(true);
-    table.id = "";
-    table.style.display = "";
-    var hotkeys = lord.getLocalObject("hotkeys", {});
-    if (!hotkeys.dir)
-        hotkeys.dir = {};
-    if (!hotkeys.rev)
-        hotkeys.rev = {};
-    lord.forIn(lord.DefaultHotkeys.dir, function(key, name) {
-        lord.nameOne(name, table).value = hotkeys.dir[name] || key;
-    });
-    lord.showDialog(null, null, table).then(function(result) {
-        if (!result)
-            return Promise.resolve();
-        lord.forIn(lord.DefaultHotkeys.dir, function(key, name) {
-            key = lord.nameOne(name, table).value || key;
-            hotkeys.dir[name] = key;
-            hotkeys.rev[key] = name;
+    var c = {};
+    lord.getTemplate("hotkeysDialog").then(function(template) {
+        c.template = template;
+        var hotkeys = lord.getLocalObject("hotkeys", {
+            dir: {},
+            rev: {}
         });
-        lord.setLocalObject("hotkeys", hotkeys);
-        return Promise.resolve();
-    });
+        c.model = {
+            hotkeys: hotkeys.dir,
+            defaultHotkeys: lord.DefaultHotkeys.dir
+        };
+        return lord.getModel(["misc/tr"], true);
+    }).then(function(model) {
+        c.model = merge.recursive(c.model, model);
+        c.div = $.parseHTML(c.template(c.model))[0];
+        return lord.showDialog(null, null, c.div);
+    }).then(function(accepted) {
+        if (!accepted)
+            return;
+        lord.query("input", c.div).forEach(function(el) {
+            var name = el.name;
+            var value = el.value || lord.DefaultHotkeys.dir[name];
+            hotkeys.dir[name] = value;
+            hotkeys.rev[value] = name;
+            lord.setLocalObject("hotkeys", hotkeys);
+        });
+    }).catch(lord.handleError);
 };
 
 lord.assignHotkey = function(e, inp) {
-    if (!e || e.type != "keypress" || !inp)
+    if (!e || e.type != "keyup" || !inp)
         return;
+    e.preventDefault();
     var name = inp.name;
-    var key = e.key;
-    if (key.length == 1)
-        key = key.toUpperCase();
+    var key = lord.keyboardMap[e.which || e.keyCode || e.key];
+    if (!key)
+        return false;
     if (e.metaKey)
         key = "Meta+" + key;
     if (e.altKey)
@@ -385,18 +391,11 @@ lord.assignHotkey = function(e, inp) {
         key = "Shift+" + key;
     if (e.ctrlKey)
         key = "Ctrl+" + key;
-    var hotkeys = lord.getLocalObject("hotkeys", {});
-    if (!hotkeys.dir)
-        hotkeys.dir = {};
-    if (!hotkeys.rev)
-        hotkeys.rev = {};
-    var curr = hotkeys.dir[name];
-    if (curr)
-        delete hotkeys.rev[curr];
-    hotkeys.dir[name] = key;
-    hotkeys.rev[key] = name;
+    var hotkeys = lord.getLocalObject("hotkeys", {
+        dir: {},
+        rev: {}
+    });
     inp.value = key;
-    e.preventDefault();
     return false;
 };
 
@@ -535,8 +534,8 @@ lord.initializeOnLoadSettings = function() {
                 return lord.DefaultHotkeys.dir[name];
             return hotkeys[name] || lord.DefaultHotkeys.dir[name];
         };
-        lord.queryOne("[name='settingsButton']").title = "(" + key("showSettings") + ")";
-        lord.queryOne("[name='favoritesButton']").title = "(" + key("showFavorites") + ")";
+        lord.queryOne("[name='settingsButton']").title += " (" + key("showSettings") + ")";
+        lord.queryOne("[name='favoritesButton']").title += " (" + key("showFavorites") + ")";
     }
     if (lord.getLocalObject("showNewPosts", true))
         lord.showNewPosts();
