@@ -207,9 +207,9 @@ router.post("/createPost", function(req, res) {
         c.fields = result.fields;
         c.files = result.files;
         c.board = Board.board(c.fields.boardName);
-        if (!board)
+        if (!c.board)
             return Promise.reject("Invalid board");
-        transaction.board = board;
+        transaction.board = c.board;
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
@@ -242,9 +242,9 @@ router.post("/createThread", function(req, res) {
         c.fields = result.fields;
         c.files = result.files;
         c.board = Board.board(c.fields.boardName);
-        if (!board)
+        if (!c.board)
             return Promise.reject("Invalid board");
-        transaction.board = board;
+        transaction.board = c.board;
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;

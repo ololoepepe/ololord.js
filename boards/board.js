@@ -487,12 +487,13 @@ var renderFileInfo = function(fi) {
             });
         } else if (Tools.isImageType(file.mimeType)) {
             file.extraData = null;
-            return ImageMagick.identify(file.path).then(function(info) {
+            var suffix = ("image/gif" == file.mimeType) ? "[0]" : "";
+            return ImageMagick.identify(file.path + suffix).then(function(info) {
                 file.dimensions = {
                     width: info.width,
                     height: info.height
                 };
-                var args = [ file.path + (("image/gif" == file.mimeType) ? "" : "[0]") ];
+                var args = [ file.path + suffix ];
                 if (info.width > 200 || info.height > 200) {
                     args.push("-resize");
                     args.push("200x200");
@@ -588,7 +589,7 @@ Board.addBoard = function(board) {
 };
 
 Board.boardInfos = function(includeHidden) {
-    includeHidden = !!(includeHidden || (typeof includeHidden == "undefined"));
+    includeHidden = (includeHidden || (typeof includeHidden == "undefined"));
     var list = [];
     Tools.toArray(boards).sort(function(b1, b2) {
         return (b1.name < b2.name) ? -1 : 1;
@@ -604,7 +605,7 @@ Board.boardInfos = function(includeHidden) {
 };
 
 Board.boardNames = function(includeHidden) {
-    includeHidden = !!(includeHidden || (typeof includeHidden == "undefined"));
+    includeHidden = (includeHidden || (typeof includeHidden == "undefined"));
     var list = [];
     Tools.toArray(boards).sort(function(b1, b2) {
         return (b1.name < b2.name) ? -1 : 1;

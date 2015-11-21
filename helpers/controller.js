@@ -135,8 +135,10 @@ controller.error = function(req, res, error, ajax) {
         var model = {};
         model.title = Tools.translate("Error", "pageTitle");
         if (Util.isError(error)) {
-            if (Tools.contains(process.argv.slice(2), "--dev-mode"))
+            if (Tools.contains(process.argv.slice(2), "--dev-mode")) {
+                console.log(error);
                 console.log(error.stack);
+            }
             model.errorMessage = Tools.translate("Internal error", "errorMessage");
             model.errorDescription = error.message;
         } else if (Util.isObject(error) && error.error) {

@@ -915,8 +915,6 @@ var removeThread = function(boardName, threadNumber, archived, leaveFileInfos) {
     }).then(function() {
         return db.hdel("threadUpdateTimes:" + boardName, threadNumber);
     }).then(function() {
-
-    }).then(function() {
         setTimeout(function() {
             var c = {};
             db.smembers("threadPostNumbers:" + boardName + ":" + threadNumber).then(function(result) {
