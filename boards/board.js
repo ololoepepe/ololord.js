@@ -216,6 +216,7 @@ var Board = function(name, title, options) {
 };
 
 /*public*/ Board.prototype.loadExtraData = function(postNumber) {
+    var _this = this;
     return Database.db.hget("postExtraData", this.name + ":" + postNumber).then(function(extraData) {
         if (Util.isNullOrUndefined(extraData))
             return Promise.resolve(null);
@@ -243,7 +244,15 @@ var Board = function(name, title, options) {
     return [];
 };
 
-/*public*/ Board.prototype.customPostBodyPart = function(n, req) {
+/*public*/ Board.prototype.customPostHeaderPart = function(n, req, thread) {
+    //
+};
+
+/*public*/ Board.prototype.customPostMenuAction = function(n, req, thread) {
+    //
+};
+
+/*public*/ Board.prototype.customPostBodyPart = function(n, req, thread) {
     //
 };
 

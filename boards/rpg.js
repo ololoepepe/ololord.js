@@ -55,6 +55,7 @@ var contains = function(variants, id) {
 };
 
 board.actionRoutes = function() {
+    var _this = this;
     return [{
         method: "post",
         path: "/vote",
@@ -63,7 +64,7 @@ board.actionRoutes = function() {
             Tools.parseForm(req).then(function(result) {
                 c.postNumber = +result.fields.postNumber;
                 c.fields = result.fields;
-                return Board.prototype.loadExtraData.call(board, c.postNumber);
+                return Board.prototype.loadExtraData.call(_this, c.postNumber);
             }).then(function(extraData) {
                 if (!extraData)
                     return Promise.reject("This post does not have voting");
@@ -123,7 +124,7 @@ board.actionRoutes = function() {
             Tools.parseForm(req).then(function(result) {
                 c.postNumber = +result.fields.postNumber;
                 c.fields = result.fields;
-                return board.loadExtraData(c.postNumber);
+                return _this.loadExtraData(c.postNumber);
             }).then(function(extraData) {
                 if (!extraData)
                     return Promise.reject("This post does not have voting");
@@ -172,12 +173,12 @@ board.actionRoutes = function() {
                     && (Database.compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
                     return Promise.reject("Not enough rights");
                 }
-                return Board.prototype.loadExtraData.call(board, post.number);
+                return Board.prototype.loadExtraData.call(_this, post.number);
             }).then(function(extraData) {
                 if (!extraData)
                     return Promise.reject("This post does not have voting");
                 extraData.disabled = !c.opened;
-                return Board.prototype.storeExtraData.call(board, c.post.number, extraData);
+                return Board.prototype.storeExtraData.call(_this, c.post.number, extraData);
             }).then(function(result) {
                 res.send({});
             }).catch(function(err) {
@@ -298,7 +299,7 @@ board.storeExtraData = function(postNumber, extraData) {
         variantUsers[variant.id] = variant.users;
         delete variant.users;
     });
-    return Board.prototype.storeExtraData.apply(board, arguments).then(function() {
+    return Board.prototype.storeExtraData.apply(this, arguments).then(function() {
         if (!users)
             return Promise.resolve();
         return Database.db.sadd("voteUsers:" + postNumber, users);
@@ -315,7 +316,7 @@ board.storeExtraData = function(postNumber, extraData) {
 
 board.loadExtraData = function(postNumber) {
     var c = {};
-    return Board.prototype.loadExtraData.apply(board, arguments).then(function(extraData) {
+    return Board.prototype.loadExtraData.apply(this, arguments).then(function(extraData) {
         c.extraData = extraData;
         return Database.db.smembers("voteUsers:" + postNumber);
     }).then(function(users) {
@@ -338,7 +339,7 @@ board.loadExtraData = function(postNumber) {
 
 board.removeExtraData = function(postNumber) {
     var c = {};
-    return Board.prototype.loadExtraData.apply(board, arguments).then(function(extraData) {
+    return Board.prototype.loadExtraData.apply(this, arguments).then(function(extraData) {
         c.extraData = extraData;
         return Database.db.del("voteUsers:" + postNumber);
     }).then(function() {
@@ -348,12 +349,12 @@ board.removeExtraData = function(postNumber) {
         });
         return Promise.all(promises);
     }).then(function() {
-        return Board.prototype.removeExtraData.apply(board, arguments);
+        return Board.prototype.removeExtraData.apply(this, arguments);
     });
 };
 
 board.renderPost = function(post, req) {
-    return Board.prototype.renderPost.apply(board, arguments).then(function(post) {
+    return Board.prototype.renderPost.apply(this, arguments).then(function(post) {
         if (!post.extraData)
             return Promise.resolve(post);
         if (post.extraData.variants) {

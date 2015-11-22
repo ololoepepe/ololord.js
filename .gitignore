@@ -8,6 +8,7 @@ boards/*
 !boards/echo.js
 !boards/index.js
 !boards/rpg.js
+!boards/soc.js
 
 # captchas
 captchas/*

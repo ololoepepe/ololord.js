@@ -22,13 +22,15 @@ board.addTranslations = function(translate) {
     translate("Thread link:", "postFormLabelLink");
 };
 
+var _board = board;
+
 var testLink = function(link) {
     if (!link)
         return { error: "Thread link is empty" };
-    if (link.length > board.maxLinkLength)
+    if (link.length > _board.maxLinkLength)
         return { error: "Thread link is too long" };
-    for (var i = 0; i < board.acceptedExternalBoardLinks.length; ++i) {
-        if ((new XRegExp(board.acceptedExternalBoardLinks[i])).test(link))
+    for (var i = 0; i < _board.acceptedExternalBoardLinks.length; ++i) {
+        if ((new XRegExp(_board.acceptedExternalBoardLinks[i])).test(link))
             return;
     }
     return { error: "This board/thread may not be accepted" };
@@ -49,7 +51,7 @@ board.postExtraData = function(req, fields, files, oldPost) {
 };
 
 board.renderPost = function(post, req) {
-    return Board.prototype.renderPost.apply(board, arguments).then(function(post) {
+    return Board.prototype.renderPost.apply(this, arguments).then(function(post) {
         if (post.number != post.threadNumber)
             return Promise.resolve(post);
         var model = {

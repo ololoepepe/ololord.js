@@ -29,6 +29,7 @@ img/*
 !img/closed.png
 !img/close_voting.png
 !img/delete.png
+!img/dislike.png
 !img/download.png
 !img/down.png
 !img/edit.png
@@ -46,6 +47,7 @@ img/*
 !img/iqdb.png
 !img/jpeg_file.png
 !img/left.png
+!img/like.png
 !img/loading.gif
 !img/login.png
 !img/logout.png
@@ -121,6 +123,7 @@ js/*
 !js/manage.js
 !js/playlist.js
 !js/rpg.js
+!js/soc.js
 !js/thread.js
 !js/worker.js
 !js/yandex-captcha-script.js
@@ -166,5 +169,6 @@ templates/*
 !templates/rpgPostBodyPart.jst
 !templates/settingsDialog.jst
 !templates/setVotingOpenedDialog.jst
+!templates/socPostHeaderPart.jst
 !templates/userBan.jst
 !templates/voteVariant.jst

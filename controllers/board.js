@@ -34,6 +34,24 @@ var selectCaptchaEngine = function(req, board) {
     return Captcha.captcha(ceid);
 };
 
+var custom = function(model, req, board, thread) {
+    model.customPostHeaderPart = {};
+    for (var i = 0; i < 180; i += 10)
+        model.customPostHeaderPart[i] = board.customPostHeaderPart(i, req, thread);
+    model.customPostMenuAction = {};
+    for (var i = 0; i < 120; i += 10)
+        model.customPostMenuAction[i] = board.customPostMenuAction(i, req, thread);
+    model.customPostBodyPart = {};
+    for (var i = 0; i < 60; i += 10)
+        model.customPostBodyPart[i] = board.customPostBodyPart(i, req, thread);
+    model.customPostFormField = {};
+    for (var i = 0; i < 120; i += 10)
+        model.customPostFormField[i] = board.customPostFormField(i, req, thread);
+    model.customPostFormOption = {};
+    for (var i = 0; i < 50; i += 10)
+        model.customPostFormOption[i] = board.customPostFormOption(i, req, thread);
+};
+
 var renderPage = function(model, board, req, json) {
     model.currentPage = +(req.params.page || 0);
     var promises = model.threads.map(function(thread) {
@@ -68,15 +86,7 @@ var renderPage = function(model, board, req, json) {
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
-        model.customPostBodyPart = {};
-        for (var i = 0; i < 60; i += 10)
-            model.customPostBodyPart[i] = board.customPostBodyPart(i, req);
-        model.customPostFormField = {};
-        for (var i = 0; i < 120; i += 10)
-            model.customPostFormField[i] = board.customPostFormField(i, req);
-        model.customPostFormOption = {};
-        for (var i = 0; i < 50; i += 10)
-            model.customPostFormOption[i] = board.customPostFormOption(i, req);
+        custom(model, req, board);
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
@@ -116,15 +126,7 @@ var renderThread = function(model, board, req, json) {
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
-        model.customPostBodyPart = {};
-        for (var i = 0; i < 60; i += 10)
-            model.customPostBodyPart[i] = board.customPostBodyPart(i, req);
-        model.customPostFormField = {};
-        for (var i = 0; i < 120; i += 10)
-            model.customPostFormField[i] = board.customPostFormField(i, req, thread);
-        model.customPostFormOption = {};
-        for (var i = 0; i < 50; i += 10)
-            model.customPostFormOption[i] = board.customPostFormOption(i, req, thread);
+        custom(model, req, board, thread);
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else

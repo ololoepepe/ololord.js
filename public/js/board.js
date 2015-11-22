@@ -17,6 +17,8 @@ lord.filesMap = null;
 lord.spells = null;
 lord.worker = new Worker("/js/worker.js");
 lord.workerTasks = {};
+lord.customPostHeaderPart = {};
+lord.customPostMenuAction = {};
 lord.customPostBodyPart = {};
 lord.customEditPostDialogPart = {};
 
@@ -357,6 +359,52 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
             if (!part)
                 return;
             c.model.customPostBodyPart[part.index] = part.part;
+        });
+        var indexes = [];
+        for (var i = 0; i < 180; i += 10)
+            indexes.push(i);
+        var promises = indexes.map(function(index) {
+            if (!lord.customPostHeaderPart[index])
+                return Promise.resolve(null);
+            return lord.customPostHeaderPart[index]().then(function(part) {
+                if (!part)
+                    return Promise.resolve(null);
+                return Promise.resolve({
+                    index: index,
+                    part: part
+                });
+            });
+        });
+        return Promise.all(promises);
+    }).then(function(parts) {
+        c.model.customPostHeaderPart = {};
+        parts.forEach(function(part) {
+            if (!part)
+                return;
+            c.model.customPostHeaderPart[part.index] = part.part;
+        });
+        var indexes = [];
+        for (var i = 0; i < 120; i += 10)
+            indexes.push(i);
+        var promises = indexes.map(function(index) {
+            if (!lord.customPostMenuAction[index])
+                return Promise.resolve(null);
+            return lord.customPostMenuAction[index]().then(function(part) {
+                if (!part)
+                    return Promise.resolve(null);
+                return Promise.resolve({
+                    index: index,
+                    part: part
+                });
+            });
+        });
+        return Promise.all(promises);
+    }).then(function(parts) {
+        c.model.customPostMenuAction = {};
+        parts.forEach(function(part) {
+            if (!part)
+                return;
+            c.model.customPostMenuAction[part.index] = part.part;
         });
         return lord.getTemplate("post");
     }).then(function(template) {

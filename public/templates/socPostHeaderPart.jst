@@ -1,0 +1,30 @@
+<span class="likeArea {{=it.deviceType}}" name="likeArea">
+    <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
+          action="/{{=it.site.pathPrefix}}action/like"
+          {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.likeDislike(event, this); return false;"{{?}}>
+        <input type="hidden" name="postNumber" value="{{=it.post.number}}" />
+        <input type="image" src="/{{=it.site.pathPrefix}}img/like.png" name="buttonLike" title="{{=it.tr.likeText}}"
+               width="16" height="16" class="buttonImage" />
+    </form>
+    {{? it.liked}}
+        <b>
+    {{?}}
+    {{=it.likeCount}}
+    {{? it.liked}}
+        </b>
+    {{?}}
+    <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
+          action="/{{=it.site.pathPrefix}}action/dislike"
+          {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.likeDislike(event, this); return false;"{{?}}>
+        <input type="hidden" name="postNumber" value="{{=it.post.number}}" />
+        <input type="image" src="/{{=it.site.pathPrefix}}img/dislike.png" name="buttonDislike" class="buttonImage"
+               title="{{=it.tr.dislikeText}}" width="16" height="16" />
+    </form>
+    {{? it.disliked}}
+        <b>
+    {{?}}
+    {{=it.dislikeCount}}
+    {{? it.disliked}}
+        </b>
+    {{?}}
+</span>

@@ -4,6 +4,12 @@ var Board = require("./board");
 var Captcha = require("../captchas");
 var Tools = require("../helpers/tools");
 
+FSSync.readdirSync(__dirname).forEach(function(file) {
+    if ("index.js" == file)
+        return;
+    Board.addBoard(require("./" + file.split(".").shift()));
+});
+
 Board.addBoard(new Board("3dpd", Tools.translate.noop("3D pron", "boardTitle")));
 
 Board.addBoard(new Board("a", Tools.translate.noop("/a/nime", "boardTitle"),
@@ -52,16 +58,7 @@ Board.addBoard(board);
 Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"),
     { defaultUserName: Tools.translate.noop("Whiner", "defaultUserName") }));
 
-Board.addBoard(new Board("soc", Tools.translate.noop("Social life", "boardTitle"),
-    { defaultUserName: Tools.translate.noop("Life of the party", "defaultUserName") }));
-
 Board.addBoard(new Board("vg", Tools.translate.noop("Video games", "boardTitle"),
     { defaultUserName: Tools.translate.noop("PC Nobleman", "defaultUserName") }));
-
-FSSync.readdirSync(__dirname).forEach(function(file) {
-    if ("index.js" == file)
-        return;
-    Board.addBoard(require("./" + file.split(".").shift()));
-});
 
 module.exports = Board;
