@@ -290,6 +290,7 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
             return Promise.reject(thread);
         c.model.thread = thread;
         c.model.post = post;
+        c.model.includeThreadScripts = !!lord.data("threadNumber");
         c.model.compareRatings = function(r1, r2) {
             if (["SFW", "R-15", "R-18", "R-18G"].indexOf(r2) < 0)
                 throw "Invalid rating r2: " + r2;

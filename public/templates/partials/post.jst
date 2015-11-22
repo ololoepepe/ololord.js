@@ -278,7 +278,7 @@
         {{? it.customPostHeaderPart && it.customPostHeaderPart[160]}}
             {{ out += it.customPostHeaderPart[160](it, thread, post); }}
         {{?}}
-        {{? post.isOp && !it.thread && "mobile" != it.deviceType}}
+        {{? post.isOp && !it.includeThreadScripts && "mobile" != it.deviceType}}
             <span name="toThread" class="postToThread {{=it.deviceType}}">
                 [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"
                     name="toThreadLink">{{=it.tr.toThread}}</a>]

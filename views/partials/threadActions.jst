@@ -7,13 +7,6 @@
             name="updateThreadButton"><img class="buttonImage" width="24" height="24"
                                            src="/{{=it.site.pathPrefix}}img/thread_update.png"></a>]
     {{?}}
-    {{? "Top" == position}}
-        [<a href="#bottom" title="{{=it.tr.toBottomText}}"><img class="buttonImage" width="24" height="24"
-                                                                src="/{{=it.site.pathPrefix}}img/thread_down.png"></a>]
-    {{??}}
-        [<a href="#top" title="{{=it.tr.toTopText}}"><img class="buttonImage" width="24" height="24"
-                                                          src="/{{=it.site.pathPrefix}}img/thread_up.png"></a>]
-    {{?}}
     {{? it.settings.mode.name != "ascetic"}}
         [<input id="autoUpdate{{=position}}" type="text" style="display: none;" />]
         <script type="text/javascript">
