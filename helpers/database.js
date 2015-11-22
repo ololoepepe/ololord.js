@@ -215,9 +215,7 @@ var threadPosts = function(boardName, threadNumber, options) {
         };
         var getNext = function() {
             var keys = getKeys();
-            console.log(threadNumber, keys ? keys.length : null);
             return db.hmget("posts", keys).then(function(posts) {
-                //console.log(threadNumber, "ok");
                 posts = posts.map(function(post) {
                     post = JSON.parse(post);
                     post.sequenceNumber = result.indexOf(post.number) + 1;
@@ -225,7 +223,7 @@ var threadPosts = function(boardName, threadNumber, options) {
                 });
                 c.posts = c.posts.concat(filter? posts.filter(options.filterFunction) : posts);
                 if (!pred() || (limit && c.posts.length >= limit)) {
-                    if (limit && c.posts.length > limit)
+                    if (limit && c.posts.length >= limit)
                         return c.posts.slice(0, limit);
                     else
                         return c.posts;
