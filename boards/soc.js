@@ -81,8 +81,8 @@ board.extraScripts = function() {
 };
 
 board.addTranslations = function(translate) {
-    translate("Dislike", "likeText");
-    translate("Like", "dislikeText");
+    translate("Like", "likeText");
+    translate("Dislike", "dislikeText");
 };
 
 board.renderPost = function(post, req) {

@@ -3624,5 +3624,15 @@
         "targetBoardLabelText": {
             "value": "Целевая доска"
         }
+    },
+    "Like": {
+        "likeText": {
+            "value": "Нравится"
+        }
+    },
+    "Dislike": {
+        "dislikeText": {
+            "value": "Не нравится"
+        }
     }
 }
