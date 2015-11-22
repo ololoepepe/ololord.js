@@ -1733,11 +1733,6 @@
             "value": "Добавляет новый пост"
         }
     },
-    "Leaves page unmodified": {
-        "quickReplyActionDoNothingText": {
-            "value": "Оставляет страницу не измененной"
-        }
-    },
     "Redirects to thread": {
         "quickReplyActionGotoThreadText": {
             "value": "Перенаправляет в тред"
@@ -1811,9 +1806,9 @@
             "value": "Настройки скрипта"
         }
     },
-    "Mark posts as drafts by default:": {
+    "Posts are drafts by default": {
         "draftsByDefaultLabelText": {
-            "value": "По умолчанию отмечать посты как черновики:"
+            "value": "Посты-черновики по умолчанию"
         }
     },
     "Framed version": {
@@ -1826,19 +1821,19 @@
             "value": "Скрыть доски:"
         }
     },
-    "Show titles of YouTube videos:": {
+    "Show titles of YouTube videos": {
         "showYoutubeVideoTitleLabelText": {
-            "value": "Показывать названия видео с YouTube:"
+            "value": "Показывать названия видео с YouTube"
         }
     },
-    "Check if attached file exists on server:": {
+    "Check if attached file exists on server": {
         "checkFileExistenceLabelText": {
-            "value": "Проверять, есть ли прикрепленный файл на сервере:"
+            "value": "Проверять, есть ли прикрепленный файл на сервере"
         }
     },
-    "Show previews when attaching files:": {
+    "Show previews when attaching files": {
         "showAttachedFilePreviewLabelText": {
-            "value": "Показывать превью прикрепляемых файлов:"
+            "value": "Показывать превью прикрепляемых файлов"
         }
     },
     "Logged in, but not registered": {
@@ -1876,19 +1871,19 @@
             "value": "Пароль/хешпасс"
         }
     },
-    "Leaf through images only:": {
+    "Leaf through images only": {
         "leafThroughImagesOnlyLabelText": {
-            "value": "Пролистывать только картинки:"
+            "value": "Пролистывать только картинки"
         }
     },
-    "Show file leaf buttons:": {
+    "Show file leaf buttons": {
         "showLeafButtonsLabelText": {
-            "value": "Показывать кнопки пролистывания файлов:"
+            "value": "Показывать кнопки пролистывания файлов"
         }
     },
-    "Image zoom sensitivity, %:": {
+    "Image zoom sensitivity:": {
         "imageZoomSensitivityLabelText": {
-            "value": "Чувствительность зума картинок, %:"
+            "value": "Чувствительность зума картинок:"
         }
     },
     "Auto update interval (sec):": {
@@ -1896,19 +1891,14 @@
             "value": "Интервал автообновленияы (сек):"
         }
     },
-    "Auto update threads by default:": {
+    "Auto update threads by default": {
         "autoUpdateThreadsByDefaultLabelText": {
-            "value": "По умолчанию автоматически обновлять треды:"
+            "value": "По умолчанию автоматически обновлять треды"
         }
     },
-    "Show auto update timer:": {
-        "showAutoUpdateTimerLabelText": {
-            "value": "Показывать таймер автообновления:"
-        }
-    },
-    "Show desktop notifications:": {
+    "Show desktop notifications": {
         "showAutoUpdateDesktopNotificationsLabelText": {
-            "value": "Показывать уведомления на рабочем столе:"
+            "value": "Показывать уведомления на рабочем столе"
         }
     },
     "Files": {
@@ -1921,30 +1911,34 @@
             "value": "Прочее"
         }
     },
-    "Hide postform rules:": {
+    "Hide postform rules": {
         "hidePostformRulesLabelText": {
-            "value": "Скрывать правила под формой ответа:"
+            "value": "Скрывать правила под формой ответа"
         }
     },
-    "Edit": {
-        "editUserCssText": {
-            "value": "Редактировать"
-        },
+    "Edit hotkeys": {
         "editHotkeysText": {
-            "value": "Редактировать"
-        },
+            "value": "Редактировать горячие клавиши"
+        }
+    },
+    "Edit user CSS": {
+        "editUserCssText": {
+            "value": "Редактировать CSS"
+        }
+    },
+    "Edit spells": {
         "editSpellsText": {
-            "value": "Редактировать"
+            "value": "Редактировать спеллы"
         }
     },
-    "User CSS:": {
+    "User CSS enabled": {
         "userCssLabelText": {
-            "value": "Пользовательские CSS:"
+            "value": "Пользовательские CSS"
         }
     },
-    "Hide tripcodes:": {
+    "Hide tripcodes": {
         "hideTripcodesLabelText": {
-            "value": "Скрывать трипкоды:"
+            "value": "Скрывать трипкоды"
         }
     },
     "Hiding": {
@@ -1952,14 +1946,14 @@
             "value": "Скрытие"
         }
     },
-    "Hide user names:": {
+    "Hide user names": {
         "hideUserNamesLabelText": {
-            "value": "Скрывать имена пользователей:"
+            "value": "Скрывать имена пользователей"
         }
     },
-    "Strike out links to hidden posts:": {
+    "Strike out links to hidden posts": {
         "strikeOutHiddenPostLinksLabelText": {
-            "value": "Зачеркивать ссылки на скрытые посты:"
+            "value": "Зачеркивать ссылки на скрытые посты"
         }
     },
     "Postform and posting": {
@@ -1972,24 +1966,24 @@
             "value": "Посты и треды"
         }
     },
-    "Show new post count near board names:": {
+    "New post count near board names": {
         "showNewPostsLabelText": {
-            "value": "Показывать количество новых постов рядом с именами борд:"
+            "value": "Количество новых постов рядом с именами борд"
         }
     },
-    "Default audio and video files volume:": {
+    "Default volume:": {
         "defaultAudioVideoVolumeLabelText": {
-            "value": "Громкость аудио- и видеофайлов по умолчанию:"
+            "value": "Громкость по умолчанию:"
         }
     },
-    "Add thread to favorites on reply:": {
+    "Add thread to favorites on reply": {
         "addToFavoritesOnReplyLabelText": {
-            "value": "Добавлять тред в избранное при ответе:"
+            "value": "Добавлять тред в избранное при ответе"
         }
     },
-    "Hide postform markup:": {
+    "Hide postform markup": {
         "hidePostformMarkupLabelText": {
-            "value": "Скрывать разметку под формой ответа:"
+            "value": "Скрывать разметку под формой ответа"
         }
     },
     "Previous page/file": {
@@ -2012,9 +2006,9 @@
             "value": "Следующий тред (на доске)/пост (в треде)"
         }
     },
-    "Hotkeys:": {
+    "Hotkeys enabled": {
         "hotkeysLabelText": {
-            "value": "Горячие клавиши:"
+            "value": "Горячие клавиши"
         }
     },
     "Previous post (in thread/on board)": {
@@ -2131,14 +2125,14 @@
             "value": "Отправить пост"
         }
     },
-    "Strip EXIF from JPEG files:": {
+    "Strip EXIF from JPEG files": {
         "stripExifFromJpegLabelText": {
-            "value": "Удалять EXIF из файлов JPEG:"
+            "value": "Удалять EXIF из файлов JPEG"
         }
     },
-    "Spells (command-based post hiding):": {
+    "Spells (command-based post hiding)": {
         "spellsLabelText": {
-            "value": "Спеллы (скрытие постов на основе команд):"
+            "value": "Спеллы (скрытие постов на основе команд)"
         }
     },
     "Hidden posts/threads": {
@@ -2151,9 +2145,9 @@
             "value": "Убрать из списка скрытых постов/тредов"
         }
     },
-    "Show hidden post/thread list": {
+    "Show hidden post list": {
         "showHiddenPostListText": {
-            "value": "Показать список скрытых постов/тредов"
+            "value": "Показать список скрытых постов"
         }
     },
     "Mum is watching me!": {
@@ -2161,9 +2155,9 @@
             "value": "Мамка в комнате!"
         }
     },
-    "Maximum allowed rating:": {
+    "Maximum rating:": {
         "maxAllowedRatingLabelText": {
-            "value": "Максимальный разрешенный рейтинг:"
+            "value": "Максимальный рейтинг:"
         }
     },
     "SFW - safe for work (no socially condemned content)\nR-15 - restricted for 15 years (contains ecchi, idols, violence)\nR-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\nR-18G - restricted for 18 years, guidance advised (shemale, death, guro, scat, defecation, urination, etc.)": {
@@ -2176,39 +2170,39 @@
             "value": "Коррекция:"
         }
     },
-    "Loop audio and video files:": {
+    "Loop media": {
         "loopAudioVideoLabelText": {
-            "value": "Зацикливать аудио- и видеофайлы:"
+            "value": "Зацикливать медиафайлы"
         }
     },
-    "Play audio and video files immediately:": {
+    "Play media immediately": {
         "playAudioVideoImmediatelyLabelText": {
-            "value": "Проигрывать аудио- и видеофайлы сразу же:"
+            "value": "Проигрывать медиафайлы сразу"
         }
     },
-    "Remember volume:": {
+    "Remember": {
         "rememberAudioVideoVolumeLabelText": {
-            "value": "Запоминать громкость:"
+            "value": "Запоминать"
         }
     },
-    "Move to post after replying in thread:": {
+    "Move to post after replying in thread": {
         "moveToPostOnReplyInThreadLabelText": {
-            "value": "Перемещаться к посту после ответа в треде:"
+            "value": "Перемещаться к посту после ответа в треде"
         }
     },
-    "Use minimalistic post form:": {
+    "Minimalistic post form": {
         "minimalisticPostformLabelText": {
-            "value": "Использовать минималистичную форму ответа:"
+            "value": "Минималистичная форма ответа"
         }
     },
-    "Mark OP post links:": {
+    "Mark OP post links": {
         "signOpPostLinksLabelText": {
-            "value": "Помечать ссылки на ОП-посты:"
+            "value": "Помечать ссылки на ОП-посты"
         }
     },
-    "Mark own post links:": {
+    "Mark own post links": {
         "signOwnPostLinksLabelText": {
-            "value": "Помечать ссылки на собственные посты:"
+            "value": "Помечать ссылки на собственные посты"
         }
     },
     "Neutron": {
@@ -2228,9 +2222,9 @@
         },
         "_obsolete": true
     },
-    "Shrink posts:": {
+    "Shrink posts": {
         "postShrinkingLabelText": {
-            "value": "Скукоживать посты:"
+            "value": "Скукоживать посты"
         }
     },
     "AJAX request returned status": {
@@ -3524,9 +3518,9 @@
             "value": "Залогиниться"
         }
     },
-    "Sticky toolbar:": {
+    "Sticky toolbar": {
         "stickyToolbarLabelText": {
-            "value": "Прилепить панель:"
+            "value": "Прилепить панель"
         }
     },
     "Show post form": {

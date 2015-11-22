@@ -2327,10 +2327,13 @@ lord.submitted = function(event, form) {
                         window.location.hash = "#" + result.number;
                 });
             } else {
-                var action = lord.getLocalObject("quickReplyAction", "goto_thread");
-                if ("do_nothing" === action) {
-                    //Do nothing
-                } else if ("append_post" == action) {
+                var action = lord.getLocalObject("quickReplyAction", "append_post");
+                if ("goto_thread" == action) {
+                    window.location = "/" + lord.data("sitePathPrefix") + result.boardName + "/res/"
+                        + result.threadNumber + ".html#" + result.number;
+                    return;
+                } else {
+                    //The default: append_post
                     if (!lord.hasClass(parent, "threadPosts")) {
                         parent = parent.nextSibling;
                         if (!parent.tagName)
@@ -2346,11 +2349,6 @@ lord.submitted = function(event, form) {
                         var lastPost = lord.query(".post, .opPost", parent).pop();
                         parent.appendChild(post, parent.lastChild);
                     }).catch(lord.handleError);
-                } else {
-                    //The default
-                    window.location = "/" + lord.data("sitePathPrefix") + result.boardName + "/res/"
-                        + result.threadNumber + ".html#" + result.number;
-                    return;
                 }
             }
         } else {

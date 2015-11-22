@@ -18,47 +18,35 @@
                 <tbody>
                     <tr>
                         <td>
-                            {{=it.tr.autoUpdateThreadsByDefaultLabelText}}
-                        </td>
-                        <td>
-                            <input type="checkbox" name="autoUpdateThreadsByDefault"
-                                   {{? it.settings.autoUpdateThreadsByDefault}}checked="true"{{?}} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
                             {{=it.tr.autoUpdateIntervalLabelText}}
                         </td>
                         <td>
-                            <input type="number" min="1" name="autoUpdateInterval"
+                            <input type="number" min="1" name="autoUpdateInterval" class="numberSize3"
                                    value="{{=it.settings.autoUpdateInterval}}" />
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.showAutoUpdateDesktopNotificationsLabelText}}
+                        <td colspan="2">
+                            <input type="checkbox" name="autoUpdateThreadsByDefault"
+                                   {{? it.settings.autoUpdateThreadsByDefault}}checked="true"{{?}} /><label>{{=it.tr.autoUpdateThreadsByDefaultLabelText}}</label>
                         </td>
-                        <td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
                             <input type="checkbox" name="showAutoUpdateDesktopNotifications"
-                                   {{? it.settings.showAutoUpdateDesktopNotifications}}checked="true"{{?}} />
+                                   {{? it.settings.showAutoUpdateDesktopNotifications}}checked="true"{{?}} /><label>{{=it.tr.showAutoUpdateDesktopNotificationsLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.signOpPostLinksLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="signOpPostLinks"
-                                   {{? it.settings.signOpPostLinks}}checked="true"{{?}} />
+                                   {{? it.settings.signOpPostLinks}}checked="true"{{?}} /><label>{{=it.tr.signOpPostLinksLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.signOwnPostLinksLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="signOwnPostLinks"
-                                   {{? it.settings.signOwnPostLinks}}checked="true"{{?}} />
+                                   {{? it.settings.signOwnPostLinks}}checked="true"{{?}} /><label>{{=it.tr.signOwnPostLinksLabelText}}</label>
                         </td>
                     </tr>
                 </tbody>
@@ -67,29 +55,11 @@
                 <tbody>
                     <tr>
                         <td>
-                            {{=it.tr.showLeafButtonsLabelText}}
-                        </td>
-                        <td>
-                            <input type="checkbox" name="showLeafButtons"
-                                   {{? it.settings.showLeafButtons}}checked="true"{{?}} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            {{=it.tr.leafThroughImagesOnlyLabelText}}
-                        </td>
-                        <td>
-                            <input type="checkbox" name="leafThroughImagesOnly"
-                                   {{? it.settings.leafThroughImagesOnly}}checked="true"{{?}} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
                             {{=it.tr.imageZoomSensitivityLabelText}}
                         </td>
                         <td>
                             <input type="number" min="1" name="imageZoomSensitivity" class="numberSize3"
-                                   value="{{=it.settings.imageZoomSensitivity}}" />
+                                   value="{{=it.settings.imageZoomSensitivity}}" /> %
                         </td>
                     </tr>
                     <tr>
@@ -98,28 +68,33 @@
                         </td>
                         <td class="nowrap">
                             <input type="number" min="0" max="100" name="defaultAudioVideoVolume" class="numberSize3"
-                                   value="{{=it.settings.defaultAudioVideoVolume}}" />
-                            {{=it.tr.rememberAudioVideoVolumeLabelText}}
+                                   value="{{=it.settings.defaultAudioVideoVolume}}" /> %
                             <input type="checkbox" name="rememberAudioVideoVolume"
-                                   {{? it.settings.rememberAudioVideoVolume}}checked="true"{{?}} />
+                                   {{? it.settings.rememberAudioVideoVolume}}checked="true"{{?}} /><label>{{=it.tr.rememberAudioVideoVolumeLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.playAudioVideoImmediatelyLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="playAudioVideoImmediately"
-                                   {{? it.settings.playAudioVideoImmediately}}checked="true"{{?}} />
+                                   {{? it.settings.playAudioVideoImmediately}}checked="true"{{?}} /><label>{{=it.tr.playAudioVideoImmediatelyLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.loopAudioVideoLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="loopAudioVideo"
-                                   {{? it.settings.loopAudioVideo}}checked="true"{{?}} />
+                                   {{? it.settings.loopAudioVideo}}checked="true"{{?}} /><label>{{=it.tr.loopAudioVideoLabelText}}</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="checkbox" name="showLeafButtons"
+                                   {{? it.settings.showLeafButtons}}checked="true"{{?}} /><label>{{=it.tr.showLeafButtonsLabelText}}</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="checkbox" name="leafThroughImagesOnly"
+                                   {{? it.settings.leafThroughImagesOnly}}checked="true"{{?}} /><label>{{=it.tr.leafThroughImagesOnlyLabelText}}</label>
                         </td>
                     </tr>
                 </tbody>
@@ -132,67 +107,47 @@
                         </td>
                         <td>
                             <select name="quickReplyAction" class="select">
-                                <option {{? it.settings.quickReplyAction == "goto_thread"}}selected="true"{{?}}
-                                        value="goto_thread">{{=it.tr.quickReplyActionGotoThreadText}}</option>
-                                <option {{? it.settings.quickReplyAction == "do_nothing"}}selected="true"{{?}}
-                                        value="do_nothing">{{=it.tr.quickReplyActionDoNothingText}}</option>
                                 <option {{? it.settings.quickReplyAction == "append_post"}}selected="true"{{?}}
                                         value="append_post">{{=it.tr.quickReplyActionAppendPostText}}</option>
+                                <option {{? it.settings.quickReplyAction == "goto_thread"}}selected="true"{{?}}
+                                        value="goto_thread">{{=it.tr.quickReplyActionGotoThreadText}}</option>
                             </select>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.moveToPostOnReplyInThreadLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="moveToPostOnReplyInThread"
-                                   {{? it.settings.moveToPostOnReplyInThread}}checked="true"{{?}} />
+                                   {{? it.settings.moveToPostOnReplyInThread}}checked="true"{{?}} /><label>{{=it.tr.moveToPostOnReplyInThreadLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.checkFileExistenceLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="checkFileExistence"
-                                   {{? it.settings.checkFileExistence}}checked="true"{{?}} />
+                                   {{? it.settings.checkFileExistence}}checked="true"{{?}} /><label>{{=it.tr.checkFileExistenceLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.showAttachedFilePreviewLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="showAttachedFilePreview"
-                                   {{? it.settings.showAttachedFilePreview}}checked="true"{{?}} />
+                                   {{? it.settings.showAttachedFilePreview}}checked="true"{{?}} /><label>{{=it.tr.showAttachedFilePreviewLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.addToFavoritesOnReplyLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="addToFavoritesOnReply"
-                                   {{? it.settings.addToFavoritesOnReply}}checked="true"{{?}} />
+                                   {{? it.settings.addToFavoritesOnReply}}checked="true"{{?}} /><label>{{=it.tr.addToFavoritesOnReplyLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.hidePostformMarkupLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="hidePostformMarkup"
-                                   {{? it.settings.hidePostformMarkup}}checked="true"{{?}} />
+                                   {{? it.settings.hidePostformMarkup}}checked="true"{{?}} /><label>{{=it.tr.hidePostformMarkupLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.stripExifFromJpegLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="stripExifFromJpeg"
-                                   {{? it.settings.stripExifFromJpeg}}checked="true"{{?}} />
+                                   {{? it.settings.stripExifFromJpeg}}checked="true"{{?}} /><label>{{=it.tr.stripExifFromJpegLabelText}}</label>
                         </td>
                     </tr>
                 </tbody>
@@ -200,44 +155,32 @@
             <table name="4" style="display: none;">
                 <tbody>
                     <tr>
-                        <td>
-                            {{=it.tr.hideTripcodesLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="hideTripcodes"
-                                   {{? it.settings.hideTripcodes}}checked="true"{{?}} />
+                                   {{? it.settings.hideTripcodes}}checked="true"{{?}} /><label>{{=it.tr.hideTripcodesLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.hideUserNamesLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="hideUserNames"
-                                   {{? it.settings.hideUserNames}}checked="true"{{?}} />
+                                   {{? it.settings.hideUserNames}}checked="true"{{?}} /><label>{{=it.tr.hideUserNamesLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.strikeOutHiddenPostLinksLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="strikeOutHiddenPostLinks"
-                                   {{? it.settings.strikeOutHiddenPostLinks}}checked="true"{{?}} />
+                                   {{? it.settings.strikeOutHiddenPostLinks}}checked="true"{{?}} /><label>{{=it.tr.strikeOutHiddenPostLinksLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.spellsLabelText}}
-                        </td>
-                        <td class="nowrap">
+                        <td colspan="2">
                             <input type="checkbox" name="spellsEnabled"
-                                   {{? it.settings.spellsEnabled}}checked="true"{{?}} />
-                            <button class="button" onclick="lord.editSpells();">{{=it.tr.editSpellsText}}</button>
+                                   {{? it.settings.spellsEnabled}}checked="true"{{?}} /><label>{{=it.tr.spellsLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2" class="nowrap">
+                            <button class="button" onclick="lord.editSpells();">{{=it.tr.editSpellsText}}</button>
                             <button class="button"
                                     onclick="lord.showHiddenPostList();">{{=it.tr.showHiddenPostListText}}</button>
                         </td>
@@ -247,40 +190,32 @@
             <table name="5" style="display: none;">
                 <tbody>
                     <tr>
-                        <td>
-                            {{=it.tr.showNewPostsLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="showNewPosts"
-                                   {{? it.settings.showNewPosts}}checked="true"{{?}} />
+                                   {{? it.settings.showNewPosts}}checked="true"{{?}} /><label>{{=it.tr.showNewPostsLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.showYoutubeVideoTitleLabelText}}
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input type="checkbox" name="showYoutubeVideosTitles"
-                                   {{? it.settings.showYoutubeVideosTitles}}checked="true"{{?}} />
+                                   {{? it.settings.showYoutubeVideosTitles}}checked="true"{{?}} /><label>{{=it.tr.showYoutubeVideoTitleLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.hotkeysLabelText}}
-                        </td>
-                        <td class="nowrap">
+                        <td colspan="2">
                             <input type="checkbox" name="hotkeysEnabled"
-                                   {{? it.settings.hotkeysEnabled}}checked="true"{{?}} />
-                            <button class="button" onclick="lord.editHotkeys();">{{=it.tr.editHotkeysText}}</button>
+                                   {{? it.settings.hotkeysEnabled}}checked="true"{{?}} /><label>{{=it.tr.hotkeysLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            {{=it.tr.userCssLabelText}}
-                        </td>
-                        <td class="nowrap">
+                        <td colspan="2">
                             <input type="checkbox" name="userCssEnabled"
-                                   {{? it.settings.userCssEnabled}}checked="true"{{?}} />
+                                   {{? it.settings.userCssEnabled}}checked="true"{{?}} /><label>{{=it.tr.userCssLabelText}}</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button class="button" onclick="lord.editHotkeys();">{{=it.tr.editHotkeysText}}</button>
                             <button class="button" onclick="lord.editUserCss();">{{=it.tr.editUserCssText}}</button>
                         </td>
                     </tr>

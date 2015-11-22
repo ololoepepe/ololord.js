@@ -1268,7 +1268,6 @@ lord.settings = function() {
         checkFileExistence: lord.getLocalObject("checkFileExistence", true),
         showAttachedFilePreview: lord.getLocalObject("showAttachedFilePreview", true),
         addToFavoritesOnReply: lord.getLocalObject("addToFavoritesOnReply", false),
-        hidePostformMarkup: lord.getLocalObject("hidePostformMarkup", false),
         stripExifFromJpeg: lord.getLocalObject("stripExifFromJpeg", true),
         hideTripcodes: lord.getLocalObject("hideTripcodes", false),
         hideUserNames: lord.getLocalObject("hideUserNames", false),
