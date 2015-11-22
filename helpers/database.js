@@ -614,7 +614,6 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         }).then(function(threads) {
             if (!threads || threads.length != 1)
                 return Promise.reject("No such thread or no access to thread");
-            c.thread = threads[0];
             return markup(board.name, rawText, {
                 markupModes: markupModes,
                 referencedPosts: referencedPosts
@@ -718,7 +717,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     }).then(function() {
         return db.sadd("threadPostNumbers:" + board.name + ":" + threadNumber, c.postNumber);
     }).then(function() {
-        return db.hset("threadUpdateTimes:" + board.name, c.thread.number, date.toISOString());
+        return db.hset("threadUpdateTimes:" + board.name, threadNumber, date.toISOString());
     }).then(function() {
         c.post.referencedPosts = c.refs;
         c.fileInfos = files;
