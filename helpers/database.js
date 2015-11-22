@@ -214,7 +214,10 @@ var threadPosts = function(boardName, threadNumber, options) {
             return keys;
         };
         var getNext = function() {
-            return db.hmget("posts", getKeys()).then(function(posts) {
+            var keys = getKeys();
+            console.log(threadNumber, keys ? keys.length : null);
+            return db.hmget("posts", keys).then(function(posts) {
+                console.log(threadNumber, "ok");
                 posts = posts.map(function(post) {
                     post = JSON.parse(post);
                     post.sequenceNumber = result.indexOf(post.number) + 1;
