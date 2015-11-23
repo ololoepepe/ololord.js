@@ -1030,7 +1030,7 @@ lord.deletePost = function(el) {
             return Promise.reject("No such post");
         if (lord.data("isOp", post)) {
             if (!isNaN(+lord.data("threadNumber"))) {
-                window.location = c.model.site.protocol + "://" + c.model.site.domain + "/" + c.model.site.pathPrefix
+                window.location = window.location.protocol + "//" + c.model.site.domain + "/" + c.model.site.pathPrefix
                     + lord.data("boardName");
             } else {
                 lord.reloadPage();
@@ -2067,7 +2067,7 @@ lord.showImage = function(a, mimeType, width, height) {
     lord.getModel("misc/base").then(function(model) {
         var href = a;
         if (typeof a != "string") {
-            href = model.site.protocol + "://" + model.site.domain + "/" + model.site.pathPrefix
+            href = window.location.protocol + "//" + model.site.domain + "/" + model.site.pathPrefix
                 + lord.data("boardName", a, true) + "/src/" + lord.data("fileName", a, true);
             mimeType = lord.data("mimeType", a, true);
             width = lord.data("width", a, true);
