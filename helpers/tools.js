@@ -519,5 +519,7 @@ module.exports.preferIPv4 = function(ip) {
         if (address.isValid())
             return address.correctForm();
         return ip;
-
+    } catch (err) {
+        console.log(err.stack || err);
+    }
 };
