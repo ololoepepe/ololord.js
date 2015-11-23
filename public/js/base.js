@@ -349,12 +349,12 @@ lord.editHotkeys = function() {
     var c = {};
     lord.getTemplate("hotkeysDialog").then(function(template) {
         c.template = template;
-        var hotkeys = lord.getLocalObject("hotkeys", {
+        c.hotkeys = lord.getLocalObject("hotkeys", {
             dir: {},
             rev: {}
         });
         c.model = {
-            hotkeys: hotkeys.dir,
+            hotkeys: c.hotkeys.dir,
             defaultHotkeys: lord.DefaultHotkeys.dir
         };
         return lord.getModel(["misc/tr"], true);
@@ -368,9 +368,9 @@ lord.editHotkeys = function() {
         lord.query("input", c.div).forEach(function(el) {
             var name = el.name;
             var value = el.value || lord.DefaultHotkeys.dir[name];
-            hotkeys.dir[name] = value;
-            hotkeys.rev[value] = name;
-            lord.setLocalObject("hotkeys", hotkeys);
+            c.hotkeys.dir[name] = value;
+            c.hotkeys.rev[value] = name;
+            lord.setLocalObject("hotkeys", c.hotkeys);
         });
     }).catch(lord.handleError);
 };
