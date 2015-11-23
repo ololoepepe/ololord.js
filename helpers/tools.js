@@ -492,22 +492,32 @@ module.exports.proxy = function() {
 };
 
 module.exports.correctAddress = function(ip) {
-    var address = new Address6(ip);
-    if (!address.isValid())
-        address = Address6.fromAddress4(ip);
-    if (!address.isValid())
+    if (!ip)
         return null;
-    return address.correctForm();
+    try {
+        var address = new Address6(ip);
+        if (!address.isValid())
+            address = Address6.fromAddress4(ip);
+        if (!address.isValid())
+            return null;
+        return address.correctForm();
+    } catch (err) {
+        console.log(err.stack || err);
+    }
 };
 
 module.exports.preferIPv4 = function(ip) {
-    var address = new Address6(ip);
-    var ipv4 = address.to4();
-    if (ipv4.isValid()) {
-        ipv4 = ipv4.correctForm();
-        return ("0.0.0.1" == ipv4) ? "127.0.0.1" : ipv4;
-    }
-    if (address.isValid())
-        return address.correctForm();
-    return ip;
+    if (!ip)
+        return null;
+    try {
+        var address = new Address6(ip);
+        var ipv4 = address.to4();
+        if (ipv4.isValid()) {
+            ipv4 = ipv4.correctForm();
+            return ("0.0.0.1" == ipv4) ? "127.0.0.1" : ipv4;
+        }
+        if (address.isValid())
+            return address.correctForm();
+        return ip;
+
 };
