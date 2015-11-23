@@ -496,14 +496,19 @@ module.exports.correctAddress = function(ip) {
         return null;
     try {
         var address = new Address6(ip);
-        if (!address.isValid())
-            address = Address6.fromAddress4(ip);
-        if (!address.isValid())
-            return null;
-        return address.correctForm();
+        if (address.isValid())
+            return address.correctForm();
     } catch (err) {
-        console.log(err.stack || err);
+        //
     }
+    try {
+        var address = Address6.fromAddress4(ip);
+        if (address.isValid())
+            return address.correctForm();
+    } catch (err) {
+        //
+    }
+    return null;
 };
 
 module.exports.preferIPv4 = function(ip) {
@@ -520,6 +525,7 @@ module.exports.preferIPv4 = function(ip) {
             return address.correctForm();
         return ip;
     } catch (err) {
-        console.log(err.stack || err);
+        //
     }
+    return ip;
 };
