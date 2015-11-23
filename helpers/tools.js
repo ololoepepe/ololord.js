@@ -241,7 +241,7 @@ module.exports.mimeType = function(fileName) {
         return Promise.resolve(null);
     try {
         return new Promise(function(resolve, reject) {
-            var out = ChildProcess.exec(`file --brief --mime-type ${fileName}`, {
+            ChildProcess.exec(`file --brief --mime-type ${fileName}`, {
                 timeout: 5000,
                 encoding: "utf8",
                 stdio: [
