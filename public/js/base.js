@@ -535,8 +535,12 @@ lord.initializeOnLoadSettings = function() {
                 return lord.DefaultHotkeys.dir[name];
             return hotkeys[name] || lord.DefaultHotkeys.dir[name];
         };
-        lord.queryOne("[name='settingsButton']").title += " (" + key("showSettings") + ")";
-        lord.queryOne("[name='favoritesButton']").title += " (" + key("showFavorites") + ")";
+        var settingsButton = lord.queryOne("[name='settingsButton']");
+        var favoritesButton = lord.queryOne("[name='favoritesButton']");
+        if (settingsButton)
+            settingsButton.title += " (" + key("showSettings") + ")";
+        if (favoritesButton)
+            favoritesButton.title += " (" + key("showFavorites") + ")";
     }
     if (lord.getLocalObject("showNewPosts", true))
         lord.showNewPosts();

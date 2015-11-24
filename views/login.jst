@@ -11,8 +11,20 @@
         {{=it.title}}
     </h1>
 </div>
+{{? it.site.vkontakte.integrationEnabled}}
+    <style type="text/css">
+        #vkontakteLoginButton > table {
+            display: inline-table;
+            position: relative;
+            top: 5px;
+        }
+    </style>
+    <script type="text/javascript">
+        VK.init({ apiId: {{=it.site.vkontakte.appId}} });
+    </script>
+{{?}}
 <div class="login">
-    <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/login"
+    <form id="loginForm" method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/login"
           enctype="application/x-www-form-urlencoded" class="inlineForm"
           {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.doLogin(event, this); return false;"{{?}}>
         <input type="hidden" name="source" value="{{=it.source}}" />
@@ -21,6 +33,9 @@
                autofocus="true" />
         <input type="submit" class="button" name="submit" value="{{=it.tr.loginText}}" />
     </form>
+    {{? it.site.vkontakte.integrationEnabled}}
+        <span id="vkontakteLoginButton" onclick="lord.vkAuth();"></span>
+    {{?}}
 </div>
 <div class="loginDescription">
     {{=it.tr.loginSystemDescriptionText}}

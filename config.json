@@ -30,7 +30,11 @@
         "domain": "localhost:8080",
         "dateFormat": "MM/DD/YYYY HH:mm:ss",
         "timeOffset": 0,
-        "youtubeApiKey": ""
+        "youtubeApiKey": "",
+        "vkontakte": {
+            "integrationEnabled": false,
+            "appId": ""
+        }
     },
     "board": {
         "captchaQuota": 10,
