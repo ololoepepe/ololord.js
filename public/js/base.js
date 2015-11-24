@@ -51,7 +51,7 @@ lord.changeLocale = function() {
     lord.reloadPage();
 };
 
-lord.LogoutImplementation = function(vk) {
+lord.LogoutImplementation = function(form, vk) {
     lord.setCookie("hashpass", "", {
         expires: lord.Billion,
         path: "/"
@@ -68,9 +68,9 @@ lord.LogoutImplementation = function(vk) {
 lord.doLogout = function(event, form) {
     event.preventDefault();
     if (!VK)
-        return lord.LogoutImplementation(false);
+        return lord.LogoutImplementation(form, false);
     VK.Auth.logout(function() {
-        return lord.LogoutImplementation(true);
+        return lord.LogoutImplementation(form, true);
     });
 };
 
