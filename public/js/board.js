@@ -1823,7 +1823,7 @@ lord.attachFileByVk = function(a) {
             response = response.response;
             var c = {};
             lord.getTemplate("vkAudioList").then(function(template) {
-                c.div = $.parseHTML(template(response))[0];
+                c.div = $.parseHTML(template({ tracks: response }))[0];
                 return lord.showDialog("selectTrackTitle", null, c.div);
             }).then(function(result) {
                 if (!result)
