@@ -1819,6 +1819,7 @@ lord.attachFileByVk = function(a) {
         console.log(1);
         var uid = response.session.mid;
         VK.Api.call("audio.get", {owner_id: uid}, function(response) {
+            console.log(response);
             if (!response.response)
                 return;
             console.log(2);
