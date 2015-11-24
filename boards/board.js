@@ -332,10 +332,9 @@ var renderFileInfo = function(fi) {
         if (ipv4 && ipv4 != post.user.ip)
             post.user.ipv4 = ipv4;
     }
-    if (post.showTripcode
-        && Database.compareRegisteredUserLevels(post.user.level, Database.RegisteredUserLevels.User) >= 0) {
+    if (post.options.showTripcode) {
         var md5 = Crypto.createHash("md5");
-        md5.update(post.hashpass + config("site.tripcodeSalt", ""));
+        md5.update(post.user.hashpass + config("site.tripcodeSalt", ""));
         post.tripcode = "!" + md5.digest("base64").substr(0, 10);
     }
     delete post.user.hashpass;

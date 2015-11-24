@@ -51,7 +51,7 @@
         {{? it.customPostHeaderPart && it.customPostHeaderPart[60]}}
             {{ out += it.customPostHeaderPart[60](it, thread, post); }}
         {{?}}
-        {{? post.showTripcode && it.compareRegisteredUserLevels(post.user.level, "USER") >= 0}}
+        {{? post.options.showTripcode && it.compareRegisteredUserLevels(post.user.level, "USER") >= 0}}
             <img src="/{{=it.site.pathPrefix}}img/registered.png" title="{{=it.tr.registeredText}}">
         {{?}}
         {{? it.customPostHeaderPart && it.customPostHeaderPart[70]}}
@@ -67,7 +67,7 @@
         {{? it.customPostHeaderPart && it.customPostHeaderPart[90]}}
             {{ out += it.customPostHeaderPart[90](it, thread, post); }}
         {{?}}
-        {{? post.showTripcode && post.tripcode}}
+        {{? post.options.showTripcode && post.tripcode}}
             <span class="tripcode {{=it.deviceType}}">{{=post.tripcode}}</span>
         {{?}}
         {{? it.customPostHeaderPart && it.customPostHeaderPart[100]}}
