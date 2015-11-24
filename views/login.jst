@@ -11,7 +11,7 @@
         {{=it.title}}
     </h1>
 </div>
-{{? it.site.vkontakte.integrationEnabled}}
+{{? "ascetic" != it.settings.mode.name && it.site.vkontakte.integrationEnabled}}
     <style type="text/css">
         #vkontakteLoginButton > table {
             display: inline-table;
@@ -33,7 +33,7 @@
                autofocus="true" />
         <input type="submit" class="button" name="submit" value="{{=it.tr.loginText}}" />
     </form>
-    {{? it.site.vkontakte.integrationEnabled}}
+    {{? "ascetic" != it.settings.mode.name && it.site.vkontakte.integrationEnabled}}
         <span id="vkontakteLoginButton" onclick="lord.vkAuth();"></span>
     {{?}}
 </div>
