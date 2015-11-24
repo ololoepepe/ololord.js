@@ -2598,6 +2598,16 @@
             "value": "Указать ссылку на файл"
         }
     },
+    "Specify Vkontakte audio file": {
+        "attachFileByVkText": {
+            "value": "Указать аудио-файл из Vkontakte"
+        }
+    },
+    "Select a track": {
+        "selectTrackTitle": {
+            "value": "Выберите трек"
+        }
+    },
     "URL:": {
         "linkLabelText": {
             "value": "Ссылка:"

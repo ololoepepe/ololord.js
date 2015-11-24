@@ -1807,6 +1807,52 @@ lord.attachFileByLink = function(a) {
     });
 };
 
+lord.attachFileByVk = function(a) {
+    if (!a)
+        return;
+    var div = a.parentNode;
+    if (!div)
+        return;
+    VK.Auth.getLoginStatus(function(response) {
+        if (!response.session || !response.session.mid)
+            return;
+        var uid = response.session.mid;
+        VK.Api.call("audio.get", {owner_id: uid}, function(response) {
+            if (!response.response)
+                return;
+            response = response.response;
+            var c = {};
+            lord.getTemplate("vkAudioList").then(function(template) {
+                c.div = $.parseHTML(template(response))[0];
+                return lord.showDialog("selectTrackTitle", null, c.div);
+            }).then(function(result) {
+                if (!result)
+                    return Promise.resolve();
+                var trackId = +lord.queryOne("input[name='track']:checked", c.div);
+                if (!trackId)
+                    return Promise.resolve();
+                var url;
+                result.result.forEach(function(track) {
+                    if (url)
+                        return;
+                    if (track.id != trackId)
+                        return;
+                    url = track.url;
+                });
+                if (!url)
+                    return;
+                if (div.droppedFile)
+                    delete div.droppedFile;
+                var inp = lord.queryOne("input", div);
+                inp.parentNode.replaceChild(inp.cloneNode(true), inp);
+                lord.clearFileInput(div);
+                div.fileUrl = url;
+                lord.fileAddedCommon(div);
+            }).catch(lord.handleError);
+        });
+    });
+};
+
 lord.removeFile = function(current) {
     if (!current)
         return;

@@ -12,6 +12,7 @@ img/*
 !img/banners
 !img/flags
 !img/addfile_link.png
+!img/addfile_vk.png
 !img/addfile.png
 !img/add.png
 !img/application_pdf_logo.png
@@ -169,4 +170,5 @@ templates/*
 !templates/setVotingOpenedDialog.jst
 !templates/socPostHeaderPart.jst
 !templates/userBan.jst
+!templates/vkAudioList.jst
 !templates/voteVariant.jst

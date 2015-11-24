@@ -249,7 +249,8 @@ controller.baseModel = function(req) {
         user: {
             ip: req.ip,
             level: req.level,
-            loggedIn: !!req.hashpass
+            loggedIn: !!req.hashpass,
+            vkAuth: req.vkAuth
         },
         modes: [
             {
@@ -626,6 +627,8 @@ controller.translationsModel = function() {
     translate("Show markup", "showPostformMarkupText");
     translate("Hide markup", "hidePostformMarkupText");
     translate("Target board", "targetBoardLabelText");
+    translate("Specify Vkontakte audio file", "attachFileByVkText");
+    translate("Select a track", "selectTrackTitle");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

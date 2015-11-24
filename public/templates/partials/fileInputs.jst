@@ -8,6 +8,11 @@
         <a onclick="lord.attachFileByLink(this); return lord.preventOnclick(event);" class="fileByLinkButton"
            title="{{=it.tr.attachFileByLinkText}}"><img class="buttonImage" width="32" height="32"
                                                         src="/{{=it.site.pathPrefix}}img/addfile_link.png"></a>
+        {{? it.user.vkAuth}}
+            <a onclick="lord.attachFileByVk(this); return lord.preventOnclick(event);" class="fileByLinkButton"
+               title="{{=it.tr.attachFileByVkText}}"><img class="buttonImage" width="32" height="32"
+                                                          src="/{{=it.site.pathPrefix}}img/addfile_vk.png"></a>
+        {{?}}
         <input type="file" name="file" onchange="lord.fileSelected(this);" class="postformFileInput"
                accept="{{ out += it.board.supportedFileTypes.join(","); }}" />
         <span class="postformFileText"></span>
