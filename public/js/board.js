@@ -1841,7 +1841,6 @@ lord.attachFileByVk = function(a) {
                 });
                 if (!url)
                     return;
-                console.log(url);
                 if (div.droppedFile)
                     delete div.droppedFile;
                 var inp = lord.queryOne("input", div);
