@@ -255,13 +255,12 @@ router.get("/fileHeaders.json", function(req, res) {
     } else {
         p = HTTP.request({
             method: "HEAD",
+            headers: { "User-Agent": "Mozilla/5.0 (X11; Linux i686; rv:36.0) Gecko/20100101 Firefox/36.0" },
             url: req.query.url,
             timeout: Tools.Minute
         });
     }
     return p.then(function(response) {
-        console.log(req.query.url);
-        console.log(response.status, response.headers);
         if (response.status != 200)
             return Promise.reject("Failed to get file headers");
         res.json(response.headers);
