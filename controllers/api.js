@@ -253,7 +253,6 @@ router.get("/fileHeaders.json", function(req, res) {
             timeout: Tools.Minute
         });
     } else {
-        console.log("NO PROXY", req.query.url);
         p = HTTP.request({
             method: "HEAD",
             url: req.query.url,
@@ -261,7 +260,7 @@ router.get("/fileHeaders.json", function(req, res) {
         });
     }
     return p.then(function(response) {
-        console.log(response.status);
+        console.log(response.status, response.headers);
         if (response.status != 200)
             return Promise.reject("Failed to get file headers");
         res.json(response.headers);
