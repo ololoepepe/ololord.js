@@ -196,12 +196,7 @@ var threadPosts = function(boardName, threadNumber, options) {
     var c = { posts: [] };
     var p = threadPostNumbers(boardName, threadNumber).then(function(result) {
         var i = reverse ? (result.length - 1) : 0;
-        var bound;
-        var bound = reverse ? (limit ? (result.length - limit - 1) : -1) : (limit ? limit : result.length);
-        if (bound < 0)
-            bound = -1;
-        if (bound > result.length)
-            bound = result.length;
+        var bound = reverse ? -1 : result.length;
         var step = limit ? limit : result.length;
         var pred = function() {
             return reverse ? (i > bound) : (i < bound);
@@ -224,9 +219,8 @@ var threadPosts = function(boardName, threadNumber, options) {
                 c.posts = c.posts.concat(filter? posts.filter(options.filterFunction) : posts);
                 if (!pred() || (limit && c.posts.length >= limit)) {
                     if (limit && c.posts.length >= limit)
-                        return c.posts.slice(0, limit);
-                    else
-                        return c.posts;
+                        c.posts = c.posts.slice(0, limit);
+                    return;
                 }
                 return getNext();
             });

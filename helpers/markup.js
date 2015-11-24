@@ -507,8 +507,10 @@ var convertPostLink = function(info, _, matchs, _, options) {
                     };
                 }
             }
-            var href = "href=\"/" + config("site.pathPrefix", "") + boardName + "/res/" + post.threadNumber
-                + ".html#" + postNumber + "\"";
+            var href = "href=\"/" + config("site.pathPrefix", "") + boardName + "/res/" + post.threadNumber + ".html";
+            if (postNumber != post.threadNumber)
+                href += "#" + postNumber;
+            href += "\"";
             return "<a " + href + " data-board-name=\"" + boardName + "\" data-post-number=\"" + postNumber
                 + "\" data-thread-number=\"" + post.threadNumber + "\">" + escaped + "</a>";
         });
