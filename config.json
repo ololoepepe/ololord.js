@@ -31,6 +31,7 @@
         "dateFormat": "MM/DD/YYYY HH:mm:ss",
         "timeOffset": 0,
         "youtubeApiKey": "",
+        "tripcodeSalt": "ololo",
         "vkontakte": {
             "integrationEnabled": false,
             "appId": ""

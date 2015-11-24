@@ -13,10 +13,14 @@
 </div>
 {{? "ascetic" != it.settings.mode.name && it.site.vkontakte.integrationEnabled}}
     <style type="text/css">
+        #vkontakteLoginButton {
+            text-align: center;
+            margin-top: 8px;
+        }
+
         #vkontakteLoginButton > table {
-            display: inline-table;
-            position: relative;
-            top: 5px;
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
     <script type="text/javascript">
@@ -34,7 +38,7 @@
         <input type="submit" class="button" name="submit" value="{{=it.tr.loginText}}" />
     </form>
     {{? "ascetic" != it.settings.mode.name && it.site.vkontakte.integrationEnabled}}
-        <span id="vkontakteLoginButton" onclick="lord.vkAuth();"></span>
+        <div id="vkontakteLoginButton" onclick="lord.vkAuth();"></div>
     {{?}}
 </div>
 <div class="loginDescription">
