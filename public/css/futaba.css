@@ -1196,3 +1196,7 @@ blockquote.blockquoteThread.expand {
     font-size: 1.2em;
     width: 100%;
 }
+
+.cursorPointer {
+	cursor: pointer;
+}

@@ -1535,12 +1535,13 @@ lord.viewPost = function(a, boardName, postNumber) {
                 : (scrollTop + coords.top - post.scrollHeight - 4 + "px");
             post.style.zIndex = 9001;
         } else {
+            lord.addClass(post, "cursorPointer");
             post.style.position = "fixed";
             lord.toCenter(post, null, null, 1);
             post.style.zIndex = 9001;
             if (!lord.postPreviewMask) {
                 lord.postPreviewMask = lord.node("div");
-                lord.postPreviewMask.className = "temporaryPostOverlayMask";
+                lord.postPreviewMask.className = "temporaryPostOverlayMask cursorPointer";
                 document.body.appendChild(lord.postPreviewMask);
             }
         }
