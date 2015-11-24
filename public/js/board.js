@@ -1832,44 +1832,22 @@ lord.attachFileByVk = function(a) {
                 if (!trackId)
                     return Promise.resolve();
                 var url;
-                var title;
                 response.forEach(function(track) {
                     if (url)
                         return;
                     if (track.aid != trackId)
                         return;
                     url = track.url;
-                    c.title = track.title;
                 });
                 if (!url)
                     return;
-                var xhr = new XMLHttpRequest();
-                xhr.open("get", "http://cors.io?u=" + url, true);
-                xhr.responseType = "blob";
-                return new Promise(function(resolve, reject) {
-                    xhr.onreadystatechange = function() {
-                        if (xhr.readyState != 4)
-                            return;
-                        if (xhr.status != 200)
-                            return resolve(null);
-                        var response = xhr.response;
-                        if (!response)
-                            return resolve(null);
-                        resolve(responseText);
-                    };
-                    xhr.send(null);
-                });
-            }).then(function(blob) {
-                if (!blob)
-                    return;
-                var file = new File([blob], c.title || "unknown.mp3", { type: "audio/mpeg" });
-                div.droppedFile = file;
-                if (div.fileUrl)
-                    delete div.fileUrl;
+                if (div.droppedFile)
+                    delete div.droppedFile;
                 var inp = lord.queryOne("input", div);
                 inp.parentNode.replaceChild(inp.cloneNode(true), inp);
                 lord.clearFileInput(div);
-                lord.fileAddedCommon(div, file);
+                div.fileUrl = url;
+                lord.fileAddedCommon(div);
             }).catch(lord.handleError);
         });
     });
