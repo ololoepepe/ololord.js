@@ -1828,11 +1828,11 @@ lord.attachFileByVk = function(a) {
             }).then(function(result) {
                 if (!result)
                     return Promise.resolve();
-                var trackId = +lord.queryOne("input[name='track']:checked", c.div);
+                var trackId = +lord.queryOne("input[name='track']:checked", c.div).value;
                 if (!trackId)
                     return Promise.resolve();
                 var url;
-                result.result.forEach(function(track) {
+                response.forEach(function(track) {
                     if (url)
                         return;
                     if (track.id != trackId)
