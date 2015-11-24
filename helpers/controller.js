@@ -514,9 +514,11 @@ controller.translationsModel = function() {
     translate("New post count near board names", "showNewPostsLabelText");
     translate("Show titles of YouTube videos", "showYoutubeVideoTitleLabelText");
     translate("Hotkeys enabled", "hotkeysLabelText");
-    translate("Edit hotkeys", "editHotkeysText");
-    translate("Edit user CSS", "editUserCssText");
     translate("User CSS enabled", "userCssLabelText");
+    translate("User JavaScript enabled", "userJavaScriptLabelText");
+    translate("Edit", "editHotkeysText");
+    translate("Edit", "editUserCssText");
+    translate("Edit", "editUserJavaScriptText");
     translate("Cancel", "cancelButtonText");
     translate("Confirm", "confirmButtonText");
     translate("Show post form", "showPostFormText");

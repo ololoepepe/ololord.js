@@ -502,6 +502,19 @@ lord.editUserCss = function() {
     });
 };
 
+lord.editUserJavaScript = function() {
+    var ta = lord.node("textarea");
+    ta.rows = 10;
+    ta.cols = 43;
+    ta.value = lord.getLocalObject("userJavaScript", "");
+    lord.showDialog(null, null, ta).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        lord.setLocalObject("userJavaScript", ta.value);
+        return Promise.resolve();
+    });
+};
+
 lord.hotkey_showFavorites = function() {
     lord.showFavorites();
     return false;
@@ -558,7 +571,7 @@ lord.initializeOnLoadSettings = function() {
     }
     if (lord.getLocalObject("showNewPosts", true))
         lord.showNewPosts();
-    if (lord.getLocalObject("userCssEnabled", false)) {
+    if (lord.getLocalObject("userCssEnabled", true)) {
         var css = lord.getLocalObject("userCss", "");
         var head = lord.queryOne("head");
         var style = lord.node("style");
@@ -568,6 +581,14 @@ lord.initializeOnLoadSettings = function() {
         else
             style.appendChild(lord.node("text", css));
         head.appendChild(style);
+    }
+    if (lord.getLocalObject("userJavaScriptEnabled", true)) {
+        var js = lord.getLocalObject("userJavaScript", "");
+        var head = lord.queryOne("head");
+        var script = lord.node("script");
+        script.type = "text/javascript";
+        script.innerHTML = js;
+        head.appendChild(script);
     }
 };
 

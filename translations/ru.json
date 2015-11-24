@@ -1916,16 +1916,6 @@
             "value": "Скрывать правила под формой ответа"
         }
     },
-    "Edit hotkeys": {
-        "editHotkeysText": {
-            "value": "Редактировать горячие клавиши"
-        }
-    },
-    "Edit user CSS": {
-        "editUserCssText": {
-            "value": "Редактировать CSS"
-        }
-    },
     "Edit spells": {
         "editSpellsText": {
             "value": "Редактировать спеллы"
@@ -1934,6 +1924,22 @@
     "User CSS enabled": {
         "userCssLabelText": {
             "value": "Пользовательские CSS"
+        }
+    },
+    "User JavaScript enabled": {
+        "userJavaScriptLabelText": {
+            "value": "Пользовательский JavaScript"
+        }
+    },
+    "Edit": {
+        "editHotkeysText": {
+            "value": "Редактировать"
+        },
+        "editUserCssText": {
+            "value": "Редактировать"
+        },
+        "editUserJavaScriptText": {
+            "value": "Редактировать"
         }
     },
     "Hide tripcodes": {

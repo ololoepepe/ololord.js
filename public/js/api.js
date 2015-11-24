@@ -1276,7 +1276,8 @@ lord.settings = function() {
         showNewPosts: lord.getLocalObject("showNewPosts", true),
         showYoutubeVideosTitles: lord.getLocalObject("showYoutubeVideosTitles", true),
         hotkeysEnabled: lord.getLocalObject("hotkeysEnabled", true),
-        userCssEnabled: lord.getLocalObject("userCssEnabled", true)
+        userCssEnabled: lord.getLocalObject("userCssEnabled", true),
+        userJavaScriptEnabled: lord.getLocalObject("userJavaScriptEnabled", true)
     };
 };
 

@@ -205,18 +205,21 @@
                         <td colspan="2">
                             <input type="checkbox" name="hotkeysEnabled"
                                    {{? it.settings.hotkeysEnabled}}checked="true"{{?}} /><label>{{=it.tr.hotkeysLabelText}}</label>
+                            <button class="button" onclick="lord.editHotkeys();">{{=it.tr.editHotkeysText}}</button>
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2">
                             <input type="checkbox" name="userCssEnabled"
                                    {{? it.settings.userCssEnabled}}checked="true"{{?}} /><label>{{=it.tr.userCssLabelText}}</label>
+                            <button class="button" onclick="lord.editUserCss();">{{=it.tr.editUserCssText}}</button>
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2">
-                            <button class="button" onclick="lord.editHotkeys();">{{=it.tr.editHotkeysText}}</button>
-                            <button class="button" onclick="lord.editUserCss();">{{=it.tr.editUserCssText}}</button>
+                            <input type="checkbox" name="userJavaScriptEnabled"
+                                   {{? it.settings.userJavaScriptEnabled}}checked="true"{{?}} /><label>{{=it.tr.userJavaScriptLabelText}}</label>
+                            <button class="button" onclick="lord.editUserJavaScript();">{{=it.tr.editUserJavaScriptText}}</button>
                         </td>
                     </tr>
                 </tbody>
