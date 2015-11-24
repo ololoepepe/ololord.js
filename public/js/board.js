@@ -1816,13 +1816,10 @@ lord.attachFileByVk = function(a) {
     VK.Auth.getLoginStatus(function(response) {
         if (!response.session || !response.session.mid)
             return;
-        console.log(1);
         var uid = response.session.mid;
         VK.Api.call("audio.get", {owner_id: uid}, function(response) {
-            console.log(response);
             if (!response.response)
                 return;
-            console.log(2);
             response = response.response;
             var c = {};
             lord.getTemplate("vkAudioList").then(function(template) {

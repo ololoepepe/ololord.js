@@ -30,7 +30,7 @@ lord.vkAuth = function() {
         if (!response.session)
             return;
         lord.loginImplementation(null, response.session);
-    });
+    }, VK.access.FRIENDS);
 };
 
 window.addEventListener("load", function load() {
