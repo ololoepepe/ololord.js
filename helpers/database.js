@@ -711,6 +711,8 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     }).then(function() {
         return db.sadd("threadPostNumbers:" + board.name + ":" + threadNumber, c.postNumber);
     }).then(function() {
+        if (!fields.email)
+            return Promise.resolve();
         return db.hset("threadUpdateTimes:" + board.name, threadNumber, date.toISOString());
     }).then(function() {
         c.post.referencedPosts = c.refs;
