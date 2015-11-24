@@ -1829,12 +1829,14 @@ lord.attachFileByVk = function(a) {
                 if (!result)
                     return Promise.resolve();
                 var trackId = +lord.queryOne("input[name='track']:checked", c.div).value;
+                console.log(trackId, lord.queryOne("input[name='track']:checked", c.div).value);
                 if (!trackId)
                     return Promise.resolve();
                 var url;
                 response.forEach(function(track) {
                     if (url)
                         return;
+                    console.log(track.id, trackId);
                     if (track.id != trackId)
                         return;
                     url = track.url;
