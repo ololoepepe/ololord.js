@@ -642,7 +642,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             options: {
                 draft: (hashpass && board.draftsEnabled && fields.draft),
                 rawHtml: c.isRaw,
-                showTripcode: !!fields.showTripcode,
+                showTripcode: !!fields.tripcode,
                 signAsOp: !!fields.signAsOp
             },
             rawText: rawText,
