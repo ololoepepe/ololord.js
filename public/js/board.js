@@ -1845,7 +1845,7 @@ lord.attachFileByVk = function(a) {
                     return;
                 //
                 var script = lord.node("script");
-                script.src = url + "&callback=callbackFunc";
+                script.src = url.replace("http://", "https://") + "&callback=callbackFunc";
                 console.log(url);
                 lord.queryOne("head").appendChild(script);
                 return;
