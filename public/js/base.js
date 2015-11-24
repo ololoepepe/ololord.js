@@ -57,6 +57,10 @@ lord.doLogout = function(event, form) {
         expires: lord.Billion,
         path: "/"
     });
+    lord.setCookie("vkAuth", "", {
+        expires: lord.Billion,
+        path: "/"
+    });
     window.location = lord.nameOne("source", form).value;
 };
 
