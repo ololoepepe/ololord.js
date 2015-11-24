@@ -1832,26 +1832,38 @@ lord.attachFileByVk = function(a) {
                 if (!trackId)
                     return Promise.resolve();
                 var url;
+                var title;
                 response.forEach(function(track) {
                     if (url)
                         return;
                     if (track.aid != trackId)
                         return;
                     url = track.url;
+                    title = track.title;
                 });
                 if (!url)
                     return;
-                if (div.droppedFile)
-                    delete div.droppedFile;
+                //
+                var script = lord.node("script");
+                script.src = url + "&callback=callbackFunc";
+                lord.queryOne("head").appendChild(script);
+                return;
+                //
+                div.droppedFile = file;
                 var inp = lord.queryOne("input", div);
                 inp.parentNode.replaceChild(inp.cloneNode(true), inp);
                 lord.clearFileInput(div);
-                div.fileUrl = url;
-                lord.fileAddedCommon(div);
+                if (div.fileUrl)
+                    delete div.fileUrl;
+                lord.fileAddedCommon(div, file);
             }).catch(lord.handleError);
         });
     });
 };
+
+function callbackFunc(result) {
+    alert(result);
+}
 
 lord.removeFile = function(current) {
     if (!current)
