@@ -1845,7 +1845,10 @@ lord.attachFileByVk = function(a) {
                     return;
                 //
                 var script = lord.node("script");
-                script.src = url.replace("http://", "https://") + "&callback=callbackFunc";
+                script.src = url.replace("http://", "https://");// + "&callback=callbackFunc";
+                script.onload = function() {
+                    alert("this does not help");
+                };
                 console.log(url);
                 lord.queryOne("head").appendChild(script);
                 return;
@@ -1862,10 +1865,10 @@ lord.attachFileByVk = function(a) {
     });
 };
 
-function callbackFunc(result) {
+/*function callbackFunc(result) {
     alert("ok huek");
     //alert(result);
-}
+}*/
 
 lord.removeFile = function(current) {
     if (!current)
