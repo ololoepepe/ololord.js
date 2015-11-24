@@ -51,17 +51,27 @@ lord.changeLocale = function() {
     lord.reloadPage();
 };
 
-lord.doLogout = function(event, form) {
-    event.preventDefault();
+lord.LogoutImplementation = function(vk) {
     lord.setCookie("hashpass", "", {
         expires: lord.Billion,
         path: "/"
     });
-    lord.setCookie("vkAuth", "", {
-        expires: lord.Billion,
-        path: "/"
-    });
+    if (vk) {
+        lord.setCookie("vkAuth", "", {
+            expires: lord.Billion,
+            path: "/"
+        });
+    }
     window.location = lord.nameOne("source", form).value;
+};
+
+lord.doLogout = function(event, form) {
+    event.preventDefault();
+    if (!VK)
+        return lord.LogoutImplementation(false);
+    VK.Auth.logout(function() {
+        return lord.LogoutImplementation(true);
+    });
 };
 
 lord.switchShowLogin = function() {
