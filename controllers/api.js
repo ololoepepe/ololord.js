@@ -242,7 +242,6 @@ router.get("/fileHeaders.json", function(req, res) {
         return controller.error(req, res, "Invalid url", true);
     var proxy = Tools.proxy();
     var url = URL.parse(req.query.url);
-    console.log(req.query.url);
     var p;
     if (proxy && !/vk\.me$/i.test(url.hostname)) {
         p = HTTP.request({
@@ -261,6 +260,8 @@ router.get("/fileHeaders.json", function(req, res) {
         });
     }
     return p.then(function(response) {
+        console.log(req.query.url);
+        console.log(response.status, response.headers);
         if (response.status != 200)
             return Promise.reject("Failed to get file headers");
         res.json(response.headers);
