@@ -1844,7 +1844,7 @@ lord.attachFileByVk = function(a) {
                 if (!url)
                     return;
                 var xhr = new XMLHttpRequest();
-                xhr.open("get", url, true);
+                xhr.open("get", "http://cors.io?u=" + url, true);
                 xhr.responseType = "blob";
                 return new Promise(function(resolve, reject) {
                     xhr.onreadystatechange = function() {
