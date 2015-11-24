@@ -1844,13 +1844,20 @@ lord.attachFileByVk = function(a) {
                 if (!url)
                     return;
                 //
-                var script = lord.node("script");
-                script.src = url.replace("http://", "https://");// + "&callback=callbackFunc";
-                script.onload = function() {
-                    alert("this does not help");
+                var xhr = new XMLHttpRequest();
+                xhr.open("get", url, true);
+                //xhr.responseType = "arraybuffer";
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState != 4)
+                        return;
+                    if (xhr.status != 200)
+                        return console.log(xhr.status);
+                    var response = xhr.response;
+                    if (!response)
+                        return;
+                    console.log(response);
                 };
-                console.log(url);
-                lord.queryOne("head").appendChild(script);
+                xhr.send(null);
                 return;
                 //
                 div.droppedFile = file;
