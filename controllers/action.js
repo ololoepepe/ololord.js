@@ -5,7 +5,6 @@ var FS = require("q-io/fs");
 var FSSync = require("fs");
 var HTTP = require("q-io/http");
 var moment = require("moment");
-var URL = require("url");
 var UUID = require("uuid");
 
 var Board = require("../boards");
@@ -94,9 +93,8 @@ var getFiles = function(fields, files, transaction) {
             transaction.filePaths.push(path);
             var c = {};
             var proxy = Tools.proxy();
-            var url = URL.parse(req.query.url);
             var p;
-            if (proxy && !/vk\.me$/i.test(url.hostname)) {
+            if (proxy) {
                 p = HTTP.request({
                     host: proxy.host,
                     port: proxy.port,

@@ -1,6 +1,5 @@
 var express = require("express");
 var HTTP = require("q-io/http");
-var URL = require("url");
 var Util = require("util");
 
 var Board = require("../boards");
@@ -241,9 +240,8 @@ router.get("/fileHeaders.json", function(req, res) {
     if (!req.query.url)
         return controller.error(req, res, "Invalid url", true);
     var proxy = Tools.proxy();
-    var url = URL.parse(req.query.url);
     var p;
-    if (proxy && !/vk\.me$/i.test(url.hostname)) {
+    if (proxy) {
         p = HTTP.request({
             method: "HEAD",
             host: proxy.host,
@@ -255,7 +253,6 @@ router.get("/fileHeaders.json", function(req, res) {
     } else {
         p = HTTP.request({
             method: "HEAD",
-            headers: { "User-Agent": "Mozilla/5.0 (X11; Linux i686; rv:36.0) Gecko/20100101 Firefox/36.0" },
             url: req.query.url,
             timeout: Tools.Minute
         });
