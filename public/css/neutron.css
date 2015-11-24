@@ -921,7 +921,7 @@ ul.tabWidget > li.activated {
     display: block;
     font-size: 0.9em;
     padding-bottom: 5px;
-    text-align: left;
+    text-align: center;
     overflow-x: auto;
     font-size: 1.2em;
     position: relative;

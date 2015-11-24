@@ -6,6 +6,8 @@ var config = require("./config");
 var Database = require("./database");
 var Tools = require("./tools");
 
+var langNames = require("../misc/lang-names.json");
+
 var SkipTypes = {
     NoSkip: "NO_SKIP",
     HtmlSkip: "HTML_SKIP",
@@ -461,7 +463,9 @@ var convertCode = function(_, text, matchs, _, options) {
     var result = lang ? Highlight.highlight(lang, text, true) : Highlight.highlightAuto(text);
     text = result.value;
     lang = result.language || lang;
-    options.op = "<div class=\"codeBlock" + (lang ? (" " + lang) : "") + " hljs\">";
+    var langClass = lang ? (" " + lang) : "";
+    var langName = langNames.hasOwnProperty(lang) ? langNames[lang] : lang;
+    options.op = `<div class="codeBlock${langClass}hljs" title=${langName}>`;
     options.cl = "</div>";
     return Promise.resolve(Highlight.fixMarkup(text));
 };
