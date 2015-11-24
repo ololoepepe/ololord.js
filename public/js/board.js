@@ -1845,7 +1845,7 @@ lord.attachFileByVk = function(a) {
                     return;
                 //
                 var xhr = new XMLHttpRequest();
-                xhr.open("get", url, true);
+                xhr.open("get", url.replace("http://", "https://"), true);
                 //xhr.responseType = "arraybuffer";
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState != 4)
@@ -1871,11 +1871,6 @@ lord.attachFileByVk = function(a) {
         });
     });
 };
-
-/*function callbackFunc(result) {
-    alert("ok huek");
-    //alert(result);
-}*/
 
 lord.removeFile = function(current) {
     if (!current)
