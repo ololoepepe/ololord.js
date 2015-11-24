@@ -1821,6 +1821,9 @@ lord.attachFileByVk = function(a) {
             if (!response.response)
                 return;
             response = response.response;
+            response.forEach(function(track) {
+                console.log(track);
+            };
             var c = {};
             lord.getTemplate("vkAudioList").then(function(template) {
                 c.div = $.parseHTML(template({ tracks: response }))[0];
