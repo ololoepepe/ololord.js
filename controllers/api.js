@@ -243,6 +243,7 @@ router.get("/fileHeaders.json", function(req, res) {
     var proxy = Tools.proxy();
     var url = URL.parse(req.query.url);
     var p;
+    console.log(!/vk\.me$/i.test(url.hostname));
     if (proxy && !/vk\.me$/i.test(url.hostname)) {
         p = HTTP.request({
             method: "HEAD",
