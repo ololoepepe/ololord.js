@@ -586,32 +586,35 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         if (fields.markupMode && fields.markupMode.indexOf(val) >= 0)
             markupModes.push(val);
     });
-    return registeredUser(hashpass).then(function(user) {
-        c.user = user;
-        c.level = c.user ? c.user.level : null;
+
+    return getThreads(board.name, {
+        limit: 1,
+        filterFunction: function(thread) {
+            if (thread.number != threadNumber)
+                return false;
+            if (!thread.options.draft)
+                return true;
+            if (!thread.user.hashpass)
+                return true;
+            if (thread.user.hashpass == hashpass)
+                return true;
+            return compareRegisteredUserLevels(thread.user.level, c.level) <= 0;
+        }
+    }).then(function(threads) {
+        if (!threads || threads.length != 1)
+            return Promise.reject("No such thread or no access to thread");
+        c.level = req.level || null;
         c.isRaw = fields.raw && compareRegisteredUserLevels(c.level, RegisteredUserLevels.Admin) >= 0;
+        return db.scard("threadPostNumbers:" + board.name + ":" + threadNumber);
+    }).then(function(postCount) {
+        c.postCount = postCount;
+        if (c.postCount >= board.postLimit)
+            return Promise.reject("Post limit reached");
         if (c.isRaw)
             return rawText;
-        return getThreads(board.name, {
-            limit: 1,
-            filterFunction: function(thread) {
-                if (thread.number != threadNumber)
-                    return false;
-                if (!thread.options.draft)
-                    return true;
-                if (!thread.user.hashpass)
-                    return true;
-                if (thread.user.hashpass == hashpass)
-                    return true;
-                return compareRegisteredUserLevels(thread.user.level, c.level) <= 0;
-            }
-        }).then(function(threads) {
-            if (!threads || threads.length != 1)
-                return Promise.reject("No such thread or no access to thread");
-            return markup(board.name, rawText, {
-                markupModes: markupModes,
-                referencedPosts: referencedPosts
-            });
+        return markup(board.name, rawText, {
+            markupModes: markupModes,
+            referencedPosts: referencedPosts
         });
     }).then(function(text) {
         c.text = text;
@@ -711,7 +714,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     }).then(function() {
         return db.sadd("threadPostNumbers:" + board.name + ":" + threadNumber, c.postNumber);
     }).then(function() {
-        if (!fields.email)
+        if (c.postCount >= board.bumpLimit || (fields.email && fields.email.toLowerCase() == "sage"))
             return Promise.resolve();
         return db.hset("threadUpdateTimes:" + board.name, threadNumber, date.toISOString());
     }).then(function() {
