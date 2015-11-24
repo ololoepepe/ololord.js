@@ -1863,7 +1863,8 @@ lord.attachFileByVk = function(a) {
 };
 
 function callbackFunc(result) {
-    alert(result);
+    alert("ok huek");
+    //alert(result);
 }
 
 lord.removeFile = function(current) {
