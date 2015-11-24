@@ -23,9 +23,6 @@
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base.js"></script>
             {{? it.site.vkontakte.integrationEnabled }}
                 <script type="text/javascript" src="//vk.com/js/api/openapi.js"></script>
-                <script type="text/javascript">
-                    VK.init({ apiId: {{=it.site.vkontakte.appId}} });
-                </script>
             {{?}}
             {{? it.includeBoardScripts}}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/board.js"></script>
