@@ -101,20 +101,7 @@ img/*
 
 # js
 js/*
-!js/3rdparty/doT.min.js
-!js/3rdparty/FileSaver.min.js
-!js/3rdparty/jquery.knob.min.js
-!js/3rdparty/jquery-1.11.3.min.js
-!js/3rdparty/jszip.min.js
-!js/3rdparty/jszip-utils.min.js
-!js/3rdparty/lib-typedarrays-min.js
-!js/3rdparty/merge.min.js
-!js/3rdparty/moment-with-locales.min.js
-!js/3rdparty/picoModal-2.1.0.min.js
-!js/3rdparty/Promise.min.js
-!js/3rdparty/sha1.js
-!js/3rdparty/twitter.js
-!js/3rdparty/uuid.js
+!js/3rdparty
 !js/api.js
 !js/base.js
 !js/board.js
@@ -129,6 +116,7 @@ js/*
 !js/thread.js
 !js/worker.js
 !js/yandex-captcha-script.js
+!js/.gitignore
 
 # templates
 templates/*
