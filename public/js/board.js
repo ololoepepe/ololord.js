@@ -1841,12 +1841,12 @@ lord.attachFileByVk = function(a) {
                         return;
                     title = track.title;
                 });
-                div.fileUrl = "vk://" + uid + "_" + trackId + "/" + (title || "unknown");
                 if (div.droppedFile)
                     delete div.droppedFile;
                 var inp = lord.queryOne("input", div);
                 inp.parentNode.replaceChild(inp.cloneNode(true), inp);
                 lord.clearFileInput(div);
+                div.fileUrl = "vk://" + uid + "_" + trackId + "/" + (title || "unknown");
                 lord.fileAddedCommon(div);
             }).catch(lord.handleError);
         });
