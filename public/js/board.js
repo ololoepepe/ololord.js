@@ -1592,8 +1592,8 @@ lord.fileAddedCommon = function(div, file) {
     };
     var fileName = file ? file.name : div.fileUrl.split("/").pop();
     fileName = (fileName || "");
-    if (fileName.length > 50)
-        fileName = fileName.substr(0, 47) + "...";
+    if (fileName.length > 30)
+        fileName = fileName.substr(0, 27) + "...";
     var p;
     if (file) {
         p = lord.readableSize(file.size).then(function(txt) {
