@@ -1832,7 +1832,7 @@ lord.attachFileByVk = function(a) {
         VK.Api.call("audio.get", {owner_id: uid}, function(response) {
             if (!response.response)
                 return;
-            response = response.response;
+            response = response.response.slice(1);
             var c = {};
             lord.getTemplate("vkAudioList").then(function(template) {
                 c.div = $.parseHTML(template({ tracks: response }))[0];
