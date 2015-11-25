@@ -36,6 +36,9 @@
             "integrationEnabled": false,
             "appId": 0,
             "accessToken": ""
+        },
+        "twitter": {
+            "integrationEnabled": true
         }
     },
     "board": {

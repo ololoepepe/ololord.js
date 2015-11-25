@@ -244,6 +244,9 @@ controller.baseModel = function(req) {
             vkontakte: {
                 integrationEnabled: !!config("site.vkontakte.integrationEnabled", false),
                 appId: config("site.vkontakte.appId", "")
+            },
+            twitter: {
+                integrationEnabled: !!config("site.twitter.integrationEnabled", true)
             }
         },
         user: {

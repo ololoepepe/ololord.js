@@ -409,8 +409,15 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
         });
         return lord.getTemplate("post");
     }).then(function(template) {
-        var nodes = $.parseHTML(template(c.model));
+        var html = template(c.model);
+        var nodes = $.parseHTML(html);
         c.node = (nodes.length > 1) ? nodes[1] : nodes[0];
+        if (html.replace("src=\"//platform.twitter.com/widgets.js\"", "") != html) {
+            var script = lord.node("script");
+            script.type = "text/javascript";
+            script.src = "//platform.twitter.com/widgets.js";
+            c.node.appendChild(script);
+        }
         if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
             lord.strikeOutHiddenPostLinks(c.node);
         if (lord.getLocalObject("signOpPostLinks", true))

@@ -1,4 +1,5 @@
 var Highlight = require("highlight.js");
+var HTTP = require("q-io/http");
 var XRegExp = require("xregexp");
 
 var Board = require("../boards");
@@ -116,6 +117,34 @@ var withoutEscaped = function(text) {
         ind = text.lastIndexOf(rx, ind - text.length - 2);
     }
     return text;
+};
+
+var matchTwitterLink = function(href) {
+    return config("site.twitter.integrationEnabled", true)
+        && href.match(/^https?\:\/\/twitter\.com\/[^\/]+\/status\/\d+\/?$/);
+};
+
+var getTwitterEmbeddedHtml = function(href, defaultHtml) {
+    return HTTP.request({
+        method: "GET",
+        url: `https://api.twitter.com/1/statuses/oembed.json?url=${href}`,
+        timeout: Tools.Minute
+    }).then(function(response) {
+        if (response.status != 200)
+            return Promise.reject("Failed to get Twitter embedded HTML");
+        return response.body.read();
+    }).then(function(data) {
+        try {
+            return Promise.resolve(JSON.parse(data.toString()).html);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+    }).catch(function(err) {
+        console.log(err.stack || err);
+        return Promise.resolve(defaultHtml);
+    }).then(function(html) {
+        return Promise.resolve(html);
+    });
 };
 
 var ProcessingInfo = function(text, boardName, referencedPosts, deletedPost, referencesToReplace) {
@@ -475,7 +504,10 @@ var convertExternalLink = function(_, _, matchs, _, options) {
     var href = matchs[0];
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
-    return Promise.resolve("<a href=\"" + href + "\">" + Tools.toHtml(matchs[0]) + "</a>");
+    var def = "<a href=\"" + href + "\">" + Tools.toHtml(matchs[0]) + "</a>";
+    if (matchTwitterLink(href))
+        return getTwitterEmbeddedHtml(href, def);
+    return Promise.resolve(def);
 };
 
 var convertProtocol = function(_, _, matchs, _, options) {
@@ -544,7 +576,10 @@ var convertUrl = function(_, text, _, _, options) {
     var href = text;
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
-    return Promise.resolve("<a href=\"" + href + "\">" + Tools.toHtml(text) + "</a>");
+    var def = "<a href=\"" + href + "\">" + Tools.toHtml(text) + "</a>"
+    if (matchTwitterLink(href))
+        return getTwitterEmbeddedHtml(href, def);
+    return Promise.resolve(def);
 };
 
 var convertCSpoiler = function(_, text, matchs, _, options) {
