@@ -2,13 +2,16 @@
 
 lord.loginImplementation = function(form, session) {
     form = form || lord.id("loginForm");
-    var hashpass = session ? session.sid : lord.nameOne("hashpass", form).value;
+    var hashpass = lord.nameOne("hashpass", form).value;
+    var realHashpass = !!hashpass;
+    if (!hashpass && session)
+        hashpass = session.sid;
     if (!hashpass)
         return;
     if (!hashpass.match(/^([0-9a-fA-F]{40})$/))
         hashpass = CryptoJS.SHA1(hashpass).toString(CryptoJS.enc.Hex);
     lord.setCookie("hashpass", hashpass, {
-        expires: (session ? session.expire : lord.Billion),
+        expires: (session && !realHashpass) ? session.expire : lord.Billion),
         path: "/"
     });
     if (session) {
