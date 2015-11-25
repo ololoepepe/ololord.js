@@ -44,6 +44,11 @@
 <div class="loginDescription">
     {{=it.tr.loginSystemDescriptionText}}
 </div>
+{{? "ascetic" != it.settings.mode.name && it.site.vkontakte.integrationEnabled}}
+    <div class="loginDescription">
+        {{=it.tr.loginSystemVkontakteDescriptionText}}
+    </div>
+{{?}}
 {{? it.customFooter}}
     {{#def.customFooter}}
 {{?}}

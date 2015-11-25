@@ -67,7 +67,7 @@ lord.LogoutImplementation = function(form, vk) {
 
 lord.doLogout = function(event, form) {
     event.preventDefault();
-    if (!VK)
+    if (!VK || lord.getCookie("vkAuth", "false") != "true")
         return lord.LogoutImplementation(form, false);
     VK.Auth.logout(function() {
         return lord.LogoutImplementation(form, true);

@@ -3549,9 +3549,14 @@
             "value": "Комментарий. Макс. длина:"
         }
     },
-    "\"Log in\", you say? On an imageboard? I am out!\n\nPlease, wait a sec. The login systyem does NOT store any data on the server. It only stores a cookie on your PC to allow post editing, deleting, etc. without entering password every time, and nothing else.\n\nWell, actually, the admin may register someone manually (if he is a fag), but there is no way to register through the web.": {
+    "\"Log in\", you say? On an imageboard? I am out!<br />Please, wait a sec. The login systyem does NOT store any data on the server. It only stores a cookie on your PC to allow post editing, deleting, etc. without entering password every time, and nothing else.<br />Well, actually, the admin may register someone manually (if he is a fag), but there is no way to register through the web.": {
         "loginSystemDescriptionText": {
-            "value": "\"Залогиниться\", говоришь? На имиджборде? Я сваливаю!\n\nПогоди секундочку. Система логина НЕ СОХРАНЯЕТ никаких данных на сервере. Она только хранит cookie на вашем ПК, что позволяет редактировать, удалять посты и т.д. без ввода пароля каждый раз, и ничего более.\n\nНу, на самом деле админ может кого-то зарегистрировать вручную (если он мудак), но способ зарегистрироваться через веб-интерфейс отсутствует."
+            "value": "\"Залогиниться\", говоришь? На имиджборде? Я сваливаю!<br />Погоди секундочку. Система логина НЕ СОХРАНЯЕТ никаких данных на сервере. Она только хранит cookie на вашем ПК, что позволяет редактировать, удалять посты и т.д. без ввода пароля каждый раз, и ничего более.<br />Ну, на самом деле админ может кого-то зарегистрировать вручную (если он мудак), но способ зарегистрироваться через веб-интерфейс отсутствует."
+        }
+    },
+    "When logging in with Vkontakte, you may omit the login, but to be logged in with the same login on each browser, you have to specify it.<br />When logged in with Vkontakte, you are able to attach your VK audio.<br />This does not affect your anonymity in any way.": {
+        "loginSystemVkontakteDescriptionText": {
+            "value": "При входе в систему через Вкотнакте можно не указывать логин, но, чтобы быть залогиненым во всех браузерах под одним логином, его потребуется указать.<br />Когда вы залогинены через Вконтакте, вы можете прикреплять к посту свои аудиозаписи из ВК.<br />Это никак не влияет на вашу анонимность."
         }
     },
     "Code style:": {
