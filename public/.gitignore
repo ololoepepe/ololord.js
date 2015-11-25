@@ -113,6 +113,7 @@ js/*
 !js/3rdparty/picoModal-2.1.0.min.js
 !js/3rdparty/Promise.min.js
 !js/3rdparty/sha1.js
+!js/3rdparty/twitter.js
 !js/3rdparty/uuid.js
 !js/api.js
 !js/base.js
