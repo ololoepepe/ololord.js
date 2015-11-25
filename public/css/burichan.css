@@ -577,14 +577,6 @@ span.newPostCount {
     color: #000000;
 }
 
-.postActions > img {
-    opacity: 0.65;
-}
-
-.postActions:hover > img {
-    opacity: 1;
-}
-
 .postActionsMenu {
     list-style-type: none;
     margin-left: 0px;

@@ -107,15 +107,17 @@
             {{ out += it.customPostHeaderPart[140](it, thread, post); }}
         {{?}}
         {{? it.settings.mode.name != "ascetic" && thread.postingEnabled && !thread.postLimitReached}}
-            [<a href="javascript:void(0);" onclick="lord.quickReply(this); return false;" title="{{=it.tr.quickReplyText}}"
-                name="quickReply">&gt;&gt;</a>]
+            [<a href="javascript:void(0);" onclick="lord.quickReply(this); return false;" name="quickReply"
+                title="{{=it.tr.quickReplyText}}"><img src="/{{=it.site.pathPrefix}}img/reply.png"
+                                                        class="buttonImage"></a>]
         {{?}}
         {{? it.customPostHeaderPart && it.customPostHeaderPart[150]}}
             {{ out += it.customPostHeaderPart[150](it, thread, post); }}
         {{?}}
         {{? it.settings.mode.name != "ascetic" || it.user.loggedIn}}
             <span tabindex="0" class="{{=it.deviceType}} postActions">
-                <img src="/{{=it.site.pathPrefix}}img/post_actions.png" title="{{=it.tr.postActionsText}}">
+                [<img src="/{{=it.site.pathPrefix}}img/post_actions.png" class="buttonImage"
+                      title="{{=it.tr.postActionsText}}">]
                 <ul class="postActionsMenu {{=it.deviceType}}">
                     {{? it.customPostMenuAction && it.customPostMenuAction[0]}}
                         {{ out += it.customPostMenuAction[0](it, thread, post); }}
@@ -137,6 +139,13 @@
                                href="/{{=it.site.pathPrefix}}editPost.html?boardName={{=it.board.name}}&postNumber={{=post.number}}"
                                {{? it.settings.mode.name != "ascetic"}}onclick="lord.editPost(this); return false;"{{?}}>
                                 <img src="/{{=it.site.pathPrefix}}img/edit.png" /> {{=it.tr.editPostText}}</a>
+                        </li>
+                    {{?}}
+                    {{? it.settings.mode.name != "ascetic"}}
+                        <li>
+                            <a name="chatButton" href="javascript:void(0);"
+                               onclick="lord.chatWithUser(this); return false;">
+                                <img src="/{{=it.site.pathPrefix}}img/chat.png" /> {{=it.tr.chatWithUserText}}</a>
                         </li>
                     {{?}}
                     {{? post.rawText}}

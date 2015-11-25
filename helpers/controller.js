@@ -636,6 +636,7 @@ controller.translationsModel = function() {
     translate("Target board", "targetBoardLabelText");
     translate("Specify Vkontakte audio file", "attachFileByVkText");
     translate("Select a track", "selectTrackTitle");
+    translate("Chat privately with this user", "chatWithUserText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

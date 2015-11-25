@@ -1005,6 +1005,10 @@ lord.showPostSourceText = function(el) {
     }).catch(lord.handleError);
 };
 
+lord.chatWithUser = function(el) {
+    alert("Эта функция в разработке");
+};
+
 lord.deletePost = function(el) {
     var c = {};
     var postNumber = +lord.data("number", el, true);
