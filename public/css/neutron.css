@@ -671,7 +671,7 @@ span.newPostCount {
     transition: visibility 0s linear 0.2s,opacity 0.2s linear;
     position: absolute;
     z-index: 9999;
-    background-color: #DDEDAA;
+    background-color: #212121;
     border: 1px solid #575757;
     margin-top: 0px;
     top: 100%;
@@ -1085,6 +1085,7 @@ blockquote.blockquoteThread.expand {
 .buttonImage {
     vertical-align: middle;
     opacity: 0.65;
+    filter: invert(1);
 }
 
 .buttonImage:disabled {
@@ -1097,6 +1098,11 @@ blockquote.blockquoteThread.expand {
 
 .buttonImage:disabled:hover {
     opacity: 0.4;
+}
+
+.signImage {
+    vertical-align: middle;
+    filter: invert(1);
 }
 
 .boardSelect {
