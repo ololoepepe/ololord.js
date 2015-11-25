@@ -1835,11 +1835,10 @@ lord.attachFileByVk = function(a) {
                     return Promise.resolve();
                 var title;
                 response.forEach(function(track) {
-                    if (url)
+                    if (title)
                         return;
                     if (track.aid != trackId)
                         return;
-                    url = track.url;
                     title = track.title;
                 });
                 div.fileUrl = "vk://" + uid + "_" + trackId + "/" + (title || "unknown");
