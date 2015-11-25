@@ -1598,6 +1598,8 @@ lord.fileAddedCommon = function(div, file) {
         });
         if (+file.size > +lord.data("maxFileSize"))
             warn();
+    } else if (div.fileUrl.replace("vk://", "") != div.fileUrl) {
+        p = Promise.resolve(fileName + " [VK]");
     } else {
         p = lord.getModel("api/fileHeaders", "url=" + encodeURIComponent(div.fileUrl)).then(function(headers) {
             if (lord.checkError(headers))
@@ -1831,7 +1833,6 @@ lord.attachFileByVk = function(a) {
                 var trackId = +lord.queryOne("input[name='track']:checked", c.div).value;
                 if (!trackId)
                     return Promise.resolve();
-                var url;
                 var title;
                 response.forEach(function(track) {
                     if (url)
@@ -1841,32 +1842,13 @@ lord.attachFileByVk = function(a) {
                     url = track.url;
                     title = track.title;
                 });
-                if (!url)
-                    return;
-                //
-                var xhr = new XMLHttpRequest();
-                xhr.open("get", url.replace("http://", "https://"), true);
-                //xhr.responseType = "arraybuffer";
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState != 4)
-                        return;
-                    if (xhr.status != 200)
-                        return console.log(xhr.status);
-                    var response = xhr.response;
-                    if (!response)
-                        return;
-                    console.log(response);
-                };
-                xhr.send(null);
-                return;
-                //
-                div.droppedFile = file;
+                div.fileUrl = "vk://" + uid + "_" + trackId + "/" + (title || "unknown");
+                if (div.droppedFile)
+                    delete div.droppedFile;
                 var inp = lord.queryOne("input", div);
                 inp.parentNode.replaceChild(inp.cloneNode(true), inp);
                 lord.clearFileInput(div);
-                if (div.fileUrl)
-                    delete div.fileUrl;
-                lord.fileAddedCommon(div, file);
+                lord.fileAddedCommon(div);
             }).catch(lord.handleError);
         });
     });

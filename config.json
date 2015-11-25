@@ -35,8 +35,7 @@
         "vkontakte": {
             "integrationEnabled": false,
             "appId": 0,
-            "appIdServer": 0,
-            "appSecretServer": ""
+            "accessToken": ""
         }
     },
     "board": {

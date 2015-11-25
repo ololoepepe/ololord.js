@@ -13,6 +13,7 @@ var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
+var vk = require("../helpers/vk")(config("site.vkontakte.accessToken", ""));
 
 var rootRouter = express.Router();
 
@@ -94,7 +95,14 @@ var getFiles = function(fields, files, transaction) {
             var c = {};
             var proxy = Tools.proxy();
             var p;
-            if (proxy) {
+            if (url.url.replace("vk://", "") != url.url) {
+                p = vk("audio.getById", {audios: url.url.split("/")[2]}).then(function(result) {
+                    return HTTP.request({
+                        url: result.response[0].url,
+                        timeout: Tools.Minute
+                    });
+                });
+            } else if (proxy) {
                 p = HTTP.request({
                     host: proxy.host,
                     port: proxy.port,
