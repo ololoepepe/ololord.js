@@ -64,7 +64,7 @@ hr {
 .popup {
     background-color: #F0E0D6;
     position: fixed;
-    top: 5px;
+    top: 35px;
     right: 5px;
     z-index: 9950;
     vertical-align: middle;
