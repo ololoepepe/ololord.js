@@ -32,6 +32,7 @@
     "express": "^4.13.3",
     "express-cluster": "0.0.4",
     "express-device": "^0.4.2",
+    "express-ws-routes": "^1.0.2",
     "fast-csv": "^0.6.0",
     "fluent-ffmpeg": "^2.0.1",
     "formidable": "^1.0.17",

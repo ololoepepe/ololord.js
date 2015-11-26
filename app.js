@@ -25,7 +25,7 @@ var spawnCluster = function() {
 
         var controller = require("./helpers/controller");
 
-        var app = express();
+        var app = require("express-ws-routes")();
 
         app.use(require("./middlewares"));
         app.use(require("./controllers"));

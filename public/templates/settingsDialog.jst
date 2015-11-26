@@ -191,6 +191,12 @@
                 <tbody>
                     <tr>
                         <td colspan="2">
+                            <input type="checkbox" name="chatEnabled"
+                                   {{? it.settings.chatEnabled}}checked="true"{{?}} /><label>{{=it.tr.chatLabelText}}</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
                             <input type="checkbox" name="showNewPosts"
                                    {{? it.settings.showNewPosts}}checked="true"{{?}} /><label>{{=it.tr.showNewPostsLabelText}}</label>
                         </td>

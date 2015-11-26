@@ -907,6 +907,7 @@ self.addEventListener("message", function(message) {
         message = JSON.parse(message.data);
     } catch (err) {
         console.log(err);
+        return;
     }
     var f = lord["message_" + message.type];
     if (!f) {

@@ -638,6 +638,10 @@ controller.translationsModel = function() {
     translate("Select a track", "selectTrackTitle");
     translate("Chat privately with this user", "chatWithUserText");
     translate("Highlight code (page reload required)", "sourceHighlightingLabelText");
+    translate("Enable private chat", "chatLabelText");
+    translate("Private chat", "chatText");
+    translate("New private message", "newChatMessageText");
+    translate("Send message", "sendMessageButtonText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

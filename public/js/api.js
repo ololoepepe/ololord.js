@@ -1278,7 +1278,8 @@ lord.settings = function() {
         hotkeysEnabled: lord.getLocalObject("hotkeysEnabled", true),
         userCssEnabled: lord.getLocalObject("userCssEnabled", true),
         userJavaScriptEnabled: lord.getLocalObject("userJavaScriptEnabled", true),
-        sourceHighlightingEnabled: lord.getLocalObject("sourceHighlightingEnabled", false)
+        sourceHighlightingEnabled: lord.getLocalObject("sourceHighlightingEnabled", false),
+        chatEnabled: lord.getLocalObject("chatEnabled", true)
     };
 };
 

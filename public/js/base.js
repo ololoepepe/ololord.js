@@ -40,6 +40,11 @@ lord._defineHotkey("markupSpoiler", "Alt+P");
 lord._defineHotkey("markupQuotation", "Alt+Q");
 lord._defineHotkey("markupCode", "Alt+C");
 
+/*Variables*/
+
+lord.chatTasks = {};
+lord.chatMessages = {};
+
 /*Functions*/
 
 lord.changeLocale = function() {
@@ -51,7 +56,7 @@ lord.changeLocale = function() {
     lord.reloadPage();
 };
 
-lord.LogoutImplementation = function(form, vk) {
+lord.logoutImplementation = function(form, vk) {
     lord.setCookie("hashpass", "", {
         expires: lord.Billion,
         path: "/"
@@ -68,9 +73,9 @@ lord.LogoutImplementation = function(form, vk) {
 lord.doLogout = function(event, form) {
     event.preventDefault();
     if (!VK || lord.getCookie("vkAuth", "false") != "true")
-        return lord.LogoutImplementation(form, false);
+        return lord.logoutImplementation(form, false);
     VK.Auth.logout(function() {
-        return lord.LogoutImplementation(form, true);
+        return lord.logoutImplementation(form, true);
     });
 };
 
@@ -581,6 +586,205 @@ lord.interceptHotkey = function(e) {
     return false;
 };
 
+lord.chatMessage = function(data) {
+    if (!lord.chatMessages[data.hash])
+        lord.chatMessages[data.hash] = [];
+    lord.chatMessages[data.hash].push({
+        text: data.message,
+        type: "in"
+    });
+    if (lord.chatDialog) {
+        var chat = lord.nameOne(data.hash, lord.chatDialog);
+        if (!chat) {
+            chat = lord.createChatNode(data,hash);
+            lord.chatDialog.appendChild(chat);
+        }
+        var img = lord.queryOne("img", chat);
+        if (img.src.replace("chat_message", "") == img.src)
+            img.src = img.src.replace("chat", "chat_message");
+        if (lord.currentChat && lord.currentChat.name == data.hash) {
+            var messages = lord.nameOne("messages", lord.currentChat);
+            var msg = lord.node("div");
+            msg.appendChild(lord.node("text", "< " + data.message));
+            messages.appendChild(msg);
+        }
+    }
+    if (!lord.chatOpened) {
+        var a = lord.nameOne("chatButton");
+        var img = lord.queryOne("img", a);
+        if (img.src.replace("chat_message", "") == img.src)
+            img.src = img.src.replace("chat", "chat_message");
+        lord.getModel("misc/tr").then(function(model) {
+            var div = lord.node("div");
+            var a = lord.createChatButton(true);
+            a.onclick = lord.showChat.bind(lord, data.hash);
+            div.appendChild(a);
+            div.appendChild(lord.node("text", " " + model.tr.newChatMessageText));
+            lord.showPopup(div, { type: "node" });
+        }).catch(lord.handleError);
+    }
+};
+
+lord.chatMessageHandler = function(message) {
+    try {
+        message = JSON.parse(message.data);
+    } catch (err) {
+        lord.handleError(err);
+        return;
+    }
+    var task = lord.chatTasks[message.id];
+    if (task) {
+        delete lord.chatTasks[message.id];
+        if (!message.error)
+            task.resolve(message.data);
+        else
+            task.reject(message.error);
+    } else {
+        switch (message.type) {
+        case "message":
+            lord.chatMessage(message.data);
+            break;
+        case "error":
+            lord.handleError(message.data);
+            break;
+        default:
+            lord.handleError("Unknown request");
+            break;
+        }
+    }
+};
+
+lord.doChat = function(type, data) {
+    if (!lord.wsChat)
+        return Promise.reject("Connection lost");
+    return new Promise(function(resolve, reject) {
+        var id = uuid.v1();
+        lord.chatTasks[id] = {
+            resolve: resolve,
+            reject: reject
+        };
+        lord.wsChat.send(JSON.stringify({
+            id: id,
+            type: type,
+            data: data
+        }));
+    });
+};
+
+lord.showChat = function(hash) {
+    if (lord.currentChat && lord.currentChat.name == hash)
+        return;
+    var div = lord.node("div");
+    div.setAttribute("name", hash);
+    var messages = lord.node("div");
+    messages.setAttribute("name", "messages");
+    lord.chatMessages[hash].forEach(function(message) {
+        var msg = lord.node("div");
+        msg.appendChild(lord.node("text", (("in" == message.type) ? ">" : "<") + " " + message.text));
+        messages.appendChild(msg);
+    });
+    div.appendChild(messages);
+    var actions = lord.node("div");
+    var button = lord.node("button");
+    button.onclick = lord.sendChatMessage.bind(lord, hash, null);
+    lord.getModel("misc/tr").then(function(model) {
+        button.appendChild(lord.node("text", model.tr.sendMessageButtonText));
+    }).catch(lord.handleError);
+    actions.appendChild(button);
+    div.appendChild(actions);
+    lord.currentChat = div;
+    lord.showDialog(hash, null, div).then(function() {
+        lord.currentChat = null;
+    }).catch(lord.handleError);
+    if (lord.chatDialog) {
+        var chat = lord.nameOne(hash, lord.chatDialog);
+        if (!chat)
+            return;
+        var img = lord.queryOne("img", chat);
+        if (img.src.replace("chat_message", "") != img.src)
+            img.src = img.src.replace("chat_message", "chat");
+    }
+};
+
+lord.sendChatMessage = function(boardName, postNumber) {
+    var div = lord.node("div");
+    var ta = lord.node("textArea");
+    ta.rows = 10;
+    ta.cols = 43;
+    div.appendChild(ta);
+    lord.showDialog("chatText", null, div).then(function(result) {
+        if (!result || !ta.value)
+            return Promise.resolve();
+        var data = { message: ta.value };
+        if (postNumber) {
+            data.boardName = boardName;
+            data.postNumber = postNumber;
+        } else {
+            data.hash = boardName;
+        }
+        return lord.doChat("message", data);
+    }).then(function(response) {
+        if (!response)
+            return Promise.resolve();
+        if (lord.checkError(response))
+            return Promise.reject(response);
+        if (response.hash) {
+            if (!lord.chatMessages[response.hash])
+                lord.chatMessages[response.hash] = [];
+            lord.chatMessages[response.hash].push({
+                text: ta.value,
+                type: "out"
+            });
+            if (lord.currentChat && lord.currentChat.name == response.hash) {
+                var messages = lord.nameOne("messages", lord.currentChat);
+                var msg = lord.node("div");
+                msg.appendChild(lord.node("text", "< " + ta.value));
+                messages.appendChild(msg);
+            }
+        }
+    }).catch(lord.handleError);
+};
+
+lord.createChatNode = function(hash) {
+    var chat = lord.node("div");
+    chat.setAttribute("name", hash);
+    chat.appendChild(lord.node("text", hash + " "));
+    var a = lord.createChatButton();
+    a.onclick = lord.showChat.bind(lord, hash);
+    chat.appendChild(a);
+    return chat;
+};
+
+lord.showChats = function() {
+    lord.chatOpened = true;
+    var a = lord.nameOne("chatButton");
+    var img = lord.queryOne("img", a);
+    img.src = img.src.replace("chat_message", "chat");
+    var div = lord.chatDialog || lord.node("div");
+    lord.forIn(lord.chatMessages, function(_, hash) {
+        div.appendChild(lord.createChatNode(hash));
+    });
+    lord.chatDialog = div;
+    lord.showDialog("chatText", null, div).then(function() {
+        lord.chatOpened = false;
+        lord.chatDialog = null;
+    });
+};
+
+lord.createChatButton = function(message) {
+    var a = lord.node("a");
+    a.name = "chatButton";
+    a.onclick = lord.showChats.bind(lord);
+    var img = lord.node("img");
+    lord.addClass(img, "buttonImage");
+    img.src = "/" + lord.data("sitePathPrefix") + "img/chat" + (message ? "_message" : "") + ".png";
+    lord.getModel("misc/tr").then(function(model) {
+        a.title = model.tr.chatText;
+    }).catch(lord.handleError);
+    a.appendChild(img);
+    return a;
+};
+
 lord.initializeOnLoadSettings = function() {
     if (lord.getCookie("show_tripcode") === "true")
         lord.id("showTripcodeCheckbox").checked = true;
@@ -612,14 +816,16 @@ lord.initializeOnLoadSettings = function() {
         link.rel = "stylesheet";
         link.href = "/" + lord.data("sitePathPrefix") + "css/3rdparty/codemirror.css";
         head.appendChild(link);
-        script = lord.node("script");
-        script.type = "text/javascript";
-        script.src = "/" + lord.data("sitePathPrefix") + "js/3rdparty/codemirror/javascript.min.js";
-        head.appendChild(script);
-        script = lord.node("script");
-        script.type = "text/javascript";
-        script.src = "/" + lord.data("sitePathPrefix") + "js/3rdparty/codemirror/css.min.js";
-        head.appendChild(script);
+        script.onload = function() {
+            script = lord.node("script");
+            script.type = "text/javascript";
+            script.src = "/" + lord.data("sitePathPrefix") + "js/3rdparty/codemirror/javascript.min.js";
+            head.appendChild(script);
+            script = lord.node("script");
+            script.type = "text/javascript";
+            script.src = "/" + lord.data("sitePathPrefix") + "js/3rdparty/codemirror/css.min.js";
+            head.appendChild(script);
+        };
     }
     if (lord.getLocalObject("userCssEnabled", true)) {
         var css = lord.getLocalObject("userCss", "");
@@ -631,6 +837,24 @@ lord.initializeOnLoadSettings = function() {
         else
             style.appendChild(lord.node("text", css));
         head.appendChild(style);
+    }
+    if (lord.getLocalObject("chatEnabled", true)) {
+        var loc = window.location;
+        var path = "ws" + (("https" == loc.protocol) ? "s" : "") + "://" + loc.host + lord.data("sitePathPrefix")
+            + "/websocket/chat";
+        lord.wsChat = new WebSocket(path);
+        lord.wsChat.addEventListener("message", lord.chatMessageHandler);
+        lord.wsChat.addEventListener("close", function() {
+            delete lord.wsChat;
+        });
+        var toolbar = lord.queryOne(".toolbar");
+        toolbar.appendChild(lord.node("text", " "));
+        var span = lord.node("span");
+        lord.addClass(span, "navbarItem");
+        toolbar.appendChild(lord.node("text", "["));
+        span.appendChild(lord.createChatButton());
+        toolbar.appendChild(span);
+        toolbar.appendChild(lord.node("text", "]"));
     }
     if (lord.getLocalObject("userJavaScriptEnabled", true)) {
         var js = lord.getLocalObject("userJavaScript", "");

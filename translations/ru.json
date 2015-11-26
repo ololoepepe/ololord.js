@@ -2677,6 +2677,26 @@
             "value": "Post source text"
         }
     },
+    "Enable private chat": {
+        "chatLabelText": {
+            "value": "Разрешить приватный чат"
+        }
+    },
+    "Private chat": {
+        "chatText": {
+            "value": "Приватный чат"
+        }
+    },
+    "New private message": {
+        "newChatMessageText": {
+            "value": "Новое личное сообщение"
+        }
+    },
+    "Send message": {
+        "sendMessageButtonText": {
+            "value": "Отправить сообщение"
+        }
+    },
     "Highlight code (page reload required)": {
         "sourceHighlightingLabelText": {
             "value": "Подсвечивать код (требуется перезагрузка страницы)"

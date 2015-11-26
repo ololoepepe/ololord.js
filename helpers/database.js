@@ -1,6 +1,5 @@
 var Address6 = require("ip-address").Address6;
 var bigInt = require("big-integer");
-var Crypto = require("crypto");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
 var moment = require("moment");
