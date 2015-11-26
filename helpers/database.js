@@ -16,6 +16,7 @@ var mkpath = promisify("mkpath");
 var Board = require("../boards");
 var Captcha = require("../captchas");
 var config = require("./config");
+var controller = require("./controller");
 var markup = require("./markup");
 var Tools = require("./tools");
 

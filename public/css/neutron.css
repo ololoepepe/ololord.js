@@ -562,7 +562,6 @@ span.newPostCount {
 */
 
 .post {
-    background: url("../favicon.ico") right bottom no-repeat;
     background-color: #2C2C2C;
     border: 1px solid #575757;
     margin-top: 4px;
@@ -572,6 +571,10 @@ span.newPostCount {
     width: 100%
     overflow-x: auto;
     display: table;
+}
+
+.post:not(.hidden) {
+    background: url("../favicon.ico") right bottom no-repeat;
 }
 
 .opPost {
@@ -1098,6 +1101,10 @@ blockquote.blockquoteThread.expand {
 
 .buttonImage:disabled:hover {
     opacity: 0.4;
+}
+
+input.buttonImage {
+    background-color: transparent;
 }
 
 .signImage {

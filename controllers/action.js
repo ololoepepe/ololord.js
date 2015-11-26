@@ -360,7 +360,7 @@ router.post("/deletePost", function(req, res) {
         c.fields = result.fields;
         return controller.checkBan(req, res, c.fields.boardName, true);
     }).then(function() {
-        return Database.deletePost(req, c.fields);
+        return Database.deletePost(req, res, c.fields);
     }).then(function(result) {
         if (req.ascetic) {
             var path = result.boardName;

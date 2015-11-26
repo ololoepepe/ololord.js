@@ -1080,6 +1080,10 @@ blockquote.blockquoteThread.expand {
     opacity: 0.4;
 }
 
+input.buttonImage {
+    background-color: transparent;
+}
+
 .signImage {
     vertical-align: middle;
 }
