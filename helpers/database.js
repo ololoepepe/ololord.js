@@ -1636,7 +1636,7 @@ module.exports.setThreadClosed = function(req, fields) {
     });
 };
 
-module.exports.deletePost = function(req, fields) {
+module.exports.deletePost = function(req, res, fields) {
     var board = Board.board(fields.boardName);
     if (!board)
         return Promise.reject("Invalid board");
@@ -1645,7 +1645,9 @@ module.exports.deletePost = function(req, fields) {
         return Promise.reject("Invalid post number");
     var password = Tools.password(fields.password);
     var c = {};
-    return getPost(board.name, postNumber).then(function(post) {
+    return controller.checkBan(req, res, board.name, true).then(function() {
+        return getPost(board.name, postNumber);
+    }).then(function(post) {
         c.post = post;
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
@@ -1886,7 +1888,7 @@ module.exports.deleteFile = function(req, fields) {
     });
 };
 
-module.exports.editAudioTags = function(req, fields) {
+module.exports.editAudioTags = function(req, res, fields) {
     var c = {};
     var password = Tools.password(fields.password);
     return getFileInfo({ fileName: fields.fileName }).then(function(fileInfo) {
@@ -1895,7 +1897,9 @@ module.exports.editAudioTags = function(req, fields) {
         if (fileInfo.mimeType.substr(0, 6) != "audio/")
             return Promise.reject("Invalid file type");
         c.fileInfo = fileInfo;
-        return getPost(fileInfo.boardName, fileInfo.postNumber);
+        return controller.checkBan(req, res, c.fileInfo.boardName, true);
+    }).then(function() {
+        return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
     }).then(function(post) {
         c.post = post;
         if ((!password || password != post.user.password)

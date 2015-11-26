@@ -180,7 +180,9 @@ router.get("/:boardName/catalog.html", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
-    return boardModel.getCatalog(board, req.hashpass, req.query.sort).then(function(model) {
+    controller.checkBan(req, res, board.name).then(function() {
+        return boardModel.getCatalog(board, req.hashpass, req.query.sort);
+    }).then(function(model) {
         return renderCatalog(model, board, req);
     }).then(function(data) {
         res.send(data);
@@ -193,7 +195,9 @@ router.get("/:boardName/catalog.json", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404, true);
-    boardModel.getCatalog(board, req.hashpass, req.query.sort).then(function(model) {
+    controller.checkBan(req, res, board.name).then(function() {
+        return boardModel.getCatalog(board, req.hashpass, req.query.sort);
+    }).then(function(model) {
         return renderCatalog(model, board, req, true);
     }).then(function(data) {
         res.send(data);
@@ -206,14 +210,20 @@ router.get("/:boardName/rss.xml", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
-    res.send(Database.rss[board.name]);
+    controller.checkBan(req, res, board.name).then(function() {
+        res.send(Database.rss[board.name]);
+    }).catch(function(err) {
+        controller.error(req, res, err);
+    });
 });
 
 router.get("/:boardName/:page.html", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
-    board.renderBoardPage(req, res, false).then(function(result) {
+    controller.checkBan(req, res, board.name).then(function() {
+        return board.renderBoardPage(req, res, false);
+    }).then(function(result) {
         if (result)
             return;
         return boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
@@ -230,7 +240,9 @@ router.get("/:boardName/:page.json", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404, true);
-    board.renderBoardPage(req, res, true).then(function(result) {
+    controller.checkBan(req, res, board.name).then(function() {
+        return board.renderBoardPage(req, res, true);
+    }).then(function(result) {
         if (result)
             return;
         return boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
@@ -247,7 +259,9 @@ router.get("/:boardName/res/:threadNumber.html", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
-    board.renderThread(req, res, false).then(function(result) {
+    controller.checkBan(req, res, board.name).then(function() {
+        return board.renderThread(req, res, false);
+    }).then(function(result) {
         if (result)
             return;
         return boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
@@ -264,7 +278,9 @@ router.get("/:boardName/res/:threadNumber.json", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404, true);
-    board.renderThread(req, res, true).then(function(result) {
+    controller.checkBan(req, res, board.name).then(function() {
+        return board.renderThread(req, res, true);
+    }).then(function(result) {
         if (result)
             return;
         return boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {

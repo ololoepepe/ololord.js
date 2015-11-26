@@ -218,6 +218,8 @@ router.post("/createPost", function(req, res) {
         if (!c.board)
             return Promise.reject("Invalid board");
         transaction.board = c.board;
+        return controller.checkBan(req, res, c.board.name, true);
+    }).then(function() {
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
@@ -253,6 +255,8 @@ router.post("/createThread", function(req, res) {
         if (!c.board)
             return Promise.reject("Invalid board");
         transaction.board = c.board;
+        return controller.checkBan(req, res, c.board.name, true);
+    }).then(function() {
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
@@ -280,9 +284,12 @@ router.post("/createThread", function(req, res) {
 router.post("/editPost", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
+        c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.postNumber = +result.fields.postNumber;
-        return Database.editPost(req, result.fields);
+        return controller.checkBan(req, res, c.boardName, true);
+    }).then(function() {
+        return Database.editPost(req, c.fields);
     }).then(function(result) {
         if (req.ascetic) {
             res.redirect("/" + config("site.pathPrefix", "")
@@ -305,6 +312,8 @@ router.post("/addFiles", function(req, res) {
         if (!board)
             return Promise.reject("Invalid board");
         transaction.board = board;
+        return controller.checkBan(req, res, c.board.name, true);
+    }).then(function() {
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
@@ -346,8 +355,12 @@ router.post("/addFiles", function(req, res) {
 });
 
 router.post("/deletePost", function(req, res) {
+    var c = {};
     Tools.parseForm(req).then(function(result) {
-        return Database.deletePost(req, result.fields);
+        c.fields = result.fields;
+        return controller.checkBan(req, res, c.fields.boardName, true);
+    }).then(function() {
+        return Database.deletePost(req, c.fields);
     }).then(function(result) {
         if (req.ascetic) {
             var path = result.boardName;
@@ -364,7 +377,7 @@ router.post("/deletePost", function(req, res) {
 
 router.post("/deleteFile", function(req, res) {
     Tools.parseForm(req).then(function(result) {
-        return Database.deleteFile(req, result.fields);
+        return Database.deleteFile(req, res, result.fields);
     }).then(function(result) {
         if (req.ascetic) {
             var path = result.boardName + "/res/" + result.threadNumber + ".html";
@@ -380,8 +393,14 @@ router.post("/deleteFile", function(req, res) {
 });
 
 router.post("/moveThread", function(req, res) {
+    var c = {};
     Tools.parseForm(req).then(function(result) {
-        return Database.moveThread(req, result.fields);
+        c.fields = result.fields;
+        return controller.checkBan(req, res, c.fields.boardName, true);
+    }).then(function() {
+        return controller.checkBan(req, res, c.fields.targetBoardName, true);
+    }).then(function() {
+        return Database.moveThread(req, c.fields);
     }).then(function(result) {
         if (req.ascetic) {
             var path = result.boardName + "/res/" + result.threadNumber + ".html";
@@ -396,7 +415,7 @@ router.post("/moveThread", function(req, res) {
 
 router.post("/editAudioTags", function(req, res) {
     Tools.parseForm(req).then(function(result) {
-        return Database.editAudioTags(req, result.fields);
+        return Database.editAudioTags(req, res, result.fields);
     }).then(function(result) {
         if (req.ascetic) {
             var path = result.boardName + "/res/" + result.threadNumber + ".html";
@@ -416,7 +435,8 @@ router.post("/banUser", function(req, res) {
         return controller.error(req, res, "Not enough rights", !req.ascetic);
     var c = {};
     Tools.parseForm(req).then(function(result) {
-        var bans = [];
+        c.bans = [];
+        c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.postNumber = +result.fields.postNumber;
         c.userIp = result.fields.userIp;
@@ -428,7 +448,7 @@ router.post("/banUser", function(req, res) {
                 return;
             var expiresAt = result.fields["banExpires_" + value];
             expiresAt = expiresAt? moment(expiresAt, "DD.MM.YYYY:HH") : null;
-            bans.push({
+            c.bans.push({
                 boardName: value,
                 expiresAt: +expiresAt ? expiresAt : null,
                 level: level,
@@ -436,7 +456,9 @@ router.post("/banUser", function(req, res) {
                 postNumber: +result.fields["banPostNumber_" + value] || null
             });
         });
-        return Database.banUser(req, result.fields.userIp, bans);
+        return controller.checkBan(req, res, c.boardName, true);
+    }).then(function() {
+        return Database.banUser(req, c.fields.userIp, c.bans);
     }).then(function(result) {
         if (req.ascetic) {
             var path;
@@ -459,7 +481,9 @@ router.post("/delall", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
-        return Database.delall(req, result.fields);
+        return controller.checkBan(req, res, c.fields.boardName, true);
+    }).then(function() {
+        return Database.delall(req, c.fields);
     }).then(function(result) {
         if (req.ascetic) {
             var path = "/" + config("site.pathPrefix", "");
@@ -507,9 +531,12 @@ router.post("/changeSettings", function(req, res) {
 router.post("/setThreadFixed", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
+        c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.threadNumber = +result.fields.threadNumber;
-        return Database.setThreadFixed(req, result.fields);
+        return controller.checkBan(req, res, c.boardName, true);
+    }).then(function() {
+        return Database.setThreadFixed(req, c.fields);
     }).then(function(result) {
         if (req.ascetic)
             res.redirect("/" + config("site.pathPrefix", "") + `${c.boardName}/res/${c.threadNumber}.html`);
@@ -523,9 +550,12 @@ router.post("/setThreadFixed", function(req, res) {
 router.post("/setThreadClosed", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
+        c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.threadNumber = +result.fields.threadNumber;
-        return Database.setThreadClosed(req, result.fields);
+        return controller.checkBan(req, res, c.boardName, true);
+    }).then(function() {
+        return Database.setThreadClosed(req, c.fields);
     }).then(function(result) {
         if (req.ascetic)
             res.redirect("/" + config("site.pathPrefix", "") + `${c.boardName}/res/${c.threadNumber}.html`);
