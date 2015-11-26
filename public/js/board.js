@@ -1607,6 +1607,7 @@ lord.fileAddedCommon = function(div, file) {
         });
     };
     var fileName = file ? file.name : div.fileUrl.split("/").pop();
+    var fileNameFull = fileName;
     fileName = (fileName || "");
     if (fileName.length > 30)
         fileName = fileName.substr(0, 27) + "...";
@@ -1688,11 +1689,11 @@ lord.fileAddedCommon = function(div, file) {
             lord.queryOne("img", div).src = e.target.result;
         };
     };
-    if (fileName.match(/\.(jpe?g|png|gif)$/i) && lord.getLocalObject("showAttachedFilePreview", true)) {
+    if (fileNameFull.match(/\.(jpe?g|png|gif)$/i) && lord.getLocalObject("showAttachedFilePreview", true)) {
         if (!fileName.match(/\.(jpe?g)$/i) || !lord.getLocalObject("stripExifFromJpeg", true))
             preview();
     } else {
-        var match = fileName.match(/\.(jpe?g|png|gif|mpeg|mp1|m1a|m2a|mpa|mp3|mpg|mp4|ogg|ogv|webm|wav|pdf)$/i);
+        var match = fileNameFull.match(/\.(jpe?g|png|gif|mpeg|mp1|m1a|m2a|mpa|mp3|mpg|mp4|ogg|ogv|webm|wav|pdf)$/i);
         if (match) {
             var extension = match[1].replace("jpg", "jpeg").replace("ogv", "ogg");
             ["mpeg", "mp1", "m1a", "m2a", "mpa", "mpg"].forEach(function(alias) {
@@ -1703,7 +1704,7 @@ lord.fileAddedCommon = function(div, file) {
             lord.queryOne("img", div).src = "/" + prefix + "img/file.png";
         }
     }
-    if (file && fileName.match(/\.(jpe?g)$/i) && lord.getLocalObject("stripExifFromJpeg", true)) {
+    if (file && fileNameFull.match(/\.(jpe?g)$/i) && lord.getLocalObject("stripExifFromJpeg", true)) {
         var fr = new FileReader();
         fr.onload = function() {
             var dv = new DataView(fr.result);
