@@ -840,9 +840,8 @@ lord.initializeOnLoadSettings = function() {
     }
     if (lord.getLocalObject("chatEnabled", true)) {
         var loc = window.location;
-        var path = "ws" + (("https" == loc.protocol) ? "s" : "") + "://" + loc.host + lord.data("sitePathPrefix")
+        var path = "ws" + (("https:" == loc.protocol) ? "s" : "") + "://" + loc.host + lord.data("sitePathPrefix")
             + "/websocket/chat";
-        console.log(path);
         lord.wsChat = new WebSocket(path);
         lord.wsChat.addEventListener("message", lord.chatMessageHandler);
         lord.wsChat.addEventListener("close", function() {
