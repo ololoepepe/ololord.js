@@ -222,6 +222,12 @@
                             <button class="button" onclick="lord.editUserJavaScript();">{{=it.tr.editUserJavaScriptText}}</button>
                         </td>
                     </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="checkbox" name="sourceHighlightingEnabled"
+                                   {{? it.settings.sourceHighlightingEnabled}}checked="true"{{?}} /><label>{{=it.tr.sourceHighlightingLabelText}}</label>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>

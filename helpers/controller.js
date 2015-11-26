@@ -618,7 +618,7 @@ controller.translationsModel = function() {
     translate("Reason:", "banReasonLabelText");
     translate("Delete all user posts on selected board", "delallButtonText");
     translate("Select all", "selectAllText");
-    translate("Post source text", "postSourceTextText");
+    translate("Post source text", "postSourceText");
     translate("Expand video", "expandVideoText");
     translate("Collapse video", "collapseVideoText");
     translate("Favorite threads", "favoriteThreadsText");
@@ -637,6 +637,7 @@ controller.translationsModel = function() {
     translate("Specify Vkontakte audio file", "attachFileByVkText");
     translate("Select a track", "selectTrackTitle");
     translate("Chat privately with this user", "chatWithUserText");
+    translate("Highlight code (page reload required)", "sourceHighlightingLabelText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

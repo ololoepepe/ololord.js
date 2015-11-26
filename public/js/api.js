@@ -1277,7 +1277,8 @@ lord.settings = function() {
         showYoutubeVideosTitles: lord.getLocalObject("showYoutubeVideosTitles", true),
         hotkeysEnabled: lord.getLocalObject("hotkeysEnabled", true),
         userCssEnabled: lord.getLocalObject("userCssEnabled", true),
-        userJavaScriptEnabled: lord.getLocalObject("userJavaScriptEnabled", true)
+        userJavaScriptEnabled: lord.getLocalObject("userJavaScriptEnabled", true),
+        sourceHighlightingEnabled: lord.getLocalObject("sourceHighlightingEnabled", false)
     };
 };
 

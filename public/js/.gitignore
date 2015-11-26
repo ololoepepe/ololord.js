@@ -1,5 +1,6 @@
 # 3rdparty
 3rdparty/*
+!3rdparty/codemirror
 !3rdparty/doT.min.js
 !3rdparty/FileSaver.min.js
 !3rdparty/jquery.knob.min.js

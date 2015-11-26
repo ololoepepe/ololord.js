@@ -2670,11 +2670,16 @@
         }
     },
     "Post source text": {
-        "postSourceTextText": {
+        "postSourceText": {
             "value": "Исходный текст поста"
         },
         "pageTitle": {
             "value": "Post source text"
+        }
+    },
+    "Highlight code (page reload required)": {
+        "sourceHighlightingLabelText": {
+            "value": "Подсвечивать код (требуется перезагрузка страницы)"
         }
     },
     "This is ololord. Enter \"help --all\" to see full Help": {

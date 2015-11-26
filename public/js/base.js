@@ -490,27 +490,57 @@ lord.removeHidden = function(el) {
 };
 
 lord.editUserCss = function() {
-    var ta = lord.node("textarea");
-    ta.rows = 10;
-    ta.cols = 43;
-    ta.value = lord.getLocalObject("userCss", "");
-    lord.showDialog(null, null, ta).then(function(result) {
+    var div = lord.node("div");
+    var c = {};
+    if (lord.getLocalObject("sourceHighlightingEnabled", false)) {
+        c.editor = CodeMirror(div, {
+            mode: "javascript",
+            lineNumbers: true,
+            autofocus: true,
+            value: lord.getLocalObject("userCss", "")
+        });
+    } else {
+        var ta = lord.node("textarea");
+        ta.rows = 10;
+        ta.cols = 43;
+        ta.value = lord.getLocalObject("userCss", "");
+        div.appendChild(ta);
+    }
+    lord.showDialog(null, null, div, function() {
+        if (c.editor)
+            c.editor.refresh();
+    }).then(function(result) {
         if (!result)
             return Promise.resolve();
-        lord.setLocalObject("userCss", ta.value);
+        lord.setLocalObject("userCss", c.editor ? c.editor.getValue() : ta.value);
         return Promise.resolve();
     });
 };
 
 lord.editUserJavaScript = function() {
-    var ta = lord.node("textarea");
-    ta.rows = 10;
-    ta.cols = 43;
-    ta.value = lord.getLocalObject("userJavaScript", "");
-    lord.showDialog(null, null, ta).then(function(result) {
+    var div = lord.node("div");
+    var c = {};
+    if (lord.getLocalObject("sourceHighlightingEnabled", false)) {
+        c.editor = CodeMirror(div, {
+            mode: "javascript",
+            lineNumbers: true,
+            autofocus: true,
+            value: lord.getLocalObject("userJavaScript", "")
+        });
+    } else {
+        var ta = lord.node("textarea");
+        ta.rows = 10;
+        ta.cols = 43;
+        ta.value = lord.getLocalObject("userJavaScript", "");
+        div.appendChild(ta);
+    }
+    lord.showDialog(null, null, div, function() {
+        if (c.editor)
+            c.editor.refresh();
+    }).then(function(result) {
         if (!result)
             return Promise.resolve();
-        lord.setLocalObject("userJavaScript", ta.value);
+        lord.setLocalObject("userJavaScript", c.editor ? c.editor.getValue() : ta.value);
         return Promise.resolve();
     });
 };
@@ -571,6 +601,26 @@ lord.initializeOnLoadSettings = function() {
     }
     if (lord.getLocalObject("showNewPosts", true))
         lord.showNewPosts();
+    if (lord.getLocalObject("sourceHighlightingEnabled", false)) {
+        var head = lord.queryOne("head");
+        var script = lord.node("script");
+        script.type = "text/javascript";
+        script.src = "/" + lord.data("sitePathPrefix") + "js/3rdparty/codemirror/codemirror.min.js";
+        head.appendChild(script);
+        var link = lord.node("link");
+        link.type = "text/css";
+        link.rel = "stylesheet";
+        link.href = "/" + lord.data("sitePathPrefix") + "css/3rdparty/codemirror.css";
+        head.appendChild(link);
+        script = lord.node("script");
+        script.type = "text/javascript";
+        script.src = "/" + lord.data("sitePathPrefix") + "js/3rdparty/codemirror/javascript.min.js";
+        head.appendChild(script);
+        script = lord.node("script");
+        script.type = "text/javascript";
+        script.src = "/" + lord.data("sitePathPrefix") + "js/3rdparty/codemirror/css.min.js";
+        head.appendChild(script);
+    }
     if (lord.getLocalObject("userCssEnabled", true)) {
         var css = lord.getLocalObject("userCss", "");
         var head = lord.queryOne("head");
