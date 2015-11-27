@@ -3155,7 +3155,7 @@ lord.initializeOnLoadBaseBoard = function() {
                 lord.processPost(post, data);
             }, {
                 delay: 20,
-                n: 50
+                n: 100
             });
         });
         lord.query(".opPost").forEach(function(opPost) {
