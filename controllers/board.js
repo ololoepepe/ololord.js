@@ -130,7 +130,7 @@ var renderThread = function(model, board, req, json) {
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
-            return controller(req, "thread", model);
+            return controller(req, "threadPage", model);
     });
 };
 

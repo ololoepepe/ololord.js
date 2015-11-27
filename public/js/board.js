@@ -2413,7 +2413,7 @@ lord.submitted = function(event, form) {
         if (lord.checkError(result))
             return Promise.reject(result);
         if (c.post) {
-            var parent = postForm.parentNode;
+            var threadId = +lord.nameOne("threadNumber", postForm).value;
             lord.resetPostForm();
             if (["postFormContainerTop", "postFormContainerBottom"].indexOf(form.parentNode.id) < 0)
                 lord.hidePostForm();
@@ -2430,22 +2430,17 @@ lord.submitted = function(event, form) {
                     window.location = "/" + lord.data("sitePathPrefix") + result.boardName + "/res/"
                         + result.threadNumber + ".html#" + result.number;
                     return;
-                } else {
-                    //The default: append_post
-                    if (!lord.hasClass(parent, "threadPosts")) {
-                        parent = parent.nextSibling;
-                        if (!parent.tagName)
-                            parent = parent.nextSibling;
-                    }
-                    //NOTE: Yep, twice
-                    if (!lord.hasClass(parent, "threadPosts")) {
-                        parent = parent.nextSibling;
-                        if (!parent.tagName)
-                            parent = parent.nextSibling;
+                } else if (threadId) {
+                    var thread = lord.id("thread" + threadId);
+                    var threadPosts = lord.queryOne(".threadPosts", thread);
+                    if (!threadPosts) {
+                        threadPosts = lord.node("div");
+                        threadPosts.setAttribute("id", "threadPosts" + threadId);
+                        lord.addClass(threadPosts, "threadPosts");
+                        thread.appendChild(threadPosts);
                     }
                     lord.createPostNode(result, true).then(function(post) {
-                        var lastPost = lord.query(".post, .opPost", parent).pop();
-                        parent.appendChild(post, parent.lastChild);
+                        threadPosts.appendChild(post);
                     }).catch(lord.handleError);
                 }
             }
