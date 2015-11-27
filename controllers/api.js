@@ -5,6 +5,7 @@ var Util = require("util");
 var Board = require("../boards");
 var boardModel = require("../models/board");
 var Captcha = require("../captchas");
+var Chat = require("../helpers/chat");
 var controller = require("../helpers/controller");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");
@@ -261,6 +262,14 @@ router.get("/fileHeaders.json", function(req, res) {
         if (response.status != 200)
             return Promise.reject("Failed to get file headers");
         res.json(response.headers);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
+router.get("/chatMessages.json", function(req, res) {
+    Chat.getMessages(req, req.query.lastRequestDate).then(function(messages) {
+        res.json(messages);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

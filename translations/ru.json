@@ -2692,9 +2692,14 @@
             "value": "Новое личное сообщение"
         }
     },
-    "Send message": {
-        "sendMessageButtonText": {
-            "value": "Отправить сообщение"
+    "Send": {
+        "sendChatMessageButtonText": {
+            "value": "Отправить"
+        }
+    },
+    "Delete this chat": {
+        "deleteChatButtonText": {
+            "value": "Удалить этот чат"
         }
     },
     "Highlight code (page reload required)": {

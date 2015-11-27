@@ -1,0 +1,6 @@
+<div name="{{=contact.hash}}" onclick="lord.selectChatContact('{{=contact.hash}}');" class="chatContact">
+    <span class="chatContactNewMessages"></span>
+    {{ out += contact.hash.substr(0, 10) + "..."; }}
+    <input type="image" src="/{{=it.site.pathPrefix}}img/delete.png" onclick="lord.deleteChat('{{=contact.hash}}');"
+           class="buttonImage" title="{{=it.tr.deleteChatButtonText}}" />
+</div>

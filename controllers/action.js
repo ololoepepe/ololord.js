@@ -9,6 +9,7 @@ var UUID = require("uuid");
 
 var Board = require("../boards");
 var Captcha = require("../captchas");
+var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
@@ -561,6 +562,28 @@ router.post("/setThreadClosed", function(req, res) {
             res.redirect("/" + config("site.pathPrefix", "") + `${c.boardName}/res/${c.threadNumber}.html`);
         else
             res.send(result);
+    }).catch(function(err) {
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
+router.post("/sendChatMessage", function(req, res) {
+    Tools.parseForm(req).then(function(result) {
+        var fields = result.fields;
+        return Chat.sendMessage(req, fields.text, fields.boardName, +fields.postNumber, fields.hash);
+    }).then(function(result) {
+        res.send(result);
+    }).catch(function(err) {
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
+router.post("/deleteChatMessages", function(req, res) {
+    Tools.parseForm(req).then(function(result) {
+        var fields = result.fields;
+        return Chat.deleteMessages(req, fields.hash);
+    }).then(function(result) {
+        res.send(result);
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });

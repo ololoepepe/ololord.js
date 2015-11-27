@@ -24,7 +24,6 @@ router.use("/", require("./settings"));
 
 router.use("/api", require("./api"));
 router.use("/misc", require("./misc"));
-router.use("/websocket", require("./websocket"));
 
 Board.boardNames().forEach(function(name) {
     Board.board(name).routes().forEach(function(route) {

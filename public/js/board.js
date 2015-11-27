@@ -1011,7 +1011,37 @@ lord.chatWithUser = function(el) {
     var postNumber = +lord.data("number", el, true);
     if (!postNumber)
         return;
-    lord.sendChatMessage(lord.data("boardName"), postNumber);
+    var div = lord.node("div");
+    var ta = lord.node("textArea");
+    ta.rows = 10;
+    ta.cols = 43;
+    div.appendChild(ta);
+    lord.showDialog("chatText", null, div).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var formData = new FormData();
+        formData.append("text", ta.value);
+        formData.append("boardName", lord.data("boardName"));
+        formData.append("postNumber", postNumber);
+        return $.ajax("/" + lord.data("sitePathPrefix") + "action/sendChatMessage", {
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false
+        });
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        if (lord.checkError(result))
+            return Promise.reject(result);
+        if (!lord.chats[result.receiver])
+            lord.chats[result.receiver] = [];
+        lord.chats[result.receiver].push({
+            type: "out",
+            text: result.text,
+            date: result.date
+        });
+    }).catch(lord.handleError);
 };
 
 lord.deletePost = function(el) {

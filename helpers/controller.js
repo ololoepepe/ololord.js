@@ -641,7 +641,8 @@ controller.translationsModel = function() {
     translate("Enable private chat", "chatLabelText");
     translate("Private chat", "chatText");
     translate("New private message", "newChatMessageText");
-    translate("Send message", "sendMessageButtonText");
+    translate("Send", "sendChatMessageButtonText");
+    translate("Delete this chat", "deleteChatButtonText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

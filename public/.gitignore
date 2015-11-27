@@ -121,25 +121,11 @@ js/*
 
 # templates
 templates/*
-!templates/partials/addFilesForm.jst
-!templates/partials/deleteFileForm.jst
-!templates/partials/deletePostForm.jst
-!templates/partials/editAudioTagsForm.jst
-!templates/partials/editPostForm.jst
-!templates/partials/favoritesElement.jst
-!templates/partials/fileInputs.jst
-!templates/partials/moveThreadForm.jst
-!templates/partials/postFile.jst
-!templates/partials/postFileThumb.jst
-!templates/partials/post.jst
-!templates/partials/postName.jst
-!templates/partials/postReference.jst
-!templates/partials/postReferringPosts.jst
-!templates/partials/postSubject.jst
-!templates/partials/settingsTable.jst
-!templates/partials/setVotingOpenedForm.jst
-!templates/partials/userBan.jst
+!templates/partials
 !templates/addFilesDialog.jst
+!templates/chatContact.jst
+!templates/chatDialog.jst
+!templates/chatMessage.jst
 !templates/deleteFileDialog.jst
 !templates/deletePostDialog.jst
 !templates/dPostBodyPart.jst
@@ -164,3 +150,4 @@ templates/*
 !templates/userBan.jst
 !templates/vkAudioList.jst
 !templates/voteVariant.jst
+!templates/.gitignore

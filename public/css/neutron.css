@@ -1224,3 +1224,49 @@ input.buttonImage {
 .cursorPointer {
 	cursor: pointer;
 }
+
+.chatContactList {
+    overflow-y: auto;
+    min-width: 50px;
+}
+
+.chatContact {
+    white-space: nowrap;
+}
+
+.chatContact:hover {
+    color: #FFFFFF;
+    background-color: #666666;
+}
+
+.chatContact.selected {
+    color: #FFFFFF;
+    background-color: #666666;
+}
+
+.chatContactNewMessages {
+    color: red;
+}
+
+.chatTarget {
+    background-color: #2C2C2C;
+    white-space: nowrap;
+}
+
+.chatHistory {
+    padding-left: 8px;
+    border: 1px solid black;
+    overflow-y: auto;
+    min-width: 200px;
+    min-height: 400px;
+}
+
+.chatInput {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.chatSendButton {
+    box-sizing: border-box;
+    width: 100%;
+}
