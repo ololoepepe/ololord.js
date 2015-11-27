@@ -677,6 +677,7 @@ lord.gently = function(obj, f, options) {
         return Promise.reject("Invalid arguments");
     var delay = options ? +options.delay : undefined;
     var n = options ? +options.n : undefined;
+    var promise = options && options.promise;
     if (isNaN(delay) || delay < 1)
         delay = 1;
     if (isNaN(n) || n < 1)
@@ -688,10 +689,26 @@ lord.gently = function(obj, f, options) {
             var g = function() {
                 if (ind >= arr.length)
                     return resolve();
-                for (var i = ind; i < Math.min(ind + n, arr.length); ++i)
-                    f(arr[i], i);
-                ind += n;
-                setTimeout(g, delay);
+                if (promise) {
+                    var i = ind;
+                    var h = function() {
+                        return f(arr[i], i).then(function() {
+                            ++i;
+                            if (i >= Math.min(ind + n, arr.length))
+                                return Promise.resolve();
+                            return h();
+                        });
+                    };
+                    h().then(function() {
+                        ind += n;
+                        setTimeout(g, delay);
+                    });
+                } else {
+                    for (var i = ind; i < Math.min(ind + n, arr.length); ++i)
+                        f(arr[i], i);
+                    ind += n;
+                    setTimeout(g, delay);
+                }
             };
             g();
         } else {
@@ -708,10 +725,26 @@ lord.gently = function(obj, f, options) {
             var g = function() {
                 if (ind >= arr.length)
                     return resolve();
-                for (var i = ind; i < Math.min(ind + n, arr.length); ++i)
-                    f(arr[i].value, arr[i].key);
-                ind += n;
-                setTimeout(g, delay);
+                if (promise) {
+                    var i = ind;
+                    var h = function() {
+                        return f(arr[i].value, arr[i].key).then(function() {
+                            ++i;
+                            if (i >= Math.min(ind + n, arr.length))
+                                return Promise.resolve();
+                            return h();
+                        });
+                    };
+                    h().then(function() {
+                        ind += n;
+                        setTimeout(g, delay);
+                    });
+                } else {
+                    for (var i = ind; i < Math.min(ind + n, arr.length); ++i)
+                        f(arr[i].value, arr[i].key);
+                    ind += n;
+                    setTimeout(g, delay);
+                }
             };
             g();
         }

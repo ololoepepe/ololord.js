@@ -3015,18 +3015,43 @@ lord.initializeOnLoadBaseBoard = function() {
         return lord.appendExtrasToModel(c.model);
     }).then(function() {
         c.notCatalog = (+lord.data("threadNumber") || +lord.data("currentPage") >= 0);
-        return lord.getTemplate(c.notCatalog ? "thread" : "catalogThread");
+        return lord.getTemplate(c.notCatalog ? ("thread") : "catalogThread");
     }).then(function(template) {
         var threads = lord.id("threads");
         lord.removeChildren(threads);
         lord.removeClass(threads, "loadingMessage");
-        c.threads.forEach(function(thread) {
-            var model = merge.recursive(c.model, { thread: thread });
-            var nodes = $.parseHTML(template(model));
-            if (c.notCatalog)
-                threads.appendChild(lord.node("hr"));
-            threads.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
-        });
+        if (+lord.data("threadNumber")) {
+            threads.appendChild(lord.node("hr"));
+            var allPosts = c.threads[0].lastPosts.concat(c.threads[0].opPost);
+            return lord.createPostNode(c.threads[0].opPost, c.threads[0], true, allPosts).then(function(post) {
+                threads.appendChild(post);
+                var threadPosts = lord.node("div");
+                lord.addClass(threadPosts, "threadPosts");
+                threads.appendChild(threadPosts);
+                return lord.gently(c.threads[0].lastPosts, function(post) {
+                    return lord.createPostNode(post, c.threads[0], true, allPosts).then(function(post) {
+                        threadPosts.appendChild(post);
+                        return Promise.resolve();
+                    });
+                }, {
+                    delay: 10,
+                    n: 10,
+                    promise: true
+                });
+            });
+        } else {
+            return lord.gently(c.threads, function(thread) {
+                var model = merge.recursive(c.model, { thread: thread });
+                var nodes = $.parseHTML(template(model));
+                if (c.notCatalog)
+                    threads.appendChild(lord.node("hr"));
+                threads.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
+            }, {
+                delay: 10,
+                n: 10
+            });
+        }
+    }).then(function() {
         document.body.onclick = lord.globalOnclick;
         if (lord.data("deviceType") != "mobile") {
             document.body.onmouseover = lord.globalOnmouseover;
