@@ -3020,10 +3020,10 @@ lord.initializeOnLoadBaseBoard = function() {
         lord.removeClass(threads, "loadingMessage");
         c.threads.forEach(function(thread) {
             var model = merge.recursive(c.model, { thread: thread });
-            var node = $.parseHTML(template(model))[1];
+            var nodes = $.parseHTML(template(model));
             if (c.notCatalog)
                 threads.appendChild(lord.node("hr"));
-            threads.appendChild(node);
+            threads.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
         });
         document.body.onclick = lord.globalOnclick;
         if (lord.data("deviceType") != "mobile") {
