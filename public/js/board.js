@@ -3019,7 +3019,6 @@ lord.initializeOnLoadBaseBoard = function() {
         lord.removeChildren(threads);
         lord.removeClass(threads, "loadingMessage");
         c.threads.forEach(function(thread) {
-            console.log(thread);
             var model = merge.recursive(c.model, { thread: thread });
             var nodes = $.parseHTML(template(model));
             if (c.notCatalog)
