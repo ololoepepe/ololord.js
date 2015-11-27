@@ -1,0 +1,17 @@
+# 3rdparty
+3rdparty/*
+!3rdparty/codemirror
+!3rdparty/doT.min.js
+!3rdparty/FileSaver.min.js
+!3rdparty/jquery.knob.min.js
+!3rdparty/jquery-1.11.3.min.js
+!3rdparty/jszip.min.js
+!3rdparty/jszip-utils.min.js
+!3rdparty/lib-typedarrays-min.js
+!3rdparty/merge.min.js
+!3rdparty/moment-with-locales.min.js
+!3rdparty/picoModal-2.1.0.min.js
+!3rdparty/Promise.min.js
+!3rdparty/sha1.js
+!3rdparty/twitter.js
+!3rdparty/uuid.js

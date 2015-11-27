@@ -1,10 +1,19 @@
+var FSSync = require("fs");
+var Util = require("util");
+
 var Captcha = require("./captcha");
 
-Captcha.addCaptcha(require("./google-recaptcha"));
-Captcha.addCaptcha(require("./google-recaptcha-v1"));
-require("./yandex-captcha").forEach(function(captcha) {
-    Captcha.addCaptcha(captcha);
+FSSync.readdirSync(__dirname).forEach(function(file) {
+    if ("index.js" == file)
+        return;
+    var captcha = require("./" + file.split(".").shift());
+    if (Util.isArray(captcha)) {
+        captcha.forEach(function(captcha) {
+            Captcha.addCaptcha(captcha);
+        });
+    } else {
+        Captcha.addCaptcha(captcha);
+    }
 });
-Captcha.addCaptcha(require("./codecha"));
 
 module.exports = Captcha;

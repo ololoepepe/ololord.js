@@ -73,7 +73,7 @@ hr {
     background-color: #DDDDDD;
     border: 1px solid #BBBBBB;
     position: fixed;
-    top: 5px;
+    top: 35px;
     right: 5px;
     z-index: 9950;
     vertical-align: middle;
@@ -133,12 +133,15 @@ hr {
 }
 
 .hidePostformRulesButton {
+    display: block;
     text-decoration: none;
+    font-size: 0.7em;
     margin-left: 30px;
     cursor: pointer;
 }
 
 .hidePostformMarkupButton {
+    display: block;
     text-decoration: none;
     text-align: right;
     font-size: 0.7em;
@@ -153,6 +156,10 @@ hr {
 
 .nowrap {
     white-space: nowrap;
+}
+
+.wrap {
+    white-space: normal;
 }
 
 .postSequenceNumber {
@@ -403,6 +410,8 @@ span.newPostCount {
 
 .postFormTextarea {
     font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .postFormTable {
@@ -424,7 +433,6 @@ span.newPostCount {
     bottom: 7px;
     color: #333333;
     opacity: 0.6;
-    /*filter: alpha(opacity=60);*/
 }
 
 .symbolCounterContainer {
@@ -555,10 +563,12 @@ span.newPostCount {
     padding-top: 10px;
     padding-left: 10px;
     overflow-x: auto;
+    display: table;
 }
 
 .opPost {
     overflow-x: auto;
+    display: table;
 }
 
 .newPost {
@@ -631,10 +641,6 @@ span.newPostCount {
     font-size: 1.2em;
 }
 
-.postToThread {
-    margin-left: 20px;
-}
-
 .postToThread.mobile {
     display: block;
 }
@@ -646,18 +652,6 @@ span.newPostCount {
 
 .postActions, .postActions:active, .postActions:visited {
     color: #000000;
-}
-
-.postActions.mobile {
-    display: block;
-}
-
-.postActions > img {
-    opacity: 0.65;
-}
-
-.postActions:hover > img {
-    opacity: 1;
 }
 
 .postActionsMenu {
@@ -674,6 +668,10 @@ span.newPostCount {
     margin-top: 0px;
     top: 100%;
     left: 0%;
+}
+
+.postActionsMenu.mobile {
+    left: -200px;
 }
 
 .postActions:focus > .postActionsMenu {
@@ -754,6 +752,7 @@ span.newPostCount {
 
 .someName.mobile {
     font-size: 0.8em;
+    display: block;
 }
 
 .navigationButton {
@@ -908,7 +907,7 @@ ul.tabWidget > li.activated {
     display: block;
     font-size: 0.9em;
     padding-bottom: 5px;
-    text-align: left;
+    text-align: center;
     overflow-x: auto;
     font-size: 1.2em;
     position: relative;
@@ -938,7 +937,10 @@ blockquote.blockquoteThread.expand {
 }
 
 .codeBlock {
-    /**/
+    font-family: monospace;
+    white-space: pre;
+    padding-left: 20px !important;
+    border: 1px solid #AAAAAA;
 }
 
 /*span.spoiler, span.spoiler a <- Board*/
@@ -1054,8 +1056,8 @@ blockquote.blockquoteThread.expand {
     background-color: inherit;
 }
 
-.shrinkedPost {
-    display: table;
+.stretchedPost {
+    width: 99%;
 }
 
 .login {
@@ -1088,6 +1090,14 @@ blockquote.blockquoteThread.expand {
 
 .buttonImage:disabled:hover {
     opacity: 0.4;
+}
+
+input.buttonImage {
+    background-color: transparent;
+}
+
+.signImage {
+    vertical-align: middle;
 }
 
 .boardSelect {
@@ -1137,6 +1147,17 @@ blockquote.blockquoteThread.expand {
     text-align: center;
 }
 
+.temporaryPostOverlayMask {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index: 9000;
+    background-color: #000000;
+    opacity: 0.6;
+}
+
 .overlayMask {
     position: fixed;
     left: 0px;
@@ -1172,4 +1193,68 @@ blockquote.blockquoteThread.expand {
 
 .numberSize3 {
     width: 40px;
+}
+
+.postFormInput {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.submitContainer {
+    text-align: center;
+}
+
+.submitContainer > input {
+    font-size: 1.2em;
+    width: 100%;
+}
+
+.cursorPointer {
+	cursor: pointer;
+}
+
+.chatContactList {
+    overflow-y: auto;
+    min-width: 50px;
+}
+
+.chatContact {
+    white-space: nowrap;
+}
+
+.chatContact:hover {
+    color: #FFFFFF;
+    background-color: #666666;
+}
+
+.chatContact.selected {
+    color: #FFFFFF;
+    background-color: #666666;
+}
+
+.chatContactNewMessages {
+    color: red;
+}
+
+.chatTarget {
+    background-color: #DDDDDD;
+    white-space: nowrap;
+}
+
+.chatHistory {
+    padding-left: 8px;
+    border: 1px solid black;
+    overflow-y: auto;
+    min-width: 200px;
+    min-height: 400px;
+}
+
+.chatInput {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.chatSendButton {
+    box-sizing: border-box;
+    width: 100%;
 }

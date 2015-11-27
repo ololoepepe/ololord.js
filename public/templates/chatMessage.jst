@@ -1,0 +1,11 @@
+<div>
+    {{? "in" == it.type}}
+        <font color="red">&gt;&gt;</font>
+    {{??}}
+        <font color="green">&lt;&lt;</font>
+    {{?}}
+    {{ out += it.formattedDate(it.date); }}
+    <br />
+    {{!it.text}}
+    <br />
+</div>

@@ -255,9 +255,6 @@
     "Update thread": {
         "updateThreadText": {
             "value": "Обновить тред"
-        },
-        "hotkeyUpdateThreadLabelText": {
-            "value": "Update thread"
         }
     },
     "No new posts": {
@@ -517,12 +514,6 @@
             "value": "Пост:"
         }
     },
-    "Comment. Max length %1": {
-        "postFormTextPlaceholder": {
-            "value": "Комментарий. Макс. длина %1"
-        },
-        "_obsolete": true
-    },
     "Attached file error": {
         "error": {
             "value": "Ошибка прикрепленного файла"
@@ -566,39 +557,23 @@
         }
     },
     "No markup": {
-        "markupMode name": {
-            "value": "Без разметки",
-            "_obsolete": true
-        },
         "markupMode": {
-            "value": "No markup"
+            "value": "Без разметки"
         }
     },
     "Extended WakabaMark only": {
-        "markupMode name": {
-            "value": "Только расширенная WakabaMark",
-            "_obsolete": true
-        },
         "markupMode": {
-            "value": "Extended WakabaMark only"
+            "value": "Только расширенная WakabaMark"
         }
     },
     "bbCode only": {
-        "markupMode name": {
-            "value": "Только bbCode",
-            "_obsolete": true
-        },
         "markupMode": {
-            "value": "bbCode only"
+            "value": "Только bbCode"
         }
     },
     "Extended WakabaMark and bbCode": {
-        "markupMode name": {
-            "value": "Расширенная WakabaMark и bbCode",
-            "_obsolete": true
-        },
         "markupMode": {
-            "value": "Extended WakabaMark and bbCode"
+            "value": "Расширенная WakabaMark и bbCode"
         }
     },
     "Markup mode:": {
@@ -617,6 +592,7 @@
         },
         "_obsolete": true
     },
+    
     "Public captcha key.\nApperas in the HTML pages.": {
         "_default": {
             "value": "Открытый ключ сервиса капчи.\nПоявляется в HTML-страницах."
@@ -818,13 +794,12 @@
         },
         "_obsolete": true
     },
-    "Add file": {
+    "Add files": {
         "pageTitle": {
-            "value": "Добавить файл",
-            "_obsolete": true
+            "value": "Добавить файлы"
         },
-        "addFileText": {
-            "value": "Добавить файл"
+        "addFilesText": {
+            "value": "Добавить файлы"
         }
     },
     "Ban user": {
@@ -1758,11 +1733,6 @@
             "value": "Добавляет новый пост"
         }
     },
-    "Leaves page unmodified": {
-        "quickReplyActionDoNothingText": {
-            "value": "Оставляет страницу не измененной"
-        }
-    },
     "Redirects to thread": {
         "quickReplyActionGotoThreadText": {
             "value": "Перенаправляет в тред"
@@ -1812,21 +1782,13 @@
         "_obsolete": true
     },
     "Normal": {
-        "mode title": {
-            "value": "Нормальный",
-            "_obsolete": true
-        },
         "_default": {
-            "value": "Normal"
+            "value": "Нормальный"
         }
     },
     "Ascetic": {
-        "mode title": {
-            "value": "Аскетичный",
-            "_obsolete": true
-        },
         "_default": {
-            "value": "Ascetic"
+            "value": "Аскетичный"
         }
     },
     "Mode:": {
@@ -1844,9 +1806,9 @@
             "value": "Настройки скрипта"
         }
     },
-    "Mark posts as drafts by default:": {
+    "Posts are drafts by default": {
         "draftsByDefaultLabelText": {
-            "value": "По умолчанию отмечать посты как черновики:"
+            "value": "Посты-черновики по умолчанию"
         }
     },
     "Framed version": {
@@ -1859,19 +1821,19 @@
             "value": "Скрыть доски:"
         }
     },
-    "Show titles of YouTube videos:": {
+    "Show titles of YouTube videos": {
         "showYoutubeVideoTitleLabelText": {
-            "value": "Показывать названия видео с YouTube:"
+            "value": "Показывать названия видео с YouTube"
         }
     },
-    "Check if attached file exists on server:": {
+    "Check if attached file exists on server": {
         "checkFileExistenceLabelText": {
-            "value": "Проверять, есть ли прикрепленный файл на сервере:"
+            "value": "Проверять, есть ли прикрепленный файл на сервере"
         }
     },
-    "Show previews when attaching files:": {
+    "Show previews when attaching files": {
         "showAttachedFilePreviewLabelText": {
-            "value": "Показывать превью прикрепляемых файлов:"
+            "value": "Показывать превью прикрепляемых файлов"
         }
     },
     "Logged in, but not registered": {
@@ -1909,19 +1871,19 @@
             "value": "Пароль/хешпасс"
         }
     },
-    "Leaf through images only:": {
+    "Leaf through images only": {
         "leafThroughImagesOnlyLabelText": {
-            "value": "Пролистывать только картинки:"
+            "value": "Пролистывать только картинки"
         }
     },
-    "Show file leaf buttons:": {
+    "Show file leaf buttons": {
         "showLeafButtonsLabelText": {
-            "value": "Показывать кнопки пролистывания файлов:"
+            "value": "Показывать кнопки пролистывания файлов"
         }
     },
-    "Image zoom sensitivity, %:": {
+    "Image zoom sensitivity:": {
         "imageZoomSensitivityLabelText": {
-            "value": "Чувствительность зума картинок, %:"
+            "value": "Чувствительность зума картинок:"
         }
     },
     "Auto update interval (sec):": {
@@ -1929,19 +1891,14 @@
             "value": "Интервал автообновленияы (сек):"
         }
     },
-    "Auto update threads by default:": {
+    "Auto update threads by default": {
         "autoUpdateThreadsByDefaultLabelText": {
-            "value": "По умолчанию автоматически обновлять треды:"
+            "value": "По умолчанию автоматически обновлять треды"
         }
     },
-    "Show auto update timer:": {
-        "showAutoUpdateTimerLabelText": {
-            "value": "Показывать таймер автообновления:"
-        }
-    },
-    "Show desktop notifications:": {
+    "Show desktop notifications": {
         "showAutoUpdateDesktopNotificationsLabelText": {
-            "value": "Показывать уведомления на рабочем столе:"
+            "value": "Показывать уведомления на рабочем столе"
         }
     },
     "Files": {
@@ -1954,30 +1911,40 @@
             "value": "Прочее"
         }
     },
-    "Hide postform rules:": {
+    "Hide postform rules": {
         "hidePostformRulesLabelText": {
-            "value": "Скрывать правила под формой ответа:"
+            "value": "Скрывать правила под формой ответа"
+        }
+    },
+    "Edit spells": {
+        "editSpellsText": {
+            "value": "Редактировать спеллы"
+        }
+    },
+    "User CSS enabled": {
+        "userCssLabelText": {
+            "value": "Пользовательские CSS"
+        }
+    },
+    "User JavaScript enabled": {
+        "userJavaScriptLabelText": {
+            "value": "Пользовательский JavaScript"
         }
     },
     "Edit": {
-        "editUserCssText": {
-            "value": "Редактировать"
-        },
         "editHotkeysText": {
             "value": "Редактировать"
         },
-        "editSpellsText": {
+        "editUserCssText": {
+            "value": "Редактировать"
+        },
+        "editUserJavaScriptText": {
             "value": "Редактировать"
         }
     },
-    "User CSS:": {
-        "userCssLabelText": {
-            "value": "Пользовательские CSS:"
-        }
-    },
-    "Hide tripcodes:": {
+    "Hide tripcodes": {
         "hideTripcodesLabelText": {
-            "value": "Скрывать трипкоды:"
+            "value": "Скрывать трипкоды"
         }
     },
     "Hiding": {
@@ -1985,14 +1952,14 @@
             "value": "Скрытие"
         }
     },
-    "Hide user names:": {
+    "Hide user names": {
         "hideUserNamesLabelText": {
-            "value": "Скрывать имена пользователей:"
+            "value": "Скрывать имена пользователей"
         }
     },
-    "Strike out links to hidden posts:": {
+    "Strike out links to hidden posts": {
         "strikeOutHiddenPostLinksLabelText": {
-            "value": "Зачеркивать ссылки на скрытые посты:"
+            "value": "Зачеркивать ссылки на скрытые посты"
         }
     },
     "Postform and posting": {
@@ -2005,24 +1972,24 @@
             "value": "Посты и треды"
         }
     },
-    "Show new post count near board names:": {
+    "New post count near board names": {
         "showNewPostsLabelText": {
-            "value": "Показывать количество новых постов рядом с именами борд:"
+            "value": "Количество новых постов рядом с именами борд"
         }
     },
-    "Default audio and video files volume:": {
+    "Default volume:": {
         "defaultAudioVideoVolumeLabelText": {
-            "value": "Громкость аудио- и видеофайлов по умолчанию:"
+            "value": "Громкость по умолчанию:"
         }
     },
-    "Add thread to favorites on reply:": {
+    "Add thread to favorites on reply": {
         "addToFavoritesOnReplyLabelText": {
-            "value": "Добавлять тред в избранное при ответе:"
+            "value": "Добавлять тред в избранное при ответе"
         }
     },
-    "Hide postform markup:": {
+    "Hide postform markup": {
         "hidePostformMarkupLabelText": {
-            "value": "Скрывать разметку под формой ответа:"
+            "value": "Скрывать разметку под формой ответа"
         }
     },
     "Previous page/file": {
@@ -2033,8 +2000,7 @@
     "Previous thread (on board)/post (in thread)": {
         "hotkeyPreviousThreadPostLabelText": {
             "value": "Предыдущий тред (на доске)/пост (в треде)"
-        },
-        "_obsolete": true
+        }
     },
     "Next page/file": {
         "hotkeyNextPageImageLabelText": {
@@ -2044,25 +2010,22 @@
     "Next thread (on board)/post (in thread)": {
         "hotkeyNextThreadPostLabelText": {
             "value": "Следующий тред (на доске)/пост (в треде)"
-        },
-        "_obsolete": true
+        }
     },
-    "Hotkeys:": {
+    "Hotkeys enabled": {
         "hotkeysLabelText": {
-            "value": "Горячие клавиши:"
+            "value": "Горячие клавиши"
         }
     },
     "Previous post (in thread/on board)": {
         "hotkeyPreviousPostLabelText": {
             "value": "Предыдущий пост (в треде/на доске)"
-        },
-        "_obsolete": true
+        }
     },
     "Next post (inthread/on board)": {
         "hotkeyNextPostLabelText": {
             "value": "Следующий пост (в треде/на доске)"
-        },
-        "_obsolete": true
+        }
     },
     "Expand thread": {
         "hotkeyExpandThreadLabelText": {
@@ -2117,7 +2080,7 @@
         }
     },
     "Quote selected text": {
-        "hotkeyMarkupQutationLabelText": {
+        "hotkeyMarkupQuotationLabelText": {
             "value": "Цитировать выделенный текст"
         },
         "markupQuotation": {
@@ -2151,8 +2114,7 @@
     "Update thread (in thread only)": {
         "hotkeyUpdateThreadLabelText": {
             "value": "Обновить тред (только в треде)"
-        },
-        "_obsolete": true
+        }
     },
     "Show favorite threads": {
         "hotkeyShowFavoritesLabelText": {
@@ -2169,14 +2131,14 @@
             "value": "Отправить пост"
         }
     },
-    "Strip EXIF from JPEG files:": {
+    "Strip EXIF from JPEG files": {
         "stripExifFromJpegLabelText": {
-            "value": "Удалять EXIF из файлов JPEG:"
+            "value": "Удалять EXIF из файлов JPEG"
         }
     },
-    "Spells (command-based post hiding):": {
+    "Spells (command-based post hiding)": {
         "spellsLabelText": {
-            "value": "Спеллы (скрытие постов на основе команд):"
+            "value": "Спеллы (скрытие постов на основе команд)"
         }
     },
     "Hidden posts/threads": {
@@ -2189,9 +2151,9 @@
             "value": "Убрать из списка скрытых постов/тредов"
         }
     },
-    "Show hidden post/thread list": {
+    "Show hidden post list": {
         "showHiddenPostListText": {
-            "value": "Показать список скрытых постов/тредов"
+            "value": "Показать список скрытых постов"
         }
     },
     "Mum is watching me!": {
@@ -2199,9 +2161,9 @@
             "value": "Мамка в комнате!"
         }
     },
-    "Maximum allowed rating:": {
+    "Maximum rating:": {
         "maxAllowedRatingLabelText": {
-            "value": "Максимальный разрешенный рейтинг:"
+            "value": "Максимальный рейтинг:"
         }
     },
     "SFW - safe for work (no socially condemned content)\nR-15 - restricted for 15 years (contains ecchi, idols, violence)\nR-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\nR-18G - restricted for 18 years, guidance advised (shemale, death, guro, scat, defecation, urination, etc.)": {
@@ -2214,39 +2176,39 @@
             "value": "Коррекция:"
         }
     },
-    "Loop audio and video files:": {
+    "Loop media": {
         "loopAudioVideoLabelText": {
-            "value": "Зацикливать аудио- и видеофайлы:"
+            "value": "Зацикливать медиафайлы"
         }
     },
-    "Play audio and video files immediately:": {
+    "Play media immediately": {
         "playAudioVideoImmediatelyLabelText": {
-            "value": "Проигрывать аудио- и видеофайлы сразу же:"
+            "value": "Проигрывать медиафайлы сразу"
         }
     },
-    "Remember volume:": {
+    "Remember": {
         "rememberAudioVideoVolumeLabelText": {
-            "value": "Запоминать громкость:"
+            "value": "Запоминать"
         }
     },
-    "Move to post after replying in thread:": {
+    "Move to post after replying in thread": {
         "moveToPostOnReplyInThreadLabelText": {
-            "value": "Перемещаться к посту после ответа в треде:"
+            "value": "Перемещаться к посту после ответа в треде"
         }
     },
-    "Use minimalistic post form:": {
+    "Minimalistic post form": {
         "minimalisticPostformLabelText": {
-            "value": "Использовать минималистичную форму ответа:"
+            "value": "Минималистичная форма ответа"
         }
     },
-    "Mark OP post links:": {
+    "Mark OP post links": {
         "signOpPostLinksLabelText": {
-            "value": "Помечать ссылки на ОП-посты:"
+            "value": "Помечать ссылки на ОП-посты"
         }
     },
-    "Mark own post links:": {
+    "Mark own post links": {
         "signOwnPostLinksLabelText": {
-            "value": "Помечать ссылки на собственные посты:"
+            "value": "Помечать ссылки на собственные посты"
         }
     },
     "Neutron": {
@@ -2266,9 +2228,9 @@
         },
         "_obsolete": true
     },
-    "Shrink posts:": {
+    "Shrink posts": {
         "postShrinkingLabelText": {
-            "value": "Скукоживать посты:"
+            "value": "Скукоживать посты"
         }
     },
     "AJAX request returned status": {
@@ -2300,14 +2262,12 @@
     "If password is empty, current hashpass will be used": {
         "enterPasswordText": {
             "value": "Если пароль пуст, будет использован текущий хешпасс"
-        },
-        "_obsolete": true
+        }
     },
     "Enter password": {
         "enterPasswordTitle": {
             "value": "Введите пароль"
-        },
-        "_obsolete": true
+        }
     },
     "Fixed": {
         "fixedText": {
@@ -2335,11 +2295,10 @@
             "value": "Открыть тред"
         }
     },
-    "Send": {
+    "Submit": {
         "postFormButtonSubmit": {
             "value": "Отправить"
-        },
-        "_obsolete": true
+        }
     },
     "Password:": {
         "postFormLabelPassword": {
@@ -2570,14 +2529,12 @@
     "Hide markup": {
         "hidePostformMarkupText": {
             "value": "Скрыть разметку"
-        },
-        "_obsolete": true
+        }
     },
     "Show markup": {
         "showPostformMarkupText": {
             "value": "Показать разметку"
-        },
-        "_obsolete": true
+        }
     },
     "Subscript": {
         "markupSubscript": {
@@ -2639,6 +2596,16 @@
     "Specify file URL": {
         "attachFileByLinkText": {
             "value": "Указать ссылку на файл"
+        }
+    },
+    "Specify Vkontakte audio file": {
+        "attachFileByVkText": {
+            "value": "Указать аудио-файл из Vkontakte"
+        }
+    },
+    "Select a track": {
+        "selectTrackTitle": {
+            "value": "Выберите трек"
         }
     },
     "URL:": {
@@ -2703,11 +2670,41 @@
         }
     },
     "Post source text": {
-        "postSourceTextText": {
+        "postSourceText": {
             "value": "Исходный текст поста"
         },
         "pageTitle": {
             "value": "Post source text"
+        }
+    },
+    "Enable private chat": {
+        "chatLabelText": {
+            "value": "Разрешить приватный чат"
+        }
+    },
+    "Private chat": {
+        "chatText": {
+            "value": "Приватный чат"
+        }
+    },
+    "New private message": {
+        "newChatMessageText": {
+            "value": "Новое личное сообщение"
+        }
+    },
+    "Send": {
+        "sendChatMessageButtonText": {
+            "value": "Отправить"
+        }
+    },
+    "Delete this chat": {
+        "deleteChatButtonText": {
+            "value": "Удалить этот чат"
+        }
+    },
+    "Highlight code (page reload required)": {
+        "sourceHighlightingLabelText": {
+            "value": "Подсвечивать код (требуется перезагрузка страницы)"
         }
     },
     "This is ololord. Enter \"help --all\" to see full Help": {
@@ -3567,29 +3564,9 @@
             "value": "Залогиниться"
         }
     },
-    "Previous thread on board/post in thread": {
-        "hotkeyPreviousThreadPostLabelText": {
-            "value": "Previous thread on board/post in thread"
-        }
-    },
-    "Next thread on board/post in thread": {
-        "hotkeyNextThreadPostLabelText": {
-            "value": "Next thread on board/post in thread"
-        }
-    },
-    "Previous post in thread/on board": {
-        "hotkeyPreviousPostLabelText": {
-            "value": "Previous post in thread/on board"
-        }
-    },
-    "Next post in thread/on board": {
-        "hotkeyNextPostLabelText": {
-            "value": "Next post in thread/on board"
-        }
-    },
-    "Sticky toolbar:": {
+    "Sticky toolbar": {
         "stickyToolbarLabelText": {
-            "value": "Прилепить панель:"
+            "value": "Прилепить панель"
         }
     },
     "Show post form": {
@@ -3597,19 +3574,24 @@
             "value": "Показать форму постинга"
         }
     },
-    "Submit": {
-        "postFormButtonSubmit": {
-            "value": "Submit"
-        }
-    },
     "Comment. Max length:": {
         "postFormTextPlaceholder": {
-            "value": "Comment. Max length:"
+            "value": "Комментарий. Макс. длина:"
         }
     },
-    "\"Log in\", you say? On an imageboard? I am out!\n\nPlease, wait a sec. The login systyem does NOT store any data on the server. It only stores a cookie on your PC to allow post editing, deleting, etc. without entering password every time, and nothing else.\n\nWell, actually, the admin may register someone manually (if he is a fag), but there is no way to register through the web.": {
+    "\"Log in\", you say? On an imageboard? I am out!<br />Please, wait a sec. The login systyem does NOT store any data on the server. It only stores a cookie on your PC to allow post editing, deleting, etc. without entering password every time, and nothing else.<br />Well, actually, the admin may register someone manually (if he is a fag), but there is no way to register through the web.": {
         "loginSystemDescriptionText": {
-            "value": "\"Залогиниться\", говоришь? На имиджборде? Я сваливаю!\n\nПогоди секундочку. Система логина НЕ СОХРАНЯЕТ никаких данных на сервере. Она только хранит cookie на вашем ПК, что позволяет редактировать, удалять посты и т.д. без ввода пароля каждый раз, и ничего более.\n\nНу, на самом деле админ может кого-то зарегистрировать вручную (если он мудак), но способ зарегистрироваться через веб-интерфейс отсутствует."
+            "value": "\"Залогиниться\", говоришь? На имиджборде? Я сваливаю!<br />Погоди секундочку. Система логина НЕ СОХРАНЯЕТ никаких данных на сервере. Она только хранит cookie на вашем ПК, что позволяет редактировать, удалять посты и т.д. без ввода пароля каждый раз, и ничего более.<br />Ну, на самом деле админ может кого-то зарегистрировать вручную (если он мудак), но способ зарегистрироваться через веб-интерфейс отсутствует."
+        }
+    },
+    "When logging in with Vkontakte, you may omit the login, but to be logged in with the same login on each browser, you have to specify it.<br />When logged in with Vkontakte, you are able to attach your VK audio.<br />This does not affect your anonymity in any way.": {
+        "loginSystemVkontakteDescriptionText": {
+            "value": "При входе в систему через Вкотнакте можно не указывать логин, но, чтобы быть залогиненым во всех браузерах под одним логином, его потребуется указать.<br />Когда вы залогинены через Вконтакте, вы можете прикреплять к посту свои аудиозаписи из ВК.<br />Это никак не влияет на вашу анонимность."
+        }
+    },
+    "Chat privately with this user": {
+        "chatWithUserText": {
+            "value": "Приватный чат с этим пользователем"
         }
     },
     "Code style:": {
@@ -3678,11 +3660,6 @@
             "value": "Yandex captcha (Cyrillic)"
         }
     },
-    "Add files": {
-        "pageTitle": {
-            "value": "Add files"
-        }
-    },
     "Answer in this thread": {
         "answerInThreadText": {
             "value": "Answer in this thread"
@@ -3691,6 +3668,21 @@
     "Create thread": {
         "createThreadText": {
             "value": "Create thread"
+        }
+    },
+    "Target board": {
+        "targetBoardLabelText": {
+            "value": "Целевая доска"
+        }
+    },
+    "Like": {
+        "likeText": {
+            "value": "Нравится"
+        }
+    },
+    "Dislike": {
+        "dislikeText": {
+            "value": "Не нравится"
         }
     }
 }

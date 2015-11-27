@@ -19,7 +19,7 @@ lord.codecha.serialize = function(obj) {
     var array = [];
     for (key in obj)
         array[array.length] = encodeURIComponent(key) + "=" + encodeURIComponent(obj[key]);
-    var result = array.join("&"); 
+    var result = array.join("&");
     result = result.replace(/%20/g, "+");
     return result;
 };
@@ -68,7 +68,7 @@ lord.codecha.updateState = function() {
             var codecha = lord.codecha;
             eval(response.replace(".callbacks", ""));
         }
-    }).fail(function(err) {
+    }).catch(function(err) {
         console.log(err);
     });
 };
@@ -151,7 +151,7 @@ lord.codecha.codeSubmit = function() {
     }).then(function(response) {
         lord.codecha.setStatus("sending");
         setTimeout(lord.codecha.updateState, 1000);
-    }).fail(function(err) {
+    }).catch(function(err) {
         console.log(err);
     });
 };
@@ -162,7 +162,7 @@ lord.codecha.codeSubmit = function() {
     link.setAttribute("type", "text/css");
     link.setAttribute("href", "//codecha.org/static/widget.css");
     lord.queryOne("head").appendChild(link);
-    
+
 })();
 
 window.addEventListener("load", function load() {

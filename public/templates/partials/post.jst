@@ -1,5 +1,5 @@
 <div id="{{=post.number}}"
-     class="{{? post.isOp}}opPost{{??}}post{{?}}{{? post.ownIp}} ownIp{{?}}{{? post.opIp}} opIp{{?}}{{? it.settings.shrinkPosts}} shrinkedPost{{?}}"
+     class="{{? post.isOp}}opPost{{??}}post{{?}}{{? post.ownIp}} ownIp{{?}}{{? post.opIp}} opIp{{?}}{{? !it.settings.shrinkPosts}} stretchedPost{{?}}"
      data-board-name="{{=post.boardName}}"
      data-number="{{=post.number}}"
      data-thread-number="{{=post.threadNumber}}"
@@ -8,78 +8,150 @@
      {{? post.ownIp}}data-own-ip="true"{{?}}
      {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 && it.settings.mode.name != "ascetic"}}
         data-user-ip="{{=post.user.ip}}"
+        {{? post.user.ipv4}}
+            data-user-ipv4="{{=post.user.ipv4}}"
+        {{?}}
      {{?}}>
     <div class="postHeader">
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[0]}}
+            {{ out += it.customPostHeaderPart[0](it, thread, post); }}
+        {{?}}
         {{? post.isOp}}
             {{? thread.fixed}}
-                <img src="/{{=it.site.pathPrefix}}img/fixed.png" title="{{=it.tr.fixedText}}">
+                <img src="/{{=it.site.pathPrefix}}img/fixed.png" class="signImage" title="{{=it.tr.fixedText}}">
+            {{?}}
+            {{? it.customPostHeaderPart && it.customPostHeaderPart[10]}}
+                {{ out += it.customPostHeaderPart[10](it, thread, post); }}
             {{?}}
             {{? thread.closed}}
-                <img src="/{{=it.site.pathPrefix}}img/closed.png" title="{{=it.tr.closedText}}">
+                <img src="/{{=it.site.pathPrefix}}img/closed.png" class="signImage" title="{{=it.tr.closedText}}">
+            {{?}}
+            {{? it.customPostHeaderPart && it.customPostHeaderPart[20]}}
+                {{ out += it.customPostHeaderPart[20](it, thread, post); }}
             {{?}}
             {{? thread.postLimitReached}}
-                <img src="/{{=it.site.pathPrefix}}img/postlimit.png" title="{{=it.tr.postLimitReachedText}}">
+                <img src="/{{=it.site.pathPrefix}}img/postlimit.png" class="signImage"
+                     title="{{=it.tr.postLimitReachedText}}">
             {{?? thread.bumpLimitReached}}
-                <img src="/{{=it.site.pathPrefix}}img/bumplimit.png" title="{{=it.tr.bumpLimitReachedText}}">
+                <img src="/{{=it.site.pathPrefix}}img/bumplimit.png" class="signImage"
+                      title="{{=it.tr.bumpLimitReachedText}}">
             {{?}}
         {{?}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[30]}}
+            {{ out += it.customPostHeaderPart[30](it, thread, post); }}
+        {{?}}
         {{? post.options.draft}}
-            <img src="/{{=it.site.pathPrefix}}img/edit.png" title="{{=it.tr.draftText}}" />
+            <img src="/{{=it.site.pathPrefix}}img/edit.png" class="signImage" title="{{=it.tr.draftText}}" />
+        {{?}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[40]}}
+            {{ out += it.customPostHeaderPart[40](it, thread, post); }}
         {{?}}
         {{#def.postSubject}}
-        {{? post.showTripcode && it.compareRegisteredUserLevels(post.user.level, "USER") >= 0}}
-            <img src="/{{=it.site.pathPrefix}}img/registered.png" title="{{=it.tr.registeredText}}">
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[50]}}
+            {{ out += it.customPostHeaderPart[50](it, thread, post); }}
+        {{?}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[60]}}
+            {{ out += it.customPostHeaderPart[60](it, thread, post); }}
+        {{?}}
+        {{? post.options.showTripcode && it.compareRegisteredUserLevels(post.user.level, "USER") >= 0}}
+            <img src="/{{=it.site.pathPrefix}}img/registered.png" class="signImage" title="{{=it.tr.registeredText}}">
+        {{?}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[70]}}
+            {{ out += it.customPostHeaderPart[70](it, thread, post); }}
         {{?}}
         {{#def.postName}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[80]}}
+            {{ out += it.customPostHeaderPart[80](it, thread, post); }}
+        {{?}}
         {{? post.opIp && post.options.signAsOp}}
             <span class="opSign">[OP]</span>
         {{?}}
-        {{? post.showTripcode && post.tripcode}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[90]}}
+            {{ out += it.customPostHeaderPart[90](it, thread, post); }}
+        {{?}}
+        {{? post.options.showTripcode && post.tripcode}}
             <span class="tripcode {{=it.deviceType}}">{{=post.tripcode}}</span>
+        {{?}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[100]}}
+            {{ out += it.customPostHeaderPart[100](it, thread, post); }}
         {{?}}
         {{? it.board.showWhois && post.geolocation.flagName}}
             {{? post.geolocation.cityName}}
-                <img src="/{{=it.site.pathPrefix}}img/flag/{{=post.geolocation.flagName}}"
+                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}"
                      title="{{=post.geolocation.cityName}}, {{=post.geolocation.countryName}}">
             {{??}}
-                <img src="/{{=it.site.pathPrefix}}img/flag/{{=post.geolocation.flagName}}"
+                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}"
                      title="{{=post.geolocation.countryName}}">
             {{?}}
         {{?}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[110]}}
+            {{ out += it.customPostHeaderPart[110](it, thread, post); }}
+        {{?}}
         <span class="postDateTime {{=it.deviceType}}"
               name="dateTime">{{ out += it.formattedDate(post.createdAt, it.req); }}</span>
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[120]}}
+            {{ out += it.customPostHeaderPart[120](it, thread, post); }}
+        {{?}}
         {{? it.threads}}
             #<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.threadNumber}}.html#{{? thread.postingEnabled}}i{{?}}{{=post.number}}"
-                name="number" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.user.ip}}"{{?}}
+                name="number" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{ out += (post.user.ipv4 || post.user.ip); }}"{{?}}
                 data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}" data-thread-number="{{=post.threadNumber}}">{{=post.number}}</a>
         {{??}}
-            #<a href="#{{=post.number}}" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{=post.user.ip}}"{{?}}
+            #<a href="#{{=post.number}}" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{ out += (post.user.ipv4 || post.user.ip); }}"{{?}}
                 {{? thread.postingEnabled}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}} name="number"
                 data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}" data-thread-number="{{=post.threadNumber}}">{{=post.number}}</a>
         {{?}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[130]}}
+            {{ out += it.customPostHeaderPart[130](it, thread, post); }}
+        {{?}}
         <span class="postSequenceNumber">{{=post.sequenceNumber}}</span>
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[140]}}
+            {{ out += it.customPostHeaderPart[140](it, thread, post); }}
+        {{?}}
         {{? it.settings.mode.name != "ascetic" && thread.postingEnabled && !thread.postLimitReached}}
-            [<a href="javascript:void(0);" onclick="lord.quickReply(this); return false;" title="{{=it.tr.quickReplyText}}"
-                name="quickReply">&gt;&gt;</a>]
+            <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
+                                                 onclick="lord.quickReply(this); return false;"
+                                                 title="{{=it.tr.quickReplyText}}"><img src="/{{=it.site.pathPrefix}}img/reply.png"
+                                                                                        class="buttonImage"></a>]</span>
+        {{?}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[150]}}
+            {{ out += it.customPostHeaderPart[150](it, thread, post); }}
         {{?}}
         {{? it.settings.mode.name != "ascetic" || it.user.loggedIn}}
             <span tabindex="0" class="{{=it.deviceType}} postActions">
-                <img src="/{{=it.site.pathPrefix}}img/post_actions.png" title="{{=it.tr.postActionsText}}">
-                <ul class="postActionsMenu">
+                [<img src="/{{=it.site.pathPrefix}}img/post_actions.png" class="buttonImage"
+                      title="{{=it.tr.postActionsText}}">]
+                <ul class="postActionsMenu {{=it.deviceType}}">
+                    {{? it.customPostMenuAction && it.customPostMenuAction[0]}}
+                        {{ out += it.customPostMenuAction[0](it, thread, post); }}
+                    {{?}}
                     {{? (it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.options.draft) && (post.fileInfos.length < it.board.maxFileCount)}}
                         <li>
                             <a name="addFileButton" target="_blank"
                                href="/{{=it.site.pathPrefix}}addFiles.html?boardName={{=it.board.name}}&postNumber={{=post.number}}"
                                {{? it.settings.mode.name != "ascetic"}}onclick="lord.addFiles(this); return false;"{{?}}>
-                                <img src="/{{=it.site.pathPrefix}}img/add.png" /> {{=it.tr.addFileText}}</a>
+                                <img src="/{{=it.site.pathPrefix}}img/add.png"
+                                     class="signImage" /> {{=it.tr.addFilesText}}</a>
                         </li>
+                    {{?}}
+                    {{? it.customPostMenuAction && it.customPostMenuAction[10]}}
+                        {{ out += it.customPostMenuAction[10](it, thread, post); }}
                     {{?}}
                     {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 || post.options.draft}}
                         <li>
                             <a name="editButton" target="_blank"
                                href="/{{=it.site.pathPrefix}}editPost.html?boardName={{=it.board.name}}&postNumber={{=post.number}}"
                                {{? it.settings.mode.name != "ascetic"}}onclick="lord.editPost(this); return false;"{{?}}>
-                                <img src="/{{=it.site.pathPrefix}}img/edit.png" /> {{=it.tr.editPostText}}</a>
+                                <img src="/{{=it.site.pathPrefix}}img/edit.png"
+                                     class="signImage" /> {{=it.tr.editPostText}}</a>
+                        </li>
+                    {{?}}
+                    {{? it.settings.mode.name != "ascetic"}}
+                        <li>
+                            <a name="chatButton" href="javascript:void(0);"
+                               onclick="lord.chatWithUser(this); return false;">
+                                <img src="/{{=it.site.pathPrefix}}img/chat.png" class="signImage" />
+                                {{=it.tr.chatWithUserText}}</a>
                         </li>
                     {{?}}
                     {{? post.rawText}}
@@ -87,21 +159,30 @@
                             <a name="sourceTextButton" target="_blank"
                                href="/{{=it.site.pathPrefix}}postSourceText.html?boardName={{=it.board.name}}&postNumber={{=post.number}}"
                                {{? it.settings.mode.name != "ascetic"}}onclick="lord.showPostSourceText(this); return false;"{{?}}>
-                                <img src="/{{=it.site.pathPrefix}}img/source_text.png" /> {{=it.tr.postSourceTextText}}</a>
+                                <img src="/{{=it.site.pathPrefix}}img/source_text.png"
+                                     class="signImage" /> {{=it.tr.postSourceText}}</a>
                         </li>
+                    {{?}}
+                    {{? it.customPostMenuAction && it.customPostMenuAction[20]}}
+                        {{ out += it.customPostMenuAction[20](it, thread, post); }}
                     {{?}}
                     {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 && post.isOp}}
                         {{? it.settings.mode.name != "ascetic"}}
                             <li>
                                 <a name="fixButton" href="javascript:void(0);"
                                    onclick="lord.setThreadFixed(this, {{=!thread.fixed}}); return false;">
-                                    <img src="/{{=it.site.pathPrefix}}img/{{? thread.fixed}}unfix{{??}}fixed{{?}}.png" />
+                                    <img src="/{{=it.site.pathPrefix}}img/{{? thread.fixed}}unfix{{??}}fixed{{?}}.png"
+                                         class="signImage" />
                                     {{? thread.fixed}}{{=it.tr.unfixThreadText}}{{??}}{{=it.tr.fixThreadText}}{{?}}</a>
                             </li>
+                            {{? it.customPostMenuAction && it.customPostMenuAction[30]}}
+                                {{ out += it.customPostMenuAction[30](it, thread, post); }}
+                            {{?}}
                             <li>
                                 <a name="closeButton" href="javascript:void(0);"
                                    onclick="lord.setThreadClosed(this, {{=!thread.closed}}); return false;">
-                                    <img src="/{{=it.site.pathPrefix}}img/{{? thread.closed}}open{{??}}closed{{?}}.png" />
+                                    <img src="/{{=it.site.pathPrefix}}img/{{? thread.closed}}open{{??}}closed{{?}}.png"
+                                         class="signImage" />
                                     {{? thread.closed}}{{=it.tr.openThreadText}}{{??}}{{=it.tr.closeThreadText}}{{?}}</a>
                             </li>
                         {{??}}
@@ -112,10 +193,14 @@
                                     <input type="hidden" name="threadNumber" value="{{=post.number}}" />
                                     <input type="hidden" name="fixed" value="{{=!thread.fixed}}" />
                                     <input type="image" name="submit"
-                                           src="/{{=it.site.pathPrefix}}img/{{? thread.fixed}}unfix{{??}}fixed{{?}}.png" />
+                                           src="/{{=it.site.pathPrefix}}img/{{? thread.fixed}}unfix{{??}}fixed{{?}}.png"
+                                           class="signImage" />
                                     {{? thread.fixed}}{{=it.tr.unfixThreadText}}{{??}}{{=it.tr.fixThreadText}}{{?}}
                                 </form>
                             </li>
+                            {{? it.customPostMenuAction && it.customPostMenuAction[30]}}
+                                {{ out += it.customPostMenuAction[30](it, thread, post); }}
+                            {{?}}
                             <li>
                                 <form method="post" accept-charset="utf-8" enctype="multipart/form-data"
                                       class="inlineForm" action="/{{=it.site.pathPrefix}}action/setThreadClosed">
@@ -123,32 +208,48 @@
                                     <input type="hidden" name="threadNumber" value="{{=post.number}}" />
                                     <input type="hidden" name="closed" value="{{=!thread.closed}}" />
                                     <input type="image" name="submit"
-                                           src="/{{=it.site.pathPrefix}}img/{{? thread.closed}}open{{??}}closed{{?}}.png" />
+                                           src="/{{=it.site.pathPrefix}}img/{{? thread.closed}}open{{??}}closed{{?}}.png"
+                                           class="signImage" />
                                     {{? thread.cosed}}{{=it.tr.openThreadText}}{{??}}{{=it.tr.closeThreadText}}{{?}}
                             </form>
                             </li>
                         {{?}}
+                        {{? it.customPostMenuAction && it.customPostMenuAction[40]}}
+                            {{ out += it.customPostMenuAction[40](it, thread, post); }}
+                        {{?}}
                         <li>
                             <a name="moveButton" target="_blank"
-                               href="/{{=it.site.pathPrefix}}move_thread?board={{=it.board.name}}&thread={{=post.number}}"
+                               href="/{{=it.site.pathPrefix}}moveThread.html?boardName={{=it.board.name}}&threadNumber={{=post.threadNumber}}"
                                {{? it.settings.mode.name != "ascetic"}}onclick="lord.moveThread(this); return false;"{{?}}>
-                                <img src="/{{=it.site.pathPrefix}}img/move.png" /> {{=it.tr.moveThreadText}}</a>
+                                <img src="/{{=it.site.pathPrefix}}img/move.png"
+                                     class="signImage" /> {{=it.tr.moveThreadText}}</a>
                         </li>
+                    {{?}}
+                    {{? it.customPostMenuAction && it.customPostMenuAction[50]}}
+                        {{ out += it.customPostMenuAction[50](it, thread, post); }}
                     {{?}}
                     {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
                         {{? it.settings.mode.name != "ascetic"}}
                             <li>
                                 <a name="ipButton" href="javascript:void(0);"
                                    onclick="lord.showUserIp(this); return false;">
-                                    <img src="/{{=it.site.pathPrefix}}img/ip.png" /> {{=it.tr.showUserIpText}}</a>
+                                    <img src="/{{=it.site.pathPrefix}}img/ip.png" class="signImage" />
+                                    {{=it.tr.showUserIpText}}</a>
                             </li>
+                        {{?}}
+                        {{? it.customPostMenuAction && it.customPostMenuAction[60]}}
+                            {{ out += it.customPostMenuAction[60](it, thread, post); }}
                         {{?}}
                         <li>
                             <a name="banButton" target="_blank"
                                href="/{{=it.site.pathPrefix}}banUser.html?boardName={{=it.board.name}}&postNumber={{=post.number}}&userIp={{=post.user.ip}}"
                                {{? it.settings.mode.name != "ascetic"}}onclick="lord.banUser(this); return false;"{{?}}>
-                                <img src="/{{=it.site.pathPrefix}}img/ban.png" /> {{=it.tr.banUserText}}</a>
+                                <img src="/{{=it.site.pathPrefix}}img/ban.png" class="signImage" />
+                                {{=it.tr.banUserText}}</a>
                         </li>
+                    {{?}}
+                    {{? it.customPostMenuAction && it.customPostMenuAction[70]}}
+                        {{ out += it.customPostMenuAction[70](it, thread, post); }}
                     {{?}}
                     {{? it.settings.mode.name != "ascetic"}}
                         {{? post.isOp}}
@@ -156,50 +257,59 @@
                                 <li>
                                     <a name="downloadButton" href="javascript:void(0);"
                                        onclick="lord.downloadThread(this); return false;">
-                                        <img src="/{{=it.site.pathPrefix}}img/download.png" />
+                                        <img src="/{{=it.site.pathPrefix}}img/download.png" class="signImage" />
                                         {{=it.tr.downloadThreadText}}</a>
                                 </li>
+                            {{?}}
+                            {{? it.customPostMenuAction && it.customPostMenuAction[80]}}
+                                {{ out += it.customPostMenuAction[80](it, thread, post); }}
                             {{?}}
                             <li>
                                 <a name="addToFavoritesButton" href="javascript:void(0);"
                                    onclick="lord.addToOrRemoveFromFavorites(this); return false;">
-                                    <img src="/{{=it.site.pathPrefix}}img/favorite.png">
+                                    <img src="/{{=it.site.pathPrefix}}img/favorite.png" class="signImage">
                                     <span>{{=it.tr.addThreadToFavoritesText}}</span></a>
                             </li>
                         {{?}}
-                        <li>
-                            <a href="javascript:void(0);"
-                               name="complainButton" onclick="lord.complain(this); return false;">
-                                <img src="/{{=it.site.pathPrefix}}img/complain.png" /> {{=it.tr.complainText}}</a>
-                        </li>
+                    {{?}}
+                    {{? it.customPostMenuAction && it.customPostMenuAction[90]}}
+                        {{ out += it.customPostMenuAction[90](it, thread, post); }}
                     {{?}}
                     <li>
                         <a name="deleteButton" target="_blank"
                            href="/{{=it.site.pathPrefix}}deletePost.html?boardName={{=it.board.name}}&postNumber={{=post.number}}"
                            {{? it.settings.mode.name != "ascetic"}}onclick="lord.deletePost(this); return false;"{{?}}>
-                            <img src="/{{=it.site.pathPrefix}}img/delete.png" />
+                            <img src="/{{=it.site.pathPrefix}}img/delete.png" class="signImage" />
                             {{? post.number == post.threadNumber}}{{=it.tr.deleteThreadText}}{{??}}{{=it.tr.deletePostText}}{{?}}</a>
                     </li>
+                    {{? it.customPostMenuAction && it.customPostMenuAction[100]}}
+                        {{ out += it.customPostMenuAction[100](it, thread, post); }}
+                    {{?}}
                     {{? it.settings.mode.name != "ascetic"}}
                         <li>
                             <a name="hideButton" href="javascript:void(0);"
                                onclick="lord.setPostHidden(this); return false;">
-                                <img src="/{{=it.site.pathPrefix}}img/hide.png" /> {{=it.tr.showHidePostText}}</a>
+                                <img src="/{{=it.site.pathPrefix}}img/hide.png" class="signImage" />
+                                {{=it.tr.showHidePostText}}</a>
                         </li>
+                    {{?}}
+                    {{? it.customPostMenuAction && it.customPostMenuAction[110]}}
+                        {{ out += it.customPostMenuAction[110](it, thread, post); }}
                     {{?}}
                 </ul>
             </span>
         {{?}}
-        {{? post.isOp && !it.thread}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[160]}}
+            {{ out += it.customPostHeaderPart[160](it, thread, post); }}
+        {{?}}
+        {{? post.isOp && !it.includeThreadScripts && "mobile" != it.deviceType}}
             <span name="toThread" class="postToThread {{=it.deviceType}}">
-                {{? it.deviceType != "mobile"}}
-                    [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"
-                        name="toThreadLink">{{=it.tr.toThread}}</a>]
-                {{??}}
-                    <a name="toThreadLink"
-                       href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"><button class="button">{{=it.tr.toThread}}</button></a>
-                {{?}}
+                [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"
+                    name="toThreadLink">{{=it.tr.toThread}}</a>]
             </span>
+        {{?}}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[170]}}
+            {{ out += it.customPostHeaderPart[170](it, thread, post); }}
         {{?}}
     </div>
     <table class="postBody">
@@ -268,4 +378,10 @@
             {{?}}
         </tbody>
     </table>
+    {{? post.isOp && !it.thread && "mobile" == it.deviceType}}
+        <span name="toThread" class="postToThread {{=it.deviceType}}">
+            <a name="toThreadLink"
+               href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"><button class="button">{{=it.tr.toThread}}</button></a>
+        </span>
+    {{?}}
 </div>

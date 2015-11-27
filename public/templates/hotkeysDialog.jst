@@ -7,10 +7,11 @@
             <tr>
                 <td>
                     <input type="text" readonly="true" name="{{=hotkey}}"
-                           onkeypress="lord.assignHotkey(event, this);" />
+                           onkeyup="lord.assignHotkey(event, this);"
+                           value="{{? it.hotkeys[hotkey]}}{{=it.hotkeys[hotkey]}}{{??}}{{=it.defaultHotkeys[hotkey]}}{{?}}" />
                 </td>
                 <td>
-                    – hotkey{{ out += hotkey[0].toUpperCase() + hotkey.substr(1); }}LabelText
+                    – {{=it.tr["hotkey" + hotkey[0].toUpperCase() + hotkey.substr(1) + "LabelText"]}}
                 </td>
             </tr>
         {{~}}

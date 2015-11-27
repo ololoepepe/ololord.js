@@ -28,6 +28,7 @@ module.exports = function(req, res, next) {
     if (!codeStyles[codeStyle])
         codeStyle = "agate";
     req.hashpass = Tools.hashpass(req);
+    req.vkAuth = ("true" == req.cookies.vkAuth);
     var captchaEngine = Captcha.captcha(req.cookies.captchaEngine);
     var defMarkupMode = markup.MarkupModes.ExtendedWakabaMark + "," + markup.MarkupModes.BBCode;
     var timeZoneOffset = +req.cookies.timeZoneOffset;

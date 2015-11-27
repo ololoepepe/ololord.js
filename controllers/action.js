@@ -9,10 +9,12 @@ var UUID = require("uuid");
 
 var Board = require("../boards");
 var Captcha = require("../captchas");
+var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
+var vk = require("../helpers/vk")(config("site.vkontakte.accessToken", ""));
 
 var rootRouter = express.Router();
 
@@ -59,66 +61,86 @@ var getFiles = function(fields, files, transaction) {
         if (["R-15", "R-18", "R-18G"].indexOf(r) >= 0)
             file.rating = r;
     };
-    var tmpFiles = [];
-    Tools.forIn(files, function(file, fieldName) {
-        if (file.size < 1)
-            return FSSync.unlink(file.path);
-        file.fieldName = fieldName;
-        file.mimeType = Tools.mimeType(file.path);
-        setFileRating(file, file.fieldName.substr(5));
-        tmpFiles.push(file);
-        transaction.filePaths.push(file.path);
-    });
-    var urls = [];
-    Tools.forIn(fields, function(url, key) {
-        if (key.substr(0, 9) != "file_url_")
-            return;
-        urls.push({
-            url: url,
-            formFieldName: key
-        });
-    });
-    var promises = urls.map(function(url) {
-        var path = __dirname + "/../tmp/upload_" + UUID.v1();
-        transaction.filePaths.push(path);
-        var c = {};
-        var proxy = Tools.proxy();
-        var p;
-        if (proxy) {
-            p = HTTP.request({
-                host: proxy.host,
-                port: proxy.port,
-                headers: { "Proxy-Authorization": proxy.auth },
-                path: url.url,
-                timeout: Tools.Minute
+    var tmpFiles = Tools.filterIn(files, function(file) {
+        if (file.size < 1) {
+            FS.remove(file.path).catch(function(err) {
+                console.log(err.stack);
             });
-        } else {
-            p = HTTP.request({
-                url: url.url,
-                timeout: Tools.Minute
-            });
+            return false;
         }
-        return p.then(function(response) {
-            if (response.status != 200)
-                return Promise.reject("Failed to download file");
-            return response.body.read();
-        }).then(function(data) {
-            c.size = data.length;
-            if (c.size < 1)
-                return Promise.reject("File is empty");
-            return FS.write(path, data);
-        }).then(function() {
-            var file = {
-                name: url.url.split("/").pop(),
-                size: c.size,
-                path: path,
-                mimeType: Tools.mimeType(path)
-            };
-            setFileRating(file, url.formFieldName.substr(9));
+        return true;
+    });
+    var promises = Tools.mapIn(tmpFiles, function(file, fieldName) {
+        file.fieldName = fieldName;
+        setFileRating(file, file.fieldName.substr(5));
+        transaction.filePaths.push(file.path);
+        return Tools.mimeType(file.path).then(function(mimeType) {
+            file.mimeType = mimeType;
             return Promise.resolve(file);
         });
     });
-    return Promise.all(promises).then(function(downloadedFiles) {
+    return Promise.all(promises).then(function(files) {
+        tmpFiles = files;
+        var urls = [];
+        Tools.forIn(fields, function(url, key) {
+            if (key.substr(0, 9) != "file_url_")
+                return;
+            urls.push({
+                url: url,
+                formFieldName: key
+            });
+        });
+        promises = urls.map(function(url) {
+            var path = __dirname + "/../tmp/upload_" + UUID.v1();
+            transaction.filePaths.push(path);
+            var c = {};
+            var proxy = Tools.proxy();
+            var p;
+            if (url.url.replace("vk://", "") != url.url) {
+                p = vk("audio.getById", {audios: url.url.split("/")[2]}).then(function(result) {
+                    return HTTP.request({
+                        url: result.response[0].url,
+                        timeout: Tools.Minute
+                    });
+                });
+            } else if (proxy) {
+                p = HTTP.request({
+                    host: proxy.host,
+                    port: proxy.port,
+                    headers: { "Proxy-Authorization": proxy.auth },
+                    path: url.url,
+                    timeout: Tools.Minute
+                });
+            } else {
+                p = HTTP.request({
+                    url: url.url,
+                    timeout: Tools.Minute
+                });
+            }
+            return p.then(function(response) {
+                if (response.status != 200)
+                    return Promise.reject("Failed to download file");
+                return response.body.read();
+            }).then(function(data) {
+                c.size = data.length;
+                if (c.size < 1)
+                    return Promise.reject("File is empty");
+                return FS.write(path, data);
+            }).then(function() {
+                c.file = {
+                    name: url.url.split("/").pop(),
+                    size: c.size,
+                    path: path
+                };
+                setFileRating(c.file, url.formFieldName.substr(9));
+                return Tools.mimeType(path);
+            }).then(function(mimeType) {
+                c.file.mimeType = mimeType;
+                return Promise.resolve(c.file);
+            });
+        });
+        return Promise.all(promises);
+    }).then(function(downloadedFiles) {
         tmpFiles = tmpFiles.concat(downloadedFiles);
         var hashes = fields.fileHashes ? fields.fileHashes.split(",") : [];
         return Database.getFileInfosByHashes(hashes);
@@ -194,9 +216,11 @@ router.post("/createPost", function(req, res) {
         c.fields = result.fields;
         c.files = result.files;
         c.board = Board.board(c.fields.boardName);
-        if (!board)
+        if (!c.board)
             return Promise.reject("Invalid board");
-        transaction.board = board;
+        transaction.board = c.board;
+        return controller.checkBan(req, res, c.board.name, true);
+    }).then(function() {
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
@@ -229,9 +253,11 @@ router.post("/createThread", function(req, res) {
         c.fields = result.fields;
         c.files = result.files;
         c.board = Board.board(c.fields.boardName);
-        if (!board)
+        if (!c.board)
             return Promise.reject("Invalid board");
-        transaction.board = board;
+        transaction.board = c.board;
+        return controller.checkBan(req, res, c.board.name, true);
+    }).then(function() {
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
@@ -259,9 +285,12 @@ router.post("/createThread", function(req, res) {
 router.post("/editPost", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
+        c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.postNumber = +result.fields.postNumber;
-        return Database.editPost(req, result.fields);
+        return controller.checkBan(req, res, c.boardName, true);
+    }).then(function() {
+        return Database.editPost(req, c.fields);
     }).then(function(result) {
         if (req.ascetic) {
             res.redirect("/" + config("site.pathPrefix", "")
@@ -284,6 +313,8 @@ router.post("/addFiles", function(req, res) {
         if (!board)
             return Promise.reject("Invalid board");
         transaction.board = board;
+        return controller.checkBan(req, res, c.board.name, true);
+    }).then(function() {
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
@@ -325,8 +356,12 @@ router.post("/addFiles", function(req, res) {
 });
 
 router.post("/deletePost", function(req, res) {
+    var c = {};
     Tools.parseForm(req).then(function(result) {
-        return Database.deletePost(req, result.fields);
+        c.fields = result.fields;
+        return controller.checkBan(req, res, c.fields.boardName, true);
+    }).then(function() {
+        return Database.deletePost(req, res, c.fields);
     }).then(function(result) {
         if (req.ascetic) {
             var path = result.boardName;
@@ -334,7 +369,7 @@ router.post("/deletePost", function(req, res) {
                 path += "/res/" + result.threadNumber + ".html";
             res.redirect("/" + config("site.pathPrefix", "") + path);
         } else {
-            res.send({});
+            res.send(result);
         }
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
@@ -343,7 +378,7 @@ router.post("/deletePost", function(req, res) {
 
 router.post("/deleteFile", function(req, res) {
     Tools.parseForm(req).then(function(result) {
-        return Database.deleteFile(req, result.fields);
+        return Database.deleteFile(req, res, result.fields);
     }).then(function(result) {
         if (req.ascetic) {
             var path = result.boardName + "/res/" + result.threadNumber + ".html";
@@ -351,7 +386,28 @@ router.post("/deleteFile", function(req, res) {
                 path += "#" + result.postNumber;
             res.redirect("/" + config("site.pathPrefix", "") + path);
         } else {
-            res.send({});
+            res.send(result);
+        }
+    }).catch(function(err) {
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
+router.post("/moveThread", function(req, res) {
+    var c = {};
+    Tools.parseForm(req).then(function(result) {
+        c.fields = result.fields;
+        return controller.checkBan(req, res, c.fields.boardName, true);
+    }).then(function() {
+        return controller.checkBan(req, res, c.fields.targetBoardName, true);
+    }).then(function() {
+        return Database.moveThread(req, c.fields);
+    }).then(function(result) {
+        if (req.ascetic) {
+            var path = result.boardName + "/res/" + result.threadNumber + ".html";
+            res.redirect("/" + config("site.pathPrefix", "") + path);
+        } else {
+            res.send(result);
         }
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
@@ -360,9 +416,16 @@ router.post("/deleteFile", function(req, res) {
 
 router.post("/editAudioTags", function(req, res) {
     Tools.parseForm(req).then(function(result) {
-        return Database.editAudioTags(req, result.fields);
+        return Database.editAudioTags(req, res, result.fields);
     }).then(function(result) {
-        res.send({});
+        if (req.ascetic) {
+            var path = result.boardName + "/res/" + result.threadNumber + ".html";
+            if (result.threadNumber != result.postNumber)
+                path += "#" + result.postNumber;
+            res.redirect("/" + config("site.pathPrefix", "") + path);
+        } else {
+            res.send(result);
+        }
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });
@@ -373,7 +436,8 @@ router.post("/banUser", function(req, res) {
         return controller.error(req, res, "Not enough rights", !req.ascetic);
     var c = {};
     Tools.parseForm(req).then(function(result) {
-        var bans = [];
+        c.bans = [];
+        c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.postNumber = +result.fields.postNumber;
         c.userIp = result.fields.userIp;
@@ -385,7 +449,7 @@ router.post("/banUser", function(req, res) {
                 return;
             var expiresAt = result.fields["banExpires_" + value];
             expiresAt = expiresAt? moment(expiresAt, "DD.MM.YYYY:HH") : null;
-            bans.push({
+            c.bans.push({
                 boardName: value,
                 expiresAt: +expiresAt ? expiresAt : null,
                 level: level,
@@ -393,11 +457,17 @@ router.post("/banUser", function(req, res) {
                 postNumber: +result.fields["banPostNumber_" + value] || null
             });
         });
-        return Database.banUser(req, result.fields.userIp, bans);
+        return controller.checkBan(req, res, c.boardName, true);
+    }).then(function() {
+        return Database.banUser(req, c.fields.userIp, c.bans);
     }).then(function(result) {
         if (req.ascetic) {
-            res.redirect("/" + config("site.pathPrefix", "")
-                + `banUser.html?boardName=${c.boardName}&postNumber=${c.postNumber}&userIp=${c.userIp}`);
+            var path;
+            if (c.boardName && c.postNumber)
+                path = `banUser.html?userIp=${c.userIp}&boardName=${c.boardName}&postNumber=${c.postNumber}`;
+            else
+                path = `manage.html`;
+            res.redirect("/" + config("site.pathPrefix", "") + path);
         } else {
             res.send({});
         }
@@ -412,7 +482,9 @@ router.post("/delall", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
-        return Database.delall(req, result.fields);
+        return controller.checkBan(req, res, c.fields.boardName, true);
+    }).then(function() {
+        return Database.delall(req, c.fields);
     }).then(function(result) {
         if (req.ascetic) {
             var path = "/" + config("site.pathPrefix", "");
@@ -448,7 +520,10 @@ router.post("/changeSettings", function(req, res) {
             path: "/"
         });
     }).then(function(result) {
-        res.redirect("/" + config("site.pathPrefix", "") + "settings.html");
+        if (req.ascetic)
+            res.redirect("/" + config("site.pathPrefix", "") + "settings.html");
+        else
+            res.send({});
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });
@@ -457,14 +532,17 @@ router.post("/changeSettings", function(req, res) {
 router.post("/setThreadFixed", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
+        c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.threadNumber = +result.fields.threadNumber;
-        return Database.setThreadFixed(req, result.fields);
+        return controller.checkBan(req, res, c.boardName, true);
+    }).then(function() {
+        return Database.setThreadFixed(req, c.fields);
     }).then(function(result) {
         if (req.ascetic)
             res.redirect("/" + config("site.pathPrefix", "") + `${c.boardName}/res/${c.threadNumber}.html`);
         else
-            res.send({});
+            res.send(result);
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });
@@ -473,14 +551,39 @@ router.post("/setThreadFixed", function(req, res) {
 router.post("/setThreadClosed", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
+        c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.threadNumber = +result.fields.threadNumber;
-        return Database.setThreadClosed(req, result.fields);
+        return controller.checkBan(req, res, c.boardName, true);
+    }).then(function() {
+        return Database.setThreadClosed(req, c.fields);
     }).then(function(result) {
         if (req.ascetic)
             res.redirect("/" + config("site.pathPrefix", "") + `${c.boardName}/res/${c.threadNumber}.html`);
         else
-            res.send({});
+            res.send(result);
+    }).catch(function(err) {
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
+router.post("/sendChatMessage", function(req, res) {
+    Tools.parseForm(req).then(function(result) {
+        var fields = result.fields;
+        return Chat.sendMessage(req, fields.text, fields.boardName, +fields.postNumber, fields.hash);
+    }).then(function(result) {
+        res.send(result);
+    }).catch(function(err) {
+        controller.error(req, res, err, !req.ascetic);
+    });
+});
+
+router.post("/deleteChatMessages", function(req, res) {
+    Tools.parseForm(req).then(function(result) {
+        var fields = result.fields;
+        return Chat.deleteMessages(req, fields.hash);
+    }).then(function(result) {
+        res.send(result);
     }).catch(function(err) {
         controller.error(req, res, err, !req.ascetic);
     });

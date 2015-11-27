@@ -1,12 +1,23 @@
 {
     "system": {
         "workerCount": 1,
+        "middlewareLog": {
+            "before": "",
+            "verbosity": "ip"
+        },
         "fileDownloadProxy": "",
         "fileDownloadProxyAuth": ""
     },
     "server": {
         "port": 8080,
-        "ddosProtection": true,
+        "ddosProtection": {
+            "enabled": true,
+            "static": false,
+            "errorMessage": "Not so fast!",
+            "burst": 6,
+            "maxExpiry": 60,
+            "checkInterval": 1
+        },
         "rss": {
             "enabled": true,
             "ttl": 60,
@@ -19,7 +30,16 @@
         "domain": "localhost:8080",
         "dateFormat": "MM/DD/YYYY HH:mm:ss",
         "timeOffset": 0,
-        "youtubeApiKey": ""
+        "youtubeApiKey": "",
+        "tripcodeSalt": "ololo",
+        "vkontakte": {
+            "integrationEnabled": false,
+            "appId": 0,
+            "accessToken": ""
+        },
+        "twitter": {
+            "integrationEnabled": true
+        }
     },
     "board": {
         "captchaQuota": 10,

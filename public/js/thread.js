@@ -4,9 +4,8 @@ var lord = lord || {};
 
 /*Classes*/
 
-/*constructor*/ lord.AutoUpdateTimer = function(intervalSeconds, showCountdown) {
+/*constructor*/ lord.AutoUpdateTimer = function(intervalSeconds) {
     this.intervalSeconds = intervalSeconds;
-    this.showCountdown = showCountdown;
     this.updateTimer = null;
     this.countdownTimer = null;
     this.secondsLeft = 0;
@@ -49,8 +48,7 @@ var lord = lord || {};
         }
         this.update();
     }).bind(this), this.intervalSeconds * lord.Second);
-    if (this.showCountdown)
-        this.createCountdownTimer();
+    this.createCountdownTimer();
     this.update();
 };
 
@@ -121,7 +119,7 @@ lord.visibilityChangeListener = function(e) {
     var link = lord.id("favicon");
     var finame = link.href.split("/").pop();
     if ("favicon.ico" != finame)
-        link.href = link.href.replace("img/favicon_newmessage.ico", "favicon.ico");
+        link.href = link.href.replace("favicon_newmessage.ico", "favicon.ico");
     if (document.title.substring(0, 2) == "* ")
         document.title = document.title.substring(2);
 };
@@ -130,9 +128,9 @@ lord.blinkFaviconNewMessage = function() {
     var link = lord.id("favicon");
     var finame = link.href.split("/").pop();
     if ("favicon.ico" == finame)
-        link.href = link.href.replace("favicon.ico", "img/favicon_newmessage.ico");
+        link.href = link.href.replace("favicon.ico", "favicon_newmessage.ico");
     else
-        link.href = link.href.replace("img/favicon_newmessage.ico", "favicon.ico");
+        link.href = link.href.replace("favicon_newmessage.ico", "favicon.ico");
 };
 
 lord.updateThread = function(silent) {
@@ -146,8 +144,9 @@ lord.updateThread = function(silent) {
     var popup;
     var c = {};
     var query = "boardName=" + boardName + "&threadNumber=" + threadNumber + "&lastPostNumber=" + lastPostNumber;
-    return lord.getModel("misc/tr").then(function(model) {
-        c.tr = model.tr;
+    //NOTE: misc/base, misc/boards and misc/board/<boardName> are just cached for lord.createPostNode, not used
+    return lord.getModel(["misc/base", "misc/tr", "misc/boards", "misc/board/" + boardName]).then(function(models) {
+        c.tr = models[1].tr;
         if (!silent) {
             var span = lord.node("span");
             if (!lord.loadingImage) {
@@ -174,25 +173,68 @@ lord.updateThread = function(silent) {
             popup.resetTimeout();
         }
         if (posts.length < 1)
-            return;
-        c.sequenceNumber = posts[posts.length - 1].sequenceNumber;
-        var promises = posts.map(function(post) {
-            return lord.createPostNode(post, true);
+            return Promise.resolve();
+        c.posts = posts;
+        return lord.getModel("api/threadInfo", "boardName=" + boardName + "&threadNumber=" + threadNumber);
+    }).then(function(threadInfo) {
+        if (!c.posts)
+            return Promise.resolve();
+        if (lord.checkError(threadInfo))
+            return Promise.reject(threadInfo);
+        c.threadInfo = threadInfo;
+        c.sequenceNumber = c.posts[c.posts.length - 1].sequenceNumber;
+        var refs = [];
+        c.posts.forEach(function(post) {
+            if (post.referencedPosts)
+                refs = refs.concat(post.referencedPosts);
+            if (post.referringPosts)
+                refs = refs.concat(post.referringPosts);
+        });
+        var map = lord.toMap(refs, function(ref) {
+            return ref.boardName + ":" + ref.postNumber;
+        });
+        var postMap = lord.toMap(c.posts, function(post) {
+            return post.boardName + ":" + post.number;
+        });
+        var query = "";
+        c.postInfos = {};
+        lord.forIn(map, function(_, key) {
+            var post = postMap[key];
+            if (post)
+                c.postInfos[key] = post;
+            else
+                query = query + (query ? "&" : "") + "posts=" + key;
+        });
+        return lord.getModel("api/posts", query);
+    }).then(function(posts) {
+        if (!c.posts)
+            return Promise.resolve();
+        posts.forEach(function(post) {
+            if (post)
+                c.postInfos[post.boardName + ":" + post.number] = post;
+        });
+        var promises = c.posts.map(function(post) {
+            return lord.createPostNode(post, true, c.threadInfo, c.postInfos);
         });
         return Promise.all(promises);
     }).then(function(posts) {
-        if (!posts)
-            return;
+        if (!posts || !posts.length || posts.length < 1)
+            return Promise.resolve();
         var before = lord.id("afterAllPosts");
         posts.forEach(function(post) {
             if (lord.id(post.id))
                 return;
+            lord.addClass(post, "newPost");
+            post.onmouseover = function() {
+                post.onmouseover = undefined;
+                lord.removeClass(post, "newPost");
+            };
             document.body.insertBefore(post, before);
         });
         return lord.getModel("misc/board/" + boardName);
     }).then(function(model) {
         if (!model)
-            return;
+            return Promise.resolve();
         var board = model.board;
         var bumpLimitReached = c.sequenceNumber >= board.bumpLimit;
         var postLimitReached = c.sequenceNumber >= board.postLimit;
@@ -259,8 +301,7 @@ lord.setAutoUpdateEnabled = function(enabled) {
     });
     if (enabled) {
         var intervalSeconds = lord.getLocalObject("autoUpdateInterval", 15);
-        var showCountdown = lord.getLocalObject("showAutoUpdateTimer", true);
-        lord.autoUpdateTimer = new lord.AutoUpdateTimer(intervalSeconds, showCountdown);
+        lord.autoUpdateTimer = new lord.AutoUpdateTimer(intervalSeconds);
         lord.autoUpdateTimer.start();
     } else if (lord.autoUpdateTimer) {
         lord.autoUpdateTimer.stop();

@@ -21,7 +21,13 @@
             <script type="text/javascript"
                     src="/{{=it.site.pathPrefix}}js/3rdparty/moment-with-locales.min.js"></script>
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base.js"></script>
+            {{? it.site.vkontakte.integrationEnabled }}
+                <script type="text/javascript" src="//vk.com/js/api/openapi.js"></script>
+            {{?}}
             {{? it.includeBoardScripts}}
+                {{? it.site.twitter.integrationEnabled }}
+                    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/twitter.js"></script>
+                {{?}}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/board.js"></script>
                 {{? it.includeThreadScripts}}
                     <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jszip.min.js"></script>
@@ -41,7 +47,9 @@
             {{?}}
             {{? it.extraScripts}}
                 {{~it.extraScripts :script}}
-                    {{? script.fileName}}
+                    {{? script.source}}
+                        <script type="text/javascript" src="{{=script.source}}"></script>
+                    {{?? script.fileName}}
                         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/{{=script.fileName}}"></script>
                     {{?? script.value}}
                         <script type="text/javascript">{{=script.value}}</script>

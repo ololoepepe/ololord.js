@@ -135,8 +135,10 @@ controller.error = function(req, res, error, ajax) {
         var model = {};
         model.title = Tools.translate("Error", "pageTitle");
         if (Util.isError(error)) {
-            if (Tools.contains(process.argv.slice(2), "--dev-mode"))
+            if (Tools.contains(process.argv.slice(2), "--dev-mode")) {
+                console.log(error);
                 console.log(error.stack);
+            }
             model.errorMessage = Tools.translate("Internal error", "errorMessage");
             model.errorDescription = error.message;
         } else if (Util.isObject(error) && error.error) {
@@ -238,12 +240,20 @@ controller.baseModel = function(req) {
             locale: config("site.locale", "en"),
             dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss"),
             timeOffset: config("site.timeOffset", 0),
-            youtubeApiKey: config("site.youtubeApiKey", "")
+            youtubeApiKey: config("site.youtubeApiKey", ""),
+            vkontakte: {
+                integrationEnabled: !!config("site.vkontakte.integrationEnabled", false),
+                appId: config("site.vkontakte.appId", "")
+            },
+            twitter: {
+                integrationEnabled: !!config("site.twitter.integrationEnabled", true)
+            }
         },
         user: {
             ip: req.ip,
             level: req.level,
-            loggedIn: !!req.hashpass
+            loggedIn: !!req.hashpass,
+            vkAuth: req.vkAuth
         },
         modes: [
             {
@@ -282,7 +292,8 @@ controller.baseModel = function(req) {
             var captcha = Captcha.captcha(id);
             return {
                 id: captcha.id,
-                title: captcha.title
+                title: captcha.title,
+                publicKey: captcha.publicKey
             };
         })
     };
@@ -371,7 +382,7 @@ controller.translationsModel = function() {
     translate("Markup", "toMarkupPageText");
     translate("Home", "toHomePageText");
     translate("Framed version", "framedVersionText");
-    translate("Framed version", "normalVersionText");
+    translate("Version without frame", "normalVersionText");
     translate("F.A.Q.", "toFaqPageText");
     translate("User management", "toManagePageText");
     translate("Hide by image hash", "hideByImageText");
@@ -385,7 +396,6 @@ controller.translationsModel = function() {
     translate("Bump limit reached", "bumpLimitReachedText");
     translate("Quick reply", "quickReplyText");
     translate("Post actions", "postActionsText");
-    translate("Add file", "addFileText");
     translate("Edit post", "editPostText");
     translate("Fix thread", "fixThreadText");
     translate("Unfix thread", "unfixThreadText");
@@ -434,10 +444,10 @@ controller.translationsModel = function() {
     translate("Show password", "showPasswordText");
     translate("Previous page/file", "hotkeyPreviousPageImageLabelText");
     translate("Next page/file", "hotkeyNextPageImageLabelText");
-    translate("Previous thread on board/post in thread", "hotkeyPreviousThreadPostLabelText");
-    translate("Next thread on board/post in thread", "hotkeyNextThreadPostLabelText");
-    translate("Previous post in thread/on board", "hotkeyPreviousPostLabelText");
-    translate("Next post in thread/on board", "hotkeyNextPostLabelText");
+    translate("Previous thread (on board)/post (in thread)", "hotkeyPreviousThreadPostLabelText");
+    translate("Next thread (on board)/post (in thread)", "hotkeyNextThreadPostLabelText");
+    translate("Previous post (in thread/on board)", "hotkeyPreviousPostLabelText");
+    translate("Next post (inthread/on board)", "hotkeyNextPostLabelText");
     translate("Hide post/thread", "hotkeyHidePostLabelText");
     translate("Go to thread", "hotkeyGoToThreadLabelText");
     translate("Expand thread", "hotkeyExpandThreadLabelText");
@@ -446,29 +456,29 @@ controller.translationsModel = function() {
     translate("Submit reply", "hotkeySubmitReplyLabelText");
     translate("Show favorite threads", "hotkeyShowFavoritesLabelText");
     translate("Show settings", "hotkeyShowSettingsLabelText");
-    translate("Update thread", "hotkeyUpdateThreadLabelText");
+    translate("Update thread (in thread only)", "hotkeyUpdateThreadLabelText");
     translate("Bold text", "hotkeyMarkupBoldLabelText");
     translate("Italics", "hotkeyMarkupItalicsLabelText");
     translate("Striked out text", "hotkeyMarkupStrikedOutLabelText");
     translate("Underlined text", "hotkeyMarkupUnderlinedLabelText");
     translate("Spoiler", "hotkeyMarkupSpoilerLabelText");
-    translate("Quote selected text", "hotkeyMarkupQutationLabelText");
+    translate("Quote selected text", "hotkeyMarkupQuotationLabelText");
     translate("Code block", "hotkeyMarkupCodeLabelText");
     translate("General settings", "generalSettingsLegendText");
     translate("Mode:", "modeLabelText");
     translate("Style:", "styleLabelText");
     translate("Code style:", "codeStyleLabelText");
-    translate("Shrink posts:", "postShrinkingLabelText");
-    translate("Sticky toolbar:", "stickyToolbarLabelText");
+    translate("Shrink posts", "postShrinkingLabelText");
+    translate("Sticky toolbar", "stickyToolbarLabelText");
     translate("Time:", "timeLabelText");
     translate("Server", "timeServerText");
     translate("Local", "timeLocalText");
     translate("Offset:", "timeZoneOffsetLabelText");
     translate("Captcha:", "captchaLabelText");
-    translate("Maximum allowed rating:", "maxAllowedRatingLabelText");
-    translate("Mark posts as drafts by default:", "draftsByDefaultLabelText");
-    translate("Hide postform rules:", "hidePostformRulesLabelText");
-    translate("Use minimalistic post form:", "minimalisticPostformLabelText");
+    translate("Maximum rating:", "maxAllowedRatingLabelText");
+    translate("Posts are drafts by default", "draftsByDefaultLabelText");
+    translate("Hide postform rules", "hidePostformRulesLabelText");
+    translate("Minimalistic post form", "minimalisticPostformLabelText");
     translate("Hide boards:", "hiddenBoardsLabelText");
     translate("This option may be ignored on some boards", "captchaLabelWarningText");
     translate("Script settings", "scriptSettingsLegendText");
@@ -477,42 +487,42 @@ controller.translationsModel = function() {
     translate("Postform and posting", "postformTabText");
     translate("Hiding", "hidingTabText");
     translate("Other", "otherTabText");
-    translate("Auto update threads by default:", "autoUpdateThreadsByDefaultLabelText");
+    translate("Auto update threads by default", "autoUpdateThreadsByDefaultLabelText");
     translate("Auto update interval (sec):", "autoUpdateIntervalLabelText");
-    translate("Show auto update timer:", "showAutoUpdateTimerLabelText");
-    translate("Show desktop notifications:", "showAutoUpdateDesktopNotificationsLabelText");
-    translate("Mark OP post links:", "signOpPostLinksLabelText");
-    translate("Mark own post links:", "signOwnPostLinksLabelText");
-    translate("Show file leaf buttons:", "showLeafButtonsLabelText");
-    translate("Leaf through images only:", "leafThroughImagesOnlyLabelText");
-    translate("Image zoom sensitivity, %:", "imageZoomSensitivityLabelText");
-    translate("Default audio and video files volume:", "defaultAudioVideoVolumeLabelText");
-    translate("Remember volume:", "rememberAudioVideoVolumeLabelText");
-    translate("Play audio and video files immediately:", "playAudioVideoImmediatelyLabelText");
-    translate("Loop audio and video files:", "loopAudioVideoLabelText");
+    translate("Show desktop notifications", "showAutoUpdateDesktopNotificationsLabelText");
+    translate("Mark OP post links", "signOpPostLinksLabelText");
+    translate("Mark own post links", "signOwnPostLinksLabelText");
+    translate("Show file leaf buttons", "showLeafButtonsLabelText");
+    translate("Leaf through images only", "leafThroughImagesOnlyLabelText");
+    translate("Image zoom sensitivity:", "imageZoomSensitivityLabelText");
+    translate("Default volume:", "defaultAudioVideoVolumeLabelText");
+    translate("Remember", "rememberAudioVideoVolumeLabelText");
+    translate("Play media immediately", "playAudioVideoImmediatelyLabelText");
+    translate("Loop media", "loopAudioVideoLabelText");
     translate("Quick reply outside thread:", "quickReplyActionLabelText");
     translate("Redirects to thread", "quickReplyActionGotoThreadText");
-    translate("Leaves page unmodified", "quickReplyActionDoNothingText");
     translate("Appends a new post", "quickReplyActionAppendPostText");
-    translate("Move to post after replying in thread:", "moveToPostOnReplyInThreadLabelText");
-    translate("Check if attached file exists on server:", "checkFileExistenceLabelText");
-    translate("Show previews when attaching files:", "showAttachedFilePreviewLabelText");
-    translate("Add thread to favorites on reply:", "addToFavoritesOnReplyLabelText");
-    translate("Hide postform markup:", "hidePostformMarkupLabelText");
-    translate("Strip EXIF from JPEG files:", "stripExifFromJpegLabelText");
-    translate("Hide tripcodes:", "hideTripcodesLabelText");
-    translate("Hide user names:", "hideUserNamesLabelText");
-    translate("Strike out links to hidden posts:", "strikeOutHiddenPostLinksLabelText");
-    translate("Spells (command-based post hiding):", "spellsLabelText");
-    translate("Edit", "editSpellsText");
-    translate("Show hidden post/thread list", "showHiddenPostListText");
+    translate("Move to post after replying in thread", "moveToPostOnReplyInThreadLabelText");
+    translate("Check if attached file exists on server", "checkFileExistenceLabelText");
+    translate("Show previews when attaching files", "showAttachedFilePreviewLabelText");
+    translate("Add thread to favorites on reply", "addToFavoritesOnReplyLabelText");
+    translate("Hide postform markup", "hidePostformMarkupLabelText");
+    translate("Strip EXIF from JPEG files", "stripExifFromJpegLabelText");
+    translate("Hide tripcodes", "hideTripcodesLabelText");
+    translate("Hide user names", "hideUserNamesLabelText");
+    translate("Strike out links to hidden posts", "strikeOutHiddenPostLinksLabelText");
+    translate("Spells (command-based post hiding)", "spellsLabelText");
+    translate("Edit spells", "editSpellsText");
+    translate("Show hidden post list", "showHiddenPostListText");
     translate("Maximum simultaneous AJAX requests:", "maxSimultaneousAjaxLabelText");
-    translate("Show new post count near board names:", "showNewPostsLabelText");
-    translate("Show titles of YouTube videos:", "showYoutubeVideoTitleLabelText");
-    translate("Hotkeys:", "hotkeysLabelText");
+    translate("New post count near board names", "showNewPostsLabelText");
+    translate("Show titles of YouTube videos", "showYoutubeVideoTitleLabelText");
+    translate("Hotkeys enabled", "hotkeysLabelText");
+    translate("User CSS enabled", "userCssLabelText");
+    translate("User JavaScript enabled", "userJavaScriptLabelText");
     translate("Edit", "editHotkeysText");
     translate("Edit", "editUserCssText");
-    translate("User CSS:", "userCssLabelText");
+    translate("Edit", "editUserJavaScriptText");
     translate("Cancel", "cancelButtonText");
     translate("Confirm", "confirmButtonText");
     translate("Show post form", "showPostFormText");
@@ -555,12 +565,16 @@ controller.translationsModel = function() {
     translate("Posts left:", "captchaQuotaText");
     translate("Show rules", "showPostformRulesText");
     translate("Hide rules", "hidePostformRulesText");
-    translate("\"Log in\", you say? On an imageboard? I am out!\n\n"
+    translate("\"Log in\", you say? On an imageboard? I am out!<br />"
         + "Please, wait a sec. The login systyem does NOT store any data on the server. "
         + "It only stores a cookie on your PC to allow post editing, deleting, etc. without "
-        + "entering password every time, and nothing else.\n\n"
+        + "entering password every time, and nothing else.<br />"
         + "Well, actually, the admin may register someone manually (if he is a fag), "
         + "but there is no way to register through the web.", "loginSystemDescriptionText");
+    translate("When logging in with Vkontakte, you may omit the login, "
+        + "but to be logged in with the same login on each browser, you have to specify it.<br />"
+        + "When logged in with Vkontakte, you are able to attach your VK audio.<br />"
+        + "This does not affect your anonymity in any way.", "loginSystemVkontakteDescriptionText");
     translate("SFW - safe for work (no socially condemned content)\n"
         + "R-15 - restricted for 15 years (contains ecchi, idols, violence)\n"
         + "R-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\n"
@@ -604,7 +618,7 @@ controller.translationsModel = function() {
     translate("Reason:", "banReasonLabelText");
     translate("Delete all user posts on selected board", "delallButtonText");
     translate("Select all", "selectAllText");
-    translate("Post source text", "postSourceTextText");
+    translate("Post source text", "postSourceText");
     translate("Expand video", "expandVideoText");
     translate("Collapse video", "collapseVideoText");
     translate("Favorite threads", "favoriteThreadsText");
@@ -614,6 +628,21 @@ controller.translationsModel = function() {
     translate("Remove from hidden post/thread list", "removeFromHiddenPostListText");
     translate("Hidden posts/threads", "hiddenPostListText");
     translate("Settings", "settingsDialogTitle");
+    translate("If password is empty, current hashpass will be used", "enterPasswordText");
+    translate("Enter password", "enterPasswordTitle");
+    translate("Add files", "addFilesText");
+    translate("Show markup", "showPostformMarkupText");
+    translate("Hide markup", "hidePostformMarkupText");
+    translate("Target board", "targetBoardLabelText");
+    translate("Specify Vkontakte audio file", "attachFileByVkText");
+    translate("Select a track", "selectTrackTitle");
+    translate("Chat privately with this user", "chatWithUserText");
+    translate("Highlight code (page reload required)", "sourceHighlightingLabelText");
+    translate("Enable private chat", "chatLabelText");
+    translate("Private chat", "chatText");
+    translate("New private message", "newChatMessageText");
+    translate("Send", "sendChatMessageButtonText");
+    translate("Delete this chat", "deleteChatButtonText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

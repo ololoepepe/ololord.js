@@ -1,3 +1,4 @@
+var Address6 = require("ip-address").Address6;
 var Canvas = require("canvas");
 var Crypto = require("crypto");
 var ffmpeg = require("fluent-ffmpeg");
@@ -134,7 +135,8 @@ var Board = function(name, title, options) {
                 var captcha = Captcha.captcha(id);
                 list.push({
                     id: captcha.id,
-                    title: captcha.title
+                    title: captcha.title,
+                    publicKey: captcha.publicKey
                 });
             });
             return list;
@@ -214,6 +216,7 @@ var Board = function(name, title, options) {
 };
 
 /*public*/ Board.prototype.loadExtraData = function(postNumber) {
+    var _this = this;
     return Database.db.hget("postExtraData", this.name + ":" + postNumber).then(function(extraData) {
         if (Util.isNullOrUndefined(extraData))
             return Promise.resolve(null);
@@ -241,7 +244,15 @@ var Board = function(name, title, options) {
     return [];
 };
 
-/*public*/ Board.prototype.customPostBodyPart = function(n, req) {
+/*public*/ Board.prototype.customPostHeaderPart = function(n, req, thread) {
+    //
+};
+
+/*public*/ Board.prototype.customPostMenuAction = function(n, req, thread) {
+    //
+};
+
+/*public*/ Board.prototype.customPostBodyPart = function(n, req, thread) {
     //
 };
 
@@ -257,11 +268,11 @@ var Board = function(name, title, options) {
     //
 };
 
-/*public*/ Board.prototype.renderBoardPage = function(req, res) {
+/*public*/ Board.prototype.renderBoardPage = function(req, res, ajax) {
     return Promise.resolve(null);
 };
 
-/*public*/ Board.prototype.renderThread = function(req, res) {
+/*public*/ Board.prototype.renderThread = function(req, res, ajax) {
     return Promise.resolve(null);
 };
 
@@ -314,18 +325,25 @@ var renderFileInfo = function(fi) {
     post.ownIp = (req.ip == post.user.ip);
     post.ownHashpass = (req.hashpass && req.hashpass == post.user.hashpass);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
-    if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0)
+    if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0) {
         delete post.user.ip;
-    if (post.showTripcode
-        && Database.compareRegisteredUserLevels(post.user.level, Database.RegisteredUserLevels.User) >= 0) {
+    } else {
+        var ipv4 = Tools.preferIPv4(post.user.ip);
+        if (ipv4 && ipv4 != post.user.ip)
+            post.user.ipv4 = ipv4;
+    }
+    if (post.options.showTripcode) {
         var md5 = Crypto.createHash("md5");
-        md5.update(post.hashpass + config("site.tripcodeSalt", ""));
+        md5.update(post.user.hashpass + config("site.tripcodeSalt", ""));
         post.tripcode = "!" + md5.digest("base64").substr(0, 10);
     }
     delete post.user.hashpass;
     delete post.user.password;
-    if (!this.showWhois)
+    if (!this.showWhois) {
+        if (post.geolocation)
+            delete post.geolocation;
         return Promise.resolve(post);
+    }
     return Tools.flagName(post.geolocation.countryCode).then(function(flagName) {
         post.geolocation.flagName = flagName || "default.png";
         if (!post.geolocation.countryName)
@@ -401,7 +419,16 @@ var renderFileInfo = function(fi) {
                 file.extraData.artist = (metadata.artist && metadata.artist.length > 0) ? metadata.artist[0] : "";
                 file.extraData.title = metadata.title || "";
                 file.extraData.year = metadata.year || "";
-                if (metadata.picture && metadata.picture.length > 0)
+                return Promise.resolve(metadata);
+            }).catch(function(err) {
+                console.log(err.stack ? err.stack : err);
+                file.extraData.album = "";
+                file.extraData.artist = "";
+                file.extraData.title = "";
+                file.extraData.year = "";
+                return Promise.resolve();
+            }).then(function(metadata) {
+                if (metadata && metadata.picture && metadata.picture.length > 0)
                     return FS.write(thumbPath, metadata.picture[0].data);
                 else
                     return generateRandomImage(file.hash, file.mimeType, thumbPath);
@@ -414,10 +441,9 @@ var renderFileInfo = function(fi) {
                     thumbPath,
                     "-resize",
                     "200x200",
-                    thumbPath + ".png"
+                    thumbPath
                 ]);
             }).then(function() {
-                file.thumbPath += ".png";
                 return ImageMagick.identify(file.thumbPath);
             }).then(function(info) {
                 file.thumbDimensions = {
@@ -444,6 +470,10 @@ var renderFileInfo = function(fi) {
                 return new Promise(function(resolve, reject) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
                 })
+            }).catch(function(err) {
+                console.log(err.stack ? err.stack : err);
+                file.thumbPath = thumbPath;
+                return generateRandomImage(file.hash, file.mimeType, thumbPath);
             }).then(function() {
                 return ImageMagick.identify(file.thumbPath);
             }).then(function(info) {
@@ -465,12 +495,13 @@ var renderFileInfo = function(fi) {
             });
         } else if (Tools.isImageType(file.mimeType)) {
             file.extraData = null;
-            return ImageMagick.identify(file.path).then(function(info) {
+            var suffix = ("image/gif" == file.mimeType) ? "[0]" : "";
+            return ImageMagick.identify(file.path + suffix).then(function(info) {
                 file.dimensions = {
                     width: info.width,
                     height: info.height
                 };
-                var args = [ file.path + (("image/gif" == file.mimeType) ? "" : "[0]") ];
+                var args = [ file.path + suffix ];
                 if (info.width > 200 || info.height > 200) {
                     args.push("-resize");
                     args.push("200x200");
@@ -566,9 +597,11 @@ Board.addBoard = function(board) {
 };
 
 Board.boardInfos = function(includeHidden) {
-    includeHidden = !!(includeHidden || (typeof includeHidden == "undefined"));
+    includeHidden = (includeHidden || (typeof includeHidden == "undefined"));
     var list = [];
-    Tools.forIn(boards, function(board) {
+    Tools.toArray(boards).sort(function(b1, b2) {
+        return (b1.name < b2.name) ? -1 : 1;
+    }).forEach(function(board) {
         if (!board.enabled || (!includeHidden && board.hidden))
             return;
         list.push({
@@ -580,9 +613,11 @@ Board.boardInfos = function(includeHidden) {
 };
 
 Board.boardNames = function(includeHidden) {
-    includeHidden = !!(includeHidden || (typeof includeHidden == "undefined"));
+    includeHidden = (includeHidden || (typeof includeHidden == "undefined"));
     var list = [];
-    Tools.forIn(boards, function(board) {
+    Tools.toArray(boards).sort(function(b1, b2) {
+        return (b1.name < b2.name) ? -1 : 1;
+    }).forEach(function(board) {
         if (!board.enabled || (!includeHidden && board.hidden))
             return;
         list.push(board.name);

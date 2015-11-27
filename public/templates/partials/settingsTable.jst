@@ -28,9 +28,6 @@
                         </option>
                     {{~}}
                 </select>
-                {{=it.tr.postShrinkingLabelText}}
-                <input type="checkbox" name="shrinkPosts" value="true"
-                       {{? it.settings.shrinkPosts}}checked="true"{{?}} />
             </td>
         </tr>
         <tr>
@@ -46,9 +43,6 @@
                         </option>
                     {{~}}
                 </select>
-                {{=it.tr.stickyToolbarLabelText}}
-                <input type="checkbox" name="stickyToolbar" value="true"
-                       {{? it.settings.stickyToolbar}}checked="true"{{?}} />
             </td>
         </tr>
         <tr>
@@ -99,30 +93,29 @@
             </td>
         </tr>
         <tr>
-            <td>
-                {{=it.tr.draftsByDefaultLabelText}}
+            <td colspan="2">
+                <input type="checkbox" name="shrinkPosts" value="true"
+                       {{? it.settings.shrinkPosts}}checked="true"{{?}} /><label>{{=it.tr.postShrinkingLabelText}}</label>
+                <input type="checkbox" name="stickyToolbar" value="true"
+                       {{? it.settings.stickyToolbar}}checked="true"{{?}} /><label>{{=it.tr.stickyToolbarLabelText}}</label>
             </td>
-            <td>
+        </tr>
+        <tr>
+            <td colspan="2">
                 <input type="checkbox" name="draftsByDefault" value="true"
-                       {{? it.settings.draftsByDefault}}checked="true"{{?}} />
+                       {{? it.settings.draftsByDefault}}checked="true"{{?}} /><label>{{=it.tr.draftsByDefaultLabelText}}</label>
             </td>
         </tr>
         <tr>
-            <td>
-                {{=it.tr.hidePostformRulesLabelText}}
-            </td>
-            <td>
+            <td colspan="2">
                 <input type="checkbox" name="hidePostformRules" value="true"
-                       {{? it.settings.hidePostformRules}}checked="true"{{?}} />
+                       {{? it.settings.hidePostformRules}}checked="true"{{?}} /><label>{{=it.tr.hidePostformRulesLabelText}}</label>
             </td>
         </tr>
         <tr>
-            <td>
-                {{=it.tr.minimalisticPostformLabelText}}
-            </td>
-            <td>
+            <td colspan="2">
                 <input type="checkbox" name="minimalisticPostform" value="true"
-                       {{? it.settings.minimalisticPostform}}checked="true"{{?}} />
+                       {{? it.settings.minimalisticPostform}}checked="true"{{?}} /><label>{{=it.tr.minimalisticPostformLabelText}}</label>
             </td>
         </tr>
         <tr>
@@ -132,10 +125,12 @@
             <td>
                 <div class="scrollAreaH60" name="hiddenBoards">
                     {{~it.boards :brd}}
-                        <input type="checkbox" name="board_{{=brd.name}}"
-                               {{? it.settings.hiddenBoards.indexOf(brd.name) >= 0}}checked="true"{{?}}
-                               value="true">[{{=brd.name}}] {{=brd.title}}</input>
+                        {{? !brd.hidden}}
+                            <input type="checkbox" name="board_{{=brd.name}}"
+                                   {{? it.settings.hiddenBoards.indexOf(brd.name) >= 0}}checked="true"{{?}}
+                                   value="true">[{{=brd.name}}] {{=brd.title}}</input>
                             <br />
+                        {{?}}
                     {{~}}
                 </div>
             </td>

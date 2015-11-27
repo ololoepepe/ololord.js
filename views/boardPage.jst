@@ -4,11 +4,16 @@
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}
       data-last-post-number="{{=it.lastPostNumber}}">
+{{? it.settings.mode.name != "ascetic" && it.site.vkontakte.integrationEnabled }}
+    <script type="text/javascript">
+        VK.init({ apiId: {{=it.site.vkontakte.appId}} });
+    </script>
+{{?}}
 {{? it.settings.mode.name != "ascetic"}}
     <div id="hiddenPostForm" style="display: none;">
         {{#def.postForm}}
     </div>
-    {{? it.settings.captchaEnabled}}
+    {{? it.board.captchaEnabled}}
         <div id="hiddenCaptcha" style="display: none;">
             {{? it.user.captchaQuota > 0}}
                 {{ out += it.captchaEngine.widgetHtml(it.req, it.captchaPrepared); }}
@@ -27,9 +32,9 @@
         {{#def.leafButton}}
     {{~}}
 {{?}}
-<a id="top"></a>
 {{#def.toolbar}}
 <br />
+<a id="top"></a>
 {{#def.searchAction}}
 {{? it.board.bannerFileName}}
     <br />
@@ -38,10 +43,12 @@
 <div class="theTitle">
     <h1>
         {{=it.board.title}}
-        <sup>[<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/catalog.html" class="buttonImage"
-                 title="{{=it.tr.boardCatalogLinkText}}"><img src="/{{=it.site.pathPrefix}}img/catalog.png"></a>]</sup>
-        <sup>[<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/rss.xml" target="_blank" class="buttonImage"
-                 title="{{=it.tr.boardRssLinkText}}"><img src="/{{=it.site.pathPrefix}}img/rss.png"></a>]</sup>
+        <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/catalog.html" class="buttonImage"
+           title="{{=it.tr.boardCatalogLinkText}}"><img src="/{{=it.site.pathPrefix}}img/catalog.png"
+                                                        width="24" height="24"></a>
+        <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/rss.xml" target="_blank" class="buttonImage"
+           title="{{=it.tr.boardRssLinkText}}"><img src="/{{=it.site.pathPrefix}}img/rss.png"
+                                                    width="24" height="24"></a>
     </h1>
 </div>
 {{? it.board.postingEnabled}}

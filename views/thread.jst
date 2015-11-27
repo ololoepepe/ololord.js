@@ -4,11 +4,16 @@
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}
       data-thread-number="{{=it.thread.number}}">
+{{? it.settings.mode.name != "ascetic" && it.site.vkontakte.integrationEnabled }}
+    <script type="text/javascript">
+        VK.init({ apiId: {{=it.site.vkontakte.appId}} });
+    </script>
+{{?}}
 {{? it.settings.mode.name != "ascetic"}}
     <div id="hiddenPostForm" style="display: none;">
         {{#def.postForm}}
     </div>
-    {{? it.settings.captchaEnabled}}
+    {{? it.board.captchaEnabled}}
         <div id="hiddenCaptcha" style="display: none;">
             {{? it.user.captchaQuota > 0}}
                 {{ out += it.captchaEngine.widgetHtml(it.req, it.captchaPrepared); }}
@@ -27,14 +32,21 @@
         {{#def.leafButton}}
     {{~}}
 {{?}}
-<a id="top"></a>
 {{#def.toolbar}}
 <br />
+<a id="top"></a>
 {{#def.searchAction}}
 {{? it.board.bannerFileName}}
     <br />
     {{#def.banner}}
 {{?}}
+<div class="theTitle">
+    {{? it.thread.title}}
+        <h1>{{!it.thread.title}}</h1>
+    {{??}}
+        <h1>{{=it.board.title}} — {{=it.thread.number}}</h1>
+    {{?}}
+</div>
 {{? !it.thread.postingEnabled}}
     <div class="postingDisabledMessage">
         <h2>{{=it.tr.postingDisabledThreadText}}</h2>

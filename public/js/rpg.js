@@ -55,9 +55,7 @@ lord.vote = function(event, form) {
         if (result.errorMessage)
             return Promise.reject(result.errorMessage);
         return lord.updatePost(lord.data("number", form, true));
-    }).fail(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
 lord.setVotingOpened = function(el, opened) {
@@ -90,9 +88,7 @@ lord.setVotingOpened = function(el, opened) {
         if (typeof result == "undefined")
             return Promise.resolve();
         return lord.updatePost(postNumber);
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
 lord.customPostBodyPart[20] = function() {

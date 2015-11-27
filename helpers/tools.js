@@ -1,3 +1,5 @@
+var Address4 = require("ip-address").Address4;
+var Address6 = require("ip-address").Address6;
 var ChildProcess = require("child_process");
 var Crypto = require("crypto");
 var equal = require("deep-equal");
@@ -14,6 +16,7 @@ var config = require("./config");
 
 var translate = require("cute-localize")({
     locale: config("site.locale", "en"),
+    extraLocations: __dirname + "/../translations/custom",
     silent: true
 });
 
@@ -51,6 +54,41 @@ var forIn = function(obj, f) {
 };
 
 module.exports.forIn = forIn;
+
+module.exports.mapIn = function(obj, f) {
+    if (!obj || typeof f != "function")
+        return;
+    var arr = [];
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x))
+            arr.push(f(obj[x], x));
+    }
+    return arr;
+};
+
+module.exports.filterIn = function(obj, f) {
+    if (!obj || typeof f != "function")
+        return;
+    var nobj = {};
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x)) {
+            var item = obj[x];
+            if (f(item, x))
+                nobj[x] = item;
+        }
+    }
+    return nobj;
+};
+
+module.exports.toArray = function(obj) {
+    var arr = [];
+    var i = 0;
+    forIn(obj, function(val) {
+        arr[i] = val;
+        ++i;
+    });
+    return arr;
+};
 
 module.exports.randomInt = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -124,7 +162,7 @@ module.exports.flagName = function(countryCode) {
     var fn = countryCode.toUpperCase() + ".png";
     if (flags.hasOwnProperty(fn))
         return Promise.resolve(fn);
-    return FS.exists(__dirname + "/../public/img/flag/" + fn).then(function(exists) {
+    return FS.exists(__dirname + "/../public/img/flags/" + fn).then(function(exists) {
         if (exists)
             flags[fn] = true;
         return Promise.resolve(exists ? fn : "");
@@ -149,32 +187,6 @@ module.exports.forever = function() {
 
 module.exports.externalLinkRootZoneExists = function(zoneName) {
     return rootZones.hasOwnProperty(zoneName);
-};
-
-module.exports.ipNum = function(ip) {
-    if (typeof ip != "string" || !/^([0-9]+\.){3}[0-9]+$/gi.test(ip))
-        return null;
-    var sl = ip.split(".");
-    if (sl.length != 4)
-        return null;
-    var n = +sl[3];
-    if (isNaN(n))
-        return null;
-    var nn = +sl[2];
-    if (isNaN(nn))
-        return null;
-    n += 256 * nn;
-    nn = +sl[1];
-    if (isNaN(nn))
-        return null;
-    n += 256 * 256 * nn;
-    nn = +sl[0];
-    if (isNaN(nn))
-        return null;
-    n += 256 * 256 * 256 * nn;
-    if (!n)
-        return null;
-    return n;
 };
 
 module.exports.toHtml = function(text, replaceSpaces) {
@@ -226,20 +238,25 @@ module.exports.codeStyles = function() {
 
 module.exports.mimeType = function(fileName) {
     if (!fileName || !Util.isString(fileName))
-        return null;
+        return Promise.resolve(null);
     try {
-        var out = ChildProcess.execSync(`file --brief --mime-type ${fileName}`, {
-            timeout: 1000,
-            encoding: "utf8",
-            stdio: [
-                0,
-                "pipe",
-                null
-            ]
+        return new Promise(function(resolve, reject) {
+            ChildProcess.exec(`file --brief --mime-type ${fileName}`, {
+                timeout: 5000,
+                encoding: "utf8",
+                stdio: [
+                    0,
+                    "pipe",
+                    null
+                ]
+            }, function(err, out) {
+                if (err)
+                    reject(err);
+                resolve(out ? out.replace(/\r*\n+/g, "") : null);
+            });
         });
-        return out ? out.replace(/\r*\n+/g, "") : null;
     } catch (err) {
-        return null;
+        return Promise.resolve(null);
     }
 };
 
@@ -472,4 +489,43 @@ module.exports.proxy = function() {
         port: (parts[1] ? +parts[1] : null),
         auth: (auth ? ("Basic " + new Buffer(auth).toString("base64")) : null)
     };
+};
+
+module.exports.correctAddress = function(ip) {
+    if (!ip)
+        return null;
+    try {
+        var address = new Address6(ip);
+        if (address.isValid())
+            return address.correctForm();
+    } catch (err) {
+        //
+    }
+    try {
+        var address = Address6.fromAddress4(ip);
+        if (address.isValid())
+            return address.correctForm();
+    } catch (err) {
+        //
+    }
+    return null;
+};
+
+module.exports.preferIPv4 = function(ip) {
+    if (!ip)
+        return null;
+    try {
+        var address = new Address6(ip);
+        var ipv4 = address.to4();
+        if (ipv4.isValid()) {
+            ipv4 = ipv4.correctForm();
+            return ("0.0.0.1" == ipv4) ? "127.0.0.1" : ipv4;
+        }
+        if (address.isValid())
+            return address.correctForm();
+        return ip;
+    } catch (err) {
+        //
+    }
+    return ip;
 };

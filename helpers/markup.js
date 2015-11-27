@@ -1,10 +1,13 @@
 var Highlight = require("highlight.js");
+var HTTP = require("q-io/http");
 var XRegExp = require("xregexp");
 
 var Board = require("../boards");
 var config = require("./config");
 var Database = require("./database");
 var Tools = require("./tools");
+
+var langNames = require("../misc/lang-names.json");
 
 var SkipTypes = {
     NoSkip: "NO_SKIP",
@@ -116,10 +119,39 @@ var withoutEscaped = function(text) {
     return text;
 };
 
-var ProcessingInfo = function(text, boardName, referencedPosts, deletedPost) {
+var matchTwitterLink = function(href) {
+    return config("site.twitter.integrationEnabled", true)
+        && href.match(/^https?\:\/\/twitter\.com\/[^\/]+\/status\/\d+\/?$/);
+};
+
+var getTwitterEmbeddedHtml = function(href, defaultHtml) {
+    return HTTP.request({
+        method: "GET",
+        url: `https://api.twitter.com/1/statuses/oembed.json?url=${href}`,
+        timeout: Tools.Minute
+    }).then(function(response) {
+        if (response.status != 200)
+            return Promise.reject("Failed to get Twitter embedded HTML");
+        return response.body.read();
+    }).then(function(data) {
+        try {
+            return Promise.resolve(JSON.parse(data.toString()).html);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+    }).catch(function(err) {
+        console.log(err.stack || err);
+        return Promise.resolve(defaultHtml);
+    }).then(function(html) {
+        return Promise.resolve(html);
+    });
+};
+
+var ProcessingInfo = function(text, boardName, referencedPosts, deletedPost, referencesToReplace) {
     this.boardName = boardName;
     this.deletedPost = deletedPost;
     this.referencedPosts = referencedPosts;
+    this.referencesToReplace = referencesToReplace;
     this.text = text;
     this.skipList = [];
 };
@@ -217,10 +249,6 @@ ProcessingInfo.prototype.insert = function(from, txt, type) {
     if (!found && SkipTypes.NoSkip != type)
         this.skipList.unshift(info);
     this.text = this.text.substr(0, from) + txt + this.text.substr(from);
-    Tools.forIn(this.referencedPosts, function(ref) {
-        if (ref.position >= from)
-            ref.position += txt.length;
-    });
 };
 
 ProcessingInfo.prototype.replace = function(from, length, txt, correction, type) {
@@ -232,6 +260,7 @@ ProcessingInfo.prototype.replace = function(from, length, txt, correction, type)
         length: txt.length,
         type: type
     };
+    var dlength = txt.length - length;
     var found = false;
     for (var i = this.skipList.length - 1; i >= 0; --i) {
         var inf = this.skipList[i];
@@ -244,15 +273,11 @@ ProcessingInfo.prototype.replace = function(from, length, txt, correction, type)
         if (inf.from < (from + length))
             inf.from -= correction;
         else
-            inf.from += (txt.length - length);
+            inf.from += dlength;
     }
     if (!found && SkipTypes.NoSkip != type)
         this.skipList.unshift(info);
     this.text = this.text.substr(0, from) + txt + this.text.substr(from + length);
-    Tools.forIn(this.referencedPosts, function(ref) {
-        if (ref.position >= from)
-            ref.position += (txt.length - length);
-    });
 };
 
 ProcessingInfo.prototype.toHtml = function() {
@@ -467,7 +492,9 @@ var convertCode = function(_, text, matchs, _, options) {
     var result = lang ? Highlight.highlight(lang, text, true) : Highlight.highlightAuto(text);
     text = result.value;
     lang = result.language || lang;
-    options.op = "<div class=\"codeBlock" + (lang ? (" " + lang) : "") + " hljs\">";
+    var langClass = lang ? (" " + lang) : "";
+    var langName = langNames.hasOwnProperty(lang) ? langNames[lang] : lang;
+    options.op = `<div class="codeBlock${langClass} hljs" title="${langName}">`;
     options.cl = "</div>";
     return Promise.resolve(Highlight.fixMarkup(text));
 };
@@ -477,7 +504,10 @@ var convertExternalLink = function(_, _, matchs, _, options) {
     var href = matchs[0];
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
-    return Promise.resolve("<a href=\"" + href + "\">" + Tools.toHtml(matchs[0]) + "</a>");
+    var def = "<a href=\"" + href + "\">" + Tools.toHtml(matchs[0]) + "</a>";
+    if (matchTwitterLink(href))
+        return getTwitterEmbeddedHtml(href, def);
+    return Promise.resolve(def);
 };
 
 var convertProtocol = function(_, _, matchs, _, options) {
@@ -502,16 +532,21 @@ var convertPostLink = function(info, _, matchs, _, options) {
         return Database.getPost(boardName, postNumber).then(function(post) {
             if (!post)
                 return escaped;
-            if (info.referencedPosts)
-                info.referencedPosts[boardName + ":" + postNumber] = {
-                    boardName: boardName,
-                    postNumber: postNumber,
-                    threadNumber: post.threadNumber,
-                    createdAt: Tools.now(),
-                    position: matchs.index
-                };
-            var href = "href=\"/" + config("site.pathPrefix", "") + boardName + "/res/" + post.threadNumber
-                + ".html#" + postNumber + "\"";
+            if (info.referencedPosts) {
+                var key = boardName + ":" + postNumber;
+                if (!info.referencedPosts[key]) {
+                    info.referencedPosts[key] = {
+                        boardName: boardName,
+                        postNumber: postNumber,
+                        threadNumber: post.threadNumber,
+                        createdAt: Tools.now()
+                    };
+                }
+            }
+            var href = "href=\"/" + config("site.pathPrefix", "") + boardName + "/res/" + post.threadNumber + ".html";
+            if (postNumber != post.threadNumber)
+                href += "#" + postNumber;
+            href += "\"";
             return "<a " + href + " data-board-name=\"" + boardName + "\" data-post-number=\"" + postNumber
                 + "\" data-thread-number=\"" + post.threadNumber + "\">" + escaped + "</a>";
         });
@@ -541,7 +576,10 @@ var convertUrl = function(_, text, _, _, options) {
     var href = text;
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
-    return Promise.resolve("<a href=\"" + href + "\">" + Tools.toHtml(text) + "</a>");
+    var def = "<a href=\"" + href + "\">" + Tools.toHtml(text) + "</a>"
+    if (matchTwitterLink(href))
+        return getTwitterEmbeddedHtml(href, def);
+    return Promise.resolve(def);
 };
 
 var convertCSpoiler = function(_, text, matchs, _, options) {
@@ -628,7 +666,8 @@ var processPostText = function(boardName, text, options) {
     langs.splice(langs.indexOf("fsharp") + 1, 0, "f#");
     langs = langs.join("|").split("+").join("\\+").split("-").join("\\-").split(".").join("\\.");
     text = text.replace(/\r+\n/g, "\n").replace(/\r/g, "\n");
-    var info = new ProcessingInfo(text, boardName, options ? options.referencedPosts : null, deletedPost);
+    var info = new ProcessingInfo(text, boardName, options ? options.referencedPosts : null, deletedPost,
+        options ? options.referencesToReplace : null);
     var p = Promise.resolve();
     if (markupModes.indexOf(MarkupModes.ExtendedWakabaMark) >= 0) {
         p = p.then(function() {

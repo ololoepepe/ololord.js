@@ -21,7 +21,6 @@ var db = new SQLite3.Database(dbPath + "/ip2location.sqlite");
 db.pexec = promisify(db.exec);
 db.prun = promisify(db.run);
 var stream = FS.createReadStream(path, "utf8");
-var first = true;
 
 console.log("Beginning transaction...");
 
@@ -40,13 +39,10 @@ db.pexec("BEGIN").then(function () {
     console.log("Populating database...");
     return new Promise(function(resolve, reject) {
         CSV.fromStream(stream, {
-            headers: ["ipFrom", "ipTo", "countryCode", "countryName", "regionName", "cityName"],
+            headers: ["ipFrom", "ipTo", "countryCode", "countryName", "regionName", "cityName", "_", "_", "_", "_",
+                "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_"], //Supporting IP2Location-DB24
             ignoreEmpty: true
         }).on("data", function(data) {
-            if (first) {
-                first = false;
-                return;
-            }
             if (!data.countryCode || "-" === data.countryCode)
                 return;
             if ("-" === data.countryName)

@@ -175,7 +175,19 @@ var lord = lord || {};
         document.body.appendChild(this.cancelButton);
 };
 
+/*public*/ lord.OverlayProgressBar.prototype.showDelayed = function(delay) {
+    var _this = this;
+    this.mustShow = true;
+    setTimeout(function() {
+        if (!_this.mustShow)
+            return;
+        _this.show();
+    }, delay || 0);
+};
+
 /*public*/ lord.OverlayProgressBar.prototype.hide = function() {
+    this.mustShow = false;
+    this.mustHide = false;
     if (!this.visible)
         return;
     this.visible = false;
@@ -183,6 +195,16 @@ var lord = lord || {};
         document.body.removeChild(this.cancelButton);
     document.body.removeChild(this.progressBar);
     document.body.removeChild(this.mask);
+};
+
+/*public*/ lord.OverlayProgressBar.prototype.hideDelayed = function(delay) {
+    var _this = this;
+    this.mustHide = true;
+    setTimeout(function() {
+        if (!_this.mustHide)
+            return;
+        _this.hide();
+    }, delay || 0);
 };
 
 /*Constants*/
@@ -196,6 +218,265 @@ lord.Billion = 2 * 1000 * 1000 * 1000;
 lord.SettingsStoredInCookies = ["mode", "style", "codeStyle", "stickyToolbar", "shrinkPosts", "markupMode",
                                 "time", "timeZoneOffset", "captchaEngine", "maxAllowedRating",
                                 "draftsByDefault", "hidePostformRules", "minimalisticPostform", "hiddenBoards"];
+//
+lord.keyboardMap = [
+  "", // [0]
+  "", // [1]
+  "", // [2]
+  "CANCEL", // [3]
+  "", // [4]
+  "", // [5]
+  "HELP", // [6]
+  "", // [7]
+  "Backspace", // [8]
+  "Tab", // [9]
+  "", // [10]
+  "", // [11]
+  "CLEAR", // [12]
+  "Enter", // [13]
+  "ENTER_SPECIAL", // [14]
+  "", // [15]
+  "", // [16]
+  "", // [17]
+  "", // [18]
+  "Pause", // [19]
+  "CapsLock", // [20]
+  "KANA", // [21]
+  "EISU", // [22]
+  "JUNJA", // [23]
+  "FINAL", // [24]
+  "HANJA", // [25]
+  "", // [26]
+  "Esc", // [27]
+  "CONVERT", // [28]
+  "NONCONVERT", // [29]
+  "ACCEPT", // [30]
+  "MODECHANGE", // [31]
+  "Space", // [32]
+  "PageUp", // [33]
+  "PageDown", // [34]
+  "End", // [35]
+  "Home", // [36]
+  "Left", // [37]
+  "Up", // [38]
+  "Right", // [39]
+  "Down", // [40]
+  "SELECT", // [41]
+  "Print", // [42]
+  "EXECUTE", // [43]
+  "PrintScreen", // [44]
+  "Insert", // [45]
+  "Delete", // [46]
+  "", // [47]
+  "0", // [48]
+  "1", // [49]
+  "2", // [50]
+  "3", // [51]
+  "4", // [52]
+  "5", // [53]
+  "6", // [54]
+  "7", // [55]
+  "8", // [56]
+  "9", // [57]
+  ":", // [58]
+  ";", // [59]
+  "<", // [60]
+  "=", // [61]
+  ">", // [62]
+  "?", // [63]
+  "@", // [64]
+  "A", // [65]
+  "B", // [66]
+  "C", // [67]
+  "D", // [68]
+  "E", // [69]
+  "F", // [70]
+  "G", // [71]
+  "H", // [72]
+  "I", // [73]
+  "J", // [74]
+  "K", // [75]
+  "L", // [76]
+  "M", // [77]
+  "N", // [78]
+  "O", // [79]
+  "P", // [80]
+  "Q", // [81]
+  "R", // [82]
+  "S", // [83]
+  "T", // [84]
+  "U", // [85]
+  "V", // [86]
+  "W", // [87]
+  "X", // [88]
+  "Y", // [89]
+  "Z", // [90]
+  "OS_KEY", // [91] Windows Key (Windows) or Command Key (Mac)
+  "", // [92]
+  "CONTEXT_MENU", // [93]
+  "", // [94]
+  "SLEEP", // [95]
+  "Num0", // [96]
+  "Num1", // [97]
+  "Num2", // [98]
+  "Num3", // [99]
+  "Num4", // [100]
+  "Num5", // [101]
+  "Num6", // [102]
+  "Num7", // [103]
+  "Num8", // [104]
+  "Num9", // [105]
+  "*", // [106]
+  "+", // [107]
+  "SEPARATOR", // [108]
+  "-", // [109]
+  "/", // [110]
+  "/", // [111]
+  "F1", // [112]
+  "F2", // [113]
+  "F3", // [114]
+  "F4", // [115]
+  "F5", // [116]
+  "F6", // [117]
+  "F7", // [118]
+  "F8", // [119]
+  "F9", // [120]
+  "F10", // [121]
+  "F11", // [122]
+  "F12", // [123]
+  "F13", // [124]
+  "F14", // [125]
+  "F15", // [126]
+  "F16", // [127]
+  "F17", // [128]
+  "F18", // [129]
+  "F19", // [130]
+  "F20", // [131]
+  "F21", // [132]
+  "F22", // [133]
+  "F23", // [134]
+  "F24", // [135]
+  "", // [136]
+  "", // [137]
+  "", // [138]
+  "", // [139]
+  "", // [140]
+  "", // [141]
+  "", // [142]
+  "", // [143]
+  "NumLock", // [144]
+  "ScrollLock", // [145]
+  "WIN_OEM_FJ_JISHO", // [146]
+  "WIN_OEM_FJ_MASSHOU", // [147]
+  "WIN_OEM_FJ_TOUROKU", // [148]
+  "WIN_OEM_FJ_LOYA", // [149]
+  "WIN_OEM_FJ_ROYA", // [150]
+  "", // [151]
+  "", // [152]
+  "", // [153]
+  "", // [154]
+  "", // [155]
+  "", // [156]
+  "", // [157]
+  "", // [158]
+  "", // [159]
+  "CIRCUMFLEX", // [160]
+  "EXCLAMATION", // [161]
+  "\"", // [162]
+  "#", // [163]
+  "$", // [164]
+  "%", // [165]
+  "&", // [166]
+  "_", // [167]
+  "(", // [168]
+  ")", // [169]
+  "*", // [170]
+  "+", // [171]
+  "|", // [172]
+  "-", // [173]
+  "{", // [174]
+  "}", // [175]
+  "~", // [176]
+  "", // [177]
+  "", // [178]
+  "", // [179]
+  "", // [180]
+  "VOLUME_MUTE", // [181]
+  "VOLUME_DOWN", // [182]
+  "VOLUME_UP", // [183]
+  "", // [184]
+  "", // [185]
+  ";", // [186]
+  "=", // [187]
+  ",", // [188]
+  "-", // [189]
+  "PERIOD", // [190]
+  "/", // [191]
+  "`", // [192]
+  "", // [193]
+  "", // [194]
+  "", // [195]
+  "", // [196]
+  "", // [197]
+  "", // [198]
+  "", // [199]
+  "", // [200]
+  "", // [201]
+  "", // [202]
+  "", // [203]
+  "", // [204]
+  "", // [205]
+  "", // [206]
+  "", // [207]
+  "", // [208]
+  "", // [209]
+  "", // [210]
+  "", // [211]
+  "", // [212]
+  "", // [213]
+  "", // [214]
+  "", // [215]
+  "", // [216]
+  "", // [217]
+  "", // [218]
+  "[", // [219]
+  "\\", // [220]
+  "]", // [221]
+  "'", // [222]
+  "", // [223]
+  "", // [224]
+  "ALTGR", // [225]
+  "", // [226]
+  "WIN_ICO_HELP", // [227]
+  "WIN_ICO_00", // [228]
+  "", // [229]
+  "WIN_ICO_CLEAR", // [230]
+  "", // [231]
+  "", // [232]
+  "WIN_OEM_RESET", // [233]
+  "WIN_OEM_JUMP", // [234]
+  "WIN_OEM_PA1", // [235]
+  "WIN_OEM_PA2", // [236]
+  "WIN_OEM_PA3", // [237]
+  "WIN_OEM_WSCTRL", // [238]
+  "WIN_OEM_CUSEL", // [239]
+  "WIN_OEM_ATTN", // [240]
+  "WIN_OEM_FINISH", // [241]
+  "WIN_OEM_COPY", // [242]
+  "WIN_OEM_AUTO", // [243]
+  "WIN_OEM_ENLW", // [244]
+  "WIN_OEM_BACKTAB", // [245]
+  "ATTN", // [246]
+  "CRSEL", // [247]
+  "EXSEL", // [248]
+  "EREOF", // [249]
+  "PLAY", // [250]
+  "ZOOM", // [251]
+  "", // [252]
+  "PA1", // [253]
+  "WIN_OEM_CLEAR", // [254]
+  "" // [255]
+];
 
 /*Variables*/
 
@@ -972,7 +1253,6 @@ lord.settings = function() {
         hiddenBoards: lord.getCookie("hiddenBoards", "").split("|"),
         autoUpdateThreadsByDefault: lord.getLocalObject("autoUpdateThreadsByDefault", false),
         autoUpdateInterval: lord.getLocalObject("autoUpdateInterval", 15),
-        showAutoUpdateTimer: lord.getLocalObject("showAutoUpdateTimer", true),
         showAutoUpdateDesktopNotifications: lord.getLocalObject("showAutoUpdateDesktopNotifications", true),
         signOpPostLinks: lord.getLocalObject("signOpPostLinks", true),
         signOwnPostLinks: lord.getLocalObject("signOwnPostLinks", true),
@@ -988,7 +1268,6 @@ lord.settings = function() {
         checkFileExistence: lord.getLocalObject("checkFileExistence", true),
         showAttachedFilePreview: lord.getLocalObject("showAttachedFilePreview", true),
         addToFavoritesOnReply: lord.getLocalObject("addToFavoritesOnReply", false),
-        hidePostformMarkup: lord.getLocalObject("hidePostformMarkup", false),
         stripExifFromJpeg: lord.getLocalObject("stripExifFromJpeg", true),
         hideTripcodes: lord.getLocalObject("hideTripcodes", false),
         hideUserNames: lord.getLocalObject("hideUserNames", false),
@@ -997,7 +1276,10 @@ lord.settings = function() {
         showNewPosts: lord.getLocalObject("showNewPosts", true),
         showYoutubeVideosTitles: lord.getLocalObject("showYoutubeVideosTitles", true),
         hotkeysEnabled: lord.getLocalObject("hotkeysEnabled", true),
-        userCssEnabled: lord.getLocalObject("userCssEnabled", true)
+        userCssEnabled: lord.getLocalObject("userCssEnabled", true),
+        userJavaScriptEnabled: lord.getLocalObject("userJavaScriptEnabled", true),
+        sourceHighlightingEnabled: lord.getLocalObject("sourceHighlightingEnabled", false),
+        chatEnabled: lord.getLocalObject("chatEnabled", true)
     };
 };
 
@@ -1019,11 +1301,13 @@ lord.setSettings = function(model) {
 };
 
 lord.checkError = function(result) {
-    return typeof result != "object" || result.errorMessage;
+    return (["object", "number", "boolean"].indexOf(typeof result) < 0) || (result && result.errorMessage);
 };
 
 lord.handleError = function(error) {
     console.log(error);
+    if (lord.unloading)
+        return;
     var text;
     if (error) {
         if (error.errorMessage) {
@@ -1031,6 +1315,7 @@ lord.handleError = function(error) {
             if (error.errorDescription)
                 text += ": " + error.errorDescription;
         } else if (error.hasOwnProperty("readyState")) {
+            //TODO: error status
             if (500 == error.status)
                 text = "Temporarily banned or internal server error";
             else if (0 == error.readyState)
@@ -1042,4 +1327,12 @@ lord.handleError = function(error) {
         text = "Unknown error";
     }
     lord.showPopup(text, {type: "critical"});
+};
+
+lord.toMap = function(arr, keyGenerator) {
+    var map = {};
+    arr.forEach(function(item) {
+        map[keyGenerator(item)] = item;
+    });
+    return map;
 };
