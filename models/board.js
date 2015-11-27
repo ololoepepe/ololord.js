@@ -65,7 +65,7 @@ module.exports.getFileInfos = function(list, hashpass) {
     return Promise.all(promises);
 };
 
-module.exports.getPage = function(board, hashpass, page) {
+module.exports.getPage = function(board, hashpass, page, json) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     page = +(page || 0);
@@ -93,6 +93,8 @@ module.exports.getPage = function(board, hashpass, page) {
             c.pageCount = 1;
         if (page >= c.pageCount)
             return Promise.reject(404);
+        if (!json)
+            return Promise.resolve();
         var start = page * board.threadsPerPage;
         c.threads = c.threads.slice(start, start + board.threadsPerPage);
         var promises = c.threads.map(function(thread) {
@@ -108,6 +110,8 @@ module.exports.getPage = function(board, hashpass, page) {
         });
         return Promise.all(promises);
     }).then(function() {
+        if (!json)
+            return Promise.resolve();
         var promises = c.threads.map(function(thread) {
             return Database.threadPosts(board.name, thread.number, {
                 limit: board.maxLastPosts,
@@ -133,6 +137,8 @@ module.exports.getPage = function(board, hashpass, page) {
         });
         return Promise.all(promises);
     }).then(function() {
+        if (!json)
+            return Promise.resolve();
         var promises = c.threads.map(function(thread) {
             return Database.threadPostCount(board.name, thread.number).then(function(postCount) {
                 thread.postCount = postCount;
@@ -145,23 +151,25 @@ module.exports.getPage = function(board, hashpass, page) {
             threads: [],
             pageCount: c.pageCount
         };
-        c.threads.forEach(function(thread) {
-            var threadModel = {
-                opPost: thread.opPost,
-                lastPosts: thread.lastPosts.reverse(),
-                postCount: thread.postCount,
-                bumpLimit: board.bumpLimit,
-                postLimit: board.postLimit,
-                bumpLimitReached: (thread.postCount >= board.bumpLimit),
-                postLimitReached: (thread.postCount >= board.postLimit),
-                closed: thread.closed,
-                fixed: thread.fixed,
-                postingEnabled: (board.postingEnabled && !thread.closed),
-                omittedPosts: ((thread.postCount > (board.maxLastPosts + 1))
-                    ? (thread.postCount - board.maxLastPosts - 1) : 0)
-            };
-            c.model.threads.push(threadModel);
-        });
+        if (json) {
+            c.threads.forEach(function(thread) {
+                var threadModel = {
+                    opPost: thread.opPost,
+                    lastPosts: thread.lastPosts.reverse(),
+                    postCount: thread.postCount,
+                    bumpLimit: board.bumpLimit,
+                    postLimit: board.postLimit,
+                    bumpLimitReached: (thread.postCount >= board.bumpLimit),
+                    postLimitReached: (thread.postCount >= board.postLimit),
+                    closed: thread.closed,
+                    fixed: thread.fixed,
+                    postingEnabled: (board.postingEnabled && !thread.closed),
+                    omittedPosts: ((thread.postCount > (board.maxLastPosts + 1))
+                        ? (thread.postCount - board.maxLastPosts - 1) : 0)
+                };
+                c.model.threads.push(threadModel);
+            });
+        }
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
         c.model.lastPostNumber = lastPostNumber;
@@ -169,7 +177,7 @@ module.exports.getPage = function(board, hashpass, page) {
     });
 };
 
-module.exports.getThread = function(board, hashpass, number) {
+module.exports.getThread = function(board, hashpass, number, json) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     number = +(number || 0);
@@ -197,6 +205,8 @@ module.exports.getThread = function(board, hashpass, number) {
         if (threads.length != 1)
             return Promise.reject(404);
         c.thread = threads[0];
+        if (!json)
+            return Database.getPost(board.name, c.thread.number);
         return Database.threadPosts(board.name, c.thread.number, {
             withFileInfos: true,
             withReferences: true,
@@ -212,6 +222,10 @@ module.exports.getThread = function(board, hashpass, number) {
             }
         });
     }).then(function(posts) {
+        if (!json) {
+            c.opPost = posts;
+            return Database.threadPostCount(board.name, c.thread.number);
+        }
         c.opPost = posts.splice(0, 1)[0];
         c.posts = posts;
         return Database.threadPostCount(board.name, c.thread.number);
@@ -231,9 +245,10 @@ module.exports.getThread = function(board, hashpass, number) {
             fixed: c.thread.fixed,
             postCount: postCount,
             postingEnabled: (board.postingEnabled && !c.thread.closed),
-            opPost: c.opPost,
-            posts: c.posts
+            opPost: c.opPost
         };
+        if (json)
+            threadModel.lastPosts = c.posts;
         c.model.thread = threadModel;
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
@@ -336,10 +351,15 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
     });
 };
 
-module.exports.getCatalog = function(board, hashpass, sortMode) {
+module.exports.getCatalog = function(board, hashpass, sortMode, json) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     var c = {};
+    if (!json) {
+        return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
+            return Promise.resolve({ lastPostNumber: lastPostNumber });
+        });
+    }
     return Database.registeredUserLevel(hashpass).then(function(level) {
         c.level = level;
         return Database.getThreads(board.name, {
@@ -406,5 +426,5 @@ module.exports.getCatalog = function(board, hashpass, sortMode) {
     }).then(function(lastPostNumber) {
         c.model.lastPostNumber = lastPostNumber;
         return Promise.resolve(c.model);
-    });;
+    });
 };

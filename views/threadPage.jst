@@ -72,15 +72,7 @@
 {{~["Top"] :position}}
     {{#def.threadActions}}
 {{~}}
-<hr />
-{{~[it.thread] :thread}}
-    {{~[thread.opPost] :post}}
-        {{#def.post}}
-    {{~}}
-    {{~thread.posts :post}}
-        {{#def.post}}
-    {{~}}
-{{~}}
+<div id="threads" class="loadingMessage"><h1>{{=it.tr.loadingPostsMessage}}</h1></div>
 <input id="afterAllPosts" type="hidden" />
 <hr />
 {{~["Bottom"] :position}}

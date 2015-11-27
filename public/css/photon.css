@@ -1258,3 +1258,7 @@ input.buttonImage {
     box-sizing: border-box;
     width: 100%;
 }
+
+.loadingMessage {
+    text-align: center;
+}

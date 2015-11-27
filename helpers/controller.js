@@ -643,6 +643,10 @@ controller.translationsModel = function() {
     translate("New private message", "newChatMessageText");
     translate("Send", "sendChatMessageButtonText");
     translate("Delete this chat", "deleteChatButtonText");
+    translate("Loading threads...", "loadingThreadsMessage");
+    translate("Loading posts...", "loadingPostsMessage");
+    translate("Close voting", "closeVotingText");
+    translate("Open voting", "openVotingText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

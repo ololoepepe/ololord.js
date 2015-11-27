@@ -54,7 +54,7 @@ var custom = function(model, req, board, thread) {
 
 var renderPage = function(model, board, req, json) {
     model.currentPage = +(req.params.page || 0);
-    var promises = model.threads.map(function(thread) {
+    var promises = !json ? [] : model.threads.map(function(thread) {
         return board.renderPost(thread.opPost, req, thread.opPost).then(function() {
             return Promise.all(thread.lastPosts.map(function(post) {
                 return board.renderPost(post, req, thread.opPost);
@@ -86,7 +86,8 @@ var renderPage = function(model, board, req, json) {
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
-        custom(model, req, board);
+        if (json)
+            custom(model, req, board);
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
@@ -96,10 +97,11 @@ var renderPage = function(model, board, req, json) {
 
 var renderThread = function(model, board, req, json) {
     var thread = merge.clone(model.thread);
-    var promises = model.thread.posts.map(function(post) {
-        return board.renderPost(post,req, model.thread.opPost);
+    var promises = !json ? [] : model.thread.lastPosts.map(function(post) {
+        return board.renderPost(post, req, model.thread.opPost);
     });
-    promises.unshift(board.renderPost(model.thread.opPost, req, model.thread.opPost));
+    if (json)
+        promises.unshift(board.renderPost(model.thread.opPost, req, model.thread.opPost));
     return Promise.all(promises).then(function() {
         model.title = model.thread.title || (board.title + " — " + model.thread.number);
         model.includeBoardScripts = true;
@@ -126,7 +128,8 @@ var renderThread = function(model, board, req, json) {
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
-        custom(model, req, board, thread);
+        if (json)
+            custom(model, req, board, thread);
         if (json)
             return Promise.resolve(JSON.stringify(model));
         else
@@ -135,7 +138,7 @@ var renderThread = function(model, board, req, json) {
 };
 
 var renderCatalog = function(model, board, req, json) {
-    var promises = model.threads.map(function(thread) {
+    var promises = !json ? [] : model.threads.map(function(thread) {
         return board.renderPost(thread.opPost, req, thread.opPost);
     });
     return Promise.all(promises).then(function() {
@@ -166,7 +169,7 @@ router.get("/:boardName", function(req, res) {
     }).then(function(result) {
         if (result)
             return;
-        return boardModel.getPage(board, req.hashpass).then(function(model) {
+        return boardModel.getPage(board, req.hashpass, false).then(function(model) {
             return renderPage(model, board, req);
         }).then(function(data) {
             res.send(data);
@@ -181,7 +184,7 @@ router.get("/:boardName/catalog.html", function(req, res) {
     if (!board)
         return controller.error(req, res, 404);
     controller.checkBan(req, res, board.name).then(function() {
-        return boardModel.getCatalog(board, req.hashpass, req.query.sort);
+        return boardModel.getCatalog(board, req.hashpass, req.query.sort, false);
     }).then(function(model) {
         return renderCatalog(model, board, req);
     }).then(function(data) {
@@ -196,7 +199,7 @@ router.get("/:boardName/catalog.json", function(req, res) {
     if (!board)
         return controller.error(req, res, 404, true);
     controller.checkBan(req, res, board.name).then(function() {
-        return boardModel.getCatalog(board, req.hashpass, req.query.sort);
+        return boardModel.getCatalog(board, req.hashpass, req.query.sort, true);
     }).then(function(model) {
         return renderCatalog(model, board, req, true);
     }).then(function(data) {
@@ -221,7 +224,7 @@ router.get("/:boardName/:page.html", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
-    controller.checkBan(req, res, board.name).then(function() {
+    controller.checkBan(req, res, board.name, false).then(function() {
         return board.renderBoardPage(req, res, false);
     }).then(function(result) {
         if (result)
@@ -245,7 +248,7 @@ router.get("/:boardName/:page.json", function(req, res) {
     }).then(function(result) {
         if (result)
             return;
-        return boardModel.getPage(board, req.hashpass, req.params.page).then(function(model) {
+        return boardModel.getPage(board, req.hashpass, req.params.page, true).then(function(model) {
             return renderPage(model, board, req, true);
         }).then(function(data) {
             res.send(data);
@@ -264,7 +267,7 @@ router.get("/:boardName/res/:threadNumber.html", function(req, res) {
     }).then(function(result) {
         if (result)
             return;
-        return boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
+        return boardModel.getThread(board, req.hashpass, req.params.threadNumber, false).then(function(model) {
             return renderThread(model, board, req);
         }).then(function(data) {
             res.send(data);
@@ -283,7 +286,7 @@ router.get("/:boardName/res/:threadNumber.json", function(req, res) {
     }).then(function(result) {
         if (result)
             return;
-        return boardModel.getThread(board, req.hashpass, req.params.threadNumber).then(function(model) {
+        return boardModel.getThread(board, req.hashpass, req.params.threadNumber, true).then(function(model) {
             return renderThread(model, board, req, true);
         }).then(function(data) {
             res.send(data);

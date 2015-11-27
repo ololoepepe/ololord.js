@@ -38,7 +38,7 @@
             </form>
         {{?}}
         <a href="/{{=it.site.pathPrefix}}{{? !it.disabled}}close{{??}}open{{?}}Voting.html?postNumber={{=it.post.number}}"
-           title="{{? !it.disabled}}{{=it.tr.closeVoteActionText}}{{??}}{{=it.tr.openVoteActionText}}{{?}}"
+           title="{{? !it.disabled}}{{=it.tr.closeVotingText}}{{??}}{{=it.tr.openVotingText}}{{?}}"
            {{? it.settings.mode.name != "ascetic"}}onclick="lord.setVotingOpened(this, {{? !it.disabled}}false{{??}}true{{?}}); return false;"{{?}}
            target="_blank"><img src="/{{=it.site.pathPrefix}}img/{{? !it.disabled}}close{{??}}open{{?}}_voting.png"
                                 width="24" height="24" class="buttonImage"></a>

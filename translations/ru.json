@@ -3404,19 +3404,13 @@
         "_obsolete": true
     },
     "Close voting": {
-        "closeVoteActionText": {
-            "value": "Закрыть голосование"
-        },
         "pageTitle": {
-            "value": "Close voting"
+            "value": "Закрыть голосование"
         }
     },
     "Open voting": {
-        "openVoteActionText": {
-            "value": "Открыть голосование"
-        },
         "pageTitle": {
-            "value": "Open voting"
+            "value": "Открыть голосование"
         }
     },
     "Voting is closed": {
@@ -3683,6 +3677,26 @@
     "Dislike": {
         "dislikeText": {
             "value": "Не нравится"
+        }
+    },
+    "Loading threads...": {
+        "loadingThreadsMessage": {
+            "value": "Загрузка тредов..."
+        }
+    },
+    "Loading posts...": {
+        "loadingPostsMessage": {
+            "value": "Загрузка постов..."
+        }
+    },
+    "Open voting": {
+        "openVotingText": {
+            "value": "Открыть голосование"
+        }
+    },
+    "Close voting": {
+        "closeVotingText": {
+            "value": "Закрыть голосование"
         }
     }
 }

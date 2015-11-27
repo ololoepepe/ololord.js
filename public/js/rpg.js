@@ -63,7 +63,7 @@ lord.setVotingOpened = function(el, opened) {
     var postNumber = +lord.data("number", el, true);
     lord.getModel("misc/board", "boardName=rpg").then(function(model) {
         c.model = model;
-        return lord.getModel(["misc/base", "misc/tr"], true);
+        return lord.getModel(["misc/base", "misc/tr", "misc/board/rpg"], true);
     }).then(function(model) {
         c.model = merge.recursive(c.model, model);
         return lord.getTemplate("setVotingOpenedDialog");
@@ -72,7 +72,7 @@ lord.setVotingOpened = function(el, opened) {
         c.model.opened = opened;
         c.model.postNumber = postNumber;
         c.div = $.parseHTML(template(c.model))[0];
-        return lord.showDialog(open ? "openVotingText" : "closeVotingText", null, c.div);
+        return lord.showDialog(opened ? "openVotingText" : "closeVotingText", null, c.div);
     }).then(function(result) {
         if (!result)
             return Promise.resolve();

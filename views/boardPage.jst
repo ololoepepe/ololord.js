@@ -3,7 +3,8 @@
 {{#def.head}}
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}
-      data-last-post-number="{{=it.lastPostNumber}}">
+      data-last-post-number="{{=it.lastPostNumber}}"
+      data-current-page="{{=it.currentPage}}">
 {{? it.settings.mode.name != "ascetic" && it.site.vkontakte.integrationEnabled }}
     <script type="text/javascript">
         VK.init({ apiId: {{=it.site.vkontakte.appId}} });
@@ -61,24 +62,7 @@
         <h2>{{=it.tr.postingDisabledBoardText}}</h2>
     </div>
 {{?}}
-{{~it.threads :thread}}
-    <hr />
-    <div id="thread{{=thread.opPost.number}}" class="thread">
-        {{~[thread.opPost] :post}}
-            {{#def.post}}
-        {{~}}
-        {{? thread.omittedPosts > 0}}
-            <div class="omittedPosts">
-                {{=it.tr.omittedPostsText}} {{=thread.omittedPosts}}   
-            </div>
-        {{?}}
-        <div class="threadPosts">
-            {{~thread.lastPosts :post}}
-                {{#def.post}}
-            {{~}}
-        </div>
-    </div>
-{{~}}
+<div id="threads" class="loadingMessage"><h1>{{=it.tr.loadingThreadsMessage}}</h1></div>
 {{? it.settings.mode.name != "ascetic" && it.board.postingEnabled}}
     <hr />
     {{~["Bottom"] :position}}
