@@ -2999,12 +2999,14 @@ lord.initializeOnLoadBaseBoard = function() {
     ], true).then(function(model) {
         c.model = model;
         var p;
-        if (+lord.data("threadNumber"))
+        if (+lord.data("threadNumber")) {
+            c.model.includeThreadScripts = true;
             p = lord.getModel(lord.data("boardName") + "/res/" + +lord.data("threadNumber"), true);
-        else if (+lord.data("currentPage") >= 0)
+        } else if (+lord.data("currentPage") >= 0) {
             p = lord.getModel(lord.data("boardName") + "/" + +lord.data("currentPage"), true);
-        else
+        } else {
             p = lord.getModel(lord.data("boardName") + "/catalog", true);
+        }
         return p;
     }).then(function(model) {
         if (typeof model != "object")
