@@ -1263,7 +1263,7 @@ lord.now = function() {
 lord.settings = function() {
     return {
         mode: {
-            name: lord.getCookie("mode", "normal")
+            name: "normal" //TODO: remove
         },
         style: {
             name: lord.getCookie("style", "photon")

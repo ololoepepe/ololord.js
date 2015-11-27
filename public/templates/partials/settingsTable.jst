@@ -2,21 +2,6 @@
     <tbody>
         <tr>
             <td>
-                {{=it.tr.modeLabelText}}
-            </td>
-            <td>
-                <select name="mode" class="select">
-                    {{~it.modes :mode}}
-                        <option value="{{=mode.name}}"
-                                {{? mode.name == it.settings.mode.name}}selected="true"{{?}}>
-                            {{=mode.title}}
-                        </option>
-                    {{~}}
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>
                 {{=it.tr.styleLabelText}}
             </td>
             <td class="nowrap">

@@ -1791,11 +1791,6 @@
             "value": "Аскетичный"
         }
     },
-    "Mode:": {
-        "modeLabelText": {
-            "value": "Режим:"
-        }
-    },
     "General settings": {
         "generalSettingsLegendText": {
             "value": "Общие настройки"
@@ -3421,36 +3416,6 @@
     "Attempt to edit voting while not being the OP": {
         "error": {
             "value": "Попытка редактировать голосование не будучи ОПом"
-        },
-        "_obsolete": true
-    },
-    "Enter logging mode:": {
-        "_default": {
-            "value": "Введите режим ведения логов:"
-        },
-        "_obsolete": true
-    },
-    "Enter skipped IP's:": {
-        "_default": {
-            "value": "Введите пропускаемые IP-адреса:"
-        },
-        "_obsolete": true
-    },
-    "Enter size:": {
-        "_default": {
-            "value": "Введите размер:"
-        },
-        "_obsolete": true
-    },
-    "Invalid cache size": {
-        "error": {
-            "value": "Неправильный размер кеша"
-        },
-        "_obsolete": true
-    },
-    "Invalid value": {
-        "_default": {
-            "value": "Неправильное значение"
         },
         "_obsolete": true
     },

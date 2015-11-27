@@ -3025,37 +3025,13 @@ lord.initializeOnLoadBaseBoard = function() {
         var threads = lord.id("threads");
         lord.removeChildren(threads);
         lord.removeClass(threads, "loadingMessage");
-        if (+lord.data("threadNumber")) {
-            threads.appendChild(lord.node("hr"));
-            var allPosts = c.threads[0].lastPosts.concat(c.threads[0].opPost);
-            return lord.createPostNode(c.threads[0].opPost, true, c.threads[0], allPosts).then(function(post) {
-                threads.appendChild(post);
-                var threadPosts = lord.node("div");
-                lord.addClass(threadPosts, "threadPosts");
-                threads.appendChild(threadPosts);
-                return lord.gently(c.threads[0].lastPosts, function(post) {
-                    return lord.createPostNode(post, true, c.threads[0], allPosts).then(function(post) {
-                        threadPosts.appendChild(post);
-                        return Promise.resolve();
-                    });
-                }, {
-                    delay: 10,
-                    n: 20,
-                    promise: true
-                });
-            });
-        } else {
-            return lord.gently(c.threads, function(thread) {
-                var model = merge.recursive(c.model, { thread: thread });
-                var nodes = $.parseHTML(template(model));
-                if (c.notCatalog)
-                    threads.appendChild(lord.node("hr"));
-                threads.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
-            }, {
-                delay: 10,
-                n: 10
-            });
-        }
+        return c.threads.forEach(function(thread) {
+            var model = merge.recursive(c.model, { thread: thread });
+            var nodes = $.parseHTML(template(model));
+            if (c.notCatalog)
+                threads.appendChild(lord.node("hr"));
+            threads.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
+        });
     }).then(function() {
         document.body.onclick = lord.globalOnclick;
         if (lord.data("deviceType") != "mobile") {

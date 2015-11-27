@@ -3,10 +3,6 @@ var markup = require("../helpers/markup");
 var Tools = require("../helpers/tools");
 
 module.exports = function(req, res, next) {
-    var modes = {
-        normal: {},
-        ascetic: {}
-    };
     var styles = {
         photon: {},
         neutron: {},
@@ -17,10 +13,7 @@ module.exports = function(req, res, next) {
         acc[style.name] = {};
         return acc;
     }, {});
-    var mode = (req.cookies.mode || "normal");
-    if (!modes[mode])
-        mode = "normal";
-    req.ascetic = ("ascetic" == mode);
+    req.ascetic = false;
     var style = (req.cookies.style || "photon");
     if (!styles[style])
         style = "photon";
@@ -36,7 +29,7 @@ module.exports = function(req, res, next) {
         timeZoneOffset = 0;
     req.settings = {
         mode: {
-            name: mode
+            name: "normal"
         },
         style: {
             name: style

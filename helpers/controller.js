@@ -255,15 +255,6 @@ controller.baseModel = function(req) {
             loggedIn: !!req.hashpass,
             vkAuth: req.vkAuth
         },
-        modes: [
-            {
-                name: "normal",
-                title: Tools.translate("Normal")
-            }, {
-                name: "ascetic",
-                title: Tools.translate("Ascetic")
-            }
-        ],
         styles: Tools.styles(),
         codeStyles: Tools.codeStyles(),
         deviceType: ((req.device.type == "desktop") ? "desktop" : "mobile"),
@@ -465,7 +456,6 @@ controller.translationsModel = function() {
     translate("Quote selected text", "hotkeyMarkupQuotationLabelText");
     translate("Code block", "hotkeyMarkupCodeLabelText");
     translate("General settings", "generalSettingsLegendText");
-    translate("Mode:", "modeLabelText");
     translate("Style:", "styleLabelText");
     translate("Code style:", "codeStyleLabelText");
     translate("Shrink posts", "postShrinkingLabelText");
