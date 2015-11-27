@@ -1041,6 +1041,7 @@ lord.chatWithUser = function(el) {
             text: result.text,
             date: result.date
         });
+        lord.setLocalObject("chats", lord.chats);
     }).catch(lord.handleError);
 };
 

@@ -43,9 +43,9 @@ lord._defineHotkey("markupCode", "Alt+C");
 /*Variables*/
 
 lord.chatTasks = {};
-lord.chats = {};
+lord.chats = lord.getLocalObject("chats", {});
 lord.chatDialog = null;
-lord.lastChatCheckDate = null;
+lord.lastChatCheckDate = lord.getLocalObject("lastChatCheckDate", null);
 
 /*Functions*/
 
@@ -657,6 +657,7 @@ lord.checkChats = function() {
         if (!model)
             return Promise.resolve();
         lord.lastChatCheckDate = model.date;
+        lord.setLocalObject("lastChatCheckDate", lord.lastChatCheckDate);
         var hashes = [];
         lord.forIn(model.messages, function(messages, senderHash) {
             if (!lord.chats[senderHash])
@@ -674,6 +675,7 @@ lord.checkChats = function() {
         });
         if (hashes.length > 0)
             lord.updateChat(hashes);
+        lord.setLocalObject("chats", lord.chats);
         setTimeout(lord.checkChats.bind(lord), 2 * lord.Second);
     }).catch(function(err) {
         lord.handleError(err);
@@ -750,6 +752,7 @@ lord.deleteChat = function(hash) {
         if (lord.checkError(result))
             return Promise.reject(result);
         delete lord.chats[hash];
+        lord.setLocalObject("chats", lord.chats);
         if (!lord.chatDialog)
             return Promise.resolve();
         var contact = lord.nameOne(hash, lord.chatDialog);
@@ -791,6 +794,7 @@ lord.sendChatMessage = function() {
             text: result.text,
             date: result.date
         });
+        lord.setLocalObject("chats", lord.chats);
         lord.updateChat([result.receiver]);
     }).catch(lord.handleError);
 };
