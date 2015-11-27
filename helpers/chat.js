@@ -4,9 +4,9 @@ var Database = require("./database");
 var config = require("./config");
 var Tools = require("./tools");
 
-var createHash = function(data) {
+var createHash = function(user) {
     var sha256 = Crypto.createHash("sha256");
-    sha256.update(data);
+    sha256.update(user.hashpass || user.ip);
     return sha256.digest("hex");
 };
 
@@ -15,7 +15,7 @@ module.exports.sendMessage = function(req, text, boardName, postNumber, hash) {
         return Promise.reject("Message is empty");
     if (!boardName && !hash)
         return Promise.reject("No post or hash specified");
-    var senderHash = createHash(req.ip + (req.hashpass || ""));
+    var senderHash = createHash(req);
     var p;
     if (boardName) {
         postNumber = +postNumber;
@@ -24,7 +24,7 @@ module.exports.sendMessage = function(req, text, boardName, postNumber, hash) {
         p = Database.getPost(boardName, +postNumber).then(function(post) {
             if (!post)
                 return Promise.reject("No such post");
-            return createHash(post.user.ip + (post.user.hashpass || ""));
+            return createHash(post.user);
         });
     } else {
         if (!/^[0-9a-z]{64}$/i.test(hash))
@@ -51,7 +51,7 @@ module.exports.sendMessage = function(req, text, boardName, postNumber, hash) {
 };
 
 module.exports.getMessages = function(req, lastRequestDate) {
-    var hash = createHash(req.ip + (req.hashpass || ""));
+    var hash = createHash(req);
     return Database.db.smembers("chatMap:" + hash).then(function(senderHashes) {
         if (!senderHashes)
             return Promise.resolve([]);
@@ -95,7 +95,7 @@ module.exports.getMessages = function(req, lastRequestDate) {
 module.exports.deleteMessages = function(req, hash) {
     if (!/^[0-9a-z]{64}$/i.test(hash))
         return Promise.reject("Invalid hash");
-    var receiverHash = createHash(req.ip + (req.hashpass || ""));
+    var receiverHash = createHash(req);
     return Database.db.del("chat:" + receiverHash + ":" + hash).then(function() {
         return Database.db.del("chatMap:" + receiverHash);
     }).then(function() {
