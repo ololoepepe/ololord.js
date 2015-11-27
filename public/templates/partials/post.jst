@@ -108,6 +108,7 @@
         {{? it.customPostHeaderPart && it.customPostHeaderPart[140]}}
             {{ out += it.customPostHeaderPart[140](it, thread, post); }}
         {{?}}
+        {{=it.settings.mode.name}} {{=thread.postingEnabled}} {{=thread.postLimitReached}}
         {{? it.settings.mode.name != "ascetic" && thread.postingEnabled && !thread.postLimitReached}}
             <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
                                                  onclick="lord.quickReply(this); return false;"

@@ -435,6 +435,11 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
                 return lord.signOwnPostLinks(c.node, infos);
             });
         }
+        if (lord.getLocalObject("mumWatching", false)) {
+            lord.query(".postFileFile > a > img", c.node).forEach(function(img) {
+                lord.addClass(img, "mumWatching");
+            });
+        }
         if (!permanent) {
             var actions = lord.queryOne(".postActions", c.node);
             actions.parentNode.removeChild(actions);
@@ -3023,13 +3028,13 @@ lord.initializeOnLoadBaseBoard = function() {
         if (+lord.data("threadNumber")) {
             threads.appendChild(lord.node("hr"));
             var allPosts = c.threads[0].lastPosts.concat(c.threads[0].opPost);
-            return lord.createPostNode(c.threads[0].opPost, c.threads[0], true, allPosts).then(function(post) {
+            return lord.createPostNode(c.threads[0].opPost, true, c.threads[0], allPosts).then(function(post) {
                 threads.appendChild(post);
                 var threadPosts = lord.node("div");
                 lord.addClass(threadPosts, "threadPosts");
                 threads.appendChild(threadPosts);
                 return lord.gently(c.threads[0].lastPosts, function(post) {
-                    return lord.createPostNode(post, c.threads[0], true, allPosts).then(function(post) {
+                    return lord.createPostNode(post, true, c.threads[0], allPosts).then(function(post) {
                         threadPosts.appendChild(post);
                         return Promise.resolve();
                     });
