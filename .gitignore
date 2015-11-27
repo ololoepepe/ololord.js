@@ -73,7 +73,7 @@ views/*
 !views/rpgPostFormField.jst
 !views/search.jst
 !views/settings.jst
-!views/thread.jst
+!views/threadPage.jst
 !views/yandexCaptchaWidget.jst
 
 # public
