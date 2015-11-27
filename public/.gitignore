@@ -122,6 +122,7 @@ js/*
 templates/*
 !templates/partials
 !templates/addFilesDialog.jst
+!templates/catalogThread.jst
 !templates/chatContact.jst
 !templates/chatDialog.jst
 !templates/chatMessage.jst
@@ -146,6 +147,7 @@ templates/*
 !templates/settingsDialog.jst
 !templates/setVotingOpenedDialog.jst
 !templates/socPostHeaderPart.jst
+!templates/thread.jst
 !templates/userBan.jst
 !templates/vkAudioList.jst
 !templates/voteVariant.jst

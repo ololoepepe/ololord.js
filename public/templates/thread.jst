@@ -1,0 +1,17 @@
+{{~[it.thread] :thread}}
+    <div id="thread{{=thread.opPost.number}}" class="thread">
+        {{~[thread.opPost] :post}}
+            {{#def.post}}
+        {{~}}
+        {{? thread.omittedPosts > 0}}
+            <div class="omittedPosts">
+                {{=it.tr.omittedPostsText}} {{=thread.omittedPosts}}   
+            </div>
+        {{?}}
+        <div class="threadPosts">
+            {{~thread.lastPosts :post}}
+                {{#def.post}}
+            {{~}}
+        </div>
+    </div>
+{{~}}
