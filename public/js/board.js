@@ -3040,7 +3040,7 @@ lord.initializeOnLoadBaseBoard = function() {
                     });
                 }, {
                     delay: 10,
-                    n: 10,
+                    n: 20,
                     promise: true
                 });
             });
@@ -3154,8 +3154,8 @@ lord.initializeOnLoadBaseBoard = function() {
                 var data = map[+post.id];
                 lord.processPost(post, data);
             }, {
-                delay: 20,
-                n: 100
+                delay: 10,
+                n: 10
             });
         });
         lord.query(".opPost").forEach(function(opPost) {
