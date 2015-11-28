@@ -2558,6 +2558,9 @@
     "Loading posts...": {
         "loadingPostsText": {
             "value": "Загрузка постов..."
+        },
+        "loadingPostsMessage": {
+            "value": "Загрузка постов..."
         }
     },
     "Invalid spell order": {
@@ -3647,11 +3650,6 @@
     "Loading threads...": {
         "loadingThreadsMessage": {
             "value": "Загрузка тредов..."
-        }
-    },
-    "Loading posts...": {
-        "loadingPostsMessage": {
-            "value": "Загрузка постов..."
         }
     },
     "Open voting": {
