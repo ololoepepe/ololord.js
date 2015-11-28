@@ -542,27 +542,27 @@ var processFiles = function(req, fields, files, transaction) {
         return Promise.reject("Invalid board");
     if (files.length < 1)
         return Promise.resolve([]);
-    var list = [];
-    var p = processFile(board, files[0], transaction).then(function(file) {
-        list.push(file);
-        return Promise.resolve();
-    });
-    for (var i = 1; i < files.length; ++i) {
-        (function(file) {
-            p = p.then(function() {
-                return processFile(board, file, transaction);
-            }).then(function(file) {
-                list.push(file);
-                return Promise.resolve();
-            });
-        })(files[i]);
-    }
+    var c = {};
     return mkpath(__dirname + "/../public/" + board.name + "/src").then(function() {
         return mkpath(__dirname + "/../public/" + board.name + "/thumb");
     }).then(function() {
-        return p;
+        c.list = [];
+        var p = processFile(board, files[0], transaction).then(function(file) {
+            c.list.push(file);
+            return Promise.resolve();
+        });
+        for (var i = 1; i < files.length; ++i) {
+            (function(file) {
+                p = p.then(function() {
+                    return processFile(board, file, transaction);
+                }).then(function(file) {
+                    c.list.push(file);
+                    return Promise.resolve();
+                });
+            })(files[i]);
+        }
     }).then(function() {
-        return Promise.resolve(list);
+        return Promise.resolve(c.list);
     });
 };
 
@@ -586,7 +586,6 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         if (fields.markupMode && fields.markupMode.indexOf(val) >= 0)
             markupModes.push(val);
     });
-
     return getThreads(board.name, {
         limit: 1,
         filterFunction: function(thread) {
