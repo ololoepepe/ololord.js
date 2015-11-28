@@ -1252,8 +1252,8 @@ lord.insertPostNumber = function(postNumber) {
             field.value += value;
         }
         field.focus();
-    } catch (ex) {
-        //Do nothing
+    } catch (err) {
+        console.log(err);
     }
 };
 
@@ -3033,6 +3033,9 @@ lord.initializeOnLoadBaseBoard = function() {
             threads.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
         });
     }).then(function() {
+        var hash = lord.hash();
+        if (hash && "#" != hash)
+            window.location.hash = hash;
         document.body.onclick = lord.globalOnclick;
         if (lord.data("deviceType") != "mobile") {
             document.body.onmouseover = lord.globalOnmouseover;

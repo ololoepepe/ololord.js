@@ -18,6 +18,7 @@ lord.reloadCaptchaFunction = function() {
         img.src = "/" + lord.data("sitePathPrefix") + "img/yandex-hernya.png";
         img.onclick = lord.reloadCaptchaFunction.bind(lord);
         img.title = err;
+        img.style.cursor = "pointer";
         image.appendChild(img);
     };
     lord.getModel("api/yandexCaptchaImage", "type=" + type).then(function(model) {
@@ -27,6 +28,7 @@ lord.reloadCaptchaFunction = function() {
         var img = lord.node("img");
         img.src = "//" + model.url;
         img.onclick = lord.reloadCaptchaFunction.bind(lord);
+        img.style.cursor = "pointer";
         image.appendChild(img);
     }).catch(function(err) {
         onError(err);

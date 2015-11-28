@@ -358,14 +358,6 @@ lord.initializeOnLoadThread = function() {
     var enabled = lord.getLocalObject("autoUpdate", {})[+lord.data("threadNumber")];
     if (true === enabled || (false !== enabled && lord.getLocalObject("autoUpdateThreadsByDefault", false)))
         lord.setAutoUpdateEnabled(true);
-    var hash = lord.hash();
-    if (hash.substring(0, 1) === "i") {
-        hash = hash.substring(1);
-        if (isNaN(+hash))
-            return;
-        lord.showHidePostForm("Top");
-        lord.insertPostNumber(hash);
-    }
 };
 
 window.addEventListener("load", function load() {

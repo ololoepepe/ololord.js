@@ -92,15 +92,10 @@
         {{? it.customPostHeaderPart && it.customPostHeaderPart[120]}}
             {{ out += it.customPostHeaderPart[120](it, thread, post); }}
         {{?}}
-        {{? it.threads}}
-            #<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.threadNumber}}.html#{{? thread.postingEnabled}}i{{?}}{{=post.number}}"
-                name="number" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{ out += (post.user.ipv4 || post.user.ip); }}"{{?}}
-                data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}" data-thread-number="{{=post.threadNumber}}">{{=post.number}}</a>
-        {{??}}
-            #<a href="#{{=post.number}}" {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{ out += (post.user.ipv4 || post.user.ip); }}"{{?}}
-                {{? thread.postingEnabled}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}} name="number"
-                data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}" data-thread-number="{{=post.threadNumber}}">{{=post.number}}</a>
-        {{?}}
+        #<a href="{{? it.threads}}#{{=post.number}}{{??}}/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.threadNumber}}.html#{{=post.number}}{{?}}"
+            {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}title="{{ out += (post.user.ipv4 || post.user.ip); }}"{{?}}
+            {{? thread.postingEnabled}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}} name="number"
+            data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}" data-thread-number="{{=post.threadNumber}}">{{=post.number}}</a>
         {{? it.customPostHeaderPart && it.customPostHeaderPart[130]}}
             {{ out += it.customPostHeaderPart[130](it, thread, post); }}
         {{?}}
