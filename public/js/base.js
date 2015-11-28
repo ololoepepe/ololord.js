@@ -79,6 +79,9 @@ lord.doLogout = function(event, form) {
     VK.Auth.logout(function() {
         return lord.logoutImplementation(form, true);
     });
+    setTimeout(function() {
+        return lord.logoutImplementation(form, true);
+    }, 1000);
 };
 
 lord.switchShowLogin = function() {
