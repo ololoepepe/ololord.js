@@ -72,7 +72,10 @@
 {{~["Top"] :position}}
     {{#def.threadActions}}
 {{~}}
-<div id="threads" class="loadingMessage"><h1>{{=it.tr.loadingPostsMessage}}</h1></div>
+<div id="threads" class="loadingMessage">
+    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+    <h1 style="display: inline;">{{=it.tr.loadingPostsMessage}}</h1>
+</div>
 <input id="afterAllPosts" type="hidden" />
 <hr />
 {{~["Bottom"] :position}}

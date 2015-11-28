@@ -62,7 +62,10 @@
         <h2>{{=it.tr.postingDisabledBoardText}}</h2>
     </div>
 {{?}}
-<div id="threads" class="loadingMessage"><h1>{{=it.tr.loadingThreadsMessage}}</h1></div>
+<div id="threads" class="loadingMessage">
+    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+    <h1 style="display: inline;">{{=it.tr.loadingThreadsMessage}}</h1>
+</div>
 {{? it.settings.mode.name != "ascetic" && it.board.postingEnabled}}
     <hr />
     {{~["Bottom"] :position}}
