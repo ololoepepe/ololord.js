@@ -1328,10 +1328,35 @@ lord.handleError = function(error) {
                 text += ": " + error.errorDescription;
         } else if (error.hasOwnProperty("readyState")) {
             //TODO: error status
-            if (500 == error.status)
-                text = "Temporarily banned or internal server error";
-            else if (0 == error.readyState)
-                text = "No connection with server";
+            switch (error.status) {
+            case 400:
+                break;
+            case 404:
+                break;
+            case 408:
+                break;
+            case 413:
+                break;
+            case 429:
+                //DDOS
+                break;
+            case 500:
+                text = "Temporarily banned or internal server error"; //Move to 429
+                break;
+            case 502:
+                break;
+            case 503:
+                break;
+            case 504:
+                break;
+            case 523:
+                //CF
+                break;
+            default:
+                if (0 == error.readyState)
+                    text = "No connection with server";
+                break;
+            }
         } else {
             text = error;
         }

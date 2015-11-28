@@ -890,7 +890,7 @@ window.addEventListener("load", function load() {
         return lord.getTemplate("settingsDialog");
     }).then(function() {
         return lord.getTemplate("editPostDialog");
-    }).catch(lord.handleError);
+    }).catch(lord.handleError); //TODO: remove
 }, false);
 
 window.addEventListener("beforeunload", function unload() {

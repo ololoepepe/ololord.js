@@ -1833,7 +1833,7 @@ module.exports.moveThread = function(req, fields) {
     });
 };
 
-module.exports.deleteFile = function(req, fields) {
+module.exports.deleteFile = function(req, res, fields) {
     var fileName = fields.fileName;
     if (!fileName)
         return Promise.reject("Invalid file name");
@@ -1851,6 +1851,8 @@ module.exports.deleteFile = function(req, fields) {
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
             return Promise.reject("Not enough rights");
         }
+        return controller.checkBan(req, res, c.post.boardName, true);
+    }).then(function() {
         return postFileInfoNames(c.post.boardName, c.post.number);
     }).then(function(numbers) {
         if (!c.post.rawText && numbers.length < 2)
