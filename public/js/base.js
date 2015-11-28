@@ -497,6 +497,7 @@ lord.removeHidden = function(el) {
     div.parentNode.removeChild(div);
     var list = lord.getLocalObject("hiddenPosts", {});
     delete list[lord.data("boardName", div) + "/" + lord.data("postNumber", div)];
+    lord.setLocalObject("hiddenPosts", list);
 };
 
 lord.editUserCss = function() {

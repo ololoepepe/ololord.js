@@ -1013,27 +1013,6 @@ lord.generateImageHash = function(imageData, sizeX, sizeY) {
     return hash;
 };
 
-lord.getImageBase64Data = function(img) {
-    if (!img)
-        return null;
-    var canvas = lord.node("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-    var ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0);
-    var dataURL = canvas.toDataURL("image/png");
-    return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
-};
-
-lord.base64ToArrayBuffer = function(base64) {
-    var binaryString = atob(base64);
-    var len = binaryString.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++)
-        bytes[i] = binaryString.charCodeAt(i);
-    return bytes.buffer;
-};
-
 lord.getPlainText = function(node) {
     if (!node)
         return "";

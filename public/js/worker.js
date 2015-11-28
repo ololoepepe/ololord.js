@@ -134,6 +134,29 @@ lord.getCoubVideoInfo = function(href) {
     });
 };
 
+lord.getImageHash = function(url, width, height) {
+    width = +width;
+    height = +height;
+    if (!url || isNaN(width) || width <= 0 || isNaN(height) || height < 0)
+        return Promise.resolve(null);
+    var xhr = new XMLHttpRequest();
+    xhr.open("get", url, true);
+    xhr.responseType = "arraybuffer";
+    return new Promise(function(resolve, reject) {
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState != 4)
+                return;
+            if (xhr.status != 200)
+                return resolve(null);
+            var response = xhr.response;
+            if (!response)
+                return resolve(null);
+            resolve(lord.generateImageHash(response, width, height));
+        };
+        xhr.send(null);
+    });
+};
+
 lord.parseSpells = function(text) {
     if (typeof text != "string")
         return Promise.reject("Internal error");
@@ -631,32 +654,19 @@ lord.spell_imgn = function(post, args) {
 };
 
 lord.spell_ihash = function(post, args) {
-    if (!post || !args || !args.match(/^\d+$/) || !post.files)
+    args = +args;
+    if (!post || !args || args <= 0 || !post.files)
         return Promise.resolve(null);
     var f = function(i) {
         if (i >= post.files.length)
             return Promise.resolve(null);
         var f = post.files[i];
-        if (!f || !f.thumb)
+        if (!f)
             return f(i + 1);
-        var xhr = new XMLHttpRequest();
-        var url = f.thumb.href;
-        xhr.open("get", url, true);
-        xhr.responseType = "arraybuffer";
-        return new Promise(function(resolve, reject) {
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState != 4)
-                    return;
-                if (xhr.status != 200)
-                    return resolve(null);
-                var response = xhr.response;
-                if (!response)
-                    return resolve(null);
-                if (lord.generateImageHash(response, f.thumb.width, f.thumb.height) == args)
-                    return resolve({ "hidden": true });
-                resolve(null);
-            };
-            xhr.send(null);
+        return lord.getImageHash(f.href, f.width, f.height).then(function(hash) {
+            if (hash && hash == args)
+                return Promise.resolve({ "hidden": true });
+            return Promise.resolve(null);
         });
     };
     return f(0);
@@ -897,6 +907,12 @@ lord.message_processPosts = function(data) {
     if (!data)
         return Promise.reject("Invalid data");
     return lord.processPosts(data.posts, data.spells, data.youtube);
+};
+
+lord.message_getImageHash = function(data) {
+    if (!data)
+        return Promise.reject("Invalid data");
+    return lord.getImageHash(data.href, data.width, data.height);
 };
 
 importScripts("3rdparty/Promise.min.js");

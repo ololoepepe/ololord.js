@@ -81,18 +81,13 @@ lord.getPostData = function(post) {
         var blockquote = lord.queryOne("blockquote", post);
         var files = [];
         lord.query(".postFile", post).forEach(function(file) {
-            var img = lord.queryOne(".postFileFile > a > img", file);
             files.push({
-                "mimeType": lord.data("mimeType", file, true),
-                "size": +lord.data("sizeKB", file, true),
-                "sizeText": lord.data("sizeText", file, true),
-                "width": +lord.nameOne("width", file, true),
-                "height": +lord.nameOne("height", file, true),
-                "thumb": {
-                    "width": +img.width,
-                    "height": +img.height,
-                    "href": img.src
-                }
+                "href": lord.data("href", file),
+                "mimeType": lord.data("mimeType", file),
+                "size": +lord.data("sizeKB", file),
+                "sizeText": lord.data("sizeText", file),
+                "width": +lord.data("width", file),
+                "height": +lord.data("height", file)
             });
         });
         var mailto = lord.queryOne(".mailtoName", post);
@@ -1432,19 +1427,63 @@ lord.setPostHidden = function(el) {
 lord.hideByImage = function(a) {
     if (!a)
         return;
-    var img = lord.queryOne(".postFileFile > a > img", a.parentNode.parentNode);
-    if (!img)
+    var file = $(a).closest(".postFile")[0];
+    if (!file)
         return;
-    var data = lord.base64ToArrayBuffer(lord.getImageBase64Data(img));
-    var hash = lord.generateImageHash(data, img.width, img.height);
-    if (!hash)
-        return;
-    var spells = lord.getLocalObject("spells", lord.DefaultSpells) + "\n#ihash(" + hash + ")";
-    lord.setLocalObject("spells", spells);
-    lord.worker.postMessage({
-        "type": "parseSpells",
-        "data": lord.getLocalObject("spells", lord.DefaultSpells)
-    });
+    var c = {};
+    lord.doWork("getImageHash", {
+        href: lord.data("href", file),
+        width: +lord.data("width", file),
+        height: +lord.data("height", file)
+    }).then(function(hash) {
+        if (!hash)
+            return Promise.reject("Failed to generate hash");
+        c.hash = hash;
+        var spells = lord.getLocalObject("spells", lord.DefaultSpells) + "\n#ihash(" + c.hash + ")";
+        lord.setLocalObject("spells", spells);
+        if (!lord.getLocalObject("spellsEnabled", true))
+            return Promise.resolve();
+        return lord.doWork("parseSpells", spells);
+    }).then(function(spells) {
+        if (!spells || !spells.root)
+            return Promise.resolve();
+        lord.spells = spells.root.spells;
+        c.list = [];
+        c.posts = lord.query(".post, .opPost");
+        return lord.gently(c.posts, function(post) {
+            var data = lord.getPostData(post);
+            if (!data)
+                return;
+            c.list.push(data);
+        }, {
+            delay: 10,
+            n: 10
+        }).then(function() {
+            return Promise.resolve(true);
+        });
+    }).then(function(result) {
+        if (!result)
+            return Promise.reolve();
+        return lord.doWork("processPosts", {
+            youtube: null,
+            posts: c.list,
+            spells: lord.spells
+        });
+    }).then(function(list) {
+        if (!list)
+            return Promise.resolve();
+        var map = list.reduce(function(acc, data) {
+            acc[data.postNumber] = data;
+            return acc;
+        }, {});
+        return lord.gently(c.posts, function(post) {
+            var data = map[+post.id];
+            lord.processPost(post, data);
+        }, {
+            delay: 10,
+            n: 10
+        });
+    }).catch(lord.handleError);
 };
 
 lord.deleteFile = function(el) {
