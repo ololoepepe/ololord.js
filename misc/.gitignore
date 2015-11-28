@@ -1,7 +1,7 @@
 # friends
 friends/*
-!friends/friends.txt
+!friends/friends.json
 
 # news
 news/*
-!news/news.txt
+!news/news.json

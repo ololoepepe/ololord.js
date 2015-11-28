@@ -14,46 +14,21 @@ router.get("/", function(req, res) {
         return Tools.getRules("home");
     }).then(function(rules) {
         model.rules = rules;
-        var fileName = __dirname + "/../misc/news/news.txt";
+        var fileName = __dirname + "/../misc/news/news.json";
         return Tools.localeBasedFileName(fileName);
     }).then(function(fileName) {
         if (!fileName)
             return null;
         return FS.read(fileName);
     }).then(function(data) {
-        if (!data)
-            return [];
-        return data.split(/\r*\n+/gi).filter(function(rule) {
-            return rule;
-        });
-    }).then(function(news) {
-        model.news = news;
-        return Tools.localeBasedFileName(__dirname + "/../misc/friends/friends.txt");
+        model.news = data ? JSON.parse(data) : [];
+        return Tools.localeBasedFileName(__dirname + "/../misc/friends/friends.json");
     }).then(function(fileName) {
         if (!fileName)
             return null;
         return FS.read(fileName);
     }).then(function(data) {
-        var friends = [];
-        if (data) {
-            data.split(/\r*\n+/gi).forEach(function(line) {
-                if (!line)
-                    return;
-                var result = Tools.splitCommand(line);
-                if (!result || result.arguments.length < 1 || result.arguments.length > 2)
-                    return;
-                var friend = {
-                    url: result.command,
-                    name: result.arguments[0]
-                };
-                if (result.arguments.length > 1)
-                    friend.title = result.arguments[1];
-                if (!friend.url || !friend.name)
-                    return;
-                friends.push(friend);
-            });
-        }
-        model.friends = friends;
+        model.friends = data ? JSON.parse(data) : [];
         return controller(req, "home", model);
     }).then(function(data) {
         res.send(data);
