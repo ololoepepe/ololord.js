@@ -642,6 +642,7 @@ lord.updateChat = function(hashes) {
                     newMessages.appendChild(lord.node("text", "!!!"));
                 }
             } else {
+                var c = {};
                 var contacts = lord.queryOne(".chatContactList", lord.chatDialog);
                 lord.getModel("misc/tr").then(function(model) {
                     c.model = model;
