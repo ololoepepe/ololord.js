@@ -1045,14 +1045,7 @@ lord.chatWithUser = function(el) {
             return Promise.resolve();
         if (lord.checkError(result))
             return Promise.reject(result);
-        if (!lord.chats[result.receiver])
-            lord.chats[result.receiver] = [];
-        lord.chats[result.receiver].push({
-            type: "out",
-            text: result.text,
-            date: result.date
-        });
-        lord.setLocalObject("chats", lord.chats);
+        lord.checkChats();
     }).catch(lord.handleError);
 };
 

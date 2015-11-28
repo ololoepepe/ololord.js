@@ -656,6 +656,8 @@ lord.updateChat = function(hashes) {
 };
 
 lord.checkChats = function() {
+    if (lord.checkChats.timer)
+        clearTimeout(lord.checkChats.timer);
     lord.getModel("api/chatMessages", "lastRequestDate=" + (lord.lastChatCheckDate || "")).then(function(model) {
         if (!model)
             return Promise.resolve();
@@ -669,20 +671,16 @@ lord.checkChats = function() {
             if (messages.length > 0)
                 hashes.push(senderHash);
             messages.forEach(function(message) {
-                list.push({
-                    type: "in",
-                    text: message.text,
-                    date: message.date
-                });
+                list.push(message);
             });
         });
         if (hashes.length > 0)
             lord.updateChat(hashes);
         lord.setLocalObject("chats", lord.chats);
-        setTimeout(lord.checkChats.bind(lord), 2 * lord.Second);
+        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), 2 * lord.Second);
     }).catch(function(err) {
         lord.handleError(err);
-        setTimeout(lord.checkChats.bind(lord), 30 * lord.Second);
+        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), 30 * lord.Second);
     });
 };
 
@@ -790,15 +788,7 @@ lord.sendChatMessage = function() {
             return Promise.reject(result);
         message.value = "";
         $(message).focus();
-        if (!lord.chats[result.receiver])
-            lord.chats[result.receiver] = [];
-        lord.chats[result.receiver].push({
-            type: "out",
-            text: result.text,
-            date: result.date
-        });
-        lord.setLocalObject("chats", lord.chats);
-        lord.updateChat([result.receiver]);
+        lord.checkChats();
     }).catch(lord.handleError);
 };
 

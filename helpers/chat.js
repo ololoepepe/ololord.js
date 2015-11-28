@@ -32,21 +32,26 @@ module.exports.sendMessage = function(req, text, boardName, postNumber, hash) {
         p = Promise.resolve(hash);
     }
     var c = {};
+    var date = Tools.now().toISOString();
     return p.then(function(receiverHash) {
         c.receiverHash = receiverHash;
-        return Database.db.sadd("chatMap:" + receiverHash, senderHash);
+        return Database.db.sadd("chatMap:" + senderHash, c.receiverHash);
     }).then(function() {
-        c.date = Tools.now().toISOString();
-        return Database.db.sadd("chat:" + c.receiverHash + ":" + senderHash, JSON.stringify({
+        return Database.db.sadd("chat:" + senderHash + ":" + c.receiverHash, JSON.stringify({
+            type: "out",
             text: text,
-            date: c.date
+            date: date
         }));
     }).then(function() {
-        return Promise.resolve({
-            receiver: c.receiverHash,
+        return Database.db.sadd("chatMap:" + c.receiverHash, senderHash);
+    }).then(function() {
+        return Database.db.sadd("chat:" + c.receiverHash + ":" + senderHash, JSON.stringify({
+            type: "in",
             text: text,
-            date: c.date
-        });
+            date: date
+        }));
+    }).then(function() {
+        return Promise.resolve({ receiver: c.receiverHash });
     });
 };
 
