@@ -361,15 +361,15 @@ board.renderPost = function(post, req) {
             post.extraData.variants.forEach(function(variant) {
                 if (!variant.users)
                     return;
-                if (variant.users.indexOf(req.ip) >= 0)
-                    variant.ownIp = true;
+                //if (variant.users.indexOf(req.ip) >= 0)
+                //    variant.ownIp = true;
                 variant.voteCount = variant.users.length;
                 delete variant.users;
             });
         }
         if (post.extraData.users) {
-            if (post.extraData.users.indexOf(req.ip) >= 0)
-                post.extraData.voted = true;
+            //if (post.extraData.users.indexOf(req.ip) >= 0)
+            //    post.extraData.voted = true;
             delete post.extraData.users;
         }
         return Promise.resolve(post);

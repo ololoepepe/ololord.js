@@ -94,14 +94,14 @@ board.renderPost = function(post, req) {
             };
         }
         if (post.extraData.likes) {
-            if (post.extraData.likes.indexOf(req.ip) >= 0)
-                post.extraData.liked = true;
+            //if (post.extraData.likes.indexOf(req.ip) >= 0)
+            //    post.extraData.liked = true;
             post.extraData.likeCount = post.extraData.likes.length;
             delete post.extraData.likes;
         }
         if (post.extraData.dislikes) {
-            if (post.extraData.dislikes.indexOf(req.ip) >= 0)
-                post.extraData.disliked = true;
+            //if (post.extraData.dislikes.indexOf(req.ip) >= 0)
+            //    post.extraData.disliked = true;
             post.extraData.dislikeCount = post.extraData.dislikes.length;
             delete post.extraData.dislikes;
         }

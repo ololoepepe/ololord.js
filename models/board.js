@@ -541,7 +541,7 @@ var generatePage = function(boardName, page, accumulator) {
         var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
         json.threads.slice(1).forEach(function(thread) {
             p = p.then(function() {
-                return renderThread(board, json.threads[0]);
+                return renderThread(board, thread);
             })
         });
         p.then(function() {
@@ -555,6 +555,7 @@ var generatePage = function(boardName, page, accumulator) {
             }
             return FS.write(path, data);
         });
+        return p;
     });
 };
 

@@ -103,7 +103,7 @@ controller.sync = function(req, templateName, modelData) {
     var baseModelData = merge.recursive(controller.baseModel(req), controller.settingsModel(req));
     baseModelData = merge.recursive(baseModelData, controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
-    baseModelData.path = req.path;
+    baseModelData.path = req ? req.path : undefined;
     if (baseModelData.user.loggedIn) {
         if (Database.compareRegisteredUserLevels(baseModelData.user.level, "ADMIN") >= 0) {
             baseModelData.loginMessageText = Tools.translate("logged in as administrator", "loginMessageText");
@@ -250,14 +250,14 @@ controller.baseModel = function(req) {
             }
         },
         user: {
-            ip: req.ip,
-            level: req.level,
-            loggedIn: !!req.hashpass,
-            vkAuth: req.vkAuth
+            ip: (req ? req.ip : undefined),
+            level: (req ? req.level : undefined),
+            loggedIn: (req ? !!req.hashpass : undefined),
+            vkAuth: (req ? req.vkAuth : undefined)
         },
         styles: Tools.styles(),
         codeStyles: Tools.codeStyles(),
-        deviceType: ((req.device.type == "desktop") ? "desktop" : "mobile"),
+        deviceType: ((req && req.device.type == "desktop") ? "desktop" : "mobile"),
         availableCodeLangs: Highlight.listLanguages().map(function(lang) {
             return {
                 id: lang,
@@ -361,7 +361,7 @@ controller.boardModel = function(board) {
 };
 
 controller.settingsModel = function(req) {
-    return { settings: req.settings };
+    return { settings: (req ? req.settings : {}) };
 };
 
 controller.translationsModel = function() {
