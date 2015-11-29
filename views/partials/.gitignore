@@ -1,0 +1,16 @@
+*
+!banner.jst
+!baseData.jst
+!createAction.jst
+!customFooter.jst
+!customHeader.jst
+!head.jst
+!innerNavbar.jst
+!leafButton.jst
+!navbar.jst
+!navigationButton.jst
+!postForm.jst
+!searchAction.jst
+!threadActions.jst
+!toolbar.jst
+!.gitignore

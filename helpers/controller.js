@@ -655,7 +655,9 @@ controller.initialize = function() {
     }).then(function(fileNames) {
         c.fileNames = c.fileNames.concat(fileNames.map(function(fileName) {
             return path2 + "/" + fileName;
-        }));
+        })).filter(function(fileName) {
+            return fileName.split(".").pop() == "jst";
+        });
         var promises = c.fileNames.map(function(fileName) {
             FS.read(fileName).then(function(data) {
                 partials[fileName.split("/").pop().split(".").shift()] = data;

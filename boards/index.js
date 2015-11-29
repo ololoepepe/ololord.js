@@ -5,7 +5,7 @@ var Captcha = require("../captchas");
 var Tools = require("../helpers/tools");
 
 FSSync.readdirSync(__dirname).forEach(function(file) {
-    if ("index.js" == file)
+    if ("index.js" == file || "js" != file.split(".").pop())
         return;
     Board.addBoard(require("./" + file.split(".").shift()));
 });

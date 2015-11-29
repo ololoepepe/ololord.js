@@ -189,7 +189,9 @@ var Board = function(name, title, options) {
     }).then(function(files) {
         if (files.length < 1)
             return Promise.resolve(null);
-        banners[this.name] = files;
+        banners[this.name] = files.filter(function(fileName) {
+            return ".gitignore" != fileName;
+        });
         return Promise.resolve(randomFile(files));
     });;
 };
