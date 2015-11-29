@@ -486,58 +486,59 @@ module.exports.getFileInfosByHashes = function(hashes) {
 };
 
 var processFile = function(board, file, transaction) {
-    var fn = board.generateFileName(file);
-    var targetFilePath = __dirname + "/../public/" + board.name + "/src/" + fn.name;
-    var targetThumbPath = __dirname + "/../public/" + board.name + "/thumb/" + fn.thumbName;
-    transaction.filePaths.push(targetFilePath);
-    transaction.filePaths.push(targetThumbPath);
-    if (file.copy) {
-        var sourceFilePath = __dirname + "/../public/" + file.boardName + "/src/" + file.name;
-        var sourceThumbPath = __dirname + "/../public/" + file.boardName + "/thumb/" + file.thumbName;
-        return FS.copy(sourceFilePath, targetFilePath).then(function() {
-            return FS.copy(sourceThumbPath, targetThumbPath)
-        }).then(function() {
-            return getFileInfo({ fileName: file.name });
-        }).then(function(fileInfo) {
-            return {
-                dimensions: fileInfo.dimensions,
-                extraData: fileInfo.extraData,
-                hash: fileInfo.hash,
-                mimeType: fileInfo.mimeType,
-                name: fn.name,
-                rating: file.rating,
-                size: fileInfo.size,
-                thumb: fileInfo.thumb
-            };
-        });
-    } else {
-        var sourceFilePath = file.path;
-        var c = {};
-        return board.processFile(file).then(function() {
-            return FS.move(sourceFilePath, targetFilePath);
-        }).then(function() {
-            transaction.filePaths.push(file.thumbPath);
-            return FS.move(file.thumbPath, targetThumbPath);
-        }).then(function() {
-            return FS.exists(targetThumbPath);
-        }).then(function(exists) {
-            if (!exists)
-                return Promise.reject("Failed to copy file");
-            return {
-                dimensions: file.dimensions,
-                extraData: file.extraData,
-                hash: file.hash,
-                mimeType: file.mimeType,
-                name: fn.name,
-                rating: file.rating,
-                size: file.size,
-                thumb: {
-                    dimensions: file.thumbDimensions,
-                    name: fn.thumbName
-                }
-            };
-        });
-    }
+    return board.generateFileName(file).then(function(fn) {
+        var targetFilePath = __dirname + "/../public/" + board.name + "/src/" + fn.name;
+        var targetThumbPath = __dirname + "/../public/" + board.name + "/thumb/" + fn.thumbName;
+        transaction.filePaths.push(targetFilePath);
+        transaction.filePaths.push(targetThumbPath);
+        if (file.copy) {
+            var sourceFilePath = __dirname + "/../public/" + file.boardName + "/src/" + file.name;
+            var sourceThumbPath = __dirname + "/../public/" + file.boardName + "/thumb/" + file.thumbName;
+            return FS.copy(sourceFilePath, targetFilePath).then(function() {
+                return FS.copy(sourceThumbPath, targetThumbPath)
+            }).then(function() {
+                return getFileInfo({ fileName: file.name });
+            }).then(function(fileInfo) {
+                return {
+                    dimensions: fileInfo.dimensions,
+                    extraData: fileInfo.extraData,
+                    hash: fileInfo.hash,
+                    mimeType: fileInfo.mimeType,
+                    name: fn.name,
+                    rating: file.rating,
+                    size: fileInfo.size,
+                    thumb: fileInfo.thumb
+                };
+            });
+        } else {
+            var sourceFilePath = file.path;
+            var c = {};
+            return board.processFile(file).then(function() {
+                return FS.move(sourceFilePath, targetFilePath);
+            }).then(function() {
+                transaction.filePaths.push(file.thumbPath);
+                return FS.move(file.thumbPath, targetThumbPath);
+            }).then(function() {
+                return FS.exists(targetThumbPath);
+            }).then(function(exists) {
+                if (!exists)
+                    return Promise.reject("Failed to copy file");
+                return {
+                    dimensions: file.dimensions,
+                    extraData: file.extraData,
+                    hash: file.hash,
+                    mimeType: file.mimeType,
+                    name: fn.name,
+                    rating: file.rating,
+                    size: file.size,
+                    thumb: {
+                        dimensions: file.thumbDimensions,
+                        name: fn.thumbName
+                    }
+                };
+            });
+        }
+    });
 };
 
 var processFiles = function(req, fields, files, transaction) {

@@ -52,7 +52,7 @@
                         <span class="symbolCounter"><span name="used"></span>/{{=it.board.maxTextLength}}</span>
                         <textarea name="text" rows="10" cols="43" placeholder="{{=it.tr.postFormTextPlaceholder}}"
                                   class="postFormTextarea"
-                                  onkeyup="lord.countSymbols(this);">{{=post.rawText}}</textarea>
+                                  onkeyup="lord.countSymbols(this);">{{? post.rawText}}{{=post.rawText}}{{?}}</textarea>
                     </div>
                 </td>
             </tr>

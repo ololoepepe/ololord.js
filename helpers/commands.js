@@ -1,4 +1,4 @@
-var cluster = require("cluster");
+//var cluster = require("cluster");
 var Crypto = require("crypto");
 var ReadLine = require("readline");
 var ReadLineSync = require("readline-sync");
@@ -6,6 +6,7 @@ var ReadLineSync = require("readline-sync");
 var Board = require("../boards/board");
 var config = require("./config");
 var Database = require("./database");
+var Global = require("./global");
 var Tools = require("./tools");
 
 var rl = ReadLine.createInterface({
@@ -41,21 +42,7 @@ _installHandler(["quit", "q"], function() {
 
 _installHandler(["respawn"], function(args) {
     var status = !isNaN(+args) ? +args : 0;
-    var promises = [];
-    for (var id in cluster.workers) {
-        promises.push(new Promise(function(resolve, reject) {
-            var worker = cluster.workers[id];
-            worker.process.send({
-                type: "exit",
-                status: status
-            }, function(err) {
-                if (err)
-                    return reject(err);
-                resolve();
-            });
-        }));
-    }
-    return Promise.all(promises).then(function() {
+    return Global.IPC.send("exit", status, true).then(function() {
         return Promise.resolve("OK");
     });
 });

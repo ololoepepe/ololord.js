@@ -12,6 +12,7 @@ var UUID = require("uuid");
 
 var Captcha = require("../captchas");
 var config = require("../helpers/config");
+var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
 var ImageMagick = promisify("imagemagick");
@@ -375,16 +376,17 @@ var renderFileInfo = function(fi) {
 };
 
 /*public*/ Board.prototype.generateFileName = function(file) {
-    var base = Tools.now().valueOf();
-    var ext = Path.extname(file.name);
-    if (Util.isString(ext))
-        ext = ext.substr(1);
-    if (!ext || Board.MimeTypesForExtensions[ext.toLowerCase()] != file.mimeType)
-        ext = Board.DefaultExtensions[file.mimeType];
-    return {
-        name: (base + "." + ext),
-        thumbName: (base + "s." + (Board.ThumbExtensionsForMimeType[file.mimeType] || ext))
-    };
+    return Global.IPC.send("fileName", this.name).then(function(base) {
+        var ext = Path.extname(file.name);
+        if (Util.isString(ext))
+            ext = ext.substr(1);
+        if (!ext || Board.MimeTypesForExtensions[ext.toLowerCase()] != file.mimeType)
+            ext = Board.DefaultExtensions[file.mimeType];
+        return Promise.resolve({
+            name: (base + "." + ext),
+            thumbName: (base + "s." + (Board.ThumbExtensionsForMimeType[file.mimeType] || ext))
+        });
+    });
 };
 
 /*public*/ Board.prototype.processFile = function(file) {
