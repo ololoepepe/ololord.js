@@ -561,6 +561,7 @@ var processFiles = function(req, fields, files, transaction) {
                 });
             })(files[i]);
         }
+        return p;
     }).then(function() {
         return Promise.resolve(c.list);
     });
