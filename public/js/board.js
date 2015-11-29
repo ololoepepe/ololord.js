@@ -957,6 +957,11 @@ lord.quickReply = function(el) {
         targetContainer.appendChild(postForm);
     lord.insertPostNumber(postNumber);
     lord.quoteSelectedText(selection);
+    var tripcode = lord.nameOne("tripcode", postForm);
+    if (tripcode) {
+        var threadNumber = lord.nameOne("threadNumber", postForm);
+        tripcode.checked = lord.showTripcode(threadNumber ? threadNumber.value : null);
+    }
 };
 
 lord.hidePostForm = function() {
@@ -981,10 +986,18 @@ lord.hidePostForm = function() {
 lord.switchShowTripcode = function() {
     var postForm = lord.id("postForm");
     var sw = lord.nameOne("tripcode", postForm);
-    if (sw.checked)
-        lord.setLocalObject("showTripcode", true);
+    var showTripcode = lord.getLocalObject("showTripcode", {});
+    var key;
+    var threadNumber = lord.nameOne("threadNumber", postForm);
+    if (threadNumber)
+        key = lord.data("boardName") + "/" + +threadNumber.value;
     else
-        lord.removeLocalObject("showTripcode");
+        key = "global";
+    if (sw.checked)
+        showTripcode[key] = true;
+    else if (showTripcode.hasOwnProperty[key])
+        delete showTripcode[key];
+    lord.setLocalObject("showTripcode", showTripcode);
 };
 
 lord.countSymbols = function(textarea) {
@@ -2507,8 +2520,10 @@ lord.resetPostForm = function() {
     for (var i = divs.length - 1; i >= 0; --i)
     lord.removeFile(lord.queryOne("a", divs[i]));
     var trip = lord.nameOne("tripcode", postForm);
-    if (trip)
-        trip.checked = !!lord.getLocalObject("showTripcode", false);
+    if (trip) {
+        var threadNumber = lord.nameOne("threadNumber", postForm);
+        trip.checked = lord.showTripcode(threadNumber ? threadNumber.value : null);
+    }
     var dr = lord.nameOne("draft", postForm);
     if (dr)
         dr.checked = (lord.getCookie("draftsByDefault") === "true");
@@ -3026,6 +3041,15 @@ lord.addToOrRemoveFromFavorites = function(el) {
         lord.addThreadToFavorites(currentBoardName, threadNumber);
 };
 
+lord.showTripcode = function(threadNumber) {
+    var showTripcode = lord.getLocalObject("showTripcode", {});
+    if (showTripcode.global)
+        return true;
+    if (!threadNumber)
+        return false;
+    return !!lord.getLocalObject("showTripcode", {})[lord.data("boardName") + "/" + threadNumber];
+};
+
 lord.initializeOnLoadBaseBoard = function() {
     var c = {};
     lord.getModel([
@@ -3119,7 +3143,7 @@ lord.initializeOnLoadBaseBoard = function() {
             if (btn)
                 btn.title += " (" + key("submitReply") + ")";
         }
-        if (lord.getLocalObject("showTripcode", false)) {
+        if (lord.showTripcode(lord.data("threadNumber"))) {
             var postForm = lord.id("postForm");
             var sw = lord.nameOne("tripcode", postForm);
             sw.checked = true;

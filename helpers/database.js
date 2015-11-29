@@ -519,6 +519,10 @@ var processFile = function(board, file, transaction) {
             transaction.filePaths.push(file.thumbPath);
             return FS.move(file.thumbPath, targetThumbPath);
         }).then(function() {
+            return FS.exists(targetThumbPath);
+        }).then(function(exists) {
+            if (!exists)
+                return Promise.reject("Failed to copy file");
             return {
                 dimensions: file.dimensions,
                 extraData: file.extraData,
