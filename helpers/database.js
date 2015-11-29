@@ -16,6 +16,7 @@ var Board = require("../boards");
 var Captcha = require("../captchas");
 var config = require("./config");
 var controller = require("./controller");
+var Global = require("./global");
 var markup = require("./markup");
 var Tools = require("./tools");
 
@@ -645,7 +646,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             name: (fields.name || null),
             number: c.postNumber,
             options: {
-                draft: (hashpass && board.draftsEnabled && fields.draft),
+                draft: false, //(hashpass && board.draftsEnabled && fields.draft), TODO: remove
                 rawHtml: c.isRaw,
                 showTripcode: !!fields.tripcode,
                 signAsOp: !!fields.signAsOp
@@ -773,6 +774,11 @@ module.exports.createPost = function(req, fields, files, transaction) {
         return processFiles(req, fields, files, transaction);
     }).then(function(files) {
         return createPost(req, fields, files, transaction);
+    }).then(function(post) {
+        Global.IPC.send("generatePages", fields.boardName).catch(function(err) {
+            console.log(err);
+        });
+        return Promise.resolve(post);
     });
 };
 
@@ -992,7 +998,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
             fixed: false,
             number: c.threadNumber,
             options: {
-                draft: (hashpass && board.draftsEnabled && fields.draft)
+                draft: false //(hashpass && board.draftsEnabled && fields.draft) //TODO: remove
             },
             user: {
                 hashpass: hashpass,
@@ -1009,6 +1015,9 @@ module.exports.createThread = function(req, fields, files, transaction) {
         c.files = files;
         return createPost(req, fields, files, transaction, c.threadNumber, date);
     }).then(function() {
+        Global.IPC.send("generatePages", fields.boardName).catch(function(err) {
+            console.log(err);
+        });
         return c.thread;
     });
 };
@@ -1573,6 +1582,9 @@ module.exports.editPost = function(req, fields) {
         });
         return Promise.all(promises);
     }).then(function() {
+        Global.IPC.send("generatePages", fields.boardName).catch(function(err) {
+            console.log(err);
+        });
         return Promise.resolve();
     });
 };
@@ -1662,6 +1674,9 @@ module.exports.deletePost = function(req, res, fields) {
         return (post.threadNumber == post.number) ? removeThread(board.name, postNumber)
             : removePost(board.name, postNumber);
     }).then(function() {
+        Global.IPC.send("generatePages", fields.boardName).catch(function(err) {
+            console.log(err);
+        });
         return {
             boardName: board.name,
             threadNumber: ((c.post.threadNumber != c.post.number) ? c.post.threadNumber : 0)
@@ -1887,6 +1902,9 @@ module.exports.deleteFile = function(req, res, fields) {
                 console.log(err);
             });
         });
+        Global.IPC.send("generatePages", fields.boardName).catch(function(err) {
+            console.log(err);
+        });
         return {
             boardName: c.post.boardName,
             postNumber: c.post.number,
@@ -1923,6 +1941,9 @@ module.exports.editAudioTags = function(req, res, fields) {
         });
         return db.hset("fileInfos", c.fileInfo.name, JSON.stringify(c.fileInfo));
     }).then(function() {
+        Global.IPC.send("generatePages", fields.boardName).catch(function(err) {
+            console.log(err);
+        });
         return {
             boardName: c.post.boardName,
             threadNumber: c.post.threadNumber,

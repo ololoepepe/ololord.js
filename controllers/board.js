@@ -248,11 +248,14 @@ router.get("/:boardName/:page.json", function(req, res) {
     }).then(function(result) {
         if (result)
             return;
-        return boardModel.getPage(board, req.hashpass, req.params.page, true).then(function(model) {
+        return boardModel.getPage(board, req.hashpass, req.params.page, true).then(function(data) {
+            res.send(data);
+        });
+        /*return boardModel.getPage(board, req.hashpass, req.params.page, true).then(function(model) {
             return renderPage(model, board, req, true);
         }).then(function(data) {
             res.send(data);
-        });
+        });*/
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

@@ -1,11 +1,19 @@
+var FS = require("q-io/fs");
 var merge = require("merge");
 var Util = require("util");
 
-var Board = require("../boards/board");
+var Board = require("../boards");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");
-var FS = require("q-io/fs");
+var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
+
+var scheduledGeneratePages = {};
+var lockedPages = {};
+var readPages = {};
+var pageCounts = {};
+var lockedThreads = {};
+var readThreads = {};
 
 module.exports.getLastPostNumbers = function(boardNames) {
     if (!Util.isArray(boardNames))
@@ -65,12 +73,49 @@ module.exports.getFileInfos = function(list, hashpass) {
     return Promise.all(promises);
 };
 
-module.exports.getPage = function(board, hashpass, page, json) {
+module.exports.getPage = function(board, hashpass, page, json, internal) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     page = +(page || 0);
     if (isNaN(page) || page < 0)
         return Promise.reject(404);
+    if (json && !internal) {
+        var list = lockedPages[board.name];
+        var p;
+        if (list) {
+            p = new Promise(function(resolve, reject) {
+                list.push(resolve);
+            });
+        } else {
+            p = Promise.resolve();
+        }
+        var c = {};
+        return p.then(function() {
+            if (!readPages[board.name])
+                readPages[board.name] = [];
+            c.promise = new Promise(function(resolve, reject) {
+                c.resolve = resolve;
+            });
+            readPages[board.name].push(c.promise);
+            return FS.read(__dirname + "/../tmp/cache/page-" + board.name + "-" + page + ".json");
+        }).then(function(data) {
+            readPages[board.name].splice(readPages[board.name].indexOf(c.promise), 1);
+            if (readPages[board.name].length < 1)
+                delete readPages[board.name];
+            c.resolve();
+            return data;
+        });
+    }
+    if (!json && !internal) {
+        var model = { threads: [] };
+        /*return module.exports.pageCount(board.name).then(function(pageCount) {
+            model.pageCount = pageCount;*/
+            return Database.lastPostNumber(board.name)
+        /*})*/.then(function(lastPostNumber) {
+            model.lastPostNumber = lastPostNumber;
+            return Promise.resolve(model);
+        });
+    }
     var c = {};
     return Database.registeredUserLevel(hashpass).then(function(level) {
         c.level = level;
@@ -426,5 +471,199 @@ module.exports.getCatalog = function(board, hashpass, sortMode, json) {
     }).then(function(lastPostNumber) {
         c.model.lastPostNumber = lastPostNumber;
         return Promise.resolve(c.model);
+    });
+};
+
+module.exports.pageCount = function(boardName) {
+    var board = Board.board(boardName);
+    if (!(board instanceof Board))
+        return Promise.reject("Invalid board instance");
+    var c = {};
+    return Database.getThreads(boardName, {
+        filterFunction: function(thread) {
+            return !thread.options.draft;
+        }
+    }).then(function(threads) {
+        return Promise.resolve(Math.ceil(threads.length / board.threadsPerPage) || 1);
+    });
+};
+
+var generateThread = function(boardName, threadNumber) {
+    var board = Board.board(boardName);
+    if (!(board instanceof Board))
+        return Promise.reject("Invalid board instance");
+    var c = {};
+    return module.exports.getThread(board, null, threadNumber, true).then(function(json) {
+        c.posts = json.thread.lastPosts;
+        delete json.thread.lastPosts;
+        return FS.write(__dirname + "/../tmp/cache/thread-" + boardName + "-" + threadNumber + ".json",
+            JSON.stringify(json));
+    }).then(function() {
+        return FS.write(__dirname + "/../tmp/cache/thread-posts-" + boardName + "-" + threadNumber + ".json",
+            JSON.stringify(c.posts));
+    });
+};
+
+var generateThreads = function(boardName) {
+    var board = Board.board(boardName);
+    if (!(board instanceof Board))
+        return Promise.reject("Invalid board instance");
+    var c = {};
+    return Database.getThreads(boardName, {
+        filterFunction: function(thread) {
+            return !thread.options.draft;
+        }
+    }).then(function(threads) {
+        var p = (threads.length > 0) ? generateThread(boardName, threads[0].number) : Promise.resolve();
+        threads.slice(1).forEach(function(thread) {
+            p = p.then(function() {
+                return generateThread(boardName, thread.number);
+            });
+        });
+        return p;
+    });
+};
+
+var renderThread = function(board, thread) {
+    var p = board.renderPost(thread.opPost, null, thread.opPost);
+    thread.lastPosts.forEach(function(post) {
+        p = p.then(function() {
+            return board.renderPost(post, null, thread.opPost);
+        });
+    });
+    return p;
+};
+
+var generatePage = function(boardName, page, accumulator) {
+    var board = Board.board(boardName);
+    return module.exports.getPage(board, null, page, true, true).then(function(json) {
+        var path = __dirname + "/../tmp/cache/page-" + boardName + "-" + page + ".json";
+        var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
+        json.threads.slice(1).forEach(function(thread) {
+            p = p.then(function() {
+                return renderThread(board, json.threads[0]);
+            })
+        });
+        p.then(function() {
+            var data = JSON.stringify(json);
+            if (accumulator) {
+                accumulator.push({
+                    path: path,
+                    data: data
+                });
+                return Promise.resolve();
+            }
+            return FS.write(path, data);
+        });
+    });
+};
+
+var generatePages = function(boardName, nowrite) {
+    return module.exports.pageCount(boardName).then(function(pageCount) {
+        pageCounts[boardName] = pageCount;
+        var pageNumbers = [];
+        for (var i = 0; i < pageCount; ++i)
+            pageNumbers.push(i);
+        var accumulator = nowrite ? [] : undefined;
+        var p = (pageNumbers.length > 0) ? generatePage(boardName, pageNumbers[0], accumulator) : Promise.resolve();
+        pageNumbers.slice(1).forEach(function(page) {
+            p = p.then(function() {
+                return generatePage(boardName, page, accumulator);
+            });
+        });
+        return p.then(function() {
+            return Promise.resolve(accumulator);
+        });
+    });
+};
+
+var generateBoard = function(boardName) {
+    return generatePages(boardName).then(function() {
+        return generateThreads(boardName);
+    });
+};
+
+module.exports.scheduleGeneratePages = function(boardName) {
+    if (scheduledGeneratePages[boardName])
+        return Promise.resolve();
+    scheduledGeneratePages[boardName] = setTimeout(function() {
+        var c = {};
+        generatePages(boardName, true).then(function(pages) {
+            c.pages = pages;
+            return Global.IPC.send("lockPages", boardName);
+        }).then(function() {
+            var p = (c.pages.length > 0) ? FS.write(c.pages[0].path, c.pages[0].data) : Promise.resolve();
+            c.pages.slice(1).forEach(function(page) {
+                p = p.then(function() {
+                    return FS.write(page.path, page.data);
+                });
+            });
+            return p;
+        }).then(function() {
+            return Global.IPC.send("unlockPages", boardName);
+        }).then(function() {
+            delete scheduledGeneratePages[boardName];
+            return Promise.resolve();
+        }).catch(function(err) {
+            console.log(err.stack || err);
+        });
+    }, Tools.Second);
+    return Promise.resolve();
+};
+
+module.exports.generate = function() {
+    return module.exports.cleanup().then(function() {
+        var boardNames = Board.boardNames();
+        var p = (boardNames.length > 0) ? generateBoard(boardNames[0]) : Promise.resolve();
+        boardNames.slice(1).forEach(function(boardName) {
+            p = p.then(function(boarName) {
+                return generateBoard(boardName);
+            });
+        });
+        return p;
+    });
+};
+
+module.exports.cleanup = function() {
+    var path = __dirname + "/../tmp/cache";
+    return FS.list(path).then(function(fileNames) {
+        fileNames = fileNames.filter(function(fileName) {
+            return ".gitignore" != fileName;
+        }).map(function(fileName) {
+            return path + "/" + fileName;
+        });
+        var p = (fileNames.length > 0) ? FS.remove(fileNames[0]) : Promise.resolve();
+        fileNames.slice(1).forEach(function(fileName) {
+            p = p.then(function() {
+                return FS.remove(fileName);
+            });
+        });
+        return p;
+    });
+};
+
+module.exports.lockPages = function(boardName) {
+    lockedPages[boardName] = [];
+    return Promise.all(readPages[boardName] || []);
+};
+
+module.exports.unlockPages = function(boardName) {
+    return Promise.all(lockedPages[boardName] || []).then(function() {
+        delete lockedPages[boardName];
+        return Promise.resolve();
+    });
+};
+
+module.exports.lockThread = function(boardName, threadNumber) {
+    var key = boardName + ":" + threadNumber;
+    lockedThreads[key] = [];
+    return Promise.all(readThreads[key] || []);
+};
+
+module.exports.unlockThread = function(boardName, threadNumber) {
+    var key = boardName + ":" + threadNumber;
+    return Promise.all(lockedThreads[key] || []).then(function() {
+        delete lockedThreads[key];
+        return Promise.resolve();
     });
 };

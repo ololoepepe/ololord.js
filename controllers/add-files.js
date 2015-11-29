@@ -2,7 +2,6 @@ var express = require("express");
 var merge = require("merge");
 
 var Board = require("../boards");
-var boardModel = require("../models/board");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");

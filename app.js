@@ -6,6 +6,7 @@ var OS = require("os");
 
 var config = require("./helpers/config");
 var controller = require("./helpers/controller");
+var BoardModel = require("./models/board");
 var Database = require("./helpers/database");
 var Global = require("./helpers/global");
 var Tools = require("./helpers/tools");
@@ -62,34 +63,56 @@ var spawnCluster = function() {
 };
 
 if (cluster.isMaster) {
-    console.log("Spawning workers, please, wait...");
-    spawnCluster();
-    var ready = 0;
-    Global.IPC.installHandler("ready", function() {
-        ++ready;
-        if (ready == count) {
-            var commands = require("./helpers/commands");
-            var rl = commands();
-        }
-    });
-    var fileNames = {};
-    var fileName = function(boardName) {
-        var fn = "" + Tools.now().valueOf();
-        if (fn != fileNames[boardName]) {
-            fileNames[boardName] = fn;
-            return Promise.resolve(fn);
-        }
-        return new Promise(function(resolve, reject) {
-            setTimeout(function() {
-                fileName(boardName).then(function(fn) {
-                    resolve(fn);
-                });
-            }, 1);
+    console.log("Generating cache, please, wait...");
+    BoardModel.generate().then(function() {
+        console.log("Spawning workers, please, wait...");
+        spawnCluster();
+        var ready = 0;
+        Global.IPC.installHandler("ready", function() {
+            ++ready;
+            if (ready == count) {
+                var commands = require("./helpers/commands");
+                var rl = commands();
+            }
         });
-    };
-    Global.IPC.installHandler("fileName", function(boardName) {
-        return fileName(boardName);
+        var fileNames = {};
+        var fileName = function(boardName) {
+            var fn = "" + Tools.now().valueOf();
+            if (fn != fileNames[boardName]) {
+                fileNames[boardName] = fn;
+                return Promise.resolve(fn);
+            }
+            return new Promise(function(resolve, reject) {
+                setTimeout(function() {
+                    fileName(boardName).then(function(fn) {
+                        resolve(fn);
+                    });
+                }, 1);
+            });
+        };
+        Global.IPC.installHandler("fileName", function(boardName) {
+            return fileName(boardName);
+        });
+        Global.IPC.installHandler("generatePages", function(boardName) {
+            return BoardModel.scheduleGeneratePages(boardName);
+        });
+        //TODO: thread/post generation sutff
+    }).catch(function(err) {
+        console.log(err.stack || err);
+        process.exit(1);
     });
 } else {
+    Global.IPC.installHandler("lockPages", function(boardName) {
+        return BoardModel.lockPages(boardName);
+    });
+    Global.IPC.installHandler("unlockPages", function(boardName) {
+        return BoardModel.unlockPages(boardName);
+    });
+    Global.IPC.installHandler("lockThread", function(data) {
+        return BoardModel.lockThread(data.boardName, data.threadNumber);
+    });
+    Global.IPC.installHandler("unlockThread", function(data) {
+        return BoardModel.unlockThread(data.boardName, data.threadNumber);
+    });
     spawnCluster();
 }

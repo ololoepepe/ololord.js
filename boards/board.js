@@ -325,10 +325,10 @@ var renderFileInfo = function(fi) {
     });
     post.rawSubject = post.subject;
     post.isOp = (post.number == post.threadNumber);
-    post.ownIp = (req.ip == post.user.ip);
-    post.ownHashpass = (req.hashpass && req.hashpass == post.user.hashpass);
+    post.ownIp = req && (req.ip == post.user.ip);
+    post.ownHashpass = req && (req.hashpass && req.hashpass == post.user.hashpass);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
-    if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0) {
+    if (Database.compareRegisteredUserLevels(req ? req.level : null, Database.RegisteredUserLevels.Moder) < 0) {
         delete post.user.ip;
     } else {
         var ipv4 = Tools.preferIPv4(post.user.ip);
