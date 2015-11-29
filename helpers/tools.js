@@ -462,7 +462,7 @@ module.exports.password = function(pwd) {
 
 module.exports.parseForm = function(req) {
     var form = new Formidable.IncomingForm();
-    form.uploadDir = __dirname + "/../tmp";
+    form.uploadDir = __dirname + "/../tmp/formidable";
     form.hash = "sha1";
     return new Promise(function(resolve, reject) {
         form.parse(req, function(err, fields, files) {

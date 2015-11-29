@@ -1,18 +1,2 @@
 config-dev.json
 node_modules
-
-# tmp
-tmp/*
-!tmp/.placeholder
-
-# tools
-tools/*
-!tools/geolocation.js
-
-# public
-public/*
-!public/css
-!public/img
-!public/js
-!public/templates
-!public/.gitignore
