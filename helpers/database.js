@@ -1421,6 +1421,16 @@ var rerenderPost = function(boardName, postNumber, silent) {
     }).then(function() {
         return addReferencedPosts(c.post, referencedPosts);
     }).then(function() {
+        Global.IPC.send("generatePages", fields.boardName).then(function() {
+            return Global.IPC.send("generateThread", {
+                boardName: c.post.boardName,
+                threadNumber: c.post.threadNumber,
+                postNumber: c.post.number,
+                action: "edit"
+            });
+        }).catch(function(err) {
+            console.log(err);
+        });
         return Promise.resolve();
     });
 };
