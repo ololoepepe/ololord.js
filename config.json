@@ -22,6 +22,9 @@
             "enabled": true,
             "ttl": 60,
             "postCount": 500
+        },
+        "chat": {
+            "ttl": 10080
         }
     },
     "site": {

@@ -33,6 +33,7 @@ module.exports.sendMessage = function(req, text, boardName, postNumber, hash) {
     }
     var c = {};
     var date = Tools.now().toISOString();
+    var ttl = config("server.chat.ttl", 10080) * 60; //NOTE: 7 days
     return p.then(function(receiverHash) {
         c.receiverHash = receiverHash;
         return Database.db.sadd("chatMap:" + senderHash, c.receiverHash);
@@ -50,6 +51,14 @@ module.exports.sendMessage = function(req, text, boardName, postNumber, hash) {
             text: text,
             date: date
         }));
+    }).then(function() {
+        return Database.db.expire("chatMap:" + senderHash, ttl);
+    }).then(function() {
+        return Database.db.expire("chat:" + senderHash + ":" + c.receiverHash, ttl);
+    }).then(function() {
+        return Database.db.expire("chatMap:" + c.receiverHash, ttl);
+    }).then(function() {
+        return Database.db.expire("chat:" + c.receiverHash + ":" + senderHash, ttl);
     }).then(function() {
         return Promise.resolve({ receiver: c.receiverHash });
     });
