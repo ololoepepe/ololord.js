@@ -96,6 +96,9 @@ if (cluster.isMaster) {
         Global.IPC.installHandler("generatePages", function(boardName) {
             return BoardModel.scheduleGeneratePages(boardName);
         });
+        Global.IPC.installHandler("generateThread", function(data) {
+            return BoardModel.scheduleGenerateThread(data.boardName, data.threadNumber, data.postNumber, data.action);
+        });
         //TODO: thread/post generation sutff
     }).catch(function(err) {
         console.log(err.stack || err);

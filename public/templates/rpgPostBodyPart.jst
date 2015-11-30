@@ -1,13 +1,14 @@
 <tr>
+    {{ var voted = it.users && it.users.indexOf(it.user.ipHash) >= 0; }}
     <td colspan="{{=it.post.fileInfos.length + 2}}" class="vote">
         <div name="voteText" class="voteText">
             {{? it.disabled}}
                 <img name="voteClosedImg" src="/{{=it.site.pathPrefix}}img/closed.png" title="{{=it.tr.voteClosedText}}">
             {{?}}
             {{=it.text}}</div>
-        {{? !it.disabled && !it.post.ownIp}}
+        {{? !it.disabled && it.post.user.ipHash != it.user.ipHash}}
             <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
-                  action="/{{=it.site.pathPrefix}}action/{{? it.voted}}unvote{{??}}vote{{?}}"
+                  action="/{{=it.site.pathPrefix}}action/{{? voted}}unvote{{??}}vote{{?}}"
                   {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.vote(event, this); return false;"{{?}}>
         {{?}}
         <div name="voteVariants">
@@ -18,22 +19,22 @@
                 {{??}}
                     <input type="radio" name="voteGroup" value="{{=variant.id}}"
                 {{?}}
-                {{? it.post.ownIp || it.disabled || it.voted}}
+                {{? it.post.user.ipHash == it.user.ipHash || it.disabled || voted}}
                     disabled="true"
                 {{?}}
-                {{? variant.ownIp}}
+                {{? variant.users && variant.users.indexOf(it.user.ipHash) >= 0}}
                     checked="true"
-                {{?}}
+                {{?}}                
                 />
                 {{=variant.text}}
-                <span class="voteCount">({{=it.tr.voteCountText}} {{ out += (variant.voteCount || 0); }})</span></br />
+                <span class="voteCount">({{=it.tr.voteCountText}} {{ out += (variant.users ? variant.users.length : 0); }})</span></br />
             {{ } }}
         </div>
-        {{? !it.post.ownIp}}
+        {{? it.post.user.ipHash != it.user.ipHash}}
             <input type="hidden" name="postNumber" value="{{=it.post.number}}" />
-            <input type="image" src="/{{=it.site.pathPrefix}}img/{{? !it.voted}}vote{{??}}unvote{{?}}.png"
-                   name="button{{? !it.voted}}Vote{{??}}Unvote{{?}}" {{? it.disabled}}disabled="true"{{?}}
-                   title="{{? !it.voted}}{{=it.tr.voteActionText}}{{??}}{{=it.tr.unvoteActionText}}{{?}}"
+            <input type="image" src="/{{=it.site.pathPrefix}}img/{{? !voted}}vote{{??}}unvote{{?}}.png"
+                   name="button{{? !voted}}Vote{{??}}Unvote{{?}}" {{? it.disabled}}disabled="true"{{?}}
+                   title="{{? !voted}}{{=it.tr.voteActionText}}{{??}}{{=it.tr.unvoteActionText}}{{?}}"
                    width="24" height="24" class="buttonImage" />
             </form>
         {{?}}

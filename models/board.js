@@ -9,6 +9,7 @@ var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
 var scheduledGeneratePages = {};
+var scheduledGenerateThread = {};
 var lockedPages = {};
 var readPages = {};
 var pageCounts = {};
@@ -24,31 +25,22 @@ module.exports.getLastPostNumbers = function(boardNames) {
     return Promise.all(promises);
 };
 
-module.exports.getPosts = function(posts, hashpass) {
+module.exports.getPosts = function(posts) {
     var c = {};
-    return Database.registeredUserLevel(hashpass).then(function(level) {
-        c.level = level;
-        var promises = posts.map(function(post) {
-            if (!post)
-                return Promise.resolve(null);
-            return Database.getPost(post.boardName, post.postNumber, {
-                withFileInfos: true,
-                withReferences: true,
-                withExtraData: true
-            });
+    var promises = posts.map(function(post) {
+        if (!post)
+            return Promise.resolve(null);
+        return Database.getPost(post.boardName, post.postNumber, {
+            withFileInfos: true,
+            withReferences: true,
+            withExtraData: true
         });
-        return Promise.all(promises);
-    }).then(function(posts) {
+    });
+    return Promise.all(promises).then(function(posts) {
         return posts.filter(function(post) {
             if (!post)
                 return true;
-            if (!post.options.draft)
-                return true;
-            if (!post.user.hashpass)
-                return true;
-            if (post.user.hashpass == hashpass)
-                return true;
-            return Database.compareRegisteredUserLevels(post.user.level, c.level) < 0;
+            return !post.options.draft;
         });
     });
 };
@@ -73,73 +65,63 @@ module.exports.getFileInfos = function(list, hashpass) {
     return Promise.all(promises);
 };
 
-module.exports.getPage = function(board, hashpass, page, json, internal) {
+module.exports.getBoardPage = function(board, page, json) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     page = +(page || 0);
-    if (isNaN(page) || page < 0)
+    if (isNaN(page) || page < 0 || page >= pageCounts[board.name])
         return Promise.reject(404);
-    if (json && !internal) {
-        var list = lockedPages[board.name];
-        var p;
-        if (list) {
-            p = new Promise(function(resolve, reject) {
-                list.push(resolve);
-            });
-        } else {
-            p = Promise.resolve();
-        }
-        var c = {};
-        return p.then(function() {
-            if (!readPages[board.name])
-                readPages[board.name] = [];
-            c.promise = new Promise(function(resolve, reject) {
-                c.resolve = resolve;
-            });
-            readPages[board.name].push(c.promise);
-            return FS.read(__dirname + "/../tmp/cache/page-" + board.name + "-" + page + ".json");
-        }).then(function(data) {
-            readPages[board.name].splice(readPages[board.name].indexOf(c.promise), 1);
-            if (readPages[board.name].length < 1)
-                delete readPages[board.name];
-            c.resolve();
-            return data;
-        });
-    }
-    if (!json && !internal) {
+    if (!json) {
         var model = { threads: [] };
-        /*return module.exports.pageCount(board.name).then(function(pageCount) {
-            model.pageCount = pageCount;*/
-            return Database.lastPostNumber(board.name)
-        /*})*/.then(function(lastPostNumber) {
+        return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
             model.lastPostNumber = lastPostNumber;
             return Promise.resolve(model);
         });
     }
-    var c = {};
-    return Database.registeredUserLevel(hashpass).then(function(level) {
-        c.level = level;
-        return Database.getThreads(board.name, {
-            filterFunction: function(thread) {
-                if (!thread.options.draft)
-                    return true;
-                if (!thread.user.hashpass)
-                    return true;
-                if (thread.user.hashpass == hashpass)
-                    return true;
-                return Database.compareRegisteredUserLevels(thread.user.level, c.level) < 0;
-            }
+    var list = lockedPages[board.name];
+    var p;
+    if (list) {
+        p = new Promise(function(resolve, reject) {
+            list.push(resolve);
         });
+    } else {
+        p = Promise.resolve();
+    }
+    var c = {};
+    return p.then(function() {
+        if (!readPages[board.name])
+            readPages[board.name] = [];
+        c.promise = new Promise(function(resolve, reject) {
+            c.resolve = resolve;
+        });
+        readPages[board.name].push(c.promise);
+        return FS.read(__dirname + "/../tmp/cache/page-" + board.name + "-" + page + ".json");
+    }).then(function(data) {
+        readPages[board.name].splice(readPages[board.name].indexOf(c.promise), 1);
+        if (readPages[board.name].length < 1)
+            delete readPages[board.name];
+        c.resolve();
+        return data;
+    });
+};
+
+var getPage = function(board, page) {
+    if (!(board instanceof Board))
+        return Promise.reject("Invalid board instance");
+    page = +(page || 0);
+    if (isNaN(page) || page < 0 || page >= pageCounts[board.name])
+        return Promise.reject(404);
+    var c = {};
+    return Database.getThreads(board.name, {
+        filterFunction: function(thread) {
+            return !thread.options.draft;
+        }
     }).then(function(threads) {
         c.threads = threads;
         c.threads.sort(Board.sortThreadsByDate);
-        c.pageCount = Math.ceil(c.threads.length / board.threadsPerPage);
-        if (!c.pageCount)
-            c.pageCount = 1;
+        c.pageCount = pageCounts[board.name];
         if (page >= c.pageCount)
             return Promise.reject(404);
-        if (!json)
-            return Promise.resolve();
         var start = page * board.threadsPerPage;
         c.threads = c.threads.slice(start, start + board.threadsPerPage);
         var promises = c.threads.map(function(thread) {
@@ -155,8 +137,6 @@ module.exports.getPage = function(board, hashpass, page, json, internal) {
         });
         return Promise.all(promises);
     }).then(function() {
-        if (!json)
-            return Promise.resolve();
         var promises = c.threads.map(function(thread) {
             return Database.threadPosts(board.name, thread.number, {
                 limit: board.maxLastPosts,
@@ -167,13 +147,7 @@ module.exports.getPage = function(board, hashpass, page, json, internal) {
                 filterFunction: function(post) {
                     if (post.number == thread.number)
                         return false;
-                    if (!post.options.draft)
-                        return true;
-                    if (!post.user.hashpass)
-                        return true;
-                    if (post.user.hashpass == hashpass)
-                        return true;
-                    return Database.compareRegisteredUserLevels(post.user.level, c.level) < 0;
+                    return !post.options.draft;
                 }
             }).then(function(posts) {
                 thread.lastPosts = posts;
@@ -182,8 +156,6 @@ module.exports.getPage = function(board, hashpass, page, json, internal) {
         });
         return Promise.all(promises);
     }).then(function() {
-        if (!json)
-            return Promise.resolve();
         var promises = c.threads.map(function(thread) {
             return Database.threadPostCount(board.name, thread.number).then(function(postCount) {
                 thread.postCount = postCount;
@@ -196,25 +168,23 @@ module.exports.getPage = function(board, hashpass, page, json, internal) {
             threads: [],
             pageCount: c.pageCount
         };
-        if (json) {
-            c.threads.forEach(function(thread) {
-                var threadModel = {
-                    opPost: thread.opPost,
-                    lastPosts: thread.lastPosts.reverse(),
-                    postCount: thread.postCount,
-                    bumpLimit: board.bumpLimit,
-                    postLimit: board.postLimit,
-                    bumpLimitReached: (thread.postCount >= board.bumpLimit),
-                    postLimitReached: (thread.postCount >= board.postLimit),
-                    closed: thread.closed,
-                    fixed: thread.fixed,
-                    postingEnabled: (board.postingEnabled && !thread.closed),
-                    omittedPosts: ((thread.postCount > (board.maxLastPosts + 1))
-                        ? (thread.postCount - board.maxLastPosts - 1) : 0)
-                };
-                c.model.threads.push(threadModel);
-            });
-        }
+        c.threads.forEach(function(thread) {
+            var threadModel = {
+                opPost: thread.opPost,
+                lastPosts: thread.lastPosts.reverse(),
+                postCount: thread.postCount,
+                bumpLimit: board.bumpLimit,
+                postLimit: board.postLimit,
+                bumpLimitReached: (thread.postCount >= board.bumpLimit),
+                postLimitReached: (thread.postCount >= board.postLimit),
+                closed: thread.closed,
+                fixed: thread.fixed,
+                postingEnabled: (board.postingEnabled && !thread.closed),
+                omittedPosts: ((thread.postCount > (board.maxLastPosts + 1))
+                    ? (thread.postCount - board.maxLastPosts - 1) : 0)
+            };
+            c.model.threads.push(threadModel);
+        });
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
         c.model.lastPostNumber = lastPostNumber;
@@ -222,55 +192,106 @@ module.exports.getPage = function(board, hashpass, page, json, internal) {
     });
 };
 
-module.exports.getThread = function(board, hashpass, number, json) {
+module.exports.getThreadPage = function(board, number, json) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     number = +(number || 0);
     if (isNaN(number) || number < 1)
         return Promise.reject("Invalid thread");
     var c = {};
-    return Database.registeredUserLevel(hashpass).then(function(level) {
-        c.level = level;
-        return Database.getThreads(board.name, {
-            limit: 1,
-            withPostNumbers: 1,
-            filterFunction: function(thread) {
-                if (thread.number != number)
-                    return false;
-                if (!thread.options.draft)
-                    return true;
-                if (!thread.user.hashpass)
-                    return true;
-                if (thread.user.hashpass == hashpass)
-                    return true;
-                return Database.compareRegisteredUserLevels(thread.user.level, c.level) < 0;
-            }
+    if (!json) {
+        return Database.getThread(board.name, number).then(function(thread) {
+            if (!thread)
+                return Promise.reject(404);
+            c.thread = thread;
+            return Database.getPost(board.name, c.thread.number);
+        }).then(function(post) {
+            c.opPost = post;
+            var postCount = c.thread.postNumbers.length;
+            c.model = {};
+            var title = (c.opPost.subject || c.opPost.rawText || "").replace(/\r*\n+/gi, "");
+            if (title.length > 50)
+                title = title.substr(0, 47) + "...";
+            var threadModel = {
+                title: title || null,
+                number: c.thread.number,
+                bumpLimit: board.bumpLimit,
+                postLimit: board.postLimit,
+                bumpLimitReached: (postCount >= board.bumpLimit),
+                postLimitReached: (postCount >= board.postLimit),
+                closed: c.thread.closed,
+                fixed: c.thread.fixed,
+                postCount: postCount,
+                postingEnabled: (board.postingEnabled && !c.thread.closed),
+                opPost: c.opPost,
+                lastPosts: []
+            };
+            c.model.thread = threadModel;
+            return Database.lastPostNumber(board.name);
+        }).then(function(lastPostNumber) {
+            c.model.lastPostNumber = lastPostNumber;
+            return Promise.resolve(c.model);
         });
+    }
+    var key = board.name + ":" + number;
+    var list = lockedThreads[key];
+    var p;
+    if (list) {
+        p = new Promise(function(resolve, reject) {
+            list.push(resolve);
+        });
+    } else {
+        p = Promise.resolve();
+    }
+    var c = {};
+    return p.then(function() {
+        if (!readThreads[key])
+            readThreads[key] = [];
+        c.promise = new Promise(function(resolve, reject) {
+            c.resolve = resolve;
+        });
+        readThreads[key].push(c.promise);
+        return FS.read(__dirname + "/../tmp/cache/thread-" + board.name + "-" + number + ".json");
+    }).then(function(data) {
+        c.data = data;
+        return FS.read(__dirname + "/../tmp/cache/thread-posts-" + board.name + "-" + number + ".json");
+    }).then(function(data) {
+        readThreads[key].splice(readThreads[key].indexOf(c.promise), 1);
+        if (readThreads[key].length < 1)
+            delete readThreads[key];
+        c.resolve();
+        return Promise.resolve("{\"thread\":{\"lastPosts\":" + data + "," + c.data.substr(11));
+    });
+};
+
+var getThread = function(board, number) {
+    if (!(board instanceof Board))
+        return Promise.reject("Invalid board instance");
+    number = +(number || 0);
+    if (isNaN(number) || number < 1)
+        return Promise.reject("Invalid thread");
+    var c = {};
+    return Database.getThreads(board.name, {
+        limit: 1,
+        withPostNumbers: 1,
+        filterFunction: function(thread) {
+            if (thread.number != number)
+                return false;
+            return !thread.options.draft;
+        }
     }).then(function(threads) {
         if (threads.length != 1)
             return Promise.reject(404);
         c.thread = threads[0];
-        if (!json)
-            return Database.getPost(board.name, c.thread.number);
         return Database.threadPosts(board.name, c.thread.number, {
             withFileInfos: true,
             withReferences: true,
             withExtraData: true,
             filterFunction: function(post) {
-                if (!post.options.draft)
-                    return true;
-                if (!post.user.hashpass)
-                    return true;
-                if (post.user.hashpass == hashpass)
-                    return true;
-                return Database.compareRegisteredUserLevels(post.user.level, c.level) < 0;
+                return !post.options.draft;
             }
         });
     }).then(function(posts) {
-        if (!json) {
-            c.opPost = posts;
-            return Database.threadPostCount(board.name, c.thread.number);
-        }
         c.opPost = posts.splice(0, 1)[0];
         c.posts = posts;
         return Database.threadPostCount(board.name, c.thread.number);
@@ -290,10 +311,9 @@ module.exports.getThread = function(board, hashpass, number, json) {
             fixed: c.thread.fixed,
             postCount: postCount,
             postingEnabled: (board.postingEnabled && !c.thread.closed),
-            opPost: c.opPost
+            opPost: c.opPost,
+            lastPosts: c.posts
         };
-        if (json)
-            threadModel.lastPosts = c.posts;
         c.model.thread = threadModel;
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
@@ -488,19 +508,42 @@ module.exports.pageCount = function(boardName) {
     });
 };
 
-var generateThread = function(boardName, threadNumber) {
+var renderThread = function(board, thread) {
+    var p = board.renderPost(thread.opPost, null, thread.opPost);
+    thread.lastPosts.forEach(function(post) {
+        p = p.then(function() {
+            return board.renderPost(post, null, thread.opPost);
+        });
+    });
+    return p;
+};
+
+var generateThread = function(boardName, threadNumber, nowrite) {
     var board = Board.board(boardName);
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     var c = {};
-    return module.exports.getThread(board, null, threadNumber, true).then(function(json) {
-        c.posts = json.thread.lastPosts;
-        delete json.thread.lastPosts;
-        return FS.write(__dirname + "/../tmp/cache/thread-" + boardName + "-" + threadNumber + ".json",
-            JSON.stringify(json));
+    var threadPath = __dirname + "/../tmp/cache/thread-" + boardName + "-" + threadNumber + ".json";
+    var postsPath = __dirname + "/../tmp/cache/thread-posts-" + boardName + "-" + threadNumber + ".json";
+    return getThread(board, threadNumber).then(function(json) {
+        c.json = json;
+        return renderThread(board, c.json.thread);
     }).then(function() {
-        return FS.write(__dirname + "/../tmp/cache/thread-posts-" + boardName + "-" + threadNumber + ".json",
-            JSON.stringify(c.posts));
+        c.posts = c.json.thread.lastPosts;
+        delete c.json.thread.lastPosts;
+        if (nowrite)
+            return Promise.resolve();
+        return FS.write(threadPath, JSON.stringify(c.json));
+    }).then(function() {
+        if (nowrite) {
+            return Promise.resolve({
+                threadPath: threadPath,
+                postsPath: postsPath,
+                threadData: JSON.stringify(c.json),
+                postsData: JSON.stringify(c.posts)
+            });
+        }
+        return FS.write(postsPath, JSON.stringify(c.posts));
     });
 };
 
@@ -524,19 +567,9 @@ var generateThreads = function(boardName) {
     });
 };
 
-var renderThread = function(board, thread) {
-    var p = board.renderPost(thread.opPost, null, thread.opPost);
-    thread.lastPosts.forEach(function(post) {
-        p = p.then(function() {
-            return board.renderPost(post, null, thread.opPost);
-        });
-    });
-    return p;
-};
-
 var generatePage = function(boardName, page, accumulator) {
     var board = Board.board(boardName);
-    return module.exports.getPage(board, null, page, true, true).then(function(json) {
+    return getPage(board, page).then(function(json) {
         var path = __dirname + "/../tmp/cache/page-" + boardName + "-" + page + ".json";
         var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
         json.threads.slice(1).forEach(function(thread) {
@@ -582,6 +615,124 @@ var generateBoard = function(boardName) {
     return generatePages(boardName).then(function() {
         return generateThreads(boardName);
     });
+};
+
+module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNumber, action) {
+    var key = boardName + ":" + threadNumber;
+    var scheduled = scheduledGenerateThread[key];
+    if (scheduled) {
+        if (!scheduled[action])
+            scheduled[action] = [];
+        scheduled[action].push(postNumber);
+        return Promise.resolve();
+    }
+    scheduledGenerateThread[key] = {};
+    scheduled = scheduledGenerateThread[key];
+    scheduled[action] = [postNumber];
+    scheduled.timer = setTimeout(function() {
+        var c = {};
+        if (scheduled.create && scheduled.delete) {
+            for (var i = scheduled.create.length - 1; i >= 0; ++i) {
+                var ind = scheduled.delete.indexOf(scheduled.create[i]);
+                if (ind >= 0) {
+                    scheduled.create.splice(i, 1);
+                    scheduled.delete.splice(ind, 1);
+                }
+            }
+        }
+        var creatingThread = false;
+        if (scheduled.create) {
+            scheduled.create.forEach(function(postNumber) {
+                if (postNumber == threadNumber)
+                    creatingThread = true;
+            });
+        }
+        var p;
+        if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)
+            || creatingThread) {
+            p = generateThread(boardName, threadNumber, true);
+        } else if (scheduled.create && scheduled.create.length > 0) {
+            var posts = scheduled.create.sort(function(pn1, pn2) {
+                pn1 = +pn1;
+                pn2 = +pn2;
+                if (pn1 < pn2)
+                    return -1;
+                else if (pn1 > pn2)
+                    return 1;
+                else
+                    return 0;
+            }).reduce(function(posts, postNumber) {
+                return posts.concat({
+                    boardName: boardName,
+                    postNumber: postNumber
+                });
+            }, []);
+            p = module.exports.getPosts(posts).then(function(posts) {
+                c.posts = posts.filter(function(post) {
+                    return post;
+                });
+                c.board = Board.board(boardName);
+                if (!c.board)
+                    return Promise.reject("Invalid board instance");
+                return Database.getPost(boardName, threadNumber);
+            }).then(function(opPost) {
+                if (c.posts.length < 1)
+                    return Promise.resolve([]);
+                var pp = board.renderPost(c.posts[0], null, opPost);
+                c.posts.slice(1).forEach(function(post) {
+                    pp = pp.then(function() {
+                        return board.renderPost(post, null, opPost);
+                    })
+                })
+                return pp;
+            }).then(function() {
+                return Promise.resolve(c.posts.reduce(function(data, post) {
+                    return data + "," + JSON.stringify(post);
+                }, ""));
+            });
+        } else {
+            p = Promise.resolve();
+        }
+        p = p.then(function(data) {
+            c.data = data;
+            return Global.IPC.send("lockThread", {
+                boardName: boardName,
+                threadNumber: threadNumber
+            });
+        });
+        if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)) {
+            p = p.then(function() {
+                return FS.write(c.data.threadPath, c.data.threadData);
+            }).then(function() {
+                return FS.write(c.data.postsPath, c.data.postsData);
+            });
+        } else if (scheduled.create && scheduled.create.length > 0) {
+            var postsPath = __dirname + "/../tmp/cache/thread-posts-" + boardName + "-" + threadNumber + ".json";
+            p = p.then(function() {
+                return FS.read(postsPath);
+            }).then(function(data) {
+                if (data.length < 3) //Empty list
+                    c.data = c.data.substr(1);
+                return FS.write(postsPath, data.substr(0, data.length - 1) + c.data + "]");
+            });
+        } else {
+            p = p.then(function() {
+                return Promise.resolve();
+            });
+        }
+        p.then(function() {
+            return Global.IPC.send("unlockThread", {
+                boardName: boardName,
+                threadNumber: threadNumber
+            });
+        }).then(function() {
+            delete scheduledGenerateThread[key];
+            return Promise.resolve();
+        }).catch(function(err) {
+            console.log(err.stack || err);
+        });
+    }, Tools.Second);
+    return Promise.resolve();
 };
 
 module.exports.scheduleGeneratePages = function(boardName) {

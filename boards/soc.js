@@ -85,7 +85,7 @@ board.addTranslations = function(translate) {
     translate("Dislike", "dislikeText");
 };
 
-board.renderPost = function(post, req) {
+board.renderPost = function(post) {
     return Board.prototype.renderPost.apply(this, arguments).then(function(post) {
         if (!post.extraData) {
             post.extraData = {
@@ -94,16 +94,14 @@ board.renderPost = function(post, req) {
             };
         }
         if (post.extraData.likes) {
-            //if (post.extraData.likes.indexOf(req.ip) >= 0)
-            //    post.extraData.liked = true;
-            post.extraData.likeCount = post.extraData.likes.length;
-            delete post.extraData.likes;
+            post.extraData.likes.forEach(function(ip, i) {
+                post.extraData.likes[i] = Tools.sha256(ip);
+            });
         }
         if (post.extraData.dislikes) {
-            //if (post.extraData.dislikes.indexOf(req.ip) >= 0)
-            //    post.extraData.disliked = true;
-            post.extraData.dislikeCount = post.extraData.dislikes.length;
-            delete post.extraData.dislikes;
+            post.extraData.dislikes.forEach(function(ip, i) {
+                post.extraData.dislikes[i] = Tools.sha256(ip);
+            });
         }
         return Promise.resolve(post);
     });

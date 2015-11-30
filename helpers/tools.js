@@ -529,3 +529,11 @@ module.exports.preferIPv4 = function(ip) {
     }
     return ip;
 };
+
+module.exports.sha256 = function(data) {
+    if (!data)
+        return null;
+    var sha256 = Crypto.createHash("sha256");
+    sha256.update(data);
+    return sha256.digest("hex");
+};

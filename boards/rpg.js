@@ -353,7 +353,7 @@ board.removeExtraData = function(postNumber) {
     });
 };
 
-board.renderPost = function(post, req) {
+board.renderPost = function(post) {
     return Board.prototype.renderPost.apply(this, arguments).then(function(post) {
         if (!post.extraData)
             return Promise.resolve(post);
@@ -361,16 +361,15 @@ board.renderPost = function(post, req) {
             post.extraData.variants.forEach(function(variant) {
                 if (!variant.users)
                     return;
-                //if (variant.users.indexOf(req.ip) >= 0)
-                //    variant.ownIp = true;
-                variant.voteCount = variant.users.length;
-                delete variant.users;
+                variant.users.forEach(function(ip, i) {
+                    variant.users[i] = Tools.sha256(ip);
+                });
             });
         }
         if (post.extraData.users) {
-            //if (post.extraData.users.indexOf(req.ip) >= 0)
-            //    post.extraData.voted = true;
-            delete post.extraData.users;
+            post.extraData.users.forEach(function(ip, i) {
+                post.extraData.users[i] = Tools.sha256(ip);
+            });
         }
         return Promise.resolve(post);
     });

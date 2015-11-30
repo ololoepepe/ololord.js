@@ -50,7 +50,7 @@ board.postExtraData = function(req, fields, files, oldPost) {
     return Promise.resolve(link);
 };
 
-board.renderPost = function(post, req) {
+board.renderPost = function(post) {
     return Board.prototype.renderPost.apply(this, arguments).then(function(post) {
         if (post.number != post.threadNumber)
             return Promise.resolve(post);
@@ -58,7 +58,7 @@ board.renderPost = function(post, req) {
             href: post.extraData,
             link: (post.subject || post.extraData)
         };
-        post.subject = controller.sync(req, "echoPostSubject", model);
+        post.subject = controller.sync(null, "echoPostSubject", model);
         post.subjectIsRaw = true;
         return Promise.resolve(post);
     });

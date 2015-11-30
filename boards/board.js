@@ -271,14 +271,6 @@ var Board = function(name, title, options) {
     //
 };
 
-/*public*/ Board.prototype.renderBoardPage = function(req, res, ajax) {
-    return Promise.resolve(null);
-};
-
-/*public*/ Board.prototype.renderThread = function(req, res, ajax) {
-    return Promise.resolve(null);
-};
-
 /*public*/ Board.prototype.testParameters = function(fields, files, creatingThread) {
     //
 };
@@ -325,21 +317,15 @@ var renderFileInfo = function(fi) {
     });
     post.rawSubject = post.subject;
     post.isOp = (post.number == post.threadNumber);
-    post.ownIp = req && (req.ip == post.user.ip);
-    post.ownHashpass = req && (req.hashpass && req.hashpass == post.user.hashpass);
+    post.user.ipHash = Tools.sha256(post.user.ip);
+    post.user.hashpassHash = Tools.sha256(post.user.hashpass);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
-    if (!req || Database.compareRegisteredUserLevels(req ? req.level : null, Database.RegisteredUserLevels.Moder) < 0) {
-        delete post.user.ip;
-    } else {
-        var ipv4 = Tools.preferIPv4(post.user.ip);
-        if (ipv4 && ipv4 != post.user.ip)
-            post.user.ipv4 = ipv4;
-    }
     if (post.options.showTripcode) {
         var md5 = Crypto.createHash("md5");
         md5.update(post.user.hashpass + config("site.tripcodeSalt", ""));
         post.tripcode = "!" + md5.digest("base64").substr(0, 10);
     }
+    delete post.user.ip;
     delete post.user.hashpass;
     delete post.user.password;
     if (!this.showWhois) {

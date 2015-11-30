@@ -314,6 +314,10 @@ lord.appendExtrasToModel = function(model) {
     model.formattedDate = function(date) {
         return moment(date).utcOffset(timeOffset).locale(locale).format(dateFormat);
     };
+    model.checkOwnPost = function(post) {
+        return (post.user.ipHash && post.user.ipHash == model.user.ipHash)
+            || (post.user.hashpassHash && post.user.hashpassHash == model.user.hashpassHash);
+    };
     var indexes = [];
     for (var i = 0; i < 60; i += 10)
         indexes.push(i);
@@ -422,14 +426,9 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
         if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
             lord.strikeOutHiddenPostLinks(c.node);
         if (lord.getLocalObject("signOpPostLinks", true))
-            postInfos = lord.signOpPostLinks(c.node, postInfos);
-        else
-            postInfos = Promise.resolve(postInfos);
-        if (lord.getLocalObject("signOwnPostLinks", true)) {
-            postInfos = postInfos.then(function(infos) {
-                return lord.signOwnPostLinks(c.node, infos);
-            });
-        }
+            lord.signOpPostLinks(c.node);
+        if (lord.getLocalObject("signOwnPostLinks", true))
+            lord.signOwnPostLinks(c.node, c.model.user);
         if (lord.getLocalObject("mumWatching", false)) {
             lord.query(".postFileFile > a > img", c.node).forEach(function(img) {
                 lord.addClass(img, "mumWatching");
@@ -494,16 +493,10 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
                 referencedBy.appendChild(a);
                 if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
                     lord.strikeOutHiddenPostLinks(targetPost);
-                if (lord.getLocalObject("signOpPostLinks", true)) {
-                    postInfos = postInfos.then(function(infos) {
-                        return lord.signOpPostLinks(targetPost, infos);
-                    });
-                }
-                if (lord.getLocalObject("signOwnPostLinks", true)) {
-                    postInfos.then(function(infos) {
-                        return lord.signOwnPostLinks(targetPost, infos);
-                    });
-                }
+                if (lord.getLocalObject("signOpPostLinks", true))
+                    lord.signOpPostLinks(targetPost);
+                if (lord.getLocalObject("signOwnPostLinks", true))
+                    lord.signOwnPostLinks(targetPost, c.model.user);
                 return Promise.resolve();
             });
             return Promise.all(promises);
@@ -2407,7 +2400,17 @@ lord.addThreadToFavorites = function(boardName, threadNumber) {
 };
 
 lord.showUserIp = function(a) {
-    prompt("IP:", lord.data("userIpv4", a, true) || lord.data("userIp", a, true));
+    var boardName = lord.data("boardName", a, true);
+    if (!boardName)
+        return;
+    var postNumber = +lord.data("number", a, true);
+    if (!postNumber || postNumber < 1)
+        return;
+    lord.getModel("api/userIp", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(result) {
+        if (lord.checkError(result))
+            return Promise.reject(result);
+        prompt("IP:", result.ipv4 || result.ip);
+    }).catch(lord.handleError);
 };
 
 lord.submitted = function(event, form) {
@@ -2595,49 +2598,25 @@ lord.signOpPostLink = function(a, data) {
         return;
     if (a.textContent.indexOf("(OP)") >= 0)
         return;
-    var boardName = lord.data("boardName", a);
-    if (!boardName)
-        return;
     var postNumber = +lord.data("postNumber", a);
     if (!postNumber)
         return;
-    var post = lord.id(postNumber);
-    if (lord.data("boardName", post) != boardName)
-        post = null;
-    if (post || data) {
-        if (post ? lord.data("isOp", post) : data.isOp)
-            a.appendChild(lord.node("text", " (OP)"));
+    var threadNumber = +lord.data("threadNumber", a);
+    if (!threadNumber)
         return;
-    }
-    return {
-        boardName: boardName,
-        postNumber: postNumber
-    };
+    if (postNumber == threadNumber)
+        a.appendChild(lord.node("text", " (OP)"));
 };
 
-lord.signOwnPostLink = function(a, data) {
+lord.signOwnPostLink = function(a, user) {
     if (!a)
         return;
     if (a.textContent.indexOf("(You)") >= 0)
         return;
-    var boardName = lord.data("boardName", a);
-    if (!boardName)
-        return;
-    var postNumber = +lord.data("postNumber", a);
-    if (!postNumber)
-        return;
-    var post = lord.id(postNumber);
-    if (lord.data("boardName", post) != boardName)
-        post = null;
-    if (post || data) {
-        if (post ? lord.data("ownIp", post) : data.ownIp)
-            a.appendChild(lord.node("text", " (You)"));
-        return;
-    }
-    return {
-        boardName: boardName,
-        postNumber: postNumber
-    };
+    var ipHash = lord.data("userIpHash", a);
+    var hashpassHash = lord.data("userHashpassHash", a);
+    if ((ipHash && user.ipHash == ipHash) || (hashpassHash && user.hashpassHash == hashpassHash))
+        a.appendChild(lord.node("text", " (You)"));
 };
 
 lord.strikeOutHiddenPostLinks = function(parent) {
@@ -2652,99 +2631,31 @@ lord.strikeOutHiddenPostLinks = function(parent) {
     });
 };
 
-lord.signOpPostLinks = function(parent, postInfos) {
+lord.signOpPostLinks = function(parent) {
     if (!parent)
-        parent = document;
+        parent = document.body;
     var list = [];
     return lord.gently(lord.query("a", parent), function(a) {
-        var post = lord.signOpPostLink(a);
-        if (!post)
-            return;
-        list.push({
-            a: a,
-            boardName: post.boardName,
-            postNumber: post.postNumber
-        });
+        lord.signOpPostLink(a);
     }, {
         delay: 10,
         n: 20
-    }).then(function() {
-        if (list.length <= 0)
-            return [];
-        if (postInfos) {
-            return list.map(function(item) {
-                return postInfos[item.boardName + ":" + item.postNumber];
-            });
-        }
-        var query = "posts=" + list[0].boardName + ":" + list[0].postNumber;
-        for (var i = 1; i < list.length; ++i)
-            query += "&posts=" + list[i].boardName + ":" + list[i].postNumber;
-        return lord.getModel("api/posts", query);
-    }).then(function(posts) {
-        if (lord.checkError(posts))
-            return Promise.reject(posts);
-        var populate = !postInfos;
-        if (populate)
-            postInfos = {};
-        posts.forEach(function(post, i) {
-            if (!post)
-                return;
-            if (populate)
-                postInfos[post.boardName + ":" + post.number] = post;
-            lord.signOpPostLink(list[i].a, post);
-        });
-    }).catch(function(err) {
-        lord.handleError(err);
-        return Promise.resolve(postInfos);
-    }).then(function() {
-        return postInfos;
     });
 };
 
-lord.signOwnPostLinks = function(parent, postInfos) {
+lord.signOwnPostLinks = function(parent, user) {
     if (!parent)
-        parent = document;
-    var list = [];
-    return lord.gently(lord.query("a", parent), function(a) {
-        var post = lord.signOwnPostLink(a);
-        if (!post)
-            return;
-        list.push({
-            a: a,
-            boardName: post.boardName,
-            postNumber: post.postNumber
+        parent = document.body;
+    var p = user ? Promise.resolve(user) : lord.getModel("misc/base").then(function(model) {
+        return Promise.resolve(model.user);
+    });
+    return p.then(function(user) {
+        lord.gently(lord.query("a", parent), function(a) {
+            lord.signOwnPostLink(a, user);
+        }, {
+            delay: 10,
+            n: 20
         });
-    }, {
-        delay: 10,
-        n: 20
-    }).then(function() {
-        if (list.length <= 0)
-            return [];
-        if (postInfos) {
-            return list.map(function(item) {
-                return postInfos[item.boardName + ":" + item.postNumber];
-            });
-        }
-        var query = "posts=" + list[0].boardName + ":" + list[0].postNumber;
-        for (var i = 1; i < list.length; ++i)
-            query += "&posts=" + list[i].boardName + ":" + list[i].postNumber;
-        return lord.getModel("api/posts", query);
-    }).then(function(posts) {
-        var populate = !postInfos;
-        if (populate)
-            postInfos = {};
-        posts.forEach(function(post, i) {
-            if (!post)
-                return;
-            if (populate)
-                postInfos[post.boardName + ":" + post.number] = post;
-            lord.signOwnPostLink(list[i].a, post);
-        });
-    }).catch(function(err) {
-        lord.handleError(err);
-        return Promise.resolve(postInfos);
-    }).then(function() {
-        return postInfos;
     });
 };
 
@@ -3145,8 +3056,11 @@ lord.initializeOnLoadBaseBoard = function() {
         }
         if (lord.showTripcode(lord.data("threadNumber"))) {
             var postForm = lord.id("postForm");
-            var sw = lord.nameOne("tripcode", postForm);
-            sw.checked = true;
+            if (postForm) {
+                var sw = lord.nameOne("tripcode", postForm);
+                if (sw)
+                    sw.checked = true;
+            }
         }
         var fav = lord.getLocalObject("favoriteThreads", {});
         var currentBoardName = lord.data("boardName");
@@ -3227,16 +3141,10 @@ lord.initializeOnLoadBaseBoard = function() {
         lord.setPostformMarkupVisible(!lord.getLocalObject("hidePostformMarkup", false));
         if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
             lord.strikeOutHiddenPostLinks();
-        var postInfos;
         if (lord.getLocalObject("signOpPostLinks", true))
-            postInfos = lord.signOpPostLinks();
-        else
-            postInfos = Promise.resolve();
-        if (lord.getLocalObject("signOwnPostLinks", true)) {
-            postInfos.then(function(infos) {
-                return lord.signOwnPostLinks(document.body, infos);
-            })
-        }
+            lord.signOpPostLinks();
+        if (lord.getLocalObject("signOwnPostLinks", true))
+            lord.signOwnPostLinks(document.body, c.model.user);
         if (!lord.data("threadNumber")) {
             var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
             lastPostNumbers[currentBoardName] = +lord.data("lastPostNumber");

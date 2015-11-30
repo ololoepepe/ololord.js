@@ -58,7 +58,7 @@ var renderPost = function(req, post) {
         } ], req.hashpass);
     }
     return p.then(function(posts) {
-        return board.renderPost(post, req, posts[0]);
+        return board.renderPost(post, posts[0]);
     });
 };
 
@@ -79,6 +79,24 @@ router.get("/post.json", function(req, res) {
         return renderPost(req, posts[0]);
     }).then(function(post) {
         res.json(post || null);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
+router.get("/userIp.json", function(req, res) {
+    Database.getPost(req.query.boardName, +req.query.postNumber).then(function(post) {
+        if (!post)
+            return Promise.reject("No such post");
+        if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0
+            || Database.compareRegisteredUserLevels(req.level, post.user.level) < 0) {
+            return Promise.reject("Not enough rights");
+        }
+        var result = { ip: post.user.ip };
+        var ipv4 = Tools.preferIPv4(post.user.ip);
+        if (ipv4 && ipv4 != post.user.ip)
+            result.ipv4 = ipv4;
+        res.json(result);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
