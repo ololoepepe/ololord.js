@@ -1580,7 +1580,17 @@ lord.viewPost = function(a, boardName, postNumber) {
     var p;
     if (post) {
         post = post.cloneNode(true);
-        post.removeChild(lord.queryOne(".postActions", post));
+        var actions = lord.queryOne(".postActions", post);
+        if (actions)
+            actions.parentNode.removeChild(actions);
+        var qr = lord.nameOne("quickReplyContainer", post);
+        if (qr)
+            qr.parentNode.removeChild(qr);
+        var ptt = lord.queryOne(".postToThread", post);
+        if (ptt)
+            ptt.parentNode.removeChild(ptt);
+        lord.removeClass(post, "opPost");
+        lord.addClass(post, "post temporary");
         p = Promise.resolve(post);
     } else {
         p = lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
