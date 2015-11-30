@@ -19,6 +19,11 @@ var readThreads = {};
 var lockedCatalogs = {};
 var readCatalogs = {};
 
+var cachePath = function() {
+    var path = Array.prototype.join.call(arguments, "-");
+    return config("system.cachePath", __dirname + "/../tmp/cache") + (path ? ("/" + path + ".json") : "");
+};
+
 module.exports.getLastPostNumbers = function(boardNames) {
     if (!Util.isArray(boardNames))
         return Promise.resolve([]);
@@ -101,7 +106,7 @@ module.exports.getBoardPage = function(board, page, json) {
             c.resolve = resolve;
         });
         readPages[board.name].push(c.promise);
-        return FS.read(__dirname + "/../tmp/cache/page-" + board.name + "-" + page + ".json");
+        return FS.read(cachePath("page", board.name, page));
     }).then(function(data) {
         readPages[board.name].splice(readPages[board.name].indexOf(c.promise), 1);
         if (readPages[board.name].length < 1)
@@ -257,10 +262,10 @@ module.exports.getThreadPage = function(board, number, json) {
             c.resolve = resolve;
         });
         readThreads[key].push(c.promise);
-        return FS.read(__dirname + "/../tmp/cache/thread-" + board.name + "-" + number + ".json");
+        return FS.read(cachePath("thread", board.name, number));
     }).then(function(data) {
         c.data = data;
-        return FS.read(__dirname + "/../tmp/cache/thread-posts-" + board.name + "-" + number + ".json");
+        return FS.read(cachePath("thread-posts", board.name, number));
     }).then(function(data) {
         readThreads[key].splice(readThreads[key].indexOf(c.promise), 1);
         if (readThreads[key].length < 1)
@@ -451,7 +456,7 @@ module.exports.getCatalogPage = function(board, sortMode, json) {
         sortMode = (sortMode || "date").toLowerCase();
         if (["recent", "bumps"].indexOf(sortMode) < 0)
             sortMode = "date";
-        return FS.read(__dirname + "/../tmp/cache/catalog-" + sortMode + "-" + board.name + ".json");
+        return FS.read(cachePath("catalog", sortMode, board.name));
     }).then(function(data) {
         readCatalogs[board.name].splice(readCatalogs[board.name].indexOf(c.promise), 1);
         if (readCatalogs[board.name].length < 1)
@@ -556,8 +561,8 @@ var generateThread = function(boardName, threadNumber, nowrite) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     var c = {};
-    var threadPath = __dirname + "/../tmp/cache/thread-" + boardName + "-" + threadNumber + ".json";
-    var postsPath = __dirname + "/../tmp/cache/thread-posts-" + boardName + "-" + threadNumber + ".json";
+    var threadPath = cachePath("thread", boardName, threadNumber);
+    var postsPath = cachePath("thread-posts", boardName, threadNumber);
     return getThread(board, threadNumber).then(function(json) {
         c.json = json;
         return renderThread(board, c.json.thread);
@@ -603,7 +608,7 @@ var generateThreads = function(boardName) {
 var generatePage = function(boardName, page, accumulator) {
     var board = Board.board(boardName);
     return getPage(board, page).then(function(json) {
-        var path = __dirname + "/../tmp/cache/page-" + boardName + "-" + page + ".json";
+        var path = cachePath("page", boardName, page);
         var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
         json.threads.slice(1).forEach(function(thread) {
             p = p.then(function() {
@@ -648,7 +653,7 @@ var generateCatalog = function(boardName, nowrite) {
     var board = Board.board(boardName);
     var c = {};
     return getCatalog(board, "date").then(function(json) {
-        var path = __dirname + "/../tmp/cache/catalog-date-" + boardName + ".json";
+        var path = cachePath("catalog", "date", boardName);
         var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
         json.threads.slice(1).forEach(function(thread) {
             p = p.then(function() {
@@ -668,7 +673,7 @@ var generateCatalog = function(boardName, nowrite) {
     }).then(function() {
         return getCatalog(board, "recent");
     }).then(function(json) {
-        var path = __dirname + "/../tmp/cache/catalog-recent-" + boardName + ".json";
+        var path = cachePath("catalog", "recent", boardName);
         var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
         json.threads.slice(1).forEach(function(thread) {
             p = p.then(function() {
@@ -688,7 +693,7 @@ var generateCatalog = function(boardName, nowrite) {
     }).then(function() {
         return getCatalog(board, "bumps");
     }).then(function(json) {
-        var path = __dirname + "/../tmp/cache/catalog-bumps-" + boardName + ".json";
+        var path = cachePath("catalog", "bumps", boardName);
         var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
         json.threads.slice(1).forEach(function(thread) {
             p = p.then(function() {
@@ -859,12 +864,12 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
             });
         } else if (deletingThread) {
             p = p.then(function() {
-                return FS.remove(__dirname + "/../tmp/cache/thread-" + boardName + "-" + threadNumber + ".json");
+                return FS.remove(cachePath("thread", boardName, threadNumber));
             }).then(function() {
-                return FS.remove(__dirname + "/../tmp/cache/thread-posts-" + boardName + "-" + threadNumber + ".json");
+                return FS.remove(cachePath("thread-posts", boardName, threadNumber));
             });
         } else if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)) {
-            var postsPath = __dirname + "/../tmp/cache/thread-posts-" + boardName + "-" + threadNumber + ".json";
+            var postsPath = cachePath("thread-posts", boardName, threadNumber);
             p = p.then(function() {
                 return FS.read(postsPath);
             }).then(function(data) {
@@ -891,7 +896,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
                 return FS.write(postsPath, JSON.stringify(data));
             });
         } else if (scheduled.create && scheduled.create.length > 0) {
-            var postsPath = __dirname + "/../tmp/cache/thread-posts-" + boardName + "-" + threadNumber + ".json";
+            var postsPath = cachePath("thread-posts", boardName, threadNumber);
             p = p.then(function() {
                 return FS.read(postsPath);
             }).then(function(data) {
@@ -987,7 +992,7 @@ module.exports.generate = function() {
 };
 
 module.exports.cleanup = function() {
-    var path = __dirname + "/../tmp/cache";
+    var path = cachePath();
     return FS.list(path).then(function(fileNames) {
         fileNames = fileNames.filter(function(fileName) {
             return ".gitignore" != fileName;
