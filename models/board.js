@@ -713,6 +713,8 @@ var generateBoard = function(boardName) {
 };
 
 module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNumber, action) {
+    threadNumber = +threadNumber;
+    postNumber = +postNumber;
     var key = boardName + ":" + threadNumber;
     var scheduled = scheduledGenerateThread[key];
     if (scheduled) {
@@ -726,26 +728,77 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
     scheduled[action] = [postNumber];
     scheduled.timer = setTimeout(function() {
         var c = {};
-        if (scheduled.create && scheduled.delete) {
-            for (var i = scheduled.create.length - 1; i >= 0; ++i) {
-                var ind = scheduled.delete.indexOf(scheduled.create[i]);
-                if (ind >= 0) {
-                    scheduled.create.splice(i, 1);
-                    scheduled.delete.splice(ind, 1);
-                }
-            }
-        }
         var creatingThread = false;
+        var deletingThread = false;
         if (scheduled.create) {
             scheduled.create.forEach(function(postNumber) {
                 if (postNumber == threadNumber)
                     creatingThread = true;
             });
         }
+        if (scheduled.edit) {
+            scheduled.edit.forEach(function(postNumber) {
+                if (postNumber == threadNumber)
+                    creatingThread = true;
+            });
+        }
+        if (scheduled.delete) {
+            scheduled.delete.forEach(function(postNumber) {
+                if (postNumber == threadNumber)
+                    deletingThread = true;
+            });
+        }
+        scheduled.create = Tools.withoutDuplicates(scheduled.create);
+        scheduled.edit = Tools.withoutDuplicates(scheduled.edit);
+        scheduled.delete = Tools.withoutDuplicates(scheduled.delete);
+        Tools.remove(scheduled.create, scheduled.delete, true);
+        Tools.remove(scheduled.create, scheduled.edit);
+        Tools.remove(scheduled.edit, scheduled.delete);
         var p;
-        if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)
-            || creatingThread) {
+        if (creatingThread) {
             p = generateThread(boardName, threadNumber, true);
+        } else if (deletingThread) {
+            p = Promise.resolve();
+        } else if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)) {
+            var posts = (scheduled.create || []).concat(scheduled.edit || []).sort(function(pn1, pn2) {
+                pn1 = +pn1;
+                pn2 = +pn2;
+                if (pn1 < pn2)
+                    return -1;
+                else if (pn1 > pn2)
+                    return 1;
+                else
+                    return 0;
+            }).reduce(function(posts, postNumber) {
+                return posts.concat({
+                    boardName: boardName,
+                    postNumber: postNumber
+                });
+            }, []);
+            p = module.exports.getPosts(posts).then(function(posts) {
+                c.posts = posts.filter(function(post) {
+                    return post;
+                });
+                c.board = Board.board(boardName);
+                if (!c.board)
+                    return Promise.reject("Invalid board instance");
+                return Database.getPost(boardName, threadNumber);
+            }).then(function(opPost) {
+                if (c.posts.length < 1)
+                    return Promise.resolve([]);
+                var pp = board.renderPost(c.posts[0], null, opPost);
+                c.posts.slice(1).forEach(function(post) {
+                    pp = pp.then(function() {
+                        return board.renderPost(post, null, opPost);
+                    })
+                })
+                return pp;
+            }).then(function() {
+                return Promise.resolve({
+                    edited: c.posts,
+                    deleted: scheduled.delete || []
+                });
+            });
         } else if (scheduled.create && scheduled.create.length > 0) {
             var posts = scheduled.create.sort(function(pn1, pn2) {
                 pn1 = +pn1;
@@ -795,11 +848,44 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
                 threadNumber: threadNumber
             });
         });
-        if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)) {
+        if (creatingThread) {
             p = p.then(function() {
                 return FS.write(c.data.threadPath, c.data.threadData);
             }).then(function() {
                 return FS.write(c.data.postsPath, c.data.postsData);
+            });
+        } else if (deletingThread) {
+            p = p.then(function() {
+                return FS.remove(__dirname + "/../tmp/cache/thread-" + boardName + "-" + threadNumber + ".json");
+            }).then(function() {
+                return FS.remove(__dirname + "/../tmp/cache/thread-posts-" + boardName + "-" + threadNumber + ".json");
+            });
+        } else if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)) {
+            var postsPath = __dirname + "/../tmp/cache/thread-posts-" + boardName + "-" + threadNumber + ".json";
+            p = p.then(function() {
+                return FS.read(postsPath);
+            }).then(function(data) {
+                data = JSON.parse(data);
+                var indexOfPost = function(post) {
+                    for (var i = 0; i < data.length; ++i) {
+                        if (data[i].number == (post.number || post))
+                            return i;
+                    }
+                    return -1;
+                };
+                c.data.edited.forEach(function(post) {
+                    var ind = indexOfPost(post);
+                    if (ind >= 0)
+                        data[ind] = post;
+                    else
+                        data.push(post);
+                });
+                c.data.deleted.forEach(function(postNumber) {
+                    var ind = indexOfPost(postNumber);
+                    if (ind >= 0)
+                        data.splice(ind, 1);
+                });
+                return FS.write(postsPath, JSON.stringify(data));
             });
         } else if (scheduled.create && scheduled.create.length > 0) {
             var postsPath = __dirname + "/../tmp/cache/thread-posts-" + boardName + "-" + threadNumber + ".json";

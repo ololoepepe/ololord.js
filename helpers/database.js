@@ -830,8 +830,21 @@ var removeReferencedPosts = function(boardName, postNumber) {
     var key = boardName + ":" + postNumber;
     return db.hgetall("referencedPosts:" + key).then(function(referencedPosts) {
         var promises = [];
-        Tools.forIn(referencedPosts, function(_, refKey) {
+        Tools.forIn(referencedPosts, function(ref, refKey) {
             promises.push(db.hdel("referringPosts:" + refKey, key));
+            ref = JSON.parse(ref);
+            Global.IPC.send("generatePages", ref.boardName).then(function() {
+                return Global.IPC.send("generateThread", {
+                    boardName: ref.boardName,
+                    threadNumber: ref.threadNumber,
+                    postNumber: ref.postNumber,
+                    action: "edit"
+                });
+            }).then(function() {
+                return Global.IPC.send("generateCatalog", ref.boardName);
+            }).catch(function(err) {
+                console.log(err);
+            });
         });
         return Promise.all(promises);
     }).then(function() {
@@ -844,6 +857,18 @@ var addReferencedPosts = function(post, referencedPosts) {
     var promises = [];
     Tools.forIn(referencedPosts, function(ref, refKey) {
         promises.push(db.hset("referencedPosts:" + key, refKey, JSON.stringify(ref)));
+        Global.IPC.send("generatePages", ref.boardName).then(function() {
+            return Global.IPC.send("generateThread", {
+                boardName: ref.boardName,
+                threadNumber: ref.threadNumber,
+                postNumber: ref.postNumber,
+                action: "edit"
+            });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", ref.boardName);
+        }).catch(function(err) {
+            console.log(err);
+        });
     });
     return Promise.all(promises).then(function() {
         var promises = [];
@@ -1679,6 +1704,18 @@ module.exports.setThreadFixed = function(req, fields) {
         thread.fixed = fixed;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
+        Global.IPC.send("generatePages", board.name).then(function() {
+            return Global.IPC.send("generateThread", {
+                boardName: board.name,
+                threadNumber: threadNumber,
+                postNumber: threadNumber,
+                action: "edit"
+            });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", board.name);
+        }).catch(function(err) {
+            console.log(err);
+        });
         return Promise.resolve({
             boardName: board.name,
             threadNumber: threadNumber
@@ -1711,6 +1748,18 @@ module.exports.setThreadClosed = function(req, fields) {
         thread.closed = closed;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
+        Global.IPC.send("generatePages", board.name).then(function() {
+            return Global.IPC.send("generateThread", {
+                boardName: board.name,
+                threadNumber: threadNumber,
+                postNumber: threadNumber,
+                action: "edit"
+            });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", board.name);
+        }).catch(function(err) {
+            console.log(err);
+        });
         return Promise.resolve({
             boardName: board.name,
             threadNumber: threadNumber
@@ -1920,6 +1969,29 @@ module.exports.moveThread = function(req, fields) {
     }).then(function() {
         return removeThread(sourceBoard.name, threadNumber, false, true);
     }).then(function() {
+        Global.IPC.send("generatePages", sourceBoard.name).then(function() {
+            return Global.IPC.send("generateThread", {
+                boardName: sourceBoard.name,
+                threadNumber: threadNumber,
+                postNumber: threadNumber,
+                action: "delete"
+            });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", sourceBoard.name);
+        }).then(function() {
+            return Global.IPC.send("generatePages", targetBoard.name);
+        }).then(function() {
+            return Global.IPC.send("generateThread", {
+                boardName: targetBoard.name,
+                threadNumber: c.thread.number,
+                postNumber: c.thread.number,
+                action: "create"
+            });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", targetBoard.name);
+        }).catch(function(err) {
+            console.log(err);
+        });
         return {
             boardName: targetBoard.name,
             threadNumber: c.thread.number

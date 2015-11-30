@@ -537,3 +537,28 @@ module.exports.sha256 = function(data) {
     sha256.update(data);
     return sha256.digest("hex");
 };
+
+module.exports.withoutDuplicates = function(arr) {
+    if (!arr || !Util.isArray(arr))
+        return arr;
+    return arr.filter(function(item, i) {
+        return arr.indexOf(item) == i;
+    });
+};
+
+module.exports.remove = function(arr, what, both) {
+    if (!arr || !Util.isArray(arr))
+        return arr;
+    if (Util.isUndefined(what))
+        return;
+    if (!Util.isArray(what))
+        what = [what];
+    for (var i = what.length - 1; i >= 0; --i) {
+        var ind = arr.indexOf(what[i]);
+        if (ind >= 0) {
+            arr.splice(ind, 1);
+            if (both)
+                what.splice(i, 1);
+        }
+    }
+};
