@@ -285,7 +285,7 @@ lord.updateThread = function(silent) {
                 var p = c.posts[0];
                 if (p && p.fileInfos.length > 0)
                     icon = "/" + sitePathPrefix + boardName + "/thumb/" + p.fileInfos[0].thumb.name;
-                lord.showNotification(title, p.rawText.substr(0, 300), icon);
+                lord.showNotification(title, (p.rawText || (boardName + "/" + p.number)).substr(0, 300), icon);
             }
         }
     }).catch(function(err) {
