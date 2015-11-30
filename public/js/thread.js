@@ -279,13 +279,13 @@ lord.updateThread = function(silent) {
             }
             if (lord.notificationsEnabled()) {
                 var subject = lord.queryOne(".theTitle > h1").textContent;
-                var title = "[" + subject + "] " + c.tr.newPostsText + " " + res.length;
+                var title = "[" + subject + "] " + c.tr.newPostsText + " " + c.posts.length;
                 var sitePathPrefix = lord.data("sitePathPrefix");
                 var icon = "/" + sitePathPrefix + "favicon.ico";
-                var p = res[0];
-                if (p.files && p.files.length > 0)
-                    icon = "/" + sitePathPrefix + boardName + "/" + p.files[0].thumbName;
-                lord.showNotification(title, p.rawPostText.substr(0, 300), icon);
+                var p = c.posts[0];
+                if (p && p.fileInfos.length > 0)
+                    icon = "/" + sitePathPrefix + boardName + "/thumb/" + p.fileInfos[0].thumb.name;
+                lord.showNotification(title, p.rawText.substr(0, 300), icon);
             }
         }
     }).catch(function(err) {
