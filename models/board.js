@@ -75,7 +75,10 @@ module.exports.getBoardPage = function(board, page, json) {
     if (isNaN(page) || page < 0 || page >= pageCounts[board.name])
         return Promise.reject(404);
     if (!json) {
-        var model = { threads: [] };
+        var model = {
+            pageCount: pageCounts[board.name],
+            threads: []
+        };
         return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
             model.lastPostNumber = lastPostNumber;
             return Promise.resolve(model);
@@ -1008,6 +1011,9 @@ module.exports.lockPages = function(boardName) {
 
 module.exports.unlockPages = function(boardName) {
     return Promise.all(lockedPages[boardName] || []).then(function() {
+        return module.exports.pageCount(boardName);
+    }).then(function(pageCount) {
+        pageCounts[boardName] = pageCount;
         delete lockedPages[boardName];
         return Promise.resolve();
     });
@@ -1037,4 +1043,14 @@ module.exports.unlockCatalog = function(boardName) {
         delete lockedCatalogs[boardName];
         return Promise.resolve();
     });
+};
+
+module.exports.initialize = function() {
+    var promises = Board.boardNames().map(function(boardName) {
+        return module.exports.pageCount(boardName).then(function(pageCount) {
+            pageCounts[boardName] = pageCount;
+            return Promise.resolve();
+        });
+    });
+    return Promise.all(promises);
 };

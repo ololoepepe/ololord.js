@@ -1574,13 +1574,24 @@ lord.addToPlaylist = function(a) {
 };
 
 lord.viewPost = function(a, boardName, postNumber) {
-    lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
-        if (lord.checkError(post))
-            return Promise.reject(post);
-        if (!post)
-            return Promise.reject("Failed to get post");
-        return lord.createPostNode(post, false);
-    }).then(function(post) {
+    var post;
+    if (boardName == lord.data("boardName"))
+        post = lord.id(postNumber);
+    var p;
+    if (post) {
+        post = post.cloneNode(true);
+        post.removeChild(lord.queryOne(".postActions", post));
+        p = Promise.resolve(post);
+    } else {
+        p = lord.getModel("api/post", "boardName=" + boardName + "&postNumber=" + postNumber).then(function(post) {
+            if (lord.checkError(post))
+                return Promise.reject(post);
+            if (!post)
+                return Promise.reject("Failed to get post");
+            return lord.createPostNode(post, false);
+        });
+    }
+    p.then(function(post) {
         if ("mobile" != lord.data("deviceType")) {
             post.onmouseout = function(event) {
                 var next = post;

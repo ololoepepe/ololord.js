@@ -37,7 +37,9 @@ var spawnCluster = function() {
             controller.notFound(req, res);
         });
 
-        controller.initialize().then(function() {
+        BoardModel.initialize().then(function() {
+            return controller.initialize();
+        }).then(function() {
             if (config("server.rss.enabled", true)) {
                 Database.generateRss();
                 setInterval(function() {
