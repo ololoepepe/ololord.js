@@ -2977,7 +2977,7 @@ lord.initializeOnLoadBaseBoard = function() {
         } else if (+lord.data("currentPage") >= 0) {
             p = lord.getModel(lord.data("boardName") + "/" + +lord.data("currentPage"), true);
         } else {
-            p = lord.getModel(lord.data("boardName") + "/catalog", true);
+            p = lord.getModel(lord.data("boardName") + "/catalog", "sort=" + lord.data("sortMode"));
         }
         return p;
     }).then(function(model) {

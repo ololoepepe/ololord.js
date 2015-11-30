@@ -3,6 +3,7 @@
 {{#def.head}}
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}
+      data-sort-mode="{{=it.sortMode}}"
       {{? it.lastPostNumber}}data-last-post-number="{{=it.lastPostNumber}}"{{?}}>
 {{? it.customHeader}}
     {{#def.customHeader}}

@@ -91,25 +91,16 @@ var renderThread = function(model, board, req) {
 };
 
 var renderCatalog = function(model, board, req, json) {
-    var promises = !json ? [] : model.threads.map(function(thread) {
-        return board.renderPost(thread.opPost, req, thread.opPost);
-    });
-    return Promise.all(promises).then(function() {
-        model.title = board.title;
-        model.includeBoardScripts = true;
-        model = merge.recursive(model, controller.boardModel(board));
-        model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
-        model.sortMode = req.query.sort || "date";
-        return board.getBannerFileName();
-    }).then(function(bannerFileName) {
+    model.title = board.title;
+    model.includeBoardScripts = true;
+    model = merge.recursive(model, controller.boardModel(board));
+    model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
+    model.sortMode = req.query.sort || "date";
+    return board.getBannerFileName().then(function(bannerFileName) {
         if (bannerFileName)
             model.board.bannerFileName = bannerFileName;
-        if (!json || json.translations)
-            model.tr = controller.translationsModel();
-        if (json)
-            return Promise.resolve(JSON.stringify(model));
-        else
-            return controller(req, "catalog", model);
+        model.tr = controller.translationsModel();
+        return controller(req, "catalog", model);
     });
 };
 
@@ -133,7 +124,7 @@ router.get("/:boardName/catalog.html", function(req, res) {
     if (!board)
         return controller.error(req, res, 404);
     controller.checkBan(req, res, board.name).then(function() {
-        return BoardModel.getCatalog(board, req.hashpass, req.query.sort, false);
+        return BoardModel.getCatalogPage(board, req.query.sort);
     }).then(function(model) {
         return renderCatalog(model, board, req);
     }).then(function(data) {
@@ -148,9 +139,7 @@ router.get("/:boardName/catalog.json", function(req, res) {
     if (!board)
         return controller.error(req, res, 404, true);
     controller.checkBan(req, res, board.name).then(function() {
-        return BoardModel.getCatalog(board, req.hashpass, req.query.sort, true);
-    }).then(function(model) {
-        return renderCatalog(model, board, req, true);
+        return BoardModel.getCatalogPage(board, req.query.sort, true);
     }).then(function(data) {
         res.send(data);
     }).catch(function(err) {

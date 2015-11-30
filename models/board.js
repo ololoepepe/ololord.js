@@ -10,11 +10,14 @@ var Tools = require("../helpers/tools");
 
 var scheduledGeneratePages = {};
 var scheduledGenerateThread = {};
+var scheduledGenerateCatalog = {};
 var lockedPages = {};
 var readPages = {};
 var pageCounts = {};
 var lockedThreads = {};
 var readThreads = {};
+var lockedCatalogs = {};
+var readCatalogs = {};
 
 module.exports.getLastPostNumbers = function(boardNames) {
     if (!Util.isArray(boardNames))
@@ -416,7 +419,7 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
     });
 };
 
-module.exports.getCatalog = function(board, hashpass, sortMode, json) {
+module.exports.getCatalogPage = function(board, sortMode, json) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     var c = {};
@@ -425,19 +428,44 @@ module.exports.getCatalog = function(board, hashpass, sortMode, json) {
             return Promise.resolve({ lastPostNumber: lastPostNumber });
         });
     }
-    return Database.registeredUserLevel(hashpass).then(function(level) {
-        c.level = level;
-        return Database.getThreads(board.name, {
-            filterFunction: function(thread) {
-                if (!thread.options.draft)
-                    return true;
-                if (!thread.user.hashpass)
-                    return true;
-                if (thread.user.hashpass == hashpass)
-                    return true;
-                return Database.compareRegisteredUserLevels(thread.user.level, c.level) < 0;
-            }
+    var list = lockedCatalogs[board.name];
+    var p;
+    if (list) {
+        p = new Promise(function(resolve, reject) {
+            list.push(resolve);
         });
+    } else {
+        p = Promise.resolve();
+    }
+    var c = {};
+    return p.then(function() {
+        if (!readCatalogs[board.name])
+            readCatalogs[board.name] = [];
+        c.promise = new Promise(function(resolve, reject) {
+            c.resolve = resolve;
+        });
+        readCatalogs[board.name].push(c.promise);
+        sortMode = (sortMode || "date").toLowerCase();
+        if (["recent", "bumps"].indexOf(sortMode) < 0)
+            sortMode = "date";
+        return FS.read(__dirname + "/../tmp/cache/catalog-" + sortMode + "-" + board.name + ".json");
+    }).then(function(data) {
+        readCatalogs[board.name].splice(readCatalogs[board.name].indexOf(c.promise), 1);
+        if (readCatalogs[board.name].length < 1)
+            delete readCatalogs[board.name];
+        c.resolve();
+        return data;
+    });
+};
+
+var getCatalog = function(board, sortMode) {
+    if (!(board instanceof Board))
+        return Promise.reject("Invalid board instance");
+    var c = {};
+    return Database.getThreads(board.name, {
+        filterFunction: function(thread) {
+            return !thread.options.draft;
+        }
     }).then(function(threads) {
         c.threads = threads;
         var promises = c.threads.map(function(thread) {
@@ -510,11 +538,13 @@ module.exports.pageCount = function(boardName) {
 
 var renderThread = function(board, thread) {
     var p = board.renderPost(thread.opPost, null, thread.opPost);
-    thread.lastPosts.forEach(function(post) {
-        p = p.then(function() {
-            return board.renderPost(post, null, thread.opPost);
+    if (thread.lastPosts) {
+        thread.lastPosts.forEach(function(post) {
+            p = p.then(function() {
+                return board.renderPost(post, null, thread.opPost);
+            });
         });
-    });
+    }
     return p;
 };
 
@@ -611,9 +641,74 @@ var generatePages = function(boardName, nowrite) {
     });
 };
 
+var generateCatalog = function(boardName, nowrite) {
+    var board = Board.board(boardName);
+    var c = {};
+    return getCatalog(board, "date").then(function(json) {
+        var path = __dirname + "/../tmp/cache/catalog-date-" + boardName + ".json";
+        var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
+        json.threads.slice(1).forEach(function(thread) {
+            p = p.then(function() {
+                return renderThread(board, thread);
+            })
+        });
+        p.then(function() {
+            var data = JSON.stringify(json);
+            if (nowrite) {
+                c.datePath = path;
+                c.dateData = data;
+                return Promise.resolve();
+            }
+            return FS.write(path, data);
+        });
+        return p;
+    }).then(function() {
+        return getCatalog(board, "recent");
+    }).then(function(json) {
+        var path = __dirname + "/../tmp/cache/catalog-recent-" + boardName + ".json";
+        var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
+        json.threads.slice(1).forEach(function(thread) {
+            p = p.then(function() {
+                return renderThread(board, thread);
+            })
+        });
+        p.then(function() {
+            var data = JSON.stringify(json);
+            if (nowrite) {
+                c.recentPath = path;
+                c.recentData = data;
+                return Promise.resolve();
+            }
+            return FS.write(path, data);
+        });
+        return p;
+    }).then(function() {
+        return getCatalog(board, "bumps");
+    }).then(function(json) {
+        var path = __dirname + "/../tmp/cache/catalog-bumps-" + boardName + ".json";
+        var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
+        json.threads.slice(1).forEach(function(thread) {
+            p = p.then(function() {
+                return renderThread(board, thread);
+            })
+        });
+        return p.then(function() {
+            var data = JSON.stringify(json);
+            if (nowrite) {
+                c.bumpsPath = path;
+                c.bumpsData = data;
+                return Promise.resolve(c);
+            }
+            return FS.write(path, data);
+        });
+    });
+};
+
 var generateBoard = function(boardName) {
     return generatePages(boardName).then(function() {
         return generateThreads(boardName);
+    }).then(function() {
+        return generateCatalog(boardName);
     });
 };
 
@@ -763,6 +858,32 @@ module.exports.scheduleGeneratePages = function(boardName) {
     return Promise.resolve();
 };
 
+module.exports.scheduleGenerateCatalog = function(boardName) {
+    if (scheduledGenerateCatalog[boardName])
+        return Promise.resolve();
+    scheduledGenerateCatalog[boardName] = setTimeout(function() {
+        var c = {};
+        generateCatalog(boardName, true).then(function(catalog) {
+            c.catalog = catalog;
+            return Global.IPC.send("lockCatalog", boardName);
+        }).then(function() {
+            return FS.write(c.catalog.datePath, c.catalog.dateData);
+        }).then(function() {
+            return FS.write(c.catalog.recentPath, c.catalog.recentData);
+        }).then(function() {
+            return FS.write(c.catalog.bumpsPath, c.catalog.bumpsData);
+        }).then(function() {
+            return Global.IPC.send("unlockCatalog", boardName);
+        }).then(function() {
+            delete scheduledGenerateCatalog[boardName];
+            return Promise.resolve();
+        }).catch(function(err) {
+            console.log(err.stack || err);
+        });
+    }, Tools.Second);
+    return Promise.resolve();
+};
+
 module.exports.generate = function() {
     return module.exports.cleanup().then(function() {
         var boardNames = Board.boardNames();
@@ -816,6 +937,18 @@ module.exports.unlockThread = function(boardName, threadNumber) {
     var key = boardName + ":" + threadNumber;
     return Promise.all(lockedThreads[key] || []).then(function() {
         delete lockedThreads[key];
+        return Promise.resolve();
+    });
+};
+
+module.exports.lockCatalog = function(boardName) {
+    lockedCatalogs[boardName] = [];
+    return Promise.all(readCatalogs[boardName] || []);
+};
+
+module.exports.unlockCatalog = function(boardName) {
+    return Promise.all(lockedCatalogs[boardName] || []).then(function() {
+        delete lockedCatalogs[boardName];
         return Promise.resolve();
     });
 };

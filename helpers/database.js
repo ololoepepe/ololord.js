@@ -797,13 +797,15 @@ module.exports.createPost = function(req, fields, files, transaction) {
     }).then(function(files) {
         return createPost(req, fields, files, transaction);
     }).then(function(post) {
-        Global.IPC.send("generatePages", fields.boardName).then(function() {
+        Global.IPC.send("generatePages", post.boardName).then(function() {
             return Global.IPC.send("generateThread", {
                 boardName: post.boardName,
                 threadNumber: post.threadNumber,
                 postNumber: post.number,
                 action: "create"
             });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", post.boardName);
         }).catch(function(err) {
             console.log(err);
         });
@@ -1048,13 +1050,15 @@ module.exports.createThread = function(req, fields, files, transaction) {
         c.files = files;
         return createPost(req, fields, files, transaction, c.threadNumber, date);
     }).then(function(post) {
-        Global.IPC.send("generatePages", fields.boardName).then(function() {
+        Global.IPC.send("generatePages", post.boardName).then(function() {
             return Global.IPC.send("generateThread", {
                 boardName: post.boardName,
                 threadNumber: post.threadNumber,
                 postNumber: post.number,
                 action: "create"
             });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", post.boardName);
         }).catch(function(err) {
             console.log(err);
         });
@@ -1421,13 +1425,15 @@ var rerenderPost = function(boardName, postNumber, silent) {
     }).then(function() {
         return addReferencedPosts(c.post, referencedPosts);
     }).then(function() {
-        Global.IPC.send("generatePages", fields.boardName).then(function() {
+        Global.IPC.send("generatePages", c.post.boardName).then(function() {
             return Global.IPC.send("generateThread", {
                 boardName: c.post.boardName,
                 threadNumber: c.post.threadNumber,
                 postNumber: c.post.number,
                 action: "edit"
             });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", c.post.boardName);
         }).catch(function(err) {
             console.log(err);
         });
@@ -1632,13 +1638,15 @@ module.exports.editPost = function(req, fields) {
         });
         return Promise.all(promises);
     }).then(function() {
-        Global.IPC.send("generatePages", fields.boardName).then(function() {
+        Global.IPC.send("generatePages", c.post.boardName).then(function() {
             return Global.IPC.send("generateThread", {
                 boardName: c.post.boardName,
                 threadNumber: c.post.threadNumber,
                 postNumber: c.post.number,
                 action: "edit"
             });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", c.post.boardName);
         }).catch(function(err) {
             console.log(err);
         });
@@ -1731,13 +1739,15 @@ module.exports.deletePost = function(req, res, fields) {
         return (post.threadNumber == post.number) ? removeThread(board.name, postNumber)
             : removePost(board.name, postNumber);
     }).then(function() {
-        Global.IPC.send("generatePages", fields.boardName).then(function() {
+        Global.IPC.send("generatePages", c.post.boardName).then(function() {
             return Global.IPC.send("generateThread", {
                 boardName: c.post.boardName,
                 threadNumber: c.post.threadNumber,
                 postNumber: c.post.number,
                 action: "delete"
             });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", c.post.boardName);
         }).catch(function(err) {
             console.log(err);
         });
@@ -1966,13 +1976,15 @@ module.exports.deleteFile = function(req, res, fields) {
                 console.log(err);
             });
         });
-        Global.IPC.send("generatePages", fields.boardName).then(function() {
+        Global.IPC.send("generatePages", c.post.boardName).then(function() {
             return Global.IPC.send("generateThread", {
                 boardName: c.post.boardName,
                 threadNumber: c.post.threadNumber,
                 postNumber: c.post.number,
                 action: "edit"
             });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", c.post.boardName);
         }).catch(function(err) {
             console.log(err);
         });
@@ -2012,13 +2024,15 @@ module.exports.editAudioTags = function(req, res, fields) {
         });
         return db.hset("fileInfos", c.fileInfo.name, JSON.stringify(c.fileInfo));
     }).then(function() {
-        Global.IPC.send("generatePages", fields.boardName).then(function() {
+        Global.IPC.send("generatePages", c.post.boardName).then(function() {
             return Global.IPC.send("generateThread", {
                 boardName: c.post.boardName,
                 threadNumber: c.post.threadNumber,
                 postNumber: c.post.number,
                 action: "edit"
             });
+        }).then(function() {
+            return Global.IPC.send("generateCatalog", c.post.boardName);
         }).catch(function(err) {
             console.log(err);
         });

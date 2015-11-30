@@ -99,7 +99,9 @@ if (cluster.isMaster) {
         Global.IPC.installHandler("generateThread", function(data) {
             return BoardModel.scheduleGenerateThread(data.boardName, data.threadNumber, data.postNumber, data.action);
         });
-        //TODO: thread/post generation sutff
+        Global.IPC.installHandler("generateCatalog", function(boardName) {
+            return BoardModel.scheduleGenerateCatalog(boardName);
+        });
     }).catch(function(err) {
         console.log(err.stack || err);
         process.exit(1);
@@ -116,6 +118,12 @@ if (cluster.isMaster) {
     });
     Global.IPC.installHandler("unlockThread", function(data) {
         return BoardModel.unlockThread(data.boardName, data.threadNumber);
+    });
+    Global.IPC.installHandler("lockCatalog", function(boardName) {
+        return BoardModel.lockCatalog(boardName);
+    });
+    Global.IPC.installHandler("unlockCatalog", function(boardName) {
+        return BoardModel.unlockCatalog(boardName);
     });
     spawnCluster();
 }
