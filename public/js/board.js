@@ -337,7 +337,7 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
         c.model.thread = thread;
         c.model.post = post;
         c.model.includeThreadScripts = !!lord.data("threadNumber");
-        appendExtrasToModel(c.model);
+        lord.appendExtrasToModel(c.model);
         var html = lord.template("post")(c.model);
         var nodes = $.parseHTML(html);
         c.node = (nodes.length > 1) ? nodes[1] : nodes[0];
