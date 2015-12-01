@@ -388,9 +388,11 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
         }).catch(lord.handleError);
         if (!permanent || !post.referencedPosts || post.referencedPosts.length < 1)
             return Promise.resolve();
-        var model = {
-            site: { pathPrefix: lord.data("sitePathPrefix") },
-            board: { name: lord.data("boardName") }
+        var model = lord.model(["base", "board/" + lord.data("boardName")], true);
+        model.settings = lord.settings();
+        model.checkOwnPost = function(post) {
+            return (post.user.ipHash && post.user.ipHash == model.user.ipHash)
+                || (post.user.hashpassHash && post.user.hashpassHash == model.user.hashpassHash);
         };
         var promises = post.referencedPosts.filter(function(reference) {
             return reference.boardName == lord.data("boardName") && lord.id(reference.postNumber);
@@ -408,7 +410,8 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
             model.reference = {
                 boardName: post.boardName,
                 postNumber: post.number,
-                threadNumber: post.threadNumber
+                threadNumber: post.threadNumber,
+                user: post.user
             };
             var nodes = $.parseHTML(lord.template("postReference")(model));
             var a = (nodes.length > 1) ? nodes[1] : nodes[0];
