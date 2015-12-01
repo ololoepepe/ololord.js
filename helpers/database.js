@@ -668,7 +668,6 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             name: (fields.name || null),
             number: c.postNumber,
             options: {
-                draft: false, //(hashpass && board.draftsEnabled && fields.draft), TODO: remove
                 rawHtml: c.isRaw,
                 showTripcode: !!fields.tripcode,
                 signAsOp: !!fields.signAsOp
@@ -1057,9 +1056,6 @@ module.exports.createThread = function(req, fields, files, transaction) {
             createdAt: date.toISOString(),
             fixed: false,
             number: c.threadNumber,
-            options: {
-                draft: false //(hashpass && board.draftsEnabled && fields.draft) //TODO: remove
-            },
             user: {
                 hashpass: hashpass,
                 ip: (req.ip || null),

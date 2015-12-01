@@ -101,7 +101,6 @@ var Board = function(name, title, options) {
         configurable: true
     });
     defineSetting(this, "captchaQuota", 0);
-    defineSetting(this, "draftsEnabled", true);
     defineSetting(this, "enabled", true);
     defineSetting(this, "hidden", false);
     defineSetting(this, "maxEmailLength", 150);
