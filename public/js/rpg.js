@@ -65,26 +65,22 @@ lord.setVotingOpened = function(el, opened) {
     }).catch(lord.handleError);
 };
 
-lord.customPostBodyPart[20] = function() {
-    return function(it, thread, post) {
-        if (!post.extraData)
-            return "";
-        var model = merge.recursive(it, post.extraData);
-        model.thread = thread;
-        model.post = post;
-        return lord.template("rpgPostBodyPart")(model);
-    };
+lord.customPostBodyPart[20] = function(it, thread, post) {
+    if (!post.extraData)
+        return "";
+    var model = merge.recursive(it, post.extraData);
+    model.thread = thread;
+    model.post = post;
+    return lord.template("rpgPostBodyPart")(model);
 };
 
-lord.customEditPostDialogPart[50] = function() {
-    return function(it, thread, post) {
-        var model;
-        if (post.extraData)
-            model = merge.recursive(it, post.extraData);
-        else
-            model = merge.clone(it);
-        model.thread = thread;
-        model.post = post;
-        return lord.template("rpgEditPostDialogPart")(model);
-    };
+lord.customEditPostDialogPart[50] = function(it, thread, post) {
+    var model;
+    if (post.extraData)
+        model = merge.recursive(it, post.extraData);
+    else
+        model = merge.clone(it);
+    model.thread = thread;
+    model.post = post;
+    return lord.template("rpgEditPostDialogPart")(model);
 };

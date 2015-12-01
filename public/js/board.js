@@ -314,76 +314,9 @@ lord.appendExtrasToModel = function(model) {
         return (post.user.ipHash && post.user.ipHash == model.user.ipHash)
             || (post.user.hashpassHash && post.user.hashpassHash == model.user.hashpassHash);
     };
-    var indexes = [];
-    for (var i = 0; i < 60; i += 10)
-        indexes.push(i);
-    var promises = indexes.map(function(index) {
-        if (!lord.customPostBodyPart[index])
-            return Promise.resolve(null);
-        return lord.customPostBodyPart[index]().then(function(part) {
-            if (!part)
-                return Promise.resolve(null);
-            return Promise.resolve({
-                index: index,
-                part: part
-            });
-        });
-    });
-    return Promise.all(promises).then(function(parts) {
-        model.customPostBodyPart = {};
-        parts.forEach(function(part) {
-            if (!part)
-                return;
-            model.customPostBodyPart[part.index] = part.part;
-        });
-        var indexes = [];
-        for (var i = 0; i < 180; i += 10)
-            indexes.push(i);
-        var promises = indexes.map(function(index) {
-            if (!lord.customPostHeaderPart[index])
-                return Promise.resolve(null);
-            return lord.customPostHeaderPart[index]().then(function(part) {
-                if (!part)
-                    return Promise.resolve(null);
-                return Promise.resolve({
-                    index: index,
-                    part: part
-                });
-            });
-        });
-        return Promise.all(promises);
-    }).then(function(parts) {
-        model.customPostHeaderPart = {};
-        parts.forEach(function(part) {
-            if (!part)
-                return;
-            model.customPostHeaderPart[part.index] = part.part;
-        });
-        var indexes = [];
-        for (var i = 0; i < 120; i += 10)
-            indexes.push(i);
-        var promises = indexes.map(function(index) {
-            if (!lord.customPostMenuAction[index])
-                return Promise.resolve(null);
-            return lord.customPostMenuAction[index]().then(function(part) {
-                if (!part)
-                    return Promise.resolve(null);
-                return Promise.resolve({
-                    index: index,
-                    part: part
-                });
-            });
-        });
-        return Promise.all(promises);
-    }).then(function(parts) {
-        model.customPostMenuAction = {};
-        parts.forEach(function(part) {
-            if (!part)
-                return;
-            model.customPostMenuAction[part.index] = part.part;
-        });
-        return Promise.resolve();
-    });
+    model.customPostBodyPart = lord.customPostBodyPart;
+    model.customPostHeaderPart = lord.customPostHeaderPart;
+    model.customPostMenuAction = lord.customPostMenuAction;
 };
 
 lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
@@ -404,8 +337,7 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
         c.model.thread = thread;
         c.model.post = post;
         c.model.includeThreadScripts = !!lord.data("threadNumber");
-        return lord.appendExtrasToModel(c.model);
-    }).then(function() {
+        appendExtrasToModel(c.model);
         var html = lord.template("post")(c.model);
         var nodes = $.parseHTML(html);
         c.node = (nodes.length > 1) ? nodes[1] : nodes[0];
@@ -2800,8 +2732,7 @@ lord.initializeOnLoadBaseBoard = function() {
     }
     p.then(function(model) {
         c.threads = model.threads || [model.thread];
-        return lord.appendExtrasToModel(c.model);
-    }).then(function() {
+        lord.appendExtrasToModel(c.model);
         c.notCatalog = (+lord.data("threadNumber") || +lord.data("currentPage") >= 0);
         var threads = lord.id("threads");
         lord.removeChildren(threads);
