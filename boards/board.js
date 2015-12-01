@@ -317,8 +317,6 @@ var renderFileInfo = function(fi) {
     });
     post.rawSubject = post.subject;
     post.isOp = (post.number == post.threadNumber);
-    post.user.ipHash = Tools.sha256(post.user.ip);
-    post.user.hashpassHash = Tools.sha256(post.user.hashpass);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
     if (post.options.showTripcode) {
         var md5 = Crypto.createHash("md5");

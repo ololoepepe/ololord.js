@@ -532,8 +532,6 @@ var convertPostLink = function(info, _, matchs, _, options) {
         return Database.getPost(boardName, postNumber).then(function(post) {
             if (!post)
                 return escaped;
-            var ipHash = Tools.sha256(post.user.ip);
-            var hashpassHash = Tools.sha256(post.user.hashpass);
             if (info.referencedPosts) {
                 var key = boardName + ":" + postNumber;
                 if (!info.referencedPosts[key]) {
@@ -541,10 +539,6 @@ var convertPostLink = function(info, _, matchs, _, options) {
                         boardName: boardName,
                         postNumber: postNumber,
                         threadNumber: post.threadNumber,
-                        user: {
-                            ipHash: ipHash,
-                            hashpassHash: hashpassHash
-                        },
                         createdAt: Tools.now()
                     };
                 }
@@ -554,10 +548,7 @@ var convertPostLink = function(info, _, matchs, _, options) {
                 href += "#" + postNumber;
             href += "\"";
             var result = "<a " + href + " data-board-name=\"" + boardName + "\" data-post-number=\"" + postNumber
-                + "\" data-thread-number=\"" + post.threadNumber + "\" data-user-ip-hash=\"" + ipHash + "\"";
-            if (hashpassHash)
-                result += " data-user-hashpass-hash=\"" + hashpassHash + "\"";
-            result += ">" + escaped + "</a>";
+                + "\" data-thread-number=\"" + post.threadNumber + "\">" + escaped + "</a>";
             return result;
         });
     } else {

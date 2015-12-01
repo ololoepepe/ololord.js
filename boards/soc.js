@@ -5,10 +5,27 @@ var uuid = require("uuid");
 var Board = require("./board");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
+var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
 var board = new Board("soc", Tools.translate.noop("Social life", "boardTitle"),
     { defaultUserName: Tools.translate.noop("Life of the party", "defaultUserName") });
+
+
+/*
+Global.IPC.send("generatePages", "rpg").then(function() {
+    return Global.IPC.send("generateThread", {
+        boardName: "rpg",
+        threadNumber: JSON.parse(post).threadNumber,
+        postNumber: c.postNumber,
+        action: "edit"
+    });
+}).then(function() {
+    return Global.IPC.send("generateCatalog", "rpg");
+}).catch(function(err) {
+    console.log(err);
+});
+*/
 
 board.actionRoutes = function() {
     var _this = this;
@@ -37,6 +54,20 @@ board.actionRoutes = function() {
                 }
                 return Board.prototype.storeExtraData.call(_this, c.postNumber, c.extraData);
             }).then(function() {
+                return Database.db.hget("posts", "soc:" + c.postNumber);
+            }).then(function(post) {
+                Global.IPC.send("generatePages", "soc").then(function() {
+                    return Global.IPC.send("generateThread", {
+                        boardName: "soc",
+                        threadNumber: JSON.parse(post).threadNumber,
+                        postNumber: c.postNumber,
+                        action: "edit"
+                    });
+                }).then(function() {
+                    return Global.IPC.send("generateCatalog", "soc");
+                }).catch(function(err) {
+                    console.log(err);
+                });
                 res.send({});
             }).catch(function(err) {
                 controller.error(req, res, err, req.settings.mode.name != "ascetic");
@@ -68,6 +99,20 @@ board.actionRoutes = function() {
                 }
                 return Board.prototype.storeExtraData.call(_this, c.postNumber, c.extraData);
             }).then(function() {
+                return Database.db.hget("posts", "soc:" + c.postNumber);
+            }).then(function(post) {
+                Global.IPC.send("generatePages", "soc").then(function() {
+                    return Global.IPC.send("generateThread", {
+                        boardName: "soc",
+                        threadNumber: JSON.parse(post).threadNumber,
+                        postNumber: c.postNumber,
+                        action: "edit"
+                    });
+                }).then(function() {
+                    return Global.IPC.send("generateCatalog", "soc");
+                }).catch(function(err) {
+                    console.log(err);
+                });
                 res.send({});
             }).catch(function(err) {
                 controller.error(req, res, err, req.settings.mode.name != "ascetic");
@@ -93,16 +138,12 @@ board.renderPost = function(post) {
                 dislikes: []
             };
         }
-        if (post.extraData.likes) {
-            post.extraData.likes.forEach(function(ip, i) {
-                post.extraData.likes[i] = Tools.sha256(ip);
-            });
-        }
-        if (post.extraData.dislikes) {
-            post.extraData.dislikes.forEach(function(ip, i) {
-                post.extraData.dislikes[i] = Tools.sha256(ip);
-            });
-        }
+        post.extraData.likeCount = post.extraData.likes ? post.extraData.likes.length : 0;
+        if (post.extraData.likes)
+            delete post.extraData.likes;
+        post.extraData.dislikeCount = post.extraData.dislikes ? post.extraData.dislikes.length : 0;
+        if (post.extraData.dislikes)
+            delete post.extraData.dislikes;
         return Promise.resolve(post);
     });
 };

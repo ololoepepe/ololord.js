@@ -826,13 +826,40 @@ var rerenderReferringPosts = function(boardName, postNumber) {
     });
 };
 
-var removeReferencedPosts = function(boardName, postNumber) {
+var removeReferencedPosts = function(boardName, postNumber, silent) {
     var key = boardName + ":" + postNumber;
     return db.hgetall("referencedPosts:" + key).then(function(referencedPosts) {
         var promises = [];
         Tools.forIn(referencedPosts, function(ref, refKey) {
             promises.push(db.hdel("referringPosts:" + refKey, key));
             ref = JSON.parse(ref);
+            if (silent) {
+                Global.IPC.send("generatePages", ref.boardName).then(function() {
+                    return Global.IPC.send("generateThread", {
+                        boardName: ref.boardName,
+                        threadNumber: ref.threadNumber,
+                        postNumber: ref.postNumber,
+                        action: "edit"
+                    });
+                }).then(function() {
+                    return Global.IPC.send("generateCatalog", ref.boardName);
+                }).catch(function(err) {
+                    console.log(err);
+                });
+            }
+        });
+        return Promise.all(promises);
+    }).then(function() {
+        return db.del("referencedPosts:" + key);
+    });
+};
+
+var addReferencedPosts = function(post, referencedPosts, silent) {
+    var key = post.boardName + ":" + post.number;
+    var promises = [];
+    Tools.forIn(referencedPosts, function(ref, refKey) {
+        promises.push(db.hset("referencedPosts:" + key, refKey, JSON.stringify(ref)));
+        if (silent) {
             Global.IPC.send("generatePages", ref.boardName).then(function() {
                 return Global.IPC.send("generateThread", {
                     boardName: ref.boardName,
@@ -845,30 +872,7 @@ var removeReferencedPosts = function(boardName, postNumber) {
             }).catch(function(err) {
                 console.log(err);
             });
-        });
-        return Promise.all(promises);
-    }).then(function() {
-        return db.del("referencedPosts:" + key);
-    });
-};
-
-var addReferencedPosts = function(post, referencedPosts) {
-    var key = post.boardName + ":" + post.number;
-    var promises = [];
-    Tools.forIn(referencedPosts, function(ref, refKey) {
-        promises.push(db.hset("referencedPosts:" + key, refKey, JSON.stringify(ref)));
-        Global.IPC.send("generatePages", ref.boardName).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: ref.boardName,
-                threadNumber: ref.threadNumber,
-                postNumber: ref.postNumber,
-                action: "edit"
-            });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", ref.boardName);
-        }).catch(function(err) {
-            console.log(err);
-        });
+        }
     });
     return Promise.all(promises).then(function() {
         var promises = [];
@@ -877,10 +881,6 @@ var addReferencedPosts = function(post, referencedPosts) {
                 boardName: post.boardName,
                 postNumber: post.number,
                 threadNumber: post.threadNumber,
-                user: {
-                    ipHash: Tools.sha256(post.user.ip),
-                    hashpassHash: Tools.sha256(post.user.hashpass)
-                },
                 createdAt: refKey.createdAt
             })));
         });
@@ -903,7 +903,7 @@ var removePost = function(boardName, postNumber, leaveFileInfos) {
     }).then(function() {
         return rerenderReferringPosts(boardName, postNumber);
     }).then(function() {
-        return removeReferencedPosts(boardName, postNumber, c.post.threadNumber, c.post.referencedPosts);
+        return removeReferencedPosts(boardName, postNumber);
     }).then(function() {
         return db.srem("userPostNumbers:" + c.post.user.ip + ":" + board.name, postNumber);
     }).then(function() {
@@ -1446,22 +1446,24 @@ var rerenderPost = function(boardName, postNumber, silent) {
             c.post.text = text;
         return db.hset("posts", key, JSON.stringify(c.post));
     }).then(function() {
-        return removeReferencedPosts(boardName, postNumber);
+        return removeReferencedPosts(boardName, postNumber, silent);
     }).then(function() {
-        return addReferencedPosts(c.post, referencedPosts);
+        return addReferencedPosts(c.post, referencedPosts, silent);
     }).then(function() {
-        Global.IPC.send("generatePages", c.post.boardName).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: c.post.boardName,
-                threadNumber: c.post.threadNumber,
-                postNumber: c.post.number,
-                action: "edit"
+        if (silent) {
+            Global.IPC.send("generatePages", c.post.boardName).then(function() {
+                return Global.IPC.send("generateThread", {
+                    boardName: c.post.boardName,
+                    threadNumber: c.post.threadNumber,
+                    postNumber: c.post.number,
+                    action: "edit"
+                });
+            }).then(function() {
+                return Global.IPC.send("generateCatalog", c.post.boardName);
+            }).catch(function(err) {
+                console.log(err);
             });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", c.post.boardName);
-        }).catch(function(err) {
-            console.log(err);
-        });
+        }
         return Promise.resolve();
     });
 };

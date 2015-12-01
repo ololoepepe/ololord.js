@@ -310,9 +310,9 @@ lord.appendExtrasToModel = function(model) {
     model.formattedDate = function(date) {
         return moment(date).utcOffset(timeOffset).locale(locale).format(dateFormat);
     };
+    var ownPosts = lord.getLocalObject("ownPosts", {});
     model.checkOwnPost = function(post) {
-        return (post.user.ipHash && post.user.ipHash == model.user.ipHash)
-            || (post.user.hashpassHash && post.user.hashpassHash == model.user.hashpassHash);
+        return !!ownPosts[post.boardName + "/" + (post.number || post.postNumber)];
     };
     model.customPostBodyPart = lord.customPostBodyPart;
     model.customPostHeaderPart = lord.customPostHeaderPart;
@@ -333,6 +333,7 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
             threadNumber: post.threadNumber
         });
     }
+    var ownPosts = lord.getLocalObject("ownPosts", {});
     return p.then(function(thread) {
         c.model.thread = thread;
         c.model.post = post;
@@ -352,7 +353,7 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
         if (lord.getLocalObject("signOpPostLinks", true))
             lord.signOpPostLinks(c.node);
         if (lord.getLocalObject("signOwnPostLinks", true))
-            lord.signOwnPostLinks(c.node, c.model.user);
+            lord.signOwnPostLinks(c.node, ownPosts);
         if (lord.getLocalObject("mumWatching", false)) {
             lord.query(".postFileFile > a > img", c.node).forEach(function(img) {
                 lord.addClass(img, "mumWatching");
@@ -391,8 +392,7 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
         var model = lord.model(["base", "board/" + lord.data("boardName")], true);
         model.settings = lord.settings();
         model.checkOwnPost = function(post) {
-            return (post.user.ipHash && post.user.ipHash == model.user.ipHash)
-                || (post.user.hashpassHash && post.user.hashpassHash == model.user.hashpassHash);
+            return !!ownPosts[post.boardName + "/" + (post.number || post.postNumber)];
         };
         var promises = post.referencedPosts.filter(function(reference) {
             return reference.boardName == lord.data("boardName") && lord.id(reference.postNumber);
@@ -422,7 +422,7 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
             if (lord.getLocalObject("signOpPostLinks", true))
                 lord.signOpPostLinks(targetPost);
             if (lord.getLocalObject("signOwnPostLinks", true))
-                lord.signOwnPostLinks(targetPost, c.model.user);
+                lord.signOwnPostLinks(targetPost, ownPosts);
             return Promise.resolve();
         });
         return Promise.all(promises);
@@ -2226,6 +2226,9 @@ lord.submitted = function(event, form) {
                 btn.value = percent + "%";
         }
     }).then(function(result) {
+        var ownPosts = lord.getLocalObject("ownPosts", {});
+        ownPosts[result.boardName + "/" + (result.postNumber || result.threadNumber)] = 1;
+        lord.setLocalObject("ownPosts", ownPosts);
         c.progressBar.hideDelayed(200);
         resetButton();
         if (result.postNumber) {
@@ -2376,14 +2379,12 @@ lord.signOpPostLink = function(a, data) {
         a.appendChild(lord.node("text", " (OP)"));
 };
 
-lord.signOwnPostLink = function(a, user) {
+lord.signOwnPostLink = function(a, ownPosts) {
     if (!a)
         return;
     if (a.textContent.indexOf("(You)") >= 0)
         return;
-    var ipHash = lord.data("userIpHash", a);
-    var hashpassHash = lord.data("userHashpassHash", a);
-    if ((ipHash && user.ipHash == ipHash) || (hashpassHash && user.hashpassHash == hashpassHash))
+    if (ownPosts.hasOwnProperty(lord.data("boardName", a) + "/" + lord.data("postNumber", a)))
         a.appendChild(lord.node("text", " (You)"));
 };
 
@@ -2411,12 +2412,12 @@ lord.signOpPostLinks = function(parent) {
     });
 };
 
-lord.signOwnPostLinks = function(parent, user) {
+lord.signOwnPostLinks = function(parent, ownPosts) {
     if (!parent)
         parent = document.body;
-    user = user || lord.model("base").user;
+    ownPosts = ownPosts || lord.getLocalObject("ownPosts", {});
     lord.gently(lord.query("a", parent), function(a) {
-        lord.signOwnPostLink(a, user);
+        lord.signOwnPostLink(a, ownPosts);
     }, {
         delay: 10,
         n: 20
@@ -2751,9 +2752,11 @@ lord.initializeOnLoadBaseBoard = function() {
             threads.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
         });
     }).then(function() {
-        var hash = lord.hash();
-        if (hash && "#" != hash)
-            window.location.hash = hash;
+        setTimeout(function() {
+            var hash = lord.hash();
+            if (hash && "#" != hash)
+                window.location.hash = hash;
+        }, 1000);
         document.body.onclick = lord.globalOnclick;
         if (lord.data("deviceType") != "mobile") {
             document.body.onmouseover = lord.globalOnmouseover;
@@ -2893,7 +2896,7 @@ lord.initializeOnLoadBaseBoard = function() {
         if (lord.getLocalObject("signOpPostLinks", true))
             lord.signOpPostLinks();
         if (lord.getLocalObject("signOwnPostLinks", true))
-            lord.signOwnPostLinks(document.body, c.model.user);
+            lord.signOwnPostLinks(document.body);
         if (!lord.data("threadNumber")) {
             var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
             lastPostNumbers[currentBoardName] = +lord.data("lastPostNumber");

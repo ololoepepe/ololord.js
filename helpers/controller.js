@@ -267,8 +267,6 @@ controller.baseModel = function(req) {
         user: {
             ip: (req ? req.ip : undefined),
             hashpass: (req ? req.hashpass : undefined),
-            ipHash: (req ? Tools.sha256(req.ip) : undefined),
-            hashpassHash: (req ? Tools.sha256(req.hashpass) : undefined),
             level: (req ? req.level : undefined),
             loggedIn: (req ? !!req.hashpass : undefined),
             vkAuth: (req ? req.vkAuth : undefined)

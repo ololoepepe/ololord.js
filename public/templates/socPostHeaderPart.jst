@@ -1,6 +1,4 @@
 <span class="likeArea {{=it.deviceType}}" name="likeArea">
-    {{ var liked = it.likes && it.likes.indexOf(it.user.ipHash) >= 0; }}
-    {{ var disliked = it.dislikes && it.dislikes.indexOf(it.user.ipHash) >= 0; }}
     <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
           action="/{{=it.site.pathPrefix}}action/like"
           {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.likeDislike(event, this); return false;"{{?}}>
@@ -8,11 +6,11 @@
         <input type="image" src="/{{=it.site.pathPrefix}}img/like.png" name="buttonLike" title="{{=it.tr.likeText}}"
                width="16" height="16" class="buttonImage" />
     </form>
-    {{? liked}}
+    {{? it.liked}}
         <b>
     {{?}}
-    {{? it.likes}}{{=it.likes.length}}{{??}}0{{?}}
-    {{? liked}}
+    {{=it.likeCount}}
+    {{? it.liked}}
         </b>
     {{?}}
     <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
@@ -22,11 +20,11 @@
         <input type="image" src="/{{=it.site.pathPrefix}}img/dislike.png" name="buttonDislike" class="buttonImage"
                title="{{=it.tr.dislikeText}}" width="16" height="16" />
     </form>
-    {{? disliked}}
+    {{? it.disliked}}
         <b>
     {{?}}
-    {{? it.dislikes}}{{=it.dislikes.length}}{{??}}0{{?}}
-    {{? disliked}}
+    {{=it.dislikeCount}}
+    {{? it.disliked}}
         </b>
     {{?}}
 </span>

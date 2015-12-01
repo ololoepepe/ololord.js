@@ -5,6 +5,7 @@ var uuid = require("uuid");
 var Board = require("./board");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
+var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
 board = new Board("rpg", Tools.translate.noop("Role-playing games", "boardTitle"));
@@ -110,6 +111,20 @@ board.actionRoutes = function() {
             }).then(function() {
                 return Database.db.sadd("voteUsers:" + c.postNumber, req.ip);
             }).then(function() {
+                return Database.db.hget("posts", "rpg:" + c.postNumber);
+            }).then(function(post) {
+                Global.IPC.send("generatePages", "rpg").then(function() {
+                    return Global.IPC.send("generateThread", {
+                        boardName: "rpg",
+                        threadNumber: JSON.parse(post).threadNumber,
+                        postNumber: c.postNumber,
+                        action: "edit"
+                    });
+                }).then(function() {
+                    return Global.IPC.send("generateCatalog", "rpg");
+                }).catch(function(err) {
+                    console.log(err);
+                });
                 res.send({});
             }).catch(function(err) {
                 controller.error(req, res, err, req.settings.mode.name != "ascetic");
@@ -151,6 +166,20 @@ board.actionRoutes = function() {
             }).then(function() {
                 return Database.db.srem("voteUsers:" + c.postNumber, req.ip);
             }).then(function() {
+                return Database.db.hget("posts", "rpg:" + c.postNumber);
+            }).then(function(post) {
+                Global.IPC.send("generatePages", "rpg").then(function() {
+                    return Global.IPC.send("generateThread", {
+                        boardName: "rpg",
+                        threadNumber: JSON.parse(post).threadNumber,
+                        postNumber: c.postNumber,
+                        action: "edit"
+                    });
+                }).then(function() {
+                    return Global.IPC.send("generateCatalog", "rpg");
+                }).catch(function(err) {
+                    console.log(err);
+                });
                 res.send({});
             }).catch(function(err) {
                 controller.error(req, res, err, req.settings.mode.name != "ascetic");
@@ -180,6 +209,18 @@ board.actionRoutes = function() {
                 extraData.disabled = !c.opened;
                 return Board.prototype.storeExtraData.call(_this, c.post.number, extraData);
             }).then(function(result) {
+                Global.IPC.send("generatePages", "rpg").then(function() {
+                    return Global.IPC.send("generateThread", {
+                        boardName: "rpg",
+                        threadNumber: c.post.threadNumber,
+                        postNumber: c.post.number,
+                        action: "edit"
+                    });
+                }).then(function() {
+                    return Global.IPC.send("generateCatalog", "rpg");
+                }).catch(function(err) {
+                    console.log(err);
+                });
                 res.send({});
             }).catch(function(err) {
                 controller.error(req, res, err, req.settings.mode.name != "ascetic");
@@ -359,18 +400,13 @@ board.renderPost = function(post) {
             return Promise.resolve(post);
         if (post.extraData.variants) {
             post.extraData.variants.forEach(function(variant) {
-                if (!variant.users)
-                    return;
-                variant.users.forEach(function(ip, i) {
-                    variant.users[i] = Tools.sha256(ip);
-                });
+                variant.voteCount = variant.users ? variant.users.length : 0
+                if (variant.users)
+                    delete variant.users;
             });
         }
-        if (post.extraData.users) {
-            post.extraData.users.forEach(function(ip, i) {
-                post.extraData.users[i] = Tools.sha256(ip);
-            });
-        }
+        if (post.extraData.users)
+            delete post.extraData.users;
         return Promise.resolve(post);
     });
 };

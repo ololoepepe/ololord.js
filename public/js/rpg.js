@@ -41,6 +41,23 @@ lord.removeVoteVariant = function(el) {
 lord.vote = function(event, form) {
     event.preventDefault();
     return lord.post(form.action, new FormData(form)).then(function(result) {
+        var ownVotes = lord.getLocalObject("ownVotes", {});
+        var postNumber = +lord.nameOne("postNumber", form).value;
+        if (form.action.split("/").pop() == "vote") {
+            var ids = {};
+            lord.query("[type='checkbox']", form).forEach(function(cbox) {
+                if (cbox.checked)
+                    ids[cbox.value] = 1;
+            });
+            lord.query("[type='radio']", form).forEach(function(radio) {
+                if (radio.checked)
+                    ids[radio.value] = 1;
+            });
+            ownVotes[postNumber] = ids;
+        } else {
+            delete ownVotes[postNumber];
+        }
+        lord.setLocalObject("ownVotes", ownVotes);
         return lord.updatePost(lord.data("number", form, true));
     }).catch(lord.handleError);
 };
@@ -71,6 +88,12 @@ lord.customPostBodyPart[20] = function(it, thread, post) {
     var model = merge.recursive(it, post.extraData);
     model.thread = thread;
     model.post = post;
+    var ownVotes = lord.getLocalObject("ownVotes", {});
+    model.voted = !!ownVotes[post.number];
+    model.checkOwnVoteVariant = function(variant) {
+        var ids = ownVotes[post.number];
+        return ids && ids[variant.id];
+    };
     return lord.template("rpgPostBodyPart")(model);
 };
 
