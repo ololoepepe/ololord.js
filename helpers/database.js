@@ -825,14 +825,14 @@ var rerenderReferringPosts = function(boardName, postNumber) {
     });
 };
 
-var removeReferencedPosts = function(boardName, postNumber, silent) {
+var removeReferencedPosts = function(boardName, postNumber, nogenerate) {
     var key = boardName + ":" + postNumber;
     return db.hgetall("referencedPosts:" + key).then(function(referencedPosts) {
         var promises = [];
         Tools.forIn(referencedPosts, function(ref, refKey) {
             promises.push(db.hdel("referringPosts:" + refKey, key));
             ref = JSON.parse(ref);
-            if (silent) {
+            if (!nogenerate) {
                 Global.IPC.send("generatePages", ref.boardName).then(function() {
                     return Global.IPC.send("generateThread", {
                         boardName: ref.boardName,
@@ -853,12 +853,12 @@ var removeReferencedPosts = function(boardName, postNumber, silent) {
     });
 };
 
-var addReferencedPosts = function(post, referencedPosts, silent) {
+var addReferencedPosts = function(post, referencedPosts, nogenerate) {
     var key = post.boardName + ":" + post.number;
     var promises = [];
     Tools.forIn(referencedPosts, function(ref, refKey) {
         promises.push(db.hset("referencedPosts:" + key, refKey, JSON.stringify(ref)));
-        if (silent) {
+        if (!nogenerate) {
             Global.IPC.send("generatePages", ref.boardName).then(function() {
                 return Global.IPC.send("generateThread", {
                     boardName: ref.boardName,
@@ -1442,9 +1442,9 @@ var rerenderPost = function(boardName, postNumber, silent) {
             c.post.text = text;
         return db.hset("posts", key, JSON.stringify(c.post));
     }).then(function() {
-        return removeReferencedPosts(boardName, postNumber, silent);
+        return removeReferencedPosts(boardName, postNumber, !silent);
     }).then(function() {
-        return addReferencedPosts(c.post, referencedPosts, silent);
+        return addReferencedPosts(c.post, referencedPosts, !silent);
     }).then(function() {
         if (silent) {
             Global.IPC.send("generatePages", c.post.boardName).then(function() {
