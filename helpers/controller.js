@@ -655,6 +655,12 @@ controller.translationsModel = function() {
     translate("Loading posts...", "loadingPostsMessage");
     translate("Close voting", "closeVotingText");
     translate("Open voting", "openVotingText");
+    translate("Tripcode activated for THIS THREAD only", "threadTripcodeActivatedText");
+    translate("Tripcode deactivated for THIS THREAD only", "threadTripcodeDeactivatedText");
+    translate("Global tripcode activated. Uncheck tripcode option OUTSIDE THREAD to disable it",
+        "globalTripcodeActivatedText");
+    translate("Global tripcode deactivated (except threads where it is activated explicitly)",
+        "globalTripcodeDeactivatedText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

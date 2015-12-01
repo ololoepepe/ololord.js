@@ -891,10 +891,13 @@ lord.switchShowTripcode = function() {
     var showTripcode = lord.getLocalObject("showTripcode", {});
     var key;
     var threadNumber = lord.nameOne("threadNumber", postForm);
-    if (threadNumber)
+    if (threadNumber) {
+        lord.showPopup(lord.text(sw.checked ? "threadTripcodeActivatedText" : "threadTripcodeDeactivatedText"));
         key = lord.data("boardName") + "/" + +threadNumber.value;
-    else
+    } else {
+        lord.showPopup(lord.text(sw.checked ? "globalTripcodeActivatedText" : "globalTripcodeDeactivatedText"));
         key = "global";
+    }
     if (sw.checked)
         showTripcode[key] = true;
     else if (showTripcode.hasOwnProperty(key))

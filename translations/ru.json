@@ -3661,5 +3661,25 @@
         "closeVotingText": {
             "value": "Закрыть голосование"
         }
+    },
+    "Tripcode activated for THIS THREAD only": {
+        "threadTripcodeActivatedText": {
+            "value": "Трипкод активирован только в этом ЭТОМ ТРЕДЕ"
+        }
+    },
+    "Tripcode deactivated for THIS THREAD only": {
+        "threadTripcodeDeactivatedText": {
+            "value": "Трипкод деактивирован только в ЭТОМ ТРЕДЕ"
+        }
+    },
+    "Global tripcode activated. Uncheck tripcode option OUTSIDE THREAD to disable it": {
+        "globalTripcodeActivatedText": {
+            "value": "Трипкод активирован везде. Снимите отметку трипкода ВНЕ ТРЕДА, чтобы отключить его"
+        }
+    },
+    "Global tripcode deactivated (except threads where it is activated explicitly)": {
+        "globalTripcodeDeactivatedText": {
+            "value": "Глобальный трипкод деактивирован (кроме тредов, где он был активирован явно)"
+        }
     }
 }
