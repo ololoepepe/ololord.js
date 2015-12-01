@@ -66,7 +66,9 @@ var spawnCluster = function() {
 
 if (cluster.isMaster) {
     console.log("Generating cache, please, wait...");
-    BoardModel.generate().then(function() {
+    controller.initialize().then(function() {
+        return BoardModel.generate();
+    }).then(function() {
         console.log("Spawning workers, please, wait...");
         spawnCluster();
         var ready = 0;

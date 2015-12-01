@@ -1158,6 +1158,7 @@ lord.editPost = function(el) {
     }).then(function(thread) {
         c.model.thread = thread;
         c.model = merge.recursive(c.model, lord.model(["base", "tr", "board/" + boardName], true));
+        c.model.settings = lord.settings();
         c.model.compareRegisteredUserLevels = function(l1, l2) {
             if (!l1)
                 l1 = null;
@@ -1182,29 +1183,7 @@ lord.editPost = function(el) {
                 throw "Invalid reistered user level l1: " + l1;
             }
         };
-        var indexes = [];
-        for (var i = 0; i < 110; i += 10)
-            indexes.push(i);
-        var promises = indexes.map(function(index) {
-            if (!lord.customEditPostDialogPart[index])
-                return Promise.resolve(null);
-            return lord.customEditPostDialogPart[index]().then(function(part) {
-                if (!part)
-                    return Promise.resolve(null);
-                return Promise.resolve({
-                    index: index,
-                    part: part
-                });
-            });
-        });
-        return Promise.all(promises);
-    }).then(function(parts) {
-        c.model.customEditPostDialogPart = {};
-        parts.forEach(function(part) {
-            if (!part)
-                return;
-            c.model.customEditPostDialogPart[part.index] = part.part;
-        });
+        c.model.customEditPostDialogPart = lord.customEditPostDialogPart;
         c.div = $.parseHTML(lord.template("editPostDialog")(c.model))[0];
         return lord.showDialog("editPostText", null, c.div);
     }).then(function(result) {
@@ -2285,6 +2264,10 @@ lord.submitted = function(event, form) {
         lord.resetCaptcha();
         lord.handleError(err);
     });
+};
+
+lord.addToDrafts = function(a) {
+    alert("В разработке");
 };
 
 lord.resetPostForm = function() {

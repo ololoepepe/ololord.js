@@ -34,6 +34,15 @@ var selectCaptchaEngine = function(req, board) {
     return Captcha.captcha(ceid);
 };
 
+var custom = function(model, req, board, thread) {
+    model.customPostFormField = {};
+    for (var i = 0; i < 120; i += 10)
+        model.customPostFormField[i] = board.customPostFormField(i, req, thread);
+    model.customPostFormOption = {};
+    for (var i = 0; i < 50; i += 10)
+        model.customPostFormOption[i] = board.customPostFormOption(i, req, thread);
+};
+
 var renderPage = function(model, board, req) {
     model.currentPage = +(req.params.page || 0);
     model.title = board.title;
@@ -58,6 +67,7 @@ var renderPage = function(model, board, req) {
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
+        custom(model, req, board);
         return controller(req, "boardPage", model);
     });
 };
@@ -86,6 +96,7 @@ var renderThread = function(model, board, req) {
         model.minimalisticPostform = function() {
             return "mobile" == this.deviceType || this.settings.minimalisticPostform;
         };
+        custom(model, req, board, model.thread);
         return controller(req, "threadPage", model);
     });
 };

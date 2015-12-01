@@ -227,12 +227,9 @@
                     {{? it.customPostFormOption && it.customPostFormOption[30]}}
                         {{ out += it.customPostFormOption[30](it); }}
                     {{?}}
-                    {{? it.board.draftsEnabled && it.user.loggedIn}}
-                        <input id="checkboxDraft" type="checkbox" name="draft" value="true"
-                               {{? it.settings.draftsByDefault}}checked="true"{{?}}
-                               class="imageCheckBox" /><label title="{{!it.tr.postFormLabelDraft}}"
-                                                              for="checkboxDraft"></label>
-                    {{?}}
+                    <a href="javascript:void(0);" onclick="lord.addToDrafts(this); return false;" class="buttonImage"
+                       title="{{!it.tr.postFormLabelDraft}}"><img src="/{{=it.site.pathPrefix}}img/draft.png"
+                                                                  width="24" height="24"></a>
                     {{? it.customPostFormOption && it.customPostFormOption[40]}}
                         {{ out += it.customPostFormOption[40](it); }}
                     {{?}}

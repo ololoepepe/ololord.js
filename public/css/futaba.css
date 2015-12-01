@@ -9,7 +9,6 @@ body.mobile {
     -moz-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
-    /*text-size-adjust: 100%;*/
     font-size: 14px;
 }
 
@@ -105,10 +104,7 @@ hr {
 }
 
 .centerForm {
-    /*width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    display: inline-block;*/
+    /**/
 }
 
 .inlineForm {
@@ -421,7 +417,6 @@ span.newPostCount {
     bottom: 7px;
     color: #333333;
     opacity: 0.6;
-    /*filter: alpha(opacity=60);*/
 }
 
 .symbolCounterContainer {
@@ -601,29 +596,18 @@ span.newPostCount {
     font-size: 0.6em;
 }
 
-/*.postFileFile.mobile {
-    -moz-transform: scale(0.7, 0.7);
-    -ms-transform: scale(0.7, 0.7);
-    -webkit-transform: scale(0.7, 0.7);
-    -o-transform: scale(0.7, 0.7);
-    transform: scale(0.7, 0.7);
-}*/
-
 .postFileFile > a > img.mumWatching:not(:hover) {
     opacity: 0.05;
-    /*filter: alpha(opacity=5);*/
 }
 
 .postHeader > a > img, .postFileSearch > a > img, .postHeader > span > a > img, .postFileSearch > form,
 .postHeader > span > form {
     opacity: 0.65;
-    /*filter: alpha(opacity=65);*/
 }
 
 .postHeader > a:not(.disabled) > img:hover, .postFileSearch > a:not(.disabled) > img:hover,
 .postHeader > span > a:not(.disabled) > img:hover, .postFileSearch > form:hover, .postHeader > span > form:hover {
     opacity: 1;
-    /*filter: alpha(opacity=100);*/
 }
 
 .postToThread > a > button {
@@ -750,12 +734,10 @@ span.newPostCount {
     right: 20px;
     z-index: 9910;
     opacity: 0.5;
-    /*filter: alpha(opacity=50);*/
 }
 
 .navigationButton:hover {
     opacity: 1;
-    /*filter: alpha(opacity=100);*/
 }
 
 .navigationButtonBottom {
@@ -771,12 +753,10 @@ span.newPostCount {
     top: 50%;
     z-index: 9910;
     opacity: 0.5;
-    /*filter: alpha(opacity=50);*/
 }
 
 .leafButton:hover {
     opacity: 1;
-    /*filter: alpha(opacity=100);*/
 }
 
 .leafButtonPrevious {
@@ -824,7 +804,6 @@ span.newPostCount {
     width: 1px;
     height: 1px;
     opacity: 0;
-    /*filter: alpha(opacity=0);*/
 }
 
 .postformFileText {
@@ -1013,8 +992,7 @@ blockquote.blockquoteThread.expand {
 /* Settings dialog */
 
 .settingsDialog {
-    /*width: 400px;
-    height: 200px;*/
+    /**/
 }
 
 /* Playlist */
@@ -1031,10 +1009,6 @@ blockquote.blockquoteThread.expand {
 .track > audio {
     width: 600px;
 }
-
-/*#recaptcha_response_field {
-    color: #698CC0;
-}*/
 
 #recaptcha_image_cell {
     background-color: inherit;
@@ -1101,8 +1075,8 @@ input.buttonImage {
 }
 
 .imageCheckBox + label {
-    height: 32px;
-    width: 32px;
+    height: 24px;
+    width: 24px;
     display: inline-block;
     padding: 0 0 0 0px;
 }
@@ -1121,10 +1095,6 @@ input.buttonImage {
 
 #checkboxTripcode + label {
     background: url("../img/checkbox_tripcode.png") center no-repeat;
-}
-
-#checkboxDraft + label, #checkboxDraftEdit + label {
-    background: url("../img/checkbox_draft.png") center no-repeat;
 }
 
 .searchSelect {

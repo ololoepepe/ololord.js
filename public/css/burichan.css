@@ -985,8 +985,8 @@ input.buttonImage {
 }
 
 .imageCheckBox + label {
-    height: 32px;
-    width: 32px;
+    height: 24px;
+    width: 24px;
     display: inline-block;
     padding: 0 0 0 0px;
 }
@@ -1005,10 +1005,6 @@ input.buttonImage {
 
 #checkboxTripcode + label {
     background: url("../img/checkbox_tripcode.png") center no-repeat;
-}
-
-#checkboxDraft + label, #checkboxDraftEdit + label {
-    background: url("../img/checkbox_draft.png") center no-repeat;
 }
 
 .searchSelect {
