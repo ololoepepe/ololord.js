@@ -988,7 +988,7 @@ lord.switchShowTripcode = function() {
         key = "global";
     if (sw.checked)
         showTripcode[key] = true;
-    else if (showTripcode.hasOwnProperty[key])
+    else if (showTripcode.hasOwnProperty(key))
         delete showTripcode[key];
     lord.setLocalObject("showTripcode", showTripcode);
 };

@@ -726,10 +726,14 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
     var key = boardName + ":" + threadNumber;
     var scheduled = scheduledGenerateThread[key];
     if (scheduled) {
-        if (!scheduled[action])
-            scheduled[action] = [];
-        scheduled[action].push(postNumber);
-        return Promise.resolve();
+        return (scheduled.promise || Promise.resolve()).then(function() {
+            scheduledGenerateThread[key] = {};
+            scheduled = scheduledGenerateThread[key];
+            if (!scheduled[action])
+                scheduled[action] = [];
+            scheduled[action].push(postNumber);
+            return Promise.resolve();
+        });
     }
     scheduledGenerateThread[key] = {};
     scheduled = scheduledGenerateThread[key];
@@ -920,6 +924,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
         }).catch(function(err) {
             console.log(err.stack || err);
         });
+        scheduled.promise = p;
     }, Tools.Second);
     return Promise.resolve();
 };
