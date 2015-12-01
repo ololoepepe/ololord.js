@@ -19,15 +19,10 @@ lord.addVoteVariant = function(el) {
             return;
         ++lastN;
     });
-    var c = {};
-    lord.getModel(["misc/base", "misc/tr"], true).then(function(model) {
-        c.model = model;
-        c.model.number = lastN + 1;
-        return lord.getTemplate("voteVariant");
-    }).then(function(template) {
-        var div = $.parseHTML(template(c.model))[0];
-        parent.appendChild(div);
-    });
+    var model = lord.model("base", "tr", true);
+    model.number = lastN + 1;
+    var div = $.parseHTML(lord.template("voteVariant")(model))[0];
+    parent.appendChild(div);
 };
 
 lord.removeVoteVariant = function(el) {
@@ -45,15 +40,7 @@ lord.removeVoteVariant = function(el) {
 
 lord.vote = function(event, form) {
     event.preventDefault();
-    var formData = new FormData(form);
-    return $.ajax(form.action, {
-        type: "POST",
-        data: formData,
-        processData: false,
-        contentType: false
-    }).then(function(result) {
-        if (result.errorMessage)
-            return Promise.reject(result.errorMessage);
+    return lord.post(form.action, new FormData(form)).then(function(result) {
         return lord.updatePost(lord.data("number", form, true));
     }).catch(lord.handleError);
 };
@@ -61,29 +48,16 @@ lord.vote = function(event, form) {
 lord.setVotingOpened = function(el, opened) {
     var c = {};
     var postNumber = +lord.data("number", el, true);
-    lord.getModel("misc/board", "boardName=rpg").then(function(model) {
-        c.model = model;
-        return lord.getModel(["misc/base", "misc/tr", "misc/board/rpg"], true);
-    }).then(function(model) {
-        c.model = merge.recursive(c.model, model);
-        return lord.getTemplate("setVotingOpenedDialog");
-    }).then(function(template) {
-        c.model.showSubmitButton = false;
-        c.model.opened = opened;
-        c.model.postNumber = postNumber;
-        c.div = $.parseHTML(template(c.model))[0];
-        return lord.showDialog(opened ? "openVotingText" : "closeVotingText", null, c.div);
-    }).then(function(result) {
+    c.model = lord.model(["base", "tr", "board/rpg"], true);
+    c.model.showSubmitButton = false;
+    c.model.opened = opened;
+    c.model.postNumber = postNumber;
+    c.div = $.parseHTML(lord.template("setVotingOpenedDialog")(c.model))[0];
+    lord.showDialog(opened ? "openVotingText" : "closeVotingText", null, c.div).then(function(result) {
         if (!result)
             return Promise.resolve();
         var form = lord.queryOne("form", c.div);
-        var formData = new FormData(form);
-        return $.ajax(form.action, {
-            type: "POST",
-            data: formData,
-            processData: false,
-            contentType: false
-        });
+        return lord.post(form.action, new FormData(form));
     }).then(function(result) {
         if (typeof result == "undefined")
             return Promise.resolve();
@@ -92,29 +66,25 @@ lord.setVotingOpened = function(el, opened) {
 };
 
 lord.customPostBodyPart[20] = function() {
-    return lord.getTemplate("rpgPostBodyPart").then(function(template) {
-        return function(it, thread, post) {
-            if (!post.extraData)
-                return "";
-            var model = merge.recursive(it, post.extraData);
-            model.thread = thread;
-            model.post = post;
-            return template(model);
-        };
-    });
+    return function(it, thread, post) {
+        if (!post.extraData)
+            return "";
+        var model = merge.recursive(it, post.extraData);
+        model.thread = thread;
+        model.post = post;
+        return lord.template("rpgPostBodyPart")(model);
+    };
 };
 
 lord.customEditPostDialogPart[50] = function() {
-    return lord.getTemplate("rpgEditPostDialogPart").then(function(template) {
-        return function(it, thread, post) {
-            var model;
-            if (post.extraData)
-                model = merge.recursive(it, post.extraData);
-            else
-                model = merge.clone(it);
-            model.thread = thread;
-            model.post = post;
-            return template(model);
-        };
-    });
+    return function(it, thread, post) {
+        var model;
+        if (post.extraData)
+            model = merge.recursive(it, post.extraData);
+        else
+            model = merge.clone(it);
+        model.thread = thread;
+        model.post = post;
+        return lord.template("rpgEditPostDialogPart")(model);
+    };
 };

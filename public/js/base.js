@@ -109,17 +109,11 @@ lord.preventOnclick = function(event) {
 
 lord.showSettings = function() {
     var c = {};
-    lord.getTemplate("settingsDialog").then(function(template) {
-        c.template = template;
-        c.model = {
-            settings: lord.settings()
-        };
-        return lord.getModel(["misc/tr", "misc/base", "misc/board" + lord.data("boardName"), "misc/boards"], true);
-    }).then(function(model) {
-        c.model = merge.recursive(c.model, model);
-        c.div = $.parseHTML(c.template(c.model))[0];
-        return lord.showDialog("settingsDialogTitle", null, c.div);
-    }).then(function(accepted) {
+    c.template = lord.template("settingsDialog");
+    var model = { settings: lord.settings() };
+    c.model = merge.recursive(model, lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true));
+    c.div = $.parseHTML(c.template(c.model))[0];
+    lord.showDialog("settingsDialogTitle", null, c.div).then(function(accepted) {
         if (!accepted)
             return;
         var model = {};
@@ -152,13 +146,11 @@ lord.showFavorites = function() {
             threadNumber: key.split("/").pop()
         });
     });
-    var query = list.reduce(function(query, item) {
-        return query + (query ? "&" : "") + "posts=" + item.boardName + ":" + item.threadNumber;
-    }, "");
+    var parameters = list.map(function(item) {
+        return item.boardName + ":" + item.threadNumber;
+    });
     var c = {};
-    lord.getModel("api/posts", query).then(function(posts) {
-        if (lord.checkError(posts))
-            return Promise.reject(posts);
+    lord.api("posts", { posts: parameters }).then(function(posts) {
         return Promise.resolve(posts);
     }).catch(function(err) {
         lord.handleError(err);
@@ -186,13 +178,9 @@ lord.showFavorites = function() {
             return data;
         });
         lord.setLocalObject("favoriteThreads", fav);
-        return lord.getModel(["misc/base", "misc/tr"], true);
-    }).then(function(model) {
-        c.model = model;
-        c.model.favorites = c.list;
-        return lord.getTemplate("favoritesDialog");
-    }).then(function(template) {
-        div = $.parseHTML(template(c.model))[0];
+        var model = lord.model(["base", "tr"], true);
+        model.favorites = c.list;
+        div = $.parseHTML(lord.template("favoritesDialog")(model))[0];
         document.body.appendChild(div);
         lord.toCenter(div, null, null, 1);
     }).catch(lord.handleError);
@@ -250,11 +238,9 @@ lord.removeThreadFromFavorites = function(boardName, threadNumber) {
     var btn = lord.nameOne("addToFavoritesButton", opPost);
     var img = lord.queryOne("img", btn);
     img.src = img.src.replace("favorite_active.png", "favorite.png");
-    lord.getModel("misc/tr").then(function(model) {
-        var span = lord.queryOne("span", btn);
-        lord.removeChildren(span);
-        span.appendChild(lord.node("text", model.tr.addThreadToFavoritesText));
-    }).catch(lord.handleError);
+    var span = lord.queryOne("span", btn);
+    lord.removeChildren(span);
+    span.appendChild(lord.node("text", lord.text("addThreadToFavoritesText")));
 };
 
 lord.checkFavoriteThreads = function() {
@@ -269,13 +255,10 @@ lord.checkFavoriteThreads = function() {
     });
     if (list.length < 1)
         return;
-    var query = list.reduce(function(query, item) {
-        return query + (query ? "&" : "") + "threads=" + item.boardName + ":" + item.threadNumber
-            + (item.lastPostNumber ? (":" + item.lastPostNumber) : "");
-    }, "");
-    lord.getModel("api/lastPosts", query).then(function(results) {
-        if (lord.checkError(results))
-            return Promise.reject(results);
+    var parameters = list.map(function(item) {
+        return item.boardName + ":" + item.threadNumber + (item.lastPostNumber ? (":" + item.lastPostNumber) : "");
+    });
+    lord.api("lastPosts", { threads: parameters }).then(function(results) {
         return Promise.resolve(results);
     }).catch(function(err) {
         lord.handleError(err);
@@ -318,16 +301,14 @@ lord.checkFavoriteThreads = function() {
             });
         }
         if (newPosts.length > 0 && lord.notificationsEnabled()) {
-            lord.getModel("misc/tr").then(function(model) {
-                var title = model.tr.favoriteThreadsText;
-                var sitePathPrefix = lord.data("sitePathPrefix");
-                var icon = "/" + sitePathPrefix + "favicon.ico";
-                var text = newPosts.reduce(function(text, post) {
-                    return text + (text ? ", " : "") + post.boardName + "/" + post.threadNumber;
-                }, "");
-                text = text.substr(0, text.length - 2);
-                lord.showNotification(title, text.substr(0, 300), icon);
-            }).catch(lord.handleError);
+            var title = lord.text("favoriteThreadsText");
+            var sitePathPrefix = lord.data("sitePathPrefix");
+            var icon = "/" + sitePathPrefix + "favicon.ico";
+            var text = newPosts.reduce(function(text, post) {
+                return text + (text ? ", " : "") + post.boardName + "/" + post.threadNumber;
+            }, "");
+            text = text.substr(0, text.length - 2);
+            lord.showNotification(title, text.substr(0, 300), icon);
         }
         setTimeout(lord.checkFavoriteThreads, 15 * lord.Second);
     });
@@ -336,9 +317,7 @@ lord.checkFavoriteThreads = function() {
 lord.showNewPosts = function() {
     var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
     var currentBoardName = lord.data("boardName");
-    lord.getModel("api/lastPostNumbers").then(function(result) {
-        if (lord.checkError(result))
-            return Promise.reject(result);
+    lord.api("lastPostNumbers").then(function(result) {
         lastPostNumbers[currentBoardName]
         lord.query(".navbar, .toolbar").forEach(function(navbar) {
             lord.query(".navbarItem", navbar).forEach(function(item) {
@@ -371,22 +350,18 @@ lord.showNewPosts = function() {
 
 lord.editHotkeys = function() {
     var c = {};
-    lord.getTemplate("hotkeysDialog").then(function(template) {
-        c.template = template;
-        c.hotkeys = lord.getLocalObject("hotkeys", {
-            dir: {},
-            rev: {}
-        });
-        c.model = {
-            hotkeys: c.hotkeys.dir,
-            defaultHotkeys: lord.DefaultHotkeys.dir
-        };
-        return lord.getModel(["misc/tr"], true);
-    }).then(function(model) {
-        c.model = merge.recursive(c.model, model);
-        c.div = $.parseHTML(c.template(c.model))[0];
-        return lord.showDialog(null, null, c.div);
-    }).then(function(accepted) {
+    c.template = lord.template("hotkeysDialog");
+    c.hotkeys = lord.getLocalObject("hotkeys", {
+        dir: {},
+        rev: {}
+    });
+    var model = {
+        hotkeys: c.hotkeys.dir,
+        defaultHotkeys: lord.DefaultHotkeys.dir
+    };
+    model = merge.recursive(model, lord.model("tr"));
+    c.div = $.parseHTML(c.template(model))[0];
+    lord.showDialog(null, null, c.div).then(function(accepted) {
         if (!accepted)
             return;
         lord.query("input", c.div).forEach(function(el) {
@@ -450,13 +425,11 @@ lord.showHiddenPostList = function() {
             postNumber: x.split("/").pop()
         });
     });
-    var query = list.reduce(function(query, item) {
-        return query + (query ? "&" : "") + "posts=" + item.boardName + ":" + item.postNumber;
-    }, "");
+    var parameters = list.map(function(item) {
+        return item.boardName + ":" + item.postNumber;
+    });
     var c = {};
-    lord.getModel("api/posts", query).then(function(posts) {
-        if (lord.checkError(posts))
-            return Promise.reject(posts);
+    lord.api("posts", { posts: parameters }).then(function(posts) {
         return Promise.resolve(posts);
     }).catch(function(err) {
         lord.handleError(err);
@@ -481,13 +454,9 @@ lord.showHiddenPostList = function() {
             };
         });
         lord.setLocalObject("hiddenPosts", hidden);
-        return lord.getModel(["misc/base", "misc/tr"], true);
-    }).then(function(model) {
-        c.model = model;
-        c.model.hiddenPosts = c.list;
-        return lord.getTemplate("hiddenPostList");
-    }).then(function(template) {
-        var div = $.parseHTML(template(c.model))[0];
+        var model = lord.model(["base", "tr"], true);
+        model.hiddenPosts = c.list;
+        var div = $.parseHTML(lord.template("hiddenPostList")(model))[0];
         return lord.showDialog("hiddenPostListText", null, div);
     }).catch(lord.handleError);
 };
@@ -595,24 +564,17 @@ lord.interceptHotkey = function(e) {
 lord.populateChatHistory = function(hash) {
     var history = lord.nameOne("history", lord.chatDialog);
     lord.removeChildren(history);
-    var c = {};
-    lord.getModel("misc/base").then(function(model) {
-        c.model = model;
-        var settings = lord.settings();
-        c.locale = model.site.locale;
-        c.dateFormat = model.site.dateFormat;
-        c.timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
-        model.formattedDate = function(date) {
-            return moment(date).utcOffset(c.timeOffset).locale(c.locale).format(c.dateFormat);
-        };
-        return lord.getTemplate("chatMessage");
-    }).then(function(template) {
-        var messages = lord.chats[hash] || [];
-        messages = messages.map(function(message) {
-            var model = merge.recursive(c.model, message);
-            history.appendChild($.parseHTML(template(model))[0]);
-        });
-    }).catch(lord.handleError);
+    var model = lord.model("base");
+    var settings = lord.settings();
+    var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
+    model.formattedDate = function(date) {
+        return moment(date).utcOffset(timeOffset).locale(model.site.locale).format(model.site.dateFormat);
+    };
+    var messages = lord.chats[hash] || [];
+    messages = messages.map(function(message) {
+        var m = merge.recursive(model, message);
+        history.appendChild($.parseHTML(lord.template("chatMessage")(m))[0]);
+    });
 };
 
 lord.updateChat = function(hashes) {
@@ -621,16 +583,14 @@ lord.updateChat = function(hashes) {
         var img = lord.queryOne("img", a);
         if (img.src.replace("chat_message", "") == img.src)
             img.src = img.src.replace("chat", "chat_message");
-        lord.getModel("misc/tr").then(function(model) {
-            var div = lord.node("div");
-            var a = lord.createChatButton(true);
-            var lastHash = lord.last(hashes);
-            a.onclick = lord.showChat.bind(lord, lastHash);
-            div.appendChild(a);
-            div.appendChild(lord.node("text", " " + model.tr.newChatMessageText + " [" + lastHash.substr(0, 10)
-                + "...]"));
-            lord.showPopup(div, { type: "node" });
-        }).catch(lord.handleError);
+        var div = lord.node("div");
+        var a = lord.createChatButton(true);
+        var lastHash = lord.last(hashes);
+        a.onclick = lord.showChat.bind(lord, lastHash);
+        div.appendChild(a);
+        div.appendChild(lord.node("text", " " + lord.text("newChatMessageText") + " [" + lastHash.substr(0, 10)
+            + "...]"));
+        lord.showPopup(div, { type: "node" });
     } else {
         hashes.forEach(function(hash) {
             var div = lord.nameOne(hash, lord.chatDialog);
@@ -643,15 +603,9 @@ lord.updateChat = function(hashes) {
                     newMessages.appendChild(lord.node("text", "!!!"));
                 }
             } else {
-                var c = {};
                 var contacts = lord.queryOne(".chatContactList", lord.chatDialog);
-                lord.getModel("misc/tr").then(function(model) {
-                    c.model = model;
-                    return lord.getTemplate("chatContact");
-                }).then(function(template) {
-                    var nodes = $.parseHTML(template(c.model));
-                    contacts.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
-                }).catch(lord.handleError);
+                var nodes = $.parseHTML(lord.template("chatContact")(lord.model("tr")));
+                contacts.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
             }
         });
     }
@@ -660,7 +614,7 @@ lord.updateChat = function(hashes) {
 lord.checkChats = function() {
     if (lord.checkChats.timer)
         clearTimeout(lord.checkChats.timer);
-    lord.getModel("api/chatMessages", "lastRequestDate=" + (lord.lastChatCheckDate || "")).then(function(model) {
+    lord.api("chatMessages", { lastRequestDate: lord.lastChatCheckDate || "" }).then(function(model) {
         if (!model)
             return Promise.resolve();
         lord.lastChatCheckDate = model.date;
@@ -691,21 +645,16 @@ lord.showChat = function(hash) {
     var img = lord.queryOne("img", a);
     if (img.src.replace("chat_message", "") != img.src)
         img.src = img.src.replace("chat_message", "chat");
-    var c = {};
-    lord.getModel(["misc/base", "misc/tr"], true).then(function(model) {
-        c.model = model;
-        c.model.contacts = [];
-        lord.forIn(lord.chats, function(_, hash) {
-            c.model.contacts.push({ hash: hash });
-        });
-        return lord.getTemplate("chatDialog");
-    }).then(function(template) {
-        lord.chatDialog = $.parseHTML(template(c.model))[0];
-        return lord.showDialog("chatText", null, lord.chatDialog, function() {
-            if (!hash)
-                return;
-            lord.selectChatContact(hash);
-        });
+    var model = lord.model(["base", "tr"], true);
+    model.contacts = [];
+    lord.forIn(lord.chats, function(_, hash) {
+        model.contacts.push({ hash: hash });
+    });
+    lord.chatDialog = $.parseHTML(lord.template("chatDialog")(model))[0];
+    lord.showDialog("chatText", null, lord.chatDialog, function() {
+        if (!hash)
+            return;
+        lord.selectChatContact(hash);
     }).then(function() {
         lord.chatDialog = null;
     }).catch(lord.handleError);
@@ -746,14 +695,7 @@ lord.deleteChat = function(hash) {
         return;
     var formData = new FormData();
     formData.append("hash", hash);
-    return $.ajax("/" + lord.data("sitePathPrefix") + "action/deleteChatMessages", {
-        type: "POST",
-        data: formData,
-        processData: false,
-        contentType: false
-    }).then(function(result) {
-        if (lord.checkError(result))
-            return Promise.reject(result);
+    return lord.post("/" + lord.data("sitePathPrefix") + "action/deleteChatMessages", formData).then(function(result) {
         delete lord.chats[hash];
         lord.setLocalObject("chats", lord.chats);
         if (!lord.chatDialog)
@@ -780,14 +722,7 @@ lord.sendChatMessage = function() {
     var formData = new FormData();
     formData.append("text", message.value);
     formData.append("hash", $(contact).attr("name"));
-    return $.ajax("/" + lord.data("sitePathPrefix") + "action/sendChatMessage", {
-        type: "POST",
-        data: formData,
-        processData: false,
-        contentType: false
-    }).then(function(result) {
-        if (lord.checkError(result))
-            return Promise.reject(result);
+    return lord.post("/" + lord.data("sitePathPrefix") + "action/sendChatMessage", formData).then(function(result) {
         message.value = "";
         $(message).focus();
         lord.checkChats();
@@ -801,9 +736,7 @@ lord.createChatButton = function(hash) {
     var img = lord.node("img");
     lord.addClass(img, "buttonImage");
     img.src = "/" + lord.data("sitePathPrefix") + "img/chat" + (hash ? "_message" : "") + ".png";
-    lord.getModel("misc/tr").then(function(model) {
-        a.title = model.tr.chatText;
-    }).catch(lord.handleError);
+    a.title = lord.text("chatText");
     a.appendChild(img);
     return a;
 };
@@ -886,11 +819,6 @@ window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
     lord.initializeOnLoadSettings();
     lord.checkFavoriteThreads();
-    lord.getTemplate("post").then(function() {
-        return lord.getTemplate("settingsDialog");
-    }).then(function() {
-        return lord.getTemplate("editPostDialog");
-    }).catch(lord.handleError); //TODO: remove
 }, false);
 
 window.addEventListener("beforeunload", function unload() {

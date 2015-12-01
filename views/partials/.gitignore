@@ -4,6 +4,7 @@
 !createAction.jst
 !customFooter.jst
 !customHeader.jst
+!extraData.jst
 !head.jst
 !innerNavbar.jst
 !leafButton.jst

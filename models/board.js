@@ -726,14 +726,16 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
     var key = boardName + ":" + threadNumber;
     var scheduled = scheduledGenerateThread[key];
     if (scheduled) {
-        return (scheduled.promise || Promise.resolve()).then(function() {
-            scheduledGenerateThread[key] = {};
-            scheduled = scheduledGenerateThread[key];
+        if (scheduled.promise) {
+            scheduled.promise.then(function() {
+                return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+            });
+        } else {
             if (!scheduled[action])
                 scheduled[action] = [];
             scheduled[action].push(postNumber);
             return Promise.resolve();
-        });
+        }
     }
     scheduledGenerateThread[key] = {};
     scheduled = scheduledGenerateThread[key];

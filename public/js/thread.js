@@ -143,30 +143,27 @@ lord.updateThread = function(silent) {
     var lastPostNumber = +lord.data("number", lastPost);
     var popup;
     var c = {};
-    var query = "boardName=" + boardName + "&threadNumber=" + threadNumber + "&lastPostNumber=" + lastPostNumber;
-    //NOTE: misc/base, misc/boards and misc/board/<boardName> are just cached for lord.createPostNode, not used
-    return lord.getModel(["misc/base", "misc/tr", "misc/boards", "misc/board/" + boardName]).then(function(models) {
-        c.tr = models[1].tr;
-        if (!silent) {
-            var span = lord.node("span");
-            if (!lord.loadingImage) {
-                lord.loadingImage = lord.node("img");
-                lord.loadingImage.src = "/" + lord.data("sitePathPrefix") + "img/loading.gif";
-            }
-            span.appendChild(lord.loadingImage.cloneNode(true));
-            span.appendChild(lord.node("text", " " + c.tr.loadingPostsText));
-            popup = lord.showPopup(span, {
-                type: "node",
-                classNames: "noNewPostsPopup",
-                timeout: lord.Billion
-            });
+    if (!silent) {
+        var span = lord.node("span");
+        if (!lord.loadingImage) {
+            lord.loadingImage = lord.node("img");
+            lord.loadingImage.src = "/" + lord.data("sitePathPrefix") + "img/loading.gif";
         }
-        return lord.getModel("api/lastPosts", query);
+        span.appendChild(lord.loadingImage.cloneNode(true));
+        span.appendChild(lord.node("text", " " + lord.text("loadingPostsText")));
+        popup = lord.showPopup(span, {
+            type: "node",
+            classNames: "noNewPostsPopup",
+            timeout: lord.Billion
+        });
+    }
+    return lord.api("lastPosts", {
+        boardName: boardName,
+        threadNumber: threadNumber,
+        lastPostNumber: lastPostNumber
     }).then(function(posts) {
-        if (lord.checkError(posts))
-            return Promise.reject(posts);
         if (popup) {
-            var txt = (posts.length >= 1) ? c.tr.newPostsText : c.tr.noNewPostsText;
+            var txt = (posts.length >= 1) ? lord.text("newPostsText") : lord.text("noNewPostsText");
             if (posts.length >= 1)
                 txt += " " + posts.length;
             popup.resetText(txt, {classNames: "noNewPostsPopup"});
@@ -175,12 +172,13 @@ lord.updateThread = function(silent) {
         if (posts.length < 1)
             return Promise.resolve();
         c.posts = posts;
-        return lord.getModel("api/threadInfo", "boardName=" + boardName + "&threadNumber=" + threadNumber);
+        return lord.api("threadInfo", {
+            boardName: boardName,
+            threadNumber: threadNumber
+        });
     }).then(function(threadInfo) {
         if (!c.posts)
             return Promise.resolve();
-        if (lord.checkError(threadInfo))
-            return Promise.reject(threadInfo);
         c.threadInfo = threadInfo;
         c.sequenceNumber = c.posts[c.posts.length - 1].sequenceNumber;
         var refs = [];
@@ -196,16 +194,16 @@ lord.updateThread = function(silent) {
         var postMap = lord.toMap(c.posts, function(post) {
             return post.boardName + ":" + post.number;
         });
-        var query = "";
+        var parameters = [];
         c.postInfos = {};
         lord.forIn(map, function(_, key) {
             var post = postMap[key];
             if (post)
                 c.postInfos[key] = post;
             else
-                query = query + (query ? "&" : "") + "posts=" + key;
+                parameters.push(key);
         });
-        return lord.getModel("api/posts", query);
+        return lord.api("posts", { posts: parameters });
     }).then(function(posts) {
         if (!c.posts)
             return Promise.resolve();
@@ -231,11 +229,7 @@ lord.updateThread = function(silent) {
             };
             document.body.insertBefore(post, before);
         });
-        return lord.getModel("misc/board/" + boardName);
-    }).then(function(model) {
-        if (!model)
-            return Promise.resolve();
-        var board = model.board;
+        var board = lord.model("board/" + boardName).board;
         var bumpLimitReached = c.sequenceNumber >= board.bumpLimit;
         var postLimitReached = c.sequenceNumber >= board.postLimit;
         if (postLimitReached) {
@@ -245,7 +239,7 @@ lord.updateThread = function(silent) {
                 div.className = "theMessage";
                 var h2 = lord.node("h2");
                 h2.className = "postLimitReached";
-                h2.appendChild(lord.node("text", c.tr.postLimitReachedText));
+                h2.appendChild(lord.node("text", lord.text("postLimitReachedText")));
                 div.appendChild(h2);
                 pl.parentNode.replaceChild(div, pl);
             }
@@ -267,7 +261,7 @@ lord.updateThread = function(silent) {
                 div.setAttribute("name", "bumpLimitReached");
                 var h3 = lord.node("h3");
                 h3.className = "bumpLimitReached";
-                h3.appendChild(lord.node("text", c.tr.bumpLimitReachedText));
+                h3.appendChild(lord.node("text", lord.text("bumpLimitReachedText")));
                 div.appendChild(h3);
                 bl.parentNode.replaceChild(div, bl);
             }
@@ -279,7 +273,7 @@ lord.updateThread = function(silent) {
             }
             if (lord.notificationsEnabled()) {
                 var subject = lord.queryOne(".theTitle > h1").textContent;
-                var title = "[" + subject + "] " + c.tr.newPostsText + " " + c.posts.length;
+                var title = "[" + subject + "] " + lord.text("newPostsText") + " " + c.posts.length;
                 var sitePathPrefix = lord.data("sitePathPrefix");
                 var icon = "/" + sitePathPrefix + "favicon.ico";
                 var p = c.posts[0];
@@ -296,9 +290,6 @@ lord.updateThread = function(silent) {
 };
 
 lord.setAutoUpdateEnabled = function(enabled) {
-    ["Top", "Bottom"].forEach(function(position) {
-        //$("#autoUpdate" + position).parent().find("canvas").css({ boxShadow: (enabled ? "inset 0 1px 5px #555555" : "") });
-    });
     if (enabled) {
         var intervalSeconds = lord.getLocalObject("autoUpdateInterval", 15);
         lord.autoUpdateTimer = new lord.AutoUpdateTimer(intervalSeconds);

@@ -12,7 +12,6 @@ lord.reloadCaptchaFunction = function() {
     response.value = "";
     if (image.firstChild)
         image.removeChild(image.firstChild);
-    var type = lord.settings().captchaEngine.id.split("-").pop();
     var onError = function(err) {
         var img = lord.node("img");
         img.src = "/" + lord.data("sitePathPrefix") + "img/yandex-hernya.png";
@@ -21,7 +20,7 @@ lord.reloadCaptchaFunction = function() {
         img.style.cursor = "pointer";
         image.appendChild(img);
     };
-    lord.getModel("api/yandexCaptchaImage", "type=" + type).then(function(model) {
+    lord.api("yandexCaptchaImage", { type: lord.settings().captchaEngine.id.split("-").pop() }).then(function(model) {
         if (!model || !model.challenge || !model.url)
             return onError(model ? model.error : "");
         challenge.value = model.challenge;

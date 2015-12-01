@@ -126,10 +126,8 @@ var lord = lord || {};
             callback();
         };
         _this.cancelButton.appendChild(lord.node("text", "Cancel"));
-        lord.getModel("misc/tr").then(function(model) {
-            lord.removeChildren(_this.cancelButton);
-            _this.cancelButton.appendChild(lord.node("text", model.tr.cancelButtonText));
-        });
+        lord.removeChildren(_this.cancelButton);
+        _this.cancelButton.appendChild(lord.node("text", lord.text("cancelButtonText")));
     };
     if (options && typeof options.cancelCallback == "function")
         createCancelButton(options.cancelCallback);
@@ -485,7 +483,7 @@ lord.unloading = false;
 lord.leftChain = [];
 lord.rightChain = [];
 lord.models = {};
-lord.partials = null;
+//lord.partials = null;
 lord.templates = {};
 
 /*Functions*/
@@ -895,76 +893,74 @@ lord.showNotification = function(title, body, icon) {
     });
 };
 
-lord.text = function(model, id) {
-    if (!model)
+lord.text = function(id) {
+    if (!id)
         return id;
-    var text = model.tr[id];
+    var text = lord.models.tr.tr[id];
     if (text)
         return text;
     return id;
 };
 
 lord.showDialog = function(title, label, body, afterShow) {
-    return lord.getModel("misc/tr").then(function(model) {
-        var root = lord.node("div");
-        title = lord.text(model, title);
-        label = lord.text(model, label);
-        if (title || label) {
-            var div = lord.node("div");
-            if (title) {
-                var c = lord.node("center");
-                var t = lord.node("b");
-                t.appendChild(lord.node("text", title));
-                c.appendChild(t);
-                div.appendChild(c);
-                div.appendChild(lord.node("br"));
-            }
-            if (label) {
-                div.appendChild(lord.node("text", label));
-                div.appendChild(lord.node("br"));
-            }
-            root.appendChild(div);
-            root.appendChild(lord.node("br"));
+    var root = lord.node("div");
+    title = lord.text(title);
+    label = lord.text(label);
+    if (title || label) {
+        var div = lord.node("div");
+        if (title) {
+            var c = lord.node("center");
+            var t = lord.node("b");
+            t.appendChild(lord.node("text", title));
+            c.appendChild(t);
+            div.appendChild(c);
+            div.appendChild(lord.node("br"));
         }
-        if (body) {
-            root.appendChild(body);
-            root.appendChild(lord.node("br"));
+        if (label) {
+            div.appendChild(lord.node("text", label));
+            div.appendChild(lord.node("br"));
         }
-        var div2 = lord.node("div");
-        var dialog = null;
-        var cancel = lord.node("button");
-        return new Promise(function(resolve, reject) {
-            cancel.onclick = function() {
-                dialog.close();
-            };
-            cancel.appendChild(lord.node("text", model.tr.cancelButtonText));
-            div2.appendChild(cancel);
-            var ok = lord.node("button");
-            ok.onclick = function() {
-                resolve(true);
-                dialog.close();
-            };
-            ok.appendChild(lord.node("text", model.tr.confirmButtonText));
-            div2.appendChild(ok);
-            root.appendChild(div2);
-            dialog = picoModal({
-                "content": root,
-                "modalStyles": function (styles) {
-                    styles.maxHeight = "80%";
-                    styles.maxWidth = "80%";
-                    styles.overflow = "auto";
-                    styles.border = "1px solid #777777";
-                    return styles;
-                }
-            }).afterShow(function(modal) {
-                if (afterShow)
-                    afterShow();
-            }).afterClose(function(modal) {
-                modal.destroy();
-                resolve(false);
-            });
-            dialog.show();
+        root.appendChild(div);
+        root.appendChild(lord.node("br"));
+    }
+    if (body) {
+        root.appendChild(body);
+        root.appendChild(lord.node("br"));
+    }
+    var div2 = lord.node("div");
+    var dialog = null;
+    var cancel = lord.node("button");
+    return new Promise(function(resolve, reject) {
+        cancel.onclick = function() {
+            dialog.close();
+        };
+        cancel.appendChild(lord.node("text", lord.text("cancelButtonText")));
+        div2.appendChild(cancel);
+        var ok = lord.node("button");
+        ok.onclick = function() {
+            resolve(true);
+            dialog.close();
+        };
+        ok.appendChild(lord.node("text", lord.text("confirmButtonText")));
+        div2.appendChild(ok);
+        root.appendChild(div2);
+        dialog = picoModal({
+            content: root,
+            modalStyles: function (styles) {
+                styles.maxHeight = "80%";
+                styles.maxWidth = "80%";
+                styles.overflow = "auto";
+                styles.border = "1px solid #777777";
+                return styles;
+            }
+        }).afterShow(function(modal) {
+            if (afterShow)
+                afterShow();
+        }).afterClose(function(modal) {
+            modal.destroy();
+            resolve(false);
         });
+        dialog.show();
     });
 };
 
@@ -1148,91 +1144,85 @@ lord.data = function(key, el, bubble) {
     return undefined;
 };
 
-lord.getTemplate = function(templateName) {
-    var prefix = lord.data("sitePathPrefix");
-    return new Promise(function(resolve, reject) {
-        if (lord.templates.hasOwnProperty(templateName))
-            return resolve(lord.templates[templateName]);
-        var f = function() {
-            $.ajax("/" + prefix + "templates/" + templateName + ".jst").then(function(result) {
-                var template = doT.template(result, {
-                    evaluate: /\{\{([\s\S]+?)\}\}/g,
-                    interpolate: /\{\{=([\s\S]+?)\}\}/g,
-                    encode: /\{\{!([\s\S]+?)\}\}/g,
-                    use: /\{\{#([\s\S]+?)\}\}/g,
-                    define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
-                    conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
-                    iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
-                    varname: 'it',
-                    strip: false,
-                    append: true,
-                    selfcontained: false
-                }, lord.partials);
-                lord.templates[templateName] = template;
-                resolve(template);
-            });
-        };
-        if (lord.partials) {
-            f();
-        } else {
-            $.ajax("/" + prefix + "misc/partials.json").then(function(list) {
-                var promises = list.map(function(partialName) {
-                    return $.ajax("/" + prefix + "templates/partials/" + partialName + ".jst").then(function(result) {
-                        return {
-                            data: result,
-                            name: partialName
-                        };
-                    });
-                });
-                return Promise.all(promises);
-            }).then(function(partials) {
-                lord.partials = {};
-                partials.forEach(function(partial) {
-                    lord.partials[partial.name] = partial.data;
-                });
-                f();
-            }).catch(function(err) {
-                reject(err);
-            });
+lord.template = function(templateName) {
+    return lord.templates[templateName];
+};
+
+lord.model = function(modelName, mustMerge) {
+    if (Array.isArray(modelName)) {
+        var models = modelName.map(function(modelName) {
+            return lord.model(modelName);
+        });
+        if (!mustMerge)
+            return models;
+        var model = (models.length > 0) ? merge.clone(models[0]) : {};
+        models.slice(1).forEach(function(m) {
+            model = merge.recursive(model, m);
+        })
+        return model;
+    } else {
+        var match = modelName.match(/^board\/(\S+)$/);
+        if (match) {
+            var boards = lord.models["boards"].boards;
+            for (var i = 0; i < boards.length; ++i) {
+                if (match[1] == boards[i].name)
+                    return { board: boards[i] };
+            }
+            return lord.models["boards"].boards[match[1]];
         }
+        return lord.models[modelName];
+    }
+};
+
+lord.api = function(entity, parameters, prefix) {
+    prefix = prefix || "api";
+    var query = "";
+    lord.forIn(parameters, function(val, key) {
+        if (!Array.isArray(val))
+            val = [val];
+        val.forEach(function(val) {
+            if (query)
+                query += "&";
+            query += (key + "=" + val);
+        });
+    });
+    query = (query ? "?" : "") + query;
+    return new Promise(function(resolve, reject) {
+        $.getJSON("/" + lord.data("sitePathPrefix") + prefix + "/" + entity + ".json" + query).then(function(result) {
+            if (lord.checkError(result))
+                reject(result);
+            resolve(result);
+        }).catch(function(err) {
+            reject(err);
+        });
     });
 };
 
-lord.getModel = function(modelName, query) {
-    if (Array.isArray(modelName)) {
-        var promises = modelName.map(function(modelName) {
-            if (typeof modelName == "string")
-                return lord.getModel(modelName);
+lord.post = function(action, formData, progressBarContext, progressBarOptions) {
+    var parameters = {
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false
+    };
+    if (typeof progressBarContext == "object") {
+        parameters.xhr = function() {
+            var xhr = new XMLHttpRequest();
+            if (progressBarOptions && progressBarOptions.uploadProgress)
+                xhr.upload.onprogress = progressBarOptions.uploadProgress;
+            progressBarContext.progressBar = new lord.OverlayProgressBar({ xhr: xhr });
+            if (progressBarOptions && progressBarOptions.delay)
+                progressBarContext.progressBar.showDelayed(progressBarOptions.delay);
             else
-                return lord.getModel(modelName.name, modelName.query);
-        });
-        return Promise.all(promises).then(function(models) {
-            if (query) {
-                var model = (models.length > 0) ? merge.clone(models[0]) : {};
-                for (var i = 1; i < models.length; ++i)
-                    model = merge.recursive(model, models[i]);
-                return Promise.resolve(model);
-            } else {
-                return Promise.resolve(models);
-            }
-        });
-    } else {
-        var cache = !query || (typeof query != "boolean" && typeof query != "string");
-        query = (query && typeof query == "string") ? ("?" + query) : "";
-        return new Promise(function(resolve, reject) {
-            if (!query && lord.models.hasOwnProperty(modelName)) {
-                resolve(lord.models[modelName]);
-            } else {
-                $.ajax("/" + lord.data("sitePathPrefix") + modelName + ".json" + query).then(function(result) {
-                    if (cache)
-                        lord.models[modelName] = result;
-                    resolve(result);
-                }).catch(function(err) {
-                    reject(err);
-                });
-            }
-        });
+                c.progressBar.show();
+            return xhr;
+        }
     }
+    return $.ajax(action, parameters).then(function(result) {
+        if (lord.checkError(result))
+            return Promise.reject(result);
+        return Promise.resolve(result);
+    });
 };
 
 lord.now = function() {

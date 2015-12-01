@@ -10,34 +10,26 @@ lord.blockVolumeChange = false;
 /*Functions*/
 
 lord.addTrack = function(key, track) {
-    var c = {};
-    lord.getModel("misc/base").then(function(model) {
-        c.model = merge.recursive(track, model);
-        return lord.getModel("misc/tr");
-    }).then(function(model) {
-        c.model = merge.recursive(c.model, model);
-        return lord.getTemplate("playlistItem");
-    }).then(function(template) {
-        var nodes = $.parseHTML(template(c.model));
-        var node = nodes[0];
-        lord.id("playlist").appendChild(node);
-        lord.currentTracks[key] = track;
-        var audio = lord.queryOne("audio", node);
-        audio.addEventListener("play", function() {
-            lord.forIn(lord.currentTracks, function(_, k) {
-                if (k == key)
-                    return;
-                var div = lord.id("track/" + k);
-                lord.queryOne("audio", div).pause();
-            });
-        }, false);
-        audio.addEventListener("ended", function() {
-            var nextDiv = audio.parentNode.nextSibling;
-            if (!nextDiv)
+    var model = megre.recursive(track, lord.model(["base", "tr"], true));
+    var nodes = $.parseHTML(lord.template("playlistItem")(model));
+    var node = nodes[0];
+    lord.id("playlist").appendChild(node);
+    lord.currentTracks[key] = track;
+    var audio = lord.queryOne("audio", node);
+    audio.addEventListener("play", function() {
+        lord.forIn(lord.currentTracks, function(_, k) {
+            if (k == key)
                 return;
-            lord.queryOne("audio", nextDiv).play();
-        }, false);
-    });
+            var div = lord.id("track/" + k);
+            lord.queryOne("audio", div).pause();
+        });
+    }, false);
+    audio.addEventListener("ended", function() {
+        var nextDiv = audio.parentNode.nextSibling;
+        if (!nextDiv)
+            return;
+        lord.queryOne("audio", nextDiv).play();
+    }, false);
 };
 
 lord.removeTrack = function(key) {

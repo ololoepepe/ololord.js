@@ -1,30 +1,20 @@
 lord.banUser = function(e, form) {
     e.preventDefault();
-    var formData = new FormData(form);
     var c = {};
     var ip = lord.nameOne("userIp", form).value;
-    return $.ajax(form.action, {
-        type: "POST",
-        data: formData,
-        processData: false,
-        contentType: false
-    }).then(function(result) {
+    return lord.post(form.action, new FormData(form)).then(function(result) {
         if (result.errorMessage)
             return Promise.reject(result);
-        return lord.getModel(["misc/base", "misc/tr", "misc/boards"], true);
-    }).then(function(model) {
-        c.model = model;
-        return lord.getModel("api/bannedUser", "ip=" + ip);
+        c.model = lord.model(["base", "tr", "boards"], true);
+        return lord.api("bannedUser", { ip: ip });
     }).then(function(model) {
         c.model.settings = lord.settings();
         c.model.bannedUser = model;
         c.model.showSubmitButton = true;
-        return lord.getTemplate("userBan");
-    }).then(function(template) {
         var parent = lord.id("bannedUsers");
         var previous = lord.id("user" + ip);
         if (c.model.bannedUser) {
-            var nodes = $.parseHTML(template(c.model));
+            var nodes = $.parseHTML(lord.template("userBan")(c.model));
             var node = (nodes.length > 0) ? nodes[1] : nodes[0];
             if (previous)
                 parent.replaceChild(node, previous);
@@ -58,13 +48,7 @@ lord.bansSelectAll = function(e, btn) {
 
 lord.delall = function(e, form) {
     e.preventDefault();
-    var formData = new FormData(form);
-    return $.ajax(form.action, {
-        type: "POST",
-        data: formData,
-        processData: false,
-        contentType: false
-    }).then(function(result) {
+    return lord.post(form.action, new FormData(form)).then(function(result) {
         if (result.errorMessage)
             return Promise.reject(result);
     }).catch(function(err) {

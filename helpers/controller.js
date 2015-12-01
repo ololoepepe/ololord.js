@@ -13,6 +13,8 @@ var config = require("./config");
 
 var partials = {};
 var templates = {};
+var publicPartials;
+var publicTemplates;
 var langNames = require("../misc/lang-names.json");
 var ipBans = require("../misc/bans.json");
 
@@ -52,6 +54,19 @@ controller = function(req, templateName, modelData) {
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
     baseModelData.formattedDate = formattedDate;
+    baseModelData.publicPartials = publicPartials;
+    baseModelData.publicTemplates = publicTemplates;
+    baseModelData.models = {
+        base: JSON.stringify(controller.baseModel(req)),
+        boards: JSON.stringify(controller.boardsModel()),
+        tr: JSON.stringify(controller.translationsModel()),
+        partials: JSON.stringify(publicPartials.map(function(partial) {
+            return partial.name
+        })),
+        templates: JSON.stringify(publicTemplates.map(function(partial) {
+            return partial.name
+        }))
+    };
     if (!modelData)
         modelData = {};
     var template = templates[templateName];
@@ -656,6 +671,11 @@ controller.initialize = function() {
         });
         return FS.list(path2);
     }).then(function(fileNames) {
+        publicPartials = fileNames.filter(function(fileName) {
+            return fileName.split(".").pop() == "jst";
+        }).map(function(fileName) {
+            return fileName.split(".").shift();
+        });
         c.fileNames = c.fileNames.concat(fileNames.map(function(fileName) {
             return path2 + "/" + fileName;
         })).filter(function(fileName) {
@@ -663,7 +683,15 @@ controller.initialize = function() {
         });
         var promises = c.fileNames.map(function(fileName) {
             FS.read(fileName).then(function(data) {
-                partials[fileName.split("/").pop().split(".").shift()] = data;
+                var name = fileName.split("/").pop().split(".").shift();
+                var ind = publicPartials.indexOf(name);
+                if (ind >= 0) {
+                    publicPartials[ind] = {
+                        name: name,
+                        data: data
+                    };
+                }
+                partials[name] = data;
                 return Promise.resolve();
             });
         });
@@ -678,6 +706,11 @@ controller.initialize = function() {
             return FS.list(path2);
         });
     }).then(function(fileNames) {
+        publicTemplates = fileNames.filter(function(fileName) {
+            return fileName.split(".").pop() == "jst";
+        }).map(function(fileName) {
+            return fileName.split(".").shift();
+        });
         c.fileNames = c.fileNames.concat(fileNames.map(function(fileName) {
             return path2 + "/" + fileName;
         })).filter(function(fileName) {
@@ -685,7 +718,15 @@ controller.initialize = function() {
         });
         var promises = c.fileNames.map(function(fileName) {
             FS.read(fileName).then(function(data) {
-                templates[fileName.split("/").pop().split(".").shift()] = dot.template(data, {
+                var name = fileName.split("/").pop().split(".").shift();
+                var ind = publicTemplates.indexOf(name);
+                if (ind >= 0) {
+                    publicTemplates[ind] = {
+                        name: name,
+                        data: data
+                    };
+                }
+                templates[name] = dot.template(data, {
                     evaluate: /\{\{([\s\S]+?)\}\}/g,
                     interpolate: /\{\{=([\s\S]+?)\}\}/g,
                     encode: /\{\{!([\s\S]+?)\}\}/g,

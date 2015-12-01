@@ -53,11 +53,8 @@ lord.codecha.setStatus = function(state) {
 };
 
 lord.codecha.updateState = function() {
-    $.ajax("//codecha.org/api/state", {
-        type: "POST",
-        data: lord.codecha.serialize({ 'challenge': lord.id("codecha_challenge_field").value }),
-        dataType: "text"
-    }).then(function(response) {
+    lord.post("//codecha.org/api/state",
+        lord.codecha.serialize({ 'challenge': lord.id("codecha_challenge_field").value })).then(function(response) {
         var match = /codecha\.response\s*\=\s"([^"]+)"/gi.exec(response);
         if (match) {
             lord.codecha.mustRequestNewChallenge = true;
@@ -111,7 +108,7 @@ lord.codecha.requestNewChallenge = function() {
         p = Promise.resolve();
     } else {
         p = Promise.resolve().then(function() {
-            return lord.getModel("api/codechaChallenge", true); //NOTE: true means not ceched
+            return lord.api("codechaChallenge");
         }).then(function(model) {
             lord.codecha.mustRequestNewChallenge = false;
             lord.id("codecha_challenge_field").value = model;
@@ -124,11 +121,7 @@ lord.codecha.requestNewChallenge = function() {
             "k": lord.id("codecha_public_key").value,
             "lang": select.options[select.selectedIndex].value
         };
-        return $.ajax("//codecha.org/api/change", {
-            type: "POST",
-            data: lord.codecha.serialize(params),
-            dataType: "text"
-        });
+        return lord.post("//codecha.org/api/change", lord.codecha.serialize(params));
     }).then(function(response) {
         var codecha = lord.codecha;
         eval(response);
@@ -144,11 +137,7 @@ lord.codecha.codeSubmit = function() {
         "challenge": lord.id("codecha_challenge_field").value,
         "code": lord.id("codecha_code_area").value
     };
-    $.ajax("//codecha.org/api/code", {
-        type: "POST",
-        data: lord.codecha.serialize(params),
-        dataType: "text"
-    }).then(function(response) {
+    lord.post("//codecha.org/api/code", lord.codecha.serialize(params)).then(function(response) {
         lord.codecha.setStatus("sending");
         setTimeout(lord.codecha.updateState, 1000);
     }).catch(function(err) {

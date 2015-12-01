@@ -32,9 +32,10 @@
                 lord.setAutoUpdateEnabled(enabled);
             });
             canvas.css({ marginBottom: -5 });
-            lord.getModel("misc/tr").then(function(model) {
-                parent.attr("title", model.tr.autoUpdateText);
-            }).catch(lord.handleError);
+            window.addEventListener("load", function load() {
+                window.removeEventListener("load", load, false);
+                $("#autoUpdate{{=position}}").parent().attr("title", lord.text("autoUpdateText"));
+            }, false);
         </script>
     {{?}}
 </div>
