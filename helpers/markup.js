@@ -157,7 +157,7 @@ var getTwitterEmbeddedHtml = function(href, defaultHtml) {
 };
 
 var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
-    var match = href.match(/^https?\:\/\/.*youtube\.com\/.*v\=([^\/]+).*$/);
+    var match = href.match(/^https?\:\/\/.*youtube\.com\/.*v\=([^\/#\?]+).*$/);
     var videoId = match ? match[1] : null;
     var apiKey = config("server.youtubeApiKey", "");
     if (!videoId || !apiKey)
@@ -194,7 +194,7 @@ var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
 };
 
 var getCoubEmbeddedHtml = function(href, defaultHtml) {
-    var match = href.match(/^https?:\/\/coub\.com\/view\/([^\/\?]+).*$/);
+    var match = href.match(/^https?:\/\/coub\.com\/view\/([^\/\?#]+).*$/);
     var videoId = match ? match[1] : null;
     if (!videoId)
         return Promise.resolve(defaultHtml);

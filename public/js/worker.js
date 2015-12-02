@@ -735,7 +735,7 @@ lord.applySpells = function(post, spells) {
 
 lord.processPosts = function(posts, spells) {
     if (!posts)
-        return Promise.resject("Internal error");
+        return Promise.reject("Internal error");
     var promises = posts.map(function(post) {
         var npost = {
             "boardName": post.boardName,
