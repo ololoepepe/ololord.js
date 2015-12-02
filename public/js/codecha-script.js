@@ -2,6 +2,14 @@ lord.codecha = {};
 
 lord.codecha.mustRequestNewChallenge = false;
 
+lord.codecha.post = function(action, data) {
+    return $.ajax(action, {
+        type: "POST",
+        data: data,
+        dataType: "text"
+    });
+};
+
 lord.codecha.textAreaKeyPress = function(e) {
     var object = lord.id("codecha_code_area");
     if (e.keyCode == 9) {
@@ -53,7 +61,7 @@ lord.codecha.setStatus = function(state) {
 };
 
 lord.codecha.updateState = function() {
-    lord.post("//codecha.org/api/state",
+    lord.codecha.post("//codecha.org/api/state",
         lord.codecha.serialize({ 'challenge': lord.id("codecha_challenge_field").value })).then(function(response) {
         var match = /codecha\.response\s*\=\s"([^"]+)"/gi.exec(response);
         if (match) {
@@ -121,7 +129,7 @@ lord.codecha.requestNewChallenge = function() {
             "k": lord.id("codecha_public_key").value,
             "lang": select.options[select.selectedIndex].value
         };
-        return lord.post("//codecha.org/api/change", lord.codecha.serialize(params));
+        return lord.codecha.post("//codecha.org/api/change", lord.codecha.serialize(params));
     }).then(function(response) {
         var codecha = lord.codecha;
         eval(response);
@@ -137,7 +145,7 @@ lord.codecha.codeSubmit = function() {
         "challenge": lord.id("codecha_challenge_field").value,
         "code": lord.id("codecha_code_area").value
     };
-    lord.post("//codecha.org/api/code", lord.codecha.serialize(params)).then(function(response) {
+    lord.codecha.post("//codecha.org/api/code", lord.codecha.serialize(params)).then(function(response) {
         lord.codecha.setStatus("sending");
         setTimeout(lord.codecha.updateState, 1000);
     }).catch(function(err) {

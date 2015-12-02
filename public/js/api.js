@@ -30,6 +30,7 @@ var lord = lord || {};
     this.msg = lord.node("div");
     lord.addClass(this.msg, "popup");
     lord.addClass(this.msg, this.classNames);
+    this.msg.onclick = this.hide.bind(this);
     if (lord.popups.length > 0) {
         var prev = lord.popups[lord.popups.length - 1];
         this.msg.style.top = (prev.msg.offsetTop + prev.msg.offsetHeight + 5) + "px";

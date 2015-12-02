@@ -78,6 +78,7 @@ hr {
     vertical-align: middle;
     text-align: center;
     padding: 5px 5px 5px 5px;
+    cursor: pointer;
 }
 
 .critical {
