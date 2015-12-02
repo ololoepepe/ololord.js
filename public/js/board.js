@@ -328,14 +328,16 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
         c.model.includeThreadScripts = !!lord.data("threadNumber");
         lord.appendExtrasToModel(c.model);
         var html = lord.template("post")(c.model);
-        var nodes = $.parseHTML(html);
+        var nodes = $.parseHTML(html, document, true);
         c.node = (nodes.length > 1) ? nodes[1] : nodes[0];
-        if (html.replace("src=\"//platform.twitter.com/widgets.js\"", "") != html) {
-            var script = lord.node("script");
-            script.type = "text/javascript";
-            script.src = "//platform.twitter.com/widgets.js";
-            c.node.appendChild(script);
-        }
+        lord.query("script", c.node).forEach(function(script) {
+            var nscript = lord.node("script");
+            if (script.src)
+                nscript.src = script.src;
+            else if (script.innerHTML)
+                nscript.innerHTML = script.innerHTML;
+            script.parentNode.replaceChild(nscript, script);
+        });
         if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
             lord.strikeOutHiddenPostLinks(c.node);
         if (lord.getLocalObject("signOpPostLinks", true))
@@ -2630,10 +2632,19 @@ lord.initializeOnLoadBaseBoard = function() {
         lord.removeClass(threads, "loadingMessage");
         return c.threads.forEach(function(thread) {
             var model = merge.recursive(c.model, { thread: thread });
-            var nodes = $.parseHTML(lord.template(c.notCatalog ? ("thread") : "catalogThread")(model));
+            var nodes = $.parseHTML(lord.template(c.notCatalog ? ("thread") : "catalogThread")(model), document, true);
+            var node = (nodes.length > 1) ? nodes[1] : nodes[0];
+            lord.query("script", node).forEach(function(script) {
+                var nscript = lord.node("script");
+                if (script.src)
+                    nscript.src = script.src;
+                else if (script.innerHTML)
+                    nscript.innerHTML = script.innerHTML;
+                script.parentNode.replaceChild(nscript, script);
+            });
             if (c.notCatalog)
                 threads.appendChild(lord.node("hr"));
-            threads.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
+            threads.appendChild(node);
         });
     }).then(function() {
         setTimeout(function() {

@@ -589,6 +589,11 @@ var convertCode = function(_, text, matchs, _, options) {
     return Promise.resolve(Highlight.fixMarkup(text));
 };
 
+var convertVkontaktePost = function(_, _, matchs, _, options) {
+    options.type = SkipTypes.HtmlSkip;
+    return Promise.resolve(matchs[0]);
+};
+
 var convertExternalLink = function(_, _, matchs, _, options) {
     options.type = SkipTypes.HtmlSkip;
     var href = matchs[0];
@@ -820,6 +825,13 @@ var processPostText = function(boardName, text, options) {
     }
     if (markupModes.indexOf(MarkupModes.ExtendedWakabaMark) >= 0 || markupModes.indexOf(MarkupModes.BBCode) >= 0) {
         p = p.then(function() {
+            if (!config("site.vkontakte.integrationEnabled", false))
+                return Promise.resolve();
+            return process(info, convertVkontaktePost, {
+                op: /<div id\="vk_post_\d+_\d+"><\/div><script type="text\/javascript">  \(function\(d\, s\, id\) \{ var js\, fjs \= d\.getElementsByTagName\(s\)\[0\]; if \(d\.getElementById\(id\)\) return; js \= d\.createElement\(s\); js\.id \= id; js\.src \= "\/\/vk\.com\/js\/api\/openapi\.js\?121"; fjs\.parentNode\.insertBefore\(js\, fjs\); \}\(document\, 'script'\, 'vk_openapi_js'\)\);  \(function\(\) \{    if \(\!window\.VK \|\| \!VK\.Widgets \|\| \!VK\.Widgets\.Post \|\| \!VK\.Widgets\.Post\("vk_post_\d+_\d+"\, (\d+)\, (\d+)\, '([a-zA-Z0-9_\-]+)'\, \{width\: 500\}\)\) setTimeout\(arguments\.callee\, 50\);  \}\(\)\);<\/script>/g,
+                cl: null
+            });
+        }).then(function() {
             return process(info, convertExternalLink, {
                 op: new XRegExp(Tools.ExternalLinkRegexpPattern, "gi"),
                 cl: null
