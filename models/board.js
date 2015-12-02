@@ -985,6 +985,12 @@ module.exports.scheduleGenerateCatalog = function(boardName) {
     return Promise.resolve();
 };
 
+module.exports.scheduleGenerate = function(boardName, threadNumber, postNumber, action) {
+    module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+    module.exports.scheduleGeneratePages(boardName);
+    module.exports.scheduleGenerateCatalog(boardName);
+};
+
 module.exports.generate = function() {
     return module.exports.cleanup().then(function() {
         var boardNames = Board.boardNames();

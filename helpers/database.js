@@ -796,18 +796,7 @@ module.exports.createPost = function(req, fields, files, transaction) {
     }).then(function(files) {
         return createPost(req, fields, files, transaction);
     }).then(function(post) {
-        Global.IPC.send("generatePages", post.boardName).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: post.boardName,
-                threadNumber: post.threadNumber,
-                postNumber: post.number,
-                action: "create"
-            });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", post.boardName);
-        }).catch(function(err) {
-            console.log(err);
-        });
+        Global.generate(post.boardName, post.threadNumber, post.number, "create");
         return Promise.resolve(post);
     });
 };
@@ -832,20 +821,8 @@ var removeReferencedPosts = function(boardName, postNumber, nogenerate) {
         Tools.forIn(referencedPosts, function(ref, refKey) {
             promises.push(db.hdel("referringPosts:" + refKey, key));
             ref = JSON.parse(ref);
-            if (!nogenerate) {
-                Global.IPC.send("generatePages", ref.boardName).then(function() {
-                    return Global.IPC.send("generateThread", {
-                        boardName: ref.boardName,
-                        threadNumber: ref.threadNumber,
-                        postNumber: ref.postNumber,
-                        action: "edit"
-                    });
-                }).then(function() {
-                    return Global.IPC.send("generateCatalog", ref.boardName);
-                }).catch(function(err) {
-                    console.log(err);
-                });
-            }
+            if (!nogenerate)
+                Global.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
         });
         return Promise.all(promises);
     }).then(function() {
@@ -858,20 +835,8 @@ var addReferencedPosts = function(post, referencedPosts, nogenerate) {
     var promises = [];
     Tools.forIn(referencedPosts, function(ref, refKey) {
         promises.push(db.hset("referencedPosts:" + key, refKey, JSON.stringify(ref)));
-        if (!nogenerate) {
-            Global.IPC.send("generatePages", ref.boardName).then(function() {
-                return Global.IPC.send("generateThread", {
-                    boardName: ref.boardName,
-                    threadNumber: ref.threadNumber,
-                    postNumber: ref.postNumber,
-                    action: "edit"
-                });
-            }).then(function() {
-                return Global.IPC.send("generateCatalog", ref.boardName);
-            }).catch(function(err) {
-                console.log(err);
-            });
-        }
+        if (!nogenerate)
+            Global.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
     });
     return Promise.all(promises).then(function() {
         var promises = [];
@@ -1071,18 +1036,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
         c.files = files;
         return createPost(req, fields, files, transaction, c.threadNumber, date);
     }).then(function(post) {
-        Global.IPC.send("generatePages", post.boardName).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: post.boardName,
-                threadNumber: post.threadNumber,
-                postNumber: post.number,
-                action: "create"
-            });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", post.boardName);
-        }).catch(function(err) {
-            console.log(err);
-        });
+        Global.generate(post.boardName, post.threadNumber, post.number, "create");
         return c.thread;
     });
 };
@@ -1446,20 +1400,8 @@ var rerenderPost = function(boardName, postNumber, silent) {
     }).then(function() {
         return addReferencedPosts(c.post, referencedPosts, !silent);
     }).then(function() {
-        if (silent) {
-            Global.IPC.send("generatePages", c.post.boardName).then(function() {
-                return Global.IPC.send("generateThread", {
-                    boardName: c.post.boardName,
-                    threadNumber: c.post.threadNumber,
-                    postNumber: c.post.number,
-                    action: "edit"
-                });
-            }).then(function() {
-                return Global.IPC.send("generateCatalog", c.post.boardName);
-            }).catch(function(err) {
-                console.log(err);
-            });
-        }
+        if (silent)
+            Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
         return Promise.resolve();
     });
 };
@@ -1661,18 +1603,7 @@ module.exports.editPost = function(req, fields) {
         });
         return Promise.all(promises);
     }).then(function() {
-        Global.IPC.send("generatePages", c.post.boardName).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: c.post.boardName,
-                threadNumber: c.post.threadNumber,
-                postNumber: c.post.number,
-                action: "edit"
-            });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", c.post.boardName);
-        }).catch(function(err) {
-            console.log(err);
-        });
+        Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
         return Promise.resolve();
     });
 };
@@ -1702,18 +1633,7 @@ module.exports.setThreadFixed = function(req, fields) {
         thread.fixed = fixed;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
-        Global.IPC.send("generatePages", board.name).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: board.name,
-                threadNumber: threadNumber,
-                postNumber: threadNumber,
-                action: "edit"
-            });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", board.name);
-        }).catch(function(err) {
-            console.log(err);
-        });
+        Global.generate(board.name, threadNumber, threadNumber, "edit");
         return Promise.resolve({
             boardName: board.name,
             threadNumber: threadNumber
@@ -1746,18 +1666,7 @@ module.exports.setThreadClosed = function(req, fields) {
         thread.closed = closed;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
-        Global.IPC.send("generatePages", board.name).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: board.name,
-                threadNumber: threadNumber,
-                postNumber: threadNumber,
-                action: "edit"
-            });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", board.name);
-        }).catch(function(err) {
-            console.log(err);
-        });
+        Global.generate(boardName, threadNumber, threadNumber, "edit");
         return Promise.resolve({
             boardName: board.name,
             threadNumber: threadNumber
@@ -1786,18 +1695,7 @@ module.exports.deletePost = function(req, res, fields) {
         return (post.threadNumber == post.number) ? removeThread(board.name, postNumber)
             : removePost(board.name, postNumber);
     }).then(function() {
-        Global.IPC.send("generatePages", c.post.boardName).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: c.post.boardName,
-                threadNumber: c.post.threadNumber,
-                postNumber: c.post.number,
-                action: "delete"
-            });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", c.post.boardName);
-        }).catch(function(err) {
-            console.log(err);
-        });
+        Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "delete");
         return {
             boardName: board.name,
             threadNumber: ((c.post.threadNumber != c.post.number) ? c.post.threadNumber : 0)
@@ -1967,29 +1865,8 @@ module.exports.moveThread = function(req, fields) {
     }).then(function() {
         return removeThread(sourceBoard.name, threadNumber, false, true);
     }).then(function() {
-        Global.IPC.send("generatePages", sourceBoard.name).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: sourceBoard.name,
-                threadNumber: threadNumber,
-                postNumber: threadNumber,
-                action: "delete"
-            });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", sourceBoard.name);
-        }).then(function() {
-            return Global.IPC.send("generatePages", targetBoard.name);
-        }).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: targetBoard.name,
-                threadNumber: c.thread.number,
-                postNumber: c.thread.number,
-                action: "create"
-            });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", targetBoard.name);
-        }).catch(function(err) {
-            console.log(err);
-        });
+        Global.generate(sourceBoard.name, threadNumber, threadNumber, "delete");
+        Global.generate(targetBoard.name, c.thread.number, c.thread.number, "create");
         return {
             boardName: targetBoard.name,
             threadNumber: c.thread.number
@@ -2046,18 +1923,7 @@ module.exports.deleteFile = function(req, res, fields) {
                 console.log(err);
             });
         });
-        Global.IPC.send("generatePages", c.post.boardName).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: c.post.boardName,
-                threadNumber: c.post.threadNumber,
-                postNumber: c.post.number,
-                action: "edit"
-            });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", c.post.boardName);
-        }).catch(function(err) {
-            console.log(err);
-        });
+        Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
         return {
             boardName: c.post.boardName,
             postNumber: c.post.number,
@@ -2094,18 +1960,7 @@ module.exports.editAudioTags = function(req, res, fields) {
         });
         return db.hset("fileInfos", c.fileInfo.name, JSON.stringify(c.fileInfo));
     }).then(function() {
-        Global.IPC.send("generatePages", c.post.boardName).then(function() {
-            return Global.IPC.send("generateThread", {
-                boardName: c.post.boardName,
-                threadNumber: c.post.threadNumber,
-                postNumber: c.post.number,
-                action: "edit"
-            });
-        }).then(function() {
-            return Global.IPC.send("generateCatalog", c.post.boardName);
-        }).catch(function(err) {
-            console.log(err);
-        });
+        Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
         return {
             boardName: c.post.boardName,
             threadNumber: c.post.threadNumber,

@@ -11,22 +11,6 @@ var Tools = require("../helpers/tools");
 var board = new Board("soc", Tools.translate.noop("Social life", "boardTitle"),
     { defaultUserName: Tools.translate.noop("Life of the party", "defaultUserName") });
 
-
-/*
-Global.IPC.send("generatePages", "rpg").then(function() {
-    return Global.IPC.send("generateThread", {
-        boardName: "rpg",
-        threadNumber: JSON.parse(post).threadNumber,
-        postNumber: c.postNumber,
-        action: "edit"
-    });
-}).then(function() {
-    return Global.IPC.send("generateCatalog", "rpg");
-}).catch(function(err) {
-    console.log(err);
-});
-*/
-
 board.actionRoutes = function() {
     var _this = this;
     return [{
@@ -56,18 +40,7 @@ board.actionRoutes = function() {
             }).then(function() {
                 return Database.db.hget("posts", "soc:" + c.postNumber);
             }).then(function(post) {
-                Global.IPC.send("generatePages", "soc").then(function() {
-                    return Global.IPC.send("generateThread", {
-                        boardName: "soc",
-                        threadNumber: JSON.parse(post).threadNumber,
-                        postNumber: c.postNumber,
-                        action: "edit"
-                    });
-                }).then(function() {
-                    return Global.IPC.send("generateCatalog", "soc");
-                }).catch(function(err) {
-                    console.log(err);
-                });
+                Global.generate("soc", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
                 controller.error(req, res, err, req.settings.mode.name != "ascetic");
@@ -101,18 +74,7 @@ board.actionRoutes = function() {
             }).then(function() {
                 return Database.db.hget("posts", "soc:" + c.postNumber);
             }).then(function(post) {
-                Global.IPC.send("generatePages", "soc").then(function() {
-                    return Global.IPC.send("generateThread", {
-                        boardName: "soc",
-                        threadNumber: JSON.parse(post).threadNumber,
-                        postNumber: c.postNumber,
-                        action: "edit"
-                    });
-                }).then(function() {
-                    return Global.IPC.send("generateCatalog", "soc");
-                }).catch(function(err) {
-                    console.log(err);
-                });
+                Global.generate("soc", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
                 controller.error(req, res, err, req.settings.mode.name != "ascetic");

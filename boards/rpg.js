@@ -113,18 +113,7 @@ board.actionRoutes = function() {
             }).then(function() {
                 return Database.db.hget("posts", "rpg:" + c.postNumber);
             }).then(function(post) {
-                Global.IPC.send("generatePages", "rpg").then(function() {
-                    return Global.IPC.send("generateThread", {
-                        boardName: "rpg",
-                        threadNumber: JSON.parse(post).threadNumber,
-                        postNumber: c.postNumber,
-                        action: "edit"
-                    });
-                }).then(function() {
-                    return Global.IPC.send("generateCatalog", "rpg");
-                }).catch(function(err) {
-                    console.log(err);
-                });
+                Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
                 controller.error(req, res, err, req.settings.mode.name != "ascetic");
@@ -168,18 +157,7 @@ board.actionRoutes = function() {
             }).then(function() {
                 return Database.db.hget("posts", "rpg:" + c.postNumber);
             }).then(function(post) {
-                Global.IPC.send("generatePages", "rpg").then(function() {
-                    return Global.IPC.send("generateThread", {
-                        boardName: "rpg",
-                        threadNumber: JSON.parse(post).threadNumber,
-                        postNumber: c.postNumber,
-                        action: "edit"
-                    });
-                }).then(function() {
-                    return Global.IPC.send("generateCatalog", "rpg");
-                }).catch(function(err) {
-                    console.log(err);
-                });
+                Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
                 controller.error(req, res, err, req.settings.mode.name != "ascetic");
@@ -209,18 +187,7 @@ board.actionRoutes = function() {
                 extraData.disabled = !c.opened;
                 return Board.prototype.storeExtraData.call(_this, c.post.number, extraData);
             }).then(function(result) {
-                Global.IPC.send("generatePages", "rpg").then(function() {
-                    return Global.IPC.send("generateThread", {
-                        boardName: "rpg",
-                        threadNumber: c.post.threadNumber,
-                        postNumber: c.post.number,
-                        action: "edit"
-                    });
-                }).then(function() {
-                    return Global.IPC.send("generateCatalog", "rpg");
-                }).catch(function(err) {
-                    console.log(err);
-                });
+                Global.generate("rpg", c.post.threadNumber, c.post.number, "edit");
                 res.send({});
             }).catch(function(err) {
                 controller.error(req, res, err, req.settings.mode.name != "ascetic");

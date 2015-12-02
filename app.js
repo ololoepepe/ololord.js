@@ -106,11 +106,24 @@ if (cluster.isMaster) {
         Global.IPC.installHandler("generateCatalog", function(boardName) {
             return BoardModel.scheduleGenerateCatalog(boardName);
         });
+        Global.IPC.installHandler("generate", function(data) {
+            return BoardModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);
+        });
     }).catch(function(err) {
         console.log(err.stack || err);
         process.exit(1);
     });
 } else {
+    Global.generate = function(boardName, threadNumber, postNumber, action) {
+        Global.IPC.send("generate", {
+            boardName: boardName,
+            threadNumber: threadNumber,
+            postNumber: postNumber,
+            action: action
+        }).catch(function(err) {
+            console.log(err);
+        });
+    };
     Global.IPC.installHandler("lockPages", function(boardName) {
         return BoardModel.lockPages(boardName);
     });
