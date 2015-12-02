@@ -1131,3 +1131,7 @@ input.buttonImage {
 .loadingMessage {
     text-align: center;
 }
+
+[id^="vk_post_"] {
+    padding: 4px 5px 4px 5px;
+}
