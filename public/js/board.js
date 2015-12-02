@@ -1147,6 +1147,8 @@ lord.hideByImage = function(a) {
         if (!spells || !spells.root)
             return Promise.resolve();
         lord.spells = spells.root.spells;
+        if (!spellsEnabled)
+            return Promise.resolve();
         c.list = [];
         c.posts = lord.query(".post, .opPost");
         return lord.gently(c.posts, function(post) {
@@ -2729,6 +2731,8 @@ lord.initializeOnLoadBaseBoard = function() {
                 });
             });
         }).then(function(list) {
+            if (!list)
+                return Promise.resolve();
             var map = list.reduce(function(acc, data) {
                 acc[data.postNumber] = data;
                 return acc;
