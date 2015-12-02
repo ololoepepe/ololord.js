@@ -75,6 +75,12 @@
                     </tr>
                     <tr>
                         <td colspan="2">
+                            <input type="checkbox" name="closeFilesByClickingOnly"
+                                   {{? it.settings.closeFilesByClickingOnly}}checked="true"{{?}} /><label>{{=it.tr.closeFilesByClickingOnlyLabelText}}</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
                             <input type="checkbox" name="playAudioVideoImmediately"
                                    {{? it.settings.playAudioVideoImmediately}}checked="true"{{?}} /><label>{{=it.tr.playAudioVideoImmediatelyLabelText}}</label>
                         </td>

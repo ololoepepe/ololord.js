@@ -1281,7 +1281,8 @@ lord.settings = function() {
         userCssEnabled: lord.getLocalObject("userCssEnabled", true),
         userJavaScriptEnabled: lord.getLocalObject("userJavaScriptEnabled", true),
         sourceHighlightingEnabled: lord.getLocalObject("sourceHighlightingEnabled", false),
-        chatEnabled: lord.getLocalObject("chatEnabled", true)
+        chatEnabled: lord.getLocalObject("chatEnabled", true),
+        closeFilesByClickingOnly: lord.getLocalObject("closeFilesByClickingOnly", false)
     };
 };
 

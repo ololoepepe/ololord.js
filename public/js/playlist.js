@@ -10,7 +10,7 @@ lord.blockVolumeChange = false;
 /*Functions*/
 
 lord.addTrack = function(key, track) {
-    var model = megre.recursive(track, lord.model(["base", "tr"], true));
+    var model = merge.recursive(track, lord.model(["base", "tr"], true));
     var nodes = $.parseHTML(lord.template("playlistItem")(model));
     var node = nodes[0];
     lord.id("playlist").appendChild(node);

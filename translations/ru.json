@@ -3670,5 +3670,10 @@
         "globalTripcodeDeactivatedText": {
             "value": "Глобальный трипкод деактивирован (кроме тредов, где он был активирован явно)"
         }
+    },
+    "Close files only by clicking on them": {
+        "closeFilesByClickingOnlyLabelText": {
+            "value": "Закрывать файлы только при клике на них"
+        }
     }
 }

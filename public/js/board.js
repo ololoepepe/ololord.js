@@ -528,7 +528,8 @@ lord.globalOnclick = function(e) {
             return;
         }
     }
-    lord.hideImage();
+    if (!lord.getLocalObject("closeFilesByClickingOnly", false))
+        lord.hideImage();
 };
 
 lord.initFiles = function() {
