@@ -1816,11 +1816,6 @@
             "value": "Скрыть доски:"
         }
     },
-    "Show titles of YouTube videos": {
-        "showYoutubeVideoTitleLabelText": {
-            "value": "Показывать названия видео с YouTube"
-        }
-    },
     "Check if attached file exists on server": {
         "checkFileExistenceLabelText": {
             "value": "Проверять, есть ли прикрепленный файл на сервере"
@@ -3002,12 +2997,6 @@
     "ffprobe utility command (possibly full path).\nThe default is ffprobe (UNIX) or ffprobe.exe (Windows).": {
         "_default": {
             "value": "Команда вызова утилиты ffprobe (возможно, полный путь).\nПо умолчанию ffprobe (UNIX) или ffprobe.exe (Windows)."
-        },
-        "_obsolete": true
-    },
-    "The key required to access YouTube API.\nIt will appear in HTML.": {
-        "_default": {
-            "value": "Ключ, необходимый для доступа к YouTube API.\nПоявляется в HTML-страницах."
         },
         "_obsolete": true
     },

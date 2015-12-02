@@ -102,33 +102,21 @@ lord.getPostData = function(post) {
         data.isDefaultUserName = !!lord.queryOne(".defaultUserName", post);
         data.subject = lord.queryOne(".postSubject", post).value;
         data.isDefaultSubject = !!lord.queryOne(".defaultPostSubject", post);
-        data.files = ((files.length > 0) ? files : null);
-    }
-    if (lord.getLocalObject("showYoutubeVideosTitles", true)) {
-        var youtubeVideos = [];
-        var q = "a[href^='http://youtube.com'], a[href^='https://youtube.com'], "
-            + "a[href^='http://www.youtube.com'], a[href^='https://www.youtube.com'], "
-            + "a[href^='http://m.youtube.com'], a[href^='https://m.youtube.com']";
-        lord.query(q, post).forEach(function(video) {
-            youtubeVideos.push(video.href);
+        data.files = (files.length > 0) ? files : null;
+        var videos = [];
+        lord.query("[data-video-id]", blockquote).forEach(function(span) {
+            videos.push({
+                title: lord.data("videoTitle", span),
+                author: lord.data("videoAuthor", span)
+            });
         });
-        data.youtube = ((youtubeVideos.length > 0) ? youtubeVideos : null);
-        var coubVideos = [];
-        var q = "a[href^='http://coub.com'], a[href^='https://coub.com']";
-        lord.query(q, post).forEach(function(video) {
-            coubVideos.push(video.href);
-        });
-        data.coub = ((coubVideos.length > 0) ? coubVideos : null);
+        data.videos = (videos.length > 0) ? videos : null;
     }
     return data;
 };
 
 lord.processPost = function(post, data) {
     if (data) {
-        if (data.youtube)
-            lord.addYoutubeButton(post, data.youtube);
-        if (data.coub)
-            lord.addCoubButton(post, data.coub);
         if (data.replacements && data.replacements.length > 0) {
             lord.forIn(data.replacements, function(value) {
                 if (value.innerHTML)
@@ -378,10 +366,8 @@ lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
             lord.filesMap = null;
             lord.initFiles();
         }
-        var youtube = lord.getLocalObject("showYoutubeVideosTitles", true);
         var data = lord.getPostData(c.node);
         lord.doWork("processPosts", {
-            youtube: youtube ? { "apiKey": lord.data("youtubeApiKey") } : null,
             posts: [data],
             spells: lord.spells
         }).then(function(list) {
@@ -582,188 +568,102 @@ lord.nextOrPreviousFile = function(previous) {
         return lord.files[(ind < lord.files.length - 1) ? (ind + 1) : 0];
 };
 
-lord.addYoutubeButton = function(post, youtube) {
-    if (!post || !youtube)
+lord.showVideoThumb = function(e, a) {
+    if (a.img) {
+        document.body.appendChild(a.img);
         return;
-    lord.forIn(youtube, function(info, href) {
-        var link = lord.queryOne("a[href='" + href + "']", post);
-        if (!link)
-            return;
-        var img = lord.node("img");
-        img.src = "https://youtube.com/favicon.ico";
-        img.title = "YouTube";
-        link.parentNode.insertBefore(img, link);
-        link.parentNode.insertBefore(lord.node("text", " "), link);
-        link.replaceChild(lord.node("text", info.videoTitle), link.firstChild);
-        link.title = info.channelTitle;
-        link.thumb = info.thumbnail;
-        link.onmouseover = function(e) {
-            if (this.img) {
-                this.img.style.display = "";
-                document.body.appendChild(this.img);
-                return;
-            }
-            if (!this.thumb)
-                return;
-            this.img = lord.node("img");
-            this.img.width = this.thumb.width;
-            this.img.height = this.thumb.height;
-            this.img.src = this.thumb.url;
-            lord.addClass(this.img, "movableImage");
-            this.img.style.left = (e.clientX + 30) + "px";
-            this.img.style.top = (e.clientY - 10) + "px";
-            document.body.appendChild(this.img);
-        };
-        link.onmousemove = function(e) {
-            if (!this.img)
-                return;
-            this.img.style.left = (e.clientX + 30) + "px";
-            this.img.style.top = (e.clientY - 10) + "px";
-        };
-        link.onmouseout = function(e) {
-            if (!this.img)
-                return;
-            document.body.removeChild(this.img);
-            this.img.style.display = "none";
-        };
-        var a = lord.node("a");
-        lord.addClass(a, "expandCollapse");
-        a.lordExpanded = false;
-        a.onclick = (function(videoId) {
-            var _this = this;
-            if (this.lordExpanded) {
-                this.parentNode.removeChild(this.nextSibling);
-                this.parentNode.removeChild(this.nextSibling);
-                this.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"),
-                    this.childNodes[0]);
-                lord.removeClass(this.parentNode, "expand");
-            } else {
-                lord.addClass(this.parentNode, "expand");
-                var iframe = lord.node("iframe");
-                iframe.src = "https://youtube.com/embed/" + videoId + "?autoplay=1";
-                iframe.allowfullscreen = true;
-                iframe.frameborder = "0px";
-                iframe.height = "360";
-                iframe.width = "640";
-                iframe.display = "block";
-                var parent = this.parentNode;
-                var el = this.nextSibling;
-                if (el) {
-                    parent.insertBefore(lord.node("br"), el);
-                    parent.insertBefore(iframe, el);
-                } else {
-                    parent.appendChild(lord.node("br"));
-                    parent.appendChild(iframe);
-                }
-                this.replaceChild(lord.node("text", "[" + lord.text("collapseVideoText") + "]"),
-                    this.childNodes[0]);
-            }
-            this.lordExpanded = !this.lordExpanded;
-        }).bind(a, info.id);
-        a.appendChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"));
-        var el = link.nextSibling;
-        var parent = link.parentNode;
-        if (el) {
-            parent.insertBefore(lord.node("text", " "), el);
-            parent.insertBefore(a, el);
-        } else {
-            parent.appendChild(lord.node("text", " "));
-            parent.appendChild(a);
-        }
-    });
+    }
+    var thumbUrl = lord.data("thumbUrl", a, true);
+    var thumbWidth = +lord.data("thumbWidth", a, true);
+    var thumbHeight = +lord.data("thumbHeight", a, true);
+    if (!thumbUrl)
+        return;
+    a.img = lord.node("img");
+    a.img.width = thumbWidth;
+    a.img.height = thumbHeight;
+    a.img.src = thumbUrl;
+    lord.addClass(a.img, "movableImage");
+    a.img.style.left = (e.clientX + 30) + "px";
+    a.img.style.top = (e.clientY - 10) + "px";
+    document.body.appendChild(a.img);
 };
 
-lord.addCoubButton = function(post, coub) {
-    if (!post || !coub)
+lord.moveVideoThumb = function(e, a) {
+    if (!a.img)
         return;
-    lord.forIn(coub, function(info, href) {
-        var link = lord.queryOne("a[href='" + href + "']", post);
-        if (!link)
-            return;
-        var img = lord.node("img");
-        img.src = "https://coub.com/favicon.ico";
-        img.title = "COUB";
-        img.width = 16;
-        img.height = 16;
-        link.parentNode.insertBefore(img, link);
-        link.parentNode.insertBefore(lord.node("text", " "), link);
-        link.replaceChild(lord.node("text", info.videoTitle), link.firstChild);
-        link.title = info.authorName;
-        link.thumb = info.thumbnail;
-        link.onmouseover = function(e) {
-            if (this.img) {
-                this.img.style.display = "";
-                document.body.appendChild(this.img);
-                return;
-            }
-            if (!this.thumb)
-                return;
-            this.img = lord.node("img");
-            this.img.width = this.thumb.width;
-            this.img.height = this.thumb.height;
-            this.img.src = this.thumb.url;
-            lord.addClass(this.img, "movableImage");
-            this.img.style.left = (e.clientX + 30) + "px";
-            this.img.style.top = (e.clientY - 10) + "px";
-            document.body.appendChild(this.img);
-        };
-        link.onmousemove = function(e) {
-            if (!this.img)
-                return;
-            this.img.style.left = (e.clientX + 30) + "px";
-            this.img.style.top = (e.clientY - 10) + "px";
-        };
-        link.onmouseout = function(e) {
-            if (!this.img)
-                return;
-            document.body.removeChild(this.img);
-            this.img.style.display = "none";
-        };
-        var a = lord.node("a");
-        lord.addClass(a, "expandCollapse");
-        a.lordExpanded = false;
-        a.onclick = (function(videoId) {
-            if (this.lordExpanded) {
-                this.parentNode.removeChild(this.nextSibling);
-                this.parentNode.removeChild(this.nextSibling);
-                this.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"),
-                    this.childNodes[0]);
-                lord.removeClass(this.parentNode, "expand");
-            } else {
-                lord.addClass(this.parentNode, "expand");
-                var iframe = lord.node("iframe");
-                iframe.src = "https://coub.com/embed/" + videoId
-                    + "?muted=false&autostart=false&originalSize=false&hideTopBar=false&startWithHD=false";
-                iframe.allowfullscreen = true;
-                iframe.frameborder = "0px";
-                iframe.height = "360";
-                iframe.width = "480";
-                iframe.display = "block";
-                var parent = this.parentNode;
-                var el = this.nextSibling;
-                if (el) {
-                    parent.insertBefore(lord.node("br"), el);
-                    parent.insertBefore(iframe, el);
-                } else {
-                    parent.appendChild(lord.node("br"));
-                    parent.appendChild(iframe);
-                }
-                this.replaceChild(lord.node("text", "[" + lord.text("collapseVideoText") + "]"),
-                    this.childNodes[0]);
-            }
-            this.lordExpanded = !this.lordExpanded;
-        }).bind(a, info.id);
-        a.appendChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"));
-        var el = link.nextSibling;
-        var parent = link.parentNode;
+    a.img.style.left = (e.clientX + 30) + "px";
+    a.img.style.top = (e.clientY - 10) + "px";
+};
+
+lord.hideVideoThumb = function(e, a) {
+    if (!a.img)
+        return;
+    document.body.removeChild(a.img);
+};
+
+lord.expandCollapseYoutubeVideo = function(a) {
+    var videoId = lord.data("videoId", a, true);
+    if (!videoId)
+        return;
+    if (a.lordExpanded) {
+        a.parentNode.removeChild(a.nextSibling);
+        a.parentNode.removeChild(a.nextSibling);
+        a.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"), a.childNodes[0]);
+        lord.removeClass(a.parentNode, "expand");
+    } else {
+        lord.addClass(a.parentNode, "expand");
+        var iframe = lord.node("iframe");
+        iframe.src = "https://youtube.com/embed/" + videoId + "?autoplay=1";
+        iframe.allowfullscreen = true;
+        iframe.frameborder = "0px";
+        iframe.height = "360";
+        iframe.width = "640";
+        iframe.display = "block";
+        var parent = a.parentNode;
+        var el = a.nextSibling;
         if (el) {
-            parent.insertBefore(lord.node("text", " "), el);
-            parent.insertBefore(a, el);
+            parent.insertBefore(lord.node("br"), el);
+            parent.insertBefore(iframe, el);
         } else {
-            parent.appendChild(lord.node("text", " "));
-            parent.appendChild(a);
+            parent.appendChild(lord.node("br"));
+            parent.appendChild(iframe);
         }
-    });
+        a.replaceChild(lord.node("text", "[" + lord.text("collapseVideoText") + "]"), a.childNodes[0]);
+    }
+    a.lordExpanded = !a.lordExpanded;
+};
+
+lord.expandCollapseCoubVideo = function(a) {
+    var videoId = lord.data("videoId", a, true);
+    if (!videoId)
+        return;
+    if (a.lordExpanded) {
+        a.parentNode.removeChild(a.nextSibling);
+        a.parentNode.removeChild(a.nextSibling);
+        a.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"), a.childNodes[0]);
+        lord.removeClass(a.parentNode, "expand");
+    } else {
+        lord.addClass(a.parentNode, "expand");
+        var iframe = lord.node("iframe");
+        iframe.src = "https://coub.com/embed/" + videoId
+            + "?muted=false&autostart=false&originalSize=false&hideTopBar=false&startWithHD=false";
+        iframe.allowfullscreen = true;
+        iframe.frameborder = "0px";
+        iframe.height = "360";
+        iframe.width = "480";
+        iframe.display = "block";
+        var parent = a.parentNode;
+        var el = a.nextSibling;
+        if (el) {
+            parent.insertBefore(lord.node("br"), el);
+            parent.insertBefore(iframe, el);
+        } else {
+            parent.appendChild(lord.node("br"));
+            parent.appendChild(iframe);
+        }
+        a.replaceChild(lord.node("text", "[" + lord.text("collapseVideoText") + "]"), a.childNodes[0]);
+    }
+    a.lordExpanded = !a.lordExpanded;
 };
 
 lord.addPostToHidden = function(boardName, postNumber, getText) {
@@ -1264,7 +1164,6 @@ lord.hideByImage = function(a) {
         if (!result)
             return Promise.reolve();
         return lord.doWork("processPosts", {
-            youtube: null,
             posts: c.list,
             spells: lord.spells
         });
@@ -2811,8 +2710,7 @@ lord.initializeOnLoadBaseBoard = function() {
         p.then(function(spells) {
             if (spells && spells.root)
                 lord.spells = spells.root.spells;
-            var youtube = lord.getLocalObject("showYoutubeVideosTitles", true);
-            if (!spellsEnabled && !youtube)
+            if (!spellsEnabled)
                 return Promise.resolve();
             var boardName = lord.data("boardName");
             var list = [];
@@ -2826,7 +2724,6 @@ lord.initializeOnLoadBaseBoard = function() {
                 n: 10
             }).then(function() {
                 return lord.doWork("processPosts", {
-                    youtube: youtube ? { "apiKey": lord.data("youtubeApiKey") } : null,
                     posts: list,
                     spells: lord.spells
                 });

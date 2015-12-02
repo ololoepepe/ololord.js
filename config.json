@@ -25,7 +25,8 @@
         },
         "chat": {
             "ttl": 10080
-        }
+        },
+        "youtubeApiKey": ""
     },
     "site": {
         "locale": "en",
@@ -33,7 +34,6 @@
         "domain": "localhost:8080",
         "dateFormat": "MM/DD/YYYY HH:mm:ss",
         "timeOffset": 0,
-        "youtubeApiKey": "",
         "tripcodeSalt": "ololo",
         "vkontakte": {
             "integrationEnabled": false,

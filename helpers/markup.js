@@ -4,6 +4,7 @@ var XRegExp = require("xregexp");
 
 var Board = require("../boards");
 var config = require("./config");
+var controller = require("./controller");
 var Database = require("./database");
 var Tools = require("./tools");
 
@@ -124,6 +125,14 @@ var matchTwitterLink = function(href) {
         && href.match(/^https?\:\/\/twitter\.com\/[^\/]+\/status\/\d+\/?$/);
 };
 
+var matchYoutubeLink = function(href) {
+    return href.match(/^https?\:\/\/(m\.|www\.)?youtube\.com\/.*v\=[^\/]+.*$/);
+};
+
+var matchCoubLink = function(href) {
+    return href.match(/^https?:\/\/coub\.com\/view\/[^\/\?]+.*$/);
+};
+
 var getTwitterEmbeddedHtml = function(href, defaultHtml) {
     return HTTP.request({
         method: "GET",
@@ -136,6 +145,87 @@ var getTwitterEmbeddedHtml = function(href, defaultHtml) {
     }).then(function(data) {
         try {
             return Promise.resolve(JSON.parse(data.toString()).html);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+    }).catch(function(err) {
+        console.log(err.stack || err);
+        return Promise.resolve(defaultHtml);
+    }).then(function(html) {
+        return Promise.resolve(html);
+    });
+};
+
+var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
+    var match = href.match(/^https?\:\/\/.*youtube\.com\/.*v\=([^\/]+).*$/);
+    var videoId = match ? match[1] : null;
+    var apiKey = config("server.youtubeApiKey", "");
+    if (!videoId || !apiKey)
+        return Promise.resolve(defaultHtml);
+    return HTTP.request({
+        method: "GET",
+        url: `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`,
+        timeout: Tools.Minute
+    }).then(function(response) {
+        if (response.status != 200)
+            return Promise.reject("Failed to get YouTube embedded HTML");
+        return response.body.read();
+    }).then(function(data) {
+        try {
+            var response = JSON.parse(data.toString());
+            if (!response.items || response.items.length < 1)
+                return Promise.reject("Failed to get YouTube video info");
+            var info = response.items[0].snippet;
+            info.id = videoId;
+            info.href = href;
+            var html = controller.sync(null, "youtubeVideoLink", { info: info });
+            if (!html)
+                return Promise.reject("Failed to create YouTube video link");
+            return Promise.resolve(html);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+    }).catch(function(err) {
+        console.log(err.stack || err);
+        return Promise.resolve(defaultHtml);
+    }).then(function(html) {
+        return Promise.resolve(html);
+    });
+};
+
+var getCoubEmbeddedHtml = function(href, defaultHtml) {
+    var match = href.match(/^https?:\/\/coub\.com\/view\/([^\/\?]+).*$/);
+    var videoId = match ? match[1] : null;
+    if (!videoId)
+        return Promise.resolve(defaultHtml);
+    return HTTP.request({
+        method: "GET",
+        url: `https://coub.com/api/oembed.json?url=coub.com/view/${videoId}`,
+        timeout: Tools.Minute
+    }).then(function(response) {
+        if (response.status != 200)
+            return Promise.reject("Failed to get Coub embedded HTML");
+        return response.body.read();
+    }).then(function(data) {
+        try {
+            var response = JSON.parse(data.toString());
+            if (!response)
+                return Promise.reject("Failed to get Coub video info");
+            var info = {
+                href: href,
+                videoTitle: response.title,
+                authorName: response.author_name,
+                thumbnail: response.thumbnail_url ? {
+                    url: response.thumbnail_url,
+                    width: response.thumbnail_width,
+                    height: response.thumbnail_height
+                } : null,
+                id: videoId
+            };
+            var html = controller.sync(null, "coubVideoLink", { info: info });
+            if (!html)
+                return Promise.reject("Failed to create Coub video link");
+            return Promise.resolve(html);
         } catch (err) {
             return Promise.reject(err);
         }
@@ -507,6 +597,10 @@ var convertExternalLink = function(_, _, matchs, _, options) {
     var def = "<a href=\"" + href + "\">" + Tools.toHtml(matchs[0]) + "</a>";
     if (matchTwitterLink(href))
         return getTwitterEmbeddedHtml(href, def);
+    if (matchYoutubeLink(href))
+        return getYoutubeEmbeddedHtml(href, def);
+    if (matchCoubLink(href))
+        return getCoubEmbeddedHtml(href, def);
     return Promise.resolve(def);
 };
 
@@ -580,6 +674,10 @@ var convertUrl = function(_, text, _, _, options) {
     var def = "<a href=\"" + href + "\">" + Tools.toHtml(text) + "</a>"
     if (matchTwitterLink(href))
         return getTwitterEmbeddedHtml(href, def);
+    if (matchYoutubeLink(href))
+        return getYoutubeEmbeddedHtml(href, def);
+    if (matchCoubLink(href))
+        return getCoubEmbeddedHtml(href, def);
     return Promise.resolve(def);
 };
 

@@ -255,7 +255,6 @@ controller.baseModel = function(req) {
             locale: config("site.locale", "en"),
             dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss"),
             timeOffset: config("site.timeOffset", 0),
-            youtubeApiKey: config("site.youtubeApiKey", ""),
             vkontakte: {
                 integrationEnabled: !!config("site.vkontakte.integrationEnabled", false),
                 appId: config("site.vkontakte.appId", "")
@@ -520,7 +519,6 @@ controller.translationsModel = function() {
     translate("Show hidden post list", "showHiddenPostListText");
     translate("Maximum simultaneous AJAX requests:", "maxSimultaneousAjaxLabelText");
     translate("New post count near board names", "showNewPostsLabelText");
-    translate("Show titles of YouTube videos", "showYoutubeVideoTitleLabelText");
     translate("Hotkeys enabled", "hotkeysLabelText");
     translate("User CSS enabled", "userCssLabelText");
     translate("User JavaScript enabled", "userJavaScriptLabelText");

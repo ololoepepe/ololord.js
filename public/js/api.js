@@ -1277,7 +1277,6 @@ lord.settings = function() {
         strikeOutHiddenPostLinks: lord.getLocalObject("strikeOutHiddenPostLinks", true),
         spellsEnabled: lord.getLocalObject("spellsEnabled", true),
         showNewPosts: lord.getLocalObject("showNewPosts", true),
-        showYoutubeVideosTitles: lord.getLocalObject("showYoutubeVideosTitles", true),
         hotkeysEnabled: lord.getLocalObject("hotkeysEnabled", true),
         userCssEnabled: lord.getLocalObject("userCssEnabled", true),
         userJavaScriptEnabled: lord.getLocalObject("userJavaScriptEnabled", true),

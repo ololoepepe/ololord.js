@@ -61,79 +61,6 @@ lord.TokenTypes = [{
 
 /*Functions*/
 
-lord.getYoutubeVideoInfo = function(href, apiKey) {
-    if (!href || !apiKey)
-        return Promise.resolve(null);
-    if (href.replace("v=", "") == href)
-        return Promise.resolve(null);
-    var videoId = href.split("v=").pop().match(/[a-zA-Z0-9_\-]{11}/)[0];
-    if (!videoId)
-        return Promise.resolve(null);
-    var xhr = new XMLHttpRequest();
-    var url = "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key=" + apiKey + "&part=snippet";
-    xhr.open("get", url, true);
-    return new Promise(function(resolve, reject) {
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState != 4)
-                return;
-            if (xhr.status != 200)
-                return resolve(null);
-            var response = null;
-            try {
-                response = JSON.parse(xhr.responseText);
-            } catch (ex) {
-                return resolve(null);
-            }
-            if (!response.items || response.items.length < 1)
-                return resolve(null);
-            var info = response.items[0].snippet;
-            info.id = videoId;
-            resolve(info);
-        };
-        xhr.send(null);
-    });
-};
-
-lord.getCoubVideoInfo = function(href) {
-    if (!href)
-        return Promise.resolve(null);
-    var videoId = href.match(/^http:\/\/coub\.com\/view\/([^\/\?]+)?/)[1];
-    if (!videoId)
-        return Promise.resolve(null);
-    var xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
-    xhr.open("get", "../api/coubVideoInfo.json?videoId=" + videoId, true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    return new Promise(function(resolve, reject) {
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState != 4)
-                return;
-            if (xhr.status != 200)
-                return resolve(null);
-            var response = null;
-            try {
-                response = JSON.parse(xhr.responseText);
-            } catch (ex) {
-                return resolve(null);
-            }
-            if (!response)
-                return resolve(null);
-            var info = {
-                "videoTitle": response.title,
-                "authorName": response.author_name,
-                "thumbnail": response.thumbnail_url ? {
-                    "url": response.thumbnail_url,
-                    "width": response.thumbnail_width,
-                    "height": response.thumbnail_height
-                } : null
-            };
-            info["id"] = videoId;
-            resolve(info);
-        };
-        xhr.send(null);
-    });
-};
-
 lord.getImageHash = function(url, width, height) {
     width = +width;
     height = +height;
@@ -694,33 +621,30 @@ lord.spell_exph = function(post, args) {
     return Promise.resolve(null);
 };
 
-lord.spell_video = function(post, args, youtube) {
-    if (!post)
+lord.spell_video = function(post, args) {
+    if (!post || !post.videos)
         return Promise.resolve(null);
     if (args) {
-        if (!youtube || youtube.length < 1)
-            return Promise.resolve(null);
         var rx = lord.regexp(args);
         if (!rx)
             return Promise.resolve(null);
-        for (var i = 0; i < youtube.length; ++i) {
-            var video = youtube[i];
-            if (video.videoTitle && video.videoTitle.search(rx) >= 0)
+        for (var i = 0; i < post.videos.length; ++i) {
+            var video = post.videos[i];
+            if (video.title && video.title.search(rx) >= 0)
                 return Promise.resolve({ "hidden": true });
         }
-        return Promise.resolve(null);
-    } else if (youtube && youtube.length > 0) {
+    } else {
         return Promise.resolve({ "hidden": true });
     }
     return Promise.resolve(null);
 };
 
-lord.spell_vauthor = function(post, args, youtube) {
-    if (!post || !args || !youtube)
+lord.spell_vauthor = function(post, args) {
+    if (!post || !post.videos || !args)
         return Promise.resolve(null);
-    for (var i = 0; i < youtube.length; ++i) {
-        var video = youtube[i];
-        if (video && video.channelTitle && video.channelTitle == args)
+    for (var i = 0; i < post.videos.length; ++i) {
+        var video = post.videos[i];
+        if (video && video.author && video.author == args)
             return Promise.resolve({ "hidden": true });
     }
     return Promise.resolve(null);
@@ -739,25 +663,25 @@ lord.spell_rep = function(post, args) {
     return Promise.resolve({ "replacements": [ { "innerHTML": nih } ] });
 };
 
-lord.applySpell = function(post, spell, youtube) {
+lord.applySpell = function(post, spell) {
     if (!post || !spell)
         return Promise.resolve(null);
     switch (spell.type) {
     case "SPELL": {
-        return lord.applySpell(post, spell.value, youtube);
+        return lord.applySpell(post, spell.value);
     }
     case "spell": {
         if (spell.board && post.board != spell.board)
             return Promise.resolve(null);
         if (spell.thread && post.thread != spell.thread)
             return Promise.resolve(null);
-        return lord["spell_" + spell.name](post, spell.args, youtube);
+        return lord["spell_" + spell.name](post, spell.args);
     }
     case "|": {
         var f = function(i) {
             if (i >= spell.value.length)
                 return Promise.resolve(null);
-            return lord.applySpell(post, spell.value[i].value, youtube).then(function(result) {
+            return lord.applySpell(post, spell.value[i].value).then(function(result) {
                 if (result && result.hidden)
                     return Promise.resolve(result);
                 return f(i + 1);
@@ -769,7 +693,7 @@ lord.applySpell = function(post, spell, youtube) {
         var f = function(i) {
             if (i >= spell.value.length)
                 return Promise.resolve(null);
-            return lord.applySpell(post, spell.value[i].value, youtube).then(function(result) {
+            return lord.applySpell(post, spell.value[i].value).then(function(result) {
                 if (!result || !result.hidden)
                     return Promise.resolve(null);
                 return f(i + 1);
@@ -788,64 +712,14 @@ lord.applySpell = function(post, spell, youtube) {
     return Promise.resolve(null);
 };
 
-lord.applyYouTube = function(post, apiKey) {
-    if (!post || !post.youtube || post.youtube.length < 1 || !apiKey)
-        return Promise.resolve(null);
-    var videos = null;
-    var promises = post.youtube.map(function(href) {
-        return lord.getYoutubeVideoInfo(href, apiKey).then(function(info) {
-            if (!info)
-                return Promise.resolve();
-            if (!videos)
-                videos = {};
-            videos[href] = {
-                "id": info.id,
-                "videoTitle": info.title,
-                "channelTitle": info.channelTitle
-            };
-            if (info.thumbnails.medium)
-                videos[href].thumbnail = info.thumbnails.medium;
-            return Promise.resolve();
-        });
-    });
-    return Promise.all(promises).then(function() {
-        return Promise.resolve(videos);
-    });
-};
-
-lord.applyCoub = function(post) {
-    if (!post || !post.coub || post.coub.length < 1)
-        return Promise.resolve(null);
-    var videos = null;
-    var promises = post.coub.map(function(href) {
-        return lord.getCoubVideoInfo(href).then(function(info) {
-            if (!info)
-                return Promise.resolve();
-            if (!videos)
-                videos = {};
-            videos[href] = {
-                "id": info.id,
-                "videoTitle": info.videoTitle,
-                "authorName": info.authorName
-            };
-            if (info.thumbnail)
-                videos[href].thumbnail = info.thumbnail;
-            return Promise.resolve();
-        });
-    });
-    return Promise.all(promises).then(function() {
-        return Promise.resolve(videos);
-    });
-};
-
-lord.applySpells = function(post, spells, youtube) {
+lord.applySpells = function(post, spells) {
     if (!post || !spells || spells.length < 1)
         return Promise.resolve(null);
     var npost = { replacements: [] };
     var promises = spells.map(function(spell) {
         if (npost.hidden && ("SPELL" != spell.value.type || "rep" != spell.value.value.name))
             return Promise.resolve();
-        return lord.applySpell(post, spell.value, youtube).then(function(result) {
+        return lord.applySpell(post, spell.value).then(function(result) {
             if (!result)
                 return Promise.resolve();
             npost.hidden = result.hidden;
@@ -859,7 +733,7 @@ lord.applySpells = function(post, spells, youtube) {
     });
 };
 
-lord.processPosts = function(posts, spells, youtube) {
+lord.processPosts = function(posts, spells) {
     if (!posts)
         return Promise.resject("Internal error");
     var promises = posts.map(function(post) {
@@ -867,21 +741,10 @@ lord.processPosts = function(posts, spells, youtube) {
             "boardName": post.boardName,
             "postNumber": post.postNumber
         };
-        var p;
-        if (youtube && youtube.apiKey) {
-            p = lord.applyYouTube(post, youtube.apiKey).then(function(result) {
-                npost.youtube = result;
-                return lord.applyCoub(post);
-            }).then(function(result) {
-                npost.coub = result;
-                return Promise.resolve();
-            });
-        } else {
-            p = Promise.resolve();
-        }
+        var p = Promise.resolve();
         if (spells && !post.hidden) {
             p = p.then(function() {
-                return lord.applySpells(post, spells, npost.youtube);
+                return lord.applySpells(post, spells);
             }).then(function(result) {
                 if (result) {
                     npost.hidden = result.hidden;
@@ -906,7 +769,7 @@ lord.message_parseSpells = function(data) {
 lord.message_processPosts = function(data) {
     if (!data)
         return Promise.reject("Invalid data");
-    return lord.processPosts(data.posts, data.spells, data.youtube);
+    return lord.processPosts(data.posts, data.spells);
 };
 
 lord.message_getImageHash = function(data) {
