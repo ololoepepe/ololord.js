@@ -633,10 +633,10 @@ lord.checkChats = function() {
         if (hashes.length > 0)
             lord.updateChat(hashes);
         lord.setLocalObject("chats", lord.chats);
-        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), 2 * lord.Second);
+        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), 5 * lord.Second);
     }).catch(function(err) {
         lord.handleError(err);
-        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), 30 * lord.Second);
+        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), 60 * lord.Second);
     });
 };
 
