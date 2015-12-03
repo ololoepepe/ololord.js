@@ -839,6 +839,9 @@ lord.showPostSourceText = function(el) {
 };
 
 lord.chatWithUser = function(el) {
+    var boardName = lord.data("boardName", el, true);
+    if (!boardName)
+        return;
     var postNumber = +lord.data("number", el, true);
     if (!postNumber)
         return;
@@ -850,10 +853,12 @@ lord.chatWithUser = function(el) {
     lord.showDialog("chatText", null, div).then(function(result) {
         if (!result)
             return Promise.resolve();
+        if (!ta.value)
+            return Promise.resolve();
         var formData = new FormData();
-        formData.append("text", ta.value);
         formData.append("boardName", lord.data("boardName"));
         formData.append("postNumber", postNumber);
+        formData.append("text", ta.value);
         return lord.post("/" + lord.data("sitePathPrefix") + "action/sendChatMessage", formData);
     }).then(function(result) {
         if (!result)

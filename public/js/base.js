@@ -561,7 +561,7 @@ lord.interceptHotkey = function(e) {
     return false;
 };
 
-lord.populateChatHistory = function(hash) {
+lord.populateChatHistory = function(key) {
     var history = lord.nameOne("history", lord.chatDialog);
     lord.removeChildren(history);
     var model = lord.model("base");
@@ -570,14 +570,14 @@ lord.populateChatHistory = function(hash) {
     model.formattedDate = function(date) {
         return moment(date).utcOffset(timeOffset).locale(model.site.locale).format(model.site.dateFormat);
     };
-    var messages = lord.chats[hash] || [];
+    var messages = lord.chats[key] || [];
     messages = messages.map(function(message) {
         var m = merge.recursive(model, message);
         history.appendChild($.parseHTML(lord.template("chatMessage")(m))[0]);
     });
 };
 
-lord.updateChat = function(hashes) {
+lord.updateChat = function(keys) {
     if (!lord.chatDialog) {
         var a = lord.nameOne("chatButton");
         var img = lord.queryOne("img", a);
@@ -585,18 +585,17 @@ lord.updateChat = function(hashes) {
             img.src = img.src.replace("chat", "chat_message");
         var div = lord.node("div");
         var a = lord.createChatButton(true);
-        var lastHash = lord.last(hashes);
-        a.onclick = lord.showChat.bind(lord, lastHash);
+        var lastKey = lord.last(keys);
+        a.onclick = lord.showChat.bind(lord, lastKey);
         div.appendChild(a);
-        div.appendChild(lord.node("text", " " + lord.text("newChatMessageText") + " [" + lastHash.substr(0, 10)
-            + "...]"));
+        div.appendChild(lord.node("text", " " + lord.text("newChatMessageText") + " [" + lastKey + "]"));
         lord.showPopup(div, { type: "node" });
     } else {
-        hashes.forEach(function(hash) {
-            var div = lord.nameOne(hash, lord.chatDialog);
+        keys.forEach(function(key) {
+            var div = lord.nameOne(key, lord.chatDialog);
             if (div) {
                 if (lord.hasClass(div, "selected")) {
-                    lord.populateChatHistory(hash);
+                    lord.populateChatHistory(key);
                 } else {
                     var newMessages = lord.queryOne(".chatContactNewMessages", div);
                     lord.removeChildren(newMessages);
@@ -604,7 +603,9 @@ lord.updateChat = function(hashes) {
                 }
             } else {
                 var contacts = lord.queryOne(".chatContactList", lord.chatDialog);
-                var nodes = $.parseHTML(lord.template("chatContact")(lord.model("tr")));
+                var model = lord.model(["base", "tr"], true);
+                model.contact = { key: key };
+                var nodes = $.parseHTML(lord.template("chatContact")(model));
                 contacts.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
             }
         });
@@ -617,21 +618,21 @@ lord.checkChats = function() {
     lord.api("chatMessages", { lastRequestDate: lord.lastChatCheckDate || "" }).then(function(model) {
         if (!model)
             return Promise.resolve();
-        lord.lastChatCheckDate = model.date;
+        lord.lastChatCheckDate = model.lastRequestDate;
         lord.setLocalObject("lastChatCheckDate", lord.lastChatCheckDate);
-        var hashes = [];
-        lord.forIn(model.messages, function(messages, senderHash) {
-            if (!lord.chats[senderHash])
-                lord.chats[senderHash] = [];
-            var list = lord.chats[senderHash];
+        var keys = [];
+        lord.forIn(model.chats, function(messages, key) {
+            if (!lord.chats[key])
+                lord.chats[key] = [];
+            var list = lord.chats[key];
             if (messages.length > 0)
-                hashes.push(senderHash);
+                keys.push(key);
             messages.forEach(function(message) {
                 list.push(message);
             });
         });
-        if (hashes.length > 0)
-            lord.updateChat(hashes);
+        if (keys.length > 0)
+            lord.updateChat(keys);
         lord.setLocalObject("chats", lord.chats);
         lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), lord.chatDialog ? lord.Second : lord.Minute);
     }).catch(function(err) {
@@ -640,31 +641,31 @@ lord.checkChats = function() {
     });
 };
 
-lord.showChat = function(hash) {
+lord.showChat = function(key) {
     var a = lord.nameOne("chatButton");
     var img = lord.queryOne("img", a);
     if (img.src.replace("chat_message", "") != img.src)
         img.src = img.src.replace("chat_message", "chat");
     var model = lord.model(["base", "tr"], true);
     model.contacts = [];
-    lord.forIn(lord.chats, function(_, hash) {
-        model.contacts.push({ hash: hash });
+    lord.forIn(lord.chats, function(_, key) {
+        model.contacts.push({ key: key });
     });
     lord.chatDialog = $.parseHTML(lord.template("chatDialog")(model))[0];
     lord.showDialog("chatText", null, lord.chatDialog, function() {
         lord.checkChats();
-        if (!hash)
+        if (!key)
             return;
-        lord.selectChatContact(hash);
+        lord.selectChatContact(key);
     }).then(function() {
         lord.chatDialog = null;
     }).catch(lord.handleError);
 };
 
-lord.selectChatContact = function(hash) {
-    if (!hash || !lord.chatDialog)
+lord.selectChatContact = function(key) {
+    if (!key|| !lord.chatDialog)
         return;
-    var div = lord.nameOne(hash, lord.chatDialog);
+    var div = lord.nameOne(key, lord.chatDialog);
     if (!div)
         return;
     var newMessages = lord.queryOne(".chatContactNewMessages", div);
@@ -676,37 +677,38 @@ lord.selectChatContact = function(hash) {
     lord.addClass(div, "selected");
     var target = lord.nameOne("target", lord.chatDialog);
     target.style.display = "";
-    var targetHash = lord.nameOne("targetHash", lord.chatDialog);
-    lord.removeChildren(targetHash);
-    targetHash.appendChild(lord.node("text", hash));
-    lord.populateChatHistory(hash);
+    var targetKey = lord.nameOne("targetKey", lord.chatDialog);
+    lord.removeChildren(targetKey);
+    targetKey.appendChild(lord.node("text", key));
+    lord.populateChatHistory(key);
     lord.nameOne("sendMessageButton", lord.chatDialog).disabled = false;
     lord.nameOne("message", lord.chatDialog).disabled = false;
 };
 
-lord.deleteChat = function(hash) {
-    if (!hash)
+lord.deleteChat = function(key) {
+    if (!key)
         return;
-    if (hash.tagName) {
-        hash = lord.queryOne(".chatContact.selected", lord.chatDialog);
-        if (hash)
-            hash = $(hash).attr("name");
+    if (key.tagName) {
+        key = lord.queryOne(".chatContact.selected", lord.chatDialog);
+        if (key)
+            key = $(key).attr("name");
     }
-    if (!hash)
+    if (!key)
         return;
     var formData = new FormData();
-    formData.append("hash", hash);
+    formData.append("boardName", key.split(":").shift());
+    formData.append("postNumber", +key.split(":").pop());
     return lord.post("/" + lord.data("sitePathPrefix") + "action/deleteChatMessages", formData).then(function(result) {
-        delete lord.chats[hash];
+        delete lord.chats[key];
         lord.setLocalObject("chats", lord.chats);
         if (!lord.chatDialog)
             return Promise.resolve();
-        var contact = lord.nameOne(hash, lord.chatDialog);
+        var contact = lord.nameOne(key, lord.chatDialog);
         if (!contact)
             return Promise.resolve();
         if (lord.hasClass(contact, "selected")) {
             lord.nameOne("target", lord.chatDialog).style.display = "none";
-            lord.removeChildren(lord.nameOne("targetHash", lord.chatDialog));
+            lord.removeChildren(lord.nameOne("targetKey", lord.chatDialog));
             lord.removeChildren(lord.nameOne("history", lord.chatDialog));
             lord.nameOne("sendMessageButton", lord.chatDialog).disabled = true;
             lord.nameOne("message", lord.chatDialog).disabled = true;
@@ -721,8 +723,10 @@ lord.sendChatMessage = function() {
         return;
     var message = lord.nameOne("message", lord.chatDialog);
     var formData = new FormData();
+    var key = $(contact).attr("name");
     formData.append("text", message.value);
-    formData.append("hash", $(contact).attr("name"));
+    formData.append("boardName", key.split(":").shift());
+    formData.append("postNumber", +key.split(":").pop());
     return lord.post("/" + lord.data("sitePathPrefix") + "action/sendChatMessage", formData).then(function(result) {
         message.value = "";
         $(message).focus();
@@ -730,13 +734,13 @@ lord.sendChatMessage = function() {
     }).catch(lord.handleError);
 };
 
-lord.createChatButton = function(hash) {
+lord.createChatButton = function(key) {
     var a = lord.node("a");
     a.name = "chatButton";
     a.onclick = lord.showChat.bind(lord);
     var img = lord.node("img");
     lord.addClass(img, "buttonImage");
-    img.src = "/" + lord.data("sitePathPrefix") + "img/chat" + (hash ? "_message" : "") + ".png";
+    img.src = "/" + lord.data("sitePathPrefix") + "img/chat" + (key ? "_message" : "") + ".png";
     a.title = lord.text("chatText");
     a.appendChild(img);
     return a;

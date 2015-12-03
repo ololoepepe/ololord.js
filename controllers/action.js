@@ -537,7 +537,7 @@ router.post("/setThreadClosed", function(req, res) {
 router.post("/sendChatMessage", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         var fields = result.fields;
-        return Chat.sendMessage(req, fields.text, fields.boardName, +fields.postNumber, fields.hash);
+        return Chat.sendMessage(req, fields.boardName, +fields.postNumber, fields.text);
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
@@ -548,7 +548,7 @@ router.post("/sendChatMessage", function(req, res) {
 router.post("/deleteChatMessages", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         var fields = result.fields;
-        return Chat.deleteMessages(req, fields.hash);
+        return Chat.deleteMessages(req, fields.boardName, fields.postNumber);
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
