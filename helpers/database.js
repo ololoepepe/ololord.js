@@ -1321,9 +1321,7 @@ module.exports.findPosts = function(query, boardName) {
             return Promise.resolve([]);
         return db.hmget("posts", keys);
     }).then(function(posts) {
-        return posts.filter(function(post) {
-            return post; //TODO: fix and remove
-        }).map(function(post) {
+        return posts.map(function(post) {
             return JSON.parse(post);
         });
     });
