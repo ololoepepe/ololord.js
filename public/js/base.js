@@ -652,6 +652,7 @@ lord.showChat = function(hash) {
     });
     lord.chatDialog = $.parseHTML(lord.template("chatDialog")(model))[0];
     lord.showDialog("chatText", null, lord.chatDialog, function() {
+        lord.checkChats();
         if (!hash)
             return;
         lord.selectChatContact(hash);
