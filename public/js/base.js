@@ -804,10 +804,10 @@ lord.initializeOnLoadSettings = function() {
         toolbar.appendChild(lord.node("text", " "));
         var span = lord.node("span");
         lord.addClass(span, "navbarItem");
-        toolbar.appendChild(lord.node("text", "["));
+        span.appendChild(lord.node("text", "["));
         span.appendChild(lord.createChatButton());
+        span.appendChild(lord.node("text", "]"));
         toolbar.appendChild(span);
-        toolbar.appendChild(lord.node("text", "]"));
         lord.checkChats();
     }
     if (lord.getLocalObject("userJavaScriptEnabled", true)) {
