@@ -140,6 +140,17 @@ _installHandler("rerender-posts", function(args) {
     });
 });
 
+_installHandler("rebuild-search-index", function(args) {
+    return rl.question("Are you sure? [Yes/no] ").then(function(answer) {
+        answer = answer.toLowerCase();
+        if (answer && answer != "yes" && answer != "y")
+            return Promise.resolve();
+        return Database.rebuildSearchIndex().then(function() {
+            return Promise.resolve();
+        });
+    });
+});
+
 var init = function() {
     console.log("Type 'help' for commands");
     rl.prompt();

@@ -1322,7 +1322,7 @@ module.exports.findPosts = function(query, boardName) {
         return db.hmget("posts", keys);
     }).then(function(posts) {
         return posts.filter(function(post) {
-            return post;
+            return post; //TODO: fix and remove
         }).map(function(post) {
             return JSON.parse(post);
         });
@@ -1410,6 +1410,36 @@ var rerenderBoardPosts = function(boardName, posts) {
     return p;
 };
 
+var rebuildPostSearchIndex = function(boardName, postNumber) {
+    var key = boardName + ":" + postNumber;
+    return getPost(boardName, postNumber).then(function(post) {
+        var promises = [];
+        Tools.forIn(Tools.indexPost({
+            boardName: boardName,
+            number: postNumber,
+            rawText: post.rawText,
+            subject: (post.subject || null)
+        }), function(index, word) {
+            promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
+        });
+        return Promise.all(promises);
+    });
+};
+
+var rebuildBoardSearchIndex = function(boardName, posts) {
+    if (posts.length < 1)
+        return Promise.resolve();
+    var p = rebuildPostSearchIndex(boardName, posts[0]);
+    for (var i = 1; i < posts.length; ++i) {
+        (function(i) {
+            p = p.then(function() {
+                return rebuildPostSearchIndex(boardName, posts[i]);
+            });
+        })(i);
+    }
+    return p;
+};
+
 module.exports.rerenderPosts = function(boardNames) {
     var posts = {};
     return db.hkeys("posts").then(function(keys) {
@@ -1433,6 +1463,46 @@ module.exports.rerenderPosts = function(boardNames) {
             (function(i) {
                 p = p.then(function() {
                     return rerenderBoardPosts(postList[i].boardName, postList[i].posts);
+                });
+            })(i);
+        }
+        return p;
+    });
+};
+
+module.exports.rebuildSearchIndex = function() {
+    var posts = {};
+    return db.keys("postSearchIndex:*").then(function(keys) {
+        var p = (keys.length > 0) ? db.del(keys[0]) : Promise.resolve();
+        keys.slice(1).forEach(function(key) {
+            p = p.then(function() {
+                return db.del(key);
+            });
+        });
+        return p;
+    }).then(function() {
+        return db.hkeys("posts");
+    }).then(function(keys) {
+        keys.forEach(function(key) {
+            var boardName = key.split(":").shift();
+            var postNumber = +key.split(":").pop();
+            if (!posts.hasOwnProperty(boardName))
+                posts[boardName] = [];
+            posts[boardName].push(postNumber);
+        });
+        var postList = Board.boardNames().map(function(boardName) {
+            return {
+                boardName: boardName,
+                posts: (posts.hasOwnProperty(boardName) ? posts[boardName] : [])
+            };
+        });
+        if (postList.length < 1)
+            return Promise.resolve();
+        var p = rebuildBoardSearchIndex(postList[0].boardName, postList[0].posts);
+        for (var i = 1; i < postList.length; ++i) {
+            (function(i) {
+                p = p.then(function() {
+                    return rebuildBoardSearchIndex(postList[i].boardName, postList[i].posts);
                 });
             })(i);
         }

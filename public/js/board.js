@@ -2114,8 +2114,6 @@ lord.submitted = function(event, form) {
         var ownPosts = lord.getLocalObject("ownPosts", {});
         ownPosts[result.boardName + "/" + (result.postNumber || result.threadNumber)] = 1;
         lord.setLocalObject("ownPosts", ownPosts);
-        c.progressBar.hideDelayed(200);
-        resetButton();
         if (result.postNumber) {
             c.post = true;
             return lord.api("post", {
@@ -2128,6 +2126,8 @@ lord.submitted = function(event, form) {
         }
     }).then(function(result) {
         if (c.post) {
+            c.progressBar.hideDelayed(200);
+            resetButton();
             var threadId = +lord.nameOne("threadNumber", postForm).value;
             lord.resetPostForm();
             if (["postFormContainerTop", "postFormContainerBottom"].indexOf(form.parentNode.id) < 0)
@@ -2161,6 +2161,8 @@ lord.submitted = function(event, form) {
             }
         } else {
             setTimeout(function() {
+                c.progressBar.hide(200);
+                resetButton();
                 window.location = "/" + lord.data("sitePathPrefix") + result.boardName + "/res/" + result.threadNumber
                     + ".html";
             }, lord.Second);
