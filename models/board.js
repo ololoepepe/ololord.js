@@ -662,6 +662,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
     if (scheduled) {
         if (scheduled.promise) {
             return scheduled.promise.then(function() {
+                console.log("scheduleGenerateThread", boardName, threadNumber, postNumber, action); //TODO: debug
                 return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
             });
         } else {
