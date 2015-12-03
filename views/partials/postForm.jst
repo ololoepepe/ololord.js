@@ -86,7 +86,7 @@
                             <span class="symbolCounter"><span name="used">0</span>/{{=it.board.maxTextLength}}</span>
                             <textarea name="text" rows="10" cols="43" class="postFormTextarea"
                                       placeholder="{{=it.tr.postFormTextPlaceholder}} {{=it.board.maxTextLength}}"
-                                      onkeyup="lord.countSymbols(this);"></textarea>
+                                      oninput="lord.countSymbols(this);"></textarea>
                         </div>
                     </td>
                 {{?}}
