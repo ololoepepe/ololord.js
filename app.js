@@ -46,13 +46,43 @@ var spawnCluster = function() {
                     Database.generateRss();
                 }, config("server.rss.ttl", 60) * Tools.Minute);
             }
-            app.listen(config("server.port", 8080), function() {
+            var sockets = {};
+            var nextSocketId = 0;
+            var server = app.listen(config("server.port", 8080), function() {
                 console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080) + "...");
                 Global.IPC.installHandler("exit", function(status) {
                     process.exit(status);
                 });
+                Global.IPC.installHandler("stop", function() {
+                    return new Promise(function(resolve, reject) {
+                        server.close(function() {
+                            console.log("[" + process.pid + "] Closed");
+                            resolve();
+                        });
+                        Tools.forIn(sockets, function(socket, socketId) {
+                            delete sockets[socketId];
+                            socket.destroy();
+                        });
+                    });
+                });
+                Global.IPC.installHandler("start", function() {
+                    return new Promise(function(resolve, reject) {
+                        server.listen(config("server.port", 8080), function() {
+                            console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080)
+                                + "...");
+                            resolve();
+                        });
+                    });
+                });
                 Global.IPC.send("ready").catch(function(err) {
                     console.log(err);
+                });
+            });
+            server.on("connection", function(socket) {
+                var socketId = ++nextSocketId;
+                sockets[socketId] = socket;
+                socket.on("close", function() {
+                    delete sockets[socketId];
                 });
             });
         }).catch(function(err) {

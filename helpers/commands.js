@@ -4,6 +4,7 @@ var ReadLine = require("readline");
 var ReadLineSync = require("readline-sync");
 
 var Board = require("../boards/board");
+var BoardModel = require("../models/board");
 var config = require("./config");
 var Database = require("./database");
 var Global = require("./global");
@@ -136,7 +137,39 @@ _installHandler("rerender-posts", function(args) {
         answer = answer.toLowerCase();
         if (answer && answer != "yes" && answer != "y")
             return Promise.resolve();
-        return Database.rerenderPosts(boards);
+        return Global.IPC.send("stop").then(function() {
+            return Database.rerenderPosts(boards);
+        }).then(function() {
+            console.log("Generating cache, please, wait...");
+            return BoardModel.generate();
+        }).then(function() {
+            return Global.IPC.send("start");
+        }).then(function() {
+            return Promise.resolve("OK");
+        });
+    });
+});
+
+_installHandler("stop", function(args) {
+    return Global.IPC.send("stop").then(function() {
+        return Promise.resolve("OK");
+    });
+});
+
+_installHandler("start", function(args) {
+    return Global.IPC.send("start").then(function() {
+        return Promise.resolve("OK");
+    });
+});
+
+_installHandler("regenerate", function(args) {
+    return Global.IPC.send("stop").then(function() {
+        console.log("Generating cache, please, wait...");
+        return BoardModel.generate();
+    }).then(function() {
+        return Global.IPC.send("start");
+    }).then(function() {
+        return Promise.resolve("OK");
     });
 });
 
