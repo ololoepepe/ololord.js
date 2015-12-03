@@ -859,6 +859,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
             delete scheduledGenerateThread[key];
             return Promise.resolve();
         }).catch(function(err) {
+            delete scheduledGenerateThread[key];
             console.log(err.stack || err);
         });
         scheduled.promise = p;
