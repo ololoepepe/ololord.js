@@ -230,19 +230,14 @@ router.post("/createPost", function(req, res) {
         return Database.createPost(req, c.fields, c.files, transaction);
     }).then(function(post) {
         setMarkupModeCookie(res, c.fields);
-        if (req.ascetic) {
-            res.redirect("/" + config("site.pathPrefix", "")
-                + `${c.board.name}/res/${post.threadNumber}#${post.number}`);
-        } else {
-            res.send({
-                boardName: post.boardName,
-                postNumber: post.number
-            });
-        }
+        res.send({
+            boardName: post.boardName,
+            postNumber: post.number
+        });
     }).catch(function(err) {
         transaction.rollback();
         setMarkupModeCookie(res, c.fields);
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -267,18 +262,14 @@ router.post("/createThread", function(req, res) {
         return Database.createThread(req, c.fields, c.files, transaction);
     }).then(function(thread) {
         setMarkupModeCookie(res, c.fields);
-        if (req.ascetic) {
-            res.redirect("/" + config("site.pathPrefix", "") + `${c.board.name}/res/${thread.number}`);
-        } else {
-            res.send({
-                boardName: thread.boardName,
-                threadNumber: thread.number
-            });
-        }
+        res.send({
+            boardName: thread.boardName,
+            threadNumber: thread.number
+        });
     }).catch(function(err) {
         transaction.rollback();
         setMarkupModeCookie(res, c.fields);
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -292,14 +283,9 @@ router.post("/editPost", function(req, res) {
     }).then(function() {
         return Database.editPost(req, c.fields);
     }).then(function(result) {
-        if (req.ascetic) {
-            res.redirect("/" + config("site.pathPrefix", "")
-                + `editPost.html?boardName=${c.boardName}&postNumber=${c.postNumber}`);
-        } else {
-            res.send({});
-        }
+        res.send({});
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -339,19 +325,14 @@ router.post("/addFiles", function(req, res) {
         }
         return Database.addFiles(req, c.fields, c.files, transaction);
     }).then(function(result) {
-        if (req.ascetic) {
-            res.redirect("/" + config("site.pathPrefix", "")
-                + `${c.board.name}/res/${result.threadNumber}#${result.postNumber}`);
-        } else {
-            res.send({
-                boardName: result.boardName,
-                postNumber: result.postNumber,
-                threadNumber: result.threadNumber
-            });
-        }
+        res.send({
+            boardName: result.boardName,
+            postNumber: result.postNumber,
+            threadNumber: result.threadNumber
+        });
     }).catch(function(err) {
         transaction.rollback();
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -363,16 +344,9 @@ router.post("/deletePost", function(req, res) {
     }).then(function() {
         return Database.deletePost(req, res, c.fields);
     }).then(function(result) {
-        if (req.ascetic) {
-            var path = result.boardName;
-            if (result.threadNumber)
-                path += "/res/" + result.threadNumber + ".html";
-            res.redirect("/" + config("site.pathPrefix", "") + path);
-        } else {
-            res.send(result);
-        }
+        res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -380,16 +354,9 @@ router.post("/deleteFile", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         return Database.deleteFile(req, res, result.fields);
     }).then(function(result) {
-        if (req.ascetic) {
-            var path = result.boardName + "/res/" + result.threadNumber + ".html";
-            if (result.threadNumber != result.postNumber)
-                path += "#" + result.postNumber;
-            res.redirect("/" + config("site.pathPrefix", "") + path);
-        } else {
-            res.send(result);
-        }
+        res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -403,14 +370,9 @@ router.post("/moveThread", function(req, res) {
     }).then(function() {
         return Database.moveThread(req, c.fields);
     }).then(function(result) {
-        if (req.ascetic) {
-            var path = result.boardName + "/res/" + result.threadNumber + ".html";
-            res.redirect("/" + config("site.pathPrefix", "") + path);
-        } else {
-            res.send(result);
-        }
+        res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -418,22 +380,15 @@ router.post("/editAudioTags", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         return Database.editAudioTags(req, res, result.fields);
     }).then(function(result) {
-        if (req.ascetic) {
-            var path = result.boardName + "/res/" + result.threadNumber + ".html";
-            if (result.threadNumber != result.postNumber)
-                path += "#" + result.postNumber;
-            res.redirect("/" + config("site.pathPrefix", "") + path);
-        } else {
-            res.send(result);
-        }
+        res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
 router.post("/banUser", function(req, res) {
     if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return controller.error(req, res, "Not enough rights", !req.ascetic);
+        return controller.error(req, res, "Not enough rights", true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.bans = [];
@@ -461,24 +416,15 @@ router.post("/banUser", function(req, res) {
     }).then(function() {
         return Database.banUser(req, c.fields.userIp, c.bans);
     }).then(function(result) {
-        if (req.ascetic) {
-            var path;
-            if (c.boardName && c.postNumber)
-                path = `banUser.html?userIp=${c.userIp}&boardName=${c.boardName}&postNumber=${c.postNumber}`;
-            else
-                path = `manage.html`;
-            res.redirect("/" + config("site.pathPrefix", "") + path);
-        } else {
-            res.send({});
-        }
+        res.send({});
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
 router.post("/delall", function(req, res) {
     if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return controller.error(req, res, "Not enough rights", !req.ascetic);
+        return controller.error(req, res, "Not enough rights", true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
@@ -486,24 +432,16 @@ router.post("/delall", function(req, res) {
     }).then(function() {
         return Database.delall(req, c.fields);
     }).then(function(result) {
-        if (req.ascetic) {
-            var path = "/" + config("site.pathPrefix", "");
-            if (c.fields.boardName != "*")
-                path += c.fields.boardName;
-            res.redirect(path);
-        } else {
-            res.send({});
-        }
+        res.send({});
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
 router.post("/changeSettings", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         var textCookies = ["mode", "style", "codeStyle", "stickyToolbar", "shrinkPosts", "markupMode", "time",
-            "timeZoneOffset", "captchaEngine", "maxAllowedRating", "draftsByDefault", "hidePostformRules",
-            "minimalisticPostform"];
+            "timeZoneOffset", "captchaEngine", "maxAllowedRating", "hidePostformRules", "minimalisticPostform"];
         var hiddenBoards = [];
         Tools.forIn(result.fields, function(value, name) {
             if (name.substr(0, 6) == "board_") {
@@ -520,12 +458,9 @@ router.post("/changeSettings", function(req, res) {
             path: "/"
         });
     }).then(function(result) {
-        if (req.ascetic)
-            res.redirect("/" + config("site.pathPrefix", "") + "settings.html");
-        else
-            res.send({});
+        res.send({});
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -539,12 +474,9 @@ router.post("/setThreadFixed", function(req, res) {
     }).then(function() {
         return Database.setThreadFixed(req, c.fields);
     }).then(function(result) {
-        if (req.ascetic)
-            res.redirect("/" + config("site.pathPrefix", "") + `${c.boardName}/res/${c.threadNumber}.html`);
-        else
-            res.send(result);
+        res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -558,12 +490,9 @@ router.post("/setThreadClosed", function(req, res) {
     }).then(function() {
         return Database.setThreadClosed(req, c.fields);
     }).then(function(result) {
-        if (req.ascetic)
-            res.redirect("/" + config("site.pathPrefix", "") + `${c.boardName}/res/${c.threadNumber}.html`);
-        else
-            res.send(result);
+        res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -574,7 +503,7 @@ router.post("/sendChatMessage", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -585,7 +514,7 @@ router.post("/deleteChatMessages", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, !req.ascetic);
+        controller.error(req, res, err, true);
     });
 });
 

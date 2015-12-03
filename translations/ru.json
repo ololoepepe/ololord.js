@@ -293,12 +293,6 @@
             "value": "Автообновление"
         }
     },
-    "Determines if drafts are enabled on this board.\nThe default is true.": {
-        "_default": {
-            "value": "Определяет, включены ли черновики на этой доске.\nПо умолчанию true."
-        },
-        "_obsolete": true
-    },
     "/a/nime": {
         "boardTitle": {
             "value": "/a/ниме"
@@ -481,12 +475,9 @@
             "value": "Редактировать пост"
         }
     },
-    "Draft": {
-        "draftText": {
-            "value": "Черновик"
-        },
-        "postFormLabelDraft": {
-            "value": "Черновик"
+    "Add to drafts": {
+        "addToDraftsText": {
+            "value": "Добавить в черновики"
         }
     },
     "E-mail:": {

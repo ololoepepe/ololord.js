@@ -41,8 +41,6 @@ var checkCaptcha = function(req, fields) {
 };
 
 var scriptSource = function(req) {
-    if ("ascetic" == req.settings.mode.name)
-        return;
     return "/" + config("site.pathPrefix", "") + "js/yandex-captcha-script.js";
 };
 
@@ -51,7 +49,7 @@ var widgetHtml = function(req, prepared) {
 };
 
 var prepare = function(req, fromApi) {
-    if (!fromApi && "ascetic" != req.settings.mode.name)
+    if (!fromApi)
         return Promise.resolve();
     var captcha = req.settings.captchaEngine;
     var type = this.id.split("-").pop();

@@ -214,9 +214,9 @@ lord.Hour = 60 * lord.Minute;
 lord.Day = 24 * lord.Hour;
 lord.Year = 365 * lord.Day;
 lord.Billion = 2 * 1000 * 1000 * 1000;
-lord.SettingsStoredInCookies = ["mode", "style", "codeStyle", "stickyToolbar", "shrinkPosts", "markupMode",
-                                "time", "timeZoneOffset", "captchaEngine", "maxAllowedRating",
-                                "draftsByDefault", "hidePostformRules", "minimalisticPostform", "hiddenBoards"];
+lord.SettingsStoredInCookies = ["style", "codeStyle", "stickyToolbar", "shrinkPosts", "markupMode", "time",
+                                "timeZoneOffset", "captchaEngine", "maxAllowedRating", "hidePostformRules",
+                                "minimalisticPostform", "hiddenBoards"];
 //
 lord.keyboardMap = [
   "", // [0]
@@ -1250,7 +1250,6 @@ lord.settings = function() {
             id: lord.getCookie("captchaEngine", "google-recaptcha")
         },
         maxAllowedRating: lord.getCookie("maxAllowedRating", "R-18G"),
-        draftsByDefault: (lord.getCookie("draftsByDefault", "false") == "true"),
         hidePostformRules: (lord.getCookie("hidePostformRules", "false") == "true"),
         minimalisticPostform: (lord.getCookie("minimalisticPostform", "false") == "true"),
         hiddenBoards: lord.getCookie("hiddenBoards", "").split("|"),

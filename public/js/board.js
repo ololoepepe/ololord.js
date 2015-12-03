@@ -2185,9 +2185,6 @@ lord.resetPostForm = function() {
         var threadNumber = lord.nameOne("threadNumber", postForm);
         trip.checked = lord.showTripcode(threadNumber ? threadNumber.value : null);
     }
-    var dr = lord.nameOne("draft", postForm);
-    if (dr)
-        dr.checked = (lord.getCookie("draftsByDefault") === "true");
     var markupMode = lord.nameOne("markupMode", postForm);
     for (var i = 0; i < markupMode.options.length; ++i) {
         if (markupMode.options[i].value == lord.getCookie("markupMode", "EXTENDED_WAKABA_MARK,BB_CODE")) {

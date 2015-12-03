@@ -43,7 +43,7 @@ board.actionRoutes = function() {
                 Global.generate("soc", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
-                controller.error(req, res, err, req.settings.mode.name != "ascetic");
+                controller.error(req, res, err, true);
             });
         }
     },
@@ -77,7 +77,7 @@ board.actionRoutes = function() {
                 Global.generate("soc", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
-                controller.error(req, res, err, req.settings.mode.name != "ascetic");
+                controller.error(req, res, err, true);
             });
         }
     }];

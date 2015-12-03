@@ -394,7 +394,7 @@ controller.translationsModel = function() {
     translate("Answers:", "referencedByText");
     translate("Fixed", "fixedText");
     translate("The thread is closed", "closedText");
-    translate("Draft", "draftText");
+    translate("Add to drafts", "addToDraftsText");
     translate("This user is registered", "registeredText");
     translate("Post limit reached", "postLimitReachedText");
     translate("Bump limit reached", "bumpLimitReachedText");
@@ -479,7 +479,6 @@ controller.translationsModel = function() {
     translate("Offset:", "timeZoneOffsetLabelText");
     translate("Captcha:", "captchaLabelText");
     translate("Maximum rating:", "maxAllowedRatingLabelText");
-    translate("Posts are drafts by default", "draftsByDefaultLabelText");
     translate("Hide postform rules", "hidePostformRulesLabelText");
     translate("Minimalistic post form", "minimalisticPostformLabelText");
     translate("Hide boards:", "hiddenBoardsLabelText");
@@ -554,7 +553,6 @@ controller.translationsModel = function() {
     translate("Raw HTML", "postFormLabelRaw");
     translate("Sign as OP", "postFormLabelSignAsOp");
     translate("Enable tripcode", "postFormLabelTripcode");
-    translate("Draft", "postFormLabelDraft");
     translate("File(s):", "postFormInputFile");
     translate("Select file", "selectFileText");
     translate("Remove this file", "removeFileText");

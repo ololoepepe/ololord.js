@@ -44,31 +44,12 @@ module.exports.getPosts = function(posts) {
             withExtraData: true
         });
     });
-    return Promise.all(promises).then(function(posts) {
-        return posts.filter(function(post) {
-            if (!post)
-                return true;
-            return !post.options.draft;
-        });
-    });
+    return Promise.all(promises);
 };
 
 module.exports.getFileInfos = function(list, hashpass) {
     var promises = list.map(function(file) {
-        return Database.getFileInfo(file).then(function(fileInfo) {
-            var p;
-            if (fileInfo) {
-                p = Database.getPost(fileInfo.boardName, fileInfo.postNumber).then(function(post) {
-                    if (!post.draft || !post.user.hashpass || post.user.hashpass == hashpass)
-                        return Promise.resolve(fileInfo);
-                    else
-                        return Promise.resolve(null);
-                });
-            } else {
-                p = Promise.resolve(null);
-            }
-            return p;
-        });
+        return Database.getFileInfo(file);
     });
     return Promise.all(promises);
 };
@@ -123,11 +104,7 @@ var getPage = function(board, page) {
     if (isNaN(page) || page < 0 || page >= pageCounts[board.name])
         return Promise.reject(404);
     var c = {};
-    return Database.getThreads(board.name, {
-        filterFunction: function(thread) {
-            return !thread.options.draft;
-        }
-    }).then(function(threads) {
+    return Database.getThreads(board.name).then(function(threads) {
         c.threads = threads;
         c.threads.sort(Board.sortThreadsByDate);
         c.pageCount = pageCounts[board.name];
@@ -156,9 +133,7 @@ var getPage = function(board, page) {
                 withReferences: true,
                 withExtraData: true,
                 filterFunction: function(post) {
-                    if (post.number == thread.number)
-                        return false;
-                    return !post.options.draft;
+                    return post.number != thread.number;
                 }
             }).then(function(posts) {
                 thread.lastPosts = posts;
@@ -286,9 +261,7 @@ var getThread = function(board, number) {
         limit: 1,
         withPostNumbers: 1,
         filterFunction: function(thread) {
-            if (thread.number != number)
-                return false;
-            return !thread.options.draft;
+            return thread.number == number;
         }
     }).then(function(threads) {
         if (threads.length != 1)
@@ -297,10 +270,7 @@ var getThread = function(board, number) {
         return Database.threadPosts(board.name, c.thread.number, {
             withFileInfos: true,
             withReferences: true,
-            withExtraData: true,
-            filterFunction: function(post) {
-                return !post.options.draft;
-            }
+            withExtraData: true
         });
     }).then(function(posts) {
         c.opPost = posts.splice(0, 1)[0];
@@ -349,15 +319,7 @@ module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNu
             limit: 1,
             withPostNumbers: 1,
             filterFunction: function(thread) {
-                if (thread.number != threadNumber)
-                    return false;
-                if (!thread.options.draft)
-                    return true;
-                if (!thread.user.hashpass)
-                    return true;
-                if (thread.user.hashpass == hashpass)
-                    return true;
-                return Database.compareRegisteredUserLevels(thread.user.level, c.level) < 0;
+                return thread.number == threadNumber;
             }
         });
     }).then(function(threads) {
@@ -369,15 +331,7 @@ module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNu
             withReferences: true,
             withExtraData: true,
             filterFunction: function(post) {
-                if (post.number <= lastPostNumber)
-                    return false;
-                if (!post.options.draft)
-                    return true;
-                if (!post.user.hashpass)
-                    return true;
-                if (post.user.hashpass == hashpass)
-                    return true;
-                return Database.compareRegisteredUserLevels(post.user.level, c.level) < 0;
+                return post.number > lastPostNumber;
             }
         });
     });
@@ -395,15 +349,7 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
         return Database.getThreads(board.name, {
             limit: 1,
             filterFunction: function(thread) {
-                if (thread.number != number)
-                    return false;
-                if (!thread.options.draft)
-                    return true;
-                if (!thread.user.hashpass)
-                    return true;
-                if (thread.user.hashpass == hashpass)
-                    return true;
-                return Database.compareRegisteredUserLevels(thread.user.level, c.level) < 0;
+                return thread.number == number;
             }
         });
     }).then(function(threads) {
@@ -470,11 +416,7 @@ var getCatalog = function(board, sortMode) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     var c = {};
-    return Database.getThreads(board.name, {
-        filterFunction: function(thread) {
-            return !thread.options.draft;
-        }
-    }).then(function(threads) {
+    return Database.getThreads(board.name).then(function(threads) {
         c.threads = threads;
         var promises = c.threads.map(function(thread) {
             return Database.threadPosts(board.name, thread.number, {
@@ -535,11 +477,7 @@ module.exports.pageCount = function(boardName) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     var c = {};
-    return Database.getThreads(boardName, {
-        filterFunction: function(thread) {
-            return !thread.options.draft;
-        }
-    }).then(function(threads) {
+    return Database.getThreads(boardName).then(function(threads) {
         return Promise.resolve(Math.ceil(threads.length / board.threadsPerPage) || 1);
     });
 };
@@ -590,11 +528,7 @@ var generateThreads = function(boardName) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
     var c = {};
-    return Database.getThreads(boardName, {
-        filterFunction: function(thread) {
-            return !thread.options.draft;
-        }
-    }).then(function(threads) {
+    return Database.getThreads(boardName).then(function(threads) {
         var p = (threads.length > 0) ? generateThread(boardName, threads[0].number) : Promise.resolve();
         threads.slice(1).forEach(function(thread) {
             p = p.then(function() {

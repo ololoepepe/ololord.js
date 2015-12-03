@@ -618,15 +618,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     return getThreads(board.name, {
         limit: 1,
         filterFunction: function(thread) {
-            if (thread.number != threadNumber)
-                return false;
-            if (!thread.options.draft)
-                return true;
-            if (!thread.user.hashpass)
-                return true;
-            if (thread.user.hashpass == hashpass)
-                return true;
-            return compareRegisteredUserLevels(thread.user.level, c.level) <= 0;
+            return thread.number == threadNumber;
         }
     }).then(function(threads) {
         if (!threads || threads.length != 1)
@@ -1169,9 +1161,6 @@ module.exports.generateRss = function() {
             if (posts.length >= rssPostCount || c.threads.length < 1)
                 return Promise.resolve();
             return threadPosts(boardName, c.threads.shift().number, {
-                filterFunction: function(post) {
-                    return !post.options.draft;
-                },
                 limit: (rssPostCount - posts.length),
                 withFileInfos: true
             }).then(function(result) {
@@ -1201,11 +1190,7 @@ module.exports.generateRss = function() {
                 }
             }
         };
-        getThreads(boardName, {
-            filterFunction: function(thread) {
-                return !thread.draft;
-            }
-        }).then(function(threads) {
+        getThreads(boardName).then(function(threads) {
             threads.sort(Board.sortThreadsByDate);
             c.threads = threads;
             return f();
@@ -1333,7 +1318,9 @@ module.exports.findPosts = function(query, boardName) {
             return Promise.resolve([]);
         return db.hmget("posts", keys);
     }).then(function(posts) {
-        return posts.map(function(post) {
+        return posts.filter(function(post) {
+            return post;
+        }).map(function(post) {
             return JSON.parse(post);
         });
     });
@@ -1459,8 +1446,6 @@ module.exports.addFiles = function(req, fields, files, transaction) {
     if (isNaN(postNumber) || postNumber <= 0)
         return Promise.reject("Invalid post number");
     return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
-        if (!post.options.draft && compareRegisteredUserLevels(req.level, "MODER") < 0)
-            return Promise.reject("Not enough rights");
         if ((!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
             return Promise.reject("Not enough rights");
@@ -1528,15 +1513,11 @@ module.exports.editPost = function(req, fields) {
             markupModes.push(val);
     });
     return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
-        if (!post.options.draft && compareRegisteredUserLevels(req.level, "MODER") < 0)
-            return Promise.reject("Not enough rights");
         if ((!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
             return Promise.reject("Not enough rights");
         }
         c.post = post;
-        c.wasDraft = post.options.draft;
-        c.draft = post.options.draft && fields.draft;
         return postFileInfoNames(post.boardName, post.number);
     }).then(function(numbers) {
         if (!rawText && numbers.length < 1)
@@ -1575,12 +1556,10 @@ module.exports.editPost = function(req, fields) {
         c.post.markup = markupModes;
         c.post.name = name || null;
         c.post.options.rawHtml = isRaw;
-        c.post.options.draft = c.draft;
         c.post.rawText = rawText;
         c.post.subject = subject || null;
         c.post.text = c.text || null;
-        if (!c.wasDraft)
-            c.post.updatedAt = date.toISOString();
+        c.post.updatedAt = date.toISOString();
         delete c.post.bannedFor;
         return db.hset("posts", board.name + ":" + c.post.number, JSON.stringify(c.post));
     }).then(function() {
@@ -1859,7 +1838,7 @@ module.exports.moveThread = function(req, fields) {
     }).then(function() {
         return db.hset("threads:" + targetBoard.name, c.thread.number, JSON.stringify(c.thread));
     }).then(function() {
-        return db.hset("threadUpdateTime:" + targetBoard.name, c.thread.number, Tools.now().toISOString());
+        return db.hset("threadUpdateTimes:" + targetBoard.name, c.thread.number, Tools.now().toISOString());
     }).then(function() {
         return db.sadd("threadPostNumbers:" + targetBoard.name + ":" + c.thread.number, Tools.toArray(c.postNumberMap));
     }).then(function() {
