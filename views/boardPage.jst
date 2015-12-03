@@ -63,11 +63,19 @@
     <h1 style="display: inline;">{{=it.tr.loadingThreadsMessage}}</h1>
 </div>
 {{? it.board.postingEnabled}}
-<hr />
-{{~["Bottom"] :position}}
-    {{#def.createAction}}
-{{~}}
+    <hr />
+    {{~["Bottom"] :position}}
+        {{#def.createAction}}
+    {{~}}
 {{?}}
+<div>
+    <center>[<a id="draftsVisibilitySwitch" href="javascript:void(0);"
+                onclick="lord.switchDraftsVisibility(); return false;">{{=it.tr.showDraftsText}}</a>]</center>
+</div>
+<div id="drafts" style="display: none;">
+    <hr />
+    <center><h2>{{=it.tr.draftsText}}</h2></center>
+</div>
 <hr />
 <div class="pages">
     {{? it.currentPage > 0}}

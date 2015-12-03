@@ -563,6 +563,17 @@ span.newPostCount {
     display: table;
 }
 
+.draft {
+    background-color: #DDDDDD;
+    border: 1px solid #CCCCCC;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-top: 10px;
+    padding-left: 10px;
+    overflow-x: auto;
+    display: table;
+}
+
 .opPost {
     overflow-x: auto;
     display: table;

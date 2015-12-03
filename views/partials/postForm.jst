@@ -224,8 +224,8 @@
                         {{ out += it.customPostFormOption[30](it); }}
                     {{?}}
                     <a href="javascript:void(0);" onclick="lord.addToDrafts(this); return false;" class="buttonImage"
-                       title="{{!it.tr.postFormLabelDraft}}"><img src="/{{=it.site.pathPrefix}}img/draft.png"
-                                                                  width="24" height="24"></a>
+                       title="{{=it.tr.addToDraftsText}}"><img src="/{{=it.site.pathPrefix}}img/draft.png"
+                                                               width="24" height="24"></a>
                     {{? it.customPostFormOption && it.customPostFormOption[40]}}
                         {{ out += it.customPostFormOption[40](it); }}
                     {{?}}

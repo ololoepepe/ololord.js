@@ -3666,5 +3666,30 @@
         "closeFilesByClickingOnlyLabelText": {
             "value": "Закрывать файлы только при клике на них"
         }
+    },
+    "Drafts": {
+        "draftsText": {
+            "value": "Черновики"
+        }
+    },
+    "Fill form with this draft": {
+        "fillFormWithDraftText": {
+            "value": "Заполнить форму, используя этот черновик"
+        }
+    },
+    "Delete this draft": {
+        "deleteDraftText": {
+            "value": "Удалить этот черновик"
+        }
+    },
+    "Show drafts": {
+        "showDraftsText": {
+            "value": "Показать черновики"
+        }
+    },
+    "Hide drafts": {
+        "hideDraftsText": {
+            "value": "Скрыть черновики"
+        }
     }
 }

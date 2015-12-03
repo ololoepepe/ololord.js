@@ -2183,8 +2183,154 @@ lord.submitted = function(event, form) {
     });
 };
 
+lord.switchDraftsVisibility = function(visible) {
+    var draftsContainer = lord.id("drafts");
+    if (typeof visible != "boolean")
+        visible = ("none" == draftsContainer.style.display);
+    draftsContainer.style.display = (visible ? "" : "none");
+    lord.setLocalObject("draftsVisible", visible);
+    var sw = lord.id("draftsVisibilitySwitch");
+    lord.removeChildren(sw);
+    sw.appendChild(lord.node("text", lord.text(visible ? "hideDraftsText" : "showDraftsText")));
+};
+
+lord.appendDraft = function(draft, visible) {
+    var drafts = lord.id("drafts");
+    if (!drafts)
+        return;
+    lord.switchDraftsVisibility(typeof visible == "boolean" ? visible : true);
+    var model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true);
+    model.settings = lord.settings();
+    model.draft = draft;
+    model.draft.user = model.user;
+    lord.appendExtrasToModel(model);
+    var nodes = $.parseHTML(lord.template("draft")(model), document, true);
+    var node = (nodes.length > 1) ? nodes[1] : nodes[0];
+    lord.query("script", node).forEach(function(script) {
+        var nscript = lord.node("script");
+        if (script.src)
+            nscript.src = script.src;
+        else if (script.innerHTML)
+            nscript.innerHTML = script.innerHTML;
+        script.parentNode.replaceChild(nscript, script);
+    });
+    drafts.appendChild(node);
+};
+
+lord.fillFormWithDraft = function(a) {
+    var key = lord.data("key", a, true);
+    var createdAt = lord.data("createdAt", a, true);
+    if (!key || !createdAt)
+        return;
+    var drafts = lord.getLocalObject("drafts", {});
+    var list = drafts[key];
+    if (!list)
+        return;
+    var draft;
+    for (var i = 0; i < list.length; ++i) {
+        if (createdAt == list[i].createdAt) {
+            draft = list[i];
+            break;
+        }
+    }
+    if (!draft)
+        return;
+    var postForm = lord.id("postForm");
+    var email = lord.nameOne("email", postForm);
+    var name = lord.nameOne("name", postForm);
+    var subject = lord.nameOne("subject", postForm);
+    var text = lord.nameOne("text", postForm);
+    var raw = lord.nameOne("raw", postForm);
+    var op = lord.nameOne("signAsOp", postForm);
+    var tripcode = lord.nameOne("tripcode", postForm);
+    var markupMode = lord.nameOne("markupMode", postForm);
+    //TODO: confirm is form not empty
+    email.value = draft.email;
+    name.value = draft.name;
+    subject.value = draft.subject;
+    text.value = draft.rawText;
+    raw.checked = draft.options.rawHtml;
+    op.checked = draft.options.signAsOp;
+    tripcode.checked = draft.options.showTripcode;
+    for (var i = 0; i < markupMode.options.length; ++i) {
+        if (draft.markupMode == markupMode.options[i].value) {
+            markupMode.selectedIndex = i;
+            break;
+        }
+    }
+};
+
+lord.deleteDraft = function(a) {
+    var key = lord.data("key", a, true);
+    var createdAt = lord.data("createdAt", a, true);
+    if (!key || !createdAt)
+        return;
+    var draftsContainer = lord.id("drafts");
+    var draft = lord.id("draft/" + createdAt);
+    if (draft)
+        draftsContainer.removeChild(draft);
+    var drafts = lord.getLocalObject("drafts", {});
+    var list = drafts[key];
+    if (!list)
+        return;
+    for (var i = 0; i < list.length; ++i) {
+        if (createdAt == list[i].createdAt) {
+            list.splice(i, 1);
+            break;
+        }
+    }
+    if (list.length < 1) {
+        delete drafts[key];
+        lord.switchDraftsVisibility(false);
+    }
+    lord.setLocalObject("drafts", drafts);
+};
+
 lord.addToDrafts = function(a) {
-    alert("В разработке");
+    var postForm = lord.id("postForm");
+    var boardName = lord.nameOne("boardName", postForm).value;
+    var threadNumber = lord.nameOne("threadNumber", postForm);
+    threadNumber = threadNumber ? +threadNumber.value : null;
+    var markupMode = lord.nameOne("markupMode", postForm);
+    markupMode = markupMode.options[markupMode.selectedIndex].value;
+    var formData = new FormData();
+    formData.append("boardName", boardName);
+    formData.append("text", lord.nameOne("text", postForm).value);
+    if (lord.nameOne("raw", postForm).checked)
+        formData.append("raw", "true");
+    if (lord.nameOne("signAsOp", postForm).checked)
+        formData.append("signAsOp", "true");
+    if (lord.nameOne("tripcode", postForm).checked)
+        formData.append("tripcode", "true");
+    formData.append("markupMode", markupMode);
+    var c = {};
+    lord.post("/" + lord.data("sitePathPrefix") + "action/markupText", formData, c, {
+        delay: 500,
+        uploadProgress: function(e) {
+            var percent = Math.floor(100 * (e.loaded / e.total));
+            if (100 == percent)
+                btn.value = "...";
+            else
+                btn.value = percent + "%";
+        }
+    }).then(function(result) {
+        c.progressBar.hideDelayed(200);
+        result.email = lord.nameOne("email", postForm).value;
+        result.name = lord.nameOne("name", postForm).value;
+        result.subject = lord.nameOne("subject", postForm).value;
+        result.markupMode = markupMode;
+        var key = boardName + (threadNumber ? ("/" + threadNumber) : "");
+        result.key = key;
+        var drafts = lord.getLocalObject("drafts", {});
+        if (!drafts.hasOwnProperty(key))
+            drafts[key] = [];
+        drafts[key].push(result);
+        lord.setLocalObject("drafts", drafts);
+        lord.appendDraft(result);
+    }).catch(function(err) {
+        c.progressBar.hideDelayed(200);
+        lord.handleError(err);
+    });
 };
 
 lord.resetPostForm = function() {
@@ -2663,6 +2809,14 @@ lord.initializeOnLoadBaseBoard = function() {
             if (hash && "#" != hash)
                 window.location.hash = hash;
         }, 1000);
+        var threadNumber = +lord.data("threadNumber");
+        var key = lord.data("boardName") + (threadNumber ? ("/" + threadNumber) : "");
+        var drafts = lord.getLocalObject("drafts", {})[key];
+        if (drafts) {
+            drafts.forEach(function(draft) {
+                lord.appendDraft(draft, lord.getLocalObject("draftsVisible", true));
+            });
+        }
         document.body.onclick = lord.globalOnclick;
         if (lord.data("deviceType") != "mobile") {
             document.body.onmouseover = lord.globalOnmouseover;

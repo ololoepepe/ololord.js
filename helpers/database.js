@@ -626,7 +626,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         if (!threads || threads.length != 1)
             return Promise.reject("No such thread or no access to thread");
         c.level = req.level || null;
-        c.isRaw = fields.raw && compareRegisteredUserLevels(c.level, RegisteredUserLevels.Admin) >= 0;
+        c.isRaw = !!fields.raw && compareRegisteredUserLevels(c.level, RegisteredUserLevels.Admin) >= 0;
         return db.scard("threadPostNumbers:" + board.name + ":" + threadNumber);
     }).then(function(postCount) {
         c.postCount = postCount;
@@ -663,7 +663,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             number: c.postNumber,
             options: {
                 rawHtml: c.isRaw,
-                showTripcode: !!fields.tripcode,
+                showTripcode: !!req.hashpass && !!fields.tripcode,
                 signAsOp: !!fields.signAsOp
             },
             rawText: rawText,

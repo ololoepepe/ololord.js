@@ -563,6 +563,18 @@ span.newPostCount {
     display: table;
 }
 
+.draft {
+    background-color: #2C2C2C;
+    border: 1px solid #575757;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-top: 10px;
+    padding-left: 10px;
+    width: 100%
+    overflow-x: auto;
+    display: table;
+}
+
 .post:not(.hidden) {
     background: url("../favicon.ico") right bottom no-repeat;
 }

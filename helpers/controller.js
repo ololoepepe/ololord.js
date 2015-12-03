@@ -654,6 +654,11 @@ controller.translationsModel = function() {
     translate("Global tripcode deactivated (except threads where it is activated explicitly)",
         "globalTripcodeDeactivatedText");
     translate("Close files only by clicking on them", "closeFilesByClickingOnlyLabelText");
+    translate("Drafts", "draftsText");
+    translate("Fill form with this draft", "fillFormWithDraftText");
+    translate("Delete this draft", "deleteDraftText");
+    translate("Show drafts", "showDraftsText");
+    translate("Hide drafts", "hideDraftsText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

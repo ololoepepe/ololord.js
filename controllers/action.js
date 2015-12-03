@@ -13,6 +13,7 @@ var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
+var markup = require("../helpers/markup");
 var Tools = require("../helpers/tools");
 var vk = require("../helpers/vk")(config("site.vkontakte.accessToken", ""));
 
@@ -202,12 +203,53 @@ var testParameters = function(fields, files, creatingThread) {
     //NOTE: Yep, return nothing
 };
 
-var setMarkupModeCookie = function(res, fields) {
-    res.cookie("markupMode", fields.markupMode, {
-        expires: Tools.forever(),
-        path: "/"
+router.post("/markupText", function(req, res) {
+    var c = {};
+    var date = Tools.now();
+    Tools.parseForm(req).then(function(result) {
+        c.fields = result.fields;
+        c.board = Board.board(c.fields.boardName);
+        if (!c.board)
+            return Promise.reject("Invalid board");
+        return controller.checkBan(req, res, c.board.name, true);
+    }).then(function() {
+        if (c.fields.text.length > c.board.maxTextFieldLength)
+            return Promise.reject(Tools.translate("Comment is too long", "error"));
+        var markupModes = [];
+        Tools.forIn(markup.MarkupModes, function(val) {
+            if (c.fields.markupMode && c.fields.markupMode.indexOf(val) >= 0)
+                markupModes.push(val);
+        });
+        c.isRaw = !!c.fields.raw
+            && Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Admin) >= 0;
+        if (c.isRaw)
+            return c.fields.text;
+        return markup(c.board.name, c.fields.text, {
+            markupModes: markupModes,
+            referencedPosts: {}
+        });
+    }).then(function(text) {
+        var data = {
+            boardName: c.board.name,
+            text: text || null,
+            rawText: c.fields.text || null,
+            options: {
+                rawHtml: c.isRaw,
+                signAsOp: !!c.fields.signAsOp,
+                showTripcode: !!req.hashpass && !!c.fields.tripcode
+            },
+            createdAt: date.toISOString()
+        };
+        if (req.hashpass && c.fields.tripcode) {
+            var md5 = Crypto.createHash("md5");
+            md5.update(req.hashpass + config("site.tripcodeSalt", ""));
+            data.tripcode = "!" + md5.digest("base64").substr(0, 10);
+        }
+        res.send(data);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
     });
-};
+});
 
 router.post("/createPost", function(req, res) {
     var c = {};
@@ -229,14 +271,12 @@ router.post("/createPost", function(req, res) {
             return Promise.reject(testResult.error);
         return Database.createPost(req, c.fields, c.files, transaction);
     }).then(function(post) {
-        setMarkupModeCookie(res, c.fields);
         res.send({
             boardName: post.boardName,
             postNumber: post.number
         });
     }).catch(function(err) {
         transaction.rollback();
-        setMarkupModeCookie(res, c.fields);
         controller.error(req, res, err, true);
     });
 });
@@ -261,14 +301,12 @@ router.post("/createThread", function(req, res) {
             return Promise.reject(testResult.error);
         return Database.createThread(req, c.fields, c.files, transaction);
     }).then(function(thread) {
-        setMarkupModeCookie(res, c.fields);
         res.send({
             boardName: thread.boardName,
             threadNumber: thread.number
         });
     }).catch(function(err) {
         transaction.rollback();
-        setMarkupModeCookie(res, c.fields);
         controller.error(req, res, err, true);
     });
 });
