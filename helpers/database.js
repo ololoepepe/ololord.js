@@ -1030,7 +1030,8 @@ module.exports.createThread = function(req, fields, files, transaction) {
         c.files = files;
         return createPost(req, fields, files, transaction, c.threadNumber, date);
     }).then(function(post) {
-        Global.generate(post.boardName, post.threadNumber, post.number, "create");
+        return Global.generate(post.boardName, post.threadNumber, post.number, "create");
+    }).then(function() {
         return c.thread;
     });
 };

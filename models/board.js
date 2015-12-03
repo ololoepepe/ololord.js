@@ -674,7 +674,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
     scheduledGenerateThread[key] = {};
     scheduled = scheduledGenerateThread[key];
     scheduled[action] = [postNumber];
-    scheduled.timer = setTimeout(function() {
+    var f = function() {
         var c = {};
         var creatingThread = false;
         var deletingThread = false;
@@ -861,7 +861,11 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
             console.log(err.stack || err);
         });
         scheduled.promise = p;
-    }, Tools.Second);
+    };
+    if (threadNumber == postNumber)
+        f();
+    else
+        scheduled.timer = setTimeout(f, Tools.Second);
     return Promise.resolve();
 };
 

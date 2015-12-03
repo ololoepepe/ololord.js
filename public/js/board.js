@@ -881,12 +881,14 @@ lord.deletePost = function(el) {
         if (!post)
             return Promise.reject("No such post");
         if (lord.data("isOp", post)) {
-            if (!isNaN(+lord.data("threadNumber"))) {
-                window.location = window.location.protocol + "//" + c.model.site.domain + "/" + c.model.site.pathPrefix
-                    + lord.data("boardName");
-            } else {
-                lord.reloadPage();
-            }
+            setTimeout(function() {
+                if (!isNaN(+lord.data("threadNumber"))) {
+                    window.location = window.location.protocol + "//" + model.site.domain + "/" + model.site.pathPrefix
+                        + lord.data("boardName");
+                } else {
+                    lord.reloadPage();
+                }
+            }, lord.Second);
         } else {
             post.parentNode.removeChild(post);
         }
@@ -2158,8 +2160,10 @@ lord.submitted = function(event, form) {
                 }
             }
         } else {
-            window.location = "/" + lord.data("sitePathPrefix") + result.boardName + "/res/" + result.threadNumber
-                + ".html";
+            setTimeout(function() {
+                window.location = "/" + lord.data("sitePathPrefix") + result.boardName + "/res/" + result.threadNumber
+                    + ".html";
+            }, lord.Second);
         }
         return Promise.resolve();
     }).catch(function(err) {
