@@ -286,8 +286,8 @@ router.get("/fileHeaders.json", function(req, res) {
 });
 
 router.get("/chatMessages.json", function(req, res) {
-    Chat.getMessages(req, req.query.lastRequestDate).then(function(messages) {
-        res.json(messages);
+    Chat.getMessages(req, req.query.lastRequestDate).then(function(result) {
+        res.json(result);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
