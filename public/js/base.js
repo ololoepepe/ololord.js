@@ -634,7 +634,8 @@ lord.checkChats = function() {
         if (keys.length > 0)
             lord.updateChat(keys);
         lord.setLocalObject("chats", lord.chats);
-        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), lord.chatDialog ? lord.Second : lord.Minute);
+        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord),
+            lord.chatDialog ? (5 * lord.Second) : lord.Minute);
     }).catch(function(err) {
         lord.handleError(err);
         lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), lord.Minute);
