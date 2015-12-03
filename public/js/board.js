@@ -143,7 +143,7 @@ lord.resetScale = function(image) {
     lord.showPopup(parseFloat(image.scale.toString().substr(0, 5)) + "%", { "timeout": +lord.Second });
 };
 
-lord.removeReferences = function(postNumber) {
+lord.removeReferences = function(postNumber, referencedOnly) {
     postNumber = +postNumber;
     if (isNaN(postNumber))
         return;
@@ -156,7 +156,7 @@ lord.removeReferences = function(postNumber) {
             parent.removeChild(a);
             if (parent.children.length <= 1)
                 parent.style.display = "none";
-        } else {
+        } else if (!referencedOnly) {
             parent.replaceChild(lord.node("text", a.textContent), a);
         }
     });
@@ -1111,7 +1111,7 @@ lord.editPost = function(el) {
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
-        lord.removeReferences(postNumber);
+        lord.removeReferences(postNumber, true);
         return lord.updatePost(postNumber);
     }).catch(lord.handleError);
 };
