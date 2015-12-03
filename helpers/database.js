@@ -1412,6 +1412,7 @@ var rerenderBoardPosts = function(boardName, posts) {
 
 var rebuildPostSearchIndex = function(boardName, postNumber) {
     var key = boardName + ":" + postNumber;
+    console.log(`Rebuilding post search index: [${boardName}] ${postNumber}`);
     return getPost(boardName, postNumber).then(function(post) {
         var promises = [];
         Tools.forIn(Tools.indexPost({
