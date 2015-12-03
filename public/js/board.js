@@ -942,18 +942,25 @@ lord.moveThread = function(el) {
 lord.banUser = function(el) {
     var boardName = lord.data("boardName", el, true);
     var postNumber = +lord.data("number", el, true);
-    var userIp = lord.data("userIp", el, true);
-    if (!boardName || isNaN(postNumber) || postNumber <= 0 || !userIp)
+    if (!boardName || isNaN(postNumber) || postNumber <= 0)
         return;
     var c = {};
     c.model = lord.model(["base", "tr", "boards"], true);
     c.model.settings = lord.settings();
-    lord.api("bannedUser", { ip: userIp }).then(function(model) {
+    lord.api("userIp", {
+        boardName: boardName,
+        postNumber: postNumber
+    }).then(function(ip) {
+        if (!ip)
+            return Promise.reject("No such post");
+        c.userIp = ip.ipv4 || ip.ip;
+        return lord.api("bannedUser", { ip: c.userIp });
+    }).then(function(model) {
         if (model)
             c.model.bannedUser = model;
         c.model.boardName = boardName;
         c.model.postNumber = postNumber;
-        c.model.userIp = userIp;
+        c.model.userIp = c.userIp;
         var nodes = $.parseHTML(lord.template("userBan")(c.model));
         c.div = (nodes.length > 1) ? nodes[1] : nodes[0];
         return lord.showDialog("banUserText", null, c.div);

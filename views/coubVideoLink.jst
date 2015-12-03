@@ -1,7 +1,7 @@
 <span data-video-id="{{=it.info.id}}" data-video-title="{{=it.info.videoTitle}}"
       data-video-author="{{=it.info.authorName}}" {{? it.info.thumbnail}}data-thumb-url="{{=it.info.thumbnail.url}}"
       data-thumb-width="{{=it.info.thumbnail.width}}" data-thumb-height="{{=it.info.thumbnail.height}}"{{?}}>
-    <img title="COUB" src="https://coub.com/favicon.ico" width="16" height="16">
+    <img title="COUB" src="https://coub.com/favicon.ico" class="signImage" width="16" height="16">
     <a {{? it.info.thumbnail}}onmouseover="lord.showVideoThumb(event, this);"
        onmousemove="lord.moveVideoThumb(event, this);" onmouseout="lord.hideVideoThumb(event, this);"{{?}}
        title="{{=it.info.authorName}}" href="{{=it.info.href}}">{{!it.info.videoTitle}}</a>

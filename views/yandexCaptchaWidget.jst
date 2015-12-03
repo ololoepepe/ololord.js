@@ -1,14 +1,5 @@
 <div id="captcha">
-    {{? "ascetic" == it.settings.mode.name}}
-        {{? it.url && it.challenge}}
-            <div name="image"><img src="//{{=it.url}}"></div>
-            <input type="hidden" name="yandexCaptchaChallenge" value="{{=it.challenge}}" />
-        {{??}}
-            <div name="image"><img src="/{{=it.site.pathPrefix}}img/yandex-hernya.png" title="{{=it.error}}"></div>
-        {{?}}
-    {{??}}
-        <div name="image"></div>
-        <input type="hidden" name="yandexCaptchaChallenge" />
-    {{?}}
+    <div name="image"></div>
+    <input type="hidden" name="yandexCaptchaChallenge" />
     <input type="text" name="yandexCaptchaResponse" style="width: 200px;" />
 </div>

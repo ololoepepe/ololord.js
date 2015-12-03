@@ -10,20 +10,9 @@
         <div>{{=it.tr.voteTextText}} <input type="text" name="voteText" size="36" /></div>
         <div>{{=it.tr.multipleVoteVariantsText}}
              <input type="checkbox" name="multipleVoteVariants" value="true" /></div>
-        {{? it.settings.mode.name != "ascetic"}}
-            <div name="voteVariants"></div>
-            <a href="javascript:void(0);" onclick="lord.addVoteVariant(this); return false;">
-                <img src="/{{=it.site.pathPrefix}}img/add.png" title="{{=it.tr.addVoteVariantText}}"
-                     class="buttonImage"></a>
-        {{??}}
-            <div name="voteVariants">
-                {{ for (var i = 0; i < 10; ++i) { }}
-                    <input type="text" name="voteVariant_{{ out += (i + 1); }}" size="43" />
-                    {{? i < 9}}
-                        <br />
-                    {{?}}
-                {{ } }}
-            </div>
-        {{?}} 
+        <div name="voteVariants"></div>
+        <a href="javascript:void(0);" onclick="lord.addVoteVariant(this); return false;">
+            <img src="/{{=it.site.pathPrefix}}img/add.png" title="{{=it.tr.addVoteVariantText}}"
+                 class="buttonImage"></a> 
     </td>
 </tr>

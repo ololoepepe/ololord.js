@@ -24,18 +24,16 @@
                 {{?}}
             {{?}}
         {{~}}
-        {{? it.settings.mode.name != "ascetic"}}
-            {{? it.deviceType != "mobile"}}
-                <img src="/{{=it.site.pathPrefix}}img/playlist.png" class="buttonImage" width="16" height="16">
-                <a href="/{{=it.site.pathPrefix}}playlist.html" target="page">{{=it.tr.toPlaylistPageText}}</a>
-            {{??}}
-                <span class="nowrap">
-                [<a href="/{{=it.site.pathPrefix}}playlist.html" target="page"
-                    title="{{=it.tr.toPlaylistPageText}}"><img src="/{{=it.site.pathPrefix}}img/playlist.png"
-                                                               class="buttonImage" width="16" height="16"></a>]</span>
-            {{?}}
-            <br />
+        {{? it.deviceType != "mobile"}}
+            <img src="/{{=it.site.pathPrefix}}img/playlist.png" class="buttonImage" width="16" height="16">
+            <a href="/{{=it.site.pathPrefix}}playlist.html" target="page">{{=it.tr.toPlaylistPageText}}</a>
+        {{??}}
+            <span class="nowrap">
+            [<a href="/{{=it.site.pathPrefix}}playlist.html" target="page"
+                title="{{=it.tr.toPlaylistPageText}}"><img src="/{{=it.site.pathPrefix}}img/playlist.png"
+                                                           class="buttonImage" width="16" height="16"></a>]</span>
         {{?}}
+        <br />
         {{? it.deviceType != "mobile"}}
             <img src="/{{=it.site.pathPrefix}}img/markup.png" class="buttonImage" width="16" height="16">
             <a href="/{{=it.site.pathPrefix}}markup.html" target="page">{{=it.tr.toMarkupPageText}}</a>

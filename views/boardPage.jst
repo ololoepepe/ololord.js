@@ -5,22 +5,20 @@
       {{#def.baseData}}
       data-last-post-number="{{=it.lastPostNumber}}"
       data-current-page="{{=it.currentPage}}">
-{{? it.settings.mode.name != "ascetic" && it.site.vkontakte.integrationEnabled }}
+{{? it.site.vkontakte.integrationEnabled }}
     <script type="text/javascript">
         VK.init({ apiId: {{=it.site.vkontakte.appId}} });
     </script>
 {{?}}
-{{? it.settings.mode.name != "ascetic"}}
-    <div id="hiddenPostForm" style="display: none;">
-        {{#def.postForm}}
+<div id="hiddenPostForm" style="display: none;">
+    {{#def.postForm}}
+</div>
+{{? it.board.captchaEnabled}}
+    <div id="hiddenCaptcha" style="display: none;">
+        {{? it.user.captchaQuota > 0}}
+            {{ out += it.captchaEngine.widgetHtml(it.req, it.captchaPrepared); }}
+        {{?}}
     </div>
-    {{? it.board.captchaEnabled}}
-        <div id="hiddenCaptcha" style="display: none;">
-            {{? it.user.captchaQuota > 0}}
-                {{ out += it.captchaEngine.widgetHtml(it.req, it.captchaPrepared); }}
-            {{?}}
-        </div>
-    {{?}}
 {{?}}
 {{? it.customHeader}}
     {{#def.customHeader}}
@@ -28,11 +26,9 @@
 {{~["top", "bottom"] :target}}
     {{#def.navigationButton}}
 {{~}}
-{{? it.settings.mode.name != "ascetic"}}
-    {{~["previous", "next"] :target}}
-        {{#def.leafButton}}
-    {{~}}
-{{?}}
+{{~["previous", "next"] :target}}
+    {{#def.leafButton}}
+{{~}}
 {{#def.toolbar}}
 <br />
 <a id="top"></a>
@@ -66,11 +62,11 @@
     <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
     <h1 style="display: inline;">{{=it.tr.loadingThreadsMessage}}</h1>
 </div>
-{{? it.settings.mode.name != "ascetic" && it.board.postingEnabled}}
-    <hr />
-    {{~["Bottom"] :position}}
-        {{#def.createAction}}
-    {{~}}
+{{? it.board.postingEnabled}}
+<hr />
+{{~["Bottom"] :position}}
+    {{#def.createAction}}
+{{~}}
 {{?}}
 <hr />
 <div class="pages">

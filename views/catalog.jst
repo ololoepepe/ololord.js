@@ -24,23 +24,15 @@
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{=it.board.title}}</a>
     </h1>
     {{=it.tr.sortingModeLabelText}}
-    {{? it.settings.mode.name != "ascetic"}}
-        <select name="catalogSortingModeSelect" class="select"
-                onchange="location = '/{{=it.site.pathPrefix}}{{=it.board.name}}/catalog.html?sort=' + this.options[this.selectedIndex].value;">
-            <option value="date"
-                    {{? it.sortMode == "date"}}selected="true"{{?}}>{{=it.tr.sortingModeDateLabelText}}</option>
-            <option value="recent"
-                    {{? it.sortMode == "recent"}}selected="true"{{?}}>{{=it.tr.sortingModeRecentLabelText}}</option>
-            <option value="bumps"
-                    {{? it.sortMode == "bumps"}}selected="true"{{?}}>{{=it.tr.sortingModeBumpsLabelText}}</option>
-        </select>
-    {{??}}
-        <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/catalog.html?sort=date">{{=it.tr.sortingModeDateLabelText}}</a>
-        |
-        <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/catalog.html?sort=recent">{{=it.tr.sortingModeRecentLabelText}}</a>
-        |
-        <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/catalog.html?sort=bumps">{{=it.tr.sortingModeBumpsLabelText}}</a>
-    {{?}}
+    <select name="catalogSortingModeSelect" class="select"
+            onchange="location = '/{{=it.site.pathPrefix}}{{=it.board.name}}/catalog.html?sort=' + this.options[this.selectedIndex].value;">
+        <option value="date"
+                {{? it.sortMode == "date"}}selected="true"{{?}}>{{=it.tr.sortingModeDateLabelText}}</option>
+        <option value="recent"
+                {{? it.sortMode == "recent"}}selected="true"{{?}}>{{=it.tr.sortingModeRecentLabelText}}</option>
+        <option value="bumps"
+                {{? it.sortMode == "bumps"}}selected="true"{{?}}>{{=it.tr.sortingModeBumpsLabelText}}</option>
+    </select>
 </div>
 <hr />
 <hr />

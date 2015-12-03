@@ -1,6 +1,5 @@
 <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
-      action="/{{=it.site.pathPrefix}}action/banUser"
-      {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.banUser(event, this); return false;"{{?}}>
+      action="/{{=it.site.pathPrefix}}action/banUser" onsubmit="lord.banUser(event, this); return false;">
     {{? it.boardName}}
         <input type="hidden" name="boardName" value="{{=it.boardName}}" />
     {{?}}
@@ -44,20 +43,18 @@
                    placeholder="{{=it.tr.banReasonLabelText}} [...]" />
         </div>
     {{~}}
-    {{? it.settings.mode.name != "ascetic"}}
-        <br />
-        <input type="submit" name="submit" value="{{=it.tr.selectAllText}}"
-               onclick="lord.bansSelectAll(event, this); return false;" />
-        <select name="level" class="select">
-            {{~banLevels :level}}
-                <option {{? "NONE" == level.level}}selected="true"{{?}}
-                        value="{{=level.level}}">{{=level.description}}</option>
-            {{~}}
-        </select>
-        <input type="text" name="expires" size="23" placeholder="{{=it.tr.banExpiresLabelText}} <dd.MM.yyyy:hh>" />
-        <input type="text" name="reason" size="33" placeholder="{{=it.tr.banReasonLabelText}} [...]" />
-        <br />
-    {{?}}
+    <br />
+    <input type="submit" name="submit" value="{{=it.tr.selectAllText}}"
+           onclick="lord.bansSelectAll(event, this); return false;" />
+    <select name="level" class="select">
+        {{~banLevels :level}}
+            <option {{? "NONE" == level.level}}selected="true"{{?}}
+                    value="{{=level.level}}">{{=level.description}}</option>
+        {{~}}
+    </select>
+    <input type="text" name="expires" size="23" placeholder="{{=it.tr.banExpiresLabelText}} <dd.MM.yyyy:hh>" />
+    <input type="text" name="reason" size="33" placeholder="{{=it.tr.banReasonLabelText}} [...]" />
+    <br />
     <br />
     {{? it.showSubmitButton}}
         <input type="submit" name="submit" value="{{=it.tr.confirmButtonText}}" />
@@ -65,8 +62,7 @@
 </form>
 <br />
 <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
-      action="/{{=it.site.pathPrefix}}action/delall"
-      {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.delall(event, this); return false;"{{?}}>
+      action="/{{=it.site.pathPrefix}}action/delall" onsubmit="lord.delall(event, this); return false;">
     {{? !it.userIp}}
         <input name="userIp"
                {{? typeof user != "undefined"}}value="{{=user.ip}}" type="hidden"{{??}}type="text" placeholder="IP: <::192.168.0.1>"{{?}} />

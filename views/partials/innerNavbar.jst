@@ -1,22 +1,12 @@
 {{? "mobile" == it.deviceType}}
-    {{? it.settings.mode.name == "ascetic"}}
-        <form action="/{{=it.site.pathPrefix}}action/redirect" method="post" accept-charset="utf-8"
-              class="boardSelectForm" enctype="application/x-www-form-urlencoded">
-    {{?}}
-        <select name="url" class="select boardSelect"
-                {{? it.settings.mode.name != "ascetic"}}onchange="location = this.options[this.selectedIndex].value;"{{?}}>
-            {{~it.boards :board}}
-                {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
-                    <option {{? it.board && it.board.name == board.name}}selected="true"{{?}}
-                            value="/{{=it.site.pathPrefix}}{{=board.name}}">[{{=board.name}}] {{=board.title}}</option>
-                {{?}}
-            {{~}}
-        </select>
-    {{? it.settings.mode.name == "ascetic"}}
-        <input type="image" name="submit" title="{{=it.tr.goText}}"
-                   src="/{{=it.site.pathPrefix}}img/go.png" class="buttonImage" />
-        </form>
-    {{?}}
+    <select name="url" class="select boardSelect" onchange="location = this.options[this.selectedIndex].value;">
+        {{~it.boards :board}}
+            {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+                <option {{? it.board && it.board.name == board.name}}selected="true"{{?}}
+                        value="/{{=it.site.pathPrefix}}{{=board.name}}">[{{=board.name}}] {{=board.title}}</option>
+            {{?}}
+        {{~}}
+    </select>
 {{??}}
     {{~it.boards :board}}
         {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
@@ -25,12 +15,10 @@
         {{?}}
     {{~}}
 {{?}}
-{{? it.settings.mode.name != "ascetic"}}
-    <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}playlist.html"
-                                 title="{{=it.tr.toPlaylistPageText}}"><img src="/{{=it.site.pathPrefix}}img/playlist.png"
-                                                                            class="buttonImage"
-                                                                            width="16" height="16"></a>]</span>
-{{?}}
+<span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}playlist.html"
+                             title="{{=it.tr.toPlaylistPageText}}"><img src="/{{=it.site.pathPrefix}}img/playlist.png"
+                                                                        class="buttonImage"
+                                                                        width="16" height="16"></a>]</span>
 <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}markup.html"
                              title="{{=it.tr.toMarkupPageText}}"><img src="/{{=it.site.pathPrefix}}img/markup.png"
                                                                       class="buttonImage"

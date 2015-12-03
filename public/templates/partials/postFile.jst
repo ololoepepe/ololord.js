@@ -24,13 +24,11 @@
         ({{=fileInfo.sizeText}})
     </div>
     <div class="postFileSearch">
-        <a href="/{{=it.site.pathPrefix}}deleteFile.html?fileName={{=fileInfo.name}}" name="deleteFileButton"
-           target="_blank" {{? it.settings.mode.name != "ascetic"}}onclick="lord.deleteFile(this); return false;"{{?}}>
+        <a href="javascript:void(0);" name="deleteFileButton" target="_blank"
+           onclick="lord.deleteFile(this); return false;">
            <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.deleteFileText}}" /></a>
-        {{? it.settings.mode.name != "ascetic" && fileInfo.mimeType.substr(0, 6) == "image/"}}
-            <a name="hideByImageButton" onclick="lord.hideByImage(this); return false;">
-                <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}" /></a>
-        {{?}}
+        <a name="hideByImageButton" onclick="lord.hideByImage(this); return false;">
+            <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}" /></a>
         {{? fileInfo.mimeType.substr(0, 6) == "image/"}}
             <a href="//www.google.com/searchbyimage?image_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
                title="{{=it.tr.findSourceWithGoogleText}}" target="_blank">
@@ -40,18 +38,12 @@
                 <img src="/{{=it.site.pathPrefix}}img/iqdb.png"></a>
         {{?}}
         {{? fileInfo.mimeType.substr(0, 6) == "audio/"}}
-            {{? it.settings.mode.name != "ascetic"}}
-                <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false"
-                   title="{{=it.tr.editAudioTagsText}}">
-                    <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
-                <a href="javascript:void(0);" onclick="lord.addToPlaylist(this); return false;"
-                   title="{{=it.tr.addToPlaylistText}}">
-                    <img src="/{{=it.site.pathPrefix}}img/playlist.png"></a>
-            {{??}}
-                <a href="/{{=it.site.pathPrefix}}edit_audio_tags?board={{=it.board.name}}&post={{=post.number}}&fileName={{=fileInfo.name}}"
-                   target="_blank" title="{{=it.tr.editAudioTagsText}}">
-                    <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
-            {{?}}
+            <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false"
+               title="{{=it.tr.editAudioTagsText}}">
+                <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
+            <a href="javascript:void(0);" onclick="lord.addToPlaylist(this); return false;"
+               title="{{=it.tr.addToPlaylistText}}">
+                <img src="/{{=it.site.pathPrefix}}img/playlist.png"></a>
         {{?}}
     </div>
     <div class="postFileFile {{=it.deviceType}}">

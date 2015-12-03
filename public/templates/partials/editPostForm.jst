@@ -92,11 +92,6 @@
                     {{? it.customEditPostDialogPart && it.customEditPostDialogPart[70]}}
                         {{ out += it.customEditPostDialogPart[70](it, thread, post); }}
                     {{?}}
-                    {{? it.board.draftsEnabled && it.user.loggedIn && post.options.draft}}
-                        <input id="checkboxDraftEdit" type="checkbox" name="draft" value="true" checked="true"
-                               class="imageCheckBox" /><label title="{{!it.tr.postFormLabelDraft}}"
-                                                              for="checkboxDraftEdit"></label>
-                    {{?}}
                     {{? it.customEditPostDialogPart && it.customEditPostDialogPart[80]}}
                         {{ out += it.customEditPostDialogPart[80](it, thread, post); }}
                     {{?}}

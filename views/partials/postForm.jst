@@ -1,6 +1,6 @@
 <form id="postForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
       action="/{{=it.site.pathPrefix}}action/{{? it.thread}}createPost{{??}}createThread{{?}}"
-      {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.submitted(event, this); return false;"{{?}}>
+      onsubmit="lord.submitted(event, this); return false;">
     <input type="hidden" name="boardName" value="{{=it.board.name}}" />
     {{? it.thread}}
         <input type="hidden" name="threadNumber" value="{{=it.thread.number}}" />
@@ -83,9 +83,7 @@
                     </td>
                     <td class="postformField">
                         <div class="symbolCounterContainer postFormInput">
-                            {{? it.settings.mode.name != "ascetic"}}
-                                <span class="symbolCounter"><span name="used">0</span>/{{=it.board.maxTextLength}}</span>
-                            {{?}}
+                            <span class="symbolCounter"><span name="used">0</span>/{{=it.board.maxTextLength}}</span>
                             <textarea name="text" rows="10" cols="43" class="postFormTextarea"
                                       placeholder="{{=it.tr.postFormTextPlaceholder}} {{=it.board.maxTextLength}}"
                                       onkeyup="lord.countSymbols(this);"></textarea>
@@ -96,9 +94,7 @@
             <tr>
                 {{? !it.minimalisticPostform()}}
                     <td class="postformLabel">
-                        {{? it.settings.mode.name != "ascetic"}}
-                            <a class="hidePostformMarkupButton" />
-                        {{?}}
+                        <a class="hidePostformMarkupButton" />
                         <a href="javascript:void(0);"
                            onclick="lord.setPostformRulesVisible({{=it.settings.hidePostformRules}}); return false;"
                            class="hidePostformRulesButton">{{? it.settings.hidePostformRules}}{{=it.tr.showPostformRulesText}}{{??}}{{=it.tr.hidePostformRulesText}}{{?}}</a>
@@ -111,7 +107,7 @@
             {{? it.customPostFormField && it.customPostFormField[40]}}
                 {{ out += it.customPostFormField[40](it); }}
             {{?}}
-            {{? !it.minimalisticPostform() && it.settings.mode.name != "ascetic"}}
+            {{? !it.minimalisticPostform()}}
                 <tr name="postformMarkup">
                     <td class="postformLabel">
                     </td>
@@ -220,7 +216,7 @@
                     {{?}}
                     {{? it.user.loggedIn}}
                         <input id="checkboxTripcode" type="checkbox" name="tripcode" value="true"
-                               {{? it.settings.mode.name != "ascetic"}}onclick="lord.switchShowTripcode();"{{?}}
+                               onclick="lord.switchShowTripcode();"
                                class="imageCheckBox" /><label title="{{!it.tr.postFormLabelTripcode}}"
                                                               for="checkboxTripcode"></label>
                     {{?}}
