@@ -1363,3 +1363,26 @@ lord.toMap = function(arr, keyGenerator) {
     });
     return map;
 };
+
+lord.readAs = function(blob, method) {
+    switch (method) {
+    case "ArrayBuffer":
+    case "BinaryString":
+    case "DataURL":
+    case "Text":
+        break;
+    default:
+        method = "ArrayBuffer";
+        break;
+    }
+    var binaryReader = new FileReader();
+    return new Promise(function(resolve, reject) {
+        binaryReader.onload = function(e) {
+            resolve(e.target.result);
+        };
+        binaryReader.onerror = function(e) {
+            reject(e.getMessage());
+        };
+        binaryReader["readAs" + method](blob);
+    });
+};

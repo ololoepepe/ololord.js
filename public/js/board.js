@@ -1375,6 +1375,48 @@ lord.removeFileHash = function(div) {
     fileHashes.value = val;
 };
 
+lord.removeExifData = function(data) {
+    return new Promise(function(resolve, reject) {
+        try {
+            var dv = new DataView(data);
+            var offset = 0;
+            var recess = 0;
+            var pieces = [];
+            var i = 0;
+            if (dv.getUint16(offset) != 0xffd8)
+                return resolve();
+            offset += 2;
+            var app1 = dv.getUint16(offset);
+            offset += 2;
+            while (offset < dv.byteLength) {
+                if (app1 == 0xffe1) {
+                    pieces[i] = {
+                        "recess": recess,
+                        "offset": offset - 2
+                    };
+                    recess = offset + dv.getUint16(offset);
+                    i++;
+                } else if (app1 == 0xffda) {
+                    break;
+                }
+                offset += dv.getUint16(offset);
+                var app1 = dv.getUint16(offset);
+                offset += 2;
+            }
+            if (pieces.length <= 0)
+                return resolve();
+            var newPieces = [];
+            pieces.forEach(function(v) {
+                newPieces.push(data.slice(v.recess, v.offset));
+            });
+            newPieces.push(data.slice(recess));
+            resolve(newPieces);
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
 lord.fileAddedCommon = function(div, file) {
     if (!div || (!file && !div.fileUrl))
         return;
@@ -1425,42 +1467,38 @@ lord.fileAddedCommon = function(div, file) {
     if (ratingSelect)
         ratingSelect.name = "file_" + _uuid + "_rating";
     lord.removeFileHash(div);
-    var binaryReader = new FileReader();
     var prefix = lord.data("sitePathPrefix");
-    binaryReader.onload = function(e) {
-        var wordArray = CryptoJS.lib.WordArray.create(e.target.result);
-        var currentBoardName = lord.data("boardName");
-        var fileHash = CryptoJS.SHA1(wordArray).toString(CryptoJS.enc.Hex);
-        lord.api("fileInfo", { fileHash: fileHash }).then(function(fileInfo) {
-            if (!fileInfo)
-                return;
-            var img = lord.node("img");
-            img.src = "/" + prefix + "img/storage.png";
-            img.title = lord.text("fileExistsOnServerText");
-            lord.queryOne("span", div).appendChild(lord.node("text", " "));
-            lord.queryOne("span", div).appendChild(img);
-            var fileHashes = lord.getFileHashes(div);
-            if (fileHashes.value.indexOf(fileHash) < 0)
-                fileHashes.value = fileHashes.value + (fileHashes.value.length > 0 ? "," : "") + fileHash;
-            var f = inp.onchange;
-            delete inp.onchange;
-            inp.value = "";
-            inp.onchange = f;
-            div.fileHash = fileHash;
-            if (div.droppedFile)
-                delete div.droppedFile;
-        }).catch(lord.handleError);
-    };
-    if (file && lord.getLocalObject("checkFileExistence", true))
-        binaryReader.readAsArrayBuffer(file);
+    if (file && lord.getLocalObject("checkFileExistence", true)) {
+        lord.readAs(file).then(function(data) {
+            return lord.doWork("getFileHash", data);
+        }).then(function(fileHash) {
+            return lord.api("fileInfo", { fileHash: fileHash }).then(function(fileInfo) {
+                if (!fileInfo)
+                    return;
+                var img = lord.node("img");
+                img.src = "/" + prefix + "img/storage.png";
+                img.title = lord.text("fileExistsOnServerText");
+                lord.queryOne("span", div).appendChild(lord.node("text", " "));
+                lord.queryOne("span", div).appendChild(img);
+                var fileHashes = lord.getFileHashes(div);
+                if (fileHashes.value.indexOf(fileHash) < 0)
+                    fileHashes.value = fileHashes.value + (fileHashes.value.length > 0 ? "," : "") + fileHash;
+                var f = inp.onchange;
+                delete inp.onchange;
+                inp.value = "";
+                inp.onchange = f;
+                div.fileHash = fileHash;
+                if (div.droppedFile)
+                    delete div.droppedFile;
+            });
+        }).catch(lord.handleError);;
+    }
     var preview = function() {
         if (!file)
             return;
-        var reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = function(e) {
-            lord.queryOne("img", div).src = e.target.result;
-        };
+        lord.readAs(file, "DataURL").then(function(url) {
+            lord.queryOne("img", div).src = url;
+        }).catch(lord.handleError);
     };
     if (fileNameFull.match(/\.(jpe?g|png|gif)$/i) && lord.getLocalObject("showAttachedFilePreview", true)) {
         if (!fileName.match(/\.(jpe?g)$/i) || !lord.getLocalObject("stripExifFromJpeg", true))
@@ -1478,45 +1516,14 @@ lord.fileAddedCommon = function(div, file) {
         }
     }
     if (file && fileNameFull.match(/\.(jpe?g)$/i) && lord.getLocalObject("stripExifFromJpeg", true)) {
-        var fr = new FileReader();
-        fr.onload = function() {
-            var dv = new DataView(fr.result);
-            var offset = 0;
-            var recess = 0;
-            var pieces = [];
-            var i = 0;
-            if (dv.getUint16(offset) == 0xffd8) {
-                offset += 2;
-                var app1 = dv.getUint16(offset);
-                offset += 2;
-                while (offset < dv.byteLength) {
-                    if (app1 == 0xffe1) {
-                        pieces[i] = {
-                            "recess": recess,
-                            "offset": offset - 2
-                        };
-                        recess = offset + dv.getUint16(offset);
-                        i++;
-                    } else if (app1 == 0xffda) {
-                        break;
-                    }
-                    offset += dv.getUint16(offset);
-                    var app1 = dv.getUint16(offset);
-                    offset += 2;
-                }
-                if (pieces.length > 0) {
-                    var newPieces = [];
-                    pieces.forEach(function(v) {
-                        newPieces.push(fr.result.slice(v.recess, v.offset));
-                    });
-                    newPieces.push(fr.result.slice(recess));
-                    div.droppedFile = new File(newPieces, file.name, {"type": "image/jpeg"});
-                }
-                if (lord.getLocalObject("showAttachedFilePreview", true))
-                    preview();
-            }
-        };
-        fr.readAsArrayBuffer(file);
+        lord.readAs(file).then(function(data) {
+            return lord.removeExifData(data);
+        }).then(function(pieces) {
+            if (pieces)
+                div.droppedFile = new File(pieces, file.name, {"type": "image/jpeg"});
+            if (lord.getLocalObject("showAttachedFilePreview", true))
+                preview();
+        }).catch(lord.handleError);
     }
     var f = inp.onchange;
     delete inp.onchange;
