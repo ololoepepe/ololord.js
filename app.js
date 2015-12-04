@@ -151,26 +151,8 @@ if (cluster.isMaster) {
             postNumber: postNumber,
             action: action
         }).catch(function(err) {
-            console.log(err);
+            console.log(err.stack || err);
         });
     };
-    Global.IPC.installHandler("lockPages", function(boardName) {
-        return BoardModel.lockPages(boardName);
-    });
-    Global.IPC.installHandler("unlockPages", function(boardName) {
-        return BoardModel.unlockPages(boardName);
-    });
-    Global.IPC.installHandler("lockThread", function(data) {
-        return BoardModel.lockThread(data.boardName, data.threadNumber);
-    });
-    Global.IPC.installHandler("unlockThread", function(data) {
-        return BoardModel.unlockThread(data.boardName, data.threadNumber);
-    });
-    Global.IPC.installHandler("lockCatalog", function(boardName) {
-        return BoardModel.lockCatalog(boardName);
-    });
-    Global.IPC.installHandler("unlockCatalog", function(boardName) {
-        return BoardModel.unlockCatalog(boardName);
-    });
     spawnCluster();
 }

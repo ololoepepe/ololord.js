@@ -1,4 +1,5 @@
 var FS = require("q-io/fs");
+var FSSync = require("fs-ext");
 var merge = require("merge");
 var Util = require("util");
 
@@ -11,17 +12,110 @@ var Tools = require("../helpers/tools");
 var scheduledGeneratePages = {};
 var scheduledGenerateThread = {};
 var scheduledGenerateCatalog = {};
-var lockedPages = {};
-var readPages = {};
 var pageCounts = {};
-var lockedThreads = {};
-var readThreads = {};
-var lockedCatalogs = {};
-var readCatalogs = {};
+var deletedPosts = {};
 
 var cachePath = function() {
     var path = Array.prototype.join.call(arguments, "-");
     return config("system.cachePath", __dirname + "/../tmp/cache") + (path ? ("/" + path + ".json") : "");
+};
+
+var readFile = function(path) {
+    return new Promise(function(resolve, reject) {
+        try {
+            FSSync.open(path, "r", function(err, fd) {
+                if (err)
+                    return reject(err);
+                FSSync.flock(fd, "sh", function (err) {
+                    if (err)
+                        return reject(err);
+                    FSSync.stat(path, function(err, stats) {
+                        if (err)
+                            return reject(err);
+                        if (stats.size <= 0)
+                            return resolve("");
+                        var buffer = new Buffer(stats.size);
+                        FSSync.read(fd, buffer, 0, buffer.length, null, function(err) {
+                            if (err)
+                                return reject(err);
+                            FSSync.flock(fd, "un", function (err) {
+                                if (err)
+                                    return reject(err);
+                                FSSync.close(fd, function(err) {
+                                    if (err)
+                                        return reject(err);
+                                    resolve(buffer.toString("utf8"));
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+var writeFile = function(path, data) {
+    return new Promise(function(resolve, reject) {
+        try {
+            FSSync.open(path, "w", function(err, fd) {
+                if (err)
+                    return reject(err);
+                FSSync.flock(fd, "ex", function (err) {
+                    if (err)
+                        return reject(err);
+                    FSSync.write(fd, data, null, "utf8", function(err) {
+                        if (err)
+                            return reject(err);
+                        FSSync.flock(fd, "un", function (err) {
+                            if (err)
+                                return reject(err);
+                            FSSync.close(fd, function(err) {
+                                if (err)
+                                    return reject(err);
+                                resolve();
+                            });
+                        });
+                    });
+                });
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+var removeFile = function(path) {
+    return new Promise(function(resolve, reject) {
+        try {
+            FSSync.open(path, "r", function(err, fd) {
+                if (err)
+                    return reject(err);
+                FSSync.flock(fd, "ex", function (err) {
+                    if (err)
+                        return reject(err);
+                    setTimeout(function() {
+                        FSSync.unlink(path, function(err) {
+                            if (err) {
+                                FSSync.flock(fd, "un", function () {
+                                    return reject(err);
+                                });
+                            }
+                            FSSync.flock(fd, "un", function (err) {
+                                if (err)
+                                    return reject(err);
+                                resolve();
+                            });
+                        });
+                    }, Tools.Second);
+                });
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
 };
 
 module.exports.getLastPostNumbers = function(boardNames) {
@@ -60,40 +154,15 @@ module.exports.getBoardPage = function(board, page, json) {
     page = +(page || 0);
     if (isNaN(page) || page < 0 || page >= pageCounts[board.name])
         return Promise.reject(404);
-    if (!json) {
-        var model = {
-            pageCount: pageCounts[board.name],
-            threads: []
-        };
-        return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
-            model.lastPostNumber = lastPostNumber;
-            return Promise.resolve(model);
-        });
-    }
-    var list = lockedPages[board.name];
-    var p;
-    if (list) {
-        p = new Promise(function(resolve, reject) {
-            list.push(resolve);
-        });
-    } else {
-        p = Promise.resolve();
-    }
-    var c = {};
-    return p.then(function() {
-        if (!readPages[board.name])
-            readPages[board.name] = [];
-        c.promise = new Promise(function(resolve, reject) {
-            c.resolve = resolve;
-        });
-        readPages[board.name].push(c.promise);
-        return FS.read(cachePath("page", board.name, page));
-    }).then(function(data) {
-        readPages[board.name].splice(readPages[board.name].indexOf(c.promise), 1);
-        if (readPages[board.name].length < 1)
-            delete readPages[board.name];
-        c.resolve();
-        return data;
+    if (json)
+        return readFile(cachePath("page", board.name, page));
+    var model = {
+        pageCount: pageCounts[board.name],
+        threads: []
+    };
+    return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
+        model.lastPostNumber = lastPostNumber;
+        return Promise.resolve(model);
     });
 };
 
@@ -185,68 +254,45 @@ module.exports.getThreadPage = function(board, number, json) {
     if (isNaN(number) || number < 1)
         return Promise.reject("Invalid thread");
     var c = {};
-    if (!json) {
-        return Database.getThread(board.name, number).then(function(thread) {
-            if (!thread)
-                return Promise.reject(404);
-            c.thread = thread;
-            return Database.getPost(board.name, c.thread.number);
-        }).then(function(post) {
-            c.opPost = post;
-            var postCount = c.thread.postNumbers.length;
-            c.model = {};
-            var title = (c.opPost.subject || c.opPost.rawText || "").replace(/\r*\n+/gi, "");
-            if (title.length > 50)
-                title = title.substr(0, 47) + "...";
-            var threadModel = {
-                title: title || null,
-                number: c.thread.number,
-                bumpLimit: board.bumpLimit,
-                postLimit: board.postLimit,
-                bumpLimitReached: (postCount >= board.bumpLimit),
-                postLimitReached: (postCount >= board.postLimit),
-                closed: c.thread.closed,
-                fixed: c.thread.fixed,
-                postCount: postCount,
-                postingEnabled: (board.postingEnabled && !c.thread.closed),
-                opPost: c.opPost,
-                lastPosts: []
-            };
-            c.model.thread = threadModel;
-            return Database.lastPostNumber(board.name);
-        }).then(function(lastPostNumber) {
-            c.model.lastPostNumber = lastPostNumber;
-            return Promise.resolve(c.model);
+    if (json) {
+        return readFile(cachePath("thread", board.name, number)).then(function(data) {
+            c.data = data;
+            return readFile(cachePath("thread-posts", board.name, number));
+        }).then(function(data) {
+            return Promise.resolve("{\"thread\":{\"lastPosts\":" + data + "," + c.data.substr(11));
         });
     }
-    var key = board.name + ":" + number;
-    var list = lockedThreads[key];
-    var p;
-    if (list) {
-        p = new Promise(function(resolve, reject) {
-            list.push(resolve);
-        });
-    } else {
-        p = Promise.resolve();
-    }
-    var c = {};
-    return p.then(function() {
-        if (!readThreads[key])
-            readThreads[key] = [];
-        c.promise = new Promise(function(resolve, reject) {
-            c.resolve = resolve;
-        });
-        readThreads[key].push(c.promise);
-        return FS.read(cachePath("thread", board.name, number));
-    }).then(function(data) {
-        c.data = data;
-        return FS.read(cachePath("thread-posts", board.name, number));
-    }).then(function(data) {
-        readThreads[key].splice(readThreads[key].indexOf(c.promise), 1);
-        if (readThreads[key].length < 1)
-            delete readThreads[key];
-        c.resolve();
-        return Promise.resolve("{\"thread\":{\"lastPosts\":" + data + "," + c.data.substr(11));
+    return Database.getThread(board.name, number).then(function(thread) {
+        if (!thread)
+            return Promise.reject(404);
+        c.thread = thread;
+        return Database.getPost(board.name, c.thread.number);
+    }).then(function(post) {
+        c.opPost = post;
+        var postCount = c.thread.postNumbers.length;
+        c.model = {};
+        var title = (c.opPost.subject || c.opPost.rawText || "").replace(/\r*\n+/gi, "");
+        if (title.length > 50)
+            title = title.substr(0, 47) + "...";
+        var threadModel = {
+            title: title || null,
+            number: c.thread.number,
+            bumpLimit: board.bumpLimit,
+            postLimit: board.postLimit,
+            bumpLimitReached: (postCount >= board.bumpLimit),
+            postLimitReached: (postCount >= board.postLimit),
+            closed: c.thread.closed,
+            fixed: c.thread.fixed,
+            postCount: postCount,
+            postingEnabled: (board.postingEnabled && !c.thread.closed),
+            opPost: c.opPost,
+            lastPosts: []
+        };
+        c.model.thread = threadModel;
+        return Database.lastPostNumber(board.name);
+    }).then(function(lastPostNumber) {
+        c.model.lastPostNumber = lastPostNumber;
+        return Promise.resolve(c.model);
     });
 };
 
@@ -376,39 +422,14 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
 module.exports.getCatalogPage = function(board, sortMode, json) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");
-    var c = {};
-    if (!json) {
-        return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
-            return Promise.resolve({ lastPostNumber: lastPostNumber });
-        });
-    }
-    var list = lockedCatalogs[board.name];
-    var p;
-    if (list) {
-        p = new Promise(function(resolve, reject) {
-            list.push(resolve);
-        });
-    } else {
-        p = Promise.resolve();
-    }
-    var c = {};
-    return p.then(function() {
-        if (!readCatalogs[board.name])
-            readCatalogs[board.name] = [];
-        c.promise = new Promise(function(resolve, reject) {
-            c.resolve = resolve;
-        });
-        readCatalogs[board.name].push(c.promise);
+    if (json) {
         sortMode = (sortMode || "date").toLowerCase();
         if (["recent", "bumps"].indexOf(sortMode) < 0)
             sortMode = "date";
-        return FS.read(cachePath("catalog", sortMode, board.name));
-    }).then(function(data) {
-        readCatalogs[board.name].splice(readCatalogs[board.name].indexOf(c.promise), 1);
-        if (readCatalogs[board.name].length < 1)
-            delete readCatalogs[board.name];
-        c.resolve();
-        return data;
+        return readFile(cachePath("catalog", sortMode, board.name));
+    }
+    return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
+        return Promise.resolve({ lastPostNumber: lastPostNumber });
     });
 };
 
@@ -655,6 +676,8 @@ var generateBoard = function(boardName) {
 };
 
 module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNumber, action) {
+    if (deletedPosts[boardName + ":" + threadNumber] || deletedPosts[boardName + ":" + postNumber])
+        return Promise.resolve();
     threadNumber = +threadNumber;
     postNumber = +postNumber;
     var key = boardName + ":" + threadNumber;
@@ -662,7 +685,6 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
     if (scheduled) {
         if (scheduled.promise) {
             return scheduled.promise.then(function() {
-                console.log("scheduleGenerateThread", boardName, threadNumber, postNumber, action); //TODO: debug
                 return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
             });
         } else {
@@ -704,11 +726,17 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
         Tools.remove(scheduled.create, scheduled.edit);
         Tools.remove(scheduled.edit, scheduled.delete);
         var p;
-        if (creatingThread) {
-            p = generateThread(boardName, threadNumber, true);
-        } else if (deletingThread) {
+        if (deletingThread) {
+            deletedPosts[boardName + ":" + threadNumber] = {};
             p = Promise.resolve();
+        } else if (creatingThread) {
+            p = generateThread(boardName, threadNumber, true);
         } else if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)) {
+            if (scheduled.delete) {
+                scheduled.delete.forEach(function(pn) {
+                    deletedPosts[boardName + ":" + pn] = {};
+                });
+            }
             var posts = (scheduled.create || []).concat(scheduled.edit || []).sort(function(pn1, pn2) {
                 pn1 = +pn1;
                 pn2 = +pn2;
@@ -792,22 +820,19 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
         }
         p = p.then(function(data) {
             c.data = data;
-            return Global.IPC.send("lockThread", {
-                boardName: boardName,
-                threadNumber: threadNumber
-            });
+            return Promise.resolve();
         });
-        if (creatingThread) {
+        if (deletingThread) {
             p = p.then(function() {
-                return FS.write(c.data.threadPath, c.data.threadData);
+                return removeFile(cachePath("thread", boardName, threadNumber));
             }).then(function() {
-                return FS.write(c.data.postsPath, c.data.postsData);
+                return removeFile(cachePath("thread-posts", boardName, threadNumber));
             });
-        } else if (deletingThread) {
+        } else if (creatingThread) {
             p = p.then(function() {
-                return FS.remove(cachePath("thread", boardName, threadNumber));
+                return writeFile(c.data.threadPath, c.data.threadData);
             }).then(function() {
-                return FS.remove(cachePath("thread-posts", boardName, threadNumber));
+                return writeFile(c.data.postsPath, c.data.postsData);
             });
         } else if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)) {
             var postsPath = cachePath("thread-posts", boardName, threadNumber);
@@ -834,7 +859,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
                     if (ind >= 0)
                         data.splice(ind, 1);
                 });
-                return FS.write(postsPath, JSON.stringify(data));
+                return writeFile(postsPath, JSON.stringify(data));
             });
         } else if (scheduled.create && scheduled.create.length > 0) {
             var postsPath = cachePath("thread-posts", boardName, threadNumber);
@@ -843,7 +868,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
             }).then(function(data) {
                 if (data.length < 3) //Empty list
                     c.data = c.data.substr(1);
-                return FS.write(postsPath, data.substr(0, data.length - 1) + c.data + "]");
+                return writeFile(postsPath, data.substr(0, data.length - 1) + c.data + "]");
             });
         } else {
             p = p.then(function() {
@@ -851,16 +876,14 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
             });
         }
         p.then(function() {
-            return Global.IPC.send("unlockThread", {
-                boardName: boardName,
-                threadNumber: threadNumber
-            });
-        }).then(function() {
             delete scheduledGenerateThread[key];
             return Promise.resolve();
         }).catch(function(err) {
             delete scheduledGenerateThread[key];
             console.log(err.stack || err);
+            return Promise.resolve();
+        }).then(function() {
+            return Promise.resolve();
         });
         scheduled.promise = p;
     };
@@ -878,17 +901,13 @@ module.exports.scheduleGeneratePages = function(boardName) {
         var c = {};
         generatePages(boardName, true).then(function(pages) {
             c.pages = pages;
-            return Global.IPC.send("lockPages", boardName);
-        }).then(function() {
             var p = (c.pages.length > 0) ? FS.write(c.pages[0].path, c.pages[0].data) : Promise.resolve();
             c.pages.slice(1).forEach(function(page) {
                 p = p.then(function() {
-                    return FS.write(page.path, page.data);
+                    return writeFile(page.path, page.data);
                 });
             });
             return p;
-        }).then(function() {
-            return Global.IPC.send("unlockPages", boardName);
         }).then(function() {
             delete scheduledGeneratePages[boardName];
             return Promise.resolve();
@@ -906,15 +925,11 @@ module.exports.scheduleGenerateCatalog = function(boardName) {
         var c = {};
         generateCatalog(boardName, true).then(function(catalog) {
             c.catalog = catalog;
-            return Global.IPC.send("lockCatalog", boardName);
+            return writeFile(c.catalog.datePath, c.catalog.dateData);
         }).then(function() {
-            return FS.write(c.catalog.datePath, c.catalog.dateData);
+            writeFile(c.catalog.recentPath, c.catalog.recentData);
         }).then(function() {
-            return FS.write(c.catalog.recentPath, c.catalog.recentData);
-        }).then(function() {
-            return FS.write(c.catalog.bumpsPath, c.catalog.bumpsData);
-        }).then(function() {
-            return Global.IPC.send("unlockCatalog", boardName);
+            writeFile(c.catalog.bumpsPath, c.catalog.bumpsData);
         }).then(function() {
             delete scheduledGenerateCatalog[boardName];
             return Promise.resolve();
@@ -959,47 +974,6 @@ module.exports.cleanup = function() {
             });
         });
         return p;
-    });
-};
-
-module.exports.lockPages = function(boardName) {
-    lockedPages[boardName] = [];
-    return Promise.all(readPages[boardName] || []);
-};
-
-module.exports.unlockPages = function(boardName) {
-    return Promise.all(lockedPages[boardName] || []).then(function() {
-        return module.exports.pageCount(boardName);
-    }).then(function(pageCount) {
-        pageCounts[boardName] = pageCount;
-        delete lockedPages[boardName];
-        return Promise.resolve();
-    });
-};
-
-module.exports.lockThread = function(boardName, threadNumber) {
-    var key = boardName + ":" + threadNumber;
-    lockedThreads[key] = [];
-    return Promise.all(readThreads[key] || []);
-};
-
-module.exports.unlockThread = function(boardName, threadNumber) {
-    var key = boardName + ":" + threadNumber;
-    return Promise.all(lockedThreads[key] || []).then(function() {
-        delete lockedThreads[key];
-        return Promise.resolve();
-    });
-};
-
-module.exports.lockCatalog = function(boardName) {
-    lockedCatalogs[boardName] = [];
-    return Promise.all(readCatalogs[boardName] || []);
-};
-
-module.exports.unlockCatalog = function(boardName) {
-    return Promise.all(lockedCatalogs[boardName] || []).then(function() {
-        delete lockedCatalogs[boardName];
-        return Promise.resolve();
     });
 };
 
