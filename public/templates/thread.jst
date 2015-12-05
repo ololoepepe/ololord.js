@@ -1,5 +1,5 @@
 {{~[it.thread] :thread}}
-    <div id="thread{{=thread.opPost.number}}" class="thread">
+    <div id="thread{{=thread.opPost.number}}" class="thread"{{? thread.expanded}} data-expanded="true"{{?}}>
         {{~[thread.opPost] :post}}
             {{#def.post}}
         {{~}}

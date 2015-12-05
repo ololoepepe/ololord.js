@@ -605,6 +605,43 @@ lord.forIn = function(obj, f) {
     }
 };
 
+lord.mapIn = function(obj, f) {
+    if (!obj || typeof f != "function")
+        return;
+    var arr = [];
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x))
+            arr.push(f(obj[x], x));
+    }
+    return arr;
+};
+
+lord.filterIn = function(obj, f) {
+    if (!obj || typeof f != "function")
+        return;
+    var nobj = {};
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x)) {
+            var item = obj[x];
+            if (f(item, x))
+                nobj[x] = item;
+        }
+    }
+    return nobj;
+};
+
+lord.toArray = function(obj) {
+    var arr = [];
+    var i = 0;
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x)) {
+            arr[i] = obj[x];
+            ++i;
+        }
+    }
+    return arr;
+};
+
 lord.removeChildren = function(obj) {
     if (!obj || typeof obj.removeChild != "function")
         return;
@@ -887,7 +924,7 @@ lord.showNotification = function(title, body, icon) {
     Notification.requestPermission(function(permission) {
         if (permission !== "granted")
             return;
-        var notification = new Notification(title, {
+        var notification = new Notification(lord.text(title), {
             "body": body,
             "icon": icon
         });

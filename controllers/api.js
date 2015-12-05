@@ -62,6 +62,9 @@ var renderPost = function(req, post) {
     });
 };
 
+/**
+ * @deprecated Will be deleted in next beta.
+ */
 router.get("/posts.json", function(req, res) {
     var posts = postIdentifiers(req);
     boardModel.getPosts(posts, req.hashpass).then(function(posts) {
@@ -146,6 +149,9 @@ router.get("/fileInfo.json", function(req, res) {
     });
 });
 
+/**
+ * @deprecated Will be deleted in next beta.
+ */
 router.get("/lastPosts.json", function(req, res) {
     if (req.query.threads) {
         var threads = req.query.threads;
@@ -211,6 +217,30 @@ router.get("/lastPostNumber.json", function(req, res) {
     });
 });
 
+router.get("/threadLastPostNumbers.json", function(req, res) {
+    var threads = req.query.threads;
+    if (Util.isString(threads))
+        threads = [threads];
+    var promises = (threads || []).map(function(thread) {
+        var boardName = thread.split(":").shift();
+        var threadNumber = +thread.split(":")[1];
+        return boardModel.getThreadLastPostNumber(boardName, threadNumber);
+    });
+    Promise.all(promises).then(function(results) {
+        res.json(results);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
+router.get("/threadLastPostNumber.json", function(req, res) {
+    boardModel.getThreadLastPostNumber(req.query.boardName, req.query.threadNumber).then(function(number) {
+        res.json(number);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
 router.get("/captchaQuota.json", function(req, res) {
     Database.getUserCaptchaQuota(req.query.boardName, req.ip).then(function(quota) {
         res.json(quota);
@@ -230,26 +260,6 @@ router.get("/bannedUser.json", function(req, res) {
 router.get("/bannedUsers.json", function(req, res) {
     Database.bannedUsers().then(function(users) {
         res.json(users);
-    }).catch(function(err) {
-        controller.error(req, res, err, true);
-    });
-});
-
-router.get("/coubVideoInfo.json", function(req, res) {
-    var url = "https://coub.com/api/oembed.json?url=coub.com/view/" + (req.query.videoId || "");
-    HTTP.request({
-        url: url,
-        timeout: Tools.Minute
-    }).then(function(response) {
-        if (response.status != 200)
-            return Promise.reject("Failed to get Coub video info");
-        return response.body.read();
-    }).then(function(data) {
-        try {
-            res.json(JSON.parse(data.toString()));
-        } catch (err) {
-            return Promise.reject(err);
-        }
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

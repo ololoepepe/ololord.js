@@ -157,11 +157,22 @@ lord.updateThread = function(silent) {
             timeout: lord.Billion
         });
     }
-    return lord.api("lastPosts", {
-        boardName: boardName,
-        threadNumber: threadNumber,
-        lastPostNumber: lastPostNumber
-    }).then(function(posts) {
+    return lord.api("threadLastPostNumber", {
+        boardName: lord.data("boardName"),
+        threadNumber: threadNumber
+    }).then(function(newLastPostNumber) {
+        if (!newLastPostNumber)
+            return Promise.reject("Thre thread was deleted");
+        c.newLastPostNumber = newLastPostNumber;
+        if (c.newLastPostNumber <= lastPostNumber)
+            return Promise.resolve({ thread: { lastPosts: [] } });
+        return lord.api(threadNumber, {}, lord.data("boardName") + "/res");
+    }).then(function(model) {
+        if (!model)
+            return Promise.reject("Thre thread was deleted");
+        var posts = model.thread.lastPosts.filter(function(post) {
+            return post.number > lastPostNumber;
+        });
         if (popup) {
             var txt = (posts.length >= 1) ? lord.text("newPostsText") : lord.text("noNewPostsText");
             if (posts.length >= 1)
@@ -181,38 +192,8 @@ lord.updateThread = function(silent) {
             return Promise.resolve();
         c.threadInfo = threadInfo;
         c.sequenceNumber = c.posts[c.posts.length - 1].sequenceNumber;
-        var refs = [];
-        c.posts.forEach(function(post) {
-            if (post.referencedPosts)
-                refs = refs.concat(post.referencedPosts);
-            if (post.referringPosts)
-                refs = refs.concat(post.referringPosts);
-        });
-        var map = lord.toMap(refs, function(ref) {
-            return ref.boardName + ":" + ref.postNumber;
-        });
-        var postMap = lord.toMap(c.posts, function(post) {
-            return post.boardName + ":" + post.number;
-        });
-        var parameters = [];
-        c.postInfos = {};
-        lord.forIn(map, function(_, key) {
-            var post = postMap[key];
-            if (post)
-                c.postInfos[key] = post;
-            else
-                parameters.push(key);
-        });
-        return lord.api("posts", { posts: parameters });
-    }).then(function(posts) {
-        if (!c.posts)
-            return Promise.resolve();
-        posts.forEach(function(post) {
-            if (post)
-                c.postInfos[post.boardName + ":" + post.number] = post;
-        });
         var promises = c.posts.map(function(post) {
-            return lord.createPostNode(post, true, c.threadInfo, c.postInfos);
+            return lord.createPostNode(post, true, c.threadInfo);
         });
         return Promise.all(promises);
     }).then(function(posts) {

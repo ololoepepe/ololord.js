@@ -659,6 +659,8 @@ controller.translationsModel = function() {
     translate("Delete this draft", "deleteDraftText");
     translate("Show drafts", "showDraftsText");
     translate("Hide drafts", "hideDraftsText");
+    translate("Expand thread", "expandThreadText");
+    translate("Collapse thread", "collapseThreadText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

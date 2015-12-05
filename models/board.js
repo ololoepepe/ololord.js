@@ -383,6 +383,29 @@ module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNu
     });
 };
 
+module.exports.getThreadLastPostNumber = function(boardName, threadNumber) {
+    var board = Board.board(boardName);
+    if (!(board instanceof Board))
+        return Promise.resolve(0);
+    threadNumber = +(threadNumber || 0);
+    if (isNaN(threadNumber) || threadNumber < 1)
+        return Promise.resolve(0);
+    var c = {};
+    return Database.db.smembers("threadPostNumbers:" + boardName + ":" + threadNumber).then(function(numbers) {
+        numbers = (numbers || []).map(function(pn) {
+            return +pn;
+        }).sort(function(pn1, pn2) {
+            if (pn1 < pn2)
+                return -1;
+            else if (pn1 > pn2)
+                return 1;
+            else
+                return 0;
+        });
+        return (numbers.length > 0) ? numbers[numbers.length - 1] : 0;
+    });
+};
+
 module.exports.getThreadInfo = function(board, hashpass, number) {
     if (!(board instanceof Board))
         return Promise.reject("Invalid board instance");

@@ -3691,5 +3691,15 @@
         "hideDraftsText": {
             "value": "Скрыть черновики"
         }
+    },
+    "Expand thread": {
+        "expandThreadText": {
+            "value": "Развернуть тред"
+        }
+    },
+    "Collapse thread": {
+        "collapseThreadText": {
+            "value": "Свернуть тред"
+        }
     }
 }

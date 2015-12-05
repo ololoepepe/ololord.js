@@ -124,7 +124,7 @@ lord.processPost = function(post, data) {
             });
         }
         if (data.hidden)
-            lord.addPostToHidden(data.boardName, data.postNumber, false);
+            lord.addPostToHidden(data.boardName, data.postNumber, data.threadNumber);
     }
     lord.tryHidePost(post);
 }
@@ -307,7 +307,7 @@ lord.appendExtrasToModel = function(model) {
     model.customPostMenuAction = lord.customPostMenuAction;
 };
 
-lord.createPostNode = function(post, permanent, threadInfo, postInfos) {
+lord.createPostNode = function(post, permanent, threadInfo) {
     if (typeof permanent == "undefined")
         permanent = true;
     var c = {};
@@ -669,38 +669,20 @@ lord.expandCollapseCoubVideo = function(a) {
     a.lordExpanded = !a.lordExpanded;
 };
 
-lord.addPostToHidden = function(boardName, postNumber, getText) {
+lord.addPostToHidden = function(boardName, postNumber, threadNumber) {
     postNumber = +postNumber;
-    if (!boardName || isNaN(postNumber))
+    if (!boardName || isNaN(postNumber) || postNumber <= 0)
         return;
-    getText = (typeof getText != undefined) ? getText : true;
     var key = boardName + "/" + postNumber;
-    var fallback = function() {
-        var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
-        if (hiddenPosts[key])
-            return;
-        hiddenPosts[key] = { subject: (boardName + "/" + postNumber) };
-        lord.setLocalObject("hiddenPosts", hiddenPosts);
+    var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
+    if (hiddenPosts.hasOwnProperty(key))
+        return;
+    hiddenPosts[key] = {
+        boardName: boardName,
+        postNumber: postNumber,
+        threadNumber: threadNumber
     };
-    if (getText) {
-        lord.api("post", {
-            boardName: boardName,
-            postNumber: postNumber
-        }).then(function(post) {
-            if (!post) {
-                fallback();
-                return Promise.resolve();
-            }
-            var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
-            if (hiddenPosts[key])
-                return Promise.resolve();
-            var subject = (post.subject || post.rawText || (boardName + "/" + postNumber)).substring(0, 150);
-            hiddenPosts[key] = { subject: subject };
-            lord.setLocalObject("hiddenPosts", hiddenPosts);
-        }).catch(lord.handleError);
-    } else {
-        fallback();
-    }
+    lord.setLocalObject("hiddenPosts", hiddenPosts);
 };
 
 lord.tryHidePost = function(post, list) {
@@ -1119,7 +1101,8 @@ lord.editPost = function(el) {
 lord.setPostHidden = function(el) {
     var boardName = lord.data("boardName", el, true);
     var postNumber = +lord.data("number", el, true);
-    if (!boardName || isNaN(postNumber) || postNumber < 1)
+    var threadNumber = +lord.data("threadNumber", el, true);
+    if (!boardName || isNaN(postNumber) || postNumber < 1 || isNaN(threadNumber) || threadNumber < 1)
         return;
     var post = lord.id(postNumber);
     if (!post)
@@ -1132,7 +1115,7 @@ lord.setPostHidden = function(el) {
         f(thread, "hidden");
     var list = lord.getLocalObject("hiddenPosts", {});
     if (!hidden) {
-        lord.addPostToHidden(boardName, postNumber);
+        lord.addPostToHidden(boardName, postNumber, threadNumber);
     } else if (list[boardName + "/" + postNumber]) {
         delete list[boardName + "/" + postNumber];
         lord.setLocalObject("hiddenPosts", list);
@@ -1256,7 +1239,8 @@ lord.addToPlaylist = function(a) {
     lord.setLocalObject("playlist/tracks", tracks);
 };
 
-lord.viewPost = function(a, boardName, postNumber) {
+lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
+    var previousPostPreview = lord.lastPostPreview;
     var post;
     if (boardName == lord.data("boardName"))
         post = lord.id(postNumber);
@@ -1272,7 +1256,7 @@ lord.viewPost = function(a, boardName, postNumber) {
         var ptt = lord.queryOne(".postToThread", post);
         if (ptt)
             ptt.parentNode.removeChild(ptt);
-        lord.removeClass(post, "opPost");
+        lord.removeClass(post, "opPost hidden");
         lord.addClass(post, "post temporary");
         p = Promise.resolve(post);
     } else {
@@ -1334,12 +1318,12 @@ lord.viewPost = function(a, boardName, postNumber) {
             post.style.top = (doc.clientHeight - coords.bottom >= post.scrollHeight)
                 ? (scrollTop + coords.bottom - 4 + "px")
                 : (scrollTop + coords.top - post.scrollHeight - 4 + "px");
-            post.style.zIndex = 9001;
+            post.style.zIndex = previousPostPreview ? previousPostPreview.style.zIndex : (hiddenPost? 11000 : 9001);
         } else {
             lord.addClass(post, "cursorPointer");
             post.style.position = "fixed";
             lord.toCenter(post, null, null, 1);
-            post.style.zIndex = 9001;
+            post.style.zIndex = previousPostPreview ? previousPostPreview.style.zIndex : (hiddenPost? 11000 : 9001);
             if (!lord.postPreviewMask) {
                 lord.postPreviewMask = lord.node("div");
                 lord.postPreviewMask.className = "temporaryPostOverlayMask cursorPointer";
@@ -2043,33 +2027,44 @@ lord.nextFile = function() {
 };
 
 lord.addThreadToFavorites = function(boardName, threadNumber) {
-    lord.api("lastPosts", {
+    var c = {};
+    lord.api("post", {
         boardName: boardName,
-        threadNumber: threadNumber
-    }).then(function(posts) {
-        if (!posts || posts.length < 1)
-            return Promise.reject("Internal error");
-        var fav = lord.getLocalObject("favoriteThreads", {});
-        if (fav.hasOwnProperty(boardName + "/" + threadNumber))
+        postNumber: threadNumber
+    }).then(function(opPost) {
+        if (!opPost)
+            return Promise.reject("The thread was deleted");
+        c.opPost = opPost;
+        return lord.api("threadLastPostNumber", {
+            boardName: boardName,
+            threadNumber: threadNumber
+        });
+    }).then(function(lastPostNumber) {
+        if (!lastPostNumber)
+            return Promise.reject("The thread was deleted");
+        var favoriteThreads = lord.getLocalObject("favoriteThreads", {});
+        if (favoriteThreads.hasOwnProperty(boardName + "/" + threadNumber))
             return Promise.reject("Already in favorites");
-        var postNumber = posts.pop().number;
-        var opPost = posts.shift();
-        var txt = opPost.subject || opPost.rawText || (boardName + "/" + threadNumber);
-        fav[boardName + "/" + threadNumber] = {
-            "lastPostNumber": postNumber,
-            "previousLastPostNumber": postNumber,
-            "subject": txt.substring(0, 150)
+        var txt = c.opPost.subject || c.opPost.rawText || (boardName + "/" + threadNumber);
+        favoriteThreads[boardName + "/" + threadNumber] = {
+            boardName: boardName,
+            threadNumber: threadNumber,
+            lastPostNumber: lastPostNumber,
+            previousLastPostNumber: lastPostNumber,
+            subject: txt.substring(0, 150)
         };
+        lord.setLocalObject("favoriteThreads", favoriteThreads);
         var opPost = lord.id(threadNumber);
         var btn = lord.nameOne("addToFavoritesButton", opPost);
         var img = lord.queryOne("img", btn);
+        img.src = img.src.replace("favorite.png", "favorite_active.png");
         var div = lord.id("favorites");
-        var model = lord.model(["base", "tr"], true);
         var span = lord.queryOne("span", btn);
         lord.removeChildren(span);
-        span.appendChild(lord.node("text", model.tr.removeThreadFromFavoritesText));
+        span.appendChild(lord.node("text", lord.text("removeThreadFromFavoritesText")));
         if (!div)
             return Promise.resolve();
+        var model = lord.model(["base", "tr"], true);
         model.favorite = {
             boardName: boardName,
             threadNumber: threadNumber,
@@ -2077,8 +2072,6 @@ lord.addThreadToFavorites = function(boardName, threadNumber) {
         };
         var fdiv = $.parseHTML(lord.template("favoritesElement")(model))[1];
         lord.nameOne("favorites", div).appendChild(fdiv);
-        img.src = img.src.replace("favorite.png", "favorite_active.png");
-        lord.setLocalObject("favoriteThreads", fav);
         return Promise.resolve();
     }).catch(lord.handleError);
 };
@@ -2154,15 +2147,19 @@ lord.submitted = function(event, form) {
             lord.resetCaptcha();
             var currentThreadNumber = lord.data("threadNumber");
             if (currentThreadNumber) {
-                lord.updateThread(true).then(function() {
-                    if (lord.getLocalObject("moveToPostOnReplyInThread", true))
-                        window.location.hash = "#" + result.number;
-                });
+                setTimeout(function() {
+                    lord.updateThread(true).then(function() {
+                        if (lord.getLocalObject("moveToPostOnReplyInThread", true))
+                            window.location.hash = "#" + result.number;
+                    });
+                }, 1.5 * lord.Second);
             } else {
                 var action = lord.getLocalObject("quickReplyAction", "append_post");
                 if ("goto_thread" == action) {
-                    window.location = "/" + lord.data("sitePathPrefix") + result.boardName + "/res/"
-                        + result.threadNumber + ".html#" + result.number;
+                    setTimeout(function() {
+                        window.location = "/" + lord.data("sitePathPrefix") + result.boardName + "/res/"
+                            + result.threadNumber + ".html#" + result.number;
+                    }, 1.5 * lord.Second);
                     return;
                 } else if (threadId) {
                     var thread = lord.id("thread" + threadId);
@@ -2379,7 +2376,7 @@ lord.globalOnmouseover = function(e) {
         return;
     if (!/^>>.*$/gi.test(a.textContent))
         return;
-    lord.viewPost(a, boardName, postNumber);
+    lord.viewPost(a, boardName, postNumber, !!lord.data("hiddenPost", a));
 };
 
 lord.globalOnmouseout = function(e) {
@@ -2479,6 +2476,52 @@ lord.signOwnPostLinks = function(parent, ownPosts) {
     });
 };
 
+lord.expandCollapseThread = function(el) {
+    lord.expandThread($(el).closest(".thread")[0]);
+};
+
+lord.expandThread = function(thread) {
+    if (!thread)
+        return;
+    var div = lord.node("div");
+    var img = lord.node("img");
+    img.src = "/" + lord.data("sitePathPrefix") + "img/loading_big.gif";
+    div.appendChild(img);
+    var h1 = lord.node("h1");
+    h1.appendChild(lord.node("text", lord.text("loadingPostsMessage")));
+    div.appendChild(h1);
+    thread.appendChild(div);
+    var threadNumber = +thread.id.replace("thread", "");
+    var c = {};
+    c.model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true);
+    c.model.settings = lord.settings();
+    lord.api(threadNumber, {}, lord.data("boardName") + "/res").then(function(model) {
+        lord.appendExtrasToModel(c.model);
+        thread.removeChild(div);
+        c.model.thread = model.thread;
+        c.model.thread.expanded = !lord.data("expanded", thread);
+        if (!c.model.thread.expanded) {
+            c.model.thread.omittedPosts = c.model.board.maxLastPosts - (c.model.thread.lastPosts.length + 1);
+            var offset = c.model.thread.lastPosts.length - c.model.board.maxLastPosts;
+            c.model.thread.lastPosts = c.model.thread.lastPosts.slice(offset);
+        }
+        var nodes = $.parseHTML(lord.template("thread")(c.model), document, true);
+        var node = (nodes.length > 1) ? nodes[1] : nodes[0];
+        lord.query("script", node).forEach(function(script) {
+            var nscript = lord.node("script");
+            if (script.src)
+                nscript.src = script.src;
+            else if (script.innerHTML)
+                nscript.innerHTML = script.innerHTML;
+            script.parentNode.replaceChild(nscript, script);
+        });
+        thread.parentNode.replaceChild(node, thread);
+    }).catch(function(err) {
+        lord.handleError(err);
+        thread.removeChild(div);
+    });
+};
+
 lord.hotkey_previousPageImage = function() {
     if (lord.img) {
         lord.previousFile();
@@ -2535,11 +2578,11 @@ lord.currentThread = function() {
     var list = lord.query(".opPost");
     for (var i = 0; i < list.length; ++i) {
         if (lord.isInViewport(list[i]))
-            return lord.id(list[i].id.replace("post", "thread"));
+            return lord.id("thread" + list[i].id);
     }
     list = lord.query(".opPost, .post");
     for (var i = 0; i < list.length; ++i) {
-        if (lord.isInViewport(list[i]) && window.location.hash.replace("#", "") == list[i].id.replace("post", ""))
+        if (lord.isInViewport(list[i]) && window.location.hash.replace("#", "") == list[i].id)
             return lord.id(list[i].parentNode.id.replace("threadPosts", "thread"));
     }
     for (var i = 0; i < list.length; ++i) {
@@ -2548,7 +2591,7 @@ lord.currentThread = function() {
     }
     list = lord.query(".opPost");
     if (list && list.length > 0)
-        return lord.id(list[0].id.replace("post", "thread"));
+        return lord.id("thread" + list[0].id);
     return null;
 };
 
@@ -2636,46 +2679,7 @@ lord.hotkey_goToThread = function() {
 };
 
 lord.hotkey_expandThread = function() {
-    var t = lord.currentThread();
-    if (!t)
-        return;
-    var tn = +t.id.replace("thread", "");
-    var posts = lord.id("threadPosts" + tn);
-    if (!posts || posts.length < 1)
-        return;
-    (function(tn, posts) {
-        var div = lord.node("div");
-        div.appendChild(lord.node("text", lord.text("loadingPostsText")));
-        posts.parentNode.insertBefore(div, posts);
-        var lastPost = lord.query(".post", posts).pop();
-        var seqNum = 1;
-        lord.api("lastPosts", {
-            boardName: lord.data("boardName"),
-            threadNumber: tn,
-            lastPostNumber: tn
-        }).then(function(list) {
-            if (!list || list.length < 1)
-                return;
-            lord.removeChildren(posts);
-            var omitted = lord.id("threadOmitted" + tn);
-            if (omitted)
-                omitted.parentNode.removeChild(omitted);
-            div.parentNode.removeChild(div);
-            lord.gently(list, function(ps) {
-                var newPost = lord.createPostNode(ps, true);
-                if (!newPost)
-                    return;
-                lord.removeClass(newPost, "newPost");
-                if (!isNaN(seqNum))
-                    lord.queryOne(".postSequenceNumber", newPost).appendChild(lord.node("text", ++seqNum));
-                posts.appendChild(newPost);
-                lord.postNodeInserted(newPost);
-            }, {
-                delay: 10,
-                n: 10
-            });
-        }).catch(lord.handleError);
-    })(tn, posts);
+    lord.expandThread(lord.currentThread());
     return false;
 };
 

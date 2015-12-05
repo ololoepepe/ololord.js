@@ -214,9 +214,18 @@
                             <img src="/{{=it.site.pathPrefix}}img/favorite.png" class="signImage">
                             <span>{{=it.tr.addThreadToFavoritesText}}</span></a>
                     </li>
+                    {{? it.customPostMenuAction && it.customPostMenuAction[90]}}
+                        {{ out += it.customPostMenuAction[90](it, thread, post); }}
+                    {{?}}
+                    <li>
+                        <a name="expandCollapseThreadButton" href="javascript:void(0);"
+                           onclick="lord.expandCollapseThread(this); return false;">
+                            <img src="/{{=it.site.pathPrefix}}img/expand.png" class="signImage">
+                            <span>{{? thread.expanded}}{{=it.tr.collapseThreadText}}{{??}}{{=it.tr.expandThreadText}}{{?}}</span></a>
+                    </li>
                 {{?}}
-                {{? it.customPostMenuAction && it.customPostMenuAction[90]}}
-                    {{ out += it.customPostMenuAction[90](it, thread, post); }}
+                {{? it.customPostMenuAction && it.customPostMenuAction[100]}}
+                    {{ out += it.customPostMenuAction[100](it, thread, post); }}
                 {{?}}
                 <li>
                     <a name="deleteButton" target="_blank" href="javascript:void(0);"
@@ -224,16 +233,16 @@
                         <img src="/{{=it.site.pathPrefix}}img/delete.png" class="signImage" />
                         {{? post.number == post.threadNumber}}{{=it.tr.deleteThreadText}}{{??}}{{=it.tr.deletePostText}}{{?}}</a>
                 </li>
-                {{? it.customPostMenuAction && it.customPostMenuAction[100]}}
-                    {{ out += it.customPostMenuAction[100](it, thread, post); }}
+                {{? it.customPostMenuAction && it.customPostMenuAction[110]}}
+                    {{ out += it.customPostMenuAction[110](it, thread, post); }}
                 {{?}}
                 <li>
                     <a name="hideButton" href="javascript:void(0);" onclick="lord.setPostHidden(this); return false;">
                         <img src="/{{=it.site.pathPrefix}}img/hide.png" class="signImage" />
                         {{=it.tr.showHidePostText}}</a>
                 </li>
-                {{? it.customPostMenuAction && it.customPostMenuAction[110]}}
-                    {{ out += it.customPostMenuAction[110](it, thread, post); }}
+                {{? it.customPostMenuAction && it.customPostMenuAction[120]}}
+                    {{ out += it.customPostMenuAction[120](it, thread, post); }}
                 {{?}}
             </ul>
         </span>
