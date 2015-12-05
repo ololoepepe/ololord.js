@@ -2519,7 +2519,7 @@ lord.expandThread = function(thread) {
         c.model.thread = model.thread;
         c.model.thread.expanded = !lord.data("expanded", thread);
         if (!c.model.thread.expanded) {
-            c.model.thread.omittedPosts = c.model.thread.lastPosts.length - c.model.board.maxLastPosts - 1;
+            c.model.thread.omittedPosts = c.model.thread.lastPosts.length - c.model.board.maxLastPosts;
             var offset = c.model.thread.lastPosts.length - c.model.board.maxLastPosts;
             c.model.thread.lastPosts = c.model.thread.lastPosts.slice(offset);
         }
