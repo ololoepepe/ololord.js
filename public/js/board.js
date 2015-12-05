@@ -2091,6 +2091,20 @@ lord.showUserIp = function(a) {
     }).catch(lord.handleError);
 };
 
+lord.showLoadingPostsPopup = function(text) {
+    var span = lord.node("span");
+    if (!lord.loadingImage) {
+        lord.loadingImage = lord.node("img");
+        lord.loadingImage.src = "/" + lord.data("sitePathPrefix") + "img/loading.gif";
+    }
+    span.appendChild(lord.loadingImage.cloneNode(true));
+    span.appendChild(lord.node("text", " " + lord.text(text || "loadingPostsText")));
+    return lord.showPopup(span, {
+        type: "node",
+        timeout: lord.Billion
+    });
+};
+
 lord.submitted = function(event, form) {
     if (event)
         event.preventDefault();
@@ -2147,8 +2161,10 @@ lord.submitted = function(event, form) {
             lord.resetCaptcha();
             var currentThreadNumber = lord.data("threadNumber");
             if (currentThreadNumber) {
+                var popup = lord.showLoadingPostsPopup();
                 setTimeout(function() {
                     lord.updateThread(true).then(function() {
+                        popup.hide();
                         if (lord.getLocalObject("moveToPostOnReplyInThread", true))
                             window.location.hash = "#" + result.number;
                     });
@@ -2156,7 +2172,9 @@ lord.submitted = function(event, form) {
             } else {
                 var action = lord.getLocalObject("quickReplyAction", "append_post");
                 if ("goto_thread" == action) {
+                    var popup = lord.showLoadingPostsPopup("redirectingToThreadText");
                     setTimeout(function() {
+                        popup.hide();
                         window.location = "/" + lord.data("sitePathPrefix") + result.boardName + "/res/"
                             + result.threadNumber + ".html#" + result.number;
                     }, 1.5 * lord.Second);

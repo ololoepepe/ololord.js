@@ -223,9 +223,10 @@
                     {{? it.customPostFormOption && it.customPostFormOption[30]}}
                         {{ out += it.customPostFormOption[30](it); }}
                     {{?}}
-                    <a href="javascript:void(0);" onclick="lord.addToDrafts(this); return false;" class="buttonImage"
+                    <a href="javascript:void(0);" onclick="lord.addToDrafts(this); return false;"
+                       style="display: inline-block; vertical-align: top;"
                        title="{{=it.tr.addToDraftsText}}"><img src="/{{=it.site.pathPrefix}}img/draft.png"
-                                                               width="24" height="24"></a>
+                                                               class="buttonImage" width="24" height="24"></a>
                     {{? it.customPostFormOption && it.customPostFormOption[40]}}
                         {{ out += it.customPostFormOption[40](it); }}
                     {{?}}

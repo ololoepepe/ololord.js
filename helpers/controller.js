@@ -661,6 +661,7 @@ controller.translationsModel = function() {
     translate("Hide drafts", "hideDraftsText");
     translate("Expand thread", "expandThreadText");
     translate("Collapse thread", "collapseThreadText");
+    translate("Redirecting to thread...", "redirectingToThreadText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

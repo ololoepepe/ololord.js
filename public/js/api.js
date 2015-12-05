@@ -1252,7 +1252,7 @@ lord.post = function(action, formData, progressBarContext, progressBarOptions) {
             if (progressBarOptions && progressBarOptions.delay)
                 progressBarContext.progressBar.showDelayed(progressBarOptions.delay);
             else
-                c.progressBar.show();
+                progressBarContext.progressBar.show();
             return xhr;
         }
     }

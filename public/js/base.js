@@ -204,17 +204,17 @@ lord.removeThreadFromFavorites = function(boardName, threadNumber) {
 };
 
 lord.checkFavoriteThreads = function() {
-    var favoriteThreads = lord.toArray(lord.getLocalObject("favoriteThreads", {}));
-    var parameters = favoriteThreads.map(function(fav) {
+    var favoriteThreads = lord.getLocalObject("favoriteThreads", {});
+    var parameters = lord.toArray(favoriteThreads).map(function(fav) {
         return fav.boardName + ":" + fav.threadNumber;
     });
     if (parameters.length <= 0)
         return;
     lord.api("threadLastPostNumbers", { threads: parameters }).then(function(lastPostNumbers) {
-        favoriteThreads = lord.toArray(lord.getLocalObject("favoriteThreads", {}));
+        favoriteThreads = lord.getLocalObject("favoriteThreads", {});
         var div = lord.id("favorites");
         var show = false;
-        favoriteThreads.forEach(function(fav, i) {
+        lord.toArray(favoriteThreads).forEach(function(fav, i) {
             var lastPostNumber = lastPostNumbers[i];
             if (!lastPostNumber)
                 fav.subject = "[404] " + fav.subject;

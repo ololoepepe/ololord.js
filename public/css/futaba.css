@@ -68,7 +68,7 @@ hr {
     z-index: 9950;
     vertical-align: middle;
     text-align: center;
-    padding: 5px 5px 5px 5px;
+    padding: 10px 10px 10px 10px;
     cursor: pointer;
 }
 
@@ -941,12 +941,6 @@ blockquote.blockquoteThread.expand {
     text-align: left;
     white-space: nowrap;
     overflow-x: auto;
-}
-
-.noNewPostsPopup {
-    height: 40px;
-    line-height: 40px;
-    width: 200px;
 }
 
 /*

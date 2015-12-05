@@ -3701,5 +3701,10 @@
         "collapseThreadText": {
             "value": "Свернуть тред"
         }
+    },
+    "Redirecting to thread...": {
+        "redirectingToThreadText": {
+            "value": "Перенаправление в тред..."
+        }
     }
 }

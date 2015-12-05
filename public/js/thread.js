@@ -143,20 +143,8 @@ lord.updateThread = function(silent) {
     var lastPostNumber = +lord.data("number", lastPost);
     var popup;
     var c = {};
-    if (!silent) {
-        var span = lord.node("span");
-        if (!lord.loadingImage) {
-            lord.loadingImage = lord.node("img");
-            lord.loadingImage.src = "/" + lord.data("sitePathPrefix") + "img/loading.gif";
-        }
-        span.appendChild(lord.loadingImage.cloneNode(true));
-        span.appendChild(lord.node("text", " " + lord.text("loadingPostsText")));
-        popup = lord.showPopup(span, {
-            type: "node",
-            classNames: "noNewPostsPopup",
-            timeout: lord.Billion
-        });
-    }
+    if (!silent)
+        popup = lord.showLoadingPostsPopup();
     return lord.api("threadLastPostNumber", {
         boardName: lord.data("boardName"),
         threadNumber: threadNumber
@@ -177,7 +165,7 @@ lord.updateThread = function(silent) {
             var txt = (posts.length >= 1) ? lord.text("newPostsText") : lord.text("noNewPostsText");
             if (posts.length >= 1)
                 txt += " " + posts.length;
-            popup.resetText(txt, {classNames: "noNewPostsPopup"});
+            popup.resetText(txt);
             popup.resetTimeout();
         }
         if (posts.length < 1)
