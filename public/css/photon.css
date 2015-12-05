@@ -624,14 +624,8 @@ span.newPostCount {
     opacity: 0.05;
 }
 
-.postHeader > a > img, .postFileSearch > a > img, .postHeader > span > a > img, .postFileSearch > form,
-.postHeader > span > form {
-    opacity: 0.65;
-}
-
-.postHeader > a:not(.disabled) > img:hover, .postFileSearch > a:not(.disabled) > img:hover,
-.postHeader > span > a:not(.disabled) > img:hover, .postFileSearch > form:hover, .postHeader > span > form:hover {
-    opacity: 1;
+.postFileSearch {
+    padding-bottom: 4px;
 }
 
 .postToThread > a > button {

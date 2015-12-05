@@ -418,8 +418,11 @@ controller.translationsModel = function() {
     translate("Last modified:", "modificationDateTimeText");
     translate("User was banned for this post", "bannedForText");
     translate("Delete file", "deleteFileText");
-    translate("Find source with Iqdb", "findSourceWithIqdbText");
     translate("Find source with Google", "findSourceWithGoogleText");
+    translate("Find source with Yandex", "findSourceWithYandexText");
+    translate("Find source with TinEye", "findSourceWithTineyeText");
+    translate("Find source with SauceNAO", "findSourceWithSaucenaoText");
+    translate("Find source with Iqdb", "findSourceWithIqdbText");
     translate("Edit audio file tags", "editAudioTagsText");
     translate("Add to playlist", "addToPlaylistText");
     translate("Answer in this thread", "answerInThreadText");

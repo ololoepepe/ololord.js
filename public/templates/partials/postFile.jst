@@ -26,24 +26,35 @@
     <div class="postFileSearch">
         <a href="javascript:void(0);" name="deleteFileButton" target="_blank"
            onclick="lord.deleteFile(this); return false;">
-           <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.deleteFileText}}" /></a>
+           <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.deleteFileText}}"
+                class="buttonImage" /></a>
         <a name="hideByImageButton" onclick="lord.hideByImage(this); return false;">
-            <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}" /></a>
+            <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}"
+                 class="buttonImage" /></a>
         {{? fileInfo.mimeType.substr(0, 6) == "image/"}}
             <a href="//www.google.com/searchbyimage?image_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
                title="{{=it.tr.findSourceWithGoogleText}}" target="_blank">
-                <img src="/{{=it.site.pathPrefix}}img/google.png"></a>
+                <img src="//www.google.com/favicon.ico" width="16" height="16" class="buttonImage noInvert"></a>
+            <a href="//yandex.ru/images/search?rpt=imageview&img_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+               title="{{=it.tr.findSourceWithYandexText}}" target="_blank">
+                <img src="//www.yandex.ru/favicon.ico" width="16" height="16" class="buttonImage noInvert"></a>
+            <a href="//tineye.com/search/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+               title="{{=it.tr.findSourceWithTineyeText}}" target="_blank">
+                <img src="//tineye.com/favicon.ico" width="16" height="16" class="buttonImage noInvert"></a>
+            <a href="//saucenao.com/search.php?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+               title="{{=it.tr.findSourceWithSaucenaoText}}" target="_blank">
+                <img src="//saucenao.com/favicon.ico" width="16" height="16" class="buttonImage noInvert"></a>
             <a href="http://iqdb.org/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
                title="{{=it.tr.findSourceWithIqdbText}}" target="_blank">
-                <img src="/{{=it.site.pathPrefix}}img/iqdb.png"></a>
+                <img src="//iqdb.org/favicon.ico" width="16" height="16" class="buttonImage noInvert"></a>
         {{?}}
         {{? fileInfo.mimeType.substr(0, 6) == "audio/"}}
             <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false"
                title="{{=it.tr.editAudioTagsText}}">
-                <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
+                <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png" class="buttonImage"></a>
             <a href="javascript:void(0);" onclick="lord.addToPlaylist(this); return false;"
                title="{{=it.tr.addToPlaylistText}}">
-                <img src="/{{=it.site.pathPrefix}}img/playlist.png"></a>
+                <img src="/{{=it.site.pathPrefix}}img/playlist.png" class="buttonImage"></a>
         {{?}}
     </div>
     <div class="postFileFile {{=it.deviceType}}">
