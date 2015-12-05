@@ -69,13 +69,19 @@ var writeFile = function(path, data) {
                     FSSync.write(fd, data, null, "utf8", function(err) {
                         if (err)
                             return reject(err);
-                        FSSync.flock(fd, "un", function (err) {
-                            if (err)
-                                return reject(err);
-                            FSSync.close(fd, function(err) {
+                        FSSync.fsync(fd, function(err) {
+                            var syncErr = err;
+                            FSSync.flock(fd, "un", function (err) {
                                 if (err)
                                     return reject(err);
-                                resolve();
+                                FSSync.close(fd, function(err) {
+                                    if (err)
+                                        return reject(err);
+                                    if (syncErr)
+                                        reject(syncErr)
+                                    else
+                                        resolve();
+                                });
                             });
                         });
                     });
