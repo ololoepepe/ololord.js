@@ -22,7 +22,6 @@ var cachePath = function() {
 
 var readFile = function(path) {
     var recover = function(fd, callback) {
-        console.log("recover-r", path);
         FSSync.flock(fd, "un", function(err) {
             FSSync.close(fd, function(err) {
                 callback(err);
@@ -40,8 +39,19 @@ var readFile = function(path) {
                     FSSync.stat(path, function(err, stats) {
                         if (err)
                             return recover(fd, reject);
-                        if (stats.size <= 0)
-                            return resolve("");
+                        if (stats.size <= 0) {
+                            FSSync.flock(fd, "un", function (err) {
+                                var unerr = err;
+                                FSSync.close(fd, function(err) {
+                                    if (err)
+                                        return reject(err);
+                                    if (unerr)
+                                        return reject(unerr);
+                                    resolve("");
+                                });
+                            });
+                            return;
+                        }
                         var buffer = new Buffer(stats.size);
                         FSSync.read(fd, buffer, 0, buffer.length, null, function(err) {
                             if (err)
@@ -68,7 +78,6 @@ var readFile = function(path) {
 
 var writeFile = function(path, data) {
     var recover = function(fd, callback) {
-        console.log("recover-w", path);
         FSSync.flock(fd, "un", function(err) {
             FSSync.close(fd, function(err) {
                 callback(err);
@@ -113,7 +122,6 @@ var writeFile = function(path, data) {
 
 var removeFile = function(path) {
     var recover = function(fd, callback) {
-        console.log("recover-u", path);
         FSSync.flock(fd, "un", function(err) {
             FSSync.close(fd, function(err) {
                 callback(err);
@@ -606,7 +614,7 @@ var generateThread = function(boardName, threadNumber, nowrite) {
         delete c.json.thread.lastPosts;
         if (nowrite)
             return Promise.resolve();
-        return FS.write(threadPath, JSON.stringify(c.json));
+        return writeFile(threadPath, JSON.stringify(c.json));
     }).then(function() {
         if (nowrite) {
             return Promise.resolve({
@@ -616,7 +624,7 @@ var generateThread = function(boardName, threadNumber, nowrite) {
                 postsData: JSON.stringify(c.posts)
             });
         }
-        return FS.write(postsPath, JSON.stringify(c.posts));
+        return writeFile(postsPath, JSON.stringify(c.posts));
     });
 };
 
@@ -655,7 +663,7 @@ var generatePage = function(boardName, page, accumulator) {
                 });
                 return Promise.resolve();
             }
-            return FS.write(path, data);
+            return writeFile(path, data);
         });
         return p;
     });
@@ -698,7 +706,7 @@ var generateCatalog = function(boardName, nowrite) {
                 c.dateData = data;
                 return Promise.resolve();
             }
-            return FS.write(path, data);
+            return writeFile(path, data);
         });
         return p;
     }).then(function() {
@@ -718,7 +726,7 @@ var generateCatalog = function(boardName, nowrite) {
                 c.recentData = data;
                 return Promise.resolve();
             }
-            return FS.write(path, data);
+            return writeFile(path, data);
         });
         return p;
     }).then(function() {
@@ -738,7 +746,7 @@ var generateCatalog = function(boardName, nowrite) {
                 c.bumpsData = data;
                 return Promise.resolve(c);
             }
-            return FS.write(path, data);
+            return writeFile(path, data);
         });
     });
 };
@@ -913,7 +921,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
         } else if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)) {
             var postsPath = cachePath("thread-posts", boardName, threadNumber);
             p = p.then(function() {
-                return FS.read(postsPath);
+                return readFile(postsPath);
             }).then(function(data) {
                 data = JSON.parse(data);
                 var indexOfPost = function(post) {
@@ -940,7 +948,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
         } else if (scheduled.create && scheduled.create.length > 0) {
             var postsPath = cachePath("thread-posts", boardName, threadNumber);
             p = p.then(function() {
-                return FS.read(postsPath);
+                return readFile(postsPath);
             }).then(function(data) {
                 if (data.length < 3) //Empty list
                     c.data = c.data.substr(1);
@@ -977,7 +985,7 @@ module.exports.scheduleGeneratePages = function(boardName) {
         var c = {};
         generatePages(boardName, true).then(function(pages) {
             c.pages = pages;
-            var p = (c.pages.length > 0) ? FS.write(c.pages[0].path, c.pages[0].data) : Promise.resolve();
+            var p = (c.pages.length > 0) ? writeFile(c.pages[0].path, c.pages[0].data) : Promise.resolve();
             c.pages.slice(1).forEach(function(page) {
                 p = p.then(function() {
                     return writeFile(page.path, page.data);
@@ -1043,10 +1051,10 @@ module.exports.cleanup = function() {
         }).map(function(fileName) {
             return path + "/" + fileName;
         });
-        var p = (fileNames.length > 0) ? FS.remove(fileNames[0]) : Promise.resolve();
+        var p = (fileNames.length > 0) ? removeFile(fileNames[0]) : Promise.resolve();
         fileNames.slice(1).forEach(function(fileName) {
             p = p.then(function() {
-                return FS.remove(fileName);
+                return removeFile(fileName);
             });
         });
         return p;
@@ -1062,5 +1070,3 @@ module.exports.initialize = function() {
     });
     return Promise.all(promises);
 };
-
-module.exports.deletedPosts = deletedPosts; //TODO: Debug

@@ -85,12 +85,6 @@ _installHandler("remove", function(args) {
     return Promise.resolve("OK");
 });
 
-//TODO: Debug
-_installHandler("deleted", function(args) {
-    console.log(BoardModel.deletedPosts);
-    return Promise.resolve("OK");
-});
-
 _installHandler("register-user", function() {
     rl.pause();
     var password = ReadLineSync.question("Enter password: ", {
