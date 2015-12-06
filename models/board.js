@@ -21,6 +21,14 @@ var cachePath = function() {
 };
 
 var readFile = function(path) {
+    var recover = function(fd, callback) {
+        console.log("recover-r", path);
+        FSSync.flock(fd, "un", function(err) {
+            FSSync.close(fd, function(err) {
+                callback(err);
+            });
+        });
+    };
     return new Promise(function(resolve, reject) {
         try {
             FSSync.open(path, "r", function(err, fd) {
@@ -31,19 +39,20 @@ var readFile = function(path) {
                         return reject(err);
                     FSSync.stat(path, function(err, stats) {
                         if (err)
-                            return reject(err);
+                            return recover(fd, reject);
                         if (stats.size <= 0)
                             return resolve("");
                         var buffer = new Buffer(stats.size);
                         FSSync.read(fd, buffer, 0, buffer.length, null, function(err) {
                             if (err)
-                                return reject(err);
+                                return recover(fd, reject);
                             FSSync.flock(fd, "un", function (err) {
-                                if (err)
-                                    return reject(err);
+                                var unerr = err;
                                 FSSync.close(fd, function(err) {
                                     if (err)
                                         return reject(err);
+                                    if (unerr)
+                                        return reject(unerr);
                                     resolve(buffer.toString("utf8"));
                                 });
                             });
@@ -58,6 +67,14 @@ var readFile = function(path) {
 };
 
 var writeFile = function(path, data) {
+    var recover = function(fd, callback) {
+        console.log("recover-w", path);
+        FSSync.flock(fd, "un", function(err) {
+            FSSync.close(fd, function(err) {
+                callback(err);
+            });
+        });
+    };
     return new Promise(function(resolve, reject) {
         try {
             FSSync.open(path, "w", function(err, fd) {
@@ -68,17 +85,18 @@ var writeFile = function(path, data) {
                         return reject(err);
                     FSSync.write(fd, data, null, "utf8", function(err) {
                         if (err)
-                            return reject(err);
+                            return recover(fd, reject);
                         FSSync.fsync(fd, function(err) {
                             var syncErr = err;
                             FSSync.flock(fd, "un", function (err) {
-                                if (err)
-                                    return reject(err);
+                                var unerr = err;
                                 FSSync.close(fd, function(err) {
                                     if (err)
                                         return reject(err);
                                     if (syncErr)
-                                        reject(syncErr)
+                                        reject(syncErr);
+                                    else if (unerr)
+                                        reject(unerr);
                                     else
                                         resolve();
                                 });
@@ -94,6 +112,14 @@ var writeFile = function(path, data) {
 };
 
 var removeFile = function(path) {
+    var recover = function(fd, callback) {
+        console.log("recover-u", path);
+        FSSync.flock(fd, "un", function(err) {
+            FSSync.close(fd, function(err) {
+                callback(err);
+            });
+        });
+    };
     return new Promise(function(resolve, reject) {
         try {
             FSSync.open(path, "r", function(err, fd) {
@@ -104,11 +130,8 @@ var removeFile = function(path) {
                         return reject(err);
                     setTimeout(function() {
                         FSSync.unlink(path, function(err) {
-                            if (err) {
-                                FSSync.flock(fd, "un", function () {
-                                    return reject(err);
-                                });
-                            }
+                            if (err)
+                                return recover(fd, reject);
                             FSSync.flock(fd, "un", function (err) {
                                 if (err)
                                     return reject(err);
@@ -134,8 +157,29 @@ module.exports.getLastPostNumbers = function(boardNames) {
 };
 
 module.exports.getPosts = function(posts) {
-    var c = {};
-    var promises = posts.map(function(post) {
+    if (!posts || posts.length < 1)
+        return Promise.resolve([]);
+    var c = { posts: [] };
+    var p = Database.getPost(posts[0].boardName, posts[0].postNumber, {
+        withFileInfos: true,
+        withReferences: true,
+        withExtraData: true
+    }).then(function(post) {
+        c.posts.push(post);
+    });
+    posts.slice(1).forEach(function(post) {
+        p = p.then(function() {
+            return Database.getPost(post.boardName, post.postNumber, {
+                withFileInfos: true,
+                withReferences: true,
+                withExtraData: true
+            });
+        }).then(function(post) {
+            c.posts.push(post);
+            return Promise.resolve();
+        });
+    });
+    /*var promises = posts.map(function(post) {
         if (!post)
             return Promise.resolve(null);
         return Database.getPost(post.boardName, post.postNumber, {
@@ -144,7 +188,10 @@ module.exports.getPosts = function(posts) {
             withExtraData: true
         });
     });
-    return Promise.all(promises);
+    return Promise.all(promises);*/
+    return p.then(function() {
+        return Promise.resolve(c.posts);
+    });
 };
 
 module.exports.getFileInfos = function(list, hashpass) {
@@ -1015,3 +1062,5 @@ module.exports.initialize = function() {
     });
     return Promise.all(promises);
 };
+
+module.exports.deletedPosts = deletedPosts; //TODO: Debug
