@@ -136,17 +136,15 @@ var removeFile = function(path) {
                 FSSync.flock(fd, "ex", function (err) {
                     if (err)
                         return reject(err);
-                    setTimeout(function() {
-                        FSSync.unlink(path, function(err) {
+                    FSSync.unlink(path, function(err) {
+                        if (err)
+                            return recover(fd, reject);
+                        FSSync.flock(fd, "un", function (err) {
                             if (err)
-                                return recover(fd, reject);
-                            FSSync.flock(fd, "un", function (err) {
-                                if (err)
-                                    return reject(err);
-                                resolve();
-                            });
+                                return reject(err);
+                            resolve();
                         });
-                    }, Tools.Second);
+                    });
                 });
             });
         } catch (err) {
