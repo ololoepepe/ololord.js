@@ -835,7 +835,13 @@ lord.banUser = function(el) {
         return;
     var c = {};
     c.model = lord.model(["base", "tr", "boards"], true);
-    c.model.settings = lord.settings();
+    var settings = lord.settings();
+    var locale = c.model.site.locale;
+    var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : c.model.site.timeOffset;
+    c.model.settings = settings;
+    c.model.formattedDate = function(date) {
+        return moment(date).utcOffset(timeOffset).locale(locale).format("DD.MM.YYYY:HH");
+    };
     lord.api("userIp", {
         boardName: boardName,
         postNumber: postNumber

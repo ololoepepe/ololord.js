@@ -2026,7 +2026,7 @@ module.exports.editAudioTags = function(req, res, fields) {
 };
 
 module.exports.bannedUser = function(ip) {
-    return db.hget("bannedUsers", ip).then(function(user) {
+    return db.hget("bannedUsers", Tools.correctAddress(ip)).then(function(user) {
         if (!user)
             return Promise.resolve(null);
         return Promise.resolve(JSON.parse(user));

@@ -36,7 +36,7 @@
                 {{~}}
             </select>
             <input type="text" name="banExpires_{{=board.name}}" size="23"
-                   {{? typeof ban != "undefined" && ban.expiresAt}}value="{{=ban.expiresAt}}"{{?}}
+                   {{? typeof ban != "undefined" && ban.expiresAt}}value="{{ out += it.formattedDate(ban.expiresAt); }}"{{?}}
                    placeholder="{{=it.tr.banExpiresLabelText}} <DD.MM.YYYY:HH>" />
             <input type="text" name="banReason_{{=board.name}}" size="33"
                    {{? typeof ban != "undefined" && ban.reason}}value="{{=ban.reason}}"{{?}}

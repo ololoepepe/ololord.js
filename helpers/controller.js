@@ -156,11 +156,16 @@ controller.error = function(req, res, error, ajax) {
             }
             model.errorMessage = Tools.translate("Internal error", "errorMessage");
             model.errorDescription = error.message;
-        } else if (Util.isObject(error) && error.error) {
+        } else if (Util.isObject(error) && (error.error || error.ban)) {
             if (Tools.contains(process.argv.slice(2), "--dev-mode"))
                 console.log(error);
-            model.errorMessage = error.description ? error.error : Tools.translate("Error", "errorMessage");
-            model.errorDescription = error.description || error.error;
+            if (error.ban) {
+                model.errorMessage = Tools.translate("Your are banned", "errorMessage");
+                model.errorDescription = error.ban.reason || "";
+            } else {
+                model.errorMessage = error.description ? error.error : Tools.translate("Error", "errorMessage");
+                model.errorDescription = error.description || error.error;
+            }
         } else {
             if (Tools.contains(process.argv.slice(2), "--dev-mode"))
                 console.log(error);
@@ -231,10 +236,11 @@ controller.notFound = function(req, res) {
 };
 
 controller.checkBan = function(req, res, boardName, write) {
-    var ban = ipBans[req.ip];
+    var ip = Tools.correctAddress(req.ip);
+    var ban = ipBans[ip];
     if (ban && (write || "NO_ACCESS" == ban.level))
         return Promise.reject({ ban: ban });
-    return Database.bannedUser(req.ip).then(function(user) {
+    return Database.bannedUser(ip).then(function(user) {
         if (!user || !user.bans || user.bans.length < 1)
             return Promise.resolve();
         var ban = user.bans[boardName];
@@ -669,6 +675,8 @@ controller.translationsModel = function() {
     translate("Vkontakte posts embedding", "vkontakteEmbeddingMarkup");
     translate("Twitter twits embedding", "twitterEmbeddingMarkup");
     translate("becomes", "becomesText");
+    translate("Previous file", "previousFileText");
+    translate("Next file", "nextFileText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });
