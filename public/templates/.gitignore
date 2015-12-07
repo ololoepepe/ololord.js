@@ -8,6 +8,7 @@
 !deleteFileDialog.jst
 !deletePostDialog.jst
 !dPostBodyPart.jst
+!draft.jst
 !echoEditPostDialogPart.jst
 !echoPostBodyPart.jst
 !echoPostSubject.jst

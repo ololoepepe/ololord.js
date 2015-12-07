@@ -665,7 +665,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             options: {
                 rawHtml: c.isRaw,
                 showTripcode: !!req.hashpass && !!fields.tripcode,
-                signAsOp: !!fields.signAsOp
+                signAsOp: ("true" == fields.signAsOp)
             },
             rawText: rawText,
             subject: (fields.subject || null),

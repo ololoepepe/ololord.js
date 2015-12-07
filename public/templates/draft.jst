@@ -1,0 +1,32 @@
+{{~[it.draft] :post}}
+    <div id="draft/{{=post.createdAt}}" class="draft{{? !it.settings.shrinkPosts}} stretchedPost{{?}}"
+         data-key="{{=post.key}}" data-created-at="{{=post.createdAt}}">
+        <div class="postHeader">
+            {{#def.postSubject}}
+            {{#def.postName}}
+            {{? post.options.signAsOp}}
+                <span class="opSign">[OP]</span>
+            {{?}}
+            {{? post.options.showTripcode && post.tripcode}}
+                <span class="tripcode {{=it.deviceType}}">{{=post.tripcode}}</span>
+            {{?}}
+            <span class="postDateTime {{=it.deviceType}}"
+                  name="dateTime">{{ out += it.formattedDate(post.createdAt); }}</span>
+            [<a href="javascript:void(0);" name="fillFormWithDraft" onclick="lord.fillFormWithDraft(this); return false;"
+                title="{{=it.tr.fillFormWithDraftText}}"><img src="/{{=it.site.pathPrefix}}img/fill_form.png"
+                                                              class="buttonImage"></a>]
+            [<a href="javascript:void(0);" name="deleteDraft" onclick="lord.deleteDraft(this); return false;"
+                title="{{=it.tr.deleteDraftText}}"><img src="/{{=it.site.pathPrefix}}img/delete.png"
+                                                              class="buttonImage"></a>]
+        </div>
+        <table class="postBody">
+            <tbody>
+                <tr>
+                    <td class="postText">
+                        <blockquote>{{ out += (post.text || ""); }}</blockquote>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{{~}}
