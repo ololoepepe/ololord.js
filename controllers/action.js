@@ -1,4 +1,3 @@
-var BodyParser = require("body-parser");
 var Crypto = require("crypto");
 var express = require("express");
 var FS = require("q-io/fs");
@@ -17,43 +16,7 @@ var markup = require("../helpers/markup");
 var Tools = require("../helpers/tools");
 var vk = require("../helpers/vk")(config("site.vkontakte.accessToken", ""));
 
-var rootRouter = express.Router();
-
 var router = express.Router();
-
-router.use(BodyParser.urlencoded({ extended: false }));
-
-router.post("/login", function(req, res) {
-    var hashpass = req.body.hashpass;
-    if (typeof hashpass != "string")
-        hashpass = "";
-    if (hashpass && !hashpass.match(/^([0-9a-fA-F]{40})$/)) {
-        var sha1 = Crypto.createHash("sha1");
-        sha1.update(hashpass);
-        hashpass = sha1.digest("hex");
-    }
-    res.cookie("hashpass", hashpass, {
-        expires: Tools.forever(),
-        path: "/"
-    });
-    res.redirect(req.body.source || ("/" + config("site.pathPrefix", "")));
-});
-
-router.post("/redirect", function(req, res) {
-    res.redirect(req.body.url || ("/" + config("site.pathPrefix", "")));
-});
-
-router.post("/logout", function(req, res) {
-    res.cookie("hashpass", "", {
-        expires: Tools.forever(),
-        path: "/"
-    });
-    res.redirect(req.body.source || ("/" + config("site.pathPrefix", "")));
-});
-
-rootRouter.use(router);
-
-router = express.Router();
 
 var getFiles = function(fields, files, transaction) {
     var setFileRating = function(file, id) {
@@ -476,32 +439,6 @@ router.post("/delall", function(req, res) {
     });
 });
 
-router.post("/changeSettings", function(req, res) {
-    Tools.parseForm(req).then(function(result) {
-        var textCookies = ["mode", "style", "codeStyle", "stickyToolbar", "shrinkPosts", "markupMode", "time",
-            "timeZoneOffset", "captchaEngine", "maxAllowedRating", "hidePostformRules", "minimalisticPostform"];
-        var hiddenBoards = [];
-        Tools.forIn(result.fields, function(value, name) {
-            if (name.substr(0, 6) == "board_") {
-                hiddenBoards.push(name.substr(6));
-            } else if (textCookies.indexOf(name) >= 0) {
-                res.cookie(name, value, {
-                    expires: Tools.forever(),
-                    path: "/"
-                });
-            }
-        });
-        res.cookie("hiddenBoards", hiddenBoards.join("|"), {
-            expires: Tools.forever(),
-            path: "/"
-        });
-    }).then(function(result) {
-        res.send({});
-    }).catch(function(err) {
-        controller.error(req, res, err, true);
-    });
-});
-
 router.post("/setThreadFixed", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
@@ -568,6 +505,4 @@ Board.boardNames().forEach(function(name) {
     });
 });
 
-rootRouter.use(router);
-
-module.exports = rootRouter;
+module.exports = router;

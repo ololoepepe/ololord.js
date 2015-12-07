@@ -1,0 +1,9 @@
+87a88,95
+>         // If there are multiple files with the same name, append random string to the name
+>         if (files.hasOwnProperty(name)) {
+>           name += '_';
+>           var buf = crypto.randomBytes(16);
+>           for (var i = 0; i < buf.length; ++i) {
+>             name += ('0' + buf[i].toString(16)).slice(-2);
+>           }
+>         }

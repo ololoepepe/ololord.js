@@ -115,29 +115,6 @@ router.get("/threadInfo.json", function(req, res) {
     });
 });
 
-router.get("/fileInfos.json", function(req, res) {
-    var list = [];
-    if (Util.isArray(req.query.fileNames)) {
-        req.query.fileNames.forEach(function(fileName) {
-            list.push({ fileName: fileName });
-        });
-    } else if (req.query.fileNames) {
-        list.push({ fileName: req.query.fileNames });
-    }
-    if (Util.isArray(req.query.fileHashes)) {
-        req.query.fileHashes.forEach(function(fileHashes) {
-            list.push({ fileHash: fileHash });
-        });
-    } else if (req.query.fileHashes) {
-        list.push({ fileHash: req.query.fileHashes });
-    }
-    boardModel.getFileInfos(list, req.hashpass).then(function(fileInfos) {
-        res.json(fileInfos);
-    }).catch(function(err) {
-        controller.error(req, res, err, true);
-    });
-});
-
 router.get("/fileInfo.json", function(req, res) {
     boardModel.getFileInfos([{
         fileName: req.query.fileName,
@@ -252,14 +229,6 @@ router.get("/captchaQuota.json", function(req, res) {
 router.get("/bannedUser.json", function(req, res) {
     Database.bannedUser(req.query.ip).then(function(user) {
         res.json(user);
-    }).catch(function(err) {
-        controller.error(req, res, err, true);
-    });
-});
-
-router.get("/bannedUsers.json", function(req, res) {
-    Database.bannedUsers().then(function(users) {
-        res.json(users);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
