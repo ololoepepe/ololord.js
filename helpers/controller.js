@@ -216,7 +216,7 @@ controller.notFound = function(req, res) {
         return Promise.all(promises);
     }).then(function(results) {
         var fileNames = results.filter(function(result) {
-            return result.stats.isFile() && result.fileName != ".placeholder";
+            return result.stats.isFile() && result.fileName != ".gitignore";
         }).map(function(result) {
             return result.fileName;
         });
