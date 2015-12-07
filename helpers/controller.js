@@ -665,6 +665,10 @@ controller.translationsModel = function() {
     translate("Expand thread", "expandThreadText");
     translate("Collapse thread", "collapseThreadText");
     translate("Redirecting to thread...", "redirectingToThreadText");
+    translate("YouTube and Coub video embedding", "youtubeCoubEmbeddingMarkup");
+    translate("Vkontakte posts embedding", "vkontakteEmbeddingMarkup");
+    translate("Twitter twits embedding", "twitterEmbeddingMarkup");
+    translate("becomes", "becomesText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

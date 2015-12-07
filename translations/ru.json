@@ -3721,5 +3721,25 @@
         "redirectingToThreadText": {
             "value": "Перенаправление в тред..."
         }
+    },
+    "YouTube and Coub video embedding": {
+        "youtubeCoubEmbeddingMarkup": {
+            "value": "Встраивание видео с YouTube и Coub"
+        }
+    },
+    "Vkontakte posts embedding": {
+        "vkontakteEmbeddingMarkup": {
+            "value": "Встраивание записей из Вконтакте"
+        }
+    },
+    "Twitter twits embedding": {
+        "twitterEmbeddingMarkup": {
+            "value": "Встраиватие твитов из Twitter"
+        }
+    },
+    "becomes": {
+        "becomesText": {
+            "value": "превращается в"
+        }
     }
 }

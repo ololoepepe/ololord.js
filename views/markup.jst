@@ -106,6 +106,45 @@
     <br /><br />
     irc:#some_channel —&gt; <a href="irc:#some_channel">#some_channel</a>
 </div>
+{{? it.site.twitter.integrationEnabled}}
+    <div class="sectionHeader">
+        <h3>{{=it.tr.twitterEmbeddingMarkup}}</h3>
+    </div>
+    <div class="rules">
+        https://twitter.com/Interior/status/463440424141459456
+        <br /><br />
+        {{=it.tr.becomesText}}
+        <br /><br />
+        <blockquote class="twitter-tweet"><p lang="en" dir="ltr">Sunsets don&#39;t get much better than this one over <a href="https://twitter.com/GrandTetonNPS">@GrandTetonNPS</a>. <a href="https://twitter.com/hashtag/nature?src=hash">#nature</a> <a href="https://twitter.com/hashtag/sunset?src=hash">#sunset</a> <a href="http://t.co/YuKy2rcjyU">pic.twitter.com/YuKy2rcjyU</a></p>&mdash; US Dept of Interior (@Interior) <a href="https://twitter.com/Interior/status/463440424141459456">May 5, 2014</a></blockquote><script src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+{{?}}
+{{? it.site.vkontakte.integrationEnabled}}
+    <div class="sectionHeader">
+        <h3>{{=it.tr.vkontakteEmbeddingMarkup}}</h3>
+    </div>
+    <div class="rules">
+        <img src="/{{=it.site.pathPrefix}}img/markup_vk_1.png">
+        <br />
+        <img src="/{{=it.site.pathPrefix}}img/markup_vk_2.png">
+        <div style="overflow-x: auto;"><pre>&lt;div id=&quot;vk_post_1_45616&quot;&gt;&lt;/div&gt;&lt;script type=&quot;text/javascript&quot;&gt; (function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = &quot;//vk.com/js/api/openapi.js?121&quot;; fjs.parentNode.insertBefore(js, fjs); }(document, 'script', 'vk_openapi_js')); (function() { if (!window.VK || !VK.Widgets || !VK.Widgets.Post || !VK.Widgets.Post(&quot;vk_post_1_45616&quot;, 1, 45616, 'ZM4yaNBirAYceJVaXcCrja8wKww', {width: 500})) setTimeout(arguments.callee, 50); }());&lt;/script&gt;</pre></div>
+        <br />
+        {{=it.tr.becomesText}}
+        <br /><br />
+        <div id="vk_post_1_45616"></div><script type="text/javascript"> (function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = "//vk.com/js/api/openapi.js?121"; fjs.parentNode.insertBefore(js, fjs); }(document, 'script', 'vk_openapi_js')); (function() { if (!window.VK || !VK.Widgets || !VK.Widgets.Post || !VK.Widgets.Post("vk_post_1_45616", 1, 45616, 'ZM4yaNBirAYceJVaXcCrja8wKww', {width: 500})) setTimeout(arguments.callee, 50); }());</script>
+    </div>
+{{?}}
+<div class="sectionHeader">
+    <h3>{{=it.tr.youtubeCoubEmbeddingMarkup}}</h3>
+</div>
+<div class="rules">
+    https://www.youtube.com/watch?v=7wHhnX1WMNA
+    <br />
+    http://coub.com/view/qq94
+    <br /><br />
+    {{=it.tr.becomesText}}
+    <br /><br />
+    <span data-video-id="7wHhnX1WMNA" data-video-title="О квадратных формочках и говне, в которое превратился веб" data-video-author="Andrey Bogdanov" data-thumb-url="https://i.ytimg.com/vi/7wHhnX1WMNA/mqdefault.jpg" data-thumb-width="320" data-thumb-height="180"> <img title="YouTube" src="https://youtube.com/favicon.ico" class="signImage noInvert" width="16" height="16"> <a onmouseover="lord.showVideoThumb(event, this);" onmousemove="lord.moveVideoThumb(event, this);" onmouseout="lord.hideVideoThumb(event, this);" title="Andrey Bogdanov" href="https://www.youtube.com/watch?v=7wHhnX1WMNA">О квадратных формочках и говне, в которое превратился веб</a> <a href="javascript:void(0);" class="expandCollapse" onclick="lord.expandCollapseYoutubeVideo(this); return false;">[Развернуть видео]</a><span>
+</div>
 <div class="sectionHeader">
     <h3>{{=it.tr.replacementMarkup}}</h3>
 </div>

@@ -1,5 +1,6 @@
 var express = require("express");
 
+var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Highlight = require("highlight.js");
 var Tools = require("../helpers/tools");
@@ -56,6 +57,11 @@ router.get("/markup.html", function(req, res) {
     });
     var result = Highlight.highlight("cpp", model.codeToMarkup, true);
     model.markedUpCode = "<div class=\"codeBlock cpp hljs\">" + Highlight.fixMarkup(result.value) + "</div>";
+    if (config("site.twitter.integrationEnabled", true))
+        model.extraScripts = [
+            { fileName: "3rdparty/twitter.js" },
+            { fileName: "youtube-coub.js" }
+        ];
     controller(req, "markup", model).then(function(data) {
         res.send(data);
     }).catch(function(err) {

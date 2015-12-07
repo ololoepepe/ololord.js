@@ -45,6 +45,9 @@
         }
     },
     "board": {
+        "bumpLimit": 500,
+        "postLimit": 1000,
+        "captchaEnabled": true,
         "captchaQuota": 10,
         "launchDate": "",
         "maxFileSize": 15728640,
