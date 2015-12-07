@@ -1,6 +1,7 @@
 var FS = require("q-io/fs");
 var FSSync = require("fs-ext");
 var merge = require("merge");
+var promisify = require("promisify-node");
 var Util = require("util");
 
 var Board = require("../boards");
@@ -20,137 +21,86 @@ var cachePath = function() {
     return config("system.cachePath", __dirname + "/../tmp/cache") + (path ? ("/" + path + ".json") : "");
 };
 
-var readFile = function(path) {
-    var recover = function(fd, callback) {
-        FSSync.flock(fd, "un", function(err) {
-            FSSync.close(fd, function(err) {
-                callback(err);
-            });
-        });
-    };
-    return new Promise(function(resolve, reject) {
-        try {
-            FSSync.open(path, "r", function(err, fd) {
-                if (err)
-                    return reject(err);
-                FSSync.flock(fd, "sh", function (err) {
-                    if (err)
-                        return reject(err);
-                    FSSync.stat(path, function(err, stats) {
-                        if (err)
-                            return recover(fd, reject);
-                        if (stats.size <= 0) {
-                            FSSync.flock(fd, "un", function (err) {
-                                var unerr = err;
-                                FSSync.close(fd, function(err) {
-                                    if (err)
-                                        return reject(err);
-                                    if (unerr)
-                                        return reject(unerr);
-                                    resolve("");
-                                });
-                            });
-                            return;
-                        }
-                        var buffer = new Buffer(stats.size);
-                        FSSync.read(fd, buffer, 0, buffer.length, null, function(err) {
-                            if (err)
-                                return recover(fd, reject);
-                            FSSync.flock(fd, "un", function (err) {
-                                var unerr = err;
-                                FSSync.close(fd, function(err) {
-                                    if (err)
-                                        return reject(err);
-                                    if (unerr)
-                                        return reject(unerr);
-                                    resolve(buffer.toString("utf8"));
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        } catch (err) {
-            reject(err);
-        }
+var openFile = promisify(FSSync.open);
+var closeFile = promisify(FSSync.close);
+var flockFile = promisify(FSSync.flock);
+var readData = promisify(FSSync.read);
+var writeData = promisify(FSSync.write);
+
+var recover = function(c, err) {
+    if (!c.fd)
+        return Promise.reject(err);
+    return flockFile(c.fd, "un").catch(function(err) {
+        console.log(err.stack || err);
+        return Promise.resolve();
+    }).then(function() {
+        if (c.noclose)
+            return Promise.resolve();
+        return closeFile(c.fd);
+    }).catch(function(err) {
+        console.log(err.stack || err);
+        return Promise.resolve();
+    }).then(function() {
+        return Promise.reject(err);
     });
+};
+
+var readFile = function(path) {
+    var c = {};
+    return openFile(path, "r").then(function(fd) {
+        c.fd = fd;
+        return flockFile(c.fd, "sh");
+    }).then(function() {
+        c.locked = true;
+        return FS.stat(path);
+    }).then(function(stats) {
+        if (stats.size <= 0)
+            return Promise.resolve();
+        c.buffer = new Buffer(stats.size);
+        return readData(c.fd, c.buffer, 0, c.buffer.length, null);
+    }).then(function() {
+        c.data = c.buffer ? c.buffer.toString("utf8") : "";
+        return flockFile(c.fd, "un");
+    }).then(function() {
+        c.locked = false;
+        return closeFile(c.fd);
+    }).then(function() {
+        return Promise.resolve(c.data);
+    }).catch(recover.bind(null, c));
 };
 
 var writeFile = function(path, data) {
-    var recover = function(fd, callback) {
-        FSSync.flock(fd, "un", function(err) {
-            FSSync.close(fd, function(err) {
-                callback(err);
-            });
-        });
-    };
-    return new Promise(function(resolve, reject) {
-        try {
-            FSSync.open(path, "w", function(err, fd) {
-                if (err)
-                    return reject(err);
-                FSSync.flock(fd, "ex", function (err) {
-                    if (err)
-                        return reject(err);
-                    FSSync.write(fd, data, null, "utf8", function(err) {
-                        if (err)
-                            return recover(fd, reject);
-                        FSSync.fsync(fd, function(err) {
-                            var syncErr = err;
-                            FSSync.flock(fd, "un", function (err) {
-                                var unerr = err;
-                                FSSync.close(fd, function(err) {
-                                    if (err)
-                                        return reject(err);
-                                    if (syncErr)
-                                        reject(syncErr);
-                                    else if (unerr)
-                                        reject(unerr);
-                                    else
-                                        resolve();
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        } catch (err) {
-            reject(err);
-        }
-    });
+    var c = {};
+    return openFile(path, "w").then(function(fd) {
+        c.fd = fd;
+        return flockFile(c.fd, "ex");
+    }).then(function() {
+        c.locked = true;
+        return writeData(c.fd, data, null, "utf8");
+    }).then(function() {
+        return flockFile(c.fd, "un");
+    }).then(function() {
+        c.locked = false;
+        return closeFile(c.fd);
+    }).then(function() {
+        return Promise.resolve(c.data);
+    }).catch(recover.bind(null, c));
 };
 
 var removeFile = function(path) {
-    var recover = function(fd, callback) {
-        FSSync.flock(fd, "un", function(err) {
-            FSSync.close(fd, function(err) {
-                callback(err);
-            });
-        });
-    };
-    return new Promise(function(resolve, reject) {
-        try {
-            FSSync.open(path, "r", function(err, fd) {
-                if (err)
-                    return reject(err);
-                FSSync.flock(fd, "ex", function (err) {
-                    if (err)
-                        return reject(err);
-                    FSSync.unlink(path, function(err) {
-                        if (err)
-                            return recover(fd, reject);
-                        FSSync.flock(fd, "un", function (err) {
-                            if (err)
-                                return reject(err);
-                            resolve();
-                        });
-                    });
-                });
-            });
-        } catch (err) {
-            reject(err);
-        }
-    });
+    var c = { noclose: true };
+    return openFile(path, "w").then(function(fd) {
+        c.fd = fd;
+        return flockFile(c.fd, "ex");
+    }).then(function() {
+        c.locked = true;
+        return FS.remove(path);
+    }).then(function() {
+        return flockFile(c.fd, "un");
+    }).then(function() {
+        c.locked = false;
+        return Promise.resolve();
+    }).catch(recover.bind(null, c));
 };
 
 module.exports.getLastPostNumbers = function(boardNames) {

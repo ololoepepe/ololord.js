@@ -3,7 +3,7 @@
 lord.reloadCaptchaFunction = function() {
     var captcha = lord.id("captcha");
     if (!captcha)
-        return lord.showPopup("No captcha", {type: "critical"});
+        return;
     var image = lord.nameOne("image", captcha);
     var challenge = lord.nameOne("yandexCaptchaChallenge", captcha);
     var response = lord.nameOne("yandexCaptchaResponse", captcha);

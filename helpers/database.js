@@ -1,3 +1,4 @@
+var Address4 = require("ip-address").Address4;
 var Address6 = require("ip-address").Address6;
 var bigInt = require("big-integer");
 var FS = require("q-io/fs");
@@ -1095,10 +1096,14 @@ var getGeolocationInfo = function(ip) {
     var address = Tools.correctAddress(ip);
     if (!address)
         return Promise.resolve(info);
+    var ipv4 = Tools.preferIPv4(ip);
     var q = "SELECT ipFrom, countryCode, countryName, cityName FROM ip2location WHERE ipTo >= ? LIMIT 1";
     var stmt = dbGeo.prepare(q);
     stmt.pget = promisify(stmt.get);
-    address = bigInt(new Address6(address).bigInteger().toString());
+    if (ipv4)
+        address = bigInt(new Address4(ipv4).bigInteger().toString());
+    else
+        address = bigInt(new Address6(address).bigInteger().toString());
     return stmt.pget(address.toString()).then(function(result) {
         stmt.finalize();
         if (!result)

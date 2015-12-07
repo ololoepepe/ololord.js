@@ -169,6 +169,9 @@ window.addEventListener("load", function load() {
 }, false);
 
 lord.reloadCaptchaFunction = function() {
+    var captcha = lord.id("captcha");
+    if (!captcha)
+        return;
     lord.codecha.requestNewChallenge();
     lord.id("codecha_widget").style.display = "";
     lord.id("codecha_ready_widget").style.display = "none";

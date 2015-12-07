@@ -127,15 +127,6 @@ if (cluster.isMaster) {
         Global.IPC.installHandler("fileName", function(boardName) {
             return fileName(boardName);
         });
-        Global.IPC.installHandler("generatePages", function(boardName) {
-            return BoardModel.scheduleGeneratePages(boardName);
-        });
-        Global.IPC.installHandler("generateThread", function(data) {
-            return BoardModel.scheduleGenerateThread(data.boardName, data.threadNumber, data.postNumber, data.action);
-        });
-        Global.IPC.installHandler("generateCatalog", function(boardName) {
-            return BoardModel.scheduleGenerateCatalog(boardName);
-        });
         Global.IPC.installHandler("generate", function(data) {
             return BoardModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);
         });
