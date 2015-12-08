@@ -1340,7 +1340,8 @@ lord.setSettings = function(model) {
 };
 
 lord.checkError = function(result) {
-    return (["object", "number", "boolean"].indexOf(typeof result) < 0) || (result && result.errorMessage);
+    return (["object", "number", "boolean"].indexOf(typeof result) < 0)
+        || (result && (result.errorMessage || result.ban));
 };
 
 lord.handleError = function(error) {
@@ -1353,6 +1354,23 @@ lord.handleError = function(error) {
             text = error.errorMessage;
             if (error.errorDescription)
                 text += ": " + error.errorDescription;
+        } else if (error.ban) {
+            var model = lord.model("base");
+            var settings = lord.settings();
+            var locale = model.site.locale;
+            var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
+            var dateFormat = model.site.dateFormat;
+            var formattedDate = function(date) {
+                return moment(date).utcOffset(timeOffset).locale(locale).format(dateFormat);
+            };
+            text = lord.text("bannedText") + ".";
+            if (error.ban.reason)
+                text += " " + lord.text("banReasonLabelText") + " " + error.ban.reason + ".";
+            text += " " + lord.text("banExpiresLabelText") + " ";
+            if (error.ban.expiresAt)
+                text += formattedDate(error.ban.expiresAt);
+            else
+                text += lord.text("banExpiresNeverText");
         } else if (error.hasOwnProperty("readyState")) {
             //TODO: error status
             switch (error.status) {

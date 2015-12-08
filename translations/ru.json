@@ -1,15 +1,8 @@
 {
     "You are banned": {
-        "error": {
+        "bannedText": {
             "value": "Вы забанены"
-        },
-        "banMessage": {
-            "value": "Вы забанены"
-        },
-        "errorMessage": {
-            "value": "Вы забанены"
-        },
-        "_obsolete": true
+        }
     },
     "Next page": {
         "toNextPageText": {
@@ -3194,13 +3187,9 @@
         "_obsolete": true
     },
     "never": {
-        "banExpires": {
+        "banExpiresNeverText": {
             "value": "никогда"
-        },
-        "errorDescription": {
-            "value": "никогда"
-        },
-        "_obsolete": true
+        }
     },
     "Expires": {
         "banExpiresLabel": {

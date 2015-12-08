@@ -160,8 +160,7 @@ controller.error = function(req, res, error, ajax) {
             if (Tools.contains(process.argv.slice(2), "--dev-mode"))
                 console.log(error);
             if (error.ban) {
-                model.errorMessage = Tools.translate("Your are banned", "errorMessage");
-                model.errorDescription = error.ban.reason || "";
+                model.ban = error.ban;
             } else {
                 model.errorMessage = error.description ? error.error : Tools.translate("Error", "errorMessage");
                 model.errorDescription = error.description || error.error;
@@ -677,6 +676,8 @@ controller.translationsModel = function() {
     translate("becomes", "becomesText");
     translate("Previous file", "previousFileText");
     translate("Next file", "nextFileText");
+    translate("You are banned", "bannedText");
+    translate("never", "banExpiresNeverText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

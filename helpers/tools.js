@@ -494,6 +494,10 @@ module.exports.proxy = function() {
 module.exports.correctAddress = function(ip) {
     if (!ip)
         return null;
+    if ("::1" == ip)
+        ip = "127.0.0.1";
+    if (ip.replace(":", "") == ip)
+        ip = "::" + ip;
     try {
         var address = new Address6(ip);
         if (address.isValid())

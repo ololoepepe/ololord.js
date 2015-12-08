@@ -6,7 +6,7 @@ var controller = require("../helpers/controller");
 var Tools = require("../helpers/tools");
 
 module.exports = function(req, res, next) {
-    var trueIp = req.ip;
+    var trueIp = Tools.correctAddress(req.ip);
     if (!trueIp)
         return res.sendStatus(500);
     if (config("system.detectRealIp", true)) {
