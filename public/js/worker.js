@@ -775,7 +775,7 @@ lord.getFileHash = function(data) {
 };
 
 lord.message_parseSpells = function(data) {
-    if (!data || typeof data != "string")
+    if (typeof data != "string")
         return Promise.reject("Invalid data");
     return lord.parseSpells(data);
 };
