@@ -404,7 +404,17 @@ router.post("/banUser", function(req, res) {
             if ("NONE" == level)
                 return;
             var expiresAt = result.fields["banExpires_" + value];
-            expiresAt = expiresAt? moment(expiresAt, "DD.MM.YYYY:HH") : null;
+            if (expiresAt) {
+                var timeOffset = ("local" == req.settings.time) ? +req.settings.timeZoneOffset
+                    : config("site.timeOffset", 0);
+                var hours = Math.floor(timeOffset / 60);
+                var minutes = Math.abs(timeOffset) % 60;
+                var tz = ((timeOffset > 0) ? "+" : "") + ((Math.abs(hours) < 10) ? "0" : "") + hours + ":"
+                    + ((minutes < 10) ? "0" : "") + minutes;
+                expiresAt = moment(expiresAt + " " + tz, "DD.MM.YYYY:HH ZZ");
+            } else {
+                expiresAt = null;
+            }
             c.bans.push({
                 boardName: value,
                 expiresAt: +expiresAt ? expiresAt : null,
