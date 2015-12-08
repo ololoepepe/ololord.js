@@ -41,6 +41,8 @@
                         <td colspan="2">
                             <input type="checkbox" name="playAutoUpdateSound"
                                    {{? it.settings.playAutoUpdateSound}}checked="false"{{?}} /><label>{{=it.tr.playAutoUpdateSoundLabelText}}</label>
+                            <input type="number" min="0" max="100" name="soundNotificationsVolume" class="numberSize3"
+                                   value="{{=it.settings.soundNotificationsVolume}}" /> %
                         </td>
                     </tr>
                     <tr>

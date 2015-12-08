@@ -199,14 +199,24 @@ blockquote {
     max-height: 300px;
     box-sizing: border-box;
     max-width: 1200px;
+    overflow-wrap: break-word;
     word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
+blockquote.mobile {
+    max-width: 550px;
 }
 
 blockquote.expand {
     max-height: none;
 }
 
-span.spoiler, span.spoiler a, span.spoiler .cspoilerTitle {
+span.spoiler, span.spoiler a, span.spoiler .cspoilerTitle, span.spoiler .quotation {
     background: #F0D0B6;
     color: #F0D0B6;
 }
@@ -221,6 +231,10 @@ span.spoiler:hover a {
 
 span.spoiler:hover .cspoilerTitle {
     color: #E08060;
+}
+
+span.spoiler:hover .quotation {
+    color: #789922;
 }
 
 span.tooltip {
@@ -911,7 +925,11 @@ blockquote.blockquoteThread.expand {
 .codeBlock {
     font-family: monospace;
     white-space: pre;
+    word-break: normal;
+    word-wrap: normal;
+    overflow-wrap: normal;
     padding-left: 20px !important;
+    overflow-x: auto;
 }
 
 /*span.spoiler, span.spoiler a <- Board*/
@@ -1224,4 +1242,8 @@ input.buttonImage {
 
 [id^="vk_post_"] {
     padding: 4px 5px 4px 5px;
+}
+
+.overflowContainer {
+    overflow-x: auto;
 }

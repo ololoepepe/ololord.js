@@ -1165,6 +1165,7 @@ lord.playSound = function() {
         var source = lord.node("source");
         source.type = "audio/ogg";
         source.src = "/" + lord.data("sitePathPrefix") + "audio/signal.ogg";
+        lord.sound.volume = lord.getLocalObject("soundNotificationsVolume", 100) / 100;
         lord.sound.appendChild(source);
     }
     lord.sound.play();
@@ -1309,6 +1310,7 @@ lord.settings = function() {
         autoUpdateInterval: lord.getLocalObject("autoUpdateInterval", 15),
         showAutoUpdateDesktopNotifications: lord.getLocalObject("showAutoUpdateDesktopNotifications", true),
         playAutoUpdateSound: lord.getLocalObject("playAutoUpdateSound", false),
+        soundNotificationsVolume: lord.getLocalObject("soundNotificationsVolume", 100),
         signOpPostLinks: lord.getLocalObject("signOpPostLinks", true),
         signOwnPostLinks: lord.getLocalObject("signOwnPostLinks", true),
         showLeafButtons: lord.getLocalObject("showLeafButtons", true),

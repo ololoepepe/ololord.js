@@ -591,7 +591,7 @@ var convertCode = function(_, text, matchs, _, options) {
 
 var convertVkontaktePost = function(_, _, matchs, _, options) {
     options.type = SkipTypes.HtmlSkip;
-    return Promise.resolve(matchs[0]);
+    return Promise.resolve("<div class=\"overflowContainer\">" + matchs[0] + "</div>");
 };
 
 var convertExternalLink = function(_, _, matchs, _, options) {
