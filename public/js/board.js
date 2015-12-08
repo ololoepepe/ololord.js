@@ -1388,7 +1388,7 @@ lord.fileAddedCommon = function(div, file) {
                 if (div.droppedFile)
                     delete div.droppedFile;
             });
-        }).catch(lord.handleError);;
+        }).catch(lord.handleError);
     }
     var preview = function() {
         if (!file)
@@ -2753,9 +2753,11 @@ lord.initializeOnLoadBaseBoard = function() {
     }).then(function() {
         setTimeout(function() {
             var hash = lord.hash();
-            if (hash && "#" != hash)
+            if (hash && "#" != hash) {
+                window.location.hash = "";
                 window.location.hash = hash;
-        }, 1000);
+            }
+        }, lord.Second);
         var threadNumber = +lord.data("threadNumber");
         var key = lord.data("boardName") + (threadNumber ? ("/" + threadNumber) : "");
         var drafts = lord.getLocalObject("drafts", {})[key];
@@ -2867,7 +2869,7 @@ lord.initializeOnLoadBaseBoard = function() {
                 delay: 10,
                 n: 10
             });
-        });
+        }).catch(lord.handleError);
         lord.query(".opPost").forEach(function(opPost) {
             var threadNumber = +opPost.id;
             var btn = lord.nameOne("addToFavoritesButton", opPost);
