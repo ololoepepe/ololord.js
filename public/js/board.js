@@ -1130,10 +1130,13 @@ lord.editAudioTags = function(el) {
 lord.addToPlaylist = function(a) {
     var boardName = lord.data("boardName", a, true);
     var fileName = lord.data("fileName", a, true);
-    var tracks = lord.getLocalObject("playlist/tracks", {});
-    if (tracks.hasOwnProperty(boardName + "/" + fileName))
-        return;
-    tracks[boardName + "/" + fileName] = {
+    var trackList = lord.getLocalObject("playlist/trackList", []);
+    for (var i = 0; i < trackList.length; ++i) {
+        var track = trackList[i];
+        if (boardName == track.boardName && fileName == track.fileName)
+            return;
+    }
+    trackList.push({
         boardName: boardName,
         fileName: fileName,
         mimeType: lord.data("mimeType", a, true),
@@ -1143,8 +1146,8 @@ lord.addToPlaylist = function(a) {
         artist: lord.data("audioTagArtist", a, true),
         title: lord.data("audioTagTitle", a, true),
         year: lord.data("audioTagYear", a, true)
-    };
-    lord.setLocalObject("playlist/tracks", tracks);
+    });
+    lord.setLocalObject("playlist/trackList", trackList);
 };
 
 lord.viewPost = function(a, boardName, postNumber, hiddenPost) {

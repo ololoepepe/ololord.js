@@ -1875,6 +1875,11 @@
             "value": "Показывать уведомления на рабочем столе"
         }
     },
+    "Play sound": {
+        "playAutoUpdateSoundLabelText": {
+            "value": "Звуковые уведомления"
+        }
+    },
     "Files": {
         "filesTabText": {
             "value": "Файлы"

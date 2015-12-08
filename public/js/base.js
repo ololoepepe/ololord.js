@@ -228,6 +228,8 @@ lord.checkFavoriteThreads = function() {
                         threadNumber: fav.threadNumber
                     });
                 }
+                if (lord.soundEnabled())
+                    lord.playSound();
                 if (div) {
                     var postDiv = lord.id("favorite/" + fav.boardName + "/" + fav.threadNumber);
                     if (!postDiv)

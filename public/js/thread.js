@@ -250,6 +250,8 @@ lord.updateThread = function(silent) {
                     icon = "/" + sitePathPrefix + boardName + "/thumb/" + p.fileInfos[0].thumb.name;
                 lord.showNotification(title, (p.rawText || (boardName + "/" + p.number)).substr(0, 300), icon);
             }
+            if (lord.soundEnabled())
+                lord.playSound();
         }
     }).catch(function(err) {
         if (popup)

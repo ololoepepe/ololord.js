@@ -5,9 +5,50 @@ var lord = lord || {};
 /*Variables*/
 
 lord.currentTracks = {};
-lord.blockVolumeChange = false;
 
 /*Functions*/
+
+lord.allowTrackDrop = function(e) {
+    e.preventDefault();
+}
+
+lord.trackDrag = function(e) {
+    e.dataTransfer.setData("text", $(e.target).closest(".track")[0].id);
+}
+
+lord.trackDrop = function(e) {
+    e.preventDefault();
+    var data = e.dataTransfer.getData("text");
+    var parent = lord.id("playlist");
+    var draggedTrack = lord.id(data);
+    var replacedTrack = $(e.target).closest(".track")[0];
+    if (!draggedTrack || !replacedTrack)
+        return;
+    var draggedBoardName = lord.data("boardName", draggedTrack);
+    var draggedFileName = lord.data("fileName", draggedTrack);
+    var replacedBoardName = lord.data("boardName", replacedTrack);
+    var replacedFileName = lord.data("fileName", replacedTrack);
+    var draggedIndex;
+    var replacedIndex;
+    var trackList = lord.getLocalObject("playlist/trackList", []);
+    for (var i = 0; i < trackList.length; ++i) {
+        var track = trackList[i];
+        if (draggedBoardName == track.boardName && draggedFileName == track.fileName) {
+            draggedIndex = i;
+            if (replacedIndex >= 0)
+                break;
+        }
+        if (replacedBoardName == track.boardName && replacedFileName == track.fileName) {
+            replacedIndex = i;
+            if (draggedIndex >= 0)
+                break;
+        }
+    }
+    if (draggedIndex >= 0 && replacedIndex >= 0)
+        trackList[draggedIndex] = trackList.splice(replacedIndex, 1, trackList[draggedIndex])[0];
+    lord.setLocalObject("playlist/trackList", trackList);
+    parent.insertBefore(draggedTrack, replacedTrack);
+};
 
 lord.addTrack = function(key, track) {
     var model = merge.recursive(track, lord.model(["base", "tr"], true));
@@ -28,11 +69,25 @@ lord.addTrack = function(key, track) {
         var nextDiv = audio.parentNode.nextSibling;
         if (!nextDiv)
             return;
-        lord.queryOne("audio", nextDiv).play();
+        var nextAudio = lord.queryOne("audio", nextDiv);
+        nextAudio.volume = audio.volume;
+        nextAudio.play();
     }, false);
 };
 
-lord.removeTrack = function(key) {
+lord.removeFromPlaylist = function(a) {
+    var boardName = lord.data("boardName", a, true);
+    var fileName = lord.data("fileName", a, true);
+    var key = boardName + "/" + fileName;
+    var trackList = lord.getLocalObject("playlist/trackList", []);
+    for (var i = 0; i < trackList.length; ++i) {
+        var track = trackList[i];
+        if (boardName == track.boardName && fileName == track.fileName) {
+            trackList.splice(i, 1);
+            break;
+        }
+    }
+    lord.setLocalObject("playlist/trackList", trackList);
     var node = lord.id("track/" + key);
     if (node)
         lord.id("playlist").removeChild(node);
@@ -40,29 +95,15 @@ lord.removeTrack = function(key) {
         delete lord.currentTracks[key];
 };
 
-lord.removeFromPlaylist = function(a) {
-    var boardName = lord.data("boardName", a, true);
-    var fileName = lord.data("fileName", a, true);
-    var key = boardName + "/" + fileName;
-    var tracks = lord.getLocalObject("playlist/tracks", {});
-    if (!tracks.hasOwnProperty(key))
-        return;
-    delete tracks[key];
-    lord.setLocalObject("playlist/tracks", tracks);
-    lord.removeTrack(key);
-};
-
 lord.checkPlaylist = function() {
-    var tracks = lord.getLocalObject("playlist/tracks", {});
-    lord.forIn(tracks, function(track, key) {
-        if (!lord.currentTracks[key])
-            lord.addTrack(key, track);
+    lord.getLocalObject("playlist/trackList", []).forEach(function(track) {
+        var key = track.boardName + "/" + track.fileName;
+        if (lord.currentTracks.hasOwnProperty(key))
+            return;
+        lord.currentTracks[key] = {};
+        lord.addTrack(key, track);
     });
-    lord.forIn(lord.currentTracks, function(_, key) {
-        if (!tracks[key])
-            lord.removeTrack(key);
-    });
-    setTimeout(lord.checkPlaylist, 1000);
+    setTimeout(lord.checkPlaylist, lord.Second);
 };
 
 window.addEventListener("load", function load() {

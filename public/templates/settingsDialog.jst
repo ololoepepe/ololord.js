@@ -39,6 +39,12 @@
                     </tr>
                     <tr>
                         <td colspan="2">
+                            <input type="checkbox" name="playAutoUpdateSound"
+                                   {{? it.settings.playAutoUpdateSound}}checked="false"{{?}} /><label>{{=it.tr.playAutoUpdateSoundLabelText}}</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
                             <input type="checkbox" name="signOpPostLinks"
                                    {{? it.settings.signOpPostLinks}}checked="true"{{?}} /><label>{{=it.tr.signOpPostLinksLabelText}}</label>
                         </td>

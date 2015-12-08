@@ -1000,6 +1000,7 @@ blockquote.blockquoteThread.expand {
 .track {
     background-color: #F0E0D6;
     padding: 2px 2px 2px 2px;
+    display: table;
 }
 
 .track ~ .track {

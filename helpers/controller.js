@@ -500,6 +500,7 @@ controller.translationsModel = function() {
     translate("Auto update threads by default", "autoUpdateThreadsByDefaultLabelText");
     translate("Auto update interval (sec):", "autoUpdateIntervalLabelText");
     translate("Show desktop notifications", "showAutoUpdateDesktopNotificationsLabelText");
+    translate("Play sound", "playAutoUpdateSoundLabelText");
     translate("Mark OP post links", "signOpPostLinksLabelText");
     translate("Mark own post links", "signOwnPostLinksLabelText");
     translate("Show file leaf buttons", "showLeafButtonsLabelText");

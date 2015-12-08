@@ -1152,7 +1152,22 @@ lord.activateTab = function(a, tabIndex, display) {
 };
 
 lord.notificationsEnabled = function() {
-    return lord.getLocalObject("showAutoUpdateDesktopNotifications", false);
+    return lord.getLocalObject("showAutoUpdateDesktopNotifications", true);
+};
+
+lord.soundEnabled = function() {
+    return lord.getLocalObject("playAutoUpdateSound", false);
+};
+
+lord.playSound = function() {
+    if (!lord.sound) {
+        lord.sound = lord.node("audio");
+        var source = lord.node("source");
+        source.type = "audio/ogg";
+        source.src = "/" + lord.data("sitePathPrefix") + "audio/signal.ogg";
+        lord.sound.appendChild(source);
+    }
+    lord.sound.play();
 };
 
 lord.nearlyEqual = function(a, b, epsilon) {
@@ -1293,6 +1308,7 @@ lord.settings = function() {
         autoUpdateThreadsByDefault: lord.getLocalObject("autoUpdateThreadsByDefault", false),
         autoUpdateInterval: lord.getLocalObject("autoUpdateInterval", 15),
         showAutoUpdateDesktopNotifications: lord.getLocalObject("showAutoUpdateDesktopNotifications", true),
+        playAutoUpdateSound: lord.getLocalObject("playAutoUpdateSound", false),
         signOpPostLinks: lord.getLocalObject("signOpPostLinks", true),
         signOwnPostLinks: lord.getLocalObject("signOwnPostLinks", true),
         showLeafButtons: lord.getLocalObject("showLeafButtons", true),
