@@ -756,6 +756,13 @@ lord.initializeOnLoadSettings = function() {
         script.innerHTML = js;
         head.appendChild(script);
     }
+    if (lord.queryOne(".toolbar")) {
+        window.addEventListener("hashchange", function() {
+            var offset = $(":target").offset();
+            var scrollto = offset.top - $(".toolbar").height();
+            $("html, body").animate({ scrollTop: scrollto }, 0);
+        }, false);
+    }
 };
 
 window.addEventListener("load", function load() {
