@@ -528,8 +528,10 @@ lord.globalOnclick = function(e) {
             return;
         }
     }
-    if (!lord.getLocalObject("closeFilesByClickingOnly", false))
+    if (!lord.getLocalObject("closeFilesByClickingOnly", false)
+        || (lord.img && lord.img.mimeType.replace("audio/", "") != lord.img.mimeType)) {
         lord.hideImage();
+    }
 };
 
 lord.initFiles = function() {
