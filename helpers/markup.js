@@ -432,7 +432,7 @@ var process = function(info, conversionFunction, regexps, options) {
         : null;
     var rerun = false;
     var f = function() {
-        if (!matchs || (rxCl && matche && matche.index <= matchs.index))
+        if (!matchs || (rxCl && (!matche || matche.index <= matchs.index)))
             return Promise.resolve();
         if (checkFunction && !checkFunction(info, matchs, matche)) {
             if (rxCl && matche)
@@ -539,7 +539,7 @@ var checkExternalLink = function(info, matchs) {
     return matchs[2].split(".").length == 3 || Tools.externalLinkRootZoneExists(matchs[4]);
 };
 
-var checkNotInterrupted = function(info, matchs, matche) {
+var checkQuotationNotInterrupted = function(info, matchs, matche) {
     if (info.isIn(matchs.index, matche.index - matchs.index))
         return false;
     if (0 == matchs.index)
@@ -980,7 +980,7 @@ var processPostText = function(boardName, text, options) {
             return process(info, convertCitation, {
                 op: ">",
                 cl: /\n|$/gi
-            }, { checkFunction: checkNotInterrupted });
+            }, { checkFunction: checkQuotationNotInterrupted });
         });
     }
     return p.then(function() {
