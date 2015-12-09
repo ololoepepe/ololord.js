@@ -536,7 +536,7 @@ module.exports.pageCount = function(boardName) {
 };
 
 var renderThread = function(board, thread) {
-    var p = board.renderPost(thread.opPost, null, thread.opPost);
+    var p = Promise.resolve();
     if (thread.lastPosts) {
         thread.lastPosts.forEach(function(post) {
             p = p.then(function() {
@@ -544,6 +544,9 @@ var renderThread = function(board, thread) {
             });
         });
     }
+    p = p.then(function() {
+        return board.renderPost(thread.opPost, null, thread.opPost);
+    });
     return p;
 };
 
