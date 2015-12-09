@@ -14,12 +14,14 @@
     </h1>
 </div>
 <div id="bannedUsers">
-    {{~it.bannedUsers :user}}
+    {{ for (var ip in it.bannedUsers) { }}
+        {{ if (!it.bannedUsers.hasOwnProperty(ip)) continue; }}
+        {{ var user = { ip: ip, bans: it.bannedUsers[ip] }; }}
         <div id="user{{=user.ip}}">
             {{#def.userBan}}
             <br />
         </div>
-    {{~}}
+    {{ } }}
 </div>    
 <hr />
 <div>

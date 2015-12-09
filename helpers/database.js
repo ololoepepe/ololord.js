@@ -14,6 +14,7 @@ XML2JS = require("xml2js");
 var mkpath = promisify("mkpath");
 
 var Board = require("../boards");
+var BoardModel = require("../models/board");
 var Captcha = require("../captchas");
 var config = require("./config");
 var controller = require("./controller");
@@ -197,13 +198,10 @@ module.exports.getThread = function(boardName, threadNumber) {
 };
 
 var bannedFor = function(boardName, postNumber, userIp) {
-    return db.hget("bannedUsers", userIp).then(function(result) {
-        if (!result)
-            return Promise.resolve(false);
-        var ban = JSON.parse(result).bans[boardName];
+    return db.get("userBans:" + userIp + ":" + boardName).then(function(ban) {
         if (!ban)
             return Promise.resolve(false);
-        return Promise.resolve(ban.postNumber == postNumber);
+        return Promise.resolve(JSON.parse(ban).postNumber == postNumber);
     });
 };
 
@@ -602,6 +600,8 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     var board = Board.board(fields.boardName);
     if (!board)
         return Promise.reject("Invalid board");
+    if (!board.postingEnabled)
+        return Promise.reject("Posting is disabled on this board");
     date = date || Tools.now();
     var c = {};
     if (threadNumber)
@@ -626,6 +626,8 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     }).then(function(threads) {
         if (!threads || threads.length != 1)
             return Promise.reject("No such thread or no access to thread");
+        if (thread.closed)
+            return Promise.reject("Posting is disabled in this thread");
         c.level = req.level || null;
         c.isRaw = !!fields.raw && compareRegisteredUserLevels(c.level, RegisteredUserLevels.Admin) >= 0;
         return db.scard("threadPostNumbers:" + board.name + ":" + threadNumber);
@@ -973,6 +975,8 @@ module.exports.createThread = function(req, fields, files, transaction) {
     var board = Board.board(fields.boardName);
     if (!board)
         return Promise.reject("Invalid board");
+    if (!board.postingEnabled)
+        return Promise.reject("Posting is disabled on this board");
     var c = {};
     var date = Tools.now();
     var hashpass = req.hashpass || null;
@@ -2025,21 +2029,59 @@ module.exports.editAudioTags = function(req, res, fields) {
     });
 };
 
-module.exports.bannedUser = function(ip) {
-    return db.hget("bannedUsers", Tools.correctAddress(ip)).then(function(user) {
-        if (!user)
-            return Promise.resolve(null);
-        return Promise.resolve(JSON.parse(user));
+module.exports.userBans = function(ip) {
+    if (!ip) {
+        var users = {};
+        return db.keys("userBans:*").then(function(keys) {
+            var ips = {};
+            keys.forEach(function(key) {
+                var boardName = key.split(":").pop();
+                var ip = key.replace(":" + boardName, "").split(":").slice(1).join(":");
+                if (!ips.hasOwnProperty(ip))
+                    ips[ip] = {};
+            });
+            ips = Tools.mapIn(ips, function(_, key) {
+                return key;
+            });
+            var p = Promise.resolve();
+            ips.forEach(function(ip) {
+                p = p.then(function() {
+                    return module.exports.userBans(ip);
+                }).then(function(bans) {
+                    users[ip] = bans;
+                });
+            });
+            return p;
+        }).then(function() {
+            return Promise.resolve(users);
+        });
+    }
+    var p = Promise.resolve();
+    var bans = {};
+    var address = Tools.correctAddress(ip);
+    Board.boardNames().forEach(function(boardName) {
+        p = p.then(function() {
+            return db.get("userBans:" + address + ":" + boardName);
+        }).then(function(ban) {
+            if (!ban)
+                return Promise.resolve();
+            bans[boardName] = JSON.parse(ban);
+            return Promise.resolve();
+        });;
+    });
+    return p.then(function() {
+        return Promise.resolve(bans);
     });
 };
 
-module.exports.bannedUsers = function() {
-    return db.hgetall("bannedUsers").then(function(result) {
-        var users = [];
-        Tools.forIn(result, function(user, ip) {
-            users.push(JSON.parse(user));
-        });
-        return Promise.resolve(users);
+var updatePostBanInfo = function(boardName, ban) {
+    return db.hget("posts", boardName + ":" + ban.postNumber).then(function(post) {
+        if (!post)
+            return Promise.resolve();
+        if (Global.Generate)
+            return Global.generate(boardName, JSON.parse(post).threadNumber, ban.postNumber, "edit");
+        else
+            return BoardModel.scheduleGenerate(boardName, JSON.parse(post).threadNumber, ban.postNumber, "edit");
     });
 };
 
@@ -2068,18 +2110,48 @@ module.exports.banUser = function(req, ip, bans) {
         user = user ? JSON.parse(user) : null;
         if (user && compareRegisteredUserLevels(req.level, user.level) <= 0)
             return Promise.reject("Not enough rights");
-        if (bans.length < 1)
-            return db.hdel("bannedUsers", address);
         var date = Tools.now();
         bans = bans.reduce(function(acc, ban) {
             ban.createdAt = date;
             acc[ban.boardName] = ban;
             return acc;
         }, {});
-        return db.hset("bannedUsers", address, JSON.stringify({
-            ip: address,
-            bans: bans
-        }));
+        var p = Promise.resolve();
+        Board.boardNames().forEach(function(boardName) {
+            p = p.then(function() {
+                var key = "userBans:" + address + ":" + boardName;
+                var ban = bans[boardName];
+                if (!ban) {
+                    return db.get(key).then(function(banString) {
+                        if (banString)
+                            ban = JSON.parse(banString);
+                        return db.del(key);
+                    }).then(function() {
+                        if (!ban || !ban.postNumber)
+                            return Promise.resolve();
+                        return updatePostBanInfo(boardName, ban);
+                    });
+                }
+                return db.set(key, JSON.stringify(ban)).then(function() {
+                    if (!ban.expiresAt)
+                        return Promise.resolve();
+                    var ttl = Math.ceil((+ban.expiresAt - +Tools.now()) / 1000);
+                    if (ban.postNumber) {
+                        setTimeout(function() {
+                            updatePostBanInfo(boardName, ban).catch(function(err) {
+                                console.log(err.stack || err);
+                            });
+                        }, (ttl + 1) * Tools.Second); //NOTE: Adding extra delay
+                    }
+                    return db.expire(key, ttl);
+                }).then(function() {
+                    if (!ban.postNumber)
+                        return Promise.resolve();
+                    return updatePostBanInfo(boardName, ban);
+                });
+            });
+        });
+        return p;
     });
 };
 
@@ -2123,6 +2195,30 @@ module.exports.delall = function(req, fields) {
         var promises = posts.map(function(post) {
             return (post.threadNumber == post.number) ? removeThread(post.boardName, post.number)
                 : removePost(post.boardName, post.number);
+        });
+    });
+};
+
+module.exports.initialize = function() {
+    return module.exports.userBans().then(function(users) {
+        var p = Promise.resolve();
+        Tools.forIn(users, function(bans, ip) {
+            Tools.forIn(bans, function(ban, boardName) {
+                if (!ban.postNumber)
+                    return;
+                p = p.then(function() {
+                    return db.ttl("userBans:" + ip + ":" + boardName);
+                }).then(function(ttl) {
+                    if (ttl <= 0)
+                        return Promise.resolve();
+                    setTimeout(function() {
+                        updatePostBanInfo(boardName, ban).catch(function(err) {
+                            console.log(err.stack || err);
+                        });
+                    }, (ttl + 1) * Tools.Second); //NOTE: Adding extra delay
+                    return Promise.resolve();
+                });
+            });
         });
     });
 };

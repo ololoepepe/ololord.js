@@ -2,9 +2,7 @@ lord.banUser = function(e, form) {
     e.preventDefault();
     var c = {};
     var ip = lord.nameOne("userIp", form).value;
-    return lord.post(form.action, new FormData(form)).then(function(result) {
-        if (result.errorMessage)
-            return Promise.reject(result);
+    return lord.post(form.action, new FormData(form)).then(function() {
         c.model = lord.model(["base", "tr", "boards"], true);
         return lord.api("bannedUser", { ip: ip });
     }).then(function(model) {
@@ -38,12 +36,20 @@ lord.bansSelectAll = function(e, btn) {
     lord.query("div", form).forEach(function(div) {
         lord.queryOne("select", div).selectedIndex = levelInd;
         lord.query("input", div).forEach(function(inp) {
-            if (inp.name.substr(0, 11) == "banExpires_")
+            if (inp.name.substr(0, 11) == "banExpires_") {
                 inp.value = expires;
-            else if (inp.name.substr(0, 10) == "banReason_")
+                $(inp).attr("value", expires);
+            } else if (inp.name.substr(0, 10) == "banReason_") {
                 inp.value = reason;
+            }
         });
     });
+};
+
+lord.clearDate = function(inputName) {
+    var inp = lord.queryOne("[name='" + inputName + "']");
+    inp.value = "____/__/__ __:__";
+    $(inp).attr("value", "");
 };
 
 lord.delall = function(e, form) {
@@ -55,3 +61,18 @@ lord.delall = function(e, form) {
         console.log(err);
     });
 };
+
+window.addEventListener("load", function load() {
+    window.removeEventListener("load", load, false);
+    lord.query("[name='expires'], [name^='banExpires_']").forEach(function(inp) {
+        $(inp).change(function(){
+            $(this).attr("value", $(inp).val());
+        });
+        $(inp).datetimepicker({
+            i18n: { format: "YYYY/MM/DD HH:mm" },
+            mask: true,
+            value: inp.value
+        });
+    });
+    $(".xdsoft_datetimepicker").css("zIndex", 11000);
+}, false);

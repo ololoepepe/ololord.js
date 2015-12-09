@@ -3733,5 +3733,10 @@
         "becomesText": {
             "value": "превращается в"
         }
+    },
+    "Clear date field": {
+        "clearDateFieldText": {
+            "value": "Очистить поле даты"
+        }
     }
 }

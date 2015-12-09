@@ -227,8 +227,14 @@ router.get("/captchaQuota.json", function(req, res) {
 });
 
 router.get("/bannedUser.json", function(req, res) {
-    Database.bannedUser(req.query.ip).then(function(user) {
-        res.json(user);
+    var ip = req.query.ip;
+    if (!ip)
+        return controller.error(req, res, "Invalid IP", true);
+    Database.userBans(ip).then(function(bans) {
+        res.json({
+            ip: ip,
+            bans: bans
+        });
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

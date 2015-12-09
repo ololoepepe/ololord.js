@@ -411,7 +411,9 @@ router.post("/banUser", function(req, res) {
                 var minutes = Math.abs(timeOffset) % 60;
                 var tz = ((timeOffset > 0) ? "+" : "") + ((Math.abs(hours) < 10) ? "0" : "") + hours + ":"
                     + ((minutes < 10) ? "0" : "") + minutes;
-                expiresAt = moment(expiresAt + " " + tz, "DD.MM.YYYY:HH ZZ");
+                expiresAt = moment(expiresAt + " " + tz, "YYYY/MM/DD HH:mm ZZ");
+                if (+expiresAt < (+Tools.now() + Tools.Second))
+                    expiresAt = null;
             } else {
                 expiresAt = null;
             }

@@ -29,10 +29,10 @@ var customContent = function(req, name) {
 };
 
 var formattedDate = function(date, req) {
-    var offset = ("local" == req.settings.time) ? req.settings.timeZoneOffset : config("site.timeOffset", 0);
+    var timeOffset = ("local" == req.settings.time) ? req.settings.timeZoneOffset : config("site.timeOffset", 0);
     var locale = config("site.locale", "en");
     var format = config("site.dateFormat", "MM/DD/YYYY HH:mm:ss");
-    return moment(date).utcOffset(offset).locale(locale).format(format);
+    return moment(date).utcOffset(timeOffset).locale(locale).format(format);
 };
 
 controller = function(req, templateName, modelData) {
@@ -239,10 +239,10 @@ controller.checkBan = function(req, res, boardName, write) {
     var ban = ipBans[ip];
     if (ban && (write || "NO_ACCESS" == ban.level))
         return Promise.reject({ ban: ban });
-    return Database.bannedUser(ip).then(function(user) {
-        if (!user || !user.bans || user.bans.length < 1)
+    return Database.userBans(ip).then(function(bans) {
+        if (!bans)
             return Promise.resolve();
-        var ban = user.bans[boardName];
+        var ban = bans[boardName];
         if (!ban)
             return Promise.resolve();
         if (write)
@@ -679,6 +679,7 @@ controller.translationsModel = function() {
     translate("Next file", "nextFileText");
     translate("You are banned", "bannedText");
     translate("never", "banExpiresNeverText");
+    translate("Clear date field", "clearDateFieldText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

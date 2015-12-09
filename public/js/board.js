@@ -842,7 +842,7 @@ lord.banUser = function(el) {
     var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : c.model.site.timeOffset;
     c.model.settings = settings;
     c.model.formattedDate = function(date) {
-        return moment(date).utcOffset(timeOffset).locale(locale).format("DD.MM.YYYY:HH");
+        return moment(date).utcOffset(timeOffset).locale(locale).format("DD/MM/YYYY HH:mm");
     };
     lord.api("userIp", {
         boardName: boardName,
@@ -860,6 +860,17 @@ lord.banUser = function(el) {
         c.model.userIp = c.userIp;
         var nodes = $.parseHTML(lord.template("userBan")(c.model));
         c.div = (nodes.length > 1) ? nodes[1] : nodes[0];
+        lord.query("[name='expires'], [name^='banExpires_']", c.div).forEach(function(inp) {
+            $(inp).change(function(){
+                $(this).attr("value", $(inp).val());
+            });
+            $(inp).datetimepicker({
+                i18n: { format: "YYYY/MM/DD HH:mm" },
+                mask: true,
+                value: inp.value
+            });
+        });
+        $(".xdsoft_datetimepicker").css("zIndex", 11000);
         return lord.showDialog("banUserText", null, c.div);
     }).then(function(result) {
         if (!result)
@@ -871,6 +882,31 @@ lord.banUser = function(el) {
             return Promise.resolve();
         return lord.updatePost(postNumber);
     }).catch(lord.handleError);
+};
+
+lord.clearDate = function(inputName) {
+    var inp = lord.queryOne("[name='" + inputName + "']");
+    inp.value = "____/__/__ __:__";
+    $(inp).attr("value", "");
+};
+
+lord.bansSelectAll = function(e, btn) {
+    e.preventDefault();
+    var form = btn.parentNode;
+    var levelInd = lord.nameOne("level", form).selectedIndex;
+    var expires = lord.nameOne("expires", form).value;
+    var reason = lord.nameOne("reason", form).value;
+    lord.query("div", form).forEach(function(div) {
+        lord.queryOne("select", div).selectedIndex = levelInd;
+        lord.query("input", div).forEach(function(inp) {
+            if (inp.name.substr(0, 11) == "banExpires_") {
+                inp.value = expires;
+                $(inp).attr("value", expires);
+            } else if (inp.name.substr(0, 10) == "banReason_") {
+                inp.value = reason;
+            }
+        });
+    });
 };
 
 lord.delall = function(e, form) {
