@@ -151,6 +151,26 @@ var lord = lord || {};
             _this.progressBar.max = _this.max;
             _this.progress(e.loaded);
         };
+        options.xhr.upload.onload = function() {
+            _this.max = 0;
+            _this.value = 0;
+            _this.progressBar.removeAttribute("max");
+            _this.progressBar.removeAttribute("value");
+        };
+        options.xhr.onprogress = function(e) {
+            if (!e.lengthComputable)
+                return;
+            _this.max = e.total;
+            _this.progressBar.max = _this.max;
+            _this.progress(e.loaded);
+        };
+        options.xhr.onload = function() {
+            _this.max = 0;
+            _this.value = 0;
+            _this.progressBar.removeAttribute("max");
+            _this.progressBar.removeAttribute("value");
+            this.finishCallback();
+        };
     }
 };
 
@@ -159,9 +179,7 @@ var lord = lord || {};
     if (isNaN(value) || value < 0 || value > this.max)
         return;
     this.value = value;
-    this.progressBar.value = value;
-    if (value == this.max)
-        this.finishCallback();
+    this.progressBar.value = this.value;
 };
 
 /*public*/ lord.OverlayProgressBar.prototype.show = function() {

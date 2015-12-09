@@ -786,6 +786,7 @@ var checkCaptcha = function(req, fields) {
 
 module.exports.createPost = function(req, fields, files, transaction) {
     var threadNumber = +fields.threadNumber;
+    var c = {};
     if (isNaN(threadNumber) || threadNumber <= 0)
         return Promise.reject("Invalid thread");
     return checkCaptcha(req, fields).then(function() {
@@ -793,8 +794,10 @@ module.exports.createPost = function(req, fields, files, transaction) {
     }).then(function(files) {
         return createPost(req, fields, files, transaction);
     }).then(function(post) {
-        Global.generate(post.boardName, post.threadNumber, post.number, "create");
-        return Promise.resolve(post);
+        c.post = post;
+        return Global.generate(post.boardName, post.threadNumber, post.number, "create");
+    }).then(function() {
+        return Promise.resolve(c.post);
     });
 };
 
@@ -1693,7 +1696,8 @@ module.exports.setThreadFixed = function(req, fields) {
         thread.fixed = fixed;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
-        Global.generate(board.name, threadNumber, threadNumber, "edit");
+        return Global.generate(board.name, threadNumber, threadNumber, "edit");
+    }).then(function() {
         return Promise.resolve({
             boardName: board.name,
             threadNumber: threadNumber
@@ -1726,7 +1730,8 @@ module.exports.setThreadClosed = function(req, fields) {
         thread.closed = closed;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
-        Global.generate(boardName, threadNumber, threadNumber, "edit");
+        return Global.generate(board.name, threadNumber, threadNumber, "edit");
+    }).then(function() {
         return Promise.resolve({
             boardName: board.name,
             threadNumber: threadNumber
@@ -1752,10 +1757,12 @@ module.exports.deletePost = function(req, res, fields) {
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
             return Promise.reject("Not enough rights");
         }
-        return (post.threadNumber == post.number) ? removeThread(board.name, postNumber)
-            : removePost(board.name, postNumber);
+        c.isThread = post.threadNumber == post.number;
+        return (c.isThread) ? removeThread(board.name, postNumber) : removePost(board.name, postNumber);
     }).then(function() {
-        Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "delete");
+        var p = Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "delete");
+        return c.isThread ? p : Promise.resolve();
+    }).then(function() {
         return {
             boardName: board.name,
             threadNumber: ((c.post.threadNumber != c.post.number) ? c.post.threadNumber : 0)
@@ -1926,7 +1933,8 @@ module.exports.moveThread = function(req, fields) {
         return removeThread(sourceBoard.name, threadNumber, false, true);
     }).then(function() {
         Global.generate(sourceBoard.name, threadNumber, threadNumber, "delete");
-        Global.generate(targetBoard.name, c.thread.number, c.thread.number, "create");
+        return Global.generate(targetBoard.name, c.thread.number, c.thread.number, "create");
+    }).then(function() {
         return {
             boardName: targetBoard.name,
             threadNumber: c.thread.number

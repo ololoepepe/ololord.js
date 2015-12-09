@@ -710,29 +710,57 @@ var generateBoard = function(boardName) {
     });
 };
 
-module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNumber, action) {
-    if (deletedPosts[boardName + ":" + threadNumber] || deletedPosts[boardName + ":" + postNumber])
-        return Promise.resolve();
-    threadNumber = +threadNumber;
-    postNumber = +postNumber;
-    var key = boardName + ":" + threadNumber;
-    var scheduled = scheduledGenerateThread[key];
+var addTask = function(map, key, f, data) {
+    var scheduled = map[key];
     if (scheduled) {
-        if (scheduled.promise) {
-            return scheduled.promise.then(function() {
-                return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+        return new Promise(function(resolve, reject) {
+            if (!scheduled.next)
+                scheduled.next = [];
+            scheduled.next.push({
+                resolve: resolve,
+                data: data
             });
-        } else {
-            if (!scheduled[action])
-                scheduled[action] = [];
-            scheduled[action].push(postNumber);
+        });
+    } else {
+        map[key] = {};
+        return f(key, data).catch(function(err) {
+            console.log(err.stack || err);
+        }).then(function() {
+            var scheduled = map[key];
+            var next = scheduled.next;
+            if (next && next.length > 0) {
+                delete scheduled.next;
+                var data = next.map(function(n) {
+                    return n.data;
+                });
+                f(key, data).catch(function(err) {
+                    console.log(err.stack || err);
+                }).then(function() {
+                    delete map[key];
+                    next.forEach(function(n) {
+                        n.resolve();
+                    });
+                });
+            } else {
+                delete map[key];
+            }
             return Promise.resolve();
-        }
-    }
-    scheduledGenerateThread[key] = {};
-    scheduled = scheduledGenerateThread[key];
-    scheduled[action] = [postNumber];
-    var f = function() {
+        });
+    };
+};
+
+module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNumber, action) {
+    var f = function(key, data) {
+        if (!Util.isArray(data))
+            data = [data];
+        var boardName = data[0].boardName;
+        var threadNumber = data[0].threadNumber;
+        var scheduled = {};
+        data.forEach(function(d) {
+            if (!scheduled.hasOwnProperty(d.action))
+                scheduled[d.action] = [];
+            scheduled[d.action].push(d.postNumber);
+        });
         var c = {};
         var creatingThread = false;
         var deletingThread = false;
@@ -910,31 +938,20 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
                 return Promise.resolve();
             });
         }
-        p.then(function() {
-            delete scheduledGenerateThread[key];
-            return Promise.resolve();
-        }).catch(function(err) {
-            delete scheduledGenerateThread[key];
-            console.log(err.stack || err);
-            return Promise.resolve();
-        }).then(function() {
-            return Promise.resolve();
-        });
-        scheduled.promise = p;
+        return p;
     };
-    if (threadNumber == postNumber)
-        f();
-    else
-        scheduled.timer = setTimeout(f, Tools.Second);
-    return Promise.resolve();
+    return addTask(scheduledGenerateThread, boardName + ":" + threadNumber, f, {
+        boardName: boardName,
+        threadNumber: threadNumber,
+        postNumber: postNumber,
+        action: action
+    });
 };
 
 module.exports.scheduleGeneratePages = function(boardName) {
-    if (scheduledGeneratePages[boardName])
-        return Promise.resolve();
-    scheduledGeneratePages[boardName] = setTimeout(function() {
+    var f = function(boardName) {
         var c = {};
-        generatePages(boardName, true).then(function(pages) {
+        return generatePages(boardName, true).then(function(pages) {
             c.pages = pages;
             var p = (c.pages.length > 0) ? writeFile(c.pages[0].path, c.pages[0].data) : Promise.resolve();
             c.pages.slice(1).forEach(function(page) {
@@ -943,42 +960,64 @@ module.exports.scheduleGeneratePages = function(boardName) {
                 });
             });
             return p;
-        }).then(function() {
-            delete scheduledGeneratePages[boardName];
-            return Promise.resolve();
-        }).catch(function(err) {
-            console.log(err.stack || err);
         });
-    }, Tools.Second);
-    return Promise.resolve();
+    };
+    return addTask(scheduledGeneratePages, boardName, f);
 };
 
 module.exports.scheduleGenerateCatalog = function(boardName) {
-    if (scheduledGenerateCatalog[boardName])
-        return Promise.resolve();
-    scheduledGenerateCatalog[boardName] = setTimeout(function() {
+    var f = function(boardName) {
         var c = {};
-        generateCatalog(boardName, true).then(function(catalog) {
+        return generateCatalog(boardName, true).then(function(catalog) {
             c.catalog = catalog;
             return writeFile(c.catalog.datePath, c.catalog.dateData);
         }).then(function() {
             writeFile(c.catalog.recentPath, c.catalog.recentData);
         }).then(function() {
             writeFile(c.catalog.bumpsPath, c.catalog.bumpsData);
-        }).then(function() {
-            delete scheduledGenerateCatalog[boardName];
-            return Promise.resolve();
-        }).catch(function(err) {
-            console.log(err.stack || err);
         });
-    }, Tools.Second);
-    return Promise.resolve();
+    };
+    return addTask(scheduledGenerateCatalog, boardName, f);
 };
 
 module.exports.scheduleGenerate = function(boardName, threadNumber, postNumber, action) {
-    module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
-    module.exports.scheduleGeneratePages(boardName);
-    module.exports.scheduleGenerateCatalog(boardName);
+    var p = Promise.resolve();
+    switch (action) {
+    case "create":
+        p = p.then(function() {
+            return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+        }).then(function() {
+            module.exports.scheduleGeneratePages(boardName).then(function() {
+                module.exports.scheduleGenerateCatalog(boardName);
+            });
+            return Promise.resolve();
+        });
+        break;
+    case "edit":
+    case "delete":
+        if (threadNumber == postNumber) {
+            p = p.then(function() {
+                return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+            }).then(function() {
+                return module.exports.scheduleGeneratePages(boardName);
+            }).then(function() {
+                module.exports.scheduleGenerateCatalog(boardName);
+                return Promise.resolve();
+            });
+        }
+        break;
+    default:
+        p = p.then(function() {
+            module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action).then(function() {
+                return module.exports.scheduleGeneratePages(boardName);
+            }).then(function() {
+                module.exports.scheduleGenerateCatalog(boardName);
+            });
+            return Promise.resolve();
+        });
+        break;
+    }
+    return p;
 };
 
 module.exports.generate = function() {

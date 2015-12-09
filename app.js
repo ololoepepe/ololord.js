@@ -138,7 +138,7 @@ if (cluster.isMaster) {
     });
 } else {
     Global.generate = function(boardName, threadNumber, postNumber, action) {
-        Global.IPC.send("generate", {
+        return Global.IPC.send("generate", {
             boardName: boardName,
             threadNumber: threadNumber,
             postNumber: postNumber,
