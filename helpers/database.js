@@ -626,7 +626,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     }).then(function(threads) {
         if (!threads || threads.length != 1)
             return Promise.reject("No such thread or no access to thread");
-        if (thread.closed)
+        if (threads[0].closed)
             return Promise.reject("Posting is disabled in this thread");
         c.level = req.level || null;
         c.isRaw = !!fields.raw && compareRegisteredUserLevels(c.level, RegisteredUserLevels.Admin) >= 0;
