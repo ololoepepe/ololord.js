@@ -1004,6 +1004,15 @@ module.exports.scheduleGenerate = function(boardName, threadNumber, postNumber, 
                 module.exports.scheduleGenerateCatalog(boardName);
                 return Promise.resolve();
             });
+        } else {
+            p = p.then(function() {
+                module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action).then(function() {
+                    return module.exports.scheduleGeneratePages(boardName);
+                }).then(function() {
+                    module.exports.scheduleGenerateCatalog(boardName);
+                });
+                return Promise.resolve();
+            });
         }
         break;
     default:
