@@ -2141,7 +2141,7 @@ module.exports.banUser = function(req, ip, bans) {
                             updatePostBanInfo(boardName, ban).catch(function(err) {
                                 console.log(err.stack || err);
                             });
-                        }, (ttl + 1) * Tools.Second); //NOTE: Adding extra delay
+                        }, Math.ceil(ttl * Tools.Second * 1.002)); //NOTE: Adding extra delay
                     }
                     return db.expire(key, ttl);
                 }).then(function() {
@@ -2215,7 +2215,7 @@ module.exports.initialize = function() {
                         updatePostBanInfo(boardName, ban).catch(function(err) {
                             console.log(err.stack || err);
                         });
-                    }, (ttl + 1) * Tools.Second); //NOTE: Adding extra delay
+                    }, Math.ceil(ttl * Tools.Second * 1.002)); //NOTE: Adding extra delay
                     return Promise.resolve();
                 });
             });
