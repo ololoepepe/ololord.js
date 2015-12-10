@@ -726,9 +726,13 @@ var addTask = function(map, key, f, data) {
         return f(key, data).catch(function(err) {
             console.log(err.stack || err);
         }).then(function() {
-            var scheduled = map[key];
-            var next = scheduled.next;
-            if (next && next.length > 0) {
+            var g = function() {
+                var scheduled = map[key];
+                var next = scheduled.next;
+                if (!next || next.length < 1) {
+                    delete map[key];
+                    return Promise.resolve();
+                }
                 delete scheduled.next;
                 var data = next.map(function(n) {
                     return n.data;
@@ -736,15 +740,14 @@ var addTask = function(map, key, f, data) {
                 f(key, data).catch(function(err) {
                     console.log(err.stack || err);
                 }).then(function() {
-                    delete map[key];
+                    g();
                     next.forEach(function(n) {
                         n.resolve();
                     });
                 });
-            } else {
-                delete map[key];
-            }
-            return Promise.resolve();
+                return Promise.resolve();
+            };
+            return g();
         });
     };
 };
