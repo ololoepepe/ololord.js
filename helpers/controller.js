@@ -239,7 +239,7 @@ controller.checkBan = function(req, res, boardName, write) {
     var ban = ipBans[ip];
     if (ban && (write || "NO_ACCESS" == ban.level))
         return Promise.reject({ ban: ban });
-    return Database.userBans(ip).then(function(bans) {
+    return Database.userBans(ip, boardName).then(function(bans) {
         if (!bans)
             return Promise.resolve();
         var ban = bans[boardName];

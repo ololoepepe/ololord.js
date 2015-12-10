@@ -293,9 +293,7 @@ module.exports.getThreadPage = function(board, number, json) {
             closed: c.thread.closed,
             fixed: c.thread.fixed,
             postCount: postCount,
-            postingEnabled: (board.postingEnabled && !c.thread.closed),
-            opPost: c.opPost,
-            lastPosts: []
+            postingEnabled: (board.postingEnabled && !c.thread.closed)
         };
         c.model.thread = threadModel;
         return Database.lastPostNumber(board.name);

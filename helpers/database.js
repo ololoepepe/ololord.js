@@ -2037,7 +2037,7 @@ module.exports.editAudioTags = function(req, res, fields) {
     });
 };
 
-module.exports.userBans = function(ip) {
+module.exports.userBans = function(ip, boardNames) {
     if (!ip) {
         var users = {};
         return db.keys("userBans:*").then(function(keys) {
@@ -2054,7 +2054,7 @@ module.exports.userBans = function(ip) {
             var p = Promise.resolve();
             ips.forEach(function(ip) {
                 p = p.then(function() {
-                    return module.exports.userBans(ip);
+                    return module.exports.userBans(ip, boardNames);
                 }).then(function(bans) {
                     users[ip] = bans;
                 });
@@ -2067,7 +2067,11 @@ module.exports.userBans = function(ip) {
     var p = Promise.resolve();
     var bans = {};
     var address = Tools.correctAddress(ip);
-    Board.boardNames().forEach(function(boardName) {
+    if (!boardNames)
+        boardNames = Board.boardNames();
+    else if (!Util.isArray(boardNames))
+        boardNames = [boardNames];
+    boardNames.forEach(function(boardName) {
         p = p.then(function() {
             return db.get("userBans:" + address + ":" + boardName);
         }).then(function(ban) {
@@ -2075,7 +2079,7 @@ module.exports.userBans = function(ip) {
                 return Promise.resolve();
             bans[boardName] = JSON.parse(ban);
             return Promise.resolve();
-        });;
+        });
     });
     return p.then(function() {
         return Promise.resolve(bans);
