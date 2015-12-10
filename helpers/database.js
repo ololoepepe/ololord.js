@@ -816,16 +816,22 @@ var rerenderReferringPosts = function(boardName, postNumber) {
 
 var removeReferencedPosts = function(boardName, postNumber, nogenerate) {
     var key = boardName + ":" + postNumber;
+    var c = {};
     return db.hgetall("referencedPosts:" + key).then(function(referencedPosts) {
+        c.referencedPosts = {};
         var promises = [];
         Tools.forIn(referencedPosts, function(ref, refKey) {
             promises.push(db.hdel("referringPosts:" + refKey, key));
             ref = JSON.parse(ref);
-            if (!nogenerate)
-                Global.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
+            c.referencedPosts[refKey] = ref;
         });
         return Promise.all(promises);
     }).then(function() {
+        if (!nogenerate) {
+            Tools.forIn(c.referencedPosts, function(ref, refKey) {
+                Global.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
+            });
+        }
         return db.del("referencedPosts:" + key);
     });
 };
@@ -835,10 +841,13 @@ var addReferencedPosts = function(post, referencedPosts, nogenerate) {
     var promises = [];
     Tools.forIn(referencedPosts, function(ref, refKey) {
         promises.push(db.hset("referencedPosts:" + key, refKey, JSON.stringify(ref)));
-        if (!nogenerate)
-            Global.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
     });
     return Promise.all(promises).then(function() {
+        if (!nogenerate) {
+            Tools.forIn(referencedPosts, function(ref, refKey) {
+                Global.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
+            });
+        }
         var promises = [];
         Tools.forIn(referencedPosts, function(ref, refKey) {
             promises.push(db.hset("referringPosts:" + refKey, key, JSON.stringify({
