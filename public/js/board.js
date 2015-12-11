@@ -2899,15 +2899,12 @@ lord.initializeOnLoadBaseBoard = function() {
                 });
             });
         }).then(function(list) {
-            if (!list)
-                return Promise.resolve();
-            var map = list.reduce(function(acc, data) {
+            var map = list ? list.reduce(function(acc, data) {
                 acc[data.postNumber] = data;
                 return acc;
-            }, {});
+            }, {}) : {};
             lord.gently(posts, function(post) {
-                var data = map[+post.id];
-                lord.processPost(post, data);
+                lord.processPost(post, map[+post.id]);
             }, {
                 delay: 10,
                 n: 10
