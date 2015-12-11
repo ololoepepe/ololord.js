@@ -197,7 +197,7 @@
                     {{ out += it.customPostMenuAction[70](it, thread, post); }}
                 {{?}}
                 {{? post.isOp}}
-                    {{? it.thread}}
+                    {{? it.includeThreadScripts}}
                         <li>
                             <a name="downloadButton" href="javascript:void(0);"
                                onclick="lord.downloadThread(this); return false;">
@@ -274,7 +274,7 @@
                 {{? (it.deviceType != "mobile" && post.fileInfos.length < 2) || it.deviceType == "mobile" && post.fileInfos.length < 1}}
                     <td class="postText">
                         <blockquote id="post{{=post.number}}Text"
-                                    class="{{=it.deviceType}}{{? it.thread}} blockquoteThread{{?}}">{{ out += (post.text || ""); }}</blockquote>
+                                    class="{{=it.deviceType}}{{? it.includeThreadScripts}} blockquoteThread{{?}}">{{ out += (post.text || ""); }}</blockquote>
                     </td>
                 {{??}}
                     <td class="shrink"></td>
@@ -287,7 +287,7 @@
                 <tr>
                     <td colspan="{{ out += (post.fileInfos.length + 2); }}">
                         <blockquote id="post{{=post.number}}Text" 
-                                    class="{{=it.deviceType}}{{? it.thread}} blockquoteThread{{?}}">{{ out += (post.text || ""); }}</blockquote>
+                                    class="{{=it.deviceType}}{{? it.includeThreadScripts}} blockquoteThread{{?}}">{{ out += (post.text || ""); }}</blockquote>
                     </td>
                 </tr>
             {{?}}
