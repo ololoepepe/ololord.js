@@ -1,4 +1,20 @@
-<span name="boardsBlockPlaceholder" style="display: none;"></span>
+{{? "mobile" == it.deviceType}}
+    <select name="url" class="select boardSelect" onchange="location = this.options[this.selectedIndex].value;">
+        {{~it.boards :board}}
+            {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+                <option {{? it.board && it.board.name == board.name}}selected="true"{{?}}
+                        value="/{{=it.site.pathPrefix}}{{=board.name}}">[{{=board.name}}] {{=board.title}}</option>
+            {{?}}
+        {{~}}
+    </select>
+{{??}}
+    {{~it.boards :board}}
+        {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+            <span class="navbarItem navbarItemBoard">[<a href="/{{=it.site.pathPrefix}}{{=board.name}}"
+                  title="{{=board.title}}" data-board-name="{{=board.name}}">{{=board.name}}</a>] </span>
+        {{?}}
+    {{~}}
+{{?}}
 <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}playlist.html"
                              title="{{=it.tr.toPlaylistPageText}}"><img src="/{{=it.site.pathPrefix}}img/playlist.png"
                                                                         class="buttonImage"
@@ -19,3 +35,15 @@
                              title="{{=it.tr.toFaqPageText}}"><img src="/{{=it.site.pathPrefix}}img/question.png"
                                                                    class="buttonImage"
                                                                    width="16" height="16"></a>]</span>
+{{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+    <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}manage.html"
+                                 title="{{=it.tr.toManagePageText}}"><img src="/{{=it.site.pathPrefix}}img/manage.png"
+                                                                          class="buttonImage"
+                                                                          width="16" height="16"></a>]</span>
+{{?}}
+{{? it.settings.chatEnabled}}
+    <span class="navbarItem">[<a href="javascript:void(0);" name="chatButton" onclick="lord.showChat(); return false;"
+                                 title="{{=it.tr.chatText}}"><img src="/{{=it.site.pathPrefix}}img/chat.png"
+                                                                  class="buttonImage"
+                                                                  width="16" height="16"></a>]</span>
+{{?}}

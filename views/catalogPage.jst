@@ -11,9 +11,9 @@
     {{#def.navigationButton}}
 {{~}}
 <a id="top"></a>
-{{#def.toolbar}}
+<div id="toolbarPlaceholder" style="display: none;"></div>
 <br />
-{{#def.searchAction}}
+<div id="searchPlaceholder" style="display: none;"></div>
 <div id="bannerPlaceholder" style="display: none;"></div>
 <div class="theTitle">
     <h1>
@@ -36,10 +36,7 @@
     <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
     <h1 style="display: inline;">{{=it.tr.loadingThreadsMessage}}</h1>
 </div>
-{{? !it.settings.stickyToolbar}}
-    <hr />
-    {{#def.navbar}}
-{{?}}
+<div id="navbarPlaceholder" style="display: none;"></div>
 <hr />
 <div id="postingSpeedPlaceholder" style="display: none;"></div>
 <a id="bottom"></a>

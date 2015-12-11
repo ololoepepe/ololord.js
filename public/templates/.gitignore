@@ -4,7 +4,6 @@
 !banner.jst
 !boardPageLower.jst
 !boardPageUpper.jst
-!boardsBlock.jst
 !catalogThread.jst
 !chatContact.jst
 !chatDialog.jst
@@ -26,8 +25,8 @@
 !googleRecaptchaWidget.jst
 !hiddenPostList.jst
 !hotkeysDialog.jst
-!loginButton.jst
 !moveThreadDialog.jst
+!navbar.jst
 !pagination.jst
 !playlistItem.jst
 !post.jst
@@ -37,12 +36,14 @@
 !rpgEditPostDialogPart.jst
 !rpgPostBodyPart.jst
 !rpgPostFormField.jst
+!searchAction.jst
 !settingsDialog.jst
 !setVotingOpenedDialog.jst
 !socPostHeaderPart.jst
 !thread.jst
 !threadPageLower.jst
 !threadPageUpper.jst
+!toolbar.jst
 !userBan.jst
 !vkAudioList.jst
 !voteVariant.jst

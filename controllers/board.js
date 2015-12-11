@@ -19,7 +19,6 @@ var renderPage = function(board, page) {
         c.model.title = board.title;
         c.model.includeBoardScripts = true;
         c.model.board = controller.boardModel(board).board;
-        c.model.board.postingSpeed = controller.postingSpeedString(board, c.model.lastPostNumber);
         c.model.extraScripts = board.extraScripts();
         c.model.tr = controller.translationsModel();
         return board.postformRules();
@@ -50,7 +49,6 @@ router.get("/:boardName/catalog.html", function(req, res) {
             c.model.title = board.title;
             c.model.includeBoardScripts = true;
             c.model.board = controller.boardModel(board).board;
-            c.model.board.postingSpeed = controller.postingSpeedString(board, c.model.lastPostNumber);
             c.model.sortMode = sortMode || "date";
             c.model.tr = controller.translationsModel();
             return controller(null, "catalogPage", c.model);

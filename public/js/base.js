@@ -686,11 +686,26 @@ lord.initializeOnLoadSettings = function() {
     var defaultStylesheet = lord.id("defaultStylesheet");
     defaultStylesheet.parentNode.removeChild(defaultStylesheet);
     lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
-    var model = lord.model(["base", "boards"], true);
+    var model = lord.model(["base", "tr", "boards"], true);
     model.settings = settings;
-    lord.name("boardsBlockPlaceholder").forEach(function(placeholder) {
-        placeholder.parentNode.replaceChild(lord.template("boardsBlock", model), placeholder);
-    });
+    model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
+    if (model.user.loggedIn) {
+        if (lord.compareRegisteredUserLevels(model.user.level, "ADMIN") >= 0)
+            model.loginMessageText = lord.text("loginMessageAdminText");
+        else if (lord.compareRegisteredUserLevels(model.user.level, "MODER") >= 0)
+            model.loginMessageText = lord.text("loginMessageModerText");
+        else if (lord.compareRegisteredUserLevels(model.user.level, "USER") >= 0)
+            model.loginMessageText = lord.text("loginMessageUserText");
+        else
+            model.loginMessageText = lord.text("loginMessageNoneText");
+    }
+    var toolbarPlaceholder = lord.id("toolbarPlaceholder");
+    toolbarPlaceholder.parentNode.replaceChild(lord.template("toolbar", model), toolbarPlaceholder);
+    var navbarPlaceholder = lord.id("navbarPlaceholder");
+    if (navbarPlaceholder)
+        navbarPlaceholder.parentNode.replaceChild(lord.template("navbar", model), navbarPlaceholder);
+    var searchPlaceholder = lord.id("searchPlaceholder");
+    searchPlaceholder.parentNode.replaceChild(lord.template("searchAction", model), searchPlaceholder);
     if (lord.getCookie("show_tripcode") === "true")
         lord.id("showTripcodeCheckbox").checked = true;
     if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
@@ -739,49 +754,8 @@ lord.initializeOnLoadSettings = function() {
             style.appendChild(lord.node("text", css));
         head.appendChild(style);
     }
-    var loginButton = lord.id("loginButtonPlaceholder");
-    var model = lord.model(["base", "tr"], true);
-    if (model.user.loggedIn) {
-        if (lord.compareRegisteredUserLevels(model.user.level, "ADMIN") >= 0)
-            model.loginMessageText = lord.text("loginMessageAdminText");
-        else if (lord.compareRegisteredUserLevels(model.user.level, "MODER") >= 0)
-            model.loginMessageText = lord.text("loginMessageModerText");
-        else if (lord.compareRegisteredUserLevels(model.user.level, "USER") >= 0)
-            model.loginMessageText = lord.text("loginMessageUserText");
-        else
-            model.loginMessageText = lord.text("loginMessageNoneText");
-    }
-    loginButton.parentNode.replaceChild(lord.template("loginButton", model), loginButton);
-    if (lord.compareRegisteredUserLevels(lord.model("base").user.level, "MODER") >= 0) {
-        var toolbar = lord.queryOne(".toolbar");
-        toolbar.appendChild(lord.node("text", " "));
-        var span = lord.node("span");
-        lord.addClass(span, "navbarItem");
-        span.appendChild(lord.node("text", "["));
-        var a = lord.node("a");
-        a.href = "/" + lord.data("sitePathPrefix") + "manage.html";
-        a.title = lord.text("toManagePageText");
-        var img = lord.node("img");
-        img.src = "/" + lord.data("sitePathPrefix") + "img/manage.png";
-        lord.addClass(img, "buttonImage");
-        img.width = 16;
-        img.height = 16;
-        a.appendChild(img);
-        span.appendChild(a);
-        span.appendChild(lord.node("text", "]"));
-        toolbar.appendChild(span);
-    }
-    if (lord.getLocalObject("chatEnabled", true)) {
-        var toolbar = lord.queryOne(".toolbar");
-        toolbar.appendChild(lord.node("text", " "));
-        var span = lord.node("span");
-        lord.addClass(span, "navbarItem");
-        span.appendChild(lord.node("text", "["));
-        span.appendChild(lord.createChatButton());
-        span.appendChild(lord.node("text", "]"));
-        toolbar.appendChild(span);
+    if (lord.getLocalObject("chatEnabled", true))
         lord.checkChats();
-    }
     if (lord.notificationsEnabled())
         lord.checkNotificationQueue();
     if (lord.getLocalObject("userJavaScriptEnabled", true)) {

@@ -4,11 +4,7 @@
 !customHeader.jst
 !extraData.jst
 !head.jst
-!innerNavbar.jst
 !leafButton.jst
-!navbar.jst
 !navigationButton.jst
-!searchAction.jst
 !threadActions.jst
-!toolbar.jst
 !.gitignore

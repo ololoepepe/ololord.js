@@ -2774,6 +2774,7 @@ lord.initializeOnLoadBaseBoard = function() {
         }
         if (!lord.data("threadNumber")) {
             var postingSpeedPlaceholder = lord.id("postingSpeedPlaceholder");
+            c.model.postingSpeed = model.postingSpeed;
             postingSpeedPlaceholder.parentNode.replaceChild(lord.template("postingSpeed", c.model),
                 postingSpeedPlaceholder);
         }

@@ -267,6 +267,7 @@ controller.baseModel = function(req) {
                 name: (langNames.hasOwnProperty(lang) ? langNames[lang] : lang)
             };
         }),
+        maxSearchQueryLength: 100,
         markupModes: [
             {
                 name: "NONE",

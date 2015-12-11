@@ -22,10 +22,10 @@
 {{~["previous", "next"] :target}}
     {{#def.leafButton}}
 {{~}}
-{{#def.toolbar}}
+<div id="toolbarPlaceholder" style="display: none;"></div>
 <br />
 <a id="top"></a>
-{{#def.searchAction}}
+<div id="searchPlaceholder" style="display: none;"></div>
 <div id="bannerPlaceholder" style="display: none;"></div>
 <div class="theTitle">
     <h1>{{!it.title}}</h1>
@@ -45,10 +45,7 @@
     {{#def.threadActions}}
 {{~}}
 <div id="lowerPlaceholder" style="display: none;"></div>
-{{? !it.settings.stickyToolbar}}
-    <hr />
-    {{#def.navbar}}
-{{?}}
+<div id="navbarPlaceholder" style="display: none;"></div>
 <a id="bottom"></a>
 {{? it.customFooter}}
     {{#def.customFooter}}

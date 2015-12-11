@@ -7,6 +7,7 @@ var Util = require("util");
 
 var Board = require("../boards");
 var config = require("../helpers/config");
+var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
 var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
@@ -169,6 +170,7 @@ var getPage = function(board, page) {
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
         c.model.lastPostNumber = lastPostNumber;
+        c.model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
         return Promise.resolve(c.model);
     });
 };
@@ -436,6 +438,7 @@ var getCatalog = function(board, sortMode) {
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
         c.model.lastPostNumber = lastPostNumber;
+        c.model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
         return Promise.resolve(c.model);
     });
 };
