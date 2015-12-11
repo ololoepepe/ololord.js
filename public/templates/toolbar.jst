@@ -22,9 +22,9 @@
                         title="{{=it.tr.logoutText}}{{? it.loginMessageText}} [{{=it.loginMessageText}}]{{?}}" />]
             </form>
         {{??}}
-            [<a href="/{{=it.site.pathPrefix}}login.html?source={{=it.path}}"><img src="/{{=it.site.pathPrefix}}img/login.png"
-                                                                                   class="buttonImage"
-                                                                                   title="{{=it.tr.loginText}}"></a>]
+            [<a href="javascript:void(0);"
+                onclick="lord.redirectToLoginPage();"><img src="/{{=it.site.pathPrefix}}img/login.png"
+                                                           class="buttonImage" title="{{=it.tr.loginText}}"></a>]
         {{?}}
         {{? "mobile" != it.deviceType}}
             |

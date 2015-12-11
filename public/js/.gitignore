@@ -7,9 +7,13 @@
 !codecha-script.js
 !d.js
 !echo.js
+!faq.js
+!frame-list.js
 !google-recaptcha-v1-script.js
+!home.js
 !login.js
 !manage.js
+!not-found.js
 !playlist.js
 !rpg.js
 !soc.js

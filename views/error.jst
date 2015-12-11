@@ -2,9 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
 <body class="{{=it.deviceType}}" {{#def.baseData}}>
-{{? it.customHeader}}
-    {{#def.customHeader}}
-{{?}}
+<div id="customHeaderPlaceholder" style="display: none;"></div>
 <div id="toolbarPlaceholder" style="display: none;"></div>
 <br />
 <div id="searchPlaceholder" style="display: none;"></div>
@@ -14,8 +12,6 @@
 <div class="error" id="errorDescription">
     {{=it.errorDescription}}
 </div>
-{{? it.customFooter}}
-    {{#def.customFooter}}
-{{?}}
+<div id="customFooterPlaceholder" style="display: none;"></div>
 </body>
 </html>

@@ -61,7 +61,11 @@ lord.addTrack = function(key, track) {
             if (k == key)
                 return;
             var div = lord.id("track/" + k);
-            lord.queryOne("audio", div).pause();
+            var prev = lord.queryOne("audio", div);
+            if (!prev.paused) {
+                audio.volume = prev.volume;
+                prev.pause();
+            }
         });
     }, false);
     audio.addEventListener("ended", function() {

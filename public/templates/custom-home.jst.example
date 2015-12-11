@@ -1,0 +1,39 @@
+Rendered just as normal .jst template. Actual name must be custom-home.jst.
+
+Example:
+
+<div>
+    <script type="text/javascript">
+        var some = "script";
+    </script>
+    <style type="text/css">
+        .some {
+            style: none;
+        }
+    </style>
+    <div class="customImageContainer">
+        <img src="logoURL">
+    </div>
+    <div class="sectionHeader">
+        <h3>{{=it.tr.friendsHeader}}</h3>
+    </div>
+    <div class="friendsBar">
+        <span class="navbarItem">[<a href="site.com" target="_blank">A friend</a>]</span>
+    </div>
+    <div class="sectionHeader">
+        <h3>{{=it.tr.rulesHeader}}</h3>
+    </div>
+    <div class="rules">
+        <ol>
+            <li>Some rules here</li>
+        </ol>
+    </div>
+    <div class="sectionHeader">
+        <h3>{{=it.tr.newsHeader}}</h3>
+    </div>
+    <div class="rules">
+        <ul>
+            <li>Some news here</li>
+        </ul>
+    </div>
+</div>

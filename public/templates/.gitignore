@@ -1,4 +1,5 @@
 *
+!custom
 !partials
 !addFilesDialog.jst
 !banner.jst
@@ -9,6 +10,10 @@
 !chatDialog.jst
 !chatMessage.jst
 !codechaWidget.jst
+!custom-faq.jst.example
+!custom-footer.jst.example
+!custom-header.jst.example
+!custom-home.jst.example
 !deleteFileDialog.jst
 !deletePostDialog.jst
 !dPostBodyPart.jst
@@ -21,12 +26,14 @@
 !editPostDialog.jst
 !favoritesDialog.jst
 !favoritesElement.jst
+!frameListNavigation.jst
 !googleRecaptchaV1Widget.jst
 !googleRecaptchaWidget.jst
 !hiddenPostList.jst
 !hotkeysDialog.jst
 !moveThreadDialog.jst
 !navbar.jst
+!notFoundImage.jst
 !pagination.jst
 !playlistItem.jst
 !post.jst

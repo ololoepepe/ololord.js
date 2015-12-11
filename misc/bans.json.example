@@ -1,0 +1,16 @@
+Actual name must be bans.json.
+
+IP addresses must be in IPv6 form, even if they are just aliases for IPv4 addresses like in the following example.
+
+Example:
+
+{
+    "::c0a8:1": {
+        "level": "NO_ACCESS",
+        "reason": "peedor"
+    },
+    "::7f00:1": {
+        "level": "READ_ONLY",
+        "reason:" "sooqa"
+    }
+}

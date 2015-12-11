@@ -289,12 +289,28 @@ var renderFileInfo = function(fi) {
     });
 };
 
+var getRules = function(boardName) {
+    var fileName = __dirname + "/../misc/rules/rules" + (boardName ? ("." + boardName) : "") + ".txt";
+    console.log(fileName);
+    return FS.exists(fileName).then(function(exists) {
+        if (!exists)
+            return Promise.resolve();
+        return FS.read(fileName);
+    }).then(function(data) {
+        if (!data)
+            return [];
+        return data.split(/\r*\n+/gi).filter(function(rule) {
+            return rule;
+        });
+    });
+};
+
 /*public*/ Board.prototype.postformRules = function() {
     var c = {};
     var _this = this;
-    return Tools.getRules("postform").then(function(rules) {
+    return getRules().then(function(rules) {
         c.common = rules;
-        return Tools.getRules("postform", _this.name);
+        return getRules(_this.name);
     }).then(function(rules) {
         c.specific = rules;
         for (var i = c.specific.length - 1; i >= 0; --i) {

@@ -19,19 +19,11 @@ var templates = {};
 var publicPartials;
 var publicTemplates;
 var langNames = require("../misc/lang-names.json");
-var ipBans = require("../misc/bans.json");
+var ipBans = FSSync.exists(__dirname + "/../misc/bans.json") ? require("../misc/bans.json") : {};
 
 var controller;
 
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-html");
-
-var customContent = function(req, name) {
-    return Tools.localeBasedFileName(__dirname + "/../views/custom/" + name + "/content.jst").then(function(fileName) {
-        if (!fileName)
-            return Promise.resolve(null);
-        return controller(req, "custom/" + name + "/" + Path.basename(fileName, ".jst"));
-    });
-};
 
 var formattedDate = function(date, req) {
     var timeOffset = ("local" == req.settings.time) ? req.settings.timeZoneOffset : config("site.timeOffset", 0);
@@ -64,49 +56,12 @@ controller = function(req, templateName, modelData) {
     if (!modelData)
         modelData = {};
     var template = templates[templateName];
-    var p;
-    if (templateName.substr(0, 13) == "custom/footer" || templateName.substr(0, 13) == "custom/header"
-        || templateName.substr(0, 11) == "custom/home" || templateName.substr(0, 10) == "custom/faq") {
-        if (template) {
-            p = Promise.resolve();
-        } else {
-            p = FS.read(__dirname + "/../views/" + templateName + ".jst").then(function(data) {
-                template = dot.template(data, {
-                    evaluate: /\{\{([\s\S]+?)\}\}/g,
-                    interpolate: /\{\{=([\s\S]+?)\}\}/g,
-                    encode: /\{\{!([\s\S]+?)\}\}/g,
-                    use: /\{\{#([\s\S]+?)\}\}/g,
-                    define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
-                    conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
-                    iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
-                    varname: 'it',
-                    strip: false,
-                    append: true,
-                    selfcontained: false
-                }, partials);
-                templates[templateName] = template;
-                return Promise.resolve();
-            });
-        }
-    } else {
-        if (!template)
-            return Promise.reject("Invalid template");
-        p = customContent(req, "header").then(function(content) {
-            modelData.customHeader = content;
-            return customContent(req, "footer");
-        }).then(function(content) {
-            modelData.customFooter = content;
-            return Promise.resolve();
-        });
-    }
-    return p.then(function() {
-        modelData = merge.recursive(baseModelData, modelData);
-        modelData.req = req;
-        return Promise.resolve(template(modelData));
-    });
+    if (!template)
+        return Promise.reject("Invalid template");
+    modelData = merge.recursive(baseModelData, modelData);
+    modelData.req = req;
+    return Promise.resolve(template(modelData));
 };
-
-controller.customContent = customContent;
 
 controller.sync = function(req, templateName, modelData) {
     var baseModelData = merge.recursive(controller.baseModel(req), controller.settingsModel(req));
@@ -176,42 +131,32 @@ controller.error = function(req, res, error, ajax) {
         var model = {};
         model.title = Tools.translate("Ban", "pageTitle");
         model.ban = error.ban;
-        return ajax ? h(error) : controller(req, "ban", model).then(function(data) {
+        return ajax ? h(error) : controller(null, "ban", model).then(function(data) {
             res.send(data);
         }).catch(h);
     } else {
-        return ajax ? g(error) : controller(req, "error", f(error)).then(function(data) {
+        return ajax ? g(error) : controller(null, "error", f(error)).then(function(data) {
             res.send(data);
         }).catch(g);
     }
 };
 
 controller.notFound = function(req, res) {
-    var model = {};
-    model.title = Tools.translate("Error 404", "pageTitle");
-    model.notFoundMessage = Tools.translate("Page or file not found", "notFoundMessage");
-    var path = __dirname + "/../public/img/404";
-    return FS.list(path).then(function(fileNames) {
-        var promises = fileNames.map(function(fileName) {
-            return FS.stat(path + "/" + fileName).then(function(stats) {
-                return {
-                    fileName: fileName,
-                    stats: stats
-                };
+    var f = function() {
+        var model = {};
+        model.title = Tools.translate("Error 404", "pageTitle");
+        model.notFoundMessage = Tools.translate("Page or file not found", "notFoundMessage");
+        model.extraScripts = [ { fileName: "not-found.js" } ];
+        var path = __dirname + "/../public/img/404";
+        return FS.list(path).then(function(fileNames) {
+            model.notFoundImageFileNames = fileNames.filter(function(fileName) {
+                return fileName != ".gitignore";
             });
+            return controller(null, "notFound", model);
         });
-        return Promise.all(promises);
-    }).then(function(results) {
-        var fileNames = results.filter(function(result) {
-            return result.stats.isFile() && result.fileName != ".gitignore";
-        }).map(function(result) {
-            return result.fileName;
-        });
-        if (fileNames.length > 0)
-            model.imageFileName = fileNames[random.integer(0, fileNames.length - 1)];
-        return controller(req, "notFound", model);
-    }).then(function(data) {
-        res.send(data);
+    };
+    controller.html(f.bind(null), "notFound").then(function(data) {
+        res.status(404).send(data);
     }).catch(function(err) {
         controller.error(req, res, err);
     });
@@ -717,7 +662,7 @@ controller.initialize = function() {
         });
     }).then(function(fileNames) {
         publicTemplates = fileNames.filter(function(fileName) {
-            return fileName.split(".").pop() == "jst";
+            return fileName.split(".").pop() == "jst" && fileName.split("-").shift() != "custom";
         }).map(function(fileName) {
             return fileName.split(".").shift();
         });

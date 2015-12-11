@@ -4,6 +4,7 @@
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}
       data-thread-number="{{=it.threadNumber}}">
+<script id="model-postformRules" type="application/json">{{ out += JSON.stringify(it.postformRules); }}</script>
 {{? it.site.vkontakte.integrationEnabled }}
     <script type="text/javascript">
         VK.init({ apiId: {{=it.site.vkontakte.appId}} });
@@ -13,9 +14,7 @@
 {{? it.board.captchaEnabled}}
     <div id="hiddenCaptcha" style="display: none;"></div>
 {{?}}
-{{? it.customHeader}}
-    {{#def.customHeader}}
-{{?}}
+<div id="customHeaderPlaceholder" style="display: none;"></div>
 {{~["top", "bottom"] :target}}
     {{#def.navigationButton}}
 {{~}}
@@ -47,8 +46,6 @@
 <div id="lowerPlaceholder" style="display: none;"></div>
 <div id="navbarPlaceholder" style="display: none;"></div>
 <a id="bottom"></a>
-{{? it.customFooter}}
-    {{#def.customFooter}}
-{{?}}
+<div id="customFooterPlaceholder" style="display: none;"></div>
 </body>
 </html>

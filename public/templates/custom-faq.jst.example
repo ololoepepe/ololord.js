@@ -1,0 +1,22 @@
+Rendered just as normal .jst template. Actual name must be custom-faq.jst.
+
+Example:
+
+<div>
+    <div class="sectionHeader">
+        <h3>Contents</h3>
+    </div>
+    <div class="rules">
+        <ol type="1">
+            <li><a href="#question">Some question?</a>
+        </ol>
+    </div>
+    <div class="sectionHeader">
+        <h3>F.A.Q.</h3>
+    </div>
+    <div class="rules">
+        <b id="faq">Some question?</b>
+        <br />
+        Some answer.
+    </div>
+</div>

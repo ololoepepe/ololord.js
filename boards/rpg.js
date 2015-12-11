@@ -10,43 +10,6 @@ var Tools = require("../helpers/tools");
 
 board = new Board("rpg", Tools.translate.noop("Role-playing games", "boardTitle"));
 
-board.routes = function() {
-    return [{
-        method: "get",
-        path: "/openVoting.html",
-        handler: function(req, res) {
-            var model = {};
-            model.title = Tools.translate("Open voting", "pageTitle");
-            model.opened = true;
-            model.postNumber = req.query.postNumber;
-            model.showSubmitButton = true;
-            model = merge.recursive(model, controller.boardModel("rpg"));
-            controller(req, "openCloseVoting", model).then(function(data) {
-                res.send(data);
-            }).catch(function(err) {
-                controller.error(req, res, err);
-            });
-        }
-    },
-    {
-        method: "get",
-        path: "/closeVoting.html",
-        handler: function(req, res) {
-            var model = {};
-            model.title = Tools.translate("Close voting", "pageTitle");
-            model.opened = false;
-            model.postNumber = req.query.postNumber;
-            model.showSubmitButton = true;
-            model = merge.recursive(model, controller.boardModel("rpg"));
-            controller(req, "openCloseVoting", model).then(function(data) {
-                res.send(data);
-            }).catch(function(err) {
-                controller.error(req, res, err);
-            });
-        }
-    }];
-};
-
 var contains = function(variants, id) {
     for (var i = 0; i < variants.length; ++i) {
         if (variants[i].id == id)

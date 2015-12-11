@@ -349,48 +349,6 @@ module.exports.sum = function(map1, map2) {
     return merge.recursive(map1, map2);
 };
 
-var localeBasedFileName = function(fileName, locale) {
-    if (!fileName || !Util.isString(fileName))
-        return Promise.resolve(null);
-    if (!Util.isString(locale))
-        locale = config("site.locale", "en");
-    var ext = Path.extname(fileName);
-    var baseFileName = Path.dirname(fileName) + "/" + Path.basename(fileName, ext);
-    var list = [];
-    list.push(baseFileName + "." + locale + ext);
-    list.push(baseFileName + ".en" + ext);
-    list.push(fileName);
-    var f = function() {
-        var fn = list.shift();
-        return FS.exists(fn).then(function(exists) {
-            return exists ? fn : null;
-        });
-    };
-    return f().then(function(fn) {
-        if (fn)
-            return fn;
-        if (list.length > 0)
-            return f();
-        return null;
-    });
-};
-module.exports.localeBasedFileName = localeBasedFileName;
-
-module.exports.getRules = function(name, infix, locale) {
-    var fileName = __dirname + "/../misc/rules/" + name + "/rules" + (infix ? ("." + infix) : "") + ".txt";
-    return localeBasedFileName(fileName, locale).then(function(fileName) {
-        if (!fileName)
-            return null;
-        return FS.read(fileName);
-    }).then(function(data) {
-        if (!data)
-            return [];
-        return data.split(/\r*\n+/gi).filter(function(rule) {
-            return rule;
-        });
-    });
-};
-
 module.exports.splitCommand = function(cmd) {
     var args = [];
     var arg = "";

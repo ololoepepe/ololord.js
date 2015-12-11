@@ -2197,11 +2197,13 @@ lord.addToDrafts = function(a) {
     var formData = new FormData();
     formData.append("boardName", boardName);
     formData.append("text", lord.nameOne("text", postForm).value);
-    if (lord.nameOne("raw", postForm).checked)
+    var raw = lord.nameOne("raw", postForm);
+    if (raw && raw.checked)
         formData.append("raw", "true");
     if (lord.nameOne("signAsOp", postForm).checked)
         formData.append("signAsOp", "true");
-    if (lord.nameOne("tripcode", postForm).checked)
+    var tripcode = lord.nameOne("tripcode", postForm);
+    if (tripcode && tripcode.checked)
         formData.append("tripcode", "true");
     formData.append("markupMode", markupMode);
     var c = {};
@@ -2722,6 +2724,7 @@ lord.initializeOnLoadBaseBoard = function() {
             c.model.customPostFormOption = lord.customPostFormOption;
             if (+lord.data("threadNumber"))
                 c.model.thread = model.thread;
+            c.model.postformRules = JSON.parse(lord.id("model-postformRules").innerHTML);
             lord.id("hiddenPostForm").appendChild(lord.template("postForm", c.model));
             var captcha = lord.selectCaptchaEngine();
             var appendCaptchaWidgetToContainer = function(container) {
@@ -2816,6 +2819,8 @@ lord.initializeOnLoadBaseBoard = function() {
                 lord.addClass(img, "mumWatching");
             });
         }
+        if (lord.getCookie("show_tripcode") === "true")
+            lord.id("showTripcodeCheckbox").checked = true;
         if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
             var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
             var key = function(name) {

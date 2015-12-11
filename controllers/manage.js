@@ -25,7 +25,7 @@ router.get("/manage.html", function(req, res) {
     };
     Database.userBans().then(function(users) {
         model.bannedUsers = users;
-        return controller(req, "manage", model);
+        return controller(null, "manage", model);
     }).then(function(data) {
         res.send(data);
     }).catch(function(err) {

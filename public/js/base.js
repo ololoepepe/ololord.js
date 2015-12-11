@@ -70,7 +70,7 @@ lord.logoutImplementation = function(form, vk) {
             path: "/"
         });
     }
-    window.location = lord.nameOne("source", form).value;
+    lord.reloadPage();
 };
 
 lord.doLogout = function(event, form) {
@@ -83,6 +83,10 @@ lord.doLogout = function(event, form) {
     setTimeout(function() {
         return lord.logoutImplementation(form, true);
     }, 1000);
+};
+
+lord.redirectToLoginPage = function() {
+    window.location = "/" + lord.data("sitePathPrefix") + "login.html?source=" + window.location.pathname;
 };
 
 lord.switchShowLogin = function() {
@@ -696,14 +700,34 @@ lord.initializeOnLoadSettings = function() {
             model.loginMessageText = lord.text("loginMessageNoneText");
     }
     var toolbarPlaceholder = lord.id("toolbarPlaceholder");
-    toolbarPlaceholder.parentNode.replaceChild(lord.template("toolbar", model), toolbarPlaceholder);
+    if (toolbarPlaceholder)
+        toolbarPlaceholder.parentNode.replaceChild(lord.template("toolbar", model), toolbarPlaceholder);
     var navbarPlaceholder = lord.id("navbarPlaceholder");
     if (navbarPlaceholder)
         navbarPlaceholder.parentNode.replaceChild(lord.template("navbar", model), navbarPlaceholder);
     var searchPlaceholder = lord.id("searchPlaceholder");
-    searchPlaceholder.parentNode.replaceChild(lord.template("searchAction", model), searchPlaceholder);
-    if (lord.getCookie("show_tripcode") === "true")
-        lord.id("showTripcodeCheckbox").checked = true;
+    if (searchPlaceholder)
+        searchPlaceholder.parentNode.replaceChild(lord.template("searchAction", model), searchPlaceholder);
+    var customHeaderPlaceholder = lord.id("customHeaderPlaceholder");
+    if (customHeaderPlaceholder) {
+        var data = lord.template("custom-header", model);
+        if (data) {
+            var header = lord.node("header");
+            header.appendChild(data);
+            customHeaderPlaceholder.parentNode.replaceChild(header, customHeaderPlaceholder);
+            header.parentNode.insertBefore(lord.node("br"), header.nextSibling);
+        }
+    }
+    var customFooterPlaceholder = lord.id("customFooterPlaceholder");
+    if (customFooterPlaceholder) {
+        var data = lord.template("custom-footer", model);
+        if (data) {
+            var footer = lord.node("footer");
+            footer.appendChild(data);
+            customFooterPlaceholder.parentNode.replaceChild(footer, customFooterPlaceholder);
+            footer.parentNode.insertBefore(lord.node("br"), footer);
+        }
+    }
     if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
         document.body.addEventListener("keyup", lord.interceptHotkey, false);
         var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
