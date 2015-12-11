@@ -32,7 +32,7 @@ Example:
         "timeOffset": 180,
         "vkontakte": {
             "integrationEnabled": true,
-            "appId": 5161317,
+            "appId": your_app_id,
             "accessToken": "your_token"
         },
         "twitter": {
