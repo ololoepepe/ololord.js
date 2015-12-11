@@ -1,3 +1,5 @@
+Actual file name must be config-dev.json.
+
 {
     "system": {
         "workerCount": 1,
