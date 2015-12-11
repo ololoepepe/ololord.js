@@ -19,10 +19,9 @@ lord.addVoteVariant = function(el) {
             return;
         ++lastN;
     });
-    var model = lord.model("base", "tr", true);
+    var model = lord.model(["base", "tr"], true);
     model.number = lastN + 1;
-    var div = $.parseHTML(lord.template("voteVariant")(model))[0];
-    parent.appendChild(div);
+    parent.appendChild(lord.template("voteVariant", model));
 };
 
 lord.removeVoteVariant = function(el) {
@@ -69,7 +68,7 @@ lord.setVotingOpened = function(el, opened) {
     c.model.showSubmitButton = false;
     c.model.opened = opened;
     c.model.postNumber = postNumber;
-    c.div = $.parseHTML(lord.template("setVotingOpenedDialog")(c.model))[0];
+    c.div = lord.template("setVotingOpenedDialog", c.model);
     lord.showDialog(opened ? "openVotingText" : "closeVotingText", null, c.div).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -80,6 +79,33 @@ lord.setVotingOpened = function(el, opened) {
             return Promise.resolve();
         return lord.updatePost(postNumber);
     }).catch(lord.handleError);
+};
+
+lord.customPostFormField[50] = function(it) {
+    if (it.includeThreadScripts) {
+        var ownPosts = lord.getLocalObject("ownPosts", {});
+        var opPost = it.thread.opPost;
+        if (!ownPosts[opPost.boardName + "/" + opPost.number])
+            return "";
+    }
+    var model = {
+        site: it.site,
+        tr: merge.clone(it.tr),
+        board: merge.clone(it.board),
+        minimalisticPostform: it.minimalisticPostform
+    };
+    return lord.template("rpgPostFormField", model, true);
+};
+
+lord.customEditPostDialogPart[50] = function(it, thread, post) {
+    var model;
+    if (post.extraData)
+        model = merge.recursive(it, post.extraData);
+    else
+        model = merge.clone(it);
+    model.thread = thread;
+    model.post = post;
+    return lord.template("rpgEditPostDialogPart", model, true);
 };
 
 lord.customPostBodyPart[20] = function(it, thread, post) {
@@ -94,16 +120,5 @@ lord.customPostBodyPart[20] = function(it, thread, post) {
         var ids = ownVotes[post.number];
         return ids && ids[variant.id];
     };
-    return lord.template("rpgPostBodyPart")(model);
-};
-
-lord.customEditPostDialogPart[50] = function(it, thread, post) {
-    var model;
-    if (post.extraData)
-        model = merge.recursive(it, post.extraData);
-    else
-        model = merge.clone(it);
-    model.thread = thread;
-    model.post = post;
-    return lord.template("rpgEditPostDialogPart")(model);
+    return lord.template("rpgPostBodyPart", model, true);
 };

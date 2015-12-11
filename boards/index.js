@@ -61,4 +61,16 @@ Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"),
 Board.addBoard(new Board("vg", Tools.translate.noop("Video games", "boardTitle"),
     { defaultUserName: Tools.translate.noop("PC Nobleman", "defaultUserName") }));
 
+Board._banners = {};
+Board.boardNames().forEach(function(boardName) {
+    var path = __dirname + "/../public/img/banners/" + boardName;
+    if (FSSync.existsSync(path)) {
+        Board._banners[boardName] = FSSync.readdirSync(path).filter(function(fileName) {
+            return ".gitignore" != fileName;
+        });
+    } else {
+        Board._banners[boardName] = [];
+    }
+});
+
 module.exports = Board;

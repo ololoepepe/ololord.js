@@ -5,12 +5,10 @@
 !ban.jst
 !banUser.jst
 !boardPage.jst
-!catalog.jst
-!codechaWidget.jst
+!catalogPage.jst
 !coubVideoLink.jst
 !deleteFile.jst
 !deletePost.jst
-!echoPostFormField.jst
 !editPost.jst
 !error.jst
 !faq.jst
@@ -25,10 +23,8 @@
 !openCloseVoting.jst
 !playlist.jst
 !postSourceText.jst
-!rpgPostFormField.jst
 !search.jst
 !settings.jst
 !threadPage.jst
-!yandexCaptchaWidget.jst
 !youtubeVideoLink.jst
 !.gitignore

@@ -10,7 +10,7 @@ lord.customPostHeaderPart[120] = function(it, thread, post) {
     var ownLikes = lord.getLocalObject("ownLikes", {});
     model.liked = +ownLikes[post.number] > 0;
     model.disliked = +ownLikes[post.number] < 0;
-    return lord.template("socPostHeaderPart")(model);
+    return lord.template("socPostHeaderPart", model, true);
 };
 
 lord.likeDislike = function(event, form) {

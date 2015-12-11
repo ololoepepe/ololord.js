@@ -378,47 +378,4 @@ board.renderPost = function(post) {
     });
 };
 
-board.customPostBodyPart = function(n, _) {
-    if (20 != n)
-        return;
-    return function(it, thread, post) {
-        if (!post.extraData)
-            return "";
-        var model = merge.clone(post.extraData);
-        model.post = post;
-        return controller.sync(it.req, "rpgPostBodyPart", model);
-    };
-};
-
-board.customPostFormField = function(n, req, thread) {
-    if (50 != n)
-        return;
-    if (thread) {
-        var user = thread.opPost.user;
-        if (user.ip != req.ip && (!req.hashpass || user.hashpass != req.hashpass))
-            return;
-    }
-    var _this = this;
-    return function(it) {
-        var model = {
-            site: it.site,
-            tr: merge.clone(it.tr),
-            board: merge.clone(it.board),
-            minimalisticPostform: it.minimalisticPostform
-        };
-        return controller.sync(it.req, "rpgPostFormField", model);
-    };
-};
-
-board.customEditPostDialogPart = function(n, req) {
-    if (50 != n)
-        return;
-    return function(it, thread, post) {
-        var model = post.extraData ? merge.clone(post.extraData) : {};
-        model.thread = thread;
-        model.post = post;
-        return controller.sync(it.req, "rpgEditPostDialogPart", model);
-    };
-};
-
 module.exports = board;

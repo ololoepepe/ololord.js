@@ -28,7 +28,6 @@ var defineSetting = function(o, name, def) {
 };
 
 var boards = {};
-var banners = {};
 
 var generateRandomImage = function(hash, mimeType, thumbPath) {
     var canvas = new Canvas(200, 200);
@@ -100,6 +99,12 @@ var Board = function(name, title, options) {
         },
         configurable: true
     });
+    Object.defineProperty(this, "bannerFileNames", {
+        get: function() {
+            return Board._banners[name];
+        },
+        configurable: true
+    });
     defineSetting(this, "captchaQuota", 0);
     defineSetting(this, "enabled", true);
     defineSetting(this, "hidden", false);
@@ -128,18 +133,11 @@ var Board = function(name, title, options) {
         get: function() {
             var ids = config("board." + name + ".supportedCaptchaEngines",
                 config("board.supportedCaptchaEngines", Captcha.captchaIds()));
-            var list = [];
-            if (!(ids instanceof Array))
+            if (!Util.isArray(ids))
                 ids = [];
-            ids.forEach(function(id) {
-                var captcha = Captcha.captcha(id);
-                list.push({
-                    id: captcha.id,
-                    title: captcha.title,
-                    publicKey: captcha.publicKey
-                });
+            return ids.map(function(id) {
+                return Captcha.captcha(id).info();
             });
-            return list;
         },
         configurable: true
     });
@@ -170,29 +168,6 @@ var Board = function(name, title, options) {
 
 /*public*/ Board.prototype.customBoardInfoFields = function() {
     return [];
-};
-
-/*public*/ Board.prototype.getBannerFileName = function() {
-    var randomFile = function(files) {
-        if (!files || !files.length || files.length < 1)
-            return;
-        return files[Tools.randomInt(0, files.length - 1)];
-    };
-    if (banners[this.name])
-        return Promise.resolve(randomFile(banners[this.name]));
-    var path = __dirname + "/../public/img/banners/" + this.name;
-    return FS.exists(path).then(function(exists) {
-        if (!exists)
-            return Promise.resolve([]);
-        return FS.list(path);
-    }).then(function(files) {
-        if (files.length < 1)
-            return Promise.resolve(null);
-        banners[this.name] = files.filter(function(fileName) {
-            return ".gitignore" != fileName;
-        });
-        return Promise.resolve(randomFile(files));
-    });;
 };
 
 /*public*/ Board.prototype.isCaptchaEngineSupported = function(engineName) {
@@ -244,30 +219,6 @@ var Board = function(name, title, options) {
 
 /*public*/ Board.prototype.extraScripts = function() {
     return [];
-};
-
-/*public*/ Board.prototype.customPostHeaderPart = function(n, req, thread) {
-    //
-};
-
-/*public*/ Board.prototype.customPostMenuAction = function(n, req, thread) {
-    //
-};
-
-/*public*/ Board.prototype.customPostBodyPart = function(n, req, thread) {
-    //
-};
-
-/*public*/ Board.prototype.customPostFormField = function(n, req, thread) {
-    //
-};
-
-/*public*/ Board.prototype.customPostFormOption = function(n, req, thread) {
-    //
-};
-
-/*public*/ Board.prototype.customEditPostDialogPart = function(n, req) {
-    //
 };
 
 /*public*/ Board.prototype.testParameters = function(fields, files, creatingThread) {

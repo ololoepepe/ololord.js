@@ -64,34 +64,6 @@ board.renderPost = function(post) {
     });
 };
 
-board.customPostBodyPart = function(n, _) {
-    if (0 != n)
-        return;
-    return function(it, thread, post) {
-        if (!post.extraData || !it.thread)
-            return "";
-        var model = {
-            link: post.extraData,
-            deviceType: it.deviceType
-        };
-        return controller.sync(it.req, "echoPostBodyPart", model);
-    };
-};
-
-board.customPostFormField = function(n, _, thread) {
-    if (thread || 30 != n)
-        return;
-    var _this = this;
-    return function(it) {
-        var model = {
-            tr: merge.clone(it.tr),
-            board: merge.clone(it.board)
-        };
-        model.board.maxLinkLength = _this.maxLinkLength;
-        return controller.sync(it.req, "echoPostFormField", model);
-    };
-};
-
 board.testParameters = function(fields, files, creatingThread) {
     if (!creatingThread)
         return;

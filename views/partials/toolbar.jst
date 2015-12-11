@@ -12,19 +12,7 @@
     [<a onclick="lord.switchMumWatching(); return false;" name="switchMumWatchingButton"
         title="{{=it.tr.mumWatchingText}}"><img src="/{{=it.site.pathPrefix}}img/mum_not_watching.png"
                                                 class="buttonImage"></a>]
-    {{? it.user.loggedIn}}
-        <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/logout"
-              enctype="application/x-www-form-urlencoded" class="inlineForm"
-              onsubmit="lord.doLogout(event, this); return false;">
-            <input type="hidden" name="source" value="{{=it.path}}" />
-            [<input type="image" name="submit" src="/{{=it.site.pathPrefix}}img/logout.png" class="buttonImage"
-                    title="{{=it.tr.logoutText}}{{? it.loginMessageText}} [{{=it.loginMessageText}}]{{?}}" />]
-        </form>
-    {{??}}
-        [<a href="/{{=it.site.pathPrefix}}login.html?source={{=it.path}}"><img src="/{{=it.site.pathPrefix}}img/login.png"
-                                                                               class="buttonImage"
-                                                                               title="{{=it.tr.loginText}}"></a>]
-    {{?}}
+    <span id="loginButtonPlaceholder" style="display: none;"></span>
     {{? "mobile" != it.deviceType}}
         |
     {{?}}

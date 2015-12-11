@@ -188,7 +188,7 @@ router.get("/lastPostNumbers.json", function(req, res) {
 
 router.get("/lastPostNumber.json", function(req, res) {
     boardModel.getLastPostNumbers([req.query.boardName]).then(function(lastPostNumbers) {
-        res.json(lastPostNumbers[0]);
+        res.json({ lastPostNumber: lastPostNumbers[0] });
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

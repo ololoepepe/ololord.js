@@ -17,6 +17,8 @@ lord.filesMap = null;
 lord.spells = null;
 lord.worker = new Worker("/js/worker.js");
 lord.workerTasks = {};
+lord.customPostFormField = {};
+lord.customPostFormOption = {};
 lord.customPostHeaderPart = {};
 lord.customPostMenuAction = {};
 lord.customPostBodyPart = {};
@@ -271,36 +273,16 @@ lord.appendExtrasToModel = function(model) {
             throw "Invalid rating r1: " + r1;
         }
     };
-    model.compareRegisteredUserLevels = function(l1, l2) {
-        if (!l1)
-            l1 = null;
-        if (!l2)
-            l2 = null;
-        if (["ADMIN", "MODER", "USER", null].indexOf(l2) < 0)
-            throw "Invalid registered user level l2: " + l2;
-        switch (l1) {
-        case "ADMIN":
-            return (l1 == l2) ? 0 : 1;
-        case "MODER":
-            if (l1 == l2)
-                return 0;
-            return ("ADMIN" == l2) ? -1 : 1;
-        case "USER":
-            if (l1 == l2)
-                return 0;
-            return (null == l2) ? 1 : -1;
-        case null:
-            return (l1 == l2) ? 0 : -1;
-        default:
-            throw "Invalid reistered user level l1: " + l1;
-        }
-    };
+    model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
     model.formattedDate = function(date) {
         return moment(date).utcOffset(timeOffset).locale(locale).format(dateFormat);
     };
     var ownPosts = lord.getLocalObject("ownPosts", {});
     model.checkOwnPost = function(post) {
         return !!ownPosts[post.boardName + "/" + (post.number || post.postNumber)];
+    };
+    model.minimalisticPostform = function() {
+        return "mobile" == model.deviceType || settings.minimalisticPostform;
     };
     model.customPostBodyPart = lord.customPostBodyPart;
     model.customPostHeaderPart = lord.customPostHeaderPart;
@@ -327,17 +309,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
         c.model.post = post;
         c.model.includeThreadScripts = !!lord.data("threadNumber");
         lord.appendExtrasToModel(c.model);
-        var html = lord.template("post")(c.model);
-        var nodes = $.parseHTML(html, document, true);
-        c.node = (nodes.length > 1) ? nodes[1] : nodes[0];
-        lord.query("script", c.node).forEach(function(script) {
-            var nscript = lord.node("script");
-            if (script.src)
-                nscript.src = script.src;
-            else if (script.innerHTML)
-                nscript.innerHTML = script.innerHTML;
-            script.parentNode.replaceChild(nscript, script);
-        });
+        c.node = lord.template("post", c.model);
         if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
             lord.strikeOutHiddenPostLinks(c.node);
         if (lord.getLocalObject("signOpPostLinks", true))
@@ -401,8 +373,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
                 threadNumber: post.threadNumber,
                 user: post.user
             };
-            var nodes = $.parseHTML(lord.template("postReference")(model));
-            var a = (nodes.length > 1) ? nodes[1] : nodes[0];
+            var a = lord.template("postReference", model);
             referencedBy.appendChild(lord.node("text", " "));
             referencedBy.appendChild(a);
             if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
@@ -503,7 +474,7 @@ lord.globalOnclick = function(e) {
     if (t && lord.img && t == lord.img)
         return;
     while (t) {
-        if ("mobile" == lord.data("deviceType") && "A" == t.tagName) {
+        if ("mobile" == lord.deviceType() && "A" == t.tagName) {
             var boardName = lord.data("boardName", t);
             var postNumber = +lord.data("postNumber", t);
             if (!isNaN(postNumber) && postNumber > 0 && /^>>.*$/gi.test(t.textContent)) {
@@ -516,7 +487,7 @@ lord.globalOnclick = function(e) {
             return;
         t = t.parentNode;
     }
-    if ("mobile" == lord.data("deviceType")) {
+    if (lord.deviceType("mobile")) {
         var post = lord.lastPostPreview;
         if (post && post.parentNode) {
             post.parentNode.removeChild(post);
@@ -759,7 +730,7 @@ lord.deletePost = function(el) {
     var model = lord.model(["base", "tr"], true);
         model.boardName = lord.data("boardName", el, true);
         model.postNumber = postNumber;
-        c.div = $.parseHTML(lord.template("deletePostDialog")(model))[0];
+        c.div = lord.template("deletePostDialog", model);
     lord.showDialog("enterPasswordTitle", "enterPasswordText", c.div).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -814,7 +785,7 @@ lord.moveThread = function(el) {
     var model = lord.model(["base", "tr", "boards"], true);
     model.boardName = boardName;
     model.threadNumber = threadNumber;
-    c.div = $.parseHTML(lord.template("moveThreadDialog")(model))[0];
+    c.div = lord.template("moveThreadDialog", model);
     lord.showDialog("moveThreadText", null, c.div).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -856,8 +827,7 @@ lord.banUser = function(el) {
         c.model.boardName = boardName;
         c.model.postNumber = postNumber;
         c.model.userIp = c.userIp;
-        var nodes = $.parseHTML(lord.template("userBan")(c.model));
-        c.div = (nodes.length > 1) ? nodes[1] : nodes[0];
+        c.div = lord.template("userBan", c.model);
         lord.query("[name='expires'], [name^='banExpires_']", c.div).forEach(function(inp) {
             $(inp).change(function(){
                 $(this).attr("value", $(inp).val());
@@ -958,9 +928,9 @@ lord.addFiles = function(el) {
     model.postNumber = postNumber;
     model.fileCount = +lord.data("fileCount", el, true);
     model.minimalisticPostform = function() {
-        return "mobile" == this.deviceType || this.settings.minimalisticPostform;
+        return lord.deviceType("mobile") || model.settings.minimalisticPostform;
     };
-    c.div = $.parseHTML(lord.template("addFilesDialog")(model))[0];
+    c.div = lord.template("addFilesDialog", model);
     lord.showDialog("addFilesText", null, c.div).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -1002,32 +972,9 @@ lord.editPost = function(el) {
         c.model.thread = thread;
         c.model = merge.recursive(c.model, lord.model(["base", "tr", "board/" + boardName], true));
         c.model.settings = lord.settings();
-        c.model.compareRegisteredUserLevels = function(l1, l2) {
-            if (!l1)
-                l1 = null;
-            if (!l2)
-                l2 = null;
-            if (["ADMIN", "MODER", "USER", null].indexOf(l2) < 0)
-                throw "Invalid registered user level l2: " + l2;
-            switch (l1) {
-            case "ADMIN":
-                return (l1 == l2) ? 0 : 1;
-            case "MODER":
-                if (l1 == l2)
-                    return 0;
-                return ("ADMIN" == l2) ? -1 : 1;
-            case "USER":
-                if (l1 == l2)
-                    return 0;
-                return (null == l2) ? 1 : -1;
-            case null:
-                return (l1 == l2) ? 0 : -1;
-            default:
-                throw "Invalid reistered user level l1: " + l1;
-            }
-        };
+        c.model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
         c.model.customEditPostDialogPart = lord.customEditPostDialogPart;
-        c.div = $.parseHTML(lord.template("editPostDialog")(c.model))[0];
+        c.div = lord.template("editPostDialog", c.model);
         return lord.showDialog("editPostText", null, c.div);
     }).then(function(result) {
         if (!result)
@@ -1133,7 +1080,7 @@ lord.hideByImage = function(a) {
 lord.deleteFile = function(el) {
     var model = lord.model(["base", "tr"], true);
     model.fileName = lord.data("fileName", el, true);
-    var div = $.parseHTML(lord.template("deleteFileDialog")(model))[0];
+    var div = lord.template("deleteFileDialog", model);
     lord.showDialog("enterPasswordTitle", "enterPasswordText", div).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -1149,7 +1096,7 @@ lord.editAudioTags = function(el) {
     var c = {};
     lord.api("fileInfo", { fileName: fileName }).then(function(fileInfo) {
         c.model = merge.recursive({ fileInfo: fileInfo }, lord.model(["base", "tr"], true));
-        c.div = $.parseHTML(lord.template("editAudioTagsDialog")(c.model))[0];
+        c.div = lord.template("editAudioTagsDialog", c.model);
         return lord.showDialog("editAudioTagsText", null, c.div);
     }).then(function(result) {
         if (!result)
@@ -1217,7 +1164,7 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
         });
     }
     p.then(function(post) {
-        if ("mobile" != lord.data("deviceType")) {
+        if (!lord.deviceType("mobile")) {
             post.onmouseout = function(event) {
                 var next = post;
                 while (next) {
@@ -1247,7 +1194,7 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
         }
         post.style.width = "auto";
         document.body.appendChild(post);
-        if ("mobile" != lord.data("deviceType")) {
+        if (!lord.deviceType("mobile")) {
             post.style.position = "absolute";
             var doc = document.documentElement;
             var coords = a.getBoundingClientRect();
@@ -1553,7 +1500,7 @@ lord.attachFileByVk = function(a) {
                 return;
             response = response.response.slice(1);
             var c = {};
-            c.div = $.parseHTML(lord.template("vkAudioList")({ tracks: response }))[0];
+            c.div = lord.template("vkAudioList", { tracks: response });
             lord.showDialog("selectTrackTitle", null, c.div).then(function(result) {
                 if (!result)
                     return Promise.resolve();
@@ -1847,7 +1794,7 @@ lord.showImage = function(a, mimeType, width, height) {
         lord.removeChildren(lord.imgWrapper);
         lord.imgWrapper.appendChild(lord.img);
         if (lord.isAudioType(mimeType)) {
-            if (lord.data("deviceType") == "mobile")
+            if (lord.deviceType("mobile"))
                 lord.imgWrapper.scale = 60;
             else
                 lord.imgWrapper.scale = 100;
@@ -1886,13 +1833,13 @@ lord.showImage = function(a, mimeType, width, height) {
         lord.removeChildren(lord.imgWrapper);
     }
     if (lord.isAudioType(mimeType)) {
-        width = (lord.data("deviceType") == "mobile") ? 500 : 400;
+        width = (lord.deviceType("mobile")) ? 500 : 400;
         lord.img = lord.node("audio");
         lord.img.width = width + "px";
         lord.img.controls = true;
         if (lord.getLocalObject("loopAudioVideo", false))
             lord.img.loop = true;
-        if (lord.data("deviceType") == "mobile")
+        if (lord.deviceType("mobile"))
             lord.imgWrapper.scale = 60;
         else
             lord.imgWrapper.scale = 100;
@@ -2017,7 +1964,7 @@ lord.addThreadToFavorites = function(boardName, threadNumber) {
             threadNumber: threadNumber,
             text: txt
         };
-        var fdiv = $.parseHTML(lord.template("favoritesElement")(model))[1];
+        var fdiv = lord.template("favoritesElement", model);
         lord.nameOne("favorites", div).appendChild(fdiv);
         return Promise.resolve();
     }).catch(lord.handleError);
@@ -2168,17 +2115,7 @@ lord.appendDraft = function(draft, visible) {
     model.draft = draft;
     model.draft.user = model.user;
     lord.appendExtrasToModel(model);
-    var nodes = $.parseHTML(lord.template("draft")(model), document, true);
-    var node = (nodes.length > 1) ? nodes[1] : nodes[0];
-    lord.query("script", node).forEach(function(script) {
-        var nscript = lord.node("script");
-        if (script.src)
-            nscript.src = script.src;
-        else if (script.innerHTML)
-            nscript.innerHTML = script.innerHTML;
-        script.parentNode.replaceChild(nscript, script);
-    });
-    drafts.appendChild(node);
+    drafts.appendChild(lord.template("draft", model));
 };
 
 lord.fillFormWithDraft = function(a) {
@@ -2460,17 +2397,7 @@ lord.expandThread = function(thread) {
             var offset = c.model.thread.lastPosts.length - c.model.board.maxLastPosts;
             c.model.thread.lastPosts = c.model.thread.lastPosts.slice(offset);
         }
-        var nodes = $.parseHTML(lord.template("thread")(c.model), document, true);
-        var node = (nodes.length > 1) ? nodes[1] : nodes[0];
-        lord.query("script", node).forEach(function(script) {
-            var nscript = lord.node("script");
-            if (script.src)
-                nscript.src = script.src;
-            else if (script.innerHTML)
-                nscript.innerHTML = script.innerHTML;
-            script.parentNode.replaceChild(nscript, script);
-        });
-        thread.parentNode.replaceChild(node, thread);
+        thread.parentNode.replaceChild(lord.template("thread", c.model), thread);
     }).catch(function(err) {
         lord.handleError(err);
         thread.removeChild(div);
@@ -2739,9 +2666,37 @@ lord.showTripcode = function(threadNumber) {
     return !!lord.getLocalObject("showTripcode", {})[lord.data("boardName") + "/" + threadNumber];
 };
 
+lord.selectCaptchaEngine = function() {
+    var captcha = lord.settings().captchaEngine;
+    var supportedCaptchaEngines = lord.model("board/" + lord.data("boardName")).board.supportedCaptchaEngines;
+    if (supportedCaptchaEngines.length < 1)
+        return null;
+    var ceid = captcha ? captcha.id : null;
+    var isSupported = function(id) {
+        for (var i = 0; i < supportedCaptchaEngines.length; ++i) {
+            if (supportedCaptchaEngines[i].id == id)
+                return true;
+        }
+        return false;
+    };
+    if (!ceid || !isSupported(ceid)) {
+        if (isSupported("google-recaptcha"))
+            ceid = "google-recaptcha";
+        else
+            ceid = supportedCaptchaEngines[0].id;
+    }
+    for (var i = 0; i < supportedCaptchaEngines.length; ++i) {
+        if (supportedCaptchaEngines[i].id == ceid)
+            return supportedCaptchaEngines[i];
+    }
+    return null;
+};
+
 lord.initializeOnLoadBaseBoard = function() {
     var c = {};
     c.model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true);
+    c.model.settings = lord.settings();
+    lord.appendExtrasToModel(c.model);
     var p;
     if (+lord.data("threadNumber")) {
         c.model.includeThreadScripts = true;
@@ -2751,28 +2706,86 @@ lord.initializeOnLoadBaseBoard = function() {
     } else {
         p = lord.api("catalog", { sort: lord.data("sortMode") }, lord.data("boardName"));
     }
+    var bannerFileNames = c.model.board.bannerFileNames;
+    if (bannerFileNames.length > 0) {
+        var bannerFileName = bannerFileNames[Math.floor(Math.random() * bannerFileNames.length)];
+        var bannerPlaceholder = lord.id("bannerPlaceholder");
+        c.model.bannerFileName = bannerFileName;
+        var banner = lord.template("banner", c.model);
+        bannerPlaceholder.parentNode.replaceChild(banner, bannerPlaceholder);
+        banner.parentNode.insertBefore(lord.node("br"), banner);
+    }
     p.then(function(model) {
-        c.threads = model.threads || [model.thread];
-        lord.appendExtrasToModel(c.model);
+        if ((+lord.data("threadNumber") || +lord.data("currentPage") >= 0)
+            && lord.model("board/" + lord.data("boardName")).board.captchaEnabled) {
+            c.model.customPostFormField = lord.customPostFormField;
+            c.model.customPostFormOption = lord.customPostFormOption;
+            if (+lord.data("threadNumber"))
+                c.model.thread = model.thread;
+            lord.id("hiddenPostForm").appendChild(lord.template("postForm", c.model));
+            var captcha = lord.selectCaptchaEngine();
+            var appendCaptchaWidgetToContainer = function(container) {
+                if (captcha && captcha.widgetHtml)
+                    container.innerHTML = captcha.widgetHtml;
+                else if (captcha && captcha.widgetTemplate)
+                    container.appendChild(lord.template(captcha.widgetTemplate, captcha));
+            };
+            lord.api("captchaQuota", { boardName: lord.data("boardName") }).then(function(quota) {
+                if (quota > 0) {
+                    appendCaptchaWidgetToContainer(lord.id("hiddenPostForm"));
+                    var span = lord.node("span");
+                    span.appendChild(lord.node("text", lord.text("noCaptchaText") + ". "
+                        + lord.text("captchaQuotaText") + " " + quota));
+                    lord.id("captchaContainer").appendChild(span);
+                } else {
+                    appendCaptchaWidgetToContainer(lord.id("captchaContainer"));
+                }
+                if (captcha && captcha.script) {
+                    var script = lord.node("script");
+                    script.type = "text/javascript";
+                    script.innerHTML = captcha.script;
+                    lord.queryOne("head").appendChild(script);
+                }
+                if (captcha && captcha.scriptSource) {
+                    var script = lord.node("script");
+                    script.type = "text/javascript";
+                    script.src = captcha.scriptSource;
+                    lord.queryOne("head").appendChild(script);
+                }
+            }).catch(lord.handleError);
+        }
         c.notCatalog = (+lord.data("threadNumber") || +lord.data("currentPage") >= 0);
+        if (+lord.data("threadNumber")) {
+            lord.queryOne(".theTitle > h1").innerHTML = lord.escaped(model.thread.title);
+            lord.queryOne("head > title").innerHTML = lord.escaped(model.thread.title);
+            var upperPlaceholder = lord.id("upperPlaceholder");
+            upperPlaceholder.parentNode.replaceChild(lord.template("threadPageUpper", c.model), upperPlaceholder);
+            var lowerPlaceholder = lord.id("lowerPlaceholder");
+            lowerPlaceholder.parentNode.replaceChild(lord.template("threadPageLower", c.model), lowerPlaceholder);
+        } else if (c.notCatalog) {
+            c.model.pageCount = model.pageCount;
+            c.model.currentPage = model.currentPage;
+            var upperPlaceholder = lord.id("upperPlaceholder");
+            upperPlaceholder.parentNode.replaceChild(lord.template("boardPageUpper", c.model), upperPlaceholder);
+            var lowerPlaceholder = lord.id("lowerPlaceholder");
+            lowerPlaceholder.parentNode.replaceChild(lord.template("boardPageLower", c.model), lowerPlaceholder);
+            var pagesPlaceholder = lord.id("pagesPlaceholder");
+            pagesPlaceholder.parentNode.replaceChild(lord.template("pagination", c.model), pagesPlaceholder);
+        }
+        if (!lord.data("threadNumber")) {
+            var postingSpeedPlaceholder = lord.id("postingSpeedPlaceholder");
+            postingSpeedPlaceholder.parentNode.replaceChild(lord.template("postingSpeed", c.model),
+                postingSpeedPlaceholder);
+        }
+        c.threads = model.threads || [model.thread];
         var threads = lord.id("threads");
         lord.removeChildren(threads);
         lord.removeClass(threads, "loadingMessage");
         return c.threads.forEach(function(thread) {
-            var model = merge.recursive(c.model, { thread: thread });
-            var nodes = $.parseHTML(lord.template(c.notCatalog ? ("thread") : "catalogThread")(model), document, true);
-            var node = (nodes.length > 1) ? nodes[1] : nodes[0];
-            lord.query("script", node).forEach(function(script) {
-                var nscript = lord.node("script");
-                if (script.src)
-                    nscript.src = script.src;
-                else if (script.innerHTML)
-                    nscript.innerHTML = script.innerHTML;
-                script.parentNode.replaceChild(nscript, script);
-            });
+            c.model.thread = thread;
             if (c.notCatalog)
                 threads.appendChild(lord.node("hr"));
-            threads.appendChild(node);
+            threads.appendChild(lord.template(c.notCatalog ? ("thread") : "catalogThread", c.model));
         });
     }).then(function() {
         setTimeout(function() {
@@ -2791,7 +2804,7 @@ lord.initializeOnLoadBaseBoard = function() {
             });
         }
         document.body.onclick = lord.globalOnclick;
-        if (lord.data("deviceType") != "mobile") {
+        if (!lord.deviceType("mobile")) {
             document.body.onmouseover = lord.globalOnmouseover;
             document.body.onmouseout = lord.globalOnmouseout;
         }
@@ -2802,7 +2815,7 @@ lord.initializeOnLoadBaseBoard = function() {
                 lord.addClass(img, "mumWatching");
             });
         }
-        if (lord.getLocalObject("hotkeysEnabled", true) && lord.data("deviceType") != "mobile") {
+        if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
             var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
             var key = function(name) {
                 if (!hotkeys)
@@ -2931,9 +2944,11 @@ lord.initializeOnLoadBaseBoard = function() {
         if (lord.getLocalObject("signOwnPostLinks", true))
             lord.signOwnPostLinks(document.body);
         if (!lord.data("threadNumber")) {
-            var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
-            lastPostNumbers[currentBoardName] = +lord.data("lastPostNumber");
-            lord.setLocalObject("lastPostNumbers", lastPostNumbers);
+            lord.api("lastPostNumber", { boardName: currentBoardName }).then(function(result) {
+                var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
+                lastPostNumbers[currentBoardName] = result.lastPostNumber;
+                lord.setLocalObject("lastPostNumbers", lastPostNumbers);
+            }).catch(lord.handleError);
         }
         lord.initFiles();
         lord.scrollHandler();

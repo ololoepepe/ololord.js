@@ -1,6 +1,7 @@
 *
 !addFilesForm.jst
 !chatContact.jst
+!createAction.jst
 !deleteFileForm.jst
 !deletePostForm.jst
 !editAudioTagsForm.jst

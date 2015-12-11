@@ -40,50 +40,12 @@ var checkCaptcha = function(req, fields) {
     });
 };
 
-var scriptSource = function(req) {
+var scriptSource = function() {
     return "/" + config("site.pathPrefix", "") + "js/yandex-captcha-script.js";
 };
 
-var widgetHtml = function(req, prepared) {
-    return controller.sync(req, "yandexCaptchaWidget", prepared);
-};
-
-var prepare = function(req, fromApi) {
-    if (!fromApi)
-        return Promise.resolve();
-    var captcha = req.settings.captchaEngine;
-    var type = this.id.split("-").pop();
-    var query = `key=${encodeURIComponent(this.privateKey)}&type=${type}`;
-    var url = "http://cleanweb-api.yandex.ru/1.0/get-captcha?" + query;
-    return HTTP.request({
-        url: url,
-        timeout: (15 * Tools.Second)
-    }).then(function(response) {
-        if (response.status != 200)
-            return Promise.reject("Failed to prepare captcha");
-        return response.body.read("utf8");
-    }).then(function(data) {
-        var parser = new XML2JS.Parser();
-        return new Promise(function(resolve, reject) {
-            parser.parseString(data.toString(), function(err, result) {
-                if (err)
-                    return resolve({ error: err });
-                if (result && result["get-captcha-result"]) {
-                    result = result["get-captcha-result"];
-                    if (result.captcha && result.captcha.length > 0 && result.url && result.url.length > 0) {
-                        return resolve({
-                            challenge: result.captcha[0],
-                            url: result.url[0].replace("https://", "").replace("http://", "")
-                        });
-                    } else {
-                        return resolve({ error: "Captcha server error" });
-                    }
-                } else {
-                    return resolve({ error: "Captcha server error" });
-                }
-            });
-        });
-    });
+var widgetTemplate = function() {
+    return "yandexCaptchaWidget";
 };
 
 var captchaMap = {};
@@ -100,7 +62,39 @@ yandexElatmCaptcha.apiRoutes = function() {
             var captcha = captchaMap[req.query.type];
             if (!captcha)
                 return controller.error(req, res, "Invalid captcha type", true);
-            captcha.prepare(req, true).then(function(result) {
+            var captcha = req.settings.captchaEngine;
+            var type = captcha.id.split("-").pop();
+            var query = `key=${encodeURIComponent(captcha.privateKey)}&type=${type}`;
+            var url = "http://cleanweb-api.yandex.ru/1.0/get-captcha?" + query;
+            return HTTP.request({
+                url: url,
+                timeout: (15 * Tools.Second)
+            }).then(function(response) {
+                if (response.status != 200)
+                    return Promise.reject("Failed to prepare captcha");
+                return response.body.read("utf8");
+            }).then(function(data) {
+                var parser = new XML2JS.Parser();
+                return new Promise(function(resolve, reject) {
+                    parser.parseString(data.toString(), function(err, result) {
+                        if (err)
+                            return resolve({ error: err });
+                        if (result && result["get-captcha-result"]) {
+                            result = result["get-captcha-result"];
+                            if (result.captcha && result.captcha.length > 0 && result.url && result.url.length > 0) {
+                                return resolve({
+                                    challenge: result.captcha[0],
+                                    url: result.url[0].replace("https://", "").replace("http://", "")
+                                });
+                            } else {
+                                return resolve({ error: "Captcha server error" });
+                            }
+                        } else {
+                            return resolve({ error: "Captcha server error" });
+                        }
+                    });
+                });
+            }).then(function(result) {
                 res.send(result);
             }).catch(function(err) {
                 controller.error(req, res, err, true);
@@ -115,8 +109,7 @@ captchas.forEach(function(captcha) {
     captchaMap[captcha.id.split("-").pop()] = captcha;
     captcha.checkCaptcha = checkCaptcha;
     captcha.scriptSource = scriptSource;
-    captcha.widgetHtml = widgetHtml;
-    captcha.prepare = prepare;
+    captcha.widgetTemplate = widgetTemplate;
 });
 
 module.exports = captchas;

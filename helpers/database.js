@@ -1770,6 +1770,8 @@ module.exports.deletePost = function(req, res, fields) {
         return (c.isThread) ? removeThread(board.name, postNumber) : removePost(board.name, postNumber);
     }).then(function() {
         var p = Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "delete");
+        if (c.isThread)
+            Global.removeFromCached([c.post.boardName, c.post.threadNumber]);
         return c.isThread ? p : Promise.resolve();
     }).then(function() {
         return {
@@ -1942,6 +1944,7 @@ module.exports.moveThread = function(req, fields) {
         return removeThread(sourceBoard.name, threadNumber, false, true);
     }).then(function() {
         Global.generate(sourceBoard.name, threadNumber, threadNumber, "delete");
+        Global.removeFromCached([sourceBoard.name, threadNumber]);
         return Global.generate(targetBoard.name, c.thread.number, c.thread.number, "create");
     }).then(function() {
         return {

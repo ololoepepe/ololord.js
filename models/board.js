@@ -1,6 +1,7 @@
 var FS = require("q-io/fs");
 var FSSync = require("fs-ext");
 var merge = require("merge");
+var mkpath = require("mkpath");
 var promisify = require("promisify-node");
 var Util = require("util");
 
@@ -16,91 +17,15 @@ var scheduledGenerateCatalog = {};
 var pageCounts = {};
 var deletedPosts = {};
 
+mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-json");
+
 var cachePath = function() {
-    var path = Array.prototype.join.call(arguments, "-");
-    return config("system.cachePath", __dirname + "/../tmp/cache") + (path ? ("/" + path + ".json") : "");
-};
-
-var openFile = promisify(FSSync.open);
-var closeFile = promisify(FSSync.close);
-var flockFile = promisify(FSSync.flock);
-var readData = promisify(FSSync.read);
-var writeData = promisify(FSSync.write);
-
-var recover = function(c, err) {
-    if (!c.fd)
-        return Promise.reject(err);
-    return flockFile(c.fd, "un").catch(function(err) {
-        console.log(err.stack || err);
-        return Promise.resolve();
-    }).then(function() {
-        if (c.noclose)
-            return Promise.resolve();
-        return closeFile(c.fd);
-    }).catch(function(err) {
-        console.log(err.stack || err);
-        return Promise.resolve();
-    }).then(function() {
-        return Promise.reject(err);
+    var args = [];
+    Array.prototype.slice.call(arguments, 0).forEach(function(arg) {
+        args = args.concat(arg);
     });
-};
-
-var readFile = function(path) {
-    var c = {};
-    return openFile(path, "r").then(function(fd) {
-        c.fd = fd;
-        return flockFile(c.fd, "sh");
-    }).then(function() {
-        c.locked = true;
-        return FS.stat(path);
-    }).then(function(stats) {
-        if (stats.size <= 0)
-            return Promise.resolve();
-        c.buffer = new Buffer(stats.size);
-        return readData(c.fd, c.buffer, 0, c.buffer.length, null);
-    }).then(function() {
-        c.data = c.buffer ? c.buffer.toString("utf8") : "";
-        return flockFile(c.fd, "un");
-    }).then(function() {
-        c.locked = false;
-        return closeFile(c.fd);
-    }).then(function() {
-        return Promise.resolve(c.data);
-    }).catch(recover.bind(null, c));
-};
-
-var writeFile = function(path, data) {
-    var c = {};
-    return openFile(path, "w").then(function(fd) {
-        c.fd = fd;
-        return flockFile(c.fd, "ex");
-    }).then(function() {
-        c.locked = true;
-        return writeData(c.fd, data, null, "utf8");
-    }).then(function() {
-        return flockFile(c.fd, "un");
-    }).then(function() {
-        c.locked = false;
-        return closeFile(c.fd);
-    }).then(function() {
-        return Promise.resolve(c.data);
-    }).catch(recover.bind(null, c));
-};
-
-var removeFile = function(path) {
-    var c = { noclose: true };
-    return openFile(path, "w").then(function(fd) {
-        c.fd = fd;
-        return flockFile(c.fd, "ex");
-    }).then(function() {
-        c.locked = true;
-        return FS.remove(path);
-    }).then(function() {
-        return flockFile(c.fd, "un");
-    }).then(function() {
-        c.locked = false;
-        return Promise.resolve();
-    }).catch(recover.bind(null, c));
+    var path = args.join("-");
+    return config("system.tmpPath", __dirname + "/../tmp") + "/cache-json" + (path ? ("/" + path + ".json") : "");
 };
 
 module.exports.getLastPostNumbers = function(boardNames) {
@@ -135,16 +60,6 @@ module.exports.getPosts = function(posts) {
             return Promise.resolve();
         });
     });
-    /*var promises = posts.map(function(post) {
-        if (!post)
-            return Promise.resolve(null);
-        return Database.getPost(post.boardName, post.postNumber, {
-            withFileInfos: true,
-            withReferences: true,
-            withExtraData: true
-        });
-    });
-    return Promise.all(promises);*/
     return p.then(function() {
         return Promise.resolve(c.posts);
     });
@@ -164,9 +79,10 @@ module.exports.getBoardPage = function(board, page, json) {
     if (isNaN(page) || page < 0 || page >= pageCounts[board.name])
         return Promise.reject(404);
     if (json)
-        return readFile(cachePath("page", board.name, page));
+        return Tools.readFile(cachePath("page", board.name, page));
     var model = {
         pageCount: pageCounts[board.name],
+        currentPage: page,
         threads: []
     };
     return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
@@ -230,7 +146,8 @@ var getPage = function(board, page) {
     }).then(function() {
         c.model = {
             threads: [],
-            pageCount: c.pageCount
+            pageCount: c.pageCount,
+            currentPage: page
         };
         c.threads.forEach(function(thread) {
             var threadModel = {
@@ -264,9 +181,9 @@ module.exports.getThreadPage = function(board, number, json) {
         return Promise.reject("Invalid thread");
     var c = {};
     if (json) {
-        return readFile(cachePath("thread", board.name, number)).then(function(data) {
+        return Tools.readFile(cachePath("thread", board.name, number)).then(function(data) {
             c.data = data;
-            return readFile(cachePath("thread-posts", board.name, number));
+            return Tools.readFile(cachePath("thread-posts", board.name, number));
         }).then(function(data) {
             return Promise.resolve("{\"thread\":{\"lastPosts\":" + data + "," + c.data.substr(11));
         });
@@ -456,7 +373,7 @@ module.exports.getCatalogPage = function(board, sortMode, json) {
         sortMode = (sortMode || "date").toLowerCase();
         if (["recent", "bumps"].indexOf(sortMode) < 0)
             sortMode = "date";
-        return readFile(cachePath("catalog", sortMode, board.name));
+        return Tools.readFile(cachePath("catalog", sortMode, board.name));
     }
     return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
         return Promise.resolve({ lastPostNumber: lastPostNumber });
@@ -563,7 +480,7 @@ var generateThread = function(boardName, threadNumber, nowrite) {
         delete c.json.thread.lastPosts;
         if (nowrite)
             return Promise.resolve();
-        return writeFile(threadPath, JSON.stringify(c.json));
+        return Tools.writeFile(threadPath, JSON.stringify(c.json));
     }).then(function() {
         if (nowrite) {
             return Promise.resolve({
@@ -573,7 +490,7 @@ var generateThread = function(boardName, threadNumber, nowrite) {
                 postsData: JSON.stringify(c.posts)
             });
         }
-        return writeFile(postsPath, JSON.stringify(c.posts));
+        return Tools.writeFile(postsPath, JSON.stringify(c.posts));
     });
 };
 
@@ -612,7 +529,7 @@ var generatePage = function(boardName, page, accumulator) {
                 });
                 return Promise.resolve();
             }
-            return writeFile(path, data);
+            return Tools.writeFile(path, data);
         });
         return p;
     });
@@ -655,7 +572,7 @@ var generateCatalog = function(boardName, nowrite) {
                 c.dateData = data;
                 return Promise.resolve();
             }
-            return writeFile(path, data);
+            return Tools.writeFile(path, data);
         });
         return p;
     }).then(function() {
@@ -675,7 +592,7 @@ var generateCatalog = function(boardName, nowrite) {
                 c.recentData = data;
                 return Promise.resolve();
             }
-            return writeFile(path, data);
+            return Tools.writeFile(path, data);
         });
         return p;
     }).then(function() {
@@ -695,7 +612,7 @@ var generateCatalog = function(boardName, nowrite) {
                 c.bumpsData = data;
                 return Promise.resolve(c);
             }
-            return writeFile(path, data);
+            return Tools.writeFile(path, data);
         });
     });
 };
@@ -888,20 +805,20 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
         });
         if (deletingThread) {
             p = p.then(function() {
-                return removeFile(cachePath("thread", boardName, threadNumber));
+                return Tools.removeFile(cachePath("thread", boardName, threadNumber));
             }).then(function() {
-                return removeFile(cachePath("thread-posts", boardName, threadNumber));
+                return Tools.removeFile(cachePath("thread-posts", boardName, threadNumber));
             });
         } else if (creatingThread) {
             p = p.then(function() {
-                return writeFile(c.data.threadPath, c.data.threadData);
+                return Tools.writeFile(c.data.threadPath, c.data.threadData);
             }).then(function() {
-                return writeFile(c.data.postsPath, c.data.postsData);
+                return Tools.writeFile(c.data.postsPath, c.data.postsData);
             });
         } else if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)) {
             var postsPath = cachePath("thread-posts", boardName, threadNumber);
             p = p.then(function() {
-                return readFile(postsPath);
+                return Tools.readFile(postsPath);
             }).then(function(data) {
                 data = JSON.parse(data);
                 var indexOfPost = function(post) {
@@ -923,16 +840,16 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
                     if (ind >= 0)
                         data.splice(ind, 1);
                 });
-                return writeFile(postsPath, JSON.stringify(data));
+                return Tools.writeFile(postsPath, JSON.stringify(data));
             });
         } else if (scheduled.create && scheduled.create.length > 0) {
             var postsPath = cachePath("thread-posts", boardName, threadNumber);
             p = p.then(function() {
-                return readFile(postsPath);
+                return Tools.readFile(postsPath);
             }).then(function(data) {
                 if (data.length < 3) //Empty list
                     c.data = c.data.substr(1);
-                return writeFile(postsPath, data.substr(0, data.length - 1) + c.data + "]");
+                return Tools.writeFile(postsPath, data.substr(0, data.length - 1) + c.data + "]");
             });
         } else {
             p = p.then(function() {
@@ -954,10 +871,10 @@ module.exports.scheduleGeneratePages = function(boardName) {
         var c = {};
         return generatePages(boardName, true).then(function(pages) {
             c.pages = pages;
-            var p = (c.pages.length > 0) ? writeFile(c.pages[0].path, c.pages[0].data) : Promise.resolve();
+            var p = (c.pages.length > 0) ? Tools.writeFile(c.pages[0].path, c.pages[0].data) : Promise.resolve();
             c.pages.slice(1).forEach(function(page) {
                 p = p.then(function() {
-                    return writeFile(page.path, page.data);
+                    return Tools.writeFile(page.path, page.data);
                 });
             });
             return p;
@@ -971,11 +888,11 @@ module.exports.scheduleGenerateCatalog = function(boardName) {
         var c = {};
         return generateCatalog(boardName, true).then(function(catalog) {
             c.catalog = catalog;
-            return writeFile(c.catalog.datePath, c.catalog.dateData);
+            return Tools.writeFile(c.catalog.datePath, c.catalog.dateData);
         }).then(function() {
-            writeFile(c.catalog.recentPath, c.catalog.recentData);
+            Tools.writeFile(c.catalog.recentPath, c.catalog.recentData);
         }).then(function() {
-            writeFile(c.catalog.bumpsPath, c.catalog.bumpsData);
+            Tools.writeFile(c.catalog.bumpsPath, c.catalog.bumpsData);
         });
     };
     return addTask(scheduledGenerateCatalog, boardName, f);
@@ -1051,10 +968,10 @@ module.exports.cleanup = function() {
         }).map(function(fileName) {
             return path + "/" + fileName;
         });
-        var p = (fileNames.length > 0) ? removeFile(fileNames[0]) : Promise.resolve();
+        var p = (fileNames.length > 0) ? Tools.removeFile(fileNames[0]) : Promise.resolve();
         fileNames.slice(1).forEach(function(fileName) {
             p = p.then(function() {
-                return removeFile(fileName);
+                return Tools.removeFile(fileName);
             });
         });
         return p;

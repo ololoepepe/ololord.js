@@ -12,106 +12,20 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-var selectCaptchaEngine = function(req, board) {
-    var captcha = req.settings.captchaEngine;
-    var supportedCaptchaEngines = board.supportedCaptchaEngines;
-    if (supportedCaptchaEngines.length < 1)
-        return null;
-    var ceid = captcha ? captcha.id : null;
-    var isSupported = function(id) {
-        for (var i = 0; i < supportedCaptchaEngines.length; ++i) {
-            if (supportedCaptchaEngines[i].id == id)
-                return true;
-        }
-        return false;
-    };
-    if (!ceid || !isSupported(ceid)) {
-        if (isSupported("google-recaptcha"))
-            ceid = "google-recaptcha";
-        else
-            ceid = supportedCaptchaEngines[0].id;
-    }
-    return Captcha.captcha(ceid);
-};
-
-var custom = function(model, req, board, thread) {
-    model.customPostFormField = {};
-    for (var i = 0; i < 120; i += 10)
-        model.customPostFormField[i] = board.customPostFormField(i, req, thread);
-    model.customPostFormOption = {};
-    for (var i = 0; i < 50; i += 10)
-        model.customPostFormOption[i] = board.customPostFormOption(i, req, thread);
-};
-
-var renderPage = function(model, board, req) {
-    model.currentPage = +(req.params.page || 0);
-    model.title = board.title;
-    model.includeBoardScripts = true;
-    model = merge.recursive(model, controller.boardModel(board));
-    model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
-    model.extraScripts = board.extraScripts();
-    model.tr = controller.translationsModel();
-    return board.postformRules().then(function(rules) {
-        model.postformRules = rules;
-        model.captchaEngine = selectCaptchaEngine(req, board);
-        return model.captchaEngine.prepare(req);
-    }).then(function(captchaPrepared) {
-        model.captchaPrepared = captchaPrepared;
-        return Database.getUserCaptchaQuota(board.name, req.ip);
-    }).then(function(quota) {
-        model.user = { captchaQuota: quota };
-        return board.getBannerFileName();
-    }).then(function(bannerFileName) {
-        if (bannerFileName)
-            model.board.bannerFileName = bannerFileName;
-        model.minimalisticPostform = function() {
-            return "mobile" == this.deviceType || this.settings.minimalisticPostform;
-        };
-        custom(model, req, board);
-        return controller(req, "boardPage", model);
-    });
-};
-
-var renderThread = function(model, board, req) {
-    model.title = model.thread.title || (board.title + " — " + model.thread.number);
-    model.includeBoardScripts = true;
-    model.includeThreadScripts = true;
-    model.board = controller.boardModel(board).board;
-    model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
-    model.extraScripts = board.extraScripts();
-    model.tr = controller.translationsModel();
-    return board.postformRules().then(function(rules) {
-        model.postformRules = rules;
-        model.captchaEngine = selectCaptchaEngine(req, board);
-        return model.captchaEngine.prepare(req);
-    }).then(function(captchaPrepared) {
-        model.captchaPrepared = captchaPrepared;
-        return Database.getUserCaptchaQuota(board.name, req.ip);
-    }).then(function(quota) {
-        model.user = { captchaQuota: quota };
-        return board.getBannerFileName();
-    }).then(function(bannerFileName) {
-        if (bannerFileName)
-            model.board.bannerFileName = bannerFileName;
-        model.minimalisticPostform = function() {
-            return "mobile" == this.deviceType || this.settings.minimalisticPostform;
-        };
-        custom(model, req, board, model.thread);
-        return controller(req, "threadPage", model);
-    });
-};
-
-var renderCatalog = function(model, board, req, json) {
-    model.title = board.title;
-    model.includeBoardScripts = true;
-    model = merge.recursive(model, controller.boardModel(board));
-    model.board.postingSpeed = controller.postingSpeedString(board, model.lastPostNumber);
-    model.sortMode = req.query.sort || "date";
-    return board.getBannerFileName().then(function(bannerFileName) {
-        if (bannerFileName)
-            model.board.bannerFileName = bannerFileName;
-        model.tr = controller.translationsModel();
-        return controller(req, "catalog", model);
+var renderPage = function(board, page) {
+    var c = {};
+    return BoardModel.getBoardPage(board, page).then(function(model) {
+        c.model = model;
+        c.model.title = board.title;
+        c.model.includeBoardScripts = true;
+        c.model.board = controller.boardModel(board).board;
+        c.model.board.postingSpeed = controller.postingSpeedString(board, c.model.lastPostNumber);
+        c.model.extraScripts = board.extraScripts();
+        c.model.tr = controller.translationsModel();
+        return board.postformRules();
+    }).then(function(rules) {
+        c.model.postformRules = rules;
+        return controller(null, "boardPage", c.model);
     });
 };
 
@@ -120,9 +34,7 @@ router.get("/:boardName", function(req, res) {
     if (!board)
         return controller.error(req, res, 404);
     controller.checkBan(req, res, board.name).then(function() {
-        return BoardModel.getBoardPage(board);
-    }).then(function(model) {
-        return renderPage(model, board, req);
+        return controller.html(renderPage.bind(null, board, 0), "board", board.name, 0);
     }).then(function(data) {
         res.send(data);
     }).catch(function(err) {
@@ -131,13 +43,24 @@ router.get("/:boardName", function(req, res) {
 });
 
 router.get("/:boardName/catalog.html", function(req, res) {
+    var f = function(board, sortMode) {
+        var c = {};
+        return BoardModel.getCatalogPage(board, sortMode || "date").then(function(model) {
+            c.model = model;
+            c.model.title = board.title;
+            c.model.includeBoardScripts = true;
+            c.model.board = controller.boardModel(board).board;
+            c.model.board.postingSpeed = controller.postingSpeedString(board, c.model.lastPostNumber);
+            c.model.sortMode = sortMode || "date";
+            c.model.tr = controller.translationsModel();
+            return controller(null, "catalogPage", c.model);
+        });
+    };
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
     controller.checkBan(req, res, board.name).then(function() {
-        return BoardModel.getCatalogPage(board, req.query.sort);
-    }).then(function(model) {
-        return renderCatalog(model, board, req);
+        return controller.html(f.bind(null, board, req.query.sort), "catalog", board.name, req.query.sort || "date");
     }).then(function(data) {
         res.send(data);
     }).catch(function(err) {
@@ -173,10 +96,8 @@ router.get("/:boardName/:page.html", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
-    controller.checkBan(req, res, board.name, false).then(function() {
-        return BoardModel.getBoardPage(board, req.params.page)
-    }).then(function(model) {
-        return renderPage(model, board, req);
+    controller.checkBan(req, res, board.name).then(function() {
+        return controller.html(renderPage.bind(null, board, req.params.page), "board", board.name, req.params.page);
     }).then(function(data) {
         res.send(data);
     }).catch(function(err) {
@@ -198,13 +119,29 @@ router.get("/:boardName/:page.json", function(req, res) {
 });
 
 router.get("/:boardName/res/:threadNumber.html", function(req, res) {
+    var f = function(board, threadNumber) {
+        var c = {};
+        return BoardModel.getThreadPage(board, threadNumber).then(function(model) {
+            c.model = model;
+            c.model.title = board.title + " — " + c.model.thread.number;
+            c.model.includeBoardScripts = true;
+            c.model.includeThreadScripts = true;
+            c.model.board = controller.boardModel(board).board;
+            c.model.extraScripts = board.extraScripts();
+            c.model.tr = controller.translationsModel();
+            c.model.threadNumber = c.model.thread.number;
+            return board.postformRules();
+        }).then(function(rules) {
+            c.model.postformRules = rules;
+            return controller(null, "threadPage", c.model);
+        });
+    };
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(req, res, 404);
     controller.checkBan(req, res, board.name).then(function() {
-        return BoardModel.getThreadPage(board, req.params.threadNumber);
-    }).then(function(model) {
-        return renderThread(model, board, req);
+        return controller.html(f.bind(null, board, req.params.threadNumber), "thread", board.name,
+            req.params.threadNumber);
     }).then(function(data) {
         res.send(data);
     }).catch(function(err) {

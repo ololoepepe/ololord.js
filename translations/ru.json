@@ -1810,36 +1810,6 @@
             "value": "Показывать превью прикрепляемых файлов"
         }
     },
-    "Logged in, but not registered": {
-        "loginMessageText": {
-            "value": "Залогинен, но не зарегистрирован"
-        },
-        "_obsolete": true
-    },
-    "Registered and logged in": {
-        "loginMessageText": {
-            "value": "Зарегистрирован и залогинен"
-        },
-        "_obsolete": true
-    },
-    "admin": {
-        "loginMessageText": {
-            "value": "админ"
-        },
-        "_obsolete": true
-    },
-    "moder": {
-        "loginMessageText": {
-            "value": "модер"
-        },
-        "_obsolete": true
-    },
-    "user": {
-        "loginMessageText": {
-            "value": "юзер"
-        },
-        "_obsolete": true
-    },
     "Password/hashpass": {
         "loginPlaceholderText": {
             "value": "Пароль/хешпасс"
@@ -3565,22 +3535,22 @@
         "_obsolete": true
     },
     "logged in as administrator": {
-        "loginMessageText": {
+        "loginMessageAdminText": {
             "value": "залогинен в качестве администратора"
         }
     },
     "logged in as moderator": {
-        "loginMessageText": {
+        "loginMessageModerText": {
             "value": "залогинен в качестве модератора"
         }
     },
     "logged in as user": {
-        "loginMessageText": {
+        "loginMessageUserText": {
             "value": "залогинен в качестве пользователя"
         }
     },
     "not registered": {
-        "loginMessageText": {
+        "loginMessageNoneText": {
             "value": "не зарегистрирован"
         }
     },

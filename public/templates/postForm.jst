@@ -276,14 +276,7 @@
                     </td>
                 {{?}}
                 <td id="captchaContainer" class="postformField">
-                    {{? it.board.captchaEnabled}}
-                        {{? it.user.captchaQuota > 0}}
-                            <span class="noCaptchaText">{{=it.tr.noCaptchaText}}. {{=it.tr.captchaQuotaText}}
-                                                        {{=it.user.captchaQuota}}</span>
-                        {{??}}
-                            {{ out += it.captchaEngine.widgetHtml(it.req, it.captchaPrepared); }}
-                        {{?}}
-                    {{??}}
+                    {{? !it.board.captchaEnabled}}
                         <span class="noCaptchaText">{{=it.tr.noCaptchaText}}</span>
                     {{?}}
                 </td>

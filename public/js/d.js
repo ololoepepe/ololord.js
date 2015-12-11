@@ -5,5 +5,5 @@ lord.customPostBodyPart[20] = function(it, thread, post) {
         userAgent: post.extraData,
         post: post
     };
-    return lord.template("dPostBodyPart")(model);
+    return lord.template("dPostBodyPart", model, true);
 };

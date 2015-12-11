@@ -1,3 +1,13 @@
+lord.customPostFormField[30] = function(it) {
+    if (it.includeThreadScripts)
+        return "";
+    var model = {
+        tr: merge.clone(it.tr),
+        board: merge.clone(it.board)
+    };
+    return lord.template("echoPostFormField", model, true);
+};
+
 lord.customEditPostDialogPart[30] = function(it, thread, post) {
     if (!post.isOp)
         return "";
@@ -6,7 +16,7 @@ lord.customEditPostDialogPart[30] = function(it, thread, post) {
         board: merge.clone(it.board),
         post: post
     };
-    return lord.template("echoEditPostDialogPart")(model);
+    return lord.template("echoEditPostDialogPart", model, true);
 };
 
 lord.customPostBodyPart[0] = function(it, thread, post) {
@@ -16,5 +26,5 @@ lord.customPostBodyPart[0] = function(it, thread, post) {
         link: post.extraData,
         deviceType: it.deviceType
     };
-    return lord.template("echoPostBodyPart")(model);
+    return lord.template("echoPostBodyPart", model, true);
 };

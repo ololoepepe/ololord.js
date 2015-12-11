@@ -169,7 +169,7 @@ var lord = lord || {};
             _this.value = 0;
             _this.progressBar.removeAttribute("max");
             _this.progressBar.removeAttribute("value");
-            this.finishCallback();
+            _this.finishCallback();
         };
     }
 };
@@ -958,6 +958,16 @@ lord.text = function(id) {
     return id;
 };
 
+lord.deviceType = function(expected) {
+    if (expected)
+        return expected == lord.models.base.deviceType;
+    return lord.models.base.deviceType;
+};
+
+lord.threadNumber = function() {
+    return lord.models.thread.deviceType;
+};
+
 lord.showDialog = function(title, label, body, afterShow) {
     var root = lord.node("div");
     title = lord.text(title);
@@ -1216,8 +1226,71 @@ lord.data = function(key, el, bubble) {
     return undefined;
 };
 
-lord.template = function(templateName) {
-    return lord.templates[templateName];
+lord.template = function(templateName, model, noparse) {
+    var template = lord.templates[templateName];
+    if (!template)
+        return null;
+    if (!model)
+        return template;
+    var html = template(model);
+    if (noparse)
+        return html;
+    var nodes = $.parseHTML(html, document, true);
+    var node;
+    for (var i = 0; i < nodes.length; ++i) {
+        if (1 == nodes[i].nodeType) {
+            node = nodes[i];
+            break;
+        }
+    }
+    if (!node)
+        return null;
+    lord.query("script", node).forEach(function(script) {
+        var nscript = lord.node("script");
+        if (script.src)
+            nscript.src = script.src;
+        else if (script.innerHTML)
+            nscript.innerHTML = script.innerHTML;
+        script.parentNode.replaceChild(nscript, script);
+    });
+    return node;
+};
+
+lord.createStylesheetLink = function(href, prefix) {
+    var link = lord.node("link");
+    link.type = "text/css";
+    link.rel = "stylesheet";
+    link.href = (prefix ? ("/" + lord.data("sitePathPrefix") + "css/") : "") + href;
+    lord.queryOne("head").appendChild(link);
+};
+
+lord.compareRegisteredUserLevels = function(l1, l2) {
+    if (!l1)
+        l1 = null;
+    if (!l2)
+        l2 = null;
+    if (["ADMIN", "MODER", "USER", null].indexOf(l2) < 0)
+        throw "Invalid registered user level l2: " + l2;
+    switch (l1) {
+    case "ADMIN":
+        return (l1 == l2) ? 0 : 1;
+    case "MODER":
+        if (l1 == l2)
+            return 0;
+        return ("ADMIN" == l2) ? -1 : 1;
+    case "USER":
+        if (l1 == l2)
+            return 0;
+        return (null == l2) ? 1 : -1;
+    case null:
+        return (l1 == l2) ? 0 : -1;
+    default:
+        throw "Invalid reistered user level l1: " + l1;
+    }
+};
+
+lord.escaped = function(text) {
+    return $("<div />").text(text).html();
 };
 
 lord.model = function(modelName, mustMerge) {

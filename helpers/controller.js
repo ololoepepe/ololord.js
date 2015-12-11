@@ -4,13 +4,16 @@ var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Highlight = require("highlight.js");
 var merge = require("merge");
+var mkpath = require("mkpath");
 var moment = require("moment");
 var Path = require("path");
 var random = require("random-js")();
 var Util = require("util");
 
 var config = require("./config");
+var Global = require("./global");
 
+var cachedHtml = {};
 var partials = {};
 var templates = {};
 var publicPartials;
@@ -19,6 +22,8 @@ var langNames = require("../misc/lang-names.json");
 var ipBans = require("../misc/bans.json");
 
 var controller;
+
+mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-html");
 
 var customContent = function(req, name) {
     return Tools.localeBasedFileName(__dirname + "/../views/custom/" + name + "/content.jst").then(function(fileName) {
@@ -39,18 +44,7 @@ controller = function(req, templateName, modelData) {
     var baseModelData = merge.recursive(controller.baseModel(req), controller.settingsModel(req));
     baseModelData = merge.recursive(baseModelData, controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
-    baseModelData.path = req.path;
-    if (baseModelData.user.loggedIn) {
-        if (Database.compareRegisteredUserLevels(baseModelData.user.level, "ADMIN") >= 0) {
-            baseModelData.loginMessageText = Tools.translate("logged in as administrator", "loginMessageText");
-        } else if (Database.compareRegisteredUserLevels(baseModelData.user.level, "MODER") >= 0) {
-            baseModelData.loginMessageText = Tools.translate("logged in as moderator", "loginMessageText");
-        } else if (Database.compareRegisteredUserLevels(baseModelData.user.level, "USER") >= 0) {
-            baseModelData.loginMessageText = Tools.translate("logged in as user", "loginMessageText");
-        } else {
-            baseModelData.loginMessageText = Tools.translate("not registered", "loginMessageText");
-        }
-    }
+    baseModelData.path = (req && req.path) ? req.path : (req || ("/" + config("site.pathPrefix")));
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
     baseModelData.formattedDate = formattedDate;
@@ -119,17 +113,6 @@ controller.sync = function(req, templateName, modelData) {
     baseModelData = merge.recursive(baseModelData, controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
     baseModelData.path = req ? req.path : undefined;
-    if (baseModelData.user.loggedIn) {
-        if (Database.compareRegisteredUserLevels(baseModelData.user.level, "ADMIN") >= 0) {
-            baseModelData.loginMessageText = Tools.translate("logged in as administrator", "loginMessageText");
-        } else if (Database.compareRegisteredUserLevels(baseModelData.user.level, "MODER") >= 0) {
-            baseModelData.loginMessageText = Tools.translate("logged in as moderator", "loginMessageText");
-        } else if (Database.compareRegisteredUserLevels(baseModelData.user.level, "USER") >= 0) {
-            baseModelData.loginMessageText = Tools.translate("logged in as user", "loginMessageText");
-        } else {
-            baseModelData.loginMessageText = Tools.translate("not registered", "loginMessageText");
-        }
-    }
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
     baseModelData.formattedDate = formattedDate;
@@ -300,12 +283,7 @@ controller.baseModel = function(req) {
             },
         ],
         supportedCaptchaEngines: Captcha.captchaIds().map(function(id) {
-            var captcha = Captcha.captcha(id);
-            return {
-                id: captcha.id,
-                title: captcha.title,
-                publicKey: captcha.publicKey
-            };
+            return Captcha.captcha(id).info();
         })
     };
 };
@@ -333,7 +311,8 @@ controller.boardsModel = function() {
             supportedFileTypes: board.supportedFileTypes,
             supportedCaptchaEngines: board.supportedCaptchaEngines,
             bumpLimit: board.bumpLimit,
-            postLimit: board.postLimit
+            postLimit: board.postLimit,
+            bannerFileNames: board.bannerFileNames
         };
         board.customBoardInfoFields().forEach(function(field) {
             model[field] = board[field];
@@ -369,7 +348,8 @@ controller.boardModel = function(board) {
             supportedFileTypes: board.supportedFileTypes,
             supportedCaptchaEngines: board.supportedCaptchaEngines,
             bumpLimit: board.bumpLimit,
-            postLimit: board.postLimit
+            postLimit: board.postLimit,
+            bannerFileNames: board.bannerFileNames
         }
     };
     board.customBoardInfoFields().forEach(function(field) {
@@ -680,6 +660,10 @@ controller.translationsModel = function() {
     translate("You are banned", "bannedText");
     translate("never", "banExpiresNeverText");
     translate("Clear date field", "clearDateFieldText");
+    translate("logged in as administrator", "loginMessageAdminText");
+    translate("logged in as moderator", "loginMessageModerText");
+    translate("logged in as user", "loginMessageUserText");
+    translate("not registered", "loginMessageNoneText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });
@@ -823,6 +807,52 @@ controller.postingSpeedString = function(board, lastPostNumber) {
             }
         }
     }
+};
+
+var cachePath = function() {
+    var args = [];
+    Array.prototype.slice.call(arguments, 0).forEach(function(arg) {
+        args = args.concat(arg);
+    });
+    var path = args.join("-");
+    return config("system.tmpPath", __dirname + "/../tmp") + "/cache-html" + (path ? ("/" + path + ".html") : "");
+};
+
+controller.html = function(f) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    var path = cachePath(args);
+    var key = args.join(":");
+    if (cachedHtml.hasOwnProperty(key))
+        return Tools.readFile(path);
+    var c = {};
+    return f().then(function(data) {
+        c.data = data;
+        if (cachedHtml.hasOwnProperty(key))
+            return Promise.resolve();
+        return Tools.writeFile(path, c.data);
+    }).then(function() {
+        cachedHtml[key] = {};
+        return Global.addToCached(args);
+    }).then(function() {
+        return Promise.resolve(c.data);
+    });
+};
+
+controller.addToCached = function(keyParts) {
+    var key = keyParts.join(":");
+    if (!cachedHtml.hasOwnProperty(key))
+        cachedHtml[key] = {};
+};
+
+controller.removeFromCached = function(keyParts, removeFromDisk) {
+    var key = keyParts.join(":");
+    if (!cachedHtml.hasOwnProperty(key))
+        return Promise.resolve();
+    delete cachedHtml[key];
+    if (!removeFromDisk)
+        return Promise.resolve();
+    var path = cachePath(keyParts);
+    return Tools.removeFile(path);
 };
 
 module.exports = controller;

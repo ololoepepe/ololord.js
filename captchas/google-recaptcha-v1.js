@@ -1,6 +1,7 @@
 var HTTP = require("q-io/http");
 
 var Captcha = require("./captcha");
+var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
 
 var googleRecaptcha = new Captcha("google-recaptcha-v1", Tools.translate.noop("Google reCAPTCHA v1"));
@@ -30,13 +31,12 @@ googleRecaptcha.checkCaptcha = function(req, fields) {
     });
 };
 
-googleRecaptcha.widgetHtml = function(req, _) {
-    return `<div id="captcha"><script type="text/javascript" `
-        + `src="https://www.google.com/recaptcha/api/challenge?k=${this.publicKey}"></script></div>`;
+googleRecaptcha.widgetTemplate = function() {
+    return "googleRecaptchaV1Widget";
 };
 
-googleRecaptcha.headerHtml = function(req) {
-    return "<script type=\"text/javascript\">var RecaptchaOptions = { theme : 'clean' };</script>";
+googleRecaptcha.scriptSource = function() {
+    return "/" + config("site.pathPrefix", "") + "js/google-recaptcha-v1-script.js";
 };
 
 module.exports = googleRecaptcha;

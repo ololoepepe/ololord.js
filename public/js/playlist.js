@@ -52,8 +52,7 @@ lord.trackDrop = function(e) {
 
 lord.addTrack = function(key, track) {
     var model = merge.recursive(track, lord.model(["base", "tr"], true));
-    var nodes = $.parseHTML(lord.template("playlistItem")(model));
-    var node = nodes[0];
+    var node = lord.template("playlistItem", model);
     lord.id("playlist").appendChild(node);
     lord.currentTracks[key] = track;
     var audio = lord.queryOne("audio", node);

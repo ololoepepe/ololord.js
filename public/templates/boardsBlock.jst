@@ -1,0 +1,19 @@
+<span>
+    {{? "mobile" == it.deviceType}}
+        <select name="url" class="select boardSelect" onchange="location = this.options[this.selectedIndex].value;">
+            {{~it.boards :board}}
+                {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+                    <option {{? it.board && it.board.name == board.name}}selected="true"{{?}}
+                            value="/{{=it.site.pathPrefix}}{{=board.name}}">[{{=board.name}}] {{=board.title}}</option>
+                {{?}}
+            {{~}}
+        </select>
+    {{??}}
+        {{~it.boards :board}}
+            {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+                <span class="navbarItem navbarItemBoard">[<a href="/{{=it.site.pathPrefix}}{{=board.name}}"
+                      title="{{=board.title}}" data-board-name="{{=board.name}}">{{=board.name}}</a>] </span>
+            {{?}}
+        {{~}}
+    {{?}}
+</span>

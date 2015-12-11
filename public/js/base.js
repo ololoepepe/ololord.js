@@ -110,10 +110,10 @@ lord.preventOnclick = function(event) {
 
 lord.showSettings = function() {
     var c = {};
-    c.template = lord.template("settingsDialog");
     var model = { settings: lord.settings() };
-    c.model = merge.recursive(model, lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true));
-    c.div = $.parseHTML(c.template(c.model))[0];
+    c.model = merge.recursive(model,
+            lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true));
+    c.div = lord.template("settingsDialog", c.model);
     lord.showDialog("settingsDialogTitle", null, c.div).then(function(accepted) {
         if (!accepted)
             return;
@@ -142,7 +142,7 @@ lord.showFavorites = function() {
         return;
     var model = lord.model(["base", "tr"], true);
     model.favorites = lord.toArray(lord.getLocalObject("favoriteThreads", {}));
-    div = $.parseHTML(lord.template("favoritesDialog")(model))[0];
+    div = lord.template("favoritesDialog", model);
     document.body.appendChild(div);
     lord.toCenter(div, null, null, 1);
 };
@@ -288,7 +288,6 @@ lord.showNewPosts = function() {
 
 lord.editHotkeys = function() {
     var c = {};
-    c.template = lord.template("hotkeysDialog");
     c.hotkeys = lord.getLocalObject("hotkeys", {
         dir: {},
         rev: {}
@@ -298,7 +297,7 @@ lord.editHotkeys = function() {
         defaultHotkeys: lord.DefaultHotkeys.dir
     };
     model = merge.recursive(model, lord.model("tr"));
-    c.div = $.parseHTML(c.template(model))[0];
+    c.div = lord.template("hotkeysDialog", model);
     lord.showDialog(null, null, c.div).then(function(accepted) {
         if (!accepted)
             return;
@@ -358,7 +357,7 @@ lord.editSpells = function() {
 lord.showHiddenPostList = function() {
     var model = lord.model(["base", "tr"], true);
     model.hiddenPosts = lord.toArray(lord.getLocalObject("hiddenPosts", {}));
-    var div = $.parseHTML(lord.template("hiddenPostList")(model))[0];
+    var div = lord.template("hiddenPostList", model);
     return lord.showDialog("hiddenPostListText", null, div);
 };
 
@@ -474,7 +473,7 @@ lord.populateChatHistory = function(key) {
     var messages = lord.chats[key] || [];
     messages = messages.map(function(message) {
         var m = merge.recursive(model, message);
-        history.appendChild($.parseHTML(lord.template("chatMessage")(m))[0]);
+        history.appendChild(lord.template("chatMessage", m));
     });
 };
 
@@ -506,8 +505,7 @@ lord.updateChat = function(keys) {
                 var contacts = lord.queryOne(".chatContactList", lord.chatDialog);
                 var model = lord.model(["base", "tr"], true);
                 model.contact = { key: key };
-                var nodes = $.parseHTML(lord.template("chatContact")(model));
-                contacts.appendChild((nodes.length > 1) ? nodes[1] : nodes[0]);
+                contacts.appendChild(lord.template("chatContact", model));
             }
         });
     }
@@ -553,7 +551,7 @@ lord.showChat = function(key) {
     lord.forIn(lord.chats, function(_, key) {
         model.contacts.push({ key: key });
     });
-    lord.chatDialog = $.parseHTML(lord.template("chatDialog")(model))[0];
+    lord.chatDialog = lord.template("chatDialog", model);
     lord.showDialog("chatText", null, lord.chatDialog, function() {
         lord.checkChats();
         if (!key)
@@ -683,9 +681,19 @@ lord.checkNotificationQueue = function() {
 };
 
 lord.initializeOnLoadSettings = function() {
+    var settings = lord.settings();
+    lord.createStylesheetLink(settings.style.name + ".css", true);
+    var defaultStylesheet = lord.id("defaultStylesheet");
+    defaultStylesheet.parentNode.removeChild(defaultStylesheet);
+    lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
+    var model = lord.model(["base", "boards"], true);
+    model.settings = settings;
+    lord.name("boardsBlockPlaceholder").forEach(function(placeholder) {
+        placeholder.parentNode.replaceChild(lord.template("boardsBlock", model), placeholder);
+    });
     if (lord.getCookie("show_tripcode") === "true")
         lord.id("showTripcodeCheckbox").checked = true;
-    if (lord.getLocalObject("hotkeysEnabled", true) && lord.data("deviceType") != "mobile") {
+    if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
         document.body.addEventListener("keyup", lord.interceptHotkey, false);
         var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
         var key = function(name) {
@@ -708,11 +716,7 @@ lord.initializeOnLoadSettings = function() {
         script.type = "text/javascript";
         script.src = "/" + lord.data("sitePathPrefix") + "js/3rdparty/codemirror/codemirror.min.js";
         head.appendChild(script);
-        var link = lord.node("link");
-        link.type = "text/css";
-        link.rel = "stylesheet";
-        link.href = "/" + lord.data("sitePathPrefix") + "css/3rdparty/codemirror.css";
-        head.appendChild(link);
+        lord.createStylesheetLink("3rdparty/codemirror.css", true);
         script.onload = function() {
             script = lord.node("script");
             script.type = "text/javascript";
@@ -734,6 +738,38 @@ lord.initializeOnLoadSettings = function() {
         else
             style.appendChild(lord.node("text", css));
         head.appendChild(style);
+    }
+    var loginButton = lord.id("loginButtonPlaceholder");
+    var model = lord.model(["base", "tr"], true);
+    if (model.user.loggedIn) {
+        if (lord.compareRegisteredUserLevels(model.user.level, "ADMIN") >= 0)
+            model.loginMessageText = lord.text("loginMessageAdminText");
+        else if (lord.compareRegisteredUserLevels(model.user.level, "MODER") >= 0)
+            model.loginMessageText = lord.text("loginMessageModerText");
+        else if (lord.compareRegisteredUserLevels(model.user.level, "USER") >= 0)
+            model.loginMessageText = lord.text("loginMessageUserText");
+        else
+            model.loginMessageText = lord.text("loginMessageNoneText");
+    }
+    loginButton.parentNode.replaceChild(lord.template("loginButton", model), loginButton);
+    if (lord.compareRegisteredUserLevels(lord.model("base").user.level, "MODER") >= 0) {
+        var toolbar = lord.queryOne(".toolbar");
+        toolbar.appendChild(lord.node("text", " "));
+        var span = lord.node("span");
+        lord.addClass(span, "navbarItem");
+        span.appendChild(lord.node("text", "["));
+        var a = lord.node("a");
+        a.href = "/" + lord.data("sitePathPrefix") + "manage.html";
+        a.title = lord.text("toManagePageText");
+        var img = lord.node("img");
+        img.src = "/" + lord.data("sitePathPrefix") + "img/manage.png";
+        lord.addClass(img, "buttonImage");
+        img.width = 16;
+        img.height = 16;
+        a.appendChild(img);
+        span.appendChild(a);
+        span.appendChild(lord.node("text", "]"));
+        toolbar.appendChild(span);
     }
     if (lord.getLocalObject("chatEnabled", true)) {
         var toolbar = lord.queryOne(".toolbar");

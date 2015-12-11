@@ -3,21 +3,15 @@
 {{#def.head}}
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}
-      data-thread-number="{{=it.thread.number}}">
+      data-thread-number="{{=it.threadNumber}}">
 {{? it.site.vkontakte.integrationEnabled }}
     <script type="text/javascript">
         VK.init({ apiId: {{=it.site.vkontakte.appId}} });
     </script>
 {{?}}
-<div id="hiddenPostForm" style="display: none;">
-    {{#def.postForm}}
-</div>
+<div id="hiddenPostForm" style="display: none;"></div>
 {{? it.board.captchaEnabled}}
-    <div id="hiddenCaptcha" style="display: none;">
-        {{? it.user.captchaQuota > 0}}
-            {{ out += it.captchaEngine.widgetHtml(it.req, it.captchaPrepared); }}
-        {{?}}
-    </div>
+    <div id="hiddenCaptcha" style="display: none;"></div>
 {{?}}
 {{? it.customHeader}}
     {{#def.customHeader}}
@@ -32,38 +26,11 @@
 <br />
 <a id="top"></a>
 {{#def.searchAction}}
-{{? it.board.bannerFileName}}
-    <br />
-    {{#def.banner}}
-{{?}}
+<div id="bannerPlaceholder" style="display: none;"></div>
 <div class="theTitle">
-    {{? it.thread.title}}
-        <h1>{{!it.thread.title}}</h1>
-    {{??}}
-        <h1>{{=it.board.title}} — {{=it.thread.number}}</h1>
-    {{?}}
+    <h1>{{!it.title}}</h1>
 </div>
-{{? !it.thread.postingEnabled}}
-    <div class="postingDisabledMessage">
-        <h2>{{=it.tr.postingDisabledThreadText}}</h2>
-    </div>
-{{?? it.thread.postLimitReached}}
-    <div class="theMessage">
-        <h2 class="postLimitReached">{{=it.tr.postLimitReachedText}}</h2>
-    </div>
-{{??}}
-    <hr name="insteadOfPostLimitReached" />
-    {{~["Top"] :position}}
-        {{#def.createAction}}
-    {{~}}
-{{?}}
-{{? !it.thread.postLimitReached && it.thread.bumpLimitReached}}
-    <div class="theMessage" name="bumpLimitReached">
-        <h3 class="bumpLimitReached">{{=it.tr.bumpLimitReachedText}}</h3>
-    </div>
-{{??}}
-    <span name="insteadOfBumpLimitReached" style="display: none;"></span>
-{{?}}
+<div id="upperPlaceholder" style="display: none;"></div>
 <hr />
 {{~["Top"] :position}}
     {{#def.threadActions}}
@@ -77,22 +44,7 @@
 {{~["Bottom"] :position}}
     {{#def.threadActions}}
 {{~}}
-{{? it.board.postingEnabled}}
-    <hr />
-    {{~["Bottom"] :position}}
-        {{#def.createAction}}
-    {{~}}
-{{?}}
-{{? it.board.postingEnabled && it.thread.postingEnabled && !it.thread.postLimitReached}}
-    <div>
-        <center>[<a id="draftsVisibilitySwitch" href="javascript:void(0);"
-                    onclick="lord.switchDraftsVisibility(); return false;">{{=it.tr.showDraftsText}}</a>]</center>
-    </div>
-    <div id="drafts" style="display: none;">
-        <hr />
-        <center><h2>{{=it.tr.draftsText}}</h2></center>
-    </div>
-{{?}}
+<div id="lowerPlaceholder" style="display: none;"></div>
 {{? !it.settings.stickyToolbar}}
     <hr />
     {{#def.navbar}}

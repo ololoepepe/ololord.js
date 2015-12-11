@@ -12,8 +12,7 @@ lord.banUser = function(e, form) {
         var parent = lord.id("bannedUsers");
         var previous = lord.id("user" + ip);
         if (c.model.bannedUser) {
-            var nodes = $.parseHTML(lord.template("userBan")(c.model));
-            var node = (nodes.length > 0) ? nodes[1] : nodes[0];
+            var node = lord.template("userBan", c.model);
             if (previous)
                 parent.replaceChild(node, previous);
             else

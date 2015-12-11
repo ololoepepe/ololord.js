@@ -3,8 +3,7 @@
 {{#def.head}}
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}
-      data-sort-mode="{{=it.sortMode}}"
-      {{? it.lastPostNumber}}data-last-post-number="{{=it.lastPostNumber}}"{{?}}>
+      data-sort-mode="{{=it.sortMode}}">
 {{? it.customHeader}}
     {{#def.customHeader}}
 {{?}}
@@ -15,10 +14,7 @@
 {{#def.toolbar}}
 <br />
 {{#def.searchAction}}
-{{? it.board.bannerFileName}}
-    <br />
-    {{#def.banner}}
-{{?}}
+<div id="bannerPlaceholder" style="display: none;"></div>
 <div class="theTitle">
     <h1>
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{=it.board.title}}</a>
@@ -45,9 +41,7 @@
     {{#def.navbar}}
 {{?}}
 <hr />
-<div class="postingSpeedBar">
-    <span class="navbarItem">[{{=it.tr.postingSpeedText}} {{=it.board.postingSpeed}}]</span>
-</div>
+<div id="postingSpeedPlaceholder" style="display: none;"></div>
 <a id="bottom"></a>
 {{? it.customFooter}}
     {{#def.customFooter}}

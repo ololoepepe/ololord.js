@@ -10,6 +10,12 @@ lord.templates = {};
 
 /**/
 
+var xhr = new XMLHttpRequest();
+xhr.open("get", "/" + lord.data("sitePathPrefix") + "misc/base.json", false);
+xhr.send(null);
+if (xhr.status === 200)
+    lord.id("model-base").innerHTML = "<![CDATA[" + xhr.responseText + "]]>";
+
 ["base", "boards", "tr", "partials", "templates"].forEach(function(modelName) {
     var html = lord.id("model-" + modelName).innerHTML;
     lord.models[modelName] = JSON.parse(html.substr(9, html.length - 12)); //NOTE: Removing CDATA wrapper

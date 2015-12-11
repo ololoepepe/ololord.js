@@ -1,6 +1,6 @@
 lord.codecha = {};
 
-lord.codecha.mustRequestNewChallenge = false;
+lord.codecha.mustRequestNewChallenge = true;
 
 lord.codecha.post = function(action, data) {
     return $.ajax(action, {
@@ -119,7 +119,7 @@ lord.codecha.requestNewChallenge = function() {
             return lord.api("codechaChallenge");
         }).then(function(model) {
             lord.codecha.mustRequestNewChallenge = false;
-            lord.id("codecha_challenge_field").value = model;
+            lord.id("codecha_challenge_field").value = model.challenge;
             return Promise.resolve();
         });
     }
@@ -162,12 +162,6 @@ lord.codecha.codeSubmit = function() {
 
 })();
 
-window.addEventListener("load", function load() {
-    window.removeEventListener("load", load, false);
-    lord.codecha.disable();
-    lord.codecha.requestNewChallenge();
-}, false);
-
 lord.reloadCaptchaFunction = function() {
     var captcha = lord.id("captcha");
     if (!captcha)
@@ -176,3 +170,6 @@ lord.reloadCaptchaFunction = function() {
     lord.id("codecha_widget").style.display = "";
     lord.id("codecha_ready_widget").style.display = "none";
 };
+
+lord.codecha.disable();
+lord.codecha.requestNewChallenge();

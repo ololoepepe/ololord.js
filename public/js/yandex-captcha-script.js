@@ -34,7 +34,4 @@ lord.reloadCaptchaFunction = function() {
     });
 };
 
-window.addEventListener("load", function load() {
-    window.removeEventListener("load", load, false);
-    lord.reloadCaptchaFunction();
-}, false);
+lord.reloadCaptchaFunction();

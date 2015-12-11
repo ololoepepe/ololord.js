@@ -37,11 +37,11 @@ googleRecaptcha.checkCaptcha = function(req, fields) {
     });
 };
 
-googleRecaptcha.widgetHtml = function(req, _) {
-    return `<div id="captcha" class="g-recaptcha" data-sitekey="${this.publicKey}"></div>`;
+googleRecaptcha.widgetTemplate = function() {
+    return "googleRecaptchaWidget";
 };
 
-googleRecaptcha.scriptSource = function(req) {
+googleRecaptcha.scriptSource = function() {
     return "https://www.google.com/recaptcha/api.js";
 };
 

@@ -14,8 +14,6 @@ var Tools = require("./helpers/tools");
 Global.IPC = require("./helpers/ipc")(cluster);
 
 config.installSetHook("site.locale", Tools.setLocale);
-if (Tools.contains(process.argv.slice(2), "--dev-mode"))
-    config.setConfigFile(__dirname + "/config-dev.json");
 
 var count = config("system.workerCount", OS.cpus().length);
 if (count <= 0)
@@ -73,6 +71,12 @@ var spawnCluster = function() {
                             resolve();
                         });
                     });
+                });
+                Global.IPC.installHandler("addToCached", function(data) {
+                    controller.addToCached(data);
+                });
+                Global.IPC.installHandler("removeFromCached", function(data) {
+                    return controller.removeFromCached(data);
                 });
                 Global.IPC.send("ready").catch(function(err) {
                     console.log(err);
@@ -132,6 +136,15 @@ if (cluster.isMaster) {
         Global.IPC.installHandler("generate", function(data) {
             return BoardModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);
         });
+        Global.IPC.installHandler("addToCached", function(data) {
+            controller.addToCached(data);
+            return Global.IPC.send("addToCached", data);
+        });
+        Global.IPC.installHandler("removeFromCached", function(data) {
+            return Global.IPC.send("removeFromCached", data).then(function() {
+                return controller.removeFromCached(data, true);
+            });
+        });
     }).catch(function(err) {
         console.log(err.stack || err);
         process.exit(1);
@@ -144,6 +157,17 @@ if (cluster.isMaster) {
             postNumber: postNumber,
             action: action
         }).catch(function(err) {
+            console.log(err.stack || err);
+        });
+    };
+    Global.addToCached = function(keyParts) {
+        controller.addToCached(keyParts);
+        return Global.IPC.send("addToCached", keyParts).catch(function(err) {
+            console.log(err.stack || err);
+        });
+    };
+    Global.removeFromCached = function(keyParts) {
+        return Global.IPC.send("removeFromCached", ["thread"].concat(keyParts)).catch(function(err) {
             console.log(err.stack || err);
         });
     };
