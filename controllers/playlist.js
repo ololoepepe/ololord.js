@@ -6,7 +6,6 @@ var Tools = require("../helpers/tools");
 var router = express.Router();
 
 router.get("/playlist.html", function(req, res) {
-    console.time("html");
     var f = function() {
         var model = {};
         model.title = Tools.translate("Playlist", "pageTitle");
@@ -14,7 +13,6 @@ router.get("/playlist.html", function(req, res) {
         return controller(null, "playlist", model);
     };
     controller.html(f.bind(null), "playlist").then(function(data) {
-        console.timeEnd("html");
         res.send(data);
     }).catch(function(err) {
         controller.error(req, res, err);

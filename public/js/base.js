@@ -682,10 +682,6 @@ lord.checkNotificationQueue = function() {
 
 lord.initializeOnLoadSettings = function() {
     var settings = lord.settings();
-    lord.createStylesheetLink(settings.style.name + ".css", true);
-    var defaultStylesheet = lord.id("defaultStylesheet");
-    defaultStylesheet.parentNode.removeChild(defaultStylesheet);
-    lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
     var model = lord.model(["base", "tr", "boards"], true);
     model.settings = settings;
     model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;

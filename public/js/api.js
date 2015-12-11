@@ -1260,7 +1260,7 @@ lord.createStylesheetLink = function(href, prefix) {
     var link = lord.node("link");
     link.type = "text/css";
     link.rel = "stylesheet";
-    link.href = (prefix ? ("/" + lord.data("sitePathPrefix") + "css/") : "") + href;
+    link.href = (prefix ? ("/" + lord.models.base.site.pathPrefix + "css/") : "") + href;
     lord.queryOne("head").appendChild(link);
 };
 
