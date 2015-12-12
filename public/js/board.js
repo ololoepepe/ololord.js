@@ -1941,8 +1941,8 @@ lord.addThreadToFavorites = function(boardName, threadNumber) {
             boardName: boardName,
             threadNumber: threadNumber
         });
-    }).then(function(lastPostNumber) {
-        if (!lastPostNumber)
+    }).then(function(result) {
+        if (!result || !result.lastPostNumber)
             return Promise.reject("The thread was deleted");
         var favoriteThreads = lord.getLocalObject("favoriteThreads", {});
         if (favoriteThreads.hasOwnProperty(boardName + "/" + threadNumber))
@@ -1951,8 +1951,8 @@ lord.addThreadToFavorites = function(boardName, threadNumber) {
         favoriteThreads[boardName + "/" + threadNumber] = {
             boardName: boardName,
             threadNumber: threadNumber,
-            lastPostNumber: lastPostNumber,
-            previousLastPostNumber: lastPostNumber,
+            lastPostNumber: result.lastPostNumber,
+            previousLastPostNumber: result.lastPostNumber,
             subject: txt.substring(0, 150)
         };
         lord.setLocalObject("favoriteThreads", favoriteThreads);

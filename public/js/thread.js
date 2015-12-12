@@ -148,10 +148,10 @@ lord.updateThread = function(silent) {
     return lord.api("threadLastPostNumber", {
         boardName: lord.data("boardName"),
         threadNumber: threadNumber
-    }).then(function(newLastPostNumber) {
-        if (!newLastPostNumber)
+    }).then(function(result) {
+        if (!result || !result.lastPostNumber)
             return Promise.reject("Thre thread was deleted");
-        c.newLastPostNumber = newLastPostNumber;
+        c.newLastPostNumber = result.lastPostNumber;
         if (c.newLastPostNumber <= lastPostNumber)
             return Promise.resolve({ thread: { lastPosts: [] } });
         return lord.api(threadNumber, {}, lord.data("boardName") + "/res");

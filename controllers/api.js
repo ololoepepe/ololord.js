@@ -212,7 +212,7 @@ router.get("/threadLastPostNumbers.json", function(req, res) {
 
 router.get("/threadLastPostNumber.json", function(req, res) {
     boardModel.getThreadLastPostNumber(req.query.boardName, req.query.threadNumber).then(function(number) {
-        res.json(number);
+        res.json({ lastPostNumber: number });
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
