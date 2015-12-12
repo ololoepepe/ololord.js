@@ -716,6 +716,10 @@ span.newPostCount {
     vertical-align: top;
 }
 
+.postFiles > .postText {
+    display: inline-block;
+}
+
 .bannedFor {
     color: red;
 }
