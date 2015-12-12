@@ -924,6 +924,7 @@ blockquote.blockquoteThread.expand {
 }
 
 .vote {
+    display: table;
     background-color: #CCCCCC;
     border: 1px solid #BBBBBB;
 }

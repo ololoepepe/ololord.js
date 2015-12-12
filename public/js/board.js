@@ -205,7 +205,8 @@ lord.reloadCaptchaFunction = function() {
 lord.resetCaptcha = function() {
     var captcha = lord.id("captcha");
     if (captcha) {
-        lord.api("captchaQuota", { boardName: lord.data("boardName") }).then(function(quota) {
+        lord.api("captchaQuota", { boardName: lord.data("boardName") }).then(function(result) {
+            var quota = result.quota;
             if (isNaN(quota))
                 return;
             var hiddenCaptcha = lord.id("hiddenCaptcha");
@@ -2740,7 +2741,8 @@ lord.initializeOnLoadBaseBoard = function() {
                 else if (captcha && captcha.widgetTemplate)
                     container.appendChild(lord.template(captcha.widgetTemplate, captcha));
             };
-            lord.api("captchaQuota", { boardName: lord.data("boardName") }).then(function(quota) {
+            lord.api("captchaQuota", { boardName: lord.data("boardName") }).then(function(result) {
+                var quota = result.quota;
                 if (quota > 0) {
                     appendCaptchaWidgetToContainer(lord.id("hiddenPostForm"));
                     var span = lord.node("span");

@@ -1012,6 +1012,7 @@ blockquote.blockquoteThread.expand {
 /* Vote */
 
 .vote {
+    display: table;
     background-color: #F0D0B6;
 }
 
