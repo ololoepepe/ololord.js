@@ -687,6 +687,8 @@ lord.checkNotificationQueue = function() {
 lord.initializeOnLoadSettings = function() {
     var settings = lord.settings();
     var model = lord.model(["base", "tr", "boards"], true);
+    if (lord.data("boardName"))
+        model.board = lord.model("board/" + lord.data("boardName")).board;
     model.settings = settings;
     model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
     if (model.user.loggedIn) {

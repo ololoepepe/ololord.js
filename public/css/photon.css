@@ -52,6 +52,10 @@ hr {
     cursor: pointer;
 }
 
+.selectOption {
+    background: #EAEAEA;
+}
+
 .input {
     border: 1px solid #CCCCCC;
 }
@@ -650,6 +654,10 @@ span.newPostCount {
     display: block;
 }
 
+.postToThread.mobile > a > button {
+    width: 100%;
+}
+
 .postActions {
     position: relative;
     outline: 0;
@@ -1093,8 +1101,17 @@ input.buttonImage {
     vertical-align: middle;
 }
 
+.boardSelectContainer {
+    display: inline-block;
+    vertical-align: middle;
+    width: 16px;
+    overflow: hidden;
+}
+
 .boardSelect {
-    width: 60px;
+    border: none;
+    background: url("../img/boards.png") left top no-repeat;
+    width: 36px;
 }
 
 .boardSelectForm {

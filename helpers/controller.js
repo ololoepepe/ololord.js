@@ -205,7 +205,7 @@ controller.baseModel = function(req) {
         },
         styles: Tools.styles(),
         codeStyles: Tools.codeStyles(),
-        deviceType: ((req && req.device.type == "desktop") ? "desktop" : "mobile"),
+        deviceType: "mobile",//((req && req.device.type == "desktop") ? "desktop" : "mobile"),
         availableCodeLangs: Highlight.listLanguages().map(function(lang) {
             return {
                 id: lang,
@@ -610,6 +610,7 @@ controller.translationsModel = function() {
     translate("logged in as moderator", "loginMessageModerText");
     translate("logged in as user", "loginMessageUserText");
     translate("not registered", "loginMessageNoneText");
+    translate("Boards", "boardsText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

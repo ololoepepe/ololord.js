@@ -3708,5 +3708,10 @@
         "clearDateFieldText": {
             "value": "Очистить поле даты"
         }
+    },
+    "Boards": {
+        "boardsText": {
+            "value": "Доски"
+        }
     }
 }

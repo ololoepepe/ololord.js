@@ -49,6 +49,16 @@ hr {
     cursor: pointer;
 }
 
+.selectOption {
+    background-color: #111111;
+    color: #EEEEEE;
+    -webkit-filter: invert(0);
+    -moz-filter: invert(0);
+    -ms-filter: invert(0);
+    -o-filter: invert(0);
+    filter: invert(0);
+}
+
 textarea {
     background-color: #111111;
     color: #EEEEEE;
@@ -348,7 +358,7 @@ span.newPostCount {
     padding-top: 5px;
     position: relative;
     text-align: center;
-    vertical-align:top;
+    vertical-align: top;
     width: 240px;
     word-wrap: break-word;
 }
@@ -654,6 +664,10 @@ span.newPostCount {
 
 .postToThread.mobile {
     display: block;
+}
+
+.postToThread.mobile > a > button {
+    width: 100%;
 }
 
 .postActions {
@@ -1121,8 +1135,22 @@ input.buttonImage {
     filter: invert(0);
 }
 
+.boardSelectContainer {
+    display: inline-block;
+    vertical-align: middle;
+    width: 16px;
+    overflow: hidden;
+}
+
 .boardSelect {
-    width: 60px;
+    border: none;
+    background: url("../img/boards.png") left top no-repeat;
+    -webkit-filter: invert(1);
+    -moz-filter: invert(1);
+    -ms-filter: invert(1);
+    -o-filter: invert(1);
+    filter: invert(1);
+    width: 36px;
 }
 
 .boardSelectForm {

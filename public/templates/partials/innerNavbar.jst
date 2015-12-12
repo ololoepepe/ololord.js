@@ -1,12 +1,16 @@
 {{? "mobile" == it.deviceType}}
-    <select name="url" class="select boardSelect" onchange="location = this.options[this.selectedIndex].value;">
-        {{~it.boards :board}}
-            {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
-                <option {{? it.board && it.board.name == board.name}}selected="true"{{?}}
-                        value="/{{=it.site.pathPrefix}}{{=board.name}}">[{{=board.name}}] {{=board.title}}</option>
-            {{?}}
-        {{~}}
-    </select>
+    [<div class="boardSelectContainer">
+        <select name="url" class="select boardSelect" title="{{=it.tr.boardsText}}"
+                onchange="(function(sel) { var val = sel.options[sel.selectedIndex].value; if (val) location = val; })(this);">
+            <option selected="true" value="" class="selectOption"></option>
+            {{~it.boards :board}}
+                {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+                    <option value="/{{=it.site.pathPrefix}}{{=board.name}}"
+                            class="selectOption">[{{=board.name}}] {{=board.title}}</option>
+                {{?}}
+            {{~}}
+        </select>
+    </div>]
 {{??}}
     {{~it.boards :board}}
         {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
