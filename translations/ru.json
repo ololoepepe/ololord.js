@@ -2160,6 +2160,11 @@
             "value": "Помечать ссылки на собственные посты"
         }
     },
+    "Post preview appearance delay (ms):": {
+        "viewPostPreviewDelayLabelText": {
+            "value": "Задержка появления превью постов (мс):"
+        }
+    },
     "Neutron": {
         "style title": {
             "value": "Neutron"

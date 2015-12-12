@@ -2278,7 +2278,15 @@ lord.globalOnmouseover = function(e) {
         return;
     if (!/^>>.*$/gi.test(a.textContent))
         return;
-    lord.viewPost(a, boardName, postNumber, !!lord.data("hiddenPost", a));
+    var viewPostPreviewDelay = lord.getLocalObject("viewPostPreviewDelay", 200);
+    if (viewPostPreviewDelay > 0) {
+        a.viewPostTimer = setTimeout(function() {
+            delete a.viewPostTimer;
+            lord.viewPost(a, boardName, postNumber, !!lord.data("hiddenPost", a));
+        }, viewPostPreviewDelay);
+    } else {
+        lord.viewPost(a, boardName, postNumber, !!lord.data("hiddenPost", a));
+    }
 };
 
 lord.globalOnmouseout = function(e) {
@@ -2291,12 +2299,12 @@ lord.globalOnmouseout = function(e) {
     var postNumber = +lord.data("postNumber", a);
     if (isNaN(postNumber) || postNumber <= 0)
         return;
-    lord.lastPostPreviewTimer = setTimeout(function() {
-        if (!lord.lastPostPreview)
-            return;
-        if (lord.lastPostPreview.mustHide && lord.lastPostPreview.parentNode)
-            lord.lastPostPreview.parentNode.removeChild(lord.lastPostPreview);
-    }, 500);
+    if (!/^>>.*$/gi.test(a.textContent))
+        return;
+    if (a.viewPostTimer) {
+        clearTimeout(a.viewPostTimer);
+        delete a.viewPostTimer;
+    }
 };
 
 lord.strikeOutHiddenPostLink = function(a, list) {

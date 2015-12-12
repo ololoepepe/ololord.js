@@ -425,6 +425,7 @@ controller.translationsModel = function() {
     translate("Play sound", "playAutoUpdateSoundLabelText");
     translate("Mark OP post links", "signOpPostLinksLabelText");
     translate("Mark own post links", "signOwnPostLinksLabelText");
+    translate("Post preview appearance delay (ms):", "viewPostPreviewDelayLabelText");
     translate("Show file leaf buttons", "showLeafButtonsLabelText");
     translate("Leaf through images only", "leafThroughImagesOnlyLabelText");
     translate("Image zoom sensitivity:", "imageZoomSensitivityLabelText");

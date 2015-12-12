@@ -57,6 +57,15 @@
                                    {{? it.settings.signOwnPostLinks}}checked="true"{{?}} /><label>{{=it.tr.signOwnPostLinksLabelText}}</label>
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            {{=it.tr.viewPostPreviewDelayLabelText}}
+                        </td>
+                        <td>
+                            <input type="number" min="0" name="viewPostPreviewDelay" class="numberSize3"
+                                   value="{{=it.settings.viewPostPreviewDelay}}" />
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             <table name="2" style="display: none;">
