@@ -483,17 +483,18 @@ lord.populateChatHistory = function(key) {
 
 lord.updateChat = function(keys) {
     if (!lord.chatDialog) {
-        var a = lord.nameOne("chatButton");
-        var img = lord.queryOne("img", a);
-        if (img.src.replace("chat_message.gif", "") == img.src)
-            img.src = img.src.replace("chat.png", "chat_message.gif");
-        var div = lord.node("div");
-        var a = lord.createChatButton(true);
-        var lastKey = lord.last(keys);
-        a.onclick = lord.showChat.bind(lord, lastKey);
-        div.appendChild(a);
-        div.appendChild(lord.node("text", " " + lord.text("newChatMessageText") + " [" + lastKey + "]"));
-        lord.showPopup(div, { type: "node" });
+        lord.name("chatButton").forEach(function(a) {
+            var img = lord.queryOne("img", a);
+            if (img.src.replace("chat_message.gif", "") == img.src)
+                img.src = img.src.replace("chat.png", "chat_message.gif");
+            var div = lord.node("div");
+            var a = lord.createChatButton(true);
+            var lastKey = lord.last(keys);
+            a.onclick = lord.showChat.bind(lord, lastKey);
+            div.appendChild(a);
+            div.appendChild(lord.node("text", " " + lord.text("newChatMessageText") + " [" + lastKey + "]"));
+            lord.showPopup(div, { type: "node" });
+        });
     } else {
         keys.forEach(function(key) {
             var div = lord.nameOne(key, lord.chatDialog);
