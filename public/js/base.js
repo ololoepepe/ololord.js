@@ -547,10 +547,11 @@ lord.checkChats = function() {
 };
 
 lord.showChat = function(key) {
-    var a = lord.nameOne("chatButton");
-    var img = lord.queryOne("img", a);
-    if (img.src.replace("chat_message.gif", "") != img.src)
-        img.src = img.src.replace("chat_message.gif", "chat.png");
+    lord.name("chatButton").forEach(function(a) {
+        var img = lord.queryOne("img", a);
+        if (img.src.replace("chat_message.gif", "") != img.src)
+            img.src = img.src.replace("chat_message.gif", "chat.png");
+    });
     var model = lord.model(["base", "tr"], true);
     model.contacts = [];
     lord.forIn(lord.chats, function(_, key) {
