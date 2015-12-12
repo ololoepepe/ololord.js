@@ -29,14 +29,10 @@ Board.addBoard(new Board("mlp", Tools.translate.noop("My Little Pony", "boardTit
 Board.addBoard(new Board("po", Tools.translate.noop("/po/litics", "boardTitle"),
     { defaultUserName: Tools.translate.noop("Armchair warrior", "defaultUserName") }));
 
-var codecha = Captcha.captcha("codecha");
 board = new Board("pr", Tools.translate.noop("/pr/ogramming", "boardTitle"));
 Object.defineProperty(board, "supportedCaptchaEngines", {
     get: function() {
-        return [{
-            id: codecha.id,
-            title: codecha.title
-        }];
+        return [Captcha.captcha("codecha").info()];
     }
 });
 Object.defineProperty(board, "markupElements", {

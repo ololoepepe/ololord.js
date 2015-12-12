@@ -1324,3 +1324,11 @@ input.buttonImage {
 .overflowContainer {
     overflow-x: auto;
 }
+
+.spoilerMarkupButton {
+    border: none;
+    width: 48px;
+    height: 24px;
+    background-color: #212121;
+    color: #698CC0;
+}

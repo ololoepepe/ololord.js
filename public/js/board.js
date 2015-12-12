@@ -1680,7 +1680,7 @@ lord.markup = function(tag) {
         break;
     }
     case "code": {
-        var sel = lord.queryOne(".postformMarkup > span > [name='langSelect']");
+        var sel = lord.queryOne(".postformMarkup > span > [name='codeLang']");
         var lang = sel.options[sel.selectedIndex].value;
         wrap("[" + (("-" != lang) ? (tag + " lang=\"" + lang + "\"") : tag) + "]", "[/" + tag + "]");
         break;
@@ -1692,7 +1692,7 @@ lord.markup = function(tag) {
 };
 
 lord.changeLastCodeLang = function() {
-    var sel = lord.queryOne(".postformMarkup > span > [name='langSelect']");
+    var sel = lord.queryOne(".postformMarkup > span > [name='codeLang']");
     var lang = sel.options[sel.selectedIndex].value;
     lord.setLocalObject("lastCodeLang", lang);
 };
@@ -2941,7 +2941,7 @@ lord.initializeOnLoadBaseBoard = function() {
             });
         }
         var lastLang = lord.getLocalObject("lastCodeLang", "-");
-        var sel = lord.queryOne(".postformMarkup > span > [name='langSelect']");
+        var sel = lord.queryOne(".postformMarkup > span > [name='codeLang']");
         if (sel) {
             lord.arr(sel.options).forEach(function(opt) {
                 if (opt.value == lastLang)
