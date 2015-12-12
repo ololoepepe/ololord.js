@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{#def.head}}
+<body class="{{=it.deviceType}}"
+      {{#def.baseData}}
+      data-thread-number="{{=it.threadNumber}}">
+<script id="model-postformRules" type="application/json">{{ out += JSON.stringify(it.postformRules); }}</script>
+{{? it.site.vkontakte.integrationEnabled }}
+    <script type="text/javascript">
+        VK.init({ apiId: {{=it.site.vkontakte.appId}} });
+    </script>
+{{?}}
+<div id="hiddenPostForm" style="display: none;"></div>
+{{? it.board.captchaEnabled}}
+    <div id="hiddenCaptcha" style="display: none;"></div>
+{{?}}
+<div id="customHeaderPlaceholder" style="display: none;"></div>
+{{~["top", "bottom"] :target}}
+    {{#def.navigationButton}}
+{{~}}
+{{~["previous", "next"] :target}}
+    {{#def.leafButton}}
+{{~}}
+<div id="toolbarPlaceholder" style="display: none;"></div>
+<br />
+<a id="top"></a>
+<div id="searchPlaceholder" style="display: none;"></div>
+<div id="bannerPlaceholder" style="display: none;"></div>
+<div class="theTitle">
+    <h1>{{!it.title}}</h1>
+</div>
+<div id="upperPlaceholder" style="display: none;"></div>
+<hr />
+{{~["Top"] :position}}
+    {{#def.threadActions}}
+{{~}}
+<div id="threads" class="loadingMessage">
+    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+    <h1 style="display: inline;">{{=it.tr.loadingPostsMessage}}</h1>
+</div>
+<input id="afterAllPosts" type="hidden" />
+<hr />
+{{~["Bottom"] :position}}
+    {{#def.threadActions}}
+{{~}}
+<div id="lowerPlaceholder" style="display: none;"></div>
+<div id="navbarPlaceholder" style="display: none;"></div>
+<a id="bottom"></a>
+<div id="customFooterPlaceholder" style="display: none;"></div>
+</body>
+</html>

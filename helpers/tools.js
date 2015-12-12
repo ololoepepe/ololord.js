@@ -6,9 +6,11 @@ var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
 var Formidable = require("formidable");
 var FS = require("q-io/fs");
-var FSSync = require("fs");
+var FSSync = require("fs-ext");
 var merge = require("merge");
+var mkpath = require("mkpath");
 var Path = require("path");
+var promisify = require("promisify-node");
 var Util = require("util");
 var XRegExp = require("xregexp");
 
@@ -27,6 +29,8 @@ var rootZones = require("../misc/root-zones.json").reduce(function(acc, zone) {
     acc[zone] = {};
     return acc;
 }, {});
+
+mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/formidable");
 
 var ExternalLinkRegexpPattern = (function() {
     var schema = "https?:\\/\\/|ftp:\\/\\/";
@@ -90,11 +94,7 @@ module.exports.toArray = function(obj) {
     return arr;
 };
 
-module.exports.randomInt = function(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-};
-
-module.exports.extend = function (Child, Parent) {
+module.exports.extend = function(Child, Parent) {
     var F = function() {};
     F.prototype = Parent.prototype;
     Child.prototype = new F();
@@ -349,48 +349,6 @@ module.exports.sum = function(map1, map2) {
     return merge.recursive(map1, map2);
 };
 
-var localeBasedFileName = function(fileName, locale) {
-    if (!fileName || !Util.isString(fileName))
-        return Promise.resolve(null);
-    if (!Util.isString(locale))
-        locale = config("site.locale", "en");
-    var ext = Path.extname(fileName);
-    var baseFileName = Path.dirname(fileName) + "/" + Path.basename(fileName, ext);
-    var list = [];
-    list.push(baseFileName + "." + locale + ext);
-    list.push(baseFileName + ".en" + ext);
-    list.push(fileName);
-    var f = function() {
-        var fn = list.shift();
-        return FS.exists(fn).then(function(exists) {
-            return exists ? fn : null;
-        });
-    };
-    return f().then(function(fn) {
-        if (fn)
-            return fn;
-        if (list.length > 0)
-            return f();
-        return null;
-    });
-};
-module.exports.localeBasedFileName = localeBasedFileName;
-
-module.exports.getRules = function(name, infix, locale) {
-    var fileName = __dirname + "/../misc/rules/" + name + "/rules" + (infix ? ("." + infix) : "") + ".txt";
-    return localeBasedFileName(fileName, locale).then(function(fileName) {
-        if (!fileName)
-            return null;
-        return FS.read(fileName);
-    }).then(function(data) {
-        if (!data)
-            return [];
-        return data.split(/\r*\n+/gi).filter(function(rule) {
-            return rule;
-        });
-    });
-};
-
 module.exports.splitCommand = function(cmd) {
     var args = [];
     var arg = "";
@@ -462,7 +420,7 @@ module.exports.password = function(pwd) {
 
 module.exports.parseForm = function(req) {
     var form = new Formidable.IncomingForm();
-    form.uploadDir = __dirname + "/../tmp";
+    form.uploadDir = config("system.tmpPath", __dirname + "/../tmp") + "/formidable";
     form.hash = "sha1";
     return new Promise(function(resolve, reject) {
         form.parse(req, function(err, fields, files) {
@@ -494,6 +452,10 @@ module.exports.proxy = function() {
 module.exports.correctAddress = function(ip) {
     if (!ip)
         return null;
+    if ("::1" == ip)
+        ip = "127.0.0.1";
+    if (ip.replace(":", "") == ip)
+        ip = "::" + ip;
     try {
         var address = new Address6(ip);
         if (address.isValid())
@@ -528,4 +490,119 @@ module.exports.preferIPv4 = function(ip) {
         //
     }
     return ip;
+};
+
+module.exports.sha256 = function(data) {
+    if (!data)
+        return null;
+    var sha256 = Crypto.createHash("sha256");
+    sha256.update(data);
+    return sha256.digest("hex");
+};
+
+module.exports.withoutDuplicates = function(arr) {
+    if (!arr || !Util.isArray(arr))
+        return arr;
+    return arr.filter(function(item, i) {
+        return arr.indexOf(item) == i;
+    });
+};
+
+module.exports.remove = function(arr, what, both) {
+    if (!arr || !Util.isArray(arr))
+        return arr;
+    if (Util.isUndefined(what))
+        return;
+    if (!Util.isArray(what))
+        what = [what];
+    for (var i = what.length - 1; i >= 0; --i) {
+        var ind = arr.indexOf(what[i]);
+        if (ind >= 0) {
+            arr.splice(ind, 1);
+            if (both)
+                what.splice(i, 1);
+        }
+    }
+};
+
+var openFile = promisify(FSSync.open);
+var closeFile = promisify(FSSync.close);
+var flockFile = promisify(FSSync.flock);
+var readData = promisify(FSSync.read);
+var writeData = promisify(FSSync.write);
+
+var recover = function(c, err) {
+    if (!c.fd)
+        return Promise.reject(err);
+    return flockFile(c.fd, "un").catch(function(err) {
+        console.log(err.stack || err);
+        return Promise.resolve();
+    }).then(function() {
+        if (c.noclose)
+            return Promise.resolve();
+        return closeFile(c.fd);
+    }).catch(function(err) {
+        console.log(err.stack || err);
+        return Promise.resolve();
+    }).then(function() {
+        return Promise.reject(err);
+    });
+};
+
+module.exports.readFile = function(path) {
+    var c = {};
+    return openFile(path, "r").then(function(fd) {
+        c.fd = fd;
+        return flockFile(c.fd, "sh");
+    }).then(function() {
+        c.locked = true;
+        return FS.stat(path);
+    }).then(function(stats) {
+        if (stats.size <= 0)
+            return Promise.resolve();
+        c.buffer = new Buffer(stats.size);
+        return readData(c.fd, c.buffer, 0, c.buffer.length, null);
+    }).then(function() {
+        c.data = c.buffer ? c.buffer.toString("utf8") : "";
+        return flockFile(c.fd, "un");
+    }).then(function() {
+        c.locked = false;
+        return closeFile(c.fd);
+    }).then(function() {
+        return Promise.resolve(c.data);
+    }).catch(recover.bind(null, c));
+};
+
+module.exports.writeFile = function(path, data) {
+    var c = {};
+    return openFile(path, "w").then(function(fd) {
+        c.fd = fd;
+        return flockFile(c.fd, "ex");
+    }).then(function() {
+        c.locked = true;
+        return writeData(c.fd, data, null, "utf8");
+    }).then(function() {
+        return flockFile(c.fd, "un");
+    }).then(function() {
+        c.locked = false;
+        return closeFile(c.fd);
+    }).then(function() {
+        return Promise.resolve(c.data);
+    }).catch(recover.bind(null, c));
+};
+
+module.exports.removeFile = function(path) {
+    var c = { noclose: true };
+    return openFile(path, "w").then(function(fd) {
+        c.fd = fd;
+        return flockFile(c.fd, "ex");
+    }).then(function() {
+        c.locked = true;
+        return FS.remove(path);
+    }).then(function() {
+        return flockFile(c.fd, "un");
+    }).then(function() {
+        c.locked = false;
+        return Promise.resolve();
+    }).catch(recover.bind(null, c));
 };

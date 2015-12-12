@@ -6,12 +6,15 @@ var Tools = require("../helpers/tools");
 var router = express.Router();
 
 router.get("/frame.html", function(req, res) {
-    var model = {
-        title: Tools.translate("ololord.js", "pageTitle"),
-        source: (req.query.path || ""),
-        noJavaScript: true
+    var f = function(deviceType) {
+        var model = {};
+        model.title = Tools.translate("ololord.js", "pageTitle");
+        model.deviceType = deviceType;
+        model.noJavaScript = true;
+        return controller(null, "frame", model);
     };
-    controller(req, "frame", model).then(function(data) {
+    var deviceType = (req.device.type == "desktop") ? "desktop" : "mobile";
+    controller.html(f.bind(null, deviceType), "frame", deviceType).then(function(data) {
         res.send(data);
     }).catch(function(err) {
         controller.error(req, res, err);
@@ -19,10 +22,13 @@ router.get("/frame.html", function(req, res) {
 });
 
 router.get("/frameList.html", function(req, res) {
-    var model = {
-        title: Tools.translate("ololord.js", "pageTitle")
+    var f = function() {
+        var model = {};
+        model.title = Tools.translate("ololord.js", "pageTitle");
+        model.extraScripts = [ { fileName: "frame-list.js" } ];
+        return controller(null, "frameList", model);
     };
-    controller(req, "frameList", model).then(function(data) {
+    controller.html(f.bind(null), "frameList").then(function(data) {
         res.send(data);
     }).catch(function(err) {
         controller.error(req, res, err);

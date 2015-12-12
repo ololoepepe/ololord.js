@@ -1,4 +1,3 @@
-var BodyParser = require("body-parser");
 var FSSync = require("fs");
 var HTTP = require("q-io/http");
 var Util = require("util");

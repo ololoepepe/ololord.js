@@ -39,6 +39,14 @@
                     </tr>
                     <tr>
                         <td colspan="2">
+                            <input type="checkbox" name="playAutoUpdateSound"
+                                   {{? it.settings.playAutoUpdateSound}}checked="false"{{?}} /><label>{{=it.tr.playAutoUpdateSoundLabelText}}</label>
+                            <input type="number" min="0" max="100" name="soundNotificationsVolume" class="numberSize3"
+                                   value="{{=it.settings.soundNotificationsVolume}}" /> %
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
                             <input type="checkbox" name="signOpPostLinks"
                                    {{? it.settings.signOpPostLinks}}checked="true"{{?}} /><label>{{=it.tr.signOpPostLinksLabelText}}</label>
                         </td>
@@ -71,6 +79,12 @@
                                    value="{{=it.settings.defaultAudioVideoVolume}}" /> %
                             <input type="checkbox" name="rememberAudioVideoVolume"
                                    {{? it.settings.rememberAudioVideoVolume}}checked="true"{{?}} /><label>{{=it.tr.rememberAudioVideoVolumeLabelText}}</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="checkbox" name="closeFilesByClickingOnly"
+                                   {{? it.settings.closeFilesByClickingOnly}}checked="true"{{?}} /><label>{{=it.tr.closeFilesByClickingOnlyLabelText}}</label>
                         </td>
                     </tr>
                     <tr>
@@ -199,12 +213,6 @@
                         <td colspan="2">
                             <input type="checkbox" name="showNewPosts"
                                    {{? it.settings.showNewPosts}}checked="true"{{?}} /><label>{{=it.tr.showNewPostsLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="showYoutubeVideosTitles"
-                                   {{? it.settings.showYoutubeVideosTitles}}checked="true"{{?}} /><label>{{=it.tr.showYoutubeVideoTitleLabelText}}</label>
                         </td>
                     </tr>
                     <tr>

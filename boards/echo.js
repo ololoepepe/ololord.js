@@ -50,7 +50,7 @@ board.postExtraData = function(req, fields, files, oldPost) {
     return Promise.resolve(link);
 };
 
-board.renderPost = function(post, req) {
+board.renderPost = function(post) {
     return Board.prototype.renderPost.apply(this, arguments).then(function(post) {
         if (post.number != post.threadNumber)
             return Promise.resolve(post);
@@ -58,38 +58,10 @@ board.renderPost = function(post, req) {
             href: post.extraData,
             link: (post.subject || post.extraData)
         };
-        post.subject = controller.sync(req, "echoPostSubject", model);
+        post.subject = controller.sync(null, "echoPostSubject", model);
         post.subjectIsRaw = true;
         return Promise.resolve(post);
     });
-};
-
-board.customPostBodyPart = function(n, _) {
-    if (0 != n)
-        return;
-    return function(it, thread, post) {
-        if (!post.extraData || !it.thread)
-            return "";
-        var model = {
-            link: post.extraData,
-            deviceType: it.deviceType
-        };
-        return controller.sync(it.req, "echoPostBodyPart", model);
-    };
-};
-
-board.customPostFormField = function(n, _, thread) {
-    if (thread || 30 != n)
-        return;
-    var _this = this;
-    return function(it) {
-        var model = {
-            tr: merge.clone(it.tr),
-            board: merge.clone(it.board)
-        };
-        model.board.maxLinkLength = _this.maxLinkLength;
-        return controller.sync(it.req, "echoPostFormField", model);
-    };
 };
 
 board.testParameters = function(fields, files, creatingThread) {

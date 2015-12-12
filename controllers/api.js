@@ -58,10 +58,13 @@ var renderPost = function(req, post) {
         } ], req.hashpass);
     }
     return p.then(function(posts) {
-        return board.renderPost(post, req, posts[0]);
+        return board.renderPost(post, posts[0]);
     });
 };
 
+/**
+ * @deprecated Will be deleted in next beta.
+ */
 router.get("/posts.json", function(req, res) {
     var posts = postIdentifiers(req);
     boardModel.getPosts(posts, req.hashpass).then(function(posts) {
@@ -84,34 +87,29 @@ router.get("/post.json", function(req, res) {
     });
 });
 
-router.get("/threadInfo.json", function(req, res) {
-    var board = Board.board(req.query.boardName);
-    var threadNumber = +req.query.threadNumber;
-    boardModel.getThreadInfo(board, req.hashpass, threadNumber).then(function(thread) {
-        res.json(thread);
+router.get("/userIp.json", function(req, res) {
+    Database.getPost(req.query.boardName, +req.query.postNumber).then(function(post) {
+        if (!post)
+            return Promise.reject("No such post");
+        if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0
+            || Database.compareRegisteredUserLevels(req.level, post.user.level) < 0) {
+            return Promise.reject("Not enough rights");
+        }
+        var result = { ip: post.user.ip };
+        var ipv4 = Tools.preferIPv4(post.user.ip);
+        if (ipv4 && ipv4 != post.user.ip)
+            result.ipv4 = ipv4;
+        res.json(result);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
 });
 
-router.get("/fileInfos.json", function(req, res) {
-    var list = [];
-    if (Util.isArray(req.query.fileNames)) {
-        req.query.fileNames.forEach(function(fileName) {
-            list.push({ fileName: fileName });
-        });
-    } else if (req.query.fileNames) {
-        list.push({ fileName: req.query.fileNames });
-    }
-    if (Util.isArray(req.query.fileHashes)) {
-        req.query.fileHashes.forEach(function(fileHashes) {
-            list.push({ fileHash: fileHash });
-        });
-    } else if (req.query.fileHashes) {
-        list.push({ fileHash: req.query.fileHashes });
-    }
-    boardModel.getFileInfos(list, req.hashpass).then(function(fileInfos) {
-        res.json(fileInfos);
+router.get("/threadInfo.json", function(req, res) {
+    var board = Board.board(req.query.boardName);
+    var threadNumber = +req.query.threadNumber;
+    boardModel.getThreadInfo(board, req.hashpass, threadNumber).then(function(thread) {
+        res.json(thread);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
@@ -128,6 +126,9 @@ router.get("/fileInfo.json", function(req, res) {
     });
 });
 
+/**
+ * @deprecated Will be deleted in next beta.
+ */
 router.get("/lastPosts.json", function(req, res) {
     if (req.query.threads) {
         var threads = req.query.threads;
@@ -187,7 +188,31 @@ router.get("/lastPostNumbers.json", function(req, res) {
 
 router.get("/lastPostNumber.json", function(req, res) {
     boardModel.getLastPostNumbers([req.query.boardName]).then(function(lastPostNumbers) {
-        res.json(lastPostNumbers[0]);
+        res.json({ lastPostNumber: lastPostNumbers[0] });
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
+router.get("/threadLastPostNumbers.json", function(req, res) {
+    var threads = req.query.threads;
+    if (Util.isString(threads))
+        threads = [threads];
+    var promises = (threads || []).map(function(thread) {
+        var boardName = thread.split(":").shift();
+        var threadNumber = +thread.split(":")[1];
+        return boardModel.getThreadLastPostNumber(boardName, threadNumber);
+    });
+    Promise.all(promises).then(function(results) {
+        res.json(results);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
+router.get("/threadLastPostNumber.json", function(req, res) {
+    boardModel.getThreadLastPostNumber(req.query.boardName, req.query.threadNumber).then(function(number) {
+        res.json(number);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
@@ -202,36 +227,14 @@ router.get("/captchaQuota.json", function(req, res) {
 });
 
 router.get("/bannedUser.json", function(req, res) {
-    Database.bannedUser(req.query.ip).then(function(user) {
-        res.json(user);
-    }).catch(function(err) {
-        controller.error(req, res, err, true);
-    });
-});
-
-router.get("/bannedUsers.json", function(req, res) {
-    Database.bannedUsers().then(function(users) {
-        res.json(users);
-    }).catch(function(err) {
-        controller.error(req, res, err, true);
-    });
-});
-
-router.get("/coubVideoInfo.json", function(req, res) {
-    var url = "https://coub.com/api/oembed.json?url=coub.com/view/" + (req.query.videoId || "");
-    HTTP.request({
-        url: url,
-        timeout: Tools.Minute
-    }).then(function(response) {
-        if (response.status != 200)
-            return Promise.reject("Failed to get Coub video info");
-        return response.body.read();
-    }).then(function(data) {
-        try {
-            res.json(JSON.parse(data.toString()));
-        } catch (err) {
-            return Promise.reject(err);
-        }
+    var ip = req.query.ip;
+    if (!ip)
+        return controller.error(req, res, "Invalid IP", true);
+    Database.userBans(ip).then(function(bans) {
+        res.json({
+            ip: ip,
+            bans: bans
+        });
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
@@ -268,8 +271,8 @@ router.get("/fileHeaders.json", function(req, res) {
 });
 
 router.get("/chatMessages.json", function(req, res) {
-    Chat.getMessages(req, req.query.lastRequestDate).then(function(messages) {
-        res.json(messages);
+    Chat.getMessages(req, req.query.lastRequestDate).then(function(result) {
+        res.json(result);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

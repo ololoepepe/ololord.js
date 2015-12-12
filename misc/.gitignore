@@ -1,7 +1,6 @@
-# friends
-friends/*
-!friends/friends.txt
-
-# news
-news/*
-!news/news.txt
+*
+!rules
+!bans.json.example
+!lang-names.json
+!root-zones.json
+!.gitignore

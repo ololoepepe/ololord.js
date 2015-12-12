@@ -6,8 +6,9 @@
             "markupSpoiler", "markupQuotation", "markupCode"] :hotkey}}
             <tr>
                 <td>
-                    <input type="text" readonly="true" name="{{=hotkey}}"
+                    <input type="text" name="{{=hotkey}}"
                            onkeyup="lord.assignHotkey(event, this);"
+                           onkeydown="return false;"
                            value="{{? it.hotkeys[hotkey]}}{{=it.hotkeys[hotkey]}}{{??}}{{=it.defaultHotkeys[hotkey]}}{{?}}" />
                 </td>
                 <td>

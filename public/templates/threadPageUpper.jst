@@ -1,0 +1,23 @@
+<div>
+    {{? !it.thread.postingEnabled}}
+        <div class="postingDisabledMessage">
+            <h2>{{=it.tr.postingDisabledThreadText}}</h2>
+        </div>
+    {{?? it.thread.postLimitReached}}
+        <div class="theMessage">
+            <h2 class="postLimitReached">{{=it.tr.postLimitReachedText}}</h2>
+        </div>
+    {{??}}
+        <hr name="insteadOfPostLimitReached" />
+        {{~["Top"] :position}}
+            {{#def.createAction}}
+        {{~}}
+    {{?}}
+    {{? !it.thread.postLimitReached && it.thread.bumpLimitReached}}
+        <div class="theMessage" name="bumpLimitReached">
+            <h3 class="bumpLimitReached">{{=it.tr.bumpLimitReachedText}}</h3>
+        </div>
+    {{??}}
+        <span name="insteadOfBumpLimitReached" style="display: none;"></span>
+    {{?}}
+</div>

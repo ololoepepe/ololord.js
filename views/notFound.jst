@@ -2,22 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
 <body class="{{=it.deviceType}}" {{#def.baseData}}>
-{{? it.customHeader}}
-    {{#def.customHeader}}
-{{?}}
-{{#def.toolbar}}
+<script id="model-notFoundImageFileNames"
+        type="application/json">{{ out += JSON.stringify(it.notFoundImageFileNames); }}</script>
+<div id="customHeaderPlaceholder" style="display: none;"></div>
+<div id="toolbarPlaceholder" style="display: none;"></div>
 <br />
-{{#def.searchAction}}
+<div id="searchPlaceholder" style="display: none;"></div>
 <div class="theTitle">
     <h1>{{=it.notFoundMessage}}</h1>
 </div>
-{{? it.imageFileName}}
-    <div class="theImage">
-        <img src="/{{=it.site.pathPrefix}}img/404/{{=it.imageFileName}}">
-    </div>
-{{?}}
-{{? it.customFooter}}
-    {{#def.customFooter}}
-{{?}}
+<div id="notFoundImagePlaceholder" style="display: none;"></div>
+<div id="customFooterPlaceholder" style="display: none;"></div>
 </body>
 </html>

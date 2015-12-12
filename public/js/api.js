@@ -30,6 +30,7 @@ var lord = lord || {};
     this.msg = lord.node("div");
     lord.addClass(this.msg, "popup");
     lord.addClass(this.msg, this.classNames);
+    this.msg.onclick = this.hide.bind(this);
     if (lord.popups.length > 0) {
         var prev = lord.popups[lord.popups.length - 1];
         this.msg.style.top = (prev.msg.offsetTop + prev.msg.offsetHeight + 5) + "px";
@@ -126,10 +127,8 @@ var lord = lord || {};
             callback();
         };
         _this.cancelButton.appendChild(lord.node("text", "Cancel"));
-        lord.getModel("misc/tr").then(function(model) {
-            lord.removeChildren(_this.cancelButton);
-            _this.cancelButton.appendChild(lord.node("text", model.tr.cancelButtonText));
-        });
+        lord.removeChildren(_this.cancelButton);
+        _this.cancelButton.appendChild(lord.node("text", lord.text("cancelButtonText")));
     };
     if (options && typeof options.cancelCallback == "function")
         createCancelButton(options.cancelCallback);
@@ -152,6 +151,26 @@ var lord = lord || {};
             _this.progressBar.max = _this.max;
             _this.progress(e.loaded);
         };
+        options.xhr.upload.onload = function() {
+            _this.max = 0;
+            _this.value = 0;
+            _this.progressBar.removeAttribute("max");
+            _this.progressBar.removeAttribute("value");
+        };
+        options.xhr.onprogress = function(e) {
+            if (!e.lengthComputable)
+                return;
+            _this.max = e.total;
+            _this.progressBar.max = _this.max;
+            _this.progress(e.loaded);
+        };
+        options.xhr.onload = function() {
+            _this.max = 0;
+            _this.value = 0;
+            _this.progressBar.removeAttribute("max");
+            _this.progressBar.removeAttribute("value");
+            _this.finishCallback();
+        };
     }
 };
 
@@ -160,9 +179,7 @@ var lord = lord || {};
     if (isNaN(value) || value < 0 || value > this.max)
         return;
     this.value = value;
-    this.progressBar.value = value;
-    if (value == this.max)
-        this.finishCallback();
+    this.progressBar.value = this.value;
 };
 
 /*public*/ lord.OverlayProgressBar.prototype.show = function() {
@@ -215,9 +232,9 @@ lord.Hour = 60 * lord.Minute;
 lord.Day = 24 * lord.Hour;
 lord.Year = 365 * lord.Day;
 lord.Billion = 2 * 1000 * 1000 * 1000;
-lord.SettingsStoredInCookies = ["mode", "style", "codeStyle", "stickyToolbar", "shrinkPosts", "markupMode",
-                                "time", "timeZoneOffset", "captchaEngine", "maxAllowedRating",
-                                "draftsByDefault", "hidePostformRules", "minimalisticPostform", "hiddenBoards"];
+lord.SettingsStoredInCookies = ["style", "codeStyle", "stickyToolbar", "shrinkPosts", "markupMode", "time",
+                                "timeZoneOffset", "captchaEngine", "maxAllowedRating", "hidePostformRules",
+                                "minimalisticPostform", "hiddenBoards"];
 //
 lord.keyboardMap = [
   "", // [0]
@@ -485,7 +502,7 @@ lord.unloading = false;
 lord.leftChain = [];
 lord.rightChain = [];
 lord.models = {};
-lord.partials = null;
+//lord.partials = null;
 lord.templates = {};
 
 /*Functions*/
@@ -606,6 +623,43 @@ lord.forIn = function(obj, f) {
     }
 };
 
+lord.mapIn = function(obj, f) {
+    if (!obj || typeof f != "function")
+        return;
+    var arr = [];
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x))
+            arr.push(f(obj[x], x));
+    }
+    return arr;
+};
+
+lord.filterIn = function(obj, f) {
+    if (!obj || typeof f != "function")
+        return;
+    var nobj = {};
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x)) {
+            var item = obj[x];
+            if (f(item, x))
+                nobj[x] = item;
+        }
+    }
+    return nobj;
+};
+
+lord.toArray = function(obj) {
+    var arr = [];
+    var i = 0;
+    for (var x in obj) {
+        if (obj.hasOwnProperty(x)) {
+            arr[i] = obj[x];
+            ++i;
+        }
+    }
+    return arr;
+};
+
 lord.removeChildren = function(obj) {
     if (!obj || typeof obj.removeChild != "function")
         return;
@@ -677,6 +731,7 @@ lord.gently = function(obj, f, options) {
         return Promise.reject("Invalid arguments");
     var delay = options ? +options.delay : undefined;
     var n = options ? +options.n : undefined;
+    var promise = options && options.promise;
     if (isNaN(delay) || delay < 1)
         delay = 1;
     if (isNaN(n) || n < 1)
@@ -688,10 +743,26 @@ lord.gently = function(obj, f, options) {
             var g = function() {
                 if (ind >= arr.length)
                     return resolve();
-                for (var i = ind; i < Math.min(ind + n, arr.length); ++i)
-                    f(arr[i], i);
-                ind += n;
-                setTimeout(g, delay);
+                if (promise) {
+                    var i = ind;
+                    var h = function() {
+                        return f(arr[i], i).then(function() {
+                            ++i;
+                            if (i >= Math.min(ind + n, arr.length))
+                                return Promise.resolve();
+                            return h();
+                        });
+                    };
+                    h().then(function() {
+                        ind += n;
+                        setTimeout(g, delay);
+                    });
+                } else {
+                    for (var i = ind; i < Math.min(ind + n, arr.length); ++i)
+                        f(arr[i], i);
+                    ind += n;
+                    setTimeout(g, delay);
+                }
             };
             g();
         } else {
@@ -708,10 +779,26 @@ lord.gently = function(obj, f, options) {
             var g = function() {
                 if (ind >= arr.length)
                     return resolve();
-                for (var i = ind; i < Math.min(ind + n, arr.length); ++i)
-                    f(arr[i].value, arr[i].key);
-                ind += n;
-                setTimeout(g, delay);
+                if (promise) {
+                    var i = ind;
+                    var h = function() {
+                        return f(arr[i].value, arr[i].key).then(function() {
+                            ++i;
+                            if (i >= Math.min(ind + n, arr.length))
+                                return Promise.resolve();
+                            return h();
+                        });
+                    };
+                    h().then(function() {
+                        ind += n;
+                        setTimeout(g, delay);
+                    });
+                } else {
+                    for (var i = ind; i < Math.min(ind + n, arr.length); ++i)
+                        f(arr[i].value, arr[i].key);
+                    ind += n;
+                    setTimeout(g, delay);
+                }
             };
             g();
         }
@@ -855,83 +942,90 @@ lord.showNotification = function(title, body, icon) {
     Notification.requestPermission(function(permission) {
         if (permission !== "granted")
             return;
-        var notification = new Notification(title, {
+        var notification = new Notification(lord.text(title), {
             "body": body,
             "icon": icon
         });
     });
 };
 
-lord.text = function(model, id) {
-    if (!model)
+lord.text = function(id) {
+    if (!id)
         return id;
-    var text = model.tr[id];
+    var text = lord.models.tr.tr[id];
     if (text)
         return text;
     return id;
 };
 
+lord.deviceType = function(expected) {
+    var base = lord.models.base;
+    if (!base)
+        return expected ? false : null;
+    if (expected)
+        return expected == base.deviceType;
+    return base.deviceType;
+};
+
 lord.showDialog = function(title, label, body, afterShow) {
-    return lord.getModel("misc/tr").then(function(model) {
-        var root = lord.node("div");
-        title = lord.text(model, title);
-        label = lord.text(model, label);
-        if (title || label) {
-            var div = lord.node("div");
-            if (title) {
-                var c = lord.node("center");
-                var t = lord.node("b");
-                t.appendChild(lord.node("text", title));
-                c.appendChild(t);
-                div.appendChild(c);
-                div.appendChild(lord.node("br"));
-            }
-            if (label) {
-                div.appendChild(lord.node("text", label));
-                div.appendChild(lord.node("br"));
-            }
-            root.appendChild(div);
-            root.appendChild(lord.node("br"));
+    var root = lord.node("div");
+    title = lord.text(title);
+    label = lord.text(label);
+    if (title || label) {
+        var div = lord.node("div");
+        if (title) {
+            var c = lord.node("center");
+            var t = lord.node("b");
+            t.appendChild(lord.node("text", title));
+            c.appendChild(t);
+            div.appendChild(c);
+            div.appendChild(lord.node("br"));
         }
-        if (body) {
-            root.appendChild(body);
-            root.appendChild(lord.node("br"));
+        if (label) {
+            div.appendChild(lord.node("text", label));
+            div.appendChild(lord.node("br"));
         }
-        var div2 = lord.node("div");
-        var dialog = null;
-        var cancel = lord.node("button");
-        return new Promise(function(resolve, reject) {
-            cancel.onclick = function() {
-                dialog.close();
-            };
-            cancel.appendChild(lord.node("text", model.tr.cancelButtonText));
-            div2.appendChild(cancel);
-            var ok = lord.node("button");
-            ok.onclick = function() {
-                resolve(true);
-                dialog.close();
-            };
-            ok.appendChild(lord.node("text", model.tr.confirmButtonText));
-            div2.appendChild(ok);
-            root.appendChild(div2);
-            dialog = picoModal({
-                "content": root,
-                "modalStyles": function (styles) {
-                    styles.maxHeight = "80%";
-                    styles.maxWidth = "80%";
-                    styles.overflow = "auto";
-                    styles.border = "1px solid #777777";
-                    return styles;
-                }
-            }).afterShow(function(modal) {
-                if (afterShow)
-                    afterShow();
-            }).afterClose(function(modal) {
-                modal.destroy();
-                resolve(false);
-            });
-            dialog.show();
+        root.appendChild(div);
+        root.appendChild(lord.node("br"));
+    }
+    if (body) {
+        root.appendChild(body);
+        root.appendChild(lord.node("br"));
+    }
+    var div2 = lord.node("div");
+    var dialog = null;
+    var cancel = lord.node("button");
+    return new Promise(function(resolve, reject) {
+        cancel.onclick = function() {
+            dialog.close();
+        };
+        cancel.appendChild(lord.node("text", lord.text("cancelButtonText")));
+        div2.appendChild(cancel);
+        var ok = lord.node("button");
+        ok.onclick = function() {
+            resolve(true);
+            dialog.close();
+        };
+        ok.appendChild(lord.node("text", lord.text("confirmButtonText")));
+        div2.appendChild(ok);
+        root.appendChild(div2);
+        dialog = picoModal({
+            content: root,
+            modalStyles: function (styles) {
+                styles.maxHeight = "80%";
+                styles.maxWidth = "80%";
+                styles.overflow = "auto";
+                styles.border = "1px solid #777777";
+                return styles;
+            }
+        }).afterShow(function(modal) {
+            if (afterShow)
+                afterShow();
+        }).afterClose(function(modal) {
+            modal.destroy();
+            resolve(false);
         });
+        dialog.show();
     });
 };
 
@@ -978,27 +1072,6 @@ lord.generateImageHash = function(imageData, sizeX, sizeY) {
         }
     }
     return hash;
-};
-
-lord.getImageBase64Data = function(img) {
-    if (!img)
-        return null;
-    var canvas = lord.node("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-    var ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0);
-    var dataURL = canvas.toDataURL("image/png");
-    return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
-};
-
-lord.base64ToArrayBuffer = function(base64) {
-    var binaryString = atob(base64);
-    var len = binaryString.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++)
-        bytes[i] = binaryString.charCodeAt(i);
-    return bytes.buffer;
 };
 
 lord.getPlainText = function(node) {
@@ -1106,7 +1179,23 @@ lord.activateTab = function(a, tabIndex, display) {
 };
 
 lord.notificationsEnabled = function() {
-    return lord.getLocalObject("showAutoUpdateDesktopNotifications", false);
+    return lord.getLocalObject("showAutoUpdateDesktopNotifications", true);
+};
+
+lord.soundEnabled = function() {
+    return lord.getLocalObject("playAutoUpdateSound", false);
+};
+
+lord.playSound = function() {
+    if (!lord.sound) {
+        lord.sound = lord.node("audio");
+        var source = lord.node("source");
+        source.type = "audio/ogg";
+        source.src = "/" + lord.data("sitePathPrefix") + "audio/signal.ogg";
+        lord.sound.volume = lord.getLocalObject("soundNotificationsVolume", 100) / 100;
+        lord.sound.appendChild(source);
+    }
+    lord.sound.play();
 };
 
 lord.nearlyEqual = function(a, b, epsilon) {
@@ -1136,91 +1225,157 @@ lord.data = function(key, el, bubble) {
     return undefined;
 };
 
-lord.getTemplate = function(templateName) {
-    var prefix = lord.data("sitePathPrefix");
-    return new Promise(function(resolve, reject) {
-        if (lord.templates.hasOwnProperty(templateName))
-            return resolve(lord.templates[templateName]);
-        var f = function() {
-            $.ajax("/" + prefix + "templates/" + templateName + ".jst").then(function(result) {
-                var template = doT.template(result, {
-                    evaluate: /\{\{([\s\S]+?)\}\}/g,
-                    interpolate: /\{\{=([\s\S]+?)\}\}/g,
-                    encode: /\{\{!([\s\S]+?)\}\}/g,
-                    use: /\{\{#([\s\S]+?)\}\}/g,
-                    define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
-                    conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
-                    iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
-                    varname: 'it',
-                    strip: false,
-                    append: true,
-                    selfcontained: false
-                }, lord.partials);
-                lord.templates[templateName] = template;
-                resolve(template);
-            });
-        };
-        if (lord.partials) {
-            f();
-        } else {
-            $.ajax("/" + prefix + "misc/partials.json").then(function(list) {
-                var promises = list.map(function(partialName) {
-                    return $.ajax("/" + prefix + "templates/partials/" + partialName + ".jst").then(function(result) {
-                        return {
-                            data: result,
-                            name: partialName
-                        };
-                    });
-                });
-                return Promise.all(promises);
-            }).then(function(partials) {
-                lord.partials = {};
-                partials.forEach(function(partial) {
-                    lord.partials[partial.name] = partial.data;
-                });
-                f();
-            }).catch(function(err) {
-                reject(err);
-            });
+lord.template = function(templateName, model, noparse) {
+    var template = lord.templates[templateName];
+    if (!template)
+        return null;
+    if (!model)
+        return template;
+    var html = template(model);
+    if (noparse)
+        return html;
+    var nodes = $.parseHTML(html, document, true);
+    var node;
+    for (var i = 0; i < nodes.length; ++i) {
+        if (1 == nodes[i].nodeType) {
+            node = nodes[i];
+            break;
         }
+    }
+    if (!node)
+        return null;
+    lord.query("script", node).forEach(function(script) {
+        var nscript = lord.node("script");
+        if (script.src)
+            nscript.src = script.src;
+        else if (script.innerHTML)
+            nscript.innerHTML = script.innerHTML;
+        script.parentNode.replaceChild(nscript, script);
+    });
+    return node;
+};
+
+lord.createStylesheetLink = function(href, prefix) {
+    var link = lord.node("link");
+    link.type = "text/css";
+    link.rel = "stylesheet";
+    link.href = (prefix ? ("/" + lord.models.base.site.pathPrefix + "css/") : "") + href;
+    lord.queryOne("head").appendChild(link);
+};
+
+lord.compareRegisteredUserLevels = function(l1, l2) {
+    if (!l1)
+        l1 = null;
+    if (!l2)
+        l2 = null;
+    if (["ADMIN", "MODER", "USER", null].indexOf(l2) < 0)
+        throw "Invalid registered user level l2: " + l2;
+    switch (l1) {
+    case "ADMIN":
+        return (l1 == l2) ? 0 : 1;
+    case "MODER":
+        if (l1 == l2)
+            return 0;
+        return ("ADMIN" == l2) ? -1 : 1;
+    case "USER":
+        if (l1 == l2)
+            return 0;
+        return (null == l2) ? 1 : -1;
+    case null:
+        return (l1 == l2) ? 0 : -1;
+    default:
+        throw "Invalid reistered user level l1: " + l1;
+    }
+};
+
+lord.escaped = function(text) {
+    return $("<div />").text(text).html();
+};
+
+lord.model = function(modelName, mustMerge) {
+    if (Array.isArray(modelName)) {
+        var models = modelName.map(function(modelName) {
+            return lord.model(modelName);
+        });
+        if (!mustMerge)
+            return models;
+        var model = (models.length > 0) ? merge.clone(models[0]) : {};
+        models.slice(1).forEach(function(m) {
+            model = merge.recursive(model, m);
+        })
+        return model;
+    } else {
+        var match = modelName.match(/^board\/(\S+)$/);
+        if (match) {
+            var boards = lord.models["boards"].boards;
+            for (var i = 0; i < boards.length; ++i) {
+                if (match[1] == boards[i].name)
+                    return { board: boards[i] };
+            }
+            return lord.models["boards"].boards[match[1]];
+        }
+        return lord.models[modelName];
+    }
+};
+
+lord.get = function(what) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("get", "/" + lord.data("sitePathPrefix", lord.queryOne("head")) + what, false);
+    xhr.send(null);
+    if (xhr.status === 200)
+        return xhr.responseText;
+    return null;
+};
+
+lord.api = function(entity, parameters, prefix) {
+    prefix = prefix || "api";
+    var query = "";
+    lord.forIn(parameters, function(val, key) {
+        if (!Array.isArray(val))
+            val = [val];
+        val.forEach(function(val) {
+            if (query)
+                query += "&";
+            query += (key + "=" + val);
+        });
+    });
+    query = (query ? "?" : "") + query;
+    return new Promise(function(resolve, reject) {
+        $.getJSON("/" + lord.data("sitePathPrefix") + prefix + "/" + entity + ".json" + query).then(function(result) {
+            if (lord.checkError(result))
+                reject(result);
+            resolve(result);
+        }).catch(function(err) {
+            reject(err);
+        });
     });
 };
 
-lord.getModel = function(modelName, query) {
-    if (Array.isArray(modelName)) {
-        var promises = modelName.map(function(modelName) {
-            if (typeof modelName == "string")
-                return lord.getModel(modelName);
+lord.post = function(action, formData, progressBarContext, progressBarOptions) {
+    var parameters = {
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false
+    };
+    if (typeof progressBarContext == "object") {
+        parameters.xhr = function() {
+            var xhr = new XMLHttpRequest();
+            if (progressBarOptions && progressBarOptions.uploadProgress)
+                xhr.upload.onprogress = progressBarOptions.uploadProgress;
+            progressBarContext.progressBar = new lord.OverlayProgressBar({ xhr: xhr });
+            if (progressBarOptions && progressBarOptions.delay)
+                progressBarContext.progressBar.showDelayed(progressBarOptions.delay);
             else
-                return lord.getModel(modelName.name, modelName.query);
-        });
-        return Promise.all(promises).then(function(models) {
-            if (query) {
-                var model = (models.length > 0) ? merge.clone(models[0]) : {};
-                for (var i = 1; i < models.length; ++i)
-                    model = merge.recursive(model, models[i]);
-                return Promise.resolve(model);
-            } else {
-                return Promise.resolve(models);
-            }
-        });
-    } else {
-        var cache = !query || (typeof query != "boolean" && typeof query != "string");
-        query = (query && typeof query == "string") ? ("?" + query) : "";
-        return new Promise(function(resolve, reject) {
-            if (!query && lord.models.hasOwnProperty(modelName)) {
-                resolve(lord.models[modelName]);
-            } else {
-                $.ajax("/" + lord.data("sitePathPrefix") + modelName + ".json" + query).then(function(result) {
-                    if (cache)
-                        lord.models[modelName] = result;
-                    resolve(result);
-                }).catch(function(err) {
-                    reject(err);
-                });
-            }
-        });
+                progressBarContext.progressBar.show();
+            return xhr;
+        }
     }
+    return $.ajax(action, parameters).then(function(result) {
+        if (lord.checkError(result))
+            return Promise.reject(result);
+        return Promise.resolve(result);
+    });
 };
 
 lord.now = function() {
@@ -1229,9 +1384,6 @@ lord.now = function() {
 
 lord.settings = function() {
     return {
-        mode: {
-            name: lord.getCookie("mode", "normal")
-        },
         style: {
             name: lord.getCookie("style", "photon")
         },
@@ -1247,13 +1399,15 @@ lord.settings = function() {
             id: lord.getCookie("captchaEngine", "google-recaptcha")
         },
         maxAllowedRating: lord.getCookie("maxAllowedRating", "R-18G"),
-        draftsByDefault: (lord.getCookie("draftsByDefault", "false") == "true"),
         hidePostformRules: (lord.getCookie("hidePostformRules", "false") == "true"),
-        minimalisticPostform: (lord.getCookie("minimalisticPostform", "false") == "true"),
+        minimalisticPostform: (lord.getCookie("minimalisticPostform",
+            lord.deviceType("mobile") ? "true" : "false") == "true"),
         hiddenBoards: lord.getCookie("hiddenBoards", "").split("|"),
         autoUpdateThreadsByDefault: lord.getLocalObject("autoUpdateThreadsByDefault", false),
         autoUpdateInterval: lord.getLocalObject("autoUpdateInterval", 15),
         showAutoUpdateDesktopNotifications: lord.getLocalObject("showAutoUpdateDesktopNotifications", true),
+        playAutoUpdateSound: lord.getLocalObject("playAutoUpdateSound", false),
+        soundNotificationsVolume: lord.getLocalObject("soundNotificationsVolume", 100),
         signOpPostLinks: lord.getLocalObject("signOpPostLinks", true),
         signOwnPostLinks: lord.getLocalObject("signOwnPostLinks", true),
         showLeafButtons: lord.getLocalObject("showLeafButtons", true),
@@ -1274,12 +1428,12 @@ lord.settings = function() {
         strikeOutHiddenPostLinks: lord.getLocalObject("strikeOutHiddenPostLinks", true),
         spellsEnabled: lord.getLocalObject("spellsEnabled", true),
         showNewPosts: lord.getLocalObject("showNewPosts", true),
-        showYoutubeVideosTitles: lord.getLocalObject("showYoutubeVideosTitles", true),
         hotkeysEnabled: lord.getLocalObject("hotkeysEnabled", true),
         userCssEnabled: lord.getLocalObject("userCssEnabled", true),
         userJavaScriptEnabled: lord.getLocalObject("userJavaScriptEnabled", true),
         sourceHighlightingEnabled: lord.getLocalObject("sourceHighlightingEnabled", false),
-        chatEnabled: lord.getLocalObject("chatEnabled", true)
+        chatEnabled: lord.getLocalObject("chatEnabled", true),
+        closeFilesByClickingOnly: lord.getLocalObject("closeFilesByClickingOnly", false)
     };
 };
 
@@ -1301,7 +1455,8 @@ lord.setSettings = function(model) {
 };
 
 lord.checkError = function(result) {
-    return (["object", "number", "boolean"].indexOf(typeof result) < 0) || (result && result.errorMessage);
+    return (["object", "number", "boolean"].indexOf(typeof result) < 0)
+        || (result && (result.errorMessage || result.ban));
 };
 
 lord.handleError = function(error) {
@@ -1314,12 +1469,54 @@ lord.handleError = function(error) {
             text = error.errorMessage;
             if (error.errorDescription)
                 text += ": " + error.errorDescription;
+        } else if (error.ban) {
+            var model = lord.model("base");
+            var settings = lord.settings();
+            var locale = model.site.locale;
+            var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
+            var dateFormat = model.site.dateFormat;
+            var formattedDate = function(date) {
+                return moment(date).utcOffset(timeOffset).locale(locale).format(dateFormat);
+            };
+            text = lord.text("bannedText") + ".";
+            if (error.ban.reason)
+                text += " " + lord.text("banReasonLabelText") + " " + error.ban.reason + ".";
+            text += " " + lord.text("banExpiresLabelText") + " ";
+            if (error.ban.expiresAt)
+                text += formattedDate(error.ban.expiresAt);
+            else
+                text += lord.text("banExpiresNeverText");
         } else if (error.hasOwnProperty("readyState")) {
             //TODO: error status
-            if (500 == error.status)
-                text = "Temporarily banned or internal server error";
-            else if (0 == error.readyState)
-                text = "No connection with server";
+            switch (error.status) {
+            case 400:
+                break;
+            case 404:
+                break;
+            case 408:
+                break;
+            case 413:
+                break;
+            case 429:
+                //DDOS
+                break;
+            case 500:
+                text = "Temporarily banned or internal server error"; //Move to 429
+                break;
+            case 502:
+                break;
+            case 503:
+                break;
+            case 504:
+                break;
+            case 523:
+                //CF
+                break;
+            default:
+                if (0 == error.readyState)
+                    text = "No connection with server";
+                break;
+            }
         } else {
             text = error;
         }
@@ -1335,4 +1532,27 @@ lord.toMap = function(arr, keyGenerator) {
         map[keyGenerator(item)] = item;
     });
     return map;
+};
+
+lord.readAs = function(blob, method) {
+    switch (method) {
+    case "ArrayBuffer":
+    case "BinaryString":
+    case "DataURL":
+    case "Text":
+        break;
+    default:
+        method = "ArrayBuffer";
+        break;
+    }
+    var binaryReader = new FileReader();
+    return new Promise(function(resolve, reject) {
+        binaryReader.onload = function(e) {
+            resolve(e.target.result);
+        };
+        binaryReader.onerror = function(e) {
+            reject(e.getMessage());
+        };
+        binaryReader["readAs" + method](blob);
+    });
 };

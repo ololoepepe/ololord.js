@@ -12,6 +12,7 @@ var UUID = require("uuid");
 
 var Captcha = require("../captchas");
 var config = require("../helpers/config");
+var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
 var ImageMagick = promisify("imagemagick");
@@ -27,7 +28,6 @@ var defineSetting = function(o, name, def) {
 };
 
 var boards = {};
-var banners = {};
 
 var generateRandomImage = function(hash, mimeType, thumbPath) {
     var canvas = new Canvas(200, 200);
@@ -99,8 +99,13 @@ var Board = function(name, title, options) {
         },
         configurable: true
     });
+    Object.defineProperty(this, "bannerFileNames", {
+        get: function() {
+            return Board._banners[name];
+        },
+        configurable: true
+    });
     defineSetting(this, "captchaQuota", 0);
-    defineSetting(this, "draftsEnabled", true);
     defineSetting(this, "enabled", true);
     defineSetting(this, "hidden", false);
     defineSetting(this, "maxEmailLength", 150);
@@ -128,18 +133,11 @@ var Board = function(name, title, options) {
         get: function() {
             var ids = config("board." + name + ".supportedCaptchaEngines",
                 config("board.supportedCaptchaEngines", Captcha.captchaIds()));
-            var list = [];
-            if (!(ids instanceof Array))
+            if (!Util.isArray(ids))
                 ids = [];
-            ids.forEach(function(id) {
-                var captcha = Captcha.captcha(id);
-                list.push({
-                    id: captcha.id,
-                    title: captcha.title,
-                    publicKey: captcha.publicKey
-                });
+            return ids.map(function(id) {
+                return Captcha.captcha(id).info();
             });
-            return list;
         },
         configurable: true
     });
@@ -170,27 +168,6 @@ var Board = function(name, title, options) {
 
 /*public*/ Board.prototype.customBoardInfoFields = function() {
     return [];
-};
-
-/*public*/ Board.prototype.getBannerFileName = function() {
-    var randomFile = function(files) {
-        if (!files || !files.length || files.length < 1)
-            return;
-        return files[Tools.randomInt(0, files.length - 1)];
-    };
-    if (banners[this.name])
-        return Promise.resolve(randomFile(banners[this.name]));
-    var path = __dirname + "/../public/img/banners/" + this.name;
-    return FS.exists(path).then(function(exists) {
-        if (!exists)
-            return Promise.resolve([]);
-        return FS.list(path);
-    }).then(function(files) {
-        if (files.length < 1)
-            return Promise.resolve(null);
-        banners[this.name] = files;
-        return Promise.resolve(randomFile(files));
-    });;
 };
 
 /*public*/ Board.prototype.isCaptchaEngineSupported = function(engineName) {
@@ -244,38 +221,6 @@ var Board = function(name, title, options) {
     return [];
 };
 
-/*public*/ Board.prototype.customPostHeaderPart = function(n, req, thread) {
-    //
-};
-
-/*public*/ Board.prototype.customPostMenuAction = function(n, req, thread) {
-    //
-};
-
-/*public*/ Board.prototype.customPostBodyPart = function(n, req, thread) {
-    //
-};
-
-/*public*/ Board.prototype.customPostFormField = function(n, req, thread) {
-    //
-};
-
-/*public*/ Board.prototype.customPostFormOption = function(n, req, thread) {
-    //
-};
-
-/*public*/ Board.prototype.customEditPostDialogPart = function(n, req) {
-    //
-};
-
-/*public*/ Board.prototype.renderBoardPage = function(req, res, ajax) {
-    return Promise.resolve(null);
-};
-
-/*public*/ Board.prototype.renderThread = function(req, res, ajax) {
-    return Promise.resolve(null);
-};
-
 /*public*/ Board.prototype.testParameters = function(fields, files, creatingThread) {
     //
 };
@@ -322,21 +267,13 @@ var renderFileInfo = function(fi) {
     });
     post.rawSubject = post.subject;
     post.isOp = (post.number == post.threadNumber);
-    post.ownIp = (req.ip == post.user.ip);
-    post.ownHashpass = (req.hashpass && req.hashpass == post.user.hashpass);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
-    if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0) {
-        delete post.user.ip;
-    } else {
-        var ipv4 = Tools.preferIPv4(post.user.ip);
-        if (ipv4 && ipv4 != post.user.ip)
-            post.user.ipv4 = ipv4;
-    }
     if (post.options.showTripcode) {
         var md5 = Crypto.createHash("md5");
         md5.update(post.user.hashpass + config("site.tripcodeSalt", ""));
         post.tripcode = "!" + md5.digest("base64").substr(0, 10);
     }
+    delete post.user.ip;
     delete post.user.hashpass;
     delete post.user.password;
     if (!this.showWhois) {
@@ -352,12 +289,28 @@ var renderFileInfo = function(fi) {
     });
 };
 
+var getRules = function(boardName) {
+    var fileName = __dirname + "/../misc/rules/rules" + (boardName ? ("." + boardName) : "") + ".txt";
+    console.log(fileName);
+    return FS.exists(fileName).then(function(exists) {
+        if (!exists)
+            return Promise.resolve();
+        return FS.read(fileName);
+    }).then(function(data) {
+        if (!data)
+            return [];
+        return data.split(/\r*\n+/gi).filter(function(rule) {
+            return rule;
+        });
+    });
+};
+
 /*public*/ Board.prototype.postformRules = function() {
     var c = {};
     var _this = this;
-    return Tools.getRules("postform").then(function(rules) {
+    return getRules().then(function(rules) {
         c.common = rules;
-        return Tools.getRules("postform", _this.name);
+        return getRules(_this.name);
     }).then(function(rules) {
         c.specific = rules;
         for (var i = c.specific.length - 1; i >= 0; --i) {
@@ -375,16 +328,17 @@ var renderFileInfo = function(fi) {
 };
 
 /*public*/ Board.prototype.generateFileName = function(file) {
-    var base = Tools.now().valueOf();
-    var ext = Path.extname(file.name);
-    if (Util.isString(ext))
-        ext = ext.substr(1);
-    if (!ext || Board.MimeTypesForExtensions[ext.toLowerCase()] != file.mimeType)
-        ext = Board.DefaultExtensions[file.mimeType];
-    return {
-        name: (base + "." + ext),
-        thumbName: (base + "s." + (Board.ThumbExtensionsForMimeType[file.mimeType] || ext))
-    };
+    return Global.IPC.send("fileName", this.name).then(function(base) {
+        var ext = Path.extname(file.name);
+        if (Util.isString(ext))
+            ext = ext.substr(1);
+        if (!ext || Board.MimeTypesForExtensions[ext.toLowerCase()] != file.mimeType)
+            ext = Board.DefaultExtensions[file.mimeType];
+        return Promise.resolve({
+            name: (base + "." + ext),
+            thumbName: (base + "s." + (Board.ThumbExtensionsForMimeType[file.mimeType] || ext))
+        });
+    });
 };
 
 /*public*/ Board.prototype.processFile = function(file) {

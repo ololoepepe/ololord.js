@@ -22,8 +22,21 @@ var Captcha = function(id, title, options) {
     defineSetting(this, "publicKey");
 };
 
-/*public*/ Captcha.prototype.prepare = function(req) {
-    return Promise.resolve();
+/*public*/ Captcha.prototype.info = function() {
+    var info = {
+        id: this.id,
+        title: this.title,
+        publicKey: this.publicKey
+    };
+    if (this.script)
+        info.script = this.script();
+    if (this.scriptSource)
+        info.scriptSource = this.scriptSource();
+    if (this.widgetHtml)
+        info.widgetHtml = this.widgetHtml();
+    if (this.widgetTemplate)
+        info.widgetTemplate = this.widgetTemplate();
+    return info;
 };
 
 /*public*/ Captcha.prototype.apiRoutes = function() {
@@ -56,9 +69,11 @@ Captcha.captchaIds = function() {
 
 //NOTE: Must implement the following methods:
 //checkCaptcha(req, fields) -> {ok: boolean, message: string}
-//widgetHtml(req, prepared) -> string
+//widgetHtml() -> string
+//or
+//widgetTemplate() -> string
 //NOTE: May implement the following methods:
-//headerHtml(req) -> string
-//scriptSource(req) -> string
+//script() -> string
+//scriptSource() -> string
 
 module.exports = Captcha;

@@ -3,15 +3,13 @@
 {{#def.head}}
 <body class="{{=it.deviceType}}"
       {{#def.baseData}}>
-{{? it.customHeader}}
-    {{#def.customHeader}}
-{{?}}
+<div id="customHeaderPlaceholder" style="display: none;"></div>
 <div class="theTitle">
     <h1>
         {{=it.title}}
     </h1>
 </div>
-{{? "ascetic" != it.settings.mode.name && it.site.vkontakte.integrationEnabled}}
+{{? it.site.vkontakte.integrationEnabled}}
     <style type="text/css">
         #vkontakteLoginButton {
             text-align: center;
@@ -30,27 +28,23 @@
 <div class="login">
     <form id="loginForm" method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/login"
           enctype="application/x-www-form-urlencoded" class="inlineForm"
-          {{? it.settings.mode.name != "ascetic"}}onsubmit="lord.doLogin(event, this); return false;"{{?}}>
-        <input type="hidden" name="source" value="{{=it.source}}" />
+          onsubmit="lord.doLogin(event, this); return false;">
         <input type="password" class="input" name="hashpass" placeholder="{{=it.tr.loginPlaceholderText}}"
-               size="{{? "mobile" == it.deviceType}}30{{??}}43{{?}}"
-               autofocus="true" />
+               size="30" autofocus="true" />
         <input type="submit" class="button" name="submit" value="{{=it.tr.loginText}}" />
     </form>
-    {{? "ascetic" != it.settings.mode.name && it.site.vkontakte.integrationEnabled}}
+    {{? it.site.vkontakte.integrationEnabled}}
         <div id="vkontakteLoginButton" onclick="lord.vkAuth();"></div>
     {{?}}
 </div>
 <div class="loginDescription">
     {{=it.tr.loginSystemDescriptionText}}
 </div>
-{{? "ascetic" != it.settings.mode.name && it.site.vkontakte.integrationEnabled}}
+{{? it.site.vkontakte.integrationEnabled}}
     <div class="loginDescription">
         {{=it.tr.loginSystemVkontakteDescriptionText}}
     </div>
 {{?}}
-{{? it.customFooter}}
-    {{#def.customFooter}}
-{{?}}
+<div id="customFooterPlaceholder" style="display: none;"></div>
 </body>
 </html>

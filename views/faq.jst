@@ -2,22 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
 <body class="{{=it.deviceType}}" {{#def.baseData}}>
-{{? it.customHeader}}
-    {{#def.customHeader}}
-{{?}}
-{{#def.toolbar}}
+<div id="customHeaderPlaceholder" style="display: none;"></div>
+<div id="toolbarPlaceholder" style="display: none;"></div>
 <br />
-{{#def.searchAction}}
+<div id="searchPlaceholder" style="display: none;"></div>
 <div class="theTitle">
     <h1>
         {{=it.title}}
     </h1>
 </div>
-{{? it.faqContent}}
-    {{=it.faqContent}}
-{{?}}
-{{? it.customFooter}}
-    {{#def.customFooter}}
-{{?}}
+<div id="faqContentPlaceholder" style="display: none;"></div>
+<div id="customFooterPlaceholder" style="display: none;"></div>
 </body>
 </html>

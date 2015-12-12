@@ -3,6 +3,6 @@
 {{#def.head}}
 <frameset cols="{{? it.deviceType != "mobile"}}210{{??}}80{{?}},*">
     <frame src="/{{=it.site.pathPrefix}}frameList.html" name="list" noresize="" scrolling="auto" frameborder="1"></frame>
-    <frame src="{{=it.source}}" name="page" noresize=""></frame>
+    <frame src="/{{=it.site.pathPrefix}}" name="page" noresize=""></frame>
 </frameset>
 </html>

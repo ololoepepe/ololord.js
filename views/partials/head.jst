@@ -1,61 +1,68 @@
-<head>    
+<head data-site-path-prefix="{{=it.site.pathPrefix}}">
     <title>{{=it.title}}</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     {{? "mobile" == it.deviceType}}
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     {{?}}
     <link id="favicon" rel="shortcut icon" href="/{{=it.site.pathPrefix}}favicon.ico">
-    <link rel="stylesheet" type="text/css" href="/{{=it.site.pathPrefix}}css/{{=it.settings.style.name}}.css">
-    <link rel="stylesheet" type="text/css"
-          href="/{{=it.site.pathPrefix}}css/3rdparty/highlight.js/{{=it.settings.codeStyle.name}}.css">
+    <link id="defaultStylesheet" rel="stylesheet" type="text/css" href="/{{=it.site.pathPrefix}}css/photon.css">
+    <link rel="stylesheet" type="text/css" href="/{{=it.site.pathPrefix}}css/3rdparty/jquery.datetimepicker.css">
     {{? !it.noJavaScript}}
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery-1.11.3.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/Promise.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/doT.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/picoModal-2.1.0.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/sha1.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/ExpandSelect_1.00.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/api.js"></script>
-        {{? it.settings.mode.name != "ascetic"}}
-            <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/merge.min.js"></script>
-            <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/uuid.js"></script>
-            <script type="text/javascript"
-                    src="/{{=it.site.pathPrefix}}js/3rdparty/moment-with-locales.min.js"></script>
-            <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base.js"></script>
-            {{? it.site.vkontakte.integrationEnabled }}
-                <script type="text/javascript" src="//vk.com/js/api/openapi.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/merge.min.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/uuid.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/moment-with-locales.min.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base.js"></script>
+        <script id="model-base" type="application/json"></script>
+        <script id="model-boards" type="application/json">{{=it.models.boards}}</script>
+        <script id="model-tr" type="application/json">{{=it.models.tr}}</script>
+        <script id="model-partials" type="application/json">{{=it.models.partials}}</script>
+        <script id="model-templates" type="application/json">{{=it.models.templates}}</script>
+        {{~it.publicPartials :partial}}
+            <script id="partial-{{=partial.name}}" type="application/jst">{{=partial.data}}</script>
+        {{~}}
+        {{~it.publicTemplates :template}}
+            <script id="template-{{=template.name}}" type="application/jst">{{=template.data}}</script>
+        {{~}}
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/bottom.js"></script>
+        {{? it.site.vkontakte.integrationEnabled }}
+            <script type="text/javascript" src="//vk.com/js/api/openapi.js"></script>
+        {{?}}
+        {{? it.includeBoardScripts}}
+            {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+                <script type="text/javascript"
+                        src="/{{=it.site.pathPrefix}}js/3rdparty/jquery.datetimepicker.js"></script>
             {{?}}
-            {{? it.includeBoardScripts}}
-                {{? it.site.twitter.integrationEnabled }}
-                    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/twitter.js"></script>
-                {{?}}
-                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/board.js"></script>
-                {{? it.includeThreadScripts}}
-                    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jszip.min.js"></script>
-                    <script type="text/javascript"
-                            src="/{{=it.site.pathPrefix}}js/3rdparty/jszip-utils.min.js"></script>
-                    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/FileSaver.min.js"></script>
-                    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery.knob.min.js"></script>
-                    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/thread.js"></script>
-                {{?}}
-                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/lib-typedarrays-min.js"></script>
-                {{? it.captchaEngine && it.captchaEngine.scriptSource && it.captchaEngine.scriptSource(it.req)}}
-                    <script type="text/javascript" src="{{ out += it.captchaEngine.scriptSource(it.req); }}"></script>
-                {{?}}
-                {{? it.captchaEngine && it.captchaEngine.headerHtml && it.captchaEngine.headerHtml(it.req)}}
-                    {{ out += it.captchaEngine.headerHtml(it.req); }}
-                {{?}}
+            {{? it.site.twitter.integrationEnabled }}
+                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/twitter.js"></script>
             {{?}}
-            {{? it.extraScripts}}
-                {{~it.extraScripts :script}}
-                    {{? script.source}}
-                        <script type="text/javascript" src="{{=script.source}}"></script>
-                    {{?? script.fileName}}
-                        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/{{=script.fileName}}"></script>
-                    {{?? script.value}}
-                        <script type="text/javascript">{{=script.value}}</script>
-                    {{?}}
-                {{~}}
+            <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/board.js"></script>
+            <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/youtube-coub.js"></script>
+            {{? it.includeThreadScripts}}
+                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jszip.min.js"></script>
+                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jszip-utils.min.js"></script>
+                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/FileSaver.min.js"></script>
+                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery.knob.min.js"></script>
+                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/thread.js"></script>
             {{?}}
+            <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/lib-typedarrays-min.js"></script>
+        {{?}}
+        {{? it.extraScripts}}
+            {{~it.extraScripts :script}}
+                {{? script.source}}
+                    <script type="text/javascript" src="{{=script.source}}"></script>
+                {{?? script.fileName}}
+                    <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/{{=script.fileName}}"></script>
+                {{?? script.value}}
+                    <script type="text/javascript">{{=script.value}}</script>
+                {{?}}
+            {{~}}
         {{?}}
     {{?}}
 </head>

@@ -5,46 +5,10 @@ var uuid = require("uuid");
 var Board = require("./board");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
+var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
 board = new Board("rpg", Tools.translate.noop("Role-playing games", "boardTitle"));
-
-board.routes = function() {
-    return [{
-        method: "get",
-        path: "/openVoting.html",
-        handler: function(req, res) {
-            var model = {};
-            model.title = Tools.translate("Open voting", "pageTitle");
-            model.opened = true;
-            model.postNumber = req.query.postNumber;
-            model.showSubmitButton = true;
-            model = merge.recursive(model, controller.boardModel("rpg"));
-            controller(req, "openCloseVoting", model).then(function(data) {
-                res.send(data);
-            }).catch(function(err) {
-                controller.error(req, res, err);
-            });
-        }
-    },
-    {
-        method: "get",
-        path: "/closeVoting.html",
-        handler: function(req, res) {
-            var model = {};
-            model.title = Tools.translate("Close voting", "pageTitle");
-            model.opened = false;
-            model.postNumber = req.query.postNumber;
-            model.showSubmitButton = true;
-            model = merge.recursive(model, controller.boardModel("rpg"));
-            controller(req, "openCloseVoting", model).then(function(data) {
-                res.send(data);
-            }).catch(function(err) {
-                controller.error(req, res, err);
-            });
-        }
-    }];
-};
 
 var contains = function(variants, id) {
     for (var i = 0; i < variants.length; ++i) {
@@ -110,9 +74,12 @@ board.actionRoutes = function() {
             }).then(function() {
                 return Database.db.sadd("voteUsers:" + c.postNumber, req.ip);
             }).then(function() {
+                return Database.db.hget("posts", "rpg:" + c.postNumber);
+            }).then(function(post) {
+                Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
-                controller.error(req, res, err, req.settings.mode.name != "ascetic");
+                controller.error(req, res, err, true);
             });
         }
     },
@@ -151,9 +118,12 @@ board.actionRoutes = function() {
             }).then(function() {
                 return Database.db.srem("voteUsers:" + c.postNumber, req.ip);
             }).then(function() {
+                return Database.db.hget("posts", "rpg:" + c.postNumber);
+            }).then(function(post) {
+                Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
-                controller.error(req, res, err, req.settings.mode.name != "ascetic");
+                controller.error(req, res, err, true);
             });
         }
     },
@@ -180,9 +150,10 @@ board.actionRoutes = function() {
                 extraData.disabled = !c.opened;
                 return Board.prototype.storeExtraData.call(_this, c.post.number, extraData);
             }).then(function(result) {
+                Global.generate("rpg", c.post.threadNumber, c.post.number, "edit");
                 res.send({});
             }).catch(function(err) {
-                controller.error(req, res, err, req.settings.mode.name != "ascetic");
+                controller.error(req, res, err, true);
             });
         }
     }];
@@ -353,70 +324,21 @@ board.removeExtraData = function(postNumber) {
     });
 };
 
-board.renderPost = function(post, req) {
+board.renderPost = function(post) {
     return Board.prototype.renderPost.apply(this, arguments).then(function(post) {
         if (!post.extraData)
             return Promise.resolve(post);
         if (post.extraData.variants) {
             post.extraData.variants.forEach(function(variant) {
-                if (!variant.users)
-                    return;
-                if (variant.users.indexOf(req.ip) >= 0)
-                    variant.ownIp = true;
-                variant.voteCount = variant.users.length;
-                delete variant.users;
+                variant.voteCount = variant.users ? variant.users.length : 0
+                if (variant.users)
+                    delete variant.users;
             });
         }
-        if (post.extraData.users) {
-            if (post.extraData.users.indexOf(req.ip) >= 0)
-                post.extraData.voted = true;
+        if (post.extraData.users)
             delete post.extraData.users;
-        }
         return Promise.resolve(post);
     });
-};
-
-board.customPostBodyPart = function(n, _) {
-    if (20 != n)
-        return;
-    return function(it, thread, post) {
-        if (!post.extraData)
-            return "";
-        var model = merge.clone(post.extraData);
-        model.post = post;
-        return controller.sync(it.req, "rpgPostBodyPart", model);
-    };
-};
-
-board.customPostFormField = function(n, req, thread) {
-    if (50 != n)
-        return;
-    if (thread) {
-        var user = thread.opPost.user;
-        if (user.ip != req.ip && (!req.hashpass || user.hashpass != req.hashpass))
-            return;
-    }
-    var _this = this;
-    return function(it) {
-        var model = {
-            site: it.site,
-            tr: merge.clone(it.tr),
-            board: merge.clone(it.board),
-            minimalisticPostform: it.minimalisticPostform
-        };
-        return controller.sync(it.req, "rpgPostFormField", model);
-    };
-};
-
-board.customEditPostDialogPart = function(n, req) {
-    if (50 != n)
-        return;
-    return function(it, thread, post) {
-        var model = post.extraData ? merge.clone(post.extraData) : {};
-        model.thread = thread;
-        model.post = post;
-        return controller.sync(it.req, "rpgEditPostDialogPart", model);
-    };
 };
 
 module.exports = board;

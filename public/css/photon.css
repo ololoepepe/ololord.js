@@ -13,7 +13,6 @@ body.mobile {
     -moz-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
-    /*text-size-adjust: 100%;*/
     font-size: 14px;
 }
 
@@ -53,6 +52,10 @@ hr {
     cursor: pointer;
 }
 
+.selectOption {
+    background: #EAEAEA;
+}
+
 .input {
     border: 1px solid #CCCCCC;
 }
@@ -78,7 +81,8 @@ hr {
     z-index: 9950;
     vertical-align: middle;
     text-align: center;
-    padding: 5px 5px 5px 5px;
+    padding: 10px 10px 10px 10px;
+    cursor: pointer;
 }
 
 .critical {
@@ -116,10 +120,7 @@ hr {
 }
 
 .centerForm {
-    /*width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    display: inline-block;*/
+    /**/
 }
 
 .inlineForm {
@@ -213,14 +214,24 @@ blockquote {
     max-height: 300px;
     box-sizing: border-box;
     max-width: 1200px;
+    overflow-wrap: break-word;
     word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
+blockquote.mobile {
+    max-width: 550px;
 }
 
 blockquote.expand {
     max-height: none;
 }
 
-span.spoiler, span.spoiler a, span.spoiler .cspoilerTitle {
+span.spoiler, span.spoiler a, span.spoiler .cspoilerTitle, span.spoiler .quotation {
     background: #BBBBBB;
     color: #BBBBBB;
 }
@@ -235,6 +246,10 @@ span.spoiler:hover a {
 
 span.spoiler:hover .cspoilerTitle {
     color: #304070;
+}
+
+span.spoiler:hover .quotation {
+    color: #789922;
 }
 
 span.tooltip {
@@ -566,6 +581,17 @@ span.newPostCount {
     display: table;
 }
 
+.draft {
+    background-color: #DDDDDD;
+    border: 1px solid #CCCCCC;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-top: 10px;
+    padding-left: 10px;
+    overflow-x: auto;
+    display: table;
+}
+
 .opPost {
     overflow-x: auto;
     display: table;
@@ -612,29 +638,12 @@ span.newPostCount {
     font-size: 0.6em;
 }
 
-/*.postFileFile.mobile {
-    -moz-transform: scale(0.7, 0.7);
-    -ms-transform: scale(0.7, 0.7);
-    -webkit-transform: scale(0.7, 0.7);
-    -o-transform: scale(0.7, 0.7);
-    transform: scale(0.7, 0.7);
-}*/
-
 .postFileFile > a > img.mumWatching:not(:hover) {
     opacity: 0.05;
-    /*filter: alpha(opacity=5);*/
 }
 
-.postHeader > a > img, .postFileSearch > a > img, .postHeader > span > a > img, .postFileSearch > form,
-.postHeader > span > form {
-    opacity: 0.65;
-    /*filter: alpha(opacity=65);*/
-}
-
-.postHeader > a:not(.disabled) > img:hover, .postFileSearch > a:not(.disabled) > img:hover,
-.postHeader > span > a:not(.disabled) > img:hover, .postFileSearch > form:hover, .postHeader > span > form:hover {
-    opacity: 1;
-    /*filter: alpha(opacity=100);*/
+.postFileSearch {
+    padding-bottom: 4px;
 }
 
 .postToThread > a > button {
@@ -645,16 +654,20 @@ span.newPostCount {
     display: block;
 }
 
-.postActions {
+.postToThread.mobile > a > button {
+    width: 100%;
+}
+
+.popupActions {
     position: relative;
     outline: 0;
 }
 
-.postActions, .postActions:active, .postActions:visited {
+.popupActions, .popupActions:active, .popupActions:visited {
     color: #000000;
 }
 
-.postActionsMenu {
+.popupActionsMenu {
     list-style-type: none;
     margin-left: 0px;
     padding: 4px 4px 4px 4px;
@@ -671,20 +684,24 @@ span.newPostCount {
 }
 
 .postActionsMenu.mobile {
-    left: -200px;
+    left: -220px;
 }
 
-.postActions:focus > .postActionsMenu {
+.fileActionsMenu.mobile {
+    left: -40px;
+}
+
+.popupActions:focus > .popupActionsMenu {
     visibility: visible;
     opacity: 1;
 }
 
-.postActionsMenu > li > a {
+.popupActionsMenu > li > a {
     text-decoration: none;
     color: #000000;
 }
 
-.postActionsMenu > li > a:hover {
+.popupActionsMenu > li > a:hover {
     display: block;
     color: #FFFFFF;
     background-color: #666666;
@@ -695,8 +712,8 @@ span.newPostCount {
 }
 
 .postFile {
+    display: inline-block;
     vertical-align: top;
-    width: 0px;
 }
 
 .shrink {
@@ -709,6 +726,10 @@ span.newPostCount {
 
 .postText {
     vertical-align: top;
+}
+
+.postFiles > .postText {
+    display: inline-block;
 }
 
 .bannedFor {
@@ -745,11 +766,6 @@ span.newPostCount {
     color: blue;
 }
 
-/*.userName {
-    font-weight: bold;
-    color: #006000;
-}*/
-
 .someName.mobile {
     font-size: 0.8em;
     display: block;
@@ -760,12 +776,10 @@ span.newPostCount {
     right: 20px;
     z-index: 9910;
     opacity: 0.5;
-    /*filter: alpha(opacity=50);*/
 }
 
 .navigationButton:hover {
     opacity: 1;
-    /*filter: alpha(opacity=100);*/
 }
 
 .navigationButtonBottom {
@@ -781,12 +795,10 @@ span.newPostCount {
     top: 50%;
     z-index: 9910;
     opacity: 0.5;
-    /*filter: alpha(opacity=50);*/
 }
 
 .leafButton:hover {
     opacity: 1;
-    /*filter: alpha(opacity=100);*/
 }
 
 .leafButtonPrevious {
@@ -834,7 +846,6 @@ span.newPostCount {
     width: 1px;
     height: 1px;
     opacity: 0;
-    /*filter: alpha(opacity=0);*/
 }
 
 .postformFileText {
@@ -939,8 +950,12 @@ blockquote.blockquoteThread.expand {
 .codeBlock {
     font-family: monospace;
     white-space: pre;
+    word-break: normal;
+    word-wrap: normal;
+    overflow-wrap: normal;
     padding-left: 20px !important;
     border: 1px solid #AAAAAA;
+    overflow-x: auto;
 }
 
 /*span.spoiler, span.spoiler a <- Board*/
@@ -964,12 +979,6 @@ blockquote.blockquoteThread.expand {
     text-align: left;
     white-space: nowrap;
     overflow-x: auto;
-}
-
-.noNewPostsPopup {
-    height: 40px;
-    line-height: 40px;
-    width: 200px;
 }
 
 /*
@@ -1013,6 +1022,7 @@ blockquote.blockquoteThread.expand {
 /* Vote */
 
 .vote {
+    display: table;
     background-color: #CCCCCC;
     border: 1px solid #BBBBBB;
 }
@@ -1028,8 +1038,7 @@ blockquote.blockquoteThread.expand {
 /* Settings dialog */
 
 .settingsDialog {
-    /*width: 400px;
-    height: 200px;*/
+    /**/
 }
 
 /* Playlist */
@@ -1038,6 +1047,7 @@ blockquote.blockquoteThread.expand {
     background-color: #DDDDDD;
     border: 1px solid #CCCCCC;
     padding: 2px 2px 2px 2px;
+    display: table;
 }
 
 .track ~ .track {
@@ -1100,8 +1110,17 @@ input.buttonImage {
     vertical-align: middle;
 }
 
+.boardSelectContainer {
+    display: inline-block;
+    vertical-align: middle;
+    width: 16px;
+    overflow: hidden;
+}
+
 .boardSelect {
-    width: 60px;
+    border: none;
+    background: url("../img/boards.png") left top no-repeat;
+    width: 36px;
 }
 
 .boardSelectForm {
@@ -1113,8 +1132,8 @@ input.buttonImage {
 }
 
 .imageCheckBox + label {
-    height: 32px;
-    width: 32px;
+    height: 24px;
+    width: 24px;
     display: inline-block;
     padding: 0 0 0 0px;
 }
@@ -1133,10 +1152,6 @@ input.buttonImage {
 
 #checkboxTripcode + label {
     background: url("../img/checkbox_tripcode.png") center no-repeat;
-}
-
-#checkboxDraft + label, #checkboxDraftEdit + label {
-    background: url("../img/checkbox_draft.png") center no-repeat;
 }
 
 .searchSelect {
@@ -1257,4 +1272,16 @@ input.buttonImage {
 .chatSendButton {
     box-sizing: border-box;
     width: 100%;
+}
+
+.loadingMessage {
+    text-align: center;
+}
+
+[id^="vk_post_"] {
+    padding: 4px 5px 4px 5px;
+}
+
+.overflowContainer {
+    overflow-x: auto;
 }

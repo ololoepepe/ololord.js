@@ -38,33 +38,12 @@ codecha.checkCaptcha = function(req, fields) {
     });
 };
 
-codecha.scriptSource = function(req) {
+codecha.scriptSource = function() {
     return "/" + config("site.pathPrefix", "") + "js/codecha-script.js";
 };
 
-codecha.widgetHtml = function(req, prepared) {
-    var model = {
-        publicKey: this.publicKey,
-        challenge: prepared
-    };
-    return controller.sync(req, "codechaWidget", model);
-};
-
-codecha.prepare = function(req) {
-    var url = `http://codecha.org/api/challenge?k=${this.publicKey}`;
-    return HTTP.request({
-        url: url,
-        timeout: (15 * Tools.Second)
-    }).then(function(response) {
-        if (response.status != 200)
-            return Promise.reject("Failed to prepare captcha");
-        return response.body.read("utf8");
-    }).then(function(data) {
-        var match = /codecha.setChallenge\("([^"]+)"/gi.exec(data.toString());
-        if (!match)
-            return Promise.reject("Captcha server error");
-        return Promise.resolve(match[1]);
-    });
+codecha.widgetTemplate = function() {
+    return "codechaWidget";
 };
 
 codecha.apiRoutes = function() {
@@ -72,8 +51,21 @@ codecha.apiRoutes = function() {
         method: "get",
         path: "/codechaChallenge.json",
         handler: function(req, res) {
-            codecha.prepare(req).then(function(result) {
-                res.send(result);
+            var url = `http://codecha.org/api/challenge?k=${codecha.publicKey}`;
+            return HTTP.request({
+                url: url,
+                timeout: (15 * Tools.Second)
+            }).then(function(response) {
+                if (response.status != 200)
+                    return Promise.reject("Failed to prepare captcha");
+                return response.body.read("utf8");
+            }).then(function(data) {
+                var match = /codecha.setChallenge\("([^"]+)"/gi.exec(data.toString());
+                if (!match)
+                    return Promise.reject("Captcha server error");
+                return Promise.resolve(match[1]);
+            }).then(function(result) {
+                res.send({ challenge: result });
             }).catch(function(err) {
                 controller.error(req, res, err, true);
             });

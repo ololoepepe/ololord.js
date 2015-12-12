@@ -1,7 +1,8 @@
-<div class="track" id="track/{{=it.boardName}}/{{=it.fileName}}"
+<div class="track" id="track/{{=it.boardName}}/{{=it.fileName}}" class="track"
+     ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);"
      data-board-name="{{=it.boardName}}"
      data-file-name="{{=it.fileName}}">
-    <span>
+    <span draggable="true">
         {{? it.artist}}{{=it.artist}}{{?}}
         {{? it.artist || it.title}}—{{?}}
         {{? it.title}}{{=it.title}}{{?}}

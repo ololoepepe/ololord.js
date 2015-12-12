@@ -1,15 +1,8 @@
 {
     "You are banned": {
-        "error": {
+        "bannedText": {
             "value": "Вы забанены"
-        },
-        "banMessage": {
-            "value": "Вы забанены"
-        },
-        "errorMessage": {
-            "value": "Вы забанены"
-        },
-        "_obsolete": true
+        }
     },
     "Next page": {
         "toNextPageText": {
@@ -293,12 +286,6 @@
             "value": "Автообновление"
         }
     },
-    "Determines if drafts are enabled on this board.\nThe default is true.": {
-        "_default": {
-            "value": "Определяет, включены ли черновики на этой доске.\nПо умолчанию true."
-        },
-        "_obsolete": true
-    },
     "/a/nime": {
         "boardTitle": {
             "value": "/a/ниме"
@@ -481,12 +468,9 @@
             "value": "Редактировать пост"
         }
     },
-    "Draft": {
-        "draftText": {
-            "value": "Черновик"
-        },
-        "postFormLabelDraft": {
-            "value": "Черновик"
+    "Add to drafts": {
+        "addToDraftsText": {
+            "value": "Добавить в черновики"
         }
     },
     "E-mail:": {
@@ -1791,11 +1775,6 @@
             "value": "Аскетичный"
         }
     },
-    "Mode:": {
-        "modeLabelText": {
-            "value": "Режим:"
-        }
-    },
     "General settings": {
         "generalSettingsLegendText": {
             "value": "Общие настройки"
@@ -1821,11 +1800,6 @@
             "value": "Скрыть доски:"
         }
     },
-    "Show titles of YouTube videos": {
-        "showYoutubeVideoTitleLabelText": {
-            "value": "Показывать названия видео с YouTube"
-        }
-    },
     "Check if attached file exists on server": {
         "checkFileExistenceLabelText": {
             "value": "Проверять, есть ли прикрепленный файл на сервере"
@@ -1835,36 +1809,6 @@
         "showAttachedFilePreviewLabelText": {
             "value": "Показывать превью прикрепляемых файлов"
         }
-    },
-    "Logged in, but not registered": {
-        "loginMessageText": {
-            "value": "Залогинен, но не зарегистрирован"
-        },
-        "_obsolete": true
-    },
-    "Registered and logged in": {
-        "loginMessageText": {
-            "value": "Зарегистрирован и залогинен"
-        },
-        "_obsolete": true
-    },
-    "admin": {
-        "loginMessageText": {
-            "value": "админ"
-        },
-        "_obsolete": true
-    },
-    "moder": {
-        "loginMessageText": {
-            "value": "модер"
-        },
-        "_obsolete": true
-    },
-    "user": {
-        "loginMessageText": {
-            "value": "юзер"
-        },
-        "_obsolete": true
     },
     "Password/hashpass": {
         "loginPlaceholderText": {
@@ -1899,6 +1843,11 @@
     "Show desktop notifications": {
         "showAutoUpdateDesktopNotificationsLabelText": {
             "value": "Показывать уведомления на рабочем столе"
+        }
+    },
+    "Play sound": {
+        "playAutoUpdateSoundLabelText": {
+            "value": "Звуковые уведомления"
         }
     },
     "Files": {
@@ -2396,14 +2345,9 @@
             "value": "Ответы:"
         }
     },
-    "Find source with Google": {
-        "findSourceWithGoogleText": {
-            "value": "Найти соус с помощью Google"
-        }
-    },
-    "Find source with Iqdb": {
-        "findSourceWithIqdbText": {
-            "value": "Найти соус с помощью Iqdb"
+    "Find source...": {
+        "findSourceText": {
+            "value": "Найти соус..."
         }
     },
     "Download all thread files as a .zip archive": {
@@ -2507,14 +2451,12 @@
     "Next file": {
         "nextFileText": {
             "value": "Следующий файл"
-        },
-        "_obsolete": true
+        }
     },
     "Previous file": {
         "previousFileText": {
             "value": "Предыдущий файл"
-        },
-        "_obsolete": true
+        }
     },
     "Hide rules": {
         "hidePostformRulesText": {
@@ -2562,6 +2504,9 @@
     },
     "Loading posts...": {
         "loadingPostsText": {
+            "value": "Загрузка постов..."
+        },
+        "loadingPostsMessage": {
             "value": "Загрузка постов..."
         }
     },
@@ -3007,12 +2952,6 @@
         },
         "_obsolete": true
     },
-    "The key required to access YouTube API.\nIt will appear in HTML.": {
-        "_default": {
-            "value": "Ключ, необходимый для доступа к YouTube API.\nПоявляется в HTML-страницах."
-        },
-        "_obsolete": true
-    },
     "file utility command (possibly full path).\nThe default is file (UNIX) or file.exe (Windows).": {
         "_default": {
             "value": "Команда вызова утилиты file (возможно, полный путь).\nПо умолчанию file (UNIX) или file.exe (Windows)."
@@ -3203,13 +3142,9 @@
         "_obsolete": true
     },
     "never": {
-        "banExpires": {
+        "banExpiresNeverText": {
             "value": "никогда"
-        },
-        "errorDescription": {
-            "value": "никогда"
-        },
-        "_obsolete": true
+        }
     },
     "Expires": {
         "banExpiresLabel": {
@@ -3404,19 +3339,13 @@
         "_obsolete": true
     },
     "Close voting": {
-        "closeVoteActionText": {
-            "value": "Закрыть голосование"
-        },
         "pageTitle": {
-            "value": "Close voting"
+            "value": "Закрыть голосование"
         }
     },
     "Open voting": {
-        "openVoteActionText": {
-            "value": "Открыть голосование"
-        },
         "pageTitle": {
-            "value": "Open voting"
+            "value": "Открыть голосование"
         }
     },
     "Voting is closed": {
@@ -3427,36 +3356,6 @@
     "Attempt to edit voting while not being the OP": {
         "error": {
             "value": "Попытка редактировать голосование не будучи ОПом"
-        },
-        "_obsolete": true
-    },
-    "Enter logging mode:": {
-        "_default": {
-            "value": "Введите режим ведения логов:"
-        },
-        "_obsolete": true
-    },
-    "Enter skipped IP's:": {
-        "_default": {
-            "value": "Введите пропускаемые IP-адреса:"
-        },
-        "_obsolete": true
-    },
-    "Enter size:": {
-        "_default": {
-            "value": "Введите размер:"
-        },
-        "_obsolete": true
-    },
-    "Invalid cache size": {
-        "error": {
-            "value": "Неправильный размер кеша"
-        },
-        "_obsolete": true
-    },
-    "Invalid value": {
-        "_default": {
-            "value": "Неправильное значение"
         },
         "_obsolete": true
     },
@@ -3616,22 +3515,22 @@
         "_obsolete": true
     },
     "logged in as administrator": {
-        "loginMessageText": {
+        "loginMessageAdminText": {
             "value": "залогинен в качестве администратора"
         }
     },
     "logged in as moderator": {
-        "loginMessageText": {
+        "loginMessageModerText": {
             "value": "залогинен в качестве модератора"
         }
     },
     "logged in as user": {
-        "loginMessageText": {
+        "loginMessageUserText": {
             "value": "залогинен в качестве пользователя"
         }
     },
     "not registered": {
-        "loginMessageText": {
+        "loginMessageNoneText": {
             "value": "не зарегистрирован"
         }
     },
@@ -3683,6 +3582,116 @@
     "Dislike": {
         "dislikeText": {
             "value": "Не нравится"
+        }
+    },
+    "Loading threads...": {
+        "loadingThreadsMessage": {
+            "value": "Загрузка тредов..."
+        }
+    },
+    "Open voting": {
+        "openVotingText": {
+            "value": "Открыть голосование"
+        }
+    },
+    "Close voting": {
+        "closeVotingText": {
+            "value": "Закрыть голосование"
+        }
+    },
+    "Tripcode activated for THIS THREAD only": {
+        "threadTripcodeActivatedText": {
+            "value": "Трипкод активирован только в этом ЭТОМ ТРЕДЕ"
+        }
+    },
+    "Tripcode deactivated for THIS THREAD only": {
+        "threadTripcodeDeactivatedText": {
+            "value": "Трипкод деактивирован только в ЭТОМ ТРЕДЕ"
+        }
+    },
+    "Global tripcode activated. Uncheck tripcode option OUTSIDE THREAD to disable it": {
+        "globalTripcodeActivatedText": {
+            "value": "Трипкод активирован везде. Снимите отметку трипкода ВНЕ ТРЕДА, чтобы отключить его"
+        }
+    },
+    "Global tripcode deactivated (except threads where it is activated explicitly)": {
+        "globalTripcodeDeactivatedText": {
+            "value": "Глобальный трипкод деактивирован (кроме тредов, где он был активирован явно)"
+        }
+    },
+    "Close files only by clicking on them": {
+        "closeFilesByClickingOnlyLabelText": {
+            "value": "Закрывать файлы только при клике на них"
+        }
+    },
+    "Drafts": {
+        "draftsText": {
+            "value": "Черновики"
+        }
+    },
+    "Fill form with this draft": {
+        "fillFormWithDraftText": {
+            "value": "Заполнить форму, используя этот черновик"
+        }
+    },
+    "Delete this draft": {
+        "deleteDraftText": {
+            "value": "Удалить этот черновик"
+        }
+    },
+    "Show drafts": {
+        "showDraftsText": {
+            "value": "Показать черновики"
+        }
+    },
+    "Hide drafts": {
+        "hideDraftsText": {
+            "value": "Скрыть черновики"
+        }
+    },
+    "Expand thread": {
+        "expandThreadText": {
+            "value": "Развернуть тред"
+        }
+    },
+    "Collapse thread": {
+        "collapseThreadText": {
+            "value": "Свернуть тред"
+        }
+    },
+    "Redirecting to thread...": {
+        "redirectingToThreadText": {
+            "value": "Перенаправление в тред..."
+        }
+    },
+    "YouTube and Coub video embedding": {
+        "youtubeCoubEmbeddingMarkup": {
+            "value": "Встраивание видео с YouTube и Coub"
+        }
+    },
+    "Vkontakte posts embedding": {
+        "vkontakteEmbeddingMarkup": {
+            "value": "Встраивание записей из Вконтакте"
+        }
+    },
+    "Twitter twits embedding": {
+        "twitterEmbeddingMarkup": {
+            "value": "Встраивание твитов из Twitter"
+        }
+    },
+    "becomes": {
+        "becomesText": {
+            "value": "превращается в"
+        }
+    },
+    "Clear date field": {
+        "clearDateFieldText": {
+            "value": "Очистить поле даты"
+        }
+    },
+    "Boards": {
+        "boardsText": {
+            "value": "Доски"
         }
     }
 }

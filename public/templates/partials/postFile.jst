@@ -1,4 +1,4 @@
-<td id="file{{=fileInfo.name}}" class="postFile"
+<div id="file{{=fileInfo.name}}" class="postFile"
     data-href="{{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=post.boardName}}/src/{{=fileInfo.name}}"
     data-file-name="{{=fileInfo.name}}"
     data-mime-type="{{=fileInfo.mimeType}}"
@@ -24,34 +24,53 @@
         ({{=fileInfo.sizeText}})
     </div>
     <div class="postFileSearch">
-        <a href="/{{=it.site.pathPrefix}}deleteFile.html?fileName={{=fileInfo.name}}" name="deleteFileButton"
-           target="_blank" {{? it.settings.mode.name != "ascetic"}}onclick="lord.deleteFile(this); return false;"{{?}}>
-           <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.deleteFileText}}" /></a>
-        {{? it.settings.mode.name != "ascetic" && fileInfo.mimeType.substr(0, 6) == "image/"}}
-            <a name="hideByImageButton" onclick="lord.hideByImage(this); return false;">
-                <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}" /></a>
-        {{?}}
+        <a href="javascript:void(0);" name="deleteFileButton" target="_blank"
+           onclick="lord.deleteFile(this); return false;">
+           <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.deleteFileText}}"
+                class="buttonImage" /></a>
+        <a name="hideByImageButton" onclick="lord.hideByImage(this); return false;">
+            <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}"
+                 class="buttonImage" /></a>
         {{? fileInfo.mimeType.substr(0, 6) == "image/"}}
-            <a href="//www.google.com/searchbyimage?image_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-               title="{{=it.tr.findSourceWithGoogleText}}" target="_blank">
-                <img src="/{{=it.site.pathPrefix}}img/google.png"></a>
-            <a href="http://iqdb.org/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-               title="{{=it.tr.findSourceWithIqdbText}}" target="_blank">
-                <img src="/{{=it.site.pathPrefix}}img/iqdb.png"></a>
+            <span tabindex="0" class="{{=it.deviceType}} popupActions">
+                <img src="/{{=it.site.pathPrefix}}img/search.png" class="buttonImage"
+                     title="{{=it.tr.findSourceText}}">
+                <ul class="popupActionsMenu fileActionsMenu {{=it.deviceType}}">
+                    <li class="nowrap">
+                        <a href="//www.google.com/searchbyimage?image_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+                           target="_blank">
+                            <img src="//www.google.com/favicon.ico" width="16" height="16" class="signImage noInvert" /> Google</a>
+                    </li>
+                    <li class="nowrap">
+                        <a href="//yandex.ru/images/search?rpt=imageview&img_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+                           target="_blank">
+                            <img src="//www.yandex.ru/favicon.ico" width="16" height="16" class="signImage noInvert" /> Yandex</a>
+                    </li>
+                    <li class="nowrap">
+                        <a href="//tineye.com/search/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+                           target="_blank">
+                            <img src="//tineye.com/favicon.ico" width="16" height="16" class="signImage noInvert" /> TinEye</a>
+                    </li>
+                    <li class="nowrap">
+                        <a href="//saucenao.com/search.php?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+                           target="_blank">
+                            <img src="//saucenao.com/favicon.ico" width="16" height="16" class="signImage noInvert"/> SauceNAO</a>
+                    </li>
+                    <li class="nowrap">
+                        <a href="http://iqdb.org/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+                           target="_blank">
+                            <img src="//iqdb.org/favicon.ico" width="16" height="16" class="signImage noInvert" /> Iqdb</a>
+                    </li>
+                </ul>
+            </span>
         {{?}}
         {{? fileInfo.mimeType.substr(0, 6) == "audio/"}}
-            {{? it.settings.mode.name != "ascetic"}}
-                <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false"
-                   title="{{=it.tr.editAudioTagsText}}">
-                    <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
-                <a href="javascript:void(0);" onclick="lord.addToPlaylist(this); return false;"
-                   title="{{=it.tr.addToPlaylistText}}">
-                    <img src="/{{=it.site.pathPrefix}}img/playlist.png"></a>
-            {{??}}
-                <a href="/{{=it.site.pathPrefix}}edit_audio_tags?board={{=it.board.name}}&post={{=post.number}}&fileName={{=fileInfo.name}}"
-                   target="_blank" title="{{=it.tr.editAudioTagsText}}">
-                    <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
-            {{?}}
+            <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false"
+               title="{{=it.tr.editAudioTagsText}}">
+                <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png" class="buttonImage"></a>
+            <a href="javascript:void(0);" onclick="lord.addToPlaylist(this); return false;"
+               title="{{=it.tr.addToPlaylistText}}">
+                <img src="/{{=it.site.pathPrefix}}img/playlist.png" class="buttonImage"></a>
         {{?}}
     </div>
     <div class="postFileFile {{=it.deviceType}}">
@@ -60,4 +79,4 @@
             {{#def.postFileThumb}}
         </a>
     </div>
-</td>
+</div>

@@ -10,7 +10,6 @@ body.mobile {
     -moz-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
-    /*text-size-adjust: 100%;*/
     font-size: 14px;
 }
 
@@ -37,12 +36,6 @@ audio {
 }
 
 hr {
-    /*color: #808080; /*IE*/
-    /*background-color: #808080; /*Firefox, Opera, Safari*/
-    /*background-image: url(../img/neutron-line.png);
-    border: 0px none;
-    height: 1px;
-    clear: both;*/
     height: 3px;
     border-width: 0px;
     background: url("../img/neutron_line.png") center no-repeat;
@@ -54,6 +47,16 @@ hr {
     background-color: #111111;
     color: #EEEEEE;
     cursor: pointer;
+}
+
+.selectOption {
+    background-color: #111111;
+    color: #EEEEEE;
+    -webkit-filter: invert(0);
+    -moz-filter: invert(0);
+    -ms-filter: invert(0);
+    -o-filter: invert(0);
+    filter: invert(0);
 }
 
 textarea {
@@ -86,7 +89,8 @@ input {
     z-index: 9950;
     vertical-align: middle;
     text-align: center;
-    padding: 5px 5px 5px 5px;
+    padding: 10px 10px 10px 10px;
+    cursor: pointer;
 }
 
 .critical {
@@ -122,10 +126,7 @@ input {
 }
 
 .centerForm {
-    /*width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    display: inline-block;*/
+    /**/
 }
 
 .inlineForm {
@@ -219,14 +220,24 @@ blockquote {
     max-height: 300px;
     box-sizing: border-box;
     max-width: 1200px;
+    overflow-wrap: break-word;
     word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
+blockquote.mobile {
+    max-width: 550px;
 }
 
 blockquote.expand {
     max-height: none;
 }
 
-span.spoiler, span.spoiler a, span.spoiler .cspoilerTitle {
+span.spoiler, span.spoiler a, span.spoiler .cspoilerTitle, span.spoiler .quotation {
     background: #575757;
     color: #575757;
 }
@@ -241,6 +252,10 @@ span.spoiler:hover a {
 
 span.spoiler:hover .cspoilerTitle {
     color: #E08060;
+}
+
+span.spoiler:hover .quotation {
+    color: #789922;
 }
 
 span.tooltip {
@@ -343,7 +358,7 @@ span.newPostCount {
     padding-top: 5px;
     position: relative;
     text-align: center;
-    vertical-align:top;
+    vertical-align: top;
     width: 240px;
     word-wrap: break-word;
 }
@@ -438,7 +453,6 @@ span.newPostCount {
     bottom: 7px;
     color: #333333;
     opacity: 0.6;
-    /*filter: alpha(opacity=60);*/
 }
 
 .symbolCounterContainer {
@@ -573,6 +587,18 @@ span.newPostCount {
     display: table;
 }
 
+.draft {
+    background-color: #2C2C2C;
+    border: 1px solid #575757;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-top: 10px;
+    padding-left: 10px;
+    width: 100%
+    overflow-x: auto;
+    display: table;
+}
+
 .post:not(.hidden) {
     background: url("../favicon.ico") right bottom no-repeat;
 }
@@ -599,6 +625,7 @@ span.newPostCount {
 }
 
 .post.temporary {
+    background-color: #2C2C2C;
     border: 1px solid #000000;
 }
 
@@ -623,29 +650,12 @@ span.newPostCount {
     font-size: 0.6em;
 }
 
-/*.postFileFile.mobile {
-    -moz-transform: scale(0.7, 0.7);
-    -ms-transform: scale(0.7, 0.7);
-    -webkit-transform: scale(0.7, 0.7);
-    -o-transform: scale(0.7, 0.7);
-    transform: scale(0.7, 0.7);
-}*/
-
 .postFileFile > a > img.mumWatching:not(:hover) {
     opacity: 0.05;
-    /*filter: alpha(opacity=5);*/
 }
 
-.postHeader > a > img, .postFileSearch > a > img, .postHeader > span > a > img, .postFileSearch > form,
-.postHeader > span > form {
-    opacity: 0.65;
-    /*filter: alpha(opacity=65);*/
-}
-
-.postHeader > a:not(.disabled) > img:hover, .postFileSearch > a:not(.disabled) > img:hover,
-.postHeader > span > a:not(.disabled) > img:hover, .postFileSearch > form:hover, .postHeader > span > form:hover {
-    opacity: 1;
-    /*filter: alpha(opacity=100);*/
+.postFileSearch {
+    padding-bottom: 4px;
 }
 
 .postToThread > a > button {
@@ -656,16 +666,20 @@ span.newPostCount {
     display: block;
 }
 
-.postActions {
+.postToThread.mobile > a > button {
+    width: 100%;
+}
+
+.popupActions {
     position: relative;
     outline: 0;
 }
 
-.postActions, .postActions:active, .postActions:visited {
+.popupActions, .popupActions:active, .popupActions:visited {
     color: #698CC0;
 }
 
-.postActionsMenu {
+.popupActionsMenu {
     list-style-type: none;
     margin-left: 0px;
     padding: 4px 4px 4px 4px;
@@ -682,20 +696,24 @@ span.newPostCount {
 }
 
 .postActionsMenu.mobile {
-    left: -200px;
+    left: -220px;
 }
 
-.postActions:focus > .postActionsMenu {
+.fileActionsMenu.mobile {
+    left: -40px;
+}
+
+.popupActions:focus > .popupActionsMenu {
     visibility: visible;
     opacity: 1;
 }
 
-.postActionsMenu > li > a {
+.popupActionsMenu > li > a {
     text-decoration: none;
     color: #698CC0;
 }
 
-.postActionsMenu > li > a:hover {
+.popupActionsMenu > li > a:hover {
     display: block;
     color: #FFFFFF;
     background-color: #666666;
@@ -706,8 +724,8 @@ span.newPostCount {
 }
 
 .postFile {
+    display: inline-block;
     vertical-align: top;
-    width: 0px;
 }
 
 .shrink {
@@ -720,6 +738,10 @@ span.newPostCount {
 
 .postText {
     vertical-align: top;
+}
+
+.postFiles > .postText {
+    display: inline-block;
 }
 
 .bannedFor {
@@ -772,12 +794,10 @@ span.newPostCount {
     right: 20px;
     z-index: 9910;
     opacity: 0.5;
-    /*filter: alpha(opacity=50);*/
 }
 
 .navigationButton:hover {
     opacity: 1;
-    /*filter: alpha(opacity=100);*/
 }
 
 .navigationButtonBottom {
@@ -793,12 +813,10 @@ span.newPostCount {
     top: 50%;
     z-index: 9910;
     opacity: 0.5;
-    /*filter: alpha(opacity=50);*/
 }
 
 .leafButton:hover {
     opacity: 1;
-    /*filter: alpha(opacity=100);*/
 }
 
 .leafButtonPrevious {
@@ -846,7 +864,6 @@ span.newPostCount {
     width: 1px;
     height: 1px;
     opacity: 0;
-    /*filter: alpha(opacity=0);*/
 }
 
 .postformFileText {
@@ -948,7 +965,11 @@ blockquote.blockquoteThread.expand {
 .codeBlock {
     font-family: monospace;
     white-space: pre;
+    word-break: normal;
+    word-wrap: normal;
+    overflow-wrap: normal;
     padding-left: 20px !important;
+    overflow-x: auto;
 }
 
 /*span.spoiler, span.spoiler a <- Board*/
@@ -972,12 +993,6 @@ blockquote.blockquoteThread.expand {
     text-align: left;
     white-space: nowrap;
     overflow-x: auto;
-}
-
-.noNewPostsPopup {
-    height: 40px;
-    line-height: 40px;
-    width: 200px;
 }
 
 /*
@@ -1021,6 +1036,7 @@ blockquote.blockquoteThread.expand {
 /* Vote */
 
 .vote {
+    display: table;
     background-color: #DDEDAA;
 }
 
@@ -1035,8 +1051,7 @@ blockquote.blockquoteThread.expand {
 /* Settings dialog */
 
 .settingsDialog {
-    /*width: 400px;
-    height: 200px;*/
+    /**/
 }
 
 /* Playlist */
@@ -1044,6 +1059,7 @@ blockquote.blockquoteThread.expand {
 .track {
     background-color: #DDEDAA;
     padding: 2px 2px 2px 2px;
+    display: table;
 }
 
 .track ~ .track {
@@ -1088,6 +1104,10 @@ blockquote.blockquoteThread.expand {
 .buttonImage {
     vertical-align: middle;
     opacity: 0.65;
+    -webkit-filter: invert(1);
+    -moz-filter: invert(1);
+    -ms-filter: invert(1);
+    -o-filter: invert(1);
     filter: invert(1);
 }
 
@@ -1109,11 +1129,37 @@ input.buttonImage {
 
 .signImage {
     vertical-align: middle;
+    -webkit-filter: invert(1);
+    -moz-filter: invert(1);
+    -ms-filter: invert(1);
+    -o-filter: invert(1);
     filter: invert(1);
 }
 
+.noInvert {
+    -webkit-filter: invert(0);
+    -moz-filter: invert(0);
+    -ms-filter: invert(0);
+    -o-filter: invert(0);
+    filter: invert(0);
+}
+
+.boardSelectContainer {
+    display: inline-block;
+    vertical-align: middle;
+    width: 16px;
+    overflow: hidden;
+}
+
 .boardSelect {
-    width: 60px;
+    border: none;
+    background: url("../img/boards.png") left top no-repeat;
+    -webkit-filter: invert(1);
+    -moz-filter: invert(1);
+    -ms-filter: invert(1);
+    -o-filter: invert(1);
+    filter: invert(1);
+    width: 36px;
 }
 
 .boardSelectForm {
@@ -1125,8 +1171,8 @@ input.buttonImage {
 }
 
 .imageCheckBox + label {
-    height: 32px;
-    width: 32px;
+    height: 24px;
+    width: 24px;
     display: inline-block;
     padding: 0 0 0 0px;
 }
@@ -1145,10 +1191,6 @@ input.buttonImage {
 
 #checkboxTripcode + label {
     background: url("../img/checkbox_tripcode.png") center no-repeat;
-}
-
-#checkboxDraft + label, #checkboxDraftEdit + label {
-    background: url("../img/checkbox_draft.png") center no-repeat;
 }
 
 .searchSelect {
@@ -1269,4 +1311,16 @@ input.buttonImage {
 .chatSendButton {
     box-sizing: border-box;
     width: 100%;
+}
+
+.loadingMessage {
+    text-align: center;
+}
+
+[id^="vk_post_"] {
+    padding: 4px 5px 4px 5px;
+}
+
+.overflowContainer {
+    overflow-x: auto;
 }

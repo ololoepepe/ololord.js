@@ -2,39 +2,36 @@
     [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}"
         title="{{=it.tr.backText}}"><img class="buttonImage" width="24" height="24"
                                          src="/{{=it.site.pathPrefix}}img/thread_back.png"></a>]
-    {{? it.settings.mode.name != "ascetic"}}
-        [<a href="javascript:void(0);" onclick="lord.updateThread();" title="{{=it.tr.updateThreadText}}"
-            name="updateThreadButton"><img class="buttonImage" width="24" height="24"
-                                           src="/{{=it.site.pathPrefix}}img/thread_update.png"></a>]
-    {{?}}
-    {{? it.settings.mode.name != "ascetic"}}
-        [<input id="autoUpdate{{=position}}" type="text" style="display: none;" />]
-        <script type="text/javascript">
-            $("#autoUpdate{{=position}}").knob({
-                readOnly: true,
-                thickness: 0.5,
-                displayInput: false,
-                max: 1,
-                height: 22,
-                width: 22,
-                fgColor: "#2F2F2F"
-            });
-            $("#autoUpdate{{=position}}").val(1).trigger("change");
-            var parent = $("#autoUpdate{{=position}}").parent();
-            parent.addClass("buttonImage");
-            var canvas = parent.find("canvas");
-            canvas.click(function(e) {
-                var list = lord.getLocalObject("autoUpdate", {});
-                var threadNumber = +lord.data("threadNumber");
-                var enabled = !list[threadNumber];
-                list[threadNumber] = enabled;
-                lord.setLocalObject("autoUpdate", list);
-                lord.setAutoUpdateEnabled(enabled);
-            });
-            canvas.css({ marginBottom: -5 });
-            lord.getModel("misc/tr").then(function(model) {
-                parent.attr("title", model.tr.autoUpdateText);
-            }).catch(lord.handleError);
-        </script>
-    {{?}}
+    [<a href="javascript:void(0);" onclick="lord.updateThread();" title="{{=it.tr.updateThreadText}}"
+        name="updateThreadButton"><img class="buttonImage" width="24" height="24"
+                                       src="/{{=it.site.pathPrefix}}img/thread_update.png"></a>]
+    [<input id="autoUpdate{{=position}}" type="text" style="display: none;" />]
+    <script type="text/javascript">
+        $("#autoUpdate{{=position}}").knob({
+            readOnly: true,
+            thickness: 0.5,
+            displayInput: false,
+            max: 1,
+            height: 22,
+            width: 22,
+            fgColor: "#2F2F2F"
+        });
+        $("#autoUpdate{{=position}}").val(1).trigger("change");
+        var parent = $("#autoUpdate{{=position}}").parent();
+        parent.addClass("buttonImage");
+        var canvas = parent.find("canvas");
+        canvas.click(function(e) {
+            var list = lord.getLocalObject("autoUpdate", {});
+            var threadNumber = +lord.data("threadNumber");
+            var enabled = !list[threadNumber];
+            list[threadNumber] = enabled;
+            lord.setLocalObject("autoUpdate", list);
+            lord.setAutoUpdateEnabled(enabled);
+        });
+        canvas.css({ marginBottom: -5 });
+        window.addEventListener("load", function load() {
+            window.removeEventListener("load", load, false);
+            $("#autoUpdate{{=position}}").parent().attr("title", lord.text("autoUpdateText"));
+        }, false);
+    </script>
 </div>

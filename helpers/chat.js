@@ -10,95 +10,88 @@ var createHash = function(user) {
     return sha256.digest("hex");
 };
 
-module.exports.sendMessage = function(req, text, boardName, postNumber, hash) {
+module.exports.sendMessage = function(req, boardName, postNumber, text) {
     if (!text)
         return Promise.reject("Message is empty");
-    if (!boardName && !hash)
-        return Promise.reject("No post or hash specified");
-    var senderHash = createHash(req);
-    var p;
-    if (boardName) {
-        postNumber = +postNumber;
-        if (isNaN(postNumber) || postNumber <= 0)
-            return Promise.reject("Invalid post number");
-        p = Database.getPost(boardName, +postNumber).then(function(post) {
-            if (!post)
-                return Promise.reject("No such post");
-            return createHash(post.user);
-        });
-    } else {
-        if (!/^[0-9a-z]{64}$/i.test(hash))
-            return Promise.reject("Invalid hash");
-        p = Promise.resolve(hash);
-    }
+    if (!boardName)
+        return Promise.reject("Invalid board name");
+    postNumber = +postNumber;
+    if (!boardName || !postNumber || postNumber < 0)
+        return Promise.reject("Invalid post number");
     var c = {};
-    return p.then(function(receiverHash) {
+    c.key = boardName + ":" + postNumber;
+    c.senderHash = createHash(req);
+    c.date = Tools.now();
+    c.ttl = config("server.chat.ttl", 10080) * 60; //NOTE: 7 days
+    return Database.getPost(boardName, postNumber).then(function(post) {
+        if (!post)
+            return Promise.reject("No such post");
+        return createHash(post.user);
+    }).then(function(receiverHash) {
         c.receiverHash = receiverHash;
-        return Database.db.sadd("chatMap:" + receiverHash, senderHash);
+        return Database.db.sadd("chats:" + c.senderHash, c.key);
     }).then(function() {
-        c.date = Tools.now().toISOString();
-        return Database.db.sadd("chat:" + c.receiverHash + ":" + senderHash, JSON.stringify({
+        return Database.db.sadd("chats:" + c.receiverHash, c.key);
+    }).then(function() {
+        return Database.db.zadd("chat:" + c.key, +c.date.valueOf(), JSON.stringify({
             text: text,
-            date: c.date
+            date: c.date.toISOString(),
+            senderHash: c.senderHash,
+            receiverHash: c.receiverHash
         }));
     }).then(function() {
-        return Promise.resolve({
-            receiver: c.receiverHash,
-            text: text,
-            date: c.date
-        });
+        return Database.db.expire("chats:" + c.senderHash, c.ttl);
+    }).then(function() {
+        return Database.db.expire("chats:" + c.receiverHash, c.ttl);
+    }).then(function() {
+        return Database.db.expire("chat:" + c.key, c.ttl);
+    }).then(function() {
+        return Promise.resolve({});
     });
 };
 
 module.exports.getMessages = function(req, lastRequestDate) {
+    lastRequestDate = +(new Date(lastRequestDate)).valueOf();
+    if (!lastRequestDate)
+        lastRequestDate = 0;
     var hash = createHash(req);
-    return Database.db.smembers("chatMap:" + hash).then(function(senderHashes) {
-        if (!senderHashes)
-            return Promise.resolve([]);
-        var promises = senderHashes.map(function(senderHash) {
-            return Database.db.smembers("chat:" + hash + ":" + senderHash).then(function(list) {
-                if (!list)
-                    return Promise.resolve();
-                var l = [];
-                list.forEach(function(msg) {
-                    msg = JSON.parse(msg);
-                    if (lastRequestDate && msg.date > lastRequestDate)
-                        l.push(msg);
-                });
-                if (l.length < 1)
-                    return Promise.resolve();
-                return Promise.resolve(l);
-            }).then(function(messages) {
-                if (!messages)
-                    return Promise.resolve();
-                return Promise.resolve({
-                    senderHash: senderHash,
-                    messages: messages
+    var chats = {};
+    var date = Tools.now().toISOString();
+    return Database.db.smembers("chats:" + hash).then(function(keys) {
+        var p = Promise.resolve();
+        (keys || []).forEach(function(key) {
+            p = p.then(function() {
+                return Database.db.zrangebyscore("chat:" + key, lastRequestDate, Infinity).then(function(list) {
+                    list = (list || []).map(function(msg) {
+                        msg = JSON.parse(msg);
+                        return {
+                            text: msg.text,
+                            date: msg.date,
+                            type: ((hash == msg.senderHash) ? "out" : "in")
+                        };
+                    });
+                    if (list.length > 0)
+                        chats[key] = list;
                 });
             });
         });
-        return Promise.all(promises);
-    }).then(function(messages) {
-        var result = {
-            date: Tools.now().toISOString(),
-            messages: {}
-        };
-        messages.forEach(function(message) {
-            if (!message)
-                return;
-            result.messages[message.senderHash] = message.messages;
+        return p;
+    }).then(function() {
+        return Promise.resolve({
+            lastRequestDate: date,
+            chats: chats
         });
-        return Promise.resolve(result);
     });
 };
 
-module.exports.deleteMessages = function(req, hash) {
-    if (!/^[0-9a-z]{64}$/i.test(hash))
-        return Promise.reject("Invalid hash");
-    var receiverHash = createHash(req);
-    return Database.db.del("chat:" + receiverHash + ":" + hash).then(function() {
-        return Database.db.del("chatMap:" + receiverHash);
-    }).then(function() {
+module.exports.deleteMessages = function(req, boardName, postNumber) {
+    if (!boardName)
+        return Promise.reject("Invalid board name");
+    postNumber = +postNumber;
+    if (!boardName || !postNumber || postNumber < 0)
+        return Promise.reject("Invalid post number");
+    var hash = createHash(req);
+    return Database.db.del("chats:" + hash).then(function() {
         return Promise.resolve({});
     });
 };

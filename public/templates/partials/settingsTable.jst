@@ -2,21 +2,6 @@
     <tbody>
         <tr>
             <td>
-                {{=it.tr.modeLabelText}}
-            </td>
-            <td>
-                <select name="mode" class="select">
-                    {{~it.modes :mode}}
-                        <option value="{{=mode.name}}"
-                                {{? mode.name == it.settings.mode.name}}selected="true"{{?}}>
-                            {{=mode.title}}
-                        </option>
-                    {{~}}
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>
                 {{=it.tr.styleLabelText}}
             </td>
             <td class="nowrap">
@@ -98,12 +83,6 @@
                        {{? it.settings.shrinkPosts}}checked="true"{{?}} /><label>{{=it.tr.postShrinkingLabelText}}</label>
                 <input type="checkbox" name="stickyToolbar" value="true"
                        {{? it.settings.stickyToolbar}}checked="true"{{?}} /><label>{{=it.tr.stickyToolbarLabelText}}</label>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <input type="checkbox" name="draftsByDefault" value="true"
-                       {{? it.settings.draftsByDefault}}checked="true"{{?}} /><label>{{=it.tr.draftsByDefaultLabelText}}</label>
             </td>
         </tr>
         <tr>

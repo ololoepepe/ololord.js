@@ -1,8 +1,4 @@
-# home
-home/*
-!home/rules.txt
-
-# postform
-postform/*
-!postform/rules.txt
-!postform/rules.b.txt
+*
+!rules.b.txt.example
+!rules.txt.example
+!.gitignore

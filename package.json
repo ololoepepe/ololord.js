@@ -21,7 +21,6 @@
   "homepage": "https://github.com/ololoepepe/ololord.js",
   "dependencies": {
     "big-integer": "^1.6.7",
-    "body-parser": "^1.14.1",
     "canvas": "^1.3.1",
     "cookie-parser": "^1.4.0",
     "cute-localize": "^0.1.8",
@@ -35,6 +34,7 @@
     "fast-csv": "^0.6.0",
     "fluent-ffmpeg": "^2.0.1",
     "formidable": "^1.0.17",
+    "fs-ext": "^0.5.0",
     "highlight.js": "^8.9.1",
     "imagemagick": "^0.1.3",
     "ip-address": "^5.0.2",

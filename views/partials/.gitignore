@@ -1,0 +1,9 @@
+*
+!baseData.jst
+!customFooter.jst
+!customHeader.jst
+!head.jst
+!leafButton.jst
+!navigationButton.jst
+!threadActions.jst
+!.gitignore
