@@ -2304,6 +2304,13 @@ lord.globalOnmouseout = function(e) {
     if (a.viewPostTimer) {
         clearTimeout(a.viewPostTimer);
         delete a.viewPostTimer;
+    } else {
+        lord.lastPostPreviewTimer = setTimeout(function() {
+            if (!lord.lastPostPreview)
+                return;
+            if (lord.lastPostPreview.mustHide && lord.lastPostPreview.parentNode)
+                lord.lastPostPreview.parentNode.removeChild(lord.lastPostPreview);
+        }, 500);
     }
 };
 
