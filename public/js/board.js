@@ -328,9 +328,11 @@ lord.createPostNode = function(post, permanent, threadInfo) {
         }
         if (!permanent) {
             var actions = lord.queryOne(".postActions", c.node);
-            actions.parentNode.removeChild(actions);
+            if (actions)
+                actions.parentNode.removeChild(actions);
             var qr = lord.nameOne("quickReplyContainer", c.node);
-            qr.parentNode.removeChild(qr);
+            if (qr)
+                qr.parentNode.removeChild(qr);
             lord.removeClass(c.node, "opPost");
             lord.addClass(c.node, "post");
             lord.addClass(c.node, "temporary");
