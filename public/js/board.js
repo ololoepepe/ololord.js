@@ -282,7 +282,12 @@ lord.appendExtrasToModel = function(model) {
         return !!ownPosts[post.boardName + "/" + (post.number || post.postNumber)];
     };
     model.minimalisticPostform = function() {
-        return "mobile" == model.deviceType || settings.minimalisticPostform;
+        return settings.minimalisticPostform;
+    };
+    model.scaledSize = function(size) {
+        if (lord.deviceType("desktop"))
+            return size;
+        return Math.floor(0.8 * size);
     };
     model.customPostBodyPart = lord.customPostBodyPart;
     model.customPostHeaderPart = lord.customPostHeaderPart;
@@ -358,7 +363,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
             return reference.boardName == lord.data("boardName") && lord.id(reference.postNumber);
         }).map(function(reference) {
             var targetPost = lord.id(reference.postNumber);
-            lord.nameOne("referencedByTr", targetPost).style.display = "";
+            lord.nameOne("referencedByContainer", targetPost).style.display = "";
             var referencedBy = lord.nameOne("referencedBy", targetPost);
             var list = lord.query("a", referencedBy);
             for (var i = 0; i < list.length; ++i) {
@@ -928,7 +933,7 @@ lord.addFiles = function(el) {
     model.postNumber = postNumber;
     model.fileCount = +lord.data("fileCount", el, true);
     model.minimalisticPostform = function() {
-        return lord.deviceType("mobile") || model.settings.minimalisticPostform;
+        return model.settings.minimalisticPostform;
     };
     c.div = lord.template("addFilesDialog", model);
     lord.showDialog("addFilesText", null, c.div).then(function(result) {

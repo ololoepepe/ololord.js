@@ -2345,29 +2345,9 @@
             "value": "Ответы:"
         }
     },
-    "Find source with Google": {
-        "findSourceWithGoogleText": {
-            "value": "Найти соус с помощью Google"
-        }
-    },
-    "Find source with Yandex": {
-        "findSourceWithYandexText": {
-            "value": "Найти соус с помощью Яндекса"
-        }
-    },
-    "Find source with TinEye": {
-        "findSourceWithTineyeText": {
-            "value": "Найти соус с помощью TinEye"
-        }
-    },
-    "Find source with SauceNAO": {
-        "findSourceWithSaucenaoText": {
-            "value": "Найти соус с помощью SauceNAO"
-        }
-    },
-    "Find source with Iqdb": {
-        "findSourceWithIqdbText": {
-            "value": "Найти соус с помощью Iqdb"
+    "Find source...": {
+        "findSourceText": {
+            "value": "Найти соус..."
         }
     },
     "Download all thread files as a .zip archive": {

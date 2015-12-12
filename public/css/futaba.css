@@ -646,16 +646,16 @@ span.newPostCount {
     width: 100%;
 }
 
-.postActions {
+.popupActions {
     position: relative;
     outline: 0;
 }
 
-.postActions, .postActions:active, .postActions:visited {
+.popupActions, .popupActions:active, .popupActions:visited {
     color: #800000;
 }
 
-.postActionsMenu {
+.popupActionsMenu {
     list-style-type: none;
     margin-left: 0px;
     padding: 4px 4px 4px 4px;
@@ -675,17 +675,21 @@ span.newPostCount {
     left: -220px;
 }
 
-.postActions:focus > .postActionsMenu {
+.fileActionsMenu.mobile {
+    left: -40px;
+}
+
+.popupActions:focus > .popupActionsMenu {
     visibility: visible;
     opacity: 1;
 }
 
-.postActionsMenu > li > a {
+.popupActionsMenu > li > a {
     text-decoration: none;
     color: #800000;
 }
 
-.postActionsMenu > li > a:hover {
+.popupActionsMenu > li > a:hover {
     display: block;
     color: #FFFFFF;
     background-color: #444444;
@@ -696,8 +700,8 @@ span.newPostCount {
 }
 
 .postFile {
+    display: inline-block;
     vertical-align: top;
-    width: 0px;
 }
 
 .shrink {

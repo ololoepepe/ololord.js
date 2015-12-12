@@ -205,7 +205,7 @@ controller.baseModel = function(req) {
         },
         styles: Tools.styles(),
         codeStyles: Tools.codeStyles(),
-        deviceType: "mobile",//((req && req.device.type == "desktop") ? "desktop" : "mobile"),
+        deviceType: ((req && req.device.type == "desktop") ? "desktop" : "mobile"),
         availableCodeLangs: Highlight.listLanguages().map(function(lang) {
             return {
                 id: lang,
@@ -349,11 +349,7 @@ controller.translationsModel = function() {
     translate("Last modified:", "modificationDateTimeText");
     translate("User was banned for this post", "bannedForText");
     translate("Delete file", "deleteFileText");
-    translate("Find source with Google", "findSourceWithGoogleText");
-    translate("Find source with Yandex", "findSourceWithYandexText");
-    translate("Find source with TinEye", "findSourceWithTineyeText");
-    translate("Find source with SauceNAO", "findSourceWithSaucenaoText");
-    translate("Find source with Iqdb", "findSourceWithIqdbText");
+    translate("Find source...", "findSourceText");
     translate("Edit audio file tags", "editAudioTagsText");
     translate("Add to playlist", "addToPlaylistText");
     translate("Answer in this thread", "answerInThreadText");

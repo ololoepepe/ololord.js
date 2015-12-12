@@ -8,5 +8,6 @@
     {{?}}
 {{??}}
     <img src="/{{=it.site.pathPrefix}}{{=it.board.name}}/thumb/{{=fileInfo.thumb.name}}"
-         {{? fileInfo.thumb.dimensions}}width="{{=fileInfo.thumb.dimensions.width}}" height="{{=fileInfo.thumb.dimensions.height}}"{{?}}>
+         {{? fileInfo.thumb.dimensions}}width="{{ out += it.scaledSize(fileInfo.thumb.dimensions.width); }}"
+         height="{{ out += it.scaledSize(fileInfo.thumb.dimensions.height); }}"{{?}}>
 {{?}}

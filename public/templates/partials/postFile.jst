@@ -1,4 +1,4 @@
-<td id="file{{=fileInfo.name}}" class="postFile"
+<div id="file{{=fileInfo.name}}" class="postFile"
     data-href="{{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=post.boardName}}/src/{{=fileInfo.name}}"
     data-file-name="{{=fileInfo.name}}"
     data-mime-type="{{=fileInfo.mimeType}}"
@@ -32,21 +32,37 @@
             <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}"
                  class="buttonImage" /></a>
         {{? fileInfo.mimeType.substr(0, 6) == "image/"}}
-            <a href="//www.google.com/searchbyimage?image_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-               title="{{=it.tr.findSourceWithGoogleText}}" target="_blank">
-                <img src="//www.google.com/favicon.ico" width="16" height="16" class="buttonImage noInvert"></a>
-            <a href="//yandex.ru/images/search?rpt=imageview&img_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-               title="{{=it.tr.findSourceWithYandexText}}" target="_blank">
-                <img src="//www.yandex.ru/favicon.ico" width="16" height="16" class="buttonImage noInvert"></a>
-            <a href="//tineye.com/search/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-               title="{{=it.tr.findSourceWithTineyeText}}" target="_blank">
-                <img src="//tineye.com/favicon.ico" width="16" height="16" class="buttonImage noInvert"></a>
-            <a href="//saucenao.com/search.php?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-               title="{{=it.tr.findSourceWithSaucenaoText}}" target="_blank">
-                <img src="//saucenao.com/favicon.ico" width="16" height="16" class="buttonImage noInvert"></a>
-            <a href="http://iqdb.org/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-               title="{{=it.tr.findSourceWithIqdbText}}" target="_blank">
-                <img src="//iqdb.org/favicon.ico" width="16" height="16" class="buttonImage noInvert"></a>
+            <span tabindex="0" class="{{=it.deviceType}} popupActions">
+                <img src="/{{=it.site.pathPrefix}}img/search.png" class="buttonImage"
+                     title="{{=it.tr.findSourceText}}">
+                <ul class="popupActionsMenu fileActionsMenu {{=it.deviceType}}">
+                    <li class="nowrap">
+                        <a href="//www.google.com/searchbyimage?image_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+                           target="_blank">
+                            <img src="//www.google.com/favicon.ico" width="16" height="16" class="signImage noInvert" /> Google</a>
+                    </li>
+                    <li class="nowrap">
+                        <a href="//yandex.ru/images/search?rpt=imageview&img_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+                           target="_blank">
+                            <img src="//www.yandex.ru/favicon.ico" width="16" height="16" class="signImage noInvert" /> Yandex</a>
+                    </li>
+                    <li class="nowrap">
+                        <a href="//tineye.com/search/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+                           target="_blank">
+                            <img src="//tineye.com/favicon.ico" width="16" height="16" class="signImage noInvert" /> TinEye</a>
+                    </li>
+                    <li class="nowrap">
+                        <a href="//saucenao.com/search.php?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+                           target="_blank">
+                            <img src="//saucenao.com/favicon.ico" width="16" height="16" class="signImage noInvert"/> SauceNAO</a>
+                    </li>
+                    <li class="nowrap">
+                        <a href="http://iqdb.org/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+                           target="_blank">
+                            <img src="//iqdb.org/favicon.ico" width="16" height="16" class="signImage noInvert" /> Iqdb</a>
+                    </li>
+                </ul>
+            </span>
         {{?}}
         {{? fileInfo.mimeType.substr(0, 6) == "audio/"}}
             <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false"
@@ -63,4 +79,4 @@
             {{#def.postFileThumb}}
         </a>
     </div>
-</td>
+</div>

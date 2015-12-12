@@ -959,13 +959,12 @@ lord.text = function(id) {
 };
 
 lord.deviceType = function(expected) {
+    var base = lord.models.base;
+    if (!base)
+        return expected ? false : null;
     if (expected)
-        return expected == lord.models.base.deviceType;
-    return lord.models.base.deviceType;
-};
-
-lord.threadNumber = function() {
-    return lord.models.thread.deviceType;
+        return expected == base.deviceType;
+    return base.deviceType;
 };
 
 lord.showDialog = function(title, label, body, afterShow) {
@@ -1385,9 +1384,6 @@ lord.now = function() {
 
 lord.settings = function() {
     return {
-        mode: {
-            name: "normal" //TODO: remove
-        },
         style: {
             name: lord.getCookie("style", "photon")
         },
@@ -1404,7 +1400,8 @@ lord.settings = function() {
         },
         maxAllowedRating: lord.getCookie("maxAllowedRating", "R-18G"),
         hidePostformRules: (lord.getCookie("hidePostformRules", "false") == "true"),
-        minimalisticPostform: (lord.getCookie("minimalisticPostform", "false") == "true"),
+        minimalisticPostform: (lord.getCookie("minimalisticPostform",
+            lord.deviceType("mobile") ? "true" : "false") == "true"),
         hiddenBoards: lord.getCookie("hiddenBoards", "").split("|"),
         autoUpdateThreadsByDefault: lord.getLocalObject("autoUpdateThreadsByDefault", false),
         autoUpdateInterval: lord.getLocalObject("autoUpdateInterval", 15),
