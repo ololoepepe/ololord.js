@@ -220,7 +220,7 @@ router.get("/threadLastPostNumber.json", function(req, res) {
 
 router.get("/captchaQuota.json", function(req, res) {
     Database.getUserCaptchaQuota(req.query.boardName, req.ip).then(function(quota) {
-        res.json(quota);
+        res.json({ quota: quota });
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });
