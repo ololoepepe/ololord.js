@@ -401,7 +401,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
 lord.updatePost = function(postNumber) {
     var post = lord.id(postNumber);
     if (!post)
-        return Promise.reject("No such post");
+        return Promise.reject("noSuchPostErrorText");
     var boardName = lord.data("boardName");
     return lord.api("post", {
         boardName: boardName,
@@ -749,7 +749,7 @@ lord.deletePost = function(el) {
             return Promise.resolve();
         var post = lord.id(postNumber);
         if (!post)
-            return Promise.reject("No such post");
+            return Promise.reject("noSuchPostErrorText");
         if (lord.data("isOp", post)) {
             if (!isNaN(+lord.data("threadNumber"))) {
                 window.location = window.location.protocol + "//" + model.site.domain + "/" + model.site.pathPrefix
@@ -826,7 +826,7 @@ lord.banUser = function(el) {
         postNumber: postNumber
     }).then(function(ip) {
         if (!ip)
-            return Promise.reject("No such post");
+            return Promise.reject("noSuchPostErrorText");
         c.userIp = ip.ipv4 || ip.ip;
         return lord.api("bannedUser", { ip: c.userIp });
     }).then(function(model) {
@@ -1035,7 +1035,7 @@ lord.hideByImage = function(a) {
         height: +lord.data("height", file)
     }).then(function(hash) {
         if (!hash)
-            return Promise.reject("Failed to generate hash");
+            return Promise.reject("failedToGenerateHashErrorText");
         c.hash = hash;
         var spells = lord.getLocalObject("spells", lord.DefaultSpells) + "\n#ihash(" + c.hash + ")";
         lord.setLocalObject("spells", spells);
@@ -1167,7 +1167,7 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
             postNumber: postNumber
         }).then(function(post) {
             if (!post)
-                return Promise.reject("Failed to get post");
+                return Promise.reject("faliedToGetPostErrorText");
             return lord.createPostNode(post, false);
         });
     }
@@ -1212,14 +1212,14 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
                 post.style.left = linkCenter + "px";
             } else {
                 post.style.maxWidth = linkCenter + "px";
-                post.style.left = linkCenter - post.scrollWidth + "px";
+                post.style.left = linkCenter - $(post).width() + "px";
             }
             var scrollTop = doc.scrollTop;
             if (!scrollTop) //NOTE: Workaround for Chrome/Safari. I really HATE you, HTML/CSS/JS!
                 scrollTop = document.body.scrollTop;
-            post.style.top = (doc.clientHeight - coords.bottom >= post.scrollHeight)
+            post.style.top = (doc.clientHeight - coords.bottom >= $(post).height())
                 ? (scrollTop + coords.bottom - 4 + "px")
-                : (scrollTop + coords.top - post.scrollHeight - 4 + "px");
+                : (scrollTop + coords.top - $(post).height() - 4 + "px");
             post.style.zIndex = previousPostPreview ? previousPostPreview.style.zIndex : (hiddenPost? 11000 : 9001);
         } else {
             lord.addClass(post, "cursorPointer");
@@ -1935,7 +1935,7 @@ lord.addThreadToFavorites = function(boardName, threadNumber) {
         postNumber: threadNumber
     }).then(function(opPost) {
         if (!opPost)
-            return Promise.reject("The thread was deleted");
+            return Promise.reject("threadDeletedErrorText");
         c.opPost = opPost;
         return lord.api("threadLastPostNumber", {
             boardName: boardName,
@@ -1943,10 +1943,10 @@ lord.addThreadToFavorites = function(boardName, threadNumber) {
         });
     }).then(function(result) {
         if (!result || !result.lastPostNumber)
-            return Promise.reject("The thread was deleted");
+            return Promise.reject("threadDeletedErrorText");
         var favoriteThreads = lord.getLocalObject("favoriteThreads", {});
         if (favoriteThreads.hasOwnProperty(boardName + "/" + threadNumber))
-            return Promise.reject("Already in favorites");
+            return Promise.reject("alreadyInFavoritesErrorText");
         var txt = c.opPost.subject || c.opPost.rawText || (boardName + "/" + threadNumber);
         favoriteThreads[boardName + "/" + threadNumber] = {
             boardName: boardName,

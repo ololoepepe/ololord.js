@@ -86,7 +86,7 @@ lord.getImageHash = function(url, width, height) {
 
 lord.parseSpells = function(text) {
     if (typeof text != "string")
-        return Promise.reject("Internal error");
+        return Promise.reject("internalErrorText");
     var skipSpaces = function(text) {
         var first = text.search(/\S/);
         if (first < 0)
@@ -735,7 +735,7 @@ lord.applySpells = function(post, spells) {
 
 lord.processPosts = function(posts, spells) {
     if (!posts)
-        return Promise.reject("Internal error");
+        return Promise.reject("internalErrorText");
     var promises = posts.map(function(post) {
         var npost = {
             "boardName": post.boardName,
@@ -762,7 +762,7 @@ lord.processPosts = function(posts, spells) {
 
 lord.getFileHash = function(data) {
     if (!data)
-        return Promise.reject("Invalid data");
+        return Promise.reject("invalidDataErrorText");
     return new Promise(function(resolve, reject) {
         try {
             var wordArray = CryptoJS.lib.WordArray.create(data);
@@ -776,25 +776,25 @@ lord.getFileHash = function(data) {
 
 lord.message_parseSpells = function(data) {
     if (typeof data != "string")
-        return Promise.reject("Invalid data");
+        return Promise.reject("invalidDataErrorText");
     return lord.parseSpells(data);
 };
 
 lord.message_processPosts = function(data) {
     if (!data)
-        return Promise.reject("Invalid data");
+        return Promise.reject("invalidDataErrorText");
     return lord.processPosts(data.posts, data.spells);
 };
 
 lord.message_getImageHash = function(data) {
     if (!data)
-        return Promise.reject("Invalid data");
+        return Promise.reject("invalidDataErrorText");
     return lord.getImageHash(data.href, data.width, data.height);
 };
 
 lord.message_getFileHash = function(data) {
     if (!data)
-        return Promise.reject("Invalid data");
+        return Promise.reject("invalidDataErrorText");
     return lord.getFileHash(data);
 };
 

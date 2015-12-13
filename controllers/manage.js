@@ -10,7 +10,7 @@ var router = express.Router();
 
 router.get("/manage.html", function(req, res) {
     if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return controller.error(req, res, "Not enough rights");
+        return controller.error(req, res, Tools.translate("Not enough rights"));
     var model = {};
     model.title = Tools.translate("User management", "pageTitle");
     model.extraScripts = [

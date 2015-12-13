@@ -83,12 +83,12 @@ var getFiles = function(fields, files, transaction) {
             }
             return p.then(function(response) {
                 if (response.status != 200)
-                    return Promise.reject("Failed to download file");
+                    return Promise.reject(Tools.translate("Failed to download file"));
                 return response.body.read();
             }).then(function(data) {
                 c.size = data.length;
                 if (c.size < 1)
-                    return Promise.reject("File is empty");
+                    return Promise.reject(Tools.translate("File is empty"));
                 return FS.write(path, data);
             }).then(function() {
                 c.file = {
@@ -173,7 +173,7 @@ router.post("/markupText", function(req, res) {
         c.fields = result.fields;
         c.board = Board.board(c.fields.boardName);
         if (!c.board)
-            return Promise.reject("Invalid board");
+            return Promise.reject(Tools.translate("Invalid board"));
         return controller.checkBan(req, res, c.board.name, true);
     }).then(function() {
         if (c.fields.text.length > c.board.maxTextFieldLength)
@@ -222,7 +222,7 @@ router.post("/createPost", function(req, res) {
         c.files = result.files;
         c.board = Board.board(c.fields.boardName);
         if (!c.board)
-            return Promise.reject("Invalid board");
+            return Promise.reject(Tools.translate("Invalid board"));
         transaction.board = c.board;
         return controller.checkBan(req, res, c.board.name, true);
     }).then(function() {
@@ -252,7 +252,7 @@ router.post("/createThread", function(req, res) {
         c.files = result.files;
         c.board = Board.board(c.fields.boardName);
         if (!c.board)
-            return Promise.reject("Invalid board");
+            return Promise.reject(Tools.translate("Invalid board"));
         transaction.board = c.board;
         return controller.checkBan(req, res, c.board.name, true);
     }).then(function() {
@@ -298,7 +298,7 @@ router.post("/addFiles", function(req, res) {
         c.files = result.files;
         c.board = Board.board(c.fields.boardName);
         if (!board)
-            return Promise.reject("Invalid board");
+            return Promise.reject(Tools.translate("Invalid board"));
         transaction.board = board;
         return controller.checkBan(req, res, c.board.name, true);
     }).then(function() {
@@ -307,7 +307,7 @@ router.post("/addFiles", function(req, res) {
         c.files = files;
         var fileCount = c.files.length;
         if (fileCount < 1)
-            return Promise.reject("No file specified");
+            return Promise.reject(Tools.translate("No file specified"));
         var maxFileSize = c.board.maxFileSize;
         var maxFileCount = c.board.maxFileCount;
         if (fileCount > maxFileCount) {
@@ -389,7 +389,7 @@ router.post("/editAudioTags", function(req, res) {
 
 router.post("/banUser", function(req, res) {
     if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return controller.error(req, res, "Not enough rights", true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.bans = [];
@@ -437,7 +437,7 @@ router.post("/banUser", function(req, res) {
 
 router.post("/delall", function(req, res) {
     if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return controller.error(req, res, "Not enough rights", true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
@@ -517,7 +517,7 @@ router.post("/search", function(req, res) {
         c.model.searchBoard = boardName;
         c.phrases = Tools.splitCommand(c.query);
         if (!c.phrases || !c.phrases.command)
-            return Promise.reject("Invalid search query");
+            return Promise.reject(Tools.translate("Invalid search query"));
         c.phrases = [c.phrases.command].concat(c.phrases.arguments);
         c.query = {
             requiredPhrases: [],

@@ -150,14 +150,14 @@ lord.updateThread = function(silent) {
         threadNumber: threadNumber
     }).then(function(result) {
         if (!result || !result.lastPostNumber)
-            return Promise.reject("Thre thread was deleted");
+            return Promise.reject("threadDeletedErrorText");
         c.newLastPostNumber = result.lastPostNumber;
         if (c.newLastPostNumber <= lastPostNumber)
             return Promise.resolve({ thread: { lastPosts: [] } });
         return lord.api(threadNumber, {}, lord.data("boardName") + "/res");
     }).then(function(model) {
         if (!model)
-            return Promise.reject("Thre thread was deleted");
+            return Promise.reject("threadDeletedErrorText");
         var posts = model.thread.lastPosts.filter(function(post) {
             return post.number > lastPostNumber;
         });

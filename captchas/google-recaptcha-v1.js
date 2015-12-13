@@ -10,9 +10,9 @@ googleRecaptcha.checkCaptcha = function(req, fields) {
     var challenge = fields.recaptcha_challenge_field;
     var response = fields.recaptcha_response_field;
     if (!challenge)
-        return Promise.reject("Captcha challenge is empty");
+        return Promise.reject(Tools.translate("Captcha challenge is empty"));
     if (!response)
-        return Promise.reject("Captcha is empty", "error");
+        return Promise.reject(Tools.translate("Captcha is empty"));
     var query = `privatekey=${this.privateKey}&remoteip=${req.ip}&challenge=${encodeURIComponent(challenge)}`
         + `&response=${encodeURIComponent(response)}`;
     var url = "https://www.google.com/recaptcha/api/verify?" + query;
@@ -21,12 +21,12 @@ googleRecaptcha.checkCaptcha = function(req, fields) {
         timeout: (15 * Tools.Second)
     }).then(function(response) {
         if (response.status != 200)
-            return Promise.reject("Failed to check captcha");
+            return Promise.reject(Tools.translate("Failed to check captcha"));
         return response.body.read("utf8");
     }).then(function(data) {
         var result = data.toString();
         if (result.replace("true", "") == result)
-            return Promise.reject("Invalid captcha");
+            return Promise.reject(Tools.translate("Invalid captcha"));
         return Promise.resolve();
     });
 };

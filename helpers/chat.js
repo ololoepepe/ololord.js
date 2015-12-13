@@ -12,12 +12,12 @@ var createHash = function(user) {
 
 module.exports.sendMessage = function(req, boardName, postNumber, text) {
     if (!text)
-        return Promise.reject("Message is empty");
+        return Promise.reject(Tools.translate("Message is empty"));
     if (!boardName)
-        return Promise.reject("Invalid board name");
+        return Promise.reject(Tools.translate("Invalid board"));
     postNumber = +postNumber;
     if (!boardName || !postNumber || postNumber < 0)
-        return Promise.reject("Invalid post number");
+        return Promise.reject(Tools.translate("Invalid post number"));
     var c = {};
     c.key = boardName + ":" + postNumber;
     c.senderHash = createHash(req);
@@ -25,7 +25,7 @@ module.exports.sendMessage = function(req, boardName, postNumber, text) {
     c.ttl = config("server.chat.ttl", 10080) * 60; //NOTE: 7 days
     return Database.getPost(boardName, postNumber).then(function(post) {
         if (!post)
-            return Promise.reject("No such post");
+            return Promise.reject(Tools.translate("No such post"));
         return createHash(post.user);
     }).then(function(receiverHash) {
         c.receiverHash = receiverHash;
@@ -86,10 +86,10 @@ module.exports.getMessages = function(req, lastRequestDate) {
 
 module.exports.deleteMessages = function(req, boardName, postNumber) {
     if (!boardName)
-        return Promise.reject("Invalid board name");
+        return Promise.reject(Tools.translate("Invalid board"));
     postNumber = +postNumber;
     if (!boardName || !postNumber || postNumber < 0)
-        return Promise.reject("Invalid post number");
+        return Promise.reject(Tools.translate("Invalid post number"));
     var hash = createHash(req);
     return Database.db.del("chats:" + hash).then(function() {
         return Promise.resolve({});

@@ -90,10 +90,10 @@ router.get("/post.json", function(req, res) {
 router.get("/userIp.json", function(req, res) {
     Database.getPost(req.query.boardName, +req.query.postNumber).then(function(post) {
         if (!post)
-            return Promise.reject("No such post");
+            return Promise.reject(Tools.translate("No such post"));
         if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0
             || Database.compareRegisteredUserLevels(req.level, post.user.level) < 0) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         var result = { ip: post.user.ip };
         var ipv4 = Tools.preferIPv4(post.user.ip);
@@ -229,7 +229,7 @@ router.get("/captchaQuota.json", function(req, res) {
 router.get("/bannedUser.json", function(req, res) {
     var ip = req.query.ip;
     if (!ip)
-        return controller.error(req, res, "Invalid IP", true);
+        return controller.error(req, res, Tools.translate("Invalid IP address"), true);
     Database.userBans(ip).then(function(bans) {
         res.json({
             ip: ip,
@@ -242,7 +242,7 @@ router.get("/bannedUser.json", function(req, res) {
 
 router.get("/fileHeaders.json", function(req, res) {
     if (!req.query.url)
-        return controller.error(req, res, "Invalid url", true);
+        return controller.error(req, res, Tools.translate("Invalid URL"), true);
     var proxy = Tools.proxy();
     var p;
     if (proxy) {
@@ -263,7 +263,7 @@ router.get("/fileHeaders.json", function(req, res) {
     }
     return p.then(function(response) {
         if (response.status != 200)
-            return Promise.reject("Failed to get file headers");
+            return Promise.reject(Tools.translate("Failed to get file headers"));
         res.json(response.headers);
     }).catch(function(err) {
         controller.error(req, res, err, true);

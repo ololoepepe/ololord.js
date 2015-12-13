@@ -57,7 +57,7 @@ controller = function(req, templateName, modelData) {
         modelData = {};
     var template = templates[templateName];
     if (!template)
-        return Promise.reject("Invalid template");
+        return Promise.reject(Tools.translate("Invalid template"));
     modelData = merge.recursive(baseModelData, modelData);
     modelData.req = req;
     return Promise.resolve(template(modelData));
@@ -621,6 +621,16 @@ controller.translationsModel = function() {
     translate("Service unavailable", "error503Text");
     translate("Gateway timeout", "error504Text");
     translate("CloudFlare: server is unreachable", "error523Text");
+    translate("Unexpected end of token list", "unexpectedEndOfTokenListErrorText");
+    translate("Failed to generate hash", "failedToGenerateHashErrorText");
+    translate("The thread is already in favorites", "alreadyInFavoritesErrorText");
+    translate("Invalid arguments", "invalidArgumentsErrorText");
+    translate("Failed to get post", "faliedToGetPostErrorText");
+    translate("No such token in the table", "noTokenInTableErrorText");
+    translate("The thread was deleted", "threadDeletedErrorText");
+    translate("Invalid data", "invalidDataErrorText");
+    translate("No such post", "noSuchPostErrorText");
+    translate("Internal error", "internalErrorText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

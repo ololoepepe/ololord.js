@@ -32,6 +32,12 @@
     "Internal error": {
         "errorMessage": {
             "value": "Внутренняя ошибка"
+        },
+        "_default": {
+            "value": "Internal error"
+        },
+        "internalErrorText": {
+            "value": "Internal error"
         }
     },
     "Anonymous": {
@@ -42,16 +48,25 @@
     "E-mail is too long": {
         "error": {
             "value": "Эл. почта слишком длинная"
+        },
+        "_default": {
+            "value": "E-mail is too long"
         }
     },
     "Name is too long": {
         "error": {
             "value": "Имя слишком длинное"
+        },
+        "_default": {
+            "value": "Name is too long"
         }
     },
     "Subject is too long": {
         "error": {
             "value": "Тема слишком длинная"
+        },
+        "_default": {
+            "value": "Subject is too long"
         }
     },
     "Comment is too long": {
@@ -162,11 +177,17 @@
     "Both file and comment are missing": {
         "error": {
             "value": "Отсутствуют и файл, и комментарий"
+        },
+        "_default": {
+            "value": "Both file and comment are missing"
         }
     },
     "Too many files": {
         "error": {
             "value": "Слишком много файлов"
+        },
+        "_default": {
+            "value": "Too many files"
         }
     },
     "File is too big": {
@@ -1241,11 +1262,17 @@
     "Posting is disabled in this thread": {
         "postingDisabledThreadText": {
             "value": "В этом треде постинг запрещен"
+        },
+        "_default": {
+            "value": "Posting is disabled in this thread"
         }
     },
     "Post limit reached": {
         "postLimitReachedText": {
             "value": "Достигнут лимит постов"
+        },
+        "_default": {
+            "value": "Post limit reached"
         }
     },
     "This user is registered": {
@@ -1978,6 +2005,334 @@
     "CloudFlare: server is unreachable": {
         "error523Text": {
             "value": "CloudFlare: сервер недоступен"
+        }
+    },
+    "Unsupported file type": {
+        "_default": {
+            "value": "Неподдерживаемый тип файла"
+        }
+    },
+    "This post does not have voting": {
+        "_default": {
+            "value": "Этот пост не содержит голосования"
+        }
+    },
+    "This voting is disabled": {
+        "_default": {
+            "value": "Это голосование закрыто"
+        }
+    },
+    "You have already voted": {
+        "_default": {
+            "value": "Вы уже голосовали"
+        }
+    },
+    "Invalid variant": {
+        "_default": {
+            "value": "Недействительный вариант"
+        }
+    },
+    "No variant selected": {
+        "_default": {
+            "value": "Не выбрано ни одного варианта"
+        }
+    },
+    "You have not voted yet": {
+        "_default": {
+            "value": "Вы еще не голосовали"
+        }
+    },
+    "Not enough rights": {
+        "_default": {
+            "value": "Недостаточно прав"
+        }
+    },
+    "Attempt to attach voting while not being the OP": {
+        "_default": {
+            "value": "Попытка прикрепить голосвание не будучи ОПом"
+        }
+    },
+    "No vote text provided": {
+        "_default": {
+            "value": "Не указан текст голосования"
+        }
+    },
+    "Invalid vote variant ID": {
+        "_default": {
+            "value": "Некорректный ID варианта голосования"
+        }
+    },
+    "Captcha challenge is empty": {
+        "_default": {
+            "value": "Задание капчи пусто"
+        }
+    },
+    "Captcha is empty": {
+        "_default": {
+            "value": "Капча пуста"
+        }
+    },
+    "Failed to check captcha": {
+        "_default": {
+            "value": "Не удалось проверить капчу"
+        }
+    },
+    "Invalid captcha": {
+        "_default": {
+            "value": "Недействительная капча"
+        }
+    },
+    "Failed to prepare captcha": {
+        "_default": {
+            "value": "Не удалось подготовить капчу"
+        }
+    },
+    "Captcha server error": {
+        "_default": {
+            "value": "Ошибка сервера капчи"
+        }
+    },
+    "The secret captcha parameter is missing": {
+        "_default": {
+            "value": "Отсутствует секретный параметр капчи"
+        }
+    },
+    "The secret captcha parameter is invalid or malformed": {
+        "_default": {
+            "value": "Секретный параметр капчи недействителен или неправильно оформлен"
+        }
+    },
+    "The captcha response parameter is missing": {
+        "_default": {
+            "value": "Отсутствует ответ на капчу"
+        }
+    },
+    "The captcha response parameter is invalid or malformed": {
+        "_default": {
+            "value": "Ответ на капчу недействителен или неправильно оформлен"
+        }
+    },
+    "Failed to download file": {
+        "_default": {
+            "value": "Не удалось скачать файл"
+        }
+    },
+    "File is empty": {
+        "_default": {
+            "value": "Файл пуст"
+        }
+    },
+    "Invalid board": {
+        "_default": {
+            "value": "Недействительная доска"
+        }
+    },
+    "No file specified": {
+        "_default": {
+            "value": "Не указан файл"
+        }
+    },
+    "Invalid search query": {
+        "_default": {
+            "value": "Недействительный поисковый запрос"
+        }
+    },
+    "No such post": {
+        "_default": {
+            "value": "Нет такого поста"
+        },
+        "noSuchPostErrorText": {
+            "value": "No such post"
+        }
+    },
+    "Failed to get file headers": {
+        "_default": {
+            "value": "Не удалось получить заголовки файла"
+        }
+    },
+    "Message is empty": {
+        "_default": {
+            "value": "Отсутствует сообщение"
+        }
+    },
+    "Invalid post number": {
+        "_default": {
+            "value": "Недействительный номер поста"
+        }
+    },
+    "Invalid template": {
+        "_default": {
+            "value": "Недействительный шаблон"
+        }
+    },
+    "Invalid thread": {
+        "_default": {
+            "value": "Недействительный тред"
+        }
+    },
+    "Invalid post": {
+        "_default": {
+            "value": "Недействительный пост"
+        }
+    },
+    "Invalid IP address": {
+        "_default": {
+            "value": "Недействительный IP-адрес"
+        }
+    },
+    "Failed to copy file": {
+        "_default": {
+            "value": "Не удалось скопировать файл"
+        }
+    },
+    "Posting is disabled on this board": {
+        "_default": {
+            "value": "На этой доске постинг запрещен"
+        }
+    },
+    "No such thread or no access to thread": {
+        "_default": {
+            "value": "Нет такого тред или нет доступа к треду"
+        }
+    },
+    "Invalid captcha engine": {
+        "_default": {
+            "value": "Недействительный движок капчи"
+        }
+    },
+    "Text is too long": {
+        "_default": {
+            "value": "Текст слишком длинный"
+        }
+    },
+    "Invalid thread number": {
+        "_default": {
+            "value": "Недействительный номер треда"
+        }
+    },
+    "No such thread": {
+        "_default": {
+            "value": "Нет такого треда"
+        }
+    },
+    "Source and target boards are the same": {
+        "_default": {
+            "value": "Исходная и целевая доски совпадают"
+        }
+    },
+    "Invalid file name": {
+        "_default": {
+            "value": "Недействительное имя файла"
+        }
+    },
+    "No such file": {
+        "_default": {
+            "value": "Нет такого файла"
+        }
+    },
+    "Not an audio file": {
+        "_default": {
+            "value": "Файл не является аудио-файлом"
+        }
+    },
+    "Invalid PID": {
+        "_default": {
+            "value": "Недействительный PID"
+        }
+    },
+    "Failed to get Twitter embedded HTML": {
+        "_default": {
+            "value": "Не удалось получить встраиваемый HTML Twitter"
+        }
+    },
+    "Failed to get YouTube embedded HTML": {
+        "_default": {
+            "value": "Не удалось получить встраиваемый HTML YouTube"
+        }
+    },
+    "Failed to get YouTube video info": {
+        "_default": {
+            "value": "Не удалось получить информацию о видео YouTube"
+        }
+    },
+    "Failed to create YouTube video link": {
+        "_default": {
+            "value": "Не удалось создать ссылку на видео YouTube"
+        }
+    },
+    "Failed to get Coub embedded HTML": {
+        "_default": {
+            "value": "Не удалось получить встраиваемый HTML"
+        }
+    },
+    "Failed to get Coub video info": {
+        "_default": {
+            "value": "Не удалось получить информацию о видео Coub"
+        }
+    },
+    "Failed to create Coub video link": {
+        "_default": {
+            "value": "Не удалось создать ссылку на видео Coub"
+        }
+    },
+    "Invalid method": {
+        "_default": {
+            "value": "Недействительный метод"
+        }
+    },
+    "Failed to call method": {
+        "_default": {
+            "value": "Не удалось вызвать метод"
+        }
+    },
+    "Invalid captcha type": {
+        "_default": {
+            "value": "Недействительный тип капчи"
+        }
+    },
+    "Invalid URL": {
+        "_default": {
+            "value": "Недействительный URL"
+        }
+    },
+    "Unexpected end of token list": {
+        "unexpectedEndOfTokenListErrorText": {
+            "value": "Неожиданный конец списка токенов"
+        }
+    },
+    "Failed to generate hash": {
+        "failedToGenerateHashErrorText": {
+            "value": "Не удалось сгенерировать хеш"
+        }
+    },
+    "The thread is already in favorites": {
+        "alreadyInFavoritesErrorText": {
+            "value": "Тред уже добавлен в избранное"
+        }
+    },
+    "Invalid arguments": {
+        "invalidArgumentsErrorText": {
+            "value": "Недействительные аргументы"
+        }
+    },
+    "Failed to get post": {
+        "faliedToGetPostErrorText": {
+            "value": "Не удалось получить пост"
+        }
+    },
+    "No such token in the table": {
+        "noTokenInTableErrorText": {
+            "value": "В таблице нет такого токена"
+        }
+    },
+    "The thread was deleted": {
+        "threadDeletedErrorText": {
+            "value": "Тред был удален"
+        }
+    },
+    "Invalid data": {
+        "invalidDataErrorText": {
+            "value": "Недействительные данные"
         }
     }
 }

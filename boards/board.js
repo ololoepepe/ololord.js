@@ -492,7 +492,7 @@ var getRules = function(boardName) {
                 };
             });
         } else {
-            return Promise.reject("Unsupported file type");
+            return Promise.reject(Tools.translate("Unsupported file type"));
         }
     });
 };

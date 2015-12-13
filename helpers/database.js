@@ -127,7 +127,7 @@ var postFileInfoNames = function(boardName, postNumber) {
 
 var getThreads = function(boardName, options) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var opts = (typeof options == "object");
     var c = {};
     var key = ((options && options.archived) ? "archivedThreads" : "threads") + ":" + boardName;
@@ -177,7 +177,7 @@ module.exports.getThreads = getThreads;
 
 module.exports.getThread = function(boardName, threadNumber) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     return db.hget("threads:" + boardName, threadNumber).then(function(thread) {
         if (!thread)
@@ -208,9 +208,9 @@ var bannedFor = function(boardName, postNumber, userIp) {
 var threadPosts = function(boardName, threadNumber, options) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread");
+        return Promise.reject(Tools.translate("Invalid thread"));
     var opts = (typeof options == "object");
     var filter = opts && (typeof options.filterFunction == "function");
     var limit = (opts && !isNaN(options.limit) && options.limit > 0) ? options.limit : 0; //NOTE: 0 means no limit
@@ -309,9 +309,9 @@ module.exports.threadPosts = threadPosts;
 var getPost = function(boardName, postNumber, options) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject("Invalid post");
+        return Promise.reject(Tools.translate("Invalid post"));
     var opts = (typeof options == "object");
     var c = {};
     var key = boardName + ":" + postNumber;
@@ -394,9 +394,9 @@ module.exports.getFileInfo = getFileInfo;
 
 module.exports.threadPostCount = function(boardName, threadNumber) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread");
+        return Promise.reject(Tools.translate("Invalid thread"));
     return db.scard("threadPostNumbers:" + boardName + ":" + threadNumber);
 };
 
@@ -422,7 +422,7 @@ module.exports.registerUser = function(hashpass, level, boardNames, ips) {
         var promises = ips.map(function(ip) {
             var address = Tools.correctAddress(ip);
             if (!address)
-                return Promise.reject("Invalid IP address");
+                return Promise.reject(Tools.translate("Invalid IP address"));
             return db.hset("registeredUserHashes", address, hashpass);
         });
         return Promise.resolve(promises);
@@ -468,7 +468,7 @@ module.exports.moderOnBoard = function(reqOrHashpass, boardName1, boardName2) {
 
 var lastPostNumber = function(boardName) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     return db.hget("postCounters", boardName).then(function(number) {
         if (!number)
             return 0;
@@ -480,7 +480,7 @@ module.exports.lastPostNumber = lastPostNumber;
 
 var nextPostNumber = function(boardName, incrby) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     incrby = +incrby;
     if (isNaN(incrby) || incrby < 1)
         incrby = 1;
@@ -546,7 +546,7 @@ var processFile = function(board, file, transaction) {
                 return FS.exists(targetThumbPath);
             }).then(function(exists) {
                 if (!exists)
-                    return Promise.reject("Failed to copy file");
+                    return Promise.reject(Tools.translate("Failed to copy file"));
                 return {
                     dimensions: file.dimensions,
                     extraData: file.extraData,
@@ -568,7 +568,7 @@ var processFile = function(board, file, transaction) {
 var processFiles = function(req, fields, files, transaction) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (files.length < 1)
         return Promise.resolve([]);
     var c = {};
@@ -599,9 +599,9 @@ var processFiles = function(req, fields, files, transaction) {
 var createPost = function(req, fields, files, transaction, threadNumber, date) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (!board.postingEnabled)
-        return Promise.reject("Posting is disabled on this board");
+        return Promise.reject(Tools.translate("Posting is disabled on this board"));
     date = date || Tools.now();
     var c = {};
     if (threadNumber)
@@ -625,16 +625,16 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         }
     }).then(function(threads) {
         if (!threads || threads.length != 1)
-            return Promise.reject("No such thread or no access to thread");
+            return Promise.reject(Tools.translate("No such thread or no access to thread"));
         if (threads[0].closed)
-            return Promise.reject("Posting is disabled in this thread");
+            return Promise.reject(Tools.translate("Posting is disabled in this thread"));
         c.level = req.level || null;
         c.isRaw = !!fields.raw && compareRegisteredUserLevels(c.level, RegisteredUserLevels.Admin) >= 0;
         return db.scard("threadPostNumbers:" + board.name + ":" + threadNumber);
     }).then(function(postCount) {
         c.postCount = postCount;
         if (c.postCount >= board.postLimit)
-            return Promise.reject("Post limit reached");
+            return Promise.reject(Tools.translate("Post limit reached"));
         if (c.isRaw)
             return rawText;
         return markup(board.name, rawText, {
@@ -751,7 +751,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
 var checkCaptcha = function(req, fields) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (!board.captchaEnabled)
         return Promise.resolve();
     var ip = req.ip;
@@ -760,7 +760,7 @@ var checkCaptcha = function(req, fields) {
             return captchaUsed(board.name, ip);
         var supportedCaptchaEngines = board.supportedCaptchaEngines;
         if (supportedCaptchaEngines.length < 1)
-            return Promise.reject("Internal error");
+            return Promise.reject(Tools.translate("Internal error"));
         var ceid = fields.captchaEngine;
         var isSupported = function(id) {
             for (var i = 0; i < supportedCaptchaEngines.length; ++i) {
@@ -777,7 +777,7 @@ var checkCaptcha = function(req, fields) {
         }
         var captcha = Captcha.captcha(ceid);
         if (!captcha)
-            return Promise.reject("Invalid captcha engine");
+            return Promise.reject(Tools.translate("Invalid captcha engine"));
         return captcha.checkCaptcha(req, fields).then(function() {
             return captchaSolved(board.name, ip);
         });
@@ -788,7 +788,7 @@ module.exports.createPost = function(req, fields, files, transaction) {
     var threadNumber = +fields.threadNumber;
     var c = {};
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread");
+        return Promise.reject(Tools.translate("Invalid thread"));
     return checkCaptcha(req, fields).then(function() {
         return processFiles(req, fields, files, transaction);
     }).then(function(files) {
@@ -864,7 +864,7 @@ var addReferencedPosts = function(post, referencedPosts, nogenerate) {
 var removePost = function(boardName, postNumber, leaveFileInfos) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     return db.sadd("postsPlannedForDeletion", boardName + ":" + postNumber).then(function() {
         return getPost(boardName, postNumber, { withReferences: true });
@@ -986,9 +986,9 @@ module.exports.removeThread = removeThread;
 module.exports.createThread = function(req, fields, files, transaction) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (!board.postingEnabled)
-        return Promise.reject("Posting is disabled on this board");
+        return Promise.reject(Tools.translate("Posting is disabled on this board"));
     var c = {};
     var date = Tools.now();
     var hashpass = req.hashpass || null;
@@ -1361,7 +1361,7 @@ module.exports.findPosts = function(query, boardName) {
 var getUserCaptchaQuota = function(boardName, userIp) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     return db.hget("captchaQuotas", boardName + ":" + userIp).then(function(quota) {
         return Promise.resolve((+quota > 0) ? +quota : 0);
     });
@@ -1372,7 +1372,7 @@ module.exports.getUserCaptchaQuota = getUserCaptchaQuota;
 var captchaSolved = function(boardName, userIp) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var quota = board.captchaQuota;
     if (quota < 1)
         return Promise.resolve(0);
@@ -1384,7 +1384,7 @@ module.exports.captchaSolved = captchaSolved;
 var captchaUsed = function(boardName, userIp) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (board.captchaQuota < 1)
         return Promise.resolve(0);
     return db.hincrby("captchaQuotas", boardName + ":" + userIp, -1).then(function(quota) {
@@ -1543,21 +1543,21 @@ module.exports.rebuildSearchIndex = function() {
 module.exports.addFiles = function(req, fields, files, transaction) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     var postNumber = +fields.postNumber;
     if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject("Invalid post number");
+        return Promise.reject(Tools.translate("Invalid post number"));
     return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
         if ((!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         c.post = post;
         return postFileInfoNames(board.name, c.post.number);
     }).then(function(names) {
         if (names.length + files.length > board.maxFileCount)
-            return Promise.reject("Too many files");
+            return Promise.reject(Tools.translate("Too many files"));
         return processFiles(req, fields, files, transaction);
     }).then(function(files) {
         c.files = files;
@@ -1598,12 +1598,12 @@ module.exports.addFiles = function(req, fields, files, transaction) {
 module.exports.editPost = function(req, fields) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var date = Tools.now();
     var c = {};
     var postNumber = +fields.postNumber;
     if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject("Invalid post number");
+        return Promise.reject(Tools.translate("Invalid post number"));
     var rawText = fields.text || null;
     var email = fields.email || null;
     var name = fields.name || null;
@@ -1618,21 +1618,21 @@ module.exports.editPost = function(req, fields) {
     return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
         if ((!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         c.post = post;
         return postFileInfoNames(post.boardName, post.number);
     }).then(function(numbers) {
         if (!rawText && numbers.length < 1)
-            return Promise.reject("Both file and comment are missing");
+            return Promise.reject(Tools.translate("Both file and comment are missing"));
         if (rawText && rawText.length > board.maxTextLength)
-            return Promise.reject("Text is too long");
+            return Promise.reject(Tools.translate("Text is too long"));
         if (email && email.length > board.maxEmailLength)
-            return Promise.reject("E-mail is too long");
+            return Promise.reject(Tools.translate("E-mail is too long"));
         if (name && name.length > board.maxNameLength)
-            return Promise.reject("Name is too long");
+            return Promise.reject(Tools.translate("Name is too long"));
         if (subject && subject.length > board.maxSubjectLength)
-            return Promise.reject("Subject is too long");
+            return Promise.reject(Tools.translate("Subject is too long"));
         if (isRaw)
             return Promise.resolve(rawText);
         return markup(board.name, rawText, {
@@ -1692,22 +1692,22 @@ module.exports.editPost = function(req, fields) {
 
 module.exports.setThreadFixed = function(req, fields) {
     if (compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return Promise.reject("Not enough rights");
+        return Promise.reject(Tools.translate("Not enough rights"));
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var date = Tools.now();
     var c = {};
     var threadNumber = +fields.threadNumber;
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread number");
+        return Promise.reject(Tools.translate("Invalid thread number"));
     return db.hget("threads:" + board.name, threadNumber).then(function(thread) {
         if (!thread)
-            return Promise.reject("No such thread");
+            return Promise.reject(Tools.translate("No such thread"));
         thread = JSON.parse(thread);
         if ((!req.hashpass || req.hashpass != thread.user.hashpass)
             && (compareRegisteredUserLevels(req.level, thread.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         var fixed = (fields.fixed == "true");
         if (thread.fixed == fixed)
@@ -1726,22 +1726,22 @@ module.exports.setThreadFixed = function(req, fields) {
 
 module.exports.setThreadClosed = function(req, fields) {
     if (compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return Promise.reject("Not enough rights");
+        return Promise.reject(Tools.translate("Not enough rights"));
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var date = Tools.now();
     var c = {};
     var threadNumber = +fields.threadNumber;
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread number");
+        return Promise.reject(Tools.translate("Invalid thread number"));
     return db.hget("threads:" + board.name, threadNumber).then(function(thread) {
         if (!thread)
-            return Promise.reject("No such thread");
+            return Promise.reject(Tools.translate("No such thread"));
         thread = JSON.parse(thread);
         if ((!req.hashpass || req.hashpass != thread.user.hashpass)
             && (compareRegisteredUserLevels(req.level, thread.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         var closed = (fields.closed == "true");
         if (thread.closed == closed)
@@ -1761,10 +1761,10 @@ module.exports.setThreadClosed = function(req, fields) {
 module.exports.deletePost = function(req, res, fields) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var postNumber = +fields.postNumber;
     if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject("Invalid post number");
+        return Promise.reject(Tools.translate("Invalid post number"));
     var password = Tools.password(fields.password);
     var c = {};
     return controller.checkBan(req, res, board.name, true).then(function() {
@@ -1774,7 +1774,7 @@ module.exports.deletePost = function(req, res, fields) {
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         c.isThread = post.threadNumber == post.number;
         return (c.isThread) ? removeThread(board.name, postNumber) : removePost(board.name, postNumber);
@@ -1795,14 +1795,14 @@ module.exports.moveThread = function(req, fields) {
     var sourceBoard = Board.board(fields.boardName);
     var targetBoard = Board.board(fields.targetBoardName);
     if (!sourceBoard || !targetBoard)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (fields.boardName == fields.targetBoardName)
-        return Promise.reject("Source and target boards are the same");
+        return Promise.reject(Tools.translate("Source and target boards are the same"));
     var threadNumber = +fields.threadNumber;
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread number");
+        return Promise.reject(Tools.translate("Invalid thread number"));
     if (compareRegisteredUserLevels(req.level, RegisteredUserLevels.Moder) < 0)
-        return Promise.reject("Not enough rights");
+        return Promise.reject(Tools.translate("Not enough rights"));
     var password = Tools.password(fields.password);
     var c = {};
     var sourcePath = __dirname + "/../public/" + sourceBoard.name + "/src"
@@ -1816,12 +1816,12 @@ module.exports.moveThread = function(req, fields) {
         }
     }).then(function(thread) {
         if (!thread || thread.length != 1)
-            return Promise.reject("No such thread");
+            return Promise.reject(Tools.translate("No such thread"));
         c.thread = thread[0];
         if ((!password || password != c.thread.user.password)
             && (!req.hashpass || req.hashpass != c.thread.user.hashpass)
             && (compareRegisteredUserLevels(req.level, c.thread.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         delete c.thread.updatedAt;
         c.postNumbers = c.thread.postNumbers;
@@ -1967,12 +1967,12 @@ module.exports.moveThread = function(req, fields) {
 module.exports.deleteFile = function(req, res, fields) {
     var fileName = fields.fileName;
     if (!fileName)
-        return Promise.reject("Invalid file name");
+        return Promise.reject(Tools.translate("Invalid file name"));
     var password = Tools.password(fields.password);
     var c = {};
     return db.hget("fileInfos", fileName).then(function(fileInfo) {
         if (!fileInfo)
-            return Promise.reject("No such file");
+            return Promise.reject(Tools.translate("No such file"));
         c.fileInfo = JSON.parse(fileInfo);
         return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
     }).then(function(post) {
@@ -1980,14 +1980,14 @@ module.exports.deleteFile = function(req, res, fields) {
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         return controller.checkBan(req, res, c.post.boardName, true);
     }).then(function() {
         return postFileInfoNames(c.post.boardName, c.post.number);
     }).then(function(numbers) {
         if (!c.post.rawText && numbers.length < 2)
-            return Promise.reject("Both file and comment are missing");
+            return Promise.reject(Tools.translate("Both file and comment are missing"));
         return db.srem("postFileInfoNames:" + c.post.boardName + ":" + c.post.number, fileName);
     }).then(function() {
         return db.hdel("fileInfos", fileName);
@@ -2027,9 +2027,9 @@ module.exports.editAudioTags = function(req, res, fields) {
     var password = Tools.password(fields.password);
     return getFileInfo({ fileName: fields.fileName }).then(function(fileInfo) {
         if (!fileInfo)
-            return Promise.reject("No such file info");
+            return Promise.reject(Tools.translate("No such file"));
         if (fileInfo.mimeType.substr(0, 6) != "audio/")
-            return Promise.reject("Invalid file type");
+            return Promise.reject(Tools.translate("Not an audio file"));
         c.fileInfo = fileInfo;
         return controller.checkBan(req, res, c.fileInfo.boardName, true);
     }).then(function() {
@@ -2039,7 +2039,7 @@ module.exports.editAudioTags = function(req, res, fields) {
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         ["album", "artist", "title", "year"].forEach(function(tag) {
             if (fields[tag]) {
@@ -2122,9 +2122,9 @@ var updatePostBanInfo = function(boardName, ban) {
 module.exports.banUser = function(req, ip, bans) {
     var address = Tools.correctAddress(ip);
     if (!address)
-        return Promise.reject("Invalid IP");
+        return Promise.reject(Tools.translate("Invalid IP address"));
     if (address == req.ip)
-        return Promise.reject("Not enough rights");
+        return Promise.reject(Tools.translate("Not enough rights"));
     var err = bans.reduce(function(err, ban) {
         if (err)
             return err;
@@ -2143,7 +2143,7 @@ module.exports.banUser = function(req, ip, bans) {
     }).then(function(user) {
         user = user ? JSON.parse(user) : null;
         if (user && compareRegisteredUserLevels(req.level, user.level) <= 0)
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         var date = Tools.now();
         bans = bans.reduce(function(acc, ban) {
             ban.createdAt = date;
@@ -2200,11 +2200,11 @@ module.exports.delall = function(req, fields) {
         return !board;
     }, false);
     if (err)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (!address)
-        return Promise.reject("Invalid IP");
+        return Promise.reject(Tools.translate("Invalid IP address"));
     if (address == req.ip)
-        return Promise.reject("Not enough rights");
+        return Promise.reject(Tools.translate("Not enough rights"));
     var posts = [];
     return db.hget("registeredUserHashes", address).then(function(hash) {
         if (!hash)
@@ -2213,7 +2213,7 @@ module.exports.delall = function(req, fields) {
     }).then(function(user) {
         user = user ? JSON.parse(user) : null;
         if (user && compareRegisteredUserLevels(req.level, user.level) <= 0)
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         var promises = boards.map(function(board) {
             return db.smembers("userPostNumbers:" + address + ":" + board.name).then(function(numbers) {
                 return Promise.all(numbers.map(function(postNumber) {

@@ -90,7 +90,7 @@ module.exports = function(cluster) {
             if (pid) {
                 var worker = cluster.workers[id];
                 if (!worker)
-                    return Promise.reject("Invalid PID");
+                    return Promise.reject(Tools.translate("Invalid PID"));
             } else {
                 var promises = Tools.mapIn(cluster.workers, function(worker) {
                     return sendMessage(worker.process, type, data, nowait);

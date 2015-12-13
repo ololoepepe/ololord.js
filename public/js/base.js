@@ -719,7 +719,6 @@ lord.initializeOnLoadSettings = function() {
             var header = lord.node("header");
             header.appendChild(data);
             customHeaderPlaceholder.parentNode.replaceChild(header, customHeaderPlaceholder);
-            header.parentNode.insertBefore(lord.node("br"), header.nextSibling);
         }
     }
     var customFooterPlaceholder = lord.id("customFooterPlaceholder");
@@ -729,7 +728,6 @@ lord.initializeOnLoadSettings = function() {
             var footer = lord.node("footer");
             footer.appendChild(data);
             customFooterPlaceholder.parentNode.replaceChild(footer, customFooterPlaceholder);
-            footer.parentNode.insertBefore(lord.node("br"), footer);
         }
     }
     if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {

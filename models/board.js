@@ -75,7 +75,7 @@ module.exports.getFileInfos = function(list, hashpass) {
 
 module.exports.getBoardPage = function(board, page, json) {
     if (!(board instanceof Board))
-        return Promise.reject("Invalid board instance");
+        return Promise.reject(Tools.translate("Invalid board"));
     page = +(page || 0);
     if (isNaN(page) || page < 0 || page >= pageCounts[board.name])
         return Promise.reject(404);
@@ -94,7 +94,7 @@ module.exports.getBoardPage = function(board, page, json) {
 
 var getPage = function(board, page) {
     if (!(board instanceof Board))
-        return Promise.reject("Invalid board instance");
+        return Promise.reject(Tools.translate("Invalid board"));
     page = +(page || 0);
     if (isNaN(page) || page < 0 || page >= pageCounts[board.name])
         return Promise.reject(404);
@@ -177,10 +177,10 @@ var getPage = function(board, page) {
 
 module.exports.getThreadPage = function(board, number, json) {
     if (!(board instanceof Board))
-        return Promise.reject("Invalid board instance");
+        return Promise.reject(Tools.translate("Invalid board"));
     number = +(number || 0);
     if (isNaN(number) || number < 1)
-        return Promise.reject("Invalid thread");
+        return Promise.reject(Tools.translate("Invalid thread"));
     var c = {};
     if (json)
         return Tools.readFile(cachePath("thread", board.name, number));
@@ -218,10 +218,10 @@ module.exports.getThreadPage = function(board, number, json) {
 
 var getThread = function(board, number) {
     if (!(board instanceof Board))
-        return Promise.reject("Invalid board instance");
+        return Promise.reject(Tools.translate("Invalid board"));
     number = +(number || 0);
     if (isNaN(number) || number < 1)
-        return Promise.reject("Invalid thread");
+        return Promise.reject(Tools.translate("Invalid thread"));
     var c = {};
     return Database.getThreads(board.name, {
         limit: 1,
@@ -271,10 +271,10 @@ var getThread = function(board, number) {
 
 module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNumber) {
     if (!(board instanceof Board))
-        return Promise.reject("Invalid board instance");
+        return Promise.reject(Tools.translate("Invalid board"));
     threadNumber = +(threadNumber || 0);
     if (isNaN(threadNumber) || threadNumber < 1)
-        return Promise.reject("Invalid thread");
+        return Promise.reject(Tools.translate("Invalid thread"));
     lastPostNumber = +(lastPostNumber || 0);
     if (isNaN(lastPostNumber) || lastPostNumber < 0)
         lastPostNumber = 0;
@@ -328,10 +328,10 @@ module.exports.getThreadLastPostNumber = function(boardName, threadNumber) {
 
 module.exports.getThreadInfo = function(board, hashpass, number) {
     if (!(board instanceof Board))
-        return Promise.reject("Invalid board instance");
+        return Promise.reject(Tools.translate("Invalid board"));
     number = +(number || 0);
     if (isNaN(number) || number < 1)
-        return Promise.reject("Invalid thread");
+        return Promise.reject(Tools.translate("Invalid thread"));
     var c = {};
     return Database.registeredUserLevel(hashpass).then(function(level) {
         c.level = level;
@@ -364,7 +364,7 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
 
 module.exports.getCatalogPage = function(board, sortMode, json) {
     if (!(board instanceof Board))
-        return Promise.reject("Invalid board instance");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (json) {
         sortMode = (sortMode || "date").toLowerCase();
         if (["recent", "bumps"].indexOf(sortMode) < 0)
@@ -378,7 +378,7 @@ module.exports.getCatalogPage = function(board, sortMode, json) {
 
 var getCatalog = function(board, sortMode) {
     if (!(board instanceof Board))
-        return Promise.reject("Invalid board instance");
+        return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     return Database.getThreads(board.name).then(function(threads) {
         c.threads = threads;
@@ -440,7 +440,7 @@ var getCatalog = function(board, sortMode) {
 module.exports.pageCount = function(boardName) {
     var board = Board.board(boardName);
     if (!(board instanceof Board))
-        return Promise.reject("Invalid board instance");
+        return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     return Database.getThreads(boardName).then(function(threads) {
         return Promise.resolve(Math.ceil(threads.length / board.threadsPerPage) || 1);
@@ -465,7 +465,7 @@ var renderThread = function(board, thread) {
 var generateThread = function(boardName, threadNumber, nowrite) {
     var board = Board.board(boardName);
     if (!(board instanceof Board))
-        return Promise.reject("Invalid board instance");
+        return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     var threadPath = cachePath("thread", boardName, threadNumber);
     return getThread(board, threadNumber).then(function(json) {
@@ -489,7 +489,7 @@ var generateThread = function(boardName, threadNumber, nowrite) {
 var generateThreads = function(boardName) {
     var board = Board.board(boardName);
     if (!(board instanceof Board))
-        return Promise.reject("Invalid board instance");
+        return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     return Database.getThreads(boardName).then(function(threads) {
         var p = (threads.length > 0) ? generateThread(boardName, threads[0].number) : Promise.resolve();
@@ -732,7 +732,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
                 });
                 c.board = Board.board(boardName);
                 if (!c.board)
-                    return Promise.reject("Invalid board instance");
+                    return Promise.reject(Tools.translate("Invalid board"));
                 return Database.getPost(boardName, threadNumber);
             }).then(function(opPost) {
                 if (c.posts.length < 1)

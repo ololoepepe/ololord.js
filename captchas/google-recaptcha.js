@@ -8,7 +8,7 @@ var googleRecaptcha = new Captcha("google-recaptcha", Tools.translate.noop("Goog
 googleRecaptcha.checkCaptcha = function(req, fields) {
     var captcha = fields["g-recaptcha-response"];
     if (!captcha)
-        return Promise.reject("Captcha is empty");
+        return Promise.reject(Tools.translate("Captcha is empty"));
     var query = `secret=${this.privateKey}&response=${captcha}&remoteip=${req.ip}`;
     var url = "https://www.google.com/recaptcha/api/siteverify?" + query;
     return HTTP.request({
@@ -16,21 +16,21 @@ googleRecaptcha.checkCaptcha = function(req, fields) {
         timeout: (15 * Tools.Second)
     }).then(function(response) {
         if (response.status != 200)
-            return Promise.reject("Failed to check captcha");
+            return Promise.reject(Tools.translate("Failed to check captcha"));
         return response.body.read("utf8");
     }).then(function(data) {
         var reply = JSON.parse(data.toString());
         if (!reply.success) {
             if (reply["error-codes"].indexOf("missing-input-secret") >= 0)
-                return Promise.reject("The secret parameter is missing");
+                return Promise.reject(Tools.translate("The secret captcha parameter is missing"));
             else if (reply["error-codes"].indexOf("invalid-input-secret") >= 0)
-                return Promise.reject("The secret parameter is invalid or malformed");
+                return Promise.reject(Tools.translate("The secret captcha parameter is invalid or malformed"));
             else if (reply["error-codes"].indexOf("missing-input-response") >= 0)
-                return Promise.reject("The response parameter is missing");
+                return Promise.reject(Tools.translate("The captcha response parameter is missing"));
             else if (reply["error-codes"].indexOf("invalid-input-response") >= 0)
-                return Promise.reject("The response parameter is invalid or malformed");
+                return Promise.reject(Tools.translate("The captcha response parameter is invalid or malformed"));
             else
-                return Promise.reject("Invalid captcha");
+                return Promise.reject(Tools.translate("Invalid captcha"));
         } else {
             return Promise.resolve();
         }

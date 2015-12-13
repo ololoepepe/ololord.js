@@ -728,7 +728,7 @@ lord.equal = function(x, y) {
 
 lord.gently = function(obj, f, options) {
     if (!obj || typeof f != "function")
-        return Promise.reject("Invalid arguments");
+        return Promise.reject("invalidArgumentsErrorText");
     var delay = options ? +options.delay : undefined;
     var n = options ? +options.n : undefined;
     var promise = options && options.promise;
@@ -1507,7 +1507,7 @@ lord.handleError = function(error) {
                 break;
             }
         } else {
-            text = error;
+            text = lord.text(error);
         }
     } else {
         text = lord.text("errorUnknownText");

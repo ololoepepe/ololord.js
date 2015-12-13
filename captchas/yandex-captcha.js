@@ -10,9 +10,9 @@ var checkCaptcha = function(req, fields) {
     var challenge = fields.yandexCaptchaChallenge;
     var response = fields.yandexCaptchaResponse;
     if (!challenge)
-        return Promise.reject("Captcha challenge is empty");
+        return Promise.reject(Tools.translate("Captcha challenge is empty"));
     if (!response)
-        return Promise.reject("Captcha is empty", "error");
+        return Promise.reject(Tools.translate("Captcha is empty"));
     var query = `key=${encodeURIComponent(this.privateKey)}&captcha=${encodeURIComponent(challenge)}`
         + `&value=${encodeURIComponent(response)}`;
     var url = "http://cleanweb-api.yandex.ru/1.0/check-captcha?" + query;
@@ -21,7 +21,7 @@ var checkCaptcha = function(req, fields) {
         timeout: (15 * Tools.Second)
     }).then(function(response) {
         if (response.status != 200)
-            return Promise.reject("Failed to check captcha");
+            return Promise.reject(Tools.translate("Failed to check captcha"));
         return response.body.read("utf8");
     }).then(function(data) {
         var parser = new XML2JS.Parser();
@@ -34,7 +34,7 @@ var checkCaptcha = function(req, fields) {
                     if (result.ok)
                         return resolve();
                 }
-                reject("Invalid captcha");
+                reject(Tools.translate("Invalid captcha"));
             });
         });
     });
@@ -61,7 +61,7 @@ yandexElatmCaptcha.apiRoutes = function() {
         handler: function(req, res) {
             var captcha = captchaMap[req.query.type];
             if (!captcha)
-                return controller.error(req, res, "Invalid captcha type", true);
+                return controller.error(req, res, Tools.translate("Invalid captcha type"), true);
             var captcha = req.settings.captchaEngine;
             var type = captcha.id.split("-").pop();
             var query = `key=${encodeURIComponent(captcha.privateKey)}&type=${type}`;
@@ -71,7 +71,7 @@ yandexElatmCaptcha.apiRoutes = function() {
                 timeout: (15 * Tools.Second)
             }).then(function(response) {
                 if (response.status != 200)
-                    return Promise.reject("Failed to prepare captcha");
+                    return Promise.reject(Tools.translate("Failed to prepare captcha"));
                 return response.body.read("utf8");
             }).then(function(data) {
                 var parser = new XML2JS.Parser();
