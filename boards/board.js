@@ -419,7 +419,7 @@ var getRules = function(boardName) {
                     height: metadata.streams[0].height
                 };
                 file.extraData.duration = durationToString(metadata.format.duration);
-                file.extraData.bitrate = Math.floor(+metadata.format.bitrate / 1024);
+                file.extraData.bitrate = Math.floor(+metadata.format.bit_rate / 1024);
                 file.thumbPath += ".png";
                 return new Promise(function(resolve, reject) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
