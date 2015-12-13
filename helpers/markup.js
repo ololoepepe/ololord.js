@@ -126,7 +126,8 @@ var matchTwitterLink = function(href) {
 };
 
 var matchYoutubeLink = function(href) {
-    return href.match(/^https?\:\/\/(m\.|www\.)?youtube\.com\/.*v\=[^\/]+.*$/);
+    return href.match(/^https?\:\/\/(m\.|www\.)?youtube\.com\/.*v\=[^\/]+.*$/)
+        || href.match(/^https?\:\/\/youtu\.be\/[^\/]+.*$/);
 };
 
 var matchCoubLink = function(href) {
@@ -159,6 +160,10 @@ var getTwitterEmbeddedHtml = function(href, defaultHtml) {
 var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
     var match = href.match(/^https?\:\/\/.*youtube\.com\/.*v\=([^\/#\?]+).*$/);
     var videoId = match ? match[1] : null;
+    if (!videoId) {
+        match = href.match(/^https?\:\/\/youtu\.be\/([^\/#\?]+).*$/);
+        videoId = match ? match[1] : null;
+    }
     var apiKey = config("server.youtubeApiKey", "");
     if (!videoId || !apiKey)
         return Promise.resolve(defaultHtml);
