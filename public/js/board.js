@@ -1149,7 +1149,7 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
     var p;
     if (post) {
         post = post.cloneNode(true);
-        var actions = lord.queryOne(".postActions", post);
+        var actions = lord.queryOne(".popupActions", post);
         if (actions)
             actions.parentNode.removeChild(actions);
         var qr = lord.nameOne("quickReplyContainer", post);
