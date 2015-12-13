@@ -510,6 +510,10 @@ router.post("/search", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         var fields = result.fields;
         c.query = fields.query || "";
+        if (!c.query)
+            return Promise.reject(Tools.translate("Search query is empty"));
+        if (c.query.length > config("site.maxSearchQueryLength", 50))
+            return Promise.reject(Tools.translate("Search query is too long"));
         var boardName = fields.boardName || "";
         if ("*" == boardName)
             boardName = "";

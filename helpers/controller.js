@@ -212,7 +212,7 @@ controller.baseModel = function(req) {
                 name: (langNames.hasOwnProperty(lang) ? langNames[lang] : lang)
             };
         }),
-        maxSearchQueryLength: 100,
+        maxSearchQueryLength: config("site.maxSearchQueryLength", 50),
         markupModes: [
             {
                 name: "NONE",

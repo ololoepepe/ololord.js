@@ -2334,5 +2334,15 @@
         "invalidDataErrorText": {
             "value": "Недействительные данные"
         }
+    },
+    "Search query is empty": {
+        "_default": {
+            "value": "Поисковый запрос пуст"
+        }
+    },
+    "Search query is too long": {
+        "_default": {
+            "value": "Поисковый запрос слишком длинный"
+        }
     }
 }

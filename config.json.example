@@ -38,6 +38,7 @@ Actual file name must be config-dev.json.
         "dateFormat": "MM/DD/YYYY HH:mm:ss",
         "timeOffset": 0,
         "tripcodeSalt": "ololo",
+        "maxSearchQueryLength": 50,
         "vkontakte": {
             "integrationEnabled": false,
             "appId": 0,

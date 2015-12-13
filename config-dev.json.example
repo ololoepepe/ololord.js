@@ -31,6 +31,8 @@ Example:
         "domain": "localhost:8080",
         "dateFormat": "DD/MM/YYYY ddd HH:mm:ss",
         "timeOffset": 180,
+        "tripcodeSalt": "ololo",
+        "maxSearchQueryLength": 50,
         "vkontakte": {
             "integrationEnabled": true,
             "appId": your_app_id,
