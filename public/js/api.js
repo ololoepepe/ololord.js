@@ -1488,41 +1488,29 @@ lord.handleError = function(error) {
             else
                 text += lord.text("banExpiresNeverText");
         } else if (error.hasOwnProperty("readyState")) {
-            //TODO: error status
             switch (error.status) {
             case 400:
-                break;
             case 404:
-                break;
             case 408:
-                break;
             case 413:
-                break;
-            case 429:
-                //DDOS
-                break;
-            case 500:
-                text = "Temporarily banned or internal server error"; //Move to 429
-                break;
+            case 429: //DDoS
+            case 500: //TODO: Move to 429
             case 502:
-                break;
             case 503:
-                break;
             case 504:
-                break;
-            case 523:
-                //CF
+            case 523: //CloudFlare
+            text = lord.text("error" + error.status + "Text");
                 break;
             default:
                 if (0 == error.readyState)
-                    text = "No connection with server";
+                    text = lord.text("error0Text");
                 break;
             }
         } else {
             text = error;
         }
     } else {
-        text = "Unknown error";
+        text = lord.text("errorUnknownText");
     }
     lord.showPopup(text, {type: "critical"});
 };

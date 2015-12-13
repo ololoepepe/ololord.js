@@ -21,7 +21,7 @@ Board.addBoard(new Board("cg", Tools.translate.noop("Console games", "boardTitle
 
 Board.addBoard(new Board("h", Tools.translate.noop("/h/entai", "boardTitle")));
 
-Board.addBoard(new Board("int", Tools.translate.noop("/int/ernational", "boardTitle"),
+Board.addBoard(new Board("int", "/int/ernational",
     { defaultUserName: Tools.translate.noop("Vladimir Putin", "defaultUserName") }));
 
 Board.addBoard(new Board("mlp", Tools.translate.noop("My Little Pony", "boardTitle")));

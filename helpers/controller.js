@@ -352,8 +352,6 @@ controller.translationsModel = function() {
     translate("Find source...", "findSourceText");
     translate("Edit audio file tags", "editAudioTagsText");
     translate("Add to playlist", "addToPlaylistText");
-    translate("Answer in this thread", "answerInThreadText");
-    translate("Create thread", "createThreadText");
     translate("Borad rules", "boardRulesLinkText");
     translate("Threads catalog", "boardCatalogLinkText");
     translate("RSS feed", "boardRssLinkText");
@@ -611,6 +609,18 @@ controller.translationsModel = function() {
     translate("Boards", "boardsText");
     translate("Nothing found", "nothingFoundMessage");
     translate("Search results", "searchResultsMessage");
+    translate("Unknown error", "errorUnknownText");
+    translate("No connection with server", "error0Text");
+    translate("Bad request", "error400Text");
+    translate("Not found", "error404Text");
+    translate("Request timeout", "error408Text");
+    translate("Request entity too large", "error413Text");
+    translate("Temporarily banned (DDoS detected)", "error429Text");
+    translate("Temporarily banned (DDoS detected) or internal server error", "error500Text"); //TODO
+    translate("Bad gateway", "error502Text");
+    translate("Service unavailable", "error503Text");
+    translate("Gateway timeout", "error504Text");
+    translate("CloudFlare: server is unreachable", "error523Text");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });
