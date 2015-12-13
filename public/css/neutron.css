@@ -258,6 +258,18 @@ span.spoiler:hover .quotation {
     color: #789922;
 }
 
+.spoilerMarkupButton {
+    border: none;
+    height: 20px;
+    background-color: #212121;
+    color: #698CC0;
+    vertical-align: middle;
+}
+
+.spoilerMarkupButton.spoiler {
+    color: #48B0FD;
+}
+
 span.tooltip {
     color: #E08060;
     cursor: help;
@@ -639,6 +651,10 @@ span.newPostCount {
 
 .postHeader, .postFileName, .postFileSize {
     white-space: nowrap;
+}
+
+.postFileName.mobile {
+    font-size: 0.9em;
 }
 
 .postFileSize {
@@ -1146,7 +1162,7 @@ input.buttonImage {
 
 .boardSelectContainer {
     display: inline-block;
-    vertical-align: middle;
+    vertical-align: top;
     width: 16px;
     overflow: hidden;
 }
@@ -1325,10 +1341,11 @@ input.buttonImage {
     overflow-x: auto;
 }
 
-.spoilerMarkupButton {
-    border: none;
-    width: 48px;
-    height: 24px;
-    background-color: #212121;
-    color: #698CC0;
+.select[name="codeLang"] {
+    height: 20px;
+    vertical-align: middle;
+}
+
+.bordered {
+    border: 1px solid #575757;
 }

@@ -116,50 +116,54 @@
                             {{? it.board.markupElements.indexOf("BOLD") >= 0}}
                                 <input type="image" src="/{{=it.site.pathPrefix}}img/markup/bold.png"
                                        onclick="lord.markup('b'); return false;" name="markupBold"
-                                       title="{{=it.tr.markupBold}}" class="buttonImage" width="24" height="24" />
+                                       title="{{=it.tr.markupBold}}" class="buttonImage bordered" width="20"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("ITALICS") >= 0}}
                                 <input type="image" src="/{{=it.site.pathPrefix}}img/markup/italics.png"
                                        onclick="lord.markup('i'); return false;" name="markupItalics"
-                                       title="{{=it.tr.markupItalics}}" class="buttonImage" width="24" height="24" />
+                                       title="{{=it.tr.markupItalics}}" class="buttonImage bordered" width="20"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("STRIKED_OUT") >= 0}}
                                 <input type="image" src="/{{=it.site.pathPrefix}}img/markup/strikedout.png"
                                        onclick="lord.markup('s'); return false;" name="markupStrikedOut"
-                                       title="{{=it.tr.markupStrikedOut}}" class="buttonImage" width="24"
-                                       height="24" />
+                                       title="{{=it.tr.markupStrikedOut}}" class="buttonImage bordered" width="20"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("UNDERLINED") >= 0}}
                                 <input type="image" src="/{{=it.site.pathPrefix}}img/markup/underlined.png"
                                        onclick="lord.markup('u'); return false;" name="markupUnderlined"
-                                       title="{{=it.tr.markupUnderlined}}" class="buttonImage" width="24"
-                                       height="24" />
+                                       title="{{=it.tr.markupUnderlined}}" class="buttonImage bordered" width="20"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("SPOILER") >= 0}}
                                 <button onclick="lord.markup('spoiler'); return false;" name="markupSpoiler"
-                                        class="spoilerMarkupButton"
-                                        title="{{=it.tr.markupSpoiler}}"><span class="spoiler">------</span></button>
+                                        title="{{=it.tr.markupSpoiler}}"
+                                        class="spoilerMarkupButton bordered"><span class="spoiler">&nbsp;[spoiler]&nbsp;</span></button>
                             {{?}}
                             {{? it.board.markupElements.indexOf("QUOTATION") >= 0}}
                                 <input type="image" src="/{{=it.site.pathPrefix}}img/markup/quotation.png"
                                        onclick="lord.markup('>'); return false;" name="markupQuotation"
-                                       title="{{=it.tr.markupQuotation}}" class="buttonImage" width="24" height="24" />
+                                       title="{{=it.tr.markupQuotation}}" class="buttonImage bordered" width="20"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("SUBSCRIPT") >= 0}}
                                 <input type="image" src="/{{=it.site.pathPrefix}}img/markup/subscript.png"
                                        onclick="lord.markup('sub'); return false;" name="markupSubscript"
-                                       title="{{=it.tr.markupSubscript}}" class="buttonImage" width="43" height="24" />
+                                       title="{{=it.tr.markupSubscript}}" class="buttonImage bordered" width="36"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("SUPERSCRIPT") >= 0}}
                                 <input type="image" src="/{{=it.site.pathPrefix}}img/markup/superscript.png"
                                        onclick="lord.markup('sup'); return false;" name="markupSuperscript"
-                                       title="{{=it.tr.markupSuperscript}}" class="buttonImage" width="24"
-                                       height="24" />
+                                       title="{{=it.tr.markupSuperscript}}" class="buttonImage bordered" width="20"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("URL") >= 0}}
                                 <input type="image" src="/{{=it.site.pathPrefix}}img/markup/url.png"
                                        onclick="lord.markup('url'); return false;" name="markupUrl"
-                                       title="{{=it.tr.markupUrl}}" class="buttonImage" width="48" height="24" />
+                                       title="{{=it.tr.markupUrl}}" class="buttonImage bordered" width="40" height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("CODE") >= 0}}
                                 <br />
@@ -172,7 +176,8 @@
                                 </select>
                                 <input type="image" src="/{{=it.site.pathPrefix}}img/markup/code.png"
                                        onclick="lord.markup('code'); return false;" name="markupCode"
-                                       title="{{=it.tr.markupCode}}" class="buttonImage" width="48" height="24" />
+                                       title="{{=it.tr.markupCode}}" class="buttonImage bordered" width="40"
+                                       height="20" />
                             {{?}}
                         </span>
                     </td>
