@@ -11,6 +11,7 @@ Example:
         },
         "fileDownloadProxy": "127.0.0.1:3128",
         "fileDownloadProxyAuth": "user:password",
+        "searchLimit": 100,
         "tmpPath": "/tmp/ramdisk"
     },
     "server": {

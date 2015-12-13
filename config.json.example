@@ -8,7 +8,8 @@ Actual file name must be config-dev.json.
             "verbosity": "ip"
         },
         "fileDownloadProxy": "",
-        "fileDownloadProxyAuth": ""
+        "fileDownloadProxyAuth": "",
+        "searchLimit": 100
     },
     "server": {
         "port": 8080,

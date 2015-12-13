@@ -608,6 +608,8 @@ controller.translationsModel = function() {
     translate("logged in as user", "loginMessageUserText");
     translate("not registered", "loginMessageNoneText");
     translate("Boards", "boardsText");
+    translate("Nothing found", "nothingFoundMessage");
+    translate("Search results", "searchResultsMessage");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

@@ -505,6 +505,65 @@ router.post("/deleteChatMessages", function(req, res) {
     });
 });
 
+router.post("/search", function(req, res) {
+    var c = { model: {} };
+    Tools.parseForm(req).then(function(result) {
+        var fields = result.fields;
+        c.query = fields.query || "";
+        var boardName = fields.boardName || "";
+        if ("*" == boardName)
+            boardName = "";
+        c.model.searchQuery = c.query;
+        c.model.searchBoard = boardName;
+        c.phrases = Tools.splitCommand(c.query);
+        if (!c.phrases || !c.phrases.command)
+            return Promise.reject("Invalid search query");
+        c.phrases = [c.phrases.command].concat(c.phrases.arguments);
+        c.query = {
+            requiredPhrases: [],
+            excludedPhrases: [],
+            possiblePhrases: []
+        };
+        c.phrases.forEach(function(phrase) {
+            if (phrase.substr(0, 1) == "+")
+                c.query.requiredPhrases.push(phrase.substr(1).toLowerCase());
+            else if (phrase.substr(0, 1) == "-")
+                c.query.excludedPhrases.push(phrase.substr(1).toLowerCase());
+            else
+                c.query.possiblePhrases.push(phrase.toLowerCase());
+        });
+        return Database.findPosts(c.query, boardName);
+    }).then(function(posts) {
+        c.model.searchResults = posts.map(function(post) {
+            var text = post.rawText;
+            text = text.replace(/\r*\n+/g, " ");
+            if (text.length > 300)
+                text = text.substr(0, 297) + "...";
+            var subject = post.subject || text;
+            if (subject.length > 100)
+                subject = subject.substr(0, 97) + "...";
+            c.query.requiredPhrases.concat(c.query.possiblePhrases).forEach(function(phrase) {
+                var ind = text.toLowerCase().indexOf(phrase);
+                while (ind >= 0) {
+                    var nphrase = "<b><font color=\"red\">" + phrase + "</font></b>";
+                    text = text.substr(0, ind) + nphrase + text.substr(ind + phrase.length);
+                    ind = text.toLowerCase().indexOf(phrase, ind + nphrase.length);
+                }
+            });
+            return {
+                boardName: post.boardName,
+                postNumber: post.number,
+                threadNumber: post.threadNumber,
+                subject: subject,
+                text: text
+            };
+        });
+        res.send(c.model);
+    }).catch(function(err) {
+        controller.error(req, res, err, true);
+    });
+});
+
 Captcha.captchaIds().forEach(function(id) {
     Captcha.captcha(id).actionRoutes().forEach(function(route) {
         router[route.method](route.path, route.handler);

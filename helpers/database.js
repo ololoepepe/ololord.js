@@ -1334,9 +1334,19 @@ module.exports.findPosts = function(query, boardName) {
         });
         return Promise.all(promises);
     }).then(function() {
-        var keys = [];
-        Tools.forIn(c.map, function(post) {
-            keys.push(post.boardName + ":" + post.postNumber);
+        var keys = Tools.toArray(c.map).slice(0, config("system.searchLimit", 100)).sort(function(p1, p2) {
+            if (p1.boardName < p2.boardName)
+                return -1;
+            else if (p1.boardName > p2.boardName)
+                return 1;
+            if (p1.postNumber < p2.postNumber)
+                return -1;
+            else if (p1.postNumber > p2.postNumber)
+                return 1;
+            else
+                return 0;
+        }).map(function(post) {
+            return post.boardName + ":" + post.postNumber;
         });
         if (keys.length < 1)
             return Promise.resolve([]);

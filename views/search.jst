@@ -7,36 +7,9 @@
 <br />
 <div id="searchPlaceholder" style="display: none;"></div>
 <div class="theTitle">
-    {{? !it.error}}
-        <h1>{{=it.resultsMessage}}</h1>
-    {{??}}
-        <h1>{{=it.errorMessage}}</h1>
-    {{?}}
+    <h1>{{=it.tr.searchResultsMessage}}</h1>
 </div>
-{{? !it.error}}
-    {{? it.searchResults && it.searchResults.length > 0}}
-        <ol>
-            {{~it.searchResults :result}}
-                <li>
-                    <div>
-                        <a href="/{{=it.site.pathPrefix}}{{=result.boardName}}/res/{{=result.threadNumber}}.html{{? result.threadNumber != result.postNumber}}#{{=result.postNumber}}{{?}}"
-                                   target="_blank">{{!result.subject}}</a>
-                    </div>
-                    <div>
-                        <span class="quotation">/{{=result.boardName}}/res/{{=result.threadNumber}}.html{{? result.threadNumber != result.postNumber}}#{{=result.postNumber}}{{?}}</span>
-                    </div>
-                    <div>
-                        {{=result.text}}
-                    </div>
-                </li>
-            {{~}}
-        </ol>
-    {{??}}
-        <div class="sectionHeader">
-            <h3>{{=it.nothingFoundMessage}}</h3>
-        </div>
-    {{?}}
-{{?}}
+<div id="searchResultsPlaceholder" style="display: none;"></div>
 <div id="customFooterPlaceholder" style="display: none;"></div>
 </body>
 </html>

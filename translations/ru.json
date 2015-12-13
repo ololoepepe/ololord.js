@@ -1258,7 +1258,7 @@
         }
     },
     "Search results": {
-        "resultsMessage": {
+        "searchResultsMessage": {
             "value": "Результаты поиска"
         }
     },
