@@ -9,7 +9,10 @@
 <div class="theTitle">
     <h1>{{=it.tr.searchResultsMessage}}</h1>
 </div>
-<div id="searchResultsPlaceholder" style="display: none;"></div>
+<div id="searchResultsPlaceholder" class="loadingMessage">
+    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+    <h1 style="display: inline;">{{=it.tr.searchingMessage}}</h1>
+</div>
 <div id="customFooterPlaceholder" style="display: none;"></div>
 </body>
 </html>

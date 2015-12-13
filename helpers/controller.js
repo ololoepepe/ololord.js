@@ -577,6 +577,7 @@ controller.translationsModel = function() {
     translate("Delete this chat", "deleteChatButtonText");
     translate("Loading threads...", "loadingThreadsMessage");
     translate("Loading posts...", "loadingPostsMessage");
+    translate("Searching for posts...", "searchingMessage");
     translate("Close voting", "closeVotingText");
     translate("Open voting", "openVotingText");
     translate("Tripcode activated for THIS THREAD only", "threadTripcodeActivatedText");

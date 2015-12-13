@@ -2515,6 +2515,11 @@
             "value": "Загрузка постов..."
         }
     },
+    "Searching for posts...": {
+        "searchingMessage": {
+            "value": "Поиск постов..."
+        }
+    },
     "Invalid spell order": {
         "noTokenInTableErrorText": {
             "value": "Неправильный порядок спеллов"

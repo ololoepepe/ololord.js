@@ -1,8 +1,9 @@
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
+    var searchResultsPlaceholder = lord.id("searchResultsPlaceholder");
     var match = window.location.search.match(/^\?query\=([^&]+)&board\=(.+)$/);
     if (!match)
-        return;
+        return searchResultsPlaceholder.parentNode.removeChild(searchResultsPlaceholder);
     var query = decodeURIComponent(match[1]);
     var boardName = decodeURIComponent(match[2]);
     var formData = new FormData();
@@ -11,7 +12,6 @@ window.addEventListener("load", function load() {
     lord.post("/" + lord.data("sitePathPrefix") + "action/search", formData).then(function(model) {
         model = merge.recursive(lord.model(["base", "tr"], true), model);
         var data = lord.template("searchResults", model);
-        var searchResultsPlaceholder = lord.id("searchResultsPlaceholder");
         searchResultsPlaceholder.parentNode.replaceChild(data, searchResultsPlaceholder);
         var inp = lord.queryOne(".searchAction > form > [name='query']");
         if (inp) {
@@ -29,5 +29,8 @@ window.addEventListener("load", function load() {
                 }
             }
         }
-    }).catch(lord.handleError);
+    }).catch(function(err) {
+        lord.handleError(err);
+        searchResultsPlaceholder.parentNode.removeChild(searchResultsPlaceholder);
+    });
 }, false);
