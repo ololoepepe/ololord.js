@@ -91,7 +91,7 @@ router.get("/userIp.json", function(req, res) {
     Database.getPost(req.query.boardName, +req.query.postNumber).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("No such post"));
-        if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0
+        if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0)
             return Promise.reject(Tools.translate("Not enough rights"));
         var result = { ip: post.user.ip };
         var ipv4 = Tools.preferIPv4(post.user.ip);
