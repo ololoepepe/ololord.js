@@ -590,6 +590,7 @@ span.newPostCount {
     padding-top: 10px;
     padding-left: 10px;
     overflow-x: auto;
+    white-space: normal;
     display: table;
 }
 
