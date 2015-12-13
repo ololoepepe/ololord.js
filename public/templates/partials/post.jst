@@ -263,7 +263,7 @@
         {{? it.customPostBodyPart && it.customPostBodyPart[0]}}
             {{ out += it.customPostBodyPart[0](it, thread, post); }}
         {{?}}
-        <div class="postFiles{{? (it.deviceType != "mobile" && post.fileInfos.length < 2) || (it.deviceType == "mobile" && post.fileInfos.length < 1)}} nowrap{{?}}">
+        <div class="postFiles">
             {{~post.fileInfos :fileInfo}}
                 {{#def.postFile}}
             {{~}}

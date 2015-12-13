@@ -202,7 +202,6 @@ blockquote {
     max-height: 300px;
     box-sizing: border-box;
     max-width: 1200px;
-    white-space: normal;
     overflow-wrap: break-word;
     word-wrap: break-word;
     word-break: break-word;
@@ -528,7 +527,6 @@ span.newPostCount {
     padding-top: 10px;
     padding-left: 10px;
     overflow-x: auto;
-    white-space: normal;
     display: table;
 }
 
