@@ -92,9 +92,7 @@ router.get("/userIp.json", function(req, res) {
         if (!post)
             return Promise.reject(Tools.translate("No such post"));
         if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0
-            || Database.compareRegisteredUserLevels(req.level, post.user.level) < 0) {
             return Promise.reject(Tools.translate("Not enough rights"));
-        }
         var result = { ip: post.user.ip };
         var ipv4 = Tools.preferIPv4(post.user.ip);
         if (ipv4 && ipv4 != post.user.ip)
