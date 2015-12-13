@@ -1499,7 +1499,7 @@ lord.handleError = function(error) {
             case 503:
             case 504:
             case 523: //CloudFlare
-            text = lord.text("error" + error.status + "Text");
+            text = lord.text("error" + error.status + "Text") + " (" + error.status + ")";
                 break;
             default:
                 if (0 == error.readyState)
