@@ -10,12 +10,12 @@ router.get("/playlist.html", function(req, res) {
         var model = {};
         model.title = Tools.translate("Playlist", "pageTitle");
         model.extraScripts = [ { fileName: "playlist.js" } ];
-        return controller(null, "playlist", model);
+        return controller("playlist", model);
     };
     controller.html(f.bind(null), "playlist").then(function(data) {
         res.send(data);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        controller.error(res, err);
     });
 });
 

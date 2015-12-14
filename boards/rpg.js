@@ -79,7 +79,7 @@ board.actionRoutes = function() {
                 Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
-                controller.error(req, res, err, true);
+                controller.error(res, err, true);
             });
         }
     },
@@ -123,7 +123,7 @@ board.actionRoutes = function() {
                 Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
-                controller.error(req, res, err, true);
+                controller.error(res, err, true);
             });
         }
     },
@@ -153,7 +153,7 @@ board.actionRoutes = function() {
                 Global.generate("rpg", c.post.threadNumber, c.post.number, "edit");
                 res.send({});
             }).catch(function(err) {
-                controller.error(req, res, err, true);
+                controller.error(res, err, true);
             });
         }
     }];

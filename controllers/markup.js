@@ -64,12 +64,12 @@ router.get("/markup.html", function(req, res) {
                 { fileName: "youtube-coub.js" }
             ];
         }
-        return controller(null, "markup", model);
+        return controller("markup", model);
     };
     controller.html(f.bind(null), "markup").then(function(data) {
         res.send(data);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        controller.error(res, err);
     });
 });
 

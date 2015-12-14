@@ -67,7 +67,7 @@ codecha.apiRoutes = function() {
             }).then(function(result) {
                 res.send({ challenge: result });
             }).catch(function(err) {
-                controller.error(req, res, err, true);
+                controller.error(res, err, true);
             });
         }
     }];

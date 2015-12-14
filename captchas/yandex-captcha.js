@@ -61,7 +61,7 @@ yandexElatmCaptcha.apiRoutes = function() {
         handler: function(req, res) {
             var captcha = captchaMap[req.query.type];
             if (!captcha)
-                return controller.error(req, res, Tools.translate("Invalid captcha type"), true);
+                return controller.error(res, Tools.translate("Invalid captcha type"), true);
             var captcha = req.settings.captchaEngine;
             var type = captcha.id.split("-").pop();
             var query = `key=${encodeURIComponent(captcha.privateKey)}&type=${type}`;
@@ -97,7 +97,7 @@ yandexElatmCaptcha.apiRoutes = function() {
             }).then(function(result) {
                 res.send(result);
             }).catch(function(err) {
-                controller.error(req, res, err, true);
+                controller.error(res, err, true);
             });
         }
     }];

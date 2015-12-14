@@ -183,7 +183,7 @@ var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
             var info = response.items[0].snippet;
             info.id = videoId;
             info.href = href;
-            var html = controller.sync(null, "youtubeVideoLink", { info: info });
+            var html = controller.sync("youtubeVideoLink", { info: info });
             if (!html)
                 return Promise.reject(Tools.translate("Failed to create YouTube video link"));
             return Promise.resolve(html);
@@ -227,7 +227,7 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
                 } : null,
                 id: videoId
             };
-            var html = controller.sync(null, "coubVideoLink", { info: info });
+            var html = controller.sync("coubVideoLink", { info: info });
             if (!html)
                 return Promise.reject(Tools.translate("Failed to create Coub video link"));
             return Promise.resolve(html);

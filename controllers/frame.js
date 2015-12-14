@@ -11,13 +11,13 @@ router.get("/frame.html", function(req, res) {
         model.title = Tools.translate("ololord.js", "pageTitle");
         model.deviceType = deviceType;
         model.noJavaScript = true;
-        return controller(null, "frame", model);
+        return controller("frame", model);
     };
     var deviceType = (req.device.type == "desktop") ? "desktop" : "mobile";
     controller.html(f.bind(null, deviceType), "frame", deviceType).then(function(data) {
         res.send(data);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        controller.error(res, err);
     });
 });
 
@@ -26,12 +26,12 @@ router.get("/frameList.html", function(req, res) {
         var model = {};
         model.title = Tools.translate("ololord.js", "pageTitle");
         model.extraScripts = [ { fileName: "frame-list.js" } ];
-        return controller(null, "frameList", model);
+        return controller("frameList", model);
     };
     controller.html(f.bind(null), "frameList").then(function(data) {
         res.send(data);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        controller.error(res, err);
     });
 });
 

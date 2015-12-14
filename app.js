@@ -32,7 +32,7 @@ var spawnCluster = function() {
         app.use(require("./middlewares"));
         app.use(require("./controllers"));
         app.use("*", function(req, res) {
-            controller.notFound(req, res);
+            controller.notFound(res);
         });
 
         BoardModel.initialize().then(function() {

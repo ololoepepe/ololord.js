@@ -210,7 +210,7 @@ router.post("/markupText", function(req, res) {
         }
         res.send(data);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -240,7 +240,7 @@ router.post("/createPost", function(req, res) {
         });
     }).catch(function(err) {
         transaction.rollback();
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -270,7 +270,7 @@ router.post("/createThread", function(req, res) {
         });
     }).catch(function(err) {
         transaction.rollback();
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -286,7 +286,7 @@ router.post("/editPost", function(req, res) {
     }).then(function(result) {
         res.send({});
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -333,7 +333,7 @@ router.post("/addFiles", function(req, res) {
         });
     }).catch(function(err) {
         transaction.rollback();
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -347,7 +347,7 @@ router.post("/deletePost", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -357,7 +357,7 @@ router.post("/deleteFile", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -373,7 +373,7 @@ router.post("/moveThread", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -383,13 +383,13 @@ router.post("/editAudioTags", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
 router.post("/banUser", function(req, res) {
     if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return controller.error(req, res, Tools.translate("Not enough rights"), true);
+        return controller.error(res, Tools.translate("Not enough rights"), true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.bans = [];
@@ -431,13 +431,13 @@ router.post("/banUser", function(req, res) {
     }).then(function(result) {
         res.send({});
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
 router.post("/delall", function(req, res) {
     if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return controller.error(req, res, Tools.translate("Not enough rights"), true);
+        return controller.error(res, Tools.translate("Not enough rights"), true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
@@ -447,7 +447,7 @@ router.post("/delall", function(req, res) {
     }).then(function(result) {
         res.send({});
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -463,7 +463,7 @@ router.post("/setThreadFixed", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -479,7 +479,7 @@ router.post("/setThreadClosed", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -490,7 +490,7 @@ router.post("/sendChatMessage", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -501,7 +501,7 @@ router.post("/deleteChatMessages", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -564,7 +564,7 @@ router.post("/search", function(req, res) {
         });
         res.send(c.model);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 

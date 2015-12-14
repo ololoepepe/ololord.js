@@ -32,18 +32,16 @@ var formattedDate = function(date, req) {
     return moment(date).utcOffset(timeOffset).locale(locale).format(format);
 };
 
-controller = function(req, templateName, modelData) {
-    var baseModelData = merge.recursive(controller.baseModel(req), controller.settingsModel(req));
-    baseModelData = merge.recursive(baseModelData, controller.translationsModel());
+controller = function(templateName, modelData) {
+    var baseModelData = merge.recursive(controller.baseModel(), controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
-    baseModelData.path = (req && req.path) ? req.path : (req || ("/" + config("site.pathPrefix")));
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
     baseModelData.formattedDate = formattedDate;
     baseModelData.publicPartials = publicPartials;
     baseModelData.publicTemplates = publicTemplates;
     baseModelData.models = {
-        base: JSON.stringify(controller.baseModel(req)),
+        base: JSON.stringify(controller.baseModel()),
         boards: JSON.stringify(controller.boardsModel()),
         tr: JSON.stringify(controller.translationsModel()),
         partials: JSON.stringify(publicPartials.map(function(partial) {
@@ -59,15 +57,12 @@ controller = function(req, templateName, modelData) {
     if (!template)
         return Promise.reject(Tools.translate("Invalid template"));
     modelData = merge.recursive(baseModelData, modelData);
-    modelData.req = req;
     return Promise.resolve(template(modelData));
 };
 
-controller.sync = function(req, templateName, modelData) {
-    var baseModelData = merge.recursive(controller.baseModel(req), controller.settingsModel(req));
-    baseModelData = merge.recursive(baseModelData, controller.translationsModel());
+controller.sync = function(templateName, modelData) {
+    var baseModelData = merge.recursive(controller.baseModel(), controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
-    baseModelData.path = req ? req.path : undefined;
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
     baseModelData.formattedDate = formattedDate;
@@ -77,13 +72,12 @@ controller.sync = function(req, templateName, modelData) {
     if (!template)
         return null;
     modelData = merge.recursive(baseModelData, modelData);
-    modelData.req = req;
     return template(modelData);
 };
 
-controller.error = function(req, res, error, ajax) {
+controller.error = function(res, error, ajax) {
     if (!ajax && Util.isNumber(error) && 404 == error)
-        return controller.notFound(req, res);
+        return controller.notFound(res);
     var f = function(error) {
         var model = {};
         model.title = Tools.translate("Error", "pageTitle");
@@ -131,17 +125,17 @@ controller.error = function(req, res, error, ajax) {
         var model = {};
         model.title = Tools.translate("Ban", "pageTitle");
         model.ban = error.ban;
-        return ajax ? h(error) : controller(null, "ban", model).then(function(data) {
+        return ajax ? h(error) : controller("ban", model).then(function(data) {
             res.send(data);
         }).catch(h);
     } else {
-        return ajax ? g(error) : controller(null, "error", f(error)).then(function(data) {
+        return ajax ? g(error) : controller("error", f(error)).then(function(data) {
             res.send(data);
         }).catch(g);
     }
 };
 
-controller.notFound = function(req, res) {
+controller.notFound = function(res) {
     var f = function() {
         var model = {};
         model.title = Tools.translate("Error 404", "pageTitle");
@@ -152,13 +146,13 @@ controller.notFound = function(req, res) {
             model.notFoundImageFileNames = fileNames.filter(function(fileName) {
                 return fileName != ".gitignore";
             });
-            return controller(null, "notFound", model);
+            return controller("notFound", model);
         });
     };
     controller.html(f.bind(null), "notFound").then(function(data) {
         res.status(404).send(data);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        controller.error(res, err);
     });
 };
 

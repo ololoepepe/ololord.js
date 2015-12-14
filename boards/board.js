@@ -291,7 +291,6 @@ var renderFileInfo = function(fi) {
 
 var getRules = function(boardName) {
     var fileName = __dirname + "/../misc/rules/rules" + (boardName ? ("." + boardName) : "") + ".txt";
-    console.log(fileName);
     return FS.exists(fileName).then(function(exists) {
         if (!exists)
             return Promise.resolve();

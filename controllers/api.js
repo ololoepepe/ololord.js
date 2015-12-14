@@ -73,7 +73,7 @@ router.get("/posts.json", function(req, res) {
     }).then(function(posts) {
         res.json(posts);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -83,7 +83,7 @@ router.get("/post.json", function(req, res) {
     }).then(function(post) {
         res.json(post || null);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -99,7 +99,7 @@ router.get("/userIp.json", function(req, res) {
             result.ipv4 = ipv4;
         res.json(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -109,7 +109,7 @@ router.get("/threadInfo.json", function(req, res) {
     boardModel.getThreadInfo(board, req.hashpass, threadNumber).then(function(thread) {
         res.json(thread);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -120,7 +120,7 @@ router.get("/fileInfo.json", function(req, res) {
     }], req.hashpass).then(function(fileInfos) {
         res.json(fileInfos[0]);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -150,7 +150,7 @@ router.get("/lastPosts.json", function(req, res) {
         }).then(function(results) {
             res.json(results);
         }).catch(function(err) {
-            controller.error(req, res, err, true);
+            controller.error(res, err, true);
         });
     } else {
         var board = Board.board(req.query.boardName);
@@ -162,7 +162,7 @@ router.get("/lastPosts.json", function(req, res) {
         }).then(function(posts) {
             res.json(posts);
         }).catch(function(err) {
-            controller.error(req, res, err, true);
+            controller.error(res, err, true);
         });
     }
 });
@@ -180,7 +180,7 @@ router.get("/lastPostNumbers.json", function(req, res) {
         });
         res.json(r);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -188,7 +188,7 @@ router.get("/lastPostNumber.json", function(req, res) {
     boardModel.getLastPostNumbers([req.query.boardName]).then(function(lastPostNumbers) {
         res.json({ lastPostNumber: lastPostNumbers[0] });
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -204,7 +204,7 @@ router.get("/threadLastPostNumbers.json", function(req, res) {
     Promise.all(promises).then(function(results) {
         res.json(results);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -212,7 +212,7 @@ router.get("/threadLastPostNumber.json", function(req, res) {
     boardModel.getThreadLastPostNumber(req.query.boardName, req.query.threadNumber).then(function(number) {
         res.json({ lastPostNumber: number });
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -220,14 +220,14 @@ router.get("/captchaQuota.json", function(req, res) {
     Database.getUserCaptchaQuota(req.query.boardName, req.ip).then(function(quota) {
         res.json({ quota: quota });
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
 router.get("/bannedUser.json", function(req, res) {
     var ip = req.query.ip;
     if (!ip)
-        return controller.error(req, res, Tools.translate("Invalid IP address"), true);
+        return controller.error(res, Tools.translate("Invalid IP address"), true);
     Database.userBans(ip).then(function(bans) {
         var user = {
             ip: ip,
@@ -238,13 +238,13 @@ router.get("/bannedUser.json", function(req, res) {
             user.ipv4 = ipv4;
         res.json(user);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
 router.get("/fileHeaders.json", function(req, res) {
     if (!req.query.url)
-        return controller.error(req, res, Tools.translate("Invalid URL"), true);
+        return controller.error(res, Tools.translate("Invalid URL"), true);
     var proxy = Tools.proxy();
     var p;
     if (proxy) {
@@ -268,7 +268,7 @@ router.get("/fileHeaders.json", function(req, res) {
             return Promise.reject(Tools.translate("Failed to get file headers"));
         res.json(response.headers);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
@@ -276,7 +276,7 @@ router.get("/chatMessages.json", function(req, res) {
     Chat.getMessages(req, req.query.lastRequestDate).then(function(result) {
         res.json(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        controller.error(res, err, true);
     });
 });
 
