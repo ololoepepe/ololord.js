@@ -2723,6 +2723,7 @@ lord.initializeOnLoadBaseBoard = function() {
     c.model.settings = lord.settings();
     lord.appendExtrasToModel(c.model);
     var p;
+    c.notCatalog = (+lord.data("threadNumber") || +lord.data("currentPage") >= 0);
     if (+lord.data("threadNumber")) {
         c.model.includeThreadScripts = true;
         p = lord.api(lord.data("threadNumber"), {}, lord.data("boardName") + "/res");
@@ -2741,6 +2742,8 @@ lord.initializeOnLoadBaseBoard = function() {
         banner.parentNode.insertBefore(lord.node("br"), banner);
     }
     p.then(function(model) {
+        if (c.notCatalog && lord.compareRegisteredUserLevels(c.model.user.level, "MODER") >= 0)
+            lord.createScript("3rdparty/jquery.datetimepicker.js");
         if ((+lord.data("threadNumber") || +lord.data("currentPage") >= 0)
             && lord.model("board/" + lord.data("boardName")).board.captchaEnabled) {
             c.model.customPostFormField = lord.customPostFormField;
@@ -2781,7 +2784,6 @@ lord.initializeOnLoadBaseBoard = function() {
                 }
             }).catch(lord.handleError);
         }
-        c.notCatalog = (+lord.data("threadNumber") || +lord.data("currentPage") >= 0);
         if (+lord.data("threadNumber")) {
             lord.queryOne(".theTitle > h1").innerHTML = lord.escaped(model.thread.title);
             lord.queryOne("head > title").innerHTML = lord.escaped(model.thread.title);

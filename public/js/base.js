@@ -484,17 +484,23 @@ lord.populateChatHistory = function(key) {
 lord.updateChat = function(keys) {
     if (!lord.chatDialog) {
         lord.name("chatButton").forEach(function(a) {
+            console.log(a);
             var img = lord.queryOne("img", a);
             if (img.src.replace("chat_message.gif", "") == img.src)
                 img.src = img.src.replace("chat.png", "chat_message.gif");
-            var div = lord.node("div");
-            var a = lord.createChatButton(true);
-            var lastKey = lord.last(keys);
-            a.onclick = lord.showChat.bind(lord, lastKey);
-            div.appendChild(a);
-            div.appendChild(lord.node("text", " " + lord.text("newChatMessageText") + " [" + lastKey + "]"));
-            lord.showPopup(div, { type: "node" });
         });
+        var div = lord.node("div");
+        var a = lord.node("a");
+        var img = lord.node("img");
+        lord.addClass(img, "buttonImage");
+        img.src = "/" + lord.data("sitePathPrefix") + "img/chat_message.gif";
+        a.title = lord.text("chatText");
+        a.appendChild(img);
+        var lastKey = lord.last(keys);
+        a.onclick = lord.showChat.bind(lord, lastKey);
+        div.appendChild(a);
+        div.appendChild(lord.node("text", " " + lord.text("newChatMessageText") + " [" + lastKey + "]"));
+        lord.showPopup(div, { type: "node" });
     } else {
         keys.forEach(function(key) {
             var div = lord.nameOne(key, lord.chatDialog);
@@ -638,18 +644,6 @@ lord.sendChatMessage = function() {
         $(message).focus();
         lord.checkChats();
     }).catch(lord.handleError);
-};
-
-lord.createChatButton = function(key) {
-    var a = lord.node("a");
-    a.name = "chatButton";
-    a.onclick = lord.showChat.bind(lord);
-    var img = lord.node("img");
-    lord.addClass(img, "buttonImage");
-    img.src = "/" + lord.data("sitePathPrefix") + "img/chat" + (key ? "_message.gif" : ".png");
-    a.title = lord.text("chatText");
-    a.appendChild(img);
-    return a;
 };
 
 lord.checkNotificationQueue = function() {

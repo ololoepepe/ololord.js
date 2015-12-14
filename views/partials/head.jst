@@ -35,10 +35,6 @@
             <script type="text/javascript" src="//vk.com/js/api/openapi.js"></script>
         {{?}}
         {{? it.includeBoardScripts}}
-            {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
-                <script type="text/javascript"
-                        src="/{{=it.site.pathPrefix}}js/3rdparty/jquery.datetimepicker.js"></script>
-            {{?}}
             {{? it.site.twitter.integrationEnabled }}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/twitter.js"></script>
             {{?}}
