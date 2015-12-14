@@ -453,8 +453,9 @@ var process = function(info, conversionFunction, regexps, options) {
             cl: "",
             type: SkipTypes.NoSkip
         };
-        var txt = info.text.substr(matchs.index + matchs[0].length,
-            (matche ? matche.index : -1) - matchs.index - matchs[0].length);
+        var start = matche ? (matchs.index + matchs[0].length) : matchs.index;
+        var end = matche ? (matche.index - matchs.index - matchs[0].length) : (matchs.index + matchs[0].length);
+        var txt = info.text.substr(start, end);
         return conversionFunction(info, txt, matchs, matche, options).then(function(ntxt) {
             txt = ntxt;
             if (txt) {
@@ -599,8 +600,12 @@ var convertVkontaktePost = function(_, _, matchs, _, options) {
     return Promise.resolve("<div class=\"overflowContainer\">" + matchs[0] + "</div>");
 };
 
-var convertExternalLink = function(_, _, matchs, _, options) {
+var convertExternalLink = function(info, text, matchs, _, options) {
+    if (!text)
+        return Promise.resolve("");
     options.type = SkipTypes.HtmlSkip;
+    if (info.isIn(matchs.index + matchs[0].length, text.length, SkipTypes.HtmlSkip))
+        return Promise.resolve(text);
     var href = matchs[0];
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
@@ -674,10 +679,12 @@ var convertMarkup = function(_, text, matchs, _, options) {
     return Promise.resolve(text);
 };
 
-var convertUrl = function(_, text, _, _, options) {
+var convertUrl = function(info, text, matchs, matche, options) {
     if (!text)
         return Promise.resolve("");
     options.type = SkipTypes.HtmlSkip;
+    if (info.isIn(matchs.index + matchs[0].length, text.length, SkipTypes.HtmlSkip))
+        return Promise.resolve(text);
     var href = text;
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
@@ -837,6 +844,11 @@ var processPostText = function(boardName, text, options) {
                 cl: null
             });
         }).then(function() {
+            return process(info, convertUrl, {
+                op: "[url]",
+                cl: "[/url]"
+            });
+        }).then(function() {
             return process(info, convertExternalLink, {
                 op: new XRegExp(Tools.ExternalLinkRegexpPattern, "gi"),
                 cl: null
@@ -942,11 +954,6 @@ var processPostText = function(boardName, text, options) {
             return process(info, convertMarkup, {
                 op: "[spoiler]",
                 cl: "[/spoiler]"
-            }, { nestable: true });
-        }).then(function() {
-            return process(info, convertUrl, {
-                op: "[url]",
-                cl: "[/url]"
             }, { nestable: true });
         }).then(function() {
             return process(info, convertCSpoiler, {
