@@ -986,6 +986,11 @@ blockquote.blockquoteThread.expand {
     overflow-wrap: normal;
     padding-left: 20px !important;
     overflow-x: auto;
+    max-width: 800px;
+}
+
+.codeBlock.mobile {
+    max-width: 300px;
 }
 
 /*span.spoiler, span.spoiler a <- Board*/

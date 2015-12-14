@@ -889,6 +889,11 @@ blockquote.blockquoteThread.expand {
     padding-left: 20px !important;
     border: 1px solid #AAAAAA;
     overflow-x: auto;
+    max-width: 800px;
+}
+
+.codeBlock.mobile {
+    max-width: 300px;
 }
 
 .theMessage {
