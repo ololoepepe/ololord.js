@@ -610,7 +610,7 @@ controller.translationsModel = function() {
     translate("Request timeout", "error408Text");
     translate("Request entity too large", "error413Text");
     translate("Temporarily banned (DDoS detected)", "error429Text");
-    translate("Temporarily banned (DDoS detected) or internal server error", "error500Text"); //TODO
+    translate("Internal server error", "error500Text");
     translate("Bad gateway", "error502Text");
     translate("Service unavailable", "error503Text");
     translate("Gateway timeout", "error504Text");

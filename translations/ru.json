@@ -1982,9 +1982,9 @@
             "value": "Временный бан (обнаружен DDoS)"
         }
     },
-    "Temporarily banned (DDoS detected) or internal server error": {
+    "Internal server error": {
         "error500Text": {
-            "value": "Временный бан (обнаружен DDoS) или внутренняя ошибка сервера"
+            "value": "Внутренняя ошибка сервера"
         }
     },
     "Bad gateway": {

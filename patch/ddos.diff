@@ -15,3 +15,11 @@
 ---
 >             if (!params.silent)
 >                 console.log('ddos: denied: entry:', host, table[host])
+66c70
+<                 response.json(table[host]).status(500).pipe(res)
+---
+>                 response.json(table[host]).status(429).pipe(res)
+68c72
+<                 res.writeHead(500);
+---
+>                 res.writeHead(429);

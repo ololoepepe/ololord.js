@@ -67,9 +67,9 @@ var ddos = function(params) {
             if (!params.silent)
                 console.log('ddos: denied: entry:', host, table[host])
             if (params.testmode) {
-                response.json(table[host]).status(500).pipe(res)
+                response.json(table[host]).status(429).pipe(res)
             } else {
-                res.writeHead(500);
+                res.writeHead(429);
                 res.end(params.errormessage);
             }
         } else {         

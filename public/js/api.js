@@ -1504,7 +1504,7 @@ lord.handleError = function(error) {
             case 408:
             case 413:
             case 429: //DDoS
-            case 500: //TODO: Move to 429
+            case 500:
             case 502:
             case 503:
             case 504:

@@ -1,1 +1,1 @@
-diff ../node_modules/MODULE_NAME/PATH_TO_FILE.js ./patched/MODULE_NAME/lib/PATH_TO_FILE.js > ./MODULE_NAME.diff
+diff ../node_modules/MODULE_NAME/PATH_TO_FILE.js ./patched/MODULE_NAME/PATH_TO_FILE.js > ./MODULE_NAME.diff
