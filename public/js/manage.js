@@ -33,9 +33,7 @@ lord.banUser = function(e, form) {
                     parent.removeChild(previous);
             }
         }
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
 lord.bansSelectAll = function(e, btn) {
