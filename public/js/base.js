@@ -484,7 +484,6 @@ lord.populateChatHistory = function(key) {
 lord.updateChat = function(keys) {
     if (!lord.chatDialog) {
         lord.name("chatButton").forEach(function(a) {
-            console.log(a);
             var img = lord.queryOne("img", a);
             if (img.src.replace("chat_message.gif", "") == img.src)
                 img.src = img.src.replace("chat.png", "chat_message.gif");

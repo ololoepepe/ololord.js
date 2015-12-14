@@ -13,13 +13,25 @@ lord.banUser = function(e, form) {
         var previous = lord.id("user" + ip);
         if (c.model.bannedUser) {
             var node = lord.template("userBan", c.model);
-            if (previous)
-                parent.replaceChild(node, previous);
-            else
-                parent.appendChild(node);
-        } else {
-            if (previous)
-                parent.removeChild(previous);
+            lord.query("[name='expires'], [name^='banExpires_']", node).forEach(function(inp) {
+                $(inp).change(function(){
+                    $(this).attr("value", $(inp).val());
+                });
+                $(inp).datetimepicker({
+                    i18n: { format: "YYYY/MM/DD HH:mm" },
+                    mask: true,
+                    value: inp.value
+                });
+            });
+            if (lord.hasOwnProperties(c.model.bannedUser.bans)) {
+                if (previous)
+                    parent.replaceChild(node, previous);
+                else
+                    parent.appendChild(node);
+            } else {
+                if (previous)
+                    parent.removeChild(previous);
+            }
         }
     }).catch(function(err) {
         console.log(err);

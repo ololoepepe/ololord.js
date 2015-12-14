@@ -25,6 +25,13 @@ router.get("/manage.html", function(req, res) {
     };
     Database.userBans().then(function(users) {
         model.bannedUsers = users;
+        Tools.forIn(model.bannedUsers, function(user, ip) {
+            var ipv4 = Tools.preferIPv4(ip);
+            if (ipv4 && ipv4 == ip)
+                return;
+            model.bannedUsers[ipv4] = user;
+            delete model.bannedUsers[ip];
+        });
         return controller(null, "manage", model);
     }).then(function(data) {
         res.send(data);

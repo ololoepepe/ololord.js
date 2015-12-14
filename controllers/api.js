@@ -229,10 +229,14 @@ router.get("/bannedUser.json", function(req, res) {
     if (!ip)
         return controller.error(req, res, Tools.translate("Invalid IP address"), true);
     Database.userBans(ip).then(function(bans) {
-        res.json({
+        var user = {
             ip: ip,
             bans: bans
-        });
+        };
+        var ipv4 = Tools.preferIPv4(ip);
+        if (ipv4 && ipv4 != ip)
+            user.ipv4 = ipv4;
+        res.json(user);
     }).catch(function(err) {
         controller.error(req, res, err, true);
     });

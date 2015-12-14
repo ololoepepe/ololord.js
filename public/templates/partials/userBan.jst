@@ -8,7 +8,7 @@
     {{?}}
     {{? !it.userIp}}
         <input type="text" name="userIp"
-               {{? typeof user != "undefined"}}value="{{=user.ip}}" readonly="true"{{??}}placeholder="IP: <::192.168.0.1>"{{?}} />
+               {{? typeof user != "undefined"}}value="{{=user.ip}}" readonly="true"{{??}}placeholder="IP: <192.168.0.1>"{{?}} />
     {{??}}
         <input type="text" name="userIp" value="{{=it.userIp}}" readonly="true" />
     {{?}}
@@ -68,7 +68,7 @@
       action="/{{=it.site.pathPrefix}}action/delall" onsubmit="lord.delall(event, this); return false;">
     {{? !it.userIp}}
         <input name="userIp"
-               {{? typeof user != "undefined"}}value="{{=user.ip}}" type="hidden"{{??}}type="text" placeholder="IP: <::192.168.0.1>"{{?}} />
+               {{? typeof user != "undefined"}}value="{{=user.ip}}" type="hidden"{{??}}type="text" placeholder="IP: <192.168.0.1>"{{?}} />
     {{??}}
         <input type="hidden" name="userIp" value="{{=it.userIp}}" />
     {{?}}

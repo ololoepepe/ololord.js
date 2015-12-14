@@ -2057,8 +2057,9 @@ module.exports.userBans = function(ip, boardNames) {
         return db.keys("userBans:*").then(function(keys) {
             var ips = {};
             keys.forEach(function(key) {
-                var boardName = key.split(":").pop();
-                var ip = key.replace(":" + boardName, "").split(":").slice(1).join(":");
+                var sl = key.split(":");
+                var boardName = sl.pop();
+                var ip = sl.slice(1, sl.length).join(":");
                 if (!ips.hasOwnProperty(ip))
                     ips[ip] = {};
             });

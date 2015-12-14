@@ -2743,7 +2743,7 @@ lord.initializeOnLoadBaseBoard = function() {
     }
     p.then(function(model) {
         if (c.notCatalog && lord.compareRegisteredUserLevels(c.model.user.level, "MODER") >= 0)
-            lord.createScript("3rdparty/jquery.datetimepicker.js");
+            lord.createScript("3rdparty/jquery.datetimepicker.js", true);
         if ((+lord.data("threadNumber") || +lord.data("currentPage") >= 0)
             && lord.model("board/" + lord.data("boardName")).board.captchaEnabled) {
             c.model.customPostFormField = lord.customPostFormField;
