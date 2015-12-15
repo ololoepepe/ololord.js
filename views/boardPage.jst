@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<body class="{{=it.deviceType}}"
-      {{#def.baseData}}
-      data-current-page="{{=it.currentPage}}">
+<body class="mobile" {{#def.baseData}} data-current-page="{{=it.currentPage}}">
 <script id="model-postformRules" type="application/json">{{ out += JSON.stringify(it.postformRules); }}</script>
 {{? it.site.vkontakte.integrationEnabled }}
     <script type="text/javascript">

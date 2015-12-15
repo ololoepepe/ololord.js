@@ -682,6 +682,11 @@ lord.checkNotificationQueue = function() {
 lord.initializeOnLoadSettings = function() {
     var settings = lord.settings();
     var model = lord.model(["base", "tr", "boards"], true);
+    if ("desktop" == model.deviceType) {
+        lord.removeClass(document.body, "mobile");
+        lord.addClass(document.body, "desktop");
+        document.head.removeChild(lord.nameOne("viewport", document.head));
+    }
     if (lord.data("boardName"))
         model.board = lord.model("board/" + lord.data("boardName")).board;
     model.settings = settings;
