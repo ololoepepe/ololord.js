@@ -542,7 +542,7 @@ var checkLangsMatch = function(info, matchs, matche) {
 };
 
 var checkExternalLink = function(info, matchs) {
-    return matchs[2].split(".").length == 3 || Tools.externalLinkRootZoneExists(matchs[4]);
+    return /^\d+\.\d+\.\d+\.\d+$/.test(matchs[2]) || Tools.externalLinkRootZoneExists(matchs[4]);
 };
 
 var checkQuotationNotInterrupted = function(info, matchs, matche) {
