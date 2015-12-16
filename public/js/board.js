@@ -1064,7 +1064,7 @@ lord.hideByImage = function(a) {
         });
     }).then(function(result) {
         if (!result)
-            return Promise.reolve();
+            return Promise.resolve();
         return lord.doWork("processPosts", {
             posts: c.list,
             spells: lord.spells
