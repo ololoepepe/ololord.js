@@ -1591,6 +1591,7 @@ module.exports.addFiles = function(req, fields, files, transaction) {
         });
         return Promise.all(promises);
     }).then(function() {
+        Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
         return Promise.resolve(c.post);
     });
 };
