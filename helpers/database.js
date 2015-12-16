@@ -40,6 +40,11 @@ db.sadd = function(key, members) {
     return db.tmp_sadd.apply(db, [key].concat(members));
 };
 
+db.tmp_srem = db.srem;
+db.srem = function(key, members) {
+    return db.tmp_srem.apply(db, [key].concat(members));
+};
+
 var rss = {};
 
 Object.defineProperty(module.exports, "rss", {
@@ -87,6 +92,30 @@ var sortedReferensces = function(references) {
         delete ref.createdAt;
         return ref;
     });
+};
+
+var addPostToIndex = function(post) {
+    var p = Promise.resolve();
+    Tools.forIn(Tools.indexPost(post), function(index, word) {
+        p = p.then(function() {
+            return db.sadd("postSearchIndex:" + word, index.map(function(item) {
+                return JSON.stringify(item);
+            }));
+        });
+    });
+    return p;
+};
+
+var removePostFromIndex = function(post) {
+    var p = Promise.resolve();
+    Tools.forIn(Tools.indexPost(post), function(index, word) {
+        p = p.then(function() {
+            return db.srem("postSearchIndex:" + word, index.map(function(item) {
+                return JSON.stringify(item);
+            }));
+        });
+    });
+    return p;
 };
 
 var threadPostNumbers = function(boardName, threadNumber) {
@@ -725,16 +754,12 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         });
         return Promise.all(promises);
     }).then(function() {
-        var promises = [];
-        Tools.forIn(Tools.indexPost({
+        return addPostToIndex({
             boardName: board.name,
             number: c.postNumber,
             rawText: rawText,
             subject: (fields.subject || null)
-        }), function(index, word) {
-            promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
-        return Promise.all(promises);
     }).then(function() {
         return db.sadd("threadPostNumbers:" + board.name + ":" + threadNumber, c.postNumber);
     }).then(function() {
@@ -927,16 +952,12 @@ var removePost = function(boardName, postNumber, leaveFileInfos) {
     }).then(function() {
         return board.removeExtraData(postNumber);
     }).then(function() {
-        var promises = [];
-        Tools.forIn(Tools.indexPost({
+        return removePostFromIndex({
             boardName: boardName,
             number: postNumber,
             rawText: c.post.rawText,
             subject: c.post.subject
-        }), function(index, word) {
-            promises.push(db.srem("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
-        return Promise.all(promises);
     }).then(function() {
         if (!leaveFileInfos) {
             c.paths.forEach(function(path) {
@@ -1279,19 +1300,34 @@ var toMap = function(index, boardName) {
         post = JSON.parse(post);
         if (boardName && post.boardName != boardName)
             return;
-        map[post.boardName + ":" + post.postNumber + ":" + post.source] = post;
+        var key = post.boardName + ":" + post.postNumber + ":" + post.source;
+        if (!map.hasOwnProperty(key))
+            map[key] = [];
+        map[key].push(post);
     });
     return map;
 };
 
 var findPhrase = function(phrase, boardName) {
-    var promises = Tools.getWords(phrase).map(function(word) {
-        return db.smembers("postSearchIndex:" + word.word);
+    var results = [];
+    var p = Promise.resolve();
+    Tools.getWords(phrase).forEach(function(word) {
+        p = p.then(function() {
+            return db.smembers("postSearchIndex:" + word.word);
+        }).then(function(result) {
+            results.push(result);
+            return Promise.resolve();
+        });
     });
-    return Promise.all(promises).then(function(results) {
+    return p.then(function() {
         if (results.length < 1)
             return {};
         var first = toMap(results[0], boardName);
+        if (results.length < 2) {
+            Tools.forIn(first, function(arr, key) {
+                first[key] = arr[0];
+            });
+        }
         for (var i = 1; i < results.length; ++i) {
             var next = toMap(results[i]);
             for (var key in first) {
@@ -1301,11 +1337,27 @@ var findPhrase = function(phrase, boardName) {
                     delete first[key];
                     continue;
                 }
-                var firstPost = first[key];
-                var nextPost = next[key];
-                ++firstPost.position;
-                if (nextPost.position != firstPost.position)
+                var firstPosts = first[key];
+                var nextPosts = next[key];
+                var outerMatch = -1;
+                for (var j = 0; j < firstPosts.length; ++j) {
+                    var pos = firstPosts[j].position + 1;
+                    var innerMatch = false;
+                    for (var k = 0; k < nextPosts.length; ++k) {
+                        if (pos == nextPosts[k].position) {
+                            innerMatch = true;
+                            break;
+                        }
+                    }
+                    if (innerMatch) {
+                        outerMatch = j;
+                        break;
+                    }
+                }
+                if (outerMatch < 0)
                     delete first[key];
+                else
+                    first[key] = first[key][outerMatch];
             }
         }
         return first;
@@ -1443,16 +1495,12 @@ var rebuildPostSearchIndex = function(boardName, postNumber) {
     var key = boardName + ":" + postNumber;
     console.log(`Rebuilding post search index: [${boardName}] ${postNumber}`);
     return getPost(boardName, postNumber).then(function(post) {
-        var promises = [];
-        Tools.forIn(Tools.indexPost({
+        return addPostToIndex({
             boardName: boardName,
             number: postNumber,
             rawText: post.rawText,
             subject: (post.subject || null)
-        }), function(index, word) {
-            promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
-        return Promise.all(promises);
     });
 };
 
@@ -1645,16 +1693,12 @@ module.exports.editPost = function(req, fields) {
         return board.postExtraData(req, fields, null, c.post)
     }).then(function(extraData) {
         c.extraData = extraData;
-        var promises = [];
-        Tools.forIn(Tools.indexPost({
+        return removePostFromIndex({
             boardName: c.post.boardName,
             number: c.post.number,
             rawText: c.post.rawText,
             subject: c.post.subject
-        }), function(index, word) {
-            promises.push(db.srem("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
-        return Promise.all(promises);
     }).then(function() {
         c.post.email = email || null;
         c.post.markup = markupModes;
@@ -1675,16 +1719,12 @@ module.exports.editPost = function(req, fields) {
     }).then(function() {
         return addReferencedPosts(c.post, referencedPosts);
     }).then(function() {
-        var promises = [];
-        Tools.forIn(Tools.indexPost({
+        return addPostToIndex({
             boardName: board.name,
             number: c.post.number,
             rawText: rawText,
             subject: subject
-        }), function(index, word) {
-            promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
-        return Promise.all(promises);
     }).then(function() {
         Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
         return Promise.resolve();
@@ -1919,16 +1959,12 @@ module.exports.moveThread = function(req, fields) {
                 });
                 return Promise.all(promises);
             }).then(function() {
-                var promises = [];
-                Tools.forIn(Tools.indexPost({
+                return addPostToIndex({
                     boardName: targetBoard.name,
                     number: post.number,
                     rawText: post.rawText,
                     subject: (post.subject || null)
-                }), function(index, word) {
-                    promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
                 });
-                return Promise.all(promises);
             });
         });
         return Promise.all(promises);

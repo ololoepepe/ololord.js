@@ -4,7 +4,7 @@ window.addEventListener("load", function load() {
     var match = window.location.search.match(/^\?query\=([^&]+)&board\=(.+)$/);
     if (!match)
         return searchResultsPlaceholder.parentNode.removeChild(searchResultsPlaceholder);
-    var query = decodeURIComponent(match[1]);
+    var query = decodeURIComponent(match[1].split("+").join(" "));
     var boardName = decodeURIComponent(match[2]);
     var formData = new FormData();
     formData.append("query", query);

@@ -3,7 +3,6 @@
           class="inlineForm">
         <input type="text" class="input" maxlength="{{=it.maxSearchQueryLength}}" name="query"
                size="{{? it.deviceType != "mobile"}}43{{??}}25{{?}}"
-               onkeypress="lord.searchKeyPress(event);"
                {{? it.deviceType != "mobile"}}placeholder="{{=it.tr.searchInputPlaceholder}}"{{?}} value="" />
         <select name="board" class="select{{? it.deviceType == "mobile"}} searchSelect{{?}}">
             <option value="*" {{? !it.searchBoard}}selected="true"{{?}}>[*] {{=it.tr.allBoardsText}}</option>

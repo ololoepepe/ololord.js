@@ -97,13 +97,6 @@ lord.switchShowLogin = function() {
         inp.type = "password";
 };
 
-lord.searchKeyPress = function(e) {
-    e = e || window.event;
-    if (e.keyCode != 13)
-        return;
-    lord.doSearch();
-};
-
 lord.preventOnclick = function(event) {
     if (event) {
         event.stopPropagation();

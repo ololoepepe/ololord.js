@@ -576,6 +576,7 @@ span.newPostCount {
     margin-bottom: 4px;
     padding-top: 10px;
     padding-left: 10px;
+    padding-right: 4px;
     width: 100%
     overflow-x: auto;
     display: table;
@@ -937,7 +938,7 @@ ul.tabWidget > li.activated {
     position: fixed;
     top: 0px;
     background-color: #FFFFEE;
-    width: 100%;
+    width: 99%;
 }
 
 /*
