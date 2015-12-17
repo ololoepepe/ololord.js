@@ -101,7 +101,8 @@ controller.error = function(res, error, ajax) {
             if (Tools.contains(process.argv.slice(2), "--dev-mode"))
                 Global.error(error);
             model.errorMessage = Tools.translate("Error", "errorMessage");
-            model.errorDescription = (error && Util.isString(error)) ? error : "";
+            model.errorDescription = (error && Util.isString(error)) ? error
+                : ((404 == error) ? Tools.translate("404 (not found)", "errorMessage") : "");
         }
         return model;
     };
