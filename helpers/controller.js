@@ -83,14 +83,14 @@ controller.error = function(res, error, ajax) {
         model.title = Tools.translate("Error", "pageTitle");
         if (Util.isError(error)) {
             if (Tools.contains(process.argv.slice(2), "--dev-mode")) {
-                console.log(error);
-                console.log(error.stack);
+                Global.error(error);
+                Global.error(error.stack);
             }
             model.errorMessage = Tools.translate("Internal error", "errorMessage");
             model.errorDescription = error.message;
         } else if (Util.isObject(error) && (error.error || error.ban)) {
             if (Tools.contains(process.argv.slice(2), "--dev-mode"))
-                console.log(error);
+                Global.error(error);
             if (error.ban) {
                 model.ban = error.ban;
             } else {
@@ -99,7 +99,7 @@ controller.error = function(res, error, ajax) {
             }
         } else {
             if (Tools.contains(process.argv.slice(2), "--dev-mode"))
-                console.log(error);
+                Global.error(error);
             model.errorMessage = Tools.translate("Error", "errorMessage");
             model.errorDescription = (error && Util.isString(error)) ? error : "";
         }
@@ -136,6 +136,7 @@ controller.error = function(res, error, ajax) {
 };
 
 controller.notFound = function(res) {
+    Global.error(404);
     var f = function() {
         var model = {};
         model.title = Tools.translate("Error 404", "pageTitle");

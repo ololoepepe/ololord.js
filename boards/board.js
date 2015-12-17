@@ -374,7 +374,7 @@ var getRules = function(boardName) {
                 file.extraData.year = metadata.year || "";
                 return Promise.resolve(metadata);
             }).catch(function(err) {
-                console.log(err.stack ? err.stack : err);
+                Global.error(err.stack || err);
                 file.extraData.album = "";
                 file.extraData.artist = "";
                 file.extraData.title = "";
@@ -424,7 +424,7 @@ var getRules = function(boardName) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
                 })
             }).catch(function(err) {
-                console.log(err.stack ? err.stack : err);
+                Global.error(err.stack || err);
                 file.thumbPath = thumbPath;
                 return generateRandomImage(file.hash, file.mimeType, thumbPath);
             }).then(function() {

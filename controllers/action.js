@@ -28,7 +28,7 @@ var getFiles = function(fields, files, transaction) {
     var tmpFiles = Tools.filterIn(files, function(file) {
         if (file.size < 1) {
             FS.remove(file.path).catch(function(err) {
-                console.log(err.stack);
+                Global.error(err.stack || err);
             });
             return false;
         }

@@ -2,6 +2,7 @@
 
 var cluster = require("cluster");
 var expressCluster = require("express-cluster");
+var Log4JS = require("log4js");
 var OS = require("os");
 
 var config = require("./helpers/config");
@@ -12,6 +13,26 @@ var Global = require("./helpers/global");
 var Tools = require("./helpers/tools");
 
 Global.IPC = require("./helpers/ipc")(cluster);
+
+var appenders = [];
+var logTargets = config("system.log.targets", ["console", "file"]);
+if (logTargets.indexOf("console") >= 0)
+    appenders.push({ type: "console" });
+if (logTargets.indexOf("console") >= 0) {
+    appenders.push({
+        type: "file",
+        filename: __dirname + "/logs/ololord.log",
+        maxLogSize: config("system.log.maxSize", 1048576),
+        backups: config("system.log.backups", 100)
+    });
+}
+Log4JS.configure({ appenders: appenders });
+Global.logger = Log4JS.getLogger();
+["trace", "debug", "info", "warn", "error", "fatal"].forEach(function(name) {
+    Global[name] = function() {
+        return Global.logger[name].apply(Global.logger, arguments);
+    };
+});
 
 config.installSetHook("site.locale", Tools.setLocale);
 
@@ -79,7 +100,7 @@ var spawnCluster = function() {
                     return controller.removeFromCached(data);
                 });
                 Global.IPC.send("ready").catch(function(err) {
-                    console.log(err);
+                    Global.error(err);
                 });
             });
             server.on("connection", function(socket) {
@@ -90,7 +111,7 @@ var spawnCluster = function() {
                 });
             });
         }).catch(function(err) {
-            console.log(err);
+            Global.error(err);
         });
     }, {
         count: count,
@@ -146,7 +167,7 @@ if (cluster.isMaster) {
             });
         });
     }).catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         process.exit(1);
     });
 } else {
@@ -157,18 +178,18 @@ if (cluster.isMaster) {
             postNumber: postNumber,
             action: action
         }).catch(function(err) {
-            console.log(err.stack || err);
+            Global.error(err.stack || err);
         });
     };
     Global.addToCached = function(keyParts) {
         controller.addToCached(keyParts);
         return Global.IPC.send("addToCached", keyParts).catch(function(err) {
-            console.log(err.stack || err);
+            Global.error(err.stack || err);
         });
     };
     Global.removeFromCached = function(keyParts) {
         return Global.IPC.send("removeFromCached", ["thread"].concat(keyParts)).catch(function(err) {
-            console.log(err.stack || err);
+            Global.error(err.stack || err);
         });
     };
     spawnCluster();

@@ -1,4 +1,5 @@
 var Database = require("../helpers/database");
+var Global = require("../helpers/global");
 
 module.exports = function(req, res, next) {
     Database.registeredUser(req.hashpass).then(function(user) {
@@ -8,7 +9,7 @@ module.exports = function(req, res, next) {
         }
         next();
     }).catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         next();
     });
 };

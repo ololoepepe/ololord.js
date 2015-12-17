@@ -4,11 +4,12 @@ var device = require("express-device");
 var express = require("express");
 
 var config = require("../helpers/config");
+var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
 var log = function(req, res, next) {
     var args;
-    switch (config("system.middlewareLog.verbosity", "")) {
+    switch (config("system.log.middleware.verbosity", "")) {
     case "all":
         args = [Tools.preferIPv4(req.ip), req.path, req.query];
         break;
@@ -22,20 +23,20 @@ var log = function(req, res, next) {
         break;
     }
     if (args)
-        console.log.apply(console, args);
+        Global.info.apply(Global.logger, args);
     next();
 };
 
 module.exports = [];
 
-if (config("system.middlewareLog.before", "") == "all") {
+if (config("system.log.middleware.before", "") == "all") {
     module.exports.push(log);
 }
 
 module.exports.push(require("./ip-fix"));
 
 var setupDdos = function() {
-    if (config("system.middlewareLog.before", "") == "ddos")
+    if (config("system.log.middleware.before", "") == "ddos")
         module.exports.push(log);
 
     if (config("server.ddosProtection.enabled", true)) {
@@ -55,7 +56,7 @@ var setupDdos = function() {
 };
 
 var setupStatic = function() {
-    if (config("system.middlewareLog.before", "") == "static")
+    if (config("system.log.middleware.before", "") == "static")
         module.exports.push(log);
 
     module.exports.push(express.static(__dirname + "/../public"));
@@ -69,7 +70,7 @@ if (config("server.ddosProtection.static", false)) {
     setupDdos();
 }
 
-if (config("system.middlewareLog.before", "") == "middleware")
+if (config("system.log.middleware.before", "") == "middleware")
     module.exports.push(log);
 
 module.exports = module.exports.concat([
@@ -79,5 +80,5 @@ module.exports = module.exports.concat([
     require("./registered-user")
 ]);
 
-if (config("system.middlewareLog.before", "") == "request")
+if (config("system.log.middleware.before", "") == "request")
     module.exports.push(log);

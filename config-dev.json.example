@@ -5,9 +5,17 @@ Example:
 {
     "system": {
         "workerCount": 1,
-        "middlewareLog": {
-            "before": "ddos",
-            "verbosity": "all"
+        "log": {
+            "targets": [
+                "console",
+                "file"
+            ],
+            "maxSize": 1048576,
+            "backups": 100,
+            "middleware": {
+                "before": "ddos",
+                "verbosity": "all"
+            }
         },
         "fileDownloadProxy": "127.0.0.1:3128",
         "fileDownloadProxyAuth": "user:password",

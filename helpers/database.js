@@ -962,7 +962,7 @@ var removePost = function(boardName, postNumber, leaveFileInfos) {
         if (!leaveFileInfos) {
             c.paths.forEach(function(path) {
                 return FS.remove(path).catch(function(err) {
-                    console.log(err);
+                    Global.error(err.stack || err);
                 });
             });
         }
@@ -995,7 +995,7 @@ var removeThread = function(boardName, threadNumber, archived, leaveFileInfos) {
             }).then(function() {
                 return db.srem("threadsPlannedForDeletion", boardName + ":" + threadNumber);
             }).catch(function(err) {
-                console.log(err);
+                Global.error(err.stack || err);
             });
         }, 5000);
         return Promise.resolve();
@@ -1173,7 +1173,7 @@ Transaction.prototype.rollback = function() {
             if (!exists)
                 return;
             FS.remove(path).catch(function(err) {
-                console.log(err);
+                Global.error(err.stack || err);
             });
         });
     });
@@ -2040,7 +2040,7 @@ module.exports.deleteFile = function(req, res, fields) {
         paths.push(__dirname + "/../public/" + c.post.boardName + "/thumb/" + c.fileInfo.thumb.name);
         paths.forEach(function(path) {
             FS.remove(path).catch(function(err) {
-                console.log(err);
+                Global.error(err);
             });
         });
         Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
@@ -2204,7 +2204,7 @@ module.exports.banUser = function(req, ip, bans) {
                     if (ban.postNumber) {
                         setTimeout(function() {
                             updatePostBanInfo(boardName, ban).catch(function(err) {
-                                console.log(err.stack || err);
+                                Global.error(err.stack || err);
                             });
                         }, Math.ceil(ttl * Tools.Second * 1.002)); //NOTE: Adding extra delay
                     }
@@ -2278,7 +2278,7 @@ module.exports.initialize = function() {
                         return Promise.resolve();
                     setTimeout(function() {
                         updatePostBanInfo(boardName, ban).catch(function(err) {
-                            console.log(err.stack || err);
+                            Global.error(err.stack || err);
                         });
                     }, Math.ceil(ttl * Tools.Second * 1.002)); //NOTE: Adding extra delay
                     return Promise.resolve();

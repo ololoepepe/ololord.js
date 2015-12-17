@@ -631,7 +631,7 @@ var addTask = function(map, key, f, data) {
     } else {
         map[key] = {};
         return f(key, data).catch(function(err) {
-            console.log(err.stack || err);
+            Global.error(err.stack || err);
         }).then(function() {
             var g = function() {
                 var scheduled = map[key];
@@ -645,7 +645,7 @@ var addTask = function(map, key, f, data) {
                     return n.data;
                 });
                 f(key, data).catch(function(err) {
-                    console.log(err.stack || err);
+                    Global.error(err.stack || err);
                 }).then(function() {
                     g();
                     next.forEach(function(n) {

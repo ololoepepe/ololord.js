@@ -150,7 +150,7 @@ var getTwitterEmbeddedHtml = function(href, defaultHtml) {
             return Promise.reject(err);
         }
     }).catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function(html) {
         return Promise.resolve(html);
@@ -191,7 +191,7 @@ var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
             return Promise.reject(err);
         }
     }).catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function(html) {
         return Promise.resolve(html);
@@ -235,7 +235,7 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
             return Promise.reject(err);
         }
     }).catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function(html) {
         return Promise.resolve(html);

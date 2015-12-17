@@ -3,9 +3,17 @@ Actual file name must be config-dev.json.
 {
     "system": {
         "workerCount": 1,
-        "middlewareLog": {
-            "before": "",
-            "verbosity": "ip"
+        "log": {
+            "targets": [
+                "console",
+                "file"
+            ],
+            "maxSize": 1048576,
+            "backups": 100,
+            "middleware": {
+                "before": "",
+                "verbosity": "ip"
+            }
         },
         "fileDownloadProxy": "",
         "fileDownloadProxyAuth": "",
