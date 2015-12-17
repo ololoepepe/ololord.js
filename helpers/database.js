@@ -340,7 +340,7 @@ var getPost = function(boardName, postNumber, options) {
     if (!board)
         return Promise.reject(Tools.translate("Invalid board"));
     if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject(Tools.translate("Invalid post"));
+        return Promise.reject(Tools.translate("Invalid post number"));
     var opts = (typeof options == "object");
     var c = {};
     var key = boardName + ":" + postNumber;
@@ -1666,6 +1666,8 @@ module.exports.editPost = function(req, fields) {
             markupModes.push(val);
     });
     return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
+        if (!post)
+            return Promise.reject(Tools.translate("Invalid post"));
         if ((!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
             return Promise.reject(Tools.translate("Not enough rights"));
@@ -1804,6 +1806,8 @@ module.exports.deletePost = function(req, res, fields) {
     return controller.checkBan(req, res, board.name, true).then(function() {
         return getPost(board.name, postNumber);
     }).then(function(post) {
+        if (!post)
+            return Promise.reject(Tools.translate("Invalid post"));
         c.post = post;
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
@@ -2065,6 +2069,8 @@ module.exports.editAudioTags = function(req, res, fields) {
     }).then(function() {
         return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
     }).then(function(post) {
+        if (!post)
+            return Promise.reject(Tools.translate("Invalid post"));
         c.post = post;
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
