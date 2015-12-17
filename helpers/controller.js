@@ -615,7 +615,13 @@ controller.translationsModel = function() {
     translate("Bad gateway", "error502Text");
     translate("Service unavailable", "error503Text");
     translate("Gateway timeout", "error504Text");
+    translate("CloudFlare: server is returning an unknown error", "error520Text");
+    translate("CloudFlare: server is down", "error521Text");
+    translate("CloudFlare: connection timed out", "error522Text");
     translate("CloudFlare: server is unreachable", "error523Text");
+    translate("CloudFlare: a timeout occured", "error524Text");
+    translate("CloudFlare: SSL handshake failed", "error525Text");
+    translate("CloudFlare: invalid SSL certificate", "error526Text");
     translate("Unexpected end of token list", "unexpectedEndOfTokenListErrorText");
     translate("Failed to generate hash", "failedToGenerateHashErrorText");
     translate("The thread is already in favorites", "alreadyInFavoritesErrorText");

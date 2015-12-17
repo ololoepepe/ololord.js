@@ -2002,9 +2002,39 @@
             "value": "Шлюз не дождался ответа от сервера"
         }
     },
+    "CloudFlare: server is returning an unknown error": {
+        "error520Text": {
+            "value": "CloudFlare: сервер возвращает неизвестную ошибку"
+        }
+    },
+    "CloudFlare: server is down": {
+        "error521Text": {
+            "value": "CloudFlare: сервер упал"
+        }
+    },
+    "CloudFlare: connection timed out": {
+        "error522Text": {
+            "value": "CloudFlare: время ожидания соединения истекло"
+        }
+    },
     "CloudFlare: server is unreachable": {
         "error523Text": {
             "value": "CloudFlare: сервер недоступен"
+        }
+    },
+    "CloudFlare: a timeout occured": {
+        "error524Text": {
+            "value": "CloudFlare: время ожидания ответа от сервера истекло"
+        }
+    },
+    "CloudFlare: SSL handshake failed": {
+        "error525Text": {
+            "value": "CloudFlare: не удалось осуществить рукопожатие SSL"
+        }
+    },
+    "CloudFlare: invalid SSL certificate": {
+        "error526Text": {
+            "value": "CloudFlare: недействительный SSL-сертификат"
         }
     },
     "Unsupported file type": {

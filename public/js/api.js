@@ -1508,7 +1508,13 @@ lord.handleError = function(error) {
             case 502:
             case 503:
             case 504:
+            case 520: //CloudFlare
+            case 521: //CloudFlare
+            case 522: //CloudFlare
             case 523: //CloudFlare
+            case 524: //CloudFlare
+            case 525: //CloudFlare
+            case 526: //CloudFlare
             text = lord.text("error" + error.status + "Text") + " (" + error.status + ")";
                 break;
             default:
