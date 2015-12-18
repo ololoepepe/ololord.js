@@ -62,22 +62,7 @@ var renderPost = function(req, post) {
     });
 };
 
-/**
- * @deprecated Will be deleted in next beta.
- */
-router.get("/posts.json", function(req, res) {
-    var posts = postIdentifiers(req);
-    boardModel.getPosts(posts, req.hashpass).then(function(posts) {
-        var promises = posts.map(renderPost.bind(null, req));
-        return Promise.all(promises);
-    }).then(function(posts) {
-        res.json(posts);
-    }).catch(function(err) {
-        controller.error(res, err, true);
-    });
-});
-
-router.get("/post.json", function(req, res) {
+router.get("/api/post.json", function(req, res) {
     boardModel.getPosts(postIdentifiers(req, true), req.hashpass).then(function(posts) {
         return renderPost(req, posts[0]);
     }).then(function(post) {
@@ -87,7 +72,7 @@ router.get("/post.json", function(req, res) {
     });
 });
 
-router.get("/userIp.json", function(req, res) {
+router.get("/api/userIp.json", function(req, res) {
     Database.getPost(req.query.boardName, +req.query.postNumber).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("No such post"));
@@ -103,7 +88,7 @@ router.get("/userIp.json", function(req, res) {
     });
 });
 
-router.get("/threadInfo.json", function(req, res) {
+router.get("/api/threadInfo.json", function(req, res) {
     var board = Board.board(req.query.boardName);
     var threadNumber = +req.query.threadNumber;
     boardModel.getThreadInfo(board, req.hashpass, threadNumber).then(function(thread) {
@@ -113,7 +98,7 @@ router.get("/threadInfo.json", function(req, res) {
     });
 });
 
-router.get("/fileInfo.json", function(req, res) {
+router.get("/api/fileInfo.json", function(req, res) {
     boardModel.getFileInfos([{
         fileName: req.query.fileName,
         fileHash: req.query.fileHash
@@ -124,7 +109,7 @@ router.get("/fileInfo.json", function(req, res) {
     });
 });
 
-router.get("/lastPostNumbers.json", function(req, res) {
+router.get("/api/lastPostNumbers.json", function(req, res) {
     var boardNames = req.query.boardNames;
     if (boardNames && !Util.isArray(boardNames))
         boardNames = [boardNames];
@@ -141,7 +126,7 @@ router.get("/lastPostNumbers.json", function(req, res) {
     });
 });
 
-router.get("/lastPostNumber.json", function(req, res) {
+router.get("/api/lastPostNumber.json", function(req, res) {
     boardModel.getLastPostNumbers([req.query.boardName]).then(function(lastPostNumbers) {
         res.json({ lastPostNumber: lastPostNumbers[0] });
     }).catch(function(err) {
@@ -149,7 +134,7 @@ router.get("/lastPostNumber.json", function(req, res) {
     });
 });
 
-router.get("/threadLastPostNumbers.json", function(req, res) {
+router.get("/api/threadLastPostNumbers.json", function(req, res) {
     var threads = req.query.threads;
     if (Util.isString(threads))
         threads = [threads];
@@ -165,7 +150,7 @@ router.get("/threadLastPostNumbers.json", function(req, res) {
     });
 });
 
-router.get("/threadLastPostNumber.json", function(req, res) {
+router.get("/api/threadLastPostNumber.json", function(req, res) {
     boardModel.getThreadLastPostNumber(req.query.boardName, req.query.threadNumber).then(function(number) {
         res.json({ lastPostNumber: number });
     }).catch(function(err) {
@@ -173,7 +158,7 @@ router.get("/threadLastPostNumber.json", function(req, res) {
     });
 });
 
-router.get("/captchaQuota.json", function(req, res) {
+router.get("/api/captchaQuota.json", function(req, res) {
     Database.getUserCaptchaQuota(req.query.boardName, req.ip).then(function(quota) {
         res.json({ quota: quota });
     }).catch(function(err) {
@@ -181,7 +166,7 @@ router.get("/captchaQuota.json", function(req, res) {
     });
 });
 
-router.get("/bannedUser.json", function(req, res) {
+router.get("/api/bannedUser.json", function(req, res) {
     var ip = req.query.ip;
     if (!ip)
         return controller.error(res, Tools.translate("Invalid IP address"), true);
@@ -199,7 +184,7 @@ router.get("/bannedUser.json", function(req, res) {
     });
 });
 
-router.get("/fileHeaders.json", function(req, res) {
+router.get("/api/fileHeaders.json", function(req, res) {
     if (!req.query.url)
         return controller.error(res, Tools.translate("Invalid URL"), true);
     var proxy = Tools.proxy();
@@ -229,7 +214,7 @@ router.get("/fileHeaders.json", function(req, res) {
     });
 });
 
-router.get("/chatMessages.json", function(req, res) {
+router.get("/api/chatMessages.json", function(req, res) {
     Chat.getMessages(req, req.query.lastRequestDate).then(function(result) {
         res.json(result);
     }).catch(function(err) {
@@ -239,13 +224,13 @@ router.get("/chatMessages.json", function(req, res) {
 
 Captcha.captchaIds().forEach(function(id) {
     Captcha.captcha(id).apiRoutes().forEach(function(route) {
-        router[route.method](route.path, route.handler);
+        router[route.method]("/api" + route.path, route.handler);
     });
 });
 
 Board.boardNames().forEach(function(name) {
     Board.board(name).apiRoutes().forEach(function(route) {
-        router[route.method](route.path, route.handler);
+        router[route.method]("/api" + route.path, route.handler);
     });
 });
 

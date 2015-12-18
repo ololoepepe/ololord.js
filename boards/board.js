@@ -209,10 +209,6 @@ var Board = function(name, title, options) {
     return []; //[ { method, path, handler }, ... ]
 };
 
-/*public*/ Board.prototype.routes = function() {
-    return []; //[ { method, path, handler }, ... ]
-};
-
 /*public*/ Board.prototype.actionRoutes = function() {
     return []; //[ { method, path, handler }, ... ]
 };

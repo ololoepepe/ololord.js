@@ -166,7 +166,7 @@ var testParameters = function(fields, files, creatingThread) {
     //NOTE: Yep, return nothing
 };
 
-router.post("/markupText", function(req, res) {
+router.post("/action/markupText", function(req, res) {
     var c = {};
     var date = Tools.now();
     Tools.parseForm(req).then(function(result) {
@@ -214,7 +214,7 @@ router.post("/markupText", function(req, res) {
     });
 });
 
-router.post("/createPost", function(req, res) {
+router.post("/action/createPost", function(req, res) {
     var c = {};
     var transaction = new Database.Transaction();
     Tools.parseForm(req).then(function(result) {
@@ -244,7 +244,7 @@ router.post("/createPost", function(req, res) {
     });
 });
 
-router.post("/createThread", function(req, res) {
+router.post("/action/createThread", function(req, res) {
     var c = {};
     var transaction = new Database.Transaction();
     Tools.parseForm(req).then(function(result) {
@@ -274,7 +274,7 @@ router.post("/createThread", function(req, res) {
     });
 });
 
-router.post("/editPost", function(req, res) {
+router.post("/action/editPost", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
@@ -290,7 +290,7 @@ router.post("/editPost", function(req, res) {
     });
 });
 
-router.post("/addFiles", function(req, res) {
+router.post("/action/addFiles", function(req, res) {
     var c = {};
     var transaction = new Database.Transaction();
     Tools.parseForm(req).then(function(result) {
@@ -337,7 +337,7 @@ router.post("/addFiles", function(req, res) {
     });
 });
 
-router.post("/deletePost", function(req, res) {
+router.post("/action/deletePost", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
@@ -351,7 +351,7 @@ router.post("/deletePost", function(req, res) {
     });
 });
 
-router.post("/deleteFile", function(req, res) {
+router.post("/action/deleteFile", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         return Database.deleteFile(req, res, result.fields);
     }).then(function(result) {
@@ -361,7 +361,7 @@ router.post("/deleteFile", function(req, res) {
     });
 });
 
-router.post("/moveThread", function(req, res) {
+router.post("/action/moveThread", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
@@ -377,7 +377,7 @@ router.post("/moveThread", function(req, res) {
     });
 });
 
-router.post("/editAudioTags", function(req, res) {
+router.post("/action/editAudioTags", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         return Database.editAudioTags(req, res, result.fields);
     }).then(function(result) {
@@ -387,7 +387,7 @@ router.post("/editAudioTags", function(req, res) {
     });
 });
 
-router.post("/banUser", function(req, res) {
+router.post("/action/banUser", function(req, res) {
     if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
         return controller.error(res, Tools.translate("Not enough rights"), true);
     var c = {};
@@ -435,7 +435,7 @@ router.post("/banUser", function(req, res) {
     });
 });
 
-router.post("/delall", function(req, res) {
+router.post("/action/delall", function(req, res) {
     if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
         return controller.error(res, Tools.translate("Not enough rights"), true);
     var c = {};
@@ -451,7 +451,7 @@ router.post("/delall", function(req, res) {
     });
 });
 
-router.post("/setThreadFixed", function(req, res) {
+router.post("/action/setThreadFixed", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
@@ -467,7 +467,7 @@ router.post("/setThreadFixed", function(req, res) {
     });
 });
 
-router.post("/setThreadClosed", function(req, res) {
+router.post("/action/setThreadClosed", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
@@ -483,7 +483,7 @@ router.post("/setThreadClosed", function(req, res) {
     });
 });
 
-router.post("/sendChatMessage", function(req, res) {
+router.post("/action/sendChatMessage", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         var fields = result.fields;
         return Chat.sendMessage(req, fields.boardName, +fields.postNumber, fields.text);
@@ -494,7 +494,7 @@ router.post("/sendChatMessage", function(req, res) {
     });
 });
 
-router.post("/deleteChatMessages", function(req, res) {
+router.post("/action/deleteChatMessages", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         var fields = result.fields;
         return Chat.deleteMessages(req, fields.boardName, fields.postNumber);
@@ -505,7 +505,7 @@ router.post("/deleteChatMessages", function(req, res) {
     });
 });
 
-router.post("/search", function(req, res) {
+router.post("/action/search", function(req, res) {
     var c = { model: {} };
     Tools.parseForm(req).then(function(result) {
         var fields = result.fields;
@@ -570,13 +570,13 @@ router.post("/search", function(req, res) {
 
 Captcha.captchaIds().forEach(function(id) {
     Captcha.captcha(id).actionRoutes().forEach(function(route) {
-        router[route.method](route.path, route.handler);
+        router[route.method]("/action" + route.path, route.handler);
     });
 });
 
 Board.boardNames().forEach(function(name) {
     Board.board(name).actionRoutes().forEach(function(route) {
-        router[route.method](route.path, route.handler);
+        router[route.method]("/action" + route.path, route.handler);
     });
 });
 
