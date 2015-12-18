@@ -66,9 +66,7 @@ router.get("/markup.html", function(req, res) {
         }
         return controller("markup", model);
     };
-    controller.html(f.bind(null), "markup").then(function(data) {
-        res.send(data);
-    }).catch(function(err) {
+    Tools.controllerHtml(req, res, f.bind(null), "markup").catch(function(err) {
         controller.error(res, err);
     });
 });

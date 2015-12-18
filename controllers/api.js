@@ -124,49 +124,6 @@ router.get("/fileInfo.json", function(req, res) {
     });
 });
 
-/**
- * @deprecated Will be deleted in next beta.
- */
-router.get("/lastPosts.json", function(req, res) {
-    if (req.query.threads) {
-        var threads = req.query.threads;
-        if (Util.isString(threads))
-            threads = [threads];
-        var promises = threads.map(function(thread) {
-            var board = Board.board(thread.split(":").shift());
-            if (!board)
-                return Promise.resolve(null);
-            var threadNumber = +thread.split(":")[1];
-            if (isNaN(threadNumber) || threadNumber <= 0)
-                return Promise.resolve(null);
-            var lastPostNumber = +thread.split(":").pop();
-            return boardModel.getLastPosts(board, req.hashpass, threadNumber, lastPostNumber);
-        });
-        Promise.all(promises).then(function(results) {
-            var promises = results.map(function(posts) {
-                return Promise.all(posts.map(renderPost.bind(null, req)));
-            });
-            return Promise.all(promises);
-        }).then(function(results) {
-            res.json(results);
-        }).catch(function(err) {
-            controller.error(res, err, true);
-        });
-    } else {
-        var board = Board.board(req.query.boardName);
-        var threadNumber = +req.query.threadNumber;
-        var lastPostNumber = +req.query.lastPostNumber;
-        boardModel.getLastPosts(board, req.hashpass, threadNumber, lastPostNumber).then(function(posts) {
-            var promises = posts.map(renderPost.bind(null, req));
-            return Promise.all(promises);
-        }).then(function(posts) {
-            res.json(posts);
-        }).catch(function(err) {
-            controller.error(res, err, true);
-        });
-    }
-});
-
 router.get("/lastPostNumbers.json", function(req, res) {
     var boardNames = req.query.boardNames;
     if (boardNames && !Util.isArray(boardNames))

@@ -12,9 +12,7 @@ router.get("/faq.html", function(req, res) {
         model.extraScripts = [ { fileName: "faq.js" } ];
         return controller("faq", model);
     };
-    controller.html(f.bind(null), "faq").then(function(data) {
-        res.send(data);
-    }).catch(function(err) {
+    Tools.controllerHtml(req, res, f.bind(null), "faq").catch(function(err) {
         controller.error(res, err);
     });
 });

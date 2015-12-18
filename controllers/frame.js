@@ -14,9 +14,7 @@ router.get("/frame.html", function(req, res) {
         return controller("frame", model);
     };
     var deviceType = (req.device.type == "desktop") ? "desktop" : "mobile";
-    controller.html(f.bind(null, deviceType), "frame", deviceType).then(function(data) {
-        res.send(data);
-    }).catch(function(err) {
+    Tools.controllerHtml(req, res, f.bind(null, deviceType), "frame", deviceType).catch(function(err) {
         controller.error(res, err);
     });
 });
@@ -28,9 +26,7 @@ router.get("/frameList.html", function(req, res) {
         model.extraScripts = [ { fileName: "frame-list.js" } ];
         return controller("frameList", model);
     };
-    controller.html(f.bind(null), "frameList").then(function(data) {
-        res.send(data);
-    }).catch(function(err) {
+    Tools.controllerHtml(req, res, f.bind(null), "frameList").catch(function(err) {
         controller.error(res, err);
     });
 });

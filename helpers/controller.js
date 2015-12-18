@@ -151,8 +151,8 @@ controller.notFound = function(res) {
             return controller("notFound", model);
         });
     };
-    controller.html(f.bind(null), "notFound").then(function(data) {
-        res.status(404).send(data);
+    controller.html(f.bind(null), null, "notFound").then(function(data) {
+        res.status(404).send(data.data);
     }).catch(function(err) {
         controller.error(res, err);
     });
@@ -786,12 +786,12 @@ var cachePath = function() {
     return config("system.tmpPath", __dirname + "/../tmp") + "/cache-html" + (path ? ("/" + path + ".html") : "");
 };
 
-controller.html = function(f) {
-    var args = Array.prototype.slice.call(arguments, 1);
+controller.html = function(f, ifModifiedSince) {
+    var args = Array.prototype.slice.call(arguments, 2);
     var path = cachePath(args);
     var key = args.join(":");
     if (cachedHtml.hasOwnProperty(key))
-        return Tools.readFile(path);
+        return Tools.readFile(path, ifModifiedSince);
     var c = {};
     return f().then(function(data) {
         c.data = data;
@@ -799,10 +799,14 @@ controller.html = function(f) {
             return Promise.resolve();
         return Tools.writeFile(path, c.data);
     }).then(function() {
+        c.lastModified = Tools.now();
         cachedHtml[key] = {};
         return Global.addToCached(args);
     }).then(function() {
-        return Promise.resolve(c.data);
+        return Promise.resolve({
+            data: c.data,
+            lastModified: c.lastModified
+        });
     });
 };
 

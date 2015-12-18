@@ -12,9 +12,7 @@ router.get("/login.html", function(req, res) {
         model.extraScripts = [ { fileName: "login.js" } ];
         return controller("login", model);
     };
-    controller.html(f.bind(null), "login").then(function(data) {
-        res.send(data);
-    }).catch(function(err) {
+    Tools.controllerHtml(req, res, f.bind(null), "login").catch(function(err) {
         controller.error(res, err);
     });
 });

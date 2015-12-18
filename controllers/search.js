@@ -12,9 +12,7 @@ router.get("/search.html", function(req, res) {
         model.extraScripts = [ { fileName: "search.js" } ];
         return controller("search", model);
     };
-    controller.html(f.bind(null), "search").then(function(data) {
-        res.send(data);
-    }).catch(function(err) {
+    Tools.controllerHtml(req, res, f.bind(null), "search").catch(function(err) {
         controller.error(res, err);
     });
 });

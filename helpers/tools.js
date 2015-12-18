@@ -15,6 +15,7 @@ var Util = require("util");
 var XRegExp = require("xregexp");
 
 var config = require("./config");
+var Global = require("./global");
 
 var translate = require("cute-localize")({
     locale: config("site.locale", "en"),
@@ -535,21 +536,21 @@ var recover = function(c, err) {
     if (!c.fd)
         return Promise.reject(err);
     return flockFile(c.fd, "un").catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         return Promise.resolve();
     }).then(function() {
         if (c.noclose)
             return Promise.resolve();
         return closeFile(c.fd);
     }).catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         return Promise.resolve();
     }).then(function() {
         return Promise.reject(err);
     });
 };
 
-module.exports.readFile = function(path) {
+module.exports.readFile = function(path, ifModifiedSince) {
     var c = {};
     return openFile(path, "r").then(function(fd) {
         c.fd = fd;
@@ -558,6 +559,9 @@ module.exports.readFile = function(path) {
         c.locked = true;
         return FS.stat(path);
     }).then(function(stats) {
+        c.lastModified = stats.node.mtime;
+        if (ifModifiedSince && +ifModifiedSince >= +stats.mtime)
+            return Promise.resolve();
         if (stats.size <= 0)
             return Promise.resolve();
         c.buffer = new Buffer(stats.size);
@@ -569,7 +573,10 @@ module.exports.readFile = function(path) {
         c.locked = false;
         return closeFile(c.fd);
     }).then(function() {
-        return Promise.resolve(c.data);
+        return Promise.resolve({
+            data: c.data,
+            lastModified: c.lastModified
+        });
     }).catch(recover.bind(null, c));
 };
 
@@ -605,4 +612,19 @@ module.exports.removeFile = function(path) {
         c.locked = false;
         return Promise.resolve();
     }).catch(recover.bind(null, c));
+};
+
+var controller;
+
+module.exports.controllerHtml = function(req, res, f, keys) {
+    if (!controller)
+        controller = require("./controller"); //NOTE: Circular dependency workaround
+    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
+    var args = [f, ifModifiedSince].concat(Array.prototype.slice.call(arguments, 3));
+    return controller.html.apply(controller, args).then(function(data) {
+        res.setHeader("Last-Modified", data.lastModified.toUTCString());
+        if (+ifModifiedSince >= +data.lastModified)
+            res.status(304);
+        res.send(data.data);
+    });
 };

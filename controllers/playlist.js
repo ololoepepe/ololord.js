@@ -12,9 +12,7 @@ router.get("/playlist.html", function(req, res) {
         model.extraScripts = [ { fileName: "playlist.js" } ];
         return controller("playlist", model);
     };
-    controller.html(f.bind(null), "playlist").then(function(data) {
-        res.send(data);
-    }).catch(function(err) {
+    Tools.controllerHtml(req, res, f.bind(null), "playlist").catch(function(err) {
         controller.error(res, err);
     });
 });
