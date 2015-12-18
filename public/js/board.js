@@ -1358,8 +1358,6 @@ lord.fileAddedCommon = function(div, file) {
             return lord.doWork("getFileHash", data);
         }).then(function(fileHash) {
             return lord.api("fileInfo", { fileHash: fileHash }).then(function(fileInfo) {
-                if (!fileInfo)
-                    return;
                 var img = lord.node("img");
                 img.src = "/" + prefix + "img/storage.png";
                 img.title = lord.text("fileExistsOnServerText");
@@ -1375,6 +1373,8 @@ lord.fileAddedCommon = function(div, file) {
                 div.fileHash = fileHash;
                 if (div.droppedFile)
                     delete div.droppedFile;
+            }).catch(function(err) {
+                console.log(err);
             });
         }).catch(lord.handleError);
     }
