@@ -2220,11 +2220,6 @@
             "value": "На этой доске постинг запрещен"
         }
     },
-    "No such thread or no access to thread": {
-        "_default": {
-            "value": "Нет такого тред или нет доступа к треду"
-        }
-    },
     "Invalid captcha engine": {
         "_default": {
             "value": "Недействительный движок капчи"
@@ -2345,11 +2340,6 @@
             "value": "Недействительные аргументы"
         }
     },
-    "Failed to get post": {
-        "faliedToGetPostErrorText": {
-            "value": "Не удалось получить пост"
-        }
-    },
     "No such token in the table": {
         "noTokenInTableErrorText": {
             "value": "В таблице нет такого токена"
@@ -2378,6 +2368,11 @@
     "404 (not found)": {
         "errorMessage": {
             "value": "404 (не найдено)"
+        }
+    },
+    "Invalid page number": {
+        "_default": {
+            "value": "Недействительный номер страницы"
         }
     }
 }

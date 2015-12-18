@@ -210,17 +210,13 @@ module.exports.getThread = function(boardName, threadNumber) {
     var c = {};
     return db.hget("threads:" + boardName, threadNumber).then(function(thread) {
         if (!thread)
-            return Promise.resolve(null);
+            return Promise.reject(Tools.translate("No such thread"));
         c.thread = JSON.parse(thread);
         return db.hget("threadUpdateTimes:" + boardName, thread.number);
     }).then(function(time) {
-        if (!c.thread)
-            return Promise.resolve(null);
         c.thread.updatedAt = time;
         return threadPostNumbers(boardName, c.thread.number);
     }).then(function(postNumbers) {
-        if (!c.thread)
-            return Promise.resolve(null);
         c.thread.postNumbers = postNumbers;
         return Promise.resolve(c.thread);
     });
@@ -345,25 +341,19 @@ var getPost = function(boardName, postNumber, options) {
     var c = {};
     var key = boardName + ":" + postNumber;
     var p = db.hget("posts", key).then(function(post) {
-        c.post = post ? JSON.parse(post) : null;
-        return c.post;
-    }).then(function(post) {
         if (!post)
-            return Promise.resolve(post);
-        return bannedFor(boardName, post.number, post.user.ip).then(function(banned) {
-            post.bannedFor = banned;
-            return Promise.resolve(c.post);
-        });
-    });
+            return Promise.reject(Tools.translate("No such post"));
+        c.post = JSON.parse(post);
+        return bannedFor(boardName, c.post.number, c.post.user.ip);
+    }).then(function(banned) {
+        c.post.bannedFor = banned;
+        return Promise.resolve(c.post);
+    });;
     if (!opts || (!options.withFileInfos && !options.withReferences && !options.withExtraData))
         return p;
     return p.then(function() {
-        if (!c.post)
-            return Promise.resolve();
         return threadPostNumbers(c.post.boardName, c.post.threadNumber);
     }).then(function(postNumbers) {
-        if (!c.post)
-            return Promise.resolve();
         c.post.sequenceNumber = postNumbers.indexOf(c.post.number) + 1;
         var promises = [];
         if (options.withFileInfos) {
@@ -408,14 +398,16 @@ var getFileInfo = function(file) {
     } else {
         p = db.hget("fileHashes", file.fileHash).then(function(fileInfo) {
             if (!fileInfo)
-                return Promise.resolve(null);
+                return Promise.reject(Tools.translate("No such file"));
             return Promise.resolve(JSON.parse(fileInfo).name);
         });
     }
     return p.then(function(fileName) {
         return db.hget("fileInfos", fileName);
     }).then(function(fileInfo) {
-        return Promise.resolve(fileInfo ? JSON.parse(fileInfo) : null);
+        if (!fileInfo)
+            return Promise.reject(Tools.translate("No such file"));
+        return Promise.resolve(JSON.parse(fileInfo));
     });
 };
 
@@ -654,7 +646,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         }
     }).then(function(threads) {
         if (!threads || threads.length != 1)
-            return Promise.reject(Tools.translate("No such thread or no access to thread"));
+            return Promise.reject(Tools.translate("No such thread"));
         if (threads[0].closed)
             return Promise.reject(Tools.translate("Posting is disabled in this thread"));
         c.level = req.level || null;
@@ -2060,8 +2052,6 @@ module.exports.editAudioTags = function(req, res, fields) {
     var c = {};
     var password = Tools.password(fields.password);
     return getFileInfo({ fileName: fields.fileName }).then(function(fileInfo) {
-        if (!fileInfo)
-            return Promise.reject(Tools.translate("No such file"));
         if (fileInfo.mimeType.substr(0, 6) != "audio/")
             return Promise.reject(Tools.translate("Not an audio file"));
         c.fileInfo = fileInfo;

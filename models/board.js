@@ -78,7 +78,7 @@ module.exports.getBoardPage = function(board, page, json) {
         return Promise.reject(Tools.translate("Invalid board"));
     page = +(page || 0);
     if (isNaN(page) || page < 0 || page >= pageCounts[board.name])
-        return Promise.reject(404);
+        return Promise.reject(Tools.translate("Invalid page number"));
     if (json)
         return Tools.readFile(cachePath("page", board.name, page));
     var model = {
@@ -97,14 +97,14 @@ var getPage = function(board, page) {
         return Promise.reject(Tools.translate("Invalid board"));
     page = +(page || 0);
     if (isNaN(page) || page < 0 || page >= pageCounts[board.name])
-        return Promise.reject(404);
+        return Promise.reject(Tools.translate("Invalid page number"));
     var c = {};
     return Database.getThreads(board.name).then(function(threads) {
         c.threads = threads;
         c.threads.sort(Board.sortThreadsByDate);
         c.pageCount = pageCounts[board.name];
         if (page >= c.pageCount)
-            return Promise.reject(404);
+            return Promise.reject(Tools.translate("Invalid page number"));
         var start = page * board.threadsPerPage;
         c.threads = c.threads.slice(start, start + board.threadsPerPage);
         var promises = c.threads.map(function(thread) {
@@ -186,7 +186,7 @@ module.exports.getThreadPage = function(board, number, json) {
         return Tools.readFile(cachePath("thread", board.name, number));
     return Database.getThread(board.name, number).then(function(thread) {
         if (!thread)
-            return Promise.reject(404);
+            return Promise.reject(Tools.translate("No such thread"));
         c.thread = thread;
         return Database.getPost(board.name, c.thread.number);
     }).then(function(post) {
@@ -231,7 +231,7 @@ var getThread = function(board, number) {
         }
     }).then(function(threads) {
         if (threads.length != 1)
-            return Promise.reject(404);
+            return Promise.reject(Tools.translate("No such thread"));
         c.thread = threads[0];
         return Database.threadPosts(board.name, c.thread.number, {
             withFileInfos: true,
@@ -290,7 +290,7 @@ module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNu
         });
     }).then(function(threads) {
         if (threads.length != 1)
-            return Promise.reject(404);
+            return Promise.reject(Tools.translate("No such thread"));
         c.thread = threads[0];
         return Database.threadPosts(board.name, c.thread.number, {
             withFileInfos: true,
@@ -343,7 +343,7 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
         });
     }).then(function(threads) {
         if (threads.length != 1)
-            return Promise.reject(404);
+            return Promise.reject(Tools.translate("No such thread"));
         c.thread = threads[0];
         return Database.threadPostCount(board.name, c.thread.number);
     }).then(function(postCount) {

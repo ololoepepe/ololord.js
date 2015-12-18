@@ -627,7 +627,6 @@ controller.translationsModel = function() {
     translate("Failed to generate hash", "failedToGenerateHashErrorText");
     translate("The thread is already in favorites", "alreadyInFavoritesErrorText");
     translate("Invalid arguments", "invalidArgumentsErrorText");
-    translate("Failed to get post", "faliedToGetPostErrorText");
     translate("No such token in the table", "noTokenInTableErrorText");
     translate("The thread was deleted", "threadDeletedErrorText");
     translate("Invalid data", "invalidDataErrorText");

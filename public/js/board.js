@@ -1167,8 +1167,6 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
             boardName: boardName,
             postNumber: postNumber
         }).then(function(post) {
-            if (!post)
-                return Promise.reject("faliedToGetPostErrorText");
             return lord.createPostNode(post, false);
         });
     }
@@ -1935,8 +1933,6 @@ lord.addThreadToFavorites = function(boardName, threadNumber) {
         boardName: boardName,
         postNumber: threadNumber
     }).then(function(opPost) {
-        if (!opPost)
-            return Promise.reject("threadDeletedErrorText");
         c.opPost = opPost;
         return lord.api("threadLastPostNumber", {
             boardName: boardName,
@@ -1944,7 +1940,7 @@ lord.addThreadToFavorites = function(boardName, threadNumber) {
         });
     }).then(function(result) {
         if (!result || !result.lastPostNumber)
-            return Promise.reject("threadDeletedErrorText");
+            return Promise.reject("threadDeletedErrorText"); //TODO: remove
         var favoriteThreads = lord.getLocalObject("favoriteThreads", {});
         if (favoriteThreads.hasOwnProperty(boardName + "/" + threadNumber))
             return Promise.reject("alreadyInFavoritesErrorText");
