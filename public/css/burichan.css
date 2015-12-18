@@ -530,6 +530,7 @@ span.newPostCount {
     padding-right: 4px;
     overflow-x: auto;
     display: table;
+    padding-bottom: 4px;
 }
 
 .draft {
@@ -546,6 +547,7 @@ span.newPostCount {
 .opPost {
     overflow-x: auto;
     display: table;
+    padding-bottom: 4px;
 }
 
 .newPost {
