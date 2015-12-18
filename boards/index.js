@@ -36,18 +36,7 @@ Object.defineProperty(board, "supportedCaptchaEngines", {
     }
 });
 Object.defineProperty(board, "markupElements", {
-    value: [
-        Board.MarkupElements.BoldMarkupElement,
-        Board.MarkupElements.ItalicsMarkupElement,
-        Board.MarkupElements.StrikedOutMarkupElement,
-        Board.MarkupElements.UnderlinedMarkupElement,
-        Board.MarkupElements.SpoilerMarkupElement,
-        Board.MarkupElements.QuotationMarkupElement,
-        Board.MarkupElements.CodeMarkupElement,
-        Board.MarkupElements.SubscriptMarkupElement,
-        Board.MarkupElements.SuperscriptMarkupElement,
-        Board.MarkupElements.UrlMarkupElement
-    ]
+    value: board.markupElements.concat(Board.MarkupElements.CodeMarkupElement)
 });
 Board.addBoard(board);
 

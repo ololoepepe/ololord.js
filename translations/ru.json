@@ -1480,6 +1480,21 @@
             "value": "URL (внешняя ссылка)"
         }
     },
+    "Unordered list": {
+        "markupUnorderedList": {
+            "value": "Маркированный список"
+        }
+    },
+    "Ordered list": {
+        "markupOrderedList": {
+            "value": "Нумерованный список"
+        }
+    },
+    "List item": {
+        "markupListItem": {
+            "value": "Элемент списка"
+        }
+    },
     "Code block syntax": {
         "markupCodeLang": {
             "value": "Синтаксис блока кода"

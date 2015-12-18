@@ -474,6 +474,9 @@ controller.translationsModel = function() {
     translate("Subscript", "markupSubscript");
     translate("Superscript", "markupSuperscript");
     translate("URL (external link)", "markupUrl");
+    translate("Unordered list", "markupUnorderedList");
+    translate("Ordered list", "markupOrderedList");
+    translate("List item", "markupListItem");
     translate("Markup mode:", "postFormLabelMarkupMode");
     translate("Options:", "postFormLabelOptions");
     translate("Raw HTML", "postFormLabelRaw");

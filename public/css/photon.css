@@ -257,6 +257,8 @@ span.spoiler:hover .quotation {
     height: 20px;
     background-color: #EEEEEE;
     vertical-align: middle;
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 .spoilerMarkupButton.spoiler {
@@ -303,7 +305,6 @@ span.newPostCount {
 
 .postformMarkup {
     text-align: left;
-	font-size: 0.7em;
 	white-space: normal;
 }
 
@@ -697,6 +698,7 @@ span.newPostCount {
     margin-top: 0px;
     top: 100%;
     left: 0%;
+    white-space: nowrap;
 }
 
 .postActionsMenu.mobile {
@@ -705,6 +707,16 @@ span.newPostCount {
 
 .fileActionsMenu.mobile {
     left: -40px;
+}
+
+.markupUnorderedListActionsMenu {
+    padding-left: 20px;
+    left: -40px;
+}
+
+.markupOrderedListActionsMenu {
+    padding-left: 30px;
+    left: -80px;
 }
 
 .popupActions:focus > .popupActionsMenu {

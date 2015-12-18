@@ -1668,10 +1668,45 @@ lord.markup = function(tag) {
     case "s":
     case "u":
     case "spoiler":
+    case "ul":
+    case "ol":
+    case "li":
     case "sup":
     case "sub":
     case "url": {
         wrap("[" + tag + "]", "[/" + tag + "]");
+        break;
+    }
+    case "uld": {
+        wrap("[ul type=disc]", "[/ul]");
+        break;
+    }
+    case "ulc": {
+        wrap("[ul type=circle]", "[/ul]");
+        break;
+    }
+    case "uls": {
+        wrap("[ul type=square]", "[/ul]");
+        break;
+    }
+    case "ol1": {
+        wrap("[ol type=1]", "[/ol]");
+        break;
+    }
+    case "olI": {
+        wrap("[ol type=I]", "[/ol]");
+        break;
+    }
+    case "oli": {
+        wrap("[ol type=i]", "[/ol]");
+        break;
+    }
+    case "olA": {
+        wrap("[ol type=A]", "[/ol]");
+        break;
+    }
+    case "ola": {
+        wrap("[ol type=a]", "[/ol]");
         break;
     }
     case ">": {

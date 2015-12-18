@@ -719,20 +719,25 @@ var convertTooltip = function(_, text, matchs, _, options) {
 };
 
 var convertUnorderedList = function(_, text, matchs, _, options) {
-    var t = matchs[1];
-    if (t.length == 1)
+    var t = matchs[2];
+    if (!t)
+        t = "disc";
+    else if (t.length == 1)
         t = ListTypes[t];
     if (!t)
         return Promise.resolve("");
     options.type = SkipTypes.NoSkip;
-    options.op = "<ul type=\"" + t + "\">";
+    options.op = `<ul type="${t}">`;
     options.cl = "</ul>";
     return Promise.resolve(text);
 };
 
-var convertOrderedList = function(_, text, _, _, options) {
+var convertOrderedList = function(_, text, matchs, _, options) {
+    var t = matchs[2];
+    if (!t)
+        t = "1";
     options.type = SkipTypes.NoSkip;
-    options.op = "<ol>";
+    options.op = `<ol type="${t}">`;
     options.cl = "</ol>";
     return Promise.resolve(text);
 };
@@ -972,12 +977,12 @@ var processPostText = function(boardName, text, options) {
             }, { nestable: true });
         }).then(function() {
             return process(info, convertUnorderedList, {
-                op: /\[ul\s+type\="?(disc|circle|square|d|c|s)"?\s*\]/gi,
+                op: /\[ul(\s+type\="?(disc|circle|square|d|c|s)"?)?\s*\]/gi,
                 cl: "[/ul]"
             }, { nestable: true });
         }).then(function() {
             return process(info, convertOrderedList, {
-                op: "[ol]",
+                op: /\[ol(\s+type\="?(A|a|I|i|1)"?)?\s*\]/gi,
                 cl: "[/ol]"
             }, { nestable: true });
         }).then(function() {
