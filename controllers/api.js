@@ -130,7 +130,6 @@ router.get("/api/lastPostNumber.json", function(req, res) {
     }).then(function(lastPostNumbers) {
         res.json({ lastPostNumber: lastPostNumbers[0] });
     }).catch(function(err) {
-        console.log(err);
         controller.error(res, err, true);
     });
 });
