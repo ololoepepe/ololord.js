@@ -699,6 +699,7 @@ span.newPostCount {
 
 .postFiles > .postText {
     display: inline-block;
+    max-width: 80%;
 }
 
 .bannedFor {
