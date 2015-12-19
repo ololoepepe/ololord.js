@@ -43,7 +43,7 @@ lord.worker.addEventListener("message", function(message) {
         task.reject(message.error);
 });
 
-lord.doWork = function(type, data) {
+lord.doWork = function(type, data, transferable) {
     return new Promise(function(resolve, reject) {
         var id = uuid.v1();
         lord.workerTasks[id] = {
@@ -54,7 +54,7 @@ lord.doWork = function(type, data) {
             id: id,
             type: type,
             data: data
-        }));
+        }), transferable || []);
     });
 };
 
@@ -1354,28 +1354,28 @@ lord.fileAddedCommon = function(div, file) {
     lord.removeFileHash(div);
     var prefix = lord.data("sitePathPrefix");
     if (file && lord.getLocalObject("checkFileExistence", true)) {
+        var c = {};
         lord.readAs(file).then(function(data) {
-            return lord.doWork("getFileHash", data);
-        }).then(function(fileHash) {
-            return lord.api("fileInfo", { fileHash: fileHash }).then(function(fileInfo) {
-                var img = lord.node("img");
-                img.src = "/" + prefix + "img/storage.png";
-                img.title = lord.text("fileExistsOnServerText");
-                lord.queryOne("span", div).appendChild(lord.node("text", " "));
-                lord.queryOne("span", div).appendChild(img);
-                var fileHashes = lord.getFileHashes(div);
-                if (fileHashes.value.indexOf(fileHash) < 0)
-                    fileHashes.value = fileHashes.value + (fileHashes.value.length > 0 ? "," : "") + fileHash;
-                var f = inp.onchange;
-                delete inp.onchange;
-                inp.value = "";
-                inp.onchange = f;
-                div.fileHash = fileHash;
-                if (div.droppedFile)
-                    delete div.droppedFile;
-            }).catch(function(err) {
-                console.log(err);
-            });
+            c.fileHash = sha1(data);
+            return lord.api("fileExistence", { fileHash: c.fileHash });
+        }).then(function(exists) {
+            if (!exists)
+                return;
+            var img = lord.node("img");
+            img.src = "/" + prefix + "img/storage.png";
+            img.title = lord.text("fileExistsOnServerText");
+            lord.queryOne("span", div).appendChild(lord.node("text", " "));
+            lord.queryOne("span", div).appendChild(img);
+            var fileHashes = lord.getFileHashes(div);
+            if (fileHashes.value.indexOf(c.fileHash) < 0)
+                fileHashes.value = fileHashes.value + (fileHashes.value.length > 0 ? "," : "") + c.fileHash;
+            var f = inp.onchange;
+            delete inp.onchange;
+            inp.value = "";
+            inp.onchange = f;
+            div.fileHash = c.fileHash;
+            if (div.droppedFile)
+                delete div.droppedFile;
         }).catch(lord.handleError);
     }
     var preview = function() {

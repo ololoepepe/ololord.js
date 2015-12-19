@@ -9,7 +9,10 @@ router.get("/login.html", function(req, res) {
     var f = function() {
         var model = {};
         model.title = Tools.translate("Login", "loginButtonText");
-        model.extraScripts = [ { fileName: "login.js" } ];
+        model.extraScripts = [
+            { fileName: "3rdparty/sha1.min.js" },
+            { fileName: "login.js" }
+        ];
         return controller("login", model);
     };
     Tools.controllerHtml(req, res, f.bind(null), "login").catch(function(err) {

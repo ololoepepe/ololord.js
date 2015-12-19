@@ -7,12 +7,11 @@
 !jquery.knob.min.js
 !jszip.min.js
 !jszip-utils.min.js
-!lib-typedarrays-min.js
 !merge.min.js
 !moment-with-locales.min.js
 !picoModal-2.1.0.min.js
 !Promise.min.js
-!sha1.js
+!sha1.min.js
 !twitter.js
 !uuid.js
 !.gitignore

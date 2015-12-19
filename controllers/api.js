@@ -109,6 +109,17 @@ router.get("/api/fileInfo.json", function(req, res) {
     });
 });
 
+router.get("/api/fileExistence.json", function(req, res) {
+    if (!req.query.fileName && !req.query.fileHash)
+        return controller.error(res, Tools.translate("Neither name nor hash is specified"), true);
+    var identifier = req.query.fileName || req.query.fileHash;
+    Database.db.hexists(req.query.fileName ? "fileInfos" : "fileHashes", identifier).then(function(exists) {
+        res.json(!!exists);
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
 router.get("/api/lastPostNumbers.json", function(req, res) {
     var boardNames = req.query.boardNames;
     if (boardNames && !Util.isArray(boardNames))
