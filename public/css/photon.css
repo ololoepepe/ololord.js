@@ -756,6 +756,7 @@ span.newPostCount {
 
 .postText {
     vertical-align: top;
+    white-space: normal;
 }
 
 .postFiles > .postText {
