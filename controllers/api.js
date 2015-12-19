@@ -13,58 +13,33 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-var postIdentifiers = function(req, single) {
-    if (!single) {
-        var posts = req.query.posts;
-        if (!posts)
-            return [];
-        if (Util.isString(posts))
-            posts = [posts];
-        return posts.map(function(post) {
-            var boardName = post.split(":").shift();
-            var postNumber = +post.split(":").pop();
-            if (!boardName || isNaN(postNumber) || postNumber < 1)
-                return null;
-            return {
-                boardName: boardName,
-                postNumber: postNumber
-            };
-        });
-    } else {
-        var boardName = req.query.boardName;
-        var postNumber = +req.query.postNumber;
-        if (!boardName || isNaN(postNumber) || postNumber < 1)
-            return [];
-        return [ {
-            boardName: boardName,
-            postNumber: postNumber
-        } ];
-    }
-};
-
-var renderPost = function(req, post) {
-    if (!post)
-        return Promise.resolve(post);
-    var board = Board.board(post.boardName);
-    if (!board)
-        return Promise.resolve(post);
-    var p;
-    if (post.threadNumber == post.number) {
-        p = Promise.resolve([post]);
-    } else {
-        p = boardModel.getPosts([ {
-            boardName: post.boardName,
-            postNumber: post.threadNumber
-        } ], req.hashpass);
-    }
-    return p.then(function(posts) {
-        return board.renderPost(post, posts[0]);
-    });
-};
-
 router.get("/api/post.json", function(req, res) {
-    boardModel.getPosts(postIdentifiers(req, true), req.hashpass).then(function(posts) {
-        return renderPost(req, posts[0]);
+    if (!req.query.boardName)
+        return controller.error(res, Tools.translate("Invalid board"), true);
+    controller.checkBan(req, res, req.query.boardName).then(function() {
+        return boardModel.getPosts([{
+            boardName: req.query.boardName,
+            postNumber: +req.query.postNumber
+        }], req.hashpass);
+    }).then(function(posts) {
+        var post = posts[0];
+        if (!post)
+            return Promise.resolve(post);
+        var board = Board.board(post.boardName);
+        if (!board)
+            return Promise.resolve(post);
+        var p;
+        if (post.threadNumber == post.number) {
+            p = Promise.resolve([post]);
+        } else {
+            p = boardModel.getPosts([ {
+                boardName: post.boardName,
+                postNumber: post.threadNumber
+            } ], req.hashpass);
+        }
+        return p.then(function(posts) {
+            return board.renderPost(post, posts[0]);
+        });
     }).then(function(post) {
         res.json(post || null);
     }).catch(function(err) {
@@ -73,7 +48,11 @@ router.get("/api/post.json", function(req, res) {
 });
 
 router.get("/api/userIp.json", function(req, res) {
-    Database.getPost(req.query.boardName, +req.query.postNumber).then(function(post) {
+    if (!req.query.boardName)
+        return controller.error(res, Tools.translate("Invalid board"), true);
+    controller.checkBan(req, res, req.query.boardName).then(function() {
+        return Database.getPost(req.query.boardName, +req.query.postNumber);
+    }).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("No such post"));
         if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0)
@@ -89,9 +68,13 @@ router.get("/api/userIp.json", function(req, res) {
 });
 
 router.get("/api/threadInfo.json", function(req, res) {
-    var board = Board.board(req.query.boardName);
-    var threadNumber = +req.query.threadNumber;
-    boardModel.getThreadInfo(board, req.hashpass, threadNumber).then(function(thread) {
+    if (!req.query.boardName)
+        return controller.error(res, Tools.translate("Invalid board"), true);
+    controller.checkBan(req, res, req.query.boardName).then(function() {
+        var board = Board.board(req.query.boardName);
+        var threadNumber = +req.query.threadNumber;
+        return boardModel.getThreadInfo(board, req.hashpass, threadNumber);
+    }).then(function(thread) {
         res.json(thread);
     }).catch(function(err) {
         controller.error(res, err, true);
@@ -126,7 +109,9 @@ router.get("/api/lastPostNumbers.json", function(req, res) {
         boardNames = [boardNames];
     if (!boardNames)
         boardNames = Board.boardNames();
-    boardModel.getLastPostNumbers(boardNames).then(function(lastPostNumbers) {
+    controller.checkBan(req, res, boardNames).then(function() {
+        return boardModel.getLastPostNumbers(boardNames);
+    }).then(function(lastPostNumbers) {
         var r = {};
         lastPostNumbers.forEach(function(lastPostNumber, i) {
             r[boardNames[i]] = lastPostNumber;
@@ -138,7 +123,11 @@ router.get("/api/lastPostNumbers.json", function(req, res) {
 });
 
 router.get("/api/lastPostNumber.json", function(req, res) {
-    boardModel.getLastPostNumbers([req.query.boardName]).then(function(lastPostNumbers) {
+    if (!req.query.boardName)
+        return controller.error(res, Tools.translate("Invalid board"), true);
+    controller.checkBan(req, res, req.query.boardName).then(function() {
+        return boardModel.getLastPostNumbers([req.query.boardName]);
+    }).then(function(lastPostNumbers) {
         res.json({ lastPostNumber: lastPostNumbers[0] });
     }).catch(function(err) {
         controller.error(res, err, true);
@@ -149,12 +138,17 @@ router.get("/api/threadLastPostNumbers.json", function(req, res) {
     var threads = req.query.threads;
     if (Util.isString(threads))
         threads = [threads];
-    var promises = (threads || []).map(function(thread) {
-        var boardName = thread.split(":").shift();
-        var threadNumber = +thread.split(":")[1];
-        return boardModel.getThreadLastPostNumber(boardName, threadNumber);
+    var boardNames = (threads || []).map(function(thread) {
+        return thread.split(":").shift();
     });
-    Promise.all(promises).then(function(results) {
+    controller.checkBan(req, res, boardNames).then(function() {
+        var promises = (threads || []).map(function(thread) {
+            var boardName = thread.split(":").shift();
+            var threadNumber = +thread.split(":")[1];
+            return boardModel.getThreadLastPostNumber(boardName, threadNumber);
+        });
+        return Promise.all(promises);
+    }).then(function(results) {
         res.json(results);
     }).catch(function(err) {
         controller.error(res, err, true);
@@ -162,7 +156,11 @@ router.get("/api/threadLastPostNumbers.json", function(req, res) {
 });
 
 router.get("/api/threadLastPostNumber.json", function(req, res) {
-    boardModel.getThreadLastPostNumber(req.query.boardName, req.query.threadNumber).then(function(number) {
+    if (!req.query.boardName)
+        return controller.error(res, Tools.translate("Invalid board"), true);
+    controller.checkBan(req, res, req.query.boardName).then(function() {
+        return boardModel.getThreadLastPostNumber(req.query.boardName, req.query.threadNumber);
+    }).then(function(number) {
         res.json({ lastPostNumber: number });
     }).catch(function(err) {
         controller.error(res, err, true);
@@ -170,7 +168,11 @@ router.get("/api/threadLastPostNumber.json", function(req, res) {
 });
 
 router.get("/api/captchaQuota.json", function(req, res) {
-    Database.getUserCaptchaQuota(req.query.boardName, req.ip).then(function(quota) {
+    if (!req.query.boardName)
+        return controller.error(res, Tools.translate("Invalid board"), true);
+    controller.checkBan(req, res, req.query.boardName).then(function() {
+        return Database.getUserCaptchaQuota(req.query.boardName, req.ip);
+    }).then(function(quota) {
         res.json({ quota: quota });
     }).catch(function(err) {
         controller.error(res, err, true);

@@ -158,20 +158,25 @@ controller.notFound = function(res) {
     });
 };
 
-controller.checkBan = function(req, res, boardName, write) {
+controller.checkBan = function(req, res, boardNames, write) {
     var ip = Tools.correctAddress(req.ip);
     var ban = ipBans[ip];
     if (ban && (write || "NO_ACCESS" == ban.level))
         return Promise.reject({ ban: ban });
-    return Database.userBans(ip, boardName).then(function(bans) {
+    return Database.userBans(ip, boardNames).then(function(bans) {
         if (!bans)
             return Promise.resolve();
-        var ban = bans[boardName];
-        if (!ban)
-            return Promise.resolve();
-        if (write)
-            return Promise.reject({ ban: ban });
-        return ("NO_ACCESS" == ban.level) ? Promise.reject({ ban: ban }) : Promise.resolve();
+        if (!Util.isArray(boardNames))
+            boardNames = [boardNames];
+        for (var i = 0; i < boardNames.length; ++i) {
+            var ban = bans[boardNames[i]];
+            if (ban) {
+                if (write)
+                    return Promise.reject({ ban: ban });
+                return ("NO_ACCESS" == ban.level) ? Promise.reject({ ban: ban }) : Promise.resolve();
+            }
+        }
+        return Promise.resolve();
     });
 };
 
