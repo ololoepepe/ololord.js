@@ -267,7 +267,7 @@
             {{~post.fileInfos :fileInfo}}
                 {{#def.postFile}}
             {{~}}
-            {{? (it.deviceType != "mobile" && post.fileInfos.length < 2) || (it.deviceType == "mobile" && post.fileInfos.length < 1)}}
+            {{? (post.fileInfos.length > 0) && ((it.deviceType != "mobile" && post.fileInfos.length < 2) || (it.deviceType == "mobile" && post.fileInfos.length < 1))}}
                 {{? it.customPostBodyPart && it.customPostBodyPart[10]}}
                     {{ out += it.customPostBodyPart[10](it, thread, post); }}
                 {{?}}
@@ -277,7 +277,7 @@
                 </div>
             {{?}}
         </div>
-        {{? post.fileInfos.length >= 2 || (it.deviceType == "mobile" && post.fileInfos.length >= 1)}}
+        {{? 0 == post.fileInfos.length || post.fileInfos.length >= 2 || (it.deviceType == "mobile" && post.fileInfos.length >= 1)}}
             {{? it.customPostBodyPart && it.customPostBodyPart[10]}}
                 {{ out += it.customPostBodyPart[10](it, thread, post); }}
             {{?}}
