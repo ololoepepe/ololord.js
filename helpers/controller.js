@@ -173,6 +173,7 @@ controller.checkBan = function(req, res, boardNames, write) {
             if (ban) {
                 if (write)
                     return Promise.reject({ ban: ban });
+                console.log(ip, boardNames[i], ("NO_ACCESS" == ban.level) ? true : false);
                 return ("NO_ACCESS" == ban.level) ? Promise.reject({ ban: ban }) : Promise.resolve();
             }
         }
