@@ -1272,10 +1272,12 @@ input.buttonImage {
 .chatContactList {
     overflow-y: auto;
     min-width: 50px;
+    padding-top: 20px;
 }
 
 .chatContact {
     white-space: nowrap;
+    cursor: pointer;
 }
 
 .chatContact:hover {
@@ -1284,6 +1286,11 @@ input.buttonImage {
 }
 
 .chatContact.selected {
+    color: #000000;
+    background-color: #DDDDDD;
+}
+
+.chatContact.selected:hover {
     color: #FFFFFF;
     background-color: #666666;
 }
@@ -1299,6 +1306,7 @@ input.buttonImage {
 
 .chatHistory {
     padding-left: 8px;
+    padding-right: 8px;
     border: 1px solid black;
     overflow-y: auto;
     min-width: 200px;

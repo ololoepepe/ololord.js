@@ -678,7 +678,7 @@ lord.selectChatContact = function(key) {
     target.style.display = "";
     var targetKey = lord.nameOne("targetKey", lord.chatDialog);
     lord.removeChildren(targetKey);
-    targetKey.appendChild(lord.node("text", key));
+    targetKey.appendChild(lord.node("text", "/" + key.replace(":", "/")));
     lord.populateChatHistory(key);
     lord.nameOne("sendMessageButton", lord.chatDialog).disabled = false;
     lord.nameOne("message", lord.chatDialog).disabled = false;

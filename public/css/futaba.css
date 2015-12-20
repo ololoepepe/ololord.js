@@ -1261,20 +1261,27 @@ input.buttonImage {
 .chatContactList {
     overflow-y: auto;
     min-width: 50px;
+    padding-top: 20px;
 }
 
 .chatContact {
     white-space: nowrap;
+    cursor: pointer;
 }
 
-.chatContact.hover {
-    color: #FFFFFF;
-    background-color: #444444;
+.chatContact:hover {
+    color: #800000;
+    background: #F0D0B6;
 }
 
 .chatContact.selected {
-    color: #FFFFFF;
-    background-color: #444444;
+    color: #000000;
+    background: #F0D0B6;
+}
+
+.chatContact.selected:hover {
+    color: #800000;
+    background: #F0D0B6;
 }
 
 .chatContactNewMessages {

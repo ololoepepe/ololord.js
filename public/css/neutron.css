@@ -1312,15 +1312,17 @@ input.buttonImage {
 .chatContactList {
     overflow-y: auto;
     min-width: 50px;
+    padding-top: 20px;
 }
 
 .chatContact {
     white-space: nowrap;
+    cursor: pointer;
 }
 
 .chatContact:hover {
-    color: #FFFFFF;
-    background-color: #666666;
+    color: #48B0FD;
+    background-color: #575757;
 }
 
 .chatContact.selected {
@@ -1328,12 +1330,18 @@ input.buttonImage {
     background-color: #666666;
 }
 
+.chatContact.selected:hover {
+    color: #48B0FD;
+    background-color: #575757;
+}
+
 .chatContactNewMessages {
     color: red;
 }
 
 .chatTarget {
-    background-color: #2C2C2C;
+    color: #FFFFFF;
+    background-color: #666666;
     white-space: nowrap;
 }
 

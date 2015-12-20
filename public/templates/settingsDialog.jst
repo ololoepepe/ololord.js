@@ -68,9 +68,12 @@
                     </td>
                     <td>
                         <select name="maxAllowedRating" class="select">
-                            <option {{? it.settings.maxAllowedRating == "SFW"}}selected="true"{{?}} value="SFW">SFW</option>
-                            <option {{? it.settings.maxAllowedRating == "R-15"}}selected="true"{{?}} value="R-15">R-15</option>
-                            <option {{? it.settings.maxAllowedRating == "R-18"}}selected="true"{{?}} value="R-18">R-18</option>
+                            <option {{? it.settings.maxAllowedRating == "SFW"}}selected="true"{{?}}
+                                    value="SFW">SFW</option>
+                            <option {{? it.settings.maxAllowedRating == "R-15"}}selected="true"{{?}}
+                                    value="R-15">R-15</option>
+                            <option {{? it.settings.maxAllowedRating == "R-18"}}selected="true"{{?}}
+                                    value="R-18">R-18</option>
                             <option {{? it.settings.maxAllowedRating == "R-18G"}}selected="true"{{?}}
                                     value="R-18G">R-18G</option>
                         </select>
@@ -82,23 +85,6 @@
                                {{? it.settings.shrinkPosts}}checked="true"{{?}} /><label>{{=it.tr.postShrinkingLabelText}}</label>
                         <input type="checkbox" name="stickyToolbar" value="true"
                                {{? it.settings.stickyToolbar}}checked="true"{{?}} /><label>{{=it.tr.stickyToolbarLabelText}}</label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        {{=it.tr.hiddenBoardsLabelText}}
-                    </td>
-                    <td>
-                        <div class="scrollAreaH60" name="hiddenBoards">
-                            {{~it.boards :brd}}
-                                {{? !brd.hidden}}
-                                    <input type="checkbox" name="board_{{=brd.name}}"
-                                           {{? it.settings.hiddenBoards.indexOf(brd.name) >= 0}}checked="true"{{?}}
-                                           value="true">[{{=brd.name}}] {{=brd.title}}</input>
-                                    <br />
-                                {{?}}
-                            {{~}}
-                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -291,13 +277,30 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <sup><font color="red">*</font></sup> {{=it.tr.captchaLabelWarningText}}
+                        <sup><font color="red">*</font></sup> – {{=it.tr.captchaLabelWarningText}}
                     </td>
                 </tr>
             </tbody>
         </table>
         <table data-index="4" style="display: none;">
             <tbody>
+                <tr>
+                    <td>
+                        {{=it.tr.hiddenBoardsLabelText}}
+                    </td>
+                    <td>
+                        <div class="scrollAreaH60" name="hiddenBoards">
+                            {{~it.boards :brd}}
+                                {{? !brd.hidden}}
+                                    <input type="checkbox" name="board_{{=brd.name}}"
+                                           {{? it.settings.hiddenBoards.indexOf(brd.name) >= 0}}checked="true"{{?}}
+                                           value="true">[{{=brd.name}}] {{=brd.title}}</input>
+                                    <br />
+                                {{?}}
+                            {{~}}
+                        </div>
+                    </td>
+                </tr>
                 <tr>
                     <td colspan="2">
                         <input type="checkbox" name="hideTripcodes"
