@@ -17,7 +17,6 @@
 !postReference.jst
 !postReferringPosts.jst
 !postSubject.jst
-!settingsTable.jst
 !setVotingOpenedForm.jst
 !userBan.jst
 !.gitignore

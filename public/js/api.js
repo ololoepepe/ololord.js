@@ -232,9 +232,7 @@ lord.Hour = 60 * lord.Minute;
 lord.Day = 24 * lord.Hour;
 lord.Year = 365 * lord.Day;
 lord.Billion = 2 * 1000 * 1000 * 1000;
-lord.SettingsStoredInCookies = ["style", "codeStyle", "stickyToolbar", "shrinkPosts", "markupMode", "time",
-                                "timeZoneOffset", "captchaEngine", "maxAllowedRating", "hidePostformRules",
-                                "minimalisticPostform", "hiddenBoards"];
+lord.SettingsStoredInCookies = ["time", "timeZoneOffset", "captchaEngine"];
 //
 lord.keyboardMap = [
   "", // [0]
@@ -1151,31 +1149,25 @@ lord.getPlainText = function(node) {
     return normalize(recurse(node));
 };
 
-lord.activateTab = function(a, tabIndex, display) {
+lord.activateTab = function(a) {
     if (!a)
         return;
-    tabIndex = +tabIndex;
+    var tabIndex = +lord.data("index", a.parentNode);
     if (isNaN(tabIndex))
         return;
     var tab = a.parentNode;
     var header = tab.parentNode;
-    var widget = header.nextSibling.nextSibling;
-    var page = lord.nameOne(tabIndex, widget);
-    if (typeof display != "string")
-        display = "block";
+    var widget = lord.queryOne("div", header.parentNode);
+    var page = lord.queryOne("[data-index='" + tabIndex + "']", widget);
     lord.arr(widget.childNodes).forEach(function(node) {
         if (node.nodeType != 1) //Element
             return;
-        node.style.display = ((node == page) ? display : "none");
+        node.style.display = ((node == page) ? "block" : "none");
     });
-    lord.arr(header.childNodes).forEach(function(node) {
-        if (node.nodeType != 1) //Element
-            return;
-        if (node == tab)
-            lord.addClass(node, "activated");
-        else
-            lord.removeClass(node, "activated");
+    lord.query("ul > li", header.parentNode).forEach(function(node) {
+        lord.removeClass(node, "activated");
     });
+    lord.addClass(tab, "activated");
 };
 
 lord.notificationsEnabled = function() {
@@ -1398,25 +1390,24 @@ lord.now = function() {
 
 lord.settings = function() {
     return {
-        style: {
-            name: lord.getCookie("style", "photon")
-        },
-        codeStyle: {
-            name: lord.getCookie("codeStyle", "default")
-        },
-        shrinkPosts: (lord.getCookie("shrinkPosts", "true") != "false"),
-        markupMode: lord.getCookie("markupMode", "EXTENDED_WAKABA_MARK,BB_CODE"),
-        stickyToolbar: (lord.getCookie("stickyToolbar", "true") != "false"),
         time: lord.getCookie("time", "server"),
         timeZoneOffset: lord.getCookie("timeZoneOffset", -lord.now().getTimezoneOffset()),
         captchaEngine: {
             id: lord.getCookie("captchaEngine", "google-recaptcha")
         },
-        maxAllowedRating: lord.getCookie("maxAllowedRating", "R-18G"),
-        hidePostformRules: (lord.getCookie("hidePostformRules", "false") == "true"),
-        minimalisticPostform: (lord.getCookie("minimalisticPostform",
-            lord.deviceType("mobile") ? "true" : "false") == "true"),
-        hiddenBoards: lord.getCookie("hiddenBoards", "").split("|"),
+        style: {
+            name: lord.getLocalObject("style", "photon")
+        },
+        codeStyle: {
+            name: lord.getLocalObject("codeStyle", "default")
+        },
+        shrinkPosts: lord.getLocalObject("shrinkPosts", true),
+        markupMode: lord.getLocalObject("markupMode", "EXTENDED_WAKABA_MARK,BB_CODE"),
+        stickyToolbar: lord.getLocalObject("stickyToolbar", true),
+        maxAllowedRating: lord.getLocalObject("maxAllowedRating", "R-18G"),
+        hidePostformRules: lord.getLocalObject("hidePostformRules", false),
+        minimalisticPostform: lord.getLocalObject("minimalisticPostform", lord.deviceType("mobile")),
+        hiddenBoards: lord.getLocalObject("hiddenBoards", []),
         autoUpdateThreadsByDefault: lord.getLocalObject("autoUpdateThreadsByDefault", false),
         autoUpdateInterval: lord.getLocalObject("autoUpdateInterval", 15),
         showAutoUpdateDesktopNotifications: lord.getLocalObject("showAutoUpdateDesktopNotifications", true),
@@ -1458,8 +1449,6 @@ lord.setSettings = function(model) {
         return;
     lord.forIn(model, function(val, key) {
         if (lord.SettingsStoredInCookies.indexOf(key) >= 0) {
-            if ("hiddenBoards" == key)
-                val = val.join("|");
             lord.setCookie(key, val, {
                 "expires": lord.Billion,
                 "path": "/"

@@ -801,16 +801,6 @@
             "value": "Избранные треды"
         }
     },
-    "General settings": {
-        "generalSettingsLegendText": {
-            "value": "Общие настройки"
-        }
-    },
-    "Script settings": {
-        "scriptSettingsLegendText": {
-            "value": "Настройки скрипта"
-        }
-    },
     "Framed version": {
         "framedVersionText": {
             "value": "Версия с фреймом"
@@ -935,6 +925,11 @@
     "Postform and posting": {
         "postformTabText": {
             "value": "Форма и постинг"
+        }
+    },
+    "General": {
+        "generalTabText": {
+            "value": "Общее"
         }
     },
     "Posts and threads": {

@@ -838,6 +838,10 @@ span.newPostCount {
     color: #555555;
 }
 
+.tabWidget {
+    text-align: center;
+}
+
 ul.tabWidget > li {
     display: inline;
     background-color: #DDDDDD;

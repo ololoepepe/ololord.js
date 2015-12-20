@@ -393,7 +393,6 @@ controller.translationsModel = function() {
     translate("Spoiler", "hotkeyMarkupSpoilerLabelText");
     translate("Quote selected text", "hotkeyMarkupQuotationLabelText");
     translate("Code block", "hotkeyMarkupCodeLabelText");
-    translate("General settings", "generalSettingsLegendText");
     translate("Style:", "styleLabelText");
     translate("Code style:", "codeStyleLabelText");
     translate("Shrink posts", "postShrinkingLabelText");
@@ -408,7 +407,7 @@ controller.translationsModel = function() {
     translate("Minimalistic post form", "minimalisticPostformLabelText");
     translate("Hide boards:", "hiddenBoardsLabelText");
     translate("This option may be ignored on some boards", "captchaLabelWarningText");
-    translate("Script settings", "scriptSettingsLegendText");
+    translate("General", "generalTabText");
     translate("Posts and threads", "postsTabText");
     translate("Files", "filesTabText");
     translate("Postform and posting", "postformTabText");
