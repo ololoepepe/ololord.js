@@ -554,6 +554,8 @@ controller.translationsModel = function() {
     translate("Go complain to your mum, you whiner!", "complainMessage");
     translate("Auto update", "autoUpdateText");
     translate("Close", "closeButtonText");
+    translate("Export", "exportSettingsButtonText");
+    translate("Import", "importSettingsButtonText");
     translate("Remove from hidden post/thread list", "removeFromHiddenPostListText");
     translate("Hidden posts/threads", "hiddenPostListText");
     translate("Settings", "settingsDialogTitle");
@@ -636,6 +638,8 @@ controller.translationsModel = function() {
     translate("No such post", "noSuchPostErrorText");
     translate("Internal error", "internalErrorText");
     translate("Enable API request caching", "apiRequestCachingLabelText");
+    translate("Copy settings string and save it somewhere", "copySettingsHint");
+    translate("Paste settings string here", "pasteSettingsHint");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

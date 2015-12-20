@@ -329,7 +329,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
             });
         }
         if (!permanent) {
-            var actions = lord.queryOne(".postActions", c.node);
+            var actions = lord.nameOne("postActions", c.node);
             if (actions)
                 actions.parentNode.removeChild(actions);
             var qr = lord.nameOne("quickReplyContainer", c.node);

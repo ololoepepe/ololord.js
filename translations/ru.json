@@ -2389,5 +2389,25 @@
         "apiRequestCachingLabelText": {
             "value": "Кэшировать запросы к API"
         }
+    },
+    "Export": {
+        "exportSettingsButtonText": {
+            "value": "Экспортировать"
+        }
+    },
+    "Import": {
+        "importSettingsButtonText": {
+            "value": "Импортировать"
+        }
+    },
+    "Copy settings string and save it somewhere": {
+        "copySettingsHint": {
+            "value": "Скопируйте строку с настройками и где-нибудь сохраните"
+        }
+    },
+    "Paste settings string here": {
+        "pasteSettingsHint": {
+            "value": "Вставьте сюда строку с настройками"
+        }
     }
 }

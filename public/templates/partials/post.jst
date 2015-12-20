@@ -103,7 +103,7 @@
         {{? it.customPostHeaderPart && it.customPostHeaderPart[150]}}
             {{ out += it.customPostHeaderPart[150](it, thread, post); }}
         {{?}}
-        <span tabindex="0" class="{{=it.deviceType}} popupActions">
+        <span name="postActions" tabindex="0" class="{{=it.deviceType}} popupActions">
             [<img src="/{{=it.site.pathPrefix}}img/post_actions.png" class="buttonImage"
                   title="{{=it.tr.postActionsText}}">]
             <ul class="popupActionsMenu postActionsMenu {{=it.deviceType}}">

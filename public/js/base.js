@@ -111,7 +111,83 @@ lord.showSettings = function() {
     c.model = merge.recursive(model,
             lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true));
     c.div = lord.template("settingsDialog", c.model);
-    lord.showDialog(c.div, { title: "settingsDialogTitle" }).then(function(accepted) {
+    lord.showDialog(c.div, {
+        title: "settingsDialogTitle",
+        buttons: [
+            {
+                text: "exportSettingsButtonText",
+                action: function() {
+                    var o = { settings: lord.settings() };
+                    var f = function(key, def) {
+                        if (typeof def == "undefined")
+                            def = {};
+                        o[key] = lord.getLocalObject(key, def);
+                    };
+                    f("favoriteThreads");
+                    f("ownPosts");
+                    f("spells", "");
+                    f("userJavaScript", "");
+                    f("hotkeys", {});
+                    f("hiddenPosts", {});
+                    f("lastCodeLang", "");
+                    f("chats");
+                    f("drafts");
+                    f("playlist/trackList", []);
+                    f("lastChatCheckDate", null);
+                    f("audioVideoVolume", 1);
+                    f("userCss", "");
+                    f("ownLikes");
+                    f("ownVotes");
+                    f("lastPostNumbers");
+                    f("showTripcode");
+                    f("mumWatching", false);
+                    prompt(lord.text("copySettingsHint"), JSON.stringify(o));
+                }
+            },
+            {
+                text: "importSettingsButtonText",
+                action: function() {
+                    var s = prompt(lord.text("pasteSettingsHint"));
+                    if (!s)
+                        return;
+                    var o;
+                    try {
+                        o = JSON.parse(s);
+                    } catch(err) {
+                        lord.handleError(err);
+                        return;
+                    }
+                    lord.setSettings(o.settings);
+                    var f = function(key) {
+                        var val = o[key];
+                        if (typeof val == "undefined")
+                            return;
+                        lord.setLocalObject(key, val);
+                    };
+                    f("favoriteThreads");
+                    f("ownPosts");
+                    f("spells");
+                    f("userJavaScript");
+                    f("hotkeys");
+                    f("hiddenPosts");
+                    f("lastCodeLang");
+                    f("chats");
+                    f("drafts");
+                    f("playlist/trackList");
+                    f("lastChatCheckDate");
+                    f("audioVideoVolume");
+                    f("userCss");
+                    f("ownLikes");
+                    f("ownVotes");
+                    f("lastPostNumbers");
+                    f("showTripcode");
+                    f("mumWatching");
+                }
+            },
+            "cancel",
+            "ok"
+        ]
+    }).then(function(accepted) {
         if (!accepted)
             return;
         var model = {};

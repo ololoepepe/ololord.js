@@ -994,9 +994,10 @@ lord.showDialog = function(body, options) {
                 return {
                     text: lord.text(button.text),
                     click: function() {
-                        button.action();
-                        if (button.resolve)
-                            resolve(true);
+                        var result = button.action();
+                        if (typeof result != "boolean")
+                            return;
+                        resolve(result);
                         $(this).dialog("close");
                     }
                 };
@@ -1384,15 +1385,9 @@ lord.settings = function() {
     return {
         time: lord.getCookie("time", "server"),
         timeZoneOffset: lord.getCookie("timeZoneOffset", -lord.now().getTimezoneOffset()),
-        captchaEngine: {
-            id: lord.getCookie("captchaEngine", "google-recaptcha")
-        },
-        style: {
-            name: lord.getLocalObject("style", "photon")
-        },
-        codeStyle: {
-            name: lord.getLocalObject("codeStyle", "default")
-        },
+        captchaEngine: { id: lord.getCookie("captchaEngine", "google-recaptcha") },
+        style: { name: lord.getLocalObject("style", "photon") },
+        codeStyle: { name: lord.getLocalObject("codeStyle", "default") },
         shrinkPosts: lord.getLocalObject("shrinkPosts", true),
         markupMode: lord.getLocalObject("markupMode", "EXTENDED_WAKABA_MARK,BB_CODE"),
         stickyToolbar: lord.getLocalObject("stickyToolbar", true),
