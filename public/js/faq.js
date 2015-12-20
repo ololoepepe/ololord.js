@@ -26,5 +26,12 @@ window.addEventListener("load", function load() {
         var data = lord.template("custom-faq", model);
         if (data)
             faqContentPlaceholder.parentNode.replaceChild(data, faqContentPlaceholder);
+        setTimeout(function() {
+            var hash = lord.hash();
+            if (hash && "#" != hash) {
+                window.location.hash = "";
+                window.location.hash = hash;
+            }
+        }, lord.Second);
     }
 }, false);

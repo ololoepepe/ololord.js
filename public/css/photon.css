@@ -950,7 +950,6 @@ ul.tabWidget > li.activated {
 */
 
 .toolbar {
-    border-bottom: 1px solid #CCCCCC;
     display: block;
     font-size: 0.9em;
     padding-bottom: 5px;
@@ -1272,7 +1271,6 @@ input.buttonImage {
 .chatContactList {
     overflow-y: auto;
     min-width: 50px;
-    padding-top: 20px;
 }
 
 .chatContact {
@@ -1306,11 +1304,38 @@ input.buttonImage {
 
 .chatHistory {
     padding-left: 8px;
-    padding-right: 8px;
+    padding-top: 5px;
+    padding-right: 4px;
+    padding-bottom: 5px;
     border: 1px solid black;
     overflow-y: auto;
     min-width: 200px;
     min-height: 400px;
+}
+
+.chatMessageIn {
+    border: 1px solid black;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    background-color: #FFE5E5;
+    padding: 4px;
+}
+
+.chatMessageOut {
+    border: 1px solid black;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    background-color: #E5FFE5;
+    padding: 4px;
+}
+
+.chatMessageDate {
+    margin-bottom: 8px;
+    border-bottom: 1px dotted black;
+}
+
+.chatMessageText {
+    padding-left: 8px;
 }
 
 .chatInput {

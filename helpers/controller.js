@@ -640,6 +640,7 @@ controller.translationsModel = function() {
     translate("Enable API request caching", "apiRequestCachingLabelText");
     translate("Copy settings string and save it somewhere", "copySettingsHint");
     translate("Paste settings string here", "pasteSettingsHint");
+    translate("Enter your message here", "chatMessageTextPlaceholder");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

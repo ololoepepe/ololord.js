@@ -2409,5 +2409,10 @@
         "pasteSettingsHint": {
             "value": "Вставьте сюда строку с настройками"
         }
+    },
+    "Enter your message here": {
+        "chatMessageTextPlaceholder": {
+            "value": "Введите сообщение сюда"
+        }
     }
 }

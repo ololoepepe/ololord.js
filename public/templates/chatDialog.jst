@@ -10,17 +10,11 @@
                     </div>
                 </td>
                 <td>
-                    <div class="chatTarget" name="target" style="display: none;">
-                        <span name="targetKey"></span>
-                        <input type="image" src="/{{=it.site.pathPrefix}}img/delete.png"
-                               onclick="lord.deleteChat(this);" class="buttonImage"
-                               title="{{=it.tr.deleteChatButtonText}}" />
-                    </div>
-                    <br />
                     <div class="chatHistory" name="history"></div>
                     <div>
                         <input type="text" class="chatInput" name="message" disabled="true"
-                               onkeypress="if (13 != event.keyCode) return; lord.sendChatMessage(); return false;" />
+                               onkeypress="if (13 != event.keyCode) return; lord.sendChatMessage(); return false;"
+                               placeholder="{{it.tr.chatMessageTextPlaceholder}}" />
                     </div>
                     <div>
                         <button name="sendMessageButton" onclick="lord.sendChatMessage();" disabled="true"

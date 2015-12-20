@@ -1,11 +1,4 @@
-<div>
-    {{? "in" == it.type}}
-        <font color="red">&gt;&gt;</font>
-    {{??}}
-        <font color="green">&lt;&lt;</font>
-    {{?}}
-    {{ out += it.formattedDate(it.date); }}
-    <br />
-    {{!it.text}}
-    <br />
+<div class="{{? "in" == it.type}}chatMessageIn{{??}}chatMessageOut{{?}}">
+    <div class="chatMessageDate">{{ out += it.formattedDate(it.date); }}</div>
+    <div class="chatMessageText">{{!it.text}}</div>
 </div>

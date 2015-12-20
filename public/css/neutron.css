@@ -45,6 +45,8 @@ hr {
 
 .select {
     background-color: #111111;
+    border: 2px solid #545454;
+    border-radius: 5px;
     color: #EEEEEE;
     cursor: pointer;
 }
@@ -61,23 +63,23 @@ hr {
 
 textarea {
     background-color: #111111;
+    border: 2px solid #545454;
+    border-radius: 5px;
     color: #EEEEEE;
 }
 
-input {
+input:not([type='image']) { /*Yep, this is NOT a class*/
     background-color: #111111;
+    border: 2px solid #545454;
+    border-radius: 5px;
     color: #EEEEEE;
 }
 
 .button {
-    background-color: #111111;
-    color: #EEEEEE;
     cursor: pointer;
 }
 
 .checkbox {
-    background-color: #111111;
-    color: #EEEEEE;
     cursor: pointer;
 }
 
@@ -1312,7 +1314,6 @@ input.buttonImage {
 .chatContactList {
     overflow-y: auto;
     min-width: 50px;
-    padding-top: 20px;
 }
 
 .chatContact {
@@ -1347,10 +1348,38 @@ input.buttonImage {
 
 .chatHistory {
     padding-left: 8px;
+    padding-top: 5px;
+    padding-right: 4px;
+    padding-bottom: 5px;
     border: 1px solid black;
     overflow-y: auto;
     min-width: 200px;
     min-height: 400px;
+}
+
+.chatMessageIn {
+    border: 1px solid black;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    background-color: #FFE5E5;
+    padding: 4px;
+}
+
+.chatMessageOut {
+    border: 1px solid black;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    background-color: #E5FFE5;
+    padding: 4px;
+}
+
+.chatMessageDate {
+    margin-bottom: 8px;
+    border-bottom: 1px dotted black;
+}
+
+.chatMessageText {
+    padding-left: 8px;
 }
 
 .chatInput {
