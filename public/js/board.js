@@ -2843,13 +2843,14 @@ lord.initializeOnLoadBaseBoard = function() {
         var threads = lord.id("threads");
         lord.removeChildren(threads);
         lord.removeClass(threads, "loadingMessage");
-        return c.threads.forEach(function(thread) {
+        c.threads.forEach(function(thread) {
             c.model.thread = thread;
             if (c.notCatalog)
                 threads.appendChild(lord.node("hr"));
             threads.appendChild(lord.template(c.notCatalog ? ("thread") : "catalogThread", c.model));
         });
-    }).then(function() {
+        if (typeof lord.postsLoaded == "function")
+            lord.postsLoaded();
         $(".codeBlock").css("maxWidth", ($(window).width() - 100 + "px"));
         setTimeout(function() {
             var hash = lord.hash();
