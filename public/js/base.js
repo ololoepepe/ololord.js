@@ -111,7 +111,7 @@ lord.showSettings = function() {
     c.model = merge.recursive(model,
             lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true));
     c.div = lord.template("settingsDialog", c.model);
-    lord.showDialog("settingsDialogTitle", null, c.div).then(function(accepted) {
+    lord.showDialog(c.div, { title: "settingsDialogTitle" }).then(function(accepted) {
         if (!accepted)
             return;
         var model = {};
@@ -295,7 +295,7 @@ lord.editHotkeys = function() {
     };
     model = merge.recursive(model, lord.model("tr"));
     c.div = lord.template("hotkeysDialog", model);
-    lord.showDialog(null, null, c.div).then(function(accepted) {
+    lord.showDialog(c.div).then(function(accepted) {
         if (!accepted)
             return;
         lord.query("input", c.div).forEach(function(el) {
@@ -337,7 +337,7 @@ lord.editSpells = function() {
     ta.rows = 10;
     ta.cols = 43;
     ta.value = lord.getLocalObject("spells", lord.DefaultSpells);
-    lord.showDialog(null, null, ta).then(function(result) {
+    lord.showDialog(ta).then(function(result) {
         if (!result)
             return Promise.resolve();
         lord.setLocalObject("spells", ta.value);
@@ -355,7 +355,10 @@ lord.showHiddenPostList = function() {
     var model = lord.model(["base", "tr"], true);
     model.hiddenPosts = lord.toArray(lord.getLocalObject("hiddenPosts", {}));
     var div = lord.template("hiddenPostList", model);
-    return lord.showDialog("hiddenPostListText", null, div);
+    return lord.showDialog(div, {
+        title: "hiddenPostListText",
+        buttons: ["close"]
+    });
 };
 
 lord.removeHidden = function(el) {
@@ -383,9 +386,11 @@ lord.editUserCss = function() {
         ta.value = lord.getLocalObject("userCss", "");
         div.appendChild(ta);
     }
-    lord.showDialog(null, null, div, function() {
-        if (c.editor)
-            c.editor.refresh();
+    lord.showDialog(div, {
+        afterShow: function() {
+            if (c.editor)
+                c.editor.refresh();
+        }
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -411,9 +416,11 @@ lord.editUserJavaScript = function() {
         ta.value = lord.getLocalObject("userJavaScript", "");
         div.appendChild(ta);
     }
-    lord.showDialog(null, null, div, function() {
-        if (c.editor)
-            c.editor.refresh();
+    lord.showDialog(div, {
+        afterShow: function() {
+            if (c.editor)
+                c.editor.refresh();
+        }
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -558,11 +565,15 @@ lord.showChat = function(key) {
         model.contacts.push({ key: key });
     });
     lord.chatDialog = lord.template("chatDialog", model);
-    lord.showDialog("chatText", null, lord.chatDialog, function() {
-        lord.checkChats();
-        if (!key)
-            return;
-        lord.selectChatContact(key);
+    lord.showDialog(lord.chatDialog, {
+        title: "chatText",
+        afterShow: function() {
+            lord.checkChats();
+            if (!key)
+                return;
+            lord.selectChatContact(key);
+        },
+        buttons: ["close"]
     }).then(function() {
         lord.chatDialog = null;
     }).catch(lord.handleError);

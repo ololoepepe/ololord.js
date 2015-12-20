@@ -965,10 +965,10 @@ lord.deviceType = function(expected) {
     return base.deviceType;
 };
 
-lord.showDialog = function(title, label, body, afterShow) {
+lord.showDialog = function(body, options) {
     var root = lord.node("div");
-    title = lord.text(title);
-    label = lord.text(label);
+    var title = lord.text(options ? options.title : null);
+    var label = lord.text(options ? options.label : null);
     if (title || label) {
         var div = lord.node("div");
         if (title) {
@@ -991,21 +991,43 @@ lord.showDialog = function(title, label, body, afterShow) {
         root.appendChild(lord.node("br"));
     }
     var div2 = lord.node("div");
-    var dialog = null;
-    var cancel = lord.node("button");
     return new Promise(function(resolve, reject) {
-        cancel.onclick = function() {
-            dialog.close();
-        };
-        cancel.appendChild(lord.node("text", lord.text("cancelButtonText")));
-        div2.appendChild(cancel);
-        var ok = lord.node("button");
-        ok.onclick = function() {
-            resolve(true);
-            dialog.close();
-        };
-        ok.appendChild(lord.node("text", lord.text("confirmButtonText")));
-        div2.appendChild(ok);
+        var dialog;
+        var buttons = (options && options.buttons) || ["cancel", "ok"];
+        buttons.forEach(function(button) {
+            if ("ok" == button) {
+                var ok = lord.node("button");
+                ok.onclick = function() {
+                    resolve(true);
+                    dialog.close();
+                };
+                ok.appendChild(lord.node("text", lord.text("confirmButtonText")));
+                div2.appendChild(ok);
+            } else if ("cancel" == button) {
+                var cancel = lord.node("button");
+                cancel.onclick = function() {
+                    dialog.close();
+                };
+                cancel.appendChild(lord.node("text", lord.text("cancelButtonText")));
+                div2.appendChild(cancel);
+            } else if ("close" == button) {
+                var close = lord.node("button");
+                close.onclick = function() {
+                    dialog.close();
+                };
+                close.appendChild(lord.node("text", lord.text("closeButtonText")));
+                div2.appendChild(close);
+            } else if (button && button.text && typeof button.action == "function") {
+                var btn = lord.node("button");
+                btn.onclick = function() {
+                    button.action();
+                    resolve(true);
+                    dialog.close();
+                };
+                btn.appendChild(lord.node("text", lord.text(button.text)));
+                div2.appendChild(btn);
+            }
+        });
         root.appendChild(div2);
         dialog = picoModal({
             content: root,
@@ -1017,8 +1039,8 @@ lord.showDialog = function(title, label, body, afterShow) {
                 return styles;
             }
         }).afterShow(function(modal) {
-            if (afterShow)
-                afterShow();
+            if (options && typeof options.afterShow == "function")
+                options.afterShow();
         }).afterClose(function(modal) {
             modal.destroy();
             resolve(false);

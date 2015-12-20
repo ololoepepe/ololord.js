@@ -700,7 +700,10 @@ lord.showPostSourceText = function(el) {
         textArea.value = post.rawText;
         textArea.rows = "30";
         textArea.cols = "56";
-        return lord.showDialog("postSourceText", null, textArea);
+        return lord.showDialog(textArea, {
+            title: "postSourceText",
+            buttons: ["close"]
+        });
     }).catch(lord.handleError);
 };
 
@@ -716,7 +719,7 @@ lord.chatWithUser = function(el) {
     ta.rows = 10;
     ta.cols = 43;
     div.appendChild(ta);
-    lord.showDialog("chatText", null, div).then(function(result) {
+    lord.showDialog(div, { title: "chatText" }).then(function(result) {
         if (!result)
             return Promise.resolve();
         if (!ta.value)
@@ -740,7 +743,10 @@ lord.deletePost = function(el) {
         model.boardName = lord.data("boardName", el, true);
         model.postNumber = postNumber;
         c.div = lord.template("deletePostDialog", model);
-    lord.showDialog("enterPasswordTitle", "enterPasswordText", c.div).then(function(result) {
+    lord.showDialog(c.div, {
+        title: "enterPasswordTitle",
+        label: "enterPasswordText"
+    }).then(function(result) {
         if (!result)
             return Promise.resolve();
         var form = lord.queryOne("form", c.div);
@@ -795,7 +801,7 @@ lord.moveThread = function(el) {
     model.boardName = boardName;
     model.threadNumber = threadNumber;
     c.div = lord.template("moveThreadDialog", model);
-    lord.showDialog("moveThreadText", null, c.div).then(function(result) {
+    lord.showDialog(c.div, { title: "moveThreadText" }).then(function(result) {
         if (!result)
             return Promise.resolve();
         var form = lord.queryOne("form", c.div);
@@ -848,7 +854,7 @@ lord.banUser = function(el) {
             });
         });
         $(".xdsoft_datetimepicker").css("zIndex", 11000);
-        return lord.showDialog("banUserText", null, c.div);
+        return lord.showDialog(c.div, { title: "banUserText" });
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -940,7 +946,7 @@ lord.addFiles = function(el) {
         return model.settings.minimalisticPostform;
     };
     c.div = lord.template("addFilesDialog", model);
-    lord.showDialog("addFilesText", null, c.div).then(function(result) {
+    lord.showDialog(c.div, { title: "addFilesText" }).then(function(result) {
         if (!result)
             return Promise.resolve();
         var form = lord.queryOne("form", c.div);
@@ -984,7 +990,7 @@ lord.editPost = function(el) {
         c.model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
         c.model.customEditPostDialogPart = lord.customEditPostDialogPart;
         c.div = lord.template("editPostDialog", c.model);
-        return lord.showDialog("editPostText", null, c.div);
+        return lord.showDialog(c.div, { title: "editPostText" });
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -1090,7 +1096,10 @@ lord.deleteFile = function(el) {
     var model = lord.model(["base", "tr"], true);
     model.fileName = lord.data("fileName", el, true);
     var div = lord.template("deleteFileDialog", model);
-    lord.showDialog("enterPasswordTitle", "enterPasswordText", div).then(function(result) {
+    lord.showDialog(div, {
+        title: "enterPasswordTitle",
+        label: "enterPasswordText"
+    }).then(function(result) {
         if (!result)
             return Promise.resolve();
         var form = lord.queryOne("form", div);
@@ -1106,7 +1115,7 @@ lord.editAudioTags = function(el) {
     lord.api("fileInfo", { fileName: fileName }).then(function(fileInfo) {
         c.model = merge.recursive({ fileInfo: fileInfo }, lord.model(["base", "tr"], true));
         c.div = lord.template("editAudioTagsDialog", c.model);
-        return lord.showDialog("editAudioTagsText", null, c.div);
+        return lord.showDialog(c.div, { title: "editAudioTagsText" });
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -1508,7 +1517,7 @@ lord.attachFileByVk = function(a) {
             response = response.response.slice(1);
             var c = {};
             c.div = lord.template("vkAudioList", { tracks: response });
-            lord.showDialog("selectTrackTitle", null, c.div).then(function(result) {
+            lord.showDialog(c.div, { title: "selectTrackTitle" }).then(function(result) {
                 if (!result)
                     return Promise.resolve();
                 var trackId = +lord.queryOne("input[name='track']:checked", c.div).value;
