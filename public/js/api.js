@@ -1351,7 +1351,11 @@ lord.api = function(entity, parameters, prefix) {
     });
     query = (query ? "?" : "") + query;
     return new Promise(function(resolve, reject) {
-        $.getJSON("/" + lord.data("sitePathPrefix") + prefix + "/" + entity + ".json" + query).then(function(result) {
+        $.ajax({
+            url: "/" + lord.data("sitePathPrefix") + prefix + "/" + entity + ".json" + query,
+            dataType: "json",
+            cache: lord.getLocalObject("apiRequestCachingEnabled", false)
+        }).then(function(result) {
             if (lord.checkError(result))
                 reject(result);
             resolve(result);
@@ -1444,7 +1448,8 @@ lord.settings = function() {
         sourceHighlightingEnabled: lord.getLocalObject("sourceHighlightingEnabled", false),
         chatEnabled: lord.getLocalObject("chatEnabled", true),
         closeFilesByClickingOnly: lord.getLocalObject("closeFilesByClickingOnly", false),
-        viewPostPreviewDelay: lord.getLocalObject("viewPostPreviewDelay", 200)
+        viewPostPreviewDelay: lord.getLocalObject("viewPostPreviewDelay", 200),
+        apiRequestCachingEnabled: lord.getLocalObject("apiRequestCachingEnabled", false)
     };
 };
 

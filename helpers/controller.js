@@ -636,6 +636,7 @@ controller.translationsModel = function() {
     translate("Invalid data", "invalidDataErrorText");
     translate("No such post", "noSuchPostErrorText");
     translate("Internal error", "internalErrorText");
+    translate("Enable API request caching", "apiRequestCachingLabelText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

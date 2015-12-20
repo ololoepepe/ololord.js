@@ -1284,22 +1284,6 @@ module.exports.generateRss = function() {
     });
 };
 
-var toMap = function(index, boardName) {
-    if (!index || index.length < 1)
-        return {};
-    var map = {};
-    index.forEach(function(post) {
-        post = JSON.parse(post);
-        if (boardName && post.boardName != boardName)
-            return;
-        var key = post.boardName + ":" + post.postNumber + ":" + post.source;
-        if (!map.hasOwnProperty(key))
-            map[key] = [];
-        map[key].push(post);
-    });
-    return map;
-};
-
 var findPhrase = function(phrase, boardName) {
     var results = [];
     var p = Promise.resolve();

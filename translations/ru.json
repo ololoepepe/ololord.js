@@ -2389,5 +2389,10 @@
         "_default": {
             "value": "Недействительный номер страницы"
         }
+    },
+    "Enable API request caching": {
+        "apiRequestCachingLabelText": {
+            "value": "Кэшировать запросы к API"
+        }
     }
 }
