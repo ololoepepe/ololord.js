@@ -14,7 +14,7 @@
                     <div>
                         <input type="text" class="chatInput" name="message" disabled="true"
                                onkeypress="if (13 != event.keyCode) return; lord.sendChatMessage(); return false;"
-                               placeholder="{{it.tr.chatMessageTextPlaceholder}}" />
+                               placeholder="{{=it.tr.chatMessageTextPlaceholder}}" />
                     </div>
                     <div>
                         <button name="sendMessageButton" onclick="lord.sendChatMessage();" disabled="true"
