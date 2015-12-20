@@ -76,21 +76,20 @@ controller.sync = function(templateName, modelData) {
 };
 
 controller.error = function(res, error, ajax) {
+    if (error) {
+        Global.error(error);
+        if (error.stack)
+            Global.error(error.stack);
+    }
     if (!ajax && Util.isNumber(error) && 404 == error)
         return controller.notFound(res);
     var f = function(error) {
         var model = {};
         model.title = Tools.translate("Error", "pageTitle");
         if (Util.isError(error)) {
-            if (Tools.contains(process.argv.slice(2), "--dev-mode")) {
-                Global.error(error);
-                Global.error(error.stack);
-            }
             model.errorMessage = Tools.translate("Internal error", "errorMessage");
             model.errorDescription = error.message;
         } else if (Util.isObject(error) && (error.error || error.ban)) {
-            if (Tools.contains(process.argv.slice(2), "--dev-mode"))
-                Global.error(error);
             if (error.ban) {
                 model.ban = error.ban;
             } else {
@@ -98,8 +97,6 @@ controller.error = function(res, error, ajax) {
                 model.errorDescription = error.description || error.error;
             }
         } else {
-            if (Tools.contains(process.argv.slice(2), "--dev-mode"))
-                Global.error(error);
             model.errorMessage = Tools.translate("Error", "errorMessage");
             model.errorDescription = (error && Util.isString(error)) ? error
                 : ((404 == error) ? Tools.translate("404 (not found)", "errorMessage") : "");
@@ -137,7 +134,6 @@ controller.error = function(res, error, ajax) {
 };
 
 controller.notFound = function(res) {
-    Global.error(404);
     var f = function() {
         var model = {};
         model.title = Tools.translate("Error 404", "pageTitle");
