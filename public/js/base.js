@@ -130,7 +130,7 @@ lord.showSettings = function() {
         });
         lord.setSettings(model);
         lord.reloadPage();
-    });
+    }).catch(lord.handleError);
 };
 
 lord.showFavorites = function() {
@@ -348,7 +348,7 @@ lord.editSpells = function() {
             "data": lord.getLocalObject("spells", lord.DefaultSpells)
         });
         return Promise.resolve();
-    });
+    }).catch(lord.handleError);
 };
 
 lord.showHiddenPostList = function() {
@@ -358,7 +358,7 @@ lord.showHiddenPostList = function() {
     return lord.showDialog(div, {
         title: "hiddenPostListText",
         buttons: ["close"]
-    });
+    }).catch(lord.handleError);
 };
 
 lord.removeHidden = function(el) {
@@ -396,7 +396,7 @@ lord.editUserCss = function() {
             return Promise.resolve();
         lord.setLocalObject("userCss", c.editor ? c.editor.getValue() : ta.value);
         return Promise.resolve();
-    });
+    }).catch(lord.handleError);
 };
 
 lord.editUserJavaScript = function() {
@@ -426,7 +426,7 @@ lord.editUserJavaScript = function() {
             return Promise.resolve();
         lord.setLocalObject("userJavaScript", c.editor ? c.editor.getValue() : ta.value);
         return Promise.resolve();
-    });
+    }).catch(lord.handleError);
 };
 
 lord.hotkey_showFavorites = function() {

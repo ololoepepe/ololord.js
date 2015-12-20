@@ -843,7 +843,7 @@
     },
     "Auto update interval (sec):": {
         "autoUpdateIntervalLabelText": {
-            "value": "Интервал автообновленияы (сек):"
+            "value": "Интервал автообновления (сек):"
         }
     },
     "Auto update threads by default": {

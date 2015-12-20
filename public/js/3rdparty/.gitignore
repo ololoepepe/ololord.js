@@ -3,13 +3,13 @@
 !doT.min.js
 !FileSaver.min.js
 !jquery-1.11.3.min.js
+!jquery-ui.min.js
 !jquery.datetimepicker.js
 !jquery.knob.min.js
 !jszip.min.js
 !jszip-utils.min.js
 !merge.min.js
 !moment-with-locales.min.js
-!picoModal-2.1.0.min.js
 !Promise.min.js
 !sha1.min.js
 !twitter.js

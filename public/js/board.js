@@ -740,13 +740,13 @@ lord.deletePost = function(el) {
     var c = {};
     var postNumber = +lord.data("number", el, true);
     var model = lord.model(["base", "tr"], true);
-        model.boardName = lord.data("boardName", el, true);
-        model.postNumber = postNumber;
-        c.div = lord.template("deletePostDialog", model);
-    lord.showDialog(c.div, {
-        title: "enterPasswordTitle",
-        label: "enterPasswordText"
-    }).then(function(result) {
+    model.boardName = lord.data("boardName", el, true);
+    model.postNumber = postNumber;
+    c.div = lord.node("div");
+    c.div.appendChild(lord.node("text", lord.text("enterPasswordText")));
+    c.div.appendChild(lord.node("br"));
+    c.div.appendChild(lord.template("deletePostDialog", model));
+    lord.showDialog(c.div, { title: "enterPasswordTitle" }).then(function(result) {
         if (!result)
             return Promise.resolve();
         var form = lord.queryOne("form", c.div);
@@ -1095,11 +1095,11 @@ lord.hideByImage = function(a) {
 lord.deleteFile = function(el) {
     var model = lord.model(["base", "tr"], true);
     model.fileName = lord.data("fileName", el, true);
-    var div = lord.template("deleteFileDialog", model);
-    lord.showDialog(div, {
-        title: "enterPasswordTitle",
-        label: "enterPasswordText"
-    }).then(function(result) {
+    var div = lord.node("div");
+    div.appendChild(lord.node("text", lord.text("enterPasswordText")));
+    div.appendChild(lord.node("br"));
+    div.appendChild(lord.template("deleteFileDialog", model));
+    lord.showDialog(div, { title: "enterPasswordTitle" }).then(function(result) {
         if (!result)
             return Promise.resolve();
         var form = lord.queryOne("form", div);
