@@ -158,27 +158,33 @@ lord.showSettings = function() {
                         return;
                     }
                     lord.setSettings(o.settings);
-                    var f = function(key) {
+                    var f = function(key, merge) {
                         var val = o[key];
                         if (typeof val == "undefined")
                             return;
-                        lord.setLocalObject(key, val);
+                        if (!merge)
+                            return lord.setLocalObject(key, val);
+                        var src = lord.getLocalObject(key, {});
+                        lord.forIn(val, function(v, k) {
+                            src[v] = k;
+                        });
+                        lord.setLocalObject(src, val);
                     };
-                    f("favoriteThreads");
-                    f("ownPosts");
+                    f("favoriteThreads", true);
+                    f("ownPosts", true);
                     f("spells");
                     f("userJavaScript");
                     f("hotkeys");
                     f("hiddenPosts");
                     f("lastCodeLang");
-                    f("chats");
-                    f("drafts");
+                    f("chats", true);
+                    f("drafts", true);
                     f("playlist/trackList");
                     f("lastChatCheckDate");
                     f("audioVideoVolume");
                     f("userCss");
-                    f("ownLikes");
-                    f("ownVotes");
+                    f("ownLikes", true);
+                    f("ownVotes", true);
                     f("lastPostNumbers");
                     f("showTripcode");
                     f("mumWatching");
