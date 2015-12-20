@@ -704,7 +704,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
             p = Promise.resolve();
         } else if (creatingThread) {
             p = generateThread(boardName, threadNumber, true);
-        } else if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)
+        } else if ((scheduled.delete && scheduled.delete.length > 0) || (scheduled.edit && scheduled.edit.length > 0)
             || (scheduled.create && scheduled.create.length > 0)) {
             if (scheduled.delete) {
                 scheduled.delete.forEach(function(pn) {
@@ -765,7 +765,7 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
             p = p.then(function() {
                 return Tools.writeFile(c.data.threadPath, c.data.threadData);
             });
-        } else if ((scheduled.delete && scheduled.delete.length) > 0 || (scheduled.edit && scheduled.edit.length)
+        } else if ((scheduled.delete && scheduled.delete.length > 0) || (scheduled.edit && scheduled.edit.length > 0)
             || (scheduled.create && scheduled.create.length > 0)) {
             var threadPath = cachePath("thread", boardName, threadNumber);
             p = p.then(function() {

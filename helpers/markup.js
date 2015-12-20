@@ -638,9 +638,10 @@ var convertPostLink = function(info, _, matchs, _, options) {
     var postNumber = matchs[(matchs.length > 2) ? 2 : 1];
     var escaped = matchs[0].split(">").join("&gt;");
     if (postNumber && (postNumber != info.deletedPost)) {
-        return Database.getPost(boardName, postNumber).then(function(post) {
+        return Database.db.hget("posts", boardName + ":" + postNumber).then(function(post) {
             if (!post)
                 return escaped;
+            post = JSON.parse(post);
             if (info.referencedPosts) {
                 var key = boardName + ":" + postNumber;
                 if (!info.referencedPosts[key]) {
