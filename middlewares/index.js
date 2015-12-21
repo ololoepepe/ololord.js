@@ -1,5 +1,5 @@
 var cookieParser = require("cookie-parser");
-var DDoS = require("ddos");
+var ddos = require("ddos-express");
 var device = require("express-device");
 var express = require("express");
 
@@ -40,18 +40,28 @@ var setupDdos = function() {
         module.exports.push(log);
 
     if (config("server.ddosProtection.enabled", true)) {
-        var burst = +config("server.ddosProtection.burst", 6);
-        var limit = burst * 6;
-        var ddos = new DDoS({
-            maxcount: (limit * 1.5),
-            burst: burst,
-            limit: limit,
-            maxexpiry: +config("server.ddosProtection.maxExpiry", 60),
-            checkinterval: +config("server.ddosProtection.checkInterval", 1),
-            silentStart: true,
-            errormessage: config("server.ddosProtection.errorMessage", "Not so fast!")
-        });
-        module.exports.push(ddos.express);
+        module.exports.push(ddos({
+            errorData: config("server.ddosProtection.errorData", "Not so fast!"),
+            errorCode: config("server.ddosProtection.errorCode", 429),
+            weight: config("server.ddosProtection.weight", 1),
+            maxWeight: config("server.ddosProtection.maxWeight", 10),
+            checkInterval: config("server.ddosProtection.checkInterval", 1000),
+            rules: config("server.ddosProtection.rules", [
+                {
+                    regexp: "^/api.*",
+                    maxWeight: 4
+                },
+                {
+                    string: "/action/search",
+                    maxWeight: 1
+                },
+                {
+                    regexp: ".*",
+                    maxWeight: 10
+                }
+            ]),
+            logFunction: Global.error.bind(null, "DDoS detected:")
+        }));
     }
 };
 

@@ -24,10 +24,25 @@ Actual file name must be config-dev.json.
         "ddosProtection": {
             "enabled": true,
             "static": false,
-            "errorMessage": "Not so fast!",
-            "burst": 6,
-            "maxExpiry": 60,
-            "checkInterval": 1
+            "errorData": "Not so fast!",
+            "errorCode": 429,
+            "weight": 1,
+            "maxWeight": 10,
+            "checkInterval": 1000,
+            "rules": [
+                {
+                    "regexp": "^/api.*",
+                    "maxWeight": 4
+                },
+                {
+                    "string": "/action/search",
+                    "maxWeight": 1
+                },
+                {
+                    "regexp": ".*",
+                    "maxWeight": 16
+                }
+            ]
         },
         "rss": {
             "enabled": true,

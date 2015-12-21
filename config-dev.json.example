@@ -25,8 +25,7 @@ Example:
     "server": {
         "port": 8080,
         "ddosProtection": {
-            "enabled": false,
-            "errorMessage": "<html><head></head><body><img src='http://i3.kym-cdn.com/photos/images/masonry/000/112/322/130221984383.png' /></body></html>"
+            "enabled": false
         },
         "chat": {
             "ttl": 10080
