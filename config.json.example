@@ -32,7 +32,7 @@ Actual file name must be config-dev.json.
             "rules": [
                 {
                     "regexp": "^/api.*",
-                    "maxWeight": 4
+                    "maxWeight": 6
                 },
                 {
                     "string": "/action/search",

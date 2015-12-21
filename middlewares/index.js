@@ -49,7 +49,7 @@ var setupDdos = function() {
             rules: config("server.ddosProtection.rules", [
                 {
                     regexp: "^/api.*",
-                    maxWeight: 4
+                    maxWeight: 6
                 },
                 {
                     string: "/action/search",
