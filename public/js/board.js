@@ -3027,7 +3027,7 @@ lord.initializeOnLoadBaseBoard = function() {
     }).catch(lord.handleError);
 };
 
-lord.scrollHandler = function(e) {
+lord.scrollHandler = function() {
     var k = 1300;
     var top = ((window.innerHeight + window.scrollY + k) >= document.body.offsetHeight);
     var bottom = (window.scrollY <= k);

@@ -12,10 +12,9 @@
     <audio controls="">
         <source type="{{=it.mimeType}}" src="/{{=it.site.pathPrefix}}{{=it.boardName}}/src/{{=it.fileName}}">
     </audio>
-    <a download="{{=it.fileName}}" title="{{=it.tr.downloadPlaylistFileText}}"
-       href="/{{=it.site.pathPrefix}}{{=it.boardName}}/src/{{=it.fileName}}">
-        <img src="/{{=it.site.pathPrefix}}img/playlist_download.png"></a>
+    <a title="{{=it.tr.downloadPlaylistFileText}}"
+       href="/{{=it.site.pathPrefix}}{{=it.boardName}}/src/{{=it.fileName}}"
+       download="{{=it.fileName}}"><img src="/{{=it.site.pathPrefix}}img/playlist_download.png"></a>
     <a title="{{=it.tr.removeFromPlaylistText}}" href="javascript:void(0);"
-       onclick="lord.removeFromPlaylist(this);">
-        <img src="/{{=it.site.pathPrefix}}img/playlist_delete.png"></a>
+       onclick="lord.removeFromPlaylist(this);"><img src="/{{=it.site.pathPrefix}}img/playlist_delete.png"></a>
 </div>

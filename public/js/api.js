@@ -1018,9 +1018,12 @@ lord.showDialog = function(body, options) {
             },
             create: function() {
                 $("body").css({ overflow: "hidden" });
+                $(".navigationButton").css({ display: "none" });
             },
             beforeClose: function() {
                 $("body").css({ overflow: "inherit" });
+                if (lord.scrollHandler)
+                    lord.scrollHandler();
             }
         });
     });
