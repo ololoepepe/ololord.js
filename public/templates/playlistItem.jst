@@ -2,14 +2,13 @@
      ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);"
      data-board-name="{{=it.boardName}}"
      data-file-name="{{=it.fileName}}">
-    <span draggable="true">
+    <div draggable="true">
         {{? it.artist}}{{=it.artist}}{{?}}
         {{? it.artist || it.title}}—{{?}}
         {{? it.title}}{{=it.title}}{{?}}
         {{? it.artist}}[{{=it.artist}}]{{?}}
         <b>{{=it.duration}} / {{=it.bitrate}}{{=it.tr.kbps}}</b>
-    </span>
-    <br />
+    </div>
     <audio controls="">
         <source type="{{=it.mimeType}}" src="/{{=it.site.pathPrefix}}{{=it.boardName}}/src/{{=it.fileName}}">
     </audio>
