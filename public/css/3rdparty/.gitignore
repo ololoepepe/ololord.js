@@ -1,7 +1,6 @@
 *
-!images/
+!jquery-ui/
 !highlight.js
 !codemirror.css
 !jquery.datetimepicker.css
-!jquery-ui.min.css
 !.gitignore

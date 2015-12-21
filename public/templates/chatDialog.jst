@@ -10,7 +10,7 @@
                     </div>
                 </td>
                 <td>
-                    <div class="chatHistory" name="history"></div>
+                    <div class="chatHistory {{=it.deviceType}}" name="history"></div>
                     <div>
                         <input type="text" class="chatInput" name="message" disabled="true"
                                onkeypress="if (13 != event.keyCode) return; lord.sendChatMessage(); return false;"

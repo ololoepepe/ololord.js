@@ -1210,21 +1210,18 @@ input.buttonImage {
     overflow-y: auto;
     min-width: 200px;
     min-height: 400px;
+    max-width: 600px;
 }
 
-.chatMessageIn {
+.chatHistory.mobile {
+    max-width: 300px;
+}
+
+.chatMessage {
     border: 1px solid black;
     margin-bottom: 4px;
     border-radius: 6px;
-    background-color: #FFE5E5;
-    padding: 4px;
-}
-
-.chatMessageOut {
-    border: 1px solid black;
-    margin-bottom: 4px;
-    border-radius: 6px;
-    background-color: #E5FFE5;
+    background-color: #D6DAF0;
     padding: 4px;
 }
 
@@ -1235,6 +1232,13 @@ input.buttonImage {
 
 .chatMessageText {
     padding-left: 8px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
 }
 
 .chatInput {
