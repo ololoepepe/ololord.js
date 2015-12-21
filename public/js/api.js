@@ -1015,6 +1015,12 @@ lord.showDialog = function(body, options) {
             width: "auto",
             close: function() {
                 resolve(false);
+            },
+            create: function() {
+                $("body").css({ overflow: "hidden" });
+            },
+            beforeClose: function() {
+                $("body").css({ overflow: "inherit" });
             }
         });
     });
