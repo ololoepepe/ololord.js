@@ -890,6 +890,7 @@ ul.tabWidget > li.activated {
     top: 0px;
     background-color: #EEF2FF;
     width: 99%;
+    padding-bottom: 0px;
 }
 
 blockquote.blockquoteThread {
