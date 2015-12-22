@@ -43,7 +43,6 @@ lord._defineHotkey("markupCode", "Alt+C");
 /*Variables*/
 
 lord.chatTasks = {};
-lord.chats = lord.getLocalObject("chats", {});
 lord.chatDialog = null;
 lord.lastChatCheckDate = lord.getLocalObject("lastChatCheckDate", null);
 lord.notificationQueue = [];
@@ -553,7 +552,7 @@ lord.populateChatHistory = function(key) {
     model.formattedDate = function(date) {
         return moment(date).utcOffset(timeOffset).locale(model.site.locale).format(model.site.dateFormat);
     };
-    var messages = lord.chats[key] || [];
+    var messages = lord.getLocalObject("chats", {})[key] || [];
     messages = messages.map(function(message) {
         var m = merge.recursive(model, message);
         history.appendChild(lord.template("chatMessage", m));
@@ -611,10 +610,11 @@ lord.checkChats = function() {
         lord.lastChatCheckDate = model.lastRequestDate;
         lord.setLocalObject("lastChatCheckDate", lord.lastChatCheckDate);
         var keys = [];
+        var chats = lord.getLocalObject("chats", {});
         lord.forIn(model.chats, function(messages, key) {
-            if (!lord.chats[key])
-                lord.chats[key] = [];
-            var list = lord.chats[key];
+            if (!chats[key])
+                chats[key] = [];
+            var list = chats[key];
             if (messages.length > 0)
                 keys.push(key);
             messages.forEach(function(message) {
@@ -623,7 +623,7 @@ lord.checkChats = function() {
         });
         if (keys.length > 0)
             lord.updateChat(keys);
-        lord.setLocalObject("chats", lord.chats);
+        lord.setLocalObject("chats", chats);
         lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord),
             lord.chatDialog ? (5 * lord.Second) : lord.Minute);
     }).catch(function(err) {
@@ -640,7 +640,7 @@ lord.showChat = function(key) {
     });
     var model = lord.model(["base", "tr"], true);
     model.contacts = [];
-    lord.forIn(lord.chats, function(_, key) {
+    lord.forIn(lord.getLocalObject("chats", {}), function(_, key) {
         model.contacts.push({ key: key });
     });
     lord.chatDialog = lord.template("chatDialog", model);
@@ -690,8 +690,9 @@ lord.deleteChat = function(key) {
     formData.append("boardName", key.split(":").shift());
     formData.append("postNumber", +key.split(":").pop());
     return lord.post("/" + lord.data("sitePathPrefix") + "action/deleteChatMessages", formData).then(function(result) {
-        delete lord.chats[key];
-        lord.setLocalObject("chats", lord.chats);
+        var chats = lord.getLocalObject("chats", {});
+        delete chats[key];
+        lord.setLocalObject("chats", chats);
         if (!lord.chatDialog)
             return Promise.resolve();
         var contact = lord.nameOne(key, lord.chatDialog);
