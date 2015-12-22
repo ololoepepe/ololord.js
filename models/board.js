@@ -721,7 +721,13 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
                         var newRefs = post.referringPosts.reduce(function(acc, ref) {
                             return acc + ";" + ref.boardName + ":" + ref.postNumber;
                         }, "");
-                        if (oldRefs == newRefs)
+                        var oldFileInfos = oldPost.fileInfos.reduce(function(acc, fileInfo) {
+                            return acc + ";" + fileInfo.fileName + ":" + JSON.stringify(fileInfo.extraData);
+                        }, "");
+                        var newFileInfos = post.fileInfos.reduce(function(acc, fileInfo) {
+                            return acc + ";" + fileInfo.fileName + ":" + JSON.stringify(fileInfo.extraData);
+                        }, "");
+                        if (oldRefs == newRefs && oldFileInfos == newFileInfos)
                             return;
                     }
                     p = p.then(function() {
