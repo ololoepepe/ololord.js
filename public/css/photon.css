@@ -630,6 +630,9 @@ span.newPostCount {
 
 .post.temporary {
     border: 1px solid #000000;
+    display: block;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .thread.hidden > .omittedPosts {
