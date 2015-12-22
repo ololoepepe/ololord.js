@@ -422,14 +422,11 @@ lord.editSpells = function() {
     lord.showDialog(ta).then(function(result) {
         if (!result)
             return Promise.resolve();
-        lord.setLocalObject("spells", ta.value);
-        if (!lord.worker || !lord.getLocalObject("spellsEnabled", true))
+        var spells = ta.value;
+        lord.setLocalObject("spells", spells);
+        if (!lord.doWork || !lord.getLocalObject("spellsEnabled", true))
             return;
-        lord.worker.postMessage({
-            "type": "parseSpells",
-            "data": lord.getLocalObject("spells", lord.DefaultSpells)
-        });
-        return Promise.resolve();
+        return lord.doWork("parseSpells", spells);
     }).catch(lord.handleError);
 };
 

@@ -785,7 +785,10 @@ self.addEventListener("message", function(message) {
     try {
         message = JSON.parse(message.data);
     } catch (err) {
-        console.log(err);
+        self.postMessage(JSON.stringify({
+            id: "_error",
+            error: error
+        }));
         return;
     }
     var f = lord["message_" + message.type];

@@ -137,6 +137,8 @@ var threadPostNumbers = function(boardName, threadNumber) {
     });
 };
 
+module.exports.threadPostNumbers = threadPostNumbers;
+
 var postFileInfoNames = function(boardName, postNumber) {
     return db.smembers("postFileInfoNames:" + boardName + ":" + postNumber).then(function(list) {
         if (!list)

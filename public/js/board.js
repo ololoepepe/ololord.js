@@ -34,8 +34,11 @@ lord.worker.addEventListener("message", function(message) {
         return;
     }
     var task = lord.workerTasks[message.id];
-    if (!task)
+    if (!task) {
+        if ("_error" == message.id)
+            lord.handleError(message.error);
         return;
+    }
     delete lord.workerTasks[message.id];
     if (!message.error)
         task.resolve(message.data);
@@ -1044,7 +1047,10 @@ lord.hideByImage = function(a) {
         if (!hash)
             return Promise.reject("failedToGenerateHashErrorText");
         c.hash = hash;
-        var spells = lord.getLocalObject("spells", lord.DefaultSpells) + "\n#ihash(" + c.hash + ")";
+        var spells = lord.getLocalObject("spells", lord.DefaultSpells);
+        if (spells && spells[spells.length - 1] != "\n")
+            spells += "\n";
+        spells += "#ihash(" + c.hash + ")";
         lord.setLocalObject("spells", spells);
         if (!lord.getLocalObject("spellsEnabled", true))
             return Promise.resolve();
@@ -1053,7 +1059,7 @@ lord.hideByImage = function(a) {
         if (!spells || !spells.root)
             return Promise.resolve();
         lord.spells = spells.root.spells;
-        if (!spellsEnabled)
+        if (!lord.getLocalObject("spellsEnabled", true))
             return Promise.resolve();
         c.list = [];
         c.posts = lord.query(".post, .opPost");
@@ -2826,19 +2832,24 @@ lord.initializeOnLoadBaseBoard = function() {
             }).catch(lord.handleError);
         }
         if (+lord.data("threadNumber")) {
-            lord.queryOne(".theTitle > h1").innerHTML = lord.escaped(model.thread.title);
-            lord.queryOne("head > title").innerHTML = lord.escaped(model.thread.title);
+            var title = model.thread.title || (c.model.board.title + " — " + model.thread.number);
+            lord.queryOne(".theTitle > h1").innerHTML = lord.escaped(title);
+            lord.queryOne("head > title").innerHTML = lord.escaped(title);
             var upperPlaceholder = lord.id("upperPlaceholder");
-            upperPlaceholder.parentNode.replaceChild(lord.template("threadPageUpper", c.model), upperPlaceholder);
+            upperPlaceholder.parentNode.replaceChild(lord.template("threadPageUpper", c.model),
+                upperPlaceholder);
             var lowerPlaceholder = lord.id("lowerPlaceholder");
-            lowerPlaceholder.parentNode.replaceChild(lord.template("threadPageLower", c.model), lowerPlaceholder);
+            lowerPlaceholder.parentNode.replaceChild(lord.template("threadPageLower", c.model),
+                lowerPlaceholder);
         } else if (c.notCatalog) {
             c.model.pageCount = model.pageCount;
             c.model.currentPage = model.currentPage;
             var upperPlaceholder = lord.id("upperPlaceholder");
-            upperPlaceholder.parentNode.replaceChild(lord.template("boardPageUpper", c.model), upperPlaceholder);
+            upperPlaceholder.parentNode.replaceChild(lord.template("boardPageUpper", c.model),
+                upperPlaceholder);
             var lowerPlaceholder = lord.id("lowerPlaceholder");
-            lowerPlaceholder.parentNode.replaceChild(lord.template("boardPageLower", c.model), lowerPlaceholder);
+            lowerPlaceholder.parentNode.replaceChild(lord.template("boardPageLower", c.model),
+                lowerPlaceholder);
             var pagesPlaceholder = lord.id("pagesPlaceholder");
             pagesPlaceholder.parentNode.replaceChild(lord.template("pagination", c.model), pagesPlaceholder);
         }

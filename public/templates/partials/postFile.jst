@@ -75,7 +75,7 @@
     </div>
     <div class="postFileFile {{=it.deviceType}}">
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-           onclick="lord.showImage(this); return false;">
+           {{? "application/pdf" == fileInfo.mimeType}}target="_blank"{{??}}onclick="lord.showImage(this); return false;"{{?}}>
             {{#def.postFileThumb}}
         </a>
     </div>
