@@ -319,7 +319,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
         c.model.includeThreadScripts = !!lord.data("threadNumber");
         lord.appendExtrasToModel(c.model);
         c.node = lord.template("post", c.model);
-        $(".post, .opPost", c.node).css("maxWidth", ($(window).width() - 10) + "px");
+        $(".postBody", c.node).css("maxWidth", ($(window).width() - 30) + "px");
         var dw = (c.model.deviceType == "mobile") ? 100 : 320;
         $(".codeBlock", c.node).css("maxWidth", ($(window).width() - dw) + "px");
         if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
@@ -2873,7 +2873,7 @@ lord.initializeOnLoadBaseBoard = function() {
         });
         if (typeof lord.postsLoaded == "function")
             lord.postsLoaded();
-        $(".post, .opPost").css("maxWidth", ($(window).width() - 10) + "px");
+        $(".postBody").css("maxWidth", ($(window).width() - 30) + "px");
         var dw = (c.model.deviceType == "mobile") ? 100 : 320;
         $(".codeBlock").css("maxWidth", ($(window).width() - dw) + "px");
         setTimeout(function() {
