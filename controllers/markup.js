@@ -58,12 +58,8 @@ router.get("/markup.html", function(req, res) {
         });
         var result = Highlight.highlight("cpp", model.codeToMarkup, true);
         model.markedUpCode = "<div class=\"codeBlock cpp hljs\">" + Highlight.fixMarkup(result.value) + "</div>";
-        if (config("site.twitter.integrationEnabled", true)) {
-            model.extraScripts = [
-                { fileName: "3rdparty/twitter.js" },
-                { fileName: "youtube-coub.js" }
-            ];
-        }
+        if (config("site.twitter.integrationEnabled", true))
+            model.extraScripts = [ { fileName: "3rdparty/twitter.js" } ];
         return controller("markup", model);
     };
     Tools.controllerHtml(req, res, f.bind(null), "markup").catch(function(err) {
