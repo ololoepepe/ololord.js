@@ -398,7 +398,7 @@ var getFileInfo = function(file) {
     if (file.fileName) {
         p = Promise.resolve(file.fileName);
     } else {
-        p = db.hget("fileHashes", file.fileHash).then(function(fileInfo) {
+        p = db.srandmember("fileHashes:" + file.fileHash).then(function(fileInfo) {
             if (!fileInfo)
                 return Promise.reject(Tools.translate("No such file"));
             return Promise.resolve(JSON.parse(fileInfo).name);
@@ -523,12 +523,20 @@ module.exports.getFileInfosByHashes = function(hashes) {
         hashes = [hashes];
     if (hashes.length < 1)
         return Promise.resolve([]);
-    return db.hmget("fileHashes", hashes).then(function(fileInfos) {
-        return fileInfos.map(function(fileInfo, i) {
+    var p = Promise.resolve();
+    var fileInfos = [];
+    hashes.forEach(function(hash) {
+        p = p.then(function() {
+            return db.srandmember("fileHashes:" + hash);
+        }).then(function(fileInfo) {
             fileInfo = JSON.parse(fileInfo);
-            fileInfo.hash = hashes[i];
-            return fileInfo;
+            fileInfo.hash = hash;
+            fileInfos.push(fileInfo);
+            return Promise.resolve();
         });
+    });
+    return p.then(function() {
+        return Promise.resolve(fileInfos);
     });
 };
 
@@ -620,6 +628,47 @@ var processFiles = function(req, fields, files, transaction) {
         return p;
     }).then(function() {
         return Promise.resolve(c.list);
+    });
+};
+
+var createFileHash = function(fileInfo) {
+    return {
+        name: fileInfo.name,
+        thumb: { name: fileInfo.thumb.name },
+        size: fileInfo.size,
+        boardName: fileInfo.boardName,
+        mimeType: fileInfo.mimeType,
+        rating: fileInfo.rating
+    };
+};
+
+var addFileHashes = function(fileInfos) {
+    if (!fileInfos)
+        return Promise.resolve();
+    if (!Util.isArray(fileInfos))
+        fileInfos = [fileInfos];
+    if (fileInfos.length < 1)
+        return Promise.resolve();
+    return Tools.series(fileInfos, function(fileInfo) {
+        return db.sadd("fileHashes:" + fileInfo.hash, JSON.stringify(createFileHash(fileInfo)));
+    });
+};
+
+var removeFileHashes = function(fileInfos) {
+    if (!fileInfos)
+        return Promise.resolve();
+    if (!Util.isArray(fileInfos))
+        fileInfos = [fileInfos];
+    if (fileInfos.length < 1)
+        return Promise.resolve();
+    return Tools.series(fileInfos, function(fileInfo) {
+        return db.srem("fileHashes:" + fileInfo.hash, JSON.stringify(createFileHash(fileInfo))).then(function() {
+            return db.scard("fileHashes:" + fileInfo.hash);
+        }).then(function(size) {
+            if (size > 0)
+                return Promise.resolve();
+            return db.del("fileHashes:" + fileInfo.hash);
+        });
     });
 };
 
@@ -727,30 +776,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             });
         }));
     }).then(function() {
-        c.hashes = [];
-        if (files.length < 1)
-            return Promise.resolve();
-        c.hashes = files.reduce(function(acc, fileInfo) {
-            acc[fileInfo.hash] = JSON.stringify({
-                name: fileInfo.name,
-                thumb: { name: fileInfo.thumb.name },
-                size: fileInfo.size,
-                boardName: fileInfo.boardName,
-                mimeType: fileInfo.mimeType,
-                rating: fileInfo.rating
-            });
-            return acc;
-        }, {});
-        return db.hmset("fileHashes", c.hashes);
-    }).then(function() {
-        var promises = [];
-        Tools.forIn(c.hashes, function(_, hash) {
-            promises.push(db.sadd("fileHashesExtra:" + hash, JSON.stringify({
-                boardName: board.name,
-                postNumber: c.postNumber
-            })));
-        });
-        return Promise.all(promises);
+        return addFileHashes(files);
     }).then(function() {
         return addPostToIndex({
             boardName: board.name,
@@ -916,13 +942,13 @@ var removePost = function(boardName, postNumber, leaveFileInfos) {
     }).then(function(fileInfos) {
         if (leaveFileInfos)
             return Promise.resolve();
-        c.hashes = [];
+        c.fileInfos = [];
         c.paths = [];
         fileInfos.forEach(function(fileInfo) {
             if (!fileInfo)
                 return;
             fileInfo = JSON.parse(fileInfo);
-            c.hashes.push(fileInfo.hash);
+            c.fileInfos.push(fileInfo);
             c.paths.push(__dirname + "/../public/" + boardName + "/src/" + fileInfo.name);
             c.paths.push(__dirname + "/../public/" + boardName + "/thumb/" + fileInfo.thumb.name);
         });
@@ -936,21 +962,7 @@ var removePost = function(boardName, postNumber, leaveFileInfos) {
     }).then(function() {
         if (leaveFileInfos)
             return Promise.resolve();
-        var promises = c.hashes.map(function(hash) {
-            return db.srem("fileHashesExtra:" + hash, JSON.stringify({
-                boardName: boardName,
-                postNumber: postNumber
-            })).then(function() {
-                return db.hdel("fileHashes", hash);
-            }).then(function() {
-                return db.smembers("fileHashesExtra:" + hash);
-            }).then(function(list) {
-                if (list && list.length > 0)
-                    return Promise.resolve();
-                return db.del("fileHashesExtra:" + hash);
-            });
-        });
-        return Promise.all(promises);
+        return removeFileHashes(c.fileInfos);
     }).then(function() {
         return board.removeExtraData(postNumber);
     }).then(function() {
@@ -1596,35 +1608,15 @@ module.exports.addFiles = function(req, fields, files, transaction) {
         return processFiles(req, fields, files, transaction);
     }).then(function(files) {
         c.files = files;
-        return Promise.all(c.files.map(function(fileInfo) {
+        return Tools.series(c.files, function(fileInfo) {
             fileInfo.boardName = board.name;
             fileInfo.postNumber = c.post.number;
             return db.hset("fileInfos", fileInfo.name, JSON.stringify(fileInfo)).then(function() {
                 return db.sadd("postFileInfoNames:" + board.name + ":" + c.post.number, fileInfo.name);
             });
-        }));
-    }).then(function() {
-        c.hashes = c.files.reduce(function(acc, fileInfo) {
-            acc[fileInfo.hash] = JSON.stringify({
-                name: fileInfo.name,
-                thumb: { name: fileInfo.thumb.name },
-                size: fileInfo.size,
-                boardName: fileInfo.boardName,
-                mimeType: fileInfo.mimeType,
-                rating: fileInfo.rating
-            });
-            return acc;
-        }, {});
-        return db.hmset("fileHashes", c.hashes);
-    }).then(function() {
-        var promises = [];
-        Tools.forIn(c.hashes, function(_, hash) {
-            promises.push(db.sadd("fileHashesExtra:" + hash, JSON.stringify({
-                boardName: board.name,
-                postNumber: c.post.number
-            })));
         });
-        return Promise.all(promises);
+    }).then(function() {
+        return addFileHashes(c.files);
     }).then(function() {
         Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
         return Promise.resolve(c.post);
@@ -1912,9 +1904,7 @@ module.exports.moveThread = function(req, fields) {
             }).then(function() {
                 return db.sadd("userPostNumbers:" + post.user.ip + ":" + targetBoard.name, post.number);
             }).then(function() {
-                if (fileInfos.length < 1)
-                    return Promise.resolve();
-                return Promise.all(fileInfos.map(function(fileInfo) {
+                return Tools.series(fileInfos, function(fileInfo) {
                     return db.hset("fileInfos", fileInfo.name, JSON.stringify(fileInfo)).then(function() {
                         return db.sadd("postFileInfoNames:" + targetBoard.name + ":" + post.number, fileInfo.name);
                     }).then(function() {
@@ -1923,32 +1913,9 @@ module.exports.moveThread = function(req, fields) {
                         return FS.move(sourceThumbPath + "/" + fileInfo.thumb.name,
                             targetThumbPath + "/" + fileInfo.thumb.name);
                     });
-                }));
-            }).then(function() {
-                c.hashes = [];
-                if (fileInfos.length < 1)
-                    return Promise.resolve();
-                c.hashes = fileInfos.reduce(function(acc, fileInfo) {
-                    acc[fileInfo.hash] = JSON.stringify({
-                        name: fileInfo.name,
-                        thumb: { name: fileInfo.thumb.name },
-                        size: fileInfo.size,
-                        boardName: fileInfo.boardName,
-                        mimeType: fileInfo.mimeType,
-                        rating: fileInfo.rating
-                    });
-                    return acc;
-                }, {});
-                return db.hmset("fileHashes", c.hashes);
-            }).then(function() {
-                var promises = [];
-                Tools.forIn(c.hashes, function(_, hash) {
-                    promises.push(db.sadd("fileHashesExtra:" + hash, JSON.stringify({
-                        boardName: targetBoard.name,
-                        postNumber: post.number
-                    })));
                 });
-                return Promise.all(promises);
+            }).then(function() {
+                return addFileHashes(fileInfos);
             }).then(function() {
                 return addPostToIndex({
                     boardName: targetBoard.name,
@@ -2012,18 +1979,7 @@ module.exports.deleteFile = function(req, res, fields) {
     }).then(function() {
         return db.hdel("fileInfos", fileName);
     }).then(function() {
-        return db.srem("fileHashesExtra:" + c.fileInfo.hash, JSON.stringify({
-            boardName: c.post.boardName,
-            postNumber: c.post.number
-        }));
-    }).then(function() {
-        return db.smembers("fileHashesExtra:" + c.fileInfo.hash);
-    }).then(function(list) {
-        if (list && list.length > 0)
-            return Promise.resolve();
-        return db.del("fileHashesExtra:" + c.fileInfo.hash);
-    }).then(function() {
-        return db.hdel("fileHashes", c.fileInfo.hash);
+        return removeFileHashes(c.fileInfo);
     }).then(function() {
         paths = [];
         paths.push(__dirname + "/../public/" + c.post.boardName + "/src/" + c.fileInfo.name);

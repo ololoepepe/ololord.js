@@ -96,7 +96,12 @@ router.get("/api/fileExistence.json", function(req, res) {
     if (!req.query.fileName && !req.query.fileHash)
         return controller.error(res, Tools.translate("Neither name nor hash is specified"), true);
     var identifier = req.query.fileName || req.query.fileHash;
-    Database.db.hexists(req.query.fileName ? "fileInfos" : "fileHashes", identifier).then(function(exists) {
+    var p;
+    if (req.query.fileName)
+        p = Database.db.hexists("fileInfos", identifier);
+    else
+        p = Database.db.exists("fileHashes:" + identifier);
+    p.then(function(exists) {
         res.json(!!exists);
     }).catch(function(err) {
         controller.error(res, err, true);

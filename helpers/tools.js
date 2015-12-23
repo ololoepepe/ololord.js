@@ -628,3 +628,21 @@ module.exports.controllerHtml = function(req, res, f, keys) {
         res.send(data.data);
     });
 };
+
+module.exports.series = function(arr, f) {
+    var p = Promise.resolve();
+    if (Util.isArray(arr)) {
+        arr.forEach(function(el) {
+            p = p.then(function() {
+                return f(el);
+            });
+        });
+    } else if (Util.isObject(arr)) {
+        forIn(arr, function(el, key) {
+            p = p.then(function() {
+                return f(el, key);
+            });
+        });
+    }
+    return p;
+};
