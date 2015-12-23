@@ -542,8 +542,12 @@ var processFile = function(board, file, transaction) {
             var sourceFilePath = __dirname + "/../public/" + file.boardName + "/src/" + file.name;
             var sourceThumbPath = __dirname + "/../public/" + file.boardName + "/thumb/" + file.thumbName;
             return FS.copy(sourceFilePath, targetFilePath).then(function() {
-                return FS.copy(sourceThumbPath, targetThumbPath)
+                return FS.copy(sourceThumbPath, targetThumbPath);
             }).then(function() {
+                return FS.exists(targetThumbPath);
+            }).then(function(exists) {
+                if (!exists)
+                    return Promise.reject(Tools.translate("Failed to copy file"));
                 return getFileInfo({ fileName: file.name });
             }).then(function(fileInfo) {
                 return {
