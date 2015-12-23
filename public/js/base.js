@@ -618,6 +618,11 @@ lord.checkChats = function() {
             if (messages.length > 0)
                 keys.push(key);
             messages.forEach(function(message) {
+                for (var i = 0; i < list.length; ++i) {
+                    var msg = list[i];
+                    if (message.type == msg.type && message.date == msg.date && message.text == msg.text)
+                        return;
+                }
                 list.push(message);
             });
         });
