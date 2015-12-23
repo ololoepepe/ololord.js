@@ -34,37 +34,31 @@
         {{? it.customPostHeaderPart && it.customPostHeaderPart[30]}}
             {{ out += it.customPostHeaderPart[30](it, thread, post); }}
         {{?}}
+        {{#def.postSubject}}
         {{? it.customPostHeaderPart && it.customPostHeaderPart[40]}}
             {{ out += it.customPostHeaderPart[40](it, thread, post); }}
-        {{?}}
-        {{#def.postSubject}}
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[50]}}
-            {{ out += it.customPostHeaderPart[50](it, thread, post); }}
-        {{?}}
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[60]}}
-            {{ out += it.customPostHeaderPart[60](it, thread, post); }}
         {{?}}
         {{? post.options.showTripcode && it.compareRegisteredUserLevels(post.user.level, "USER") >= 0}}
             <img src="/{{=it.site.pathPrefix}}img/registered.png" class="signImage" title="{{=it.tr.registeredText}}">
         {{?}}
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[70]}}
-            {{ out += it.customPostHeaderPart[70](it, thread, post); }}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[50]}}
+            {{ out += it.customPostHeaderPart[50](it, thread, post); }}
         {{?}}
         {{#def.postName}}
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[80]}}
-            {{ out += it.customPostHeaderPart[80](it, thread, post); }}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[60]}}
+            {{ out += it.customPostHeaderPart[60](it, thread, post); }}
         {{?}}
         {{? post.opIp && post.options.signAsOp}}
             <span class="opSign">[OP]</span>
         {{?}}
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[90]}}
-            {{ out += it.customPostHeaderPart[90](it, thread, post); }}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[70]}}
+            {{ out += it.customPostHeaderPart[70](it, thread, post); }}
         {{?}}
         {{? post.options.showTripcode && post.tripcode}}
             <span class="tripcode {{=it.deviceType}}">{{=post.tripcode}}</span>
         {{?}}
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[100]}}
-            {{ out += it.customPostHeaderPart[100](it, thread, post); }}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[80]}}
+            {{ out += it.customPostHeaderPart[80](it, thread, post); }}
         {{?}}
         {{? it.board.showWhois && post.geolocation.flagName}}
             {{? post.geolocation.cityName}}
@@ -75,24 +69,24 @@
                      title="{{=post.geolocation.countryName}}">
             {{?}}
         {{?}}
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[110]}}
-            {{ out += it.customPostHeaderPart[110](it, thread, post); }}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[90]}}
+            {{ out += it.customPostHeaderPart[90](it, thread, post); }}
         {{?}}
         <span class="postDateTime {{=it.deviceType}}"
               name="dateTime">{{ out += it.formattedDate(post.createdAt, it.req); }}</span>
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[120]}}
-            {{ out += it.customPostHeaderPart[120](it, thread, post); }}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[100]}}
+            {{ out += it.customPostHeaderPart[100](it, thread, post); }}
         {{?}}
         #<a href="{{? it.threads}}#{{=post.number}}{{??}}/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.threadNumber}}.html#{{=post.number}}{{?}}"
             {{? thread.postingEnabled}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}}
             name="number" data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}"
             data-thread-number="{{=post.threadNumber}}">{{=post.number}}{{? it.settings.signOwnPostLinks && it.checkOwnPost(post)}} (You){{?}}</a>
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[130]}}
-            {{ out += it.customPostHeaderPart[130](it, thread, post); }}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[110]}}
+            {{ out += it.customPostHeaderPart[110](it, thread, post); }}
         {{?}}
         <span class="postSequenceNumber">{{=post.sequenceNumber}}</span>
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[140]}}
-            {{ out += it.customPostHeaderPart[140](it, thread, post); }}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[120]}}
+            {{ out += it.customPostHeaderPart[120](it, thread, post); }}
         {{?}}
         {{? thread.postingEnabled && !thread.postLimitReached}}
             <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
@@ -100,8 +94,8 @@
                                                  title="{{=it.tr.quickReplyText}}"><img src="/{{=it.site.pathPrefix}}img/reply.png"
                                                                                         class="buttonImage"></a>]</span>
         {{?}}
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[150]}}
-            {{ out += it.customPostHeaderPart[150](it, thread, post); }}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[130]}}
+            {{ out += it.customPostHeaderPart[130](it, thread, post); }}
         {{?}}
         <span name="postActions" tabindex="0" class="{{=it.deviceType}} popupActions">
             [<img src="/{{=it.site.pathPrefix}}img/post_actions.png" class="buttonImage"
@@ -246,8 +240,8 @@
                 {{?}}
             </ul>
         </span>
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[160]}}
-            {{ out += it.customPostHeaderPart[160](it, thread, post); }}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[140]}}
+            {{ out += it.customPostHeaderPart[140](it, thread, post); }}
         {{?}}
         {{? post.isOp && !it.includeThreadScripts && "mobile" != it.deviceType}}
             <span name="toThread" class="postToThread {{=it.deviceType}}">
@@ -255,8 +249,8 @@
                     name="toThreadLink">{{=it.tr.toThread}}</a>]
             </span>
         {{?}}
-        {{? it.customPostHeaderPart && it.customPostHeaderPart[170]}}
-            {{ out += it.customPostHeaderPart[170](it, thread, post); }}
+        {{? it.customPostHeaderPart && it.customPostHeaderPart[150]}}
+            {{ out += it.customPostHeaderPart[150](it, thread, post); }}
         {{?}}
     </div>
     <div class="postBody">

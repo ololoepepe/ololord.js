@@ -1,4 +1,4 @@
-lord.customPostHeaderPart[120] = function(it, thread, post) {
+lord.customPostHeaderPart[100] = function(it, thread, post) {
     var model = merge.recursive(it, post.extraData || {
         likes: [],
         dislikes: [],

@@ -775,6 +775,7 @@ span.newPostCount {
 
 .tripcode.mobile {
     font-size: 0.8em;
+    display: block;
 }
 
 .postDateTime.mobile {
@@ -983,6 +984,10 @@ blockquote.blockquoteThread.expand {
     padding-left: 20px !important;
     overflow-x: auto;
     max-width: 800px;
+    -ms-hyphens: none;
+    -moz-hyphens: none;
+    -webkit-hyphens: none;
+    hyphens: none;
 }
 
 .codeBlock.mobile {
