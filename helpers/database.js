@@ -566,7 +566,10 @@ var processFile = function(board, file, transaction) {
                     name: fn.name,
                     rating: file.rating,
                     size: fileInfo.size,
-                    thumb: fileInfo.thumb
+                    thumb: {
+                        dimensions: fileInfo.thumb,
+                        name: fn.thumbName
+                    }
                 };
             });
         } else {
