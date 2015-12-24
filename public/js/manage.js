@@ -6,9 +6,14 @@ lord.banUser = function(e, form) {
         c.model = lord.model(["base", "tr", "boards"], true);
         return lord.api("bannedUser", { ip: ip });
     }).then(function(model) {
-        c.model.settings = lord.settings();
+        var settings = lord.settings();
+        c.model.settings = settings;
         c.model.bannedUser = model;
         c.model.showSubmitButton = true;
+        var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : c.model.site.timeOffset;
+        c.model.formattedDate = function(date) {
+            return moment(date).utcOffset(timeOffset).locale(c.model.site.locale).format("YYYY/MM/dd hh:mm");
+        };
         var parent = lord.id("bannedUsers");
         var previous = lord.id("user" + ip);
         if (c.model.bannedUser) {
