@@ -869,12 +869,24 @@ ul.tabWidget > li.activated {
     margin-left: auto;
     margin-right: auto;
     text-align: right;
-    white-space: nowrap;
-    overflow-x: auto;
 }
 
-.searchAction.mobile {
+.searchAction > form {
+    display: inline-block;
+    width: 50%;
+}
+
+.searchAction.mobile > form {
     text-align: left;
+    width: 98%;
+}
+
+.searchActionInput {
+    width: 60%;
+}
+
+.searchActionSelect {
+    width: 30%;
 }
 
 .toolbar {
@@ -968,7 +980,6 @@ blockquote.blockquoteThread.expand {
     margin-left: auto;
     margin-right: auto;
     text-align: center;
-    white-space: nowrap;
     overflow-x: auto;
     color: #AF0A0F;
 }
@@ -1100,10 +1111,6 @@ input.buttonImage {
 
 #checkboxTripcode + label {
     background: url("../img/checkbox_tripcode.png") center no-repeat;
-}
-
-.searchSelect {
-    width: 100px;
 }
 
 .alignCenter {

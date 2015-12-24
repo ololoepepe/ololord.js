@@ -1,18 +1,16 @@
 <div class="searchAction {{=it.deviceType}}">
-    <form method="get" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}search.html" enctype="multipart/form-data"
-          class="inlineForm">
-        <input type="text" class="input" maxlength="{{=it.maxSearchQueryLength}}" name="query"
-               size="{{? it.deviceType != "mobile"}}43{{??}}25{{?}}"
+    <form method="get" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}search.html"
+          enctype="multipart/form-data">
+        <input type="text" class="input searchActionInput" maxlength="{{=it.maxSearchQueryLength}}" name="query"
                {{? it.deviceType != "mobile"}}placeholder="{{=it.tr.searchInputPlaceholder}}"{{?}} value="" />
-        <select name="board" class="select{{? it.deviceType == "mobile"}} searchSelect{{?}}">
+        <select name="board" class="select searchActionSelect">
             <option value="*" {{? !it.searchBoard}}selected="true"{{?}}>[*] {{=it.tr.allBoardsText}}</option>
             {{~it.boards :brd}}
                 <option {{? it.searchBoard && it.searchBoard == brd.name}}selected="true"{{?}}
                         value="{{=brd.name}}">[{{=brd.name}}] {{=brd.title}}</option>
             {{~}}
         </select>
-        <input style="background: url(/{{=it.site.pathPrefix}}img/search.png) no-repeat; border: solid 0px; width: 16; height: 16px;"
-               type="submit" title="{{=it.tr.searchButtonText}}" height="16"
-               class="buttonImage" value="" />
+        <input style="background: url(/{{=it.site.pathPrefix}}img/search.png) center no-repeat; border: solid 0px; width: 16px; height: 16px;"
+               type="submit" title="{{=it.tr.searchButtonText}}" class="buttonImage" value="" />
     </form>
 </div>
