@@ -950,7 +950,8 @@ ul.tabWidget > li.activated {
 
 .searchAction.mobile > form {
     text-align: left;
-    width: 90%;
+    white-space: nowrap;
+    width: 98%;
 }
 
 .searchActionInput {
