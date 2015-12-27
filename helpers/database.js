@@ -32,6 +32,8 @@ module.exports.db = db;
 
 db.tmp_hmget = db.hmget;
 db.hmget = function(key, hashes) {
+    if (!hashes || (Util.isArray(hashes) && hashes.length <= 0))
+        return Promise.resolve([]);
     return db.tmp_hmget.apply(db, [key].concat(hashes));
 };
 
@@ -1044,15 +1046,14 @@ module.exports.createThread = function(req, fields, files, transaction) {
         return getThreads(board.name, { archived: true }).then(function(threads) {
             c.archivedThreads = threads;
             c.archivedThreads.sort(Board.sortThreadsByDate);
-            if (c.archivedThreads.length < board.archiveLimit)
+            if (c.archivedThreads.length <= 0 || c.archivedThreads.length < board.archiveLimit)
                 return Promise.resolve();
-            var thread = c.archivedThreads.pop();
-            return removeThread(board.name, thread.number, true);
+            return removeThread(board.name, c.archivedThreads.pop().number, true);
         }).then(function() {
             c.thread = c.threads.pop();
             if (board.archiveLimit <= 0)
                 return removeThread(board.name, c.thread.number);
-            return db.hdel("threads:" + board.name, thread.number);
+            return db.hdel("threads:" + board.name, c.thread.number);
         }).then(function() {
             if (board.archiveLimit <= 0)
                 return Promise.resolve();
