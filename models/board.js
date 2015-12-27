@@ -161,6 +161,7 @@ var getPage = function(board, page) {
                 postLimitReached: (thread.postCount >= board.postLimit),
                 closed: thread.closed,
                 fixed: thread.fixed,
+                unbumpable: thread.unbumpable,
                 postingEnabled: (board.postingEnabled && !thread.closed),
                 omittedPosts: ((thread.postCount > (board.maxLastPosts + 1))
                     ? (thread.postCount - board.maxLastPosts - 1) : 0)
@@ -205,6 +206,7 @@ module.exports.getThreadPage = function(board, number, json, ifModifiedSince) {
             postLimitReached: (postCount >= board.postLimit),
             closed: c.thread.closed,
             fixed: c.thread.fixed,
+            unbumpable: c.thread.unbumpable,
             postCount: postCount,
             postingEnabled: (board.postingEnabled && !c.thread.closed)
         };
@@ -256,6 +258,7 @@ var getThread = function(board, number) {
             postLimitReached: (postCount >= board.postLimit),
             closed: c.thread.closed,
             fixed: c.thread.fixed,
+            unbumpable: c.thread.unbumpable,
             postCount: postCount,
             postingEnabled: (board.postingEnabled && !c.thread.closed),
             opPost: c.opPost,
@@ -355,6 +358,7 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
             postLimitReached: (postCount >= board.postLimit),
             closed: c.thread.closed,
             fixed: c.thread.fixed,
+            unbumpable: c.thread.unbumpable,
             postCount: postCount,
             postingEnabled: (board.postingEnabled && !c.thread.closed)
         };
@@ -425,6 +429,7 @@ var getCatalog = function(board, sortMode) {
                 postLimitReached: (thread.postCount >= board.postLimit),
                 closed: thread.closed,
                 fixed: thread.fixed,
+                unbumpable: thread.unbumpable,
                 postingEnabled: (board.postingEnabled && !thread.closed)
             };
             c.model.threads.push(threadModel);

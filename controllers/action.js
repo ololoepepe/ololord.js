@@ -483,6 +483,22 @@ router.post("/action/setThreadClosed", function(req, res) {
     });
 });
 
+router.post("/action/setThreadUnbumpable", function(req, res) {
+    var c = {};
+    Tools.parseForm(req).then(function(result) {
+        c.fields = result.fields;
+        c.boardName = result.fields.boardName;
+        c.threadNumber = +result.fields.threadNumber;
+        return controller.checkBan(req, res, c.boardName, true);
+    }).then(function() {
+        return Database.setThreadUnbumpable(req, c.fields);
+    }).then(function(result) {
+        res.send(result);
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
 router.post("/action/sendChatMessage", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         var fields = result.fields;

@@ -641,6 +641,8 @@ controller.translationsModel = function() {
     translate("Copy settings string and save it somewhere", "copySettingsHint");
     translate("Paste settings string here", "pasteSettingsHint");
     translate("Enter your message here", "chatMessageTextPlaceholder");
+    translate("Allow bumping", "setThreadBumpableText");
+    translate("Disallow bumping", "setThreadUnbumpableText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

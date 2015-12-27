@@ -3,9 +3,11 @@
 !banners/
 !flags/
 !markup/
+!addfile.png
 !addfile_link.png
 !addfile_vk.png
-!addfile.png
+!anchor.png
+!anchor_no.png
 !add.png
 !application_pdf_logo.png
 !audio_edit_tags.png

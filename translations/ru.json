@@ -2414,5 +2414,15 @@
         "chatMessageTextPlaceholder": {
             "value": "Введите сообщение сюда"
         }
+    },
+    "Allow bumping": {
+        "setThreadBumpableText": {
+            "value": "Разрешить бампать"
+        }
+    },
+    "Disallow bumping": {
+        "setThreadUnbumpableText": {
+            "value": "Запретить бампать"
+        }
     }
 }

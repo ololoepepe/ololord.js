@@ -709,6 +709,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             return Promise.reject(Tools.translate("No such thread"));
         if (threads[0].closed)
             return Promise.reject(Tools.translate("Posting is disabled in this thread"));
+        c.unbumpable = !!threads[0].unbumpable;
         c.level = req.level || null;
         c.isRaw = !!fields.raw && compareRegisteredUserLevels(c.level, RegisteredUserLevels.Admin) >= 0;
         return db.scard("threadPostNumbers:" + board.name + ":" + threadNumber);
@@ -793,6 +794,8 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         return db.sadd("threadPostNumbers:" + board.name + ":" + threadNumber, c.postNumber);
     }).then(function() {
         if (c.postCount >= board.bumpLimit || (fields.email && fields.email.toLowerCase() == "sage"))
+            return Promise.resolve();
+        if (c.unbumpable)
             return Promise.resolve();
         return db.hset("threadUpdateTimes:" + board.name, threadNumber, date.toISOString());
     }).then(function() {
@@ -1070,6 +1073,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
             closed: false,
             createdAt: date.toISOString(),
             fixed: false,
+            unbumpable: false,
             number: c.threadNumber,
             user: {
                 hashpass: hashpass,
@@ -1765,6 +1769,36 @@ module.exports.setThreadClosed = function(req, fields) {
         if (thread.closed == closed)
             return Promise.resolve();
         thread.closed = closed;
+        db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
+    }).then(function() {
+        return Global.generate(board.name, threadNumber, threadNumber, "edit");
+    }).then(function() {
+        return Promise.resolve({
+            boardName: board.name,
+            threadNumber: threadNumber
+        });
+    });
+};
+
+module.exports.setThreadUnbumpable = function(req, fields) {
+    if (compareRegisteredUserLevels(req.level, "MODER") < 0)
+        return Promise.reject(Tools.translate("Not enough rights"));
+    var board = Board.board(fields.boardName);
+    if (!board)
+        return Promise.reject(Tools.translate("Invalid board"));
+    var date = Tools.now();
+    var c = {};
+    var threadNumber = +fields.threadNumber;
+    if (isNaN(threadNumber) || threadNumber <= 0)
+        return Promise.reject(Tools.translate("Invalid thread number"));
+    return db.hget("threads:" + board.name, threadNumber).then(function(thread) {
+        if (!thread)
+            return Promise.reject(Tools.translate("No such thread"));
+        thread = JSON.parse(thread);
+        var unbumpable = (fields.unbumpable == "true");
+        if (!!thread.unbumpable == unbumpable)
+            return Promise.resolve();
+        thread.unbumpable = unbumpable;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
         return Global.generate(board.name, threadNumber, threadNumber, "edit");

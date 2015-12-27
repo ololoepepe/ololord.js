@@ -796,6 +796,17 @@ lord.setThreadClosed = function(el, closed) {
     }).catch(lord.handleError);
 };
 
+lord.setThreadUnbumpable = function(el, unbumpable) {
+    var formData = new FormData();
+    formData.append("boardName", lord.data("boardName"));
+    formData.append("threadNumber", lord.data("number", el, true));
+    formData.append("unbumpable", unbumpable);
+    lord.post("/" + lord.data("sitePathPrefix") + "action/setThreadUnbumpable",
+        formData).then(function(result) {
+        lord.reloadPage();
+    }).catch(lord.handleError);
+};
+
 lord.moveThread = function(el) {
     var boardName = lord.data("boardName");
     var threadNumber = +lord.data("threadNumber", el, true);
