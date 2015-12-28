@@ -17,7 +17,7 @@ body.mobile {
 }
 
 a {
-    color: #000;
+    color: #000000;
 }
 
 a.expandCollapse {
@@ -1178,6 +1178,7 @@ input.buttonImage {
 .submitContainer > input {
     font-size: 1.2em;
     width: 100%;
+    border-color: #000000;
 }
 
 .cursorPointer {

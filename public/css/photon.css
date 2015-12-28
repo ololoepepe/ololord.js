@@ -1279,6 +1279,7 @@ input.buttonImage {
 .submitContainer > input {
     font-size: 1.2em;
     width: 100%;
+    border-color: #FF6600;
 }
 
 .cursorPointer {
