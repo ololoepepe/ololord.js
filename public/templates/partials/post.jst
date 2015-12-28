@@ -163,7 +163,7 @@
                     <li>
                         <a name="setUnbumpableButton" href="javascript:void(0);"
                            onclick="lord.setThreadUnbumpable(this, {{=!thread.unbumpable}}); return false;">
-                            <img src="/{{=it.site.pathPrefix}}img/anchor{{? !thread.unbumpable}}_no{{?}}.png"
+                            <img src="/{{=it.site.pathPrefix}}img/anchor{{? thread.unbumpable}}_no{{?}}.png"
                                  class="signImage" />
                             {{? thread.unbumpable}}{{=it.tr.setThreadBumpableText}}{{??}}{{=it.tr.setThreadUnbumpableText}}{{?}}</a>
                     </li>
