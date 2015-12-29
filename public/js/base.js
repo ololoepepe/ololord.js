@@ -49,15 +49,6 @@ lord.notificationQueue = [];
 
 /*Functions*/
 
-lord.changeLocale = function() {
-    var sel = lord.id("localeChangeSelect");
-    var ln = sel.options[sel.selectedIndex].value;
-    lord.setCookie("locale", ln, {
-        "expires": lord.Billion, "path": "/"
-    });
-    lord.reloadPage();
-};
-
 lord.logoutImplementation = function(form, vk) {
     lord.setCookie("hashpass", "", {
         expires: lord.Billion,
