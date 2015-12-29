@@ -455,6 +455,9 @@ module.exports.correctAddress = function(ip) {
         return null;
     if ("::1" == ip)
         ip = "127.0.0.1";
+    var match = ip.match(/^\:\:ffff\:(\d+\.\d+\.\d+\.\d+)$/);
+    if (match)
+        ip = match[1];
     if (ip.replace(":", "") == ip)
         ip = "::" + ip;
     try {

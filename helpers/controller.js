@@ -25,19 +25,11 @@ var controller;
 
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-html");
 
-var formattedDate = function(date, req) {
-    var timeOffset = ("local" == req.settings.time) ? req.settings.timeZoneOffset : config("site.timeOffset", 0);
-    var locale = config("site.locale", "en");
-    var format = config("site.dateFormat", "MM/DD/YYYY HH:mm:ss");
-    return moment(date).utcOffset(timeOffset).locale(locale).format(format);
-};
-
 controller = function(templateName, modelData) {
     var baseModelData = merge.recursive(controller.baseModel(), controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
-    baseModelData.formattedDate = formattedDate;
     baseModelData.publicPartials = publicPartials;
     baseModelData.publicTemplates = publicTemplates;
     baseModelData.models = {
@@ -65,7 +57,6 @@ controller.sync = function(templateName, modelData) {
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
-    baseModelData.formattedDate = formattedDate;
     if (!modelData)
         modelData = {};
     var template = templates[templateName];
@@ -123,7 +114,15 @@ controller.error = function(res, error, ajax) {
         var model = {};
         model.title = Tools.translate("Ban", "pageTitle");
         model.ban = error.ban;
-        return ajax ? h(error) : controller("ban", model).then(function(data) {
+        if (ajax)
+            return h(error);
+        model.formattedDate = function(date) {
+            var timeOffset = config("site.timeOffset", 0);
+            var locale = config("site.locale", "en");
+            var format = config("site.dateFormat", "MM/DD/YYYY HH:mm:ss");
+            return moment(date).utcOffset(timeOffset).locale(locale).format(format);
+        };
+        return controller("ban", model).then(function(data) {
             res.send(data);
         }).catch(h);
     } else {
@@ -547,6 +546,9 @@ controller.translationsModel = function() {
     translate("Reason:", "banReasonLabelText");
     translate("Delete all user posts on selected board", "delallButtonText");
     translate("Select all", "selectAllText");
+    translate("Board:", "banBoardLabelText");
+    translate("Ban level:", "banLevelLabelText");
+    translate("Ban date:", "banDateTimeLabelText");
     translate("Post source text", "postSourceText");
     translate("Expand video", "expandVideoText");
     translate("Collapse video", "collapseVideoText");
@@ -643,6 +645,7 @@ controller.translationsModel = function() {
     translate("Enter your message here", "chatMessageTextPlaceholder");
     translate("Allow bumping", "setThreadBumpableText");
     translate("Disallow bumping", "setThreadUnbumpableText");
+
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

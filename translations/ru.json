@@ -461,6 +461,21 @@
             "value": "Выбрать все"
         }
     },
+    "Board:": {
+        "banBoardLabelText": {
+            "value": "Доска:"
+        }
+    },
+    "Ban level:": {
+        "banLevelLabelText": {
+            "value": "Уровень бана:"
+        }
+    },
+    "Ban date:": {
+        "banDateTimeLabelText": {
+            "value": "Дата бана:"
+        }
+    },
     "Markup": {
         "pageTitle": {
             "value": "Разметка"

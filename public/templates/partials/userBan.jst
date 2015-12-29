@@ -28,7 +28,7 @@
             {{?? (typeof ban != "undefined" && ban.postNumber)}}
                 <input type="hidden" name="banPostNumber_{{=board.name}}" value="{{=ban.postNumber}}" />
             {{?}}
-            [{{=board.name}}]{{? it.deviceType != "mobile"}} {{=board.title}}{{?}}
+            /{{=board.name}}/
             <select name="banLevel_{{=board.name}}" class="select">
                 {{~banLevels :level}}
                     <option {{? (typeof ban != "undefined" && ban.level == level.level) || (typeof ban == "undefined" && "NONE" == level.level)}}selected="true"{{?}}
