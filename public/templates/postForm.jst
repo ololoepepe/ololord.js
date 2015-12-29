@@ -268,25 +268,26 @@
                     {{? it.customPostFormOption && it.customPostFormOption[0]}}
                         {{ out += it.customPostFormOption[0](it); }}
                     {{?}}
-                    {{? it.compareRegisteredUserLevels(it.user.level, "ADMIN") >= 0}}
-                        <input id="checkboxRawHtml" type="checkbox" name="raw" value="true"
-                               class="imageCheckBox" /><label title="{{!it.tr.postFormLabelRaw}}"
-                                                              for="checkboxRawHtml"></label>
-                    {{?}}
-                    {{? it.customPostFormOption && it.customPostFormOption[10]}}
-                        {{ out += it.customPostFormOption[10](it); }}
-                    {{?}}
                     <input id="checkboxOp" type="checkbox" name="signAsOp" value="true"
                            class="imageCheckBox" /><label title="{{!it.tr.postFormLabelSignAsOp}}"
                                                           for="checkboxOp"></label>
-                    {{? it.customPostFormOption && it.customPostFormOption[20]}}
-                        {{ out += it.customPostFormOption[20](it); }}
+                    {{? it.customPostFormOption && it.customPostFormOption[10]}}
+                        {{ out += it.customPostFormOption[10](it); }}
                     {{?}}
                     {{? it.user.loggedIn}}
                         <input id="checkboxTripcode" type="checkbox" name="tripcode" value="true"
                                onclick="lord.switchShowTripcode();"
                                class="imageCheckBox" /><label title="{{!it.tr.postFormLabelTripcode}}"
                                                               for="checkboxTripcode"></label>
+                    {{?}}
+                    {{? it.customPostFormOption && it.customPostFormOption[20]}}
+                        {{ out += it.customPostFormOption[20](it); }}
+                    {{?}}
+                    {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+                        <a href="javascript:void(0);" onclick="lord.markup('raw-html'); return false;" name="markupHtml"
+                           style="display: inline-block; vertical-align: top;"
+                           title="{{=it.tr.markupHtml}}"><img src="/{{=it.site.pathPrefix}}img/html.png"
+                                                              class="buttonImage" width="24" height="24"></a>
                     {{?}}
                     {{? it.customPostFormOption && it.customPostFormOption[30]}}
                         {{ out += it.customPostFormOption[30](it); }}

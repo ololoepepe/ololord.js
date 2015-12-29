@@ -1701,6 +1701,7 @@ lord.markup = function(tag) {
     case "li":
     case "sup":
     case "sub":
+    case "raw-html":
     case "url": {
         wrap("[" + tag + "]", "[/" + tag + "]");
         break;
@@ -2209,7 +2210,6 @@ lord.fillFormWithDraft = function(a) {
     var name = lord.nameOne("name", postForm);
     var subject = lord.nameOne("subject", postForm);
     var text = lord.nameOne("text", postForm);
-    var raw = lord.nameOne("raw", postForm);
     var op = lord.nameOne("signAsOp", postForm);
     var tripcode = lord.nameOne("tripcode", postForm);
     var markupMode = lord.nameOne("markupMode", postForm);
@@ -2218,7 +2218,6 @@ lord.fillFormWithDraft = function(a) {
     name.value = draft.name;
     subject.value = draft.subject;
     text.value = draft.rawText;
-    raw.checked = draft.options.rawHtml;
     op.checked = draft.options.signAsOp;
     tripcode.checked = draft.options.showTripcode;
     for (var i = 0; i < markupMode.options.length; ++i) {
@@ -2265,9 +2264,6 @@ lord.addToDrafts = function(a) {
     var formData = new FormData();
     formData.append("boardName", boardName);
     formData.append("text", lord.nameOne("text", postForm).value);
-    var raw = lord.nameOne("raw", postForm);
-    if (raw && raw.checked)
-        formData.append("raw", "true");
     if (lord.nameOne("signAsOp", postForm).checked)
         formData.append("signAsOp", "true");
     var tripcode = lord.nameOne("tripcode", postForm);

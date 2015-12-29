@@ -711,17 +711,15 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             return Promise.reject(Tools.translate("Posting is disabled in this thread"));
         c.unbumpable = !!threads[0].unbumpable;
         c.level = req.level || null;
-        c.isRaw = !!fields.raw && compareRegisteredUserLevels(c.level, RegisteredUserLevels.Admin) >= 0;
         return db.scard("threadPostNumbers:" + board.name + ":" + threadNumber);
     }).then(function(postCount) {
         c.postCount = postCount;
         if (c.postCount >= board.postLimit)
             return Promise.reject(Tools.translate("Post limit reached"));
-        if (c.isRaw)
-            return rawText;
         return markup(board.name, rawText, {
             markupModes: markupModes,
-            referencedPosts: referencedPosts
+            referencedPosts: referencedPosts,
+            accessLevel: c.level
         });
     }).then(function(text) {
         c.text = text;
@@ -747,7 +745,6 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             name: (fields.name || null),
             number: c.postNumber,
             options: {
-                rawHtml: c.isRaw,
                 showTripcode: !!req.hashpass && !!fields.tripcode,
                 signAsOp: ("true" == fields.signAsOp)
             },
@@ -1463,15 +1460,13 @@ var rerenderPost = function(boardName, postNumber, silent) {
     var referencedPosts = {};
     return getPost(boardName, postNumber).then(function(post) {
         c.post = post;
-        if (c.post.rawHtml)
-            return Promise.resolve();
         return markup(c.post.boardName, c.post.rawText, {
             markupModes: c.post.markup,
-            referencedPosts: referencedPosts
+            referencedPosts: referencedPosts,
+            accessLevel: c.post.user.level
         });
     }).then(function(text) {
-        if (!c.post.options.rawHtml)
-            c.post.text = text;
+        c.post.text = text;
         return db.hset("posts", key, JSON.stringify(c.post));
     }).then(function() {
         return removeReferencedPosts(boardName, postNumber, !silent);
@@ -1644,7 +1639,6 @@ module.exports.editPost = function(req, fields) {
     var email = fields.email || null;
     var name = fields.name || null;
     var subject = fields.subject || null;
-    var isRaw = fields.raw && compareRegisteredUserLevels(req.level, RegisteredUserLevels.Admin) >= 0;
     var markupModes = [];
     var referencedPosts = {};
     Tools.forIn(markup.MarkupModes, function(val) {
@@ -1671,11 +1665,10 @@ module.exports.editPost = function(req, fields) {
             return Promise.reject(Tools.translate("Name is too long"));
         if (subject && subject.length > board.maxSubjectLength)
             return Promise.reject(Tools.translate("Subject is too long"));
-        if (isRaw)
-            return Promise.resolve(rawText);
         return markup(board.name, rawText, {
             markupModes: markupModes,
-            referencedPosts: referencedPosts
+            referencedPosts: referencedPosts,
+            accessLevel: req.level
         });
     }).then(function(text) {
         c.text = text;
@@ -1692,7 +1685,6 @@ module.exports.editPost = function(req, fields) {
         c.post.email = email || null;
         c.post.markup = markupModes;
         c.post.name = name || null;
-        c.post.options.rawHtml = isRaw;
         c.post.rawText = rawText;
         c.post.subject = subject || null;
         c.post.text = c.text || null;

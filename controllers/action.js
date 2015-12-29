@@ -183,13 +183,10 @@ router.post("/action/markupText", function(req, res) {
             if (c.fields.markupMode && c.fields.markupMode.indexOf(val) >= 0)
                 markupModes.push(val);
         });
-        c.isRaw = !!c.fields.raw
-            && Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Admin) >= 0;
-        if (c.isRaw)
-            return c.fields.text;
         return markup(c.board.name, c.fields.text, {
             markupModes: markupModes,
-            referencedPosts: {}
+            referencedPosts: {},
+            accessLevel: req.level
         });
     }).then(function(text) {
         var data = {
@@ -197,7 +194,6 @@ router.post("/action/markupText", function(req, res) {
             text: text || null,
             rawText: c.fields.text || null,
             options: {
-                rawHtml: c.isRaw,
                 signAsOp: !!c.fields.signAsOp,
                 showTripcode: !!req.hashpass && !!c.fields.tripcode
             },

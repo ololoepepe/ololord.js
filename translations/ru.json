@@ -250,11 +250,6 @@
             "value": "Имя:"
         }
     },
-    "Raw HTML": {
-        "postFormLabelRaw": {
-            "value": "\"Сырой\" HTML"
-        }
-    },
     "Subject:": {
         "postFormLabelSubject": {
             "value": "Тема:"
@@ -1488,6 +1483,11 @@
     "List item": {
         "markupListItem": {
             "value": "Элемент списка"
+        }
+    },
+    "Raw HTML": {
+        "markupHtml": {
+            "value": "\"Сырой\" HTML"
         }
     },
     "Code block syntax": {
