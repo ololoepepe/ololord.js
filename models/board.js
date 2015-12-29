@@ -732,8 +732,10 @@ module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNu
                         var newFileInfos = post.fileInfos.reduce(function(acc, fileInfo) {
                             return acc + ";" + fileInfo.fileName + ":" + JSON.stringify(fileInfo.extraData);
                         }, "");
-                        if (oldRefs == newRefs && oldFileInfos == newFileInfos && oldPost.text === post.text)
+                        if (oldPost.bannedFor === post.bannedFor && oldPost.text === post.text
+                            && oldRefs == newRefs && oldFileInfos == newFileInfos) {
                             return;
+                        }
                     }
                     p = p.then(function() {
                         return board.renderPost(post, null, opPost);
