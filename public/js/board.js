@@ -1537,6 +1537,7 @@ lord.attachFileByVk = function(a) {
             var c = {};
             c.div = lord.template("vkAudioList", { tracks: response });
             $(c.div).css("maxHeight", ($(window).height() - 100) + "px");
+            console.log($(window).height(), ($(window).height() - 100) + "px");
             lord.showDialog(c.div, { title: "selectTrackTitle" }).then(function(result) {
                 if (!result)
                     return Promise.resolve();
