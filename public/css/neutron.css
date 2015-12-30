@@ -593,6 +593,7 @@ span.newPostCount {
 .post {
     background-color: #2C2C2C;
     border: 1px solid #575757;
+    border-radius: 5px;
     margin-top: 4px;
     margin-bottom: 4px;
     padding-top: 10px;
@@ -618,6 +619,7 @@ span.newPostCount {
 
 .post:not(.hidden) {
     background: url("../favicon.ico") right bottom no-repeat;
+    background-color: #2C2C2C;
 }
 
 .opPost {
