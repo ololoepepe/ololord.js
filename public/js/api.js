@@ -1013,6 +1013,8 @@ lord.showDialog = function(body, options) {
             buttons: buttons,
             closeText: lord.text("closeButtonText"),
             width: "auto",
+            maxHeight: $(window).height() - 20,
+            maxWidth: $(window).width() - 40,
             close: function() {
                 resolve(false);
             },
