@@ -484,6 +484,10 @@ lord.hideImage = function() {
 lord.globalOnclick = function(e) {
     if (e.button)
         return;
+    if (lord.currentMenu) {
+        lord.currentMenu.hide();
+        lord.currentMenu = null;
+    }
     var t = e.target;
     if (t && lord.img && t == lord.img)
         return;
@@ -2747,8 +2751,17 @@ lord.showTripcode = function(threadNumber) {
     return !!lord.getLocalObject("showTripcode", {})[lord.data("boardName") + "/" + threadNumber];
 };
 
-lord.showMenu = function(inp) {
-    //$("ul", inp.parentNode).menu();
+lord.showMenu = function(e, input, selector) {
+    e.stopPropagation();
+    if (lord.currentMenu)
+        lord.currentMenu.hide();
+    lord.currentMenu = $(selector);
+    lord.currentMenu.menu().toggle().position({
+        my: "left top",
+        at: "left bottom+2px",
+        of: $(input),
+        collision: "fit flip"
+    }).show();
 };
 
 lord.selectCaptchaEngine = function() {

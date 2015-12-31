@@ -664,64 +664,47 @@ span.newPostCount {
     width: 100%;
 }
 
-.popupActions {
-    position: relative;
-    outline: 0;
-}
-
-.popupActions, .popupActions:active, .popupActions:visited {
-    color: #800000;
-}
-
-.popupActionsMenu {
-    list-style-type: none;
-    margin-left: 0px;
-    padding: 4px 4px 4px 4px;
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s linear 0.2s,opacity 0.2s linear;
-    position: absolute;
-    z-index: 9999;
-    background-color: #F0E0D6;
-    border: 1px solid #000000;
-    margin-top: 0px;
-    top: 100%;
-    left: 0%;
+.menu {
+    background: #F0E0D6 !important;
+    border: 1px solid #000000 !important;
+    color: #800000 !important;
+    font-family: Verdana,sans-serif !important;
     white-space: nowrap;
+    box-sizing: border-box;
+    position: absolute;
+    width: auto;
+    display: none;
+    list-style-type: none;
+    padding: 2px;
+    z-index: 9999;
 }
 
-.postActionsMenu.mobile {
-    left: -220px;
+.menu > li {
+    padding: 2px;
+    padding-right: 4px;
 }
 
-.fileActionsMenu.mobile {
-    left: -40px;
-}
-
-.markupUnorderedListActionsMenu {
-    padding-left: 20px;
-    left: -40px;
-}
-
-.markupOrderedListActionsMenu {
-    padding-left: 30px;
-    left: -80px;
-}
-
-.popupActions:focus > .popupActionsMenu {
-    visibility: visible;
-    opacity: 1;
-}
-
-.popupActionsMenu > li > a {
+.menu > li > a {
+    display: block;
     text-decoration: none;
     color: #800000;
 }
 
-.popupActionsMenu > li > a:hover {
-    display: block;
-    color: #FFFFFF;
+.menu > li:hover {
     background-color: #444444;
+    padding-right: 2px;
+}
+
+.menu > li:hover > a {
+    color: #CC1105;
+}
+
+#markupUnorderedListActionsMenu {
+    padding-left: 20px;
+}
+
+#markupOrderedListActionsMenu {
+    padding-left: 30px;
 }
 
 .postBody {

@@ -697,64 +697,47 @@ span.newPostCount {
     width: 100%;
 }
 
-.popupActions {
-    position: relative;
-    outline: 0;
-}
-
-.popupActions, .popupActions:active, .popupActions:visited {
-    color: #698CC0;
-}
-
-.popupActionsMenu {
-    list-style-type: none;
-    margin-left: 0px;
-    padding: 4px 4px 4px 4px;
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s linear 0.2s,opacity 0.2s linear;
-    position: absolute;
-    z-index: 9999;
-    background-color: #212121;
-    border: 1px solid #575757;
-    margin-top: 0px;
-    top: 100%;
-    left: 0%;
+.menu {
+    background: #212121 !important;
+    color: #698CC0 !important;
+    border: 1px solid #575757 !important;
+    font-family: "Trebuchet MS",Trebuchet,tahoma,serif !important;
     white-space: nowrap;
+    box-sizing: border-box;
+    position: absolute;
+    width: auto;
+    display: none;
+    list-style-type: none;
+    padding: 2px;
+    z-index: 9999;
 }
 
-.postActionsMenu.mobile {
-    left: -220px;
+.menu > li {
+    padding: 2px;
+    padding-right: 4px;
 }
 
-.fileActionsMenu.mobile {
-    left: -40px;
-}
-
-.markupUnorderedListActionsMenu {
-    padding-left: 20px;
-    left: -40px;
-}
-
-.markupOrderedListActionsMenu {
-    padding-left: 30px;
-    left: -80px;
-}
-
-.popupActions:focus > .popupActionsMenu {
-    visibility: visible;
-    opacity: 1;
-}
-
-.popupActionsMenu > li > a {
+.menu > li > a {
+    display: block;
     text-decoration: none;
     color: #698CC0;
 }
 
-.popupActionsMenu > li > a:hover {
-    display: block;
-    color: #FFFFFF;
+.menu > li:hover {
     background-color: #666666;
+    padding-right: 2px;
+}
+
+.menu > li:hover > a {
+    color: #FFFFFF;
+}
+
+#markupUnorderedListActionsMenu {
+    padding-left: 20px;
+}
+
+#markupOrderedListActionsMenu {
+    padding-left: 30px;
 }
 
 .postBody {

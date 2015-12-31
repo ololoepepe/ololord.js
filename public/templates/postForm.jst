@@ -149,52 +149,50 @@
                                        height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("UNORDERED_LIST") >= 0}}
-                                <span tabindex="0" class="{{=it.deviceType}} popupActions">
-                                    <img src="/{{=it.site.pathPrefix}}img/markup/ul.png" class="buttonImage bordered"
-                                         title="{{=it.tr.markupUnorderedList}}">
-                                    <ul class="popupActionsMenu markupUnorderedListActionsMenu {{=it.deviceType}}">
-                                        <li type="disc">
-                                            <a onclick="lord.markup('uld'); return false;"
-                                               href="javascript:void(0);">{{=it.tr.markupUnorderedList}}</a>
-                                        </li>
-                                        <li type="circle">
-                                            <a onclick="lord.markup('ulc'); return false;"
-                                               href="javascript:void(0);">{{=it.tr.markupUnorderedList}}</a>
-                                        </li>
-                                        <li type="square">
-                                            <a onclick="lord.markup('uls'); return false;"
-                                               href="javascript:void(0);">{{=it.tr.markupUnorderedList}}</a>
-                                        </li>
-                                    </ul>
-                                </span>
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/ul.png"
+                                       class="buttonImage bordered" title="{{=it.tr.markupUnorderedList}}"
+                                       onclick="lord.showMenu(event, this, '#markupUnorderedListActionsMenu'); return false;" />
+                                <ul id="markupUnorderedListActionsMenu" class="menu">
+                                    <li type="disc">
+                                        <a onclick="lord.markup('uld'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupUnorderedList}}</a>
+                                    </li>
+                                    <li type="circle">
+                                        <a onclick="lord.markup('ulc'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupUnorderedList}}</a>
+                                    </li>
+                                    <li type="square">
+                                        <a onclick="lord.markup('uls'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupUnorderedList}}</a>
+                                    </li>
+                                </ul>
                             {{?}}
                             {{? it.board.markupElements.indexOf("ORDERED_LIST") >= 0}}
-                                <span tabindex="0" class="{{=it.deviceType}} popupActions">
-                                    <img src="/{{=it.site.pathPrefix}}img/markup/ol.png" class="buttonImage bordered"
-                                         title="{{=it.tr.markupOrderedList}}">
-                                    <ol class="popupActionsMenu markupOrderedListActionsMenu {{=it.deviceType}}">
-                                        <li type="1" value="1">
-                                            <a onclick="lord.markup('ol1'); return false;"
-                                               href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
-                                        </li>
-                                        <li type="I" value="I">
-                                            <a onclick="lord.markup('olI'); return false;"
-                                               href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
-                                        </li>
-                                        <li type="i" value="i">
-                                            <a onclick="lord.markup('oli'); return false;"
-                                               href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
-                                        </li>
-                                        <li type="A" value="A">
-                                            <a onclick="lord.markup('olA'); return false;"
-                                               href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
-                                        </li>
-                                        <li type="a" value="a">
-                                            <a onclick="lord.markup('ola'); return false;"
-                                               href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
-                                        </li>
-                                    </ol>
-                                </span>
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/ol.png"
+                                       class="buttonImage bordered" title="{{=it.tr.markupOrderedList}}"
+                                       onclick="lord.showMenu(event, this, '#markupOrderedListActionsMenu'); return false;" />
+                                <ol id="markupOrderedListActionsMenu" class="menu">
+                                    <li type="1" value="1">
+                                        <a onclick="lord.markup('ol1'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
+                                    </li>
+                                    <li type="I" value="I">
+                                        <a onclick="lord.markup('olI'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
+                                    </li>
+                                    <li type="i" value="i">
+                                        <a onclick="lord.markup('oli'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
+                                    </li>
+                                    <li type="A" value="A">
+                                        <a onclick="lord.markup('olA'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
+                                    </li>
+                                    <li type="a" value="a">
+                                        <a onclick="lord.markup('ola'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
+                                    </li>
+                                </ol>
                             {{?}}
                             {{? it.board.markupElements.indexOf("LIST_ITEM") >= 0}}
                                 <input type="image" src="/{{=it.site.pathPrefix}}img/markup/li.png"
