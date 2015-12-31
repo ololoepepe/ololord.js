@@ -321,6 +321,8 @@ lord.createPostNode = function(post, permanent, threadInfo) {
         c.node = lord.template("post", c.model);
         $(".postBody", c.node).css("maxWidth", ($(window).width() - 30) + "px");
         var dw = (c.model.deviceType == "mobile") ? 100 : 320;
+        if (c.model.deviceType != "mobile")
+            $(".postBody", c.node).css("minWidth", Math.min($(window).width() - 30, 400) + "px");
         $(".codeBlock", c.node).css("maxWidth", ($(window).width() - dw) + "px");
         if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
             lord.strikeOutHiddenPostLinks(c.node);
@@ -1182,7 +1184,7 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
     var p;
     if (post) {
         post = post.cloneNode(true);
-        var actions = lord.queryOne(".popupActions", post);
+        var actions = lord.nameOne("postActions", post);
         if (actions)
             actions.parentNode.removeChild(actions);
         var qr = lord.nameOne("quickReplyContainer", post);
@@ -2899,6 +2901,8 @@ lord.initializeOnLoadBaseBoard = function() {
             lord.postsLoaded();
         $(".postBody").css("maxWidth", ($(window).width() - 30) + "px");
         var dw = (c.model.deviceType == "mobile") ? 100 : 320;
+        if (c.model.deviceType != "mobile")
+            $(".postBody", c.node).css("minWidth", Math.min($(window).width() - 30, 400) + "px");
         $(".codeBlock").css("maxWidth", ($(window).width() - dw) + "px");
         setTimeout(function() {
             var hash = lord.hash();
