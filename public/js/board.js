@@ -2753,8 +2753,14 @@ lord.showTripcode = function(threadNumber) {
 
 lord.showMenu = function(e, input, selector) {
     e.stopPropagation();
-    if (lord.currentMenu)
+    if (lord.currentMenu) {
+        var same = $(selector).is(":visible");
         lord.currentMenu.hide();
+        if (same) {
+            lord.currentMenu = null;
+            return;
+        }
+    }
     lord.currentMenu = $(selector);
     lord.currentMenu.menu().toggle().position({
         my: "left top",
