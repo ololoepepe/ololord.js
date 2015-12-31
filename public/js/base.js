@@ -617,9 +617,9 @@ lord.checkChats = function() {
                 list.push(message);
             });
         });
+        lord.setLocalObject("chats", chats);
         if (keys.length > 0)
             lord.updateChat(keys);
-        lord.setLocalObject("chats", chats);
         lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord),
             lord.chatDialog ? (5 * lord.Second) : lord.Minute);
     }).catch(function(err) {

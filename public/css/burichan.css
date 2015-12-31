@@ -581,7 +581,7 @@ span.newPostCount {
     display: none;
 }
 
-.postHeader, .postFileName, .postFileSize {
+.postFileName, .postFileSize {
     white-space: nowrap;
 }
 
@@ -715,11 +715,17 @@ span.newPostCount {
 
 .postSubject {
     font-weight: bold;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
 }
 
 .postSubject.mobile {
     font-size: 0.8em;
-    display: block;
 }
 
 .tripcode {
@@ -731,7 +737,7 @@ span.newPostCount {
     display: block;
 }
 
-.postDateTime.mobile {.
+.postDateTime.mobile {
     font-size: 0.8em;
 }
 
@@ -740,9 +746,18 @@ span.newPostCount {
     color: blue;
 }
 
+.someName {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
 .someName.mobile {
     font-size: 0.8em;
-    display: block;
 }
 
 .navigationButton {

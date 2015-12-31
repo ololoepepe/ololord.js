@@ -2747,6 +2747,10 @@ lord.showTripcode = function(threadNumber) {
     return !!lord.getLocalObject("showTripcode", {})[lord.data("boardName") + "/" + threadNumber];
 };
 
+lord.showMenu = function(inp) {
+    //$("ul", inp.parentNode).menu();
+};
+
 lord.selectCaptchaEngine = function() {
     var captcha = lord.settings().captchaEngine;
     var supportedCaptchaEngines = lord.model("board/" + lord.data("boardName")).board.supportedCaptchaEngines;
