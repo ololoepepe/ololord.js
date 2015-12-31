@@ -100,9 +100,9 @@
             {{? it.customPostHeaderPart && it.customPostHeaderPart[130]}}
                 {{ out += it.customPostHeaderPart[130](it, thread, post); }}
             {{?}}
-            [<input type="image" src="/{{=it.site.pathPrefix}}img/post_actions.png" class="buttonImage"
-                    name="postActions" title="{{=it.tr.postActionsText}}"
-                    onclick="lord.showMenu(event, this, '#post{{=post.number}}ActionsMenu'); return false;">]
+            <span name="postActionsContainer">[<input type="image" src="/{{=it.site.pathPrefix}}img/post_actions.png" class="buttonImage"
+                                                      name="postActions" title="{{=it.tr.postActionsText}}"
+                                                      onclick="lord.showMenu(event, this, '#post{{=post.number}}ActionsMenu'); return false;">]</span>
             <ul id="post{{=post.number}}ActionsMenu" class="menu">
                 {{? it.customPostMenuAction && it.customPostMenuAction[0]}}
                     {{ out += it.customPostMenuAction[0](it, thread, post); }}

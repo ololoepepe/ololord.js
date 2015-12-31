@@ -334,7 +334,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
             });
         }
         if (!permanent) {
-            var actions = lord.nameOne("postActions", c.node);
+            var actions = lord.nameOne("postActionsContainer", c.node);
             if (actions)
                 actions.parentNode.removeChild(actions);
             var qr = lord.nameOne("quickReplyContainer", c.node);
@@ -1182,7 +1182,7 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
     var p;
     if (post) {
         post = post.cloneNode(true);
-        var actions = lord.nameOne("postActions", post);
+        var actions = lord.nameOne("postActionsContainer", post);
         if (actions)
             actions.parentNode.removeChild(actions);
         var qr = lord.nameOne("quickReplyContainer", post);
