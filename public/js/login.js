@@ -9,7 +9,7 @@ lord.loginImplementation = function(form, session) {
     if (!hashpass)
         return;
     if (!hashpass.match(/^([0-9a-fA-F]{40})$/))
-        hashpass = CryptoJS.SHA1(hashpass).toString(CryptoJS.enc.Hex);
+        hashpass = sha1(hashpass);
     lord.setCookie("hashpass", hashpass, {
         expires: ((session && !realHashpass) ? session.expire : lord.Billion),
         path: "/"

@@ -32,12 +32,19 @@ module.exports.db = db;
 
 db.tmp_hmget = db.hmget;
 db.hmget = function(key, hashes) {
+    if (!hashes || (Util.isArray(hashes) && hashes.length <= 0))
+        return Promise.resolve([]);
     return db.tmp_hmget.apply(db, [key].concat(hashes));
 };
 
 db.tmp_sadd = db.sadd;
 db.sadd = function(key, members) {
     return db.tmp_sadd.apply(db, [key].concat(members));
+};
+
+db.tmp_srem = db.srem;
+db.srem = function(key, members) {
+    return db.tmp_srem.apply(db, [key].concat(members));
 };
 
 var rss = {};
@@ -89,6 +96,30 @@ var sortedReferensces = function(references) {
     });
 };
 
+var addPostToIndex = function(post) {
+    var p = Promise.resolve();
+    Tools.forIn(Tools.indexPost(post), function(index, word) {
+        p = p.then(function() {
+            return db.sadd("postSearchIndex:" + word, index.map(function(item) {
+                return JSON.stringify(item);
+            }));
+        });
+    });
+    return p;
+};
+
+var removePostFromIndex = function(post) {
+    var p = Promise.resolve();
+    Tools.forIn(Tools.indexPost(post), function(index, word) {
+        p = p.then(function() {
+            return db.srem("postSearchIndex:" + word, index.map(function(item) {
+                return JSON.stringify(item);
+            }));
+        });
+    });
+    return p;
+};
+
 var threadPostNumbers = function(boardName, threadNumber) {
     return db.smembers("threadPostNumbers:" + boardName + ":" + threadNumber).then(function(list) {
         if (!list)
@@ -107,6 +138,8 @@ var threadPostNumbers = function(boardName, threadNumber) {
         }));
     });
 };
+
+module.exports.threadPostNumbers = threadPostNumbers;
 
 var postFileInfoNames = function(boardName, postNumber) {
     return db.smembers("postFileInfoNames:" + boardName + ":" + postNumber).then(function(list) {
@@ -127,7 +160,7 @@ var postFileInfoNames = function(boardName, postNumber) {
 
 var getThreads = function(boardName, options) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var opts = (typeof options == "object");
     var c = {};
     var key = ((options && options.archived) ? "archivedThreads" : "threads") + ":" + boardName;
@@ -177,21 +210,17 @@ module.exports.getThreads = getThreads;
 
 module.exports.getThread = function(boardName, threadNumber) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     return db.hget("threads:" + boardName, threadNumber).then(function(thread) {
         if (!thread)
-            return Promise.resolve(null);
+            return Promise.reject(Tools.translate("No such thread"));
         c.thread = JSON.parse(thread);
         return db.hget("threadUpdateTimes:" + boardName, thread.number);
     }).then(function(time) {
-        if (!c.thread)
-            return Promise.resolve(null);
         c.thread.updatedAt = time;
         return threadPostNumbers(boardName, c.thread.number);
     }).then(function(postNumbers) {
-        if (!c.thread)
-            return Promise.resolve(null);
         c.thread.postNumbers = postNumbers;
         return Promise.resolve(c.thread);
     });
@@ -208,9 +237,9 @@ var bannedFor = function(boardName, postNumber, userIp) {
 var threadPosts = function(boardName, threadNumber, options) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread");
+        return Promise.reject(Tools.translate("Invalid thread"));
     var opts = (typeof options == "object");
     var filter = opts && (typeof options.filterFunction == "function");
     var limit = (opts && !isNaN(options.limit) && options.limit > 0) ? options.limit : 0; //NOTE: 0 means no limit
@@ -309,32 +338,26 @@ module.exports.threadPosts = threadPosts;
 var getPost = function(boardName, postNumber, options) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject("Invalid post");
+        return Promise.reject(Tools.translate("Invalid post number"));
     var opts = (typeof options == "object");
     var c = {};
     var key = boardName + ":" + postNumber;
     var p = db.hget("posts", key).then(function(post) {
-        c.post = post ? JSON.parse(post) : null;
-        return c.post;
-    }).then(function(post) {
         if (!post)
-            return Promise.resolve(post);
-        return bannedFor(boardName, post.number, post.user.ip).then(function(banned) {
-            post.bannedFor = banned;
-            return Promise.resolve(c.post);
-        });
-    });
+            return Promise.reject(Tools.translate("No such post"));
+        c.post = JSON.parse(post);
+        return bannedFor(boardName, c.post.number, c.post.user.ip);
+    }).then(function(banned) {
+        c.post.bannedFor = banned;
+        return Promise.resolve(c.post);
+    });;
     if (!opts || (!options.withFileInfos && !options.withReferences && !options.withExtraData))
         return p;
     return p.then(function() {
-        if (!c.post)
-            return Promise.resolve();
         return threadPostNumbers(c.post.boardName, c.post.threadNumber);
     }).then(function(postNumbers) {
-        if (!c.post)
-            return Promise.resolve();
         c.post.sequenceNumber = postNumbers.indexOf(c.post.number) + 1;
         var promises = [];
         if (options.withFileInfos) {
@@ -377,16 +400,18 @@ var getFileInfo = function(file) {
     if (file.fileName) {
         p = Promise.resolve(file.fileName);
     } else {
-        p = db.hget("fileHashes", file.fileHash).then(function(fileInfo) {
+        p = db.srandmember("fileHashes:" + file.fileHash).then(function(fileInfo) {
             if (!fileInfo)
-                return Promise.resolve(null);
+                return Promise.reject(Tools.translate("No such file"));
             return Promise.resolve(JSON.parse(fileInfo).name);
         });
     }
     return p.then(function(fileName) {
         return db.hget("fileInfos", fileName);
     }).then(function(fileInfo) {
-        return Promise.resolve(fileInfo ? JSON.parse(fileInfo) : null);
+        if (!fileInfo)
+            return Promise.reject(Tools.translate("No such file"));
+        return Promise.resolve(JSON.parse(fileInfo));
     });
 };
 
@@ -394,9 +419,9 @@ module.exports.getFileInfo = getFileInfo;
 
 module.exports.threadPostCount = function(boardName, threadNumber) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread");
+        return Promise.reject(Tools.translate("Invalid thread"));
     return db.scard("threadPostNumbers:" + boardName + ":" + threadNumber);
 };
 
@@ -422,7 +447,7 @@ module.exports.registerUser = function(hashpass, level, boardNames, ips) {
         var promises = ips.map(function(ip) {
             var address = Tools.correctAddress(ip);
             if (!address)
-                return Promise.reject("Invalid IP address");
+                return Promise.reject(Tools.translate("Invalid IP address"));
             return db.hset("registeredUserHashes", address, hashpass);
         });
         return Promise.resolve(promises);
@@ -468,7 +493,7 @@ module.exports.moderOnBoard = function(reqOrHashpass, boardName1, boardName2) {
 
 var lastPostNumber = function(boardName) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     return db.hget("postCounters", boardName).then(function(number) {
         if (!number)
             return 0;
@@ -480,7 +505,7 @@ module.exports.lastPostNumber = lastPostNumber;
 
 var nextPostNumber = function(boardName, incrby) {
     if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     incrby = +incrby;
     if (isNaN(incrby) || incrby < 1)
         incrby = 1;
@@ -500,12 +525,20 @@ module.exports.getFileInfosByHashes = function(hashes) {
         hashes = [hashes];
     if (hashes.length < 1)
         return Promise.resolve([]);
-    return db.hmget("fileHashes", hashes).then(function(fileInfos) {
-        return fileInfos.map(function(fileInfo, i) {
+    var p = Promise.resolve();
+    var fileInfos = [];
+    hashes.forEach(function(hash) {
+        p = p.then(function() {
+            return db.srandmember("fileHashes:" + hash);
+        }).then(function(fileInfo) {
             fileInfo = JSON.parse(fileInfo);
-            fileInfo.hash = hashes[i];
-            return fileInfo;
+            fileInfo.hash = hash;
+            fileInfos.push(fileInfo);
+            return Promise.resolve();
         });
+    });
+    return p.then(function() {
+        return Promise.resolve(fileInfos);
     });
 };
 
@@ -519,8 +552,12 @@ var processFile = function(board, file, transaction) {
             var sourceFilePath = __dirname + "/../public/" + file.boardName + "/src/" + file.name;
             var sourceThumbPath = __dirname + "/../public/" + file.boardName + "/thumb/" + file.thumbName;
             return FS.copy(sourceFilePath, targetFilePath).then(function() {
-                return FS.copy(sourceThumbPath, targetThumbPath)
+                return FS.copy(sourceThumbPath, targetThumbPath);
             }).then(function() {
+                return FS.exists(targetThumbPath);
+            }).then(function(exists) {
+                if (!exists)
+                    return Promise.reject(Tools.translate("Failed to copy file"));
                 return getFileInfo({ fileName: file.name });
             }).then(function(fileInfo) {
                 return {
@@ -531,7 +568,10 @@ var processFile = function(board, file, transaction) {
                     name: fn.name,
                     rating: file.rating,
                     size: fileInfo.size,
-                    thumb: fileInfo.thumb
+                    thumb: {
+                        dimensions: fileInfo.thumb,
+                        name: fn.thumbName
+                    }
                 };
             });
         } else {
@@ -546,7 +586,7 @@ var processFile = function(board, file, transaction) {
                 return FS.exists(targetThumbPath);
             }).then(function(exists) {
                 if (!exists)
-                    return Promise.reject("Failed to copy file");
+                    return Promise.reject(Tools.translate("Failed to copy file"));
                 return {
                     dimensions: file.dimensions,
                     extraData: file.extraData,
@@ -568,7 +608,7 @@ var processFile = function(board, file, transaction) {
 var processFiles = function(req, fields, files, transaction) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (files.length < 1)
         return Promise.resolve([]);
     var c = {};
@@ -596,12 +636,53 @@ var processFiles = function(req, fields, files, transaction) {
     });
 };
 
+var createFileHash = function(fileInfo) {
+    return {
+        name: fileInfo.name,
+        thumb: { name: fileInfo.thumb.name },
+        size: fileInfo.size,
+        boardName: fileInfo.boardName,
+        mimeType: fileInfo.mimeType,
+        rating: fileInfo.rating
+    };
+};
+
+var addFileHashes = function(fileInfos) {
+    if (!fileInfos)
+        return Promise.resolve();
+    if (!Util.isArray(fileInfos))
+        fileInfos = [fileInfos];
+    if (fileInfos.length < 1)
+        return Promise.resolve();
+    return Tools.series(fileInfos, function(fileInfo) {
+        return db.sadd("fileHashes:" + fileInfo.hash, JSON.stringify(createFileHash(fileInfo)));
+    });
+};
+
+var removeFileHashes = function(fileInfos) {
+    if (!fileInfos)
+        return Promise.resolve();
+    if (!Util.isArray(fileInfos))
+        fileInfos = [fileInfos];
+    if (fileInfos.length < 1)
+        return Promise.resolve();
+    return Tools.series(fileInfos, function(fileInfo) {
+        return db.srem("fileHashes:" + fileInfo.hash, JSON.stringify(createFileHash(fileInfo))).then(function() {
+            return db.scard("fileHashes:" + fileInfo.hash);
+        }).then(function(size) {
+            if (size > 0)
+                return Promise.resolve();
+            return db.del("fileHashes:" + fileInfo.hash);
+        });
+    });
+};
+
 var createPost = function(req, fields, files, transaction, threadNumber, date) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (!board.postingEnabled)
-        return Promise.reject("Posting is disabled on this board");
+        return Promise.reject(Tools.translate("Posting is disabled on this board"));
     date = date || Tools.now();
     var c = {};
     if (threadNumber)
@@ -625,21 +706,20 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         }
     }).then(function(threads) {
         if (!threads || threads.length != 1)
-            return Promise.reject("No such thread or no access to thread");
+            return Promise.reject(Tools.translate("No such thread"));
         if (threads[0].closed)
-            return Promise.reject("Posting is disabled in this thread");
+            return Promise.reject(Tools.translate("Posting is disabled in this thread"));
+        c.unbumpable = !!threads[0].unbumpable;
         c.level = req.level || null;
-        c.isRaw = !!fields.raw && compareRegisteredUserLevels(c.level, RegisteredUserLevels.Admin) >= 0;
         return db.scard("threadPostNumbers:" + board.name + ":" + threadNumber);
     }).then(function(postCount) {
         c.postCount = postCount;
         if (c.postCount >= board.postLimit)
-            return Promise.reject("Post limit reached");
-        if (c.isRaw)
-            return rawText;
+            return Promise.reject(Tools.translate("Post limit reached"));
         return markup(board.name, rawText, {
             markupModes: markupModes,
-            referencedPosts: referencedPosts
+            referencedPosts: referencedPosts,
+            accessLevel: c.level
         });
     }).then(function(text) {
         c.text = text;
@@ -665,7 +745,6 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             name: (fields.name || null),
             number: c.postNumber,
             options: {
-                rawHtml: c.isRaw,
                 showTripcode: !!req.hashpass && !!fields.tripcode,
                 signAsOp: ("true" == fields.signAsOp)
             },
@@ -700,45 +779,20 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             });
         }));
     }).then(function() {
-        c.hashes = [];
-        if (files.length < 1)
-            return Promise.resolve();
-        c.hashes = files.reduce(function(acc, fileInfo) {
-            acc[fileInfo.hash] = JSON.stringify({
-                name: fileInfo.name,
-                thumb: { name: fileInfo.thumb.name },
-                size: fileInfo.size,
-                boardName: fileInfo.boardName,
-                mimeType: fileInfo.mimeType,
-                rating: fileInfo.rating
-            });
-            return acc;
-        }, {});
-        return db.hmset("fileHashes", c.hashes);
+        return addFileHashes(files);
     }).then(function() {
-        var promises = [];
-        Tools.forIn(c.hashes, function(_, hash) {
-            promises.push(db.sadd("fileHashesExtra:" + hash, JSON.stringify({
-                boardName: board.name,
-                postNumber: c.postNumber
-            })));
-        });
-        return Promise.all(promises);
-    }).then(function() {
-        var promises = [];
-        Tools.forIn(Tools.indexPost({
+        return addPostToIndex({
             boardName: board.name,
             number: c.postNumber,
             rawText: rawText,
             subject: (fields.subject || null)
-        }), function(index, word) {
-            promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
-        return Promise.all(promises);
     }).then(function() {
         return db.sadd("threadPostNumbers:" + board.name + ":" + threadNumber, c.postNumber);
     }).then(function() {
         if (c.postCount >= board.bumpLimit || (fields.email && fields.email.toLowerCase() == "sage"))
+            return Promise.resolve();
+        if (c.unbumpable)
             return Promise.resolve();
         return db.hset("threadUpdateTimes:" + board.name, threadNumber, date.toISOString());
     }).then(function() {
@@ -751,7 +805,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
 var checkCaptcha = function(req, fields) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (!board.captchaEnabled)
         return Promise.resolve();
     var ip = req.ip;
@@ -760,7 +814,7 @@ var checkCaptcha = function(req, fields) {
             return captchaUsed(board.name, ip);
         var supportedCaptchaEngines = board.supportedCaptchaEngines;
         if (supportedCaptchaEngines.length < 1)
-            return Promise.reject("Internal error");
+            return Promise.reject(Tools.translate("Internal error"));
         var ceid = fields.captchaEngine;
         var isSupported = function(id) {
             for (var i = 0; i < supportedCaptchaEngines.length; ++i) {
@@ -777,7 +831,7 @@ var checkCaptcha = function(req, fields) {
         }
         var captcha = Captcha.captcha(ceid);
         if (!captcha)
-            return Promise.reject("Invalid captcha engine");
+            return Promise.reject(Tools.translate("Invalid captcha engine"));
         return captcha.checkCaptcha(req, fields).then(function() {
             return captchaSolved(board.name, ip);
         });
@@ -788,7 +842,7 @@ module.exports.createPost = function(req, fields, files, transaction) {
     var threadNumber = +fields.threadNumber;
     var c = {};
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread");
+        return Promise.reject(Tools.translate("Invalid thread"));
     return checkCaptcha(req, fields).then(function() {
         return processFiles(req, fields, files, transaction);
     }).then(function(files) {
@@ -803,14 +857,14 @@ module.exports.createPost = function(req, fields, files, transaction) {
 
 var rerenderReferringPosts = function(boardName, postNumber) {
     return db.hgetall("referringPosts:" + boardName + ":" + postNumber).then(function(referringPosts) {
-        if (!referringPosts)
-            return Promise.resolve();
-        var promises = [];
+        var p = Promise.resolve();
         Tools.forIn(referringPosts, function(ref) {
             ref = JSON.parse(ref);
-            promises.push(rerenderPost(ref.boardName, ref.postNumber, true));
+            p = p.then(function() {
+                return rerenderPost(ref.boardName, ref.postNumber, true);
+            });
         });
-        return Promise.all(promises);
+        return p;
     });
 };
 
@@ -864,7 +918,7 @@ var addReferencedPosts = function(post, referencedPosts, nogenerate) {
 var removePost = function(boardName, postNumber, leaveFileInfos) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     return db.sadd("postsPlannedForDeletion", boardName + ":" + postNumber).then(function() {
         return getPost(boardName, postNumber, { withReferences: true });
@@ -875,8 +929,12 @@ var removePost = function(boardName, postNumber, leaveFileInfos) {
         return db.hdel("posts", boardName + ":" + postNumber);
     }).then(function() {
         return rerenderReferringPosts(boardName, postNumber);
+    }).catch(function(err) {
+        Global.error(err);
     }).then(function() {
         return removeReferencedPosts(boardName, postNumber);
+    }).catch(function(err) {
+        Global.error(err);
     }).then(function() {
         return db.srem("userPostNumbers:" + c.post.user.ip + ":" + board.name, postNumber);
     }).then(function() {
@@ -889,13 +947,13 @@ var removePost = function(boardName, postNumber, leaveFileInfos) {
     }).then(function(fileInfos) {
         if (leaveFileInfos)
             return Promise.resolve();
-        c.hashes = [];
+        c.fileInfos = [];
         c.paths = [];
         fileInfos.forEach(function(fileInfo) {
             if (!fileInfo)
                 return;
             fileInfo = JSON.parse(fileInfo);
-            c.hashes.push(fileInfo.hash);
+            c.fileInfos.push(fileInfo);
             c.paths.push(__dirname + "/../public/" + boardName + "/src/" + fileInfo.name);
             c.paths.push(__dirname + "/../public/" + boardName + "/thumb/" + fileInfo.thumb.name);
         });
@@ -909,39 +967,21 @@ var removePost = function(boardName, postNumber, leaveFileInfos) {
     }).then(function() {
         if (leaveFileInfos)
             return Promise.resolve();
-        var promises = c.hashes.map(function(hash) {
-            return db.srem("fileHashesExtra:" + hash, JSON.stringify({
-                boardName: boardName,
-                postNumber: postNumber
-            })).then(function() {
-                return db.hdel("fileHashes", hash);
-            }).then(function() {
-                return db.smembers("fileHashesExtra:" + hash);
-            }).then(function(list) {
-                if (list && list.length > 0)
-                    return Promise.resolve();
-                return db.del("fileHashesExtra:" + hash);
-            });
-        });
-        return Promise.all(promises);
+        return removeFileHashes(c.fileInfos);
     }).then(function() {
         return board.removeExtraData(postNumber);
     }).then(function() {
-        var promises = [];
-        Tools.forIn(Tools.indexPost({
+        return removePostFromIndex({
             boardName: boardName,
             number: postNumber,
             rawText: c.post.rawText,
             subject: c.post.subject
-        }), function(index, word) {
-            promises.push(db.srem("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
-        return Promise.all(promises);
     }).then(function() {
         if (!leaveFileInfos) {
             c.paths.forEach(function(path) {
                 return FS.remove(path).catch(function(err) {
-                    console.log(err);
+                    Global.error(err.stack || err);
                 });
             });
         }
@@ -974,7 +1014,7 @@ var removeThread = function(boardName, threadNumber, archived, leaveFileInfos) {
             }).then(function() {
                 return db.srem("threadsPlannedForDeletion", boardName + ":" + threadNumber);
             }).catch(function(err) {
-                console.log(err);
+                Global.error(err.stack || err);
             });
         }, 5000);
         return Promise.resolve();
@@ -986,9 +1026,9 @@ module.exports.removeThread = removeThread;
 module.exports.createThread = function(req, fields, files, transaction) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (!board.postingEnabled)
-        return Promise.reject("Posting is disabled on this board");
+        return Promise.reject(Tools.translate("Posting is disabled on this board"));
     var c = {};
     var date = Tools.now();
     var hashpass = req.hashpass || null;
@@ -1006,15 +1046,14 @@ module.exports.createThread = function(req, fields, files, transaction) {
         return getThreads(board.name, { archived: true }).then(function(threads) {
             c.archivedThreads = threads;
             c.archivedThreads.sort(Board.sortThreadsByDate);
-            if (c.archivedThreads.length < board.archiveLimit)
+            if (c.archivedThreads.length <= 0 || c.archivedThreads.length < board.archiveLimit)
                 return Promise.resolve();
-            var thread = c.archivedThreads.pop();
-            return removeThread(board.name, thread.number, true);
+            return removeThread(board.name, c.archivedThreads.pop().number, true);
         }).then(function() {
             c.thread = c.threads.pop();
             if (board.archiveLimit <= 0)
                 return removeThread(board.name, c.thread.number);
-            return db.hdel("threads:" + board.name, thread.number);
+            return db.hdel("threads:" + board.name, c.thread.number);
         }).then(function() {
             if (board.archiveLimit <= 0)
                 return Promise.resolve();
@@ -1031,6 +1070,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
             closed: false,
             createdAt: date.toISOString(),
             fixed: false,
+            unbumpable: false,
             number: c.threadNumber,
             user: {
                 hashpass: hashpass,
@@ -1152,7 +1192,7 @@ Transaction.prototype.rollback = function() {
             if (!exists)
                 return;
             FS.remove(path).catch(function(err) {
-                console.log(err);
+                Global.error(err.stack || err);
             });
         });
     });
@@ -1271,44 +1311,60 @@ module.exports.generateRss = function() {
     });
 };
 
-var toMap = function(index, boardName) {
-    if (!index || index.length < 1)
-        return {};
-    var map = {};
-    index.forEach(function(post) {
-        post = JSON.parse(post);
-        if (boardName && post.boardName != boardName)
-            return;
-        map[post.boardName + ":" + post.postNumber + ":" + post.source] = post;
-    });
-    return map;
-};
-
 var findPhrase = function(phrase, boardName) {
-    var promises = Tools.getWords(phrase).map(function(word) {
-        return db.smembers("postSearchIndex:" + word.word);
+    var results = [];
+    var p = Promise.resolve();
+    Tools.getWords(phrase).forEach(function(word) {
+        p = p.then(function() {
+            return db.smembers("postSearchIndex:" + word.word);
+        }).then(function(result) {
+            results.push(result.map(function(post) {
+                return JSON.parse(post);
+            }).filter(function(post) {
+                return !boardName || (post.boardName == boardName);
+            }));
+            return Promise.resolve();
+        });
     });
-    return Promise.all(promises).then(function(results) {
-        if (results.length < 1)
-            return {};
-        var first = toMap(results[0], boardName);
-        for (var i = 1; i < results.length; ++i) {
-            var next = toMap(results[i]);
-            for (var key in first) {
-                if (!first.hasOwnProperty(key))
-                    continue;
-                if (!next.hasOwnProperty(key)) {
-                    delete first[key];
+    var f = function(chain, ind) {
+        if (!Util.isArray(chain))
+            chain = [chain];
+        ind = ind || 0;
+        var lastPost = chain[chain.length - 1];
+        if (ind > 0) {
+            var nextChain = [];
+            for (var i = 0; i < results[ind].length; ++i) {
+                var post = results[ind][i];
+                if (post.boardName != lastPost.boardName || post.number != lastPost.number
+                    || post.source != lastPost.source || post.position != (lastPost.position + 1)) {
                     continue;
                 }
-                var firstPost = first[key];
-                var nextPost = next[key];
-                ++firstPost.position;
-                if (nextPost.position != firstPost.position)
-                    delete first[key];
+                if (ind < (results.length - 1))
+                    nextChain = f(chain.concat(post), ind + 1);
+                else
+                    nextChain = chain.concat(post);
+                if (nextChain.length > 0)
+                    break;
             }
+            return nextChain;
+        } else {
+            if (1 == results.length)
+                return [lastPost];
+            return f(chain, ind + 1);
         }
-        return first;
+    };
+    return p.then(function() {
+        if (results.length < 1)
+            return {};
+        return results[0].map(function(result) {
+            return f(result);
+        }).filter(function(chain) {
+            return chain.length > 0;
+        }).reduce(function(map, chain) {
+            var post = chain[0];
+            map[post.boardName + ":" + post.postNumber] = post;
+            return map;
+        }, {});
     });
 };
 
@@ -1334,9 +1390,19 @@ module.exports.findPosts = function(query, boardName) {
         });
         return Promise.all(promises);
     }).then(function() {
-        var keys = [];
-        Tools.forIn(c.map, function(post) {
-            keys.push(post.boardName + ":" + post.postNumber);
+        var keys = Tools.toArray(c.map).slice(0, config("system.searchLimit", 100)).sort(function(p1, p2) {
+            if (p1.boardName < p2.boardName)
+                return -1;
+            else if (p1.boardName > p2.boardName)
+                return 1;
+            if (p1.postNumber < p2.postNumber)
+                return -1;
+            else if (p1.postNumber > p2.postNumber)
+                return 1;
+            else
+                return 0;
+        }).map(function(post) {
+            return post.boardName + ":" + post.postNumber;
         });
         if (keys.length < 1)
             return Promise.resolve([]);
@@ -1351,7 +1417,7 @@ module.exports.findPosts = function(query, boardName) {
 var getUserCaptchaQuota = function(boardName, userIp) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     return db.hget("captchaQuotas", boardName + ":" + userIp).then(function(quota) {
         return Promise.resolve((+quota > 0) ? +quota : 0);
     });
@@ -1362,7 +1428,7 @@ module.exports.getUserCaptchaQuota = getUserCaptchaQuota;
 var captchaSolved = function(boardName, userIp) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var quota = board.captchaQuota;
     if (quota < 1)
         return Promise.resolve(0);
@@ -1374,7 +1440,7 @@ module.exports.captchaSolved = captchaSolved;
 var captchaUsed = function(boardName, userIp) {
     var board = Board.board(boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (board.captchaQuota < 1)
         return Promise.resolve(0);
     return db.hincrby("captchaQuotas", boardName + ":" + userIp, -1).then(function(quota) {
@@ -1394,15 +1460,13 @@ var rerenderPost = function(boardName, postNumber, silent) {
     var referencedPosts = {};
     return getPost(boardName, postNumber).then(function(post) {
         c.post = post;
-        if (c.post.rawHtml)
-            return Promise.resolve();
         return markup(c.post.boardName, c.post.rawText, {
             markupModes: c.post.markup,
-            referencedPosts: referencedPosts
+            referencedPosts: referencedPosts,
+            accessLevel: c.post.user.level
         });
     }).then(function(text) {
-        if (!c.post.options.rawHtml)
-            c.post.text = text;
+        c.post.text = text;
         return db.hset("posts", key, JSON.stringify(c.post));
     }).then(function() {
         return removeReferencedPosts(boardName, postNumber, !silent);
@@ -1433,16 +1497,12 @@ var rebuildPostSearchIndex = function(boardName, postNumber) {
     var key = boardName + ":" + postNumber;
     console.log(`Rebuilding post search index: [${boardName}] ${postNumber}`);
     return getPost(boardName, postNumber).then(function(post) {
-        var promises = [];
-        Tools.forIn(Tools.indexPost({
+        return addPostToIndex({
             boardName: boardName,
             number: postNumber,
             rawText: post.rawText,
             subject: (post.subject || null)
-        }), function(index, word) {
-            promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
-        return Promise.all(promises);
     });
 };
 
@@ -1533,54 +1593,35 @@ module.exports.rebuildSearchIndex = function() {
 module.exports.addFiles = function(req, fields, files, transaction) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     var postNumber = +fields.postNumber;
     if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject("Invalid post number");
+        return Promise.reject(Tools.translate("Invalid post number"));
     return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
         if ((!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         c.post = post;
         return postFileInfoNames(board.name, c.post.number);
     }).then(function(names) {
         if (names.length + files.length > board.maxFileCount)
-            return Promise.reject("Too many files");
+            return Promise.reject(Tools.translate("Too many files"));
         return processFiles(req, fields, files, transaction);
     }).then(function(files) {
         c.files = files;
-        return Promise.all(c.files.map(function(fileInfo) {
+        return Tools.series(c.files, function(fileInfo) {
             fileInfo.boardName = board.name;
             fileInfo.postNumber = c.post.number;
             return db.hset("fileInfos", fileInfo.name, JSON.stringify(fileInfo)).then(function() {
                 return db.sadd("postFileInfoNames:" + board.name + ":" + c.post.number, fileInfo.name);
             });
-        }));
-    }).then(function() {
-        c.hashes = c.files.reduce(function(acc, fileInfo) {
-            acc[fileInfo.hash] = JSON.stringify({
-                name: fileInfo.name,
-                thumb: { name: fileInfo.thumb.name },
-                size: fileInfo.size,
-                boardName: fileInfo.boardName,
-                mimeType: fileInfo.mimeType,
-                rating: fileInfo.rating
-            });
-            return acc;
-        }, {});
-        return db.hmset("fileHashes", c.hashes);
-    }).then(function() {
-        var promises = [];
-        Tools.forIn(c.hashes, function(_, hash) {
-            promises.push(db.sadd("fileHashesExtra:" + hash, JSON.stringify({
-                boardName: board.name,
-                postNumber: c.post.number
-            })));
         });
-        return Promise.all(promises);
     }).then(function() {
+        return addFileHashes(c.files);
+    }).then(function() {
+        Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
         return Promise.resolve(c.post);
     });
 };
@@ -1588,17 +1629,16 @@ module.exports.addFiles = function(req, fields, files, transaction) {
 module.exports.editPost = function(req, fields) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var date = Tools.now();
     var c = {};
     var postNumber = +fields.postNumber;
     if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject("Invalid post number");
+        return Promise.reject(Tools.translate("Invalid post number"));
     var rawText = fields.text || null;
     var email = fields.email || null;
     var name = fields.name || null;
     var subject = fields.subject || null;
-    var isRaw = fields.raw && compareRegisteredUserLevels(req.level, RegisteredUserLevels.Admin) >= 0;
     var markupModes = [];
     var referencedPosts = {};
     Tools.forIn(markup.MarkupModes, function(val) {
@@ -1606,49 +1646,45 @@ module.exports.editPost = function(req, fields) {
             markupModes.push(val);
     });
     return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
+        if (!post)
+            return Promise.reject(Tools.translate("Invalid post"));
         if ((!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         c.post = post;
         return postFileInfoNames(post.boardName, post.number);
     }).then(function(numbers) {
         if (!rawText && numbers.length < 1)
-            return Promise.reject("Both file and comment are missing");
+            return Promise.reject(Tools.translate("Both file and comment are missing"));
         if (rawText && rawText.length > board.maxTextLength)
-            return Promise.reject("Text is too long");
+            return Promise.reject(Tools.translate("Text is too long"));
         if (email && email.length > board.maxEmailLength)
-            return Promise.reject("E-mail is too long");
+            return Promise.reject(Tools.translate("E-mail is too long"));
         if (name && name.length > board.maxNameLength)
-            return Promise.reject("Name is too long");
+            return Promise.reject(Tools.translate("Name is too long"));
         if (subject && subject.length > board.maxSubjectLength)
-            return Promise.reject("Subject is too long");
-        if (isRaw)
-            return Promise.resolve(rawText);
+            return Promise.reject(Tools.translate("Subject is too long"));
         return markup(board.name, rawText, {
             markupModes: markupModes,
-            referencedPosts: referencedPosts
+            referencedPosts: referencedPosts,
+            accessLevel: req.level
         });
     }).then(function(text) {
         c.text = text;
         return board.postExtraData(req, fields, null, c.post)
     }).then(function(extraData) {
         c.extraData = extraData;
-        var promises = [];
-        Tools.forIn(Tools.indexPost({
+        return removePostFromIndex({
             boardName: c.post.boardName,
             number: c.post.number,
             rawText: c.post.rawText,
             subject: c.post.subject
-        }), function(index, word) {
-            promises.push(db.srem("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
-        return Promise.all(promises);
     }).then(function() {
         c.post.email = email || null;
         c.post.markup = markupModes;
         c.post.name = name || null;
-        c.post.options.rawHtml = isRaw;
         c.post.rawText = rawText;
         c.post.subject = subject || null;
         c.post.text = c.text || null;
@@ -1664,16 +1700,12 @@ module.exports.editPost = function(req, fields) {
     }).then(function() {
         return addReferencedPosts(c.post, referencedPosts);
     }).then(function() {
-        var promises = [];
-        Tools.forIn(Tools.indexPost({
+        return addPostToIndex({
             boardName: board.name,
             number: c.post.number,
             rawText: rawText,
             subject: subject
-        }), function(index, word) {
-            promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
         });
-        return Promise.all(promises);
     }).then(function() {
         Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
         return Promise.resolve();
@@ -1682,23 +1714,19 @@ module.exports.editPost = function(req, fields) {
 
 module.exports.setThreadFixed = function(req, fields) {
     if (compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return Promise.reject("Not enough rights");
+        return Promise.reject(Tools.translate("Not enough rights"));
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var date = Tools.now();
     var c = {};
     var threadNumber = +fields.threadNumber;
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread number");
+        return Promise.reject(Tools.translate("Invalid thread number"));
     return db.hget("threads:" + board.name, threadNumber).then(function(thread) {
         if (!thread)
-            return Promise.reject("No such thread");
+            return Promise.reject(Tools.translate("No such thread"));
         thread = JSON.parse(thread);
-        if ((!req.hashpass || req.hashpass != thread.user.hashpass)
-            && (compareRegisteredUserLevels(req.level, thread.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
-        }
         var fixed = (fields.fixed == "true");
         if (thread.fixed == fixed)
             return Promise.resolve();
@@ -1716,23 +1744,19 @@ module.exports.setThreadFixed = function(req, fields) {
 
 module.exports.setThreadClosed = function(req, fields) {
     if (compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return Promise.reject("Not enough rights");
+        return Promise.reject(Tools.translate("Not enough rights"));
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var date = Tools.now();
     var c = {};
     var threadNumber = +fields.threadNumber;
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread number");
+        return Promise.reject(Tools.translate("Invalid thread number"));
     return db.hget("threads:" + board.name, threadNumber).then(function(thread) {
         if (!thread)
-            return Promise.reject("No such thread");
+            return Promise.reject(Tools.translate("No such thread"));
         thread = JSON.parse(thread);
-        if ((!req.hashpass || req.hashpass != thread.user.hashpass)
-            && (compareRegisteredUserLevels(req.level, thread.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
-        }
         var closed = (fields.closed == "true");
         if (thread.closed == closed)
             return Promise.resolve();
@@ -1748,23 +1772,55 @@ module.exports.setThreadClosed = function(req, fields) {
     });
 };
 
+module.exports.setThreadUnbumpable = function(req, fields) {
+    if (compareRegisteredUserLevels(req.level, "MODER") < 0)
+        return Promise.reject(Tools.translate("Not enough rights"));
+    var board = Board.board(fields.boardName);
+    if (!board)
+        return Promise.reject(Tools.translate("Invalid board"));
+    var date = Tools.now();
+    var c = {};
+    var threadNumber = +fields.threadNumber;
+    if (isNaN(threadNumber) || threadNumber <= 0)
+        return Promise.reject(Tools.translate("Invalid thread number"));
+    return db.hget("threads:" + board.name, threadNumber).then(function(thread) {
+        if (!thread)
+            return Promise.reject(Tools.translate("No such thread"));
+        thread = JSON.parse(thread);
+        var unbumpable = (fields.unbumpable == "true");
+        if (!!thread.unbumpable == unbumpable)
+            return Promise.resolve();
+        thread.unbumpable = unbumpable;
+        db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
+    }).then(function() {
+        return Global.generate(board.name, threadNumber, threadNumber, "edit");
+    }).then(function() {
+        return Promise.resolve({
+            boardName: board.name,
+            threadNumber: threadNumber
+        });
+    });
+};
+
 module.exports.deletePost = function(req, res, fields) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     var postNumber = +fields.postNumber;
     if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject("Invalid post number");
+        return Promise.reject(Tools.translate("Invalid post number"));
     var password = Tools.password(fields.password);
     var c = {};
     return controller.checkBan(req, res, board.name, true).then(function() {
         return getPost(board.name, postNumber);
     }).then(function(post) {
+        if (!post)
+            return Promise.reject(Tools.translate("Invalid post"));
         c.post = post;
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         c.isThread = post.threadNumber == post.number;
         return (c.isThread) ? removeThread(board.name, postNumber) : removePost(board.name, postNumber);
@@ -1785,14 +1841,14 @@ module.exports.moveThread = function(req, fields) {
     var sourceBoard = Board.board(fields.boardName);
     var targetBoard = Board.board(fields.targetBoardName);
     if (!sourceBoard || !targetBoard)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (fields.boardName == fields.targetBoardName)
-        return Promise.reject("Source and target boards are the same");
+        return Promise.reject(Tools.translate("Source and target boards are the same"));
     var threadNumber = +fields.threadNumber;
     if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject("Invalid thread number");
+        return Promise.reject(Tools.translate("Invalid thread number"));
     if (compareRegisteredUserLevels(req.level, RegisteredUserLevels.Moder) < 0)
-        return Promise.reject("Not enough rights");
+        return Promise.reject(Tools.translate("Not enough rights"));
     var password = Tools.password(fields.password);
     var c = {};
     var sourcePath = __dirname + "/../public/" + sourceBoard.name + "/src"
@@ -1806,12 +1862,12 @@ module.exports.moveThread = function(req, fields) {
         }
     }).then(function(thread) {
         if (!thread || thread.length != 1)
-            return Promise.reject("No such thread");
+            return Promise.reject(Tools.translate("No such thread"));
         c.thread = thread[0];
         if ((!password || password != c.thread.user.password)
             && (!req.hashpass || req.hashpass != c.thread.user.hashpass)
             && (compareRegisteredUserLevels(req.level, c.thread.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         delete c.thread.updatedAt;
         c.postNumbers = c.thread.postNumbers;
@@ -1878,9 +1934,7 @@ module.exports.moveThread = function(req, fields) {
             }).then(function() {
                 return db.sadd("userPostNumbers:" + post.user.ip + ":" + targetBoard.name, post.number);
             }).then(function() {
-                if (fileInfos.length < 1)
-                    return Promise.resolve();
-                return Promise.all(fileInfos.map(function(fileInfo) {
+                return Tools.series(fileInfos, function(fileInfo) {
                     return db.hset("fileInfos", fileInfo.name, JSON.stringify(fileInfo)).then(function() {
                         return db.sadd("postFileInfoNames:" + targetBoard.name + ":" + post.number, fileInfo.name);
                     }).then(function() {
@@ -1889,43 +1943,16 @@ module.exports.moveThread = function(req, fields) {
                         return FS.move(sourceThumbPath + "/" + fileInfo.thumb.name,
                             targetThumbPath + "/" + fileInfo.thumb.name);
                     });
-                }));
-            }).then(function() {
-                c.hashes = [];
-                if (fileInfos.length < 1)
-                    return Promise.resolve();
-                c.hashes = fileInfos.reduce(function(acc, fileInfo) {
-                    acc[fileInfo.hash] = JSON.stringify({
-                        name: fileInfo.name,
-                        thumb: { name: fileInfo.thumb.name },
-                        size: fileInfo.size,
-                        boardName: fileInfo.boardName,
-                        mimeType: fileInfo.mimeType,
-                        rating: fileInfo.rating
-                    });
-                    return acc;
-                }, {});
-                return db.hmset("fileHashes", c.hashes);
-            }).then(function() {
-                var promises = [];
-                Tools.forIn(c.hashes, function(_, hash) {
-                    promises.push(db.sadd("fileHashesExtra:" + hash, JSON.stringify({
-                        boardName: targetBoard.name,
-                        postNumber: post.number
-                    })));
                 });
-                return Promise.all(promises);
             }).then(function() {
-                var promises = [];
-                Tools.forIn(Tools.indexPost({
+                return addFileHashes(fileInfos);
+            }).then(function() {
+                return addPostToIndex({
                     boardName: targetBoard.name,
                     number: post.number,
                     rawText: post.rawText,
                     subject: (post.subject || null)
-                }), function(index, word) {
-                    promises.push(db.sadd("postSearchIndex:" + word, JSON.stringify(index[0])));
                 });
-                return Promise.all(promises);
             });
         });
         return Promise.all(promises);
@@ -1957,12 +1984,12 @@ module.exports.moveThread = function(req, fields) {
 module.exports.deleteFile = function(req, res, fields) {
     var fileName = fields.fileName;
     if (!fileName)
-        return Promise.reject("Invalid file name");
+        return Promise.reject(Tools.translate("Invalid file name"));
     var password = Tools.password(fields.password);
     var c = {};
     return db.hget("fileInfos", fileName).then(function(fileInfo) {
         if (!fileInfo)
-            return Promise.reject("No such file");
+            return Promise.reject(Tools.translate("No such file"));
         c.fileInfo = JSON.parse(fileInfo);
         return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
     }).then(function(post) {
@@ -1970,37 +1997,26 @@ module.exports.deleteFile = function(req, res, fields) {
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         return controller.checkBan(req, res, c.post.boardName, true);
     }).then(function() {
         return postFileInfoNames(c.post.boardName, c.post.number);
     }).then(function(numbers) {
         if (!c.post.rawText && numbers.length < 2)
-            return Promise.reject("Both file and comment are missing");
+            return Promise.reject(Tools.translate("Both file and comment are missing"));
         return db.srem("postFileInfoNames:" + c.post.boardName + ":" + c.post.number, fileName);
     }).then(function() {
         return db.hdel("fileInfos", fileName);
     }).then(function() {
-        return db.srem("fileHashesExtra:" + c.fileInfo.hash, JSON.stringify({
-            boardName: c.post.boardName,
-            postNumber: c.post.number
-        }));
-    }).then(function() {
-        return db.smembers("fileHashesExtra:" + c.fileInfo.hash);
-    }).then(function(list) {
-        if (list && list.length > 0)
-            return Promise.resolve();
-        return db.del("fileHashesExtra:" + c.fileInfo.hash);
-    }).then(function() {
-        return db.hdel("fileHashes", c.fileInfo.hash);
+        return removeFileHashes(c.fileInfo);
     }).then(function() {
         paths = [];
         paths.push(__dirname + "/../public/" + c.post.boardName + "/src/" + c.fileInfo.name);
         paths.push(__dirname + "/../public/" + c.post.boardName + "/thumb/" + c.fileInfo.thumb.name);
         paths.forEach(function(path) {
             FS.remove(path).catch(function(err) {
-                console.log(err);
+                Global.error(err);
             });
         });
         Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
@@ -2016,20 +2032,20 @@ module.exports.editAudioTags = function(req, res, fields) {
     var c = {};
     var password = Tools.password(fields.password);
     return getFileInfo({ fileName: fields.fileName }).then(function(fileInfo) {
-        if (!fileInfo)
-            return Promise.reject("No such file info");
         if (fileInfo.mimeType.substr(0, 6) != "audio/")
-            return Promise.reject("Invalid file type");
+            return Promise.reject(Tools.translate("Not an audio file"));
         c.fileInfo = fileInfo;
         return controller.checkBan(req, res, c.fileInfo.boardName, true);
     }).then(function() {
         return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
     }).then(function(post) {
+        if (!post)
+            return Promise.reject(Tools.translate("Invalid post"));
         c.post = post;
         if ((!password || password != post.user.password)
             && (!req.hashpass || req.hashpass != post.user.hashpass)
             && (compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         }
         ["album", "artist", "title", "year"].forEach(function(tag) {
             if (fields[tag]) {
@@ -2055,8 +2071,9 @@ module.exports.userBans = function(ip, boardNames) {
         return db.keys("userBans:*").then(function(keys) {
             var ips = {};
             keys.forEach(function(key) {
-                var boardName = key.split(":").pop();
-                var ip = key.replace(":" + boardName, "").split(":").slice(1).join(":");
+                var sl = key.split(":");
+                var boardName = sl.pop();
+                var ip = sl.slice(1, sl.length).join(":");
                 if (!ips.hasOwnProperty(ip))
                     ips[ip] = {};
             });
@@ -2112,9 +2129,9 @@ var updatePostBanInfo = function(boardName, ban) {
 module.exports.banUser = function(req, ip, bans) {
     var address = Tools.correctAddress(ip);
     if (!address)
-        return Promise.reject("Invalid IP");
+        return Promise.reject(Tools.translate("Invalid IP address"));
     if (address == req.ip)
-        return Promise.reject("Not enough rights");
+        return Promise.reject(Tools.translate("Not enough rights"));
     var err = bans.reduce(function(err, ban) {
         if (err)
             return err;
@@ -2133,7 +2150,7 @@ module.exports.banUser = function(req, ip, bans) {
     }).then(function(user) {
         user = user ? JSON.parse(user) : null;
         if (user && compareRegisteredUserLevels(req.level, user.level) <= 0)
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         var date = Tools.now();
         bans = bans.reduce(function(acc, ban) {
             ban.createdAt = date;
@@ -2163,7 +2180,7 @@ module.exports.banUser = function(req, ip, bans) {
                     if (ban.postNumber) {
                         setTimeout(function() {
                             updatePostBanInfo(boardName, ban).catch(function(err) {
-                                console.log(err.stack || err);
+                                Global.error(err.stack || err);
                             });
                         }, Math.ceil(ttl * Tools.Second * 1.002)); //NOTE: Adding extra delay
                     }
@@ -2190,11 +2207,11 @@ module.exports.delall = function(req, fields) {
         return !board;
     }, false);
     if (err)
-        return Promise.reject("Invalid board");
+        return Promise.reject(Tools.translate("Invalid board"));
     if (!address)
-        return Promise.reject("Invalid IP");
+        return Promise.reject(Tools.translate("Invalid IP address"));
     if (address == req.ip)
-        return Promise.reject("Not enough rights");
+        return Promise.reject(Tools.translate("Not enough rights"));
     var posts = [];
     return db.hget("registeredUserHashes", address).then(function(hash) {
         if (!hash)
@@ -2203,7 +2220,7 @@ module.exports.delall = function(req, fields) {
     }).then(function(user) {
         user = user ? JSON.parse(user) : null;
         if (user && compareRegisteredUserLevels(req.level, user.level) <= 0)
-            return Promise.reject("Not enough rights");
+            return Promise.reject(Tools.translate("Not enough rights"));
         var promises = boards.map(function(board) {
             return db.smembers("userPostNumbers:" + address + ":" + board.name).then(function(numbers) {
                 return Promise.all(numbers.map(function(postNumber) {
@@ -2237,7 +2254,7 @@ module.exports.initialize = function() {
                         return Promise.resolve();
                     setTimeout(function() {
                         updatePostBanInfo(boardName, ban).catch(function(err) {
-                            console.log(err.stack || err);
+                            Global.error(err.stack || err);
                         });
                     }, Math.ceil(ttl * Tools.Second * 1.002)); //NOTE: Adding extra delay
                     return Promise.resolve();

@@ -1,0 +1,24 @@
+<div>
+    {{? it.searchResults && it.searchResults.length > 0}}
+        <ol>
+            {{~it.searchResults :result}}
+                <li>
+                    <div>
+                        <a href="/{{=it.site.pathPrefix}}{{=result.boardName}}/res/{{=result.threadNumber}}.html{{? result.threadNumber != result.postNumber}}#{{=result.postNumber}}{{?}}"
+                           target="_blank">{{!result.subject}}</a>
+                    </div>
+                    <div>
+                        <span class="quotation">/{{=result.boardName}}/res/{{=result.threadNumber}}.html{{? result.threadNumber != result.postNumber}}#{{=result.postNumber}}{{?}}</span>
+                    </div>
+                    <div>
+                        {{=result.text}}
+                    </div>
+                </li>
+            {{~}}
+        </ol>
+    {{??}}
+        <div class="sectionHeader">
+            <h3>{{=it.tr.nothingFoundMessage}}</h3>
+        </div>
+    {{?}}
+</div>

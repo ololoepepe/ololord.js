@@ -58,7 +58,7 @@ board.renderPost = function(post) {
             href: post.extraData,
             link: (post.subject || post.extraData)
         };
-        post.subject = controller.sync(null, "echoPostSubject", model);
+        post.subject = controller.sync("echoPostSubject", model);
         post.subjectIsRaw = true;
         return Promise.resolve(post);
     });

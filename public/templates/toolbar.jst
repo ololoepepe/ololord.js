@@ -17,7 +17,6 @@
             <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/logout"
                   enctype="application/x-www-form-urlencoded" class="inlineForm"
                   onsubmit="lord.doLogout(event, this); return false;">
-                <input type="hidden" name="source" value="{{=it.path}}" />
                 [<input type="image" name="submit" src="/{{=it.site.pathPrefix}}img/logout.png" class="buttonImage"
                         title="{{=it.tr.logoutText}}{{? it.loginMessageText}} [{{=it.loginMessageText}}]{{?}}" />]
             </form>
@@ -30,5 +29,8 @@
             |
         {{?}}
         {{#def.innerNavbar}}
+        {{? it.settings.stickyToolbar}}
+            <hr style="margin-top: 3px; margin-bottom: 0px;" />
+        {{?}}
     </div>
 </div>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<body class="{{=it.deviceType}}" {{#def.baseData}}>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
+<body class="mobile" {{#def.baseData}}>
 <div id="toolbarPlaceholder" style="display: none;"></div>
+<div id="customHeaderPlaceholder" style="display: none;"></div>
 <br />
 <div id="searchPlaceholder" style="display: none;"></div>
 <div class="theTitle">
@@ -30,9 +30,7 @@
     [i]<i>{{=it.tr.italics}}</i>[/i]
     <br /><br />
     ---<s>{{=it.tr.strikedoutText}}</s>---
-    <br />
-    <s>{{=it.tr.strikedoutText}}</s>{{=it.strikedoutTextWakaba}}
-    <br />
+    <div class="overflowContainer"><s>{{=it.tr.strikedoutText}}</s>{{=it.strikedoutTextWakaba}}</div>
     [s]<s>{{=it.tr.strikedoutText}}</s>[/s]
     <br /><br />
     {{=it.tr.strikedoutWord1}} <s>{{=it.tr.strikedoutWord2}}</s>^W
@@ -82,9 +80,9 @@
     <br /><br />
     <span class="quotation">&gt;{{=it.tr.quotation}}</span>
     <br /><br />
-    [sub]<sub>{{=it.tr.subscript}}</sub>[/sub] (H<sub>2</sub>O)
+    [sub]<sub>{{=it.tr.subscriptText}}</sub>[/sub] (H<sub>2</sub>O)
     <br /><br />
-    [sup]<sup>{{=it.tr.superscript}}</sup>[/sup] (x<sup>3</sup> + y<sup>2</sup>)
+    [sup]<sup>{{=it.tr.superscriptText}}</sup>[/sup] (x<sup>3</sup> + y<sup>2</sup>)
 </div>
 <div class="sectionHeader">
     <h3>{{=it.tr.linkMarkup}}</h3>
@@ -109,8 +107,8 @@
         <h3>{{=it.tr.twitterEmbeddingMarkup}}</h3>
     </div>
     <div class="rules">
-        https://twitter.com/Interior/status/463440424141459456
-        <br /><br />
+        <div class="overflowContainer">https://twitter.com/Interior/status/463440424141459456</div>
+        <br />
         {{=it.tr.becomesText}}
         <br /><br />
         <blockquote class="twitter-tweet"><p lang="en" dir="ltr">Sunsets don&#39;t get much better than this one over <a href="https://twitter.com/GrandTetonNPS">@GrandTetonNPS</a>. <a href="https://twitter.com/hashtag/nature?src=hash">#nature</a> <a href="https://twitter.com/hashtag/sunset?src=hash">#sunset</a> <a href="http://t.co/YuKy2rcjyU">pic.twitter.com/YuKy2rcjyU</a></p>&mdash; US Dept of Interior (@Interior) <a href="https://twitter.com/Interior/status/463440424141459456">May 5, 2014</a></blockquote><script src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -137,8 +135,7 @@
     <h3>{{=it.tr.youtubeCoubEmbeddingMarkup}}</h3>
 </div>
 <div class="rules">
-    https://www.youtube.com/watch?v=7wHhnX1WMNA
-    <br />
+    <div class="overflowContainer">https://www.youtube.com/watch?v=7wHhnX1WMNA</div>
     http://coub.com/view/qq94
     <br /><br />
     {{=it.tr.becomesText}}

@@ -69,7 +69,7 @@ lord.setVotingOpened = function(el, opened) {
     c.model.opened = opened;
     c.model.postNumber = postNumber;
     c.div = lord.template("setVotingOpenedDialog", c.model);
-    lord.showDialog(opened ? "openVotingText" : "closeVotingText", null, c.div).then(function(result) {
+    lord.showDialog(c.div, { title: (opened ? "openVotingText" : "closeVotingText") }).then(function(result) {
         if (!result)
             return Promise.resolve();
         var form = lord.queryOne("form", c.div);

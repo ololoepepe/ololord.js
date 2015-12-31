@@ -123,6 +123,9 @@ var Board = function(name, title, options) {
         Board.MarkupElements.UnderlinedMarkupElement,
         Board.MarkupElements.SpoilerMarkupElement,
         Board.MarkupElements.QuotationMarkupElement,
+        Board.MarkupElements.UnorderedList,
+        Board.MarkupElements.OrderedList,
+        Board.MarkupElements.ListItem,
         Board.MarkupElements.SubscriptMarkupElement,
         Board.MarkupElements.SuperscriptMarkupElement,
         Board.MarkupElements.UrlMarkupElement
@@ -209,10 +212,6 @@ var Board = function(name, title, options) {
     return []; //[ { method, path, handler }, ... ]
 };
 
-/*public*/ Board.prototype.routes = function() {
-    return []; //[ { method, path, handler }, ... ]
-};
-
 /*public*/ Board.prototype.actionRoutes = function() {
     return []; //[ { method, path, handler }, ... ]
 };
@@ -291,7 +290,6 @@ var renderFileInfo = function(fi) {
 
 var getRules = function(boardName) {
     var fileName = __dirname + "/../misc/rules/rules" + (boardName ? ("." + boardName) : "") + ".txt";
-    console.log(fileName);
     return FS.exists(fileName).then(function(exists) {
         if (!exists)
             return Promise.resolve();
@@ -375,7 +373,7 @@ var getRules = function(boardName) {
                 file.extraData.year = metadata.year || "";
                 return Promise.resolve(metadata);
             }).catch(function(err) {
-                console.log(err.stack ? err.stack : err);
+                Global.error(err.stack || err);
                 file.extraData.album = "";
                 file.extraData.artist = "";
                 file.extraData.title = "";
@@ -419,13 +417,13 @@ var getRules = function(boardName) {
                     height: metadata.streams[0].height
                 };
                 file.extraData.duration = durationToString(metadata.format.duration);
-                file.extraData.bitrate = Math.floor(+metadata.format.bitrate / 1024);
+                file.extraData.bitrate = Math.floor(+metadata.format.bit_rate / 1024);
                 file.thumbPath += ".png";
                 return new Promise(function(resolve, reject) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
                 })
             }).catch(function(err) {
-                console.log(err.stack ? err.stack : err);
+                Global.error(err.stack || err);
                 file.thumbPath = thumbPath;
                 return generateRandomImage(file.hash, file.mimeType, thumbPath);
             }).then(function() {
@@ -492,7 +490,7 @@ var getRules = function(boardName) {
                 };
             });
         } else {
-            return Promise.reject("Unsupported file type");
+            return Promise.reject(Tools.translate("Unsupported file type"));
         }
     });
 };
@@ -504,6 +502,9 @@ Board.MarkupElements = {
     UnderlinedMarkupElement: "UNDERLINED",
     SpoilerMarkupElement: "SPOILER",
     QuotationMarkupElement: "QUOTATION",
+    UnorderedList: "UNORDERED_LIST",
+    OrderedList: "ORDERED_LIST",
+    ListItem: "LIST_ITEM",
     SubscriptMarkupElement: "SUBSCRIPT",
     SuperscriptMarkupElement: "SUPERSCRIPT",
     UrlMarkupElement: "URL",

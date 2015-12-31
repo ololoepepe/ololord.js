@@ -5,19 +5,27 @@ Example:
 {
     "system": {
         "workerCount": 1,
-        "middlewareLog": {
-            "before": "ddos",
-            "verbosity": "all"
+        "log": {
+            "targets": [
+                "console",
+                "file"
+            ],
+            "maxSize": 1048576,
+            "backups": 100,
+            "middleware": {
+                "before": "ddos",
+                "verbosity": "all"
+            }
         },
         "fileDownloadProxy": "127.0.0.1:3128",
         "fileDownloadProxyAuth": "user:password",
+        "searchLimit": 100,
         "tmpPath": "/tmp/ramdisk"
     },
     "server": {
         "port": 8080,
         "ddosProtection": {
-            "enabled": false,
-            "errorMessage": "<html><head></head><body><img src='http://i3.kym-cdn.com/photos/images/masonry/000/112/322/130221984383.png' /></body></html>"
+            "enabled": false
         },
         "chat": {
             "ttl": 10080
@@ -30,6 +38,8 @@ Example:
         "domain": "localhost:8080",
         "dateFormat": "DD/MM/YYYY ddd HH:mm:ss",
         "timeOffset": 180,
+        "tripcodeSalt": "ololo",
+        "maxSearchQueryLength": 50,
         "vkontakte": {
             "integrationEnabled": true,
             "appId": your_app_id,

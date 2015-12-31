@@ -252,6 +252,19 @@ span.spoiler:hover .quotation {
     color: #789922;
 }
 
+.spoilerMarkupButton {
+    border: none;
+    height: 20px;
+    background-color: #EEEEEE;
+    vertical-align: middle;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.spoilerMarkupButton.spoiler {
+    color: #333333;
+}
+
 span.tooltip {
     color: #304070;
     cursor: help;
@@ -292,7 +305,6 @@ span.newPostCount {
 
 .postformMarkup {
     text-align: left;
-	font-size: 0.7em;
 	white-space: normal;
 }
 
@@ -577,8 +589,10 @@ span.newPostCount {
     margin-bottom: 4px;
     padding-top: 10px;
     padding-left: 10px;
+    padding-right: 4px;
     overflow-x: auto;
     display: table;
+    padding-bottom: 4px;
 }
 
 .draft {
@@ -595,6 +609,7 @@ span.newPostCount {
 .opPost {
     overflow-x: auto;
     display: table;
+    padding-bottom: 4px;
 }
 
 .newPost {
@@ -615,6 +630,9 @@ span.newPostCount {
 
 .post.temporary {
     border: 1px solid #000000;
+    display: block;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .thread.hidden > .omittedPosts {
@@ -625,8 +643,16 @@ span.newPostCount {
     display: none;
 }
 
-.postHeader, .postFileName, .postFileSize {
+.postHeader.desktop {
     white-space: nowrap;
+}
+
+.postFileName, .postFileSize {
+    white-space: nowrap;
+}
+
+.postFileName.mobile {
+    font-size: 0.9em;
 }
 
 .postFileSize {
@@ -658,53 +684,46 @@ span.newPostCount {
     width: 100%;
 }
 
-.popupActions {
-    position: relative;
-    outline: 0;
-}
-
-.popupActions, .popupActions:active, .popupActions:visited {
-    color: #000000;
-}
-
-.popupActionsMenu {
-    list-style-type: none;
-    margin-left: 0px;
-    padding: 4px 4px 4px 4px;
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s linear 0.2s,opacity 0.2s linear;
+.menu {
+    background: #DDDDDD !important;
+    border: 1px solid #CCCCCC !important;
+    font-family: Verdana,sans-serif !important;
+    white-space: nowrap;
+    box-sizing: border-box;
     position: absolute;
+    width: auto;
+    display: none;
+    list-style-type: none;
+    padding: 2px;
     z-index: 9999;
-    background-color: #DDDDDD;
-    border: 1px solid #CCCCCC;
-    margin-top: 0px;
-    top: 100%;
-    left: 0%;
 }
 
-.postActionsMenu.mobile {
-    left: -220px;
+.menu > li {
+    padding: 2px;
+    padding-right: 4px;
 }
 
-.fileActionsMenu.mobile {
-    left: -40px;
-}
-
-.popupActions:focus > .popupActionsMenu {
-    visibility: visible;
-    opacity: 1;
-}
-
-.popupActionsMenu > li > a {
+.menu > li > a {
+    display: block;
     text-decoration: none;
     color: #000000;
 }
 
-.popupActionsMenu > li > a:hover {
-    display: block;
-    color: #FFFFFF;
+.menu > li:hover {
     background-color: #666666;
+    padding-right: 2px;
+}
+
+.menu > li:hover > a {
+    color: #FFFFFF;
+}
+
+#markupUnorderedListActionsMenu {
+    padding-left: 20px;
+}
+
+#markupOrderedListActionsMenu {
+    padding-left: 30px;
 }
 
 .postBody {
@@ -726,10 +745,12 @@ span.newPostCount {
 
 .postText {
     vertical-align: top;
+    white-space: normal;
 }
 
 .postFiles > .postText {
     display: inline-block;
+    max-width: 80%;
 }
 
 .bannedFor {
@@ -742,11 +763,17 @@ span.newPostCount {
 
 .postSubject {
     font-weight: bold;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
 }
 
 .postSubject.mobile {
     font-size: 0.8em;
-    display: block;
 }
 
 .tripcode {
@@ -755,6 +782,7 @@ span.newPostCount {
 
 .tripcode.mobile {
     font-size: 0.8em;
+    display: block;
 }
 
 .postDateTime.mobile {
@@ -766,9 +794,18 @@ span.newPostCount {
     color: blue;
 }
 
+.someName {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
 .someName.mobile {
     font-size: 0.8em;
-    display: block;
 }
 
 .navigationButton {
@@ -868,6 +905,10 @@ span.newPostCount {
     color: #555555;
 }
 
+.tabWidget {
+    text-align: center;
+}
+
 ul.tabWidget > li {
     display: inline;
     background-color: #DDDDDD;
@@ -901,12 +942,25 @@ ul.tabWidget > li.activated {
     margin-left: auto;
     margin-right: auto;
     text-align: right;
-    white-space: nowrap;
-    overflow-x: auto;
 }
 
-.searchAction.mobile {
+.searchAction > form {
+    display: inline-block;
+    width: 50%;
+}
+
+.searchAction.mobile > form {
     text-align: left;
+    white-space: nowrap;
+    width: 98%;
+}
+
+.searchActionInput {
+    width: 60%;
+}
+
+.searchActionSelect {
+    width: 30%;
 }
 
 /*
@@ -914,7 +968,6 @@ ul.tabWidget > li.activated {
 */
 
 .toolbar {
-    border-bottom: 1px solid #CCCCCC;
     display: block;
     font-size: 0.9em;
     padding-bottom: 5px;
@@ -930,7 +983,8 @@ ul.tabWidget > li.activated {
     position: fixed;
     top: 0px;
     background-color: #EEEEEE;
-    width: 100%;
+    width: 99%;
+    padding-bottom: 0px;
 }
 
 /*
@@ -956,6 +1010,15 @@ blockquote.blockquoteThread.expand {
     padding-left: 20px !important;
     border: 1px solid #AAAAAA;
     overflow-x: auto;
+    max-width: 800px;
+    -ms-hyphens: none;
+    -moz-hyphens: none;
+    -webkit-hyphens: none;
+    hyphens: none;
+}
+
+.codeBlock.mobile {
+    max-width: 300px;
 }
 
 /*span.spoiler, span.spoiler a <- Board*/
@@ -1015,7 +1078,6 @@ blockquote.blockquoteThread.expand {
     margin-left: auto;
     margin-right: auto;
     text-align: center;
-    white-space: nowrap;
     overflow-x: auto;
 }
 
@@ -1112,7 +1174,7 @@ input.buttonImage {
 
 .boardSelectContainer {
     display: inline-block;
-    vertical-align: middle;
+    vertical-align: top;
     width: 16px;
     overflow: hidden;
 }
@@ -1152,10 +1214,6 @@ input.buttonImage {
 
 #checkboxTripcode + label {
     background: url("../img/checkbox_tripcode.png") center no-repeat;
-}
-
-.searchSelect {
-    width: 100px;
 }
 
 .alignCenter {
@@ -1222,6 +1280,7 @@ input.buttonImage {
 .submitContainer > input {
     font-size: 1.2em;
     width: 100%;
+    border-color: #FF6600;
 }
 
 .cursorPointer {
@@ -1235,6 +1294,7 @@ input.buttonImage {
 
 .chatContact {
     white-space: nowrap;
+    cursor: pointer;
 }
 
 .chatContact:hover {
@@ -1243,6 +1303,11 @@ input.buttonImage {
 }
 
 .chatContact.selected {
+    color: #000000;
+    background-color: #DDDDDD;
+}
+
+.chatContact.selected:hover {
     color: #FFFFFF;
     background-color: #666666;
 }
@@ -1258,10 +1323,42 @@ input.buttonImage {
 
 .chatHistory {
     padding-left: 8px;
+    padding-top: 5px;
+    padding-right: 4px;
+    padding-bottom: 5px;
     border: 1px solid black;
     overflow-y: auto;
     min-width: 200px;
     min-height: 400px;
+    max-width: 600px;
+}
+
+.chatHistory.mobile {
+    max-width: 300px;
+}
+
+.chatMessage {
+    border: 1px solid #CCCCCC;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    background-color: #DDDDDD;
+    padding: 4px;
+}
+
+.chatMessageDate {
+    margin-bottom: 8px;
+    border-bottom: 1px dotted black;
+}
+
+.chatMessageText {
+    padding-left: 8px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
 }
 
 .chatInput {
@@ -1284,4 +1381,13 @@ input.buttonImage {
 
 .overflowContainer {
     overflow-x: auto;
+}
+
+.select[name="codeLang"] {
+    height: 20px;
+    vertical-align: middle;
+}
+
+.bordered {
+    border: 1px solid #CCCCCC;
 }

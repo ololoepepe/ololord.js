@@ -1,14 +1,15 @@
 var cookieParser = require("cookie-parser");
-var DDoS = require("ddos");
+var ddos = require("ddos-express");
 var device = require("express-device");
 var express = require("express");
 
 var config = require("../helpers/config");
+var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
 var log = function(req, res, next) {
     var args;
-    switch (config("system.middlewareLog.verbosity", "")) {
+    switch (config("system.log.middleware.verbosity", "")) {
     case "all":
         args = [Tools.preferIPv4(req.ip), req.path, req.query];
         break;
@@ -22,40 +23,51 @@ var log = function(req, res, next) {
         break;
     }
     if (args)
-        console.log.apply(console, args);
+        Global.info.apply(Global.logger, args);
     next();
 };
 
 module.exports = [];
 
-if (config("system.middlewareLog.before", "") == "all") {
+if (config("system.log.middleware.before", "") == "all") {
     module.exports.push(log);
 }
 
 module.exports.push(require("./ip-fix"));
 
 var setupDdos = function() {
-    if (config("system.middlewareLog.before", "") == "ddos")
+    if (config("system.log.middleware.before", "") == "ddos")
         module.exports.push(log);
 
     if (config("server.ddosProtection.enabled", true)) {
-        var burst = +config("server.ddosProtection.burst", 6);
-        var limit = burst * 6;
-        var ddos = new DDoS({
-            maxcount: (limit * 1.5),
-            burst: burst,
-            limit: limit,
-            maxexpiry: +config("server.ddosProtection.maxExpiry", 60),
-            checkinterval: +config("server.ddosProtection.checkInterval", 1),
-            silentStart: true,
-            errormessage: config("server.ddosProtection.errorMessage", "Not so fast!")
-        });
-        module.exports.push(ddos.express);
+        module.exports.push(ddos({
+            errorData: config("server.ddosProtection.errorData", "Not so fast!"),
+            errorCode: config("server.ddosProtection.errorCode", 429),
+            weight: config("server.ddosProtection.weight", 1),
+            maxWeight: config("server.ddosProtection.maxWeight", 10),
+            checkInterval: config("server.ddosProtection.checkInterval", 1000),
+            rules: config("server.ddosProtection.rules", [
+                {
+                    regexp: "^/api.*",
+                    maxWeight: 6,
+                    queueSize: 4
+                },
+                {
+                    string: "/action/search",
+                    maxWeight: 1
+                },
+                {
+                    regexp: ".*",
+                    maxWeight: 10
+                }
+            ]),
+            logFunction: Global.error.bind(null, "DDoS detected:")
+        }));
     }
 };
 
 var setupStatic = function() {
-    if (config("system.middlewareLog.before", "") == "static")
+    if (config("system.log.middleware.before", "") == "static")
         module.exports.push(log);
 
     module.exports.push(express.static(__dirname + "/../public"));
@@ -69,7 +81,7 @@ if (config("server.ddosProtection.static", false)) {
     setupDdos();
 }
 
-if (config("system.middlewareLog.before", "") == "middleware")
+if (config("system.log.middleware.before", "") == "middleware")
     module.exports.push(log);
 
 module.exports = module.exports.concat([
@@ -79,5 +91,5 @@ module.exports = module.exports.concat([
     require("./registered-user")
 ]);
 
-if (config("system.middlewareLog.before", "") == "request")
+if (config("system.log.middleware.before", "") == "request")
     module.exports.push(log);

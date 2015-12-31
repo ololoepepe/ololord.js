@@ -126,7 +126,8 @@ var matchTwitterLink = function(href) {
 };
 
 var matchYoutubeLink = function(href) {
-    return href.match(/^https?\:\/\/(m\.|www\.)?youtube\.com\/.*v\=[^\/]+.*$/);
+    return href.match(/^https?\:\/\/(m\.|www\.)?youtube\.com\/.*v\=[^\/]+.*$/)
+        || href.match(/^https?\:\/\/youtu\.be\/[^\/]+.*$/);
 };
 
 var matchCoubLink = function(href) {
@@ -140,7 +141,7 @@ var getTwitterEmbeddedHtml = function(href, defaultHtml) {
         timeout: Tools.Minute
     }).then(function(response) {
         if (response.status != 200)
-            return Promise.reject("Failed to get Twitter embedded HTML");
+            return Promise.reject(Tools.translate("Failed to get Twitter embedded HTML"));
         return response.body.read();
     }).then(function(data) {
         try {
@@ -149,7 +150,7 @@ var getTwitterEmbeddedHtml = function(href, defaultHtml) {
             return Promise.reject(err);
         }
     }).catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function(html) {
         return Promise.resolve(html);
@@ -159,6 +160,10 @@ var getTwitterEmbeddedHtml = function(href, defaultHtml) {
 var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
     var match = href.match(/^https?\:\/\/.*youtube\.com\/.*v\=([^\/#\?]+).*$/);
     var videoId = match ? match[1] : null;
+    if (!videoId) {
+        match = href.match(/^https?\:\/\/youtu\.be\/([^\/#\?]+).*$/);
+        videoId = match ? match[1] : null;
+    }
     var apiKey = config("server.youtubeApiKey", "");
     if (!videoId || !apiKey)
         return Promise.resolve(defaultHtml);
@@ -168,25 +173,25 @@ var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
         timeout: Tools.Minute
     }).then(function(response) {
         if (response.status != 200)
-            return Promise.reject("Failed to get YouTube embedded HTML");
+            return Promise.reject(Tools.translate("Failed to get YouTube embedded HTML"));
         return response.body.read();
     }).then(function(data) {
         try {
             var response = JSON.parse(data.toString());
             if (!response.items || response.items.length < 1)
-                return Promise.reject("Failed to get YouTube video info");
+                return Promise.reject(Tools.translate("Failed to get YouTube video info"));
             var info = response.items[0].snippet;
             info.id = videoId;
             info.href = href;
-            var html = controller.sync(null, "youtubeVideoLink", { info: info });
+            var html = controller.sync("youtubeVideoLink", { info: info });
             if (!html)
-                return Promise.reject("Failed to create YouTube video link");
+                return Promise.reject(Tools.translate("Failed to create YouTube video link"));
             return Promise.resolve(html);
         } catch (err) {
             return Promise.reject(err);
         }
     }).catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function(html) {
         return Promise.resolve(html);
@@ -204,13 +209,13 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
         timeout: Tools.Minute
     }).then(function(response) {
         if (response.status != 200)
-            return Promise.reject("Failed to get Coub embedded HTML");
+            return Promise.reject(Tools.translate("Failed to get Coub embedded HTML"));
         return response.body.read();
     }).then(function(data) {
         try {
             var response = JSON.parse(data.toString());
             if (!response)
-                return Promise.reject("Failed to get Coub video info");
+                return Promise.reject(Tools.translate("Failed to get Coub video info"));
             var info = {
                 href: href,
                 videoTitle: response.title,
@@ -222,15 +227,15 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
                 } : null,
                 id: videoId
             };
-            var html = controller.sync(null, "coubVideoLink", { info: info });
+            var html = controller.sync("coubVideoLink", { info: info });
             if (!html)
-                return Promise.reject("Failed to create Coub video link");
+                return Promise.reject(Tools.translate("Failed to create Coub video link"));
             return Promise.resolve(html);
         } catch (err) {
             return Promise.reject(err);
         }
     }).catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function(html) {
         return Promise.resolve(html);
@@ -448,8 +453,9 @@ var process = function(info, conversionFunction, regexps, options) {
             cl: "",
             type: SkipTypes.NoSkip
         };
-        var txt = info.text.substr(matchs.index + matchs[0].length,
-            (matche ? matche.index : -1) - matchs.index - matchs[0].length);
+        var start = matche ? (matchs.index + matchs[0].length) : matchs.index;
+        var end = matche ? (matche.index - matchs.index - matchs[0].length) : (matchs.index + matchs[0].length);
+        var txt = info.text.substr(start, end);
         return conversionFunction(info, txt, matchs, matche, options).then(function(ntxt) {
             txt = ntxt;
             if (txt) {
@@ -536,7 +542,7 @@ var checkLangsMatch = function(info, matchs, matche) {
 };
 
 var checkExternalLink = function(info, matchs) {
-    return matchs[2].split(".").length == 3 || Tools.externalLinkRootZoneExists(matchs[4]);
+    return /^\d+\.\d+\.\d+\.\d+$/.test(matchs[2]) || Tools.externalLinkRootZoneExists(matchs[4]);
 };
 
 var checkQuotationNotInterrupted = function(info, matchs, matche) {
@@ -594,8 +600,12 @@ var convertVkontaktePost = function(_, _, matchs, _, options) {
     return Promise.resolve("<div class=\"overflowContainer\">" + matchs[0] + "</div>");
 };
 
-var convertExternalLink = function(_, _, matchs, _, options) {
+var convertExternalLink = function(info, text, matchs, _, options) {
+    if (!text)
+        return Promise.resolve("");
     options.type = SkipTypes.HtmlSkip;
+    if (info.isIn(matchs.index + matchs[0].length, text.length, SkipTypes.HtmlSkip))
+        return Promise.resolve(text);
     var href = matchs[0];
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
@@ -628,9 +638,10 @@ var convertPostLink = function(info, _, matchs, _, options) {
     var postNumber = matchs[(matchs.length > 2) ? 2 : 1];
     var escaped = matchs[0].split(">").join("&gt;");
     if (postNumber && (postNumber != info.deletedPost)) {
-        return Database.getPost(boardName, postNumber).then(function(post) {
+        return Database.db.hget("posts", boardName + ":" + postNumber).then(function(post) {
             if (!post)
                 return escaped;
+            post = JSON.parse(post);
             if (info.referencedPosts) {
                 var key = boardName + ":" + postNumber;
                 if (!info.referencedPosts[key]) {
@@ -655,6 +666,11 @@ var convertPostLink = function(info, _, matchs, _, options) {
     }
 };
 
+var convertHtml = function(_, text, _, _, options) {
+    options.type = SkipTypes.HtmlSkip;
+    return Promise.resolve(text);
+};
+
 var convertMarkup = function(_, text, matchs, _, options) {
     options.type = SkipTypes.NoSkip;
     if ("----" == matchs[0])
@@ -669,10 +685,12 @@ var convertMarkup = function(_, text, matchs, _, options) {
     return Promise.resolve(text);
 };
 
-var convertUrl = function(_, text, _, _, options) {
+var convertUrl = function(info, text, matchs, matche, options) {
     if (!text)
         return Promise.resolve("");
     options.type = SkipTypes.HtmlSkip;
+    if (info.isIn(matchs.index + matchs[0].length, text.length, SkipTypes.HtmlSkip))
+        return Promise.resolve(text);
     var href = text;
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
@@ -707,20 +725,25 @@ var convertTooltip = function(_, text, matchs, _, options) {
 };
 
 var convertUnorderedList = function(_, text, matchs, _, options) {
-    var t = matchs[1];
-    if (t.length == 1)
+    var t = matchs[2];
+    if (!t)
+        t = "disc";
+    else if (t.length == 1)
         t = ListTypes[t];
     if (!t)
         return Promise.resolve("");
     options.type = SkipTypes.NoSkip;
-    options.op = "<ul type=\"" + t + "\">";
+    options.op = `<ul type="${t}">`;
     options.cl = "</ul>";
     return Promise.resolve(text);
 };
 
-var convertOrderedList = function(_, text, _, _, options) {
+var convertOrderedList = function(_, text, matchs, _, options) {
+    var t = matchs[2];
+    if (!t)
+        t = "1";
     options.type = SkipTypes.NoSkip;
-    options.op = "<ol>";
+    options.op = `<ol type="${t}">`;
     options.cl = "</ol>";
     return Promise.resolve(text);
 };
@@ -754,6 +777,7 @@ var processPostText = function(boardName, text, options) {
         MarkupModes.ExtendedWakabaMark,
         MarkupModes.BBCode
     ];
+    var accessLevel = (options && options.accessLevel) || null;
     var c = {};
     var langs = [];
     Highlight.listLanguages().forEach(function(lang) {
@@ -791,6 +815,14 @@ var processPostText = function(boardName, text, options) {
         });
     }
     if (markupModes.indexOf(MarkupModes.BBCode) >= 0) {
+        if (Database.compareRegisteredUserLevels(accessLevel, Database.RegisteredUserLevels.Moder) >= 0) {
+            p = p.then(function() {
+                return process(info, convertHtml, {
+                    op: "[raw-html]",
+                    cl: "[/raw-html]"
+                });
+            });
+        }
         p = p.then(function() {
             return process(info, convertPre, {
                 op: "[pre]",
@@ -828,8 +860,13 @@ var processPostText = function(boardName, text, options) {
             if (!config("site.vkontakte.integrationEnabled", false))
                 return Promise.resolve();
             return process(info, convertVkontaktePost, {
-                op: /<div id\="vk_post_\d+_\d+"><\/div><script type="text\/javascript">  \(function\(d\, s\, id\) \{ var js\, fjs \= d\.getElementsByTagName\(s\)\[0\]; if \(d\.getElementById\(id\)\) return; js \= d\.createElement\(s\); js\.id \= id; js\.src \= "\/\/vk\.com\/js\/api\/openapi\.js\?121"; fjs\.parentNode\.insertBefore\(js\, fjs\); \}\(document\, 'script'\, 'vk_openapi_js'\)\);  \(function\(\) \{    if \(\!window\.VK \|\| \!VK\.Widgets \|\| \!VK\.Widgets\.Post \|\| \!VK\.Widgets\.Post\("vk_post_\d+_\d+"\, (\d+)\, (\d+)\, '([a-zA-Z0-9_\-]+)'\, \{width\: 500\}\)\) setTimeout\(arguments\.callee\, 50\);  \}\(\)\);<\/script>/g,
+                op: /<div id\="vk_post_\-?\d+_\d+"><\/div><script type="text\/javascript">  \(function\(d\, s\, id\) \{ var js\, fjs \= d\.getElementsByTagName\(s\)\[0\]; if \(d\.getElementById\(id\)\) return; js \= d\.createElement\(s\); js\.id \= id; js\.src \= "\/\/vk\.com\/js\/api\/openapi\.js\?121"; fjs\.parentNode\.insertBefore\(js\, fjs\); \}\(document\, 'script'\, 'vk_openapi_js'\)\);  \(function\(\) \{    if \(\!window\.VK \|\| \!VK\.Widgets \|\| \!VK\.Widgets\.Post \|\| \!VK\.Widgets\.Post\("vk_post_\-?\d+_\d+"\, (\-?\d+)\, (\d+)\, '([a-zA-Z0-9_\-]+)'\, \{width\: 500\}\)\) setTimeout\(arguments\.callee\, 50\);  \}\(\)\);<\/script>/g,
                 cl: null
+            });
+        }).then(function() {
+            return process(info, convertUrl, {
+                op: "[url]",
+                cl: "[/url]"
             });
         }).then(function() {
             return process(info, convertExternalLink, {
@@ -939,11 +976,6 @@ var processPostText = function(boardName, text, options) {
                 cl: "[/spoiler]"
             }, { nestable: true });
         }).then(function() {
-            return process(info, convertUrl, {
-                op: "[url]",
-                cl: "[/url]"
-            }, { nestable: true });
-        }).then(function() {
             return process(info, convertCSpoiler, {
                 op: "[cspoiler]",
                 cl: "[/cspoiler]"
@@ -960,12 +992,12 @@ var processPostText = function(boardName, text, options) {
             }, { nestable: true });
         }).then(function() {
             return process(info, convertUnorderedList, {
-                op: /\[ul\s+type\="?(disc|circle|square|d|c|s)"?\s*\]/gi,
+                op: /\[ul(\s+type\="?(disc|circle|square|d|c|s)"?)?\s*\]/gi,
                 cl: "[/ul]"
             }, { nestable: true });
         }).then(function() {
             return process(info, convertOrderedList, {
-                op: "[ol]",
+                op: /\[ol(\s+type\="?(A|a|I|i|1)"?)?\s*\]/gi,
                 cl: "[/ol]"
             }, { nestable: true });
         }).then(function() {

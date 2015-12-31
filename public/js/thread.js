@@ -148,16 +148,16 @@ lord.updateThread = function(silent) {
     return lord.api("threadLastPostNumber", {
         boardName: lord.data("boardName"),
         threadNumber: threadNumber
-    }).then(function(newLastPostNumber) {
-        if (!newLastPostNumber)
-            return Promise.reject("Thre thread was deleted");
-        c.newLastPostNumber = newLastPostNumber;
+    }).then(function(result) {
+        if (!result || !result.lastPostNumber)
+            return Promise.reject("threadDeletedErrorText");
+        c.newLastPostNumber = result.lastPostNumber;
         if (c.newLastPostNumber <= lastPostNumber)
             return Promise.resolve({ thread: { lastPosts: [] } });
         return lord.api(threadNumber, {}, lord.data("boardName") + "/res");
     }).then(function(model) {
         if (!model)
-            return Promise.reject("Thre thread was deleted");
+            return Promise.reject("threadDeletedErrorText");
         var posts = model.thread.lastPosts.filter(function(post) {
             return post.number > lastPostNumber;
         });

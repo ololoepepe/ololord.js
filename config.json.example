@@ -3,22 +3,47 @@ Actual file name must be config-dev.json.
 {
     "system": {
         "workerCount": 1,
-        "middlewareLog": {
-            "before": "",
-            "verbosity": "ip"
+        "log": {
+            "targets": [
+                "console",
+                "file"
+            ],
+            "maxSize": 1048576,
+            "backups": 100,
+            "middleware": {
+                "before": "",
+                "verbosity": "ip"
+            }
         },
         "fileDownloadProxy": "",
-        "fileDownloadProxyAuth": ""
+        "fileDownloadProxyAuth": "",
+        "searchLimit": 100
     },
     "server": {
         "port": 8080,
         "ddosProtection": {
             "enabled": true,
             "static": false,
-            "errorMessage": "Not so fast!",
-            "burst": 6,
-            "maxExpiry": 60,
-            "checkInterval": 1
+            "errorData": "Not so fast!",
+            "errorCode": 429,
+            "weight": 1,
+            "maxWeight": 10,
+            "checkInterval": 1000,
+            "rules": [
+                {
+                    "regexp": "^/api.*",
+                    "maxWeight": 6,
+                    "queueSize": 4
+                },
+                {
+                    "string": "/action/search",
+                    "maxWeight": 1
+                },
+                {
+                    "regexp": ".*",
+                    "maxWeight": 16
+                }
+            ]
         },
         "rss": {
             "enabled": true,
@@ -37,6 +62,7 @@ Actual file name must be config-dev.json.
         "dateFormat": "MM/DD/YYYY HH:mm:ss",
         "timeOffset": 0,
         "tripcodeSalt": "ololo",
+        "maxSearchQueryLength": 50,
         "vkontakte": {
             "integrationEnabled": false,
             "appId": 0,

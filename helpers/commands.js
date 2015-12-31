@@ -208,12 +208,12 @@ var init = function() {
             rl.resume();
             rl.prompt();
         }).catch(function(err) {
-            console.log(err.stack ? err.stack : err);
+            Global.error(err.stack ? err.stack : err);
             rl.resume();
             rl.prompt();
         });
     }).on("error", function(err) {
-        console.log(err);
+        Global.error(err);
     });
     return rl;
 };

@@ -1,249 +1,391 @@
 <div class="settingsDialog">
-    <fieldset>
-        <legend>{{=it.tr.generalSettingsLegendText}}</legend>
-        {{#def.settingsTable}}
-    </fieldset>
-    <fieldset>
-        <legend>{{=it.tr.scriptSettingsLegendText}}</legend>
-        <ul class="tabWidget nowrap">
-            <li name="1"
-                class="activated"><a onclick="lord.activateTab(this, 1); return false;">{{=it.tr.postsTabText}}</a></li>
-            <li name="2" ><a onclick="lord.activateTab(this, 2); return false;">{{=it.tr.filesTabText}}</a></li>
-            <li name="3" ><a onclick="lord.activateTab(this, 3); return false;">{{=it.tr.postformTabText}}</a></li>
-            <li name="4" ><a onclick="lord.activateTab(this, 4); return false;">{{=it.tr.hidingTabText}}</a></li>
-            <li name="5" ><a onclick="lord.activateTab(this, 5); return false;">{{=it.tr.otherTabText}}</a></li>
-        </ul>
-        <div>
-            <table name="1">
-                <tbody>
-                    <tr>
-                        <td>
-                            {{=it.tr.autoUpdateIntervalLabelText}}
-                        </td>
-                        <td>
-                            <input type="number" min="1" name="autoUpdateInterval" class="numberSize3"
-                                   value="{{=it.settings.autoUpdateInterval}}" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="autoUpdateThreadsByDefault"
-                                   {{? it.settings.autoUpdateThreadsByDefault}}checked="true"{{?}} /><label>{{=it.tr.autoUpdateThreadsByDefaultLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="showAutoUpdateDesktopNotifications"
-                                   {{? it.settings.showAutoUpdateDesktopNotifications}}checked="true"{{?}} /><label>{{=it.tr.showAutoUpdateDesktopNotificationsLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="playAutoUpdateSound"
-                                   {{? it.settings.playAutoUpdateSound}}checked="false"{{?}} /><label>{{=it.tr.playAutoUpdateSoundLabelText}}</label>
-                            <input type="number" min="0" max="100" name="soundNotificationsVolume" class="numberSize3"
-                                   value="{{=it.settings.soundNotificationsVolume}}" /> %
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="signOpPostLinks"
-                                   {{? it.settings.signOpPostLinks}}checked="true"{{?}} /><label>{{=it.tr.signOpPostLinksLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="signOwnPostLinks"
-                                   {{? it.settings.signOwnPostLinks}}checked="true"{{?}} /><label>{{=it.tr.signOwnPostLinksLabelText}}</label>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <table name="2" style="display: none;">
-                <tbody>
-                    <tr>
-                        <td>
-                            {{=it.tr.imageZoomSensitivityLabelText}}
-                        </td>
-                        <td>
-                            <input type="number" min="1" name="imageZoomSensitivity" class="numberSize3"
-                                   value="{{=it.settings.imageZoomSensitivity}}" /> %
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            {{=it.tr.defaultAudioVideoVolumeLabelText}}
-                        </td>
-                        <td class="nowrap">
-                            <input type="number" min="0" max="100" name="defaultAudioVideoVolume" class="numberSize3"
-                                   value="{{=it.settings.defaultAudioVideoVolume}}" /> %
-                            <input type="checkbox" name="rememberAudioVideoVolume"
-                                   {{? it.settings.rememberAudioVideoVolume}}checked="true"{{?}} /><label>{{=it.tr.rememberAudioVideoVolumeLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="closeFilesByClickingOnly"
-                                   {{? it.settings.closeFilesByClickingOnly}}checked="true"{{?}} /><label>{{=it.tr.closeFilesByClickingOnlyLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="playAudioVideoImmediately"
-                                   {{? it.settings.playAudioVideoImmediately}}checked="true"{{?}} /><label>{{=it.tr.playAudioVideoImmediatelyLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="loopAudioVideo"
-                                   {{? it.settings.loopAudioVideo}}checked="true"{{?}} /><label>{{=it.tr.loopAudioVideoLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="showLeafButtons"
-                                   {{? it.settings.showLeafButtons}}checked="true"{{?}} /><label>{{=it.tr.showLeafButtonsLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="leafThroughImagesOnly"
-                                   {{? it.settings.leafThroughImagesOnly}}checked="true"{{?}} /><label>{{=it.tr.leafThroughImagesOnlyLabelText}}</label>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <table name="3" style="display: none;">
-                <tbody>
-                    <tr>
-                        <td>
-                            {{=it.tr.quickReplyActionLabelText}}
-                        </td>
-                        <td>
-                            <select name="quickReplyAction" class="select">
-                                <option {{? it.settings.quickReplyAction == "append_post"}}selected="true"{{?}}
-                                        value="append_post">{{=it.tr.quickReplyActionAppendPostText}}</option>
-                                <option {{? it.settings.quickReplyAction == "goto_thread"}}selected="true"{{?}}
-                                        value="goto_thread">{{=it.tr.quickReplyActionGotoThreadText}}</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="moveToPostOnReplyInThread"
-                                   {{? it.settings.moveToPostOnReplyInThread}}checked="true"{{?}} /><label>{{=it.tr.moveToPostOnReplyInThreadLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="checkFileExistence"
-                                   {{? it.settings.checkFileExistence}}checked="true"{{?}} /><label>{{=it.tr.checkFileExistenceLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="showAttachedFilePreview"
-                                   {{? it.settings.showAttachedFilePreview}}checked="true"{{?}} /><label>{{=it.tr.showAttachedFilePreviewLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="addToFavoritesOnReply"
-                                   {{? it.settings.addToFavoritesOnReply}}checked="true"{{?}} /><label>{{=it.tr.addToFavoritesOnReplyLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="hidePostformMarkup"
-                                   {{? it.settings.hidePostformMarkup}}checked="true"{{?}} /><label>{{=it.tr.hidePostformMarkupLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="stripExifFromJpeg"
-                                   {{? it.settings.stripExifFromJpeg}}checked="true"{{?}} /><label>{{=it.tr.stripExifFromJpegLabelText}}</label>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <table name="4" style="display: none;">
-                <tbody>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="hideTripcodes"
-                                   {{? it.settings.hideTripcodes}}checked="true"{{?}} /><label>{{=it.tr.hideTripcodesLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="hideUserNames"
-                                   {{? it.settings.hideUserNames}}checked="true"{{?}} /><label>{{=it.tr.hideUserNamesLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="strikeOutHiddenPostLinks"
-                                   {{? it.settings.strikeOutHiddenPostLinks}}checked="true"{{?}} /><label>{{=it.tr.strikeOutHiddenPostLinksLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="spellsEnabled"
-                                   {{? it.settings.spellsEnabled}}checked="true"{{?}} /><label>{{=it.tr.spellsLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="nowrap">
-                            <button class="button" onclick="lord.editSpells();">{{=it.tr.editSpellsText}}</button>
-                            <button class="button"
-                                    onclick="lord.showHiddenPostList();">{{=it.tr.showHiddenPostListText}}</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <table name="5" style="display: none;">
-                <tbody>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="chatEnabled"
-                                   {{? it.settings.chatEnabled}}checked="true"{{?}} /><label>{{=it.tr.chatLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="showNewPosts"
-                                   {{? it.settings.showNewPosts}}checked="true"{{?}} /><label>{{=it.tr.showNewPostsLabelText}}</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="hotkeysEnabled"
-                                   {{? it.settings.hotkeysEnabled}}checked="true"{{?}} /><label>{{=it.tr.hotkeysLabelText}}</label>
-                            <button class="button" onclick="lord.editHotkeys();">{{=it.tr.editHotkeysText}}</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="userCssEnabled"
-                                   {{? it.settings.userCssEnabled}}checked="true"{{?}} /><label>{{=it.tr.userCssLabelText}}</label>
-                            <button class="button" onclick="lord.editUserCss();">{{=it.tr.editUserCssText}}</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="userJavaScriptEnabled"
-                                   {{? it.settings.userJavaScriptEnabled}}checked="true"{{?}} /><label>{{=it.tr.userJavaScriptLabelText}}</label>
-                            <button class="button" onclick="lord.editUserJavaScript();">{{=it.tr.editUserJavaScriptText}}</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="checkbox" name="sourceHighlightingEnabled"
-                                   {{? it.settings.sourceHighlightingEnabled}}checked="true"{{?}} /><label>{{=it.tr.sourceHighlightingLabelText}}</label>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </fieldset>
+    <span class="ui-helper-hidden-accessible"><input type="text" /></span>
+    <ul class="tabWidget nowrap">
+        <li data-index="0"
+            class="activated"><a onclick="lord.activateTab(this); return false;">{{=it.tr.generalTabText}}</a></li>
+        <li data-index="1"><a onclick="lord.activateTab(this); return false;">{{=it.tr.postsTabText}}</a></li>
+        <li data-index="2"><a onclick="lord.activateTab(this); return false;">{{=it.tr.filesTabText}}</a></li>
+    </ul>
+    <ul class="tabWidget nowrap">
+        <li data-index="3"><a onclick="lord.activateTab(this); return false;">{{=it.tr.postformTabText}}</a></li>
+        <li data-index="4"><a onclick="lord.activateTab(this); return false;">{{=it.tr.hidingTabText}}</a></li>
+        <li data-index="5"><a onclick="lord.activateTab(this); return false;">{{=it.tr.otherTabText}}</a></li>
+    </ul>
+    <div>
+        <table data-index="0">
+            <tbody>
+                <tr>
+                    <td>
+                        {{=it.tr.styleLabelText}}
+                    </td>
+                    <td class="nowrap">
+                        <select name="style" class="select">
+                            {{~it.styles :style}}
+                                <option value="{{=style.name}}"
+                                        {{? style.name == it.settings.style.name}}selected="true"{{?}}>
+                                    {{=style.title}}
+                                </option>
+                            {{~}}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{=it.tr.codeStyleLabelText}}
+                    </td>
+                    <td class="nowrap">
+                        <select name="codeStyle" class="select">
+                            {{~it.codeStyles :style}}
+                                <option value="{{=style.name}}"
+                                        {{? style.name == it.settings.codeStyle.name}}selected="true"{{?}}>
+                                    {{=style.title}}
+                                </option>
+                            {{~}}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{=it.tr.timeLabelText}}
+                    </td>
+                    <td class="nowrap">
+                        <select name="time" class="select">
+                            <option value="server" {{? it.settings.time != "local"}}selected="true"{{?}}>
+                                {{=it.tr.timeServerText}}
+                            </option>
+                            <option value="local" {{? it.settings.time == "local"}}selected="true"{{?}}>
+                                {{=it.tr.timeLocalText}}
+                            </option>
+                        </select>
+                        {{=it.tr.timeZoneOffsetLabelText}}
+                        <input type="number" name="timeZoneOffset" min="-720" max="840" class="numberSize3"
+                               value="{{=it.settings.timeZoneOffset}}" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{=it.tr.maxAllowedRatingLabelText}}
+                    </td>
+                    <td>
+                        <select name="maxAllowedRating" class="select">
+                            <option {{? it.settings.maxAllowedRating == "SFW"}}selected="true"{{?}}
+                                    value="SFW">SFW</option>
+                            <option {{? it.settings.maxAllowedRating == "R-15"}}selected="true"{{?}}
+                                    value="R-15">R-15</option>
+                            <option {{? it.settings.maxAllowedRating == "R-18"}}selected="true"{{?}}
+                                    value="R-18">R-18</option>
+                            <option {{? it.settings.maxAllowedRating == "R-18G"}}selected="true"{{?}}
+                                    value="R-18G">R-18G</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="shrinkPosts" value="true"
+                               {{? it.settings.shrinkPosts}}checked="true"{{?}} /><label>{{=it.tr.postShrinkingLabelText}}</label>
+                        <input type="checkbox" name="stickyToolbar" value="true"
+                               {{? it.settings.stickyToolbar}}checked="true"{{?}} /><label>{{=it.tr.stickyToolbarLabelText}}</label>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table data-index="1" style="display: none;">
+            <tbody>
+                <tr>
+                    <td>
+                        {{=it.tr.autoUpdateIntervalLabelText}}
+                    </td>
+                    <td>
+                        <input type="number" min="1" name="autoUpdateInterval" class="numberSize3"
+                               value="{{=it.settings.autoUpdateInterval}}" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="autoUpdateThreadsByDefault"
+                               {{? it.settings.autoUpdateThreadsByDefault}}checked="true"{{?}} /><label>{{=it.tr.autoUpdateThreadsByDefaultLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="showAutoUpdateDesktopNotifications"
+                               {{? it.settings.showAutoUpdateDesktopNotifications}}checked="true"{{?}} /><label>{{=it.tr.showAutoUpdateDesktopNotificationsLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="playAutoUpdateSound"
+                               {{? it.settings.playAutoUpdateSound}}checked="false"{{?}} /><label>{{=it.tr.playAutoUpdateSoundLabelText}}</label>
+                        <input type="number" min="0" max="100" name="soundNotificationsVolume" class="numberSize3"
+                               value="{{=it.settings.soundNotificationsVolume}}" /> %
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="signOpPostLinks"
+                               {{? it.settings.signOpPostLinks}}checked="true"{{?}} /><label>{{=it.tr.signOpPostLinksLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="signOwnPostLinks"
+                               {{? it.settings.signOwnPostLinks}}checked="true"{{?}} /><label>{{=it.tr.signOwnPostLinksLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{=it.tr.viewPostPreviewDelayLabelText}}
+                    </td>
+                    <td>
+                        <input type="number" min="0" name="viewPostPreviewDelay" class="numberSize3"
+                               value="{{=it.settings.viewPostPreviewDelay}}" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table data-index="2" style="display: none;">
+            <tbody>
+                <tr>
+                    <td>
+                        {{=it.tr.imageZoomSensitivityLabelText}}
+                    </td>
+                    <td>
+                        <input type="number" min="1" name="imageZoomSensitivity" class="numberSize3"
+                               value="{{=it.settings.imageZoomSensitivity}}" /> %
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{=it.tr.defaultAudioVideoVolumeLabelText}}
+                    </td>
+                    <td class="nowrap">
+                        <input type="number" min="0" max="100" name="defaultAudioVideoVolume" class="numberSize3"
+                               value="{{=it.settings.defaultAudioVideoVolume}}" /> %
+                        <input type="checkbox" name="rememberAudioVideoVolume"
+                               {{? it.settings.rememberAudioVideoVolume}}checked="true"{{?}} /><label>{{=it.tr.rememberAudioVideoVolumeLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="closeFilesByClickingOnly"
+                               {{? it.settings.closeFilesByClickingOnly}}checked="true"{{?}} /><label>{{=it.tr.closeFilesByClickingOnlyLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="playAudioVideoImmediately"
+                               {{? it.settings.playAudioVideoImmediately}}checked="true"{{?}} /><label>{{=it.tr.playAudioVideoImmediatelyLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="loopAudioVideo"
+                               {{? it.settings.loopAudioVideo}}checked="true"{{?}} /><label>{{=it.tr.loopAudioVideoLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="showLeafButtons"
+                               {{? it.settings.showLeafButtons}}checked="true"{{?}} /><label>{{=it.tr.showLeafButtonsLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="leafThroughImagesOnly"
+                               {{? it.settings.leafThroughImagesOnly}}checked="true"{{?}} /><label>{{=it.tr.leafThroughImagesOnlyLabelText}}</label>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table data-index="3" style="display: none;">
+            <tbody>
+                <tr>
+                    <td>
+                        {{=it.tr.captchaLabelText}}<sup><font color="red">*</font></sup>
+                    </td>
+                    <td>
+                        <select name="captchaEngine" class="select">
+                            {{~it.supportedCaptchaEngines :engine}}
+                                <option value="{{=engine.id}}"
+                                        {{? engine.id == it.settings.captchaEngine.id}}selected="true"{{?}}>
+                                    {{=engine.title}}
+                                </option>
+                            {{~}}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{=it.tr.quickReplyActionLabelText}}
+                    </td>
+                    <td>
+                        <select name="quickReplyAction" class="select">
+                            <option {{? it.settings.quickReplyAction == "append_post"}}selected="true"{{?}}
+                                    value="append_post">{{=it.tr.quickReplyActionAppendPostText}}</option>
+                            <option {{? it.settings.quickReplyAction == "goto_thread"}}selected="true"{{?}}
+                                    value="goto_thread">{{=it.tr.quickReplyActionGotoThreadText}}</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="hidePostformRules" value="true"
+                               {{? it.settings.hidePostformRules}}checked="true"{{?}} /><label>{{=it.tr.hidePostformRulesLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="minimalisticPostform" value="true"
+                               {{? it.settings.minimalisticPostform}}checked="true"{{?}} /><label>{{=it.tr.minimalisticPostformLabelText}}</label>
+                    </td>
+                </tr>        
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="moveToPostOnReplyInThread"
+                               {{? it.settings.moveToPostOnReplyInThread}}checked="true"{{?}} /><label>{{=it.tr.moveToPostOnReplyInThreadLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="checkFileExistence"
+                               {{? it.settings.checkFileExistence}}checked="true"{{?}} /><label>{{=it.tr.checkFileExistenceLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="showAttachedFilePreview"
+                               {{? it.settings.showAttachedFilePreview}}checked="true"{{?}} /><label>{{=it.tr.showAttachedFilePreviewLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="addToFavoritesOnReply"
+                               {{? it.settings.addToFavoritesOnReply}}checked="true"{{?}} /><label>{{=it.tr.addToFavoritesOnReplyLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="hidePostformMarkup"
+                               {{? it.settings.hidePostformMarkup}}checked="true"{{?}} /><label>{{=it.tr.hidePostformMarkupLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="stripExifFromJpeg"
+                               {{? it.settings.stripExifFromJpeg}}checked="true"{{?}} /><label>{{=it.tr.stripExifFromJpegLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <sup><font color="red">*</font></sup> – {{=it.tr.captchaLabelWarningText}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table data-index="4" style="display: none;">
+            <tbody>
+                <tr>
+                    <td>
+                        {{=it.tr.hiddenBoardsLabelText}}
+                    </td>
+                    <td>
+                        <div class="scrollAreaH60" name="hiddenBoards">
+                            {{~it.boards :brd}}
+                                {{? !brd.hidden}}
+                                    <input type="checkbox" name="board_{{=brd.name}}"
+                                           {{? it.settings.hiddenBoards.indexOf(brd.name) >= 0}}checked="true"{{?}}
+                                           value="true">[{{=brd.name}}] {{=brd.title}}</input>
+                                    <br />
+                                {{?}}
+                            {{~}}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="hideTripcodes"
+                               {{? it.settings.hideTripcodes}}checked="true"{{?}} /><label>{{=it.tr.hideTripcodesLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="hideUserNames"
+                               {{? it.settings.hideUserNames}}checked="true"{{?}} /><label>{{=it.tr.hideUserNamesLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="strikeOutHiddenPostLinks"
+                               {{? it.settings.strikeOutHiddenPostLinks}}checked="true"{{?}} /><label>{{=it.tr.strikeOutHiddenPostLinksLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="spellsEnabled"
+                               {{? it.settings.spellsEnabled}}checked="true"{{?}} /><label>{{=it.tr.spellsLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="nowrap">
+                        <button class="button" onclick="lord.editSpells();">{{=it.tr.editSpellsText}}</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="nowrap">
+                        <button class="button"
+                                onclick="lord.showHiddenPostList();">{{=it.tr.showHiddenPostListText}}</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table data-index="5" style="display: none;">
+            <tbody>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="chatEnabled"
+                               {{? it.settings.chatEnabled}}checked="true"{{?}} /><label>{{=it.tr.chatLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="showNewPosts"
+                               {{? it.settings.showNewPosts}}checked="true"{{?}} /><label>{{=it.tr.showNewPostsLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="hotkeysEnabled"
+                               {{? it.settings.hotkeysEnabled}}checked="true"{{?}} /><label>{{=it.tr.hotkeysLabelText}}</label>
+                        <button class="button" onclick="lord.editHotkeys();">{{=it.tr.editHotkeysText}}</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="userCssEnabled"
+                               {{? it.settings.userCssEnabled}}checked="true"{{?}} /><label>{{=it.tr.userCssLabelText}}</label>
+                        <button class="button" onclick="lord.editUserCss();">{{=it.tr.editUserCssText}}</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="userJavaScriptEnabled"
+                               {{? it.settings.userJavaScriptEnabled}}checked="true"{{?}} /><label>{{=it.tr.userJavaScriptLabelText}}</label>
+                        <button class="button" onclick="lord.editUserJavaScript();">{{=it.tr.editUserJavaScriptText}}</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="sourceHighlightingEnabled"
+                               {{? it.settings.sourceHighlightingEnabled}}checked="true"{{?}} /><label>{{=it.tr.sourceHighlightingLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="apiRequestCachingEnabled"
+                               {{? it.settings.apiRequestCachingEnabled}}checked="true"{{?}} /><label>{{=it.tr.apiRequestCachingLabelText}}</label>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>

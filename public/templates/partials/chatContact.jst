@@ -1,6 +1,6 @@
 <div name="{{=contact.key}}" onclick="lord.selectChatContact('{{=contact.key}}');" class="chatContact">
     <span class="chatContactNewMessages"></span>
-    {{=contact.key}}
+    {{ out += "/" + contact.key.replace(":", "/"); }}
     <input type="image" src="/{{=it.site.pathPrefix}}img/delete.png" onclick="lord.deleteChat('{{=contact.key}}');"
            class="buttonImage" title="{{=it.tr.deleteChatButtonText}}" />
 </div>

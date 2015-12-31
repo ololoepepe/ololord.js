@@ -25,25 +25,15 @@ var controller;
 
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-html");
 
-var formattedDate = function(date, req) {
-    var timeOffset = ("local" == req.settings.time) ? req.settings.timeZoneOffset : config("site.timeOffset", 0);
-    var locale = config("site.locale", "en");
-    var format = config("site.dateFormat", "MM/DD/YYYY HH:mm:ss");
-    return moment(date).utcOffset(timeOffset).locale(locale).format(format);
-};
-
-controller = function(req, templateName, modelData) {
-    var baseModelData = merge.recursive(controller.baseModel(req), controller.settingsModel(req));
-    baseModelData = merge.recursive(baseModelData, controller.translationsModel());
+controller = function(templateName, modelData) {
+    var baseModelData = merge.recursive(controller.baseModel(), controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
-    baseModelData.path = (req && req.path) ? req.path : (req || ("/" + config("site.pathPrefix")));
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
-    baseModelData.formattedDate = formattedDate;
     baseModelData.publicPartials = publicPartials;
     baseModelData.publicTemplates = publicTemplates;
     baseModelData.models = {
-        base: JSON.stringify(controller.baseModel(req)),
+        base: JSON.stringify(controller.baseModel()),
         boards: JSON.stringify(controller.boardsModel()),
         tr: JSON.stringify(controller.translationsModel()),
         partials: JSON.stringify(publicPartials.map(function(partial) {
@@ -57,46 +47,40 @@ controller = function(req, templateName, modelData) {
         modelData = {};
     var template = templates[templateName];
     if (!template)
-        return Promise.reject("Invalid template");
+        return Promise.reject(Tools.translate("Invalid template"));
     modelData = merge.recursive(baseModelData, modelData);
-    modelData.req = req;
     return Promise.resolve(template(modelData));
 };
 
-controller.sync = function(req, templateName, modelData) {
-    var baseModelData = merge.recursive(controller.baseModel(req), controller.settingsModel(req));
-    baseModelData = merge.recursive(baseModelData, controller.translationsModel());
+controller.sync = function(templateName, modelData) {
+    var baseModelData = merge.recursive(controller.baseModel(), controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
-    baseModelData.path = req ? req.path : undefined;
     baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
-    baseModelData.formattedDate = formattedDate;
     if (!modelData)
         modelData = {};
     var template = templates[templateName];
     if (!template)
         return null;
     modelData = merge.recursive(baseModelData, modelData);
-    modelData.req = req;
     return template(modelData);
 };
 
-controller.error = function(req, res, error, ajax) {
+controller.error = function(res, error, ajax) {
+    if (error) {
+        Global.error(error);
+        if (error.stack)
+            Global.error(error.stack);
+    }
     if (!ajax && Util.isNumber(error) && 404 == error)
-        return controller.notFound(req, res);
+        return controller.notFound(res);
     var f = function(error) {
         var model = {};
         model.title = Tools.translate("Error", "pageTitle");
         if (Util.isError(error)) {
-            if (Tools.contains(process.argv.slice(2), "--dev-mode")) {
-                console.log(error);
-                console.log(error.stack);
-            }
             model.errorMessage = Tools.translate("Internal error", "errorMessage");
             model.errorDescription = error.message;
         } else if (Util.isObject(error) && (error.error || error.ban)) {
-            if (Tools.contains(process.argv.slice(2), "--dev-mode"))
-                console.log(error);
             if (error.ban) {
                 model.ban = error.ban;
             } else {
@@ -104,10 +88,9 @@ controller.error = function(req, res, error, ajax) {
                 model.errorDescription = error.description || error.error;
             }
         } else {
-            if (Tools.contains(process.argv.slice(2), "--dev-mode"))
-                console.log(error);
             model.errorMessage = Tools.translate("Error", "errorMessage");
-            model.errorDescription = (error && Util.isString(error)) ? error : "";
+            model.errorDescription = (error && Util.isString(error)) ? error
+                : ((404 == error) ? Tools.translate("404 (not found)", "errorMessage") : "");
         }
         return model;
     };
@@ -131,17 +114,25 @@ controller.error = function(req, res, error, ajax) {
         var model = {};
         model.title = Tools.translate("Ban", "pageTitle");
         model.ban = error.ban;
-        return ajax ? h(error) : controller(null, "ban", model).then(function(data) {
+        if (ajax)
+            return h(error);
+        model.formattedDate = function(date) {
+            var timeOffset = config("site.timeOffset", 0);
+            var locale = config("site.locale", "en");
+            var format = config("site.dateFormat", "MM/DD/YYYY HH:mm:ss");
+            return moment(date).utcOffset(timeOffset).locale(locale).format(format);
+        };
+        return controller("ban", model).then(function(data) {
             res.send(data);
         }).catch(h);
     } else {
-        return ajax ? g(error) : controller(null, "error", f(error)).then(function(data) {
+        return ajax ? g(error) : controller("error", f(error)).then(function(data) {
             res.send(data);
         }).catch(g);
     }
 };
 
-controller.notFound = function(req, res) {
+controller.notFound = function(res) {
     var f = function() {
         var model = {};
         model.title = Tools.translate("Error 404", "pageTitle");
@@ -152,30 +143,35 @@ controller.notFound = function(req, res) {
             model.notFoundImageFileNames = fileNames.filter(function(fileName) {
                 return fileName != ".gitignore";
             });
-            return controller(null, "notFound", model);
+            return controller("notFound", model);
         });
     };
-    controller.html(f.bind(null), "notFound").then(function(data) {
-        res.status(404).send(data);
+    controller.html(f.bind(null), null, "notFound").then(function(data) {
+        res.status(404).send(data.data);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        controller.error(res, err);
     });
 };
 
-controller.checkBan = function(req, res, boardName, write) {
+controller.checkBan = function(req, res, boardNames, write) {
     var ip = Tools.correctAddress(req.ip);
     var ban = ipBans[ip];
     if (ban && (write || "NO_ACCESS" == ban.level))
         return Promise.reject({ ban: ban });
-    return Database.userBans(ip, boardName).then(function(bans) {
+    return Database.userBans(ip, boardNames).then(function(bans) {
         if (!bans)
             return Promise.resolve();
-        var ban = bans[boardName];
-        if (!ban)
-            return Promise.resolve();
-        if (write)
-            return Promise.reject({ ban: ban });
-        return ("NO_ACCESS" == ban.level) ? Promise.reject({ ban: ban }) : Promise.resolve();
+        if (!Util.isArray(boardNames))
+            boardNames = [boardNames];
+        for (var i = 0; i < boardNames.length; ++i) {
+            var ban = bans[boardNames[i]];
+            if (ban) {
+                if (write)
+                    return Promise.reject({ ban: ban });
+                return ("NO_ACCESS" == ban.level) ? Promise.reject({ ban: ban }) : Promise.resolve();
+            }
+        }
+        return Promise.resolve();
     });
 };
 
@@ -212,7 +208,7 @@ controller.baseModel = function(req) {
                 name: (langNames.hasOwnProperty(lang) ? langNames[lang] : lang)
             };
         }),
-        maxSearchQueryLength: 100,
+        maxSearchQueryLength: config("site.maxSearchQueryLength", 50),
         markupModes: [
             {
                 name: "NONE",
@@ -352,8 +348,6 @@ controller.translationsModel = function() {
     translate("Find source...", "findSourceText");
     translate("Edit audio file tags", "editAudioTagsText");
     translate("Add to playlist", "addToPlaylistText");
-    translate("Answer in this thread", "answerInThreadText");
-    translate("Create thread", "createThreadText");
     translate("Borad rules", "boardRulesLinkText");
     translate("Threads catalog", "boardCatalogLinkText");
     translate("RSS feed", "boardRssLinkText");
@@ -398,7 +392,6 @@ controller.translationsModel = function() {
     translate("Spoiler", "hotkeyMarkupSpoilerLabelText");
     translate("Quote selected text", "hotkeyMarkupQuotationLabelText");
     translate("Code block", "hotkeyMarkupCodeLabelText");
-    translate("General settings", "generalSettingsLegendText");
     translate("Style:", "styleLabelText");
     translate("Code style:", "codeStyleLabelText");
     translate("Shrink posts", "postShrinkingLabelText");
@@ -413,7 +406,7 @@ controller.translationsModel = function() {
     translate("Minimalistic post form", "minimalisticPostformLabelText");
     translate("Hide boards:", "hiddenBoardsLabelText");
     translate("This option may be ignored on some boards", "captchaLabelWarningText");
-    translate("Script settings", "scriptSettingsLegendText");
+    translate("General", "generalTabText");
     translate("Posts and threads", "postsTabText");
     translate("Files", "filesTabText");
     translate("Postform and posting", "postformTabText");
@@ -425,6 +418,7 @@ controller.translationsModel = function() {
     translate("Play sound", "playAutoUpdateSoundLabelText");
     translate("Mark OP post links", "signOpPostLinksLabelText");
     translate("Mark own post links", "signOwnPostLinksLabelText");
+    translate("Post preview appearance delay (ms):", "viewPostPreviewDelayLabelText");
     translate("Show file leaf buttons", "showLeafButtonsLabelText");
     translate("Leaf through images only", "leafThroughImagesOnlyLabelText");
     translate("Image zoom sensitivity:", "imageZoomSensitivityLabelText");
@@ -479,9 +473,12 @@ controller.translationsModel = function() {
     translate("Subscript", "markupSubscript");
     translate("Superscript", "markupSuperscript");
     translate("URL (external link)", "markupUrl");
+    translate("Unordered list", "markupUnorderedList");
+    translate("Ordered list", "markupOrderedList");
+    translate("List item", "markupListItem");
+    translate("Raw HTML", "markupHtml");
     translate("Markup mode:", "postFormLabelMarkupMode");
     translate("Options:", "postFormLabelOptions");
-    translate("Raw HTML", "postFormLabelRaw");
     translate("Sign as OP", "postFormLabelSignAsOp");
     translate("Enable tripcode", "postFormLabelTripcode");
     translate("File(s):", "postFormInputFile");
@@ -549,6 +546,9 @@ controller.translationsModel = function() {
     translate("Reason:", "banReasonLabelText");
     translate("Delete all user posts on selected board", "delallButtonText");
     translate("Select all", "selectAllText");
+    translate("Board:", "banBoardLabelText");
+    translate("Ban level:", "banLevelLabelText");
+    translate("Ban date:", "banDateTimeLabelText");
     translate("Post source text", "postSourceText");
     translate("Expand video", "expandVideoText");
     translate("Collapse video", "collapseVideoText");
@@ -556,6 +556,8 @@ controller.translationsModel = function() {
     translate("Go complain to your mum, you whiner!", "complainMessage");
     translate("Auto update", "autoUpdateText");
     translate("Close", "closeButtonText");
+    translate("Export", "exportSettingsButtonText");
+    translate("Import", "importSettingsButtonText");
     translate("Remove from hidden post/thread list", "removeFromHiddenPostListText");
     translate("Hidden posts/threads", "hiddenPostListText");
     translate("Settings", "settingsDialogTitle");
@@ -576,6 +578,7 @@ controller.translationsModel = function() {
     translate("Delete this chat", "deleteChatButtonText");
     translate("Loading threads...", "loadingThreadsMessage");
     translate("Loading posts...", "loadingPostsMessage");
+    translate("Searching for posts...", "searchingMessage");
     translate("Close voting", "closeVotingText");
     translate("Open voting", "openVotingText");
     translate("Tripcode activated for THIS THREAD only", "threadTripcodeActivatedText");
@@ -607,6 +610,42 @@ controller.translationsModel = function() {
     translate("logged in as user", "loginMessageUserText");
     translate("not registered", "loginMessageNoneText");
     translate("Boards", "boardsText");
+    translate("Nothing found", "nothingFoundMessage");
+    translate("Search results", "searchResultsMessage");
+    translate("Unknown error", "errorUnknownText");
+    translate("No connection with server", "error0Text");
+    translate("Bad request", "error400Text");
+    translate("Not found", "error404Text");
+    translate("Request timeout", "error408Text");
+    translate("Request entity too large", "error413Text");
+    translate("Temporarily banned (DDoS detected)", "error429Text");
+    translate("Internal server error", "error500Text");
+    translate("Bad gateway", "error502Text");
+    translate("Service unavailable", "error503Text");
+    translate("Gateway timeout", "error504Text");
+    translate("CloudFlare: server is returning an unknown error", "error520Text");
+    translate("CloudFlare: server is down", "error521Text");
+    translate("CloudFlare: connection timed out", "error522Text");
+    translate("CloudFlare: server is unreachable", "error523Text");
+    translate("CloudFlare: a timeout occured", "error524Text");
+    translate("CloudFlare: SSL handshake failed", "error525Text");
+    translate("CloudFlare: invalid SSL certificate", "error526Text");
+    translate("Unexpected end of token list", "unexpectedEndOfTokenListErrorText");
+    translate("Failed to generate hash", "failedToGenerateHashErrorText");
+    translate("The thread is already in favorites", "alreadyInFavoritesErrorText");
+    translate("Invalid arguments", "invalidArgumentsErrorText");
+    translate("No such token in the table", "noTokenInTableErrorText");
+    translate("The thread was deleted", "threadDeletedErrorText");
+    translate("Invalid data", "invalidDataErrorText");
+    translate("No such post", "noSuchPostErrorText");
+    translate("Internal error", "internalErrorText");
+    translate("Enable API request caching", "apiRequestCachingLabelText");
+    translate("Copy settings string and save it somewhere", "copySettingsHint");
+    translate("Paste settings string here", "pasteSettingsHint");
+    translate("Enter your message here", "chatMessageTextPlaceholder");
+    translate("Allow bumping", "setThreadBumpableText");
+    translate("Disallow bumping", "setThreadUnbumpableText");
+
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });
@@ -761,12 +800,12 @@ var cachePath = function() {
     return config("system.tmpPath", __dirname + "/../tmp") + "/cache-html" + (path ? ("/" + path + ".html") : "");
 };
 
-controller.html = function(f) {
-    var args = Array.prototype.slice.call(arguments, 1);
+controller.html = function(f, ifModifiedSince) {
+    var args = Array.prototype.slice.call(arguments, 2);
     var path = cachePath(args);
     var key = args.join(":");
     if (cachedHtml.hasOwnProperty(key))
-        return Tools.readFile(path);
+        return Tools.readFile(path, ifModifiedSince);
     var c = {};
     return f().then(function(data) {
         c.data = data;
@@ -774,10 +813,14 @@ controller.html = function(f) {
             return Promise.resolve();
         return Tools.writeFile(path, c.data);
     }).then(function() {
+        c.lastModified = Tools.now();
         cachedHtml[key] = {};
         return Global.addToCached(args);
     }).then(function() {
-        return Promise.resolve(c.data);
+        return Promise.resolve({
+            data: c.data,
+            lastModified: c.lastModified
+        });
     });
 };
 

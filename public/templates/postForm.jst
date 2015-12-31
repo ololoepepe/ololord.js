@@ -114,44 +114,108 @@
                     <td class="postformMarkup">
                         <span>
                             {{? it.board.markupElements.indexOf("BOLD") >= 0}}
-                                <button class="button" onclick="lord.markup('b'); return false;" name="markupBold"
-                                        title="{{=it.tr.markupBold}}"><b>B</b></button>
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/bold.png"
+                                       onclick="lord.markup('b'); return false;" name="markupBold"
+                                       title="{{=it.tr.markupBold}}" class="buttonImage bordered" width="20"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("ITALICS") >= 0}}
-                                <button class="button" onclick="lord.markup('i'); return false;" name="markupItalics"
-                                        title="{{=it.tr.markupItalics}}"><i>i</i></button>
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/italics.png"
+                                       onclick="lord.markup('i'); return false;" name="markupItalics"
+                                       title="{{=it.tr.markupItalics}}" class="buttonImage bordered" width="20"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("STRIKED_OUT") >= 0}}
-                                <button class="button" onclick="lord.markup('s'); return false;"
-                                        name="markupStrikedOut" title="{{=it.tr.markupStrikedOut}}"><s>S</s></button>
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/strikedout.png"
+                                       onclick="lord.markup('s'); return false;" name="markupStrikedOut"
+                                       title="{{=it.tr.markupStrikedOut}}" class="buttonImage bordered" width="20"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("UNDERLINED") >= 0}}
-                                <button class="button" onclick="lord.markup('u'); return false;"
-                                        name="markupUnderlined" title="{{=it.tr.markupUnderlined}}"><u>U</u></button>
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/underlined.png"
+                                       onclick="lord.markup('u'); return false;" name="markupUnderlined"
+                                       title="{{=it.tr.markupUnderlined}}" class="buttonImage bordered" width="20"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("SPOILER") >= 0}}
-                                <button class="button" onclick="lord.markup('spoiler'); return false;"
-                                        name="markupSpoiler"
-                                        title="{{=it.tr.markupSpoiler}}"><span class="spoiler">------</span></button>
+                                <button onclick="lord.markup('spoiler'); return false;" name="markupSpoiler"
+                                        title="{{=it.tr.markupSpoiler}}"
+                                        class="spoilerMarkupButton bordered"><span class="spoiler">ab</span></button>
                             {{?}}
                             {{? it.board.markupElements.indexOf("QUOTATION") >= 0}}
-                                <button class="button" onclick="lord.markup('>'); return false;"
-                                        title="{{=it.tr.markupQuotation}}"
-                                        name="markupQuotation"><span class="quoatation">&gt;</span></button>
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/quotation.png"
+                                       onclick="lord.markup('>'); return false;" name="markupQuotation"
+                                       title="{{=it.tr.markupQuotation}}" class="buttonImage bordered" width="20"
+                                       height="20" />
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("UNORDERED_LIST") >= 0}}
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/ul.png"
+                                       class="buttonImage bordered" title="{{=it.tr.markupUnorderedList}}"
+                                       onclick="lord.showMenu(event, this, '#markupUnorderedListActionsMenu'); return false;" />
+                                <ul id="markupUnorderedListActionsMenu" class="menu">
+                                    <li type="disc">
+                                        <a onclick="lord.markup('uld'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupUnorderedList}}</a>
+                                    </li>
+                                    <li type="circle">
+                                        <a onclick="lord.markup('ulc'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupUnorderedList}}</a>
+                                    </li>
+                                    <li type="square">
+                                        <a onclick="lord.markup('uls'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupUnorderedList}}</a>
+                                    </li>
+                                </ul>
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("ORDERED_LIST") >= 0}}
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/ol.png"
+                                       class="buttonImage bordered" title="{{=it.tr.markupOrderedList}}"
+                                       onclick="lord.showMenu(event, this, '#markupOrderedListActionsMenu'); return false;" />
+                                <ol id="markupOrderedListActionsMenu" class="menu">
+                                    <li type="1" value="1">
+                                        <a onclick="lord.markup('ol1'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
+                                    </li>
+                                    <li type="I" value="I">
+                                        <a onclick="lord.markup('olI'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
+                                    </li>
+                                    <li type="i" value="i">
+                                        <a onclick="lord.markup('oli'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
+                                    </li>
+                                    <li type="A" value="A">
+                                        <a onclick="lord.markup('olA'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
+                                    </li>
+                                    <li type="a" value="a">
+                                        <a onclick="lord.markup('ola'); return false;"
+                                           href="javascript:void(0);">{{=it.tr.markupOrderedList}}</a>
+                                    </li>
+                                </ol>
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("LIST_ITEM") >= 0}}
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/li.png"
+                                       onclick="lord.markup('li'); return false;" name="markupListItem"
+                                       title="{{=it.tr.markupListItem}}" class="buttonImage bordered" width="24"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("SUBSCRIPT") >= 0}}
-                                <button class="button" onclick="lord.markup('sub'); return false;"
-                                        title="{{=it.tr.markupSubscript}}"
-                                        name="markupSubscript">H<sub>2</sub>O</button>
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/subscript.png"
+                                       onclick="lord.markup('sub'); return false;" name="markupSubscript"
+                                       title="{{=it.tr.markupSubscript}}" class="buttonImage bordered" width="36"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("SUPERSCRIPT") >= 0}}
-                                <button class="button" onclick="lord.markup('sup'); return false;"
-                                        title="{{=it.tr.markupSuperscript}}"
-                                        name="markupSuperscript">X<sup>3</sup></button>
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/superscript.png"
+                                       onclick="lord.markup('sup'); return false;" name="markupSuperscript"
+                                       title="{{=it.tr.markupSuperscript}}" class="buttonImage bordered" width="20"
+                                       height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("URL") >= 0}}
-                                <button class="button" onclick="lord.markup('url'); return false;"
-                                        title="{{=it.tr.markupUrl}}" name="markupUrl">http://</button>
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/url.png"
+                                       onclick="lord.markup('url'); return false;" name="markupUrl"
+                                       title="{{=it.tr.markupUrl}}" class="buttonImage bordered" width="40" height="20" />
                             {{?}}
                             {{? it.board.markupElements.indexOf("CODE") >= 0}}
                                 <br />
@@ -162,8 +226,10 @@
                                         <option value="{{=lang.id}}">{{=lang.name}}</option>
                                     {{~}}
                                 </select>
-                                <button class="button" onclick="lord.markup('code'); return false;" name="markupCode"
-                                        title="{{=it.tr.markupCode}}">[code]</button>
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/code.png"
+                                       onclick="lord.markup('code'); return false;" name="markupCode"
+                                       title="{{=it.tr.markupCode}}" class="buttonImage bordered" width="40"
+                                       height="20" />
                             {{?}}
                         </span>
                     </td>
@@ -200,25 +266,26 @@
                     {{? it.customPostFormOption && it.customPostFormOption[0]}}
                         {{ out += it.customPostFormOption[0](it); }}
                     {{?}}
-                    {{? it.compareRegisteredUserLevels(it.user.level, "ADMIN") >= 0}}
-                        <input id="checkboxRawHtml" type="checkbox" name="raw" value="true"
-                               class="imageCheckBox" /><label title="{{!it.tr.postFormLabelRaw}}"
-                                                              for="checkboxRawHtml"></label>
-                    {{?}}
-                    {{? it.customPostFormOption && it.customPostFormOption[10]}}
-                        {{ out += it.customPostFormOption[10](it); }}
-                    {{?}}
                     <input id="checkboxOp" type="checkbox" name="signAsOp" value="true"
                            class="imageCheckBox" /><label title="{{!it.tr.postFormLabelSignAsOp}}"
                                                           for="checkboxOp"></label>
-                    {{? it.customPostFormOption && it.customPostFormOption[20]}}
-                        {{ out += it.customPostFormOption[20](it); }}
+                    {{? it.customPostFormOption && it.customPostFormOption[10]}}
+                        {{ out += it.customPostFormOption[10](it); }}
                     {{?}}
                     {{? it.user.loggedIn}}
                         <input id="checkboxTripcode" type="checkbox" name="tripcode" value="true"
                                onclick="lord.switchShowTripcode();"
                                class="imageCheckBox" /><label title="{{!it.tr.postFormLabelTripcode}}"
                                                               for="checkboxTripcode"></label>
+                    {{?}}
+                    {{? it.customPostFormOption && it.customPostFormOption[20]}}
+                        {{ out += it.customPostFormOption[20](it); }}
+                    {{?}}
+                    {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+                        <a href="javascript:void(0);" onclick="lord.markup('raw-html'); return false;" name="markupHtml"
+                           style="display: inline-block; vertical-align: top;"
+                           title="{{=it.tr.markupHtml}}"><img src="/{{=it.site.pathPrefix}}img/html.png"
+                                                              class="buttonImage" width="24" height="24"></a>
                     {{?}}
                     {{? it.customPostFormOption && it.customPostFormOption[30]}}
                         {{ out += it.customPostFormOption[30](it); }}

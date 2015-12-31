@@ -2,9 +2,12 @@
 !404/
 !banners/
 !flags/
+!markup/
+!addfile.png
 !addfile_link.png
 !addfile_vk.png
-!addfile.png
+!anchor.png
+!anchor_no.png
 !add.png
 !application_pdf_logo.png
 !audio_edit_tags.png
@@ -18,7 +21,6 @@
 !chat_message.gif
 !chat.png
 !checkbox_op.png
-!checkbox_raw_html.png
 !checkbox_tripcode.png
 !closed.png
 !close_voting.png
@@ -39,6 +41,7 @@
 !go.png
 !hide.png
 !homepage.png
+!html.png
 !ip.png
 !jpeg_file.png
 !left.png
@@ -51,6 +54,8 @@
 !markup.png
 !markup_vk_1.png
 !markup_vk_2.png
+!message_in.png
+!message_out.png
 !move.png
 !mp3_file.png
 !mp4_file.png

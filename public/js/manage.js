@@ -6,24 +6,39 @@ lord.banUser = function(e, form) {
         c.model = lord.model(["base", "tr", "boards"], true);
         return lord.api("bannedUser", { ip: ip });
     }).then(function(model) {
-        c.model.settings = lord.settings();
+        var settings = lord.settings();
+        c.model.settings = settings;
         c.model.bannedUser = model;
         c.model.showSubmitButton = true;
+        var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : c.model.site.timeOffset;
+        c.model.formattedDate = function(date) {
+            return moment(date).utcOffset(timeOffset).locale(c.model.site.locale).format("YYYY/MM/dd hh:mm");
+        };
         var parent = lord.id("bannedUsers");
         var previous = lord.id("user" + ip);
         if (c.model.bannedUser) {
             var node = lord.template("userBan", c.model);
-            if (previous)
-                parent.replaceChild(node, previous);
-            else
-                parent.appendChild(node);
-        } else {
-            if (previous)
-                parent.removeChild(previous);
+            lord.query("[name='expires'], [name^='banExpires_']", node).forEach(function(inp) {
+                $(inp).change(function(){
+                    $(this).attr("value", $(inp).val());
+                });
+                $(inp).datetimepicker({
+                    i18n: { format: "YYYY/MM/DD HH:mm" },
+                    mask: true,
+                    value: inp.value
+                });
+            });
+            if (lord.hasOwnProperties(c.model.bannedUser.bans)) {
+                if (previous)
+                    parent.replaceChild(node, previous);
+                else
+                    parent.appendChild(node);
+            } else {
+                if (previous)
+                    parent.removeChild(previous);
+            }
         }
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
 lord.bansSelectAll = function(e, btn) {

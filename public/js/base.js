@@ -43,21 +43,11 @@ lord._defineHotkey("markupCode", "Alt+C");
 /*Variables*/
 
 lord.chatTasks = {};
-lord.chats = lord.getLocalObject("chats", {});
 lord.chatDialog = null;
 lord.lastChatCheckDate = lord.getLocalObject("lastChatCheckDate", null);
 lord.notificationQueue = [];
 
 /*Functions*/
-
-lord.changeLocale = function() {
-    var sel = lord.id("localeChangeSelect");
-    var ln = sel.options[sel.selectedIndex].value;
-    lord.setCookie("locale", ln, {
-        "expires": lord.Billion, "path": "/"
-    });
-    lord.reloadPage();
-};
 
 lord.logoutImplementation = function(form, vk) {
     lord.setCookie("hashpass", "", {
@@ -75,7 +65,7 @@ lord.logoutImplementation = function(form, vk) {
 
 lord.doLogout = function(event, form) {
     event.preventDefault();
-    if (!VK || lord.getCookie("vkAuth", "false") != "true")
+    if (typeof VK == "undefined" || lord.getCookie("vkAuth", "false") != "true")
         return lord.logoutImplementation(form, false);
     VK.Auth.logout(function() {
         return lord.logoutImplementation(form, true);
@@ -97,13 +87,6 @@ lord.switchShowLogin = function() {
         inp.type = "password";
 };
 
-lord.searchKeyPress = function(e) {
-    e = e || window.event;
-    if (e.keyCode != 13)
-        return;
-    lord.doSearch();
-};
-
 lord.preventOnclick = function(event) {
     if (event) {
         event.stopPropagation();
@@ -118,7 +101,89 @@ lord.showSettings = function() {
     c.model = merge.recursive(model,
             lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true));
     c.div = lord.template("settingsDialog", c.model);
-    lord.showDialog("settingsDialogTitle", null, c.div).then(function(accepted) {
+    lord.showDialog(c.div, {
+        title: "settingsDialogTitle",
+        buttons: [
+            {
+                text: "exportSettingsButtonText",
+                action: function() {
+                    var o = { settings: lord.settings() };
+                    var f = function(key, def) {
+                        if (typeof def == "undefined")
+                            def = {};
+                        o[key] = lord.getLocalObject(key, def);
+                    };
+                    f("favoriteThreads");
+                    f("ownPosts");
+                    f("spells", "");
+                    f("userJavaScript", "");
+                    f("hotkeys", {});
+                    f("hiddenPosts", {});
+                    f("lastCodeLang", "");
+                    f("chats");
+                    f("drafts");
+                    f("playlist/trackList", []);
+                    f("lastChatCheckDate", null);
+                    f("audioVideoVolume", 1);
+                    f("userCss", "");
+                    f("ownLikes");
+                    f("ownVotes");
+                    f("lastPostNumbers");
+                    f("showTripcode");
+                    f("mumWatching", false);
+                    prompt(lord.text("copySettingsHint"), JSON.stringify(o));
+                }
+            },
+            {
+                text: "importSettingsButtonText",
+                action: function() {
+                    var s = prompt(lord.text("pasteSettingsHint"));
+                    if (!s)
+                        return;
+                    var o;
+                    try {
+                        o = JSON.parse(s);
+                    } catch(err) {
+                        lord.handleError(err);
+                        return;
+                    }
+                    lord.setSettings(o.settings);
+                    var f = function(key, merge) {
+                        var val = o[key];
+                        if (typeof val == "undefined")
+                            return;
+                        if (!merge)
+                            return lord.setLocalObject(key, val);
+                        var src = lord.getLocalObject(key, {});
+                        lord.forIn(val, function(v, k) {
+                            src[v] = k;
+                        });
+                        lord.setLocalObject(src, val);
+                    };
+                    f("favoriteThreads", true);
+                    f("ownPosts", true);
+                    f("spells");
+                    f("userJavaScript");
+                    f("hotkeys");
+                    f("hiddenPosts");
+                    f("lastCodeLang");
+                    f("chats", true);
+                    f("drafts", true);
+                    f("playlist/trackList");
+                    f("lastChatCheckDate");
+                    f("audioVideoVolume");
+                    f("userCss");
+                    f("ownLikes", true);
+                    f("ownVotes", true);
+                    f("lastPostNumbers");
+                    f("showTripcode");
+                    f("mumWatching");
+                }
+            },
+            "cancel",
+            "ok"
+        ]
+    }).then(function(accepted) {
         if (!accepted)
             return;
         var model = {};
@@ -137,7 +202,7 @@ lord.showSettings = function() {
         });
         lord.setSettings(model);
         lord.reloadPage();
-    });
+    }).catch(lord.handleError);
 };
 
 lord.showFavorites = function() {
@@ -302,7 +367,7 @@ lord.editHotkeys = function() {
     };
     model = merge.recursive(model, lord.model("tr"));
     c.div = lord.template("hotkeysDialog", model);
-    lord.showDialog(null, null, c.div).then(function(accepted) {
+    lord.showDialog(c.div).then(function(accepted) {
         if (!accepted)
             return;
         lord.query("input", c.div).forEach(function(el) {
@@ -344,25 +409,25 @@ lord.editSpells = function() {
     ta.rows = 10;
     ta.cols = 43;
     ta.value = lord.getLocalObject("spells", lord.DefaultSpells);
-    lord.showDialog(null, null, ta).then(function(result) {
+    lord.showDialog(ta).then(function(result) {
         if (!result)
             return Promise.resolve();
-        lord.setLocalObject("spells", ta.value);
-        if (!lord.worker || !lord.getLocalObject("spellsEnabled", true))
+        var spells = ta.value;
+        lord.setLocalObject("spells", spells);
+        if (!lord.doWork || !lord.getLocalObject("spellsEnabled", true))
             return;
-        lord.worker.postMessage({
-            "type": "parseSpells",
-            "data": lord.getLocalObject("spells", lord.DefaultSpells)
-        });
-        return Promise.resolve();
-    });
+        return lord.doWork("parseSpells", spells);
+    }).catch(lord.handleError);
 };
 
 lord.showHiddenPostList = function() {
     var model = lord.model(["base", "tr"], true);
     model.hiddenPosts = lord.toArray(lord.getLocalObject("hiddenPosts", {}));
     var div = lord.template("hiddenPostList", model);
-    return lord.showDialog("hiddenPostListText", null, div);
+    return lord.showDialog(div, {
+        title: "hiddenPostListText",
+        buttons: ["close"]
+    }).catch(lord.handleError);
 };
 
 lord.removeHidden = function(el) {
@@ -390,15 +455,17 @@ lord.editUserCss = function() {
         ta.value = lord.getLocalObject("userCss", "");
         div.appendChild(ta);
     }
-    lord.showDialog(null, null, div, function() {
-        if (c.editor)
-            c.editor.refresh();
+    lord.showDialog(div, {
+        afterShow: function() {
+            if (c.editor)
+                c.editor.refresh();
+        }
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
         lord.setLocalObject("userCss", c.editor ? c.editor.getValue() : ta.value);
         return Promise.resolve();
-    });
+    }).catch(lord.handleError);
 };
 
 lord.editUserJavaScript = function() {
@@ -418,15 +485,17 @@ lord.editUserJavaScript = function() {
         ta.value = lord.getLocalObject("userJavaScript", "");
         div.appendChild(ta);
     }
-    lord.showDialog(null, null, div, function() {
-        if (c.editor)
-            c.editor.refresh();
+    lord.showDialog(div, {
+        afterShow: function() {
+            if (c.editor)
+                c.editor.refresh();
+        }
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
         lord.setLocalObject("userJavaScript", c.editor ? c.editor.getValue() : ta.value);
         return Promise.resolve();
-    });
+    }).catch(lord.handleError);
 };
 
 lord.hotkey_showFavorites = function() {
@@ -474,7 +543,7 @@ lord.populateChatHistory = function(key) {
     model.formattedDate = function(date) {
         return moment(date).utcOffset(timeOffset).locale(model.site.locale).format(model.site.dateFormat);
     };
-    var messages = lord.chats[key] || [];
+    var messages = lord.getLocalObject("chats", {})[key] || [];
     messages = messages.map(function(message) {
         var m = merge.recursive(model, message);
         history.appendChild(lord.template("chatMessage", m));
@@ -487,14 +556,21 @@ lord.updateChat = function(keys) {
             var img = lord.queryOne("img", a);
             if (img.src.replace("chat_message.gif", "") == img.src)
                 img.src = img.src.replace("chat.png", "chat_message.gif");
-            var div = lord.node("div");
-            var a = lord.createChatButton(true);
-            var lastKey = lord.last(keys);
-            a.onclick = lord.showChat.bind(lord, lastKey);
-            div.appendChild(a);
-            div.appendChild(lord.node("text", " " + lord.text("newChatMessageText") + " [" + lastKey + "]"));
-            lord.showPopup(div, { type: "node" });
         });
+        var div = lord.node("div");
+        var a = lord.node("a");
+        var img = lord.node("img");
+        lord.addClass(img, "buttonImage");
+        img.src = "/" + lord.data("sitePathPrefix") + "img/chat_message.gif";
+        a.title = lord.text("chatText");
+        a.appendChild(img);
+        var lastKey = lord.last(keys);
+        a.onclick = lord.showChat.bind(lord, lastKey);
+        div.appendChild(a);
+        div.appendChild(lord.node("text", " " + lord.text("newChatMessageText") + " [" + lastKey + "]"));
+        lord.showPopup(div, { type: "node" });
+        if (lord.soundEnabled())
+            lord.playSound();
     } else {
         keys.forEach(function(key) {
             var div = lord.nameOne(key, lord.chatDialog);
@@ -525,19 +601,25 @@ lord.checkChats = function() {
         lord.lastChatCheckDate = model.lastRequestDate;
         lord.setLocalObject("lastChatCheckDate", lord.lastChatCheckDate);
         var keys = [];
+        var chats = lord.getLocalObject("chats", {});
         lord.forIn(model.chats, function(messages, key) {
-            if (!lord.chats[key])
-                lord.chats[key] = [];
-            var list = lord.chats[key];
+            if (!chats[key])
+                chats[key] = [];
+            var list = chats[key];
             if (messages.length > 0)
                 keys.push(key);
             messages.forEach(function(message) {
+                for (var i = 0; i < list.length; ++i) {
+                    var msg = list[i];
+                    if (message.type == msg.type && message.date == msg.date && message.text == msg.text)
+                        return;
+                }
                 list.push(message);
             });
         });
+        lord.setLocalObject("chats", chats);
         if (keys.length > 0)
             lord.updateChat(keys);
-        lord.setLocalObject("chats", lord.chats);
         lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord),
             lord.chatDialog ? (5 * lord.Second) : lord.Minute);
     }).catch(function(err) {
@@ -554,15 +636,19 @@ lord.showChat = function(key) {
     });
     var model = lord.model(["base", "tr"], true);
     model.contacts = [];
-    lord.forIn(lord.chats, function(_, key) {
+    lord.forIn(lord.getLocalObject("chats", {}), function(_, key) {
         model.contacts.push({ key: key });
     });
     lord.chatDialog = lord.template("chatDialog", model);
-    lord.showDialog("chatText", null, lord.chatDialog, function() {
-        lord.checkChats();
-        if (!key)
-            return;
-        lord.selectChatContact(key);
+    lord.showDialog(lord.chatDialog, {
+        title: "chatText",
+        afterShow: function() {
+            lord.checkChats();
+            if (!key)
+                return;
+            lord.selectChatContact(key);
+        },
+        buttons: ["close"]
     }).then(function() {
         lord.chatDialog = null;
     }).catch(lord.handleError);
@@ -581,11 +667,6 @@ lord.selectChatContact = function(key) {
     if (previous)
         lord.removeClass(previous, "selected");
     lord.addClass(div, "selected");
-    var target = lord.nameOne("target", lord.chatDialog);
-    target.style.display = "";
-    var targetKey = lord.nameOne("targetKey", lord.chatDialog);
-    lord.removeChildren(targetKey);
-    targetKey.appendChild(lord.node("text", key));
     lord.populateChatHistory(key);
     lord.nameOne("sendMessageButton", lord.chatDialog).disabled = false;
     lord.nameOne("message", lord.chatDialog).disabled = false;
@@ -605,15 +686,15 @@ lord.deleteChat = function(key) {
     formData.append("boardName", key.split(":").shift());
     formData.append("postNumber", +key.split(":").pop());
     return lord.post("/" + lord.data("sitePathPrefix") + "action/deleteChatMessages", formData).then(function(result) {
-        delete lord.chats[key];
-        lord.setLocalObject("chats", lord.chats);
+        var chats = lord.getLocalObject("chats", {});
+        delete chats[key];
+        lord.setLocalObject("chats", chats);
         if (!lord.chatDialog)
             return Promise.resolve();
         var contact = lord.nameOne(key, lord.chatDialog);
         if (!contact)
             return Promise.resolve();
         if (lord.hasClass(contact, "selected")) {
-            lord.nameOne("target", lord.chatDialog).style.display = "none";
             lord.removeChildren(lord.nameOne("targetKey", lord.chatDialog));
             lord.removeChildren(lord.nameOne("history", lord.chatDialog));
             lord.nameOne("sendMessageButton", lord.chatDialog).disabled = true;
@@ -638,18 +719,6 @@ lord.sendChatMessage = function() {
         $(message).focus();
         lord.checkChats();
     }).catch(lord.handleError);
-};
-
-lord.createChatButton = function(key) {
-    var a = lord.node("a");
-    a.name = "chatButton";
-    a.onclick = lord.showChat.bind(lord);
-    var img = lord.node("img");
-    lord.addClass(img, "buttonImage");
-    img.src = "/" + lord.data("sitePathPrefix") + "img/chat" + (key ? "_message.gif" : ".png");
-    a.title = lord.text("chatText");
-    a.appendChild(img);
-    return a;
 };
 
 lord.checkNotificationQueue = function() {
@@ -686,9 +755,118 @@ lord.checkNotificationQueue = function() {
     });
 };
 
+lord.showVideoThumb = function(e, a) {
+    if (a.img) {
+        document.body.appendChild(a.img);
+        return;
+    }
+    var thumbUrl = lord.data("thumbUrl", a, true);
+    var thumbWidth = +lord.data("thumbWidth", a, true);
+    var thumbHeight = +lord.data("thumbHeight", a, true);
+    if (!thumbUrl)
+        return;
+    a.img = lord.node("img");
+    a.img.width = thumbWidth;
+    a.img.height = thumbHeight;
+    a.img.src = thumbUrl;
+    lord.addClass(a.img, "movableImage");
+    a.img.style.left = (e.clientX + 30) + "px";
+    a.img.style.top = (e.clientY - 10) + "px";
+    document.body.appendChild(a.img);
+};
+
+lord.moveVideoThumb = function(e, a) {
+    if (!a.img)
+        return;
+    a.img.style.left = (e.clientX + 30) + "px";
+    a.img.style.top = (e.clientY - 10) + "px";
+};
+
+lord.hideVideoThumb = function(e, a) {
+    if (!a.img)
+        return;
+    document.body.removeChild(a.img);
+};
+
+lord.expandCollapseYoutubeVideo = function(a) {
+    var videoId = lord.data("videoId", a, true);
+    if (!videoId)
+        return;
+    if (a.lordExpanded) {
+        a.parentNode.removeChild(a.nextSibling);
+        a.parentNode.removeChild(a.nextSibling);
+        a.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"), a.childNodes[0]);
+        lord.removeClass(a.parentNode, "expand");
+    } else {
+        lord.addClass(a.parentNode, "expand");
+        var iframe = lord.node("iframe");
+        iframe.src = "https://youtube.com/embed/" + videoId + "?autoplay=1";
+        iframe.allowfullscreen = true;
+        iframe.frameborder = "0px";
+        iframe.height = "360";
+        iframe.width = "640";
+        iframe.display = "block";
+        var parent = a.parentNode;
+        var el = a.nextSibling;
+        if (el) {
+            parent.insertBefore(lord.node("br"), el);
+            parent.insertBefore(iframe, el);
+        } else {
+            parent.appendChild(lord.node("br"));
+            parent.appendChild(iframe);
+        }
+        a.replaceChild(lord.node("text", "[" + lord.text("collapseVideoText") + "]"), a.childNodes[0]);
+    }
+    a.lordExpanded = !a.lordExpanded;
+};
+
+lord.expandCollapseCoubVideo = function(a) {
+    var videoId = lord.data("videoId", a, true);
+    if (!videoId)
+        return;
+    if (a.lordExpanded) {
+        a.parentNode.removeChild(a.nextSibling);
+        a.parentNode.removeChild(a.nextSibling);
+        a.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"), a.childNodes[0]);
+        lord.removeClass(a.parentNode, "expand");
+    } else {
+        lord.addClass(a.parentNode, "expand");
+        var iframe = lord.node("iframe");
+        iframe.src = "https://coub.com/embed/" + videoId
+            + "?muted=false&autostart=false&originalSize=false&hideTopBar=false&startWithHD=false";
+        iframe.allowfullscreen = true;
+        iframe.frameborder = "0px";
+        iframe.height = "360";
+        iframe.width = "480";
+        iframe.display = "block";
+        var parent = a.parentNode;
+        var el = a.nextSibling;
+        if (el) {
+            parent.insertBefore(lord.node("br"), el);
+            parent.insertBefore(iframe, el);
+        } else {
+            parent.appendChild(lord.node("br"));
+            parent.appendChild(iframe);
+        }
+        a.replaceChild(lord.node("text", "[" + lord.text("collapseVideoText") + "]"), a.childNodes[0]);
+    }
+    a.lordExpanded = !a.lordExpanded;
+};
+
+lord.hashChangeHandler = function() {
+    var offset = $(":target").offset();
+    var scrollto = offset.top - $(".toolbar").height() - 4;
+    $("html, body").animate({ scrollTop: scrollto }, 0);
+};
+
 lord.initializeOnLoadSettings = function() {
     var settings = lord.settings();
     var model = lord.model(["base", "tr", "boards"], true);
+    if ("desktop" == model.deviceType) {
+        lord.removeClass(document.body, "mobile");
+        lord.addClass(document.body, "desktop");
+        document.head.removeChild(lord.nameOne("viewport", document.head));
+    }
     if (lord.data("boardName"))
         model.board = lord.model("board/" + lord.data("boardName")).board;
     model.settings = settings;
@@ -719,7 +897,6 @@ lord.initializeOnLoadSettings = function() {
             var header = lord.node("header");
             header.appendChild(data);
             customHeaderPlaceholder.parentNode.replaceChild(header, customHeaderPlaceholder);
-            header.parentNode.insertBefore(lord.node("br"), header.nextSibling);
         }
     }
     var customFooterPlaceholder = lord.id("customFooterPlaceholder");
@@ -729,7 +906,6 @@ lord.initializeOnLoadSettings = function() {
             var footer = lord.node("footer");
             footer.appendChild(data);
             customFooterPlaceholder.parentNode.replaceChild(footer, customFooterPlaceholder);
-            footer.parentNode.insertBefore(lord.node("br"), footer);
         }
     }
     if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
@@ -790,13 +966,8 @@ lord.initializeOnLoadSettings = function() {
         script.innerHTML = js;
         head.appendChild(script);
     }
-    if (lord.queryOne(".toolbar")) {
-        window.addEventListener("hashchange", function() {
-            var offset = $(":target").offset();
-            var scrollto = offset.top - $(".toolbar").height();
-            $("html, body").animate({ scrollTop: scrollto }, 0);
-        }, false);
-    }
+    if (lord.queryOne(".toolbar"))
+        window.addEventListener("hashchange", lord.hashChangeHandler, false);
 };
 
 window.addEventListener("load", function load() {

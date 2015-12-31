@@ -75,31 +75,6 @@
             {{? it.customEditPostDialogPart && it.customEditPostDialogPart[50]}}
                 {{ out += it.customEditPostDialogPart[50](it, thread, post); }}
             {{?}}
-            <tr>
-                <td class="postformLabel">
-                    <b>{{=it.tr.postFormLabelOptions}}</b>
-                </td>
-                <td class="postformField nowrap">
-                    {{? it.customEditPostDialogPart && it.customEditPostDialogPart[60]}}
-                        {{ out += it.customEditPostDialogPart[60](it, thread, post); }}
-                    {{?}}
-                    {{? it.compareRegisteredUserLevels(it.user.level, "ADMIN") >= 0}}
-                        <input id="checkboxRawHtmlEdit" type="checkbox" name="raw" value="true"
-                               {{? post.options.rawHtml}}checked="true"{{?}}
-                               class="imageCheckBox" /><label title="{{!it.tr.postFormLabelRaw}}"
-                                                              for="checkboxRawHtmlEdit"></label>
-                    {{?}}
-                    {{? it.customEditPostDialogPart && it.customEditPostDialogPart[70]}}
-                        {{ out += it.customEditPostDialogPart[70](it, thread, post); }}
-                    {{?}}
-                    {{? it.customEditPostDialogPart && it.customEditPostDialogPart[80]}}
-                        {{ out += it.customEditPostDialogPart[80](it, thread, post); }}
-                    {{?}}
-                </td>
-            </tr>
-            {{? it.customEditPostDialogPart && it.customEditPostDialogPart[90]}}
-                {{ out += it.customEditPostDialogPart[90](it, thread, post); }}
-            {{?}}
             {{? it.showSubmitButton}}
                 <tr>
                     <td class="postformField" colspan="2">
@@ -107,8 +82,8 @@
                     </td>
                 </tr>
             {{?}}
-            {{? it.customEditPostDialogPart && it.customEditPostDialogPart[100]}}
-                {{ out += it.customEditPostDialogPart[100](it, thread, post); }}
+            {{? it.customEditPostDialogPart && it.customEditPostDialogPart[60]}}
+                {{ out += it.customEditPostDialogPart[60](it, thread, post); }}
             {{?}}
         </tbody>
     </table>

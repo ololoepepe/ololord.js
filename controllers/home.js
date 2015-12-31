@@ -11,12 +11,10 @@ router.get("/", function(req, res) {
         var model = {};
         model.title = Tools.translate("ololord.js", "pageTitle");
         model.extraScripts = [ { fileName: "home.js" } ];
-        return controller(null, "home", model);
+        return controller("home", model);
     };
-    controller.html(f.bind(null), "home").then(function(data) {
-        res.send(data);
-    }).catch(function(err) {
-        controller.error(req, res, err);
+    Tools.controllerHtml(req, res, f.bind(null), "home").catch(function(err) {
+        controller.error(res, err);
     });
 });
 

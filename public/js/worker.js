@@ -86,7 +86,7 @@ lord.getImageHash = function(url, width, height) {
 
 lord.parseSpells = function(text) {
     if (typeof text != "string")
-        return Promise.reject("Internal error");
+        return Promise.reject("internalErrorText");
     var skipSpaces = function(text) {
         var first = text.search(/\S/);
         if (first < 0)
@@ -735,7 +735,7 @@ lord.applySpells = function(post, spells) {
 
 lord.processPosts = function(posts, spells) {
     if (!posts)
-        return Promise.reject("Internal error");
+        return Promise.reject("internalErrorText");
     var promises = posts.map(function(post) {
         var npost = {
             "boardName": post.boardName,
@@ -760,53 +760,35 @@ lord.processPosts = function(posts, spells) {
     return Promise.all(promises);
 };
 
-lord.getFileHash = function(data) {
-    if (!data)
-        return Promise.reject("Invalid data");
-    return new Promise(function(resolve, reject) {
-        try {
-            var wordArray = CryptoJS.lib.WordArray.create(data);
-            var fileHash = CryptoJS.SHA1(wordArray).toString(CryptoJS.enc.Hex);
-            resolve(fileHash);
-        } catch (err) {
-            reject(err);
-        }
-    });
-};
-
 lord.message_parseSpells = function(data) {
     if (typeof data != "string")
-        return Promise.reject("Invalid data");
+        return Promise.reject("invalidDataErrorText");
     return lord.parseSpells(data);
 };
 
 lord.message_processPosts = function(data) {
     if (!data)
-        return Promise.reject("Invalid data");
+        return Promise.reject("invalidDataErrorText");
     return lord.processPosts(data.posts, data.spells);
 };
 
 lord.message_getImageHash = function(data) {
     if (!data)
-        return Promise.reject("Invalid data");
+        return Promise.reject("invalidDataErrorText");
     return lord.getImageHash(data.href, data.width, data.height);
 };
 
-lord.message_getFileHash = function(data) {
-    if (!data)
-        return Promise.reject("Invalid data");
-    return lord.getFileHash(data);
-};
-
 importScripts("3rdparty/Promise.min.js");
-importScripts("3rdparty/sha1.js");
 importScripts("api.js");
 
 self.addEventListener("message", function(message) {
     try {
         message = JSON.parse(message.data);
     } catch (err) {
-        console.log(err);
+        self.postMessage(JSON.stringify({
+            id: "_error",
+            error: error
+        }));
         return;
     }
     var f = lord["message_" + message.type];

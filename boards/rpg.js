@@ -31,14 +31,14 @@ board.actionRoutes = function() {
                 return Board.prototype.loadExtraData.call(_this, c.postNumber);
             }).then(function(extraData) {
                 if (!extraData)
-                    return Promise.reject("This post does not have voting");
+                    return Promise.reject(Tools.translate("This post does not have voting"));
                 if (extraData.disabled)
-                    return Promise.reject("This voting is disabled");
+                    return Promise.reject(Tools.translate("This voting is disabled"));
                 c.extraData = extraData;
                 return Database.db.sismember("voteUsers:" + c.postNumber, req.ip);
             }).then(function(isMember) {
                 if (isMember)
-                    return Promise.reject("You have already voted");
+                    return Promise.reject(Tools.translate("You have already voted"));
                 var variants = [];
                 if (c.extraData.multiple) {
                     var err = false;
@@ -55,15 +55,15 @@ board.actionRoutes = function() {
                         variants.push(id);
                     });
                     if (err)
-                        return Promise.reject("Invalid variant");
+                        return Promise.reject(Tools.translate("Invalid variant"));
                 } else {
                     var id = c.fields.voteGroup;
                     if (!contains(c.extraData.variants, id))
-                        return Promise.reject("Invalid variant");
+                        return Promise.reject(Tools.translate("Invalid variant"));
                     variants.push(id);
                 }
                 if (variants.length < 1)
-                    return Promise.reject("No variant selected");
+                    return Promise.reject(Tools.translate("No variant selected"));
                 variants = variants.filter(function(id, index) {
                     return variants.indexOf(id) == index;
                 });
@@ -79,7 +79,7 @@ board.actionRoutes = function() {
                 Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
-                controller.error(req, res, err, true);
+                controller.error(res, err, true);
             });
         }
     },
@@ -94,14 +94,14 @@ board.actionRoutes = function() {
                 return _this.loadExtraData(c.postNumber);
             }).then(function(extraData) {
                 if (!extraData)
-                    return Promise.reject("This post does not have voting");
+                    return Promise.reject(Tools.translate("This post does not have voting"));
                 if (extraData.disabled)
-                    return Promise.reject("This voting is disabled");
+                    return Promise.reject(Tools.translate("This voting is disabled"));
                 c.extraData = extraData;
                 return Database.db.sismember("voteUsers:" + c.postNumber, req.ip);
             }).then(function(isMember) {
                 if (!isMember)
-                    return Promise.reject("You have not voted yet");
+                    return Promise.reject(Tools.translate("You have not voted yet"));
                 var variants = [];
                 c.extraData.variants.forEach(function(variant) {
                     if (!variant.users)
@@ -110,7 +110,7 @@ board.actionRoutes = function() {
                         variants.push(variant.id);
                 });
                 if (variants.length < 1)
-                    return Promise.reject("Internal error");
+                    return Promise.reject(Tools.translate("Internal error"));
                 var promises = variants.map(function(id) {
                     return Database.db.srem("voteVariantUsers:" + c.postNumber + ":" + id, req.ip);
                 });
@@ -123,7 +123,7 @@ board.actionRoutes = function() {
                 Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
                 res.send({});
             }).catch(function(err) {
-                controller.error(req, res, err, true);
+                controller.error(res, err, true);
             });
         }
     },
@@ -141,19 +141,19 @@ board.actionRoutes = function() {
                 if ((!c.password || c.password != post.user.password)
                     && (!req.hashpass || req.hashpass != post.user.hashpass)
                     && (Database.compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
-                    return Promise.reject("Not enough rights");
+                    return Promise.reject(Tools.translate("Not enough rights"));
                 }
                 return Board.prototype.loadExtraData.call(_this, post.number);
             }).then(function(extraData) {
                 if (!extraData)
-                    return Promise.reject("This post does not have voting");
+                    return Promise.reject(Tools.translate("This post does not have voting"));
                 extraData.disabled = !c.opened;
                 return Board.prototype.storeExtraData.call(_this, c.post.number, extraData);
             }).then(function(result) {
                 Global.generate("rpg", c.post.threadNumber, c.post.number, "edit");
                 res.send({});
             }).catch(function(err) {
-                controller.error(req, res, err, true);
+                controller.error(res, err, true);
             });
         }
     }];
@@ -199,9 +199,9 @@ var extraData = function(req, fields, edit) {
     }
     return p.then(function(opPost) {
         if (opPost && (req.ip != opPost.user.ip && (!req.hashpass || req.hashpass != opPost.user.hashpass)))
-            return Promise.reject("Attempt to attach voting while not being the OP");
+            return Promise.reject(Tools.translate("Attempt to attach voting while not being the OP"));
         if (!fields.voteText)
-            return Promise.reject("No vote text provided");
+            return Promise.reject(Tools.translate("No vote text provided"));
         return Promise.resolve({
             variants: variants,
             multiple: ("true" == fields.multipleVoteVariants),
@@ -234,7 +234,7 @@ board.postExtraData = function(req, fields, files, oldPost) {
                     return true;
                 }, false);
                 if (!exists)
-                    return Promise.reject("Invalid vote ID");
+                    return Promise.reject(Tools.translate("Invalid vote variant ID"));
             } else {
                 id = uuid.v1();
                 variants.push({

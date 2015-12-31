@@ -10,12 +10,10 @@ router.get("/faq.html", function(req, res) {
         var model = {};
         model.title = Tools.translate("F.A.Q.", "pageTitle");
         model.extraScripts = [ { fileName: "faq.js" } ];
-        return controller(null, "faq", model);
+        return controller("faq", model);
     };
-    controller.html(f.bind(null), "faq").then(function(data) {
-        res.send(data);
-    }).catch(function(err) {
-        controller.error(req, res, err);
+    Tools.controllerHtml(req, res, f.bind(null), "faq").catch(function(err) {
+        controller.error(res, err);
     });
 });
 

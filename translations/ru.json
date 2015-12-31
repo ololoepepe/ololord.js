@@ -24,220 +24,59 @@
             "value": "Правила доски"
         }
     },
-    "rules": {
-        "pageTitle": {
-            "value": "правила"
-        },
-        "_obsolete": true
-    },
-    "There are no specific rules for this board.": {
-        "noRulesText": {
-            "value": "Для этой доски нет особых правил."
-        },
-        "_obsolete": true
-    },
-    "Posting disabled": {
-        "error": {
-            "value": "Постинг запрещен"
-        },
-        "_obsolete": true
-    },
     "Posting is disabled at this board": {
         "postingDisabledBoardText": {
             "value": "На этой доске постинг запрещен"
         }
     },
     "Internal error": {
-        "error": {
-            "value": "Внутренняя ошибка",
-            "_obsolete": true
+        "errorMessage": {
+            "value": "Внутренняя ошибка"
+        },
+        "_default": {
+            "value": "Internal error"
         },
         "internalErrorText": {
-            "value": "Внутренняя ошибка",
-            "_obsolete": true
-        },
-        "_default": {
-            "value": "Внутренняя ошибка",
-            "_obsolete": true
-        },
-        "errorMessage": {
             "value": "Internal error"
         }
-    },
-    "Internal database error": {
-        "description": {
-            "value": "Внутренняя ошибка базы данных"
-        },
-        "error": {
-            "value": "Внутренняя ошибка базы данных"
-        },
-        "_obsolete": true
-    },
-    "Determines if captcha is enabled on this board.\nThe default is true.": {
-        "_default": {
-            "value": "Определяет, включена ли капча на этой доске.\nПо умолчанию true."
-        },
-        "_obsolete": true
-    },
-    "Number of threads per one page on this board.\nThe default is 20.": {
-        "_default": {
-            "value": "Число тредов на одну страницу для этой доски.\nПо умолчанию 20."
-        },
-        "_obsolete": true
-    },
-    "Determines if posting is enabled on this board.\nThe default is true.": {
-        "_default": {
-            "value": "Определяет, разрешен ли постинг на этой доске.\nПо умолчанию true."
-        },
-        "_obsolete": true
-    },
-    "Maximum bump count on this board.\nWhen a thread has reached it's bump limit, it will not be raised anymore.\nThe default is 500.": {
-        "_default": {
-            "value": "Максимальное количество бампов на этой доске.\nКогда тред достигает своего бамплимита, он больше не будет поднят.\nПо умолчанию 500."
-        },
-        "_obsolete": true
-    },
-    "Maximum post count per thread on this board.\nThe default is 1000.": {
-        "_default": {
-            "value": "Максимальное количество постов в треде на этой доске.\nПо умолчанию 1000."
-        },
-        "_obsolete": true
-    },
-    "Maximum thread count for this board.\nWhen the limit is reached, the most old threads get deleted.\nThe default is 200.": {
-        "_default": {
-            "value": "Максимальное количество тредов на этой доске.\nКогда лимит достигнут, наиболее старые треды удаляются.\nПо умолчанию 200."
-        },
-        "_obsolete": true
-    },
-    "Determines if this board is hidden.\nA hidden board will not appear in navigation bars.\nThe default is false.": {
-        "_default": {
-            "value": "Определяет, является ли данная доска скрытой.\nСкрытая доска не отображается на панелях навигации.\nПо умолчанию false."
-        },
-        "_obsolete": true
-    },
-    "Determines if this board is enabled.\nA disabled board will not be accessible by any means.\nThe default is true.": {
-        "_default": {
-            "value": "Определяет, включена ли эта доска.\nОтключенная доска не будет доступна никаким способом.\nПо умолчанию true."
-        },
-        "_obsolete": true
-    },
-    "Maximum length of the e-mail field for this board.\nThe default is 150.": {
-        "_default": {
-            "value": "Максимальная длина поля эл. почты на этой доске.\nПо умолчанию 150."
-        },
-        "_obsolete": true
-    },
-    "Maximum length of the name field for this board.\nThe default is 50.": {
-        "_default": {
-            "value": "Максимальная длина поля имени на этой доске.\nПо умолчанию 50."
-        },
-        "_obsolete": true
-    },
-    "Maximum length of the subject field for this board.\nThe default is 150.": {
-        "_default": {
-            "value": "Максимальная длина поля темы на этой доске.\nПо умолчанию 150."
-        },
-        "_obsolete": true
-    },
-    "Maximum length of the text field for this board.\nThe default is 15000.": {
-        "_default": {
-            "value": "Максимальная длина поля текста на этой доске.\nПо умолчанию 15000."
-        },
-        "_obsolete": true
-    },
-    "Maximum length of the password field for this board.\nThe default is 150.": {
-        "_default": {
-            "value": "Максимальная длина поля пароля на этой доске.\nПо умолчанию 150."
-        },
-        "_obsolete": true
-    },
-    "Maximum attached file size (in bytes) for this board.\nThe default is 10485760 (10 MB).": {
-        "_default": {
-            "value": "Максимальный размер прикрепленного файла (в байтах) на этой доске.\nПо умолчанию 10485760 (10 МБ)."
-        },
-        "_obsolete": true
-    },
-    "Maximum attached file count for this board.\nThe default is 1.": {
-        "_default": {
-            "value": "Максимальное количество прикрепленных файлов на этой доске.\nПо умолчанию 1."
-        },
-        "_obsolete": true
-    },
-    "Maximum archived thread count for this board.\nThe default is 0 (do not archive).": {
-        "_default": {
-            "value": "Максимальное количество архивируемых тредов для этой доски.\nПо умолчанию 0 (не архивировать)."
-        },
-        "_obsolete": true
     },
     "Anonymous": {
         "defaultUserName": {
             "value": "Аноним"
         }
     },
-    "Internal logic error": {
-        "description": {
-            "value": "Внутренняя ошибка в логике программы"
-        },
-        "error": {
-            "value": "Внутренняя ошибка в логике программы"
-        },
-        "_obsolete": true
-    },
-    "Maximum count of extra posts a user may make before solving captcha again on this board.\nThe default is 0 (solve captcha every time).": {
-        "_default": {
-            "value": "Максимальное количество дополнительных постов, которые пользователь может оставить без повторного воода капчи на данной доске.\nПо умолчанию 0 (капча вводится каждый раз)."
-        },
-        "_obsolete": true
-    },
-    "MIME types of files allowed for attaching on this board.\nMust be separated by commas. Wildcard matching is used.\nThe default is %1.": {
-        "_default": {
-            "value": "MIME-типы файлов, которые разрешено прикреплять на этой доске.\nДолжны быть разделены запятыми. Используется шаблон wildcard.\nПо умолчанию %1."
-        },
-        "_obsolete": true
-    },
     "E-mail is too long": {
-        "description": {
-            "value": "Эл. почта слишком длинная",
-            "_obsolete": true
-        },
         "error": {
             "value": "Эл. почта слишком длинная"
+        },
+        "_default": {
+            "value": "E-mail is too long"
         }
     },
     "Name is too long": {
-        "description": {
-            "value": "Имя слишком длинное",
-            "_obsolete": true
-        },
         "error": {
             "value": "Имя слишком длинное"
+        },
+        "_default": {
+            "value": "Name is too long"
         }
     },
     "Subject is too long": {
-        "description": {
-            "value": "Тема слишком длинная",
-            "_obsolete": true
-        },
         "error": {
             "value": "Тема слишком длинная"
+        },
+        "_default": {
+            "value": "Subject is too long"
         }
     },
     "Comment is too long": {
-        "description": {
-            "value": "Комментарий слишком длинный",
-            "_obsolete": true
-        },
         "error": {
-            "value": "Comment is too long"
+            "value": "Комментарий слишком длинный"
         }
     },
     "Password is too long": {
-        "description": {
-            "value": "Пароль слишком длинный",
-            "_obsolete": true
-        },
         "error": {
-            "value": "Password is too long"
+            "value": "Пароль слишком длинный"
         }
     },
     "Back": {
@@ -261,25 +100,9 @@
         }
     },
     "KB": {
-        "fileSize": {
-            "value": "Кб",
-            "_obsolete": true
-        },
         "kilobytesText": {
             "value": "КБ"
         }
-    },
-    "Unknown country": {
-        "countryName": {
-            "value": "Неизвестная страна"
-        },
-        "_obsolete": true
-    },
-    "Maximum last posts displayed for each thread at this board.\nThe default is 3.": {
-        "_default": {
-            "value": "Максимальное количество отображаемых последних постов для каждого треда на этой доске.\nПо умолчанию 3."
-        },
-        "_obsolete": true
     },
     "Auto update": {
         "autoUpdateText": {
@@ -304,11 +127,6 @@
     "/h/entai": {
         "boardTitle": {
             "value": "Хентай"
-        }
-    },
-    "/int/ernational": {
-        "boardTitle": {
-            "value": "/int/ernational"
         }
     },
     "Vladimir Putin": {
@@ -359,11 +177,17 @@
     "Both file and comment are missing": {
         "error": {
             "value": "Отсутствуют и файл, и комментарий"
+        },
+        "_default": {
+            "value": "Both file and comment are missing"
         }
     },
     "Too many files": {
         "error": {
             "value": "Слишком много файлов"
+        },
+        "_default": {
+            "value": "Too many files"
         }
     },
     "File is too big": {
@@ -376,61 +200,25 @@
             "value": "Тип файла не поддерживается"
         }
     },
-    "Identifiers of captcha engines supported on this board.\nIdentifers must be separated by commas.\nExample: google-recaptcha,codecha\nBy default all captcha engines are supported.": {
-        "_default": {
-            "value": "Идентификаторы движков капчи, поддерживаемые на этой доске.\nИдентификаторы должны разделяться запятыми.\nПример: google-recaptcha,codecha\nПо умолчанию поддерживаются все движки капчи."
-        },
-        "_obsolete": true
-    },
     "kbps": {
         "kbps": {
             "value": "кбит/с"
         }
     },
     "Unknown album": {
-        "fileSizeTooltip": {
-            "value": "Неизвестный альбом",
-            "_obsolete": true
-        },
-        "unknownAlbumText": {
-            "value": "Неизвестный альбом",
-            "_obsolete": true
-        },
         "unknownAlbum": {
-            "value": "Unknown album"
+            "value": "Неизвестный альбом"
         }
     },
     "Unknown artist": {
-        "fileSizeTooltip": {
-            "value": "Неизвестный исполнитель",
-            "_obsolete": true
-        },
-        "unknownArtistText": {
-            "value": "Неизвестный исполнитель",
-            "_obsolete": true
-        },
         "unknownArtist": {
-            "value": "Unknown artist"
+            "value": "Неизвестный исполнитель"
         }
     },
     "Unknown title": {
-        "fileSizeTooltip": {
-            "value": "Неизвестное название",
-            "_obsolete": true
-        },
-        "unknownTitleText": {
-            "value": "Неизвестное название",
-            "_obsolete": true
-        },
         "unknownTitle": {
-            "value": "Unknown title"
+            "value": "Неизвестное название"
         }
-    },
-    "Date and time of first board launch.\nIs used to calculate board speed.\nFormat: %1\nBy default, the date of first site launch is used.": {
-        "_default": {
-            "value": "Дата и время первого запуска доски.\nИспользуется для подсчета скорости доски.\nФормат: %1\nПо умолчанию используется дата первого запуска сайта."
-        },
-        "_obsolete": true
     },
     "/po/litics": {
         "boardTitle": {
@@ -442,28 +230,7 @@
             "value": "Диванный эксперт"
         }
     },
-    "Invalid post number": {
-        "error": {
-            "value": "Неверный номер поста"
-        },
-        "description": {
-            "value": "Неверный номер поста"
-        },
-        "_default": {
-            "value": "Неверный номер поста"
-        },
-        "_obsolete": true
-    },
-    "Post number is null": {
-        "description": {
-            "value": "Нулевой номер поста"
-        },
-        "_obsolete": true
-    },
     "Edit post": {
-        "pageTitle": {
-            "value": "Редактировать пост"
-        },
         "editPostText": {
             "value": "Редактировать пост"
         }
@@ -483,11 +250,6 @@
             "value": "Имя:"
         }
     },
-    "Raw HTML": {
-        "postFormLabelRaw": {
-            "value": "\"Сырой\" HTML"
-        }
-    },
     "Subject:": {
         "postFormLabelSubject": {
             "value": "Тема:"
@@ -497,18 +259,6 @@
         "postFormLabelText": {
             "value": "Пост:"
         }
-    },
-    "Attached file error": {
-        "error": {
-            "value": "Ошибка прикрепленного файла"
-        },
-        "_obsolete": true
-    },
-    "Catalog": {
-        "pageTitle": {
-            "value": "Каталог"
-        },
-        "_obsolete": true
     },
     "Threads catalog": {
         "boardCatalogLinkText": {
@@ -570,235 +320,17 @@
             "value": "Дате последнего поста"
         }
     },
-    "Private captcha key.\nIs stored locally and does not appear anywhere in any HTML pages or other resources.": {
-        "_default": {
-            "value": "Закрытый ключ капчи.\nХранится локально, не появляется ни в каких HTML-страницах или других ресурсах."
-        },
-        "_obsolete": true
-    },
-    
-    "Public captcha key.\nApperas in the HTML pages.": {
-        "_default": {
-            "value": "Открытый ключ сервиса капчи.\nПоявляется в HTML-страницах."
-        },
-        "_obsolete": true
-    },
-    "Yandex captcha": {
-        "title": {
-            "value": "Капча Yandex"
-        },
-        "_obsolete": true
-    },
-    "Latin": {
-        "title": {
-            "value": "латиница"
-        },
-        "_obsolete": true
-    },
-    "digits": {
-        "title": {
-            "value": "цифры"
-        },
-        "_obsolete": true
-    },
-    "Cyrillic": {
-        "title": {
-            "value": "кириллица"
-        },
-        "_obsolete": true
-    },
-    "Captcha challenge is empty": {
-        "error": {
-            "value": "Задание капчи пусто"
-        },
-        "_obsolete": true
-    },
-    "Captcha is empty": {
-        "error": {
-            "value": "Капча пуста"
-        },
-        "_obsolete": true
-    },
-    "Captcha is incorrect": {
-        "error": {
-            "value": "Капча решена неправильно"
-        },
-        "_obsolete": true
-    },
-    "No engine for this captcha type": {
-        "error": {
-            "value": "Отсутствует движок для этого типа капчи"
-        },
-        "sescription": {
-            "value": "Отсутствует движок для этого типа капчи"
-        },
-        "_obsolete": true
-    },
-    "Yandex captcha service error": {
-        "error": {
-            "value": "Ошибка сервиса Yandex-капчи"
-        },
-        "_obsolete": true
-    },
-    "No such board": {
-        "error": {
-            "value": "Нет такой доски"
-        },
-        "_obsolete": true
-    },
-    "Invalid captcha type": {
-        "error": {
-            "value": "Недействительный тип капчи"
-        },
-        "_obsolete": true
-    },
-    "Unknown action": {
-        "error": {
-            "value": "Неизвестное действие"
-        },
-        "_obsolete": true
-    },
-    "There is no such action": {
-        "description": {
-            "value": "Нет такого действия"
-        },
-        "_obsolete": true
-    },
-    "Unknown board": {
-        "error": {
-            "value": "Неизвестная доска"
-        },
-        "_obsolete": true
-    },
-    "There is no such board": {
-        "description": {
-            "value": "Нет такой доски"
-        },
-        "_obsolete": true
-    },
-    "Failed to delete file": {
-        "error": {
-            "value": "Не удалось удалить файл"
-        },
-        "_obsolete": true
-    },
-    "Failed to delete post": {
-        "error": {
-            "value": "Не удалось удалить пост"
-        },
-        "_obsolete": true
-    },
-    "Failed to set thread fixed/unfixed": {
-        "error": {
-            "value": "Не удалось закрепить/открепить тред"
-        },
-        "_obsolete": true
-    },
-    "Failed to set thread opened/closed": {
-        "error": {
-            "value": "Не удалось открыть/закрыть тред"
-        },
-        "_obsolete": true
-    },
-    "Failed to set vote opened/closed": {
-        "error": {
-            "value": "Не удалось открыть/закрыть голосование"
-        },
-        "_obsolete": true
-    },
-    "Failed to unvote": {
-        "error": {
-            "value": "Не удалось забрать голос"
-        },
-        "_obsolete": true
-    },
-    "Failed to vote": {
-        "error": {
-            "value": "Не удалось проголосовать"
-        },
-        "_obsolete": true
-    },
-    "Failed to edit audio tags": {
-        "error": {
-            "value": "Не удалось отредактировать теги аудиофайла"
-        },
-        "_obsolete": true
-    },
-    "Failed to edit post": {
-        "error": {
-            "value": "Не удалось отредактировать пост"
-        },
-        "_obsolete": true
-    },
-    "Failed to move thread": {
-        "error": {
-            "value": "Не удалось перенести тред"
-        },
-        "_obsolete": true
-    },
-    "Failed to ban user": {
-        "error": {
-            "value": "Не удалось забанить пользователя"
-        },
-        "_obsolete": true
-    },
-    "Failed to perform delall": {
-        "error": {
-            "value": "Ну удалось выполнить делолл"
-        },
-        "_obsolete": true
-    },
-    "Access error": {
-        "error": {
-            "value": "Ошибка доступа"
-        },
-        "_obsolete": true
-    },
-    "Not enough rights": {
-        "description": {
-            "value": "Недостаточно прав"
-        },
-        "error": {
-            "value": "Недостаточно прав"
-        },
-        "_obsolete": true
-    },
-    "Invalid board name": {
-        "error": {
-            "value": "Неверное имя доски"
-        },
-        "_default": {
-            "value": "Неверное имя доски"
-        },
-        "_obsolete": true
-    },
-    "Board name is empty": {
-        "description": {
-            "value": "Пустое имя доски"
-        },
-        "_obsolete": true
-    },
     "Add files": {
-        "pageTitle": {
-            "value": "Добавить файлы"
-        },
         "addFilesText": {
             "value": "Добавить файлы"
         }
     },
     "Ban user": {
-        "pageTitle": {
-            "value": "Забанить пользователя"
-        },
         "banUserText": {
             "value": "Забанить пользователя"
         }
     },
     "All boards": {
-        "boardName": {
-            "value": "Все доски",
-            "_obsolete": true
-        },
         "allBoardsText": {
             "value": "Все доски"
         }
@@ -806,17 +338,7 @@
     "Expires:": {
         "banExpiresLabelText": {
             "value": "Истекает:"
-        },
-        "errorDescription": {
-            "value": "Истекает:",
-            "_obsolete": true
         }
-    },
-    "Level:": {
-        "banLevelLabelText": {
-            "value": "Уровень:"
-        },
-        "_obsolete": true
     },
     "Not banned": {
         "banLevelNoneDescription": {
@@ -836,20 +358,7 @@
     "Reason:": {
         "banReasonLabelText": {
             "value": "Причина:"
-        },
-        "banReasonLabel": {
-            "value": "Причина:",
-            "_obsolete": true
         }
-    },
-    "Board:": {
-        "boardLabelText": {
-            "value": "Доска:"
-        },
-        "errorDescription": {
-            "value": "Доска:"
-        },
-        "_obsolete": true
     },
     "Delete all user posts on selected board": {
         "delallButtonText": {
@@ -857,31 +366,9 @@
         }
     },
     "Codecha - programmers' CAPTCHA": {
-        "title": {
-            "value": "Codecha - программистская CAPTCHA",
-            "_obsolete": true
-        },
         "_default": {
-            "value": "Codecha - programmers' CAPTCHA"
+            "value": "Codecha - программистская капча"
         }
-    },
-    "Invalid ip": {
-        "error": {
-            "value": "Неверный IP-адрес"
-        },
-        "_obsolete": true
-    },
-    "Not logged in": {
-        "error": {
-            "value": "Не залогинен"
-        },
-        "_obsolete": true
-    },
-    "You can't delall yourself, baka": {
-        "error": {
-            "value": "Нельзя сделать делолл самому себе, бака"
-        },
-        "_obsolete": true
     },
     "Feed": {
         "channelTitle": {
@@ -903,53 +390,7 @@
             "value": "Ответ в тред"
         }
     },
-    "Invalid thread number": {
-        "error": {
-            "value": "Неверный номер треда"
-        },
-        "_default": {
-            "value": "Неверный номер треда"
-        },
-        "_obsolete": true
-    },
-    "Source and target boards are the same": {
-        "error": {
-            "value": "Исходная и целевая борды совпадают"
-        },
-        "_obsolete": true
-    },
-    "No such thread": {
-        "error": {
-            "value": "Нет такого треда"
-        },
-        "_obsolete": true
-    },
-    "Internal file system error": {
-        "error": {
-            "value": "Внутренняя ошибка файловой системы"
-        },
-        "description": {
-            "value": "Внутренняя ошибка файловой системы"
-        },
-        "_obsolete": true
-    },
-    "Invalid file name": {
-        "error": {
-            "value": "Неправильное имя файла"
-        },
-        "_obsolete": true
-    },
-    "File name is empty": {
-        "description": {
-            "value": "Пустое имя файла"
-        },
-        "_obsolete": true
-    },
     "Edit audio file tags": {
-        "pageTitle": {
-            "value": "Редактировать теги аудиофайла",
-            "_obsolete": true
-        },
         "editAudioTagsText": {
             "value": "Редактировать теги аудиофайла"
         }
@@ -987,18 +428,6 @@
             "value": "Версия без фрейма"
         }
     },
-    "ololord - (almost) free communication": {
-        "pageTitle": {
-            "value": "ololord - (почти) свободное общение"
-        },
-        "_obsolete": true
-    },
-    "Captcha response is empty": {
-        "error": {
-            "value": "Решение капчи пусто"
-        },
-        "_obsolete": true
-    },
     "Welcome. Again.": {
         "welcomeMessage": {
             "value": "Добро пожаловать. Снова."
@@ -1030,6 +459,21 @@
     "Select all": {
         "selectAllText": {
             "value": "Выбрать все"
+        }
+    },
+    "Board:": {
+        "banBoardLabelText": {
+            "value": "Доска:"
+        }
+    },
+    "Ban level:": {
+        "banLevelLabelText": {
+            "value": "Уровень бана:"
+        }
+    },
+    "Ban date:": {
+        "banDateTimeLabelText": {
+            "value": "Дата бана:"
         }
     },
     "Markup": {
@@ -1205,26 +649,10 @@
             "value": "слово"
         }
     },
-    "Thread number is null": {
-        "description": {
-            "value": "Нулевой номер треда"
-        },
-        "_obsolete": true
-    },
     "Move thread": {
-        "pageTitle": {
-            "value": "Перенести тред",
-            "_obsolete": true
-        },
         "moveThreadText": {
             "value": "Перенести тред"
         }
-    },
-    "Warning: post numbers will be changed, and so will the post references. But the raw post text will not bechanged, so be careful when editing posts in moved thread.": {
-        "moveThreadWarningText": {
-            "value": "Предупреждение: номера постов будут изменены, и ссылки на посты - тоже. Однако, исходный текст не будет изменен, поэтому будьте внимательны при редактировании постов в перенесенных тредах."
-        },
-        "_obsolete": true
     },
     "Playlist": {
         "pageTitle": {
@@ -1244,11 +672,6 @@
             "value": "Скачать файл"
         }
     },
-    "Invalid search query": {
-        "error": {
-            "value": "Недействительный поисковый запрос"
-        }
-    },
     "Search": {
         "pageTitle": {
             "value": "Поиск"
@@ -1258,7 +681,7 @@
         }
     },
     "Search results": {
-        "resultsMessage": {
+        "searchResultsMessage": {
             "value": "Результаты поиска"
         }
     },
@@ -1267,16 +690,7 @@
             "value": "Ничего не найдено"
         }
     },
-    "Query error": {
-        "error": {
-            "value": "Ошибка запроса"
-        },
-        "_obsolete": true
-    },
     "Settings": {
-        "pageTitle": {
-            "value": "Настройки"
-        },
         "settingsButtonText": {
             "value": "Настройки"
         },
@@ -1284,358 +698,20 @@
             "value": "Настройки"
         }
     },
-    "No such post": {
-        "error": {
-            "value": "Нет такого поста"
-        },
-        "_default": {
-            "value": "Нет такого поста"
-        },
-        "_obsolete": true
-    },
-    "Invalid parameters": {
-        "error": {
-            "value": "Неправильные параметры"
-        },
-        "_obsolete": true
-    },
-    "There is no such post": {
-        "description": {
-            "value": "Нет такого поста"
-        },
-        "_obsolete": true
-    },
-    "You can't ban yourself, baka": {
-        "error": {
-            "value": "Нельзя забанить самого себя, бака"
-        },
-        "_obsolete": true
-    },
-    "Invalid IP address": {
-        "error": {
-            "value": "Неверный IP-адрес"
-        },
-        "_default": {
-            "value": "Неверный IP-адрес"
-        },
-        "_obsolete": true
-    },
-    "Console games": {
-        "boardTitle": {
-            "value": "Консольные игры"
-        }
-    },
-    "No games": {
-        "imageTitle": {
-            "value": "Игор нет"
-        },
-        "_obsolete": true
-    },
-    "But there ARE games!": {
-        "imageTitle": {
-            "value": "Но игры есть!"
-        },
-        "_obsolete": true
-    },
-    "Internal parsing error": {
-        "error": {
-            "value": "Внутренняя ошибка разбора"
-        },
-        "_obsolete": true
-    },
-    "Malformed option:": {
-        "error": {
-            "value": "Неправильная опция:"
-        },
-        "_obsolete": true
-    },
-    "Missing option:": {
-        "error": {
-            "value": "Отсутствует опция:"
-        },
-        "_obsolete": true
-    },
-    "Repeating option:": {
-        "error": {
-            "value": "Повторяющаяся опция:"
-        },
-        "_obsolete": true
-    },
-    "Unknown option:": {
-        "error": {
-            "value": "Неизвестная опция:"
-        },
-        "_obsolete": true
-    },
-    "Unknown option value:": {
-        "error": {
-            "value": "Неизвестное значение опции:"
-        },
-        "_obsolete": true
-    },
-    "No such cache": {
-        "error": {
-            "value": "Нет такого кеша"
-        },
-        "_default": {
-            "value": "Нет такого кеша"
-        },
-        "_obsolete": true
-    },
-    "Invalid file hash": {
-        "error": {
-            "value": "Недействительный хэш файла"
-        },
-        "_obsolete": true
-    },
-    "Invalid file hash provided": {
-        "description": {
-            "value": "Передан недействительный хэш файла"
-        },
-        "_obsolete": true
-    },
-    "No source file": {
-        "error": {
-            "value": "Нет исходного файла"
-        },
-        "_obsolete": true
-    },
-    "No source file for this file hash": {
-        "description": {
-            "value": "Для этого хеша файла нет исходного файла"
-        },
-        "_obsolete": true
-    },
-    "There is no such thread": {
-        "description": {
-            "value": "Нет такого треда"
-        },
-        "_obsolete": true
-    },
-    "Post limit": {
-        "error": {
-            "value": "Лимит постов"
-        },
-        "_obsolete": true
-    },
-    "The thread has reached it's post limit": {
-        "description": {
-            "value": "Этот тред лостиг своего лимита постов"
-        },
-        "_obsolete": true
-    },
     "Board /d/iscussion": {
         "boardTitle": {
             "value": "/d/искуссии о борде"
         }
-    },
-    "Invalid password": {
-        "error": {
-            "value": "Неправильный пароль"
-        },
-        "_default": {
-            "value": "Неправильный пароль"
-        },
-        "_obsolete": true
-    },
-    "No such file": {
-        "error": {
-            "value": "Нет такого файла"
-        },
-        "_obsolete": true
-    },
-    "Board name mismatch": {
-        "error": {
-            "value": "Несоответствие имени доски"
-        },
-        "_obsolete": true
-    },
-    "Incorrect password": {
-        "error": {
-            "value": "Неправильный пароль"
-        },
-        "_obsolete": true
     },
     "Boardsphere echo": {
         "boardTitle": {
             "value": "Эхо бордосферы"
         }
     },
-    "This board/thread may not be accepted": {
-        "description": {
-            "value": "Эта доска/тред не может быть принята"
-        },
-        "error": {
-            "value": "Эта доска/тред не может быть принята"
-        },
-        "_obsolete": true
-    },
-    "Thread link is empty": {
-        "description": {
-            "value": "Ссылка на тред пуста"
-        },
-        "_obsolete": true
-    },
-    "Thread link is too long": {
-        "description": {
-            "value": "Ссылка на тред слишком длинная"
-        },
-        "_obsolete": true
-    },
     "Thread link:": {
         "postFormLabelLink": {
             "value": "Ссылка на тред:"
         }
-    },
-    "Attempt to edit link of non-OP post": {
-        "error": {
-            "value": "Попытка редактирования ссылки в не-ОП-посте"
-        },
-        "_obsolete": true
-    },
-    "Not an audio file": {
-        "error": {
-            "value": "Не является аудиофайлом"
-        },
-        "_obsolete": true
-    },
-    "No text provided": {
-        "error": {
-            "value": "Отсутствует текст"
-        },
-        "_obsolete": true
-    },
-    "Text is too long": {
-        "error": {
-            "value": "Текст слишком длинный"
-        },
-        "_obsolete": true
-    },
-    "OK": {
-        "_default": {
-            "value": "ОК"
-        },
-        "_obsolete": true
-    },
-    "Invalid date": {
-        "_default": {
-            "value": "Неверная дата"
-        },
-        "_obsolete": true
-    },
-    "No date specified. User will be banned forever. Continue?": {
-        "_default": {
-            "value": "Дата не указана. Пользователь будет забанен навсегда. Продолжить?"
-        },
-        "_obsolete": true
-    },
-    "Canceled": {
-        "_default": {
-            "value": "Отменено"
-        },
-        "_obsolete": true
-    },
-    "No board specified. User will be banned/unbanned on all boards. Continue?": {
-        "_default": {
-            "value": "Не указана доска. Пользователь будет забанен/разбанен на всех досках. Продолжить?"
-        },
-        "_obsolete": true
-    },
-    "Invalid argument count": {
-        "_default": {
-            "value": "Неверное количество аргументов"
-        },
-        "_obsolete": true
-    },
-    "This operation is REALLY heavy and may consume A LOT OF MEMORY. Are you sure?": {
-        "_default": {
-            "value": "Эта операция ПО-НАСТОЯЩЕМУ тяжелая и может использовать ОЧЕНЬ МНОГО ПАМЯТИ. Вы уверены?"
-        },
-        "_obsolete": true
-    },
-    "Caching dynamic files": {
-        "_default": {
-            "value": "Кеширование динамических файлов"
-        },
-        "_obsolete": true
-    },
-    "Caching static files": {
-        "_default": {
-            "value": "Кеширование статических файлов"
-        },
-        "_obsolete": true
-    },
-    "Are you sure?": {
-        "_default": {
-            "value": "Вы уверены?"
-        },
-        "_obsolete": true
-    },
-    "Error:": {
-        "_default": {
-            "value": "Ошибка:"
-        },
-        "_obsolete": true
-    },
-    "Rebuilt index of posts:": {
-        "_default": {
-            "value": "Пересоздан индекс постов:"
-        },
-        "_obsolete": true
-    },
-    "Enter password:": {
-        "_default": {
-            "value": "Введите пароль:"
-        },
-        "_obsolete": true
-    },
-    "Enter level:\n0 - no (just logs in)\n1 - user level\n10 - moder level\n100 - admin level\nYour choice:": {
-        "_default": {
-            "value": "Введите уровень:\n0 - нет (только логинится)\n1 - уровень пользователя\n10 - уровень модератора\n100 - уровень администратора\nВаш выбор:"
-        },
-        "_obsolete": true
-    },
-    "Invalid level": {
-        "_default": {
-            "value": "Неправильный уровень"
-        },
-        "_obsolete": true
-    },
-    "Enter boards:\nSeparate board names by spaces.\n* - any board\nYour choice:": {
-        "_default": {
-            "value": "Введите доски:\nОтделяйте названия досок пробелами.\n* - любая доска\nВаш выбор:"
-        },
-        "_obsolete": true
-    },
-    "Rerendered posts:": {
-        "_default": {
-            "value": "Заново отрендерено постов:"
-        },
-        "_obsolete": true
-    },
-    "This operation is REALLY heavey and may take a long time. Are you sure?": {
-        "_default": {
-            "value": "Эта операция ПО-НАСТОЯЩЕМУ тяжелая и может занять много времени. Вы уверены?"
-        },
-        "_obsolete": true
-    },
-    "No OlolordApplication instance": {
-        "_default": {
-            "value": "Отсутствует экземпляр OlolordApplication"
-        },
-        "_obsolete": true
-    },
-    "Uptime:": {
-        "_default": {
-            "value": "Аптайм:"
-        },
-        "_obsolete": true
-    },
-    "Invalid database connection": {
-        "error": {
-            "value": "Недействительное соединение с базой данных"
-        },
-        "_obsolete": true
     },
     "Home": {
         "toHomePageText": {
@@ -1656,18 +732,6 @@
         "timeServerText": {
             "value": "Серверное"
         }
-    },
-    "Login:": {
-        "loginLabelText": {
-            "value": "Логин:"
-        },
-        "_obsolete": true
-    },
-    "Logout": {
-        "loginButtonText": {
-            "value": "Разлогиниться"
-        },
-        "_obsolete": true
     },
     "Login": {
         "loginButtonText": {
@@ -1701,10 +765,10 @@
     },
     "Captcha:": {
         "captchaLabelText": {
-            "value": "Captcha:"
+            "value": "Капча:"
         },
         "postFormLabelCaptcha": {
-            "value": "Captcha:"
+            "value": "Капча:"
         }
     },
     "This option may be ignored on some boards": {
@@ -1745,49 +809,6 @@
     "Favorite threads": {
         "favoriteThreadsText": {
             "value": "Избранные треды"
-        }
-    },
-    "Request entity too large": {
-        "error413Text": {
-            "value": "Размер запроса слишком велик"
-        },
-        "_obsolete": true
-    },
-    "Photon": {
-        "style title": {
-            "value": "Photon"
-        },
-        "_obsolete": true
-    },
-    "Futaba": {
-        "style title": {
-            "value": "Futaba"
-        },
-        "_obsolete": true
-    },
-    "Normal": {
-        "_default": {
-            "value": "Нормальный"
-        }
-    },
-    "Ascetic": {
-        "_default": {
-            "value": "Аскетичный"
-        }
-    },
-    "General settings": {
-        "generalSettingsLegendText": {
-            "value": "Общие настройки"
-        }
-    },
-    "Script settings": {
-        "scriptSettingsLegendText": {
-            "value": "Настройки скрипта"
-        }
-    },
-    "Posts are drafts by default": {
-        "draftsByDefaultLabelText": {
-            "value": "Посты-черновики по умолчанию"
         }
     },
     "Framed version": {
@@ -1832,7 +853,7 @@
     },
     "Auto update interval (sec):": {
         "autoUpdateIntervalLabelText": {
-            "value": "Интервал автообновленияы (сек):"
+            "value": "Интервал автообновления (сек):"
         }
     },
     "Auto update threads by default": {
@@ -1916,6 +937,11 @@
             "value": "Форма и постинг"
         }
     },
+    "General": {
+        "generalTabText": {
+            "value": "Общее"
+        }
+    },
     "Posts and threads": {
         "postsTabText": {
             "value": "Посты и треды"
@@ -1977,6 +1003,9 @@
         }
     },
     "Expand thread": {
+        "expandThreadText": {
+            "value": "Развернуть тред"
+        },
         "hotkeyExpandThreadLabelText": {
             "value": "Развернуть тред"
         }
@@ -2160,33 +1189,20 @@
             "value": "Помечать ссылки на собственные посты"
         }
     },
-    "Neutron": {
-        "style title": {
-            "value": "Neutron"
-        },
-        "_obsolete": true
+    "Post preview appearance delay (ms):": {
+        "viewPostPreviewDelayLabelText": {
+            "value": "Задержка появления превью постов (мс):"
+        }
     },
     "Maximum simultaneous AJAX requests:": {
         "maxSimultaneousAjaxLabelText": {
             "value": "Максимум одновременных AJAX-запросов:"
         }
     },
-    "Burichan": {
-        "style title": {
-            "value": "Burichan"
-        },
-        "_obsolete": true
-    },
     "Shrink posts": {
         "postShrinkingLabelText": {
             "value": "Скукоживать посты"
         }
-    },
-    "AJAX request returned status": {
-        "ajaxErrorText": {
-            "value": "AJAX-запрос вернул статус"
-        },
-        "_obsolete": true
     },
     "User was banned for this post": {
         "bannedForText": {
@@ -2233,12 +1249,6 @@
             "value": "Скрыть форму постинга"
         }
     },
-    "You are not logged in!": {
-        "notLoggedInText": {
-            "value": "Вы не залогинены!"
-        },
-        "_obsolete": true
-    },
     "Open thread": {
         "openThreadText": {
             "value": "Открыть тред"
@@ -2257,11 +1267,17 @@
     "Posting is disabled in this thread": {
         "postingDisabledThreadText": {
             "value": "В этом треде постинг запрещен"
+        },
+        "_default": {
+            "value": "Posting is disabled in this thread"
         }
     },
     "Post limit reached": {
         "postLimitReachedText": {
             "value": "Достигнут лимит постов"
+        },
+        "_default": {
+            "value": "Post limit reached"
         }
     },
     "This user is registered": {
@@ -2273,12 +1289,6 @@
         "unfixThreadText": {
             "value": "Открепить тред"
         }
-    },
-    "Expiration time:": {
-        "banExpiresLabelText": {
-            "value": "Истекает:"
-        },
-        "_obsolete": true
     },
     "Hide/show": {
         "showHidePostText": {
@@ -2363,9 +1373,6 @@
     "Delete post": {
         "deletePostText": {
             "value": "Удалить пост"
-        },
-        "pageTitle": {
-            "value": "Delete post"
         }
     },
     "Delete thread": {
@@ -2376,16 +1383,7 @@
     "Delete file": {
         "deleteFileText": {
             "value": "Удалить файл"
-        },
-        "pageTitle": {
-            "value": "Delete file"
         }
-    },
-    "Sending:": {
-        "postFormButtonSubmitSending": {
-            "value": "Отправка:"
-        },
-        "_obsolete": true
     },
     "Posting speed:": {
         "postingSpeedText": {
@@ -2431,12 +1429,6 @@
         "addThreadToFavoritesText": {
             "value": "Добавить тред в избранные"
         }
-    },
-    "Waiting for reply...": {
-        "postFormButtonSubmitWaiting": {
-            "value": "Ожидание ответа..."
-        },
-        "_obsolete": true
     },
     "Post actions": {
         "postActionsText": {
@@ -2493,13 +1485,29 @@
             "value": "URL (внешняя ссылка)"
         }
     },
+    "Unordered list": {
+        "markupUnorderedList": {
+            "value": "Маркированный список"
+        }
+    },
+    "Ordered list": {
+        "markupOrderedList": {
+            "value": "Нумерованный список"
+        }
+    },
+    "List item": {
+        "markupListItem": {
+            "value": "Элемент списка"
+        }
+    },
+    "Raw HTML": {
+        "markupHtml": {
+            "value": "\"Сырой\" HTML"
+        }
+    },
     "Code block syntax": {
-        "markupLang": {
-            "value": "Синтаксис блока кода",
-            "_obsolete": true
-        },
         "markupCodeLang": {
-            "value": "Code block syntax"
+            "value": "Синтаксис блока кода"
         }
     },
     "Loading posts...": {
@@ -2510,28 +1518,15 @@
             "value": "Загрузка постов..."
         }
     },
-    "Invalid spell order": {
-        "noTokenInTableErrorText": {
-            "value": "Неправильный порядок спеллов"
-        },
-        "_obsolete": true
-    },
-    "Unexpected end of spell list": {
-        "unexpectedEndOfTokenListErrorText": {
-            "value": "Неожиданный конец списка спеллов"
-        },
-        "_obsolete": true
+    "Searching for posts...": {
+        "searchingMessage": {
+            "value": "Поиск постов..."
+        }
     },
     "Hide by image hash": {
         "hideByImageText": {
             "value": "Скрывать по хешу картинки"
         }
-    },
-    "A post marked as a draft is only visible to yourself and moderators/admins. You may edit a draft as many times as you wish. Finally, when you remove the \"draft\" mark, your post will become visible to everybody, and you will not be able to edit it anymore.\nNote, that you may also remove attached files or attach new ones while a post is marked as a draft.\nYou have to be logged in (NO registration, only a browser cookie!) to use drafts. You may edit your drafts from any browser and any device if you are logged in with the same password.": {
-        "postFormTooltipDraft": {
-            "value": "Пост, помеченный как черновик, виден только тебе и модераторам/админам. Ты можешь редактировать черновик сколько угодно. Наконец, когда ты уберешь пометку \"черновик\", твой пост станет виден всем, и ты не сможешь больше его редактировать.\nПомни, что ты можешь также удалять прикрепленные файлы и прикреплять новые, пока пост помечен как черновик.\nТы должен быть залогинен (НЕТ, никакой регистрации, только cookie в браузере!), чтобы пользоваться черновиками. Ты можешь редактировать свои черновики с любого браузера/устройства, если ты залогинен с одним и тем же паролем."
-        },
-        "_obsolete": true
     },
     "Rating:": {
         "ratingLabelText": {
@@ -2588,12 +1583,6 @@
             "value": "Показать IP-адрес пользователя"
         }
     },
-    "Unselect all": {
-        "unselectAllText": {
-            "value": "Отменить выбор всех"
-        },
-        "_obsolete": true
-    },
     "Options:": {
         "postFormLabelOptions": {
             "value": "Опции:"
@@ -2617,9 +1606,6 @@
     "Post source text": {
         "postSourceText": {
             "value": "Исходный текст поста"
-        },
-        "pageTitle": {
-            "value": "Post source text"
         }
     },
     "Enable private chat": {
@@ -2652,529 +1638,35 @@
             "value": "Подсвечивать код (требуется перезагрузка страницы)"
         }
     },
-    "This is ololord. Enter \"help --all\" to see full Help": {
-        "_default": {
-            "value": "Это ololord. Введите \"help --all\" чтобы увидеть полную Справку"
-        },
-        "_obsolete": true
-    },
-    "Make a thread <thread-number> at <board> not available for posting (closed).": {
-        "_default": {
-            "value": "Сделать тред <thread-number> на <board> недоступным для постинга (закрытым)."
-        },
-        "_obsolete": true
-    },
-    "Make a thread <thread-number> at <board> fixed (always above regular threads).": {
-        "_default": {
-            "value": "Сделать тред <thread-number> на <board> закрепленным (всегда выше обычных тредов)."
-        },
-        "_obsolete": true
-    },
-    "Make a thread <thread-number> at <board> available for posting.": {
-        "_default": {
-            "value": "Сделать тред <thread-number> на <board> доступным для постинга."
-        },
-        "_obsolete": true
-    },
-    "Show information about the user that made a post with <post-number> at <board>.": {
-        "_default": {
-            "value": "Показать информацию о пользователе, который оставил пост с номером <post-number> на доске <board>."
-        },
-        "_obsolete": true
-    },
-    "Make a thread <thread-number> at <board> not fixed (regular thread).": {
-        "_default": {
-            "value": "Сделать тред <thread-number> на <board> не закрепленным (обычным тредом)."
-        },
-        "_obsolete": true
-    },
-    "Reload all boards: builtin and provided by plugins.": {
-        "_default": {
-            "value": "Перезагрузить все доски: встроенные и предоставленные плагинами."
-        },
-        "_obsolete": true
-    },
-    "Registers a user.": {
-        "_default": {
-            "value": "Регистрирует пользователя."
-        },
-        "_obsolete": true
-    },
-    "Delete post with <post-number> at <board>.\nIf <post-number> is a thread, that thread and all posts in it are deleted.": {
-        "_default": {
-            "value": "Удаляет пост с номером <post-number> на доске <board>.\nЕсли <post-number> является тредом, этот тред будет удален вместе со всеми постами в нем."
-        },
-        "_obsolete": true
-    },
-    "Ban a user.\nThe parameters are:\n  --ip-address|-i=<ip>, where <ip> must be a valid IP address.\n  --board|-b=<board> (optional), where <board> must be one of the existing boards or *.\n    The user will be banned for the board specified or for all boards in case of *).\n    The default is *.\n  --level|-l=<level> (optional), where <level> must be one of the following:\n    0 - user is not banned,\n    1 - user is banned from posting,\n    10 - user is banned from reading.\n  --reason|-r=<reason> (optional), where <reason> is a reason for (un)banning.\n  --expires|-e=<date> (optional), where <date> must be the expiration date in the following format:\n    dd.MM.yyyy:hh - day.month.year:hour. If omitted, the ban will never expire.\nExample:\n  ban-user -i=192.168.0.2 -b=vg -l=1 \"-r=posting shit\" -e=01.04.2015:22": {
-        "_default": {
-            "value": "Забанить пользователя.\nПараметры:\n  --ip-address|-i=<ip>, где <ip> должен быть правильным IP-адресом.\n  --board|-b=<board> (опционально), где <board> должна быть одной из существующих досок, либо *.\n    Пользователь будет забанен на указанной доске, либо на всех досках, если указано *).\n  --level|-l=<level> (опционально), где <level> должен быть одним из следующих:\n    0 - пользователь не забанен,\n    1 - пользователю запрещено постить,\n    10 - пользователю запрещено читать.\n  --reason|-r=<reason> (опционально), где <reason> - причниа (раз)бана.\n  --expires|-e=<date> (опционально), где <date> должна быть датой окончания бана в следующем формате:\n    dd.MM.yyyy:hh - день.месяц.год:час. Если пропущено, бан не кончится никогда.\nПример:\n  ban-user -i=192.168.0.2 -b=vg -l=1 \"-r=постинг фигни\" -e=01.04.2015:22"
-        },
-        "_obsolete": true
-    },
-    "Ban a user.\nThe parameters are:\n  --source-board|-s=<board>, where <board> must be one of the existing boards.\n  --post-number|-p=<number>, where <number> must be a number of a post.\n  --board|-b=<board> (optional), where <board> must be one of the existing boards or *.\n    The user will be banned for the board specified or for all boards in case of *).\n    The default is *.\n  --level|-l=<level> (optional), where <level> must be one of the following:\n    0 - user is not banned,\n    1 - user is banned from posting,\n    10 - user is banned from reading.\n  --reason|-r=<reason> (optional), where <reason> is a reason for (un)banning.\n  --expires|-e=<date> (optional), where <date> must be the expiration date in the following format:\n    dd.MM.yyyy:hh - day.month.year:hour. If omitted, the ban will never expire.\nExample:\n  ban-poster -i=192.168.0.2 -b=vg -l=1 \"-r=posting shit\" -e=01.04.2015:22": {
-        "_default": {
-            "value": "Забанить пользователя.\nПараметры:\n  --source-board|-s=<board>, где <board> должна быть одной из существующих досок.\n  --post-number|-p=<number>, где <number> должен быть номером поста.\n  --board|-b=<board> (опционально), где <board> должна быть одной из существующих досок, либо *.\n    Пользователь будет забанен на указанной доске, либо на всех досках, если указано *).\n  --level|-l=<level> (опционально), где <level> должен быть одним из следующих:\n    0 - пользователь не забанен,\n    1 - пользователю запрещено постить,\n    10 - пользователю запрещено читать.\n  --reason|-r=<reason> (опционально), где <reason> - причниа (раз)бана.\n  --expires|-e=<date> (опционально), где <date> должна быть датой окончания бана в следующем формате:\n    dd.MM.yyyy:hh - день.месяц.год:час. Если пропущено, бан не кончится никогда.\nПример:\n  ban-poster -i=192.168.0.2 -b=vg -l=1 \"-r=постинг фигни\" -e=01.04.2015:22"
-        },
-        "_obsolete": true
-    },
-    "Clear the cache specified by [cache-name].\nIf [cache-name] is not specified, all caches are cleared.\nThe following caches may be cleared:\n%1": {
-        "_default": {
-            "value": "Очистить кеш с именем [cache-name].\nЕсли [cache-name] не задано, очищаются все кеши.\nМогут быть очищены следующие кеши:\n%1"
-        },
-        "_obsolete": true
-    },
-    "Rerenders all posts on all boards.\nIf one or more board names are specified, rerenders only posts on those boards.": {
-        "_default": {
-            "value": "Рендерит заново все посты на всех досках.\nЕсли указано одно или более названий досок, рендерит посты только на этих досках."
-        },
-        "_obsolete": true
-    },
-    "Clear post text index and create it from scratch.": {
-        "_default": {
-            "value": "Очистить индекс текста постов и создать его с нуля."
-        },
-        "_obsolete": true
-    },
-    "Reload all captcha engines: builtin and provided by plugins.": {
-        "_default": {
-            "value": "Перезагрузить все движки капчи: встроенные и предоставленные плагинами."
-        },
-        "_obsolete": true
-    },
-    "Cache all dynamic/static files.\n[cache-name] may be one of the following: \ndynamic_files, static_files.\nIf no argument is passed, everything is cached.": {
-        "_default": {
-            "value": "Кеширует все динамические/статические файлы.\n[cache-name] может быть одним из следующих:\ndynamic_files, static_files.\nЕсли не указан аргумент, кешируется все."
-        },
-        "_obsolete": true
-    },
-    "Finish writing to the current log file and start writing to a new one.": {
-        "_default": {
-            "value": "Закончить запись в текущий лог-файл и начать запись в новый."
-        },
-        "_obsolete": true
-    },
-    "Shows for how long the application has been running.": {
-        "_default": {
-            "value": "Показать, сколько времени прошло с момента запуска приложения."
-        },
-        "_obsolete": true
-    },
-    "Default password for posts/threads (stored as SHA-1 hash).": {
-        "_default": {
-            "value": "Пароль по умолчанию для постов/тредов (хранится в виде SHA-1 хеша)."
-        },
-        "_obsolete": true
-    },
-    "Determines if captcha is enabled.\nIf false, captcha will be disabled on all boards.\nThe default is true.": {
-        "_default": {
-            "value": "Определяет, включена ли капча.\nЕсли false, капча будет отключена на всех досках.\nПо умолчанию true."
-        },
-        "_obsolete": true
-    },
-    "Determines if posting is enabled.\nIf false, posting will be disabled on all boards.\nThe default is true.": {
-        "_default": {
-            "value": "Определяет, разрешен ли постинг.\nЕсли false, постинг будет запрещен на всех досках.\nПо умолчанию  true."
-        },
-        "_obsolete": true
-    },
-    "Maximum bump count.\nWhen a thread has reached it's bump limit, it will not be raised anymore.\nThe default is 500.": {
-        "_default": {
-            "value": "Максимальное количество бампов.\nКогда тред достигает своего бамплимита, он больше не будет поднят.\nПо умолчанию 500."
-        },
-        "_obsolete": true
-    },
-    "Maximum post count per thread.\nThe default is 1000.": {
-        "_default": {
-            "value": "Максимальное количество постов в треде.\nПо умолчанию 1000."
-        },
-        "_obsolete": true
-    },
-    "Global site prefix.\nFor example, if prefix is board/, the resulting URL will start with your-site.com/board/.": {
-        "_default": {
-            "value": "Глобальный префикс сайта.\nНапример, если префикс board/, результирующий URL будет начинаться с your-site.com/board/."
-        },
-        "_obsolete": true
-    },
-    "Determines if HTTP_X_REAL_IP header is used to get user IP address.\nOtherwise the address is taken directly from the socket.\nUseful when a proxy HTTP server is used (for example, nginx).\nThe server must be configured properly.\nThe default is false.": {
-        "_default": {
-            "value": "Определяет, используется ли заголовок HTTP_X_REAL_IP для определения IP-адреса пользователя.\nВ противном случае адрес берется непосредственно из сокета.\nПолезно, если используется HTTP-прокси-сервер (например, nginx).\nСервер должен быть настроен соответствующим образом.\nПо умолчанию false."
-        },
-        "_obsolete": true
-    },
-    "Number of threads per one page.\nThe default is 20.": {
-        "_default": {
-            "value": "Число тредов на одну страницу.\nПо умолчанию 20."
-        },
-        "_obsolete": true
-    },
-    "Maximum thread count per board.\nWhen the limit is reached, the most old threads get deleted.\nThe default is 200.": {
-        "_default": {
-            "value": "Максимальное количество тредов на каждой доске.\nКогда лимит достигнут, наиболее старые треды удаляются.\nПо умолчанию 200."
-        },
-        "_obsolete": true
-    },
-    "Maximum cache size (in bytes or in units).\nThe default value is %1.": {
-        "_default": {
-            "value": "Максимальный размер кеша (в байтах или штуках).\nПо умолчанию %1."
-        },
-        "_obsolete": true
-    },
-    "Logging mode. Possible values:\n  0 or less - don't log\n  1 - log to console only\n  2 - log to file only\n  3 and more - log to console and file\n  The default is 2.": {
-        "_default": {
-            "value": "Режим ведения логов. Возможные значения:\n  0 или меньше - не вести логов\n  1 - вести лог только в консоли\n  2 - вести лог только в файле\n  3 - вести лог и в консоли, и в файле\n  Значение по умолчанию - 2."
-        },
-        "_obsolete": true
-    },
-    "A salt used to generate tripcodes from hashpasses.": {
-        "_default": {
-            "value": "Соль, используемая для генерации трипкодов из хешпассов."
-        },
-        "_obsolete": true
-    },
-    "Maximum length of the e-mail field.\nThe default is 150.": {
-        "_default": {
-            "value": "Максимальная длина поля эл. почты.\nПо умолчанию 150."
-        },
-        "_obsolete": true
-    },
-    "Maximum length of the name field.\nThe default is 50.": {
-        "_default": {
-            "value": "Максимальная длина поля имени.\nПо умолчанию 50."
-        },
-        "_obsolete": true
-    },
-    "Maximum length of the subject field.\nThe default is 150.": {
-        "_default": {
-            "value": "Максимальная длина полятемы.\nПо умолчанию 150."
-        },
-        "_obsolete": true
-    },
-    "Maximum length of the text field.\nThe default is 15000.": {
-        "_default": {
-            "value": "Максимальная длина поля текста.\nПо умолчанию 15000."
-        },
-        "_obsolete": true
-    },
-    "Maximum length of the password field.\nThe default is 150.": {
-        "_default": {
-            "value": "Максимальная длина поля пароля.\nПо умолчанию 150."
-        },
-        "_obsolete": true
-    },
-    "Maximum attached file size (in bytes).\nThe default is 10485760 (10 MB).": {
-        "_default": {
-            "value": "Максимальный размер прикрепленного файлв (в байтах).\nПо умолчанию 10485760 (10 МБ)."
-        },
-        "_obsolete": true
-    },
-    "Maximum attached file count.\nThe default is 1.": {
-        "_default": {
-            "value": "Максимальное количество прикрепленных файлов.\nПо умолчанию 1."
-        },
-        "_obsolete": true
-    },
-    "Maximum archived thread count per board.\nThe default is 0 (do not archive).": {
-        "_default": {
-            "value": "Максимальное количество архивируемых тредов на каждой доске.\nПо умолчанию 0 (не архивировать)."
-        },
-        "_obsolete": true
-    },
-    "Maximum count of extra posts a user may make before solving captcha again.\nThe default is 0 (solve captcha every time).": {
-        "_default": {
-            "value": "Максимальное количество дополнительных постов, которые пользователь может оставить без повторного воода капчи.\nПо умолчанию 0 (капча вводится каждый раз)."
-        },
-        "_obsolete": true
-    },
-    "MIME types of files allowed for attaching.\nMust be separated by commas. Wildcard matching is used.\nThe default is %1.": {
-        "_default": {
-            "value": "MIME-типы файлов, которые разрешено прикреплять.\nДолжны быть разделены запятыми. Используется шаблон wildcard.\nПо умолчанию %1."
-        },
-        "_obsolete": true
-    },
-    "Query used to proxy non-SSL links inside iframes.\nMust contain \"%1\" (without quotes) - it is replaced by URL.": {
-        "_default": {
-            "value": "Запрос, используемый для проксирования не-SSL ссылок внутри iframe'ов.\nДолжен содержать \"%1\" (без кавычек) - это заменяется на ссылку."
-        },
-        "_obsolete": true
-    },
-    "Maximum last posts displayed for each thread.\nThe default is 3.": {
-        "_default": {
-            "value": "Максимальное количество отображаемых последних постов для каждого треда.\nПо умолчанию 3."
-        },
-        "_obsolete": true
-    },
-    "ffmpeg utility command (possibly full path).\nThe default is ffmpeg (UNIX) or ffmpeg.exe (Windows).": {
-        "_default": {
-            "value": "Команда вызова утилиты ffmpeg (возможно, полный путь).\nПо умолчанию ffmpeg (UNIX) или ffmpeg.exe (Windows)."
-        },
-        "_obsolete": true
-    },
-    "Site protocol.\nEither http or https": {
-        "_default": {
-            "value": "Протокол сайта.\nЛибо http, либо https"
-        },
-        "_obsolete": true
-    },
-    "Site domain name.\nExample: mysite.com": {
-        "_default": {
-            "value": "Доменное имя сайта.\nПример: mysite.com"
-        },
-        "_obsolete": true
-    },
-    "Determines if real IP of a client is detected.\nOtherwise the address may be an address of a proxy server.\nWorks for non-transparent proxies only (X-Forwarded-For, X-Client-IP).\nThe default is true.": {
-        "_default": {
-            "value": "Определяет, обнаруживать ли настоящий IP-адрес клиента.\nВ противном случае адрес может быть адресом прокси-сервера.\nРаботает только для непрозрачных прокси (X-Forwarded-For, X-Client-IP).\nПо умолчанию true."
-        },
-        "_obsolete": true
-    },
-    "Determines if drafts are enabled.\nThe default is true.": {
-        "_default": {
-            "value": "Определяет, включены ли черновики.\nПо умолчанию true."
-        },
-        "_obsolete": true
-    },
-    "List of IP addresses which are not logged.\nIP's are represented as ranges and are separated by commas.\nExample: 127.0.0.1,192.168.0.1-192.168.0.255": {
-        "_default": {
-            "value": "Список IP-адресов, которые не логгируются.\nIP-адреса записываются в виде диапазонов и отделяются запятыми.\nПример: 127.0.0.1,192.168.0.1-192.168.0.255"
-        },
-        "_obsolete": true
-    },
-    "Identifiers of supported captcha engines.\nIdentifers must be separated by commas.\nExample: google-recaptcha,codecha\nBy default all captcha engines are supported.": {
-        "_default": {
-            "value": "Идентификаторы поддерживаемых движков капчи.\nИдентификаторы должны разделяться запятыми.\nПример: google-recaptcha,codecha\nПо умолчанию поддерживаются все движки капчи."
-        },
-        "_obsolete": true
-    },
-    "ffprobe utility command (possibly full path).\nThe default is ffprobe (UNIX) or ffprobe.exe (Windows).": {
-        "_default": {
-            "value": "Команда вызова утилиты ffprobe (возможно, полный путь).\nПо умолчанию ffprobe (UNIX) или ffprobe.exe (Windows)."
-        },
-        "_obsolete": true
-    },
-    "file utility command (possibly full path).\nThe default is file (UNIX) or file.exe (Windows).": {
-        "_default": {
-            "value": "Команда вызова утилиты file (возможно, полный путь).\nПо умолчанию file (UNIX) или file.exe (Windows)."
-        },
-        "_obsolete": true
-    },
-    "Determines if an external file utility is used to identify MIME type.\nBy default MIME types are identified internally using libmagic.\nSet this option to false if libmagic crashes the application.\nCalling external file utility is MUCH slower.": {
-        "_default": {
-            "value": "Определяет, использовать ли внешнюю утилиту file для идентификации MIME-типа.\nПо умолчанию идентификация MIME-типов осуществляется библиотекой libmagic внутри программы.\nУстановите значение этой опции в false, если libmagic крэшит приложение.\nВызов внешней утилиты НАМНОГО медленнее."
-        },
-        "_obsolete": true
-    },
-    "Date and time of first site launch.\nIs used to calculate board speed.\nFormat: %1\nBy default, the date of creation of application settings file is used.": {
-        "_default": {
-            "value": "Дата и время первого запуска сайта.\nИспользуется для подсчета скорости досок.\nФормат: %1\nПо умолчанию используется дата создания файла настроек приложения."
-        },
-        "_obsolete": true
-    },
-    "Time zone offset in minutes.\nThe value must be between -720 and 840.\nThe default is -1000 (no offset).": {
-        "_default": {
-            "value": "Смещение временной зоны в минутах.\nЗначение должно быть в пределах от -720 до 840.\nПо умолчанию -1000 (без смещения)."
-        },
-        "_obsolete": true
-    },
-    "convert utility command from ImageMagick (possibly full path).\nThe default is convert (UNIX) or convert.exe (Windows).": {
-        "_default": {
-            "value": "Команда вызова утилиты convert из пакета ImageMagick (возможно, полный путь).\nПо умолчанию convert (UNIX) или convert.exe (Windows)."
-        },
-        "_obsolete": true
-    },
-    "Username/password for proxy used to download files attached as links.\nMay be useful when your server is under a firewall.\nSee CURLOPT_PROXYUSERPWD for detals.\nExample: user:passw0rd": {
-        "_default": {
-            "value": "Имя пользователя/пароль для прокси, используемого для загрузки файлов, прикрепленных в виде ссылок.\nМожет быть полезно, если ваш сервер находится за фаерволом.\nСм. CURLOPT_PROXY для дополнительной информации.\nПример: user:passw0rd"
-        },
-        "_obsolete": true
-    },
-    "Proxy used to download files attached as links.\nMay be useful when your server is under a firewall.\nIf no protocol is specified, it defaults to http.\nIf port is not specified, it defaults to 8080.\nSee CURLOPT_PROXY for detals.\nExample: 123.234.56.78:8080": {
-        "_default": {
-            "value": "Прокси, используемый для загрузки файлов, прикрепленных в виде ссылок.\nМожет быть полезно, если ваш сервер находится за фаерволом.\nЕсли протокол не указан, по умолчанию будет использован http.\nСм. CURLOPT_PROXY для дополнительной информации.\nПример: 123.234.56.78:8080"
-        },
-        "_obsolete": true
-    },
-    "Determines how many threads may be used simultaneously to render pages.\nThe default is QThread::idealThreadCount()": {
-        "_default": {
-            "value": "Определяет, сколько тредов может использоваться одновременно для рендеринга страниц.\nПо умолчанию QThread::idealThreadCount()"
-        },
-        "_obsolete": true
-    },
-    "This is": {
-        "_default": {
-            "value": "Это"
-        },
-        "_obsolete": true
-    },
-    "Enter \"help --commands\" to see the list of available commands": {
-        "_default": {
-            "value": "Введите \"help --commands\" чтобы посмотреть список доступных команд"
-        },
-        "_obsolete": true
-    },
-    "Another instance of": {
-        "_default": {
-            "value": "Другой экземпляр"
-        },
-        "_obsolete": true
-    },
-    "is already running. Quitting...": {
-        "_default": {
-            "value": "уже запущен. Выходим..."
-        },
-        "_obsolete": true
-    },
-    "Failed to read configuration file": {
-        "_default": {
-            "value": "Не удалось прочитать файл конфигурации"
-        },
-        "_obsolete": true
-    },
-    "Friendship is magic": {
-        "altVideoText": {
-            "value": "Дружба - это магия"
-        },
-        "_obsolete": true
-    },
     "My Little Pony": {
         "boardTitle": {
             "value": "Мой маленький пони"
         }
-    },
-    "Hands off my pony!!!!!11": {
-        "buttonText": {
-            "value": "Руки прочь от моих пони!!!!!11"
-        },
-        "_obsolete": true
-    },
-    "Enough jokes, please!": {
-        "noJokeButtonText": {
-            "value": "Хватит этих ваших шуточек!"
-        },
-        "_obsolete": true
-    },
-    "day(s)": {
-        "_default": {
-            "value": "дней"
-        },
-        "_obsolete": true
     },
     "/pr/ogramming": {
         "boardTitle": {
             "value": "Программирование"
         }
     },
-    "Invalid hashpass": {
-        "error": {
-            "value": "Неправильный хешпасс"
-        },
-        "_obsolete": true
-    },
-    "Invalid board(s)": {
-        "error": {
-            "value": "Неправильная(ые) доска(и)"
-        },
-        "_obsolete": true
-    },
-    "all boards": {
-        "pageTitle": {
-            "value": "все доски"
-        },
-        "errorDescription": {
-            "value": "все доски"
-        },
-        "_obsolete": true
-    },
     "reading and posting are restricted": {
-        "pageTitle": {
-            "value": "запрещены чтение и постинг",
-            "_obsolete": true
-        },
-        "errorDescription": {
-            "value": "запрещены чтение и постинг",
-            "_obsolete": true
-        },
         "readingAndPostingRestrictedtext": {
-            "value": "reading and posting are restricted"
+            "value": "запрещены чтение и постинг"
         }
     },
     "posting is restricted (read-only access)": {
-        "pageTitle": {
-            "value": "запрещен постинг (доступ ридонли)",
-            "_obsolete": true
-        },
-        "errorDescription": {
-            "value": "запрещен постинг (доступ ридонли)",
-            "_obsolete": true
-        },
         "postingRestrictedtext": {
-            "value": "posting is restricted (read-only access)"
+            "value": "запрещен постинг (доступ ридонли)"
         }
     },
-    "no action is restricted": {
-        "pageTitle": {
-            "value": "нет запрещенных действий"
-        },
-        "errorDescription": {
-            "value": "нет запрещенных действий"
-        },
-        "_obsolete": true
-    },
     "Ban": {
-        "banBoard": {
-            "value": "Бан",
-            "_obsolete": true
-        },
         "pageTitle": {
             "value": "Бан"
         }
-    },
-    "Board": {
-        "banBoardLabel": {
-            "value": "Доска"
-        },
-        "_obsolete": true
-    },
-    "Date": {
-        "banDateTimeLabel": {
-            "value": "Дата"
-        },
-        "_obsolete": true
     },
     "never": {
         "banExpiresNeverText": {
             "value": "никогда"
         }
-    },
-    "Expires": {
-        "banExpiresLabel": {
-            "value": "Дата окончания"
-        },
-        "_obsolete": true
-    },
-    "Restricted actions": {
-        "banLevelLabel": {
-            "value": "Запрещенные действия"
-        },
-        "_obsolete": true
-    },
-    "Reason": {
-        "banReasonLabel": {
-            "value": "Причина"
-        },
-        "_obsolete": true
-    },
-    "Date:": {
-        "errorDescription": {
-            "value": "Дата:"
-        },
-        "_obsolete": true
-    },
-    "Restricted actions:": {
-        "errorDescription": {
-            "value": "Запрещенные действия:"
-        },
-        "_obsolete": true
     },
     "Error": {
         "pageTitle": {
@@ -3184,107 +1676,15 @@
             "value": "Ошибка"
         }
     },
-    "Your IP address is in the ban list. You are not allowed to read or make posts.": {
-        "banDescription": {
-            "value": "Ваш IP-адрес находится в списке забаненных. Вам запрещено постить или читать."
-        },
-        "errorDescription": {
-            "value": "Ваш IP-адрес находится в списке забаненных. Вам запрещено постить или читать."
-        },
-        "_obsolete": true
-    },
-    "Your IP address is in the ban list. You are not allowed to make posts.": {
-        "banDescription": {
-            "value": "Ваш IP-адрес находится в списке забаненных. Вам запрещено постить."
-        },
-        "errorDescription": {
-            "value": "Ваш IP-адрес находится в списке забаненных. Вам запрещено постить."
-        },
-        "_obsolete": true
-    },
     "Page or file not found": {
         "notFoundMessage": {
             "value": "Страница или файл не найдены"
-        },
-        "errorDescription": {
-            "value": "Страница или файл не найдены",
-            "_obsolete": true
         }
     },
     "Error 404": {
         "pageTitle": {
             "value": "Ошибка 404"
-        },
-        "errorMessage": {
-            "value": "Ошибка 404",
-            "_obsolete": true
         }
-    },
-    "Writing posts:": {
-        "message": {
-            "value": "Запись постов:"
-        },
-        "_obsolete": true
-    },
-    "Reading post count...": {
-        "message": {
-            "value": "Считывание количества постов..."
-        },
-        "_obsolete": true
-    },
-    "Read post count:": {
-        "message": {
-            "value": "Считано количество постов:"
-        },
-        "_obsolete": true
-    },
-    "ms": {
-        "message": {
-            "value": "мс"
-        },
-        "_obsolete": true
-    },
-    "Reading posts...": {
-        "message": {
-            "value": "Считывание постов..."
-        },
-        "_obsolete": true
-    },
-    "Read posts:": {
-        "message": {
-            "value": "Считаны посты:"
-        },
-        "_obsolete": true
-    },
-    "Rendering post:": {
-        "message": {
-            "value": "Рендеринг поста:"
-        },
-        "_obsolete": true
-    },
-    "Rendered post:": {
-        "message": {
-            "value": "Пост отрендерен:"
-        },
-        "_obsolete": true
-    },
-    "Writing posts...": {
-        "message": {
-            "value": "Запись постов..."
-        },
-        "_obsolete": true
-    },
-    "Wrote posts:": {
-        "message": {
-            "value": "Пост записан:"
-        },
-        "_obsolete": true
-    },
-    "Finished! Operation took": {
-        "message": {
-            "value": "Готово! Операция заняла"
-        },
-        "_obsolete": true
     },
     "Role-playing games": {
         "boardTitle": {
@@ -3300,12 +1700,6 @@
         "multipleVoteVariantsText": {
             "value": "Разрешено несколько вариантов:"
         }
-    },
-    "Remove variant": {
-        "removeVoteVariantText": {
-            "value": "Убрать вариант"
-        },
-        "_obsolete": true
     },
     "Vote:": {
         "postFormLabelVote": {
@@ -3332,19 +1726,19 @@
             "value": "Забрать голос"
         }
     },
-    "Attempt to attach voting while not being the OP": {
-        "description": {
-            "value": "Попытка прикрепить голосование не будучи ОПом"
-        },
-        "_obsolete": true
-    },
     "Close voting": {
-        "pageTitle": {
+        "closeVotingText": {
+            "value": "Закрыть голосование"
+        },
+        "closeVoteActionText": {
             "value": "Закрыть голосование"
         }
     },
     "Open voting": {
-        "pageTitle": {
+        "openVotingText": {
+            "value": "Открыть голосование"
+        },
+        "openVoteActionText": {
             "value": "Открыть голосование"
         }
     },
@@ -3353,96 +1747,6 @@
             "value": "Голосование закрыто"
         }
     },
-    "Attempt to edit voting while not being the OP": {
-        "error": {
-            "value": "Попытка редактировать голосование не будучи ОПом"
-        },
-        "_obsolete": true
-    },
-    "Password is stored as a hash (SHA-1). You may see it in the .conf file.": {
-        "_default": {
-            "value": "Пароль хранится в виде хеша (SHA-1). Вы можете посмотреть его в .comf-файле."
-        },
-        "_obsolete": true
-    },
-    "Poster IP:": {
-        "_default": {
-            "value": "IP постера:"
-        },
-        "_obsolete": true
-    },
-    "Poster country:": {
-        "_default": {
-            "value": "Страна постера:"
-        },
-        "_obsolete": true
-    },
-    "Invalid captcha": {
-        "error": {
-            "value": "Неправильная капча"
-        },
-        "_obsolete": true
-    },
-    "Unsupported request type": {
-        "error": {
-            "value": "Неподдерживаемый тип запроса"
-        },
-        "_obsolete": true
-    },
-    "This request type is not supported": {
-        "error": {
-            "value": "Этот тип запроса не поддерживается"
-        },
-        "_obsolete": true
-    },
-    "Voting disabled": {
-        "error": {
-            "value": "Голосование отключено"
-        },
-        "_obsolete": true
-    },
-    "Not voted yet": {
-        "error": {
-            "value": "Еще не голосовал"
-        },
-        "_obsolete": true
-    },
-    "No votes": {
-        "error": {
-            "value": "Отсутствуют голоса"
-        },
-        "_obsolete": true
-    },
-    "Repeated voting": {
-        "error": {
-            "value": "Повторное голосование"
-        },
-        "_obsolete": true
-    },
-    "Too many votes": {
-        "error": {
-            "value": "Слишком много голосов"
-        },
-        "_obsolete": true
-    },
-    "Multiple vote occurance": {
-        "error": {
-            "value": "Множественное повторение голоса"
-        },
-        "_obsolete": true
-    },
-    "Invalid vote": {
-        "error": {
-            "value": "Некорректный голос"
-        },
-        "_obsolete": true
-    },
-    "Attempt to vote in an own voting": {
-        "error": {
-            "value": "Попытка проголосовать в собственном голосовании"
-        },
-        "_obsolete": true
-    },
     "Google reCAPTCHA": {
         "_default": {
             "value": "Google reCAPTCHA"
@@ -3450,7 +1754,7 @@
     },
     "files omitted:": {
         "omittedFilesText": {
-            "value": "files omitted:"
+            "value": "пропущено файлов:"
         }
     },
     "Log out": {
@@ -3508,12 +1812,6 @@
             "value": "Перейти"
         }
     },
-    "monospace \\`` font with escaped \\`` characters": {
-        "monospaceEscaped": {
-            "value": "моноширинный \\'' шрифт с экранированными \\'' символами"
-        },
-        "_obsolete": true
-    },
     "logged in as administrator": {
         "loginMessageAdminText": {
             "value": "залогинен в качестве администратора"
@@ -3536,7 +1834,7 @@
     },
     "monospace \\\\`` font with escaped \\\\`` characters": {
         "monospaceEscaped": {
-            "value": "monospace \\\\`` font with escaped \\\\`` characters"
+            "value": "моноширинный шрифт \\\\`` с экранированными \\\\`` символами"
         }
     },
     "Google reCAPTCHA v1": {
@@ -3559,16 +1857,6 @@
             "value": "Yandex captcha (Cyrillic)"
         }
     },
-    "Answer in this thread": {
-        "answerInThreadText": {
-            "value": "Answer in this thread"
-        }
-    },
-    "Create thread": {
-        "createThreadText": {
-            "value": "Create thread"
-        }
-    },
     "Target board": {
         "targetBoardLabelText": {
             "value": "Целевая доска"
@@ -3587,16 +1875,6 @@
     "Loading threads...": {
         "loadingThreadsMessage": {
             "value": "Загрузка тредов..."
-        }
-    },
-    "Open voting": {
-        "openVotingText": {
-            "value": "Открыть голосование"
-        }
-    },
-    "Close voting": {
-        "closeVotingText": {
-            "value": "Закрыть голосование"
         }
     },
     "Tripcode activated for THIS THREAD only": {
@@ -3649,11 +1927,6 @@
             "value": "Скрыть черновики"
         }
     },
-    "Expand thread": {
-        "expandThreadText": {
-            "value": "Развернуть тред"
-        }
-    },
     "Collapse thread": {
         "collapseThreadText": {
             "value": "Свернуть тред"
@@ -3692,6 +1965,479 @@
     "Boards": {
         "boardsText": {
             "value": "Доски"
+        }
+    },
+    "Console games": {
+        "boardTitle": {
+            "value": "Консольные игры"
+        }
+    },
+    "Unknown error": {
+        "errorUnknownText": {
+            "value": "Неизвестная ошибка"
+        }
+    },
+    "No connection with server": {
+        "error0Text": {
+            "value": "Отсутствует соединение с сервером"
+        }
+    },
+    "Bad request": {
+        "error400Text": {
+            "value": "Плохой, негодный запрос"
+        }
+    },
+    "Not found": {
+        "error404Text": {
+            "value": "Не найдено"
+        }
+    },
+    "Request timeout": {
+        "error408Text": {
+            "value": "Превышено время ожидания ответа"
+        }
+    },
+    "Request entity too large": {
+        "error413Text": {
+            "value": "Тело запроса слишком большое"
+        }
+    },
+    "Temporarily banned (DDoS detected)": {
+        "error429Text": {
+            "value": "Временный бан (обнаружен DDoS)"
+        }
+    },
+    "Internal server error": {
+        "error500Text": {
+            "value": "Внутренняя ошибка сервера"
+        }
+    },
+    "Bad gateway": {
+        "error502Text": {
+            "value": "Плохие ворота"
+        }
+    },
+    "Service unavailable": {
+        "error503Text": {
+            "value": "Сервис недоступен"
+        }
+    },
+    "Gateway timeout": {
+        "error504Text": {
+            "value": "Шлюз не дождался ответа от сервера"
+        }
+    },
+    "CloudFlare: server is returning an unknown error": {
+        "error520Text": {
+            "value": "CloudFlare: сервер возвращает неизвестную ошибку"
+        }
+    },
+    "CloudFlare: server is down": {
+        "error521Text": {
+            "value": "CloudFlare: сервер упал"
+        }
+    },
+    "CloudFlare: connection timed out": {
+        "error522Text": {
+            "value": "CloudFlare: время ожидания соединения истекло"
+        }
+    },
+    "CloudFlare: server is unreachable": {
+        "error523Text": {
+            "value": "CloudFlare: сервер недоступен"
+        }
+    },
+    "CloudFlare: a timeout occured": {
+        "error524Text": {
+            "value": "CloudFlare: время ожидания ответа от сервера истекло"
+        }
+    },
+    "CloudFlare: SSL handshake failed": {
+        "error525Text": {
+            "value": "CloudFlare: не удалось осуществить рукопожатие SSL"
+        }
+    },
+    "CloudFlare: invalid SSL certificate": {
+        "error526Text": {
+            "value": "CloudFlare: недействительный SSL-сертификат"
+        }
+    },
+    "Unsupported file type": {
+        "_default": {
+            "value": "Неподдерживаемый тип файла"
+        }
+    },
+    "This post does not have voting": {
+        "_default": {
+            "value": "Этот пост не содержит голосования"
+        }
+    },
+    "This voting is disabled": {
+        "_default": {
+            "value": "Это голосование закрыто"
+        }
+    },
+    "You have already voted": {
+        "_default": {
+            "value": "Вы уже голосовали"
+        }
+    },
+    "Invalid variant": {
+        "_default": {
+            "value": "Недействительный вариант"
+        }
+    },
+    "No variant selected": {
+        "_default": {
+            "value": "Не выбрано ни одного варианта"
+        }
+    },
+    "You have not voted yet": {
+        "_default": {
+            "value": "Вы еще не голосовали"
+        }
+    },
+    "Not enough rights": {
+        "_default": {
+            "value": "Недостаточно прав"
+        }
+    },
+    "Attempt to attach voting while not being the OP": {
+        "_default": {
+            "value": "Попытка прикрепить голосвание не будучи ОПом"
+        }
+    },
+    "No vote text provided": {
+        "_default": {
+            "value": "Не указан текст голосования"
+        }
+    },
+    "Invalid vote variant ID": {
+        "_default": {
+            "value": "Некорректный ID варианта голосования"
+        }
+    },
+    "Captcha challenge is empty": {
+        "_default": {
+            "value": "Задание капчи пусто"
+        }
+    },
+    "Captcha is empty": {
+        "_default": {
+            "value": "Капча пуста"
+        }
+    },
+    "Failed to check captcha": {
+        "_default": {
+            "value": "Не удалось проверить капчу"
+        }
+    },
+    "Invalid captcha": {
+        "_default": {
+            "value": "Недействительная капча"
+        }
+    },
+    "Failed to prepare captcha": {
+        "_default": {
+            "value": "Не удалось подготовить капчу"
+        }
+    },
+    "Captcha server error": {
+        "_default": {
+            "value": "Ошибка сервера капчи"
+        }
+    },
+    "The secret captcha parameter is missing": {
+        "_default": {
+            "value": "Отсутствует секретный параметр капчи"
+        }
+    },
+    "The secret captcha parameter is invalid or malformed": {
+        "_default": {
+            "value": "Секретный параметр капчи недействителен или неправильно оформлен"
+        }
+    },
+    "The captcha response parameter is missing": {
+        "_default": {
+            "value": "Отсутствует ответ на капчу"
+        }
+    },
+    "The captcha response parameter is invalid or malformed": {
+        "_default": {
+            "value": "Ответ на капчу недействителен или неправильно оформлен"
+        }
+    },
+    "Failed to download file": {
+        "_default": {
+            "value": "Не удалось скачать файл"
+        }
+    },
+    "File is empty": {
+        "_default": {
+            "value": "Файл пуст"
+        }
+    },
+    "Invalid board": {
+        "_default": {
+            "value": "Недействительная доска"
+        }
+    },
+    "No file specified": {
+        "_default": {
+            "value": "Не указан файл"
+        }
+    },
+    "Invalid search query": {
+        "_default": {
+            "value": "Недействительный поисковый запрос"
+        }
+    },
+    "No such post": {
+        "_default": {
+            "value": "Нет такого поста"
+        },
+        "noSuchPostErrorText": {
+            "value": "No such post"
+        }
+    },
+    "Failed to get file headers": {
+        "_default": {
+            "value": "Не удалось получить заголовки файла"
+        }
+    },
+    "Message is empty": {
+        "_default": {
+            "value": "Отсутствует сообщение"
+        }
+    },
+    "Invalid post number": {
+        "_default": {
+            "value": "Недействительный номер поста"
+        }
+    },
+    "Invalid template": {
+        "_default": {
+            "value": "Недействительный шаблон"
+        }
+    },
+    "Invalid thread": {
+        "_default": {
+            "value": "Недействительный тред"
+        }
+    },
+    "Invalid post": {
+        "_default": {
+            "value": "Недействительный пост"
+        }
+    },
+    "Invalid IP address": {
+        "_default": {
+            "value": "Недействительный IP-адрес"
+        }
+    },
+    "Failed to copy file": {
+        "_default": {
+            "value": "Не удалось скопировать файл"
+        }
+    },
+    "Posting is disabled on this board": {
+        "_default": {
+            "value": "На этой доске постинг запрещен"
+        }
+    },
+    "Invalid captcha engine": {
+        "_default": {
+            "value": "Недействительный движок капчи"
+        }
+    },
+    "Text is too long": {
+        "_default": {
+            "value": "Текст слишком длинный"
+        }
+    },
+    "Invalid thread number": {
+        "_default": {
+            "value": "Недействительный номер треда"
+        }
+    },
+    "No such thread": {
+        "_default": {
+            "value": "Нет такого треда"
+        }
+    },
+    "Source and target boards are the same": {
+        "_default": {
+            "value": "Исходная и целевая доски совпадают"
+        }
+    },
+    "Invalid file name": {
+        "_default": {
+            "value": "Недействительное имя файла"
+        }
+    },
+    "No such file": {
+        "_default": {
+            "value": "Нет такого файла"
+        }
+    },
+    "Not an audio file": {
+        "_default": {
+            "value": "Файл не является аудио-файлом"
+        }
+    },
+    "Invalid PID": {
+        "_default": {
+            "value": "Недействительный PID"
+        }
+    },
+    "Failed to get Twitter embedded HTML": {
+        "_default": {
+            "value": "Не удалось получить встраиваемый HTML Twitter"
+        }
+    },
+    "Failed to get YouTube embedded HTML": {
+        "_default": {
+            "value": "Не удалось получить встраиваемый HTML YouTube"
+        }
+    },
+    "Failed to get YouTube video info": {
+        "_default": {
+            "value": "Не удалось получить информацию о видео YouTube"
+        }
+    },
+    "Failed to create YouTube video link": {
+        "_default": {
+            "value": "Не удалось создать ссылку на видео YouTube"
+        }
+    },
+    "Failed to get Coub embedded HTML": {
+        "_default": {
+            "value": "Не удалось получить встраиваемый HTML"
+        }
+    },
+    "Failed to get Coub video info": {
+        "_default": {
+            "value": "Не удалось получить информацию о видео Coub"
+        }
+    },
+    "Failed to create Coub video link": {
+        "_default": {
+            "value": "Не удалось создать ссылку на видео Coub"
+        }
+    },
+    "Invalid method": {
+        "_default": {
+            "value": "Недействительный метод"
+        }
+    },
+    "Failed to call method": {
+        "_default": {
+            "value": "Не удалось вызвать метод"
+        }
+    },
+    "Invalid captcha type": {
+        "_default": {
+            "value": "Недействительный тип капчи"
+        }
+    },
+    "Invalid URL": {
+        "_default": {
+            "value": "Недействительный URL"
+        }
+    },
+    "Unexpected end of token list": {
+        "unexpectedEndOfTokenListErrorText": {
+            "value": "Неожиданный конец списка токенов"
+        }
+    },
+    "Failed to generate hash": {
+        "failedToGenerateHashErrorText": {
+            "value": "Не удалось сгенерировать хеш"
+        }
+    },
+    "The thread is already in favorites": {
+        "alreadyInFavoritesErrorText": {
+            "value": "Тред уже добавлен в избранное"
+        }
+    },
+    "Invalid arguments": {
+        "invalidArgumentsErrorText": {
+            "value": "Недействительные аргументы"
+        }
+    },
+    "No such token in the table": {
+        "noTokenInTableErrorText": {
+            "value": "В таблице нет такого токена"
+        }
+    },
+    "The thread was deleted": {
+        "threadDeletedErrorText": {
+            "value": "Тред был удален"
+        }
+    },
+    "Invalid data": {
+        "invalidDataErrorText": {
+            "value": "Недействительные данные"
+        }
+    },
+    "Search query is empty": {
+        "_default": {
+            "value": "Поисковый запрос пуст"
+        }
+    },
+    "Search query is too long": {
+        "_default": {
+            "value": "Поисковый запрос слишком длинный"
+        }
+    },
+    "404 (not found)": {
+        "errorMessage": {
+            "value": "404 (не найдено)"
+        }
+    },
+    "Invalid page number": {
+        "_default": {
+            "value": "Недействительный номер страницы"
+        }
+    },
+    "Enable API request caching": {
+        "apiRequestCachingLabelText": {
+            "value": "Кэшировать запросы к API"
+        }
+    },
+    "Export": {
+        "exportSettingsButtonText": {
+            "value": "Экспортировать"
+        }
+    },
+    "Import": {
+        "importSettingsButtonText": {
+            "value": "Импортировать"
+        }
+    },
+    "Copy settings string and save it somewhere": {
+        "copySettingsHint": {
+            "value": "Скопируйте строку с настройками и где-нибудь сохраните"
+        }
+    },
+    "Paste settings string here": {
+        "pasteSettingsHint": {
+            "value": "Вставьте сюда строку с настройками"
+        }
+    },
+    "Enter your message here": {
+        "chatMessageTextPlaceholder": {
+            "value": "Введите сообщение сюда"
+        }
+    },
+    "Allow bumping": {
+        "setThreadBumpableText": {
+            "value": "Разрешить бампать"
+        }
+    },
+    "Disallow bumping": {
+        "setThreadUnbumpableText": {
+            "value": "Запретить бампать"
         }
     }
 }

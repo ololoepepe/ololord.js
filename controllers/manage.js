@@ -10,7 +10,7 @@ var router = express.Router();
 
 router.get("/manage.html", function(req, res) {
     if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
-        return controller.error(req, res, "Not enough rights");
+        return controller.error(res, Tools.translate("Not enough rights"));
     var model = {};
     model.title = Tools.translate("User management", "pageTitle");
     model.extraScripts = [
@@ -25,11 +25,18 @@ router.get("/manage.html", function(req, res) {
     };
     Database.userBans().then(function(users) {
         model.bannedUsers = users;
-        return controller(null, "manage", model);
+        Tools.forIn(model.bannedUsers, function(user, ip) {
+            var ipv4 = Tools.preferIPv4(ip);
+            if (ipv4 && ipv4 == ip)
+                return;
+            model.bannedUsers[ipv4] = user;
+            delete model.bannedUsers[ip];
+        });
+        return controller("manage", model);
     }).then(function(data) {
         res.send(data);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        controller.error(res, err);
     });
 });
 

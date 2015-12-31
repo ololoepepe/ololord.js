@@ -1,42 +1,18 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<body class="{{=it.deviceType}}" {{#def.baseData}}>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
+<body class="mobile" {{#def.baseData}}>
 <div id="toolbarPlaceholder" style="display: none;"></div>
+<div id="customHeaderPlaceholder" style="display: none;"></div>
 <br />
 <div id="searchPlaceholder" style="display: none;"></div>
 <div class="theTitle">
-    {{? !it.error}}
-        <h1>{{=it.resultsMessage}}</h1>
-    {{??}}
-        <h1>{{=it.errorMessage}}</h1>
-    {{?}}
+    <h1>{{=it.tr.searchResultsMessage}}</h1>
 </div>
-{{? !it.error}}
-    {{? it.searchResults && it.searchResults.length > 0}}
-        <ol>
-            {{~it.searchResults :result}}
-                <li>
-                    <div>
-                        <a href="/{{=it.site.pathPrefix}}{{=result.boardName}}/res/{{=result.threadNumber}}.html{{? result.threadNumber != result.postNumber}}#{{=result.postNumber}}{{?}}"
-                                   target="_blank">{{!result.subject}}</a>
-                    </div>
-                    <div>
-                        <span class="quotation">/{{=result.boardName}}/res/{{=result.threadNumber}}.html{{? result.threadNumber != result.postNumber}}#{{=result.postNumber}}{{?}}</span>
-                    </div>
-                    <div>
-                        {{=result.text}}
-                    </div>
-                </li>
-            {{~}}
-        </ol>
-    {{??}}
-        <div class="sectionHeader">
-            <h3>{{=it.nothingFoundMessage}}</h3>
-        </div>
-    {{?}}
-{{?}}
+<div id="searchResultsPlaceholder" class="loadingMessage">
+    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+    <h1 style="display: inline;">{{=it.tr.searchingMessage}}</h1>
+</div>
 <div id="customFooterPlaceholder" style="display: none;"></div>
 </body>
 </html>

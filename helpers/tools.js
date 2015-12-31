@@ -15,6 +15,7 @@ var Util = require("util");
 var XRegExp = require("xregexp");
 
 var config = require("./config");
+var Global = require("./global");
 
 var translate = require("cute-localize")({
     locale: config("site.locale", "en"),
@@ -35,11 +36,11 @@ mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/formidable");
 var ExternalLinkRegexpPattern = (function() {
     var schema = "https?:\\/\\/|ftp:\\/\\/";
     var ip = "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}"
-             "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])";
+        + "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])";
     var hostname = "([\\w\\p{L}\\.\\-]+)\\.([\\p{L}]{2,17}\\.?)";
     var port = ":\\d+";
     var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:\\,\\(\\)]*)*\\/?";
-    return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path + "(?!\\S)";
+    return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path/* + "(?!\\S)"*/;
 })();
 
 Object.defineProperty(module.exports, "Billion", { value: (2 * 1000 * 1000 * 1000) });
@@ -454,6 +455,9 @@ module.exports.correctAddress = function(ip) {
         return null;
     if ("::1" == ip)
         ip = "127.0.0.1";
+    var match = ip.match(/^\:\:ffff\:(\d+\.\d+\.\d+\.\d+)$/);
+    if (match)
+        ip = match[1];
     if (ip.replace(":", "") == ip)
         ip = "::" + ip;
     try {
@@ -535,21 +539,21 @@ var recover = function(c, err) {
     if (!c.fd)
         return Promise.reject(err);
     return flockFile(c.fd, "un").catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         return Promise.resolve();
     }).then(function() {
         if (c.noclose)
             return Promise.resolve();
         return closeFile(c.fd);
     }).catch(function(err) {
-        console.log(err.stack || err);
+        Global.error(err.stack || err);
         return Promise.resolve();
     }).then(function() {
         return Promise.reject(err);
     });
 };
 
-module.exports.readFile = function(path) {
+module.exports.readFile = function(path, ifModifiedSince) {
     var c = {};
     return openFile(path, "r").then(function(fd) {
         c.fd = fd;
@@ -558,6 +562,9 @@ module.exports.readFile = function(path) {
         c.locked = true;
         return FS.stat(path);
     }).then(function(stats) {
+        c.lastModified = stats.node.mtime;
+        if (ifModifiedSince && +ifModifiedSince >= +stats.mtime)
+            return Promise.resolve();
         if (stats.size <= 0)
             return Promise.resolve();
         c.buffer = new Buffer(stats.size);
@@ -569,7 +576,10 @@ module.exports.readFile = function(path) {
         c.locked = false;
         return closeFile(c.fd);
     }).then(function() {
-        return Promise.resolve(c.data);
+        return Promise.resolve({
+            data: c.data,
+            lastModified: c.lastModified
+        });
     }).catch(recover.bind(null, c));
 };
 
@@ -605,4 +615,37 @@ module.exports.removeFile = function(path) {
         c.locked = false;
         return Promise.resolve();
     }).catch(recover.bind(null, c));
+};
+
+var controller;
+
+module.exports.controllerHtml = function(req, res, f, keys) {
+    if (!controller)
+        controller = require("./controller"); //NOTE: Circular dependency workaround
+    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
+    var args = [f, ifModifiedSince].concat(Array.prototype.slice.call(arguments, 3));
+    return controller.html.apply(controller, args).then(function(data) {
+        res.setHeader("Last-Modified", data.lastModified.toUTCString());
+        if (+ifModifiedSince >= +data.lastModified)
+            res.status(304);
+        res.send(data.data);
+    });
+};
+
+module.exports.series = function(arr, f) {
+    var p = Promise.resolve();
+    if (Util.isArray(arr)) {
+        arr.forEach(function(el) {
+            p = p.then(function() {
+                return f(el);
+            });
+        });
+    } else if (Util.isObject(arr)) {
+        forIn(arr, function(el, key) {
+            p = p.then(function() {
+                return f(el, key);
+            });
+        });
+    }
+    return p;
 };
