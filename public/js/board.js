@@ -2754,7 +2754,7 @@ lord.showTripcode = function(threadNumber) {
 lord.showMenu = function(e, input, selector) {
     e.stopPropagation();
     if (lord.currentMenu) {
-        var same = $(selector).is(":visible");
+        var same = (lord.currentMenu.selector == selector);
         lord.currentMenu.hide();
         if (same) {
             lord.currentMenu = null;
