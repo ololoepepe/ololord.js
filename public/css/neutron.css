@@ -660,6 +660,10 @@ span.newPostCount {
     display: none;
 }
 
+.postHeader.desktop {
+    white-space: nowrap;
+}
+
 .postFileName, .postFileSize {
     white-space: nowrap;
 }

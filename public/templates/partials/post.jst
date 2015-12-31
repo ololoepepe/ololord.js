@@ -6,7 +6,7 @@
      data-file-count={{=post.fileInfos.length}}
      {{? post.isOp}}data-is-op="true"{{?}}
      {{? it.checkOwnPost(post)}}data-own-post="true"{{?}}>
-    <div class="postHeader">
+    <div class="postHeader {{=it.deviceType}}">
         <span class="nowrap">
             {{? it.customPostHeaderPart && it.customPostHeaderPart[0]}}
                 {{ out += it.customPostHeaderPart[0](it, thread, post); }}
