@@ -980,8 +980,7 @@ lord.initializeOnLoadSettings = function() {
                         position: "absolute",
                         left: Math.floor(pos.left + bs.width() / 2 - 100) + "px",
                         top: Math.floor(pos.top + bs.height() + 15) + "px",
-                        width: "200px",
-                        zIndex: 11000
+                        width: "200px"
                     }).before("<div style='width: 20px; height: 5px; background-color: black;'></div>");
                 }
             }

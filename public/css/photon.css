@@ -1394,6 +1394,7 @@ input.buttonImage {
 
 .ui-tooltip {
     border: 1px solid #CCCCCC !important;
+    z-index: 11000 !important;
 }
 
 .ui-tooltip-content {
