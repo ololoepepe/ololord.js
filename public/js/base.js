@@ -976,11 +976,10 @@ lord.initializeOnLoadSettings = function() {
             position: {
                 using: function() {
                     var pos = bs.position();
-                    var offset = lord.queryOne(".toolbar") ? $(".toolbar").height() : (pos.top + bs.height());
                     $(this).css({
                         position: "absolute",
                         left: Math.floor(pos.left + bs.width() / 2 - 100) + "px",
-                        top: Math.floor(offset + 15) + "px",
+                        top: Math.floor(pos.top + bs.height() + 15) + "px",
                         width: "200px"
                     }).before("<div style='width: 20px; height: 5px; background-color: black;'></div>");
                 }
