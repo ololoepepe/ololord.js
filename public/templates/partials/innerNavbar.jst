@@ -1,8 +1,7 @@
 {{? "mobile" == it.deviceType}}
     [<div class="boardSelectContainer">
-        <select name="url" class="select boardSelect" title="{{=it.tr.boardsText}}" name="boardSelect"
-                onchange="(function(sel) { var val = sel.options[sel.selectedIndex].value; if (val) location = val; })(this);"
-                title="{{=it.tr.boardSelectTooltip}}">
+        <select name="url" class="select boardSelect" title="{{=it.tr.boardSelectTooltip}}"
+                onchange="(function(sel) { var val = sel.options[sel.selectedIndex].value; if (val) location = val; })(this);">
             <option selected="true" value="" class="selectOption"></option>
             {{~it.boards :board}}
                 {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}

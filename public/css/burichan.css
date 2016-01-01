@@ -1290,3 +1290,24 @@ input.buttonImage {
 .bordered {
     border: 1px solid #CCCCCC;
 }
+
+.ui-tooltip {
+    border: 1px solid #CCCCCC !important;
+}
+
+.ui-tooltip-content {
+    font-family: Verdana,sans-serif;
+    background-color: #D6DAF0;
+}
+
+.ui-tooltip-content::after {
+    content: '';
+    position: absolute;
+    border-style: solid;
+    display: block;
+    width: 0;
+    top: -10px;
+    left: 85px;
+    border-color: #CCCCCC transparent;
+    border-width: 0 10px 10px;
+}

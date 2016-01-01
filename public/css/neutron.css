@@ -1439,3 +1439,25 @@ input.buttonImage {
 .bordered {
     border: 1px solid #575757;
 }
+
+.ui-tooltip {
+    border: 1px solid #575757 !important;
+}
+
+.ui-tooltip-content {
+    background-color: #2C2C2C;
+    color: #698CC0;
+    font-family: "Trebuchet MS",Trebuchet,tahoma,serif;
+}
+
+.ui-tooltip-content::after {
+    content: '';
+    position: absolute;
+    border-style: solid;
+    display: block;
+    width: 0;
+    top: -10px;
+    left: 85px;
+    border-color: #575757 transparent;
+    border-width: 0 10px 10px;
+}

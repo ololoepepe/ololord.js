@@ -1378,3 +1378,24 @@ input.buttonImage {
 .bordered {
     border: 1px solid #F0E0D6;
 }
+
+.ui-tooltip {
+    border: none !important;
+}
+
+.ui-tooltip-content {
+    background-color: #F0E0D6;
+    color: #800000;
+}
+
+.ui-tooltip-content::after {
+    content: '';
+    position: absolute;
+    border-style: solid;
+    display: block;
+    width: 0;
+    top: -10px;
+    left: 85px;
+    border-color: #F0E0D6 transparent;
+    border-width: 0 10px 10px;
+}

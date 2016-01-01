@@ -968,13 +968,29 @@ lord.initializeOnLoadSettings = function() {
     }
     if (lord.queryOne(".toolbar"))
         window.addEventListener("hashchange", lord.hashChangeHandler, false);
-    if (lord.deviceType("mobile") && !lord.getLocalObject("tooltips/boardSelect", false)) {
-        lord.setLocalObject("tooltips/boardSelect", true);
-        var bs = $(lord.nameOne("boardSelect"));
-        bs.tooltip("open");
+    var bsc = lord.getLocalObject("tooltips/boardSelect", 0);
+    if (lord.deviceType("mobile") && bsc < 5) {
+        lord.setLocalObject("tooltips/boardSelect", bsc + 1);
+        var bs = $(lord.queryOne(".boardSelectContainer > select"));
+        bs.tooltip({
+            position: {
+                using: function() {
+                    var pos = bs.position();
+                    $(this).css({
+                        position: "absolute",
+                        left: Math.floor(pos.left + bs.width() / 2 - 100) + "px",
+                        top: Math.floor(pos.top + bs.height() + 15) + "px",
+                        width: "200px"
+                    }).before("<div style='width: 20px; height: 5px; background-color: black;'></div>");
+                }
+            }
+        });
         setTimeout(function() {
-            bs.tooltip("close");
-        }, 10 * lord.Second);
+            bs.tooltip("open");
+            setTimeout(function() {
+                bs.tooltip("close");
+            }, 10 * lord.Second);
+        }, 3 * lord.Second);
     }
 };
 
