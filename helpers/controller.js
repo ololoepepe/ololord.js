@@ -645,7 +645,7 @@ controller.translationsModel = function() {
     translate("Enter your message here", "chatMessageTextPlaceholder");
     translate("Allow bumping", "setThreadBumpableText");
     translate("Disallow bumping", "setThreadUnbumpableText");
-
+    translate("Use this button to jump between boards", "boardSelectTooltip");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

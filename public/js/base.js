@@ -968,6 +968,14 @@ lord.initializeOnLoadSettings = function() {
     }
     if (lord.queryOne(".toolbar"))
         window.addEventListener("hashchange", lord.hashChangeHandler, false);
+    if (lord.deviceType("mobile") && !lord.getLocalObject("tooltips/boardSelect", false)) {
+        lord.setLocalObject("tooltips/boardSelect", true);
+        var bs = $(lord.nameOne("boardSelect"));
+        bs.tooltip("open");
+        setTimeout(function() {
+            bs.tooltip("close");
+        }, 10 * lord.Second);
+    }
 };
 
 window.addEventListener("load", function load() {

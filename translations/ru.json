@@ -2439,5 +2439,10 @@
         "setThreadUnbumpableText": {
             "value": "Запретить бампать"
         }
+    },
+    "Use this button to jump between boards": {
+        "boardSelectTooltip": {
+            "value": "Используйте эту кнопку для перехода между досками"
+        }
     }
 }
