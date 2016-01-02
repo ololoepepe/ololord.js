@@ -36,16 +36,14 @@ var testLink = function(link) {
     return { error: "This board/thread may not be accepted" };
 };
 
-board.postExtraData = function(req, fields, files, oldPost) {
+board.postExtraData = function(req, fields) {
     if (fields.thread)
-        return Promise.resolve(null);
-    if (!oldPost || !oldPost.extraData)
         return Promise.resolve(null);
     var link = fields.link;
     var result = testLink(link);
     if (result)
         return Promise.reject(result);
-    if (!link.substr(0, 4) != "http")
+    if (link.substr(0, 4) != "http")
         link = "http://" + link;
     return Promise.resolve(link);
 };
