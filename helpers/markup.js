@@ -590,7 +590,7 @@ var convertCode = function(_, text, matchs, _, options) {
     lang = result.language || lang;
     var langClass = lang ? (" " + lang) : "";
     var langName = langNames.hasOwnProperty(lang) ? langNames[lang] : lang;
-    options.op = `<div class="codeBlock${langClass} hljs" title="${langName}">`;
+    options.op = `<div class="codeBlock${langClass} hljs" title="${langName || ''}">`;
     options.cl = "</div>";
     return Promise.resolve(Highlight.fixMarkup(text));
 };
