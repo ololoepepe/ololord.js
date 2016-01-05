@@ -21,7 +21,7 @@ a {
 }
 
 a.expandCollapse {
-    color: #D6DAF0;
+    color: #777777;
     cursor: pointer;
 }
 
@@ -30,7 +30,7 @@ a:hover {
 }
 
 a.expandCollapse:hover {
-    color: #666666;
+    color: #444444;
     cursor: pointer
 }
 
