@@ -1407,11 +1407,12 @@ module.exports.findPosts = function(query, boardName) {
         });
         if (keys.length < 1)
             return Promise.resolve([]);
+        c.keys = keys;
         return db.hmget("posts", keys);
     }).then(function(posts) {
         return posts.filter(function(post, i) {
             if (!post)
-                Global.debug(keys[i]);
+                Global.debug(c.keys[i]);
             return post;
         }).map(function(post) {
             return JSON.parse(post);
