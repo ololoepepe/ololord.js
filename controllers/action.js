@@ -551,7 +551,7 @@ router.post("/action/search", function(req, res) {
         return Database.findPosts(c.query, boardName);
     }).then(function(posts) {
         c.model.searchResults = posts.map(function(post) {
-            var text = post.rawText;
+            var text = post.rawText || "";
             text = text.replace(/\r*\n+/g, " ");
             if (text.length > 300)
                 text = text.substr(0, 297) + "...";
