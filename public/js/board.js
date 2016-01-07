@@ -2829,6 +2829,11 @@ lord.initializeOnLoadBaseBoard = function() {
                 c.model.thread = model.thread;
             c.model.postformRules = JSON.parse(lord.id("model-postformRules").innerHTML);
             lord.id("hiddenPostForm").appendChild(lord.template("postForm", c.model));
+            lord.arr(lord.id("options").childNodes).forEach(function(node) {
+                if (3 != node.nodeType)
+                    return;
+                node.parentNode.removeChild(node);
+            });
             $("#options").buttonset();
             $("[name='markupHtml'], [name='optionDraft']").button();
             var captcha = lord.selectCaptchaEngine();
