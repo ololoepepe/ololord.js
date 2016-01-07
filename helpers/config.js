@@ -1,5 +1,6 @@
 var equal = require("deep-equal");
 var FS = require("q-io/fs");
+var Path = require("path");
 
 var contains = function(s, subs) {
     if (typeof s == "string" && typeof subs == "string")
@@ -13,7 +14,11 @@ var contains = function(s, subs) {
     return false;
 };
 
-var configFileName = __dirname + `/../config${contains(process.argv.slice(2), "--dev-mode") ? "-dev" : ""}.json`;
+var configFileName = process.argv[2];
+if (!configFileName)
+    configFileName = __dirname + "/../config.json";
+configFileName = Path.resolve(__dirname + "/..", configFileName);
+console.log("[" + process.pid + "] Using config file: \"" + configFileName + "\"...");
 var config = require(configFileName);
 
 var setHooks = {};
