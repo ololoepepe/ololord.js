@@ -286,13 +286,16 @@
                     {{?}}
                     {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
                         <a href="javascript:void(0);" onclick="lord.markup('raw-html'); return false;"
-                           style="display: inline-block; vertical-align: top;" name="markupHtml">[raw-html]</a>
+                           style="display: inline-block; vertical-align: top;" title='{{=it.tr.markupHtml}}'
+                           name="markupHtml"><img src="/{{=it.site.pathPrefix}}img/html.png" class="signImage"></a>
                     {{?}}
                     {{? it.customPostFormOption && it.customPostFormOption[40]}}
                         {{ out += it.customPostFormOption[40](it); }}
                     {{?}}
                     <a href="javascript:void(0);" onclick="lord.addToDrafts(this); return false;" name="markupDraft"
-                       style="display: inline-block; vertical-align: top;">{{=it.tr.addToDraftsText}}</a>
+                       style="display: inline-block; vertical-align: top;"
+                       title="{{=it.tr.addToDraftsText}}"><img src="/{{=it.site.pathPrefix}}img/draft.png"
+                                                               class="signImage"></a>
                     {{? it.customPostFormOption && it.customPostFormOption[50]}}
                         {{ out += it.customPostFormOption[50](it); }}
                     {{?}}
