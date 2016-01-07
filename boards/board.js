@@ -220,8 +220,8 @@ var Board = function(name, title, options) {
     return [];
 };
 
-/*public*/ Board.prototype.testParameters = function(fields, files, creatingThread) {
-    //
+/*public*/ Board.prototype.testParameters = function(req, fields, files, creatingThread) {
+    return Promise.resolve();
 };
 
 /*public*/ Board.prototype.defineSetting = function(name, def) {

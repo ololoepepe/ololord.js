@@ -126,7 +126,7 @@ var getFiles = function(fields, files, transaction) {
 var testParameters = function(fields, files, creatingThread) {
     var board = Board.board(fields.boardName);
     if (!board)
-        return { error: 404 };
+        return Promise.reject(404);
     var email = fields.email || "";
     var name = fields.name || "";
     var subject = fields.subject || "";
@@ -136,21 +136,21 @@ var testParameters = function(fields, files, creatingThread) {
     var maxFileSize = board.maxFileSize;
     var maxFileCount = board.maxFileCount;
     if (email.length > board.maxEmailLength)
-        return { error: Tools.translate("E-mail is too long", "error") };
+        return Promise.reject(Tools.translate("E-mail is too long", "error"));
     if (name.length > board.maxNameLength)
-        return { error: Tools.translate("Name is too long", "error") };
+        return Promise.reject(Tools.translate("Name is too long", "error"));
     if (subject.length > board.maxSubjectLength)
-        return { error: Tools.translate("Subject is too long", "error") };
+        return Promise.reject(Tools.translate("Subject is too long", "error"));
     if (text.length > board.maxTextFieldLength)
-        return { error: Tools.translate("Comment is too long", "error") };
+        return Promise.reject(Tools.translate("Comment is too long", "error"));
     if (password.length > board.maxPasswordLength)
-        return { error: Tools.translate("Password is too long", "error") };
+        return Promise.reject(Tools.translate("Password is too long", "error"));
     if (creatingThread && maxFileCount && !fileCount)
-        return { error: Tools.translate("Attempt to create a thread without attaching a file", "error") };
+        return Promise.reject(Tools.translate("Attempt to create a thread without attaching a file", "error"));
     if (text.length < 1 && !fileCount)
-        return { error: Tools.translate("Both file and comment are missing", "error") };
+        return Promise.reject(Tools.translate("Both file and comment are missing", "error"));
     if (fileCount > maxFileCount) {
-        return { error: Tools.translate("Too many files", "error") };
+        return Promise.reject(Tools.translate("Too many files", "error"));
     } else {
         var err = files.reduce(function(err, file) {
             if (err)
@@ -161,9 +161,9 @@ var testParameters = function(fields, files, creatingThread) {
                 return Tools.translate("File type is not supported", "error");
         }, "");
         if (err)
-            return { error: err };
+            return Promise.reject(err);
     }
-    //NOTE: Yep, return nothing
+    return Promise.resolve();
 };
 
 router.post("/action/markupText", function(req, res) {
@@ -225,9 +225,10 @@ router.post("/action/createPost", function(req, res) {
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
-        var testResult = testParameters(c.fields, c.files) || c.board.testParameters(c.fields, c.files);
-        if (testResult)
-            return Promise.reject(testResult.error);
+        return testParameters(c.fields, c.files);
+    }).then(function() {
+        return c.board.testParameters(req, c.fields, c.files);
+    }).then(function() {
         return Database.createPost(req, c.fields, c.files, transaction);
     }).then(function(post) {
         res.send({
@@ -255,9 +256,10 @@ router.post("/action/createThread", function(req, res) {
         return getFiles(c.fields, c.files, transaction);
     }).then(function(files) {
         c.files = files;
-        var testResult = testParameters(c.fields, c.files, true) || c.board.testParameters(c.fields, c.files, true);
-        if (testResult)
-            return Promise.reject(testResult.error);
+        return testParameters(c.fields, c.files, true);
+    }).then(function() {
+        return c.board.testParameters(req, c.fields, c.files, true);
+    }).then(function() {
         return Database.createThread(req, c.fields, c.files, transaction);
     }).then(function(thread) {
         res.send({

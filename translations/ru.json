@@ -2444,5 +2444,25 @@
         "boardSelectTooltip": {
             "value": "Используйте эту кнопку для перехода между досками"
         }
+    },
+    "Thread link is empty": {
+        "error": {
+            "value": "Отсутствует ссылка на тред"
+        }
+    },
+    "Thread link is too long": {
+        "error": {
+            "value": "Ссылка на тред слишком длинная"
+        }
+    },
+    "This board/thread may not be accepted": {
+        "error": {
+            "value": "Эта доска/тред не может быть принята"
+        }
+    },
+    "Neither file name nor hash is specified": {
+        "error": {
+            "value": "Не указано ни имя файла, ни хеш"
+        }
     }
 }

@@ -455,7 +455,7 @@ lord.readableSize = function(sz) {
         sz = sz.toString();
         sz += " " + lord.text("bytesText");
     }
-    return Promise.resolve(sz);
+    return sz;
 };
 
 lord.getFileHashes = function(div) {
@@ -1351,9 +1351,7 @@ lord.fileAddedCommon = function(div, file) {
         fileName = fileName.substr(0, 27) + "...";
     var p;
     if (file) {
-        p = lord.readableSize(file.size).then(function(txt) {
-            return Promise.resolve("(" + txt + ")");
-        });
+        p = Promise.resolve("(" + lord.readableSize(file.size) + ")");
         if (+file.size > +lord.data("maxFileSize"))
             warn();
     } else if (div.fileUrl.replace("vk://", "") != div.fileUrl) {
@@ -2832,7 +2830,7 @@ lord.initializeOnLoadBaseBoard = function() {
             c.model.postformRules = JSON.parse(lord.id("model-postformRules").innerHTML);
             lord.id("hiddenPostForm").appendChild(lord.template("postForm", c.model));
             $("#options").buttonset();
-            $("[name='markupHtml'], [name='markupDraft']").button();
+            $("[name='markupHtml'], [name='optionDraft']").button();
             var captcha = lord.selectCaptchaEngine();
             var appendCaptchaWidgetToContainer = function(container) {
                 if (captcha && captcha.widgetHtml)
@@ -2863,6 +2861,8 @@ lord.initializeOnLoadBaseBoard = function() {
                     script.src = captcha.scriptSource;
                     lord.queryOne("head").appendChild(script);
                 }
+                if (typeof lord.postFormLoaded == "function")
+                    lord.postFormLoaded();
             }).catch(lord.handleError);
         }
         if (+lord.data("threadNumber")) {

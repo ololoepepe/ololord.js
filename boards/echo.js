@@ -26,14 +26,14 @@ var _board = board;
 
 var testLink = function(link) {
     if (!link)
-        return { error: "Thread link is empty" };
+        return Tools.translate("Thread link is empty", "error");
     if (link.length > _board.maxLinkLength)
-        return { error: "Thread link is too long" };
+        return Tools.translate("Thread link is too long", "error");
     for (var i = 0; i < _board.acceptedExternalBoardLinks.length; ++i) {
         if ((new XRegExp(_board.acceptedExternalBoardLinks[i])).test(link))
             return;
     }
-    return { error: "This board/thread may not be accepted" };
+    return Tools.translate("This board/thread may not be accepted", "error");
 };
 
 board.postExtraData = function(req, fields) {
@@ -62,10 +62,13 @@ board.renderPost = function(post) {
     });
 };
 
-board.testParameters = function(fields, files, creatingThread) {
+board.testParameters = function(req, fields, files, creatingThread) {
     if (!creatingThread)
-        return;
-    return testLink(fields.link);
+        return Promise.resolve();
+    var result = testLink(fields.link);
+    if (result)
+        return Promise.reject(result);
+    return Promise.resolve();
 };
 
 module.exports = board;

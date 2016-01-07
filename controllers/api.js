@@ -94,7 +94,7 @@ router.get("/api/fileInfo.json", function(req, res) {
 
 router.get("/api/fileExistence.json", function(req, res) {
     if (!req.query.fileName && !req.query.fileHash)
-        return controller.error(res, Tools.translate("Neither name nor hash is specified"), true);
+        return controller.error(res, Tools.translate("Neither file name nor hash is specified", "error"), true);
     var identifier = req.query.fileName || req.query.fileHash;
     var p;
     if (req.query.fileName)
