@@ -9,6 +9,10 @@ body.desktop {
     font-size: 14.4px;
 }
 
+.ui-widget {
+    font-size: 14.4px !important;
+}
+
 body.mobile {
     -moz-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
@@ -1086,33 +1090,6 @@ input.buttonImage {
 
 .boardSelectForm {
     display: inline;
-}
-
-.imageCheckBox {
-    display: none;
-}
-
-.imageCheckBox + label {
-    height: 24px;
-    width: 24px;
-    display: inline-block;
-    padding: 0 0 0 0px;
-}
-
-.imageCheckBox:checked + label {
-    box-shadow: inset 0 1px 5px #555555;
-}
-
-#checkboxRawHtml + label, #checkboxRawHtmlEdit + label {
-    background: url("../img/checkbox_raw_html.png") center no-repeat;
-}
-
-#checkboxOp + label {
-    background: url("../img/checkbox_op.png") center no-repeat;
-}
-
-#checkboxTripcode + label {
-    background: url("../img/checkbox_tripcode.png") center no-repeat;
 }
 
 .alignCenter {

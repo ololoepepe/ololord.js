@@ -235,9 +235,9 @@
             "value": "Редактировать пост"
         }
     },
-    "Add to drafts": {
+    "To drafts": {
         "addToDraftsText": {
-            "value": "Добавить в черновики"
+            "value": "В черновики"
         }
     },
     "E-mail:": {
@@ -1588,14 +1588,14 @@
             "value": "Опции:"
         }
     },
-    "Sign as OP": {
+    "OP": {
         "postFormLabelSignAsOp": {
-            "value": "ОП треда"
+            "value": "ОП"
         }
     },
-    "Enable tripcode": {
+    "Tripcode": {
         "postFormLabelTripcode": {
-            "value": "Включить трипкод"
+            "value": "Трипкод"
         }
     },
     "Posts left:": {

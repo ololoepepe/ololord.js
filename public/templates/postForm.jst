@@ -112,7 +112,7 @@
                     <td class="postformLabel">
                     </td>
                     <td class="postformMarkup">
-                        <span>
+                        <span id="markup">
                             {{? it.board.markupElements.indexOf("BOLD") >= 0}}
                                 <input type="image" src="/{{=it.site.pathPrefix}}img/markup/bold.png"
                                        onclick="lord.markup('b'); return false;" name="markupBold"
@@ -266,36 +266,35 @@
                     {{? it.customPostFormOption && it.customPostFormOption[0]}}
                         {{ out += it.customPostFormOption[0](it); }}
                     {{?}}
-                    <input id="checkboxOp" type="checkbox" name="signAsOp" value="true"
-                           class="imageCheckBox" /><label title="{{!it.tr.postFormLabelSignAsOp}}"
-                                                          for="checkboxOp"></label>
-                    {{? it.customPostFormOption && it.customPostFormOption[10]}}
-                        {{ out += it.customPostFormOption[10](it); }}
-                    {{?}}
-                    {{? it.user.loggedIn}}
-                        <input id="checkboxTripcode" type="checkbox" name="tripcode" value="true"
-                               onclick="lord.switchShowTripcode();"
-                               class="imageCheckBox" /><label title="{{!it.tr.postFormLabelTripcode}}"
-                                                              for="checkboxTripcode"></label>
-                    {{?}}
-                    {{? it.customPostFormOption && it.customPostFormOption[20]}}
-                        {{ out += it.customPostFormOption[20](it); }}
-                    {{?}}
-                    {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
-                        <a href="javascript:void(0);" onclick="lord.markup('raw-html'); return false;" name="markupHtml"
-                           style="display: inline-block; vertical-align: top;"
-                           title="{{=it.tr.markupHtml}}"><img src="/{{=it.site.pathPrefix}}img/html.png"
-                                                              class="buttonImage" width="24" height="24"></a>
-                    {{?}}
+                    <span id="options">
+                        <input id="checkboxOp" type="checkbox" name="signAsOp"
+                               value="true" /><label for="checkboxOp">{{!it.tr.postFormLabelSignAsOp}}</label>
+                        {{? it.customPostFormOption && it.customPostFormOption[10]}}
+                            {{ out += it.customPostFormOption[10](it); }}
+                        {{?}}
+                        {{? it.user.loggedIn}}
+                            <input id="checkboxTripcode" type="checkbox" name="tripcode" 
+                                   onclick="lord.switchShowTripcode();"
+                                   value="true" /><label for="checkboxTripcode">{{!it.tr.postFormLabelTripcode}}</label>
+                        {{?}}
+                        {{? it.customPostFormOption && it.customPostFormOption[20]}}
+                            {{ out += it.customPostFormOption[20](it); }}
+                        {{?}}
+                    </span>
                     {{? it.customPostFormOption && it.customPostFormOption[30]}}
                         {{ out += it.customPostFormOption[30](it); }}
                     {{?}}
-                    <a href="javascript:void(0);" onclick="lord.addToDrafts(this); return false;"
-                       style="display: inline-block; vertical-align: top;"
-                       title="{{=it.tr.addToDraftsText}}"><img src="/{{=it.site.pathPrefix}}img/draft.png"
-                                                               class="buttonImage" width="24" height="24"></a>
+                    {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+                        <a href="javascript:void(0);" onclick="lord.markup('raw-html'); return false;"
+                           style="display: inline-block; vertical-align: top;" name="markupHtml">[raw-html]</a>
+                    {{?}}
                     {{? it.customPostFormOption && it.customPostFormOption[40]}}
                         {{ out += it.customPostFormOption[40](it); }}
+                    {{?}}
+                    <a href="javascript:void(0);" onclick="lord.addToDrafts(this); return false;" name="markupDraft"
+                       style="display: inline-block; vertical-align: top;">{{=it.tr.addToDraftsText}}</a>
+                    {{? it.customPostFormOption && it.customPostFormOption[50]}}
+                        {{ out += it.customPostFormOption[50](it); }}
                     {{?}}
                 </td>
             </tr>

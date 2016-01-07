@@ -2831,6 +2831,8 @@ lord.initializeOnLoadBaseBoard = function() {
                 c.model.thread = model.thread;
             c.model.postformRules = JSON.parse(lord.id("model-postformRules").innerHTML);
             lord.id("hiddenPostForm").appendChild(lord.template("postForm", c.model));
+            $("#options").buttonset();
+            $("[name='markupHtml'], [name='markupDraft']").button();
             var captcha = lord.selectCaptchaEngine();
             var appendCaptchaWidgetToContainer = function(container) {
                 if (captcha && captcha.widgetHtml)
