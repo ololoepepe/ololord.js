@@ -569,7 +569,7 @@ var processFile = function(board, file, transaction) {
                     rating: file.rating,
                     size: fileInfo.size,
                     thumb: {
-                        dimensions: fileInfo.thumb,
+                        dimensions: fileInfo.thumb.dimensions,
                         name: fn.thumbName
                     }
                 };
