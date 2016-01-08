@@ -262,7 +262,7 @@ module.exports.mimeType = function(fileName) {
 };
 
 module.exports.isAudioType = function(mimeType) {
-    return mimeType.substr(0, 6) == "audio/";
+    return "application/ogg" == mimeType || mimeType.substr(0, 6) == "audio/";
 };
 
 module.exports.isVideoType = function(mimeType) {
