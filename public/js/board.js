@@ -2845,6 +2845,7 @@ lord.initializeOnLoadBaseBoard = function() {
         var bannerPlaceholder = lord.id("bannerPlaceholder");
         c.model.bannerFileName = bannerFileName;
         c.model.bannerBoardName = bannerBoardName;
+        c.model.bannerBoardTitle = bannerBoardTitle;
         var banner = lord.template("banner", c.model);
         bannerPlaceholder.parentNode.replaceChild(banner, bannerPlaceholder);
         banner.parentNode.insertBefore(lord.node("br"), banner);
