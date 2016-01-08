@@ -1017,6 +1017,7 @@ lord.showDialog = function(body, options) {
             maxWidth: $(window).width() - 40,
             close: function() {
                 resolve(false);
+                $(this).dialog("destroy").remove();
             },
             create: function() {
                 $("body").css({ overflow: "hidden" });
