@@ -63,7 +63,7 @@
                 </li>
             </ul>
         {{?}}
-        {{? ("application/ogg" == fileInfo.mimeType || fileInfo.mimeType.substr(0, 6) == "audio/") == "audio/"}}
+        {{? "application/ogg" == fileInfo.mimeType || fileInfo.mimeType.substr(0, 6) == "audio/"}}
             <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false"
                title="{{=it.tr.editAudioTagsText}}">
                 <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png" class="buttonImage"></a>
