@@ -291,7 +291,7 @@ lord.appendExtrasToModel = function(model) {
     model.scaledSize = function(size) {
         if (lord.deviceType("desktop"))
             return size;
-        return Math.floor(0.55 * size);
+        return Math.floor(0.4 * size);
     };
     model.customPostBodyPart = lord.customPostBodyPart;
     model.customPostHeaderPart = lord.customPostHeaderPart;
