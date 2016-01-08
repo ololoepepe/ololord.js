@@ -2811,6 +2811,7 @@ lord.initializeOnLoadBaseBoard = function() {
     }
     var bannerFileNames = [];
     var bannerBoardName = lord.data("boardName");
+    var bannerBoardTitle = null;
     switch (c.model.settings.bannersMode) {
     case "random":
         var boards = [];
@@ -2821,6 +2822,7 @@ lord.initializeOnLoadBaseBoard = function() {
             if (board.bannerFileNames.length > 0) {
                 boards.push({
                     name: board.name,
+                    title: board.title,
                     bannerFileNames: board.bannerFileNames
                 });
             }
@@ -2829,6 +2831,7 @@ lord.initializeOnLoadBaseBoard = function() {
             var board = boards[Math.floor(Math.random() * boards.length)];
             bannerFileNames = board.bannerFileNames;
             bannerBoardName = board.name;
+            bannerBoardTitle = board.title;
         }
         break;
     case "same":
