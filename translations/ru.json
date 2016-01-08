@@ -2464,5 +2464,25 @@
         "error": {
             "value": "Не указано ни имя файла, ни хеш"
         }
+    },
+    "Banners mode:": {
+        "bannersModeLabelText": {
+            "value": "Режим баннеров:"
+        }
+    },
+    "Show random board banner": {
+        "bannersModeRandomText": {
+            "value": "Показывать баннер случайной доски"
+        }
+    },
+    "Show current board banner": {
+        "bannersModeSameText": {
+            "value": "Показывать беннер текущей доски"
+        }
+    },
+    "Do not show banners": {
+        "bannersModeNoneText": {
+            "value": "Не показывать баннеры"
+        }
     }
 }

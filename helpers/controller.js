@@ -646,6 +646,10 @@ controller.translationsModel = function() {
     translate("Allow bumping", "setThreadBumpableText");
     translate("Disallow bumping", "setThreadUnbumpableText");
     translate("Use this button to jump between boards", "boardSelectTooltip");
+    translate("Banners mode:", "bannersModeLabelText");
+    translate("Show random board banner", "bannersModeRandomText");
+    translate("Show current board banner", "bannersModeSameText");
+    translate("Do not show banners", "bannersModeNoneText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

@@ -2809,11 +2809,39 @@ lord.initializeOnLoadBaseBoard = function() {
     } else {
         p = lord.api("catalog", { sort: lord.data("sortMode") }, lord.data("boardName"));
     }
-    var bannerFileNames = c.model.board.bannerFileNames;
+    var bannerFileNames = [];
+    var bannerBoardName = lord.data("boardName");
+    switch (c.model.settings.bannersMode) {
+    case "random":
+        var boards = [];
+        for (var i = 0; i < c.model.boards.length; ++i) {
+            var board = c.model.boards[i];
+            if (board.name == lord.data("boardName"))
+                continue;
+            if (board.bannerFileNames.length > 0) {
+                boards.push({
+                    name: board.name,
+                    bannerFileNames: board.bannerFileNames
+                });
+            }
+        }
+        if (boards.length > 0) {
+            var board = boards[Math.floor(Math.random() * boards.length)];
+            bannerFileNames = board.bannerFileNames;
+            bannerBoardName = board.name;
+        }
+        break;
+    case "same":
+        bannerFileNames = c.model.board.bannerFileNames;
+        break;
+    default:
+        break;
+    }
     if (bannerFileNames.length > 0) {
         var bannerFileName = bannerFileNames[Math.floor(Math.random() * bannerFileNames.length)];
         var bannerPlaceholder = lord.id("bannerPlaceholder");
         c.model.bannerFileName = bannerFileName;
+        c.model.bannerBoardName = bannerBoardName;
         var banner = lord.template("banner", c.model);
         bannerPlaceholder.parentNode.replaceChild(banner, bannerPlaceholder);
         banner.parentNode.insertBefore(lord.node("br"), banner);

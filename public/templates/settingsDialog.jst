@@ -341,15 +341,30 @@
         <table data-index="5" style="display: none;">
             <tbody>
                 <tr>
-                    <td colspan="2">
-                        <input type="checkbox" name="chatEnabled"
-                               {{? it.settings.chatEnabled}}checked="true"{{?}} /><label>{{=it.tr.chatLabelText}}</label>
+                    <td>
+                        {{=it.tr.bannersModeLabelText}}
+                    </td>
+                    <td>
+                        <select name="bannersMode" class="select">
+                            <option {{? it.settings.bannersMode == "random"}}selected="true"{{?}}
+                                    value="random">{{=it.tr.bannersModeRandomText}}</option>
+                            <option {{? it.settings.bannersMode == "same"}}selected="true"{{?}}
+                                    value="same">{{=it.tr.bannersModeSameText}}</option>
+                            <option {{? it.settings.bannersMode == "none"}}selected="true"{{?}}
+                                    value="none">{{=it.tr.bannersModeNoneText}}</option>
+                        </select>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2">
                         <input type="checkbox" name="showNewPosts"
                                {{? it.settings.showNewPosts}}checked="true"{{?}} /><label>{{=it.tr.showNewPostsLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="chatEnabled"
+                               {{? it.settings.chatEnabled}}checked="true"{{?}} /><label>{{=it.tr.chatLabelText}}</label>
                     </td>
                 </tr>
                 <tr>
