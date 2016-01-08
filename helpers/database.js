@@ -2035,7 +2035,7 @@ module.exports.editAudioTags = function(req, res, fields) {
     var c = {};
     var password = Tools.password(fields.password);
     return getFileInfo({ fileName: fields.fileName }).then(function(fileInfo) {
-        if (fileInfo.mimeType.substr(0, 6) != "audio/")
+        if (!Tools.isAudioType(fileInfo.mimeType))
             return Promise.reject(Tools.translate("Not an audio file"));
         c.fileInfo = fileInfo;
         return controller.checkBan(req, res, c.fileInfo.boardName, true);

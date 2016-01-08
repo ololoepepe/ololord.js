@@ -236,15 +236,15 @@ var Board = function(name, title, options) {
 var renderFileInfo = function(fi) {
     fi.sizeKB = fi.size / 1024;
     fi.sizeText = fi.sizeKB.toFixed(2) + "KB";
-    if (fi.mimeType.substr(0, 6) == "image/" || fi.mimeType.substr(0, 6) == "video/") {
+    if (Tools.isImageType(fi.mimeType) || Tools.isVideoType(fi.mimeType)) {
         if (fi.dimensions)
             fi.sizeText += ", " + fi.dimensions.width + "x" + fi.dimensions.height;
     }
-    if (fi.mimeType.substr(0, 6) == "audio/" || fi.mimeType.substr(0, 6) == "video/") {
+    if (Tools.isAudioType(fi.mimeType) || Tools.isVideoType(fi.mimeType)) {
         var ed = fi.extraData;
         if (ed.duration)
             fi.sizeText += ", " + ed.duration;
-        if (fi.mimeType.substr(0, 6) == "audio/") {
+        if (Tools.isAudioType(fi.mimeType)) {
             if (ed.bitrate)
                 fi.sizeText += ", " + ed.bitrate + Tools.translate("kbps", "kbps");
             fi.sizeTooltip = ed.artist ? ed.artist : Tools.translate("Unknown artist", "unknownArtist");
@@ -255,7 +255,7 @@ var renderFileInfo = function(fi) {
             fi.sizeTooltip += "]";
             if (ed.year)
                 fi.sizeTooltip += " (" + ed.year + ")";
-        } else if (fi.mimeType.substr(0, 6) == "video/") {
+        } else if (Tools.isVideoType(fi.mimeType)) {
             fi.sizeTooltip = ed.bitrate + Tools.translate("kbps", "kbps");
         }
     }
