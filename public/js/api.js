@@ -506,7 +506,7 @@ lord.templates = {};
 /*Functions*/
 
 lord.isAudioType = function(type) {
-    return type in {"audio/mpeg": true, "audio/ogg": true, "audio/wav": true};
+    return type in {"application/ogg": true, "audio/mpeg": true, "audio/ogg": true, "audio/wav": true};
 };
 
 lord.isImageType = function(type) {

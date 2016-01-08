@@ -145,6 +145,7 @@ var Board = function(name, title, options) {
         configurable: true
     });
     defineSetting(this, "supportedFileTypes", [
+        "application/ogg",
         "application/pdf",
         "audio/mpeg",
         "audio/ogg",
@@ -522,6 +523,7 @@ var defineMimeTypeExtensions = function(mimeType) {
     Board.DefaultExtensions[mimeType] = extensions[0];
 };
 
+defineMimeTypeExtensions("application/ogg", "ogg");
 defineMimeTypeExtensions("application/pdf", "pdf");
 defineMimeTypeExtensions("audio/mpeg", "mpeg", "mp1", "m1a", "mp3", "m2a", "mpa", "mpg");
 defineMimeTypeExtensions("audio/ogg", "ogg");
@@ -533,6 +535,7 @@ defineMimeTypeExtensions("video/mp4", "mp4");
 defineMimeTypeExtensions("video/webm", "webm");
 
 Board.ThumbExtensionsForMimeType = {
+    "application/ogg": "png",
     "application/pdf": "png",
     "audio/mpeg": "png",
     "audio/ogg": "png",
