@@ -49,6 +49,12 @@ controller = function(templateName, modelData) {
     if (!template)
         return Promise.reject(Tools.translate("Invalid template"));
     modelData = merge.recursive(baseModelData, modelData);
+    var extraScripts = config(`site.extraScripts.${templateName}`);
+    if (extraScripts) {
+        if (!modelData.extraScripts)
+            modelData.extraScripts = [];
+        modelData.extraScripts = modelData.extraScripts.concat(extraScripts);
+    }
     return Promise.resolve(template(modelData));
 };
 
