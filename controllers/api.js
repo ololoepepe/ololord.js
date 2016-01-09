@@ -240,6 +240,16 @@ router.get("/api/chatMessages.json", function(req, res) {
     });
 });
 
+router.get("/api/synchronization.json", function(req, res) {
+    if (!req.query.key)
+        return controller.error(res, Tools.translate("No key specified"), true);
+    Database.db.get("synchronizationData:" + req.query.key).then(function(data) {
+        res.json(data ? JSON.parse(data) : null);
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
 Captcha.captchaIds().forEach(function(id) {
     Captcha.captcha(id).apiRoutes().forEach(function(route) {
         router[route.method]("/api" + route.path, route.handler);

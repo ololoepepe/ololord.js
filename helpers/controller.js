@@ -658,6 +658,11 @@ controller.translationsModel = function() {
     translate("Show current board banner", "bannersModeSameText");
     translate("Do not show banners", "bannersModeNoneText");
     translate("This thread is archived. Posting is disabled", "archivedThreadText");
+    translate("Synchronize", "synchronizationText");
+    translate("Synchronize settings", "synchronizeSettingsLabelText");
+    translate("No password specified, and not logged in", "noPasswordNotLoggedInError");
+    translate("Synchronization data will be available within 5 minutes", "synchronizationTimeoutText");
+    translate("Synchronization completed successfully", "synchronizationSuccessfulText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

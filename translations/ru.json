@@ -2492,5 +2492,35 @@
         "bannersModeNoneText": {
             "value": "Не показывать баннеры"
         }
+    },
+    "Synchronize": {
+        "synchronizationText": {
+            "value": "Синхронизировать"
+        }
+    },
+    "Synchronize settings": {
+        "synchronizeSettingsLabelText": {
+            "value": "Синхронизировать настройки"
+        }
+    },
+    "No password specified, and not logged in": {
+        "noPasswordNotLoggedInError": {
+            "value": "Пароль не указан, и вы не залогинены"
+        }
+    },
+    "Synchronization data will be available within 5 minutes": {
+        "synchronizationTimeoutText": {
+            "value": "Данные синхронизации будут доступны в течение 5 минут"
+        }
+    },
+    "Synchronization completed successfully": {
+        "synchronizationSuccessfulText": {
+            "value": "Синхронизация успешно завершена"
+        }
+    },
+    "No key specified": {
+        "_default": {
+            "value": "Не указан ключ"
+        }
     }
 }

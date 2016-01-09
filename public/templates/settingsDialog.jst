@@ -87,6 +87,16 @@
                                {{? it.settings.stickyToolbar}}checked="true"{{?}} /><label>{{=it.tr.stickyToolbarLabelText}}</label>
                     </td>
                 </tr>
+                <tr>
+                    <td colspan="2">
+                        <button onclick="lord.exportSettings(); return false;"
+                                name="exportSettingsButton">{{=it.tr.exportSettingsButtonText}}</button>
+                        <button onclick="lord.importSettings(); return false;"
+                                name="importSettingsButton">{{=it.tr.importSettingsButtonText}}</button>
+                        <button onclick="lord.synchronize(); return false;"
+                                name="synchronizationButton">{{=it.tr.synchronizationText}}</button>
+                    </td>
+                </tr>
             </tbody>
         </table>
         <table data-index="1" style="display: none;">

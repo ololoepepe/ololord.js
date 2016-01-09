@@ -519,6 +519,28 @@ router.post("/action/deleteChatMessages", function(req, res) {
     });
 });
 
+router.post("/action/synchronize", function(req, res) {
+    var c = {};
+    Tools.parseForm(req).then(function(result) {
+        c.key = result.fields.key;
+        if (!c.key)
+            return Promise.reject(Tools.translate("No key specified"));
+        var data = result.fields.data;
+        try {
+            data = JSON.parse(data);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+        return Database.db.set("synchronizationData:" + c.key, JSON.stringify(data));
+    }).then(function() {
+        return Database.db.expire("synchronizationData:" + c.key, 300); //NOTE: 5 minutes
+    }).then(function() {
+        res.send({});
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
 router.post("/action/search", function(req, res) {
     var c = { model: {} };
     Tools.parseForm(req).then(function(result) {

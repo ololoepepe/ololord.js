@@ -95,91 +95,153 @@ lord.preventOnclick = function(event) {
     return false;
 };
 
+lord.localData = function(includeSettings) {
+    var o = {};
+    if (includeSettings)
+        o.settings = lord.settings();
+    var f = function(key, def) {
+        if (typeof def == "undefined")
+            def = {};
+        o[key] = lord.getLocalObject(key, def);
+    };
+    f("favoriteThreads");
+    f("ownPosts");
+    f("spells", "");
+    f("userJavaScript", "");
+    f("hotkeys", {});
+    f("hiddenPosts", {});
+    f("lastCodeLang", "");
+    f("chats");
+    f("drafts");
+    f("playlist/trackList", []);
+    f("lastChatCheckDate", null);
+    f("audioVideoVolume", 1);
+    f("userCss", "");
+    f("ownLikes");
+    f("ownVotes");
+    f("lastPostNumbers");
+    f("showTripcode");
+    f("mumWatching", false);
+    return o;
+};
+
+lord.setLocalData = function(o, includeSettings) {
+    if (includeSettings && o.settings)
+        lord.setSettings(o.settings);
+    var f = function(key, doMerge) {
+        var val = o[key];
+        if (typeof val == "undefined")
+            return;
+        if (!doMerge)
+            return lord.setLocalObject(key, val);
+        var src = lord.getLocalObject(key, {});
+        lord.forIn(val, function(v, k) {
+            if (typeof doMerge == "function")
+                doMerge(src, k, v);
+            else
+                src[k] = v;
+        });
+        lord.setLocalObject(src, val);
+    };
+    f("favoriteThreads", true);
+    f("ownPosts", true);
+    f("spells");
+    f("userJavaScript");
+    f("hotkeys");
+    f("hiddenPosts");
+    f("lastCodeLang");
+    f("chats", function(src, key, value) {
+        if (!src.hasOwnProperty(key))
+            return src[key] = value;
+        var newMessages = [];
+        src[key].forEach(function(message) {
+            for (var i = 0; i < value.length; ++i) {
+                var msg = value[i];
+                if (message.type == msg.type && message.date == msg.date && message.text == msg.text)
+                    return;
+                newMessages.push(msg);
+            }
+        });
+        src[key] = src[key].concat(newMessages).sort(function(m1, m2) {
+            if (m1.date < m2.date)
+                return -1;
+            else if (m1.date > m2.date)
+                return 1;
+            else
+                return 0;
+        });
+    });
+    f("drafts", true);
+    f("playlist/trackList");
+    f("lastChatCheckDate");
+    f("audioVideoVolume");
+    f("userCss");
+    f("ownLikes", true);
+    f("ownVotes", true);
+    f("lastPostNumbers");
+    f("showTripcode");
+    f("mumWatching");
+};
+
+lord.exportSettings = function() {
+    prompt(lord.text("copySettingsHint"), JSON.stringify(lord.localData(true)));
+};
+
+lord.importSettings = function() {
+    var s = prompt(lord.text("pasteSettingsHint"));
+    if (!s)
+        return;
+    var o;
+    try {
+        o = JSON.parse(s);
+    } catch(err) {
+        lord.handleError(err);
+        return;
+    }
+    lord.setLocalData(o, true);
+};
+
+lord.synchronize = function() {
+    var div = lord.template("synchronizationDialog", lord.model("tr"));
+    lord.showDialog(div, {
+        title: "synchronizationText",
+        buttons: [
+            "cancel",
+            "ok"
+        ]
+    }).then(function(accepted) {
+        if (!accepted)
+            return;
+        var password = lord.nameOne("password", div).value || lord.getCookie("hashpass");
+        if (!password) {
+            lord.showPopup(lord.text("noPasswordNotLoggedInerror"), { type: "critical" });
+            return;
+        }
+        var settings = !!lord.nameOne("synchronizeSettings", div).checked;
+        return lord.api("synchronization", { key: password }).then(function(result) {
+            if (result)
+                lord.setLocalData(result, settings);
+            var formData = new FormData();
+            formData.append("key", password);
+            formData.append("data", JSON.stringify(lord.localData(settings)));
+            return lord.post("/" + lord.data("sitePathPrefix") + "action/synchronize", formData);
+        }).then(function() {
+            lord.showPopup(lord.text("synchronizationSuccessfulText"));
+            lord.showPopup(lord.text("synchronizationTimeoutText"), { type: "warning" });
+        }).catch(lord.handleError);
+    }).catch(lord.handleError);
+};
+
 lord.showSettings = function() {
     var c = {};
     var model = { settings: lord.settings() };
     c.model = merge.recursive(model,
             lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true));
     c.div = lord.template("settingsDialog", c.model);
+    $("[name='exportSettingsButton'], [name='importSettingsButton'], [name='synchronizationButton']", c.div).button();
     lord.showDialog(c.div, {
         title: "settingsDialogTitle",
         buttons: [
-            {
-                text: "exportSettingsButtonText",
-                action: function() {
-                    var o = { settings: lord.settings() };
-                    var f = function(key, def) {
-                        if (typeof def == "undefined")
-                            def = {};
-                        o[key] = lord.getLocalObject(key, def);
-                    };
-                    f("favoriteThreads");
-                    f("ownPosts");
-                    f("spells", "");
-                    f("userJavaScript", "");
-                    f("hotkeys", {});
-                    f("hiddenPosts", {});
-                    f("lastCodeLang", "");
-                    f("chats");
-                    f("drafts");
-                    f("playlist/trackList", []);
-                    f("lastChatCheckDate", null);
-                    f("audioVideoVolume", 1);
-                    f("userCss", "");
-                    f("ownLikes");
-                    f("ownVotes");
-                    f("lastPostNumbers");
-                    f("showTripcode");
-                    f("mumWatching", false);
-                    prompt(lord.text("copySettingsHint"), JSON.stringify(o));
-                }
-            },
-            {
-                text: "importSettingsButtonText",
-                action: function() {
-                    var s = prompt(lord.text("pasteSettingsHint"));
-                    if (!s)
-                        return;
-                    var o;
-                    try {
-                        o = JSON.parse(s);
-                    } catch(err) {
-                        lord.handleError(err);
-                        return;
-                    }
-                    lord.setSettings(o.settings);
-                    var f = function(key, merge) {
-                        var val = o[key];
-                        if (typeof val == "undefined")
-                            return;
-                        if (!merge)
-                            return lord.setLocalObject(key, val);
-                        var src = lord.getLocalObject(key, {});
-                        lord.forIn(val, function(v, k) {
-                            src[v] = k;
-                        });
-                        lord.setLocalObject(src, val);
-                    };
-                    f("favoriteThreads", true);
-                    f("ownPosts", true);
-                    f("spells");
-                    f("userJavaScript");
-                    f("hotkeys");
-                    f("hiddenPosts");
-                    f("lastCodeLang");
-                    f("chats", true);
-                    f("drafts", true);
-                    f("playlist/trackList");
-                    f("lastChatCheckDate");
-                    f("audioVideoVolume");
-                    f("userCss");
-                    f("ownLikes", true);
-                    f("ownVotes", true);
-                    f("lastPostNumbers");
-                    f("showTripcode");
-                    f("mumWatching");
-                }
-            },
             "cancel",
             "ok"
         ]
