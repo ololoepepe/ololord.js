@@ -125,7 +125,7 @@ lord.localData = function(includeSettings) {
     return o;
 };
 
-lord.setLocalData = function(o, includeSettings) {
+lord.setLocalData = function(o, includeSettings, includeCustom) {
     if (includeSettings && o.settings)
         lord.setSettings(o.settings);
     var f = function(key, doMerge) {
@@ -143,10 +143,13 @@ lord.setLocalData = function(o, includeSettings) {
         });
         lord.setLocalObject(key, src);
     };
+    if (includeCustom) {
+        f("userCss");
+        f("userJavaScript");
+    }
     f("favoriteThreads", true);
     f("ownPosts", true);
     f("spells");
-    f("userJavaScript");
     f("hotkeys");
     f("hiddenPosts");
     f("lastCodeLang");
@@ -175,7 +178,6 @@ lord.setLocalData = function(o, includeSettings) {
     f("playlist/trackList");
     f("lastChatCheckDate");
     f("audioVideoVolume");
-    f("userCss");
     f("ownLikes", true);
     f("ownVotes", true);
     f("lastPostNumbers");
@@ -198,7 +200,7 @@ lord.importSettings = function() {
         lord.handleError(err);
         return;
     }
-    lord.setLocalData(o, true);
+    lord.setLocalData(o, true, true);
 };
 
 lord.synchronize = function() {
@@ -218,9 +220,10 @@ lord.synchronize = function() {
             return;
         }
         var settings = !!lord.nameOne("synchronizeSettings", div).checked;
+        var cssJs = !!lord.nameOne("synchronizeCssAndJs", div).checked;
         return lord.api("synchronization", { key: password }).then(function(result) {
             if (result)
-                lord.setLocalData(result, settings);
+                lord.setLocalData(result, settings, cssJs);
             var formData = new FormData();
             formData.append("key", password);
             formData.append("data", JSON.stringify(lord.localData(settings)));

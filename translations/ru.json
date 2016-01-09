@@ -2503,6 +2503,11 @@
             "value": "Синхронизировать настройки"
         }
     },
+    "Synchronize CSS and JS": {
+        "synchronizeCssAndJsLabelText": {
+            "value": "Синхронизировать CSS и JS"
+        }
+    },
     "No password specified, and not logged in": {
         "noPasswordNotLoggedInError": {
             "value": "Пароль не указан, и вы не залогинены"

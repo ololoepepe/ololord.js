@@ -660,6 +660,7 @@ controller.translationsModel = function() {
     translate("This thread is archived. Posting is disabled", "archivedThreadText");
     translate("Synchronize", "synchronizationText");
     translate("Synchronize settings", "synchronizeSettingsLabelText");
+    translate("Synchronize CSS and JS", "synchronizeCssAndJsLabelText");
     translate("No password specified, and not logged in", "noPasswordNotLoggedInError");
     translate("Synchronization data will be available within 5 minutes", "synchronizationTimeoutText");
     translate("Synchronization completed successfully", "synchronizationSuccessfulText");
