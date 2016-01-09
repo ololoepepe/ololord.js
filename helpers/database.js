@@ -726,7 +726,6 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         c.text = text;
         return board.postExtraData(req, fields, files);
     }).then(function(extraData) {
-        console.log(extraData);
         c.extraData = !Util.isNullOrUndefined(extraData) ? extraData : null;
         return getGeolocationInfo(ip);
     }).then(function(geo) {
