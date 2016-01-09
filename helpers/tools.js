@@ -40,7 +40,7 @@ var ExternalLinkRegexpPattern = (function() {
     var hostname = "([\\w\\p{L}\\.\\-]+)\\.([\\p{L}]{2,17}\\.?)";
     var port = ":\\d+";
     var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:\\,\\(\\)]*)*\\/?";
-    return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path/* + "(?!\\S)"*/;
+    return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
 })();
 
 Object.defineProperty(module.exports, "Billion", { value: (2 * 1000 * 1000 * 1000) });
