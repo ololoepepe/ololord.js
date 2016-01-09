@@ -174,6 +174,7 @@ board.addTranslations = function(translate) {
     translate("Text:", "voteTextText");
     translate("Multiple variants allowed:", "multipleVoteVariantsText");
     translate("Add variant", "addVoteVariantText");
+    translate("Remove this variant", "removeVoteVariantText");
 };
 
 var extraData = function(req, fields, edit) {

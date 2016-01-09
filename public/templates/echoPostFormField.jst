@@ -1,8 +1,15 @@
 <tr>
-    <td class="postformLabel">
-        <b>{{=it.tr.postFormLabelLink}}</b>
-    </td>
-    <td class="postformField">
-        <input type="text" maxlength="{{=it.board.maxLinkLength}}" name="link" size="43" />
-     </td>
+    {{? it.minimalisticPostform()}}
+        <td class="postformField" colspan="2">
+            <input type="text" maxlength="{{=it.board.maxLinkLength}}" name="link" class="postFormInput"
+                   placeholder="{{=it.tr.postFormPlaceholderLink}}" />
+        </td>
+    {{??}}
+        <td class="postformLabel">
+            <b>{{=it.tr.postFormLabelLink}}</b>
+        </td>
+        <td class="postformField">
+            <input type="text" maxlength="{{=it.board.maxLinkLength}}" name="link" class="postFormInput" />
+        </td>
+    {{?}}
 </tr>

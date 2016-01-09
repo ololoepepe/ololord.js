@@ -1010,6 +1010,15 @@ lord.editPost = function(el) {
         c.model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
         c.model.customEditPostDialogPart = lord.customEditPostDialogPart;
         c.div = lord.template("editPostDialog", c.model);
+        var textField = $("[name='text']", c.div);
+        $(c.div).css("visibility", "hidden");
+        $(c.div).css("position", "absolute");
+        document.body.appendChild(c.div);
+        textField.css("minWidth", textField.width() + 20);
+        textField.css("minHeight", 50);
+        document.body.removeChild(c.div);
+        $(c.div).css("visibility", "");
+        $(c.div).css("position", "");
         return lord.showDialog(c.div, { title: "editPostText" });
     }).then(function(result) {
         if (!result)
@@ -2866,7 +2875,16 @@ lord.initializeOnLoadBaseBoard = function() {
             if (+lord.data("threadNumber"))
                 c.model.thread = model.thread;
             c.model.postformRules = JSON.parse(lord.id("model-postformRules").innerHTML);
-            lord.id("hiddenPostForm").appendChild(lord.template("postForm", c.model));
+            var postFormNode = lord.template("postForm", c.model);
+            var hiddenPostForm = lord.id("hiddenPostForm");
+            hiddenPostForm.appendChild(postFormNode);
+            var textField = $("[name='text']", postFormNode);
+            $(hiddenPostForm).css("visibility", "hidden");
+            $(hiddenPostForm).css("display", "");
+            textField.css("minWidth", textField.width() + 20);
+            textField.css("minHeight", 50);
+            $(hiddenPostForm).css("display", "none");
+            $(hiddenPostForm).css("visibility", "");
             lord.arr(lord.id("options").childNodes).forEach(function(node) {
                 if (3 != node.nodeType)
                     return;

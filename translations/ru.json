@@ -721,6 +721,11 @@
             "value": "Ссылка на тред:"
         }
     },
+    "Thread link": {
+        "postFormPlaceholderLink": {
+            "value": "Ссылка на тред"
+        }
+    },
     "Home": {
         "toHomePageText": {
             "value": "На главную"
@@ -1707,6 +1712,11 @@
     "Add variant": {
         "addVoteVariantText": {
             "value": "Добавить вариант"
+        }
+    },
+    "Remove this variant": {
+        "removeVoteVariantText": {
+            "value": "Удалить этот вариант"
         }
     },
     "Multiple variants allowed:": {

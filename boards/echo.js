@@ -20,6 +20,7 @@ board.extraScripts = function() {
 
 board.addTranslations = function(translate) {
     translate("Thread link:", "postFormLabelLink");
+    translate("Thread link", "postFormPlaceholderLink");
 };
 
 var _board = board;
