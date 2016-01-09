@@ -1381,3 +1381,8 @@ input.buttonImage {
     border-color: #F0E0D6 transparent;
     border-width: 0 10px 10px;
 }
+
+.archivalThreadLink {
+    font-size: 1.2em;
+    margin-left: 10px;
+}

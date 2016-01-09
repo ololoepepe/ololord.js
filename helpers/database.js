@@ -208,11 +208,12 @@ var getThreads = function(boardName, options) {
 
 module.exports.getThreads = getThreads;
 
-module.exports.getThread = function(boardName, threadNumber) {
+module.exports.getThread = function(boardName, threadNumber, archived) {
     if (!Tools.contains(Board.boardNames(), boardName))
         return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
-    return db.hget("threads:" + boardName, threadNumber).then(function(thread) {
+    var key = archived ? "archivedThreads" : "threads";
+    return db.hget(key + ":" + boardName, threadNumber).then(function(thread) {
         if (!thread)
             return Promise.reject(Tools.translate("No such thread"));
         c.thread = JSON.parse(thread);
@@ -682,7 +683,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     if (!board)
         return Promise.reject(Tools.translate("Invalid board"));
     if (!board.postingEnabled)
-        return Promise.reject(Tools.translate("Posting is disabled on this board"));
+        return Promise.reject(Tools.translate("Posting is disabled at this board"));
     date = date || Tools.now();
     var c = {};
     if (threadNumber)
@@ -1029,7 +1030,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
     if (!board)
         return Promise.reject(Tools.translate("Invalid board"));
     if (!board.postingEnabled)
-        return Promise.reject(Tools.translate("Posting is disabled on this board"));
+        return Promise.reject(Tools.translate("Posting is disabled at this board"));
     var c = {};
     var date = Tools.now();
     var hashpass = req.hashpass || null;
@@ -1054,12 +1055,20 @@ module.exports.createThread = function(req, fields, files, transaction) {
             c.thread = c.threads.pop();
             if (board.archiveLimit <= 0)
                 return removeThread(board.name, c.thread.number);
-            return db.hdel("threads:" + board.name, c.thread.number);
-        }).then(function() {
-            if (board.archiveLimit <= 0)
-                return Promise.resolve();
-            c.thread.archived = true;
-            return db.hset("archivedThreads:" + board.name, c.thread.number, JSON.stringify(c.thread));
+            return db.hdel("threads:" + board.name, c.thread.number).then(function() {
+                c.thread.archived = true;
+                return db.hset("archivedThreads:" + board.name, c.thread.number, JSON.stringify(c.thread));
+            }).then(function() {
+                c.sourcePath = BoardModel.cachePath("thread", board.name, c.thread.number);
+                return Tools.readFile(c.sourcePath);
+            }).then(function(data) {
+                c.data = data.data;
+                return mkpath(`${__dirname}/../public/${board.name}/arch`);
+            }).then(function() {
+                return Tools.writeFile(`${__dirname}/../public/${board.name}/arch/${c.thread.number}.json`, c.data);
+            }).then(function() {
+                return Tools.removeFile(c.sourcePath);
+            });
         });
     }).then(function() {
         return nextPostNumber(board.name);

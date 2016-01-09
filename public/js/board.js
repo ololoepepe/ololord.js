@@ -2800,14 +2800,18 @@ lord.initializeOnLoadBaseBoard = function() {
     c.model.settings = lord.settings();
     lord.appendExtrasToModel(c.model);
     var p;
-    c.notCatalog = (+lord.data("threadNumber") || +lord.data("currentPage") >= 0);
+    c.threadOrBoard = (+lord.data("threadNumber") || +lord.data("currentPage") >= 0);
+    c.archive = !c.threadOrBoard && !lord.data("sortMode");
     if (+lord.data("threadNumber")) {
         c.model.includeThreadScripts = true;
-        p = lord.api(lord.data("threadNumber"), {}, lord.data("boardName") + "/res");
+        var suffix = lord.data("archived") ? "arch" : "res";
+        p = lord.api(lord.data("threadNumber"), {}, lord.data("boardName") + "/" + suffix);
     } else if (+lord.data("currentPage") >= 0) {
         p = lord.api(lord.data("currentPage"), {}, lord.data("boardName"));
-    } else {
+    } else if (!c.archive) {
         p = lord.api("catalog", { sort: lord.data("sortMode") }, lord.data("boardName"));
+    } else {
+        p = lord.api("archive", {}, lord.data("boardName"));
     }
     var bannerFileNames = [];
     var bannerBoardName = lord.data("boardName");
@@ -2851,8 +2855,10 @@ lord.initializeOnLoadBaseBoard = function() {
         banner.parentNode.insertBefore(lord.node("br"), banner);
     }
     p.then(function(model) {
-        if (c.notCatalog && lord.compareRegisteredUserLevels(c.model.user.level, "MODER") >= 0)
+        if (c.threadOrBoard && lord.compareRegisteredUserLevels(c.model.user.level, "MODER") >= 0)
             lord.createScript("3rdparty/jquery.datetimepicker.js", true);
+        if (+lord.data("threadNumber") && lord.data("archived"))
+            model.thread.archived = true;
         if ((+lord.data("threadNumber") || +lord.data("currentPage") >= 0)
             && lord.model("board/" + lord.data("boardName")).board.captchaEnabled) {
             c.model.customPostFormField = lord.customPostFormField;
@@ -2912,7 +2918,7 @@ lord.initializeOnLoadBaseBoard = function() {
             var lowerPlaceholder = lord.id("lowerPlaceholder");
             lowerPlaceholder.parentNode.replaceChild(lord.template("threadPageLower", c.model),
                 lowerPlaceholder);
-        } else if (c.notCatalog) {
+        } else if (c.threadOrBoard) {
             c.model.pageCount = model.pageCount;
             c.model.currentPage = model.currentPage;
             var upperPlaceholder = lord.id("upperPlaceholder");
@@ -2936,9 +2942,10 @@ lord.initializeOnLoadBaseBoard = function() {
         lord.removeClass(threads, "loadingMessage");
         c.threads.forEach(function(thread) {
             c.model.thread = thread;
-            if (c.notCatalog)
+            if (c.threadOrBoard)
                 threads.appendChild(lord.node("hr"));
-            threads.appendChild(lord.template(c.notCatalog ? ("thread") : "catalogThread", c.model));
+            var templateName = c.threadOrBoard ? "thread" : (c.archive ? "archiveThread" : "catalogThread");
+            threads.appendChild(lord.template(templateName, c.model));
         });
         if (typeof lord.postsLoaded == "function")
             lord.postsLoaded();

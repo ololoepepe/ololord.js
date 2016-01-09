@@ -29,6 +29,8 @@ var cachePath = function() {
     return config("system.tmpPath", __dirname + "/../tmp") + "/cache-json" + (path ? ("/" + path + ".json") : "");
 };
 
+module.exports.cachePath = cachePath;
+
 module.exports.getLastPostNumbers = function(boardNames) {
     if (!Util.isArray(boardNames))
         return Promise.resolve([]);
@@ -176,16 +178,20 @@ var getPage = function(board, page) {
     });
 };
 
-module.exports.getThreadPage = function(board, number, json, ifModifiedSince) {
+var getThreadPage = function(archived, board, number, json, ifModifiedSince) {
     if (!(board instanceof Board))
         return Promise.reject(Tools.translate("Invalid board"));
     number = +(number || 0);
     if (isNaN(number) || number < 1)
         return Promise.reject(Tools.translate("Invalid thread"));
     var c = {};
-    if (json)
-        return Tools.readFile(cachePath("thread", board.name, number), ifModifiedSince);
-    return Database.getThread(board.name, number).then(function(thread) {
+    if (json) {
+        if (archived)
+            return Tools.readFile(`${__dirname}/../public/${board.name}/arch/${number}.json`, ifModifiedSince);
+        else
+            return Tools.readFile(cachePath("thread", board.name, number), ifModifiedSince);
+    }
+    return Database.getThread(board.name, number, archived).then(function(thread) {
         if (!thread)
             return Promise.reject(Tools.translate("No such thread"));
         c.thread = thread;
@@ -216,6 +222,14 @@ module.exports.getThreadPage = function(board, number, json, ifModifiedSince) {
         c.model.lastPostNumber = lastPostNumber;
         return Promise.resolve(c.model);
     });
+};
+
+module.exports.getThreadPage = function(board, number, json, ifModifiedSince) {
+    return getThreadPage(false, board, number, json, ifModifiedSince);
+};
+
+module.exports.getArchivedThreadPage = function(board, number, json, ifModifiedSince) {
+    return getThreadPage(true, board, number, json, ifModifiedSince);
 };
 
 var getThread = function(board, number) {
@@ -374,6 +388,35 @@ module.exports.getCatalogPage = function(board, sortMode, json, ifModifiedSince)
         if (["recent", "bumps"].indexOf(sortMode) < 0)
             sortMode = "date";
         return Tools.readFile(cachePath("catalog", sortMode, board.name), ifModifiedSince);
+    }
+    return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
+        return Promise.resolve({ lastPostNumber: lastPostNumber });
+    });
+};
+
+module.exports.getArchivePage = function(board, json) {
+    if (!(board instanceof Board))
+        return Promise.reject(Tools.translate("Invalid board"));
+    if (json) {
+        var model = {};
+        var path = `${__dirname}/../public/${board.name}/arch`;
+        return FS.exists(path).then(function(exists) {
+            if (!exists)
+                return Promise.resolve([]);
+            return FS.list(path);
+        }).then(function(fileNames) {
+            model.threads = fileNames.map(function(fileName) {
+                return {
+                    boardName: board.name,
+                    number: +fileName.split(".").shift()
+                };
+            });
+            return Database.lastPostNumber(board.name);
+        }).then(function(lastPostNumber) {
+            model.lastPostNumber = lastPostNumber;
+            model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
+            return Promise.resolve(model);
+        });
     }
     return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
         return Promise.resolve({ lastPostNumber: lastPostNumber });

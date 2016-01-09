@@ -2,6 +2,7 @@
 !custom
 !partials
 !addFilesDialog.jst
+!archiveThread.jst
 !banner.jst
 !boardPageLower.jst
 !boardPageUpper.jst

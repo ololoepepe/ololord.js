@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{#def.head}}
+<body class="mobile" {{#def.baseData}}>
+{{~["top", "bottom"] :target}}
+    {{#def.navigationButton}}
+{{~}}
+<a id="top"></a>
+<div id="toolbarPlaceholder" style="display: none;"></div>
+<div id="customHeaderPlaceholder" style="display: none;"></div>
+<br />
+<div id="searchPlaceholder" style="display: none;"></div>
+<div id="bannerPlaceholder" style="display: none;"></div>
+<div class="theTitle">
+    <h1>
+        <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{=it.board.title}}</a>
+    </h1>
+</div>
+<div id="threads" class="loadingMessage">
+    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+    <h1 style="display: inline;">{{=it.tr.loadingThreadsMessage}}</h1>
+</div>
+<hr />
+<div id="postingSpeedPlaceholder" style="display: none;"></div>
+<a id="bottom"></a>
+<div id="customFooterPlaceholder" style="display: none;"></div>
+</body>
+</html>

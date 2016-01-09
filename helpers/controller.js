@@ -356,6 +356,7 @@ controller.translationsModel = function() {
     translate("Add to playlist", "addToPlaylistText");
     translate("Borad rules", "boardRulesLinkText");
     translate("Threads catalog", "boardCatalogLinkText");
+    translate("Thread archive", "boardArchiveLinkText");
     translate("RSS feed", "boardRssLinkText");
     translate("Posting is disabled at this board", "postingDisabledBoardText");
     translate("Posting is disabled in this thread", "postingDisabledThreadText");
@@ -656,6 +657,7 @@ controller.translationsModel = function() {
     translate("Show random board banner", "bannersModeRandomText");
     translate("Show current board banner", "bannersModeSameText");
     translate("Do not show banners", "bannersModeNoneText");
+    translate("This thread is archived. Posting is disabled", "archivedThreadText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

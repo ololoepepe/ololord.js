@@ -27,6 +27,9 @@
     "Posting is disabled at this board": {
         "postingDisabledBoardText": {
             "value": "На этой доске постинг запрещен"
+        },
+        "_default": {
+            "value": "На этой доске постинг запрещен"
         }
     },
     "Internal error": {
@@ -263,6 +266,11 @@
     "Threads catalog": {
         "boardCatalogLinkText": {
             "value": "Каталог тредов"
+        }
+    },
+    "Thread archive": {
+        "boardArchiveLinkText": {
+            "value": "Архив тредов"
         }
     },
     "Reply count:": {
@@ -1272,6 +1280,11 @@
             "value": "Posting is disabled in this thread"
         }
     },
+    "This thread is archived. Posting is disabled": {
+        "archivedThreadText": {
+            "value": "Это архивный тред. Постинг запрещен"
+        }
+    },
     "Post limit reached": {
         "postLimitReachedText": {
             "value": "Достигнут лимит постов"
@@ -2238,11 +2251,6 @@
     "Failed to copy file": {
         "_default": {
             "value": "Не удалось скопировать файл"
-        }
-    },
-    "Posting is disabled on this board": {
-        "_default": {
-            "value": "На этой доске постинг запрещен"
         }
     },
     "Invalid captcha engine": {
