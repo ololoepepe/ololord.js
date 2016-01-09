@@ -141,7 +141,7 @@ lord.setLocalData = function(o, includeSettings) {
             else
                 src[k] = v;
         });
-        lord.setLocalObject(src, val);
+        lord.setLocalObject(key, src);
     };
     f("favoriteThreads", true);
     f("ownPosts", true);
