@@ -937,7 +937,8 @@ lord.setTooltips = function(parent) {
                         top: (e.pageY + 15) + "px",
                         width: "200px"
                     });
-                }
+                },
+                collision: "fit flip"
             },
             disabled: true,
             close: function() {
