@@ -120,11 +120,18 @@ router.get("/:boardName/archive.json", function(req, res) {
 router.get("/:boardName/rss.xml", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
-        return controller.error(res, 404);
+        return controller.error(res, 404, true);
+    var c = {};
     controller.checkBan(req, res, board.name).then(function() {
-        res.send(Database.rss[board.name]);
+        c.ifModifiedSince = new Date(req.headers["if-modified-since"]);
+        return BoardModel.getRss(board, c.ifModifiedSince);
+    }).then(function(data) {
+        res.setHeader("Last-Modified", data.lastModified.toUTCString());
+        if (+c.ifModifiedSince >= +data.lastModified)
+            res.status(304);
+        res.send(data.data);
     }).catch(function(err) {
-        controller.error(res, err);
+        controller.error(res, err, true);
     });
 });
 

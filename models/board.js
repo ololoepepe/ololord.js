@@ -3,8 +3,10 @@ var FS = require("q-io/fs");
 var FSSync = require("fs-ext");
 var merge = require("merge");
 var mkpath = require("mkpath");
+var moment = require("moment");
 var promisify = require("promisify-node");
 var Util = require("util");
+var XML2JS = require("xml2js");
 
 var Board = require("../boards");
 var config = require("../helpers/config");
@@ -20,6 +22,7 @@ var pageCounts = {};
 var workerLoads = {};
 
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-json");
+mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-rss");
 
 var cachePath = function() {
     var args = [];
@@ -30,7 +33,16 @@ var cachePath = function() {
     return config("system.tmpPath", __dirname + "/../tmp") + "/cache-json" + (path ? ("/" + path + ".json") : "");
 };
 
-module.exports.cachePath = cachePath;
+var rssCachePath = function() {
+    var args = [];
+    Array.prototype.slice.call(arguments, 0).forEach(function(arg) {
+        args = args.concat(arg);
+    });
+    var path = args.join("-");
+    return config("system.tmpPath", __dirname + "/../tmp") + "/cache-rss" + (path ? ("/" + path + ".xml") : "");
+};
+
+module.exports.rssCachePath = rssCachePath;
 
 module.exports.getLastPostNumbers = function(boardNames) {
     if (!Util.isArray(boardNames))
@@ -424,6 +436,12 @@ module.exports.getArchivePage = function(board, json) {
     });
 };
 
+module.exports.getRss = function(board, ifModifiedSince) {
+    if (!(board instanceof Board))
+        return Promise.reject(Tools.translate("Invalid board"));
+    return Tools.readFile(rssCachePath(board.name), ifModifiedSince);
+};
+
 var getCatalog = function(board, sortMode) {
     if (!(board instanceof Board))
         return Promise.reject(Tools.translate("Invalid board"));
@@ -656,37 +674,38 @@ var generateBoard = function(boardName) {
     });
 };
 
-var addTask = function(map, key, funcName, data) {
-    var performTask = function(funcName, key, data) {
-        var workerId = Object.keys(cluster.workers).map(function(id) {
-            return {
-                id: id,
-                load: workerLoads[id] || 0
-            };
-        }).sort(function(w1, w2) {
-            if (w1.load < w2.load)
-                return -1;
-            else if (w1.load > w2.load)
-                return 1;
-            else
-                return 0;
-        }).shift().id;
-        if (!workerLoads.hasOwnProperty(workerId))
-            workerLoads[workerId] = 1;
+var performTask = function(funcName, key, data) {
+    var workerId = Object.keys(cluster.workers).map(function(id) {
+        return {
+            id: id,
+            load: workerLoads[id] || 0
+        };
+    }).sort(function(w1, w2) {
+        if (w1.load < w2.load)
+            return -1;
+        else if (w1.load > w2.load)
+            return 1;
         else
-            ++workerLoads[workerId];
-        return Global.IPC.send("doGenerate", {
-            funcName: funcName,
-            key: key,
-            data: data
-        }, false, workerId).then(function(result) {
-            --workerLoads[workerId];
-            return Promise.resolve(result);
-        }).catch(function(err) {
-            --workerLoads[workerId];
-            return Promise.reject(err);
-        });
-    };
+            return 0;
+    }).shift().id;
+    if (!workerLoads.hasOwnProperty(workerId))
+        workerLoads[workerId] = 1;
+    else
+        ++workerLoads[workerId];
+    return Global.IPC.send("doGenerate", {
+        funcName: funcName,
+        key: key,
+        data: data
+    }, false, workerId).then(function(result) {
+        --workerLoads[workerId];
+        return Promise.resolve(result);
+    }).catch(function(err) {
+        --workerLoads[workerId];
+        return Promise.reject(err);
+    });
+};
+
+var addTask = function(map, key, funcName, data) {
     var scheduled = map[key];
     if (scheduled) {
         return new Promise(function(resolve, reject) {
@@ -850,6 +869,117 @@ module.exports.do_generateCatalog = function(boardName) {
     }).then(function() {
         Tools.writeFile(c.catalog.bumpsPath, c.catalog.bumpsData);
     });
+};
+
+module.exports.do_generateRss = function() {
+    var site = {
+        protocol: config("site.protocol", "http"),
+        domain: config("site.domain", "localhost:8080"),
+        pathPrefix: config("site.pathPrefix", ""),
+        locale: config("site.locale", "en"),
+        dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss")
+    };
+    var rssPostCount = config("server.rss.postCount", 500);
+    return Tools.series(Board.boardNames(), function(boardName) {
+        var board = Board.board(boardName);
+        var title = Tools.translate("Feed", "channelTitle") + " " + site.domain + "/" + site.pathPrefix + boardName;
+        var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName;
+        var description = Tools.translate("Last posts from board", "channelDescription") + " /" + boardName + "/";
+        var atomLink = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/rss.xml";
+        var posts = [];
+        var c = {};
+        var f = function() {
+            if (posts.length >= rssPostCount || c.threads.length < 1)
+                return Promise.resolve();
+            return Database.threadPosts(boardName, c.threads.shift().number, {
+                limit: (rssPostCount - posts.length),
+                withFileInfos: true
+            }).then(function(result) {
+                posts = posts.concat(result);
+                return f();
+            });
+        };
+        var doc = {
+            $: {
+                version: "2.0",
+                "xmlns:dc": "http://purl.org/dc/elements/1.1/",
+                "xmlns:atom": "http://www.w3.org/2005/Atom"
+            },
+            channel: {
+                title: title,
+                link: link,
+                description: description,
+                language: site.locale,
+                pubDate: moment(Tools.now()).utc().locale("en").format("ddd, DD MMM YYYY hh:mm:ss +0000"),
+                ttl: ("" + config("server.rss.ttl", 60)),
+                "atom:link": {
+                    $: {
+                        href: atomLink,
+                        rel: "self",
+                        type: "application/rss+xml"
+                    }
+                }
+            }
+        };
+        return Database.getThreads(boardName).then(function(threads) {
+            threads.sort(Board.sortThreadsByDate);
+            c.threads = threads;
+            return f();
+        }).then(function() {
+            doc.channel.item = posts.map(function(post) {
+                var title;
+                var isOp = post.number == post.threadNumber;
+                if (isOp)
+                    title = "[" + Tools.translate("New thread", "itemTitle") + "]";
+                else
+                    title = Tools.translate("Reply to thread", "itemTitle");
+                title += " ";
+                if (!post.subject && post.rawText)
+                    post.subject = post.rawText.substr(0, 150);
+                if (post.subject) {
+                    if (!isOp)
+                        title += "\"";
+                    title += post.subject;
+                    if (!isOp)
+                        title += "\"";
+                } else {
+                    title += post.number;
+                }
+                var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/res/"
+                    + post.threadNumber + ".html";
+                var description = "\n" + post.fileInfos.map(function(fileInfo) {
+                    return"<img src=\"" + site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName
+                        + "/thumb/" + fileInfo.thumb.name + "\"><br />";
+                }) + (post.text || "") + "\n";
+                return {
+                    title: title,
+                    link: link,
+                    description: description,
+                    pubDate: moment(post.createdAt).utc().locale("en").format("ddd, DD MMM YYYY hh:mm:ss +0000"),
+                    guid: {
+                        _: link + "#" + post.number,
+                        $: { isPermalink: true }
+                    },
+                    "dc:creator": (post.name || board.defaultUserName)
+                };
+            });
+        }).then(function() {
+            var builder = new XML2JS.Builder({
+                rootName: "rss",
+                renderOpts: {
+                    pretty: true,
+                    indent: "    ",
+                    newline: "\n"
+                },
+                cdata: true
+            });
+            return Tools.writeFile(rssCachePath(boardName), builder.buildObject(doc));
+        });
+    });
+};
+
+module.exports.generateRss = function(currentProcess) {
+    return currentProcess ? module.exports.do_generateRss() : performTask("generateRss");
 };
 
 module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNumber, action) {
