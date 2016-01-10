@@ -57,7 +57,8 @@ router.get("/markup.html", function(req, res) {
             useBR: true
         });
         var result = Highlight.highlight("cpp", model.codeToMarkup, true);
-        model.markedUpCode = "<div class=\"codeBlock cpp hljs\">" + Highlight.fixMarkup(result.value) + "</div>";
+        model.markedUpCode = "<div class=\"codeBlock cpp hljs\" title=\"C++\">" + Highlight.fixMarkup(result.value)
+            + "</div>";
         if (config("site.twitter.integrationEnabled", true))
             model.extraScripts = [ { fileName: "3rdparty/twitter.js" } ];
         return controller("markup", model);

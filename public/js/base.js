@@ -924,6 +924,29 @@ lord.hashChangeHandler = function() {
     $("html, body").animate({ scrollTop: scrollto }, 0);
 };
 
+lord.setTooltips = function(parent) {
+    $(".codeBlock, .tooltip", parent).css("cursor", "pointer").click(function(e) {
+        var _this = $(this);
+        _this.tooltip({
+            position: {
+                using: function() {
+                    var pos = _this.position();
+                    $(this).css({
+                        position: "absolute",
+                        left: (e.pageX - 100) + "px",
+                        top: (e.pageY + 15) + "px",
+                        width: "200px"
+                    });
+                }
+            },
+            disabled: true,
+            close: function() {
+                $(this).tooltip("disable");
+            }
+        }).tooltip("enable").tooltip("open");
+    });
+};
+
 lord.initializeOnLoadSettings = function() {
     var settings = lord.settings();
     var model = lord.model(["base", "tr", "boards"], true);
@@ -1034,6 +1057,8 @@ lord.initializeOnLoadSettings = function() {
     if (lord.queryOne(".toolbar"))
         window.addEventListener("hashchange", lord.hashChangeHandler, false);
     var bsc = lord.getLocalObject("tooltips/boardSelect", 0);
+    if (lord.deviceType("mobile"))
+        lord.setTooltips();
     if (lord.deviceType("mobile") && bsc < 5) {
         lord.setLocalObject("tooltips/boardSelect", bsc + 1);
         var bs = $(lord.queryOne(".boardSelectContainer > select"));

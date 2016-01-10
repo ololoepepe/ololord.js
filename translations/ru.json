@@ -1855,9 +1855,9 @@
             "value": "не зарегистрирован"
         }
     },
-    "monospace \\\\`` font with escaped \\\\`` characters": {
+    "monospace \\`` font with escaped \\`` characters": {
         "monospaceEscaped": {
-            "value": "моноширинный шрифт \\\\`` с экранированными \\\\`` символами"
+            "value": "моноширинный шрифт \\`` с экранированными \\`` символами"
         }
     },
     "Google reCAPTCHA v1": {

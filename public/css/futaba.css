@@ -887,6 +887,10 @@ span.newPostCount {
 .postformFileText {
     display: inline-block;
     vertical-align: top;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
 .postformFileRemoveButton {

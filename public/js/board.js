@@ -322,6 +322,8 @@ lord.createPostNode = function(post, permanent, threadInfo) {
         $(".postBody", c.node).css("maxWidth", ($(window).width() - 30) + "px");
         var dw = (c.model.deviceType == "mobile") ? 100 : 320;
         $(".codeBlock", c.node).css("maxWidth", ($(window).width() - dw) + "px");
+        if (lord.deviceType("mobile"))
+            lord.setTooltips(c.node);
         if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
             lord.strikeOutHiddenPostLinks(c.node);
         if (lord.getLocalObject("signOpPostLinks", true))
@@ -2583,17 +2585,17 @@ lord.previousNextThreadPostCommon = function(next, post) {
         for (var i = 0; i < list.length; ++i) {
             if (lord.isInViewport(list[i])) {
                 i = f(list, i);
-                window.location.hash = list[i].id.replace("post", "");
+                window.location.hash = list[i].id;
                 return false;
             }
         }
     }
     list = lord.query(".opPost, .post");
     for (var i = 0; i < list.length; ++i) {
-        if (lord.isInViewport(list[i]) && window.location.hash.replace("#", "") == list[i].id.replace("post", "")) {
+        if (lord.isInViewport(list[i]) && window.location.hash.replace("#", "") == list[i].id) {
             if (post || +lord.data("threadNumber")) {
                 i = f(list, i);
-                window.location.hash = list[i].id.replace("post", "");
+                window.location.hash = list[i].id;
             } else {
                 window.location.hash = list[i].parentNode.id.replace("threadPosts", "");
             }
@@ -2604,7 +2606,7 @@ lord.previousNextThreadPostCommon = function(next, post) {
         if (lord.isInViewport(list[i])) {
             if (post || +lord.data("threadNumber")) {
                 i = f(list, i);
-                window.location.hash = list[i].id.replace("post", "");
+                window.location.hash = list[i].id;
             } else {
                 window.location.hash = list[i].parentNode.id.replace("threadPosts", "");
             }
@@ -2614,7 +2616,7 @@ lord.previousNextThreadPostCommon = function(next, post) {
     list = lord.query(!post ? ".opPost" : ".opPost, .post");
     if (list && list.length > 0) {
         var ind = next ? 0 : (list.length - 1);
-        window.location.hash = list[ind].id.replace("post", "");
+        window.location.hash = list[ind].id;
         return false;
     }
 };
@@ -2970,6 +2972,8 @@ lord.initializeOnLoadBaseBoard = function() {
         $(".postBody").css("maxWidth", ($(window).width() - 30) + "px");
         var dw = (c.model.deviceType == "mobile") ? 100 : 320;
         $(".codeBlock").css("maxWidth", ($(window).width() - dw) + "px");
+        if (lord.deviceType("mobile"))
+            lord.setTooltips();
         setTimeout(function() {
             var hash = lord.hash();
             if (hash && "#" != hash) {
