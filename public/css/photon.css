@@ -203,6 +203,10 @@ hr {
     Board
 */
 
+#postForm {
+    overflow-x: auto;
+}
+
 blockquote {
     margin-top: 14.4px;
     margin-left: 25px;
@@ -889,9 +893,6 @@ span.newPostCount {
     display: inline-block;
     vertical-align: top;
     white-space: normal;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-word;
 }
 
 .postformFileRemoveButton {
