@@ -2303,9 +2303,9 @@
             "value": "Файл не является аудио-файлом"
         }
     },
-    "Invalid PID": {
+    "Invalid worker ID": {
         "_default": {
-            "value": "Недействительный PID"
+            "value": "Недействительный идентификатор воркера"
         }
     },
     "Failed to get Twitter embedded HTML": {

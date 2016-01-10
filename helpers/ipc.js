@@ -85,12 +85,13 @@ module.exports = function(cluster) {
             handleMessage(cluster, message);
         });
     }
-    ipc.send = function(type, data, nowait, pid) {
+    ipc.send = function(type, data, nowait, workerId) {
         if (cluster.isMaster) {
-            if (pid) {
-                var worker = cluster.workers[id];
+            if (workerId) {
+                var worker = cluster.workers[workerId];
                 if (!worker)
-                    return Promise.reject(Tools.translate("Invalid PID"));
+                    return Promise.reject(Tools.translate("Invalid worker ID"));
+                return sendMessage(worker.process, type, data, nowait);
             } else {
                 var promises = Tools.mapIn(cluster.workers, function(worker) {
                     return sendMessage(worker.process, type, data, nowait);

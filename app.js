@@ -99,6 +99,12 @@ var spawnCluster = function() {
                 Global.IPC.installHandler("removeFromCached", function(data) {
                     return controller.removeFromCached(data);
                 });
+                Global.IPC.installHandler("doGenerate", function(data) {
+                    var f = BoardModel[`do_${data.funcName}`];
+                    if (typeof f != "function")
+                        return Promise.reject("Invalid generator function");
+                    return f.call(BoardModel, data.key, data.data);
+                });
                 Global.IPC.send("ready").catch(function(err) {
                     Global.error(err);
                 });
