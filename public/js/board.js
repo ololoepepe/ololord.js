@@ -710,7 +710,7 @@ lord.showPostSourceText = function(el) {
         var textArea = lord.node("textarea");
         textArea.value = post.rawText;
         textArea.rows = "28";
-        textArea.cols = "50";
+        textArea.cols = "43";
         return lord.showDialog(textArea, {
             title: "postSourceText",
             buttons: ["close"]
