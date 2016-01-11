@@ -803,13 +803,15 @@ lord.setThreadClosed = function(el, closed) {
 };
 
 lord.setThreadUnbumpable = function(el, unbumpable) {
+    var postNumber = +lord.data("number", el, true);
     var formData = new FormData();
     formData.append("boardName", lord.data("boardName"));
-    formData.append("threadNumber", lord.data("number", el, true));
+    formData.append("threadNumber", postNumber);
     formData.append("unbumpable", unbumpable);
     lord.post("/" + lord.data("sitePathPrefix") + "action/setThreadUnbumpable",
         formData).then(function(result) {
-        lord.reloadPage();
+        lord.removeReferences(postNumber, true);
+        return lord.updatePost(postNumber);
     }).catch(lord.handleError);
 };
 
