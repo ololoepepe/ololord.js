@@ -390,29 +390,45 @@ lord.showNewPosts = function() {
     var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
     var currentBoardName = lord.data("boardName");
     lord.api("lastPostNumbers").then(function(result) {
-        lastPostNumbers[currentBoardName]
-        lord.query(".navbar, .toolbar").forEach(function(navbar) {
-            lord.query(".navbarItem", navbar).forEach(function(item) {
-                var a = lord.queryOne("a", item);
-                if (!a)
-                    return;
-                var boardName = lord.data("boardName", a);
-                if (!boardName || currentBoardName == boardName || !result[boardName])
-                    return;
-                var lastPostNumber = lastPostNumbers[boardName];
-                if (!lastPostNumber)
-                    lastPostNumber = 0;
-                var newPostCount = result[boardName] - lastPostNumber;
-                if (newPostCount <= 0)
-                    return;
-                var span = lord.node("span");
-                lord.addClass(span, "newPostCount");
-                span.appendChild(lord.node("text", "+" + newPostCount));
-                var parent = a.parentNode;
-                parent.insertBefore(span, a);
-                parent.insertBefore(lord.node("text", " "), a);
+        if (lord.deviceType("mobile")) {
+            lord.query(".boardSelect").forEach(function(sel) {
+                lord.query("option", sel).forEach(function(opt) {
+                    var boardName = lord.data("boardName", opt);
+                    if (!boardName || currentBoardName == boardName || !result[boardName])
+                        return;
+                    var lastPostNumber = lastPostNumbers[boardName];
+                    if (!lastPostNumber)
+                        lastPostNumber = 0;
+                    var newPostCount = result[boardName] - lastPostNumber;
+                    if (newPostCount <= 0)
+                        return;
+                    opt.insertBefore(lord.node("text", "+" + newPostCount + " "), opt.childNodes[0]);
+                });
             });
-        });
+        } else {
+            lord.query(".navbar, .toolbar").forEach(function(navbar) {
+                lord.query(".navbarItem", navbar).forEach(function(item) {
+                    var a = lord.queryOne("a", item);
+                    if (!a)
+                        return;
+                    var boardName = lord.data("boardName", a);
+                    if (!boardName || currentBoardName == boardName || !result[boardName])
+                        return;
+                    var lastPostNumber = lastPostNumbers[boardName];
+                    if (!lastPostNumber)
+                        lastPostNumber = 0;
+                    var newPostCount = result[boardName] - lastPostNumber;
+                    if (newPostCount <= 0)
+                        return;
+                    var span = lord.node("span");
+                    lord.addClass(span, "newPostCount");
+                    span.appendChild(lord.node("text", "+" + newPostCount));
+                    var parent = a.parentNode;
+                    parent.insertBefore(span, a);
+                    parent.insertBefore(lord.node("text", " "), a);
+                });
+            });
+        }
         if (typeof result[currentBoardName] == "number") {
             lastPostNumbers[currentBoardName] = result[currentBoardName];
             lord.setLocalObject("lastPostNumbers", lastPostNumbers);
