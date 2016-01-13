@@ -126,8 +126,15 @@ lord.localData = function(includeSettings) {
 };
 
 lord.setLocalData = function(o, includeSettings, includeCustom) {
-    if (includeSettings && o.settings)
+    if (includeSettings && o.settings) {
+        if (o.settings.captchaEngine.id)
+            o.settings.captchaEngine = o.settings.captchaEngine.id;
+        if (o.settings.style.name)
+            o.settings.style = o.settings.style.name;
+        if (o.settings.codeStyle.name)
+            o.settings.codeStyle = o.settings.codeStyle.name;
         lord.setSettings(o.settings);
+    }
     var f = function(key, doMerge) {
         var val = o[key];
         if (typeof val == "undefined")
