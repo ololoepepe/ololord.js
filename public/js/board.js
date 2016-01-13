@@ -1406,6 +1406,7 @@ lord.fileAddedCommon = function(div, file) {
                 return;
             var img = lord.node("img");
             img.src = "/" + prefix + "img/storage.png";
+            lord.addClass(img, "signImage");
             img.title = lord.text("fileExistsOnServerText");
             lord.queryOne("span", div).appendChild(lord.node("text", " "));
             lord.queryOne("span", div).appendChild(img);
