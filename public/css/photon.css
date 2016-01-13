@@ -353,6 +353,7 @@ span.newPostCount {
 
 .catalogItem {
     background-color: #DDDDDD;
+    border: 1px solid #CCCCCC;
     box-sizing: border-box;
     color: #333333;
     display: inline-block;
