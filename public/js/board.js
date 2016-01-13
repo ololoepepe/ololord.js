@@ -2879,16 +2879,7 @@ lord.initializeOnLoadBaseBoard = function() {
             if (+lord.data("threadNumber"))
                 c.model.thread = model.thread;
             c.model.postformRules = JSON.parse(lord.id("model-postformRules").innerHTML);
-            var postFormNode = lord.template("postForm", c.model);
-            var hiddenPostForm = lord.id("hiddenPostForm");
-            hiddenPostForm.appendChild(postFormNode);
-            var textField = $("[name='text']", postFormNode);
-            $(hiddenPostForm).css("visibility", "hidden");
-            $(hiddenPostForm).css("display", "");
-            textField.css("minWidth", textField.width() + 20);
-            textField.css("minHeight", 50);
-            $(hiddenPostForm).css("display", "none");
-            $(hiddenPostForm).css("visibility", "");
+            lord.id("hiddenPostForm").appendChild(lord.template("postForm", c.model));
             lord.arr(lord.id("options").childNodes).forEach(function(node) {
                 if (3 != node.nodeType)
                     return;
