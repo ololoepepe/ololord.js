@@ -6,5 +6,6 @@
         {{!favorite.subject.substr(0, 50)}}</a>
     <font color="green">{{? favorite.lastPostNumber > favorite.previousLastPostNumber}}+{{ out += (favorite.lastPostNumber - favorite.previousLastPostNumber); }}{{?}}</font>
     <a href="javascript:void(0);" title="{{=it.tr.removeThreadFromFavoritesText}}"
-       onclick="lord.removeFavorite(this); return false;"><img src="/{{=it.site.pathPrefix}}img/delete.png"></a>
+       onclick="lord.removeFavorite(this); return false;"><img src="/{{=it.site.pathPrefix}}img/delete.png"
+                                                               class="buttonImage"></a>
 </div>

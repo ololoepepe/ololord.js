@@ -100,14 +100,9 @@ hr {
 }
 
 .favorites {
-    background-color: #CCCCCC;
-    border: 1px solid #AAAAAA;
-    position: fixed;
-    width: 600px;
-    height: 600px;
-    max-width: 90%;
-    max-height: 90%;
-    z-index: 9980;
+    background-color: #EEEEEE;
+    min-width: 300px;
+    min-height: 400px;
     padding: 2px 2px 2px 2px;
 }
 
@@ -115,12 +110,7 @@ hr {
     background-color: #DDDDDD;
     border: 1px solid #CCCCCC;
     padding: 2px 2px 2px 2px;
-}
-
-.favorites > span {
-    position: absolute;
-    bottom: 10px;
-    right: 20px;
+    margin-top: 4px;
 }
 
 .centerForm {

@@ -284,18 +284,28 @@ lord.showFavorites = function() {
     var model = lord.model(["base", "tr"], true);
     model.favorites = lord.toArray(lord.getLocalObject("favoriteThreads", {}));
     div = lord.template("favoritesDialog", model);
-    document.body.appendChild(div);
-    lord.toCenter(div, null, null, 1);
+    lord.showDialog(div, {
+        title: lord.text("favoriteThreadsText"),
+        buttons: [ "close" ]
+    }).then(function() {
+        var favoriteThreads = lord.getLocalObject("favoriteThreads", {});
+        lord.forIn(favoriteThreads, function(fav) {
+            fav.previousLastPostNumber = fav.lastPostNumber;
+        });
+        lord.setLocalObject("favoriteThreads", favoriteThreads);
+    }).catch(lord.handleError);
+    //document.body.appendChild(div);
+    //lord.toCenter(div, null, null, 1);
 };
 
-lord.closeFavorites = function() {
+/*lord.closeFavorites = function() {
     var favoriteThreads = lord.getLocalObject("favoriteThreads", {});
     lord.forIn(favoriteThreads, function(fav) {
         fav.previousLastPostNumber = fav.lastPostNumber;
     });
     lord.setLocalObject("favoriteThreads", favoriteThreads);
     document.body.removeChild(lord.id("favorites"));
-};
+};*/
 
 lord.removeFavorite = function(el) {
     var div = el.parentNode;

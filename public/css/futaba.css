@@ -90,25 +90,16 @@ hr {
 }
 
 .favorites {
-    background-color: #F0E0D6;
-    position: fixed;
-    width: 600px;
-    height: 600px;
-    max-width: 90%;
-    max-height: 90%;
-    z-index: 9980;
+    background-color: #FFFFEE;
+    min-width: 300px;
+    min-height: 400px;
     padding: 2px 2px 2px 2px;
 }
 
 .favorites > div {
-    background-color: #FBFBEA;
+    background-color: #F0E0D6;
     padding: 2px 2px 2px 2px;
-}
-
-.favorites > span {
-    position: absolute;
-    bottom: 10px;
-    right: 20px;
+    margin-top: 4px;
 }
 
 .centerForm {

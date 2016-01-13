@@ -1,9 +1,5 @@
 <div id="favorites" class="favorites">
-    <h1>{{=it.tr.favoriteThreadsText}}</h1>
-    <div name="favorites">
-        {{~it.favorites :favorite}}
-            {{#def.favoritesElement}}
-        {{~}}
-    </div>
-    <span><button onclick="lord.closeFavorites(this);">{{=it.tr.closeButtonText}}</button></span>
+    {{~it.favorites :favorite}}
+        {{#def.favoritesElement}}
+    {{~}}
 </div>
