@@ -294,18 +294,7 @@ lord.showFavorites = function() {
         });
         lord.setLocalObject("favoriteThreads", favoriteThreads);
     }).catch(lord.handleError);
-    //document.body.appendChild(div);
-    //lord.toCenter(div, null, null, 1);
 };
-
-/*lord.closeFavorites = function() {
-    var favoriteThreads = lord.getLocalObject("favoriteThreads", {});
-    lord.forIn(favoriteThreads, function(fav) {
-        fav.previousLastPostNumber = fav.lastPostNumber;
-    });
-    lord.setLocalObject("favoriteThreads", favoriteThreads);
-    document.body.removeChild(lord.id("favorites"));
-};*/
 
 lord.removeFavorite = function(el) {
     var div = el.parentNode;
