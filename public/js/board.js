@@ -1391,7 +1391,7 @@ lord.fileAddedCommon = function(div, file) {
     var _uuid = uuid.v1();
     lord.queryOne("input", div).name = "file_" + _uuid;
     div.droppedFileName = "file_" + (div.fileUrl ? "url_" : "") + _uuid;
-    var ratingSelect = lord.queryOne("[name='ratingSelectContainer'] > select");
+    var ratingSelect = lord.queryOne("[name='ratingSelectContainer'] > select", div);
     if (ratingSelect)
         ratingSelect.name = "file_" + _uuid + "_rating";
     lord.removeFileHash(div);
@@ -1404,6 +1404,11 @@ lord.fileAddedCommon = function(div, file) {
         }).then(function(exists) {
             if (!exists)
                 return;
+            lord.queryOne("input", div).name = "file_" + c.fileHash;
+            div.droppedFileName = "file_" + (div.fileUrl ? "url_" : "") + c.fileHash;
+            var ratingSelect = lord.queryOne("[name='ratingSelectContainer'] > select", div);
+            if (ratingSelect)
+                ratingSelect.name = "file_" + c.fileHash + "_rating";
             var img = lord.node("img");
             img.src = "/" + prefix + "img/storage.png";
             lord.addClass(img, "signImage");
@@ -1426,7 +1431,10 @@ lord.fileAddedCommon = function(div, file) {
         if (!file)
             return;
         lord.readAs(file, "DataURL").then(function(url) {
-            lord.queryOne("img", div).src = url;
+            var img = lord.queryOne("img", div);
+            img.src = url;
+            if ("neutron" == lord.settings().style.name)
+                lord.addClass(img, "noInvert");
         }).catch(lord.handleError);
     };
     if (fileNameFull.match(/\.(jpe?g|png|gif)$/i) && lord.getLocalObject("showAttachedFilePreview", true)) {
@@ -1474,7 +1482,6 @@ lord.fileAddedCommon = function(div, file) {
     }
     (function(div) {
         div = div.cloneNode(true);
-        var span = lord.queryOne(".postformFileText", div);
         lord.queryOne("a.postformFileRemoveButton", div).style.display = "none";
         div.innerHTML = div.innerHTML; //NOTE: Workaround since we can't clear it other way
         lord.clearFileInput(div);

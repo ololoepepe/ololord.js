@@ -109,8 +109,8 @@ var getFiles = function(fields, files, transaction) {
         var hashes = fields.fileHashes ? fields.fileHashes.split(",") : [];
         return Database.getFileInfosByHashes(hashes);
     }).then(function(fileInfos) {
-        return tmpFiles.concat(fileInfos.map(function(fileInfo) {
-            return {
+        return tmpFiles.concat(fileInfos.map(function(fileInfo, i) {
+            var fi = {
                 name: fileInfo.name,
                 thumbName: fileInfo.thumb.name,
                 size: fileInfo.size,
@@ -119,6 +119,8 @@ var getFiles = function(fields, files, transaction) {
                 rating: fileInfo.rating,
                 copy: true
             };
+            setFileRating(fi, fields.fileHashes.split(",")[i]);
+            return fi;
         }));
     });
 };

@@ -901,7 +901,7 @@ span.newPostCount {
 }
 
 .postformFileRemoveImage {
-    vertical-align: top;
+    vertical-align: top !important;
 }
 
 .referencedBy {
