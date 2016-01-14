@@ -2243,6 +2243,7 @@ lord.fillFormWithDraft = function(a) {
     subject.value = draft.subject;
     text.value = draft.rawText;
     op.checked = draft.options.signAsOp;
+    $(op).button("refresh");
     tripcode.checked = draft.options.showTripcode;
     $(tripcode).button("refresh");
     for (var i = 0; i < markupMode.options.length; ++i) {
