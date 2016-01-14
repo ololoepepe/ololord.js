@@ -1220,6 +1220,20 @@ lord.data = function(key, el, bubble) {
     return undefined;
 };
 
+lord.scriptWorkaround = function(parent) {
+    if (!parent)
+        parent = document;
+    lord.query("script", parent).forEach(function(script) {
+        var nscript = lord.node("script");
+        nscript.type = script.type;
+        if (script.src)
+            nscript.src = script.src;
+        else if (script.innerHTML)
+            nscript.innerHTML = script.innerHTML;
+        script.parentNode.replaceChild(nscript, script);
+    });
+};
+
 lord.template = function(templateName, model, noparse) {
     var template = lord.templates[templateName];
     if (!template)
@@ -1239,15 +1253,7 @@ lord.template = function(templateName, model, noparse) {
     }
     if (!node)
         return null;
-    lord.query("script", node).forEach(function(script) {
-        var nscript = lord.node("script");
-        nscript.type = script.type;
-        if (script.src)
-            nscript.src = script.src;
-        else if (script.innerHTML)
-            nscript.innerHTML = script.innerHTML;
-        script.parentNode.replaceChild(nscript, script);
-    });
+    lord.scriptWorkaround(node);
     return node;
 };
 
