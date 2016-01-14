@@ -357,50 +357,50 @@ lord.createPostNode = function(post, permanent, threadInfo) {
             lord.initFiles();
         }
         var data = lord.getPostData(c.node);
-        lord.doWork("processPosts", {
+        return lord.doWork("processPosts", {
             posts: [data],
             spells: lord.spells
         }).then(function(list) {
             lord.processPost(c.node, (list && list.length > 0) ? list[0] : null);
-        }).catch(lord.handleError);
-        if (!permanent || !post.referencedPosts || post.referencedPosts.length < 1)
-            return Promise.resolve();
-        var model = lord.model(["base", "board/" + lord.data("boardName")], true);
-        model.settings = lord.settings();
-        model.checkOwnPost = function(post) {
-            return !!ownPosts[post.boardName + "/" + (post.number || post.postNumber)];
-        };
-        var promises = post.referencedPosts.filter(function(reference) {
-            return reference.boardName == lord.data("boardName") && lord.id(reference.postNumber);
-        }).map(function(reference) {
-            var targetPost = lord.id(reference.postNumber);
-            lord.nameOne("referencedByContainer", targetPost).style.display = "";
-            var referencedBy = lord.nameOne("referencedBy", targetPost);
-            var list = lord.query("a", referencedBy);
-            for (var i = 0; i < list.length; ++i) {
-                if (lord.data("boardName", list[i]) == post.boardName
-                    && lord.data("postNumber", list[i]) == post.number) {
-                    return Promise.resolve();
-                }
-            }
-            model.reference = {
-                boardName: post.boardName,
-                postNumber: post.number,
-                threadNumber: post.threadNumber,
-                user: post.user
+            if (!permanent || !post.referencedPosts || post.referencedPosts.length < 1)
+                return Promise.resolve();
+            var model = lord.model(["base", "board/" + lord.data("boardName")], true);
+            model.settings = lord.settings();
+            model.checkOwnPost = function(post) {
+                return !!ownPosts[post.boardName + "/" + (post.number || post.postNumber)];
             };
-            var a = lord.template("postReference", model);
-            referencedBy.appendChild(lord.node("text", " "));
-            referencedBy.appendChild(a);
-            if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
-                lord.strikeOutHiddenPostLinks(targetPost);
-            if (lord.getLocalObject("signOpPostLinks", true))
-                lord.signOpPostLinks(targetPost);
-            if (lord.getLocalObject("signOwnPostLinks", true))
-                lord.signOwnPostLinks(targetPost, ownPosts);
-            return Promise.resolve();
-        });
-        return Promise.all(promises);
+            var promises = post.referencedPosts.filter(function(reference) {
+                return reference.boardName == lord.data("boardName") && lord.id(reference.postNumber);
+            }).map(function(reference) {
+                var targetPost = lord.id(reference.postNumber);
+                lord.nameOne("referencedByContainer", targetPost).style.display = "";
+                var referencedBy = lord.nameOne("referencedBy", targetPost);
+                var list = lord.query("a", referencedBy);
+                for (var i = 0; i < list.length; ++i) {
+                    if (lord.data("boardName", list[i]) == post.boardName
+                        && lord.data("postNumber", list[i]) == post.number) {
+                        return Promise.resolve();
+                    }
+                }
+                model.reference = {
+                    boardName: post.boardName,
+                    postNumber: post.number,
+                    threadNumber: post.threadNumber,
+                    user: post.user
+                };
+                var a = lord.template("postReference", model);
+                referencedBy.appendChild(lord.node("text", " "));
+                referencedBy.appendChild(a);
+                if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
+                    lord.strikeOutHiddenPostLinks(targetPost);
+                if (lord.getLocalObject("signOpPostLinks", true))
+                    lord.signOpPostLinks(targetPost);
+                if (lord.getLocalObject("signOwnPostLinks", true))
+                    lord.signOwnPostLinks(targetPost, ownPosts);
+                return Promise.resolve();
+            });
+            return Promise.all(promises);
+        }).catch(lord.handleError);
     }).then(function() {
         return c.node;
     });
@@ -1119,13 +1119,11 @@ lord.hideByImage = function(a) {
             acc[data.postNumber] = data;
             return acc;
         }, {});
-        return lord.gently(c.posts, function(post) {
+        c.posts.forEach(function(post) {
             var data = map[+post.id];
             lord.processPost(post, data);
-        }, {
-            delay: 10,
-            n: 10
         });
+        return Promise.resolve();
     }).catch(lord.handleError);
 };
 
@@ -2444,23 +2442,16 @@ lord.strikeOutHiddenPostLinks = function(parent) {
     if (!parent)
         parent = document;
     var list = lord.getLocalObject("hiddenPosts", {});
-    lord.gently(lord.query("a", parent), function(a) {
+    lord.query("a", parent).forEach(function(a) {
         lord.strikeOutHiddenPostLink(a, list);
-    }, {
-        delay: 10,
-        n: 20
     });
 };
 
 lord.signOpPostLinks = function(parent) {
     if (!parent)
         parent = document.body;
-    var list = [];
-    return lord.gently(lord.query("a", parent), function(a) {
+    lord.query("a", parent).forEach(function(a) {
         lord.signOpPostLink(a);
-    }, {
-        delay: 10,
-        n: 20
     });
 };
 
@@ -2468,11 +2459,8 @@ lord.signOwnPostLinks = function(parent, ownPosts) {
     if (!parent)
         parent = document.body;
     ownPosts = ownPosts || lord.getLocalObject("ownPosts", {});
-    lord.gently(lord.query("a", parent), function(a) {
+    lord.query("a", parent).forEach(function(a) {
         lord.signOwnPostLink(a, ownPosts);
-    }, {
-        delay: 10,
-        n: 20
     });
 };
 
@@ -3060,6 +3048,13 @@ lord.initializeOnLoadBaseBoard = function() {
         var spellsEnabled = lord.getLocalObject("spellsEnabled", true);
         var posts = lord.query(".post, .opPost");
         var p;
+        if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
+            lord.strikeOutHiddenPostLinks();
+        if (lord.getLocalObject("signOpPostLinks", true))
+            lord.signOpPostLinks();
+        if (lord.getLocalObject("signOwnPostLinks", true))
+            lord.signOwnPostLinks();
+        var p;
         if (spellsEnabled)
             p = lord.doWork("parseSpells", lord.getLocalObject("spells", lord.DefaultSpells));
         else
@@ -3090,34 +3085,32 @@ lord.initializeOnLoadBaseBoard = function() {
                 acc[data.postNumber] = data;
                 return acc;
             }, {}) : {};
-            lord.gently(posts, function(post) {
+            posts.forEach(function(post) {
                 lord.processPost(post, map[+post.id]);
-            }, {
-                delay: 10,
-                n: 10
             });
-        }).catch(lord.handleError);
-        lord.query(".opPost").forEach(function(opPost) {
-            var threadNumber = +opPost.id;
-            var btn = lord.nameOne("addToFavoritesButton", opPost);
-            if (fav.hasOwnProperty(currentBoardName + "/" + threadNumber)) {
-                var img = lord.queryOne("img", btn);
-                var span = lord.queryOne("span", btn);
-                lord.removeChildren(span);
-                span.appendChild(lord.node("text", lord.text("removeThreadFromFavoritesText")));
-                img.src = img.src.replace("favorite.png", "favorite_active.png");
+        }).then(function() {
+            lord.query(".opPost").forEach(function(opPost) {
+                var threadNumber = +opPost.id;
+                var btn = lord.nameOne("addToFavoritesButton", opPost);
+                if (fav.hasOwnProperty(currentBoardName + "/" + threadNumber)) {
+                    var img = lord.queryOne("img", btn);
+                    var span = lord.queryOne("span", btn);
+                    lord.removeChildren(span);
+                    span.appendChild(lord.node("text", lord.text("removeThreadFromFavoritesText")));
+                    img.src = img.src.replace("favorite.png", "favorite_active.png");
+                }
+            });
+            if (lord.getLocalObject("hideTripcodes", false)) {
+                lord.query(".tripcode").forEach(function(span) {
+                    span.style.display = "none";
+                });
             }
-        });
-        if (lord.getLocalObject("hideTripcodes", false)) {
-            lord.query(".tripcode").forEach(function(span) {
-                span.style.display = "none";
-            });
-        }
-        if (lord.getLocalObject("hideUserNames", false)) {
-            lord.query(".someName").forEach(function(span) {
-                span.style.display = "none";
-            });
-        }
+            if (lord.getLocalObject("hideUserNames", false)) {
+                lord.query(".someName").forEach(function(span) {
+                    span.style.display = "none";
+                });
+            }
+        }).catch(lord.handleError);
         var lastLang = lord.getLocalObject("lastCodeLang", "-");
         var sel = lord.queryOne(".postformMarkup > span > [name='codeLang']");
         if (sel) {
@@ -3127,12 +3120,6 @@ lord.initializeOnLoadBaseBoard = function() {
             });
         }
         lord.setPostformMarkupVisible(!lord.getLocalObject("hidePostformMarkup", false));
-        if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
-            lord.strikeOutHiddenPostLinks();
-        if (lord.getLocalObject("signOpPostLinks", true))
-            lord.signOpPostLinks();
-        if (lord.getLocalObject("signOwnPostLinks", true))
-            lord.signOwnPostLinks(document.body);
         if (!lord.data("threadNumber")) {
             lord.api("lastPostNumber", { boardName: currentBoardName }).then(function(result) {
                 var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
