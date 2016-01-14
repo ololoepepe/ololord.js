@@ -268,11 +268,8 @@ var renderFileInfo = function(fi) {
     post.rawSubject = post.subject;
     post.isOp = (post.number == post.threadNumber);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
-    if (post.options.showTripcode) {
-        var md5 = Crypto.createHash("md5");
-        md5.update(post.user.hashpass + config("site.tripcodeSalt", ""));
-        post.tripcode = "!" + md5.digest("base64").substr(0, 10);
-    }
+    if (post.options.showTripcode)
+        post.tripcode = Tools.generateTripcode(post.user.hashpass);
     delete post.user.ip;
     delete post.user.hashpass;
     delete post.user.password;

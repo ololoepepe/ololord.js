@@ -649,3 +649,9 @@ module.exports.series = function(arr, f) {
     }
     return p;
 };
+
+module.exports.generateTripcode = function(source) {
+    var md5 = Crypto.createHash("md5");
+    md5.update(source + config("site.tripcodeSalt", ""));
+    return "!" + md5.digest("base64").substr(0, 10);
+};

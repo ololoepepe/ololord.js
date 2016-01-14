@@ -1,4 +1,3 @@
-var Crypto = require("crypto");
 var express = require("express");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
@@ -201,11 +200,8 @@ router.post("/action/markupText", function(req, res) {
             },
             createdAt: date.toISOString()
         };
-        if (req.hashpass && c.fields.tripcode) {
-            var md5 = Crypto.createHash("md5");
-            md5.update(req.hashpass + config("site.tripcodeSalt", ""));
-            data.tripcode = "!" + md5.digest("base64").substr(0, 10);
-        }
+        if (req.hashpass && c.fields.tripcode)
+            data.tripcode = Tools.generateTripcode(req.hashpass);
         res.send(data);
     }).catch(function(err) {
         controller.error(res, err, true);
