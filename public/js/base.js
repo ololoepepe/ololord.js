@@ -379,7 +379,7 @@ lord.checkFavoriteThreads = function() {
                     lord.removeChildren(fnt);
                     var diff = fav.lastPostNumber - fav.previousLastPostNumber;
                     fnt.appendChild(lord.node("text", "+" + diff));
-                } else if (!sameThread)
+                } else if (!sameThread) {
                     show = true;
                 }
             }
