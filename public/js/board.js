@@ -648,6 +648,7 @@ lord.quickReply = function(el) {
     if (tripcode) {
         var threadNumber = lord.nameOne("threadNumber", postForm);
         tripcode.checked = lord.showTripcode(threadNumber ? threadNumber.value : null);
+        $(tripcode).button("refresh");
     }
 };
 
@@ -2243,6 +2244,7 @@ lord.fillFormWithDraft = function(a) {
     text.value = draft.rawText;
     op.checked = draft.options.signAsOp;
     tripcode.checked = draft.options.showTripcode;
+    $(tripcode).button("refresh");
     for (var i = 0; i < markupMode.options.length; ++i) {
         if (draft.markupMode == markupMode.options[i].value) {
             markupMode.selectedIndex = i;
@@ -2333,6 +2335,7 @@ lord.resetPostForm = function() {
     if (trip) {
         var threadNumber = lord.nameOne("threadNumber", postForm);
         trip.checked = lord.showTripcode(threadNumber ? threadNumber.value : null);
+        $(trip).button("refresh");
     }
     var markupMode = lord.nameOne("markupMode", postForm);
     for (var i = 0; i < markupMode.options.length; ++i) {
@@ -3045,8 +3048,10 @@ lord.initializeOnLoadBaseBoard = function() {
             var postForm = lord.id("postForm");
             if (postForm) {
                 var sw = lord.nameOne("tripcode", postForm);
-                if (sw)
+                if (sw) {
                     sw.checked = true;
+                    $(sw).button("refresh");
+                }
             }
         }
         var fav = lord.getLocalObject("favoriteThreads", {});
