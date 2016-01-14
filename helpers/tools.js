@@ -423,6 +423,7 @@ module.exports.parseForm = function(req) {
     var form = new Formidable.IncomingForm();
     form.uploadDir = config("system.tmpPath", __dirname + "/../tmp") + "/formidable";
     form.hash = "sha1";
+    form.maxFieldsSize = 5 * 1024 * 1024;
     return new Promise(function(resolve, reject) {
         form.parse(req, function(err, fields, files) {
             if (err) {

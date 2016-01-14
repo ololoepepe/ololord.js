@@ -109,8 +109,8 @@ input:not([type='image']) { /*Yep, this is NOT a class*/
 }
 
 .warning {
-    color: orange;
-    border: 1px dotted orange;
+    color: #FF6600;
+    border: 1px dotted #FF6600;
 }
 
 .favorites {

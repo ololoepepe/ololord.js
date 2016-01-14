@@ -237,7 +237,7 @@ lord.synchronize = function() {
             return lord.post("/" + lord.data("sitePathPrefix") + "action/synchronize", formData);
         }).then(function() {
             lord.showPopup(lord.text("synchronizationSuccessfulText"));
-            lord.showPopup(lord.text("synchronizationTimeoutText"), { timeout: 10 * lord.Second });
+            lord.showPopup(lord.text("synchronizationTimeoutText"), { timeout: 10 * lord.Second, type: "warning" });
         }).catch(lord.handleError);
     }).catch(lord.handleError);
 };
