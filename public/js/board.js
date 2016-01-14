@@ -2951,8 +2951,6 @@ lord.initializeOnLoadBaseBoard = function() {
         }
         c.threads = model.threads || [model.thread];
         var threads = lord.id("threads");
-        lord.removeChildren(threads);
-        lord.removeClass(threads, "loadingMessage");
         var html = "";
         c.threads.forEach(function(thread) {
             c.model.thread = thread;
@@ -2960,28 +2958,10 @@ lord.initializeOnLoadBaseBoard = function() {
             var templateName = c.threadOrBoard ? "thread" : (c.archive ? "archiveThread" : "catalogThread");
             html += lord.template(templateName, c.model, true);
         });
-        var pp = Promise.resolve();
-        var partSize = 100000000;
-        var f = function() {
-            if (html.length <= 0)
-                return Promise.resolve();
-            var len = partSize;
-            if (len < html.length) {
-                var ind = html.substr(partSize).indexOf("<div id=");
-                if (ind >= 0)
-                    len += ind;
-            }
-            threads.innerHTML += html.substr(0, len);
-            html = html.substr(len);
-            return new Promise(function(resolve, reject) {
-                setTimeout(function() {
-                    return f().then(function() {
-                        resolve();
-                    }).catch(reject);
-                }, 100);
-            });
-        };
-        f().then(function() {
+        lord.createDocumentFragment(html).then(function(frag) {
+            lord.removeChildren(threads);
+            lord.removeClass(threads, "loadingMessage");
+            threads.appendChild(frag);
             lord.scriptWorkaround(threads);
             if (typeof lord.postsLoaded == "function")
                 lord.postsLoaded();

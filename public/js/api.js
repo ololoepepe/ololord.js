@@ -1257,6 +1257,21 @@ lord.template = function(templateName, model, noparse) {
     return node;
 };
 
+lord.createDocumentFragment = function(html) {
+    var temp = document.createElement("div");
+    var frag = document.createDocumentFragment();
+    temp.innerHTML = html;
+    return new Promise(function(resolve) {
+        var f = function() {
+            if (!temp.firstChild)
+                return resolve(frag);
+            frag.appendChild(temp.firstChild);
+            setTimeout(f, 0);
+        };
+        f();
+    });
+};
+
 lord.createStylesheetLink = function(href, prefix) {
     var link = lord.node("link");
     link.type = "text/css";
