@@ -1259,8 +1259,10 @@ lord.template = function(templateName, model, noparse) {
 
 lord.createDocumentFragment = function(html) {
     var temp = document.createElement("div");
-    var frag = document.createDocumentFragment();
     temp.innerHTML = html;
+    if (typeof document.createDocumentFragment != "function")
+        return Promise.resolve(temp);
+    var frag = document.createDocumentFragment();
     return new Promise(function(resolve) {
         var f = function() {
             if (!temp.firstChild)
