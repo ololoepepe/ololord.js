@@ -360,7 +360,8 @@ lord.checkFavoriteThreads = function() {
                 fav.subject = "[404] " + fav.subject;
             fav.lastPostNumber = lastPostNumber;
             if (fav.lastPostNumber > fav.previousLastPostNumber) {
-                if (lord.notificationsEnabled()) {
+                var sameThread = (+lord.data("threadNumber") == fav.threadNumber);
+                if (!sameThread && lord.notificationsEnabled()) {
                     lord.notificationQueue.push({
                         key: fav.boardName + "/" + fav.threadNumber,
                         boardName: fav.boardName,
@@ -368,24 +369,24 @@ lord.checkFavoriteThreads = function() {
                         threadNumber: fav.threadNumber
                     });
                 }
-                if (lord.soundEnabled())
+                if (!sameThread && lord.soundEnabled())
                     lord.playSound();
                 if (div) {
                     var postDiv = lord.id("favorite/" + fav.boardName + "/" + fav.threadNumber);
                     if (!postDiv)
                         return;
                     var fnt = lord.queryOne("font", postDiv);
-                    if (fnt.childNodes.length > 0)
-                        fnt.removeChild(fnt.childNodes[0]);
+                    lord.removeChildren(fnt);
                     var diff = fav.lastPostNumber - fav.previousLastPostNumber;
                     fnt.appendChild(lord.node("text", "+" + diff));
-                } else {
-                    if (+lord.data("threadNumber") != fav.threadNumber)
-                        show = true;
+                } else if (!sameThread)
+                    show = true;
                 }
             }
-            if (show)
+            if (show) {
+                lord.setLocalObject("favoriteThreads", favoriteThreads);
                 lord.showFavorites();
+            }
         });
         lord.setLocalObject("favoriteThreads", favoriteThreads);
         setTimeout(lord.checkFavoriteThreads, 15 * lord.Second);

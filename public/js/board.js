@@ -3002,8 +3002,6 @@ lord.initializeOnLoadBaseBoard = function() {
                 lord.addClass(img, "mumWatching");
             });
         }
-        if (lord.getCookie("show_tripcode") === "true")
-            lord.id("showTripcodeCheckbox").checked = true;
         if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
             var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
             var key = function(name) {

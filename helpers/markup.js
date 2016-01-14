@@ -6,6 +6,7 @@ var Board = require("../boards");
 var config = require("./config");
 var controller = require("./controller");
 var Database = require("./database");
+var Global = require("./global");
 var Tools = require("./tools");
 
 var langNames = require("../misc/lang-names.json");
