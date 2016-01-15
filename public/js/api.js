@@ -232,7 +232,7 @@ lord.Hour = 60 * lord.Minute;
 lord.Day = 24 * lord.Hour;
 lord.Year = 365 * lord.Day;
 lord.Billion = 2 * 1000 * 1000 * 1000;
-lord.SettingsStoredInCookies = ["time", "timeZoneOffset", "captchaEngine"];
+lord.SettingsStoredInCookies = ["deviceType", "time", "timeZoneOffset", "captchaEngine"];
 //
 lord.keyboardMap = [
   "", // [0]
@@ -506,7 +506,7 @@ lord.templates = {};
 /*Functions*/
 
 lord.isAudioType = function(type) {
-    return type in {"audio/mpeg": true, "audio/ogg": true, "audio/wav": true};
+    return type in {"application/ogg": true, "audio/mpeg": true, "audio/ogg": true, "audio/wav": true};
 };
 
 lord.isImageType = function(type) {
@@ -862,9 +862,7 @@ lord.contains = function(s, subs) {
 
 lord.isInViewport = function(el) {
     var rect = el.getBoundingClientRect();
-    return (rect.top >= 0 && rect.left >= 0
-        && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
-        && rect.right <= (window.innerWidth || document.documentElement.clientWidth));
+    return (rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight));
 };
 
 lord.addClass = function(element, classNames) {
@@ -1017,6 +1015,7 @@ lord.showDialog = function(body, options) {
             maxWidth: $(window).width() - 40,
             close: function() {
                 resolve(false);
+                $(this).dialog("destroy").remove();
             },
             create: function() {
                 $("body").css({ overflow: "hidden" });
@@ -1221,6 +1220,20 @@ lord.data = function(key, el, bubble) {
     return undefined;
 };
 
+lord.scriptWorkaround = function(parent) {
+    if (!parent)
+        parent = document;
+    lord.query("script", parent).forEach(function(script) {
+        var nscript = lord.node("script");
+        nscript.type = script.type;
+        if (script.src)
+            nscript.src = script.src;
+        else if (script.innerHTML)
+            nscript.innerHTML = script.innerHTML;
+        script.parentNode.replaceChild(nscript, script);
+    });
+};
+
 lord.template = function(templateName, model, noparse) {
     var template = lord.templates[templateName];
     if (!template)
@@ -1240,16 +1253,25 @@ lord.template = function(templateName, model, noparse) {
     }
     if (!node)
         return null;
-    lord.query("script", node).forEach(function(script) {
-        var nscript = lord.node("script");
-        nscript.type = script.type;
-        if (script.src)
-            nscript.src = script.src;
-        else if (script.innerHTML)
-            nscript.innerHTML = script.innerHTML;
-        script.parentNode.replaceChild(nscript, script);
-    });
+    lord.scriptWorkaround(node);
     return node;
+};
+
+lord.createDocumentFragment = function(html) {
+    var temp = document.createElement("div");
+    temp.innerHTML = html;
+    if (typeof document.createDocumentFragment != "function")
+        return Promise.resolve(temp);
+    var frag = document.createDocumentFragment();
+    return new Promise(function(resolve) {
+        var f = function() {
+            if (!temp.firstChild)
+                return resolve(frag);
+            frag.appendChild(temp.firstChild);
+            setTimeout(f, 0);
+        };
+        f();
+    });
 };
 
 lord.createStylesheetLink = function(href, prefix) {
@@ -1394,6 +1416,7 @@ lord.now = function() {
 
 lord.settings = function() {
     return {
+        deviceType: lord.getCookie("deviceType", "auto"),
         time: lord.getCookie("time", "server"),
         timeZoneOffset: lord.getCookie("timeZoneOffset", -lord.now().getTimezoneOffset()),
         captchaEngine: { id: lord.getCookie("captchaEngine", "google-recaptcha") },
@@ -1438,7 +1461,8 @@ lord.settings = function() {
         chatEnabled: lord.getLocalObject("chatEnabled", true),
         closeFilesByClickingOnly: lord.getLocalObject("closeFilesByClickingOnly", false),
         viewPostPreviewDelay: lord.getLocalObject("viewPostPreviewDelay", 200),
-        apiRequestCachingEnabled: lord.getLocalObject("apiRequestCachingEnabled", false)
+        apiRequestCachingEnabled: lord.getLocalObject("apiRequestCachingEnabled", false),
+        bannersMode: lord.getLocalObject("bannersMode", "random")
     };
 };
 

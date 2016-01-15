@@ -11,7 +11,7 @@
         {{=it.title}}
     </h1>
 </div>
-<div class="sectionHeader">
+<div id="basic" class="sectionHeader">
     <h3>{{=it.tr.basicMarkup}}</h3>
 </div>
 <div class="rules">
@@ -84,7 +84,7 @@
     <br /><br />
     [sup]<sup>{{=it.tr.superscriptText}}</sup>[/sup] (x<sup>3</sup> + y<sup>2</sup>)
 </div>
-<div class="sectionHeader">
+<div id="link" class="sectionHeader">
     <h3>{{=it.tr.linkMarkup}}</h3>
  </div>
 <div class="rules">
@@ -103,7 +103,7 @@
     irc:#some_channel —&gt; <a href="irc:#some_channel">#some_channel</a>
 </div>
 {{? it.site.twitter.integrationEnabled}}
-    <div class="sectionHeader">
+    <div id="twitter" class="sectionHeader">
         <h3>{{=it.tr.twitterEmbeddingMarkup}}</h3>
     </div>
     <div class="rules">
@@ -115,7 +115,7 @@
     </div>
 {{?}}
 {{? it.site.vkontakte.integrationEnabled}}
-    <div class="sectionHeader">
+    <div id="vkontakte" class="sectionHeader">
         <h3>{{=it.tr.vkontakteEmbeddingMarkup}}</h3>
     </div>
     <div class="rules">
@@ -131,7 +131,7 @@
         <div class="overflowContainer"><div id="vk_post_1_45616"></div><script type="text/javascript"> (function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = "//vk.com/js/api/openapi.js?121"; fjs.parentNode.insertBefore(js, fjs); }(document, 'script', 'vk_openapi_js')); (function() { if (!window.VK || !VK.Widgets || !VK.Widgets.Post || !VK.Widgets.Post("vk_post_1_45616", 1, 45616, 'ZM4yaNBirAYceJVaXcCrja8wKww', {width: 500})) setTimeout(arguments.callee, 50); }());</script></div>
     </div>
 {{?}}
-<div class="sectionHeader">
+<div id="video" class="sectionHeader">
     <h3>{{=it.tr.youtubeCoubEmbeddingMarkup}}</h3>
 </div>
 <div class="rules">
@@ -142,7 +142,7 @@
     <br /><br />
     <span data-video-id="7wHhnX1WMNA" data-video-title="О квадратных формочках и говне, в которое превратился веб" data-video-author="Andrey Bogdanov" data-thumb-url="https://i.ytimg.com/vi/7wHhnX1WMNA/mqdefault.jpg" data-thumb-width="320" data-thumb-height="180"> <img title="YouTube" src="https://youtube.com/favicon.ico" class="signImage noInvert" width="16" height="16"> <a onmouseover="lord.showVideoThumb(event, this);" onmousemove="lord.moveVideoThumb(event, this);" onmouseout="lord.hideVideoThumb(event, this);" title="Andrey Bogdanov" href="https://www.youtube.com/watch?v=7wHhnX1WMNA">О квадратных формочках и говне, в которое превратился веб</a> <a href="javascript:void(0);" class="expandCollapse" onclick="lord.expandCollapseYoutubeVideo(this); return false;">[Развернуть видео]</a><span>
 </div>
-<div class="sectionHeader">
+<div id="replacement" class="sectionHeader">
     <h3>{{=it.tr.replacementMarkup}}</h3>
 </div>
 <div class="rules">
@@ -150,7 +150,7 @@
     <br /><br />
     ---- ({{=it.tr.quadripleHyphen}}) —&gt; — ({{=it.tr.emDash}})
 </div>
-<div class="sectionHeader">
+<div id="code" class="sectionHeader">
     <h3>{{=it.tr.codeMarkup}}</h3>
 </div>
 <div class="rules">
@@ -161,8 +161,28 @@
     [c++]{{=it.codeToMarkup}}[/c++]
     <br /><br />
     {{=it.markedUpCode}}
+    <br />
+    <span class="cspoiler">
+        <span class="cspoilerTitle" onclick="lord.expandCollapseSpoiler(this);">{{=it.tr.supportedCodeLanguagesText}}</span>
+        <span class="cspoilerBody" style="display: none;">
+            <table>
+                <tbody>
+                    <tr>
+                        <th>{{=it.tr.codeLanguageNameText}}</th>
+                        <th>{{=it.tr.codeLanguageIdText}}</th>
+                    </tr>
+                    {{~it.langs :lang}}
+                        <tr>
+                            <td>{{=lang.name}}</td>
+                            <td>{{=lang.id}}</td>
+                        </tr>
+                    {{~}}
+                </tbody>
+            </table>
+        </span>
+    </span>
 </div>
-<div class="sectionHeader">
+<div id="list" class="sectionHeader">
     <h3>{{=it.tr.listMarkup}}</h3>
 </div>
 <div class="rules">

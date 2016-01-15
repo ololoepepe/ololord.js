@@ -174,6 +174,7 @@ board.addTranslations = function(translate) {
     translate("Text:", "voteTextText");
     translate("Multiple variants allowed:", "multipleVoteVariantsText");
     translate("Add variant", "addVoteVariantText");
+    translate("Remove this variant", "removeVoteVariantText");
 };
 
 var extraData = function(req, fields, edit) {
@@ -210,7 +211,7 @@ var extraData = function(req, fields, edit) {
     });
 };
 
-board.postExtraData = function(req, fields, files, oldPost) {
+board.postExtraData = function(req, fields, _, oldPost) {
     var oldData = oldPost ? oldPost.extraData : null;
     var newData;
     return extraData(req, fields, oldPost).then(function(data) {

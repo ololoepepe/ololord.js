@@ -81,7 +81,7 @@
         {{?}}
         <span class="nowrap">
             #<a href="{{? it.threads}}#{{=post.number}}{{??}}/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.threadNumber}}.html#{{=post.number}}{{?}}"
-                {{? thread.postingEnabled}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}}
+                {{? thread.postingEnabled && !thread.archived}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}}
                 name="number" data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}"
                 data-thread-number="{{=post.threadNumber}}">{{=post.number}}{{? it.settings.signOwnPostLinks && it.checkOwnPost(post)}} (You){{?}}</a>
             {{? it.customPostHeaderPart && it.customPostHeaderPart[110]}}
@@ -91,7 +91,7 @@
             {{? it.customPostHeaderPart && it.customPostHeaderPart[120]}}
                 {{ out += it.customPostHeaderPart[120](it, thread, post); }}
             {{?}}
-            {{? thread.postingEnabled && !thread.postLimitReached}}
+            {{? thread.postingEnabled && !thread.archived && !thread.postLimitReached}}
                 <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
                                                      onclick="lord.quickReply(this); return false;"
                                                      title="{{=it.tr.quickReplyText}}"><img src="/{{=it.site.pathPrefix}}img/reply.png"

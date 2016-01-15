@@ -1,4 +1,5 @@
 var FSSync = require("fs");
+var Util = require("util");
 
 var Board = require("./board");
 var Captcha = require("../captchas");
@@ -7,7 +8,14 @@ var Tools = require("../helpers/tools");
 FSSync.readdirSync(__dirname).forEach(function(file) {
     if ("index.js" == file || "js" != file.split(".").pop())
         return;
-    Board.addBoard(require("./" + file.split(".").shift()));
+    var board = require("./" + file.split(".").shift());
+    if (Util.isArray(board)) {
+        board.forEach(function(board) {
+            Board.addBoard(board);
+        });
+    } else {
+        Board.addBoard(board);
+    }
 });
 
 Board.addBoard(new Board("3dpd", Tools.translate.noop("3D pron", "boardTitle")));

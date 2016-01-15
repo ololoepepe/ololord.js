@@ -2,7 +2,7 @@
 <div class="postformFile" onclick="lord.browseFile(event, this);" ondragover="return lord.fileDragOver(event, this);"
      ondragleave="return lord.fileDragLeave(event, this);" ondrop="return lord.fileDrop(event, this);"
      title="{{=it.tr.selectFileText}}">
-    <img class="postformFilePreview" src="/{{=it.site.pathPrefix}}img/addfile.png" class="signImage">
+    <img class="postformFilePreview signImage" src="/{{=it.site.pathPrefix}}img/addfile.png">
     <a onclick="lord.attachFileByLink(this); return lord.preventOnclick(event);" class="fileByLinkButton"
        title="{{=it.tr.attachFileByLinkText}}"><img class="buttonImage" width="32" height="32"
                                                     src="/{{=it.site.pathPrefix}}img/addfile_link.png"></a>
@@ -17,7 +17,7 @@
     <a href="javascript:void(0);" style="display: none;" onclick="lord.removeFile(this);"
        class="postformFileRemoveButton">
         <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.removeFileText}}"
-             class="postformFileRemoveImage"></a>
+             class="buttonImage postformFileRemoveImage"></a>
     {{? !it.minimalisticPostform()}}
         <div name="ratingSelectContainer">
             <span>{{=it.tr.ratingLabelText}}</span>
@@ -27,7 +27,7 @@
                 <option value="R-18" onclick="return lord.preventOnclick(event);">R-18</option>
                 <option value="R-18G" onclick="return lord.preventOnclick(event);">R-18G</option>
             </select>
-            <img src="/{{=it.site.pathPrefix}}img/question.png" title="{{=it.tr.ratingTooltip}}">
+            <img src="/{{=it.site.pathPrefix}}img/question.png" title="{{=it.tr.ratingTooltip}}" class="signImage">
         </div>
     {{?}}
 </div>

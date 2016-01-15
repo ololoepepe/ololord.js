@@ -6,6 +6,14 @@ body {
     font-family: "Trebuchet MS",Trebuchet,tahoma,serif;
 }
 
+body.desktop {
+    font-size: 14.4px;
+}
+
+.ui-widget {
+    font-size: 14.4px !important;
+}
+
 body.mobile {
     -moz-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
@@ -101,30 +109,22 @@ input:not([type='image']) { /*Yep, this is NOT a class*/
 }
 
 .warning {
-    color: orange;
-    border: 1px dotted orange;
+    color: #FF6600;
+    border: 1px dotted #FF6600;
 }
 
 .favorites {
-    background-color: #DDEDAA;
-    position: fixed;
-    width: 600px;
-    height: 600px;
-    max-width: 90%;
-    max-height: 90%;
-    z-index: 9980;
+    background-color: #212121;
+    min-width: 300px;
+    min-height: 400px;
     padding: 2px 2px 2px 2px;
 }
 
 .favorites > div {
-    background-color: #111111;
+    background-color: #2C2C2C;
+    border: 1px solid #575757;
     padding: 2px 2px 2px 2px;
-}
-
-.favorites > span {
-    position: absolute;
-    bottom: 10px;
-    right: 20px;
+    margin-top: 4px;
 }
 
 .centerForm {
@@ -356,7 +356,8 @@ span.newPostCount {
 }
 
 .catalogItem {
-    background-color: #DDEDAA;
+    background-color: #2C2C2C;
+    border: 1px solid #575757;
     box-sizing: border-box;
     color: #698CC0;
     display: inline-block;
@@ -507,14 +508,14 @@ span.newPostCount {
     background-color: #2C2C2C;
     margin-left: 5%;
     margin-right: 5%;
-    padding-top: 10px;
-    padding-left: 10px;
+    padding: 10px;
 }
 
 .news {
     background-color: #2C2C2C;
     margin-left: 5%;
     margin-right: 5%;
+    padding: 10px;
 }
 
 .sectionHeader {
@@ -912,6 +913,7 @@ span.newPostCount {
 .postformFileText {
     display: inline-block;
     vertical-align: top;
+    white-space: normal;
 }
 
 .postformFileRemoveButton {
@@ -920,8 +922,7 @@ span.newPostCount {
 }
 
 .postformFileRemoveImage {
-    display: inline;
-    vertical-align: top;
+    vertical-align: top !important;
 }
 
 .referencedBy {
@@ -1235,33 +1236,6 @@ input.buttonImage {
     display: inline;
 }
 
-.imageCheckBox {
-    display: none;
-}
-
-.imageCheckBox + label {
-    height: 24px;
-    width: 24px;
-    display: inline-block;
-    padding: 0 0 0 0px;
-}
-
-.imageCheckBox:checked + label {
-    box-shadow: inset 0 1px 5px #EEFEBB;
-}
-
-#checkboxRawHtml + label, #checkboxRawHtmlEdit + label {
-    background: url("../img/checkbox_raw_html.png") center no-repeat;
-}
-
-#checkboxOp + label {
-    background: url("../img/checkbox_op.png") center no-repeat;
-}
-
-#checkboxTripcode + label {
-    background: url("../img/checkbox_tripcode.png") center no-repeat;
-}
-
 .alignCenter {
     text-align: center;
 }
@@ -1438,4 +1412,32 @@ input.buttonImage {
 
 .bordered {
     border: 1px solid #575757;
+}
+
+.ui-tooltip {
+    border: 1px solid #575757 !important;
+    z-index: 11000 !important;
+}
+
+.ui-tooltip-content {
+    background-color: #2C2C2C;
+    color: #698CC0;
+    font-family: "Trebuchet MS",Trebuchet,tahoma,serif;
+}
+
+.ui-tooltip-content::after {
+    content: '';
+    position: absolute;
+    border-style: solid;
+    display: block;
+    width: 0;
+    top: -10px;
+    left: 85px;
+    border-color: #575757 transparent;
+    border-width: 0 10px 10px;
+}
+
+.archivalThreadLink {
+    font-size: 1.2em;
+    margin-left: 10px;
 }

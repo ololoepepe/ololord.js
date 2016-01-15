@@ -145,6 +145,7 @@ var Board = function(name, title, options) {
         configurable: true
     });
     defineSetting(this, "supportedFileTypes", [
+        "application/ogg",
         "application/pdf",
         "audio/mpeg",
         "audio/ogg",
@@ -220,8 +221,8 @@ var Board = function(name, title, options) {
     return [];
 };
 
-/*public*/ Board.prototype.testParameters = function(fields, files, creatingThread) {
-    //
+/*public*/ Board.prototype.testParameters = function(req, fields, files, creatingThread) {
+    return Promise.resolve();
 };
 
 /*public*/ Board.prototype.defineSetting = function(name, def) {
@@ -235,15 +236,15 @@ var Board = function(name, title, options) {
 var renderFileInfo = function(fi) {
     fi.sizeKB = fi.size / 1024;
     fi.sizeText = fi.sizeKB.toFixed(2) + "KB";
-    if (fi.mimeType.substr(0, 6) == "image/" || fi.mimeType.substr(0, 6) == "video/") {
+    if (Tools.isImageType(fi.mimeType) || Tools.isVideoType(fi.mimeType)) {
         if (fi.dimensions)
             fi.sizeText += ", " + fi.dimensions.width + "x" + fi.dimensions.height;
     }
-    if (fi.mimeType.substr(0, 6) == "audio/" || fi.mimeType.substr(0, 6) == "video/") {
+    if (Tools.isAudioType(fi.mimeType) || Tools.isVideoType(fi.mimeType)) {
         var ed = fi.extraData;
         if (ed.duration)
             fi.sizeText += ", " + ed.duration;
-        if (fi.mimeType.substr(0, 6) == "audio/") {
+        if (Tools.isAudioType(fi.mimeType)) {
             if (ed.bitrate)
                 fi.sizeText += ", " + ed.bitrate + Tools.translate("kbps", "kbps");
             fi.sizeTooltip = ed.artist ? ed.artist : Tools.translate("Unknown artist", "unknownArtist");
@@ -254,7 +255,7 @@ var renderFileInfo = function(fi) {
             fi.sizeTooltip += "]";
             if (ed.year)
                 fi.sizeTooltip += " (" + ed.year + ")";
-        } else if (fi.mimeType.substr(0, 6) == "video/") {
+        } else if (Tools.isVideoType(fi.mimeType)) {
             fi.sizeTooltip = ed.bitrate + Tools.translate("kbps", "kbps");
         }
     }
@@ -267,11 +268,8 @@ var renderFileInfo = function(fi) {
     post.rawSubject = post.subject;
     post.isOp = (post.number == post.threadNumber);
     post.opIp = (opPost && post.user.ip == opPost.user.ip);
-    if (post.options.showTripcode) {
-        var md5 = Crypto.createHash("md5");
-        md5.update(post.user.hashpass + config("site.tripcodeSalt", ""));
-        post.tripcode = "!" + md5.digest("base64").substr(0, 10);
-    }
+    if (post.options.showTripcode)
+        post.tripcode = Tools.generateTripcode(post.user.hashpass);
     delete post.user.ip;
     delete post.user.hashpass;
     delete post.user.password;
@@ -522,6 +520,7 @@ var defineMimeTypeExtensions = function(mimeType) {
     Board.DefaultExtensions[mimeType] = extensions[0];
 };
 
+defineMimeTypeExtensions("application/ogg", "ogg");
 defineMimeTypeExtensions("application/pdf", "pdf");
 defineMimeTypeExtensions("audio/mpeg", "mpeg", "mp1", "m1a", "mp3", "m2a", "mpa", "mpg");
 defineMimeTypeExtensions("audio/ogg", "ogg");
@@ -533,6 +532,7 @@ defineMimeTypeExtensions("video/mp4", "mp4");
 defineMimeTypeExtensions("video/webm", "webm");
 
 Board.ThumbExtensionsForMimeType = {
+    "application/ogg": "png",
     "application/pdf": "png",
     "audio/mpeg": "png",
     "audio/ogg": "png",

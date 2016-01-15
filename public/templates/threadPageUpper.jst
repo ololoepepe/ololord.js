@@ -1,5 +1,9 @@
 <div>
-    {{? !it.thread.postingEnabled}}
+    {{? it.thread.archived}}
+        <div class="postingDisabledMessage">
+            <h2>{{=it.tr.archivedThreadText}}</h2>
+        </div>
+    {{?? !it.thread.postingEnabled}}
         <div class="postingDisabledMessage">
             <h2>{{=it.tr.postingDisabledThreadText}}</h2>
         </div>

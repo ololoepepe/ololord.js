@@ -94,7 +94,7 @@ router.get("/api/fileInfo.json", function(req, res) {
 
 router.get("/api/fileExistence.json", function(req, res) {
     if (!req.query.fileName && !req.query.fileHash)
-        return controller.error(res, Tools.translate("Neither name nor hash is specified"), true);
+        return controller.error(res, Tools.translate("Neither file name nor hash is specified", "error"), true);
     var identifier = req.query.fileName || req.query.fileHash;
     var p;
     if (req.query.fileName)
@@ -235,6 +235,16 @@ router.get("/api/fileHeaders.json", function(req, res) {
 router.get("/api/chatMessages.json", function(req, res) {
     Chat.getMessages(req, req.query.lastRequestDate).then(function(result) {
         res.json(result);
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
+router.get("/api/synchronization.json", function(req, res) {
+    if (!req.query.key)
+        return controller.error(res, Tools.translate("No key specified"), true);
+    Database.db.get("synchronizationData:" + req.query.key).then(function(data) {
+        res.json(data ? JSON.parse(data) : null);
     }).catch(function(err) {
         controller.error(res, err, true);
     });

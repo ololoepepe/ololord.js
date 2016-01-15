@@ -20,32 +20,31 @@ board.extraScripts = function() {
 
 board.addTranslations = function(translate) {
     translate("Thread link:", "postFormLabelLink");
+    translate("Thread link", "postFormPlaceholderLink");
 };
 
 var _board = board;
 
 var testLink = function(link) {
     if (!link)
-        return { error: "Thread link is empty" };
+        return Tools.translate("Thread link is empty", "error");
     if (link.length > _board.maxLinkLength)
-        return { error: "Thread link is too long" };
+        return Tools.translate("Thread link is too long", "error");
     for (var i = 0; i < _board.acceptedExternalBoardLinks.length; ++i) {
         if ((new XRegExp(_board.acceptedExternalBoardLinks[i])).test(link))
             return;
     }
-    return { error: "This board/thread may not be accepted" };
+    return Tools.translate("This board/thread may not be accepted", "error");
 };
 
-board.postExtraData = function(req, fields, files, oldPost) {
+board.postExtraData = function(req, fields) {
     if (fields.thread)
-        return Promise.resolve(null);
-    if (!oldPost || !oldPost.extraData)
         return Promise.resolve(null);
     var link = fields.link;
     var result = testLink(link);
     if (result)
         return Promise.reject(result);
-    if (!link.substr(0, 4) != "http")
+    if (link.substr(0, 4) != "http")
         link = "http://" + link;
     return Promise.resolve(link);
 };
@@ -64,10 +63,13 @@ board.renderPost = function(post) {
     });
 };
 
-board.testParameters = function(fields, files, creatingThread) {
+board.testParameters = function(req, fields, files, creatingThread) {
     if (!creatingThread)
-        return;
-    return testLink(fields.link);
+        return Promise.resolve();
+    var result = testLink(fields.link);
+    if (result)
+        return Promise.reject(result);
+    return Promise.resolve();
 };
 
 module.exports = board;

@@ -3,13 +3,11 @@ var Address6 = require("ip-address").Address6;
 var bigInt = require("big-integer");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
-var moment = require("moment");
 var Path = require("path");
 var promisify = require("promisify-node");
 var Redis = require("then-redis");
 var SQLite3 = require("sqlite3");
 var Util = require("util");
-XML2JS = require("xml2js");
 
 var mkpath = promisify("mkpath");
 
@@ -46,14 +44,6 @@ db.tmp_srem = db.srem;
 db.srem = function(key, members) {
     return db.tmp_srem.apply(db, [key].concat(members));
 };
-
-var rss = {};
-
-Object.defineProperty(module.exports, "rss", {
-    get: function() {
-        return rss;
-    }
-});
 
 Ratings["SafeForWork"] = "SFW";
 Ratings["Rating15"] = "R-15";
@@ -208,11 +198,12 @@ var getThreads = function(boardName, options) {
 
 module.exports.getThreads = getThreads;
 
-module.exports.getThread = function(boardName, threadNumber) {
+module.exports.getThread = function(boardName, threadNumber, archived) {
     if (!Tools.contains(Board.boardNames(), boardName))
         return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
-    return db.hget("threads:" + boardName, threadNumber).then(function(thread) {
+    var key = archived ? "archivedThreads" : "threads";
+    return db.hget(key + ":" + boardName, threadNumber).then(function(thread) {
         if (!thread)
             return Promise.reject(Tools.translate("No such thread"));
         c.thread = JSON.parse(thread);
@@ -569,7 +560,7 @@ var processFile = function(board, file, transaction) {
                     rating: file.rating,
                     size: fileInfo.size,
                     thumb: {
-                        dimensions: fileInfo.thumb,
+                        dimensions: fileInfo.thumb.dimensions,
                         name: fn.thumbName
                     }
                 };
@@ -682,7 +673,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     if (!board)
         return Promise.reject(Tools.translate("Invalid board"));
     if (!board.postingEnabled)
-        return Promise.reject(Tools.translate("Posting is disabled on this board"));
+        return Promise.reject(Tools.translate("Posting is disabled at this board"));
     date = date || Tools.now();
     var c = {};
     if (threadNumber)
@@ -723,7 +714,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
         });
     }).then(function(text) {
         c.text = text;
-        return board.postExtraData(req, fields, files)
+        return board.postExtraData(req, fields, files);
     }).then(function(extraData) {
         c.extraData = !Util.isNullOrUndefined(extraData) ? extraData : null;
         return getGeolocationInfo(ip);
@@ -1028,7 +1019,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
     if (!board)
         return Promise.reject(Tools.translate("Invalid board"));
     if (!board.postingEnabled)
-        return Promise.reject(Tools.translate("Posting is disabled on this board"));
+        return Promise.reject(Tools.translate("Posting is disabled at this board"));
     var c = {};
     var date = Tools.now();
     var hashpass = req.hashpass || null;
@@ -1053,12 +1044,20 @@ module.exports.createThread = function(req, fields, files, transaction) {
             c.thread = c.threads.pop();
             if (board.archiveLimit <= 0)
                 return removeThread(board.name, c.thread.number);
-            return db.hdel("threads:" + board.name, c.thread.number);
-        }).then(function() {
-            if (board.archiveLimit <= 0)
-                return Promise.resolve();
-            c.thread.archived = true;
-            return db.hset("archivedThreads:" + board.name, c.thread.number, JSON.stringify(c.thread));
+            return db.hdel("threads:" + board.name, c.thread.number).then(function() {
+                c.thread.archived = true;
+                return db.hset("archivedThreads:" + board.name, c.thread.number, JSON.stringify(c.thread));
+            }).then(function() {
+                c.sourcePath = BoardModel.cachePath("thread", board.name, c.thread.number);
+                return Tools.readFile(c.sourcePath);
+            }).then(function(data) {
+                c.data = data.data;
+                return mkpath(`${__dirname}/../public/${board.name}/arch`);
+            }).then(function() {
+                return Tools.writeFile(`${__dirname}/../public/${board.name}/arch/${c.thread.number}.json`, c.data);
+            }).then(function() {
+                return Tools.removeFile(c.sourcePath);
+            });
         });
     }).then(function() {
         return nextPostNumber(board.name);
@@ -1204,113 +1203,6 @@ Transaction.prototype.rollback = function() {
 
 module.exports.Transaction = Transaction;
 
-module.exports.generateRss = function() {
-    var site = {
-        protocol: config("site.protocol", "http"),
-        domain: config("site.domain", "localhost:8080"),
-        pathPrefix: config("site.pathPrefix", ""),
-        locale: config("site.locale", "en"),
-        dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss")
-    };
-    var rssPostCount = config("server.rss.postCount", 500);
-    Board.boardNames().forEach(function(boardName) {
-        var board = Board.board(boardName);
-        var title = Tools.translate("Feed", "channelTitle") + " " + site.domain + "/" + site.pathPrefix + boardName;
-        var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName;
-        var description = Tools.translate("Last posts from board", "channelDescription") + " /" + boardName + "/";
-        var atomLink = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/rss.xml";
-        var posts = [];
-        var c = {};
-        var f = function() {
-            if (posts.length >= rssPostCount || c.threads.length < 1)
-                return Promise.resolve();
-            return threadPosts(boardName, c.threads.shift().number, {
-                limit: (rssPostCount - posts.length),
-                withFileInfos: true
-            }).then(function(result) {
-                posts = posts.concat(result);
-                return f();
-            });
-        };
-        var doc = {
-            $: {
-                version: "2.0",
-                "xmlns:dc": "http://purl.org/dc/elements/1.1/",
-                "xmlns:atom": "http://www.w3.org/2005/Atom"
-            },
-            channel: {
-                title: title,
-                link: link,
-                description: description,
-                language: site.locale,
-                pubDate: moment(Tools.now()).utc().locale("en").format("ddd, DD MMM YYYY hh:mm:ss +0000"),
-                ttl: ("" + config("server.rss.ttl", 60)),
-                "atom:link": {
-                    $: {
-                        href: atomLink,
-                        rel: "self",
-                        type: "application/rss+xml"
-                    }
-                }
-            }
-        };
-        getThreads(boardName).then(function(threads) {
-            threads.sort(Board.sortThreadsByDate);
-            c.threads = threads;
-            return f();
-        }).then(function() {
-            doc.channel.item = posts.map(function(post) {
-                var title;
-                var isOp = post.number == post.threadNumber;
-                if (isOp)
-                    title = "[" + Tools.translate("New thread", "itemTitle") + "]";
-                else
-                    title = Tools.translate("Reply to thread", "itemTitle");
-                title += " ";
-                if (!post.subject && post.rawText)
-                    post.subject = post.rawText.substr(0, 150);
-                if (post.subject) {
-                    if (!isOp)
-                        title += "\"";
-                    title += post.subject;
-                    if (!isOp)
-                        title += "\"";
-                } else {
-                    title += post.number;
-                }
-                var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/res/"
-                    + post.threadNumber + ".html";
-                var description = "\n" + post.fileInfos.map(function(fileInfo) {
-                    return"<img src=\"" + site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName
-                        + "/thumb/" + fileInfo.thumb.name + "\"><br />";
-                }) + (post.text || "") + "\n";
-                return {
-                    title: title,
-                    link: link,
-                    description: description,
-                    pubDate: moment(post.createdAt).utc().locale("en").format("ddd, DD MMM YYYY hh:mm:ss +0000"),
-                    guid: {
-                        _: link + "#" + post.number,
-                        $: { isPermalink: true }
-                    },
-                    "dc:creator": (post.name || board.defaultUserName)
-                };
-            });
-        }).then(function() {
-            var builder = new XML2JS.Builder({
-                rootName: "rss",
-                renderOpts: {
-                    pretty: true,
-                    indent: "    ",
-                    newline: "\n"
-                },
-                cdata: true
-            });
-            rss[boardName] = builder.buildObject(doc);
-        });
-    });
-};
-
 var findPhrase = function(phrase, boardName) {
     var results = [];
     var p = Promise.resolve();
@@ -1408,7 +1300,9 @@ module.exports.findPosts = function(query, boardName) {
             return Promise.resolve([]);
         return db.hmget("posts", keys);
     }).then(function(posts) {
-        return posts.map(function(post) {
+        return posts.filter(function(post, i) {
+            return post;
+        }).map(function(post) {
             return JSON.parse(post);
         });
     });
@@ -2032,7 +1926,7 @@ module.exports.editAudioTags = function(req, res, fields) {
     var c = {};
     var password = Tools.password(fields.password);
     return getFileInfo({ fileName: fields.fileName }).then(function(fileInfo) {
-        if (fileInfo.mimeType.substr(0, 6) != "audio/")
+        if (!Tools.isAudioType(fileInfo.mimeType))
             return Promise.reject(Tools.translate("Not an audio file"));
         c.fileInfo = fileInfo;
         return controller.checkBan(req, res, c.fileInfo.boardName, true);

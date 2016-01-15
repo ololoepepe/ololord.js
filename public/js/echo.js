@@ -1,11 +1,7 @@
 lord.customPostFormField[30] = function(it) {
     if (it.includeThreadScripts)
         return "";
-    var model = {
-        tr: merge.clone(it.tr),
-        board: merge.clone(it.board)
-    };
-    return lord.template("echoPostFormField", model, true);
+    return lord.template("echoPostFormField", it, true);
 };
 
 lord.customEditPostDialogPart[30] = function(it, thread, post) {

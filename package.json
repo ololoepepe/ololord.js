@@ -1,6 +1,6 @@
 {
   "name": "ololord.js",
-  "version": "0.1.0-beta",
+  "version": "0.1.0-rc2",
   "description": "Imageboard engine in JavaScript to rule them all",
   "main": "app.js",
   "scripts": {

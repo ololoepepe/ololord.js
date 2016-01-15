@@ -16,6 +16,21 @@
             <tbody>
                 <tr>
                     <td>
+                        {{=it.tr.deviceTypeLabelText}}
+                    </td>
+                    <td>
+                        <select name="deviceType" class="select">
+                            <option {{? it.settings.deviceType == "auto"}}selected="true"{{?}}
+                                    value="auto">{{=it.tr.deviceTypeAutoText}}</option>
+                            <option {{? it.settings.deviceType == "desktop"}}selected="true"{{?}}
+                                    value="desktop">{{=it.tr.deviceTypeDesktopText}}</option>
+                            <option {{? it.settings.deviceType == "mobile"}}selected="true"{{?}}
+                                    value="mobile">{{=it.tr.deviceTypeMobileText}}</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
                         {{=it.tr.styleLabelText}}
                     </td>
                     <td class="nowrap">
@@ -85,6 +100,16 @@
                                {{? it.settings.shrinkPosts}}checked="true"{{?}} /><label>{{=it.tr.postShrinkingLabelText}}</label>
                         <input type="checkbox" name="stickyToolbar" value="true"
                                {{? it.settings.stickyToolbar}}checked="true"{{?}} /><label>{{=it.tr.stickyToolbarLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button onclick="lord.exportSettings(); return false;"
+                                name="exportSettingsButton">{{=it.tr.exportSettingsButtonText}}</button>
+                        <button onclick="lord.importSettings(); return false;"
+                                name="importSettingsButton">{{=it.tr.importSettingsButtonText}}</button>
+                        <button onclick="lord.synchronize(); return false;"
+                                name="synchronizationButton">{{=it.tr.synchronizationText}}</button>
                     </td>
                 </tr>
             </tbody>
@@ -341,15 +366,30 @@
         <table data-index="5" style="display: none;">
             <tbody>
                 <tr>
-                    <td colspan="2">
-                        <input type="checkbox" name="chatEnabled"
-                               {{? it.settings.chatEnabled}}checked="true"{{?}} /><label>{{=it.tr.chatLabelText}}</label>
+                    <td>
+                        {{=it.tr.bannersModeLabelText}}
+                    </td>
+                    <td>
+                        <select name="bannersMode" class="select">
+                            <option {{? it.settings.bannersMode == "random"}}selected="true"{{?}}
+                                    value="random">{{=it.tr.bannersModeRandomText}}</option>
+                            <option {{? it.settings.bannersMode == "same"}}selected="true"{{?}}
+                                    value="same">{{=it.tr.bannersModeSameText}}</option>
+                            <option {{? it.settings.bannersMode == "none"}}selected="true"{{?}}
+                                    value="none">{{=it.tr.bannersModeNoneText}}</option>
+                        </select>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2">
                         <input type="checkbox" name="showNewPosts"
                                {{? it.settings.showNewPosts}}checked="true"{{?}} /><label>{{=it.tr.showNewPostsLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="chatEnabled"
+                               {{? it.settings.chatEnabled}}checked="true"{{?}} /><label>{{=it.tr.chatLabelText}}</label>
                     </td>
                 </tr>
                 <tr>

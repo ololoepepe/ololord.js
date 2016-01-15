@@ -6,7 +6,7 @@
     data-size-text="{{=fileInfo.sizeText}}"
     data-width="{{ out += fileInfo.dimensions ? fileInfo.dimensions.width : 0; }}"
     data-height="{{ out += fileInfo.dimensions ? fileInfo.dimensions.height : 0; }}"
-    {{? fileInfo.mimeType.substr(0, 6) == "audio/" && fileInfo.extraData}}
+    {{? ("application/ogg" == fileInfo.mimeType || fileInfo.mimeType.substr(0, 6) == "audio/") && fileInfo.extraData}}
         {{? fileInfo.extraData.duration}}data-duration="{{=fileInfo.extraData.duration}}"{{?}}
         {{? fileInfo.extraData.bitrate}}data-bitrate="{{=fileInfo.extraData.bitrate}}"{{?}}
         {{? fileInfo.extraData.album}}data-audio-tag-album="{{=fileInfo.extraData.album}}"{{?}}
@@ -63,7 +63,7 @@
                 </li>
             </ul>
         {{?}}
-        {{? fileInfo.mimeType.substr(0, 6) == "audio/"}}
+        {{? "application/ogg" == fileInfo.mimeType || fileInfo.mimeType.substr(0, 6) == "audio/"}}
             <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false"
                title="{{=it.tr.editAudioTagsText}}">
                 <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png" class="buttonImage"></a>

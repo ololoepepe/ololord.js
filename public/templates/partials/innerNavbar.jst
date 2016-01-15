@@ -1,11 +1,11 @@
 {{? "mobile" == it.deviceType}}
     [<div class="boardSelectContainer">
-        <select name="url" class="select boardSelect" title="{{=it.tr.boardsText}}"
+        <select name="url" class="select boardSelect" title="{{=it.tr.boardSelectTooltip}}"
                 onchange="(function(sel) { var val = sel.options[sel.selectedIndex].value; if (val) location = val; })(this);">
             <option selected="true" value="" class="selectOption"></option>
             {{~it.boards :board}}
                 {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
-                    <option value="/{{=it.site.pathPrefix}}{{=board.name}}"
+                    <option value="/{{=it.site.pathPrefix}}{{=board.name}}" data-board-name="{{=board.name}}"
                             class="selectOption">[{{=board.name}}] {{=board.title}}</option>
                 {{?}}
             {{~}}

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<body class="mobile" {{#def.baseData}} data-thread-number="{{=it.threadNumber}}">
+<body class="mobile" {{#def.baseData}} data-thread-number="{{=it.threadNumber}}"
+      {{? it.archived}}data-archived="true"{{?}}>
 <script id="model-postformRules" type="application/json">{{ out += JSON.stringify(it.postformRules); }}</script>
 {{? it.site.vkontakte.integrationEnabled }}
     <script type="text/javascript">

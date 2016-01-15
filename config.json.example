@@ -70,6 +70,12 @@ Actual file name must be config-dev.json.
         },
         "twitter": {
             "integrationEnabled": true
+        },
+        "extraScripts": {
+            "boardPage": [
+                { "fileName": "custom/myScript.js" },
+                { "source": "http://ajax.aspnetcdn.com/ajax/jquery.validate/1.14.0/jquery.validate.min.js" }
+            ]
         }
     },
     "board": {

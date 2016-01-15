@@ -49,6 +49,12 @@ controller = function(templateName, modelData) {
     if (!template)
         return Promise.reject(Tools.translate("Invalid template"));
     modelData = merge.recursive(baseModelData, modelData);
+    var extraScripts = config(`site.extraScripts.${templateName}`);
+    if (extraScripts) {
+        if (!modelData.extraScripts)
+            modelData.extraScripts = [];
+        modelData.extraScripts = modelData.extraScripts.concat(extraScripts);
+    }
     return Promise.resolve(template(modelData));
 };
 
@@ -321,7 +327,7 @@ controller.translationsModel = function() {
     translate("Answers:", "referencedByText");
     translate("Fixed", "fixedText");
     translate("The thread is closed", "closedText");
-    translate("Add to drafts", "addToDraftsText");
+    translate("To drafts", "addToDraftsText");
     translate("This user is registered", "registeredText");
     translate("Post limit reached", "postLimitReachedText");
     translate("Bump limit reached", "bumpLimitReachedText");
@@ -350,6 +356,7 @@ controller.translationsModel = function() {
     translate("Add to playlist", "addToPlaylistText");
     translate("Borad rules", "boardRulesLinkText");
     translate("Threads catalog", "boardCatalogLinkText");
+    translate("Thread archive", "boardArchiveLinkText");
     translate("RSS feed", "boardRssLinkText");
     translate("Posting is disabled at this board", "postingDisabledBoardText");
     translate("Posting is disabled in this thread", "postingDisabledThreadText");
@@ -397,6 +404,10 @@ controller.translationsModel = function() {
     translate("Shrink posts", "postShrinkingLabelText");
     translate("Sticky toolbar", "stickyToolbarLabelText");
     translate("Time:", "timeLabelText");
+    translate("Device type:", "deviceTypeLabelText");
+    translate("Detect automatically", "deviceTypeAutoText");
+    translate("Desktop", "deviceTypeDesktopText");
+    translate("Mobile", "deviceTypeMobileText");
     translate("Server", "timeServerText");
     translate("Local", "timeLocalText");
     translate("Offset:", "timeZoneOffsetLabelText");
@@ -479,8 +490,8 @@ controller.translationsModel = function() {
     translate("Raw HTML", "markupHtml");
     translate("Markup mode:", "postFormLabelMarkupMode");
     translate("Options:", "postFormLabelOptions");
-    translate("Sign as OP", "postFormLabelSignAsOp");
-    translate("Enable tripcode", "postFormLabelTripcode");
+    translate("OP", "postFormLabelSignAsOp");
+    translate("Tripcode", "postFormLabelTripcode");
     translate("File(s):", "postFormInputFile");
     translate("Select file", "selectFileText");
     translate("Remove this file", "removeFileText");
@@ -645,7 +656,18 @@ controller.translationsModel = function() {
     translate("Enter your message here", "chatMessageTextPlaceholder");
     translate("Allow bumping", "setThreadBumpableText");
     translate("Disallow bumping", "setThreadUnbumpableText");
-
+    translate("Use this button to jump between boards", "boardSelectTooltip");
+    translate("Banners mode:", "bannersModeLabelText");
+    translate("Show random board banner", "bannersModeRandomText");
+    translate("Show current board banner", "bannersModeSameText");
+    translate("Do not show banners", "bannersModeNoneText");
+    translate("This thread is archived. Posting is disabled", "archivedThreadText");
+    translate("Synchronize", "synchronizationText");
+    translate("Synchronize settings", "synchronizeSettingsLabelText");
+    translate("Synchronize CSS and JS", "synchronizeCssAndJsLabelText");
+    translate("No password specified, and not logged in", "noPasswordNotLoggedInError");
+    translate("Synchronization data will be available within 5 minutes", "synchronizationTimeoutText");
+    translate("Synchronization completed successfully", "synchronizationSuccessfulText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

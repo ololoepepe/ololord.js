@@ -1,5 +1,6 @@
 *
 !cache-html
 !cache-json
+!cache-rss
 !formidable/
 !.gitignore

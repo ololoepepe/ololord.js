@@ -5,6 +5,8 @@ var controller = require("../helpers/controller");
 var Highlight = require("highlight.js");
 var Tools = require("../helpers/tools");
 
+var langNames = require("../misc/lang-names.json");
+
 var router = express.Router();
 
 router.get("/markup.html", function(req, res) {
@@ -49,6 +51,9 @@ router.get("/markup.html", function(req, res) {
         translate("striked out", "strikedoutWord1");
         translate("word", "strikedoutWord2");
         translate("underlined text", "underlinedText");
+        translate("Supported languages", "supportedCodeLanguagesText");
+        translate("Language name", "codeLanguageNameText");
+        translate("Language ID", "codeLanguageIdText");
         model.tr = tr;
         model.strikedoutTextWakaba = (new Array(tr.strikedoutText.length + 1)).join("^H");
         model.codeToMarkup = "static const int x = 0;";
@@ -57,7 +62,14 @@ router.get("/markup.html", function(req, res) {
             useBR: true
         });
         var result = Highlight.highlight("cpp", model.codeToMarkup, true);
-        model.markedUpCode = "<div class=\"codeBlock cpp hljs\">" + Highlight.fixMarkup(result.value) + "</div>";
+        model.markedUpCode = "<div class=\"codeBlock cpp hljs\" title=\"C++\">" + Highlight.fixMarkup(result.value)
+            + "</div>";
+        model.langs = Highlight.listLanguages().map(function(lang) {
+            return {
+                id: lang,
+                name: langNames[lang] || lang
+            };
+        });
         if (config("site.twitter.integrationEnabled", true))
             model.extraScripts = [ { fileName: "3rdparty/twitter.js" } ];
         return controller("markup", model);

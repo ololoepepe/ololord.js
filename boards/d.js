@@ -8,7 +8,7 @@ board.extraScripts = function() {
     return [ { fileName: "d.js" } ];
 };
 
-board.postExtraData = function(req, fields, files, oldPost) {
+board.postExtraData = function(req, fields, _, oldPost) {
     return Promise.resolve(oldPost ? oldPost.extraData : (req.headers["user-agent"] || null));
 };
 

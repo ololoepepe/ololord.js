@@ -1,3 +1,9 @@
 <div class="banner">
-    <img src="/{{=it.site.pathPrefix}}img/banners/{{=it.board.name}}/{{=it.bannerFileName}}">
+    {{? it.board.name != it.bannerBoardName}}
+        <a href="/{{=it.site.pathPrefix}}{{=it.bannerBoardName}}" title="{{=it.bannerBoardTitle}}">
+    {{?}}
+        <img src="/{{=it.site.pathPrefix}}img/banners/{{=it.bannerBoardName}}/{{=it.bannerFileName}}">
+    {{? it.board.name != it.bannerBoardName}}
+        </a>
+    {{?}}
 </div>

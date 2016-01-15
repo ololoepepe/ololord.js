@@ -1,5 +1,5 @@
 <div>
-    {{? it.board.postingEnabled && it.thread.postingEnabled && !it.thread.postLimitReached}}
+    {{? it.board.postingEnabled && it.thread.postingEnabled && !it.thread.archived && !it.thread.postLimitReached}}
         <hr />
         {{~["Bottom"] :position}}
             {{#def.createAction}}

@@ -12,7 +12,7 @@
                     <b>{{=it.tr.postFormLabelEmail}}</b>
                 </td>
                 <td class="postformField">
-                    <input type="text" maxlength="{{=it.board.maxEmailLength}}" name="email" size="43"
+                    <input type="text" maxlength="{{=it.board.maxEmailLength}}" name="email" class="postFormInput"
                            {{? post.email}}value="{{=post.email}}"{{?}} />
                 </td>
             </tr>
@@ -24,7 +24,7 @@
                     <b>{{=it.tr.postFormLabelName}}</b>
                 </td>
                 <td class="postformField">
-                    <input type="text" maxlength="{{=it.board.maxNameLength}}" name="name" size="43"
+                    <input type="text" maxlength="{{=it.board.maxNameLength}}" name="name" class="postFormInput"
                            {{? post.name}}value="{{=post.name}}"{{?}} />
                 </td>
             </tr>
@@ -36,7 +36,7 @@
                     <b>{{=it.tr.postFormLabelSubject}}</b>
                 </td>
                 <td class="postformField">
-                    <input type="text" maxlength="{{=it.board.maxSubjectLength}}" name="subject" size="43"
+                    <input type="text" maxlength="{{=it.board.maxSubjectLength}}" name="subject" class="postFormInput"
                            {{? post.rawSubject}}value="{{=post.rawSubject}}"{{?}} />
                 </td>
             </tr>
@@ -50,7 +50,7 @@
                 <td class="postformField">
                     <div class="symbolCounterContainer">
                         <span class="symbolCounter"><span name="used"></span>/{{=it.board.maxTextLength}}</span>
-                        <textarea name="text" rows="10" cols="43" placeholder="{{=it.tr.postFormTextPlaceholder}}"
+                        <textarea name="text" rows="10" cols="36" placeholder="{{=it.tr.postFormTextPlaceholder}}"
                                   class="postFormTextarea"
                                   oninput="lord.countSymbols(this);">{{? post.rawText}}{{=post.rawText}}{{?}}</textarea>
                     </div>

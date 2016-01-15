@@ -59,12 +59,6 @@ var spawnCluster = function() {
         BoardModel.initialize().then(function() {
             return controller.initialize();
         }).then(function() {
-            if (config("server.rss.enabled", true)) {
-                Database.generateRss();
-                setInterval(function() {
-                    Database.generateRss();
-                }, config("server.rss.ttl", 60) * Tools.Minute);
-            }
             var sockets = {};
             var nextSocketId = 0;
             var server = app.listen(config("server.port", 8080), function() {
@@ -99,6 +93,12 @@ var spawnCluster = function() {
                 Global.IPC.installHandler("removeFromCached", function(data) {
                     return controller.removeFromCached(data);
                 });
+                Global.IPC.installHandler("doGenerate", function(data) {
+                    var f = BoardModel[`do_${data.funcName}`];
+                    if (typeof f != "function")
+                        return Promise.reject("Invalid generator function");
+                    return f.call(BoardModel, data.key, data.data);
+                });
                 Global.IPC.send("ready").catch(function(err) {
                     Global.error(err);
                 });
@@ -120,11 +120,25 @@ var spawnCluster = function() {
 };
 
 if (cluster.isMaster) {
-    console.log("Generating cache, please, wait...");
     Database.initialize().then(function() {
         return controller.initialize();
     }).then(function() {
+        console.log("Generating cache, please, wait...");
         return BoardModel.generate();
+    }).then(function() {
+        if (!config("server.rss.enabled", true))
+            return Promise.resolve();
+        console.log("Generating RSS, please, wait...");
+        setInterval(function() {
+            BoardModel.generateRss(true).catch(function(err) {
+                Global.error(err.stack || err);
+            });
+        }, config("server.rss.ttl", 60) * Tools.Minute);
+        return BoardModel.generateRss(true).catch(function(err) {
+            Global.error(err.stack || err);
+        }).then(function() {
+            return Promise.resolve();
+        });
     }).then(function() {
         console.log("Spawning workers, please, wait...");
         spawnCluster();
