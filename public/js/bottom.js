@@ -11,9 +11,9 @@ lord.templates = {};
 /**/
 
 (function() {
-    lord.id("model-base").innerHTML = lord.get("misc/base.json") || "";
+    var baseModelHtml = lord.get("misc/base.json") || "";
     ["base", "boards", "tr", "partials", "templates"].forEach(function(modelName) {
-        var html = lord.id("model-" + modelName).innerHTML;
+        var html = ("base" == modelName) ? baseModelHtml : lord.id("model-" + modelName).innerHTML;
         lord.models[modelName] = JSON.parse(html);
     });
     lord.model("partials").forEach(function(partialName) {
