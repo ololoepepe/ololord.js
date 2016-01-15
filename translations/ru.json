@@ -1858,7 +1858,8 @@
     "monospace \\`` font with escaped \\`` characters": {
         "monospaceEscaped": {
             "value": "моноширинный шрифт \\`` с экранированными \\`` символами"
-        }
+        },
+        "_obsolete": true
     },
     "Google reCAPTCHA v1": {
         "_default": {
@@ -2536,6 +2537,21 @@
     "No key specified": {
         "_default": {
             "value": "Не указан ключ"
+        }
+    },
+    "Supported languages": {
+        "supportedCodeLanguagesText": {
+            "value": "Поддерживаемые языки"
+        }
+    },
+    "Language name": {
+        "codeLanguageNameText": {
+            "value": "Имя языка"
+        }
+    },
+    "Language ID": {
+        "codeLanguageIdText": {
+            "value": "Идентификатор языка"
         }
     }
 }

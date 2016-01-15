@@ -25,7 +25,7 @@ a {
 }
 
 a.expandCollapse {
-    color: #777777;
+    color: #777777;.
     cursor: pointer;
 }
 
@@ -449,14 +449,14 @@ span.newPostCount {
     border: 1px solid #CCCCCC;
     margin-left: 5%;
     margin-right: 5%;
-    padding-top: 10px;
-    padding-left: 10px;
+    padding: 10px;
 }
 
 .news {
     background-color: #D6DAF0;
     margin-left: 5%;
     margin-right: 5%;
+    padding: 10px;
 }
 
 .sectionHeader {

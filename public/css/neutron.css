@@ -508,14 +508,14 @@ span.newPostCount {
     background-color: #2C2C2C;
     margin-left: 5%;
     margin-right: 5%;
-    padding-top: 10px;
-    padding-left: 10px;
+    padding: 10px;
 }
 
 .news {
     background-color: #2C2C2C;
     margin-left: 5%;
     margin-right: 5%;
+    padding: 10px;
 }
 
 .sectionHeader {
