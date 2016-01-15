@@ -9,6 +9,15 @@ module.exports = function(req, res, next) {
         burichan: {},
         futaba: {}
     };
+    var deviceTypes = {
+        desktop: {},
+        mobile: {}
+    };
+    var deviceType = "auto";
+    if (deviceTypes.hasOwnProperty(req.cookies.deviceType)) {
+        req.device = { type: req.cookies.deviceType };
+        deviceType = req.cookies.deviceType;
+    }
     var codeStyles = Tools.codeStyles().reduce(function(acc, style) {
         acc[style.name] = {};
         return acc;
@@ -27,9 +36,7 @@ module.exports = function(req, res, next) {
     if (isNaN(timeZoneOffset) || timeZoneOffset < -720 || timeZoneOffset > 840)
         timeZoneOffset = 0;
     req.settings = {
-        mode: {
-            name: "normal"
-        },
+        deviceType: deviceType,
         style: {
             name: style
         },

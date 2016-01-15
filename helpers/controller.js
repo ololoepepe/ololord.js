@@ -404,6 +404,10 @@ controller.translationsModel = function() {
     translate("Shrink posts", "postShrinkingLabelText");
     translate("Sticky toolbar", "stickyToolbarLabelText");
     translate("Time:", "timeLabelText");
+    translate("Device type:", "deviceTypeLabelText");
+    translate("Detect automatically", "deviceTypeAutoText");
+    translate("Desktop", "deviceTypeDesktopText");
+    translate("Mobile", "deviceTypeMobileText");
     translate("Server", "timeServerText");
     translate("Local", "timeLocalText");
     translate("Offset:", "timeZoneOffsetLabelText");

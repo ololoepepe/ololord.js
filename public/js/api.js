@@ -232,7 +232,7 @@ lord.Hour = 60 * lord.Minute;
 lord.Day = 24 * lord.Hour;
 lord.Year = 365 * lord.Day;
 lord.Billion = 2 * 1000 * 1000 * 1000;
-lord.SettingsStoredInCookies = ["time", "timeZoneOffset", "captchaEngine"];
+lord.SettingsStoredInCookies = ["deviceType", "time", "timeZoneOffset", "captchaEngine"];
 //
 lord.keyboardMap = [
   "", // [0]
@@ -1416,6 +1416,7 @@ lord.now = function() {
 
 lord.settings = function() {
     return {
+        deviceType: lord.getCookie("deviceType", "auto"),
         time: lord.getCookie("time", "server"),
         timeZoneOffset: lord.getCookie("timeZoneOffset", -lord.now().getTimezoneOffset()),
         captchaEngine: { id: lord.getCookie("captchaEngine", "google-recaptcha") },

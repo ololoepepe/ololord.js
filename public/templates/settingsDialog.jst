@@ -16,6 +16,21 @@
             <tbody>
                 <tr>
                     <td>
+                        {{=it.tr.deviceTypeLabelText}}
+                    </td>
+                    <td>
+                        <select name="deviceType" class="select">
+                            <option {{? it.settings.deviceType == "auto"}}selected="true"{{?}}
+                                    value="auto">{{=it.tr.deviceTypeAutoText}}</option>
+                            <option {{? it.settings.deviceType == "desktop"}}selected="true"{{?}}
+                                    value="desktop">{{=it.tr.deviceTypeDesktopText}}</option>
+                            <option {{? it.settings.deviceType == "mobile"}}selected="true"{{?}}
+                                    value="mobile">{{=it.tr.deviceTypeMobileText}}</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
                         {{=it.tr.styleLabelText}}
                     </td>
                     <td class="nowrap">
