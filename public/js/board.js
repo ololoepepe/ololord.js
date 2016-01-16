@@ -1456,7 +1456,7 @@ lord.fileAddedCommon = function(div, file) {
             return lord.removeExifData(data);
         }).then(function(pieces) {
             if (pieces)
-                div.droppedFile = new File(pieces, file.name, {"type": "image/jpeg"});
+                div.droppedFile = new Blob(pieces, {"type": "image/jpeg"});
             if (lord.getLocalObject("showAttachedFilePreview", true))
                 preview();
         }).catch(lord.handleError);
