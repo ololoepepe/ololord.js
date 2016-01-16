@@ -1621,7 +1621,7 @@ module.exports.setThreadFixed = function(req, fields) {
         if (!thread)
             return Promise.reject(Tools.translate("No such thread"));
         thread = JSON.parse(thread);
-        var fixed = (fields.fixed == "true");
+        var fixed = ("true" == fields.fixed);
         if (thread.fixed == fixed)
             return Promise.resolve();
         thread.fixed = fixed;
@@ -1651,7 +1651,7 @@ module.exports.setThreadClosed = function(req, fields) {
         if (!thread)
             return Promise.reject(Tools.translate("No such thread"));
         thread = JSON.parse(thread);
-        var closed = (fields.closed == "true");
+        var closed = ("true" == fields.closed);
         if (thread.closed == closed)
             return Promise.resolve();
         thread.closed = closed;
@@ -1681,7 +1681,7 @@ module.exports.setThreadUnbumpable = function(req, fields) {
         if (!thread)
             return Promise.reject(Tools.translate("No such thread"));
         thread = JSON.parse(thread);
-        var unbumpable = (fields.unbumpable == "true");
+        var unbumpable = ("true" == fields.unbumpable);
         if (!!thread.unbumpable == unbumpable)
             return Promise.resolve();
         thread.unbumpable = unbumpable;
@@ -1717,12 +1717,23 @@ module.exports.deletePost = function(req, res, fields) {
             return Promise.reject(Tools.translate("Not enough rights"));
         }
         c.isThread = post.threadNumber == post.number;
-        return (c.isThread) ? removeThread(board.name, postNumber) : removePost(board.name, postNumber);
+        c.archived = ("true" == fields.archived);
+        return (c.isThread) ? removeThread(board.name, postNumber, c.archived) : removePost(board.name, postNumber);
     }).then(function() {
-        var p = Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "delete");
-        if (c.isThread)
-            Global.removeFromCached([c.post.boardName, c.post.threadNumber]);
-        return c.isThread ? p : Promise.resolve();
+        var p;
+        if (c.archived) {
+            p = Tools.removeFile(`${__dirname}/../public/${board.name}/arch/${postNumber}.json`);
+        } else {
+            p = c.isThread ? Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "delete")
+                : Promise.resolve();
+        }
+        if (c.isThread) {
+            if (c.archived)
+                Global.removeFromCached([c.post.boardName, c.post.threadNumber, "archived"]);
+            else
+                Global.removeFromCached([c.post.boardName, c.post.threadNumber]);
+        }
+        return p;
     }).then(function() {
         return {
             boardName: board.name,

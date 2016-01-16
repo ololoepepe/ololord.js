@@ -767,7 +767,10 @@ lord.deletePost = function(el) {
         if (!result)
             return Promise.resolve();
         var form = lord.queryOne("form", c.div);
-        return lord.post(form.action, new FormData(form));
+        var formData = new FormData(form);
+        if (lord.data("archived", el, true) == "true")
+            formData.append("archived", true);
+        return lord.post(form.action, formData);
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -777,7 +780,7 @@ lord.deletePost = function(el) {
         if (lord.data("isOp", post)) {
             if (!isNaN(+lord.data("threadNumber"))) {
                 window.location = window.location.protocol + "//" + model.site.domain + "/" + model.site.pathPrefix
-                    + lord.data("boardName");
+                    + lord.data("boardName") + ((lord.data("archived", el, true) == "true") ? "/archive.html" : "");
             } else {
                 lord.reloadPage();
             }
@@ -2968,6 +2971,11 @@ lord.initializeOnLoadBaseBoard = function() {
             lord.removeClass(threads, "loadingMessage");
             threads.appendChild(frag);
             lord.scriptWorkaround(threads);
+            if (lord.queryOne(".opPost[data-archived='true']")) {
+                lord.name("backButton").forEach(function(btn) {
+                    btn.href += "/archive.html";
+                });
+            }
             if (typeof lord.postsLoaded == "function")
                 lord.postsLoaded();
             $(".postBody").css("maxWidth", ($(window).width() - 30) + "px");

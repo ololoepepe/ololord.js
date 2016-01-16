@@ -33,6 +33,8 @@ var cachePath = function() {
     return config("system.tmpPath", __dirname + "/../tmp") + "/cache-json" + (path ? ("/" + path + ".json") : "");
 };
 
+module.exports.cachePath = cachePath;
+
 var rssCachePath = function() {
     var args = [];
     Array.prototype.slice.call(arguments, 0).forEach(function(arg) {
