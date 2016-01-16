@@ -251,6 +251,12 @@ lord.traverseChildren = function(elem) {
     return children;
 };
 
+lord.scaledSize = function(size) {
+    if (lord.deviceType("desktop"))
+        return size;
+    return Math.floor(0.7 * size);
+};
+
 lord.appendExtrasToModel = function(model) {
     var settings = lord.settings();
     var locale = model.site.locale;
@@ -288,11 +294,7 @@ lord.appendExtrasToModel = function(model) {
     model.minimalisticPostform = function() {
         return settings.minimalisticPostform;
     };
-    model.scaledSize = function(size) {
-        if (lord.deviceType("desktop"))
-            return size;
-        return Math.floor(0.7 * size);
-    };
+    model.scaledSize = lord.scaledSize;
     model.customPostBodyPart = lord.customPostBodyPart;
     model.customPostHeaderPart = lord.customPostHeaderPart;
     model.customPostMenuAction = lord.customPostMenuAction;
@@ -342,6 +344,9 @@ lord.createPostNode = function(post, permanent, threadInfo) {
             var qr = lord.nameOne("quickReplyContainer", c.node);
             if (qr)
                 qr.parentNode.removeChild(qr);
+            var ptt = lord.nameOne("toThread", c.node);
+            if (ptt)
+                ptt.parentNode.removeChild(ptt);
             lord.removeClass(c.node, "opPost");
             lord.addClass(c.node, "post");
             lord.addClass(c.node, "temporary");
@@ -1200,7 +1205,7 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
         var qr = lord.nameOne("quickReplyContainer", post);
         if (qr)
             qr.parentNode.removeChild(qr);
-        var ptt = lord.queryOne(".postToThread", post);
+        var ptt = lord.nameOne("toThread", post);
         if (ptt)
             ptt.parentNode.removeChild(ptt);
         lord.removeClass(post, "opPost hidden");

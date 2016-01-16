@@ -56,9 +56,12 @@ Example:
         }
     },
     "board": {
-        "captchaEnabled": true,
         "bumpLimit": 500,
         "postLimit": 1000,
+        "threadLimit": 200,
+        "threadsPerPage": 20,
+        "archiveLimit": 0,
+        "captchaEnabled": true,
         "captchaQuota": 10,
         "launchDate": "2015-02-12T21:00:00",
         "maxFileSize": 100000000,

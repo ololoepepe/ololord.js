@@ -81,6 +81,9 @@ Actual file name must be config-dev.json.
     "board": {
         "bumpLimit": 500,
         "postLimit": 1000,
+        "threadLimit": 200,
+        "threadsPerPage": 20,
+        "archiveLimit": 0,
         "captchaEnabled": true,
         "captchaQuota": 10,
         "launchDate": "",
