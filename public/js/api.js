@@ -171,6 +171,8 @@ var lord = lord || {};
             _this.progressBar.removeAttribute("value");
             _this.finishCallback();
         };
+    } else {
+        this.finishOnMaxValue = true;
     }
 };
 
@@ -180,6 +182,8 @@ var lord = lord || {};
         return;
     this.value = value;
     this.progressBar.value = this.value;
+    if (this.finishOnMaxValue && this.value == this.max)
+        this.finishCallback();
 };
 
 /*public*/ lord.OverlayProgressBar.prototype.show = function() {

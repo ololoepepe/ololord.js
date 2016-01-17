@@ -491,7 +491,7 @@ lord.hideImage = function() {
 lord.globalOnclick = function(e) {
     if (e.button)
         return;
-    if (lord.currentMenu) {
+    if (lord.currentMenu && (!e.target || !lord.hasClass(e.target, "ui-widget-header"))) {
         lord.currentMenu.hide();
         lord.currentMenu = null;
     }
@@ -2472,6 +2472,56 @@ lord.signOwnPostLinks = function(parent, ownPosts) {
     });
 };
 
+lord.downloadThread = function(el) {
+    var suffix = lord.data("archived", el, true) ? "arch" : "res";
+    lord.api(lord.data("number", el, true), {}, lord.data("boardName") + "/" + suffix).then(function(thread) {
+        var thread = thread.thread;
+        var fileNames = [thread.opPost].concat(thread.lastPosts).reduce(function(acc, post) {
+            return acc.concat(post.fileInfos.map(function(fileInfo) {
+                return fileInfo.name;
+            }));
+        }, []);
+        if (fileNames.length < 1)
+            return Promise.resolve();
+        var cancel = false;
+        var zip = new JSZip();
+        var progressBar = new lord.OverlayProgressBar({
+            max: fileNames.length,
+            cancelCallback: function() {
+                cancel = true;
+            },
+            finishCallback: function() {
+                progressBar.hide();
+                var title = thread.title || (lord.data("boardName") + " — " + thread.opPost.number);
+                saveAs(zip.generate({ "type": "blob" }), title + ".zip");
+            }
+        });
+        var last = 0;
+        var prefix = "/" + lord.data("sitePathPrefix") + lord.data("boardName") + "/src";
+        var append = function(i) {
+            if (cancel) {
+                progressBar.hide();
+                return;
+            }
+            var fileName = fileNames[i];
+            JSZipUtils.getBinaryContent(prefix + "/" + fileName, function(err, data) {
+                if (!err) {
+                    zip.file(fileName, data, {
+                        "binary": true
+                    });
+                }
+                progressBar.progress(progressBar.value + 1);
+                if (last < fileNames.length - 1)
+                    append(++last);
+            });
+        };
+        progressBar.show();
+        append(last);
+        if (fileNames.length > 1)
+            append(++last);
+    }).catch(lord.handleError);
+};
+
 lord.expandCollapseThread = function(el) {
     lord.expandThread($(el).closest(".thread")[0]);
 };
@@ -2781,7 +2831,7 @@ lord.showMenu = function(e, input, selector) {
         }
     }
     lord.currentMenu = $(selector);
-    lord.currentMenu.menu().toggle().position({
+    lord.currentMenu.menu({ items: "> :not(.ui-widget-header)" }).toggle().position({
         my: "left top",
         at: "left bottom+2px",
         of: $(input),

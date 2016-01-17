@@ -684,22 +684,10 @@ span.newPostCount {
 
 .menu > li {
     padding: 2px;
-    padding-right: 4px;
 }
 
 .menu > li > a {
-    display: block;
     text-decoration: none;
-    color: #800000;
-}
-
-.menu > li:hover {
-    background-color: #444444;
-    padding-right: 2px;
-}
-
-.menu > li:hover > a {
-    color: #CC1105;
 }
 
 #markupUnorderedListActionsMenu {

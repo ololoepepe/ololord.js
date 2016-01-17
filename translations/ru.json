@@ -233,9 +233,18 @@
             "value": "Диванный эксперт"
         }
     },
-    "Edit post": {
+    "Edit": {
+        "editHotkeysText": {
+            "value": "Редактировать"
+        },
+        "editUserCssText": {
+            "value": "Редактировать"
+        },
+        "editUserJavaScriptText": {
+            "value": "Редактировать"
+        },
         "editPostText": {
-            "value": "Редактировать пост"
+            "value": "Редактировать"
         }
     },
     "To drafts": {
@@ -331,11 +340,6 @@
     "Add files": {
         "addFilesText": {
             "value": "Добавить файлы"
-        }
-    },
-    "Ban user": {
-        "banUserText": {
-            "value": "Забанить пользователя"
         }
     },
     "All boards": {
@@ -657,9 +661,9 @@
             "value": "слово"
         }
     },
-    "Move thread": {
+    "Move": {
         "moveThreadText": {
-            "value": "Перенести тред"
+            "value": "Перенести"
         }
     },
     "Playlist": {
@@ -812,6 +816,9 @@
     "Close": {
         "closeButtonText": {
             "value": "Закрыть"
+        },
+        "closeThreadText": {
+            "value": "Закрыть"
         }
     },
     "Remove thread from favorites": {
@@ -914,17 +921,6 @@
             "value": "Пользовательский JavaScript"
         }
     },
-    "Edit": {
-        "editHotkeysText": {
-            "value": "Редактировать"
-        },
-        "editUserCssText": {
-            "value": "Редактировать"
-        },
-        "editUserJavaScriptText": {
-            "value": "Редактировать"
-        }
-    },
     "Hide tripcodes": {
         "hideTripcodesLabelText": {
             "value": "Скрывать трипкоды"
@@ -1016,11 +1012,13 @@
         }
     },
     "Expand thread": {
-        "expandThreadText": {
-            "value": "Развернуть тред"
-        },
         "hotkeyExpandThreadLabelText": {
             "value": "Развернуть тред"
+        }
+    },
+    "Expand": {
+        "expandThreadText": {
+            "value": "Развернуть"
         }
     },
     "Go to thread": {
@@ -1232,11 +1230,6 @@
             "value": "Тред закрыт"
         }
     },
-    "Close thread": {
-        "closeThreadText": {
-            "value": "Закрыть тред"
-        }
-    },
     "If password is empty, current hashpass will be used": {
         "enterPasswordText": {
             "value": "Если пароль пуст, будет использован текущий хешпасс"
@@ -1252,9 +1245,9 @@
             "value": "Закрепленный"
         }
     },
-    "Fix thread": {
+    "Fix": {
         "fixThreadText": {
-            "value": "Закрепить тред"
+            "value": "Закрепить"
         }
     },
     "Hide post form": {
@@ -1262,9 +1255,9 @@
             "value": "Скрыть форму постинга"
         }
     },
-    "Open thread": {
+    "Open": {
         "openThreadText": {
-            "value": "Открыть тред"
+            "value": "Открыть"
         }
     },
     "Submit": {
@@ -1303,9 +1296,9 @@
             "value": "Этот пользователь зарегистрирован"
         }
     },
-    "Unfix thread": {
+    "Unfix": {
         "unfixThreadText": {
-            "value": "Открепить тред"
+            "value": "Открепить"
         }
     },
     "Hide/show": {
@@ -1343,16 +1336,6 @@
             "value": "Убрать этот файл"
         }
     },
-    "Complain": {
-        "complainText": {
-            "value": "Пожаловаться"
-        }
-    },
-    "Go complain to your mum, you whiner!": {
-        "complainMessage": {
-            "value": "Мамке своей пожалуйся, нытик!"
-        }
-    },
     "MB": {
         "megabytesText": {
             "value": "МБ"
@@ -1378,9 +1361,9 @@
             "value": "Найти соус..."
         }
     },
-    "Download all thread files as a .zip archive": {
+    "Download all files as a .zip archive": {
         "downloadThreadText": {
-            "value": "Скачать все файлы из треда в виде .zip-архива"
+            "value": "Скачать все файлы в виде .zip-архива"
         }
     },
     "Last modified:": {
@@ -1388,14 +1371,9 @@
             "value": "Последнее изменение:"
         }
     },
-    "Delete post": {
+    "Delete": {
         "deletePostText": {
-            "value": "Удалить пост"
-        }
-    },
-    "Delete thread": {
-        "deleteThreadText": {
-            "value": "Удалить тред"
+            "value": "Удалить"
         }
     },
     "Delete file": {
@@ -1443,12 +1421,12 @@
             "value": "Добавить в плей-лист"
         }
     },
-    "Add thread to favorites": {
+    "Add to favorites": {
         "addThreadToFavoritesText": {
-            "value": "Добавить тред в избранные"
+            "value": "Добавить в избранные"
         }
     },
-    "Post actions": {
+    "Actions": {
         "postActionsText": {
             "value": "Действия над постом"
         }
@@ -1596,9 +1574,9 @@
             "value": "Тема"
         }
     },
-    "Show user IP": {
+    "Show IP": {
         "showUserIpText": {
-            "value": "Показать IP-адрес пользователя"
+            "value": "Показать IP-адрес"
         }
     },
     "Options:": {
@@ -1621,9 +1599,9 @@
             "value": "Осталось постов:"
         }
     },
-    "Post source text": {
+    "Source text": {
         "postSourceText": {
-            "value": "Исходный текст поста"
+            "value": "Исходный текст"
         }
     },
     "Enable private chat": {
@@ -1679,6 +1657,9 @@
     "Ban": {
         "pageTitle": {
             "value": "Бан"
+        },
+        "banUserText": {
+            "value": "Забанить"
         }
     },
     "never": {
@@ -1815,9 +1796,9 @@
             "value": "При входе в систему через Вкотнакте можно не указывать логин, но, чтобы быть залогиненым во всех браузерах под одним логином, его потребуется указать.<br />Когда вы залогинены через Вконтакте, вы можете прикреплять к посту свои аудиозаписи из ВК.<br />Это никак не влияет на вашу анонимность."
         }
     },
-    "Chat privately with this user": {
+    "Chat privately": {
         "chatWithUserText": {
-            "value": "Приватный чат с этим пользователем"
+            "value": "Приватный чат"
         }
     },
     "Code style:": {
@@ -1950,9 +1931,9 @@
             "value": "Скрыть черновики"
         }
     },
-    "Collapse thread": {
+    "Collapse": {
         "collapseThreadText": {
-            "value": "Свернуть тред"
+            "value": "Свернуть"
         }
     },
     "Redirecting to thread...": {
@@ -2571,6 +2552,21 @@
     "Mobile": {
         "deviceTypeMobileText": {
             "value": "Мобильное устройство"
+        }
+    },
+    "Post": {
+        "postMenuCategoryPostText": {
+            "value": "Пост"
+        }
+    },
+    "Thread": {
+        "postMenuCategoryThreadText": {
+            "value": "Тред"
+        }
+    },
+    "User": {
+        "postMenuCategoryUserText": {
+            "value": "Пользователь"
         }
     }
 }
