@@ -1,5 +1,6 @@
 var Address4 = require("ip-address").Address4;
 var Address6 = require("ip-address").Address6;
+var Cheerio = require("cheerio");
 var ChildProcess = require("child_process");
 var Crypto = require("crypto");
 var equal = require("deep-equal");
@@ -655,4 +656,17 @@ module.exports.generateTripcode = function(source) {
     var md5 = Crypto.createHash("md5");
     md5.update(source + config("site.tripcodeSalt", ""));
     return "!" + md5.digest("base64").substr(0, 10);
+};
+
+module.exports.postSubject = function(post, maxLength) {
+    var title = "";
+    if (post.subject)
+        title = post.subject;
+    else if (post.text)
+        title = Cheerio.load("<div>" + post.text + "</div>")(":root").text();
+    title = title.replace(/\r*\n+/gi, "");
+    maxLength = +maxLength;
+    if (!isNaN(maxLength) && maxLength > 3 && title.length > maxLength)
+        title = title.substr(0, maxLength - 3) + "...";
+    return title;
 };

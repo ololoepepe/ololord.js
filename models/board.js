@@ -213,13 +213,10 @@ var getThreadPage = function(archived, board, number, json, ifModifiedSince) {
         return Database.getPost(board.name, c.thread.number);
     }).then(function(post) {
         c.opPost = post;
-        var postCount = c.thread.postNumbers.length;
         c.model = {};
-        var title = (c.opPost.subject || c.opPost.rawText || "").replace(/\r*\n+/gi, "");
-        if (title.length > 50)
-            title = title.substr(0, 47) + "...";
+        var postCount = c.thread.postNumbers.length;
         var threadModel = {
-            title: title || null,
+            title: Tools.postSubject(c.opPost, 50) || null,
             number: c.thread.number,
             bumpLimit: board.bumpLimit,
             postLimit: board.postLimit,
@@ -275,11 +272,8 @@ var getThread = function(board, number) {
         return Database.threadPostCount(board.name, c.thread.number);
     }).then(function(postCount) {
         c.model = {};
-        var title = (c.opPost.subject || c.opPost.rawText || "").replace(/\r*\n+/gi, "");
-        if (title.length > 50)
-            title = title.substr(0, 47) + "...";
         var threadModel = {
-            title: title || null,
+            title: Tools.postSubject(c.opPost, 50) || null,
             number: c.thread.number,
             bumpLimit: board.bumpLimit,
             postLimit: board.postLimit,
@@ -936,17 +930,11 @@ module.exports.do_generateRss = function() {
                 else
                     title = Tools.translate("Reply to thread", "itemTitle");
                 title += " ";
-                if (!post.subject && post.rawText)
-                    post.subject = post.rawText.substr(0, 150);
-                if (post.subject) {
-                    if (!isOp)
-                        title += "\"";
-                    title += post.subject;
-                    if (!isOp)
-                        title += "\"";
-                } else {
-                    title += post.number;
-                }
+                if (!isOp)
+                    title += "\"";
+                title += Tools.postSubject(post, 150) || post.number;
+                if (!isOp)
+                    title += "\"";
                 var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/res/"
                     + post.threadNumber + ".html";
                 var description = "\n" + post.fileInfos.map(function(fileInfo) {
