@@ -73,7 +73,7 @@ lord.getImageHash = function(url, width, height) {
         xhr.onreadystatechange = function() {
             if (xhr.readyState != 4)
                 return;
-            if (xhr.status != 200 && xhr.status != 304)
+            if (xhr.status != 200)
                 return resolve(null);
             var response = xhr.response;
             if (!response)
