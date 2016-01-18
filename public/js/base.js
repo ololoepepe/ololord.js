@@ -948,7 +948,7 @@ lord.hashChangeHandler = function() {
 };
 
 lord.setTooltips = function(parent) {
-    $(".codeBlock, .tooltip", parent).css("cursor", "pointer").click(function(e) {
+    $(".codeBlock, .tooltip, .flag, .postFileSize", parent).css("cursor", "pointer").click(function(e) {
         var _this = $(this);
         _this.tooltip({
             position: {

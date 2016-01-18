@@ -419,7 +419,7 @@ var getRules = function(boardName) {
                 file.thumbPath += ".png";
                 return new Promise(function(resolve, reject) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
-                })
+                });
             }).catch(function(err) {
                 Global.error(err.stack || err);
                 file.thumbPath = thumbPath;

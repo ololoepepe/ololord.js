@@ -65,10 +65,10 @@
         {{?}}
         {{? it.board.showWhois && post.geolocation.flagName}}
             {{? post.geolocation.cityName}}
-                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}"
+                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}" class="flag"
                      title="{{=post.geolocation.cityName}}, {{=post.geolocation.countryName}}">
             {{??}}
-                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}"
+                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}" class="flag"
                      title="{{=post.geolocation.countryName}}">
             {{?}}
         {{?}}
