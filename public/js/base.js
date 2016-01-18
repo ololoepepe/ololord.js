@@ -968,6 +968,9 @@ lord.setTooltips = function(parent) {
                 $(this).tooltip("disable");
             }
         }).tooltip("enable").tooltip("open");
+        setTimeout(function() {
+            _this.tooltip("close");
+        }, 15 * lord.Second);
     });
 };
 
