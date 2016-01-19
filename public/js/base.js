@@ -942,7 +942,10 @@ lord.expandCollapseCoubVideo = function(a) {
 };
 
 lord.hashChangeHandler = function() {
-    var offset = $(":target").offset();
+    var target = $(":target");
+    if (!target || !target[0])
+        return;
+    var offset = target.offset();
     var scrollto = offset.top - $(".toolbar").height() - 4;
     $("html, body").animate({ scrollTop: scrollto }, 0);
 };

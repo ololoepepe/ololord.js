@@ -864,11 +864,6 @@ lord.contains = function(s, subs) {
     return false;
 };
 
-lord.isInViewport = function(el) {
-    var rect = el.getBoundingClientRect();
-    return (rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight));
-};
-
 lord.addClass = function(element, classNames) {
     if (!element || !element.tagName || !classNames || typeof classNames != "string")
         return;
@@ -1210,8 +1205,11 @@ lord.nearlyEqual = function(a, b, epsilon) {
     }
 };
 
-lord.hash = function() {
-    return window.location.hash.substr(1, window.location.hash.length - 1);
+lord.hash = function(hash) {
+    if (!hash)
+        return window.location.hash.substr(1, window.location.hash.length - 1);
+    console.log(hash);
+    window.location.hash = hash;
 };
 
 lord.data = function(key, el, bubble) {

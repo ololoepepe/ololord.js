@@ -2592,93 +2592,52 @@ lord.hotkey_nextPageImage = function() {
     }
 };
 
-lord.currentPost = function() {
-    var list = lord.query(".opPost, .post");
-    for (var i = 0; i < list.length; ++i) {
-        if (lord.isInViewport(list[i]) && window.location.hash.replace("#", "") == list[i].id.replace("post", ""))
-            return list[i];
-    }
-    for (var i = 0; i < list.length; ++i) {
-        if (lord.isInViewport(list[i]))
-            return list[i];
-    }
-    list = lord.query(".opPost, .post");
-    if (list && list.length > 0)
-        return list[0];
+lord.currentPost = function(selectLast) {
+    var hash = lord.hash();
+    var post;
+    if (hash && !isNaN(+hash))
+        post = $("#" + hash + ":in-viewport");
+    if (post && post[0])
+        return post[0];
+    post = $(".opPost:in-viewport, .post:in-viewport");
+    if (post[0])
+        return selectLast ? post.last()[0] : post[0];
     return null;
 };
 
-lord.currentThread = function() {
+lord.currentThread = function(selectLast) {
     if (+lord.data("threadNumber"))
         return null;
-    var list = lord.query(".opPost");
-    for (var i = 0; i < list.length; ++i) {
-        if (lord.isInViewport(list[i]))
-            return lord.id("thread" + list[i].id);
-    }
-    list = lord.query(".opPost, .post");
-    for (var i = 0; i < list.length; ++i) {
-        if (lord.isInViewport(list[i]) && window.location.hash.replace("#", "") == list[i].id)
-            return lord.id(list[i].parentNode.id.replace("threadPosts", "thread"));
-    }
-    for (var i = 0; i < list.length; ++i) {
-        if (lord.isInViewport(list[i]))
-            return lord.id(list[i].parentNode.id.replace("threadPosts", "thread"));
-    }
-    list = lord.query(".opPost");
-    if (list && list.length > 0)
-        return lord.id("thread" + list[0].id);
-    return null;
+    var post = lord.currentPost(selectLast);
+    if (!post)
+        return null;
+    var thread = $(post).closest(".thread");
+    return thread[0] || null;
 };
 
 lord.previousNextThreadPostCommon = function(next, post) {
-    var list = null;
-    var f = function(list, i) {
-        if (next && i < list.length - 1)
-            return i + 1;
-        else if (!next && i > 0)
-            return i - 1;
-        return i;
+    var iterationLoop = function(container, el) {
+        for (var i = 0; i < container.length; i += 1) {
+            if (container[i] == el) {
+                if (next && (i + 1) < container.length)
+                    return container[i + 1];
+                else if (!next && i > 0)
+                    return container[i - 1];
+                return null;
+            }
+        }
+        return null;
     };
-    if (!post && !lord.data("threadNumber")) {
-        list = lord.query(".opPost");
-        for (var i = 0; i < list.length; ++i) {
-            if (lord.isInViewport(list[i])) {
-                i = f(list, i);
-                window.location.hash = list[i].id;
-                return false;
-            }
-        }
+    if (post) {
+        var el = iterationLoop($(".opPost, .post"), lord.currentPost(next));
+        if (el)
+            lord.hash(el.id);
+    } else {
+        var el = iterationLoop($(".thread"), lord.currentThread(next));
+        if (el)
+            lord.hash(el.id.replace("thread", ""));
     }
-    list = lord.query(".opPost, .post");
-    for (var i = 0; i < list.length; ++i) {
-        if (lord.isInViewport(list[i]) && window.location.hash.replace("#", "") == list[i].id) {
-            if (post || +lord.data("threadNumber")) {
-                i = f(list, i);
-                window.location.hash = list[i].id;
-            } else {
-                window.location.hash = list[i].parentNode.id.replace("threadPosts", "");
-            }
-            return false;
-        }
-    }
-    for (var i = 0; i < list.length; ++i) {
-        if (lord.isInViewport(list[i])) {
-            if (post || +lord.data("threadNumber")) {
-                i = f(list, i);
-                window.location.hash = list[i].id;
-            } else {
-                window.location.hash = list[i].parentNode.id.replace("threadPosts", "");
-            }
-            return false;
-        }
-    }
-    list = lord.query(!post ? ".opPost" : ".opPost, .post");
-    if (list && list.length > 0) {
-        var ind = next ? 0 : (list.length - 1);
-        window.location.hash = list[ind].id;
-        return false;
-    }
+    return false;
 };
 
 lord.hotkey_previousThreadPost = function() {
@@ -2710,7 +2669,7 @@ lord.hotkey_goToThread = function() {
     if (!t)
         return;
     var opPost = lord.queryOne(".opPost", t);
-    window.open(lord.queryOne(".postHeader > [name='toThreadLink']", opPost).href, '_blank').focus();
+    window.open(lord.queryOne("[name='toThreadLink']", opPost).href, '_blank').focus();
     return false;
 };
 
@@ -2747,7 +2706,7 @@ lord.hotkey_quickReply = function() {
     var p = lord.currentPost();
     if (!p)
         return;
-    lord.quickReply(p.id.replace("post", ""));
+    lord.quickReply(p);
     return false;
 };
 
