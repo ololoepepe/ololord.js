@@ -1206,9 +1206,12 @@ lord.nearlyEqual = function(a, b, epsilon) {
 };
 
 lord.hash = function(hash) {
-    if (!hash)
+    if (typeof hash == "undefined")
         return window.location.hash.substr(1, window.location.hash.length - 1);
-    console.log(hash);
+    hash = "" + hash;
+    if (!hash && !lord.hash())
+        return;
+    window.location.hash = "";
     window.location.hash = hash;
 };
 

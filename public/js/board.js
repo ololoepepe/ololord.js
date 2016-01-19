@@ -2156,7 +2156,7 @@ lord.submitted = function(event, form) {
             if (currentThreadNumber) {
                 lord.updateThread(true).then(function() {
                     if (lord.getLocalObject("moveToPostOnReplyInThread", true))
-                        window.location.hash = "#" + result.number;
+                        lord.hash(result.number);
                 });
             } else {
                 var action = lord.getLocalObject("quickReplyAction", "append_post");
@@ -2623,10 +2623,10 @@ lord.previousNextThreadPostCommon = function(next, post) {
                     return container[i + 1];
                 else if (!next && i > 0)
                     return container[i - 1];
-                return null;
+                return el;
             }
         }
-        return null;
+        return el;
     };
     if (post) {
         var el = iterationLoop($(".opPost, .post"), lord.currentPost(next));
@@ -2993,11 +2993,7 @@ lord.initializeOnLoadBaseBoard = function() {
             if (lord.deviceType("mobile"))
                 lord.setTooltips();
             setTimeout(function() {
-                var hash = lord.hash();
-                if (hash && "#" != hash) {
-                    window.location.hash = "";
-                    window.location.hash = hash;
-                }
+                lord.hash(lord.hash());
             }, lord.Second);
             var threadNumber = +lord.data("threadNumber");
             var key = lord.data("boardName") + (threadNumber ? ("/" + threadNumber) : "");
