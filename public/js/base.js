@@ -959,7 +959,7 @@ lord.setTooltips = function(parent) {
                     var pos = _this.position();
                     $(this).css({
                         position: "absolute",
-                        left: (e.pageX - 100) + "px",
+                        left: Math.max(e.pageX - 100, 5) + "px",
                         top: (e.pageY + 15) + "px",
                         width: "200px"
                     });
