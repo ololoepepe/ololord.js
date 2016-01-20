@@ -196,7 +196,7 @@
                     {{? it.customPostMenuAction && it.customPostMenuAction[100]}}
                         {{ out += it.customPostMenuAction[100](it, thread, post); }}
                     {{?}}
-                    {{? it.compareRegisteredUserLevels(it.user.level, "MODER")}}
+                    {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
                         <li>
                            <a name="fixButton" href="javascript:void(0);"
                                onclick="lord.setThreadFixed(this, {{=!thread.fixed}}); return false;">
