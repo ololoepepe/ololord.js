@@ -1446,6 +1446,7 @@ module.exports.rerenderPosts = function(boardNames) {
 
 module.exports.rebuildSearchIndex = function() {
     var posts = {};
+    console.log(`Purging post search index (this may take some time)...`);
     return db.keys("postSearchIndex:*").then(function(keys) {
         var p = (keys.length > 0) ? db.del(keys[0]) : Promise.resolve();
         keys.slice(1).forEach(function(key) {
