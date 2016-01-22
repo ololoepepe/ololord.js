@@ -1354,7 +1354,7 @@ lord.model = function(modelName, mustMerge) {
 
 lord.get = function(what) {
     var xhr = new XMLHttpRequest();
-    xhr.open("get", "/" + lord.data("sitePathPrefix", lord.queryOne("head")) + what, false);
+    xhr.open("get", "/" + lordData.site.pathPrefix + what, false);
     xhr.send(null);
     if (xhr.status === 200)
         return xhr.responseText;
