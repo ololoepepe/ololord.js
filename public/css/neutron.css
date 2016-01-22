@@ -6,7 +6,7 @@ body {
     font-family: "Trebuchet MS",Trebuchet,tahoma,serif;
 }
 
-body.desktop {
+body.desktop, input, select {
     font-size: 14.4px;
 }
 

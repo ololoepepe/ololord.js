@@ -2155,7 +2155,7 @@ lord.submitted = function(event, form) {
             var currentThreadNumber = lord.data("threadNumber");
             if (currentThreadNumber) {
                 lord.updateThread(true).then(function() {
-                    if (lord.getLocalObject("moveToPostOnReplyInThread", true))
+                    if (lord.getLocalObject("moveToPostOnReplyInThread", false))
                         lord.hash(result.number);
                 });
             } else {

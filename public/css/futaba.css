@@ -5,7 +5,7 @@ body {
     color: #800000;
 }
 
-body.desktop {
+body.desktop, input, select {
     font-size: 14.4px;
 }
 
