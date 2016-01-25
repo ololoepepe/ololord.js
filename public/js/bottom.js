@@ -47,6 +47,17 @@ lord.templates = {};
     });
     var settings = lord.settings();
     lord.createStylesheetLink(settings.style.name + ".css", true);
+    if (lord.deviceType("desktop")) {
+        var css = "input, select { font-size: 14.4px; }";
+        var head = lord.queryOne("head");
+        var style = lord.node("style");
+        style.type = "text/css";
+        if (style.styleSheet)
+            style.styleSheet.cssText = css;
+        else
+            style.appendChild(lord.node("text", css));
+        head.appendChild(style);
+    }
     lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
     lord.createStylesheetLink("3rdparty/jquery-ui/" + settings.style.name + "/jquery-ui.min.css", true);
 })();
