@@ -26,9 +26,11 @@ module.exports.sendMessage = function(req, boardName, postNumber, text) {
     return Database.getPost(boardName, postNumber).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("No such post"));
-        return createHash(post.user);
-    }).then(function(receiverHash) {
-        c.receiverHash = receiverHash;
+        c.receiverHash = createHash(post.user);
+        return Database.db.zrange("chat:" + c.key, 0, 0);
+    }).then(function(msg) {
+        if (msg && msg.length > 0 && JSON.parse(msg[0]).senderHash != c.senderHash)
+            return Promise.reject(Tools.translate("Somebody is chatting here already"));
         return Database.db.sadd("chats:" + c.senderHash, c.key);
     }).then(function() {
         return Database.db.sadd("chats:" + c.receiverHash, c.key);
@@ -63,7 +65,8 @@ module.exports.getMessages = function(req, lastRequestDate) {
             p = p.then(function() {
                 return Database.db.zrangebyscore("chat:" + key, lastRequestDate, Infinity).then(function(list) {
                     list = (list || []).map(function(msg) {
-                        msg = JSON.parse(msg);
+                        return JSON.parse(msg);
+                    }).map(function(msg) {
                         return {
                             text: msg.text,
                             date: msg.date,

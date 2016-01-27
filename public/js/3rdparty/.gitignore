@@ -2,6 +2,7 @@
 !codemirror
 !doT.min.js
 !FileSaver.min.js
+!isInViewport.min.js
 !jquery-1.11.3.min.js
 !jquery-ui.min.js
 !jquery.datetimepicker.js

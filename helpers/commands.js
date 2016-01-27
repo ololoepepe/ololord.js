@@ -51,6 +51,16 @@ _installHandler(["respawn"], function(args) {
 _installHandler("help", function() {
     console.log("q | quit - Exit the application");
     console.log("help - Print this Help");
+    console.log("set <path> [value] - Set an option (config.json). "
+        + "If value is not specified, you will be prompted to enter it");
+    console.log("get <path> - Print an option (config.json)");
+    console.log("remove <path> - Remove option (config.json)");
+    console.log("register-user - Register a user");
+    console.log("rerender-posts [board] - Rerenders all posts (workers are closed and then opened again)");
+    console.log("stop - Closes all workers, preventing incoming connections");
+    console.log("start - Opens workers for connections if closed");
+    console.log("regenerate - Regenerates the cache (workers are closed and then opened again)");
+    console.log("rebuild-search-index - Rebuilds post search index");
     return Promise.resolve();
 });
 

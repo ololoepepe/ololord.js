@@ -6,13 +6,18 @@
     <link rel="stylesheet" type="text/css" href="/{{=it.site.pathPrefix}}css/3rdparty/jquery.datetimepicker.css">
     {{? !it.noJavaScript}}
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery-1.11.3.min.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/isInViewport.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery-ui.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/Promise.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/doT.min.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/data.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/api.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/merge.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/uuid.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/moment-with-locales.min.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jszip.min.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jszip-utils.min.js"></script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/FileSaver.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base.js"></script>
         <script id="model-base" type="application/json"></script>
         <script id="model-boards" type="application/json">{{=it.models.boards}}</script>
@@ -36,9 +41,6 @@
             {{?}}
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/board.js"></script>
             {{? it.includeThreadScripts}}
-                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jszip.min.js"></script>
-                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jszip-utils.min.js"></script>
-                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/FileSaver.min.js"></script>
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery.knob.min.js"></script>
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/thread.js"></script>
             {{?}}

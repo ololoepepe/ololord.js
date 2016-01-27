@@ -27,11 +27,7 @@ window.addEventListener("load", function load() {
         if (data)
             faqContentPlaceholder.parentNode.replaceChild(data, faqContentPlaceholder);
         setTimeout(function() {
-            var hash = lord.hash();
-            if (hash && "#" != hash) {
-                window.location.hash = "";
-                window.location.hash = hash;
-            }
+            lord.hash(lord.hash());
         }, lord.Second);
     }
 }, false);

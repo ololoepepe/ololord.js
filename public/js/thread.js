@@ -275,46 +275,6 @@ lord.setAutoUpdateEnabled = function(enabled) {
     lord.setLocalObject("autoUpdate", list);
 };
 
-lord.downloadThread = function() {
-    var as = lord.query(".postFile > .postFileFile > a");
-    if (!as || as.length < 1)
-        return;
-    var cancel = false;
-    var zip = new JSZip();
-    var progressBar = new lord.OverlayProgressBar({
-        max: as.length,
-        cancelCallback: function() {
-            cancel = true;
-        },
-        finishCallback: function() {
-            progressBar.hide();
-            saveAs(zip.generate({ "type": "blob" }), document.title + ".zip");
-        }
-    });
-    var last = 0;
-    var append = function(i) {
-        if (cancel) {
-            progressBar.hide();
-            return;
-        }
-        var a = as[i];
-        JSZipUtils.getBinaryContent(a.href, function (err, data) {
-            if (!err) {
-                zip.file(a.href.split("/").pop(), data, {
-                    "binary": true
-                });
-            }
-            progressBar.progress(progressBar.value + 1);
-            if (last < as.length - 1)
-                append(++last);
-        });
-    };
-    progressBar.show();
-    append(last);
-    if (as.length > 1)
-        append(++last);
-};
-
 lord.initializeOnLoadThread = function() {
     lord.addVisibilityChangeListener(lord.visibilityChangeListener);
     var enabled = lord.getLocalObject("autoUpdate", {})[+lord.data("threadNumber")];

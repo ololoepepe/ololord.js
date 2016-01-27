@@ -171,6 +171,8 @@ var lord = lord || {};
             _this.progressBar.removeAttribute("value");
             _this.finishCallback();
         };
+    } else {
+        this.finishOnMaxValue = true;
     }
 };
 
@@ -180,6 +182,8 @@ var lord = lord || {};
         return;
     this.value = value;
     this.progressBar.value = this.value;
+    if (this.finishOnMaxValue && this.value == this.max)
+        this.finishCallback();
 };
 
 /*public*/ lord.OverlayProgressBar.prototype.show = function() {
@@ -860,11 +864,6 @@ lord.contains = function(s, subs) {
     return false;
 };
 
-lord.isInViewport = function(el) {
-    var rect = el.getBoundingClientRect();
-    return (rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight));
-};
-
 lord.addClass = function(element, classNames) {
     if (!element || !element.tagName || !classNames || typeof classNames != "string")
         return;
@@ -1021,6 +1020,7 @@ lord.showDialog = function(body, options) {
                 $("body").css({ overflow: "hidden" });
                 $(".navigationButton").css({ display: "none" });
             },
+            open: (options ? options.afterShow : undefined),
             beforeClose: function() {
                 $("body").css({ overflow: "inherit" });
                 if (lord.scrollHandler)
@@ -1206,8 +1206,14 @@ lord.nearlyEqual = function(a, b, epsilon) {
     }
 };
 
-lord.hash = function() {
-    return window.location.hash.substr(1, window.location.hash.length - 1);
+lord.hash = function(hash) {
+    if (typeof hash == "undefined")
+        return window.location.hash.substr(1, window.location.hash.length - 1);
+    hash = "" + hash;
+    if (!hash && !lord.hash())
+        return;
+    window.location.hash = "";
+    window.location.hash = hash;
 };
 
 lord.data = function(key, el, bubble) {
@@ -1348,7 +1354,7 @@ lord.model = function(modelName, mustMerge) {
 
 lord.get = function(what) {
     var xhr = new XMLHttpRequest();
-    xhr.open("get", "/" + lord.data("sitePathPrefix", lord.queryOne("head")) + what, false);
+    xhr.open("get", "/" + lordData.site.pathPrefix + what, false);
     xhr.send(null);
     if (xhr.status === 200)
         return xhr.responseText;

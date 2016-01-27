@@ -5,7 +5,8 @@
      data-thread-number="{{=post.threadNumber}}"
      data-file-count={{=post.fileInfos.length}}
      {{? post.isOp}}data-is-op="true"{{?}}
-     {{? it.checkOwnPost(post)}}data-own-post="true"{{?}}>
+     {{? it.checkOwnPost(post)}}data-own-post="true"{{?}}
+     {{? post.isOp && thread.archived}}data-archived="true"{{?}}>
     <div class="postHeader {{=it.deviceType}}">
         <span class="nowrap">
             {{? it.customPostHeaderPart && it.customPostHeaderPart[0]}}
@@ -64,10 +65,10 @@
         {{?}}
         {{? it.board.showWhois && post.geolocation.flagName}}
             {{? post.geolocation.cityName}}
-                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}"
+                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}" class="flag"
                      title="{{=post.geolocation.cityName}}, {{=post.geolocation.countryName}}">
             {{??}}
-                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}"
+                <img src="/{{=it.site.pathPrefix}}img/flags/{{=post.geolocation.flagName}}" class="flag"
                      title="{{=post.geolocation.countryName}}">
             {{?}}
         {{?}}
@@ -107,30 +108,10 @@
                 {{? it.customPostMenuAction && it.customPostMenuAction[0]}}
                     {{ out += it.customPostMenuAction[0](it, thread, post); }}
                 {{?}}
-                {{? (it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0) && (post.fileInfos.length < it.board.maxFileCount)}}
-                    <li>
-                        <a name="addFileButton" target="_blank" href="javascript:void(0);"
-                           onclick="lord.addFiles(this); return false;">
-                            <img src="/{{=it.site.pathPrefix}}img/add.png"
-                                 class="signImage" /> {{=it.tr.addFilesText}}</a>
-                    </li>
-                {{?}}
+                <li class="ui-widget-header">{{=it.tr.postMenuCategoryPostText}}</li>
                 {{? it.customPostMenuAction && it.customPostMenuAction[10]}}
                     {{ out += it.customPostMenuAction[10](it, thread, post); }}
                 {{?}}
-                {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
-                    <li>
-                        <a name="editButton" target="_blank"
-                           href="javascript:void(0);" onclick="lord.editPost(this); return false;">
-                            <img src="/{{=it.site.pathPrefix}}img/edit.png"
-                                 class="signImage" /> {{=it.tr.editPostText}}</a>
-                    </li>
-                {{?}}
-                <li>
-                    <a name="chatButton" href="javascript:void(0);" onclick="lord.chatWithUser(this); return false;">
-                        <img src="/{{=it.site.pathPrefix}}img/chat.png" class="signImage" />
-                        {{=it.tr.chatWithUserText}}</a>
-                </li>
                 {{? post.rawText}}
                     <li>
                         <a name="sourceTextButton" target="_blank" href="javascript:void(0);"
@@ -142,46 +123,135 @@
                 {{? it.customPostMenuAction && it.customPostMenuAction[20]}}
                     {{ out += it.customPostMenuAction[20](it, thread, post); }}
                 {{?}}
-                {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0 && post.isOp}}
+                {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
                     <li>
-                        <a name="fixButton" href="javascript:void(0);"
-                           onclick="lord.setThreadFixed(this, {{=!thread.fixed}}); return false;">
-                            <img src="/{{=it.site.pathPrefix}}img/{{? thread.fixed}}unfix{{??}}fixed{{?}}.png"
-                                 class="signImage" />
-                            {{? thread.fixed}}{{=it.tr.unfixThreadText}}{{??}}{{=it.tr.fixThreadText}}{{?}}</a>
-                    </li>
-                    {{? it.customPostMenuAction && it.customPostMenuAction[30]}}
-                        {{ out += it.customPostMenuAction[30](it, thread, post); }}
-                    {{?}}
-                    <li>
-                        <a name="closeButton" href="javascript:void(0);"
-                           onclick="lord.setThreadClosed(this, {{=!thread.closed}}); return false;">
-                            <img src="/{{=it.site.pathPrefix}}img/{{? thread.closed}}open{{??}}closed{{?}}.png"
-                                 class="signImage" />
-                            {{? thread.closed}}{{=it.tr.openThreadText}}{{??}}{{=it.tr.closeThreadText}}{{?}}</a>
-                    </li>
-                    {{? it.customPostMenuAction && it.customPostMenuAction[40]}}
-                        {{ out += it.customPostMenuAction[40](it, thread, post); }}
-                    {{?}}
-                    <li>
-                        <a name="setUnbumpableButton" href="javascript:void(0);"
-                           onclick="lord.setThreadUnbumpable(this, {{=!thread.unbumpable}}); return false;">
-                            <img src="/{{=it.site.pathPrefix}}img/anchor{{? thread.unbumpable}}_no{{?}}.png"
-                                 class="signImage" />
-                            {{? thread.unbumpable}}{{=it.tr.setThreadBumpableText}}{{??}}{{=it.tr.setThreadUnbumpableText}}{{?}}</a>
-                    </li>
-                    {{? it.customPostMenuAction && it.customPostMenuAction[50]}}
-                        {{ out += it.customPostMenuAction[50](it, thread, post); }}
-                    {{?}}
-                    <li>
-                        <a name="moveButton" target="_blank" href="javascript:void(0);"
-                           onclick="lord.moveThread(this); return false;">
-                            <img src="/{{=it.site.pathPrefix}}img/move.png"
-                                 class="signImage" /> {{=it.tr.moveThreadText}}</a>
+                        <a name="editButton" target="_blank"
+                           href="javascript:void(0);" onclick="lord.editPost(this); return false;">
+                            <img src="/{{=it.site.pathPrefix}}img/edit.png"
+                                 class="signImage" /> {{=it.tr.editPostText}}</a>
                     </li>
                 {{?}}
+                {{? it.customPostMenuAction && it.customPostMenuAction[30]}}
+                    {{ out += it.customPostMenuAction[30](it, thread, post); }}
+                {{?}}
+                {{? (it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0) && (post.fileInfos.length < it.board.maxFileCount)}}
+                    <li>
+                        <a name="addFileButton" target="_blank" href="javascript:void(0);"
+                           onclick="lord.addFiles(this); return false;">
+                            <img src="/{{=it.site.pathPrefix}}img/add.png"
+                                 class="signImage" /> {{=it.tr.addFilesText}}</a>
+                    </li>
+                {{?}}
+                {{? it.customPostMenuAction && it.customPostMenuAction[40]}}
+                    {{ out += it.customPostMenuAction[40](it, thread, post); }}
+                {{?}}
+                <li>
+                    <a name="hideButton" href="javascript:void(0);" onclick="lord.setPostHidden(this); return false;">
+                        <img src="/{{=it.site.pathPrefix}}img/hide.png" class="signImage" />
+                        {{=it.tr.showHidePostText}}</a>
+                </li>
+                {{? it.customPostMenuAction && it.customPostMenuAction[50]}}
+                    {{ out += it.customPostMenuAction[50](it, thread, post); }}
+                {{?}}
+                <li>
+                    <a name="deleteButton" target="_blank" href="javascript:void(0);"
+                       onclick="lord.deletePost(this); return false;">
+                        <img src="/{{=it.site.pathPrefix}}img/delete.png" class="signImage" />
+                        {{=it.tr.deletePostText}}</a>
+                </li>
                 {{? it.customPostMenuAction && it.customPostMenuAction[60]}}
                     {{ out += it.customPostMenuAction[60](it, thread, post); }}
+                {{?}}
+                {{? post.isOp}}
+                    <li class="ui-widget-header">{{=it.tr.postMenuCategoryThreadText}}</li>
+                    {{? it.customPostMenuAction && it.customPostMenuAction[70]}}
+                        {{ out += it.customPostMenuAction[70](it, thread, post); }}
+                    {{?}}
+                    <li>
+                        <a name="addToFavoritesButton" href="javascript:void(0);"
+                           onclick="lord.addToOrRemoveFromFavorites(this); return false;">
+                            <img src="/{{=it.site.pathPrefix}}img/favorite.png" class="signImage">
+                            <span>{{=it.tr.addThreadToFavoritesText}}</span></a>
+                    </li>
+                    {{? it.customPostMenuAction && it.customPostMenuAction[80]}}
+                        {{ out += it.customPostMenuAction[80](it, thread, post); }}
+                    {{?}}
+                    <li>
+                        <a name="downloadButton" href="javascript:void(0);"
+                           onclick="lord.downloadThread(this); return false;">
+                            <img src="/{{=it.site.pathPrefix}}img/download.png" class="signImage" />
+                            {{=it.tr.downloadThreadText}}</a>
+                    </li>
+                    {{? it.customPostMenuAction && it.customPostMenuAction[90]}}
+                        {{ out += it.customPostMenuAction[90](it, thread, post); }}
+                    {{?}}
+                    {{? !it.includeThreadScripts}}
+                        <li>
+                            <a name="expandCollapseThreadButton" href="javascript:void(0);"
+                               onclick="lord.expandCollapseThread(this); return false;">
+                                <img src="/{{=it.site.pathPrefix}}img/expand.png" class="signImage">
+                                <span>{{? thread.expanded}}{{=it.tr.collapseThreadText}}{{??}}{{=it.tr.expandThreadText}}{{?}}</span></a>
+                        </li>
+                    {{?}}
+                    {{? it.customPostMenuAction && it.customPostMenuAction[100]}}
+                        {{ out += it.customPostMenuAction[100](it, thread, post); }}
+                    {{?}}
+                    {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+                        <li>
+                           <a name="fixButton" href="javascript:void(0);"
+                               onclick="lord.setThreadFixed(this, {{=!thread.fixed}}); return false;">
+                                <img src="/{{=it.site.pathPrefix}}img/{{? thread.fixed}}unfix{{??}}fixed{{?}}.png"
+                                     class="signImage" />
+                                {{? thread.fixed}}{{=it.tr.unfixThreadText}}{{??}}{{=it.tr.fixThreadText}}{{?}}</a>
+                        </li>
+                        {{? it.customPostMenuAction && it.customPostMenuAction[110]}}
+                            {{ out += it.customPostMenuAction[110](it, thread, post); }}
+                        {{?}}
+                        <li>
+                            <a name="closeButton" href="javascript:void(0);"
+                               onclick="lord.setThreadClosed(this, {{=!thread.closed}}); return false;">
+                                <img src="/{{=it.site.pathPrefix}}img/{{? thread.closed}}open{{??}}closed{{?}}.png"
+                                     class="signImage" />
+                                {{? thread.closed}}{{=it.tr.openThreadText}}{{??}}{{=it.tr.closeThreadText}}{{?}}</a>
+                        </li>
+                        {{? it.customPostMenuAction && it.customPostMenuAction[120]}}
+                            {{ out += it.customPostMenuAction[120](it, thread, post); }}
+                        {{?}}
+                        <li>
+                            <a name="setUnbumpableButton" href="javascript:void(0);"
+                               onclick="lord.setThreadUnbumpable(this, {{=!thread.unbumpable}}); return false;">
+                                <img src="/{{=it.site.pathPrefix}}img/anchor{{? thread.unbumpable}}_no{{?}}.png"
+                                     class="signImage" />
+                                {{? thread.unbumpable}}{{=it.tr.setThreadBumpableText}}{{??}}{{=it.tr.setThreadUnbumpableText}}{{?}}</a>
+                        </li>
+                        {{? it.customPostMenuAction && it.customPostMenuAction[130]}}
+                            {{ out += it.customPostMenuAction[130](it, thread, post); }}
+                        {{?}}
+                        <li>
+                            <a name="moveButton" target="_blank" href="javascript:void(0);"
+                               onclick="lord.moveThread(this); return false;">
+                                <img src="/{{=it.site.pathPrefix}}img/move.png"
+                                     class="signImage" /> {{=it.tr.moveThreadText}}</a>
+                        </li>
+                        {{? it.customPostMenuAction && it.customPostMenuAction[140]}}
+                            {{ out += it.customPostMenuAction[140](it, thread, post); }}
+                        {{?}}
+                    {{?}}
+                {{?}}
+                {{? it.customPostMenuAction && it.customPostMenuAction[150]}}
+                    {{ out += it.customPostMenuAction[150](it, thread, post); }}
+                {{?}}
+                <li class="ui-widget-header">{{=it.tr.postMenuCategoryUserText}}</li>
+                {{? it.customPostMenuAction && it.customPostMenuAction[160]}}
+                    {{ out += it.customPostMenuAction[160](it, thread, post); }}
+                {{?}}
+                <li>
+                    <a name="chatButton" href="javascript:void(0);" onclick="lord.chatWithUser(this); return false;">
+                        <img src="/{{=it.site.pathPrefix}}img/chat.png" class="signImage" />
+                        {{=it.tr.chatWithUserText}}</a>
+                </li>
+                {{? it.customPostMenuAction && it.customPostMenuAction[170]}}
+                    {{ out += it.customPostMenuAction[170](it, thread, post); }}
                 {{?}}
                 {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
                     <li>
@@ -190,8 +260,8 @@
                             <img src="/{{=it.site.pathPrefix}}img/ip.png" class="signImage" />
                             {{=it.tr.showUserIpText}}</a>
                     </li>
-                    {{? it.customPostMenuAction && it.customPostMenuAction[70]}}
-                        {{ out += it.customPostMenuAction[70](it, thread, post); }}
+                    {{? it.customPostMenuAction && it.customPostMenuAction[180]}}
+                        {{ out += it.customPostMenuAction[180](it, thread, post); }}
                     {{?}}
                     <li>
                         <a name="banButton" target="_blank" href="javascript:void(0);"
@@ -199,57 +269,9 @@
                             <img src="/{{=it.site.pathPrefix}}img/ban.png" class="signImage" />
                             {{=it.tr.banUserText}}</a>
                     </li>
-                {{?}}
-                {{? it.customPostMenuAction && it.customPostMenuAction[80]}}
-                    {{ out += it.customPostMenuAction[80](it, thread, post); }}
-                {{?}}
-                {{? post.isOp}}
-                    {{? it.includeThreadScripts}}
-                        <li>
-                            <a name="downloadButton" href="javascript:void(0);"
-                               onclick="lord.downloadThread(this); return false;">
-                                <img src="/{{=it.site.pathPrefix}}img/download.png" class="signImage" />
-                                {{=it.tr.downloadThreadText}}</a>
-                        </li>
+                    {{? it.customPostMenuAction && it.customPostMenuAction[190]}}
+                        {{ out += it.customPostMenuAction[190](it, thread, post); }}
                     {{?}}
-                    {{? it.customPostMenuAction && it.customPostMenuAction[90]}}
-                        {{ out += it.customPostMenuAction[90](it, thread, post); }}
-                    {{?}}
-                    <li>
-                        <a name="addToFavoritesButton" href="javascript:void(0);"
-                           onclick="lord.addToOrRemoveFromFavorites(this); return false;">
-                            <img src="/{{=it.site.pathPrefix}}img/favorite.png" class="signImage">
-                            <span>{{=it.tr.addThreadToFavoritesText}}</span></a>
-                    </li>
-                    {{? it.customPostMenuAction && it.customPostMenuAction[100]}}
-                        {{ out += it.customPostMenuAction[100](it, thread, post); }}
-                    {{?}}
-                    <li>
-                        <a name="expandCollapseThreadButton" href="javascript:void(0);"
-                           onclick="lord.expandCollapseThread(this); return false;">
-                            <img src="/{{=it.site.pathPrefix}}img/expand.png" class="signImage">
-                            <span>{{? thread.expanded}}{{=it.tr.collapseThreadText}}{{??}}{{=it.tr.expandThreadText}}{{?}}</span></a>
-                    </li>
-                {{?}}
-                {{? it.customPostMenuAction && it.customPostMenuAction[110]}}
-                    {{ out += it.customPostMenuAction[110](it, thread, post); }}
-                {{?}}
-                <li>
-                    <a name="deleteButton" target="_blank" href="javascript:void(0);"
-                       onclick="lord.deletePost(this); return false;">
-                        <img src="/{{=it.site.pathPrefix}}img/delete.png" class="signImage" />
-                        {{? post.number == post.threadNumber}}{{=it.tr.deleteThreadText}}{{??}}{{=it.tr.deletePostText}}{{?}}</a>
-                </li>
-                {{? it.customPostMenuAction && it.customPostMenuAction[120]}}
-                    {{ out += it.customPostMenuAction[120](it, thread, post); }}
-                {{?}}
-                <li>
-                    <a name="hideButton" href="javascript:void(0);" onclick="lord.setPostHidden(this); return false;">
-                        <img src="/{{=it.site.pathPrefix}}img/hide.png" class="signImage" />
-                        {{=it.tr.showHidePostText}}</a>
-                </li>
-                {{? it.customPostMenuAction && it.customPostMenuAction[130]}}
-                    {{ out += it.customPostMenuAction[130](it, thread, post); }}
                 {{?}}
             </ul>
             {{? it.customPostHeaderPart && it.customPostHeaderPart[140]}}

@@ -640,7 +640,7 @@ lord.populateChatHistory = function(key) {
 
 lord.updateChat = function(keys) {
     if (!lord.chatDialog) {
-        lord.name("chatButton").forEach(function(a) {
+        lord.query(".navbarItem > [name='chatButton']").forEach(function(a) {
             var img = lord.queryOne("img", a);
             if (img.src.replace("chat_message.gif", "") == img.src)
                 img.src = img.src.replace("chat.png", "chat_message.gif");
@@ -717,7 +717,7 @@ lord.checkChats = function() {
 };
 
 lord.showChat = function(key) {
-    lord.name("chatButton").forEach(function(a) {
+    lord.query(".navbarItem > [name='chatButton']").forEach(function(a) {
         var img = lord.queryOne("img", a);
         if (img.src.replace("chat_message.gif", "") != img.src)
             img.src = img.src.replace("chat_message.gif", "chat.png");
@@ -942,13 +942,16 @@ lord.expandCollapseCoubVideo = function(a) {
 };
 
 lord.hashChangeHandler = function() {
-    var offset = $(":target").offset();
+    var target = $(":target");
+    if (!target || !target[0])
+        return;
+    var offset = target.offset();
     var scrollto = offset.top - $(".toolbar").height() - 4;
     $("html, body").animate({ scrollTop: scrollto }, 0);
 };
 
 lord.setTooltips = function(parent) {
-    $(".codeBlock, .tooltip", parent).css("cursor", "pointer").click(function(e) {
+    $(".codeBlock, .tooltip, .flag, .postFileSize", parent).css("cursor", "pointer").click(function(e) {
         var _this = $(this);
         _this.tooltip({
             position: {
@@ -956,7 +959,7 @@ lord.setTooltips = function(parent) {
                     var pos = _this.position();
                     $(this).css({
                         position: "absolute",
-                        left: (e.pageX - 100) + "px",
+                        left: Math.max(e.pageX - 100, 5) + "px",
                         top: (e.pageY + 15) + "px",
                         width: "200px"
                     });
@@ -968,6 +971,9 @@ lord.setTooltips = function(parent) {
                 $(this).tooltip("disable");
             }
         }).tooltip("enable").tooltip("open");
+        setTimeout(function() {
+            _this.tooltip("close");
+        }, 15 * lord.Second);
     });
 };
 
