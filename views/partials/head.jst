@@ -30,7 +30,6 @@
         {{~it.publicTemplates :template}}
             <script id="template-{{=template.name}}" type="application/jst">{{=template.data}}</script>
         {{~}}
-        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/bottom.js"></script>
         {{? it.site.vkontakte.integrationEnabled }}
             <script type="text/javascript" src="//vk.com/js/api/openapi.js"></script>
         {{?}}
@@ -45,6 +44,7 @@
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/thread.js"></script>
             {{?}}
         {{?}}
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/bottom.js"></script>
         {{? it.extraScripts}}
             {{~it.extraScripts :script}}
                 {{? script.source}}

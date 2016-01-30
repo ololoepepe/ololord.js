@@ -669,6 +669,12 @@ lord.removeChildren = function(obj) {
         obj.removeChild(obj.firstChild);
 };
 
+lord.removeSelf = function(obj) {
+    if (!obj || typeof obj.parentNode == "undefined")
+        return;
+    obj.parentNode.removeChild(obj);
+};
+
 lord.last = function(arr) {
     if (!arr || !arr.length)
         return null;
