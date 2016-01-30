@@ -14,7 +14,11 @@ var router = express.Router();
 
 var renderPage = function(board, page) {
     var c = {};
-    return BoardModel.getBoardPage(board, page).then(function(model) {
+    return BoardModel.getBoardPage(board, page).catch(function(err) {
+        if (Tools.translate("Invalid page number") == err)
+            return Promise.reject(404);
+        return Promise.reject(err);
+    }).then(function(model) {
         c.model = model;
         c.model.title = board.title;
         c.model.includeBoardScripts = true;
@@ -168,7 +172,11 @@ router.get("/:boardName/:page.json", function(req, res) {
 router.get("/:boardName/res/:threadNumber.html", function(req, res) {
     var f = function(board, threadNumber) {
         var c = {};
-        return BoardModel.getThreadPage(board, threadNumber).then(function(model) {
+        return BoardModel.getThreadPage(board, threadNumber).catch(function(err) {
+            if (Tools.translate("No such thread") == err)
+                return Promise.reject(404);
+            return Promise.reject(err);
+        }).then(function(model) {
             c.model = model;
             c.model.title = board.title + " — " + c.model.thread.number;
             c.model.includeBoardScripts = true;
@@ -215,7 +223,11 @@ router.get("/:boardName/res/:threadNumber.json", function(req, res) {
 router.get("/:boardName/arch/:threadNumber.html", function(req, res) {
     var f = function(board, threadNumber) {
         var c = {};
-        return BoardModel.getArchivedThreadPage(board, threadNumber).then(function(model) {
+        return BoardModel.getArchivedThreadPage(board, threadNumber).catch(function(err) {
+            if (Tools.translate("No such thread") == err)
+                return Promise.reject(404);
+            return Promise.reject(err);
+        }).then(function(model) {
             c.model = model;
             c.model.title = board.title + " — " + c.model.thread.number;
             c.model.includeBoardScripts = true;
