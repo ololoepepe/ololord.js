@@ -16,10 +16,9 @@
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{=it.board.title}}</a>
     </h1>
 </div>
-<div id="threads">
-    <script type="text/javascript">
-        document.write(lord._contentHtml);
-    </script>
+<div id="threads" class="loadingMessage">
+    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+    <h1 style="display: inline;">{{=it.tr.loadingThreadsMessage}}</h1>
 </div>
 <hr />
 <div id="postingSpeedPlaceholder" style="display: none;"></div>

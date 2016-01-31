@@ -33,10 +33,9 @@
 {{~["Top"] :position}}
     {{#def.threadActions}}
 {{~}}
-<div id="threads">
-    <script type="text/javascript">
-        document.write(lord._contentHtml);
-    </script>
+<div id="threads" class="loadingMessage">
+    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+    <h1 style="display: inline;">{{=it.tr.loadingPostsMessage}}</h1>
 </div>
 <input id="afterAllPosts" type="hidden" />
 <hr />

@@ -2829,10 +2829,20 @@ lord.initializeOnLoadBaseBoard = function() {
     c.model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true);
     c.model.settings = lord.settings();
     lord.appendExtrasToModel(c.model);
+    var p;
     c.threadOrBoard = (+lord.data("threadNumber") || +lord.data("currentPage") >= 0);
     c.archive = !c.threadOrBoard && !lord.data("sortMode");
-    if (+lord.data("threadNumber"))
+    if (+lord.data("threadNumber")) {
         c.model.includeThreadScripts = true;
+        var suffix = lord.data("archived") ? "arch" : "res";
+        p = lord.api(lord.data("threadNumber"), {}, lord.data("boardName") + "/" + suffix);
+    } else if (+lord.data("currentPage") >= 0) {
+        p = lord.api(lord.data("currentPage"), {}, lord.data("boardName"));
+    } else if (!c.archive) {
+        p = lord.api("catalog", { sort: lord.data("sortMode") }, lord.data("boardName"));
+    } else {
+        p = lord.api("archive", {}, lord.data("boardName"));
+    }
     var bannerFileNames = [];
     var bannerBoardName = lord.data("boardName");
     var bannerBoardTitle = null;
@@ -2874,258 +2884,274 @@ lord.initializeOnLoadBaseBoard = function() {
         bannerPlaceholder.parentNode.replaceChild(banner, bannerPlaceholder);
         banner.parentNode.insertBefore(lord.node("br"), banner);
     }
-    var model = lord._contentModel;
-    if (c.threadOrBoard && lord.compareRegisteredUserLevels(c.model.user.level, "MODER") >= 0)
-        lord.createScript("3rdparty/jquery.datetimepicker.js", true);
-    if (+lord.data("threadNumber") && lord.data("archived"))
-        model.thread.archived = true;
-    if ((+lord.data("threadNumber") || +lord.data("currentPage") >= 0)
-        && lord.model("board/" + lord.data("boardName")).board.captchaEnabled) {
-        c.model.customPostFormField = lord.customPostFormField;
-        c.model.customPostFormOption = lord.customPostFormOption;
-        if (+lord.data("threadNumber"))
-            c.model.thread = model.thread;
-        c.model.postformRules = JSON.parse(lord.id("model-postformRules").innerHTML);
-        lord.id("hiddenPostForm").appendChild(lord.template("postForm", c.model));
-        lord.arr(lord.id("options").childNodes).forEach(function(node) {
-            if (3 != node.nodeType)
-                return;
-            node.parentNode.removeChild(node);
-        });
-        $("#options").buttonset();
-        $("[name='markupHtml'], [name='optionDraft']").button();
-        var captcha = lord.selectCaptchaEngine();
-        var appendCaptchaWidgetToContainer = function(container) {
-            if (captcha && captcha.widgetHtml)
-                container.innerHTML = captcha.widgetHtml;
-            else if (captcha && captcha.widgetTemplate)
-                container.appendChild(lord.template(captcha.widgetTemplate, captcha));
-        };
-        lord.api("captchaQuota", { boardName: lord.data("boardName") }).then(function(result) {
-            var quota = result.quota;
-            if (quota > 0) {
-                appendCaptchaWidgetToContainer(lord.id("hiddenPostForm"));
-                var span = lord.node("span");
-                span.appendChild(lord.node("text", lord.text("noCaptchaText") + ". "
-                    + lord.text("captchaQuotaText") + " " + quota));
-                lord.id("captchaContainer").appendChild(span);
-            } else {
-                appendCaptchaWidgetToContainer(lord.id("captchaContainer"));
-            }
-            if (captcha && captcha.script) {
-                var script = lord.node("script");
-                script.type = "text/javascript";
-                script.innerHTML = captcha.script;
-                lord.queryOne("head").appendChild(script);
-            }
-            if (captcha && captcha.scriptSource) {
-                var script = lord.node("script");
-                script.type = "text/javascript";
-                script.src = captcha.scriptSource;
-                lord.queryOne("head").appendChild(script);
-            }
-            if (typeof lord.postFormLoaded == "function")
-                lord.postFormLoaded();
-        }).catch(lord.handleError);
-    }
-    if (+lord.data("threadNumber")) {
-        var title = model.thread.title || (c.model.board.title + " — " + model.thread.number);
-        lord.queryOne(".theTitle > h1").innerHTML = lord.escaped(title);
-        lord.queryOne("head > title").innerHTML = lord.escaped(title);
-        var upperPlaceholder = lord.id("upperPlaceholder");
-        upperPlaceholder.parentNode.replaceChild(lord.template("threadPageUpper", c.model),
-            upperPlaceholder);
-        var lowerPlaceholder = lord.id("lowerPlaceholder");
-        lowerPlaceholder.parentNode.replaceChild(lord.template("threadPageLower", c.model),
-            lowerPlaceholder);
-    } else if (c.threadOrBoard) {
-        c.model.pageCount = model.pageCount;
-        c.model.currentPage = model.currentPage;
-        var upperPlaceholder = lord.id("upperPlaceholder");
-        upperPlaceholder.parentNode.replaceChild(lord.template("boardPageUpper", c.model),
-            upperPlaceholder);
-        var lowerPlaceholder = lord.id("lowerPlaceholder");
-        lowerPlaceholder.parentNode.replaceChild(lord.template("boardPageLower", c.model),
-            lowerPlaceholder);
-        var pagesPlaceholder = lord.id("pagesPlaceholder");
-        pagesPlaceholder.parentNode.replaceChild(lord.template("pagination", c.model), pagesPlaceholder);
-    }
-    if (!lord.data("threadNumber")) {
-        var postingSpeedPlaceholder = lord.id("postingSpeedPlaceholder");
-        c.model.postingSpeed = model.postingSpeed;
-        postingSpeedPlaceholder.parentNode.replaceChild(lord.template("postingSpeed", c.model),
-            postingSpeedPlaceholder);
-    }
-    if (lord.queryOne(".opPost[data-archived='true']")) {
-        lord.name("backButton").forEach(function(btn) {
-            btn.href += "/archive.html";
-        });
-    }
-    if (typeof lord.postsLoaded == "function")
-        lord.postsLoaded();
-    $(".postBody").css("maxWidth", ($(window).width() - 30) + "px");
-    var dw = (c.model.deviceType == "mobile") ? 100 : 320;
-    $(".codeBlock").css("maxWidth", ($(window).width() - dw) + "px");
-    if (lord.deviceType("mobile"))
-        lord.setTooltips();
-    setTimeout(function() {
-        lord.hash(lord.hash());
-    }, lord.Second);
-    var threadNumber = +lord.data("threadNumber");
-    var key = lord.data("boardName") + (threadNumber ? ("/" + threadNumber) : "");
-    var drafts = lord.getLocalObject("drafts", {})[key];
-    if (drafts) {
-        drafts.forEach(function(draft) {
-            lord.appendDraft(draft, lord.getLocalObject("draftsVisible", true));
-        });
-    }
-    document.body.onclick = lord.globalOnclick;
-    if (!lord.deviceType("mobile")) {
-        document.body.onmouseover = lord.globalOnmouseover;
-        document.body.onmouseout = lord.globalOnmouseout;
-    }
-    if (lord.getLocalObject("mumWatching", false)) {
-        var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
-        img.src = "/" + lord.data("sitePathPrefix") + "img/mum_watching.png";
-        lord.query(".postFileFile > a > img").forEach(function(img) {
-            lord.addClass(img, "mumWatching");
-        });
-    }
-    if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
-        var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
-        var key = function(name) {
-            if (!hotkeys)
-                return lord.DefaultHotkeys.dir[name];
-            return hotkeys[name] || lord.DefaultHotkeys.dir[name];
-        };
-        var btn = lord.queryOne(".leafButton.leafButtonPrevious");
-        if (btn)
-            btn.title += " (" + key("previousPageImage") + ")";
-        btn = lord.queryOne(".leafButton.leafButtonNext");
-        if (btn)
-            btn.title += " (" + key("nextPageImage") + ")";
-        lord.query("[name='quickReply']").forEach(function(a) {
-            a.title += " (" + key("quickReply") + ")";
-        });
-        lord.query("[name='toThreadLink']").forEach(function(a) {
-            a.title += " (" + key("goToThread") + ")";
-        });
-        lord.query("[name='hideButton'] > img").forEach(function(img) {
-            img.title += " (" + key("hidePost") + ")";
-        });
-        var table = lord.queryOne(".postformMarkup");
-        if (table) {
-            ["Bold", "Italics", "StrikedOut", "Underlined", "Spoiler", "Quotation", "Code"].forEach(function(s) {
-                s = "markup" + s;
-                var btn = lord.nameOne(s, table);
-                if (!btn)
+    p.then(function(model) {
+        if (c.threadOrBoard && lord.compareRegisteredUserLevels(c.model.user.level, "MODER") >= 0)
+            lord.createScript("3rdparty/jquery.datetimepicker.js", true);
+        if (+lord.data("threadNumber") && lord.data("archived"))
+            model.thread.archived = true;
+        if ((+lord.data("threadNumber") || +lord.data("currentPage") >= 0)
+            && lord.model("board/" + lord.data("boardName")).board.captchaEnabled) {
+            c.model.customPostFormField = lord.customPostFormField;
+            c.model.customPostFormOption = lord.customPostFormOption;
+            if (+lord.data("threadNumber"))
+                c.model.thread = model.thread;
+            c.model.postformRules = JSON.parse(lord.id("model-postformRules").innerHTML);
+            lord.id("hiddenPostForm").appendChild(lord.template("postForm", c.model));
+            lord.arr(lord.id("options").childNodes).forEach(function(node) {
+                if (3 != node.nodeType)
                     return;
-                btn.title += " (" + key(s) + ")";
+                node.parentNode.removeChild(node);
             });
+            $("#options").buttonset();
+            $("[name='markupHtml'], [name='optionDraft']").button();
+            var captcha = lord.selectCaptchaEngine();
+            var appendCaptchaWidgetToContainer = function(container) {
+                if (captcha && captcha.widgetHtml)
+                    container.innerHTML = captcha.widgetHtml;
+                else if (captcha && captcha.widgetTemplate)
+                    container.appendChild(lord.template(captcha.widgetTemplate, captcha));
+            };
+            lord.api("captchaQuota", { boardName: lord.data("boardName") }).then(function(result) {
+                var quota = result.quota;
+                if (quota > 0) {
+                    appendCaptchaWidgetToContainer(lord.id("hiddenPostForm"));
+                    var span = lord.node("span");
+                    span.appendChild(lord.node("text", lord.text("noCaptchaText") + ". "
+                        + lord.text("captchaQuotaText") + " " + quota));
+                    lord.id("captchaContainer").appendChild(span);
+                } else {
+                    appendCaptchaWidgetToContainer(lord.id("captchaContainer"));
+                }
+                if (captcha && captcha.script) {
+                    var script = lord.node("script");
+                    script.type = "text/javascript";
+                    script.innerHTML = captcha.script;
+                    lord.queryOne("head").appendChild(script);
+                }
+                if (captcha && captcha.scriptSource) {
+                    var script = lord.node("script");
+                    script.type = "text/javascript";
+                    script.src = captcha.scriptSource;
+                    lord.queryOne("head").appendChild(script);
+                }
+                if (typeof lord.postFormLoaded == "function")
+                    lord.postFormLoaded();
+            }).catch(lord.handleError);
         }
-        lord.query("[name='updateThreadButton']").forEach(function(a) {
-            a.title += " (" + key("updateThread") + ")";
+        if (+lord.data("threadNumber")) {
+            var title = model.thread.title || (c.model.board.title + " — " + model.thread.number);
+            lord.queryOne(".theTitle > h1").innerHTML = lord.escaped(title);
+            lord.queryOne("head > title").innerHTML = lord.escaped(title);
+            var upperPlaceholder = lord.id("upperPlaceholder");
+            upperPlaceholder.parentNode.replaceChild(lord.template("threadPageUpper", c.model),
+                upperPlaceholder);
+            var lowerPlaceholder = lord.id("lowerPlaceholder");
+            lowerPlaceholder.parentNode.replaceChild(lord.template("threadPageLower", c.model),
+                lowerPlaceholder);
+        } else if (c.threadOrBoard) {
+            c.model.pageCount = model.pageCount;
+            c.model.currentPage = model.currentPage;
+            var upperPlaceholder = lord.id("upperPlaceholder");
+            upperPlaceholder.parentNode.replaceChild(lord.template("boardPageUpper", c.model),
+                upperPlaceholder);
+            var lowerPlaceholder = lord.id("lowerPlaceholder");
+            lowerPlaceholder.parentNode.replaceChild(lord.template("boardPageLower", c.model),
+                lowerPlaceholder);
+            var pagesPlaceholder = lord.id("pagesPlaceholder");
+            pagesPlaceholder.parentNode.replaceChild(lord.template("pagination", c.model), pagesPlaceholder);
+        }
+        if (!lord.data("threadNumber")) {
+            var postingSpeedPlaceholder = lord.id("postingSpeedPlaceholder");
+            c.model.postingSpeed = model.postingSpeed;
+            postingSpeedPlaceholder.parentNode.replaceChild(lord.template("postingSpeed", c.model),
+                postingSpeedPlaceholder);
+        }
+        c.threads = model.threads || [model.thread];
+        var threads = lord.id("threads");
+        var html = "";
+        c.threads.forEach(function(thread) {
+            c.model.thread = thread;
+            html += "<hr />";
+            var templateName = c.threadOrBoard ? "thread" : (c.archive ? "archiveThread" : "catalogThread");
+            html += lord.template(templateName, c.model, true);
         });
-        btn = lord.nameOne("submit", lord.id("postForm"));
-        if (btn)
-            btn.title += " (" + key("submitReply") + ")";
-    }
-    if (lord.showTripcode(lord.data("threadNumber"))) {
-        var postForm = lord.id("postForm");
-        if (postForm) {
-            var sw = lord.nameOne("tripcode", postForm);
-            if (sw) {
-                sw.checked = true;
-                $(sw).button("refresh");
+        lord.createDocumentFragment(html).then(function(frag) {
+            lord.removeChildren(threads);
+            lord.removeClass(threads, "loadingMessage");
+            threads.appendChild(frag);
+            lord.scriptWorkaround(threads);
+            if (lord.queryOne(".opPost[data-archived='true']")) {
+                lord.name("backButton").forEach(function(btn) {
+                    btn.href += "/archive.html";
+                });
             }
-        }
-    }
-    var fav = lord.getLocalObject("favoriteThreads", {});
-    var currentBoardName = lord.data("boardName");
-    var spellsEnabled = lord.getLocalObject("spellsEnabled", true);
-    var posts = lord.query(".post, .opPost");
-    var p;
-    if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
-        lord.strikeOutHiddenPostLinks();
-    if (lord.getLocalObject("signOpPostLinks", true))
-        lord.signOpPostLinks();
-    if (lord.getLocalObject("signOwnPostLinks", true))
-        lord.signOwnPostLinks();
-    var p;
-    if (spellsEnabled)
-        p = lord.doWork("parseSpells", lord.getLocalObject("spells", lord.DefaultSpells));
-    else
-        p = Promise.resolve();
-    p.then(function(spells) {
-        if (spells && spells.root)
-            lord.spells = spells.root.spells;
-        if (!spellsEnabled)
-            return Promise.resolve();
-        var boardName = lord.data("boardName");
-        var list = [];
-        return lord.gently(posts, function(post) {
-            var data = lord.getPostData(post);
-            if (!data)
-                return;
-            list.push(data);
-        }, {
-            delay: 10,
-            n: 10
-        }).then(function() {
-            return lord.doWork("processPosts", {
-                posts: list,
-                spells: lord.spells
-            });
-        });
-    }).then(function(list) {
-        var map = list ? list.reduce(function(acc, data) {
-            acc[data.postNumber] = data;
-            return acc;
-        }, {}) : {};
-        posts.forEach(function(post) {
-            lord.processPost(post, map[+post.id]);
-        });
-    }).then(function() {
-        lord.query(".opPost").forEach(function(opPost) {
-            var threadNumber = +opPost.id;
-            var btn = lord.nameOne("addToFavoritesButton", opPost);
-            if (fav.hasOwnProperty(currentBoardName + "/" + threadNumber)) {
-                var img = lord.queryOne("img", btn);
-                var span = lord.queryOne("span", btn);
-                lord.removeChildren(span);
-                span.appendChild(lord.node("text", lord.text("removeThreadFromFavoritesText")));
-                img.src = img.src.replace("favorite.png", "favorite_active.png");
+            if (typeof lord.postsLoaded == "function")
+                lord.postsLoaded();
+            $(".postBody").css("maxWidth", ($(window).width() - 30) + "px");
+            var dw = (c.model.deviceType == "mobile") ? 100 : 320;
+            $(".codeBlock").css("maxWidth", ($(window).width() - dw) + "px");
+            if (lord.deviceType("mobile"))
+                lord.setTooltips();
+            setTimeout(function() {
+                lord.hash(lord.hash());
+            }, lord.Second);
+            var threadNumber = +lord.data("threadNumber");
+            var key = lord.data("boardName") + (threadNumber ? ("/" + threadNumber) : "");
+            var drafts = lord.getLocalObject("drafts", {})[key];
+            if (drafts) {
+                drafts.forEach(function(draft) {
+                    lord.appendDraft(draft, lord.getLocalObject("draftsVisible", true));
+                });
             }
+            document.body.onclick = lord.globalOnclick;
+            if (!lord.deviceType("mobile")) {
+                document.body.onmouseover = lord.globalOnmouseover;
+                document.body.onmouseout = lord.globalOnmouseout;
+            }
+            if (lord.getLocalObject("mumWatching", false)) {
+                var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
+                img.src = "/" + lord.data("sitePathPrefix") + "img/mum_watching.png";
+                lord.query(".postFileFile > a > img").forEach(function(img) {
+                    lord.addClass(img, "mumWatching");
+                });
+            }
+            if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
+                var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
+                var key = function(name) {
+                    if (!hotkeys)
+                        return lord.DefaultHotkeys.dir[name];
+                    return hotkeys[name] || lord.DefaultHotkeys.dir[name];
+                };
+                var btn = lord.queryOne(".leafButton.leafButtonPrevious");
+                if (btn)
+                    btn.title += " (" + key("previousPageImage") + ")";
+                btn = lord.queryOne(".leafButton.leafButtonNext");
+                if (btn)
+                    btn.title += " (" + key("nextPageImage") + ")";
+                lord.query("[name='quickReply']").forEach(function(a) {
+                    a.title += " (" + key("quickReply") + ")";
+                });
+                lord.query("[name='toThreadLink']").forEach(function(a) {
+                    a.title += " (" + key("goToThread") + ")";
+                });
+                lord.query("[name='hideButton'] > img").forEach(function(img) {
+                    img.title += " (" + key("hidePost") + ")";
+                });
+                var table = lord.queryOne(".postformMarkup");
+                if (table) {
+                    ["Bold", "Italics", "StrikedOut", "Underlined", "Spoiler", "Quotation", "Code"].forEach(function(s) {
+                        s = "markup" + s;
+                        var btn = lord.nameOne(s, table);
+                        if (!btn)
+                            return;
+                        btn.title += " (" + key(s) + ")";
+                    });
+                }
+                lord.query("[name='updateThreadButton']").forEach(function(a) {
+                    a.title += " (" + key("updateThread") + ")";
+                });
+                btn = lord.nameOne("submit", lord.id("postForm"));
+                if (btn)
+                    btn.title += " (" + key("submitReply") + ")";
+            }
+            if (lord.showTripcode(lord.data("threadNumber"))) {
+                var postForm = lord.id("postForm");
+                if (postForm) {
+                    var sw = lord.nameOne("tripcode", postForm);
+                    if (sw) {
+                        sw.checked = true;
+                        $(sw).button("refresh");
+                    }
+                }
+            }
+            var fav = lord.getLocalObject("favoriteThreads", {});
+            var currentBoardName = lord.data("boardName");
+            var spellsEnabled = lord.getLocalObject("spellsEnabled", true);
+            var posts = lord.query(".post, .opPost");
+            var p;
+            if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
+                lord.strikeOutHiddenPostLinks();
+            if (lord.getLocalObject("signOpPostLinks", true))
+                lord.signOpPostLinks();
+            if (lord.getLocalObject("signOwnPostLinks", true))
+                lord.signOwnPostLinks();
+            var p;
+            if (spellsEnabled)
+                p = lord.doWork("parseSpells", lord.getLocalObject("spells", lord.DefaultSpells));
+            else
+                p = Promise.resolve();
+            p.then(function(spells) {
+                if (spells && spells.root)
+                    lord.spells = spells.root.spells;
+                if (!spellsEnabled)
+                    return Promise.resolve();
+                var boardName = lord.data("boardName");
+                var list = [];
+                return lord.gently(posts, function(post) {
+                    var data = lord.getPostData(post);
+                    if (!data)
+                        return;
+                    list.push(data);
+                }, {
+                    delay: 10,
+                    n: 10
+                }).then(function() {
+                    return lord.doWork("processPosts", {
+                        posts: list,
+                        spells: lord.spells
+                    });
+                });
+            }).then(function(list) {
+                var map = list ? list.reduce(function(acc, data) {
+                    acc[data.postNumber] = data;
+                    return acc;
+                }, {}) : {};
+                posts.forEach(function(post) {
+                    lord.processPost(post, map[+post.id]);
+                });
+            }).then(function() {
+                lord.query(".opPost").forEach(function(opPost) {
+                    var threadNumber = +opPost.id;
+                    var btn = lord.nameOne("addToFavoritesButton", opPost);
+                    if (fav.hasOwnProperty(currentBoardName + "/" + threadNumber)) {
+                        var img = lord.queryOne("img", btn);
+                        var span = lord.queryOne("span", btn);
+                        lord.removeChildren(span);
+                        span.appendChild(lord.node("text", lord.text("removeThreadFromFavoritesText")));
+                        img.src = img.src.replace("favorite.png", "favorite_active.png");
+                    }
+                });
+                if (lord.getLocalObject("hideTripcodes", false)) {
+                    lord.query(".tripcode").forEach(function(span) {
+                        span.style.display = "none";
+                    });
+                }
+                if (lord.getLocalObject("hideUserNames", false)) {
+                    lord.query(".someName").forEach(function(span) {
+                        span.style.display = "none";
+                    });
+                }
+            }).catch(lord.handleError);
+            var lastLang = lord.getLocalObject("lastCodeLang", "-");
+            var sel = lord.queryOne(".postformMarkup > span > [name='codeLang']");
+            if (sel) {
+                lord.arr(sel.options).forEach(function(opt) {
+                    if (opt.value == lastLang)
+                        opt.selected = true;
+                });
+            }
+            lord.setPostformMarkupVisible(!lord.getLocalObject("hidePostformMarkup", false));
+            if (!lord.data("threadNumber")) {
+                lord.api("lastPostNumber", { boardName: currentBoardName }).then(function(result) {
+                    var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
+                    lastPostNumbers[currentBoardName] = result.lastPostNumber;
+                    lord.setLocalObject("lastPostNumbers", lastPostNumbers);
+                }).catch(lord.handleError);
+            }
+            lord.initFiles();
+            lord.scrollHandler();
         });
-        if (lord.getLocalObject("hideTripcodes", false)) {
-            lord.query(".tripcode").forEach(function(span) {
-                span.style.display = "none";
-            });
-        }
-        if (lord.getLocalObject("hideUserNames", false)) {
-            lord.query(".someName").forEach(function(span) {
-                span.style.display = "none";
-            });
-        }
     }).catch(lord.handleError);
-    var lastLang = lord.getLocalObject("lastCodeLang", "-");
-    var sel = lord.queryOne(".postformMarkup > span > [name='codeLang']");
-    if (sel) {
-        lord.arr(sel.options).forEach(function(opt) {
-            if (opt.value == lastLang)
-                opt.selected = true;
-        });
-    }
-    lord.setPostformMarkupVisible(!lord.getLocalObject("hidePostformMarkup", false));
-    if (!lord.data("threadNumber")) {
-        lord.api("lastPostNumber", { boardName: currentBoardName }).then(function(result) {
-            var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
-            lastPostNumbers[currentBoardName] = result.lastPostNumber;
-            lord.setLocalObject("lastPostNumbers", lastPostNumbers);
-        }).catch(lord.handleError);
-    }
-    lord.initFiles();
-    lord.scrollHandler();
 };
 
 lord.scrollHandler = function() {
