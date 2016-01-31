@@ -2971,7 +2971,8 @@ lord.initializeOnLoadBaseBoard = function() {
         var html = "";
         c.threads.forEach(function(thread) {
             c.model.thread = thread;
-            html += "<hr />";
+            if (c.threadOrBoard)
+                html += "<hr />";
             var templateName = c.threadOrBoard ? "thread" : (c.archive ? "archiveThread" : "catalogThread");
             html += lord.template(templateName, c.model, true);
         });
