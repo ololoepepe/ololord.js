@@ -1,3 +1,5 @@
+[done] Improve missing page/thread handling (use 404)
+
 * Add ability to paint on any board using canvas
 * Improve file previews
 * Add own player for media file previews
