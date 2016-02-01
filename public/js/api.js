@@ -1352,8 +1352,10 @@ lord.model = function(modelName, mustMerge) {
     }
 };
 
-lord.get = function(what) {
+lord.get = function(what, enableCache) {
     var xhr = new XMLHttpRequest();
+    if (!enableCache)
+        what += ((what.indexOf("?") >= 0) ? "&" : "?") + "_random_=" + Math.random();
     xhr.open("get", "/" + lordData.site.pathPrefix + what, false);
     xhr.send(null);
     if (xhr.status === 200)

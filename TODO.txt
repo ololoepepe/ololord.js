@@ -1,4 +1,5 @@
 [done] Improve missing page/thread handling (use 404)
+[done] Fix erroneous caching in some browsers
 
 * Add ability to paint on any board using canvas
 * Improve file previews
