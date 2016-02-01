@@ -410,10 +410,12 @@ var getRules = function(boardName) {
                     resolve(metadata);
                 });
             }).then(function(metadata) {
-                file.dimensions = {
-                    width: metadata.streams[0].width,
-                    height: metadata.streams[0].height
-                };
+                if (!isNaN(+metadata.streams[0].width) && !isNaN(+metadata.streams[0].height)) {
+                    file.dimensions = {
+                        width: metadata.streams[0].width,
+                        height: metadata.streams[0].height
+                    };
+                }
                 file.extraData.duration = durationToString(metadata.format.duration);
                 file.extraData.bitrate = Math.floor(+metadata.format.bit_rate / 1024);
                 file.thumbPath += ".png";

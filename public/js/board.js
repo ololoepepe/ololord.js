@@ -1887,8 +1887,8 @@ lord.showImage = function(a, mimeType, width, height) {
         href = window.location.protocol + "//" + window.location.host + "/" + lord.data("sitePathPrefix")
             + lord.data("boardName", a, true) + "/src/" + lord.data("fileName", a, true);
         mimeType = lord.data("mimeType", a, true);
-        width = lord.data("width", a, true);
-        height = lord.data("height", a, true);
+        width = +lord.data("width", a, true) || (lord.deviceType("mobile") ? 500 : 400);
+        height = +lord.data("height", a, true);
     }
     lord.img = lord.images[href];
     if (lord.img) {
@@ -1973,7 +1973,8 @@ lord.showImage = function(a, mimeType, width, height) {
     }
     lord.img.mimeType = mimeType;
     lord.img.width = width;
-    lord.img.height = height;
+    if (height)
+        lord.img.height = height;
     lord.imgWrapper.appendChild(lord.img);
     lord.setInitialScale(lord.imgWrapper, width, height);
     lord.resetScale(lord.imgWrapper);
