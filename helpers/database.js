@@ -1227,7 +1227,7 @@ var findPhrase = function(phrase, boardName) {
             var nextChain = [];
             for (var i = 0; i < results[ind].length; ++i) {
                 var post = results[ind][i];
-                if (post.boardName != lastPost.boardName || post.number != lastPost.number
+                if (post.boardName != lastPost.boardName || post.postNumber != lastPost.postNumber
                     || post.source != lastPost.source || post.position != (lastPost.position + 1)) {
                     continue;
                 }
