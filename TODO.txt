@@ -1,6 +1,7 @@
 [done] Improve missing page/thread handling (use 404)
 [done] Fix erroneous caching in some browsers
 [done] Handle video files with audio-stream only
+[done] Fix Coub video information retrieving
 
 * Add ability to paint on any board using canvas
 * Improve file previews
