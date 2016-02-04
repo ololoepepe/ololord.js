@@ -5,7 +5,7 @@ var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Path = require("path");
 var promisify = require("promisify-node");
-var Redis = require("then-redis");
+var Redis = require("crock-then-redis");
 var SQLite3 = require("sqlite3");
 var Util = require("util");
 
