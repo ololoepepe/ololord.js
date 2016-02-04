@@ -1463,8 +1463,12 @@ lord.fileAddedCommon = function(div, file) {
         lord.readAs(file).then(function(data) {
             return lord.removeExifData(data);
         }).then(function(pieces) {
-            if (pieces)
-                div.droppedFile = new Blob(pieces, {"type": "image/jpeg"});
+            if (pieces) {
+                if (typeof window.File == "function")
+                    div.droppedFile = new File(pieces, file.name, {"type": "image/jpeg"});
+                else
+                    div.droppedFile = new Blob(pieces, {"type": "image/jpeg"});
+            }
             if (lord.getLocalObject("showAttachedFilePreview", true))
                 preview();
         }).catch(lord.handleError);

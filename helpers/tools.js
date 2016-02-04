@@ -5,11 +5,11 @@ var ChildProcess = require("child_process");
 var Crypto = require("crypto");
 var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
-var Formidable = require("formidable");
 var FS = require("q-io/fs");
 var FSSync = require("fs-ext");
 var merge = require("merge");
 var mkpath = require("mkpath");
+var Multiparty = require("multiparty");
 var Path = require("path");
 var promisify = require("promisify-node");
 var Util = require("util");
@@ -32,7 +32,7 @@ var rootZones = require("../misc/root-zones.json").reduce(function(acc, zone) {
     return acc;
 }, {});
 
-mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/formidable");
+mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/form");
 
 var ExternalLinkRegexpPattern = (function() {
     var schema = "https?:\\/\\/|ftp:\\/\\/";
@@ -61,7 +61,7 @@ var forIn = function(obj, f) {
 
 module.exports.forIn = forIn;
 
-module.exports.mapIn = function(obj, f) {
+var mapIn = function(obj, f) {
     if (!obj || typeof f != "function")
         return;
     var arr = [];
@@ -71,6 +71,8 @@ module.exports.mapIn = function(obj, f) {
     }
     return arr;
 };
+
+module.exports.mapIn = mapIn;
 
 module.exports.filterIn = function(obj, f) {
     if (!obj || typeof f != "function")
@@ -86,15 +88,15 @@ module.exports.filterIn = function(obj, f) {
     return nobj;
 };
 
-module.exports.toArray = function(obj) {
+var toArray = function(obj) {
     var arr = [];
-    var i = 0;
     forIn(obj, function(val) {
-        arr[i] = val;
-        ++i;
+        arr.push(val);
     });
     return arr;
 };
+
+module.exports.toArray = toArray;
 
 module.exports.extend = function(Child, Parent) {
     var F = function() {};
@@ -421,20 +423,28 @@ module.exports.password = function(pwd) {
 }
 
 module.exports.parseForm = function(req) {
-    var form = new Formidable.IncomingForm();
-    form.uploadDir = config("system.tmpPath", __dirname + "/../tmp") + "/formidable";
-    form.hash = "sha1";
+    var form = new Multiparty.Form();
+    form.uploadDir = config("system.tmpPath", __dirname + "/../tmp") + "/form";
+    form.autoFields = true;
+    form.autoFiles = true;
     form.maxFieldsSize = 5 * 1024 * 1024;
     return new Promise(function(resolve, reject) {
         form.parse(req, function(err, fields, files) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve({
-                    fields: fields,
-                    files: files
-                });
-            }
+            if (err)
+                return reject(err);
+            forIn(fields, function(val, key) {
+                if (1 == val.length)
+                    fields[key] = val[0];
+            });
+            resolve({
+                fields: fields,
+                files: toArray(files).reduce(function(acc, files) {
+                    return acc.concat(files);
+                }, []).map(function(file) {
+                    file.name = file.originalFilename;
+                    return file;
+                })
+            });
         });
     });
 };
