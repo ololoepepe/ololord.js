@@ -3,6 +3,7 @@
 [done] Handle video files with audio-stream only
 [done] Fix Coub video information retrieving
 [done] Use Multiparty instead of Formidable for form parsing
+[done] Implement uptime command; add uptime information to base data
 
 * Add ability to paint on any board using canvas
 * Improve file previews

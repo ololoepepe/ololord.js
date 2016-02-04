@@ -1,4 +1,3 @@
-//var cluster = require("cluster");
 var Crypto = require("crypto");
 var ReadLine = require("readline");
 var ReadLineSync = require("readline-sync");
@@ -61,6 +60,7 @@ _installHandler("help", function() {
     console.log("start - Opens workers for connections if closed");
     console.log("regenerate - Regenerates the cache (workers are closed and then opened again)");
     console.log("rebuild-search-index - Rebuilds post search index");
+    console.log("uptime - Show server uptime");
     return Promise.resolve();
 });
 
@@ -192,6 +192,20 @@ _installHandler("rebuild-search-index", function(args) {
             return Promise.resolve();
         });
     });
+});
+
+_installHandler("uptime", function() {
+    var format = function(seconds) {
+        var pad = function(s) {
+            return (s < 10 ? "0" : "") + s;
+        }
+        var days = Math.floor(seconds / (24 * 60 * 60));
+        var hours = Math.floor(seconds % (24 * 60 * 60) / (60 * 60));
+        var minutes = Math.floor(seconds % (60 * 60) / 60);
+        var seconds = Math.floor(seconds % 60);
+        return days + " days " + pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
+    }
+    return Promise.resolve(format(process.uptime()));
 });
 
 var init = function() {

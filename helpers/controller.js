@@ -183,6 +183,9 @@ controller.checkBan = function(req, res, boardNames, write) {
 
 controller.baseModel = function(req) {
     return {
+        server: {
+            uptime: process.uptime()
+        },
         site: {
             protocol: config("site.protocol", "http"),
             domain: config("site.domain", "localhost:8080"),
