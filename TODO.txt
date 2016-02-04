@@ -4,13 +4,14 @@
 [done] Fix Coub video information retrieving
 [done] Use Multiparty instead of Formidable for form parsing
 [done] Implement uptime command; add uptime information to base data
+[done] Use NPM crock-then-redis package instead of then-redis package
 
 * Add ability to paint on any board using canvas
 * Improve file previews
 * Add own player for media file previews
 * Add playlist to every page
 * Optimize spells
-* Use document.write for more efficient rendering
+* Render board/thread/catalog on the server side
 * Merge thread.js with board.js (optimize lord.downloadThread in threads)
 * Treat manually and auto-hidden posts differently
 * Show auto-hide reason
@@ -23,8 +24,6 @@
 * Implement different access levels for different boards
 * Use web interface for user access level management and registration
 * Optimize cache renewal when modifying posts with large amount of post references
-* Use NPM crock-then-redis package instead of then-redis package
-* Use NPM diff package for creating/applying patches
 * Use Elasticsearch or other search engine [not sure if needed]
 * Write detailed DB schema documentation
 * Write client scripts API documentation
