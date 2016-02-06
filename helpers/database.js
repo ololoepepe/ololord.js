@@ -2025,7 +2025,7 @@ var updatePostBanInfo = function(boardName, ban) {
     return db.hget("posts", boardName + ":" + ban.postNumber).then(function(post) {
         if (!post)
             return Promise.resolve();
-        if (Global.Generate)
+        if (Global.generate)
             return Global.generate(boardName, JSON.parse(post).threadNumber, ban.postNumber, "edit");
         else
             return BoardModel.scheduleGenerate(boardName, JSON.parse(post).threadNumber, ban.postNumber, "edit");
