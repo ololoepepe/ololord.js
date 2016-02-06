@@ -1726,7 +1726,7 @@ module.exports.deletePost = function(req, res, fields) {
             p = Tools.removeFile(`${__dirname}/../public/${board.name}/arch/${postNumber}.json`);
         } else {
             p = c.isThread ? Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "delete")
-                : Promise.resolve();
+                : Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
         }
         if (c.isThread) {
             if (c.archived)

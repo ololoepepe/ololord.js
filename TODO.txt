@@ -6,6 +6,7 @@
 [done] Implement uptime command; add uptime information to base data
 [done] Use NPM crock-then-redis package instead of then-redis package
 [done] Fix regeneration on user ban
+[done] Fix regeneration on post deletion
 
 * Add ability to paint on any board using canvas
 * Improve file previews
