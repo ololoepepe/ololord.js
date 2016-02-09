@@ -12,6 +12,13 @@ Actual file name must be config-dev.json.
             "backups": 100,
             "middleware": {
                 "before": "",
+                "exclude": [
+                    { "string": "/action/deletePost" },
+                    {
+                        "regexp": "^/action/create[a-z]+$",
+                        "flags": "i"
+                    }
+                ],
                 "verbosity": "ip"
             }
         },

@@ -423,6 +423,12 @@ module.exports.password = function(pwd) {
 }
 
 module.exports.parseForm = function(req) {
+    if (req.formFields) {
+        return Promise.resolve({
+            fields: req.formFields,
+            files: req.formFiles || []
+        });
+    }
     var form = new Multiparty.Form();
     form.uploadDir = config("system.tmpPath", __dirname + "/../tmp") + "/form";
     form.autoFields = true;

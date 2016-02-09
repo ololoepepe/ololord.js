@@ -14,6 +14,13 @@ Example:
             "backups": 100,
             "middleware": {
                 "before": "ddos",
+                "exclude": [
+                    { "string": "/action/deletePost" },
+                    {
+                        "regexp": "^/action/create[a-z]+$",
+                        "flags": "i"
+                    }
+                ],
                 "verbosity": "all"
             }
         },
