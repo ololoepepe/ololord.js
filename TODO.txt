@@ -9,6 +9,8 @@
 [done] Fix regeneration on post deletion
 [done] Log form fields of POST requests
 [done] Merge thread.js with board.js
+[done] Select files without appending input to DOM
+[done] Simplify file attaching code
 
 * Add ability to paint on any board using canvas
 * Improve file previews
@@ -20,8 +22,6 @@
 * Show auto-hide reason
 * Use common CSS file (specify style-specific stuff only in separate files)
 * Improve jQuery UI styles
-* Select files without appending input to DOM
-* Simplify file attaching code
 * Add post preview disappearance delay
 * Add some API to client scripts and simplify existing API
 * Implement different access levels for different boards

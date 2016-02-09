@@ -777,6 +777,7 @@ span.newPostCount {
 .postformFile {
     border: 1px dashed #777777;
     text-align: justify;
+    cursor: pointer;
 }
 
 .postformFile.drag {

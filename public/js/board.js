@@ -495,20 +495,16 @@ lord.updatePost = function(postNumber) {
 };
 
 lord.clearFileInput = function(div) {
-    var preview = lord.queryOne("img", div);
-    if (preview && div == preview.parentNode)
-        preview.src = "/" + lord.data("sitePathPrefix") + "img/addfile.png";
-    var span = lord.queryOne("span", div);
-    if (span && div == span.parentNode) {
-        while (span.firstChild)
-            span.removeChild(span.firstChild);
-    }
-    if (div.parentNode)
-        lord.removeFileHash(div);
-    div.fileHash = null;
-    if ("droppedFile" in div)
-        delete div.droppedFile;
-    if ("fileUrl" in div)
+    if (!div)
+        return;
+    lord.queryOne("img.postformFilePreview", div).src = "/" + lord.data("sitePathPrefix") + "img/addfile.png";
+    lord.removeChildren(lord.queryOne("span.postformFileText", div));
+    lord.removeFileHash(div);
+    if (div.hasOwnProperty("fileInput"))
+        delete div.fileInput;
+    if (div.hasOwnProperty("file"))
+        delete div.file;
+    if (div.hasOwnProperty("fileUrl"))
         delete div.fileUrl;
 };
 
@@ -533,11 +529,12 @@ lord.readableSize = function(sz) {
 };
 
 lord.getFileHashes = function(div) {
-    var parent = div.parentNode.parentNode;
-    var fhs = lord.nameOne("fileHashes", parent);
-    if (fhs)
-        return fhs;
-    return lord.nameOne("fileHashes", parent.parentNode.parentNode.parentNode);
+    if (!div)
+        return;
+    var form = $(div).closest("form")[0];
+    if (!form)
+        return;
+    return lord.nameOne("fileHashes", form);
 };
 
 lord.hideImage = function() {
@@ -1052,10 +1049,10 @@ lord.addFiles = function(el) {
         var form = lord.queryOne("form", c.div);
         var formData = new FormData(form);
         lord.query(".postformFile", form).forEach(function(div) {
-            if (div.droppedFile)
-                formData.append(div.droppedFileName || "file", div.droppedFile);
+            if (div.file)
+                formData.append(div.fileName || "file", div.file);
             else if (div.fileUrl)
-                formData.append(div.droppedFileName, div.fileUrl);
+                formData.append(div.fileName, div.fileUrl);
         });
         return lord.post(form.action, formData, c);
     }).then(function(result) {
@@ -1366,17 +1363,17 @@ lord.fileDragLeave = function(e, div) {
 };
 
 lord.removeFileHash = function(div) {
-    if (!div)
-        return;
-    if (!div.fileHash)
+    if (!div || !div.fileHash)
         return;
     var fileHashes = lord.getFileHashes(div);
-    var val = fileHashes.value.replace("," + div.fileHash, "");
-    if (val === fileHashes.value)
-        val = fileHashes.value.replace(div.fileHash + ",", "");
-    if (val === fileHashes.value)
-        val = fileHashes.value.replace(div.fileHash, "");
-    fileHashes.value = val;
+    if (!fileHashes)
+        return;
+    var list = (fileHashes.value || "").split(",");
+    var ind = list.indexOf(div.fileHash);
+    if (ind >= 0)
+        list.splice(ind, 1);
+    fileHashes.value = list.join(",");
+    delete div.fileHash;
 };
 
 lord.removeExifData = function(data) {
@@ -1421,25 +1418,22 @@ lord.removeExifData = function(data) {
     });
 };
 
-lord.fileAddedCommon = function(div, file) {
-    if (!div || (!file && !div.fileUrl))
-        return;
-    var inp = lord.queryOne("input", div);
-    if (!inp)
+lord.fileAddedCommon = function(div) {
+    if (!div || (!div.file && !div.fileUrl))
         return;
     var warn = function() {
         var txt = lord.text("fileTooLargeWarningText") + " (>" + lord.readableSize(+lord.data("maxFileSize")) + ")";
         lord.showPopup(txt, {type: "warning"});
     };
-    var fileName = file ? file.name : div.fileUrl.split("/").pop();
+    var fileName = div.file ? div.file.name : div.fileUrl.split("/").pop();
     var fileNameFull = fileName;
     fileName = (fileName || "");
     if (fileName.length > 30)
         fileName = fileName.substr(0, 27) + "...";
     var p;
-    if (file) {
-        p = Promise.resolve("(" + lord.readableSize(file.size) + ")");
-        if (+file.size > +lord.data("maxFileSize"))
+    if (div.file) {
+        p = Promise.resolve("(" + lord.readableSize(div.file.size) + ")");
+        if (+div.file.size > +lord.data("maxFileSize"))
             warn();
     } else if (div.fileUrl.replace("vk://", "") != div.fileUrl) {
         p = Promise.resolve(fileName + " [VK]");
@@ -1463,23 +1457,21 @@ lord.fileAddedCommon = function(div, file) {
         lord.queryOne(".postformFileText", div).appendChild(lord.node("text", txt));
     }).catch(lord.handleError);
     var _uuid = uuid.v1();
-    lord.queryOne("input", div).name = "file_" + _uuid;
-    div.droppedFileName = "file_" + (div.fileUrl ? "url_" : "") + _uuid;
+    div.fileName = "file_" + (div.fileUrl ? "url_" : "") + _uuid;
     var ratingSelect = lord.queryOne("[name='ratingSelectContainer'] > select", div);
     if (ratingSelect)
         ratingSelect.name = "file_" + _uuid + "_rating";
     lord.removeFileHash(div);
     var prefix = lord.data("sitePathPrefix");
-    if (file && lord.getLocalObject("checkFileExistence", true)) {
+    if (div.file && lord.getLocalObject("checkFileExistence", true)) {
         var c = {};
-        lord.readAs(file).then(function(data) {
+        lord.readAs(div.file).then(function(data) {
             c.fileHash = sha1(data);
             return lord.api("fileExistence", { fileHash: c.fileHash });
         }).then(function(exists) {
             if (!exists)
                 return;
-            lord.queryOne("input", div).name = "file_" + c.fileHash;
-            div.droppedFileName = "file_" + (div.fileUrl ? "url_" : "") + c.fileHash;
+            div.fileName = "file_" + (div.fileUrl ? "url_" : "") + c.fileHash;
             var ratingSelect = lord.queryOne("[name='ratingSelectContainer'] > select", div);
             if (ratingSelect)
                 ratingSelect.name = "file_" + c.fileHash + "_rating";
@@ -1492,19 +1484,16 @@ lord.fileAddedCommon = function(div, file) {
             var fileHashes = lord.getFileHashes(div);
             if (fileHashes.value.indexOf(c.fileHash) < 0)
                 fileHashes.value = fileHashes.value + (fileHashes.value.length > 0 ? "," : "") + c.fileHash;
-            var f = inp.onchange;
-            delete inp.onchange;
-            inp.value = "";
-            inp.onchange = f;
-            div.fileHash = c.fileHash;
-            if (div.droppedFile)
-                delete div.droppedFile;
+            if (div.hasOwnProperty("fileInput"))
+                delete div.fileInput;
+            if (div.hasOwnProperty("file"))
+                delete div.file;
         }).catch(lord.handleError);
     }
     var preview = function() {
-        if (!file)
+        if (!div.file)
             return;
-        lord.readAs(file, "DataURL").then(function(url) {
+        lord.readAs(div.file, "DataURL").then(function(url) {
             var img = lord.queryOne("img", div);
             img.src = url;
             if ("neutron" == lord.settings().style.name)
@@ -1526,24 +1515,22 @@ lord.fileAddedCommon = function(div, file) {
             lord.queryOne("img", div).src = "/" + prefix + "img/file.png";
         }
     }
-    if (file && fileNameFull.match(/\.(jpe?g)$/i) && lord.getLocalObject("stripExifFromJpeg", true)) {
-        lord.readAs(file).then(function(data) {
+    if (div.file && fileNameFull.match(/\.(jpe?g)$/i) && lord.getLocalObject("stripExifFromJpeg", true)) {
+        lord.readAs(div.file).then(function(data) {
             return lord.removeExifData(data);
         }).then(function(pieces) {
             if (pieces) {
                 if (typeof window.File == "function")
-                    div.droppedFile = new File(pieces, file.name, {"type": "image/jpeg"});
+                    div.file = new File(pieces, div.file.name, {"type": "image/jpeg"});
                 else
-                    div.droppedFile = new Blob(pieces, {"type": "image/jpeg"});
+                    div.file = new Blob(pieces, {"type": "image/jpeg"});
             }
             if (lord.getLocalObject("showAttachedFilePreview", true))
                 preview();
         }).catch(lord.handleError);
     }
-    var f = inp.onchange;
-    delete inp.onchange;
-    inp.value = "";
-    inp.onchange = f;
+    if (div.hasOwnProperty("fileInput"))
+        delete div.fileInput;
     lord.queryOne("a.postformFileRemoveButton", div).style.display = "inline";
     var maxCount = +lord.data("maxFileCount");
     maxCount -= +lord.data("fileCount", div, true) || 0;
@@ -1554,79 +1541,53 @@ lord.fileAddedCommon = function(div, file) {
         return;
     for (var i = 0; i < parent.children.length; ++i) {
         var c = parent.children[i];
-        if (!c.fileHash && lord.queryOne("input", c).value === "" && !c.droppedFile && !c.fileUrl)
+        if (!c.fileHash && !c.file && !c.fileUrl)
             return;
         lord.queryOne("a.postformFileRemoveButton", c).style.display = "inline";
     }
-    (function(div) {
-        div = div.cloneNode(true);
-        lord.queryOne("a.postformFileRemoveButton", div).style.display = "none";
-        div.innerHTML = div.innerHTML; //NOTE: Workaround since we can't clear it other way
-        lord.clearFileInput(div);
-        parent.appendChild(div);
-    })(div);
+    var ndiv = div.cloneNode(true);
+    lord.queryOne("a.postformFileRemoveButton", ndiv).style.display = "none";
+    lord.clearFileInput(ndiv);
+    parent.appendChild(ndiv);
 };
 
 lord.fileDrop = function(e, div) {
     e.preventDefault();
     lord.removeClass(div, "drag");
-    var inp = lord.queryOne("input", div);
-    inp.parentNode.replaceChild(inp.cloneNode(true), inp);
     lord.clearFileInput(div);
     var dt = e.dataTransfer;
     if (lord.in(dt.types, "text/uri-list")) {
-        if (div.droppedFile)
-            delete div.droppedFile;
         div.fileUrl = dt.getData("text/uri-list");
         lord.fileAddedCommon(div);
     } else if (dt.files) {
         var file = e.dataTransfer.files[0];
-        div.droppedFile = file;
-        lord.fileAddedCommon(div, file);
+        div.file = file;
+        lord.fileAddedCommon(div);
     }
     return false;
 };
 
-lord.fileSelected = function(current) {
-    if (!current)
-        return;
-    var div = current.parentNode;
-    if (div.droppedFile)
-        delete div.droppedFile;
-    if (current.value == "")
-        return lord.removeFile(current);
-    var file = current.files[0];
-    var inp = lord.queryOne("input", div);
-    inp.parentNode.replaceChild(inp.cloneNode(true), inp);
+lord.fileSelected = function(div) {
+    if (!div.fileInput.value)
+        return lord.removeFile(div);
+    var file = div.fileInput.files[0];
     lord.clearFileInput(div);
-    div.droppedFile = file;
-    lord.fileAddedCommon(div, file);
+    div.file = file;
+    lord.fileAddedCommon(div);
 };
 
 lord.attachFileByLink = function(a) {
-    if (!a)
-        return;
     var div = a.parentNode;
-    if (!div)
-        return;
     var url = prompt(lord.text("linkLabelText"), div.fileUrl);
     if (null === url)
         return;
-    if (div.droppedFile)
-        delete div.droppedFile;
-    var inp = lord.queryOne("input", div);
-    inp.parentNode.replaceChild(inp.cloneNode(true), inp);
     lord.clearFileInput(div);
     div.fileUrl = url;
     lord.fileAddedCommon(div);
 };
 
 lord.attachFileByVk = function(a) {
-    if (!a)
-        return;
     var div = a.parentNode;
-    if (!div)
-        return;
     VK.Auth.getLoginStatus(function(response) {
         if (!response.session || !response.session.mid)
             return;
@@ -1651,10 +1612,6 @@ lord.attachFileByVk = function(a) {
                         return;
                     title = track.title;
                 });
-                if (div.droppedFile)
-                    delete div.droppedFile;
-                var inp = lord.queryOne("input", div);
-                inp.parentNode.replaceChild(inp.cloneNode(true), inp);
                 lord.clearFileInput(div);
                 div.fileUrl = "vk://" + uid + "_" + trackId + "/" + (title || "unknown");
                 lord.fileAddedCommon(div);
@@ -1663,56 +1620,37 @@ lord.attachFileByVk = function(a) {
     });
 };
 
-lord.removeFile = function(current) {
-    if (!current)
+lord.removeFile = function(div) {
+    if (!div)
         return;
-    var div = current.parentNode;
-    lord.removeFileHash(div);
+    if ("DIV" != div.tagName)
+        div = div.parentNode;
     var parent = div.parentNode;
-    parent.removeChild(div);
-    lord.clearFileInput(div);
-    if (div.droppedFile)
-        delete div.droppedFile;
-    if (parent.children.length > 0) {
-        for (var i = 0; i < parent.children.length; ++i) {
-            var c = parent.children[i];
-            if (!c.fileHash && lord.queryOne("input", c).value === "" && !c.droppedFile) {
-                if (parent.children.length > 0)
-                    return;
-                else
-                    lord.queryOne("a.postformFileRemoveButton", c).style.display = "none";
-            }
-        }
-        var maxCount = +lord.data("maxFileCount");
-        maxCount -= +lord.data("fileCount", div, true) || 0;
-        if (maxCount <= 0)
-            return;
-        if (parent.children.length >= maxCount)
-            return;
-        div = div.cloneNode(true);
+    if (parent.children.length > 1) {
+        lord.removeFileHash(div);
+        parent.removeChild(div);
+    } else {
+        lord.clearFileInput(div);
         lord.queryOne("a.postformFileRemoveButton", div).style.display = "none";
-        div.innerHTML = div.innerHTML; //NOTE: Workaround since we can't clear it other way
-        parent.appendChild(div);
-    }
-    if (parent.children.length < 1) {
-        lord.queryOne("a.postformFileRemoveButton", div).style.display = "none";
-        div.innerHTML = div.innerHTML; //NOTE: Workaround since we can't clear it other way
-        parent.appendChild(div);
     }
 };
 
 lord.browseFile = function(e, div) {
-    var inp = lord.queryOne("input", div);
-    if (!inp)
-        return;
-    var e = window.event || e;
+    if (!div.fileInput) {
+        div.fileInput = lord.node("input");
+        div.fileInput.type = "file";
+        div.accept = lord.model("board/" + lord.data("boardName")).board.supportedFileTypes.join(",");
+        div.fileInput.onchange = function() {
+            return lord.fileSelected(div);
+        };
+    }
     var a = e.target;
-    while (!!a) {
+    while (a) {
         if (a.tagName === "A" || a.tagName === "SELECT" || a.tagName === "OPTION")
             return;
         a = a.parentNode;
     }
-    inp.click();
+    div.fileInput.click();
 };
 
 lord.setPostformRulesVisible = function(visible) {
@@ -2182,10 +2120,10 @@ lord.submitted = function(event, form) {
     btn.value = "0%";
     var formData = new FormData(form);
     lord.query(".postformFile", form).forEach(function(div) {
-        if (div.droppedFile)
-            formData.append(div.droppedFileName || "file", div.droppedFile);
+        if (div.file)
+            formData.append(div.fileName || "file", div.file);
         else if (div.fileUrl)
-            formData.append(div.droppedFileName, div.fileUrl);
+            formData.append(div.fileName, div.fileUrl);
     });
     var c = {};
     var resetButton = function() {
