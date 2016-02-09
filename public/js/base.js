@@ -977,7 +977,7 @@ lord.setTooltips = function(parent) {
     });
 };
 
-lord.initializeOnLoadSettings = function() {
+lord.initializeOnLoadBase = function() {
     var settings = lord.settings();
     var model = lord.model(["base", "tr", "boards"], true);
     if ("desktop" == model.deviceType) {
@@ -1116,7 +1116,7 @@ lord.initializeOnLoadSettings = function() {
 
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
-    lord.initializeOnLoadSettings();
+    lord.initializeOnLoadBase();
     lord.checkFavoriteThreads();
 }, false);
 

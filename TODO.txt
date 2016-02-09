@@ -8,6 +8,7 @@
 [done] Fix regeneration on user ban
 [done] Fix regeneration on post deletion
 [done] Log form fields of POST requests
+[done] Merge thread.js with board.js
 
 * Add ability to paint on any board using canvas
 * Improve file previews
@@ -15,7 +16,6 @@
 * Add playlist to every page
 * Optimize spells
 * Render board/thread/catalog on the server side
-* Merge thread.js with board.js (optimize lord.downloadThread in threads)
 * Treat manually and auto-hidden posts differently
 * Show auto-hide reason
 * Use common CSS file (specify style-specific stuff only in separate files)

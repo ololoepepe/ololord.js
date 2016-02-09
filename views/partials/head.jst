@@ -34,16 +34,13 @@
         {{? it.site.vkontakte.integrationEnabled }}
             <script type="text/javascript" src="//vk.com/js/api/openapi.js"></script>
         {{?}}
-        {{? it.includeBoardScripts}}
+        {{? it.isBoardPage}}
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/sha1.min.js"></script>
+            <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery.knob.min.js"></script>
             {{? it.site.twitter.integrationEnabled }}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/twitter.js"></script>
             {{?}}
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/board.js"></script>
-            {{? it.includeThreadScripts}}
-                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery.knob.min.js"></script>
-                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/thread.js"></script>
-            {{?}}
         {{?}}
         {{? it.extraScripts}}
             {{~it.extraScripts :script}}

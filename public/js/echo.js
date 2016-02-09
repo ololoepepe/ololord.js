@@ -1,5 +1,5 @@
 lord.customPostFormField[30] = function(it) {
-    if (it.includeThreadScripts)
+    if (it.isThreadPage)
         return "";
     return lord.template("echoPostFormField", it, true);
 };

@@ -21,7 +21,7 @@ var renderPage = function(board, page) {
     }).then(function(model) {
         c.model = model;
         c.model.title = board.title;
-        c.model.includeBoardScripts = true;
+        c.model.isBoardPage = true;
         c.model.board = controller.boardModel(board).board;
         c.model.extraScripts = board.extraScripts();
         c.model.tr = controller.translationsModel();
@@ -49,7 +49,7 @@ router.get("/:boardName/catalog.html", function(req, res) {
         return BoardModel.getCatalogPage(board, sortMode || "date").then(function(model) {
             c.model = model;
             c.model.title = board.title;
-            c.model.includeBoardScripts = true;
+            c.model.isBoardPage = true;
             c.model.board = controller.boardModel(board).board;
             c.model.sortMode = sortMode || "date";
             c.model.tr = controller.translationsModel();
@@ -91,7 +91,7 @@ router.get("/:boardName/archive.html", function(req, res) {
         return BoardModel.getArchivePage(board).then(function(model) {
             c.model = model;
             c.model.title = board.title;
-            c.model.includeBoardScripts = true;
+            c.model.isBoardPage = true;
             c.model.board = controller.boardModel(board).board;
             c.model.tr = controller.translationsModel();
             return controller("archivePage", c.model);
@@ -179,8 +179,8 @@ router.get("/:boardName/res/:threadNumber.html", function(req, res) {
         }).then(function(model) {
             c.model = model;
             c.model.title = board.title + " — " + c.model.thread.number;
-            c.model.includeBoardScripts = true;
-            c.model.includeThreadScripts = true;
+            c.model.isBoardPage = true;
+            c.model.isThreadPage = true;
             c.model.board = controller.boardModel(board).board;
             c.model.extraScripts = board.extraScripts();
             c.model.tr = controller.translationsModel();
@@ -230,8 +230,8 @@ router.get("/:boardName/arch/:threadNumber.html", function(req, res) {
         }).then(function(model) {
             c.model = model;
             c.model.title = board.title + " — " + c.model.thread.number;
-            c.model.includeBoardScripts = true;
-            c.model.includeThreadScripts = true;
+            c.model.isBoardPage = true;
+            c.model.isThreadPage = true;
             c.model.board = controller.boardModel(board).board;
             c.model.extraScripts = board.extraScripts();
             c.model.tr = controller.translationsModel();
