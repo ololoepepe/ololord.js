@@ -14,7 +14,6 @@ var Cache = require("./cache");
 var config = require("./config");
 var Global = require("./global");
 
-var cachedHtml = {};
 var partials = {};
 var templates = {};
 var publicPartials;
@@ -810,47 +809,6 @@ var cachePath = function() {
     });
     var path = args.join("-");
     return config("system.tmpPath", __dirname + "/../tmp") + "/cache-html" + (path ? ("/" + path + ".html") : "");
-};
-
-controller.html = function(f, ifModifiedSince) {
-    var args = Array.prototype.slice.call(arguments, 2);
-    var path = cachePath(args);
-    var key = args.join(":");
-    if (cachedHtml.hasOwnProperty(key))
-        return Tools.readFile(path, ifModifiedSince);
-    var c = {};
-    return f().then(function(data) {
-        c.data = data;
-        if (cachedHtml.hasOwnProperty(key))
-            return Promise.resolve();
-        return Tools.writeFile(path, c.data);
-    }).then(function() {
-        c.lastModified = Tools.now();
-        cachedHtml[key] = {};
-        return Global.addToCached(args);
-    }).then(function() {
-        return Promise.resolve({
-            data: c.data,
-            lastModified: c.lastModified
-        });
-    });
-};
-
-controller.addToCached = function(keyParts) {
-    var key = keyParts.join(":");
-    if (!cachedHtml.hasOwnProperty(key))
-        cachedHtml[key] = {};
-};
-
-controller.removeFromCached = function(keyParts, removeFromDisk) {
-    var key = keyParts.join(":");
-    if (!cachedHtml.hasOwnProperty(key))
-        return Promise.resolve();
-    delete cachedHtml[key];
-    if (!removeFromDisk)
-        return Promise.resolve();
-    var path = cachePath(keyParts);
-    return Tools.removeFile(path);
 };
 
 controller.sendCachedHTML = function(req, res, id) {

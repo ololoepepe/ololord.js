@@ -21,6 +21,7 @@
 * Optimize spells
 * Render board/thread/catalog on the server side
 * Improve posting speed retrieving
+* Fix referenced/referring posts when moving a thread
 * Treat manually and auto-hidden posts differently
 * Show auto-hide reason
 * Use common CSS file (specify style-specific stuff only in separate files)

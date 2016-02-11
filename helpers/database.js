@@ -1730,17 +1730,19 @@ module.exports.deletePost = function(req, res, fields) {
         return (c.isThread) ? removeThread(board.name, postNumber, c.archived) : removePost(board.name, postNumber);
     }).then(function() {
         var p;
-        if (c.archived) {
+        if (c.isThread && c.archived) {
             p = Tools.removeFile(`${__dirname}/../public/${board.name}/arch/${postNumber}.json`);
-        } else {
+        } else if (!c.archived) {
             p = c.isThread ? Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "delete")
                 : Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
         }
-        if (c.isThread) {
-            if (c.archived)
-                Global.removeFromCached([c.post.boardName, c.post.threadNumber, "archived"]);
-            else
-                Global.removeFromCached([c.post.boardName, c.post.threadNumber]);
+        if (c.isThread && !c.archived) {
+            var threadId = `thread-${c.post.boardName}-${c.post.threadNumber}`;
+            Cache.removeHTML(threadId).then(function() {
+                return Cache.removeJSON(threadId);
+            }).catch(function(err) {
+                Global.error(err);
+            });
         }
         return p;
     }).then(function() {
@@ -1871,21 +1873,16 @@ module.exports.moveThread = function(req, fields) {
         });
         return Promise.all(promises);
     }).then(function() {
-        var promises = c.posts.map(function(post) {
-            return rerenderPost(targetBoard.name, post.number, true);
-        });
-        return Promise.all(promises);
-    }).then(function() {
         return db.hset("threads:" + targetBoard.name, c.thread.number, JSON.stringify(c.thread));
     }).then(function() {
         return db.hset("threadUpdateTimes:" + targetBoard.name, c.thread.number, Tools.now().toISOString());
     }).then(function() {
-        return db.sadd("threadPostNumbers:" + targetBoard.name + ":" + c.thread.number, Tools.toArray(c.postNumberMap));
+        return db.sadd("threadPostNumbers:" + targetBoard.name + ":" + c.thread.number,
+            Tools.toArray(c.postNumberMap));
     }).then(function() {
         return removeThread(sourceBoard.name, threadNumber, false, true);
     }).then(function() {
-        Global.generate(sourceBoard.name, threadNumber, threadNumber, "delete");
-        Global.removeFromCached([sourceBoard.name, threadNumber]);
+        Global.generate(sourceBoard.name, threadNumber, threadNumber, "delete")
         return Global.generate(targetBoard.name, c.thread.number, c.thread.number, "create");
     }).then(function() {
         return {

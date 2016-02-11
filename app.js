@@ -88,12 +88,6 @@ var spawnCluster = function() {
                         });
                     });
                 });
-                Global.IPC.installHandler("addToCached", function(data) {
-                    controller.addToCached(data);
-                });
-                Global.IPC.installHandler("removeFromCached", function(data) {
-                    return controller.removeFromCached(data);
-                });
                 Global.IPC.installHandler("doGenerate", function(data) {
                     var f = BoardModel[`do_${data.funcName}`];
                     if (typeof f != "function")
@@ -164,15 +158,6 @@ if (cluster.isMaster) {
         Global.IPC.installHandler("generate", function(data) {
             return BoardModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);
         });
-        Global.IPC.installHandler("addToCached", function(data) {
-            controller.addToCached(data);
-            return Global.IPC.send("addToCached", data);
-        });
-        Global.IPC.installHandler("removeFromCached", function(data) {
-            return Global.IPC.send("removeFromCached", data).then(function() {
-                return controller.removeFromCached(data, true);
-            });
-        });
     }).catch(function(err) {
         Global.error(err.stack || err);
         process.exit(1);
@@ -185,17 +170,6 @@ if (cluster.isMaster) {
             postNumber: postNumber,
             action: action
         }).catch(function(err) {
-            Global.error(err.stack || err);
-        });
-    };
-    Global.addToCached = function(keyParts) {
-        controller.addToCached(keyParts);
-        return Global.IPC.send("addToCached", keyParts).catch(function(err) {
-            Global.error(err.stack || err);
-        });
-    };
-    Global.removeFromCached = function(keyParts) {
-        return Global.IPC.send("removeFromCached", ["thread"].concat(keyParts)).catch(function(err) {
             Global.error(err.stack || err);
         });
     };
