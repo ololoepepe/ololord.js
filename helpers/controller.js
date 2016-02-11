@@ -140,20 +140,7 @@ controller.error = function(res, error, ajax) {
 };
 
 controller.notFound = function(res) {
-    var f = function() {
-        var model = {};
-        model.title = Tools.translate("Error 404", "pageTitle");
-        model.notFoundMessage = Tools.translate("Page or file not found", "notFoundMessage");
-        model.extraScripts = [ { fileName: "not-found.js" } ];
-        var path = __dirname + "/../public/img/404";
-        return FS.list(path).then(function(fileNames) {
-            model.notFoundImageFileNames = fileNames.filter(function(fileName) {
-                return fileName != ".gitignore";
-            });
-            return controller("notFound", model);
-        });
-    };
-    controller.html(f.bind(null), null, "notFound").then(function(data) {
+    Cache.getHTML("notFound").then(function(data) {
         res.status(404).send(data.data);
     }).catch(function(err) {
         controller.error(res, err);
@@ -890,15 +877,58 @@ controller.sendCachedJSON = function(req, res, id) {
         res.send(result.data);
     }).catch(function(err) {
         if ("ENOENT" == err.code)
+            controller.notFound(res, true);
+        else
+            controller.error(res, err, true);
+    });
+};
+
+controller.sendCachedRSS = function(req, res, id) {
+    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
+    return Cache.getRSS(id, ifModifiedSince).then(function(result) {
+        res.setHeader("Last-Modified", result.lastModified.toUTCString());
+        if (+ifModifiedSince >= +result.lastModified)
+            res.status(304);
+        res.send(result.data);
+    }).catch(function(err) {
+        if ("ENOENT" == err.code)
             controller.notFound(res);
         else
             controller.error(res, err);
     });
 };
 
+controller.regenerate = function() {
+    return Cache.cleanup().then(function() {
+        return Tools.series(["JSON", "HTML"], function(type) {
+            console.log(`Generating ${type} cache, please, wait...`);
+            return Tools.series(require("../controllers").routers, function(router) {
+                var f = router[`generate${type}`];
+                if (typeof f != "function")
+                    return Promise.resolve();
+                return f.call(router).then(function(result) {
+                    return Tools.series(result, function(data, id) {
+                        return Cache[`set${type}`](id, data);
+                    });
+                });
+            });
+        });
+    }).then(function() {
+        if (!config("server.rss.enabled", true))
+            return Promise.resolve();
+        console.log("Generating RSS, please, wait...");
+        return BoardModel.generateRSS().catch(function(err) {
+            Global.error(err.stack || err);
+        }).then(function() {
+            return Promise.resolve();
+        });
+    });
+};
+
 module.exports = controller;
 
 var Board = require("../boards/board");
+var BoardModel = require("../models/board");
 var Captcha = require("../captchas");
 var config = require("./config");
 var Database = require("./database");

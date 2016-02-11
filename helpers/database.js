@@ -13,6 +13,7 @@ var mkpath = promisify("mkpath");
 
 var Board = require("../boards");
 var BoardModel = require("../models/board");
+var Cache = require("./cache");
 var Captcha = require("../captchas");
 var config = require("./config");
 var controller = require("./controller");
@@ -1048,15 +1049,22 @@ module.exports.createThread = function(req, fields, files, transaction) {
                 c.thread.archived = true;
                 return db.hset("archivedThreads:" + board.name, c.thread.number, JSON.stringify(c.thread));
             }).then(function() {
-                c.sourcePath = BoardModel.cachePath("thread", board.name, c.thread.number);
-                return Tools.readFile(c.sourcePath);
+                c.archPath = `${__dirname}/../public/${board.name}/arch`;
+                return mkpath(c.archPath);
+            }).then(function() {
+                c.sourceId = `thread-${board.name}-${c.thread.number}`;
+                return Cache.getJSON(c.sourceId);
             }).then(function(data) {
-                c.data = data.data;
-                return mkpath(`${__dirname}/../public/${board.name}/arch`);
+                return Tools.writeFile(`${c.archPath}/${c.thread.number}.json`, data.data);
             }).then(function() {
-                return Tools.writeFile(`${__dirname}/../public/${board.name}/arch/${c.thread.number}.json`, c.data);
+                return Cache.getHTML(c.sourceId);
+            }).then(function(data) {
+                //TODO: Must rerender as archived
+                return Tools.writeFile(`${c.archPath}/${c.thread.number}.html`, data.data);
             }).then(function() {
-                return Tools.removeFile(c.sourcePath);
+                return Cache.removeJSON(c.sourceId);
+            }).then(function() {
+                return Cache.removeHTML(c.sourceId);
             });
         });
     }).then(function() {

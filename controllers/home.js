@@ -11,11 +11,27 @@ router.get("/", function(req, res) {
 });
 
 router.generateHTML = function() {
+    var result = {};
     var model = {};
     model.title = Tools.translate("ololord.js", "pageTitle");
     model.extraScripts = [ { fileName: "home.js" } ];
     return controller("home", model).then(function(data) {
-        return Promise.resolve({ "home": data });
+        result["home"] = data;
+        var model = {};
+        model.title = Tools.translate("Error 404", "pageTitle");
+        model.notFoundMessage = Tools.translate("Page or file not found", "notFoundMessage");
+        model.extraScripts = [ { fileName: "not-found.js" } ];
+        var path = __dirname + "/../public/img/404";
+        return FS.list(path).then(function(fileNames) {
+            model.notFoundImageFileNames = fileNames.filter(function(fileName) {
+                return fileName != ".gitignore";
+            });
+            return controller("notFound", model);
+        }).then(function(data) {
+            result["notFound"] = data;
+        });
+    }).then(function() {
+        return Promise.resolve(result);
     });
 };
 

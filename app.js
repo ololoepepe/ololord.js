@@ -124,35 +124,14 @@ if (cluster.isMaster) {
     Database.initialize().then(function() {
         return controller.initialize();
     }).then(function() {
-        return Tools.series(["JSON", "HTML"], function(type) {
-            console.log(`Generating ${type} cache, please, wait...`);
-            return Tools.series(require("./controllers").routers, function(router) {
-                var f = router[`generate${type}`];
-                if (typeof f != "function")
-                    return Promise.resolve();
-                return f.call(router).then(function(result) {
-                    return Tools.series(result, function(data, id) {
-                        return Cache[`set${type}`](id, data);
-                    });
+        if (config("server.rss.enabled", true)) {
+            setInterval(function() {
+                BoardModel.generateRSS().catch(function(err) {
+                    Global.error(err.stack || err);
                 });
-            });
-        });
-    }).then(function() {
-        return BoardModel.generate();
-    }).then(function() {
-        if (!config("server.rss.enabled", true))
-            return Promise.resolve();
-        console.log("Generating RSS, please, wait...");
-        setInterval(function() {
-            BoardModel.generateRss(true).catch(function(err) {
-                Global.error(err.stack || err);
-            });
-        }, config("server.rss.ttl", 60) * Tools.Minute);
-        return BoardModel.generateRss(true).catch(function(err) {
-            Global.error(err.stack || err);
-        }).then(function() {
-            return Promise.resolve();
-        });
+            }, config("server.rss.ttl", 60) * Tools.Minute);
+        }
+        return controller.regenerate();
     }).then(function() {
         console.log("Spawning workers, please, wait...");
         spawnCluster();

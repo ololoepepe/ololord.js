@@ -635,21 +635,6 @@ module.exports.removeFile = function(path) {
     }).catch(recover.bind(null, c));
 };
 
-var controller;
-
-module.exports.controllerHtml = function(req, res, f, keys) {
-    if (!controller)
-        controller = require("./controller"); //NOTE: Circular dependency workaround
-    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
-    var args = [f, ifModifiedSince].concat(Array.prototype.slice.call(arguments, 3));
-    return controller.html.apply(controller, args).then(function(data) {
-        res.setHeader("Last-Modified", data.lastModified.toUTCString());
-        if (+ifModifiedSince >= +data.lastModified)
-            res.status(304);
-        res.send(data.data);
-    });
-};
-
 module.exports.series = function(arr, f) {
     var p = Promise.resolve();
     if (Util.isArray(arr)) {

@@ -12,6 +12,7 @@
 [done] Select files without appending input to DOM
 [done] Simplify file attaching code
 [done] Improve cache system
+[done] Prerender HTML on application load
 
 * Add ability to paint on any board using canvas
 * Improve file previews
@@ -19,6 +20,7 @@
 * Add playlist to every page
 * Optimize spells
 * Render board/thread/catalog on the server side
+* Improve posting speed retrieving
 * Treat manually and auto-hidden posts differently
 * Show auto-hide reason
 * Use common CSS file (specify style-specific stuff only in separate files)
