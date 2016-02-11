@@ -7,15 +7,16 @@ var Tools = require("../helpers/tools");
 var router = express.Router();
 
 router.get("/", function(req, res) {
-    var f = function() {
-        var model = {};
-        model.title = Tools.translate("ololord.js", "pageTitle");
-        model.extraScripts = [ { fileName: "home.js" } ];
-        return controller("home", model);
-    };
-    Tools.controllerHtml(req, res, f.bind(null), "home").catch(function(err) {
-        controller.error(res, err);
-    });
+    controller.sendCachedHTML(req, res, "home");
 });
+
+router.generateHTML = function() {
+    var model = {};
+    model.title = Tools.translate("ololord.js", "pageTitle");
+    model.extraScripts = [ { fileName: "home.js" } ];
+    return controller("home", model).then(function(data) {
+        return Promise.resolve({ "home": data });
+    });
+};
 
 module.exports = router;

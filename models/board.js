@@ -9,6 +9,7 @@ var Util = require("util");
 var XML2JS = require("xml2js");
 
 var Board = require("../boards");
+var Cache = require("../helpers/cache");
 var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
@@ -963,7 +964,7 @@ module.exports.do_generateRss = function() {
                 },
                 cdata: true
             });
-            return Tools.writeFile(rssCachePath(boardName), builder.buildObject(doc));
+            return Cache.setRSS(boardName, builder.buildObject(doc));
         });
     });
 };

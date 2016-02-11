@@ -5,6 +5,7 @@ var expressCluster = require("express-cluster");
 var Log4JS = require("log4js");
 var OS = require("os");
 
+var Cache = require("./helpers/cache");
 var config = require("./helpers/config");
 var controller = require("./helpers/controller");
 var BoardModel = require("./models/board");
@@ -123,7 +124,20 @@ if (cluster.isMaster) {
     Database.initialize().then(function() {
         return controller.initialize();
     }).then(function() {
-        console.log("Generating cache, please, wait...");
+        return Tools.series(["JSON", "HTML"], function(type) {
+            console.log(`Generating ${type} cache, please, wait...`);
+            return Tools.series(require("./controllers").routers, function(router) {
+                var f = router[`generate${type}`];
+                if (typeof f != "function")
+                    return Promise.resolve();
+                return f.call(router).then(function(result) {
+                    return Tools.series(result, function(data, id) {
+                        return Cache[`set${type}`](id, data);
+                    });
+                });
+            });
+        });
+    }).then(function() {
         return BoardModel.generate();
     }).then(function() {
         if (!config("server.rss.enabled", true))

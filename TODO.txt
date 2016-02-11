@@ -11,6 +11,7 @@
 [done] Merge thread.js with board.js
 [done] Select files without appending input to DOM
 [done] Simplify file attaching code
+[done] Improve cache system
 
 * Add ability to paint on any board using canvas
 * Improve file previews

@@ -105,7 +105,6 @@ var setupDdos = function() {
 var setupStatic = function() {
     if (config("system.log.middleware.before", "") == "static")
         module.exports.push(log);
-
     module.exports.push(express.static(__dirname + "/../public"));
 };
 

@@ -10,6 +10,7 @@ var Path = require("path");
 var random = require("random-js")();
 var Util = require("util");
 
+var Cache = require("./cache");
 var config = require("./config");
 var Global = require("./global");
 
@@ -732,8 +733,8 @@ controller.initialize = function() {
         })).filter(function(fileName) {
             return fileName.split(".").pop() == "jst";
         });
-        var promises = c.fileNames.map(function(fileName) {
-            FS.read(fileName).then(function(data) {
+        return Tools.series(c.fileNames, function(fileName) {
+            return FS.read(fileName).then(function(data) {
                 var name = fileName.split("/").pop().split(".").shift();
                 var ind = publicTemplates.indexOf(name);
                 if (ind >= 0) {
@@ -758,7 +759,6 @@ controller.initialize = function() {
                 return Promise.resolve();
             });
         });
-        return Promise.all(promises);
     });
 };
 
@@ -864,6 +864,36 @@ controller.removeFromCached = function(keyParts, removeFromDisk) {
         return Promise.resolve();
     var path = cachePath(keyParts);
     return Tools.removeFile(path);
+};
+
+controller.sendCachedHTML = function(req, res, id) {
+    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
+    return Cache.getHTML(id, ifModifiedSince).then(function(result) {
+        res.setHeader("Last-Modified", result.lastModified.toUTCString());
+        if (+ifModifiedSince >= +result.lastModified)
+            res.status(304);
+        res.send(result.data);
+    }).catch(function(err) {
+        if ("ENOENT" == err.code)
+            controller.notFound(res);
+        else
+            controller.error(res, err);
+    });
+};
+
+controller.sendCachedJSON = function(req, res, id) {
+    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
+    return Cache.getJSON(id, ifModifiedSince).then(function(result) {
+        res.setHeader("Last-Modified", result.lastModified.toUTCString());
+        if (+ifModifiedSince >= +result.lastModified)
+            res.status(304);
+        res.send(result.data);
+    }).catch(function(err) {
+        if ("ENOENT" == err.code)
+            controller.notFound(res);
+        else
+            controller.error(res, err);
+    });
 };
 
 module.exports = controller;
