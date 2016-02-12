@@ -123,7 +123,7 @@
                 {{? it.customPostMenuAction && it.customPostMenuAction[20]}}
                     {{ out += it.customPostMenuAction[20](it, thread, post); }}
                 {{?}}
-                {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+                {{? !it.archived && it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
                     <li>
                         <a name="editButton" target="_blank"
                            href="javascript:void(0);" onclick="lord.editPost(this); return false;">

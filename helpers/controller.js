@@ -228,34 +228,7 @@ controller.baseModel = function(req) {
 
 controller.boardsModel = function() {
     var boards = Board.boardNames().map(function(boardName) {
-        var board = Board.board(boardName);
-        var model = {
-            name: board.name,
-            title: board.title,
-            defaultUserName: board.defaultUserName,
-            showWhois: board.showWhois,
-            hidden: board.hidden,
-            postingEnabled: board.postingEnabled,
-            captchaEnabled: board.captchaEnabled,
-            maxEmailLength: board.maxEmailLength,
-            maxNameLength: board.maxNameLength,
-            maxSubjectLength: board.maxSubjectLength,
-            maxTextLength: board.maxTextLength,
-            maxPasswordLength: board.maxPasswordLength,
-            maxFileCount: board.maxFileCount,
-            maxFileSize: board.maxFileSize,
-            maxLastPosts: board.maxLastPosts,
-            markupElements: board.markupElements,
-            supportedFileTypes: board.supportedFileTypes,
-            supportedCaptchaEngines: board.supportedCaptchaEngines,
-            bumpLimit: board.bumpLimit,
-            postLimit: board.postLimit,
-            bannerFileNames: board.bannerFileNames
-        };
-        board.customBoardInfoFields().forEach(function(field) {
-            model[field] = board[field];
-        });
-        return model;
+        return Board.board(boardName).info();
     });
     return { boards: boards };
 };
@@ -263,37 +236,7 @@ controller.boardsModel = function() {
 controller.boardModel = function(board) {
     if (Util.isString(board))
         board = Board.board(board);
-    if (!board)
-        return null;
-    var model = {
-        board: {
-            name: board.name,
-            title: board.title,
-            defaultUserName: board.defaultUserName,
-            showWhois: board.showWhois,
-            hidden: board.hidden,
-            postingEnabled: board.postingEnabled,
-            captchaEnabled: board.captchaEnabled,
-            maxEmailLength: board.maxEmailLength,
-            maxNameLength: board.maxNameLength,
-            maxSubjectLength: board.maxSubjectLength,
-            maxTextLength: board.maxTextLength,
-            maxPasswordLength: board.maxPasswordLength,
-            maxFileCount: board.maxFileCount,
-            maxFileSize: board.maxFileSize,
-            maxLastPosts: board.maxLastPosts,
-            markupElements: board.markupElements,
-            supportedFileTypes: board.supportedFileTypes,
-            supportedCaptchaEngines: board.supportedCaptchaEngines,
-            bumpLimit: board.bumpLimit,
-            postLimit: board.postLimit,
-            bannerFileNames: board.bannerFileNames
-        }
-    };
-    board.customBoardInfoFields().forEach(function(field) {
-        model.board[field] = board[field];
-    });
-    return model;
+    return board ? { board: board.info() } : null;
 };
 
 controller.settingsModel = function(req) {
@@ -802,58 +745,31 @@ controller.postingSpeedString = function(board, lastPostNumber) {
     }
 };
 
-var cachePath = function() {
-    var args = [];
-    Array.prototype.slice.call(arguments, 0).forEach(function(arg) {
-        args = args.concat(arg);
+var sendCachedContent = function(req, res, id, type, ajax) {
+    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
+    return Cache[`get${type}`](id, ifModifiedSince).then(function(result) {
+        res.setHeader("Last-Modified", result.lastModified.toUTCString());
+        if (+ifModifiedSince >= +result.lastModified)
+            res.status(304);
+        res.send(result.data);
+    }).catch(function(err) {
+        if ("ENOENT" == err.code)
+            controller.notFound(res);
+        else
+            controller.error(res, err, ajax);
     });
-    var path = args.join("-");
-    return config("system.tmpPath", __dirname + "/../tmp") + "/cache-html" + (path ? ("/" + path + ".html") : "");
 };
 
 controller.sendCachedHTML = function(req, res, id) {
-    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
-    return Cache.getHTML(id, ifModifiedSince).then(function(result) {
-        res.setHeader("Last-Modified", result.lastModified.toUTCString());
-        if (+ifModifiedSince >= +result.lastModified)
-            res.status(304);
-        res.send(result.data);
-    }).catch(function(err) {
-        if ("ENOENT" == err.code)
-            controller.notFound(res);
-        else
-            controller.error(res, err);
-    });
+    return sendCachedContent(req, res, id, Cache.Types.HTML);
 };
 
 controller.sendCachedJSON = function(req, res, id) {
-    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
-    return Cache.getJSON(id, ifModifiedSince).then(function(result) {
-        res.setHeader("Last-Modified", result.lastModified.toUTCString());
-        if (+ifModifiedSince >= +result.lastModified)
-            res.status(304);
-        res.send(result.data);
-    }).catch(function(err) {
-        if ("ENOENT" == err.code)
-            controller.notFound(res, true);
-        else
-            controller.error(res, err, true);
-    });
+    return sendCachedContent(req, res, id, Cache.Types.JSON);
 };
 
 controller.sendCachedRSS = function(req, res, id) {
-    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
-    return Cache.getRSS(id, ifModifiedSince).then(function(result) {
-        res.setHeader("Last-Modified", result.lastModified.toUTCString());
-        if (+ifModifiedSince >= +result.lastModified)
-            res.status(304);
-        res.send(result.data);
-    }).catch(function(err) {
-        if ("ENOENT" == err.code)
-            controller.notFound(res);
-        else
-            controller.error(res, err);
-    });
+    return sendCachedContent(req, res, id, Cache.Types.RSS);
 };
 
 controller.regenerate = function() {

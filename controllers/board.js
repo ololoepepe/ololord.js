@@ -68,27 +68,8 @@ router.get("/:boardName/archive.json", function(req, res) {
     var board = Board.board(req.params.boardName);
     if (!board)
         return controller.error(res, 404, true);
-    var c = {};
     controller.checkBan(req, res, board.name).then(function() {
-        var model = {};
-        var path = `${__dirname}/../public/${board.name}/arch`;
-        return FS.exists(path).then(function(exists) {
-            if (!exists)
-                return Promise.resolve([]);
-            return FS.list(path);
-        }).then(function(fileNames) {
-            model.threads = fileNames.map(function(fileName) {
-                return {
-                    boardName: board.name,
-                    number: +fileName.split(".").shift()
-                };
-            });
-            return Database.lastPostNumber(board.name);
-        }).then(function(lastPostNumber) {
-            model.lastPostNumber = lastPostNumber;
-            model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
-            res.send(model);
-        });
+        controller.sendCachedJSON(req, res, `archive-${board.name}`);
     }).catch(function(err) {
         controller.error(res, err, true);
     });
@@ -151,23 +132,6 @@ router.get("/:boardName/res/:threadNumber.json", function(req, res) {
         controller.error(res, err, true);
     });
 });
-
-router.generateHTML = function() {
-    var result = {};
-    return Tools.series(Board.boardNames(), function(boardName) {
-        var board = Board.board(boardName);
-        var model = {};
-        model.title = board.title;
-        model.isBoardPage = true;
-        model.board = controller.boardModel(board).board;
-        model.tr = controller.translationsModel();
-        return controller("archivePage", model).then(function(data) {
-            result[`archive-${boardName}`] = data;
-        });
-    }).then(function() {
-        return Promise.resolve(result);
-    });
-};
 
 router.generateJSON = function() {
     return BoardModel.generateJSON();

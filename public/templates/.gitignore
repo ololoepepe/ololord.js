@@ -2,7 +2,6 @@
 !custom
 !partials
 !addFilesDialog.jst
-!archiveThread.jst
 !banner.jst
 !boardPageLower.jst
 !boardPageUpper.jst
@@ -39,7 +38,6 @@
 !playlistItem.jst
 !post.jst
 !postForm.jst
-!postingSpeed.jst
 !postReference.jst
 !rpgEditPostDialogPart.jst
 !rpgPostBodyPart.jst

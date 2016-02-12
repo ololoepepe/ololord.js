@@ -16,12 +16,14 @@
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{=it.board.title}}</a>
     </h1>
 </div>
-<div id="threads" class="loadingMessage">
-    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
-    <h1 style="display: inline;">{{=it.tr.loadingThreadsMessage}}</h1>
+<div id="threads">
+    {{~it.threads :thread}}
+        <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/arch/{{=thread.number}}.html"
+           class="archivalThreadLink">{{=thread.number}}.html</a>
+    {{~}}
 </div>
 <hr />
-<div id="postingSpeedPlaceholder" style="display: none;"></div>
+{{#def.postingSpeed}}
 <a id="bottom"></a>
 <div id="customFooterPlaceholder" style="display: none;"></div>
 </body>

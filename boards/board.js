@@ -170,6 +170,37 @@ var Board = function(name, title, options) {
     });
 };
 
+/*public*/ Board.prototype.info = function() {
+    var model = {
+        name: this.name,
+        title: this.title,
+        defaultUserName: this.defaultUserName,
+        showWhois: this.showWhois,
+        hidden: this.hidden,
+        postingEnabled: this.postingEnabled,
+        captchaEnabled: this.captchaEnabled,
+        maxEmailLength: this.maxEmailLength,
+        maxNameLength: this.maxNameLength,
+        maxSubjectLength: this.maxSubjectLength,
+        maxTextLength: this.maxTextLength,
+        maxPasswordLength: this.maxPasswordLength,
+        maxFileCount: this.maxFileCount,
+        maxFileSize: this.maxFileSize,
+        maxLastPosts: this.maxLastPosts,
+        markupElements: this.markupElements,
+        supportedFileTypes: this.supportedFileTypes,
+        supportedCaptchaEngines: this.supportedCaptchaEngines,
+        bumpLimit: this.bumpLimit,
+        postLimit: this.postLimit,
+        bannerFileNames: this.bannerFileNames,
+        launchDate: this.launchDate.toISOString()
+    };
+    this.customBoardInfoFields().forEach(function(field) {
+        model[field] = board[field];
+    });
+    return model;
+};
+
 /*public*/ Board.prototype.customBoardInfoFields = function() {
     return [];
 };

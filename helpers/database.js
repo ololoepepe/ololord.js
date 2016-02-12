@@ -1050,21 +1050,27 @@ module.exports.createThread = function(req, fields, files, transaction) {
                 return db.hset("archivedThreads:" + board.name, c.thread.number, JSON.stringify(c.thread));
             }).then(function() {
                 c.archPath = `${__dirname}/../public/${board.name}/arch`;
-                return mkpath(c.archPath);
-            }).then(function() {
-                c.sourceId = `thread-${board.name}-${c.thread.number}`;
-                return Cache.getJSON(c.sourceId);
-            }).then(function(data) {
-                return Tools.writeFile(`${c.archPath}/${c.thread.number}.json`, data.data);
-            }).then(function() {
-                return Cache.getHTML(c.sourceId);
-            }).then(function(data) {
-                //TODO: Must rerender as archived
-                return Tools.writeFile(`${c.archPath}/${c.thread.number}.html`, data.data);
-            }).then(function() {
-                return Cache.removeJSON(c.sourceId);
-            }).then(function() {
-                return Cache.removeHTML(c.sourceId);
+                //NOTE: Yep, no return here for the sake of speed
+                var oldThreadNumber = c.thread.number;
+                mkpath(c.archPath).then(function() {
+                    c.sourceId = `thread-${board.name}-${oldThreadNumber}`;
+                    return Cache.getJSON(c.sourceId);
+                }).then(function(data) {
+                    c.model = JSON.parse(data.data);
+                    c.model.archived = true;
+                    return Tools.writeFile(`${c.archPath}/${oldThreadNumber}.json`, JSON.stringify(c.model));
+                }).then(function() {
+                    return BoardModel.generateThreadHTML(board, oldThreadNumber, c.model, true);
+                }).then(function(data) {
+                    return Tools.writeFile(`${c.archPath}/${oldThreadNumber}.html`, data);
+                }).then(function() {
+                    return Cache.removeJSON(c.sourceId);
+                }).then(function() {
+                    return Cache.removeHTML(c.sourceId);
+                }).catch(function(err) {
+                    Global.error(err);
+                });
+                return Promise.resolve();
             });
         });
     }).then(function() {
@@ -1731,7 +1737,12 @@ module.exports.deletePost = function(req, res, fields) {
     }).then(function() {
         var p;
         if (c.isThread && c.archived) {
-            p = Tools.removeFile(`${__dirname}/../public/${board.name}/arch/${postNumber}.json`);
+            var path = `${__dirname}/../public/${board.name}/arch/${postNumber}.`;
+            p = Tools.removeFile(path + "json").then(function() {
+                return Tools.removeFile(path + "html");
+            }).then(function() {
+                return Global.generateArchive(board.name);
+            });
         } else if (!c.archived) {
             p = c.isThread ? Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "delete")
                 : Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");

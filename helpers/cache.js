@@ -22,7 +22,9 @@ Types["HTML"] = "HTML";
 Types["JSON"] = "JSON";
 Types["RSS"] = "RSS";
 
+Object.defineProperty(module.exports, "Extensions", { value: Extensions });
 Object.defineProperty(module.exports, "Paths", { value: Paths });
+Object.defineProperty(module.exports, "Types", { value: Types });
 
 var cleanup = function(type) {
     switch (type) {

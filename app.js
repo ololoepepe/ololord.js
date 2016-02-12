@@ -158,6 +158,9 @@ if (cluster.isMaster) {
         Global.IPC.installHandler("generate", function(data) {
             return BoardModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);
         });
+        Global.IPC.installHandler("generateArchive", function(data) {
+            return BoardModel.scheduleGenerateArchive(data);
+        });
     }).catch(function(err) {
         Global.error(err.stack || err);
         process.exit(1);
@@ -170,6 +173,11 @@ if (cluster.isMaster) {
             postNumber: postNumber,
             action: action
         }).catch(function(err) {
+            Global.error(err.stack || err);
+        });
+    };
+    Global.generateArchive = function(boardName) {
+        return Global.IPC.send("generateArchive", boardName).catch(function(err) {
             Global.error(err.stack || err);
         });
     };

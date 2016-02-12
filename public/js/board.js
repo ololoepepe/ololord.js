@@ -386,6 +386,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
         c.model.thread = thread;
         c.model.post = post;
         c.model.isThreadPage = !!lord.data("threadNumber");
+        c.model.archived = !!lord.data("archived");
         lord.appendExtrasToModel(c.model);
         c.node = lord.template("post", c.model);
         $(".postBody", c.node).css("maxWidth", ($(window).width() - 30) + "px");
@@ -1466,15 +1467,15 @@ lord.fileAddedCommon = function(div) {
     if (div.file && lord.getLocalObject("checkFileExistence", true)) {
         var c = {};
         lord.readAs(div.file).then(function(data) {
-            c.fileHash = sha1(data);
-            return lord.api("fileExistence", { fileHash: c.fileHash });
+            div.fileHash = sha1(data);
+            return lord.api("fileExistence", { fileHash: div.fileHash });
         }).then(function(exists) {
             if (!exists)
                 return;
-            div.fileName = "file_" + (div.fileUrl ? "url_" : "") + c.fileHash;
+            div.fileName = "file_" + (div.fileUrl ? "url_" : "") + div.fileHash;
             var ratingSelect = lord.queryOne("[name='ratingSelectContainer'] > select", div);
             if (ratingSelect)
-                ratingSelect.name = "file_" + c.fileHash + "_rating";
+                ratingSelect.name = "file_" + div.fileHash + "_rating";
             var img = lord.node("img");
             img.src = "/" + prefix + "img/storage.png";
             lord.addClass(img, "signImage");
@@ -1482,8 +1483,8 @@ lord.fileAddedCommon = function(div) {
             lord.queryOne("span", div).appendChild(lord.node("text", " "));
             lord.queryOne("span", div).appendChild(img);
             var fileHashes = lord.getFileHashes(div);
-            if (fileHashes.value.indexOf(c.fileHash) < 0)
-                fileHashes.value = fileHashes.value + (fileHashes.value.length > 0 ? "," : "") + c.fileHash;
+            if (fileHashes.value.indexOf(div.fileHash) < 0)
+                fileHashes.value = fileHashes.value + (fileHashes.value.length > 0 ? "," : "") + div.fileHash;
             if (div.hasOwnProperty("fileInput"))
                 delete div.fileInput;
             if (div.hasOwnProperty("file"))
@@ -2854,17 +2855,14 @@ lord.initializeOnLoadBoard = function() {
     lord.appendExtrasToModel(c.model);
     var p;
     c.threadOrBoard = (+lord.data("threadNumber") || +lord.data("currentPage") >= 0);
-    c.archive = !c.threadOrBoard && !lord.data("sortMode");
     if (+lord.data("threadNumber")) {
         c.model.isThreadPage = true;
         var suffix = lord.data("archived") ? "arch" : "res";
         p = lord.api(lord.data("threadNumber"), {}, lord.data("boardName") + "/" + suffix);
     } else if (+lord.data("currentPage") >= 0) {
         p = lord.api(lord.data("currentPage"), {}, lord.data("boardName"));
-    } else if (!c.archive) {
-        p = lord.api("catalog", { sort: lord.data("sortMode") }, lord.data("boardName"));
     } else {
-        p = lord.api("archive", {}, lord.data("boardName"));
+        p = lord.api("catalog", { sort: lord.data("sortMode") }, lord.data("boardName"));
     }
     var bannerFileNames = [];
     var bannerBoardName = lord.data("boardName");
@@ -2983,12 +2981,6 @@ lord.initializeOnLoadBoard = function() {
             var pagesPlaceholder = lord.id("pagesPlaceholder");
             pagesPlaceholder.parentNode.replaceChild(lord.template("pagination", c.model), pagesPlaceholder);
         }
-        if (!lord.data("threadNumber")) {
-            var postingSpeedPlaceholder = lord.id("postingSpeedPlaceholder");
-            c.model.postingSpeed = model.postingSpeed;
-            postingSpeedPlaceholder.parentNode.replaceChild(lord.template("postingSpeed", c.model),
-                postingSpeedPlaceholder);
-        }
         c.threads = model.threads || [model.thread];
         var threads = lord.id("threads");
         var html = "";
@@ -2996,7 +2988,7 @@ lord.initializeOnLoadBoard = function() {
             c.model.thread = thread;
             if (c.threadOrBoard)
                 html += "<hr />";
-            var templateName = c.threadOrBoard ? "thread" : (c.archive ? "archiveThread" : "catalogThread");
+            var templateName = c.threadOrBoard ? "thread" : "catalogThread";
             html += lord.template(templateName, c.model, true);
         });
         lord.createDocumentFragment(html).then(function(frag) {
