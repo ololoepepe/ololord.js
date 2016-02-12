@@ -7,7 +7,7 @@
      {{? post.isOp}}data-is-op="true"{{?}}
      {{? it.checkOwnPost(post)}}data-own-post="true"{{?}}
      {{? post.isOp && thread.archived}}data-archived="true"{{?}}>
-    <div class="postHeader {{=it.deviceType}}">
+    <div class="postHeader">
         <span class="nowrap">
             {{? it.customPostHeaderPart && it.customPostHeaderPart[0]}}
                 {{ out += it.customPostHeaderPart[0](it, thread, post); }}
@@ -58,7 +58,7 @@
             {{ out += it.customPostHeaderPart[70](it, thread, post); }}
         {{?}}
         {{? post.options.showTripcode && post.tripcode}}
-            <span class="tripcode {{=it.deviceType}}">{{=post.tripcode}}</span>
+            <span class="tripcode">{{=post.tripcode}}</span>
         {{?}}
         {{? it.customPostHeaderPart && it.customPostHeaderPart[80]}}
             {{ out += it.customPostHeaderPart[80](it, thread, post); }}
@@ -75,7 +75,7 @@
         {{? it.customPostHeaderPart && it.customPostHeaderPart[90]}}
             {{ out += it.customPostHeaderPart[90](it, thread, post); }}
         {{?}}
-        <span class="nowrap postDateTime {{=it.deviceType}}"
+        <span class="nowrap postDateTime"
               name="dateTime">{{ out += it.formattedDate(post.createdAt, it.req); }}</span>
         {{? it.customPostHeaderPart && it.customPostHeaderPart[100]}}
             {{ out += it.customPostHeaderPart[100](it, thread, post); }}
@@ -278,7 +278,7 @@
                 {{ out += it.customPostHeaderPart[140](it, thread, post); }}
             {{?}}
             {{? post.isOp && !it.isThreadPage && "mobile" != it.deviceType}}
-                <span name="toThread" class="postToThread {{=it.deviceType}}">
+                <span name="toThread" class="postToThread">
                     [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"
                         name="toThreadLink">{{=it.tr.toThread}}</a>]
                 </span>
@@ -302,7 +302,7 @@
                 {{?}}
                 <div class="postText">
                     <blockquote id="post{{=post.number}}Text"
-                                class="{{=it.deviceType}}{{? it.isThreadPage}} blockquoteThread{{?}}">{{ out += (post.text || ""); }}</blockquote>
+                                {{? it.isThreadPage}}class="blockquoteThread"{{?}}>{{ out += (post.text || ""); }}</blockquote>
                 </div>
             {{?}}
         </div>
@@ -312,7 +312,7 @@
             {{?}}
             <div class="postText">
                 <blockquote id="post{{=post.number}}Text"
-                            class="{{=it.deviceType}}{{? it.isThreadPage}} blockquoteThread{{?}}">{{ out += (post.text || ""); }}</blockquote>
+                            {{? it.isThreadPage}}class="blockquoteThread"{{?}}>{{ out += (post.text || ""); }}</blockquote>
             </div>
         {{?}}
         {{? it.customPostBodyPart && it.customPostBodyPart[20]}}
@@ -343,7 +343,7 @@
         {{?}}
     </div>
     {{? post.isOp && !it.isThreadPage && "mobile" == it.deviceType}}
-        <span name="toThread" class="postToThread {{=it.deviceType}}">
+        <span name="toThread" class="postToThread">
             <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"
                name="toThreadLink"><button class="button">{{=it.tr.toThread}}</button></a>
         </span>

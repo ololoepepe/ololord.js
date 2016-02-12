@@ -17,10 +17,10 @@
         {{? fileInfo.extraData.duration}}data-duration="{{=fileInfo.extraData.duration}}"{{?}}
         {{? fileInfo.extraData.bitrate}}data-bitrate="{{=fileInfo.extraData.bitrate}}"{{?}}
     {{?}}>
-    <div class="postFileName {{=it.deviceType}}">
+    <div class="postFileName">
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}" target="_blank">{{=fileInfo.name}}</a>
     </div>
-    <div class="postFileSize {{=it.deviceType}}" {{? fileInfo.sizeTooltip}}title="{{=fileInfo.sizeTooltip}}"{{?}}>
+    <div class="postFileSize" {{? fileInfo.sizeTooltip}}title="{{=fileInfo.sizeTooltip}}"{{?}}>
         ({{=fileInfo.sizeText}})
     </div>
     <div class="postFileSearch">
@@ -72,7 +72,7 @@
                 <img src="/{{=it.site.pathPrefix}}img/playlist.png" class="buttonImage"></a>
         {{?}}
     </div>
-    <div class="postFileFile {{=it.deviceType}}">
+    <div class="postFileFile">
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
            {{? "application/pdf" == fileInfo.mimeType}}target="_blank"{{??}}onclick="lord.showImage(this); return false;"{{?}}>
             {{#def.postFileThumb}}

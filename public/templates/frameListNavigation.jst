@@ -1,4 +1,4 @@
-<div class="navbar navbarFrame {{=it.deviceType}}">
+<div class="navbar navbarFrame">
     {{~it.boards :board}}
         {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
             {{? it.deviceType != "mobile"}}
