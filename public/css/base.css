@@ -921,3 +921,15 @@ input.buttonImage {
     font-size: 1.2em;
     margin-left: 10px;
 }
+
+.ownPostLink:after {
+    content: " (You)";
+}
+
+.opPostLink:after {
+    content: " (OP)";
+}
+
+.ownPostLink.opPostLink:after {
+    content: " (You) (OP)";
+}

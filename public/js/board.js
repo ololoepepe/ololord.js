@@ -330,26 +330,7 @@ lord.appendExtrasToModel = function(model) {
     var dateFormat = model.site.dateFormat;
     var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
     model.settings = settings;
-    model.compareRatings = function(r1, r2) {
-        if (["SFW", "R-15", "R-18", "R-18G"].indexOf(r2) < 0)
-            throw "Invalid rating r2: " + r2;
-        switch (r1) {
-        case "SFW":
-            return (r1 == r2) ? 0 : -1;
-        case "R-15":
-            if (r1 == r2)
-                return 0;
-            return ("SFW" == r2) ? 1 : -1;
-        case "R-18":
-            if (r1 == r2)
-                return 0;
-            return ("R-18G" == r2) ? -1 : 1;
-        case "R-18G":
-            return (r1 == r2) ? 0 : 1;
-        default:
-            throw "Invalid rating r1: " + r1;
-        }
-    };
+    model.compareRatings = lord.compareRatings;
     model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
     model.formattedDate = function(date) {
         return moment(date).utcOffset(timeOffset).locale(locale).format(dateFormat);
@@ -2436,7 +2417,7 @@ lord.strikeOutHiddenPostLink = function(a, list) {
 lord.signOpPostLink = function(a, data) {
     if (!a)
         return;
-    if (a.textContent.indexOf("(OP)") >= 0)
+    if (lord.hasClass(a, "opPostLink"))
         return;
     var postNumber = +lord.data("postNumber", a);
     if (!postNumber)
@@ -2445,16 +2426,16 @@ lord.signOpPostLink = function(a, data) {
     if (!threadNumber)
         return;
     if (postNumber == threadNumber)
-        a.appendChild(lord.node("text", " (OP)"));
+        lord.addClass(a, "opPostLink");
 };
 
 lord.signOwnPostLink = function(a, ownPosts) {
     if (!a)
         return;
-    if (a.textContent.indexOf("(You)") >= 0)
+    if (lord.hasClass(a, "ownPostLink"))
         return;
     if (ownPosts.hasOwnProperty(lord.data("boardName", a) + "/" + lord.data("postNumber", a)))
-        a.appendChild(lord.node("text", " (You)"));
+        lord.addClass(a, "ownPostLink");
 };
 
 lord.strikeOutHiddenPostLinks = function(parent) {
@@ -2981,6 +2962,8 @@ lord.initializeOnLoadBoard = function() {
             var pagesPlaceholder = lord.id("pagesPlaceholder");
             pagesPlaceholder.parentNode.replaceChild(lord.template("pagination", c.model), pagesPlaceholder);
         }
+        var ppp;
+        if (c.threadOrBoard) {
         c.threads = model.threads || [model.thread];
         var threads = lord.id("threads");
         var html = "";
@@ -2991,11 +2974,13 @@ lord.initializeOnLoadBoard = function() {
             var templateName = c.threadOrBoard ? "thread" : "catalogThread";
             html += lord.template(templateName, c.model, true);
         });
-        lord.createDocumentFragment(html).then(function(frag) {
+        ppp = lord.createDocumentFragment(html)} else { ppp = Promise.resolve(); };ppp.then(function(frag) {
+            if (frag) {
             lord.removeChildren(threads);
             lord.removeClass(threads, "loadingMessage");
             threads.appendChild(frag);
             lord.scriptWorkaround(threads);
+        }
             if (lord.queryOne(".opPost[data-archived='true']")) {
                 lord.name("backButton").forEach(function(btn) {
                     btn.href += "/archive.html";

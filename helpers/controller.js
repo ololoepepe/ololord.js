@@ -608,6 +608,8 @@ controller.translationsModel = function() {
 };
 
 controller.initialize = function() {
+    partials = {};
+    templates = {};
     var path1 = __dirname + "/../views/partials";
     var path2 = __dirname + "/../public/templates/partials";
     var c = {};

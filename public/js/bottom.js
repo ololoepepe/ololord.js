@@ -55,6 +55,34 @@ lord.templates = {};
     document.write('<link rel="stylesheet" type="text/css" href="/' + prefix + 'css/' + lord.deviceType() + '.css">');
     document.write('<link rel="stylesheet" type="text/css" href="/' + prefix + 'css/' + settings.style.name
         + '.css">');
+    if (lord.compareRatings(settings.maxAllowedRating, "R-18G") < 0) {
+        var s = '<style type="text/css">';
+        var selectors = [];
+        var size = lord.deviceType("mobile") ? "140px" : "200px";
+        var addSelector = function(rating) {
+            var sel = 'a[data-rating="' + rating + '"]';
+            selectors.push(sel);
+            s += sel + '{ background: url("../img/' + rating.toLowerCase() + '.png") center center; '
+                + 'width: ' + size + '; height: ' + size + '; }';
+        };
+        addSelector("R-18G");
+        ["R-18", "R-15"].forEach(function(rating) {
+            if (lord.compareRatings(settings.maxAllowedRating, rating) < 0)
+                addSelector(rating);
+        });
+        var createSelector = function(selector) {
+            selector = selector || "";
+            var sel = selectors[0] + selector;
+            selectors.slice(1).forEach(function(ss) {
+                sel += ", " + ss + selector;
+            });
+            return sel;
+        };
+        s += createSelector() + '{ display: inline-block; }';
+        s += createSelector(" > img") + '{ display: none; }';
+        s += '</style>';
+        document.write(s);
+    }
     document.close();
     lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
     lord.createStylesheetLink("3rdparty/jquery-ui/" + settings.style.name + "/jquery-ui.min.css", true);

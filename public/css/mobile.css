@@ -25,6 +25,11 @@ blockquote {
     padding-bottom: 4px;
 }
 
+.postFileThumbImage {
+    max-width: 140px;
+    max-height: 140px;
+}
+
 .postToThread {
     display: block;
 }

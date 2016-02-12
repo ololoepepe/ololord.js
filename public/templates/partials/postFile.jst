@@ -73,7 +73,7 @@
         {{?}}
     </div>
     <div class="postFileFile">
-        <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
+        <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}" data-rating="{{=fileInfo.rating}}"
            {{? "application/pdf" == fileInfo.mimeType}}target="_blank"{{??}}onclick="lord.showImage(this); return false;"{{?}}>
             {{#def.postFileThumb}}
         </a>

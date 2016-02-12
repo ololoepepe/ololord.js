@@ -34,7 +34,6 @@ var getFiles = function(fields, files, transaction) {
         return true;
     });
     var promises = Tools.mapIn(tmpFiles, function(file, fieldName) {
-        file.fieldName = fieldName;
         setFileRating(file, file.fieldName.substr(5));
         transaction.filePaths.push(file.path);
         return Tools.mimeType(file.path).then(function(mimeType) {
