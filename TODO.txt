@@ -18,6 +18,7 @@
 [done] Use common CSS file (specify style-specific stuff only in separate files)
 [done] Add ability to reload templates/partials
 
+* Simplify /rpg/ board server code
 * Add ability to paint on any board using canvas
 * Improve file previews
 * Add own player for media file previews

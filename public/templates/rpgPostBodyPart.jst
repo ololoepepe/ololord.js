@@ -5,7 +5,7 @@
                  title="{{=it.tr.voteClosedText}}">
         {{?}}
         {{=it.text}}</div>
-    {{? !it.disabled && !it.checkOwnPost(it.post)}}
+    {{? !it.disabled}}
         <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
               action="/{{=it.site.pathPrefix}}action/{{? it.voted}}unvote{{??}}vote{{?}}"
               onsubmit="lord.vote(event, this); return false;">
@@ -18,7 +18,7 @@
             {{??}}
                 <input type="radio" name="voteGroup" value="{{=variant.id}}"
             {{?}}
-            {{? it.checkOwnPost(it.post) || it.disabled || it.voted}}
+            {{? it.disabled || it.voted}}
                 disabled="true"
             {{?}}
             {{? it.checkOwnVoteVariant(variant)}}
@@ -29,7 +29,7 @@
             <span class="voteCount">({{=it.tr.voteCountText}} {{=variant.voteCount}})</span></br />
         {{ } }}
     </div>
-    {{? !it.checkOwnPost(it.post)}}
+    {{? !it.disabled}}
         <input type="hidden" name="postNumber" value="{{=it.post.number}}" />
         <input type="image" src="/{{=it.site.pathPrefix}}img/{{? !it.voted}}vote{{??}}unvote{{?}}.png"
                name="button{{? !it.voted}}Vote{{??}}Unvote{{?}}" {{? it.disabled}}disabled="true"{{?}}

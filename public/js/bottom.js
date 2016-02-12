@@ -55,8 +55,10 @@ lord.templates = {};
     document.write('<link rel="stylesheet" type="text/css" href="/' + prefix + 'css/' + lord.deviceType() + '.css">');
     document.write('<link rel="stylesheet" type="text/css" href="/' + prefix + 'css/' + settings.style.name
         + '.css">');
+    var s = '<style type="text/css">';
+    if (settings.shrinkPosts)
+        s += '.post, .opPost, .draft { width: 99%; }';
     if (lord.compareRatings(settings.maxAllowedRating, "R-18G") < 0) {
-        var s = '<style type="text/css">';
         var selectors = [];
         var size = lord.deviceType("mobile") ? "140px" : "200px";
         var addSelector = function(rating) {
@@ -80,9 +82,9 @@ lord.templates = {};
         };
         s += createSelector() + '{ display: inline-block; }';
         s += createSelector(" > img") + '{ display: none; }';
-        s += '</style>';
-        document.write(s);
     }
+    s += '</style>';
+    document.write(s);
     document.close();
     lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
     lord.createStylesheetLink("3rdparty/jquery-ui/" + settings.style.name + "/jquery-ui.min.css", true);

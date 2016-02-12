@@ -28,6 +28,12 @@ board.actionRoutes = function() {
             Tools.parseForm(req).then(function(result) {
                 c.postNumber = +result.fields.postNumber;
                 c.fields = result.fields;
+                return Database.getPost("rpg", c.postNumber);
+            }).then(function(post) {
+                if (!post)
+                    return Promise.reject(Tools.translate("No such post"));
+                if (req.ip == post.user.ip)
+                    return Promise.reject(Tools.translate("You can not participate in your own voting"));
                 return Board.prototype.loadExtraData.call(_this, c.postNumber);
             }).then(function(extraData) {
                 if (!extraData)
@@ -187,7 +193,7 @@ var extraData = function(req, fields, edit) {
         var id = key.substr(12);
         variants.push({
             text: value,
-            id: ((edit && id && isNaN(+id)) ? id : null)
+            id: ((edit && id && isNaN(+id)) ? id : uuid.v1())
         });
     });
     if (variants.length < 1)

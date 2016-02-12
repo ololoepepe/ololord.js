@@ -721,10 +721,6 @@ blockquote.blockquoteThread.expand {
     background-color: inherit;
 }
 
-.stretchedPost {
-    width: 99%;
-}
-
 .login {
     text-align: center;
     white-space: nowrap;

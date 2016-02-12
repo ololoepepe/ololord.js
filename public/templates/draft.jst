@@ -1,6 +1,5 @@
 {{~[it.draft] :post}}
-    <div id="draft/{{=post.createdAt}}" class="draft{{? !it.settings.shrinkPosts}} stretchedPost{{?}}"
-         data-key="{{=post.key}}" data-created-at="{{=post.createdAt}}">
+    <div id="draft/{{=post.createdAt}}" class="draft" data-key="{{=post.key}}" data-created-at="{{=post.createdAt}}">
         <div class="postHeader">
             {{#def.postSubject}}
             {{#def.postName}}

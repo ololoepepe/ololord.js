@@ -2573,5 +2573,10 @@
         "_default": {
             "value": "Здесь уже кто-то чатится"
         }
+    },
+    "You can not participate in your own voting": {
+        "_default": {
+            "value": "Вы не можете участвовать в собственном голосовании"
+        }
     }
 }
