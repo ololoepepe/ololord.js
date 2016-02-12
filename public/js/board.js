@@ -318,31 +318,19 @@ lord.traverseChildren = function(elem) {
     return children;
 };
 
-lord.scaledSize = function(size) {
-    if (lord.deviceType("desktop"))
-        return size;
-    return Math.floor(0.7 * size);
-};
-
 lord.appendExtrasToModel = function(model) {
     var settings = lord.settings();
     var locale = model.site.locale;
     var dateFormat = model.site.dateFormat;
     var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
     model.settings = settings;
-    model.compareRatings = lord.compareRatings;
     model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
     model.formattedDate = function(date) {
         return moment(date).utcOffset(timeOffset).locale(locale).format(dateFormat);
     };
-    var ownPosts = lord.getLocalObject("ownPosts", {});
-    model.checkOwnPost = function(post) {
-        return !!ownPosts[post.boardName + "/" + (post.number || post.postNumber)];
-    };
     model.minimalisticPostform = function() {
         return settings.minimalisticPostform;
     };
-    model.scaledSize = lord.scaledSize;
     model.customPostBodyPart = lord.customPostBodyPart;
     model.customPostHeaderPart = lord.customPostHeaderPart;
     model.customPostMenuAction = lord.customPostMenuAction;
@@ -420,9 +408,6 @@ lord.createPostNode = function(post, permanent, threadInfo) {
                 return Promise.resolve();
             var model = lord.model(["base", "board/" + lord.data("boardName")], true);
             model.settings = lord.settings();
-            model.checkOwnPost = function(post) {
-                return !!ownPosts[post.boardName + "/" + (post.number || post.postNumber)];
-            };
             var promises = post.referencedPosts.filter(function(reference) {
                 return reference.boardName == lord.data("boardName") && lord.id(reference.postNumber);
             }).map(function(reference) {
