@@ -27,7 +27,8 @@ Example:
         "fileDownloadProxy": "127.0.0.1:3128",
         "fileDownloadProxyAuth": "user:password",
         "searchLimit": 100,
-        "tmpPath": "/tmp/ramdisk"
+        "tmpPath": "/tmp/ramdisk",
+        "regenerateCacheOnStartup": true
     },
     "server": {
         "port": 8080,

@@ -206,8 +206,10 @@ module.exports.styles = function() {
     styles = [];
     var path = __dirname + "/../public/css";
     FSSync.readdirSync(path).forEach(function(fileName) {
-        if (fileName.split(".").pop() != "css")
+        if (fileName.split(".").pop() != "css"
+            || ["base", "desktop", "mobile"].indexOf(fileName.split(".").shift()) >= 0) {
             return;
+        }
         var name = fileName.split(".").shift();
         var str = FSSync.readFileSync(path + "/" + fileName, "utf8");
         var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(str);
@@ -620,7 +622,7 @@ module.exports.writeFile = function(path, data) {
 };
 
 module.exports.removeFile = function(path) {
-    var c = { noclose: true };
+    var c = {};
     return openFile(path, "w").then(function(fd) {
         c.fd = fd;
         return flockFile(c.fd, "ex");
@@ -631,6 +633,8 @@ module.exports.removeFile = function(path) {
         return flockFile(c.fd, "un");
     }).then(function() {
         c.locked = false;
+        return closeFile(c.fd);
+    }).then(function() {
         return Promise.resolve();
     }).catch(recover.bind(null, c));
 };

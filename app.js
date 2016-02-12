@@ -125,7 +125,9 @@ if (cluster.isMaster) {
                 });
             }, config("server.rss.ttl", 60) * Tools.Minute);
         }
-        return controller.regenerate();
+        if (config("system.regenerateCacheOnStartup", false))
+            return controller.regenerate();
+        return Promise.resolve();
     }).then(function() {
         console.log("Spawning workers, please, wait...");
         spawnCluster();

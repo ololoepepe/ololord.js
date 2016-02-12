@@ -46,18 +46,16 @@ lord.templates = {};
         }, lord.partials);
     });
     var settings = lord.settings();
-    lord.createStylesheetLink(settings.style.name + ".css", true);
-    if (lord.deviceType("desktop")) {
-        var css = "input, select { font-size: 14.4px; }";
-        var head = lord.queryOne("head");
-        var style = lord.node("style");
-        style.type = "text/css";
-        if (style.styleSheet)
-            style.styleSheet.cssText = css;
-        else
-            style.appendChild(lord.node("text", css));
-        head.appendChild(style);
+    document.open();
+    if (lord.deviceType("mobile")) {
+        document.write('<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, '
+            + 'user-scalable=no" />');
     }
+    var prefix = lord.model("base").site.pathPrefix;
+    document.write('<link rel="stylesheet" type="text/css" href="/' + prefix + 'css/' + lord.deviceType() + '.css">');
+    document.write('<link rel="stylesheet" type="text/css" href="/' + prefix + 'css/' + settings.style.name
+        + '.css">');
+    document.close();
     lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
     lord.createStylesheetLink("3rdparty/jquery-ui/" + settings.style.name + "/jquery-ui.min.css", true);
 })();
