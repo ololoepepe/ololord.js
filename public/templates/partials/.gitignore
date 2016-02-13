@@ -4,8 +4,6 @@
 !createAction.jst
 !deleteFileForm.jst
 !deletePostForm.jst
-!dPostBodyPart.jst
-!echoPostBodyPart.jst
 !editAudioTagsForm.jst
 !editPostForm.jst
 !favoritesElement.jst
@@ -19,8 +17,6 @@
 !postReference.jst
 !postReferringPosts.jst
 !postSubject.jst
-!rpgPostBodyPart.jst
 !setVotingOpenedForm.jst
-!socPostHeaderPart.jst
 !userBan.jst
 !.gitignore

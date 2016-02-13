@@ -15,20 +15,20 @@
     <div class="postHeader">
         <span class="nowrap">
             {{? it.customPostHeaderPart && it.customPostHeaderPart[0]}}
-                {{#def[it.customPostHeaderPart[0]]}}
+                {{ out += it.customPostHeaderPart[0](it, thread, post); }}
             {{?}}
             {{? post.isOp}}
                 {{? thread.fixed}}
                     <img src="/{{=it.site.pathPrefix}}img/fixed.png" class="signImage" title="{{=it.tr.fixedText}}">
                 {{?}}
                 {{? it.customPostHeaderPart && it.customPostHeaderPart[10]}}
-                    {{#def[it.customPostHeaderPart[10]]}}
+                    {{ out += it.customPostHeaderPart[10](it, thread, post); }}
                 {{?}}
                 {{? thread.closed}}
                     <img src="/{{=it.site.pathPrefix}}img/closed.png" class="signImage" title="{{=it.tr.closedText}}">
                 {{?}}
                 {{? it.customPostHeaderPart && it.customPostHeaderPart[20]}}
-                    {{#def[it.customPostHeaderPart[20]]}}
+                    {{ out += it.customPostHeaderPart[20](it, thread, post); }}
                 {{?}}
                 {{? thread.postLimitReached}}
                     <img src="/{{=it.site.pathPrefix}}img/postlimit.png" class="signImage"
@@ -40,33 +40,33 @@
             {{?}}
         </span>
         {{? it.customPostHeaderPart && it.customPostHeaderPart[30]}}
-            {{#def[it.customPostHeaderPart[30]]}}
+            {{ out += it.customPostHeaderPart[30](it, thread, post); }}
         {{?}}
         {{#def.postSubject}}
         {{? it.customPostHeaderPart && it.customPostHeaderPart[40]}}
-            {{#def[it.customPostHeaderPart[40]]}}
+            {{ out += it.customPostHeaderPart[40](it, thread, post); }}
         {{?}}
         {{? post.options.showTripcode && it.compareRegisteredUserLevels(post.user.level, "USER") >= 0}}
             <img src="/{{=it.site.pathPrefix}}img/registered.png" class="signImage" title="{{=it.tr.registeredText}}">
         {{?}}
         {{? it.customPostHeaderPart && it.customPostHeaderPart[50]}}
-            {{#def[it.customPostHeaderPart[50]]}}
+            {{ out += it.customPostHeaderPart[50](it, thread, post); }}
         {{?}}
         {{#def.postName}}
         {{? it.customPostHeaderPart && it.customPostHeaderPart[60]}}
-            {{#def[it.customPostHeaderPart[60]]}}
+            {{ out += it.customPostHeaderPart[60](it, thread, post); }}
         {{?}}
         {{? post.opIp && post.options.signAsOp}}
             <span class="opSign">[OP]</span>
         {{?}}
         {{? it.customPostHeaderPart && it.customPostHeaderPart[70]}}
-            {{#def[it.customPostHeaderPart[70]]}}
+            {{ out += it.customPostHeaderPart[70](it, thread, post); }}
         {{?}}
         {{? post.options.showTripcode && post.tripcode}}
             <span class="tripcode">{{=post.tripcode}}</span>
         {{?}}
         {{? it.customPostHeaderPart && it.customPostHeaderPart[80]}}
-            {{#def[it.customPostHeaderPart[80]]}}
+            {{ out += it.customPostHeaderPart[80](it, thread, post); }}
         {{?}}
         {{? it.board.showWhois && post.geolocation.flagName}}
             {{? post.geolocation.cityName}}
@@ -78,12 +78,12 @@
             {{?}}
         {{?}}
         {{? it.customPostHeaderPart && it.customPostHeaderPart[90]}}
-            {{#def[it.customPostHeaderPart[90]]}}
+            {{ out += it.customPostHeaderPart[90](it, thread, post); }}
         {{?}}
         <span class="nowrap postDateTime"
               name="dateTime">{{ out += it.formattedDate(post.createdAt, it.req); }}</span>
         {{? it.customPostHeaderPart && it.customPostHeaderPart[100]}}
-            {{#def[it.customPostHeaderPart[100]]}}
+            {{ out += it.customPostHeaderPart[100](it, thread, post); }}
         {{?}}
         <span class="nowrap">
             #<a href="{{? it.threads}}#{{=post.number}}{{??}}/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.threadNumber}}.html#{{=post.number}}{{?}}"
@@ -91,11 +91,11 @@
                 name="number" data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}"
                 data-thread-number="{{=post.threadNumber}}">{{=post.number}}</a>
             {{? it.customPostHeaderPart && it.customPostHeaderPart[110]}}
-                {{#def[it.customPostHeaderPart[110]]}}
+                {{ out += it.customPostHeaderPart[110](it, thread, post); }}
             {{?}}
             <span class="postSequenceNumber">{{=post.sequenceNumber}}</span>
             {{? it.customPostHeaderPart && it.customPostHeaderPart[120]}}
-                {{#def[it.customPostHeaderPart[120]]}}
+                {{ out += it.customPostHeaderPart[120](it, thread, post); }}
             {{?}}
             {{? thread.postingEnabled && !thread.archived && !thread.postLimitReached}}
                 <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
@@ -104,13 +104,13 @@
                                                                                             class="buttonImage"></a>]</span>
             {{?}}
             {{? it.customPostHeaderPart && it.customPostHeaderPart[130]}}
-                {{#def[it.customPostHeaderPart[130]]}}
+                {{ out += it.customPostHeaderPart[130](it, thread, post); }}
             {{?}}
             <span name="postActionsContainer">[<input type="image" src="/{{=it.site.pathPrefix}}img/post_actions.png" class="buttonImage"
                                                       name="postActions" title="{{=it.tr.postActionsText}}"
                                                       onclick="lord.showPostActionsMenu(event, this, {{=post.number}}); return false;">]</span>
             {{? it.customPostHeaderPart && it.customPostHeaderPart[140]}}
-                {{#def[it.customPostHeaderPart[140]]}}
+                {{ out += it.customPostHeaderPart[140](it, thread, post); }}
             {{?}}
             {{? post.isOp && !it.isThreadPage}}
                 <span name="toThread" class="postToThread postToThreadDesktop">
@@ -118,21 +118,21 @@
                         name="toThreadLink">{{=it.tr.toThread}}</a>]
                 </span>
             {{?}}
-            {{? it.customPostHeaderPart && it.customPostHeaderPart[150]}}
-                {{#def[it.customPostHeaderPart[150]]}}
+                {{? it.customPostHeaderPart && it.customPostHeaderPart[150]}}
+                {{ out += it.customPostHeaderPart[150](it, thread, post); }}
             {{?}}
         </span>
     </div>
     <div class="postBody">
         {{? it.customPostBodyPart && it.customPostBodyPart[0]}}
-            {{#def[it.customPostBodyPart[0]]}}
+            {{ out += it.customPostBodyPart[0](it, thread, post); }}
         {{?}}
         <div class="postFiles">
             {{~post.fileInfos :fileInfo}}
                 {{#def.postFile}}
             {{~}}
             {{? it.customPostBodyPart && it.customPostBodyPart[10]}}
-                {{#def[it.customPostBodyPart[10]]}}
+                {{ out += it.customPostBodyPart[10](it, thread, post); }}
             {{?}}
             <div class="postText">
                 <blockquote {{? it.isThreadPage}}class="blockquoteThread"{{?}}
@@ -140,7 +140,7 @@
             </div>
         </div>
         {{? it.customPostBodyPart && it.customPostBodyPart[20]}}
-            {{#def[it.customPostBodyPart[20]]}}
+            {{ out += it.customPostBodyPart[20](it, thread, post); }}
         {{?}}
         {{? post.updatedAt}}
             <div>
@@ -153,7 +153,7 @@
             </div>
         {{?}}
         {{? it.customPostBodyPart && it.customPostBodyPart[30]}}
-            {{#def[it.customPostBodyPart[30]]}}
+            {{ out += it.customPostBodyPart[30](it, thread, post); }}
         {{?}}
         {{? post.bannedFor}}
             <div>
@@ -161,13 +161,13 @@
             </div>
         {{?}}
         {{? it.customPostBodyPart && it.customPostBodyPart[40]}}
-            {{#def[it.customPostBodyPart[40]]}}
+            {{ out += it.customPostBodyPart[40](it, thread, post); }}
         {{?}}
         <div name="referencedByContainer" {{? post.referringPosts.length < 1}}style="display: none;"{{?}}>
             {{#def.postReferringPosts}}
         </div>
         {{? it.customPostBodyPart && it.customPostBodyPart[50]}}
-            {{#def[it.customPostBodyPart[50]]}}
+            {{ out += it.customPostBodyPart[50](it, thread, post); }}
         {{?}}
     </div>
     {{? post.isOp && !it.isThreadPage}}

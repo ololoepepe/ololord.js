@@ -15,4 +15,9 @@ lord.customEditPostDialogPart[30] = function(it, thread, post) {
     return lord.template("echoEditPostDialogPart", model, true);
 };
 
-lord.customPostBodyPart[0] = "echoPostBodyPart";
+lord.customPostBodyPart[0] = function(it, thread, post) {
+    if (!post.extraData || !+lord.data("threadNumber"))
+        return "";
+    var model = { link: post.extraData };
+    return lord.template("echoPostBodyPart", model, true);
+};
