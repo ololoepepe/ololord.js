@@ -37,6 +37,7 @@
 !pagination.jst
 !playlistItem.jst
 !post.jst
+!postActionsMenu.jst
 !postForm.jst
 !postReference.jst
 !rpgEditPostDialogPart.jst
