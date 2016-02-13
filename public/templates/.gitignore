@@ -16,12 +16,9 @@
 !custom-home.jst.example
 !deleteFileDialog.jst
 !deletePostDialog.jst
-!dPostBodyPart.jst
 !draft.jst
 !echoEditPostDialogPart.jst
-!echoPostBodyPart.jst
 !echoPostFormField.jst
-!echoPostSubject.jst
 !editAudioTagsDialog.jst
 !editPostDialog.jst
 !favoritesDialog.jst
@@ -41,13 +38,11 @@
 !postForm.jst
 !postReference.jst
 !rpgEditPostDialogPart.jst
-!rpgPostBodyPart.jst
 !rpgPostFormField.jst
 !searchAction.jst
 !searchResults.jst
 !settingsDialog.jst
 !setVotingOpenedDialog.jst
-!socPostHeaderPart.jst
 !synchronizationDialog.jst
 !thread.jst
 !threadPageLower.jst

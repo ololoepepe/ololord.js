@@ -1,20 +1,23 @@
+{{ (function() { }}
+{{ var data = post.extraData || { likeCount: 0, dislikeCount: 0 }; }}
 <span class="likeArea" name="likeArea">
     <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
           action="/{{=it.site.pathPrefix}}action/like" onsubmit="lord.likeDislike(event, this); return false;">
-        <input type="hidden" name="postNumber" value="{{=it.post.number}}" />
+        <input type="hidden" name="postNumber" value="{{=post.number}}" />
         <input type="image" src="/{{=it.site.pathPrefix}}img/like.png" name="buttonLike" title="{{=it.tr.likeText}}"
                width="16" height="16" class="buttonImage" />
     </form>
     <span name="likeCount">
-        {{=it.likeCount}}
+        {{=data.likeCount}}
     </span>
     <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
           action="/{{=it.site.pathPrefix}}action/dislike" onsubmit="lord.likeDislike(event, this); return false;">
-        <input type="hidden" name="postNumber" value="{{=it.post.number}}" />
+        <input type="hidden" name="postNumber" value="{{=post.number}}" />
         <input type="image" src="/{{=it.site.pathPrefix}}img/dislike.png" name="buttonDislike" class="buttonImage"
                title="{{=it.tr.dislikeText}}" width="16" height="16" />
     </form>
     <span name="dislikeCount">
-        {{=it.dislikeCount}}
+        {{=data.dislikeCount}}
     </span>
 </span>
+{{ })(); }}

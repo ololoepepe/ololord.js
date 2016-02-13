@@ -674,6 +674,7 @@ controller.initialize = function() {
                         data: data
                     };
                 }
+                console.log(name);
                 templates[name] = dot.template(data, {
                     evaluate: /\{\{([\s\S]+?)\}\}/g,
                     interpolate: /\{\{=([\s\S]+?)\}\}/g,

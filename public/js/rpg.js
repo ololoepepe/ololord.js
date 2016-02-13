@@ -108,14 +108,7 @@ lord.customEditPostDialogPart[50] = function(it, thread, post) {
     return lord.template("rpgEditPostDialogPart", model, true);
 };
 
-lord.customPostBodyPart[20] = function(it, thread, post) {
-    if (!post.extraData)
-        return "";
-    var model = merge.recursive(it, post.extraData);
-    model.thread = thread;
-    model.post = post;
-    return lord.template("rpgPostBodyPart", model, true);
-};
+lord.customPostBodyPart[20] = "rpgPostBodyPart";
 
 lord.postProcessors.push(function(post) {
     var postNumber = lord.data("number", post);
