@@ -43,6 +43,12 @@ controller = function(templateName, modelData) {
             return partial.name
         }))
     };
+    var timeOffset = config("site.timeOffset", 0);
+    var locale = config("site.locale", "en");
+    var format = config("site.dateFormat", "MM/DD/YYYY HH:mm:ss");
+    baseModelData.formattedDate = function(date) {
+        return moment(date).utcOffset(timeOffset).locale(locale).format(format);
+    };
     if (!modelData)
         modelData = {};
     var template = templates[templateName];
@@ -122,12 +128,6 @@ controller.error = function(res, error, ajax) {
         model.ban = error.ban;
         if (ajax)
             return h(error);
-        model.formattedDate = function(date) {
-            var timeOffset = config("site.timeOffset", 0);
-            var locale = config("site.locale", "en");
-            var format = config("site.dateFormat", "MM/DD/YYYY HH:mm:ss");
-            return moment(date).utcOffset(timeOffset).locale(locale).format(format);
-        };
         return controller("ban", model).then(function(data) {
             res.send(data);
         }).catch(h);

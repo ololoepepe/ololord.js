@@ -86,13 +86,25 @@ lord.customPostHeaderPart = {};
 lord.customPostMenuAction = {};
 lord.customPostBodyPart = {};
 lord.customEditPostDialogPart = {};
-lord.customPostProcessors = [];
+lord.postProcessors = [];
 lord.autoUpdateTimer = null;
 lord.blinkTimer = null;
 lord.pageVisible = "visible";
 lord.loadingImage = null;
 
 /*Functions*/
+
+(function() {
+    var settings = lord.settings();
+    var model = lord.model("base");
+    var timeOffset = ("local" == settings.time) ? (+settings.timeZoneOffset - model.site.timeOffset) : 0;
+
+    if ("local" == settings.time && timeOffset) {
+        lord.postProcessors.push(function(post) {
+            return lord.processFomattedDate(post);
+        });
+    }
+})();
 
 lord.worker.addEventListener("message", function(message) {
     try {
@@ -323,7 +335,8 @@ lord.appendExtrasToModel = function(model) {
     var settings = lord.settings();
     var locale = model.site.locale;
     var dateFormat = model.site.dateFormat;
-    var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
+    var timeOffset = model.site.timeOffset;
+    //var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
     model.settings = settings;
     model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
     model.formattedDate = function(date) {
@@ -397,7 +410,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
             lord.filesMap = null;
             lord.initFiles();
         }
-        lord.customPostProcessors.forEach(function(f) {
+        lord.postProcessors.forEach(function(f) {
             f(c.node);
         });
         var data = lord.getPostData(c.node);
@@ -2191,6 +2204,13 @@ lord.appendDraft = function(draft, visible) {
     model.draft = draft;
     model.draft.user = model.user;
     lord.appendExtrasToModel(model);
+    var settings = lord.settings();
+    var locale = model.site.locale;
+    var dateFormat = model.site.dateFormat;
+    var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
+    model.formattedDate = function(date) {
+        return moment(date).utcOffset(timeOffset).locale(locale).format(dateFormat);
+    };
     drafts.appendChild(lord.template("draft", model));
 };
 
@@ -3058,8 +3078,9 @@ lord.initializeOnLoadBoard = function() {
             var currentBoardName = lord.data("boardName");
             var spellsEnabled = lord.getLocalObject("spellsEnabled", true);
             var posts = lord.query(".post, .opPost");
+            //TODO: remove later
             posts.forEach(function(post) {
-                lord.customPostProcessors.forEach(function(f) {
+                lord.postProcessors.forEach(function(f) {
                     f(post);
                 });
             });

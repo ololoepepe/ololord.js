@@ -32,7 +32,7 @@ lord.likeDislike = function(event, form) {
     }).catch(lord.handleError);
 };
 
-lord.customPostProcessors.push(function(post) {
+lord.postProcessors.push(function(post) {
     var postNumber = lord.data("number", post);
     var ownLikes = lord.getLocalObject("ownLikes", {});
     var likeArea = lord.nameOne("likeArea", post);

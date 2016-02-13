@@ -117,7 +117,7 @@ lord.customPostBodyPart[20] = function(it, thread, post) {
     return lord.template("rpgPostBodyPart", model, true);
 };
 
-lord.customPostProcessors.push(function(post) {
+lord.postProcessors.push(function(post) {
     var postNumber = lord.data("number", post);
     var ownPosts = lord.getLocalObject("ownPosts", {});
     var ownVotes = lord.getLocalObject("ownVotes", {});

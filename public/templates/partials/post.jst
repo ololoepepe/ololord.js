@@ -308,8 +308,12 @@
         {{?}}
         {{? post.updatedAt}}
             <div>
-                <span class="modificationDateTime">{{=it.tr.modificationDateTimeText}}
-                    {{ out += it.formattedDate(post.updatedAt, it.req); }}</span>
+                <span class="modificationDateTime">
+                    {{=it.tr.modificationDateTimeText}}
+                    <span name="formattedDate">
+                        {{ out += it.formattedDate(post.updatedAt, it.req); }}
+                    </span>
+                </span>
             </div>
         {{?}}
         {{? it.customPostBodyPart && it.customPostBodyPart[30]}}

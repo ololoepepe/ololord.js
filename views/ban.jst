@@ -37,7 +37,7 @@
             <td>
                 <b>{{=it.tr.banDateTimeLabelText}}</b>
             </td>
-            <td>
+            <td name="formattedDate">
                 {{ out += it.formattedDate(it.ban.createdAt); }}
             </td>
         </tr>
@@ -56,7 +56,7 @@
                 <td>
                     <b>{{=it.tr.banExpiresLabelText}}</b>
                 </td>
-                <td>
+                <td name="formattedDate">
                     {{ out += it.formattedDate(ban.expiresAt); }}
                 </td>
             </tr>
