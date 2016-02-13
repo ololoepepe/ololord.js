@@ -21,6 +21,7 @@
 [done] Render board/thread/catalog/archive on the server side
 
 * Simplify /rpg/ board server code
+* Optimize thread expanding
 * Add ability to paint on any board using canvas
 * Improve file previews
 * Add own player for media file previews
