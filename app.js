@@ -125,7 +125,7 @@ if (cluster.isMaster) {
                 });
             }, config("server.rss.ttl", 60) * Tools.Minute);
         }
-        if (config("system.regenerateCacheOnStartup", false))
+        if (config("system.regenerateCacheOnStartup", true))
             return controller.regenerate();
         return Promise.resolve();
     }).then(function() {
