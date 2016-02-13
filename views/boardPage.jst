@@ -39,9 +39,9 @@
     </h1>
 </div>
 <div id="upperPlaceholder" style="display: none;"></div>
-<hr />
 <div id="threads">
     {{~it.threads :thread}}
+        <hr />
         <div id="thread{{=thread.opPost.number}}" class="thread"{{? thread.expanded}} data-expanded="true"{{?}}>
             {{~[thread.opPost] :post}}
                 {{#def.post}}
@@ -57,7 +57,6 @@
                 {{~}}
             </div>
         </div>
-        <hr />
     {{~}}
 </div>
 <div id="lowerPlaceholder" style="display: none;"></div>
