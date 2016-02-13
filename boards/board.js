@@ -264,6 +264,14 @@ var Board = function(name, title, options) {
     //
 };
 
+/*public*/ Board.prototype.customPostHeaderPart = function() {
+    //
+};
+
+/*public*/ Board.prototype.customPostBodyPart = function() {
+    //
+};
+
 var renderFileInfo = function(fi) {
     fi.sizeKB = fi.size / 1024;
     fi.sizeText = fi.sizeKB.toFixed(2) + "KB";

@@ -32,9 +32,25 @@
 {{~["Top"] :position}}
     {{#def.threadActions}}
 {{~}}
-<div id="threads" class="loadingMessage">
-    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
-    <h1 style="display: inline;">{{=it.tr.loadingPostsMessage}}</h1>
+<hr />
+<div id="threads">
+    {{~[it.thread] :thread}}
+        <div id="thread{{=thread.opPost.number}}" class="thread"{{? thread.expanded}} data-expanded="true"{{?}}>
+            {{~[thread.opPost] :post}}
+                {{#def.post}}
+            {{~}}
+            {{? thread.omittedPosts > 0}}
+                <div class="omittedPosts">
+                    {{=it.tr.omittedPostsText}} {{=thread.omittedPosts}}   
+                </div>
+            {{?}}
+            <div class="threadPosts">
+                {{~thread.lastPosts :post}}
+                    {{#def.post}}
+                {{~}}
+            </div>
+        </div>
+    {{~}}
 </div>
 <input id="afterAllPosts" type="hidden" />
 <hr />

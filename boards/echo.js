@@ -72,4 +72,15 @@ board.testParameters = function(req, fields, files, creatingThread) {
     return Promise.resolve();
 };
 
+board.customPostBodyPart = function(n, it, thread, post) {
+    return {
+        0: function(it, thread, post) {
+            if (!post.extraData || !it.isThreadPage)
+                return "";
+            var model = { link: post.extraData };
+            return controller.sync("echoPostBodyPart", model);
+        }
+    };
+};
+
 module.exports = board;

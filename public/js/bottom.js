@@ -64,7 +64,10 @@ lord.templates = {};
         var addSelector = function(rating) {
             var sel = 'a[data-rating="' + rating + '"]';
             selectors.push(sel);
-            s += sel + '{ background: url("../img/' + rating.toLowerCase() + '.png") center center; '
+            var dots = "..";
+            if (/\/((res|arch)\/\d+|catalog|archive)\.html$/.test(window.location.href))
+                dots += "/..";
+            s += sel + '{ background: url("' + dots + '/img/' + rating.toLowerCase() + '.png") center center; '
                 + 'width: ' + size + '; height: ' + size + '; }';
         };
         addSelector("R-18G");

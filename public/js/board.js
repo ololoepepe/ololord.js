@@ -2238,7 +2238,7 @@ lord.fillFormWithDraft = function(a) {
     var op = lord.nameOne("signAsOp", postForm);
     var tripcode = lord.nameOne("tripcode", postForm);
     var markupMode = lord.nameOne("markupMode", postForm);
-    //TODO: confirm is form not empty
+    //TODO: confirm if form not empty
     email.value = draft.email;
     name.value = draft.name;
     subject.value = draft.subject;
@@ -2997,203 +2997,182 @@ lord.initializeOnLoadBoard = function() {
             var pagesPlaceholder = lord.id("pagesPlaceholder");
             pagesPlaceholder.parentNode.replaceChild(lord.template("pagination", c.model), pagesPlaceholder);
         }
-        var ppp;
-        if (c.threadOrBoard) {
-        c.threads = model.threads || [model.thread];
-        var threads = lord.id("threads");
-        var html = "";
-        c.threads.forEach(function(thread) {
-            c.model.thread = thread;
-            if (c.threadOrBoard)
-                html += "<hr />";
-            var templateName = c.threadOrBoard ? "thread" : "catalogThread";
-            html += lord.template(templateName, c.model, true);
-        });
-        ppp = lord.createDocumentFragment(html)} else { ppp = Promise.resolve(); };ppp.then(function(frag) {
-            if (frag) {
-            lord.removeChildren(threads);
-            lord.removeClass(threads, "loadingMessage");
-            threads.appendChild(frag);
-            lord.scriptWorkaround(threads);
+        if (lord.queryOne(".opPost[data-archived='true']")) {
+            lord.name("backButton").forEach(function(btn) {
+                btn.href += "/archive.html";
+            });
         }
-            if (lord.queryOne(".opPost[data-archived='true']")) {
-                lord.name("backButton").forEach(function(btn) {
-                    btn.href += "/archive.html";
+        if (typeof lord.postsLoaded == "function")
+            lord.postsLoaded();
+        $(".postBody").css("maxWidth", ($(window).width() - 30) + "px");
+        var dw = (c.model.deviceType == "mobile") ? 100 : 320;
+        $(".codeBlock").css("maxWidth", ($(window).width() - dw) + "px");
+        if (lord.deviceType("mobile"))
+            lord.setTooltips();
+        setTimeout(function() {
+            lord.hash(lord.hash());
+        }, lord.Second);
+        var threadNumber = +lord.data("threadNumber");
+        var key = lord.data("boardName") + (threadNumber ? ("/" + threadNumber) : "");
+        var drafts = lord.getLocalObject("drafts", {})[key];
+        if (drafts) {
+            drafts.forEach(function(draft) {
+                lord.appendDraft(draft, lord.getLocalObject("draftsVisible", true));
+            });
+        }
+        document.body.onclick = lord.globalOnclick;
+        if (!lord.deviceType("mobile")) {
+            document.body.onmouseover = lord.globalOnmouseover;
+            document.body.onmouseout = lord.globalOnmouseout;
+        }
+        if (lord.getLocalObject("mumWatching", false)) {
+            var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
+            img.src = "/" + lord.data("sitePathPrefix") + "img/mum_watching.png";
+            lord.query(".postFileFile > a > img").forEach(function(img) {
+                lord.addClass(img, "mumWatching");
+            });
+        }
+        if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
+            var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
+            var key = function(name) {
+                if (!hotkeys)
+                    return lord.DefaultHotkeys.dir[name];
+                return hotkeys[name] || lord.DefaultHotkeys.dir[name];
+            };
+            var btn = lord.queryOne(".leafButton.leafButtonPrevious");
+            if (btn)
+                btn.title += " (" + key("previousPageImage") + ")";
+            btn = lord.queryOne(".leafButton.leafButtonNext");
+            if (btn)
+                btn.title += " (" + key("nextPageImage") + ")";
+            lord.query("[name='quickReply']").forEach(function(a) {
+                a.title += " (" + key("quickReply") + ")";
+            });
+            lord.query("[name='toThreadLink']").forEach(function(a) {
+                a.title += "(" + key("goToThread") + ")";
+            });
+            lord.query("[name='hideButton']").forEach(function(img) {
+                img.title += "(" + key("hidePost") + ")";
+            });
+            var table = lord.queryOne(".postformMarkup");
+            if (table) {
+                var markupList = ["Bold", "Italics", "StrikedOut", "Underlined", "Spoiler", "Quotation", "Code"];
+                markupList.forEach(function(s) {
+                    s = "markup" + s;
+                    var btn = lord.nameOne(s, table);
+                    if (!btn)
+                        return;
+                    btn.title += " (" + key(s) + ")";
                 });
             }
-            if (typeof lord.postsLoaded == "function")
-                lord.postsLoaded();
-            $(".postBody").css("maxWidth", ($(window).width() - 30) + "px");
-            var dw = (c.model.deviceType == "mobile") ? 100 : 320;
-            $(".codeBlock").css("maxWidth", ($(window).width() - dw) + "px");
-            if (lord.deviceType("mobile"))
-                lord.setTooltips();
-            setTimeout(function() {
-                lord.hash(lord.hash());
-            }, lord.Second);
-            var threadNumber = +lord.data("threadNumber");
-            var key = lord.data("boardName") + (threadNumber ? ("/" + threadNumber) : "");
-            var drafts = lord.getLocalObject("drafts", {})[key];
-            if (drafts) {
-                drafts.forEach(function(draft) {
-                    lord.appendDraft(draft, lord.getLocalObject("draftsVisible", true));
-                });
-            }
-            document.body.onclick = lord.globalOnclick;
-            if (!lord.deviceType("mobile")) {
-                document.body.onmouseover = lord.globalOnmouseover;
-                document.body.onmouseout = lord.globalOnmouseout;
-            }
-            if (lord.getLocalObject("mumWatching", false)) {
-                var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
-                img.src = "/" + lord.data("sitePathPrefix") + "img/mum_watching.png";
-                lord.query(".postFileFile > a > img").forEach(function(img) {
-                    lord.addClass(img, "mumWatching");
-                });
-            }
-            if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
-                var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
-                var key = function(name) {
-                    if (!hotkeys)
-                        return lord.DefaultHotkeys.dir[name];
-                    return hotkeys[name] || lord.DefaultHotkeys.dir[name];
-                };
-                var btn = lord.queryOne(".leafButton.leafButtonPrevious");
-                if (btn)
-                    btn.title += " (" + key("previousPageImage") + ")";
-                btn = lord.queryOne(".leafButton.leafButtonNext");
-                if (btn)
-                    btn.title += " (" + key("nextPageImage") + ")";
-                lord.query("[name='quickReply']").forEach(function(a) {
-                    a.title += " (" + key("quickReply") + ")";
-                });
-                lord.query("[name='toThreadLink']").forEach(function(a) {
-                    a.title += "(" + key("goToThread") + ")";
-                });
-                lord.query("[name='hideButton']").forEach(function(img) {
-                    img.title += "(" + key("hidePost") + ")";
-                });
-                var table = lord.queryOne(".postformMarkup");
-                if (table) {
-                    var markupList = ["Bold", "Italics", "StrikedOut", "Underlined", "Spoiler", "Quotation", "Code"];
-                    markupList.forEach(function(s) {
-                        s = "markup" + s;
-                        var btn = lord.nameOne(s, table);
-                        if (!btn)
-                            return;
-                        btn.title += " (" + key(s) + ")";
-                    });
-                }
-                lord.query("[name='updateThreadButton']").forEach(function(a) {
-                    a.title += " (" + key("updateThread") + ")";
-                });
-                btn = lord.nameOne("submit", lord.id("postForm"));
-                if (btn)
-                    btn.title += "(" + key("submitReply") + ")";
-            }
-            if (lord.showTripcode(lord.data("threadNumber"))) {
-                var postForm = lord.id("postForm");
-                if (postForm) {
-                    var sw = lord.nameOne("tripcode", postForm);
-                    if (sw) {
-                        sw.checked = true;
-                        $(sw).button("refresh");
-                    }
+            lord.query("[name='updateThreadButton']").forEach(function(a) {
+                a.title += " (" + key("updateThread") + ")";
+            });
+            btn = lord.nameOne("submit", lord.id("postForm"));
+            if (btn)
+                btn.title += "(" + key("submitReply") + ")";
+        }
+        if (lord.showTripcode(lord.data("threadNumber"))) {
+            var postForm = lord.id("postForm");
+            if (postForm) {
+                var sw = lord.nameOne("tripcode", postForm);
+                if (sw) {
+                    sw.checked = true;
+                    $(sw).button("refresh");
                 }
             }
-            var fav = lord.getLocalObject("favoriteThreads", {});
-            var currentBoardName = lord.data("boardName");
-            var spellsEnabled = lord.getLocalObject("spellsEnabled", true);
-            var posts = lord.query(".post, .opPost");
-            //TODO: remove later
-            posts.forEach(function(post) {
-                lord.postProcessors.forEach(function(f) {
-                    f(post);
+        }
+        var fav = lord.getLocalObject("favoriteThreads", {});
+        var currentBoardName = lord.data("boardName");
+        var spellsEnabled = lord.getLocalObject("spellsEnabled", true);
+        var posts = lord.query(".post, .opPost");
+        posts.forEach(function(post) {
+            lord.postProcessors.slice(1).forEach(function(f) {
+                f(post);
+            });
+        });
+        var p;
+        if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
+            lord.strikeOutHiddenPostLinks();
+        if (lord.getLocalObject("signOpPostLinks", true))
+            lord.signOpPostLinks();
+        if (lord.getLocalObject("signOwnPostLinks", true))
+            lord.signOwnPostLinks();
+        var p;
+        if (spellsEnabled)
+            p = lord.doWork("parseSpells", lord.getLocalObject("spells", lord.DefaultSpells));
+        else
+            p = Promise.resolve();
+        p.then(function(spells) {
+            if (spells && spells.root)
+                lord.spells = spells.root.spells;
+            if (!spellsEnabled)
+                return Promise.resolve();
+            var boardName = lord.data("boardName");
+            var list = [];
+            return lord.gently(posts, function(post) {
+                var data = lord.getPostData(post);
+                if (!data)
+                    return;
+                list.push(data);
+            }, {
+                delay: 10,
+                n: 10
+            }).then(function() {
+                return lord.doWork("processPosts", {
+                    posts: list,
+                    spells: lord.spells
                 });
             });
-            var p;
-            if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
-                lord.strikeOutHiddenPostLinks();
-            if (lord.getLocalObject("signOpPostLinks", true))
-                lord.signOpPostLinks();
-            if (lord.getLocalObject("signOwnPostLinks", true))
-                lord.signOwnPostLinks();
-            var p;
-            if (spellsEnabled)
-                p = lord.doWork("parseSpells", lord.getLocalObject("spells", lord.DefaultSpells));
-            else
-                p = Promise.resolve();
-            p.then(function(spells) {
-                if (spells && spells.root)
-                    lord.spells = spells.root.spells;
-                if (!spellsEnabled)
-                    return Promise.resolve();
-                var boardName = lord.data("boardName");
-                var list = [];
-                return lord.gently(posts, function(post) {
-                    var data = lord.getPostData(post);
-                    if (!data)
-                        return;
-                    list.push(data);
-                }, {
-                    delay: 10,
-                    n: 10
-                }).then(function() {
-                    return lord.doWork("processPosts", {
-                        posts: list,
-                        spells: lord.spells
-                    });
-                });
-            }).then(function(list) {
-                var map = list ? list.reduce(function(acc, data) {
-                    acc[data.postNumber] = data;
-                    return acc;
-                }, {}) : {};
-                posts.forEach(function(post) {
-                    lord.processPost(post, map[+post.id]);
-                });
-            }).then(function() {
-                lord.query(".opPost").forEach(function(opPost) {
-                    var threadNumber = +opPost.id;
-                    var btn = lord.nameOne("addToFavoritesButton", opPost);
-                    if (fav.hasOwnProperty(currentBoardName + "/" + threadNumber)) {
-                        var img = lord.queryOne("img", btn);
-                        var span = lord.queryOne("span", btn);
-                        lord.removeChildren(span);
-                        span.appendChild(lord.node("text", lord.text("removeThreadFromFavoritesText")));
-                        img.src = img.src.replace("favorite.png", "favorite_active.png");
-                    }
-                });
-                if (lord.getLocalObject("hideTripcodes", false)) {
-                    lord.query(".tripcode").forEach(function(span) {
-                        span.style.display = "none";
-                    });
+        }).then(function(list) {
+            var map = list ? list.reduce(function(acc, data) {
+                acc[data.postNumber] = data;
+                return acc;
+            }, {}) : {};
+            posts.forEach(function(post) {
+                lord.processPost(post, map[+post.id]);
+            });
+        }).then(function() {
+            lord.query(".opPost").forEach(function(opPost) {
+                var threadNumber = +opPost.id;
+                var btn = lord.nameOne("addToFavoritesButton", opPost);
+                if (fav.hasOwnProperty(currentBoardName + "/" + threadNumber)) {
+                    var img = lord.queryOne("img", btn);
+                    var span = lord.queryOne("span", btn);
+                    lord.removeChildren(span);
+                    span.appendChild(lord.node("text", lord.text("removeThreadFromFavoritesText")));
+                    img.src = img.src.replace("favorite.png", "favorite_active.png");
                 }
-                if (lord.getLocalObject("hideUserNames", false)) {
-                    lord.query(".someName").forEach(function(span) {
-                        span.style.display = "none";
-                    });
-                }
+            });
+            if (lord.getLocalObject("hideTripcodes", false)) {
+                lord.query(".tripcode").forEach(function(span) {
+                    span.style.display = "none";
+                });
+            }
+            if (lord.getLocalObject("hideUserNames", false)) {
+                lord.query(".someName").forEach(function(span) {
+                    span.style.display = "none";
+                });
+            }
+        }).catch(lord.handleError);
+        var lastLang = lord.getLocalObject("lastCodeLang", "-");
+        var sel = lord.queryOne(".postformMarkup > span > [name='codeLang']");
+        if (sel) {
+            lord.arr(sel.options).forEach(function(opt) {
+                if (opt.value == lastLang)
+                    opt.selected = true;
+            });
+        }
+        lord.setPostformMarkupVisible(!lord.getLocalObject("hidePostformMarkup", false));
+        if (!lord.data("threadNumber")) {
+            lord.api("lastPostNumber", { boardName: currentBoardName }).then(function(result) {
+                var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
+                lastPostNumbers[currentBoardName] = result.lastPostNumber;
+                lord.setLocalObject("lastPostNumbers", lastPostNumbers);
             }).catch(lord.handleError);
-            var lastLang = lord.getLocalObject("lastCodeLang", "-");
-            var sel = lord.queryOne(".postformMarkup > span > [name='codeLang']");
-            if (sel) {
-                lord.arr(sel.options).forEach(function(opt) {
-                    if (opt.value == lastLang)
-                        opt.selected = true;
-                });
-            }
-            lord.setPostformMarkupVisible(!lord.getLocalObject("hidePostformMarkup", false));
-            if (!lord.data("threadNumber")) {
-                lord.api("lastPostNumber", { boardName: currentBoardName }).then(function(result) {
-                    var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
-                    lastPostNumbers[currentBoardName] = result.lastPostNumber;
-                    lord.setLocalObject("lastPostNumbers", lastPostNumbers);
-                }).catch(lord.handleError);
-            }
-            lord.initFiles();
-            lord.scrollHandler();
-        });
+        }
+        lord.initFiles();
+        lord.scrollHandler();
     }).catch(lord.handleError);
 };
 

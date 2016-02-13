@@ -39,9 +39,26 @@
     </h1>
 </div>
 <div id="upperPlaceholder" style="display: none;"></div>
-<div id="threads" class="loadingMessage">
-    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
-    <h1 style="display: inline;">{{=it.tr.loadingThreadsMessage}}</h1>
+<hr />
+<div id="threads">
+    {{~it.threads :thread}}
+        <div id="thread{{=thread.opPost.number}}" class="thread"{{? thread.expanded}} data-expanded="true"{{?}}>
+            {{~[thread.opPost] :post}}
+                {{#def.post}}
+            {{~}}
+            {{? thread.omittedPosts > 0}}
+                <div class="omittedPosts">
+                    {{=it.tr.omittedPostsText}} {{=thread.omittedPosts}}   
+                </div>
+            {{?}}
+            <div class="threadPosts">
+                {{~thread.lastPosts :post}}
+                    {{#def.post}}
+                {{~}}
+            </div>
+        </div>
+        <hr />
+    {{~}}
 </div>
 <div id="lowerPlaceholder" style="display: none;"></div>
 <hr />

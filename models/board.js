@@ -432,6 +432,8 @@ var generateThreadHTML = function(board, threadNumber, model, nowrite) {
     model.threadNumber = model.thread.number;
     return board.postformRules().then(function(rules) {
         model.postformRules = rules;
+        model.customPostHeaderPart = board.customPostHeaderPart() || {};
+        model.customPostBodyPart = board.customPostBodyPart() || {};
         return controller("threadPage", model);
     }).then(function(data) {
         if (nowrite)
@@ -492,6 +494,8 @@ var generatePage = function(boardName, pageNumber) {
         return board.postformRules();
     }).then(function(rules) {
         c.model.postformRules = rules;
+        c.model.customPostHeaderPart = board.customPostHeaderPart() || {};
+        c.model.customPostBodyPart = board.customPostBodyPart() || {};
         return controller("boardPage", c.model);
     }).then(function(data) {
         return Cache.setHTML(`page-${board.name}-${pageNumber}`, data);

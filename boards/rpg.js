@@ -348,4 +348,17 @@ board.renderPost = function(post) {
     });
 };
 
+board.customPostBodyPart = function(n, it, thread, post) {
+    return {
+        20: function(it, thread, post) {
+            if (!post.extraData)
+                return "";
+            var model = merge.recursive(it, post.extraData);
+            model.thread = thread;
+            model.post = post;
+            return controller.sync("rpgPostBodyPart", model);
+        }
+    };
+};
+
 module.exports = board;

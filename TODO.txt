@@ -18,6 +18,7 @@
 [done] Use common CSS file (specify style-specific stuff only in separate files)
 [done] Add ability to reload templates/partials
 [done] Move post actions menu to a separate template
+[done] Render board/thread/catalog/archive on the server side
 
 * Simplify /rpg/ board server code
 * Add ability to paint on any board using canvas
@@ -25,7 +26,6 @@
 * Add own player for media file previews
 * Add playlist to every page
 * Optimize spells
-* Render board/thread/catalog/archive on the server side
 * Fix referenced/referring posts when moving a thread
 * Treat manually and auto-hidden posts differently
 * Show auto-hide reason
