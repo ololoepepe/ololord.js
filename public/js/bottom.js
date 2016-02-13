@@ -88,4 +88,26 @@ lord.templates = {};
     document.close();
     lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
     lord.createStylesheetLink("3rdparty/jquery-ui/" + settings.style.name + "/jquery-ui.min.css", true);
+    (function() {
+        var settings = lord.settings();
+        var model = lord.model("base");
+        var locale = model.site.locale;
+        var dateFormat = model.site.dateFormat;
+        var timeOffset = ("local" == settings.time) ? (+settings.timeZoneOffset - model.site.timeOffset) : 0;
+
+        lord.processFomattedDate = function(parent) {
+            if ("local" != settings.time || !timeOffset)
+                return;
+            if (!parent)
+                parent = document.body;
+            lord.query("[name='dateTime'], [name='formattedDate']", parent).forEach(function(span) {
+                var date = span.textContent.replace(/^\s+/, "").replace(/\s+$/, "");
+                moment.locale(locale);
+                var oldDate = date;
+                date = moment(date, dateFormat).add(timeOffset, "minutes").locale(locale).format(dateFormat);
+                lord.removeChildren(span);
+                span.appendChild(lord.node("text", date));
+            });
+        };
+    })();
 })();

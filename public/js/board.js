@@ -82,10 +82,10 @@ lord.worker = new Worker("/js/worker.js");
 lord.workerTasks = {};
 lord.customPostFormField = {};
 lord.customPostFormOption = {};
-lord.customPostHeaderPart = {};
 lord.customPostMenuAction = {};
-lord.customPostBodyPart = {};
 lord.customEditPostDialogPart = {};
+lord.customPostHeaderPart = {};
+lord.customPostBodyPart = {};
 lord.postProcessors = [];
 lord.autoUpdateTimer = null;
 lord.blinkTimer = null;
@@ -336,7 +336,6 @@ lord.appendExtrasToModel = function(model) {
     var locale = model.site.locale;
     var dateFormat = model.site.dateFormat;
     var timeOffset = model.site.timeOffset;
-    //var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
     model.settings = settings;
     model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
     model.formattedDate = function(date) {
@@ -347,7 +346,6 @@ lord.appendExtrasToModel = function(model) {
     };
     model.customPostBodyPart = lord.customPostBodyPart;
     model.customPostHeaderPart = lord.customPostHeaderPart;
-    model.customPostMenuAction = lord.customPostMenuAction;
 };
 
 lord.createPostNode = function(post, permanent, threadInfo) {
@@ -2809,6 +2807,35 @@ lord.showMenu = function(e, input, selector) {
         of: $(input),
         collision: "fit flip"
     }).show();
+};
+
+lord.showPostActionsMenu = function(e, input, postNumber) {
+    var id = "post" + postNumber + "ActionsMenu";
+    if (!lord.id(id)) {
+        var post = lord.id(postNumber);
+        if (!post)
+            return;
+        var model = {
+            post: {
+                number: postNumber,
+                rawText: lord.queryOne("blockquote", post).textContent,
+                fileInfos: lord.query(".postFile", post),
+                isOp: lord.hasClass(post, "opPost")
+            },
+            thread: {
+                fixed: lord.data("fixed", post),
+                closed: lord.data("closed", post),
+                unbumpable: lord.data("unbumpable", post),
+                expanded: lord.data("expanded", post)
+            },
+            customPostMenuAction: lord.customPostMenuAction,
+            isThreadPage: +lord.data("threadNumber")
+        };
+        model = merge.recursive(model, lord.model(["base", "tr", "board/" + lord.data("boardName")], true));
+        lord.appendExtrasToModel(model);
+        post.appendChild(lord.template("postActionsMenu", model));
+    }
+    return lord.showMenu(e, input, "#" + id);
 };
 
 lord.selectCaptchaEngine = function() {
