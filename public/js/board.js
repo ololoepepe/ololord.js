@@ -2559,7 +2559,57 @@ lord.expandThread = function(thread) {
             var offset = c.model.thread.lastPosts.length - c.model.board.maxLastPosts;
             c.model.thread.lastPosts = c.model.thread.lastPosts.slice(offset);
         }
-        thread.parentNode.replaceChild(lord.template("thread", c.model), thread);
+        var nthread = lord.template("thread", c.model);
+        var posts = lord.query(".post, .opPost", nthread);
+        posts.forEach(function(post) {
+            lord.postProcessors.forEach(function(f) {
+                f(post);
+            });
+        });
+        var p;
+        if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
+            lord.strikeOutHiddenPostLinks(nthread);
+        if (lord.getLocalObject("signOpPostLinks", true))
+            lord.signOpPostLinks(nthread);
+        if (lord.getLocalObject("signOwnPostLinks", true))
+            lord.signOwnPostLinks(nthread);
+        thread.parentNode.replaceChild(nthread, thread);
+        if (lord.spells) {
+            var boardName = lord.data("boardName");
+            var list = [];
+            lord.gently(posts, function(post) {
+                var data = lord.getPostData(post);
+                if (!data)
+                    return;
+                list.push(data);
+            }, {
+                delay: 10,
+                n: 10
+            }).then(function() {
+                return lord.doWork("processPosts", {
+                    posts: list,
+                    spells: lord.spells
+                });
+            }).then(function(list) {
+                var map = list ? list.reduce(function(acc, data) {
+                    acc[data.postNumber] = data;
+                    return acc;
+                }, {}) : {};
+                posts.forEach(function(post) {
+                    lord.processPost(post, map[+post.id]);
+                });
+            }).catch(lord.handleError);
+        }
+        if (lord.getLocalObject("hideTripcodes", false)) {
+            lord.query(".tripcode", nthread).forEach(function(span) {
+                span.style.display = "none";
+            });
+        }
+        if (lord.getLocalObject("hideUserNames", false)) {
+            lord.query(".someName", nthread).forEach(function(span) {
+                span.style.display = "none";
+            });
+        }
     }).catch(function(err) {
         lord.handleError(err);
         thread.removeChild(div);
@@ -2815,6 +2865,7 @@ lord.showPostActionsMenu = function(e, input, postNumber) {
         var post = lord.id(postNumber);
         if (!post)
             return;
+        var fav = lord.getLocalObject("favoriteThreads", {});
         var model = {
             post: {
                 number: postNumber,
@@ -2826,7 +2877,8 @@ lord.showPostActionsMenu = function(e, input, postNumber) {
                 fixed: lord.data("fixed", post),
                 closed: lord.data("closed", post),
                 unbumpable: lord.data("unbumpable", post),
-                expanded: lord.data("expanded", post)
+                expanded: lord.data("expanded", post),
+                isInFavorites: fav.hasOwnProperty(lord.data("boardName") + "/" + lord.data("threadNumber", post))
             },
             customPostMenuAction: lord.customPostMenuAction,
             isThreadPage: +lord.data("threadNumber")
@@ -3075,7 +3127,6 @@ lord.initializeOnLoadBoard = function() {
             }
         }
     }
-    var fav = lord.getLocalObject("favoriteThreads", {});
     var currentBoardName = lord.data("boardName");
     var spellsEnabled = lord.getLocalObject("spellsEnabled", true);
     var posts = lord.query(".post, .opPost");
@@ -3126,17 +3177,6 @@ lord.initializeOnLoadBoard = function() {
             lord.processPost(post, map[+post.id]);
         });
     }).then(function() {
-        lord.query(".opPost").forEach(function(opPost) {
-            var threadNumber = +opPost.id;
-            var btn = lord.nameOne("addToFavoritesButton", opPost);
-            if (fav.hasOwnProperty(currentBoardName + "/" + threadNumber)) {
-                var img = lord.queryOne("img", btn);
-                var span = lord.queryOne("span", btn);
-                lord.removeChildren(span);
-                span.appendChild(lord.node("text", lord.text("removeThreadFromFavoritesText")));
-                img.src = img.src.replace("favorite.png", "favorite_active.png");
-            }
-        });
         if (lord.getLocalObject("hideTripcodes", false)) {
             lord.query(".tripcode").forEach(function(span) {
                 span.style.display = "none";

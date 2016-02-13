@@ -62,8 +62,8 @@
         <li>
             <a name="addToFavoritesButton" href="javascript:void(0);"
                onclick="lord.addToOrRemoveFromFavorites(this); return false;">
-                <img src="/{{=it.site.pathPrefix}}img/favorite.png" class="signImage">
-                <span>{{=it.tr.addThreadToFavoritesText}}</span></a>
+                <img src="/{{=it.site.pathPrefix}}img/favorite{{? it.thread.isInFavorites}}_active{{?}}.png" class="signImage">
+                <span>{{? !it.thread.isInFavorites}}{{=it.tr.addThreadToFavoritesText}}{{??}}{{=it.tr.removeThreadFromFavoritesText}}{{?}}</span></a>
         </li>
         {{? it.customPostMenuAction && it.customPostMenuAction[80]}}
             {{ out += it.customPostMenuAction[80](it, thread, post); }}
