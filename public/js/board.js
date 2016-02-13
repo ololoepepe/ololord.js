@@ -86,6 +86,7 @@ lord.customPostHeaderPart = {};
 lord.customPostMenuAction = {};
 lord.customPostBodyPart = {};
 lord.customEditPostDialogPart = {};
+lord.customPostProcessors = [];
 lord.autoUpdateTimer = null;
 lord.blinkTimer = null;
 lord.pageVisible = "visible";
@@ -396,6 +397,9 @@ lord.createPostNode = function(post, permanent, threadInfo) {
             lord.filesMap = null;
             lord.initFiles();
         }
+        lord.customPostProcessors.forEach(function(f) {
+            f(c.node);
+        });
         var data = lord.getPostData(c.node);
         return lord.doWork("processPosts", {
             posts: [data],
@@ -3054,6 +3058,11 @@ lord.initializeOnLoadBoard = function() {
             var currentBoardName = lord.data("boardName");
             var spellsEnabled = lord.getLocalObject("spellsEnabled", true);
             var posts = lord.query(".post, .opPost");
+            posts.forEach(function(post) {
+                lord.customPostProcessors.forEach(function(f) {
+                    f(post);
+                });
+            });
             var p;
             if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
                 lord.strikeOutHiddenPostLinks();

@@ -114,11 +114,35 @@ lord.customPostBodyPart[20] = function(it, thread, post) {
     var model = merge.recursive(it, post.extraData);
     model.thread = thread;
     model.post = post;
-    var ownVotes = lord.getLocalObject("ownVotes", {});
-    model.voted = !!ownVotes[post.number];
-    model.checkOwnVoteVariant = function(variant) {
-        var ids = ownVotes[post.number];
-        return ids && ids[variant.id];
-    };
     return lord.template("rpgPostBodyPart", model, true);
 };
+
+lord.customPostProcessors.push(function(post) {
+    var postNumber = lord.data("number", post);
+    var ownPosts = lord.getLocalObject("ownPosts", {});
+    var ownVotes = lord.getLocalObject("ownVotes", {});
+    var ids = ownVotes[postNumber];
+    var form = lord.queryOne(".vote > form", post);
+    var voteVariants = lord.nameOne("voteVariants", post);
+    if (ownPosts["rpg/" + postNumber]) {
+        if (form)
+            form.parentNode.replaceChild(voteVariants, form);
+        lord.query("input", voteVariants).forEach(function(input) {
+            input.setAttribute("disabled", true);
+        });
+    }
+    if (ids) {
+        lord.query("input", voteVariants).forEach(function(input) {
+            input.setAttribute("disabled", true);
+            if (ids[input.value])
+                input.setAttribute("checked", true);
+        });
+        if (form) {
+            form.action = form.action.replace(/\/vote$/, "/unvote");
+            var btn = lord.nameOne("buttonVote", form);
+            btn.setAttribute("name", "buttonUnvote");
+            btn.src = btn.src.replace(/\/vote\.png$/, "/unvote.png");
+            btn.title = lord.text("unvoteActionText");
+        }
+    }
+});
