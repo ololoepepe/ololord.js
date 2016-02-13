@@ -662,17 +662,26 @@ lord.toArray = function(obj) {
     return arr;
 };
 
-lord.removeChildren = function(obj) {
-    if (!obj || typeof obj.removeChild != "function")
+lord.removeChildren = function(el) {
+    if (!el || typeof el.removeChild != "function")
         return;
-    while (obj.firstChild)
-        obj.removeChild(obj.firstChild);
+    while (el.firstChild)
+        el.removeChild(el.firstChild);
 };
 
-lord.removeSelf = function(obj) {
-    if (!obj || !obj.parentNode || typeof obj.parentNode.removeChild != "function")
+lord.removeSelf = function(el) {
+    if (!el || !el.parentNode || typeof el.parentNode.removeChild != "function")
         return;
-    obj.parentNode.removeChild(obj);
+    el.parentNode.removeChild(el);
+};
+
+lord.wrap = function(el, wrapper) {
+    if (!el || !wrapper || !el.parentNode || typeof el.parentNode.replaceChild != "function"
+        || typeof wrapper.appendChild != "function") {
+        return;
+    }
+    el.parentNode.replaceChild(wrapper, el);
+    wrapper.appendChild(el);
 };
 
 lord.last = function(arr) {

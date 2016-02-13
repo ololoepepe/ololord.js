@@ -7,9 +7,6 @@ lord.customPostHeaderPart[100] = function(it, thread, post) {
     });
     model.thread = thread;
     model.post = post;
-    var ownLikes = lord.getLocalObject("ownLikes", {});
-    model.liked = +ownLikes[post.number] > 0;
-    model.disliked = +ownLikes[post.number] < 0;
     return lord.template("socPostHeaderPart", model, true);
 };
 
@@ -34,3 +31,15 @@ lord.likeDislike = function(event, form) {
         return lord.updatePost(lord.data("number", form, true));
     }).catch(lord.handleError);
 };
+
+lord.customPostProcessors.push(function(post) {
+    var postNumber = lord.data("number", post);
+    var ownLikes = lord.getLocalObject("ownLikes", {});
+    var likeArea = lord.nameOne("likeArea", post);
+    if (!likeArea)
+        return;
+    if (+ownLikes[postNumber] > 0)
+        lord.wrap(lord.nameOne("likeCount", likeArea), lord.node("b"));
+    else if (+ownLikes[postNumber] < 0)
+        lord.wrap(lord.nameOne("dislikeCount", likeArea), lord.node("b"));
+});
