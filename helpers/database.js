@@ -1057,7 +1057,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
                     return Cache.getJSON(c.sourceId);
                 }).then(function(data) {
                     c.model = JSON.parse(data.data);
-                    c.model.archived = true;
+                    c.model.thread.archived = true;
                     return Tools.writeFile(`${c.archPath}/${oldThreadNumber}.json`, JSON.stringify(c.model));
                 }).then(function() {
                     return BoardModel.generateThreadHTML(board, oldThreadNumber, c.model, true);

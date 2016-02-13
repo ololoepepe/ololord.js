@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<body {{#def.baseData}} data-thread-number="{{=it.threadNumber}}" {{? it.archived}}data-archived="true"{{?}}>
+<body {{#def.baseData}}
+      data-thread-number="{{=it.threadNumber}}"
+      {{? it.thread.archived}}data-archived="true"{{?}}
+      {{? it.thread.postingEnabled}}data-posting-enabled="true"{{?}}
+      {{? it.thread.postLimitReached}}data-post-limit-reached="true"{{?}}
+      {{? it.thread.bumpLimitReached}}data-bump-limit-reached="true"{{?}}>
 <script id="model-postformRules" type="application/json">{{ out += JSON.stringify(it.postformRules); }}</script>
 {{? it.site.vkontakte.integrationEnabled }}
     <script type="text/javascript">

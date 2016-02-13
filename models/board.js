@@ -423,7 +423,7 @@ var renderThread = function(board, thread) {
 };
 
 var generateThreadHTML = function(board, threadNumber, model, nowrite) {
-    model.title = board.title + " — " + model.thread.number;
+    model.title = model.thread.title || (board.title + " — " + model.thread.number);
     model.isBoardPage = true;
     model.isThreadPage = true;
     model.board = controller.boardModel(board).board;
