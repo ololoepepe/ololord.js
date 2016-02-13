@@ -113,3 +113,11 @@ input.buttonImage {
 .boardSelectForm {
     display: inline;
 }
+
+.postText {
+    max-width: 80%;
+}
+
+.postToThreadDesktop {
+    display: none;
+}

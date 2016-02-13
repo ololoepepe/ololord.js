@@ -69,3 +69,16 @@ input.buttonImage {
 .signImage {
     vertical-align: middle;
 }
+
+.postText {
+    display: inline-block;
+    max-width: 80%;
+}
+
+.postFile ~ .postFile ~ .postText {
+    display: block;
+}
+
+.postToThreadMobile {
+    display: none;
+}

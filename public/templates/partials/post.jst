@@ -276,8 +276,8 @@
             {{? it.customPostHeaderPart && it.customPostHeaderPart[140]}}
                 {{ out += it.customPostHeaderPart[140](it, thread, post); }}
             {{?}}
-            {{? post.isOp && !it.isThreadPage && "mobile" != it.deviceType}}
-                <span name="toThread" class="postToThread">
+            {{? post.isOp && !it.isThreadPage}}
+                <span name="toThread" class="postToThread postToThreadDesktop">
                     [<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"
                         name="toThreadLink">{{=it.tr.toThread}}</a>]
                 </span>
@@ -291,29 +291,18 @@
         {{? it.customPostBodyPart && it.customPostBodyPart[0]}}
             {{ out += it.customPostBodyPart[0](it, thread, post); }}
         {{?}}
-        <div class="postFiles{{? (it.deviceType != "mobile" && post.fileInfos.length < 2) || (it.deviceType == "mobile" && post.fileInfos.length < 1)}} nowrap{{?}}">
+        <div class="postFiles">
             {{~post.fileInfos :fileInfo}}
                 {{#def.postFile}}
             {{~}}
-            {{? (post.fileInfos.length > 0) && ((it.deviceType != "mobile" && post.fileInfos.length < 2) || (it.deviceType == "mobile" && post.fileInfos.length < 1))}}
-                {{? it.customPostBodyPart && it.customPostBodyPart[10]}}
-                    {{ out += it.customPostBodyPart[10](it, thread, post); }}
-                {{?}}
-                <div class="postText">
-                    <blockquote id="post{{=post.number}}Text"
-                                {{? it.isThreadPage}}class="blockquoteThread"{{?}}>{{ out += (post.text || ""); }}</blockquote>
-                </div>
-            {{?}}
-        </div>
-        {{? 0 == post.fileInfos.length || post.fileInfos.length >= 2 || (it.deviceType == "mobile" && post.fileInfos.length >= 1)}}
             {{? it.customPostBodyPart && it.customPostBodyPart[10]}}
                 {{ out += it.customPostBodyPart[10](it, thread, post); }}
             {{?}}
             <div class="postText">
-                <blockquote id="post{{=post.number}}Text"
-                            {{? it.isThreadPage}}class="blockquoteThread"{{?}}>{{ out += (post.text || ""); }}</blockquote>
+                <blockquote {{? it.isThreadPage}}class="blockquoteThread"{{?}}
+                            id="post{{=post.number}}Text">{{ out += (post.text || ""); }}</blockquote>
             </div>
-        {{?}}
+        </div>
         {{? it.customPostBodyPart && it.customPostBodyPart[20]}}
             {{ out += it.customPostBodyPart[20](it, thread, post); }}
         {{?}}
@@ -341,8 +330,8 @@
             {{ out += it.customPostBodyPart[50](it, thread, post); }}
         {{?}}
     </div>
-    {{? post.isOp && !it.isThreadPage && "mobile" == it.deviceType}}
-        <span name="toThread" class="postToThread">
+    {{? post.isOp && !it.isThreadPage}}
+        <span name="toThread" class="postToThread postToThreadMobile">
             <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.number}}.html"
                name="toThreadLink"><button class="button">{{=it.tr.toThread}}</button></a>
         </span>

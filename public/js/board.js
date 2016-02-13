@@ -381,9 +381,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
             var qr = lord.nameOne("quickReplyContainer", c.node);
             if (qr)
                 qr.parentNode.removeChild(qr);
-            var ptt = lord.nameOne("toThread", c.node);
-            if (ptt)
-                ptt.parentNode.removeChild(ptt);
+            lord.name("toThread", c.node).forEach(lord.removeSelf.bind(lord));
             lord.removeClass(c.node, "opPost");
             lord.addClass(c.node, "post");
             lord.addClass(c.node, "temporary");
@@ -1239,9 +1237,7 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
         var qr = lord.nameOne("quickReplyContainer", post);
         if (qr)
             qr.parentNode.removeChild(qr);
-        var ptt = lord.nameOne("toThread", post);
-        if (ptt)
-            ptt.parentNode.removeChild(ptt);
+        lord.name("toThread", post).forEach(lord.removeSelf.bind(lord));
         lord.removeClass(post, "opPost hidden");
         lord.addClass(post, "post temporary");
         p = Promise.resolve(post);
@@ -2658,8 +2654,11 @@ lord.hotkey_goToThread = function() {
     var t = lord.currentThread();
     if (!t)
         return;
-    var opPost = lord.queryOne(".opPost", t);
-    window.open(lord.queryOne("[name='toThreadLink']", opPost).href, '_blank').focus();
+    var p = lord.queryOne(".opPost", t);
+    var href = "/" + lord.data("sitePathPrefix") + lord.data("boardName") + "/res/" + lord.data("number", p) + ".html";
+    var w = window.open(href, '_blank');
+    if (w)
+        w.focus();
     return false;
 };
 
@@ -3018,14 +3017,15 @@ lord.initializeOnLoadBoard = function() {
                     a.title += " (" + key("quickReply") + ")";
                 });
                 lord.query("[name='toThreadLink']").forEach(function(a) {
-                    a.title += " (" + key("goToThread") + ")";
+                    a.title += "(" + key("goToThread") + ")";
                 });
-                lord.query("[name='hideButton'] > img").forEach(function(img) {
-                    img.title += " (" + key("hidePost") + ")";
+                lord.query("[name='hideButton']").forEach(function(img) {
+                    img.title += "(" + key("hidePost") + ")";
                 });
                 var table = lord.queryOne(".postformMarkup");
                 if (table) {
-                    ["Bold", "Italics", "StrikedOut", "Underlined", "Spoiler", "Quotation", "Code"].forEach(function(s) {
+                    var markupList = ["Bold", "Italics", "StrikedOut", "Underlined", "Spoiler", "Quotation", "Code"];
+                    markupList.forEach(function(s) {
                         s = "markup" + s;
                         var btn = lord.nameOne(s, table);
                         if (!btn)
@@ -3038,7 +3038,7 @@ lord.initializeOnLoadBoard = function() {
                 });
                 btn = lord.nameOne("submit", lord.id("postForm"));
                 if (btn)
-                    btn.title += " (" + key("submitReply") + ")";
+                    btn.title += "(" + key("submitReply") + ")";
             }
             if (lord.showTripcode(lord.data("threadNumber"))) {
                 var postForm = lord.id("postForm");

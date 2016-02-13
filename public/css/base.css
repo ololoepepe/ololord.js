@@ -464,11 +464,6 @@ span.newPostCount {
     white-space: normal;
 }
 
-.postFiles > .postText {
-    display: inline-block;
-    max-width: 80%;
-}
-
 .postSubject {
     overflow-wrap: break-word;
     word-wrap: break-word;

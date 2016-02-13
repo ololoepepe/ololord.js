@@ -56,7 +56,7 @@ lord.templates = {};
     document.write('<link rel="stylesheet" type="text/css" href="/' + prefix + 'css/' + settings.style.name
         + '.css">');
     var s = '<style type="text/css">';
-    if (settings.shrinkPosts)
+    if (!settings.shrinkPosts)
         s += '.post, .opPost, .draft { width: 99%; }';
     if (lord.compareRatings(settings.maxAllowedRating, "R-18G") < 0) {
         var selectors = [];
