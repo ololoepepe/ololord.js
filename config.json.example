@@ -24,7 +24,8 @@ Actual file name must be config-dev.json.
         },
         "fileDownloadProxy": "",
         "fileDownloadProxyAuth": "",
-        "searchLimit": 100
+        "searchLimit": 100,
+        "regenerateCacheOnStartup": false
     },
     "server": {
         "port": 8080,

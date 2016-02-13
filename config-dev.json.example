@@ -28,7 +28,7 @@ Example:
         "fileDownloadProxyAuth": "user:password",
         "searchLimit": 100,
         "tmpPath": "/tmp/ramdisk",
-        "regenerateCacheOnStartup": true
+        "regenerateCacheOnStartup": false
     },
     "server": {
         "port": 8080,
