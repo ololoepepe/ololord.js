@@ -1,0 +1,21 @@
+<script type="text/javascript">
+    var settings = lord.settings();
+    var model = lord.model(["base", "tr", "boards"], true);
+    if (lord.data("boardName"))
+        model.board = lord.model("board/" + lord.data("boardName")).board;
+    model.settings = settings;
+    model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
+    if (model.user.loggedIn) {
+        if (lord.compareRegisteredUserLevels(model.user.level, "ADMIN") >= 0)
+            model.loginMessageText = lord.text("loginMessageAdminText");
+        else if (lord.compareRegisteredUserLevels(model.user.level, "MODER") >= 0)
+            model.loginMessageText = lord.text("loginMessageModerText");
+        else if (lord.compareRegisteredUserLevels(model.user.level, "USER") >= 0)
+            model.loginMessageText = lord.text("loginMessageUserText");
+        else
+            model.loginMessageText = lord.text("loginMessageNoneText");
+    }
+    document.open();
+    document.write(lord.template("toolbar", model, true));
+    document.close();
+</script>

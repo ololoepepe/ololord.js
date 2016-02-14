@@ -24,15 +24,27 @@
     {{#def.leafButton}}
 {{~}}
 <a id="top"></a>
-<div id="toolbarPlaceholder" style="display: none;"></div>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
+{{#def.toolbar}}
+{{#def.customHeader}}
 <br />
-<div id="searchPlaceholder" style="display: none;"></div>
-<div id="bannerPlaceholder" style="display: none;"></div>
+{{#def.searchAction}}
+{{#def.banner}}
 <div class="theTitle">
     <h1>{{!it.title}}</h1>
 </div>
-<div id="upperPlaceholder" style="display: none;"></div>
+<script type="text/javascript">
+    var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
+    model.settings = lord.settings();
+    model.thread = {
+        archived: lord.data("archived"),
+        postingEnabled: lord.data("postingEnabled"),
+        postLimitReached: lord.data("postLimitReached"),
+        bumpLimitReached: lord.data("bumpLimitReached")
+    };
+    document.open();
+    document.write(lord.template("threadPageUpper", model, true));
+    document.close();
+</script>
 <hr />
 {{~["Top"] :position}}
     {{#def.threadActions}}
@@ -62,9 +74,21 @@
 {{~["Bottom"] :position}}
     {{#def.threadActions}}
 {{~}}
-<div id="lowerPlaceholder" style="display: none;"></div>
-<div id="navbarPlaceholder" style="display: none;"></div>
+<script type="text/javascript">
+    var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
+    model.settings = lord.settings();
+    model.thread = {
+        archived: lord.data("archived"),
+        postingEnabled: lord.data("postingEnabled"),
+        postLimitReached: lord.data("postLimitReached"),
+        bumpLimitReached: lord.data("bumpLimitReached")
+    };
+    document.open();
+    document.write(lord.template("threadPageLower", model, true));
+    document.close();
+</script>
+{{#def.navbar}}
 <a id="bottom"></a>
-<div id="customFooterPlaceholder" style="display: none;"></div>
+{{#def.customFooter}}
 </body>
 </html>

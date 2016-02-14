@@ -985,43 +985,6 @@ lord.initializeOnLoadBase = function() {
         model.board = lord.model("board/" + lord.data("boardName")).board;
     model.settings = settings;
     model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
-    if (model.user.loggedIn) {
-        if (lord.compareRegisteredUserLevels(model.user.level, "ADMIN") >= 0)
-            model.loginMessageText = lord.text("loginMessageAdminText");
-        else if (lord.compareRegisteredUserLevels(model.user.level, "MODER") >= 0)
-            model.loginMessageText = lord.text("loginMessageModerText");
-        else if (lord.compareRegisteredUserLevels(model.user.level, "USER") >= 0)
-            model.loginMessageText = lord.text("loginMessageUserText");
-        else
-            model.loginMessageText = lord.text("loginMessageNoneText");
-    }
-    var toolbarPlaceholder = lord.id("toolbarPlaceholder");
-    if (toolbarPlaceholder)
-        toolbarPlaceholder.parentNode.replaceChild(lord.template("toolbar", model), toolbarPlaceholder);
-    var navbarPlaceholder = lord.id("navbarPlaceholder");
-    if (navbarPlaceholder)
-        navbarPlaceholder.parentNode.replaceChild(lord.template("navbar", model), navbarPlaceholder);
-    var searchPlaceholder = lord.id("searchPlaceholder");
-    if (searchPlaceholder)
-        searchPlaceholder.parentNode.replaceChild(lord.template("searchAction", model), searchPlaceholder);
-    var customHeaderPlaceholder = lord.id("customHeaderPlaceholder");
-    if (customHeaderPlaceholder) {
-        var data = lord.template("custom-header", model);
-        if (data) {
-            var header = lord.node("header");
-            header.appendChild(data);
-            customHeaderPlaceholder.parentNode.replaceChild(header, customHeaderPlaceholder);
-        }
-    }
-    var customFooterPlaceholder = lord.id("customFooterPlaceholder");
-    if (customFooterPlaceholder) {
-        var data = lord.template("custom-footer", model);
-        if (data) {
-            var footer = lord.node("footer");
-            footer.appendChild(data);
-            customFooterPlaceholder.parentNode.replaceChild(footer, customFooterPlaceholder);
-        }
-    }
     if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile")) {
         document.body.addEventListener("keyup", lord.interceptHotkey, false);
         var hotkeys = lord.getLocalObject("hotkeys", {}).dir;

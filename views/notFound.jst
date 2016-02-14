@@ -4,14 +4,14 @@
 <body {{#def.baseData}}>
 <script id="model-notFoundImageFileNames"
         type="application/json">{{ out += JSON.stringify(it.notFoundImageFileNames); }}</script>
-<div id="toolbarPlaceholder" style="display: none;"></div>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
+{{#def.toolbar}}
+{{#def.customHeader}}
 <br />
-<div id="searchPlaceholder" style="display: none;"></div>
+{{#def.searchAction}}
 <div class="theTitle">
     <h1>{{=it.notFoundMessage}}</h1>
 </div>
 <div id="notFoundImagePlaceholder" style="display: none;"></div>
-<div id="customFooterPlaceholder" style="display: none;"></div>
+{{#def.customFooter}}
 </body>
 </html>

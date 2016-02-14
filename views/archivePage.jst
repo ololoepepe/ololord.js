@@ -6,11 +6,11 @@
     {{#def.navigationButton}}
 {{~}}
 <a id="top"></a>
-<div id="toolbarPlaceholder" style="display: none;"></div>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
+{{#def.toolbar}}
+{{#def.customHeader}}
 <br />
-<div id="searchPlaceholder" style="display: none;"></div>
-<div id="bannerPlaceholder" style="display: none;"></div>
+{{#def.searchAction}}
+{{#def.banner}}
 <div class="theTitle">
     <h1>
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{=it.board.title}}</a>
@@ -25,6 +25,6 @@
 <hr />
 {{#def.postingSpeed}}
 <a id="bottom"></a>
-<div id="customFooterPlaceholder" style="display: none;"></div>
+{{#def.customFooter}}
 </body>
 </html>

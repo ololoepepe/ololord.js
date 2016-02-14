@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
 <body {{#def.baseData}}>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
+{{#def.customHeader}}
 <div class="theTitle">
     <h1>
         {{=it.title}}
@@ -44,6 +44,6 @@
         {{=it.tr.loginSystemVkontakteDescriptionText}}
     </div>
 {{?}}
-<div id="customFooterPlaceholder" style="display: none;"></div>
+{{#def.customFooter}}
 </body>
 </html>

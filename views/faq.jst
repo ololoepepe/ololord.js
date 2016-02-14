@@ -2,16 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
 <body {{#def.baseData}}>
-<div id="toolbarPlaceholder" style="display: none;"></div>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
+{{#def.toolbar}}
+{{#def.customHeader}}
 <br />
-<div id="searchPlaceholder" style="display: none;"></div>
+{{#def.searchAction}}
 <div class="theTitle">
     <h1>
         {{=it.title}}
     </h1>
 </div>
 <div id="faqContentPlaceholder" style="display: none;"></div>
-<div id="customFooterPlaceholder" style="display: none;"></div>
+{{#def.customFooter}}
 </body>
 </html>

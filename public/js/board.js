@@ -2948,47 +2948,6 @@ lord.initializeOnLoadBoard = function() {
             bumpLimitReached: lord.data("bumpLimitReached")
         };
     }
-    var bannerFileNames = [];
-    var bannerBoardName = lord.data("boardName");
-    var bannerBoardTitle = null;
-    switch (c.model.settings.bannersMode) {
-    case "random":
-        var boards = [];
-        for (var i = 0; i < c.model.boards.length; ++i) {
-            var board = c.model.boards[i];
-            if (board.name == lord.data("boardName"))
-                continue;
-            if (board.bannerFileNames.length > 0) {
-                boards.push({
-                    name: board.name,
-                    title: board.title,
-                    bannerFileNames: board.bannerFileNames
-                });
-            }
-        }
-        if (boards.length > 0) {
-            var board = boards[Math.floor(Math.random() * boards.length)];
-            bannerFileNames = board.bannerFileNames;
-            bannerBoardName = board.name;
-            bannerBoardTitle = board.title;
-        }
-        break;
-    case "same":
-        bannerFileNames = c.model.board.bannerFileNames;
-        break;
-    default:
-        break;
-    }
-    if (bannerFileNames.length > 0) {
-        var bannerFileName = bannerFileNames[Math.floor(Math.random() * bannerFileNames.length)];
-        var bannerPlaceholder = lord.id("bannerPlaceholder");
-        c.model.bannerFileName = bannerFileName;
-        c.model.bannerBoardName = bannerBoardName;
-        c.model.bannerBoardTitle = bannerBoardTitle;
-        var banner = lord.template("banner", c.model);
-        bannerPlaceholder.parentNode.replaceChild(banner, bannerPlaceholder);
-        banner.parentNode.insertBefore(lord.node("br"), banner);
-    }
     if (c.threadOrBoard && lord.compareRegisteredUserLevels(c.model.user.level, "MODER") >= 0)
         lord.createScript("3rdparty/jquery.datetimepicker.js", true);
     if ((+lord.data("threadNumber") || +lord.data("currentPage") >= 0)
@@ -3037,25 +2996,6 @@ lord.initializeOnLoadBoard = function() {
             if (typeof lord.postFormLoaded == "function")
                 lord.postFormLoaded();
         }).catch(lord.handleError);
-    }
-    if (+lord.data("threadNumber")) {
-        var upperPlaceholder = lord.id("upperPlaceholder");
-        upperPlaceholder.parentNode.replaceChild(lord.template("threadPageUpper", c.model),
-            upperPlaceholder);
-        var lowerPlaceholder = lord.id("lowerPlaceholder");
-        lowerPlaceholder.parentNode.replaceChild(lord.template("threadPageLower", c.model),
-            lowerPlaceholder);
-    } else if (c.threadOrBoard) {
-        c.model.pageCount = +lord.data("pageCount");
-        c.model.currentPage = +lord.data("currentPage");
-        var upperPlaceholder = lord.id("upperPlaceholder");
-        upperPlaceholder.parentNode.replaceChild(lord.template("boardPageUpper", c.model),
-            upperPlaceholder);
-        var lowerPlaceholder = lord.id("lowerPlaceholder");
-        lowerPlaceholder.parentNode.replaceChild(lord.template("boardPageLower", c.model),
-            lowerPlaceholder);
-        var pagesPlaceholder = lord.id("pagesPlaceholder");
-        pagesPlaceholder.parentNode.replaceChild(lord.template("pagination", c.model), pagesPlaceholder);
     }
     if (lord.queryOne(".opPost[data-archived='true']")) {
         lord.name("backButton").forEach(function(btn) {
