@@ -2548,9 +2548,9 @@ lord.processPosts = function(parent, noProcessDateTime) {
                 span.style.display = "none";
             });
         }
-        if (!lord.getLocalObject("spellsEnabled", true))
-            return Promise.resolve();
-        return lord.applySpells(posts).catch(lord.handleError);
+        if (lord.getLocalObject("spellsEnabled", true))
+            lord.applySpells(posts).catch(lord.handleError);
+        return Promise.resolve();
     });
 };
 
