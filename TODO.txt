@@ -19,8 +19,8 @@
 [done] Add ability to reload templates/partials
 [done] Move post actions menu to a separate template
 [done] Render board/thread/catalog/archive on the server side
+[done] Simplify /rpg/ board server code
 
-* Simplify /rpg/ board server code
 * Optimize thread expanding
 * Add ability to paint on any board using canvas
 * Improve file previews

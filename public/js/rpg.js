@@ -84,8 +84,7 @@ lord.setVotingOpened = function(el, opened) {
 lord.customPostFormField[50] = function(it) {
     if (it.isThreadPage) {
         var ownPosts = lord.getLocalObject("ownPosts", {});
-        var opPost = it.thread.opPost;
-        if (!ownPosts[opPost.boardName + "/" + opPost.number])
+        if (!ownPosts["rpg/" + it.thread.number])
             return "";
     }
     var model = {

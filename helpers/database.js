@@ -38,6 +38,8 @@ db.hmget = function(key, hashes) {
 
 db.tmp_sadd = db.sadd;
 db.sadd = function(key, members) {
+    if (!members || (Util.isArray(members) && members.length <= 0))
+        return Promise.resolve();
     return db.tmp_sadd.apply(db, [key].concat(members));
 };
 
