@@ -20,8 +20,8 @@
 [done] Move post actions menu to a separate template
 [done] Render board/thread/catalog/archive on the server side
 [done] Simplify /rpg/ board server code
+[done] Optimize thread expanding
 
-* Optimize thread expanding
 * Add ability to paint on any board using canvas
 * Improve file previews
 * Add own player for media file previews

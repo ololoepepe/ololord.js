@@ -1621,3 +1621,21 @@ lord.readAs = function(blob, method) {
         binaryReader["readAs" + method](blob);
     });
 };
+
+lord.series = function(arr, f) {
+    var p = Promise.resolve();
+    if (Array.isArray(arr)) {
+        arr.forEach(function(el) {
+            p = p.then(function() {
+                return f(el);
+            });
+        });
+    } else if (typeof arr == "object") {
+        forIn(arr, function(el, key) {
+            p = p.then(function() {
+                return f(el, key);
+            });
+        });
+    }
+    return p;
+};
