@@ -93,6 +93,15 @@ lord.loadingImage = null;
 
 /*Functions*/
 
+lord.postProcessors.push(function(post) {
+    if (lord.getLocalObject("mumWatching", false)) {
+        lord.query(".postFileFile > a > img", post).forEach(function(img) {
+            lord.addClass(img, "mumWatching");
+        });
+    }
+    return Promise.resolve();
+});
+
 (function() {
     var settings = lord.settings();
     var model = lord.model("base");
@@ -390,11 +399,6 @@ lord.createPostNode = function(post, permanent, threadInfo) {
         $(".codeBlock", c.node).css("maxWidth", ($(window).width() - dw) + "px");
         if (lord.deviceType("mobile"))
             lord.setTooltips(c.node);
-        if (lord.getLocalObject("mumWatching", false)) {
-            lord.query(".postFileFile > a > img", c.node).forEach(function(img) {
-                lord.addClass(img, "mumWatching");
-            });
-        }
         if (!permanent) {
             var actions = lord.nameOne("postActionsContainer", c.node);
             if (actions)
@@ -417,10 +421,6 @@ lord.createPostNode = function(post, permanent, threadInfo) {
             lord.filesMap = null;
             lord.initFiles();
         }
-        return lord.series(lord.postProcessors, function(f) {
-            return f(c.node);
-        });
-    }).then(function() {
         return lord.processPosts(c.node).catch(lord.handleError);
     }).then(function() {
         if (!permanent || !post.referencedPosts || post.referencedPosts.length < 1)
@@ -2543,7 +2543,8 @@ lord.downloadThread = function(el) {
 lord.processPosts = function(parent) {
     if (!parent)
         parent = document.body;
-    var posts = lord.query(".post, .opPost", parent);
+    var posts = (lord.hasClass(parent, "post") || lord.hasClass(parent, "opPost")) ? [parent]
+        : lord.query(".post, .opPost", parent);
     return lord.series(lord.postProcessors, function(f) {
         return lord.series(posts, function(post) {
             return f(post);
@@ -3039,13 +3040,6 @@ lord.initializeOnLoadBoard = function() {
     if (!lord.deviceType("mobile")) {
         document.body.onmouseover = lord.globalOnmouseover;
         document.body.onmouseout = lord.globalOnmouseout;
-    }
-    if (lord.getLocalObject("mumWatching", false)) {
-        var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
-        img.src = "/" + lord.data("sitePathPrefix") + "img/mum_watching.png";
-        lord.query(".postFileFile > a > img").forEach(function(img) {
-            lord.addClass(img, "mumWatching");
-        });
     }
     if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile"))
         lord.appendHotkeyShortcuts();

@@ -1010,6 +1010,10 @@ lord.initializeOnLoadBase = function() {
     lord.series(lord.pageProcessors, function(f) {
         return f();
     }).catch(lord.handleError);
+    if (lord.getLocalObject("mumWatching", false)) {
+        var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
+        img.src = "/" + lord.data("sitePathPrefix") + "img/mum_watching.png";
+    }
     var settings = lord.settings();
     var model = lord.model(["base", "tr", "boards"], true);
     if (lord.data("boardName"))
