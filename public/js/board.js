@@ -2530,7 +2530,9 @@ lord.processPosts = function(parent, noProcessDateTime) {
         parent = document.body;
     var posts = lord.query(".post, .opPost", parent);
     return lord.series(lord.postProcessors.slice(noProcessDateTime ? 1 : 0), function(f) {
-        return f(post);
+        return lord.series(posts, function(post) {
+            return f(post);
+        });
     }).then(function() {
         if (lord.getLocalObject("strikeOutHiddenPostLinks", true))
             lord.strikeOutHiddenPostLinks(parent);
