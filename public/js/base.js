@@ -47,6 +47,7 @@ lord.chatDialog = null;
 lord.lastChatCheckDate = lord.getLocalObject("lastChatCheckDate", null);
 lord.notificationQueue = [];
 lord.pageProcessors = [];
+lord.postProcessors = [];
 
 /*Functions*/
 

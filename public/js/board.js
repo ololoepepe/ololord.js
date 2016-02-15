@@ -86,7 +86,6 @@ lord.customPostMenuAction = {};
 lord.customEditPostDialogPart = {};
 lord.customPostHeaderPart = {};
 lord.customPostBodyPart = {};
-lord.postProcessors = [];
 lord.autoUpdateTimer = null;
 lord.blinkTimer = null;
 lord.pageVisible = "visible";
