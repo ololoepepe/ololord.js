@@ -24,6 +24,7 @@
 [done] Use document.write instead of dynamic content insertion
 [done] Treat manually and auto-hidden posts differently
 [done] Show auto-hide reason
+[done] Insert user JS/CSS at page render time
 
 * Add ability to paint on any board using canvas
 * Improve file previews

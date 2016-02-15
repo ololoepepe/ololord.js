@@ -2530,11 +2530,11 @@ lord.downloadThread = function(el) {
     }).catch(lord.handleError);
 };
 
-lord.processPosts = function(parent, noProcessDateTime) {
+lord.processPosts = function(parent) {
     if (!parent)
         parent = document.body;
     var posts = lord.query(".post, .opPost", parent);
-    return lord.series(lord.postProcessors.slice(noProcessDateTime ? 1 : 0), function(f) {
+    return lord.series(lord.postProcessors, function(f) {
         return lord.series(posts, function(post) {
             return f(post);
         });
@@ -3049,7 +3049,7 @@ lord.initializeOnLoadBoard = function() {
             }
         }
     }
-    lord.processPosts(document.body, true);
+    lord.processPosts(document.body);
     var lastLang = lord.getLocalObject("lastCodeLang", "-");
     var sel = lord.queryOne(".postformMarkup > span > [name='codeLang']");
     if (sel) {

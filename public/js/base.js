@@ -46,8 +46,36 @@ lord.chatTasks = {};
 lord.chatDialog = null;
 lord.lastChatCheckDate = lord.getLocalObject("lastChatCheckDate", null);
 lord.notificationQueue = [];
+lord.pageProcessors = [];
 
 /*Functions*/
+
+(function() {
+    var settings = lord.settings();
+    var model = lord.model("base");
+    var locale = model.site.locale;
+    var dateFormat = model.site.dateFormat;
+    var timeOffset = ("local" == settings.time) ? (+settings.timeZoneOffset - model.site.timeOffset) : 0;
+
+    lord.processFomattedDate = function(parent) {
+        if ("local" != settings.time || !timeOffset)
+            return;
+        if (!parent)
+            parent = document.body;
+        var q = "[name='dateTime']:not(.processedFormattedDate), [name='formattedDate']:not(.processedFormattedDate)";
+        lord.query(q, parent).forEach(function(span) {
+            var date = span.textContent.replace(/^\s+/, "").replace(/\s+$/, "");
+            moment.locale(locale);
+            var oldDate = date;
+            date = moment(date, dateFormat).add(timeOffset, "minutes").locale(locale).format(dateFormat);
+            lord.removeChildren(span);
+            span.appendChild(lord.node("text", date));
+            lord.addClass(span, "processedFormattedDate");
+        });
+    };
+
+    lord.pageProcessors.push(lord.processFomattedDate);
+})();
 
 lord.logoutImplementation = function(form, vk) {
     lord.setCookie("hashpass", "", {
@@ -978,7 +1006,9 @@ lord.setTooltips = function(parent) {
 };
 
 lord.initializeOnLoadBase = function() {
-    lord.processFomattedDate();
+    lord.series(lord.pageProcessors, function(f) {
+        return f();
+    }).catch(lord.handleError);
     var settings = lord.settings();
     var model = lord.model(["base", "tr", "boards"], true);
     if (lord.data("boardName"))
@@ -1020,29 +1050,10 @@ lord.initializeOnLoadBase = function() {
             head.appendChild(script);
         };
     }
-    if (lord.getLocalObject("userCssEnabled", true)) {
-        var css = lord.getLocalObject("userCss", "");
-        var head = lord.queryOne("head");
-        var style = lord.node("style");
-        style.type = "text/css";
-        if (style.styleSheet)
-            style.styleSheet.cssText = css;
-        else
-            style.appendChild(lord.node("text", css));
-        head.appendChild(style);
-    }
     if (lord.getLocalObject("chatEnabled", true))
         lord.checkChats();
     if (lord.notificationsEnabled())
         lord.checkNotificationQueue();
-    if (lord.getLocalObject("userJavaScriptEnabled", true)) {
-        var js = lord.getLocalObject("userJavaScript", "");
-        var head = lord.queryOne("head");
-        var script = lord.node("script");
-        script.type = "text/javascript";
-        script.innerHTML = js;
-        head.appendChild(script);
-    }
     if (lord.queryOne(".toolbar"))
         window.addEventListener("hashchange", lord.hashChangeHandler, false);
     var bsc = lord.getLocalObject("tooltips/boardSelect", 0);
