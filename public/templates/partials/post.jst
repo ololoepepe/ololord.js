@@ -97,20 +97,24 @@
             {{? it.customPostHeaderPart && it.customPostHeaderPart[120]}}
                 {{ out += it.customPostHeaderPart[120](it, thread, post); }}
             {{?}}
+            <span class="hideReason"></span>
+            {{? it.customPostHeaderPart && it.customPostHeaderPart[130]}}
+                {{ out += it.customPostHeaderPart[130](it, thread, post); }}
+            {{?}}
             {{? thread.postingEnabled && !thread.archived && !thread.postLimitReached}}
                 <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
                                                      onclick="lord.quickReply(this); return false;"
                                                      title="{{=it.tr.quickReplyText}}"><img src="/{{=it.site.pathPrefix}}img/reply.png"
                                                                                             class="buttonImage"></a>]</span>
             {{?}}
-            {{? it.customPostHeaderPart && it.customPostHeaderPart[130]}}
-                {{ out += it.customPostHeaderPart[130](it, thread, post); }}
+            {{? it.customPostHeaderPart && it.customPostHeaderPart[140]}}
+                {{ out += it.customPostHeaderPart[140](it, thread, post); }}
             {{?}}
             <span name="postActionsContainer">[<input type="image" src="/{{=it.site.pathPrefix}}img/post_actions.png" class="buttonImage"
                                                       name="postActions" title="{{=it.tr.postActionsText}}"
                                                       onclick="lord.showPostActionsMenu(event, this, {{=post.number}}); return false;">]</span>
-            {{? it.customPostHeaderPart && it.customPostHeaderPart[140]}}
-                {{ out += it.customPostHeaderPart[140](it, thread, post); }}
+            {{? it.customPostHeaderPart && it.customPostHeaderPart[150]}}
+                {{ out += it.customPostHeaderPart[150](it, thread, post); }}
             {{?}}
             {{? post.isOp && !it.isThreadPage}}
                 <span name="toThread" class="postToThread postToThreadDesktop">
@@ -118,8 +122,8 @@
                         name="toThreadLink">{{=it.tr.toThread}}</a>]
                 </span>
             {{?}}
-                {{? it.customPostHeaderPart && it.customPostHeaderPart[150]}}
-                {{ out += it.customPostHeaderPart[150](it, thread, post); }}
+                {{? it.customPostHeaderPart && it.customPostHeaderPart[160]}}
+                {{ out += it.customPostHeaderPart[160](it, thread, post); }}
             {{?}}
         </span>
     </div>

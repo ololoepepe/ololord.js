@@ -305,3 +305,7 @@ ul.tabWidget > li.activated {
 .submitContainer > input {
     border-color: #0000EE;
 }
+
+.hideReason {
+    font-weight: bold;
+}

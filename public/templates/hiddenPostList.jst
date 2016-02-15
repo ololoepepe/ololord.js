@@ -5,7 +5,7 @@
             <a href="/{{=it.site.pathPrefix}}{{=hidden.boardName}}/res/{{=hidden.threadNumber}}.html{{? hidden.postNumber != hidden.threadNumber}}#{{=hidden.postNumber}}{{?}}"
                target="_bank" data-board-name="{{=hidden.boardName}}"
                data-post-number="{{=hidden.postNumber}}"
-               data-hidden-post="true">&gt;&gt;/{{=hidden.boardName}}/{{=hidden.postNumber}}</a>
+               data-hidden-post="true">&gt;&gt;/{{=hidden.boardName}}/{{=hidden.postNumber}}{{? hidden.reason}} ({{!hidden.reason}}){{?}}</a>
             <a href="javascript:void(0);" onclick="lord.removeHidden(this); return false;"
                title="{{=it.tr.removeFromHiddenPostListText}}"><img src="/{{=it.site.pathPrefix}}img/delete.png"></a>
         </div>

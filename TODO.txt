@@ -22,6 +22,8 @@
 [done] Simplify /rpg/ board server code
 [done] Optimize thread expanding
 [done] Use document.write instead of dynamic content insertion
+[done] Treat manually and auto-hidden posts differently
+[done] Show auto-hide reason
 
 * Add ability to paint on any board using canvas
 * Improve file previews
@@ -29,8 +31,6 @@
 * Add playlist to every page
 * Optimize spells
 * Fix referenced/referring posts when moving a thread
-* Treat manually and auto-hidden posts differently
-* Show auto-hide reason
 * Improve jQuery UI styles
 * Add post preview disappearance delay
 * Add some API to client scripts and simplify existing API

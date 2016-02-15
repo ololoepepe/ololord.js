@@ -200,7 +200,12 @@ lord.getPostData = function(post) {
     return data;
 };
 
-lord.processPost = function(post, data) {
+lord.processPost = function(hiddenPosts, post, data) {
+    if (!post)
+        return;
+    var postNumber = +post.id;
+    if (isNaN(+postNumber))
+        return;
     if (data) {
         if (data.replacements && data.replacements.length > 0) {
             lord.forIn(data.replacements, function(value) {
@@ -209,9 +214,20 @@ lord.processPost = function(post, data) {
             });
         }
         if (data.hidden)
-            lord.addPostToHidden(data.boardName, data.postNumber, data.threadNumber);
+            lord.addPostToHidden(hiddenPosts, data.boardName, data.postNumber, data.threadNumber, data.hidden);
     }
-    lord.tryHidePost(post);
+    var boardName = lord.data("boardName");
+    hiddenPosts = hiddenPosts || lord.getLocalObject("hiddenPosts", {});
+    var info = hiddenPosts[boardName + "/" + postNumber];
+    if (!info)
+        return;
+    lord.addClass(post, "hidden");
+    if (info.reason)
+        lord.queryOne(".hideReason", post).appendChild(lord.node("text", info.reason));
+    var thread = lord.id("thread" + postNumber);
+    if (!thread)
+        return;
+    lord.addClass(thread, "hidden");
 }
 
 lord.resetScale = function(image) {
@@ -600,39 +616,24 @@ lord.nextOrPreviousFile = function(previous) {
         return lord.files[(ind < lord.files.length - 1) ? (ind + 1) : 0];
 };
 
-lord.addPostToHidden = function(boardName, postNumber, threadNumber) {
+lord.addPostToHidden = function(hiddenPosts, boardName, postNumber, threadNumber, reason) {
     postNumber = +postNumber;
     if (!boardName || isNaN(postNumber) || postNumber <= 0)
         return;
     var key = boardName + "/" + postNumber;
-    var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
+    var saveHiddenPosts = !hiddenPosts;
+    if (!hiddenPosts)
+        hiddenPosts = lord.getLocalObject("hiddenPosts", {});
     if (hiddenPosts.hasOwnProperty(key))
         return;
     hiddenPosts[key] = {
         boardName: boardName,
         postNumber: postNumber,
-        threadNumber: threadNumber
+        threadNumber: threadNumber,
+        reason: reason || null
     };
-    lord.setLocalObject("hiddenPosts", hiddenPosts);
-};
-
-lord.tryHidePost = function(post, list) {
-    if (!post)
-        return;
-    var postNumber = +post.id;
-    if (isNaN(+postNumber))
-        return;
-    var boardName = lord.data("boardName");
-    if (!list)
-        list = lord.getLocalObject("hiddenPosts", {});
-    if (!list[boardName + "/" + postNumber])
-        return;
-    lord.addClass(post, "hidden");
-    var thread = lord.id("thread" + postNumber);
-    if (!thread)
-        return;
-    lord.addClass(thread, "hidden");
-    lord.strikeOutHiddenPostLinks();
+    if (saveHiddenPosts)
+        lord.setLocalObject("hiddenPosts", hiddenPosts);
 };
 
 lord.showHidePostForm = function(el) {
@@ -1090,11 +1091,13 @@ lord.setPostHidden = function(el) {
     var hidden = lord.hasClass(post, "hidden");
     var f = !hidden ? lord.addClass : lord.removeClass;
     f(post, "hidden");
+    if (hidden)
+        lord.removeChildren(lord.queryOne(".hideReason", post));
     if (thread)
         f(thread, "hidden");
     var list = lord.getLocalObject("hiddenPosts", {});
     if (!hidden) {
-        lord.addPostToHidden(boardName, postNumber, threadNumber);
+        lord.addPostToHidden(null, boardName, postNumber, threadNumber);
     } else if (list[boardName + "/" + postNumber]) {
         delete list[boardName + "/" + postNumber];
         lord.setLocalObject("hiddenPosts", list);
@@ -1112,16 +1115,18 @@ lord.applySpells = function(posts, force) {
         p = lord.doWork("parseSpells", lord.getLocalObject("spells", lord.DefaultSpells));
     else
         p = Promise.resolve();
+    var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
     return p.then(function(spells) {
         if (!lord.spells && spells && spells.root)
             lord.spells = spells.root.spells;
         if (!lord.spells) {
             posts.forEach(function(post) {
-                lord.processPost(post);
+                lord.processPost(hiddenPosts, post);
             });
+            lord.setLocalObject("hiddenPosts", hiddenPosts);
+            lord.strikeOutHiddenPostLinks();
             return Promise.resolve();
         }
-        var boardName = lord.data("boardName");
         var list = [];
         return lord.gently(posts, function(post) {
             var data = lord.getPostData(post);
@@ -1142,8 +1147,11 @@ lord.applySpells = function(posts, force) {
                 return acc;
             }, {}) : {};
             posts.forEach(function(post) {
-                lord.processPost(post, map[+post.id]);
+                lord.processPost(hiddenPosts, post, map[+post.id]);
             });
+            lord.setLocalObject("hiddenPosts", hiddenPosts);
+            lord.strikeOutHiddenPostLinks();
+            return Promise.resolve();
         });
     });
 };
@@ -1241,12 +1249,9 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
     var p;
     if (post) {
         post = post.cloneNode(true);
-        var actions = lord.nameOne("postActionsContainer", post);
-        if (actions)
-            actions.parentNode.removeChild(actions);
-        var qr = lord.nameOne("quickReplyContainer", post);
-        if (qr)
-            qr.parentNode.removeChild(qr);
+        lord.removeSelf(lord.queryOne(".hideReason", post));
+        lord.removeSelf(lord.nameOne("postActionsContainer", post));
+        lord.removeSelf(lord.nameOne("quickReplyContainer", post));
         lord.name("toThread", post).forEach(lord.removeSelf.bind(lord));
         lord.removeClass(post, "opPost hidden");
         lord.addClass(post, "post temporary");

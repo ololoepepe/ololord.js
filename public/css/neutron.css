@@ -386,3 +386,7 @@ textarea {
 .submitContainer > input {
     border-color: #C9BE89;
 }
+
+.hideReason {
+    font-weight: bold;
+}
