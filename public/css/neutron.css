@@ -263,7 +263,9 @@ span.newPostCount {
 }
 
 ul.tabWidget > li {
-    background-color: #DDEDAA;
+    background-color: #2C2C2C;
+    border: 1px solid #575757;
+    border-radius: 5px;
 }
 
 ul.tabWidget > li > a {
@@ -271,7 +273,11 @@ ul.tabWidget > li > a {
 }
 
 ul.tabWidget > li.activated {
-    background-color: #212121;
+    background-color: #DDEDAA;
+}
+
+ul.tabWidget > li.activated > a {
+    color: black;
 }
 
 .toolbar.sticky {

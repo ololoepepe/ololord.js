@@ -238,6 +238,7 @@ ul.tabWidget > li > a {
 
 ul.tabWidget > li.activated {
     background-color: #FFFFEE;
+    border: 1px solid #800000;
 }
 
 .toolbar.sticky {
