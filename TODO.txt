@@ -27,6 +27,7 @@
 [done] Insert user JS/CSS at page render time
 [done] Make jQuery UI styles fit ololord.js styles
 [done] Optimize cache renewal when modifying posts with large amount of post references
+[done] Add post preview disappearance delay
 
 * Add ability to paint on any board using canvas
 * Improve file previews
@@ -34,7 +35,6 @@
 * Add playlist to every page
 * Optimize spells
 * Fix referenced/referring posts when moving a thread
-* Add post preview disappearance delay
 * Add some API to client scripts and simplify existing API
 * Implement different access levels for different boards
 * Use web interface for user access level management and registration

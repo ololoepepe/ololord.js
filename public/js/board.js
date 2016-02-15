@@ -1274,13 +1274,24 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
                         return;
                     next = next.nextPostPreview;
                 }
-                if (post.parentNode)
-                    post.parentNode.removeChild(post);
-                if (post.previousPostPreview)
-                    post.previousPostPreview.onmouseout(event);
+                var hide = function() {
+                    if (post.parentNode)
+                        post.parentNode.removeChild(post);
+                    if (post.previousPostPreview)
+                        post.previousPostPreview.onmouseout(event);
+                };
+                var hidePostPreviewDelay = lord.getLocalObject("hidePostPreviewDelay", 1000);
+                if (hidePostPreviewDelay > 0)
+                    post.hideTimer = setTimeout(hide, hidePostPreviewDelay);
+                else
+                    hide();
             };
             post.onmouseover = function(event) {
                 post.mustHide = false;
+                if (post.hideTimer) {
+                    clearTimeout(post.hideTimer);
+                    delete post.hideTimer;
+                }
             };
         }
         post.previousPostPreview = lord.lastPostPreview;

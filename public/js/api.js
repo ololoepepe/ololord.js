@@ -1529,6 +1529,7 @@ lord.settings = function() {
         chatEnabled: lord.getLocalObject("chatEnabled", true),
         closeFilesByClickingOnly: lord.getLocalObject("closeFilesByClickingOnly", false),
         viewPostPreviewDelay: lord.getLocalObject("viewPostPreviewDelay", 200),
+        hidePostPreviewDelay: lord.getLocalObject("hidePostPreviewDelay", 1000),
         apiRequestCachingEnabled: lord.getLocalObject("apiRequestCachingEnabled", false),
         bannersMode: lord.getLocalObject("bannersMode", "random")
     };

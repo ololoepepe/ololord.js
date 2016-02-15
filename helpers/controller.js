@@ -361,6 +361,7 @@ controller.translationsModel = function() {
     translate("Mark OP post links", "signOpPostLinksLabelText");
     translate("Mark own post links", "signOwnPostLinksLabelText");
     translate("Post preview appearance delay (ms):", "viewPostPreviewDelayLabelText");
+    translate("Post preview disappearance delay (ms):", "hidePostPreviewDelayLabelText");
     translate("Show file leaf buttons", "showLeafButtonsLabelText");
     translate("Leaf through images only", "leafThroughImagesOnlyLabelText");
     translate("Image zoom sensitivity:", "imageZoomSensitivityLabelText");

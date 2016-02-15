@@ -1205,6 +1205,11 @@
             "value": "Задержка появления превью постов (мс):"
         }
     },
+    "Post preview disappearance delay (ms):": {
+        "hidePostPreviewDelayLabelText": {
+            "value": "Задержка исчезновения превью постов (мс):"
+        }
+    },
     "Maximum simultaneous AJAX requests:": {
         "maxSimultaneousAjaxLabelText": {
             "value": "Максимум одновременных AJAX-запросов:"
