@@ -1104,7 +1104,7 @@ lord.setPostHidden = function(el) {
 
 lord.applySpells = function(posts, force) {
     if (!posts || !posts.length || posts.legth < 1)
-        return romise.resolve();
+        return Promise.resolve();
     var p;
     if (force)
         delete lord.spells;
