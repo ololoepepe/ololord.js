@@ -406,7 +406,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
             return f(c.node);
         });
     }).then(function() {
-        return lord.processPosts([c.node]).catch(lord.handleError);
+        return lord.processPosts(c.node).catch(lord.handleError);
     }).then(function() {
         if (!permanent || !post.referencedPosts || post.referencedPosts.length < 1)
             return Promise.resolve(c.node);
