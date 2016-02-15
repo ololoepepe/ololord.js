@@ -31,19 +31,8 @@ lord.templates = {};
             templates[templateName] = html;
     });
     lord.forIn(templates, function(html, templateName) {
-        lord.templates[templateName] = doT.template(html, {
-            evaluate: /\{\{([\s\S]+?)\}\}/g,
-            interpolate: /\{\{=([\s\S]+?)\}\}/g,
-            encode: /\{\{!([\s\S]+?)\}\}/g,
-            use: /\{\{#([\s\S]+?)\}\}/g,
-            define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
-            conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
-            iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
-            varname: 'it',
-            strip: false,
-            append: true,
-            selfcontained: false
-        }, lord.partials);
+        if (!lord.addTemplate(templateName, html))
+            return;
     });
     var settings = lord.settings();
     document.open();

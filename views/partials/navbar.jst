@@ -1,6 +1,8 @@
 <script type="text/javascript">
-    var settings = lord.settings();
-    if (!settings.stickyToolbar) {
+    (function() {
+        var settings = lord.settings();
+        if (settings.stickyToolbar)
+            return;
         var model = lord.model(["base", "tr", "boards"], true);
         if (lord.data("boardName"))
             model.board = lord.model("board/" + lord.data("boardName")).board;
@@ -9,5 +11,5 @@
         document.open();
         document.write(lord.template("navbar", model, true));
         document.close();
-    }
+    })();
 </script>

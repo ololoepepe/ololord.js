@@ -21,6 +21,7 @@
 [done] Render board/thread/catalog/archive on the server side
 [done] Simplify /rpg/ board server code
 [done] Optimize thread expanding
+[done] Use document.write instead of dynamic content insertion
 
 * Add ability to paint on any board using canvas
 * Improve file previews

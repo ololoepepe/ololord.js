@@ -25,7 +25,6 @@ var generateFrame = function(deviceType) {
 var generateFrameList = function() {
     var model = {};
     model.title = Tools.translate("ololord.js", "pageTitle");
-    model.extraScripts = [ { fileName: "frame-list.js" } ];
     return controller("frameList", model);
 };
 

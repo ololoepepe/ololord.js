@@ -11,7 +11,18 @@
 <div class="theTitle">
     <h1>{{=it.notFoundMessage}}</h1>
 </div>
-<div id="notFoundImagePlaceholder" style="display: none;"></div>
+<script type="text/javascript">
+    (function() {
+        var notFoundImageFileNames = JSON.parse(lord.id("model-notFoundImageFileNames").innerHTML);
+        if (notFoundImageFileNames.length > 0) {
+            var model = lord.model("base");
+            model.imageFileName = notFoundImageFileNames[Math.floor(Math.random() * notFoundImageFileNames.length)];
+            document.open();
+            document.write(lord.template("notFoundImage", model, true));
+            document.close();
+        }
+    })();
+</script>
 {{#def.customFooter}}
 </body>
 </html>

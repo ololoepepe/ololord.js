@@ -39,11 +39,13 @@
     </h1>
 </div>
 <script type="text/javascript">
-    var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
-    model.settings = lord.settings();
-    document.open();
-    document.write(lord.template("boardPageUpper", model, true));
-    document.close();
+    (function() {
+        var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
+        model.settings = lord.settings();
+        document.open();
+        document.write(lord.template("boardPageUpper", model, true));
+        document.close();
+    })();
 </script>
 <div id="threads">
     {{~it.threads :thread}}
@@ -66,20 +68,24 @@
     {{~}}
 </div>
 <script type="text/javascript">
-    var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
-    model.settings = lord.settings();
-    document.open();
-    document.write(lord.template("boardPageLower", model, true));
-    document.close();
+    (function() {
+        var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
+        model.settings = lord.settings();
+        document.open();
+        document.write(lord.template("boardPageLower", model, true));
+        document.close();
+    })();
 </script>
 <hr />
 <script type="text/javascript">
-    var model = lord.model(["base", "tr", "board/" + lord.data("boardName")], true);
-    model.pageCount = +lord.data("pageCount");
-    model.currentPage = +lord.data("currentPage");
-    document.open();
-    document.write(lord.template("pagination", model, true));
-    document.close();
+    (function() {
+        var model = lord.model(["base", "tr", "board/" + lord.data("boardName")], true);
+        model.pageCount = +lord.data("pageCount");
+        model.currentPage = +lord.data("currentPage");
+        document.open();
+        document.write(lord.template("pagination", model, true));
+        document.close();
+    })();
 </script>
 {{#def.navbar}}
 <hr />

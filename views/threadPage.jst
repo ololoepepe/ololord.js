@@ -33,17 +33,19 @@
     <h1>{{!it.title}}</h1>
 </div>
 <script type="text/javascript">
-    var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
-    model.settings = lord.settings();
-    model.thread = {
-        archived: lord.data("archived"),
-        postingEnabled: lord.data("postingEnabled"),
-        postLimitReached: lord.data("postLimitReached"),
-        bumpLimitReached: lord.data("bumpLimitReached")
-    };
-    document.open();
-    document.write(lord.template("threadPageUpper", model, true));
-    document.close();
+    (function() {
+        var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
+        model.settings = lord.settings();
+        model.thread = {
+            archived: lord.data("archived"),
+            postingEnabled: lord.data("postingEnabled"),
+            postLimitReached: lord.data("postLimitReached"),
+            bumpLimitReached: lord.data("bumpLimitReached")
+        };
+        document.open();
+        document.write(lord.template("threadPageUpper", model, true));
+        document.close();
+    })();
 </script>
 <hr />
 {{~["Top"] :position}}
@@ -75,17 +77,19 @@
     {{#def.threadActions}}
 {{~}}
 <script type="text/javascript">
-    var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
-    model.settings = lord.settings();
-    model.thread = {
-        archived: lord.data("archived"),
-        postingEnabled: lord.data("postingEnabled"),
-        postLimitReached: lord.data("postLimitReached"),
-        bumpLimitReached: lord.data("bumpLimitReached")
-    };
-    document.open();
-    document.write(lord.template("threadPageLower", model, true));
-    document.close();
+    (function() {
+        var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
+        model.settings = lord.settings();
+        model.thread = {
+            archived: lord.data("archived"),
+            postingEnabled: lord.data("postingEnabled"),
+            postLimitReached: lord.data("postLimitReached"),
+            bumpLimitReached: lord.data("bumpLimitReached")
+        };
+        document.open();
+        document.write(lord.template("threadPageLower", model, true));
+        document.close();
+    })();
 </script>
 {{#def.navbar}}
 <a id="bottom"></a>

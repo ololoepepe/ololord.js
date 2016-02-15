@@ -20,7 +20,6 @@ router.generateHTML = function() {
         var model = {};
         model.title = Tools.translate("Error 404", "pageTitle");
         model.notFoundMessage = Tools.translate("Page or file not found", "notFoundMessage");
-        model.extraScripts = [ { fileName: "not-found.js" } ];
         var path = __dirname + "/../public/img/404";
         return FS.list(path).then(function(fileNames) {
             model.notFoundImageFileNames = fileNames.filter(function(fileName) {

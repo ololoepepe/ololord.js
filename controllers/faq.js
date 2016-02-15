@@ -12,7 +12,6 @@ router.get("/faq.html", function(req, res) {
 router.generateHTML = function() {
     var model = {};
     model.title = Tools.translate("F.A.Q.", "pageTitle");
-    model.extraScripts = [ { fileName: "faq.js" } ];
     return controller("faq", model).then(function(data) {
         return Promise.resolve({ "faq": data });
     });

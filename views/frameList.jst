@@ -7,7 +7,16 @@
 </div>
 <br />
 <div>
-    <div id="frameListNavigationPlaceholder" style="display: none;"></div>
+    <script type="text/javascript">
+        (function() {
+            var model = lord.model(["base", "tr", "boards"], true);
+            model.settings = lord.settings();
+            model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
+            document.open();
+            document.write(lord.template("frameListNavigation", model, true));
+            document.close();
+        })();
+    </script>
 </div>
 </body>
 </html>

@@ -1,17 +1,19 @@
 <header>
     <script type="text/javascript">
-        var settings = lord.settings();
-        var model = lord.model(["base", "tr", "boards"], true);
-        if (lord.data("boardName"))
-            model.board = lord.model("board/" + lord.data("boardName")).board;
-        model.settings = settings;
-        model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
-        var html = lord.template("custom-header", model, true);
-        if (html) {
+        (function() {
+            var settings = lord.settings();
+            var model = lord.model(["base", "tr", "boards"], true);
+            if (lord.data("boardName"))
+                model.board = lord.model("board/" + lord.data("boardName")).board;
+            model.settings = settings;
+            model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
+            var html = lord.template("custom-header", model, true);
+            if (!html)
+                return;
             document.open();
             document.write(html);
             document.close();
-        }
+        })();
     </script>
 </header>
 <br />
