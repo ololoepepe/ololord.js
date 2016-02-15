@@ -26,6 +26,7 @@
 [done] Show auto-hide reason
 [done] Insert user JS/CSS at page render time
 [done] Make jQuery UI styles fit ololord.js styles
+[done] Optimize cache renewal when modifying posts with large amount of post references
 
 * Add ability to paint on any board using canvas
 * Improve file previews
@@ -37,7 +38,6 @@
 * Add some API to client scripts and simplify existing API
 * Implement different access levels for different boards
 * Use web interface for user access level management and registration
-* Optimize cache renewal when modifying posts with large amount of post references
 * Use Elasticsearch or other search engine [not sure if needed]
 * Write detailed DB schema documentation
 * Write client scripts API documentation

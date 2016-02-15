@@ -849,21 +849,19 @@ module.exports.createPost = function(req, fields, files, transaction) {
     });
 };
 
-var rerenderReferringPosts = function(boardName, postNumber) {
-    return db.hgetall("referringPosts:" + boardName + ":" + postNumber).then(function(referringPosts) {
-        var p = Promise.resolve();
-        Tools.forIn(referringPosts, function(ref) {
+var rerenderReferringPosts = function(post) {
+    return db.hgetall("referringPosts:" + post.boardName + ":" + post.number).then(function(referringPosts) {
+        return Tools.series(referringPosts, function(ref) {
             ref = JSON.parse(ref);
-            p = p.then(function() {
-                return rerenderPost(ref.boardName, ref.postNumber, true);
-            });
+            if (ref.boardName == post.boardName && ref.threadNumber == post.threadNumber)
+                return Promise.resolve();
+            return rerenderPost(ref.boardName, ref.postNumber, true);
         });
-        return p;
     });
 };
 
-var removeReferencedPosts = function(boardName, postNumber, nogenerate) {
-    var key = boardName + ":" + postNumber;
+var removeReferencedPosts = function(post, nogenerate) {
+    var key = post.boardName + ":" + post.number;
     var c = {};
     return db.hgetall("referencedPosts:" + key).then(function(referencedPosts) {
         c.referencedPosts = {};
@@ -877,7 +875,8 @@ var removeReferencedPosts = function(boardName, postNumber, nogenerate) {
     }).then(function() {
         if (!nogenerate) {
             Tools.forIn(c.referencedPosts, function(ref, refKey) {
-                Global.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
+                if (ref.boardName != post.boardName || ref.threadNumber != post.threadNumber)
+                    Global.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
             });
         }
         return db.del("referencedPosts:" + key);
@@ -893,7 +892,8 @@ var addReferencedPosts = function(post, referencedPosts, nogenerate) {
     return Promise.all(promises).then(function() {
         if (!nogenerate) {
             Tools.forIn(referencedPosts, function(ref, refKey) {
-                Global.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
+                if (ref.boardName != post.boardName || ref.threadNumber != post.threadNumber)
+                    Global.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
             });
         }
         var promises = [];
@@ -922,11 +922,11 @@ var removePost = function(boardName, postNumber, leaveFileInfos) {
     }).then(function() {
         return db.hdel("posts", boardName + ":" + postNumber);
     }).then(function() {
-        return rerenderReferringPosts(boardName, postNumber);
+        return rerenderReferringPosts(c.post);
     }).catch(function(err) {
         Global.error(err);
     }).then(function() {
-        return removeReferencedPosts(boardName, postNumber);
+        return removeReferencedPosts(c.post);
     }).catch(function(err) {
         Global.error(err);
     }).then(function() {
@@ -1379,7 +1379,7 @@ var rerenderPost = function(boardName, postNumber, silent) {
         c.post.text = text;
         return db.hset("posts", key, JSON.stringify(c.post));
     }).then(function() {
-        return removeReferencedPosts(boardName, postNumber, !silent);
+        return removeReferencedPosts(c.post, !silent);
     }).then(function() {
         return addReferencedPosts(c.post, referencedPosts, !silent);
     }).then(function() {
@@ -1607,7 +1607,7 @@ module.exports.editPost = function(req, fields) {
     }).then(function() {
         return board.storeExtraData(c.post.number, c.extraData);
     }).then(function() {
-        return removeReferencedPosts(board.name, c.post.number);
+        return removeReferencedPosts(c.post);
     }).then(function() {
         return addReferencedPosts(c.post, referencedPosts);
     }).then(function() {
@@ -1748,14 +1748,6 @@ module.exports.deletePost = function(req, res, fields) {
         } else if (!c.archived) {
             p = c.isThread ? Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "delete")
                 : Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
-        }
-        if (c.isThread && !c.archived) {
-            var threadId = `thread-${c.post.boardName}-${c.post.threadNumber}`;
-            Cache.removeHTML(threadId).then(function() {
-                return Cache.removeJSON(threadId);
-            }).catch(function(err) {
-                Global.error(err);
-            });
         }
         return p;
     }).then(function() {

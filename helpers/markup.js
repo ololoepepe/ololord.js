@@ -204,7 +204,6 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
     var videoId = match ? match[1] : null;
     if (!videoId)
         return Promise.resolve(defaultHtml);
-    console.log(videoId);
     return HTTP.request({
         method: "GET",
         url: `https://coub.com/api/oembed.json?url=http://coub.com/view/${videoId}`,
