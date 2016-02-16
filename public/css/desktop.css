@@ -87,10 +87,10 @@ input.buttonImage {
     width: 400px;
 }
 
-.playlistMinimizedActionsDesktop {
+.playerMinimizedActionsDesktop {
     display: inline-block;
 }
 
-.playlistMinimizedActionsMobile {
+.playerMinimizedActionsMobile {
     display: none;
 }

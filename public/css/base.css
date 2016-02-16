@@ -1012,6 +1012,7 @@ input.buttonImage {
 .track {
     padding: 2px 2px 2px 2px;
     cursor: pointer;
+    position: relative;
 }
 
 .track ~ .track {
@@ -1020,7 +1021,9 @@ input.buttonImage {
 
 .trackActions {
     display: inline-block;
-    float: right;
+    position: absolute;
+    top: 2px;
+    right: 4px;
 }
 
 #playerMinimizeButton {
@@ -1028,4 +1031,9 @@ input.buttonImage {
     position: absolute;
     right: 8px;
     bottom: 16px;
+}
+
+.trackInfo {
+    display: inline-block;
+    width: 70%;
 }

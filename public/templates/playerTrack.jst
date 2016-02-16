@@ -1,14 +1,14 @@
 <div class="track" id="track/{{=it.boardName}}/{{=it.fileName}}" class="track" onclick="lord.playTrack(this);"
      ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);"
      data-board-name="{{=it.boardName}}" data-file-name="{{=it.fileName}}" draggable="true">
-    <span>
+    <span class="trackInfo">
         {{? it.artist}}{{=it.artist}}{{?}}
         {{? it.artist && it.title}}—{{?}}
         {{? it.title}}{{=it.title}}{{?}}
         {{? it.year}}({{=it.year}}){{?}}
-        <b>{{=it.duration}}</b>
     </span>
     <span class="trackActions">
+        <b>{{=it.duration}}</b>
         <a title="{{=it.tr.downloadPlaylistFileText}}" draggable="false" onclick="event.stopPropagation();"
            href="/{{=it.site.pathPrefix}}{{=it.boardName}}/src/{{=it.fileName}}"
            download="{{=it.fileName}}"><img class="buttonImage" width="16" height="16"
