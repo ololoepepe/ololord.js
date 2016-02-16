@@ -296,10 +296,6 @@ ul.tabWidget > li.activated > a {
     font-style: italic;
 }
 
-.track {
-    background-color: #DDEDAA;
-}
-
 .chatContact:hover {
     color: #48B0FD;
     background-color: #575757;
@@ -411,4 +407,36 @@ textarea {
     background-color: #2C2C2C;
     border: 1px solid #575757;
     border-radius: 5px;
+}
+
+.track {
+    background-color: #2C2C2C;
+    border: 1px solid #575757;
+    border-radius: 5px;
+}
+
+.track:hover {
+    background-color: #AABA77;
+    border: 1px solid #545454;
+}
+
+.track.selected {
+    background-color: #DDEDAA;
+    border: 1px solid #000000;
+}
+
+.track:hover > span > a > img {
+    -webkit-filter: invert(0);
+    -moz-filter: invert(0);
+    -ms-filter: invert(0);
+    -o-filter: invert(0);
+    filter: invert(0);
+}
+
+.track.selected > span > a > img {
+    -webkit-filter: invert(0);
+    -moz-filter: invert(0);
+    -ms-filter: invert(0);
+    -o-filter: invert(0);
+    filter: invert(0);
 }

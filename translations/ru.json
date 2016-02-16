@@ -2590,5 +2590,35 @@
         "_default": {
             "value": "Вы не можете участвовать в собственном голосовании"
         }
+    },
+    "Play": {
+        "playerPlayText": {
+            "value": "Воспроизвести"
+        }
+    },
+    "Pause": {
+        "playerPauseText": {
+            "value": "Приостановить"
+        }
+    },
+    "Previous track": {
+        "playerPreviousTrackText": {
+            "value": "Предыдущий трек"
+        }
+    },
+    "Next track": {
+        "playerNextTrackText": {
+            "value": "Следующий трек"
+        }
+    },
+    "Mute": {
+        "playerMuteText": {
+            "value": "Выключить звук"
+        }
+    },
+    "Unmute": {
+        "playerUnmuteText": {
+            "value": "Включить звук"
+        }
     }
 }

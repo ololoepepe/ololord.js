@@ -133,7 +133,3 @@ input.buttonImage {
 .playlistMinimizedActionsMobile {
     display: inline-block;
 }
-
-.track > audio {
-    min-width: 200px;
-}

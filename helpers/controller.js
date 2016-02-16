@@ -281,6 +281,12 @@ controller.translationsModel = function() {
     translate("Show", "showPostText");
     translate("Minimize player", "minimizePlayerText");
     translate("Maximize player", "maximizePlayerText");
+    translate("Play", "playerPlayText");
+    translate("Pause", "playerPauseText");
+    translate("Previous track", "playerPreviousTrackText");
+    translate("Next track", "playerNextTrackText");
+    translate("Mute", "playerMuteText");
+    translate("Unmute", "playerUnmuteText");
     translate("Last modified:", "modificationDateTimeText");
     translate("User was banned for this post", "bannedForText");
     translate("Delete file", "deleteFileText");

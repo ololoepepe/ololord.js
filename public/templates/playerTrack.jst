@@ -1,0 +1,20 @@
+<div class="track" id="track/{{=it.boardName}}/{{=it.fileName}}" class="track" onclick="lord.playTrack(this);"
+     ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);"
+     data-board-name="{{=it.boardName}}" data-file-name="{{=it.fileName}}" draggable="true">
+    <span>
+        {{? it.artist}}{{=it.artist}}{{?}}
+        {{? it.artist && it.title}}—{{?}}
+        {{? it.title}}{{=it.title}}{{?}}
+        {{? it.year}}({{=it.year}}){{?}}
+        <b>{{=it.duration}}</b>
+    </span>
+    <span class="trackActions">
+        <a title="{{=it.tr.downloadPlaylistFileText}}" draggable="false" onclick="event.stopPropagation();"
+           href="/{{=it.site.pathPrefix}}{{=it.boardName}}/src/{{=it.fileName}}"
+           download="{{=it.fileName}}"><img class="buttonImage" width="16" height="16"
+                                            src="/{{=it.site.pathPrefix}}img/player/16/download.png"></a>
+        <a title="{{=it.tr.removeFromPlaylistText}}" href="javascript:void(0);" draggable="false"
+           onclick="lord.removeFromPlaylist(event, this);"><img class="buttonImage" width="16" height="16"
+                                                                src="/{{=it.site.pathPrefix}}img/player/16/delete.png"></a>
+    </span>
+</div>

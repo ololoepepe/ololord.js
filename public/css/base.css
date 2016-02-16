@@ -695,19 +695,6 @@ blockquote.blockquoteThread.expand {
     display: table;
 }
 
-.track {
-    padding: 2px 2px 2px 2px;
-    display: table;
-}
-
-.track ~ .track {
-    margin-top: 5px;
-}
-
-.track > audio {
-    width: auto;
-}
-
 #recaptcha_image_cell {
     background-color: inherit;
 }
@@ -950,6 +937,8 @@ input.buttonImage {
 #player > .playerMaximized {
     display: block;
     padding: 4px;
+    height: 100%;
+    position: relative;
 }
 
 #player.minimized > .playerMinimized {
@@ -992,4 +981,51 @@ input.buttonImage {
 
 .playerHeader {
     padding: 4px;
+    margin-bottom: 4px;
+}
+
+#playerDurationSlider {
+    display: inline-block;
+    width: 70%;
+}
+
+#playerVolumeSlider {
+    display: inline-block;
+    width: 26%;
+}
+
+#playerTrackInfo {
+    display: inline-block;
+    font-size: 1.5em;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+#playerTrackTags {
+    font-size: 1.2em;
+}
+
+.playerHeader > input[name="playerMuteButton"] {
+    float: right;
+}
+
+.track {
+    padding: 2px 2px 2px 2px;
+    cursor: pointer;
+}
+
+.track ~ .track {
+    margin-top: 2px;
+}
+
+.trackActions {
+    display: inline-block;
+    float: right;
+}
+
+#playerMinimizeButton {
+    display: inline-block;
+    position: absolute;
+    right: 8px;
+    bottom: 16px;
 }

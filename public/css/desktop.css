@@ -94,7 +94,3 @@ input.buttonImage {
 .playlistMinimizedActionsMobile {
     display: none;
 }
-
-.track > audio {
-    min-width: 300px;
-}

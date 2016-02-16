@@ -281,11 +281,6 @@ ul.tabWidget > li.activated {
     font-style: italic;
 }
 
-.track {
-    background-color: #DDDDDD;
-    border: 1px solid #CCCCCC;
-}
-
 .chatContact:hover {
     color: #FFFFFF;
     background-color: #666666;
@@ -346,4 +341,17 @@ ul.tabWidget > li.activated {
 .playerHeader {
     background-color: #D6DAF0;
     border: 1px solid #CCCCCC;
+}
+
+.track {
+    background-color: #D6DAF0;
+    border: 1px solid #CCCCCC;
+}
+
+.track:hover {
+    background-color: #D9D9D9;
+}
+
+.track.selected {
+    background-color: #AAAAAA;
 }

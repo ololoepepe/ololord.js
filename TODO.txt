@@ -28,11 +28,11 @@
 [done] Make jQuery UI styles fit ololord.js styles
 [done] Optimize cache renewal when modifying posts with large amount of post references
 [done] Add post preview disappearance delay
+[done] Add playlist to every page
 
 * Add ability to paint on any board using canvas
 * Improve file previews
 * Add own player for media file previews
-* Add playlist to every page
 * Optimize spells
 * Fix referenced/referring posts when moving a thread
 * Add some API to client scripts and simplify existing API
