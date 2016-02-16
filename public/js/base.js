@@ -453,7 +453,6 @@ lord.resetPlayerSource = function(track) {
 };
 
 lord.updatePlayerButtons = function() {
-    $("#playerVolumeSlider").slider(lord.playerElement ? "enable" : "disable");
     lord.name("playerPlayPauseButton", lord.id("player")).forEach(function(btn) {
         btn.disabled = !lord.playerElement && !lord.currentTrack;
         btn.src = btn.src.replace(/\/(play|pause)\.png$/,
@@ -1411,10 +1410,12 @@ lord.initializeOnLoadBase = function() {
         max: 1,
         step: 0.01,
         value: lord.getLocalObject("playerVolume", defVol),
-        disabled: true,
         slide: function() {
+            var volume = +$(this).slider("value");
             if (lord.playerElement)
-                lord.playerElement.volume = +$(this).slider("value");
+                lord.playerElement.volume = volume;
+            else
+                lord.setLocalObject("playerVolume", volume);
         }
     });
     $("#playerDurationSlider").slider({
