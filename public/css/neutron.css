@@ -396,3 +396,19 @@ textarea {
 .hideReason {
     font-weight: bold;
 }
+
+#player {
+    background-color: #212121;
+    border: 1px solid #575757;
+    border-radius: 5px;
+}
+
+#player.minimized {
+    background-color: #2C2C2C;
+}
+
+.playerHeader {
+    background-color: #2C2C2C;
+    border: 1px solid #575757;
+    border-radius: 5px;
+}

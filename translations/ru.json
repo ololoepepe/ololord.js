@@ -666,14 +666,6 @@
             "value": "Перенести"
         }
     },
-    "Playlist": {
-        "pageTitle": {
-            "value": "Плей-лист"
-        },
-        "toPlaylistPageText": {
-            "value": "Плей-лист"
-        }
-    },
     "Remove from playlist": {
         "removeFromPlaylistText": {
             "value": "Удалить из плей-листа"
@@ -1306,9 +1298,24 @@
             "value": "Открепить"
         }
     },
-    "Hide/show": {
-        "showHidePostText": {
-            "value": "Скрыть/показать"
+    "Hide": {
+        "hidePostText": {
+            "value": "Скрыть"
+        }
+    },
+    "Show": {
+        "showPostText": {
+            "value": "Показать"
+        }
+    },
+    "Minimize player": {
+        "minimizePlayerText": {
+            "value": "Свернуть плеер"
+        }
+    },
+    "Maximize player": {
+        "maximizePlayerText": {
+            "value": "Развернуть плеер"
         }
     },
     "You don't have to enter captcha": {

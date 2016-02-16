@@ -1494,7 +1494,7 @@ lord.fileAddedCommon = function(div) {
     } else {
         var match = fileNameFull.match(/\.(jpe?g|png|gif|mpeg|mp1|m1a|m2a|mpa|mp3|mpg|mp4|ogg|ogv|webm|wav|pdf)$/i);
         if (match) {
-            var extension = match[1].replace("jpg", "jpeg").replace("ogv", "ogg");
+            var extension = match[1].replace("jpg", "jpeg").replace("ogv", "ogg").toLowerCase();
             ["mpeg", "mp1", "m1a", "m2a", "mpa", "mpg"].forEach(function(alias) {
                 extension = extension.replace(alias, "mp3");
             });
@@ -2851,34 +2851,43 @@ lord.showMenu = function(e, input, selector) {
     }).show();
 };
 
+lord.hotkey = function(name, hotkeys) {
+    var hotkeys = hotkeys || lord.getLocalObject("hotkeys", {}).dir;
+    if (!hotkeys)
+        return lord.DefaultHotkeys.dir[name];
+    return hotkeys[name] || lord.DefaultHotkeys.dir[name];
+};
+
 lord.showPostActionsMenu = function(e, input, postNumber) {
     var id = "post" + postNumber + "ActionsMenu";
-    if (!lord.id(id)) {
-        var post = lord.id(postNumber);
-        if (!post)
-            return;
-        var fav = lord.getLocalObject("favoriteThreads", {});
-        var model = {
-            post: {
-                number: postNumber,
-                rawText: lord.queryOne("blockquote", post).textContent,
-                fileInfos: lord.query(".postFile", post),
-                isOp: lord.hasClass(post, "opPost")
-            },
-            thread: {
-                fixed: lord.data("fixed", post),
-                closed: lord.data("closed", post),
-                unbumpable: lord.data("unbumpable", post),
-                expanded: lord.data("expanded", post),
-                isInFavorites: fav.hasOwnProperty(lord.data("boardName") + "/" + lord.data("threadNumber", post))
-            },
-            customPostMenuAction: lord.customPostMenuAction,
-            isThreadPage: +lord.data("threadNumber")
-        };
-        model = merge.recursive(model, lord.model(["base", "tr", "board/" + lord.data("boardName")], true));
-        lord.appendExtrasToModel(model);
-        post.appendChild(lord.template("postActionsMenu", model));
-    }
+    lord.removeSelf(lord.id(id));
+    var post = lord.id(postNumber);
+    if (!post)
+        return;
+    var fav = lord.getLocalObject("favoriteThreads", {});
+    var model = {
+        post: {
+            number: postNumber,
+            rawText: lord.queryOne("blockquote", post).textContent,
+            fileInfos: lord.query(".postFile", post),
+            isOp: lord.hasClass(post, "opPost"),
+            hidden: !!lord.getLocalObject("hiddenPosts", {})[lord.data("boardName") + "/" + postNumber]
+        },
+        thread: {
+            fixed: lord.data("fixed", post),
+            closed: lord.data("closed", post),
+            unbumpable: lord.data("unbumpable", post),
+            expanded: lord.data("expanded", post),
+            isInFavorites: fav.hasOwnProperty(lord.data("boardName") + "/" + lord.data("threadNumber", post))
+        },
+        customPostMenuAction: lord.customPostMenuAction,
+        isThreadPage: +lord.data("threadNumber")
+    };
+    model = merge.recursive(model, lord.model(["base", "tr", "board/" + lord.data("boardName")], true));
+    lord.appendExtrasToModel(model);
+    if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile"))
+        model.hideActionShortcut = lord.hotkey("hidePost");
+    post.appendChild(lord.template("postActionsMenu", model));
     return lord.showMenu(e, input, "#" + id);
 };
 
@@ -2910,25 +2919,17 @@ lord.selectCaptchaEngine = function() {
 
 lord.appendHotkeyShortcuts = function() {
     var hotkeys = lord.getLocalObject("hotkeys", {}).dir;
-    var key = function(name) {
-        if (!hotkeys)
-            return lord.DefaultHotkeys.dir[name];
-        return hotkeys[name] || lord.DefaultHotkeys.dir[name];
-    };
     var btn = lord.queryOne(".leafButton.leafButtonPrevious");
     if (btn)
-        btn.title += " (" + key("previousPageImage") + ")";
+        btn.title += " (" + lord.hotkey("previousPageImage", hotkeys) + ")";
     btn = lord.queryOne(".leafButton.leafButtonNext");
     if (btn)
-        btn.title += " (" + key("nextPageImage") + ")";
+        btn.title += " (" + lord.hotkey("nextPageImage", hotkeys) + ")";
     lord.query("[name='quickReply']").forEach(function(a) {
-        a.title += " (" + key("quickReply") + ")";
+        a.title += " (" + lord.hotkey("quickReply", hotkeys) + ")";
     });
     lord.query("[name='toThreadLink']").forEach(function(a) {
-        a.title += "(" + key("goToThread") + ")";
-    });
-    lord.query("[name='hideButton']").forEach(function(img) {
-        img.title += "(" + key("hidePost") + ")";
+        a.title += "(" + lord.hotkey("goToThread", hotkeys) + ")";
     });
     var table = lord.queryOne(".postformMarkup");
     if (table) {
@@ -2938,15 +2939,15 @@ lord.appendHotkeyShortcuts = function() {
             var btn = lord.nameOne(s, table);
             if (!btn)
                 return;
-            btn.title += " (" + key(s) + ")";
+            btn.title += " (" + lord.hotkey(s, hotkeys) + ")";
         });
     }
     lord.query("[name='updateThreadButton']").forEach(function(a) {
-        a.title += " (" + key("updateThread") + ")";
+        a.title += " (" + lord.hotkey("updateThread", hotkeys) + ")";
     });
     btn = lord.nameOne("submit", lord.id("postForm"));
     if (btn)
-        btn.title += "(" + key("submitReply") + ")";
+        btn.title += "(" + lord.hotkey("submitReply", hotkeys) + ")";
 };
 
 lord.initializeOnLoadBoard = function() {

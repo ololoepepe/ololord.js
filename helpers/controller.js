@@ -248,7 +248,6 @@ controller.translationsModel = function() {
     var translate = function(sourceText, disambiguation) {
         tr[disambiguation] = Tools.translate(sourceText, disambiguation);
     };
-    translate("Playlist", "toPlaylistPageText");
     translate("Markup", "toMarkupPageText");
     translate("Home", "toHomePageText");
     translate("Framed version", "framedVersionText");
@@ -278,7 +277,10 @@ controller.translationsModel = function() {
     translate("Add to favorites", "addThreadToFavoritesText");
     translate("Remove thread from favorites", "removeThreadFromFavoritesText");
     translate("Delete", "deletePostText");
-    translate("Hide/show", "showHidePostText");
+    translate("Hide", "hidePostText");
+    translate("Show", "showPostText");
+    translate("Minimize player", "minimizePlayerText");
+    translate("Maximize player", "maximizePlayerText");
     translate("Last modified:", "modificationDateTimeText");
     translate("User was banned for this post", "bannedForText");
     translate("Delete file", "deleteFileText");

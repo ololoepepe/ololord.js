@@ -121,3 +121,19 @@ input.buttonImage {
 .postToThreadDesktop {
     display: none;
 }
+
+#player {
+    width: 80%;
+}
+
+.playlistMinimizedActionsDesktop {
+    display: none;
+}
+
+.playlistMinimizedActionsMobile {
+    display: inline-block;
+}
+
+.track > audio {
+    min-width: 200px;
+}

@@ -339,3 +339,17 @@ ul.tabWidget > li.activated > a {
 .hideReason {
     font-weight: bold;
 }
+
+#player {
+    background-color: #EEEEEE;
+    border: 1px solid #CCCCCC;
+}
+
+#player.minimized {
+    background-color: #DDDDDD;
+}
+
+.playerHeader {
+    background-color: #DDDDDD;
+    border: 1px solid #CCCCCC;
+}

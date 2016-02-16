@@ -705,7 +705,7 @@ blockquote.blockquoteThread.expand {
 }
 
 .track > audio {
-    width: 600px;
+    width: auto;
 }
 
 #recaptcha_image_cell {
@@ -927,4 +927,69 @@ input.buttonImage {
 
 .ownPostLink.opPostLink:after {
     content: " (You) (OP)";
+}
+
+#player {
+    position: fixed;
+    height: 80%;
+    bottom: 10%;
+    right: 0px;
+    z-index: 1;
+}
+
+#player.minimized {
+    width: 24px;
+    height: auto;
+    cursor: pointer;
+}
+
+#player > .playerMinimized {
+    display: none;
+}
+
+#player > .playerMaximized {
+    display: block;
+    padding: 4px;
+}
+
+#player.minimized > .playerMinimized {
+    display: block;
+    float: left;
+}
+
+#player.minimized > .playerMinimized > div {
+    display: inline-block;
+    overflow: hidden;
+    width: 1.5em;
+    padding: 6px;
+}
+
+#player.minimized > .playerMinimized > div > span {
+    white-space: nowrap;
+    -webkit-transform: translate(1.1em,0) rotate(90deg);
+    -moz-transform: translate(1.1em,0) rotate(90deg);
+    -o-transform: translate(1.1em,0) rotate(90deg);
+    transform: translate(1.1em,0) rotate(90deg);
+    -webkit-transform-origin: 0 0;
+    -moz-transform-origin: 0 0;
+    -o-transform-origin: 0 0;
+    transform-origin: 0 0;
+    -ms-transform: none;
+    -ms-transform-origin: none;
+    -ms-writing-mode: tb-rl;
+    *writing-mode: tb-rl;
+}
+
+#player.minimized > .playerMinimized > div > span:before {
+    content: "";
+    float: left;
+    margin-top: 100%;
+}
+
+#player.minimized > .playerMaximized {
+    display: none;
+}
+
+.playerHeader {
+    padding: 4px;
 }

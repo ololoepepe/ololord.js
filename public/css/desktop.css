@@ -82,3 +82,19 @@ input.buttonImage {
 .postToThreadMobile {
     display: none;
 }
+
+#player {
+    width: 400px;
+}
+
+.playlistMinimizedActionsDesktop {
+    display: inline-block;
+}
+
+.playlistMinimizedActionsMobile {
+    display: none;
+}
+
+.track > audio {
+    min-width: 300px;
+}

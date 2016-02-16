@@ -3,6 +3,7 @@
 !banners/
 !flags/
 !markup/
+!player/
 !addfile.png
 !addfile_link.png
 !addfile_vk.png
@@ -21,6 +22,7 @@
 !bumplimit.png
 !catalog.png
 !chat_message.gif
+!clear.png
 !chat.png
 !closed.png
 !close_voting.png
@@ -67,9 +69,6 @@
 !open.png
 !open_voting.png
 !pdf_file.png
-!playlist_delete.png
-!playlist_download.png
-!playlist.png
 !png_file.png
 !post_actions.png
 !postlimit.png
@@ -83,6 +82,7 @@
 !rss.png
 !search.png
 !settings.png
+!show.png
 !source_text.png
 !storage.png
 !thread_back.png

@@ -38,7 +38,7 @@
             <input type="text" name="banExpires_{{=board.name}}" size="14"
                    {{? typeof ban != "undefined" && ban.expiresAt}}value="{{ out += it.formattedDate(ban.expiresAt); }}"{{?}} />
             <a href="javascript:void(0);" onclick="lord.clearDate('banExpires_{{=board.name}}'); return false;">
-                <img src="/{{=it.site.pathPrefix}}img/hide.png" class="buttonImage" title="{{=it.tr.clearDateFieldText}}" /></a>
+                <img src="/{{=it.site.pathPrefix}}img/clear.png" class="buttonImage" title="{{=it.tr.clearDateFieldText}}" /></a>
             <input type="text" name="banReason_{{=board.name}}" size="33"
                    {{? typeof ban != "undefined" && ban.reason}}value="{{=ban.reason}}"{{?}}
                    placeholder="{{=it.tr.banReasonLabelText}} [...]" />
@@ -55,7 +55,7 @@
     </select>
     <input type="text" name="expires" size="14" />
     <a href="javascript:void(0);" onclick="lord.clearDate('expires'); return false;">
-        <img src="/{{=it.site.pathPrefix}}img/hide.png" class="buttonImage" title="{{=it.tr.clearDateFieldText}}" /></a>
+        <img src="/{{=it.site.pathPrefix}}img/clear.png" class="buttonImage" title="{{=it.tr.clearDateFieldText}}" /></a>
     <input type="text" name="reason" size="33" placeholder="{{=it.tr.banReasonLabelText}} [...]" />
     <br />
     <br />

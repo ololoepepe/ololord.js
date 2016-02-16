@@ -1,0 +1,31 @@
+<div id="player" class="minimized">
+    <div class="playerMinimized">
+        <div>
+            <span class="playlistMinimizedActionsDesktop">
+                <a href="javascript:void(0);" onclick="lord.setPlayerVisible(event, true);"
+                   title="{{=it.tr.maximizePlayerText}}"><img src="/{{=it.site.pathPrefix}}img/player/16/player.png"
+                                                              class="buttonImage" width="16" height="16"></a>
+                <a href="javascript:void(0);" onclick="lord.playerPlayPause(event);"
+                   title="Play"><img src="/{{=it.site.pathPrefix}}img/player/16/play.png"
+                                     class="buttonImage" width="16" height="16"></a>
+                <a href="javascript:void(0);" onclick="lord.playerPrevious(event);"
+                   title="Previous track"><img src="/{{=it.site.pathPrefix}}img/player/16/previous.png"
+                                               class="buttonImage" width="16" height="16"></a>
+                <a href="javascript:void(0);" onclick="lord.playerNext(event);"
+                   title="Next track"><img src="/{{=it.site.pathPrefix}}img/player/16/next.png"
+                                           class="buttonImage" width="16" height="16"></a></span>
+            <span class="playlistMinimizedActionsMobile" onclick="lord.setPlayerVisible(event, true);">
+                <img src="/{{=it.site.pathPrefix}}img/player/16/player.png" class="signImage" width="16" height="16">
+                {{=it.tr.maximizePlayerText}}
+            </span>
+        </div>
+    </div>
+    <div class="playerMaximized">
+        <div class="playerHeader">
+            <a href="javascript:void(0);" onclick="lord.setPlayerVisible(event, false);"
+               title="{{=it.tr.minimizePlayerText}}"><img src="/{{=it.site.pathPrefix}}img/player/32/hide.png"
+                                                          class="buttonImage" width="32" height="32"></a>
+        </div>
+        <div id="playlistList"></div>
+    </div>
+</div>

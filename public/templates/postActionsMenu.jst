@@ -1,10 +1,10 @@
 <ul id="post{{=it.post.number}}ActionsMenu" class="menu">
     {{? it.customPostMenuAction && it.customPostMenuAction[0]}}
-        {{ out += it.customPostMenuAction[0](it, thread, post); }}
+        {{ out += it.customPostMenuAction[0](it, it.thread, it.post); }}
     {{?}}
     <li class="ui-widget-header">{{=it.tr.postMenuCategoryPostText}}</li>
     {{? it.customPostMenuAction && it.customPostMenuAction[10]}}
-        {{ out += it.customPostMenuAction[10](it, thread, post); }}
+        {{ out += it.customPostMenuAction[10](it, it.thread, it.post); }}
     {{?}}
     {{? it.post.rawText}}
         <li>
@@ -15,7 +15,7 @@
         </li>
     {{?}}
     {{? it.customPostMenuAction && it.customPostMenuAction[20]}}
-        {{ out += it.customPostMenuAction[20](it, thread, post); }}
+        {{ out += it.customPostMenuAction[20](it, it.thread, it.post); }}
     {{?}}
     {{? !it.archived && it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
         <li>
@@ -25,7 +25,7 @@
         </li>
     {{?}}
     {{? it.customPostMenuAction && it.customPostMenuAction[30]}}
-        {{ out += it.customPostMenuAction[30](it, thread, post); }}
+        {{ out += it.customPostMenuAction[30](it, it.thread, it.post); }}
     {{?}}
     {{? (it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0) && (it.post.fileInfos.length < it.board.maxFileCount)}}
         <li>
@@ -35,15 +35,15 @@
         </li>
     {{?}}
     {{? it.customPostMenuAction && it.customPostMenuAction[40]}}
-        {{ out += it.customPostMenuAction[40](it, thread, post); }}
+        {{ out += it.customPostMenuAction[40](it, it.thread, it.post); }}
     {{?}}
     <li>
         <a name="hideButton" href="javascript:void(0);" onclick="lord.setPostHidden(this); return false;">
-            <img src="/{{=it.site.pathPrefix}}img/hide.png" class="signImage" />
-            {{=it.tr.showHidePostText}}</a>
+            <img src="/{{=it.site.pathPrefix}}img/{{? it.post.hidden}}show{{??}}hide{{?}}.png" class="signImage" />
+            {{? it.post.hidden}}{{=it.tr.showPostText}}{{??}}{{=it.tr.hidePostText}}{{?}}{{? it.hideActionShortcut}} ({{=it.hideActionShortcut}}){{?}}</a>
     </li>
     {{? it.customPostMenuAction && it.customPostMenuAction[50]}}
-        {{ out += it.customPostMenuAction[50](it, thread, post); }}
+        {{ out += it.customPostMenuAction[50](it, it.thread, it.post); }}
     {{?}}
     <li>
         <a name="deleteButton" target="_blank" href="javascript:void(0);"
@@ -52,12 +52,12 @@
             {{=it.tr.deletePostText}}</a>
     </li>
     {{? it.customPostMenuAction && it.customPostMenuAction[60]}}
-        {{ out += it.customPostMenuAction[60](it, thread, post); }}
+        {{ out += it.customPostMenuAction[60](it, it.thread, it.post); }}
     {{?}}
     {{? it.post.isOp}}
         <li class="ui-widget-header">{{=it.tr.postMenuCategoryThreadText}}</li>
         {{? it.customPostMenuAction && it.customPostMenuAction[70]}}
-            {{ out += it.customPostMenuAction[70](it, thread, post); }}
+            {{ out += it.customPostMenuAction[70](it, it.thread, it.post); }}
         {{?}}
         <li>
             <a name="addToFavoritesButton" href="javascript:void(0);"
@@ -66,7 +66,7 @@
                 <span>{{? !it.thread.isInFavorites}}{{=it.tr.addThreadToFavoritesText}}{{??}}{{=it.tr.removeThreadFromFavoritesText}}{{?}}</span></a>
         </li>
         {{? it.customPostMenuAction && it.customPostMenuAction[80]}}
-            {{ out += it.customPostMenuAction[80](it, thread, post); }}
+            {{ out += it.customPostMenuAction[80](it, it.thread, it.post); }}
         {{?}}
         <li>
             <a name="downloadButton" href="javascript:void(0);" onclick="lord.downloadThread(this); return false;">
@@ -74,7 +74,7 @@
                 {{=it.tr.downloadThreadText}}</a>
         </li>
         {{? it.customPostMenuAction && it.customPostMenuAction[90]}}
-            {{ out += it.customPostMenuAction[90](it, thread, post); }}
+            {{ out += it.customPostMenuAction[90](it, it.thread, it.post); }}
         {{?}}
         {{? !it.isThreadPage}}
             <li>
@@ -85,7 +85,7 @@
             </li>
         {{?}}
         {{? it.customPostMenuAction && it.customPostMenuAction[100]}}
-            {{ out += it.customPostMenuAction[100](it, thread, post); }}
+            {{ out += it.customPostMenuAction[100](it, it.thread, it.post); }}
         {{?}}
         {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
             <li>
@@ -95,7 +95,7 @@
                     {{? it.thread.fixed}}{{=it.tr.unfixThreadText}}{{??}}{{=it.tr.fixThreadText}}{{?}}</a>
             </li>
             {{? it.customPostMenuAction && it.customPostMenuAction[110]}}
-                {{ out += it.customPostMenuAction[110](it, thread, post); }}
+                {{ out += it.customPostMenuAction[110](it, it.thread, it.post); }}
             {{?}}
             <li>
                 <a name="closeButton" href="javascript:void(0);"
@@ -105,7 +105,7 @@
                     {{? it.thread.closed}}{{=it.tr.openThreadText}}{{??}}{{=it.tr.closeThreadText}}{{?}}</a>
             </li>
             {{? it.customPostMenuAction && it.customPostMenuAction[120]}}
-                {{ out += it.customPostMenuAction[120](it, thread, post); }}
+                {{ out += it.customPostMenuAction[120](it, it.thread, it.post); }}
             {{?}}
             <li>
                 <a name="setUnbumpableButton" href="javascript:void(0);"
@@ -114,7 +114,7 @@
                     {{? it.thread.unbumpable}}{{=it.tr.setThreadBumpableText}}{{??}}{{=it.tr.setThreadUnbumpableText}}{{?}}</a>
             </li>
             {{? it.customPostMenuAction && it.customPostMenuAction[130]}}
-                {{ out += it.customPostMenuAction[130](it, thread, post); }}
+                {{ out += it.customPostMenuAction[130](it, it.thread, it.post); }}
             {{?}}
             <li>
                 <a name="moveButton" target="_blank" href="javascript:void(0);"
@@ -123,16 +123,16 @@
                     {{=it.tr.moveThreadText}}</a>
             </li>
             {{? it.customPostMenuAction && it.customPostMenuAction[140]}}
-                {{ out += it.customPostMenuAction[140](it, thread, post); }}
+                {{ out += it.customPostMenuAction[140](it, it.thread, it.post); }}
             {{?}}
         {{?}}
     {{?}}
     {{? it.customPostMenuAction && it.customPostMenuAction[150]}}
-        {{ out += it.customPostMenuAction[150](it, thread, post); }}
+        {{ out += it.customPostMenuAction[150](it, it.thread, it.post); }}
     {{?}}
     <li class="ui-widget-header">{{=it.tr.postMenuCategoryUserText}}</li>
     {{? it.customPostMenuAction && it.customPostMenuAction[160]}}
-        {{ out += it.customPostMenuAction[160](it, thread, post); }}
+        {{ out += it.customPostMenuAction[160](it, it.thread, it.post); }}
     {{?}}
     <li>
         <a name="chatButton" href="javascript:void(0);" onclick="lord.chatWithUser(this); return false;">
@@ -140,7 +140,7 @@
             {{=it.tr.chatWithUserText}}</a>
     </li>
     {{? it.customPostMenuAction && it.customPostMenuAction[170]}}
-        {{ out += it.customPostMenuAction[170](it, thread, post); }}
+        {{ out += it.customPostMenuAction[170](it, it.thread, it.post); }}
     {{?}}
     {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
         <li>
@@ -149,7 +149,7 @@
                 {{=it.tr.showUserIpText}}</a>
         </li>
         {{? it.customPostMenuAction && it.customPostMenuAction[180]}}
-            {{ out += it.customPostMenuAction[180](it, thread, post); }}
+            {{ out += it.customPostMenuAction[180](it, it.thread, it.post); }}
         {{?}}
         <li>
             <a name="banButton" target="_blank" href="javascript:void(0);" onclick="lord.banUser(this); return false;">
@@ -157,7 +157,7 @@
                 {{=it.tr.banUserText}}</a>
         </li>
         {{? it.customPostMenuAction && it.customPostMenuAction[190]}}
-            {{ out += it.customPostMenuAction[190](it, thread, post); }}
+            {{ out += it.customPostMenuAction[190](it, it.thread, it.post); }}
         {{?}}
     {{?}}
 </ul>
