@@ -471,7 +471,6 @@ lord.updatePlayerButtons = function() {
         btn.title = lord.text((!lord.playerElement || lord.playerElement.volume) ? "playerMuteText"
             : "playerUnmuteText");
     });
-    lord.updatePlayerTrackTags();
 };
 
 lord.playerPlayPause = function(e) {
@@ -485,6 +484,7 @@ lord.playerPlayPause = function(e) {
         return;
     }
     lord.updatePlayerButtons();
+    lord.updatePlayerTrackTags();
 };
 
 lord.playerPreviousOrNext = function(next, e) {
@@ -545,6 +545,7 @@ lord.playTrack = function(el) {
     lord.resetPlayerSource(lord.currentTrack);
     lord.playerElement.play();
     lord.updatePlayerButtons();
+    lord.updatePlayerTrackTags();
 };
 
 lord.allowTrackDrop = function(e) {
@@ -655,6 +656,7 @@ lord.checkPlaylist = function() {
         if (lord.currentTrack) {
             lord.addClass(lord.id("track/" + lord.currentTrack.boardName + "/" + lord.currentTrack.fileName),
                 "selected");
+            lord.updatePlayerTrackTags();
         }
     }
     lord.updatePlayerButtons();
