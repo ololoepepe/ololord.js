@@ -17,7 +17,9 @@
                        src="/{{=it.site.pathPrefix}}img/player/16/next.png" disabled="true" />
             </span>
             <span class="playerMinimizedActionsMobile" onclick="lord.setPlayerVisible(event, true);">
-                <img src="/{{=it.site.pathPrefix}}img/player/16/player.png" class="signImage" width="16" height="16">
+                <input type="image" onclick="lord.playerPlayPause(event); return false;" name="playerPlayPauseButton"
+                       title="{{=it.tr.playerPlayText}}" src="/{{=it.site.pathPrefix}}img/player/16/play.png"
+                       class="buttonImage" width="16" height="16" disabled="true" />
                 {{=it.tr.maximizePlayerText}}
             </span>
         </div>

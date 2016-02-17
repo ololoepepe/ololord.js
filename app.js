@@ -139,23 +139,23 @@ if (cluster.isMaster) {
                 var rl = commands();
             }
         });
-        var fileNames = {};
-        var fileName = function(boardName) {
+        var lastFileName;
+        var fileName = function() {
             var fn = "" + Tools.now().valueOf();
-            if (fn != fileNames[boardName]) {
-                fileNames[boardName] = fn;
+            if (fn != lastFileName) {
+                lastFileName = fn;
                 return Promise.resolve(fn);
             }
             return new Promise(function(resolve, reject) {
                 setTimeout(function() {
-                    fileName(boardName).then(function(fn) {
+                    fileName().then(function(fn) {
                         resolve(fn);
                     });
                 }, 1);
             });
         };
-        Global.IPC.installHandler("fileName", function(boardName) {
-            return fileName(boardName);
+        Global.IPC.installHandler("fileName", function() {
+            return fileName();
         });
         Global.IPC.installHandler("generate", function(data) {
             return BoardModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);

@@ -984,14 +984,12 @@ input.buttonImage {
     margin-bottom: 4px;
 }
 
-#playerDurationSlider {
-    display: inline-block;
-    width: 70%;
+.playerSliderContainer {
+    text-align: center;
 }
 
-#playerVolumeSlider {
+#playerDurationSlider {
     display: inline-block;
-    width: 26%;
 }
 
 #playerTrackInfo {
@@ -1033,7 +1031,10 @@ input.buttonImage {
     bottom: 16px;
 }
 
+#playerTracks {
+    overflow-y: auto;
+}
+
 .trackInfo {
     display: inline-block;
-    width: 70%;
 }

@@ -349,6 +349,12 @@ lord.switchMumWatching = function() {
 lord.setPlayerVisible = function(e, visible) {
     e.stopPropagation();
     lord[visible ? "removeClass" : "addClass"](lord.id("player"), "minimized");
+    if (visible) {
+        var player = $("#player");
+        var tracks = $("#playerTracks");
+        var diff = player.position().top + player.height() - (tracks.position().top + tracks.height());
+        tracks.css("max-height", (tracks.height() - diff - 44) + "px");
+    }
 };
 
 lord.durationToString = function(duration) {
@@ -531,7 +537,7 @@ lord.playTrack = function(el) {
     if (lord.hasClass(el, "selected") && lord.playerElement) {
         if (!lord.playerElement.paused)
             return;
-        if ((lord.currentTrack.boardName + "/" + lord.currentTrack.fileName) == el.id.replace(/^track\//, "")) {
+        if (el.id.replace(/^track\//, "") == lord.currentTrack.fileName) {
             lord.playerElement.play();
             lord.updatePlayerButtons();
             return;
@@ -564,20 +570,18 @@ lord.trackDrop = function(e) {
     var replacedTrack = $(e.target).closest(".track")[0];
     if (!draggedTrack || !replacedTrack)
         return;
-    var draggedBoardName = lord.data("boardName", draggedTrack);
     var draggedFileName = lord.data("fileName", draggedTrack);
-    var replacedBoardName = lord.data("boardName", replacedTrack);
     var replacedFileName = lord.data("fileName", replacedTrack);
     var draggedIndex;
     var replacedIndex;
     var tracks = lord.getLocalObject("playerTracks", []);
     tracks.some(function(track, i) {
-        if (draggedBoardName == track.boardName && draggedFileName == track.fileName) {
+        if (draggedFileName == track.fileName) {
             draggedIndex = i;
             if (replacedIndex >= 0)
                 return true;
         }
-        if (replacedBoardName == track.boardName && replacedFileName == track.fileName) {
+        if (replacedFileName == track.fileName) {
             replacedIndex = i;
             if (draggedIndex >= 0)
                 return true;
@@ -595,18 +599,71 @@ lord.trackDrop = function(e) {
 
 lord.addTrack = function(track) {
     var model = merge.recursive(track, lord.model(["base", "tr"], true));
-    var node = lord.template("playerTrack", model);
-    lord.id("playerTracks").appendChild(node);
-    lord.currentTracks[track.boardName + "/" + track.fileName] = track;
+    lord.id("playerTracks").appendChild(lord.template("playerTrack", model));
+    lord.currentTracks[track.fileName] = track;
+};
+
+lord.editAudioTags = function(el, e) {
+    if (e)
+        e.stopPropagation();
+    var fileName = lord.data("fileName", el, true);
+    var c = {};
+    lord.api("fileInfo", { fileName: fileName }).then(function(fileInfo) {
+        c.model = merge.recursive({ fileInfo: fileInfo }, lord.model(["base", "tr"], true));
+        c.div = lord.template("editAudioTagsDialog", c.model);
+        return lord.showDialog(c.div, { title: "editAudioTagsText" });
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", c.div);
+        return lord.post(form.action, new FormData(form));
+    }).then(function(result) {
+        if (typeof result == "undefined")
+            return Promise.resolve();
+        var tracks = lord.getLocalObject("playerTracks", []);
+        var tags;
+        var inPlaylist = tracks.some(function(track) {
+            if (fileName != track.fileName)
+                return;
+            var form = lord.queryOne("form", c.div);
+            var t = lord.currentTracks[fileName];
+            tags = ["album", "artist", "title", "year"].reduce(function(acc, name) {
+                var tag = lord.nameOne(name, form).value;
+                track[name] = tag;
+                t[name] = tag;
+                if (lord.currentTrack && fileName == lord.currentTrack.fileName)
+                    lord.currentTrack[name] = tag;
+                acc[name] = tag;
+                return acc;
+            }, {});
+            return true;
+        });
+        if (inPlaylist) {
+            lord.setLocalObject("playerTracks", tracks);
+            if (lord.currentTrack && fileName == lord.currentTrack.fileName)
+                lord.updatePlayerTrackTags();
+            var t = lord.currentTracks[fileName];
+            var pnode = lord.id("track/" + fileName);
+            if (pnode) {
+                var selected = lord.hasClass(pnode, "selected");
+                var model = merge.recursive(t, lord.model(["base", "tr"], true));
+                var node = lord.template("playerTrack", model);
+                if (selected)
+                    lord.addClass(node, "selected");
+                lord.id("playerTracks").replaceChild(node, pnode);
+            }
+        }
+        if (!e)
+            return lord.updatePost(+lord.data("number", el, true));
+    }).catch(lord.handleError);
 };
 
 lord.removeFromPlaylist = function(e, a) {
     e.stopPropagation();
-    var boardName = lord.data("boardName", a, true);
     var fileName = lord.data("fileName", a, true);
     var tracks = lord.getLocalObject("playerTracks", []);
     var exists = tracks.some(function(track, i) {
-        var exists = (boardName == track.boardName && fileName == track.fileName);
+        var exists = (fileName == track.fileName);
         if (exists)
             tracks.splice(i, 1);
         return exists;
@@ -614,10 +671,9 @@ lord.removeFromPlaylist = function(e, a) {
     if (!exists)
         return;
     lord.setLocalObject("playerTracks", tracks);
-    var key = lord.data("boardName", a, true) + "/" + fileName;
-    lord.removeSelf(lord.id("track/" + key));
-    if (lord.currentTracks.hasOwnProperty(key))
-        delete lord.currentTracks[key];
+    lord.removeSelf(lord.id("track/" + fileName));
+    if (lord.currentTracks.hasOwnProperty(fileName))
+        delete lord.currentTracks[fileName];
 };
 
 lord.checkPlaylist = function() {
@@ -633,28 +689,26 @@ lord.checkPlaylist = function() {
     var tracks = lord.getLocalObject("playerTracks", []);
     if (!reorder) {
         var trackMap = tracks.reduce(function(acc, track) {
-            acc[track.boardName + "/" + track.fileName] = track;
+            acc[track.fileName] = track;
             return acc;
         }, {});
         lord.forIn(lord.currentTracks, function(track) {
-            if (!trackMap.hasOwnProperty(track.boardName + "/" + track.fileName))
-                lord.removeSelf(lord.id("track/" + track.boardName + "/" + track.fileName));
+            if (!trackMap.hasOwnProperty(track.fileName))
+                lord.removeSelf(lord.id("track/" + track.fileName));
         });
     }
     tracks.forEach(function(track) {
-        if (!reorder && lord.currentTracks.hasOwnProperty(track.boardName + "/" + track.fileName))
+        if (!reorder && lord.currentTracks.hasOwnProperty(track.fileName))
             return;
         lord.addTrack(track);
     });
     if (!lord.queryOne(".track.selected", lord.id("playerTracks"))) {
-        if (lastCurrentTrack
-                && lord.currentTracks.hasOwnProperty(lastCurrentTrack.boardName + "/" + lastCurrentTrack.fileName)) {
+        if (lastCurrentTrack && lord.currentTracks.hasOwnProperty(lastCurrentTrack.fileName))
             lord.currentTrack = lastCurrentTrack;
-        } else if (tracks.length > 0) {
+        else if (tracks.length > 0)
             lord.currentTrack = tracks[0];
-        }
         if (lord.currentTrack) {
-            lord.addClass(lord.id("track/" + lord.currentTrack.boardName + "/" + lord.currentTrack.fileName),
+            lord.addClass(lord.id("track/" + lord.currentTrack.fileName),
                 "selected");
             lord.updatePlayerTrackTags();
         }

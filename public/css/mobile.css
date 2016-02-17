@@ -5,6 +5,10 @@ body {
     font-size: 14px;
 }
 
+.spoiler {
+    cursor: pointer;
+}
+
 blockquote {
     max-width: 550px;
 }
@@ -132,4 +136,16 @@ input.buttonImage {
 
 .playerMinimizedActionsMobile {
     display: inline-block;
+}
+
+#playerDurationSlider {
+    width: 96%;
+}
+
+#playerVolumeSlider {
+    display: none;
+}
+
+[name='playerMuteButton'] {
+    display: none;
 }

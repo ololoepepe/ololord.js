@@ -440,3 +440,7 @@ textarea {
     -o-filter: invert(0);
     filter: invert(0);
 }
+
+.track.selected > .trackInfo {
+    font-weight: bold;
+}

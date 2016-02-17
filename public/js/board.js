@@ -1198,25 +1198,6 @@ lord.deleteFile = function(el) {
     }).catch(lord.handleError);
 };
 
-lord.editAudioTags = function(el) {
-    var fileName = lord.data("fileName", el, true);
-    var c = {};
-    lord.api("fileInfo", { fileName: fileName }).then(function(fileInfo) {
-        c.model = merge.recursive({ fileInfo: fileInfo }, lord.model(["base", "tr"], true));
-        c.div = lord.template("editAudioTagsDialog", c.model);
-        return lord.showDialog(c.div, { title: "editAudioTagsText" });
-    }).then(function(result) {
-        if (!result)
-            return Promise.resolve();
-        var form = lord.queryOne("form", c.div);
-        return lord.post(form.action, new FormData(form));
-    }).then(function(result) {
-        if (typeof result == "undefined")
-            return Promise.resolve();
-        return lord.updatePost(+lord.data("number", el, true));
-    }).catch(lord.handleError);
-};
-
 lord.addToPlaylist = function(a) {
     var boardName = lord.data("boardName", a, true);
     var fileName = lord.data("fileName", a, true);

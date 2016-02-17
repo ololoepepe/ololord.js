@@ -94,3 +94,12 @@ input.buttonImage {
 .playerMinimizedActionsMobile {
     display: none;
 }
+
+#playerDurationSlider {
+    width: 68%;
+}
+
+#playerVolumeSlider {
+    display: inline-block;
+    width: 26%;
+}

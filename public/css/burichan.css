@@ -355,3 +355,7 @@ ul.tabWidget > li.activated {
 .track.selected {
     background-color: #AAAAAA;
 }
+
+.track.selected > .trackInfo {
+    font-weight: bold;
+}

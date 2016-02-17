@@ -363,7 +363,7 @@ var getRules = function(boardName) {
 };
 
 /*public*/ Board.prototype.generateFileName = function(file) {
-    return Global.IPC.send("fileName", this.name).then(function(base) {
+    return Global.IPC.send("fileName").then(function(base) {
         var ext = Path.extname(file.name);
         if (Util.isString(ext))
             ext = ext.substr(1);
