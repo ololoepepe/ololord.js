@@ -9,9 +9,11 @@
 !jquery.knob.min.js
 !jszip.min.js
 !jszip-utils.min.js
+!literallycanvas.min.js
 !merge.min.js
 !moment-with-locales.min.js
 !Promise.min.js
+!react-with-addons.min.js
 !sha1.min.js
 !twitter.js
 !uuid.js

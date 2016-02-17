@@ -255,6 +255,7 @@ controller.translationsModel = function() {
     translate("F.A.Q.", "toFaqPageText");
     translate("User management", "toManagePageText");
     translate("Hide by image hash", "hideByImageText");
+    translate("Draw on this image", "drawOnImageText");
     translate("Answer", "toThread");
     translate("Answers:", "referencedByText");
     translate("Fixed", "fixedText");
@@ -437,6 +438,8 @@ controller.translationsModel = function() {
     translate("Remove this file", "removeFileText");
     translate("Rating:", "ratingLabelText");
     translate("Specify file URL", "attachFileByLinkText");
+    translate("Specify file by drawing or draw on attached image", "attachFileByDrawingText");
+    translate("Specify Vkontakte audio file", "attachFileByVkText");
     translate("Password", "postFormPlaceholderPassword");
     translate("Password:", "postFormLabelPassword");
     translate("Captcha:", "postFormLabelCaptcha");
@@ -511,17 +514,18 @@ controller.translationsModel = function() {
     translate("Remove from hidden post/thread list", "removeFromHiddenPostListText");
     translate("Hidden posts/threads", "hiddenPostListText");
     translate("Settings", "settingsDialogTitle");
+    translate("Drawing", "drawingDialogTitle");
     translate("If password is empty, current hashpass will be used", "enterPasswordText");
     translate("Enter password", "enterPasswordTitle");
     translate("Add files", "addFilesText");
     translate("Show markup", "showPostformMarkupText");
     translate("Hide markup", "hidePostformMarkupText");
     translate("Target board", "targetBoardLabelText");
-    translate("Specify Vkontakte audio file", "attachFileByVkText");
     translate("Select a track", "selectTrackTitle");
     translate("Chat privately", "chatWithUserText");
     translate("Highlight code (page reload required)", "sourceHighlightingLabelText");
     translate("Enable private chat", "chatLabelText");
+    translate("Enable painting tools", "paintingLabelText");
     translate("Private chat", "chatText");
     translate("New private message", "newChatMessageText");
     translate("Send", "sendChatMessageButtonText");

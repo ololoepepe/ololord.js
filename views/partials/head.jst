@@ -128,7 +128,21 @@
                     s += createSelector(" > img") + '{ display: none; }';
                 }
                 s += '</style>';
-                if (lord.getLocalObject("userJavaScriptEnabled", true)) {
+                var appendScript = function(path) {
+                    s += '<script type="text/javascript" src="/' + prefix + path + '"></s' + 'cript>';
+                };
+                if (settings.sourceHighlightingEnabled) {
+                    appendScript("js/3rdparty/codemirror/codemirror.min.js");
+                    appendScript("js/3rdparty/codemirror/javascript.min.js");
+                    appendScript("js/3rdparty/codemirror/css.min.js");
+                    lord.createStylesheetLink("3rdparty/codemirror.css", true);
+                }
+                if (settings.paintingEnabled) {
+                    appendScript("js/3rdparty/react-with-addons.min.js");
+                    appendScript("js/3rdparty/literallycanvas.min.js");
+                    lord.createStylesheetLink("3rdparty/literallycanvas.css", true);
+                }
+                if (settings.userJavaScriptEnabled) {
                     s += '<script type="text/javascript">' + lord.getLocalObject("userJavaScript", "")
                         + "</s" + "cript>";
                 }
@@ -136,7 +150,7 @@
                 document.close();
                 lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
                 lord.createStylesheetLink("3rdparty/jquery-ui/" + settings.style.name + "/jquery-ui.min.css", true);
-                if (lord.getLocalObject("userCssEnabled", true)) {
+                if (settings.userCssEnabled) {
                     var css = lord.getLocalObject("userCss", "");
                     var style = lord.node("style");
                     style.type = "text/css";

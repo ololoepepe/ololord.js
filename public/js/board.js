@@ -486,6 +486,8 @@ lord.clearFileInput = function(div) {
         delete div.fileInput;
     if (div.hasOwnProperty("file"))
         delete div.file;
+    if (div.hasOwnProperty("fileBackup"))
+        delete div.fileBackup;
     if (div.hasOwnProperty("fileUrl"))
         delete div.fileUrl;
 };
@@ -1181,6 +1183,72 @@ lord.hideByImage = function(a) {
     }).catch(lord.handleError);
 };
 
+lord.attachDrawnFile = function(lc, fileName, div) {
+    div = div || lord.query(".postformFile", lord.id("postForm")).pop();
+    if (!div)
+        return;
+    var blobBin = atob(lc.getImage({ scaleDownRetina: true }).toDataURL("image/png").split(",")[1]);
+    var array = [];
+    for(var i = 0; i < blobBin.length; ++i)
+        array.push(blobBin.charCodeAt(i));
+    lord.clearFileInput(div);
+    div.file = new Blob([new Uint8Array(array)], {type: "image/png"});
+    div.file.name = fileName ? (fileName.split(".").shift() + "-edited.png") : "drawn.png";
+    lord.fileAddedCommon(div);
+};
+
+lord.draw = function(width, height, imageUrl) {
+    var backgroundShape;
+    if (imageUrl) {
+        var backgroundImage = new Image();
+        backgroundImage.src = imageUrl;
+        backgroundShape = LC.createShape("Image", {
+            x: 0,
+            y: 0,
+            image: backgroundImage
+        });
+    }
+    var div = lord.node("div");
+    var subdiv = lord.node("div");
+    width = +width;
+    if (!width || width < 0)
+        width = 400;
+    height = +height;
+    if (!height || height < 0)
+        height = 400;
+    $(subdiv).width(width).height(height);
+    div.appendChild(subdiv);
+    var c = {};
+    return lord.showDialog(div, {
+        title: "drawingDialogTitle",
+        afterShow: function() {
+            $(div).width(width).height(height);
+            var options = { imageURLPrefix: "/" + lord.data("sitePathPrefix") + "img/3rdparty/literallycanvas" };
+            if (backgroundShape)
+                options.backgroundShapes = [backgroundShape];
+            c.lc = LC.init(div, options);
+        }
+    }).then(function(result) {
+        return Promise.resolve({
+            accepted: result,
+            lc: c.lc
+        });
+    });
+};
+
+lord.drawOnImage = function(a) {
+    if (!a)
+        return;
+    var file = $(a).closest(".postFile")[0];
+    if (!file)
+        return;
+    lord.draw(+lord.data("width", file), +lord.data("height", file), lord.data("href", file)).then(function(result) {
+        if (!result.accepted)
+            return;
+        lord.attachDrawnFile(result.lc, lord.data("fileName", file));
+    }).catch(lord.handleError);
+};
+
 lord.deleteFile = function(el) {
     var model = lord.model(["base", "tr"], true);
     model.fileName = lord.data("fileName", el, true);
@@ -1456,8 +1524,10 @@ lord.fileAddedCommon = function(div) {
                 fileHashes.value = fileHashes.value + (fileHashes.value.length > 0 ? "," : "") + div.fileHash;
             if (div.hasOwnProperty("fileInput"))
                 delete div.fileInput;
-            if (div.hasOwnProperty("file"))
+            if (div.hasOwnProperty("file")) {
+                div.fileBackup = div.file;
                 delete div.file;
+            }
         }).catch(lord.handleError);
     }
     var preview = function() {
@@ -1490,10 +1560,13 @@ lord.fileAddedCommon = function(div) {
             return lord.removeExifData(data);
         }).then(function(pieces) {
             if (pieces) {
-                if (typeof window.File == "function")
+                if (typeof window.File == "function") {
                     div.file = new File(pieces, div.file.name, {"type": "image/jpeg"});
-                else
+                } else {
+                    var tfn = div.file.name;
                     div.file = new Blob(pieces, {"type": "image/jpeg"});
+                    div.file.name = tfn;
+                }
             }
             if (lord.getLocalObject("showAttachedFilePreview", true))
                 preview();
@@ -1554,6 +1627,43 @@ lord.attachFileByLink = function(a) {
     lord.clearFileInput(div);
     div.fileUrl = url;
     lord.fileAddedCommon(div);
+};
+
+lord.attachFileByDrawing = function(a) {
+    var div = a.parentNode;
+    var p;
+    var file = div.file || div.fileBackup;
+    if (file && file.name && /\.(jpe?g|png|gif)$/i.test(file.name)) {
+        p = lord.readAs(file, "DataURL").then(function(url) {
+            return new Promise(function(resolve, reject) {
+                var timer =setTimeout(reject, 15 * lord.Second);
+                var img = new Image();
+                img.onload = function() {
+                    clearTimeout(timer);
+                    resolve({
+                        url: url,
+                        width: img.width,
+                        height: img.height
+                    });
+                };
+                img.src = url;
+            });
+        });
+    } else {
+        p = Promise.resolve({
+            width: $(window).width() - 150,
+            height: $(window).height() - 150
+        });
+    }
+    p.then(function(result) {
+        if (!result)
+            return Promise.resolve({ accepted: false });
+        return lord.draw(result.width, result.height, result.url);
+    }).then(function(result) {
+        if (!result.accepted)
+            return;
+        lord.attachDrawnFile(result.lc, file && file.name, div);
+    }).catch(lord.handleError);
 };
 
 lord.attachFileByVk = function(a) {

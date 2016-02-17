@@ -1428,24 +1428,6 @@ lord.initializeOnLoadBase = function() {
     }
     if (lord.getLocalObject("showNewPosts", true))
         lord.showNewPosts();
-    if (lord.getLocalObject("sourceHighlightingEnabled", false)) {
-        var head = lord.queryOne("head");
-        var script = lord.node("script");
-        script.type = "text/javascript";
-        script.src = "/" + lord.data("sitePathPrefix") + "js/3rdparty/codemirror/codemirror.min.js";
-        head.appendChild(script);
-        lord.createStylesheetLink("3rdparty/codemirror.css", true);
-        script.onload = function() {
-            script = lord.node("script");
-            script.type = "text/javascript";
-            script.src = "/" + lord.data("sitePathPrefix") + "js/3rdparty/codemirror/javascript.min.js";
-            head.appendChild(script);
-            script = lord.node("script");
-            script.type = "text/javascript";
-            script.src = "/" + lord.data("sitePathPrefix") + "js/3rdparty/codemirror/css.min.js";
-            head.appendChild(script);
-        };
-    }
     if (lord.getLocalObject("chatEnabled", true))
         lord.checkChats();
     if (lord.notificationsEnabled())

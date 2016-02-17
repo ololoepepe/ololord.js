@@ -29,8 +29,8 @@
 [done] Optimize cache renewal when modifying posts with large amount of post references
 [done] Add post preview disappearance delay
 [done] Add playlist to every page
+[done] Add ability to paint on any board using canvas
 
-* Add ability to paint on any board using canvas
 * Improve file previews
 * Add own player for media file previews
 * Optimize spells

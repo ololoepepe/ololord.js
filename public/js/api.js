@@ -1562,6 +1562,7 @@ lord.settings = function() {
         userJavaScriptEnabled: lord.getLocalObject("userJavaScriptEnabled", true),
         sourceHighlightingEnabled: lord.getLocalObject("sourceHighlightingEnabled", false),
         chatEnabled: lord.getLocalObject("chatEnabled", true),
+        paintingEnabled: lord.getLocalObject("paintingEnabled", true),
         closeFilesByClickingOnly: lord.getLocalObject("closeFilesByClickingOnly", false),
         viewPostPreviewDelay: lord.getLocalObject("viewPostPreviewDelay", 200),
         hidePostPreviewDelay: lord.getLocalObject("hidePostPreviewDelay", 1000),

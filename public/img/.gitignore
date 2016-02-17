@@ -1,4 +1,5 @@
 *
+!3rdparty/
 !404/
 !banners/
 !flags/
@@ -31,6 +32,8 @@
 !download.png
 !down.png
 !draft.png
+!draw.png
+!draw_big.png
 !edit.png
 !expand.png
 !favorite_active.png

@@ -1546,6 +1546,11 @@
             "value": "Указать ссылку на файл"
         }
     },
+    "Specify file by drawing or draw on attached image": {
+        "attachFileByDrawingText": {
+            "value": "Указать файл, нарисовав картинку, либо рисовать на прикрепленной картинке"
+        }
+    },
     "Specify Vkontakte audio file": {
         "attachFileByVkText": {
             "value": "Указать аудио-файл из Vkontakte"
@@ -2619,6 +2624,21 @@
     "Unmute": {
         "playerUnmuteText": {
             "value": "Включить звук"
+        }
+    },
+    "Enable painting tools": {
+        "paintingLabelText": {
+            "value": "Включить инструменты для рисования"
+        }
+    },
+    "Draw on this image": {
+        "drawOnImageText": {
+            "value": "Рисовать на этой картинке"
+        }
+    },
+    "Drawing": {
+        "drawingDialogTitle": {
+            "value": "Рисование"
         }
     }
 }

@@ -32,6 +32,9 @@
             <a name="hideByImageButton" onclick="lord.hideByImage(this); return false;">
                 <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}"
                      class="buttonImage" /></a>
+            <a name="drawOnImageButton" onclick="lord.drawOnImage(this); return false;">
+                <img src="/{{=it.site.pathPrefix}}img/draw.png" title="{{=it.tr.drawOnImageText}}"
+                     class="buttonImage" /></a>
             <input type="image" src="/{{=it.site.pathPrefix}}img/search.png" class="buttonImage"
                    title="{{=it.tr.findSourceText}}"
                    onclick="lord.showMenu(event, this, '#file{{=fileInfo.name.replace(".", "-")}}SearchMenu'); return false;" />
