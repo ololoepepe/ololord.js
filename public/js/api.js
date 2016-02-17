@@ -587,6 +587,41 @@ lord.removeLocalObject = function(key) {
     }
 };
 
+lord.getSessionObject = function(key, defValue) {
+    if (!key || typeof key != "string")
+        return null;
+    try {
+        var val = sessionStorage.getItem(key);
+        return (null != val) ? JSON.parse(val) : defValue;
+    } catch (ex) {
+        return null;
+    }
+};
+
+lord.setSessionObject = function(key, value) {
+    if (!key || typeof key != "string")
+        return false;
+    try {
+        if (null != value && typeof value != "undefined")
+            sessionStorage.setItem(key, JSON.stringify(value));
+        else
+            sessionStorage.setItem(key, null);
+        return true;
+    } catch (ex) {
+        return false;
+    }
+};
+
+lord.removeSessionObject = function(key) {
+    if (!key || typeof key != "string")
+        return;
+    try {
+        return sessionStorage.removeItem(key);
+    } catch (ex) {
+        //
+    }
+};
+
 lord.in = function(arr, obj, strict) {
     if (!arr || !arr.length)
         return false;

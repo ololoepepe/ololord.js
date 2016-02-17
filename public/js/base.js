@@ -426,6 +426,12 @@ lord.resetPlayerSource = function(track) {
     source.type = track.mimeType;
     source.src = "/" + lord.data("sitePathPrefix") + track.boardName + "/src/" + track.fileName;
     lord.playerElement.appendChild(source);
+    lord.playerElement.addEventListener("play", function() {
+        lord.setSessionObject("playerPlaying", true);
+    }, false);
+    lord.playerElement.addEventListener("pause", function() {
+        lord.removeSessionObject("playerPlaying");
+    }, false);
     lord.playerElement.addEventListener("ended", function() {
         lord.playerPreviousOrNext(true);
     }, false);
@@ -434,6 +440,7 @@ lord.resetPlayerSource = function(track) {
         lord.updatePlayerButtons();
     }, false);
     lord.playerElement.addEventListener("timeupdate", function() {
+        lord.setSessionObject("playerCurrentTime", lord.playerElement.currentTime);
         if (lord.playerUserSliding)
             return;
         $("#playerDurationSlider").slider("value", lord.playerElement.currentTime);
@@ -480,13 +487,18 @@ lord.updatePlayerButtons = function() {
     });
 };
 
-lord.playerPlayPause = function(e) {
-    e.stopPropagation();
+lord.playerPlayPause = function(e, time) {
+    if (e)
+        e.stopPropagation();
     if (lord.playerElement) {
         lord.playerElement[lord.playerElement.paused ? "play" : "pause"]();
+        if (!isNaN(+time) && +time >= 0 && lord.playerElement.paused)
+            lord.playerElement.currentTime = +time;
     } else if (lord.currentTrack) {
         lord.resetPlayerSource(lord.currentTrack);
         lord.playerElement.play();
+        if (!isNaN(+time) && +time >= 0)
+            lord.playerElement.currentTime = +time;
     } else {
         return;
     }
@@ -1487,6 +1499,8 @@ lord.initializeOnLoadBase = function() {
         disabled: true
     });
     lord.checkPlaylist();
+    if (lord.queryOne(".track", lord.id("playerTracks")) && lord.getSessionObject("playerPlaying", false))
+        lord.playerPlayPause(null, lord.getSessionObject("playerCurrentTime", 0));
 };
 
 window.addEventListener("load", function load() {
