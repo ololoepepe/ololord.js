@@ -421,6 +421,7 @@ lord.resetPlayerSource = function(track) {
     var defVol = lord.getLocalObject("defaultAudioVideoVolume", 100) / 100;
     lord.playerElement.volume = lord.getLocalObject("playerVolume", defVol);
     lord.playerElement.style.display = "none";
+    lord.setLocalObject("playerLastTrack", track);
     var source = lord.node("source");
     source.type = track.mimeType;
     source.src = "/" + lord.data("sitePathPrefix") + track.boardName + "/src/" + track.fileName;
@@ -703,8 +704,12 @@ lord.checkPlaylist = function() {
         lord.addTrack(track);
     });
     if (!lord.queryOne(".track.selected", lord.id("playerTracks"))) {
+        var storedLastTrack = lord.getLocalObject("playerLastTrack", {});
+        var node = lord.id("track/" + storedLastTrack.fileName);
         if (lastCurrentTrack && lord.currentTracks.hasOwnProperty(lastCurrentTrack.fileName))
             lord.currentTrack = lastCurrentTrack;
+        else if (node)
+            lord.currentTrack = storedLastTrack;
         else if (tracks.length > 0)
             lord.currentTrack = tracks[0];
         if (lord.currentTrack) {
