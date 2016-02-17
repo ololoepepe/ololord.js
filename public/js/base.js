@@ -346,15 +346,16 @@ lord.switchMumWatching = function() {
     lord.setLocalObject("mumWatching", !watching);
 };
 
+lord.updatePlayerTracksHeight = function() {
+    var tracks = $("#playerTracks");
+    tracks.css("max-height", ($("#player").height() - tracks.position().top - 44) + "px");
+};
+
 lord.setPlayerVisible = function(e, visible) {
     e.stopPropagation();
     lord[visible ? "removeClass" : "addClass"](lord.id("player"), "minimized");
-    if (visible) {
-        var player = $("#player");
-        var tracks = $("#playerTracks");
-        var diff = player.position().top + player.height() - (tracks.position().top + tracks.height());
-        tracks.css("max-height", (tracks.height() - diff - 44) + "px");
-    }
+    if (visible)
+        lord.updatePlayerTracksHeight();
 };
 
 lord.durationToString = function(duration) {
@@ -1501,6 +1502,10 @@ lord.initializeOnLoadBase = function() {
     lord.checkPlaylist();
     if (lord.queryOne(".track", lord.id("playerTracks")) && lord.getSessionObject("playerPlaying", false))
         lord.playerPlayPause(null, lord.getSessionObject("playerCurrentTime", 0));
+    $(window).resize(function() {
+        if (!lord.hasClass(lord.id("player"), "minimized"))
+            lord.updatePlayerTracksHeight();
+    });
 };
 
 window.addEventListener("load", function load() {
