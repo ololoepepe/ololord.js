@@ -600,8 +600,8 @@ lord.trackDrop = function(e) {
                 return true;
         }
     });
-    if (draggedIndex >= 0 && replacedIndex >= 0)
-        tracks[draggedIndex] = tracks.splice(replacedIndex, 1, tracks[draggedIndex])[0];
+    if (draggedIndex >= 0 && replacedIndex >= 0 && draggedIndex != replacedIndex)
+        tracks.splice(replacedIndex, 0, tracks.splice(draggedIndex, 1)[0]);
     lord.setLocalObject("playerTracks", tracks);
     lord.setLocalObject("playerMustReorder", lord.WindowID);
     lord.checkPlaylist();
