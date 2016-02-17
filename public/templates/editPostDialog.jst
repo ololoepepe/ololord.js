@@ -1,7 +1,92 @@
 <div>
-    {{~[it.thread] :thread}}
-        {{~[it.post] :post}}
-            {{#def.editPostForm}}
-        {{~}}
-    {{~}}
+    <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
+          action="/{{=it.site.pathPrefix}}action/editPost">
+        <input type="hidden" name="boardName" value="{{=it.post.boardName}}" />
+        <input type="hidden" name="postNumber" value="{{=it.post.number}}" />
+        <table class="postFormTable">
+            <tbody>
+                {{? it.customEditPostDialogPart && it.customEditPostDialogPart[0]}}
+                    {{ out += it.customEditPostDialogPart[0](it, it.thread, it.post); }}
+                {{?}}
+                <tr>
+                    <td class="postformLabel">
+                        <b>{{=it.tr.postFormLabelEmail}}</b>
+                    </td>
+                    <td class="postformField">
+                        <input type="text" maxlength="{{=it.board.maxEmailLength}}" name="email" class="postFormInput"
+                               {{? it.post.email}}value="{{=it.post.email}}"{{?}} />
+                    </td>
+                </tr>
+                {{? it.customEditPostDialogPart && it.customEditPostDialogPart[10]}}
+                    {{ out += it.customEditPostDialogPart[10](it, it.thread, it.post); }}
+                {{?}}
+                <tr>
+                    <td class="postformLabel">
+                        <b>{{=it.tr.postFormLabelName}}</b>
+                    </td>
+                    <td class="postformField">
+                        <input type="text" maxlength="{{=it.board.maxNameLength}}" name="name" class="postFormInput"
+                               {{? it.post.name}}value="{{=it.post.name}}"{{?}} />
+                    </td>
+                </tr>
+                {{? it.customEditPostDialogPart && it.customEditPostDialogPart[20]}}
+                    {{ out += it.customEditPostDialogPart[20](it, it.thread, it.post); }}
+                {{?}}
+                <tr>
+                    <td class="postformLabel">
+                        <b>{{=it.tr.postFormLabelSubject}}</b>
+                    </td>
+                    <td class="postformField">
+                        <input type="text" maxlength="{{=it.board.maxSubjectLength}}" name="subject" class="postFormInput"
+                               {{? it.post.rawSubject}}value="{{=it.post.rawSubject}}"{{?}} />
+                    </td>
+                </tr>
+                {{? it.customEditPostDialogPart && it.customEditPostDialogPart[30]}}
+                    {{ out += it.customEditPostDialogPart[30](it, it.thread, it.post); }}
+                {{?}}
+                <tr>
+                    <td class="postformLabel">
+                        <b>{{=it.tr.postFormLabelText}}</b>
+                    </td>
+                    <td class="postformField">
+                        <div class="symbolCounterContainer">
+                            <span class="symbolCounter"><span name="used"></span>/{{=it.board.maxTextLength}}</span>
+                            <textarea name="text" rows="10" cols="36" placeholder="{{=it.tr.postFormTextPlaceholder}}"
+                                      oninput="lord.countSymbols(this);"
+                                      class="postFormTextarea">{{? it.post.rawText}}{{=it.post.rawText}}{{?}}</textarea>
+                        </div>
+                    </td>
+                </tr>
+                {{? it.customEditPostDialogPart && it.customEditPostDialogPart[40]}}
+                    {{ out += it.customEditPostDialogPart[40](it, it.thread, it.post); }}
+                {{?}}
+                <tr>
+                    <td class="postformLabel">
+                        <b>{{=it.tr.postFormLabelMarkupMode}}</b>
+                    </td>
+                    <td class="postformField">
+                       <select name="markupMode" class="select">
+                            {{~it.markupModes :mode}}
+                                <option {{? mode.name == it.post.markup.join(",")}}selected="true"{{?}}
+                                        value="{{=mode.name}}">{{=mode.title}}</option>
+                            {{~}}
+                        </select>
+                    </td>
+                </tr>
+                {{? it.customEditPostDialogPart && it.customEditPostDialogPart[50]}}
+                    {{ out += it.customEditPostDialogPart[50](it, it.thread, it.post); }}
+                {{?}}
+                {{? it.showSubmitButton}}
+                    <tr>
+                        <td class="postformField" colspan="2">
+                            <input type="submit" name="submit" value="{{=it.tr.confirmButtonText}}" />
+                        </td>
+                    </tr>
+                {{?}}
+                {{? it.customEditPostDialogPart && it.customEditPostDialogPart[60]}}
+                    {{ out += it.customEditPostDialogPart[60](it, it.thread, it.post); }}
+                {{?}}
+            </tbody>
+        </table>
+    </form>
 </div>

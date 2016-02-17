@@ -123,6 +123,8 @@ lord.postProcessors.push(function(post) {
     var ids = ownVotes[postNumber];
     var form = lord.queryOne(".vote > form", post);
     var voteVariants = lord.nameOne("voteVariants", post);
+    if (!voteVariants)
+        return;
     if (ownPosts["rpg/" + postNumber]) {
         if (form)
             form.parentNode.replaceChild(voteVariants, form);
