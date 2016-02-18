@@ -346,6 +346,18 @@ lord.switchMumWatching = function() {
     lord.setLocalObject("mumWatching", !watching);
 };
 
+lord.isMediaTypeSupported = function(mimeType) {
+    var type;
+    if (lord.isAudioType(mimeType))
+        type = "audio";
+    else if (lord.isVideoType(mimeType))
+        type = "video";
+    if (!type)
+        return false;
+    var node = lord.node(type);
+    return !!(node.canPlayType && node.canPlayType(mimeType + ";").replace(/no/, ""));
+};
+
 lord.updatePlayerTracksHeight = function() {
     var tracks = $("#playerTracks");
     tracks.css("max-height", ($("#player").height() - tracks.position().top - 44) + "px");
@@ -380,19 +392,20 @@ lord.updatePlayerTrackTags = function() {
     lord.removeChildren(tags);
     tags.style.display = "none";
     if (!lord.currentTrack)
-        return;
+        return lord.updatePlayerTracksHeight();
     var t = lord.currentTrack;
     var s = t.artist || "";
     s += (t.artist && t.title) ? " — " : "";
     s += t.title || "";
     s += ((t.artist || t.title) && t.album) ? " " : "";
     s += t.album ? ("[" + t.album + "]") : "";
-    s += (s && t.year) ? ("(" + t.year + ")") : "";
+    s += (s && t.year) ? (" (" + t.year + ")") : "";
     s += s ? " " : "";
     if (!s)
-        return;
+        return lord.updatePlayerTracksHeight();
     tags.appendChild(lord.node("text", s));
     tags.style.display = "";
+    lord.updatePlayerTracksHeight();
 };
 
 lord.updatePlayerTrackInfo = function() {
@@ -1366,7 +1379,7 @@ lord.hashChangeHandler = function() {
     if (!target || !target[0])
         return;
     var offset = target.offset();
-    var scrollto = offset.top - $(".toolbar").height() - 4;
+    var scrollto = offset.top - $(".toolbar.sticky").height() - 4;
     $("html, body").animate({ scrollTop: scrollto }, 0);
 };
 
@@ -1432,7 +1445,7 @@ lord.initializeOnLoadBase = function() {
         lord.checkChats();
     if (lord.notificationsEnabled())
         lord.checkNotificationQueue();
-    if (lord.queryOne(".toolbar"))
+    if (lord.queryOne(".toolbar.sticky"))
         window.addEventListener("hashchange", lord.hashChangeHandler, false);
     var bsc = lord.getLocalObject("tooltips/boardSelect", 0);
     if (lord.deviceType("mobile"))

@@ -515,6 +515,7 @@ controller.translationsModel = function() {
     translate("Hidden posts/threads", "hiddenPostListText");
     translate("Settings", "settingsDialogTitle");
     translate("Drawing", "drawingDialogTitle");
+    translate("Save the drawing", "saveDrawingButtonText");
     translate("If password is empty, current hashpass will be used", "enterPasswordText");
     translate("Enter password", "enterPasswordTitle");
     translate("Add files", "addFilesText");
@@ -525,7 +526,7 @@ controller.translationsModel = function() {
     translate("Chat privately", "chatWithUserText");
     translate("Highlight code (page reload required)", "sourceHighlightingLabelText");
     translate("Enable private chat", "chatLabelText");
-    translate("Enable painting tools", "paintingLabelText");
+    translate("Enable drawing tools", "drawingLabelText");
     translate("Private chat", "chatText");
     translate("New private message", "newChatMessageText");
     translate("Send", "sendChatMessageButtonText");
@@ -614,6 +615,7 @@ controller.translationsModel = function() {
     translate("Post", "postMenuCategoryPostText");
     translate("Thread", "postMenuCategoryThreadText");
     translate("User", "postMenuCategoryUserText");
+    translate("Your browser can not play files of this type", "unsupportedMediaTypeText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

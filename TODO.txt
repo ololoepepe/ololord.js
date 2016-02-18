@@ -30,9 +30,10 @@
 [done] Add post preview disappearance delay
 [done] Add playlist to every page
 [done] Add ability to paint on any board using canvas
+[done] Make dialogs maximizable
+[done] Add custom player for media file previews
+[done] Prevent unsupported media formats from adding to player
 
-* Improve file previews
-* Add own player for media file previews
 * Optimize spells
 * Fix referenced/referring posts when moving a thread
 * Add some API to client scripts and simplify existing API

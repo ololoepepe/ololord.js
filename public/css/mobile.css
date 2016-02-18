@@ -138,6 +138,10 @@ input.buttonImage {
     display: inline-block;
 }
 
+#playerTrackInfo {
+    font-size: 1.1em;
+}
+
 #playerDurationSlider {
     width: 96%;
 }
@@ -147,5 +151,17 @@ input.buttonImage {
 }
 
 [name='playerMuteButton'] {
+    display: none;
+}
+
+#playerTrackTags {
+    font-size: 1.1em;
+}
+
+.movablePlayerDurationSlider {
+    width: 96%;
+}
+
+.movablePlayerVolumeSlider {
     display: none;
 }

@@ -2626,8 +2626,8 @@
             "value": "Включить звук"
         }
     },
-    "Enable painting tools": {
-        "paintingLabelText": {
+    "Enable drawing tools": {
+        "drawingLabelText": {
             "value": "Включить инструменты для рисования"
         }
     },
@@ -2639,6 +2639,16 @@
     "Drawing": {
         "drawingDialogTitle": {
             "value": "Рисование"
+        }
+    },
+    "Save the drawing": {
+        "saveDrawingButtonText": {
+            "value": "Сохранить рисунок"
+        }
+    },
+    "Your browser can not play files of this type": {
+        "unsupportedMediaTypeText": {
+            "value": "Ваш браузер не может проигрывать файлы этого типа"
         }
     }
 }

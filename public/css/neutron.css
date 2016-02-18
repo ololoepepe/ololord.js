@@ -444,3 +444,11 @@ textarea {
 .track.selected > .trackInfo {
     font-weight: bold;
 }
+
+.movablePlayer {
+    border-radius: 5px;
+}
+
+.movablePlayerControls {
+    border-radius: 5px;
+}

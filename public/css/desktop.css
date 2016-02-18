@@ -95,11 +95,28 @@ input.buttonImage {
     display: none;
 }
 
+#playerTrackInfo {
+    font-size: 1.2em;
+}
+
 #playerDurationSlider {
     width: 68%;
 }
 
 #playerVolumeSlider {
+    display: inline-block;
+    width: 26%;
+}
+
+#playerTrackTags {
+    font-size: 1.2em;
+}
+
+.movablePlayerDurationSlider {
+    width: 68%;
+}
+
+.movablePlayerVolumeSlider {
     display: inline-block;
     width: 26%;
 }
