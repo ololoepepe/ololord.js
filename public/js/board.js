@@ -2833,6 +2833,9 @@ lord.downloadThread = function(el) {
 lord.processPosts = function(parent) {
     if (!parent)
         parent = document.body;
+    $(".postBody", parent).css("maxWidth", ($(window).width() - 30) + "px");
+    var dw = lord.deviceType("mobile") ? 100 : 320;
+    $(".codeBlock", parent).css("maxWidth", ($(window).width() - dw) + "px");
     var posts = (lord.hasClass(parent, "post") || lord.hasClass(parent, "opPost")) ? [parent]
         : lord.query(".post, .opPost", parent);
     return lord.series(lord.postProcessors, function(f) {
@@ -3257,10 +3260,7 @@ lord.initializeOnLoadBoard = function() {
             bumpLimitReached: lord.data("bumpLimitReached")
         };
     }
-    if (c.threadOrBoard && lord.compareRegisteredUserLevels(c.model.user.level, "MODER") >= 0)
-        lord.createScript("3rdparty/jquery.datetimepicker.js", true);
-    if ((+lord.data("threadNumber") || +lord.data("currentPage") >= 0)
-        && lord.model("board/" + lord.data("boardName")).board.captchaEnabled) {
+    if (c.threadOrBoard && c.model.board.captchaEnabled) {
         c.model.customPostFormField = lord.customPostFormField;
         c.model.customPostFormOption = lord.customPostFormOption;
         c.model.postformRules = JSON.parse(lord.id("model-postformRules").innerHTML);
@@ -3311,14 +3311,13 @@ lord.initializeOnLoadBoard = function() {
             btn.href += "/archive.html";
         });
     }
-    $(".postBody").css("maxWidth", ($(window).width() - 30) + "px");
-    var dw = lord.deviceType("mobile") ? 100 : 320;
-    $(".codeBlock").css("maxWidth", ($(window).width() - dw) + "px");
     if (lord.deviceType("mobile"))
         lord.setTooltips();
-    setTimeout(function() {
-        lord.hash(lord.hash());
-    }, lord.Second);
+    $(window).resize(function() {
+        $(".postBody").css("maxWidth", ($(window).width() - 30) + "px");
+        var dw = lord.deviceType("mobile") ? 100 : 320;
+        $(".codeBlock").css("maxWidth", ($(window).width() - dw) + "px");
+    });
     var threadNumber = +lord.data("threadNumber");
     var key = lord.data("boardName") + (threadNumber ? ("/" + threadNumber) : "");
     var drafts = lord.getLocalObject("drafts", {})[key];

@@ -33,12 +33,13 @@
 [done] Make dialogs maximizable
 [done] Add custom player for media file previews
 [done] Prevent unsupported media formats from adding to player
+[done] Simplify client-side script API
 
 * Optimize spells
 * Fix referenced/referring posts when moving a thread
-* Add some API to client scripts and simplify existing API
 * Implement different access levels for different boards
 * Use web interface for user access level management and registration
 * Use Elasticsearch or other search engine [not sure if needed]
 * Write detailed DB schema documentation
 * Write client scripts API documentation
+* Write server scripts API documentation

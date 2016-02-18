@@ -432,6 +432,8 @@ span.newPostCount {
 
 .menu > li > a {
     text-decoration: none;
+    display: inline-block;
+    width: 100%;
 }
 
 #markupUnorderedListActionsMenu {

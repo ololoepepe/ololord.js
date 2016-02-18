@@ -131,6 +131,8 @@
                 var appendScript = function(path) {
                     s += '<script type="text/javascript" src="/' + prefix + path + '"></s' + 'cript>';
                 };
+                if (lord.compareRegisteredUserLevels(lord.model("base").user.level, "MODER") >= 0)
+                    appendScript("js/3rdparty/jquery.datetimepicker.js");
                 if (settings.sourceHighlightingEnabled) {
                     appendScript("js/3rdparty/codemirror/codemirror.min.js");
                     appendScript("js/3rdparty/codemirror/javascript.min.js");

@@ -1411,6 +1411,7 @@ lord.setTooltips = function(parent) {
 };
 
 lord.initializeOnLoadBase = function() {
+    lord.hashChangeHandler(lord.hash());
     lord.series(lord.pageProcessors, function(f) {
         return f();
     }).catch(lord.handleError);
