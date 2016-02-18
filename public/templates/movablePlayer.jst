@@ -2,13 +2,13 @@
     <div class="movablePlayerTrackInfo" style="display: none;"></div>
     <div class="movablePlayerContent">
         {{? it.isAudioType(it.fileInfo.mimeType)}}
-            <img src="{{ out += it.fileInfo.href.split(".").slice(0, -1).join(",").replace(/src(\/\d+)/, "thumb/$1") + "s.png"; }}">
+            <img src="{{ out += it.fileInfo.href.split(".").slice(0, -1).join(".").replace(/src(\/\d+)/, "thumb$1") + "s.png"; }}">
             <audio style="display: none;">
                 <source type="{{=it.fileInfo.mimeType}}" src={{=it.fileInfo.href}}></source>
             </audio>
         {{?? it.isVideoType(it.fileInfo.mimeType)}}
             {{? !it.fileInfo.width || !it.fileInfo.height }}
-                <img src="{{ out += it.fileInfo.href.split(".").slice(0, -1).join(",").replace(/src(\/\d+)/, "thumb/$1") + "s.png"; }}">
+                <img src="{{ out += it.fileInfo.href.split(".").slice(0, -1).join(".").replace(/src(\/\d+)/, "thumb$1") + "s.png"; }}">
             {{?}}
             <video {{? !it.fileInfo.width || !it.fileInfo.height }}style="display: none;"{{?}}>
                 <source type="{{=it.fileInfo.mimeType}}" src={{=it.fileInfo.href}}></source>
