@@ -94,6 +94,9 @@ var lord = lord || {};
     $(this.controls).click(function(e) {
         e.stopPropagation();
     });
+    $(this.contentImage).click(function(e) {
+        e.stopPropagation();
+    });
     if (!lord.isImageType(this.fileInfo.mimeType)) {
         var _this = this;
         var defVol = lord.getLocalObject("defaultAudioVideoVolume", 100) / 100;
@@ -448,9 +451,6 @@ lord.lastPostPreviewTimer = null;
 lord.postPreviewMask = null;
 lord.movablePlayers = {};
 lord.currentMovablePlayer = null;
-lord.images = {}; //TODO: remove
-lord.img = null; //TODO: remove
-lord.imgWrapper = null; //TODO: remove
 lord.lastPostFormPosition = "";
 lord.files = null;
 lord.filesMap = null;
@@ -871,10 +871,6 @@ lord.globalOnclick = function(e) {
         lord.currentMenu = null;
     }
     var t = e.target;
-    if (t && lord.currentMovablePlayer && t == lord.currentMovablePlayer.contentImage)
-        return;
-    if (t && lord.img && t == lord.img)
-        return;
     while (t) {
         if ("mobile" == lord.deviceType() && "A" == t.tagName) {
             var boardName = lord.data("boardName", t);
@@ -901,10 +897,8 @@ lord.globalOnclick = function(e) {
             return;
         }
     }
-    if (!lord.getLocalObject("closeFilesByClickingOnly", false)
-        || (lord.img && lord.img.mimeType.replace("audio/", "") != lord.img.mimeType)) {
+    if (lord.currentMovablePlayer && !lord.getLocalObject("closeFilesByClickingOnly", false))
         lord.hideImage();
-    }
 };
 
 lord.initFiles = function() {
@@ -2902,7 +2896,7 @@ lord.expandThread = function(thread) {
 };
 
 lord.hotkey_previousPageImage = function() {
-    if (lord.img) {
+    if (lord.currentMovablePlayer) {
         lord.previousFile();
         return false;
     }
@@ -2919,7 +2913,7 @@ lord.hotkey_previousPageImage = function() {
 };
 
 lord.hotkey_nextPageImage = function() {
-    if (lord.img) {
+    if (lord.currentMovablePlayer) {
         lord.nextFile();
         return false;
     }
@@ -3028,7 +3022,7 @@ lord.hotkey_expandImage = function() {
     var p = lord.currentPost();
     if (!p)
         return;
-    if (lord.img && lord.img.style.display != "none") {
+    if (lord.currentMovablePlayer && lord.currentMovablePlayer.visible) {
         lord.hideImage();
     } else {
         var f = lord.query(".postFile", p);
