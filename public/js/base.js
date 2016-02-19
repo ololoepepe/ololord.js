@@ -50,6 +50,10 @@ lord.notificationQueue = [];
 lord.pageProcessors = [];
 lord.postProcessors = [];
 lord.currentTracks = {};
+lord.lastWindowSize = {
+    width: $(window).width(),
+    height: $(window).height()
+};
 
 /*Functions*/
 
@@ -1498,9 +1502,17 @@ lord.initializeOnLoadBase = function() {
     lord.checkPlaylist();
     if (lord.queryOne(".track", lord.id("playerTracks")) && lord.getSessionObject("playerPlaying", false))
         lord.playerPlayPause(null, lord.getSessionObject("playerCurrentTime", 0));
-    $(window).resize(function() {
-        if (!lord.hasClass(lord.id("player"), "minimized"))
+    var w = $(window);
+    w.resize(function() {
+        var n = {
+            width: w.width(),
+            height: w.height()
+        };
+        if (n.height != lord.lastWindowSize.height && !lord.hasClass(lord.id("player"), "minimized"))
             lord.updatePlayerTracksHeight();
+        if (n.width != lord.lastWindowSize.width)
+            $(".postBody").css("maxWidth", (n.width - 30) + "px");
+        lord.lastWindowSize = n;
     });
 };
 

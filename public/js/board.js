@@ -726,9 +726,6 @@ lord.createPostNode = function(post, permanent, threadInfo) {
         c.model.archived = !!lord.data("archived");
         lord.appendExtrasToModel(c.model);
         c.node = lord.template("post", c.model);
-        $(".postBody", c.node).css("maxWidth", ($(window).width() - 30) + "px");
-        var dw = (c.model.deviceType == "mobile") ? 100 : 320;
-        $(".codeBlock", c.node).css("maxWidth", ($(window).width() - dw) + "px");
         if (lord.deviceType("mobile"))
             lord.setTooltips(c.node);
         if (!permanent) {
@@ -2828,8 +2825,6 @@ lord.processPosts = function(parent) {
     if (!parent)
         parent = document.body;
     $(".postBody", parent).css("maxWidth", ($(window).width() - 30) + "px");
-    var dw = lord.deviceType("mobile") ? 100 : 320;
-    $(".codeBlock", parent).css("maxWidth", ($(window).width() - dw) + "px");
     var posts = (lord.hasClass(parent, "post") || lord.hasClass(parent, "opPost")) ? [parent]
         : lord.query(".post, .opPost", parent);
     return lord.series(lord.postProcessors, function(f) {
@@ -3238,6 +3233,7 @@ lord.appendHotkeyShortcuts = function() {
 };
 
 lord.initializeOnLoadBoard = function() {
+    $(".postBody", document.body).css("maxWidth", ($(window).width() - 30) + "px");
     var c = {};
     c.model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true);
     c.model.settings = lord.settings();
@@ -3307,11 +3303,6 @@ lord.initializeOnLoadBoard = function() {
     }
     if (lord.deviceType("mobile"))
         lord.setTooltips();
-    $(window).resize(function() {
-        $(".postBody").css("maxWidth", ($(window).width() - 30) + "px");
-        var dw = lord.deviceType("mobile") ? 100 : 320;
-        $(".codeBlock").css("maxWidth", ($(window).width() - dw) + "px");
-    });
     var threadNumber = +lord.data("threadNumber");
     var key = lord.data("boardName") + (threadNumber ? ("/" + threadNumber) : "");
     var drafts = lord.getLocalObject("drafts", {})[key];
