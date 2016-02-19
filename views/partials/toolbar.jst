@@ -19,5 +19,7 @@
         document.open();
         document.write(lord.template("toolbar", model, true));
         document.close();
+        if (settings.stickyToolbar)
+            $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
     })();
 </script>

@@ -2,6 +2,16 @@
     font-size: 14.4px !important;
 }
 
+header {
+    padding-top: 2px;
+    padding-bottom: 8px;
+}
+
+footer {
+    padding-top: 8px;
+    padding-bottom: 2px;
+}
+
 a.expandCollapse {
     cursor: pointer;
 }

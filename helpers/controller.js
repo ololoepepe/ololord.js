@@ -28,7 +28,6 @@ mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-html");
 controller = function(templateName, modelData) {
     var baseModelData = merge.recursive(controller.baseModel(), controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
-    baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
     baseModelData.publicPartials = publicPartials;
     baseModelData.publicTemplates = publicTemplates;
@@ -67,7 +66,6 @@ controller = function(templateName, modelData) {
 controller.sync = function(templateName, modelData) {
     var baseModelData = merge.recursive(controller.baseModel(), controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
-    baseModelData.compareRatings = Database.compareRatings;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
     if (!modelData)
         modelData = {};

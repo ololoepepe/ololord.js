@@ -1510,8 +1510,11 @@ lord.initializeOnLoadBase = function() {
         };
         if (n.height != lord.lastWindowSize.height && !lord.hasClass(lord.id("player"), "minimized"))
             lord.updatePlayerTracksHeight();
-        if (n.width != lord.lastWindowSize.width)
+        if (n.width != lord.lastWindowSize.width) {
             $(".postBody").css("maxWidth", (n.width - 30) + "px");
+            if (lord.getLocalObject("stickyToolbar", true))
+                $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
+        }
         lord.lastWindowSize = n;
     });
 };

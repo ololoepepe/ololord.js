@@ -1108,27 +1108,6 @@ module.exports.createThread = function(req, fields, files, transaction) {
     });
 };
 
-module.exports.compareRatings = function(r1, r2) {
-    if (["SFW", "R-15", "R-18", "R-18G"].indexOf(r2) < 0)
-        throw "Invalid rating r2: " + r2;
-    switch (r1) {
-    case "SFW":
-        return (r1 == r2) ? 0 : -1;
-    case "R-15":
-        if (r1 == r2)
-            return 0;
-        return ("SFW" == r2) ? 1 : -1;
-    case "R-18":
-        if (r1 == r2)
-            return 0;
-        return ("R-18G" == r2) ? -1 : 1;
-    case "R-18G":
-        return (r1 == r2) ? 0 : 1;
-    default:
-        throw "Invalid rating r1: " + r1;
-    }
-};
-
 var compareRegisteredUserLevels = function(l1, l2) {
     if (!l1)
         l1 = null;
