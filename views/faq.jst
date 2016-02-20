@@ -15,7 +15,7 @@
     (function() {
         if (!lord.addTemplate("custom-faq", lord.get("templates/custom-faq.jst")))
             return;
-        var model = lord.model(["base", "tr", "boards"], true);
+        var model = lord.model(["base", "tr", "boards"]);
         model.settings = lord.settings();
         var data = lord.template("custom-faq", model, true);
         if (!data)

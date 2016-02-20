@@ -139,14 +139,14 @@ board.actionRoutes = function() {
         handler: function(req, res) {
             var c = {};
             Tools.parseForm(req).then(function(result) {
-                c.password = Tools.password(result.fields.password);
+                c.password = Tools.sha1(result.fields.password);
                 c.opened = "true" == result.fields.opened;
                 return Database.getPost("rpg", +result.fields.postNumber);
             }).then(function(post) {
                 c.post = post;
                 if ((!c.password || c.password != post.user.password)
                     && (!req.hashpass || req.hashpass != post.user.hashpass)
-                    && (Database.compareRegisteredUserLevels(req.level, post.user.level) <= 0)) {
+                    && (Database.compareRegisteredUserLevels(req.level("rpg"), post.user.level) <= 0)) {
                     return Promise.reject(Tools.translate("Not enough rights"));
                 }
                 return Board.prototype.loadExtraData.call(_this, post.number);

@@ -186,7 +186,7 @@ router.post("/action/markupText", function(req, res) {
         return markup(c.board.name, c.fields.text, {
             markupModes: markupModes,
             referencedPosts: {},
-            accessLevel: req.level
+            accessLevel: req.level(c.board.name)
         });
     }).then(function(text) {
         var data = {
@@ -383,7 +383,7 @@ router.post("/action/editAudioTags", function(req, res) {
 });
 
 router.post("/action/banUser", function(req, res) {
-    if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
+    if (!req.isModer())
         return controller.error(res, Tools.translate("Not enough rights"), true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
@@ -431,14 +431,19 @@ router.post("/action/banUser", function(req, res) {
 });
 
 router.post("/action/delall", function(req, res) {
-    if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
+    if (!req.isModer())
         return controller.error(res, Tools.translate("Not enough rights"), true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
-        return controller.checkBan(req, res, c.fields.boardName, true);
+        c.boardNames = Tools.filterIn(c.fields, function(boardName, key) {
+            return /^board_\S+$/.test(key);
+        });
+        if (c.boardNames.length < 1)
+            return Promise.reject(Tools.translate("No board specified"));
+        return controller.checkBan(req, res, c.boardNames, true);
     }).then(function() {
-        return Database.delall(req, c.fields);
+        return Database.delall(req, c.fields.userIp, c.boardNames);
     }).then(function(result) {
         res.send({});
     }).catch(function(err) {

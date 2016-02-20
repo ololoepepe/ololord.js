@@ -19,7 +19,7 @@
        class="postformFileRemoveButton">
         <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.removeFileText}}"
              class="buttonImage postformFileRemoveImage"></a>
-    {{? !it.minimalisticPostform()}}
+    {{? !it.settings.minimalisticPostform}}
         <div name="ratingSelectContainer">
             <span>{{=it.tr.ratingLabelText}}</span>
             <select name="file_rating">

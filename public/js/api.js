@@ -1397,79 +1397,122 @@ lord.createScript = function(src, prefix) {
     return script;
 };
 
+lord.userLevels = [
+    "USER",
+    "MODER",
+    "ADMIN",
+    "SUPERUSER"
+];
+
 lord.compareRegisteredUserLevels = function(l1, l2) {
-    if (!l1)
-        l1 = null;
-    if (!l2)
-        l2 = null;
-    if (["ADMIN", "MODER", "USER", null].indexOf(l2) < 0)
-        throw "Invalid registered user level l2: " + l2;
-    switch (l1) {
-    case "ADMIN":
-        return (l1 == l2) ? 0 : 1;
-    case "MODER":
-        if (l1 == l2)
-            return 0;
-        return ("ADMIN" == l2) ? -1 : 1;
-    case "USER":
-        if (l1 == l2)
-            return 0;
-        return (null == l2) ? 1 : -1;
-    case null:
-        return (l1 == l2) ? 0 : -1;
-    default:
-        throw "Invalid reistered user level l1: " + l1;
-    }
+    l1 = lord.userLevels.indexOf(l1);
+    l2 = lord.userLevels.indexOf(l2);
+    if (l1 < l2)
+        return -1;
+    else if (l1 > l2)
+        return 1;
+    else
+        return 0;
 };
 
+lord.ratings = [
+    "SFW",
+    "R-15",
+    "R-18",
+    "R-18G"
+];
+
 lord.compareRatings = function(r1, r2) {
-    if (["SFW", "R-15", "R-18", "R-18G"].indexOf(r2) < 0)
-        throw "Invalid rating r2: " + r2;
-    switch (r1) {
-    case "SFW":
-        return (r1 == r2) ? 0 : -1;
-    case "R-15":
-        if (r1 == r2)
-            return 0;
-        return ("SFW" == r2) ? 1 : -1;
-    case "R-18":
-        if (r1 == r2)
-            return 0;
-        return ("R-18G" == r2) ? -1 : 1;
-    case "R-18G":
-        return (r1 == r2) ? 0 : 1;
-    default:
-        throw "Invalid rating r1: " + r1;
-    }
+    r1 = lord.ratings.indexOf(r1);
+    if (r1 < 0)
+        r1 = 0;
+    r2 = lord.ratings.indexOf(r2);
+    if (r2 < 0)
+        r2 = 0;
+    if (r1 < r2)
+        return -1;
+    else if (r1 > r2)
+        return 1;
+    else
+        return 0;
 };
 
 lord.escaped = function(text) {
     return $("<div />").text(text).html();
 };
 
-lord.model = function(modelName, mustMerge) {
+lord.model = function(modelName) {
     if (Array.isArray(modelName)) {
         var models = modelName.map(function(modelName) {
             return lord.model(modelName);
         });
-        if (!mustMerge)
-            return models;
         var model = (models.length > 0) ? merge.clone(models[0]) : {};
         models.slice(1).forEach(function(m) {
             model = merge.recursive(model, m);
-        })
+        });
         return model;
     } else {
         var match = modelName.match(/^board\/(\S+)$/);
+        var model;
         if (match) {
             var boards = lord.models["boards"].boards;
             for (var i = 0; i < boards.length; ++i) {
                 if (match[1] == boards[i].name)
                     return { board: boards[i] };
             }
-            return lord.models["boards"].boards[match[1]];
+            model = lord.models["boards"].boards[match[1]];
+        } else {
+            model = lord.models[modelName];
         }
-        return lord.models[modelName];
+        if (!model)
+            return model;
+        var settings = lord.settings();
+        var base = lord.models.base;
+        var locale = base.site.locale;
+        var dateFormat = base.site.dateFormat;
+        var timeOffset = base.site.timeOffset;
+        model.settings = settings;
+        model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels.bind(lord);
+        model.hasOwnProperties = lord.hasOwnProperties.bind(lord);
+        model.formattedDate = function(date) {
+            return moment(date).utcOffset(timeOffset).locale(locale).format(dateFormat);
+        };
+        var maxLevel = lord.toArray(lord.models.base.user.levels).sort(function() {
+            return -1 * lord.compareRegisteredUserLevels(arguments);
+        });
+        maxLevel = (maxLevel.length > 0) ? maxLevel[0] : null;
+        var test = function(level, boardName, strict) {
+            var lvl;
+            if (boardName && typeof boardName != "boolean") {
+                lvl = lord.models.base.user.levels[boardName];
+            } else {
+                lvl = maxLevel;
+                strict = boardName;
+            }
+            if (strict)
+                return !lord.compareRegisteredUserLevels(lvl, level);
+            else
+                return lord.compareRegisteredUserLevels(lvl, level) >= 0;
+        };
+        if (!model.user)
+            model.user = {};
+        model.user.level = function(boardName) {
+            if (!boardName)
+                return maxLevel;
+            return lord.models.base.user.levels[boardName] || null;
+        };
+        var levelMap = {
+            User: "USER",
+            Moder: "MODER",
+            Admin: "ADMIN",
+            Superuser: "SUPERUSER"
+        };
+        lord.forIn(levelMap, function(lvl, key) {
+            model.user["is" + key] = test.bind(model.user, lvl);
+        });
+        model.customPostBodyPart = lord.customPostBodyPart;
+        model.customPostHeaderPart = lord.customPostHeaderPart;
+        return model;
     }
 };
 

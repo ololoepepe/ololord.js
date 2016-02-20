@@ -19,7 +19,7 @@ lord.addVoteVariant = function(el) {
             return;
         ++lastN;
     });
-    var model = lord.model(["base", "tr"], true);
+    var model = lord.model(["base", "tr"]);
     model.number = lastN + 1;
     parent.appendChild(lord.template("voteVariant", model));
 };
@@ -64,7 +64,7 @@ lord.vote = function(event, form) {
 lord.setVotingOpened = function(el, opened) {
     var c = {};
     var postNumber = +lord.data("number", el, true);
-    c.model = lord.model(["base", "tr", "board/rpg"], true);
+    c.model = lord.model(["base", "tr", "board/rpg"]);
     c.model.showSubmitButton = false;
     c.model.opened = opened;
     c.model.postNumber = postNumber;

@@ -1,5 +1,6 @@
 var equal = require("deep-equal");
 var FS = require("q-io/fs");
+var FSSync = require("fs");
 var Path = require("path");
 
 var contains = function(s, subs) {
@@ -18,8 +19,11 @@ var configFileName = process.argv[2];
 if (!configFileName)
     configFileName = __dirname + "/../config.json";
 configFileName = Path.resolve(__dirname + "/..", configFileName);
-console.log("[" + process.pid + "] Using config file: \"" + configFileName + "\"...");
-var config = require(configFileName);
+var config = {};
+if (FSSync.existsSync(configFileName)) {
+    console.log("[" + process.pid + "] Using config file: \"" + configFileName + "\"...");
+    var config = require(configFileName);
+}
 
 var setHooks = {};
 

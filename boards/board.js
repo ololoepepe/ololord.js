@@ -380,9 +380,8 @@ var getRules = function(boardName) {
     var p;
     if (!file.hash) {
         p = FS.read(file.path, "b").then(function(data) {
-            var sha1 = Crypto.createHash("sha1");
-            sha1.update(data);
-            file.hash = sha1.digest("hex");
+            file.hash = Tools.sha1(data);
+            return Promise.resolve();
         });
     } else {
         p = Promise.resolve();

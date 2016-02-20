@@ -189,7 +189,7 @@ controller.baseModel = function(req) {
         user: {
             ip: (req ? req.ip : undefined),
             hashpass: (req ? req.hashpass : undefined),
-            level: (req ? req.level : undefined),
+            levels: (req ? req.levels : undefined),
             loggedIn: (req ? !!req.hashpass : undefined),
             vkAuth: (req ? req.vkAuth : undefined)
         },
@@ -251,7 +251,7 @@ controller.translationsModel = function() {
     translate("Framed version", "framedVersionText");
     translate("Version without frame", "normalVersionText");
     translate("F.A.Q.", "toFaqPageText");
-    translate("User management", "toManagePageText");
+    translate("Management", "toManagePageText");
     translate("Hide by image hash", "hideByImageText");
     translate("Draw on this image", "drawOnImageText");
     translate("Answer", "toThread");
@@ -361,6 +361,10 @@ controller.translationsModel = function() {
     translate("Postform and posting", "postformTabText");
     translate("Hiding", "hidingTabText");
     translate("Other", "otherTabText");
+    translate("Bans", "bansTabText");
+    translate("Users", "usersTabText");
+    translate("Boards", "boardsTabText");
+    translate("Content", "contentTabText");
     translate("Auto update threads by default", "autoUpdateThreadsByDefaultLabelText");
     translate("Auto update interval (sec):", "autoUpdateIntervalLabelText");
     translate("Show desktop notifications", "showAutoUpdateDesktopNotificationsLabelText");
@@ -473,7 +477,6 @@ controller.translationsModel = function() {
     translate("Last post date", "sortingModeRecentLabelText");
     translate("Bump count", "sortingModeBumpsLabelText");
     translate("Reply count:", "replyCountLabelText");
-    translate("Loading posts...", "loadingPostsText");
     translate("New posts:", "newPostsText");
     translate("No new posts", "noNewPostsText");
     translate("kbps", "kbps");
@@ -497,7 +500,8 @@ controller.translationsModel = function() {
     translate("Expires:", "banExpiresLabelText");
     translate("Reason:", "banReasonLabelText");
     translate("Delete all user posts on selected board", "delallButtonText");
-    translate("Select all", "selectAllText");
+    translate("All", "selectAllText");
+    translate("Ban reason", "editBanReasonText");
     translate("Board:", "banBoardLabelText");
     translate("Ban level:", "banLevelLabelText");
     translate("Ban date:", "banDateTimeLabelText");
@@ -506,6 +510,7 @@ controller.translationsModel = function() {
     translate("Collapse video", "collapseVideoText");
     translate("Favorite threads", "favoriteThreadsText");
     translate("Auto update", "autoUpdateText");
+    translate("Remove", "removeButtonText");
     translate("Close", "closeButtonText");
     translate("Export", "exportSettingsButtonText");
     translate("Import", "importSettingsButtonText");
@@ -532,6 +537,7 @@ controller.translationsModel = function() {
     translate("Loading threads...", "loadingThreadsMessage");
     translate("Loading posts...", "loadingPostsMessage");
     translate("Searching for posts...", "searchingMessage");
+    translate("Loading bans...", "loadingBansMessage");
     translate("Close voting", "closeVotingText");
     translate("Open voting", "openVotingText");
     translate("Tripcode activated for THIS THREAD only", "threadTripcodeActivatedText");
@@ -558,6 +564,7 @@ controller.translationsModel = function() {
     translate("You are banned", "bannedText");
     translate("never", "banExpiresNeverText");
     translate("Clear date field", "clearDateFieldText");
+    translate("logged in as superuser", "loginMessageSuperuserText");
     translate("logged in as administrator", "loginMessageAdminText");
     translate("logged in as moderator", "loginMessageModerText");
     translate("logged in as user", "loginMessageUserText");
@@ -614,6 +621,7 @@ controller.translationsModel = function() {
     translate("Thread", "postMenuCategoryThreadText");
     translate("User", "postMenuCategoryUserText");
     translate("Your browser can not play files of this type", "unsupportedMediaTypeText");
+    translate("New ban...", "newBanText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

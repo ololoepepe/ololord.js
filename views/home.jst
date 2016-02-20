@@ -15,7 +15,7 @@
     (function() {
         if (!lord.addTemplate("custom-home", lord.get("templates/custom-home.jst")))
             return;
-        var model = lord.model(["base", "tr", "boards"], true);
+        var model = lord.model(["base", "tr", "boards"]);
         model.settings = lord.settings();
         var data = lord.template("custom-home", model, true);
         if (!data)

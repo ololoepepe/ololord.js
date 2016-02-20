@@ -63,6 +63,9 @@ Example:
             ]
         }
     },
+    "permissions": {
+        "seeUserIp": "MODER"
+    },
     "board": {
         "bumpLimit": 500,
         "postLimit": 1000,

@@ -460,17 +460,17 @@
             "value": "Наши друзья"
         }
     },
-    "User management": {
+    "Management": {
         "pageTitle": {
-            "value": "Управление пользователями"
+            "value": "Управление"
         },
         "toManagePageText": {
-            "value": "Управление пользователями"
+            "value": "Управление"
         }
     },
-    "Select all": {
+    "All": {
         "selectAllText": {
-            "value": "Выбрать все"
+            "value": "Все"
         }
     },
     "Board:": {
@@ -803,6 +803,11 @@
     "Favorites": {
         "showFavoritesText": {
             "value": "Избранное"
+        }
+    },
+    "Remove": {
+        "removeButtonText": {
+            "value": "Убрать"
         }
     },
     "Close": {
@@ -1520,7 +1525,8 @@
     },
     "Loading posts...": {
         "loadingPostsText": {
-            "value": "Загрузка постов..."
+            "value": "Загрузка постов...",
+            "_obsolete": true
         },
         "loadingPostsMessage": {
             "value": "Загрузка постов..."
@@ -1833,6 +1839,11 @@
             "value": "Перейти"
         }
     },
+    "logged in as superuser": {
+        "loginMessageSuperuserText": {
+            "value": "залогинен в качестве суперпользователя"
+        }
+    },
     "logged in as administrator": {
         "loginMessageAdminText": {
             "value": "залогинен в качестве администратора"
@@ -1985,6 +1996,9 @@
     },
     "Boards": {
         "boardsText": {
+            "value": "Доски"
+        },
+        "boardsTabText": {
             "value": "Доски"
         }
     },
@@ -2649,6 +2663,81 @@
     "Your browser can not play files of this type": {
         "unsupportedMediaTypeText": {
             "value": "Ваш браузер не может проигрывать файлы этого типа"
+        }
+    },
+    "No board specified": {
+        "_default": {
+            "value": "Не указана доска"
+        }
+    },
+    "Invalid password": {
+        "_default": {
+            "value": "Недействительный пароль"
+        }
+    },
+    "Enter superuser IP list (separate by spaces): ": {
+        "_default": {
+            "value": "Введите список IP суперпользователя (разделяйте пробелами): "
+        }
+    },
+    "Bans": {
+        "bansTabText": {
+            "value": "Баны"
+        }
+    },
+    "Users": {
+        "usersTabText": {
+            "value": "Пользователи"
+        }
+    },
+    "Content": {
+        "contentTabText": {
+            "value": "Контент"
+        }
+    },
+    "Loading bans...": {
+        "loadingBansMessage": {
+            "value": "Загрузка банов..."
+        }
+    },
+    "New ban...": {
+        "newBanText": {
+            "value": "Новый бан..."
+        }
+    },
+    "A user with this hashpass is already registered": {
+        "_default": {
+            "value": "Пользователь с таким хешпассом уже зарегистрирован"
+        }
+    },
+    "No user with this hashpass": {
+        "_default": {
+            "value": "Нет пользователя с таким хешпассом"
+        }
+    },
+    "Access level is not specified for any board": {
+        "_default": {
+            "value": "Уровень доступа не указан ни для одной доски"
+        }
+    },
+    "Invalid access level": {
+        "_default": {
+            "value": "Недействительный уровень доступа"
+        }
+    },
+    "A user with this hashpass is already registered as superuser": {
+        "_default": {
+            "value": "Пользователь с таким хешпассом уже зарегистрирован как суперпользователь"
+        }
+    },
+    "Invalid ban level": {
+        "_default": {
+            "value": "Недействительный уровень бана"
+        }
+    },
+    "Ban reason": {
+        "editBanReasonText": {
+            "value": "Причина бана"
         }
     }
 }

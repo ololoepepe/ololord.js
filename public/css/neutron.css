@@ -14,6 +14,14 @@
     border-color: #575757 transparent;
 }
 
+.ui-state-active > .ui-button-text > .signImage {
+    -webkit-filter: invert(0);
+    -moz-filter: invert(0);
+    -ms-filter: invert(0);
+    -o-filter: invert(0);
+    filter: invert(0);
+}
+
 body  {
     background-color: #212121;
     color: #698CC0;

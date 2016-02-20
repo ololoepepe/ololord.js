@@ -1,6 +1,122 @@
-{{~[it.bannedUser] :user}}
-    <div id="user{{? it.userIp}}{{=it.userIp}}{{??}}{{=user.ip}}{{?}}">
-        {{#def.userBan}}
+<div {{? typeof it.bannedUser != "undefined"}}name="{{=it.bannedUser.ip}}"{{?}} class="bannedUser">
+    <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
+          action="/{{=it.site.pathPrefix}}action/banUser" onsubmit="lord.banUser(event, this); return false;">
+        {{? it.boardName}}
+            <input type="hidden" name="boardName" value="{{=it.boardName}}" />
+        {{?}}
+        {{? it.postNumber}}
+            <input type="hidden" name="postNumber" value="{{=it.postNumber}}" />
+        {{?}}
+        {{? typeof it.bannedUser != "undefined"}}
+            <input type="hidden" name="userIp" value="{{=it.bannedUser.ip}}" />
+        {{??}}
+            <input type="text" name="userIp" placeholder="IP: <192.168.0.1>" />
+        {{?}}
+        {{ var banLevels = []; }}
+        {{ banLevels.push({ level: "NONE", description: it.tr.banLevelNoneDescription } ); }}
+        {{ banLevels.push({ level: "READ_ONLY", description: it.tr.banLevelReadOnlyDescription } ); }}
+        {{ banLevels.push({ level: "NO_ACCESS", description: it.tr.banLevelNoAccessDescription } ); }}
+        <table>
+            <tbody>
+                {{~it.boards :board}}
+                    <tr name="board">
+                        {{? typeof it.bannedUser != "undefined"}}
+                            {{ var ban = it.bannedUser.bans[board.name]; }}
+                        {{?}}
+                        <td>
+                            <input type="hidden" name="banBoard_{{=board.name}}" value="{{=board.name}}" />
+                            {{? it.postNumber && it.boardName == board.name}}
+                                <input type="hidden" name="banPostNumber_{{=board.name}}" value="{{=it.postNumber}}" />
+                            {{?? (typeof ban != "undefined" && ban.postNumber)}}
+                                <input type="hidden" name="banPostNumber_{{=board.name}}" value="{{=ban.postNumber}}" />
+                            {{?}}
+                            /{{=board.name}}/
+                        </td>
+                        <td>
+                            <div class="banLevelSelect">
+                                {{~banLevels :level}}
+                                    <input id="{{? typeof it.bannedUser != "undefined"}}{{=it.bannedUser.ip}}_{{?}}banLevel_{{=board.name}}_{{=level.level}}"
+                                           type="radio" name="banLevel_{{=board.name}}"
+                                           {{? (typeof ban != "undefined" && ban.level == level.level) || (typeof ban == "undefined" && "NONE" == level.level)}}checked="true"{{?}}
+                                           value="{{=level.level}}"><label for="{{? typeof it.bannedUser != "undefined"}}{{=it.bannedUser.ip}}_{{?}}banLevel_{{=board.name}}_{{=level.level}}"
+                                                                           title="{{=level.description}}"><img class="signImage"
+                                                                                                               src="/{{=it.site.pathPrefix}}img/ban_level/{{=level.level.toLowerCase()}}.png"></label>
+                                {{~}}
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" name="banExpires_{{=board.name}}" size="16"
+                                   {{? typeof ban != "undefined" && ban.expiresAt}}value="{{ out += it.formattedDate(ban.expiresAt); }}"{{?}} />
+                            <a href="javascript:void(0);" onclick="lord.clearDate('banExpires_{{=board.name}}'); return false;">
+                                <img src="/{{=it.site.pathPrefix}}img/clear.png" class="buttonImage" title="{{=it.tr.clearDateFieldText}}" /></a>
+                        </td>
+                        <td>
+                            <input type="{{? "mobile" == it.deviceType}}hidden{{??}}text{{?}}" name="banReason_{{=board.name}}" size="33"
+                                   {{? typeof ban != "undefined" && ban.reason}}value="{{=ban.reason}}"{{?}}
+                                   placeholder="{{=it.tr.banReasonLabelText}} [...]" />
+                        </td>
+                        <td {{? "mobile" != it.deviceType}}style="display: none;"{{?}}>
+                            <a href="javascript:void(0);" onclick="lord.editBanReason(this); return false;"
+                               title='{{=it.tr.editBanReasonText}}'><img src="/{{=it.site.pathPrefix}}img/question.png"
+                                                                         class="buttonImage"></a>
+                        </td>
+                    </tr>
+                {{~}}
+                <tr>
+                    <td>
+                        <input type="submit" name="submit" value="{{=it.tr.selectAllText}}"
+                               onclick="lord.bansSelectAll(event, this); return false;" />
+                    </td>
+                    <td>
+                        <div name="level" class="banLevelSelect">
+                            {{~banLevels :level}}
+                                <input id="{{? typeof it.bannedUser != "undefined"}}{{=it.bannedUser.ip}}_{{?}}{{=level.level}}"
+                                       type="radio" name="banLevel" {{? "NONE" == level.level}}checked="true"{{?}}
+                                       value="{{=level.level}}"><label for="{{? typeof it.bannedUser != "undefined"}}{{=it.bannedUser.ip}}_{{?}}{{=level.level}}"
+                                                                       title="{{=level.description}}"><img class="signImage"
+                                                                                                           src="/{{=it.site.pathPrefix}}img/ban_level/{{=level.level.toLowerCase()}}.png"></label>
+                            {{~}}
+                        </div>
+                    </td>
+                    <td>
+                        <input type="text" name="expires" size="16" />
+                        <a href="javascript:void(0);" onclick="lord.clearDate('expires'); return false;">
+                            <img src="/{{=it.site.pathPrefix}}img/clear.png" class="buttonImage" title="{{=it.tr.clearDateFieldText}}" /></a>
+                    </td>
+                    <td>
+                        <input type="{{? "mobile" == it.deviceType}}hidden{{??}}text{{?}}" name="reason" size="33"
+                               placeholder="{{=it.tr.banReasonLabelText}} [...]" />
+                    </td>
+                    <td {{? "mobile" != it.deviceType}}style="display: none;"{{?}}>
+                        <a href="javascript:void(0);" onclick="lord.editBanReason(this); return false;"
+                           title='{{=it.tr.editBanReasonText}}'><img src="/{{=it.site.pathPrefix}}img/question.png"
+                                                                     class="buttonImage"></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        {{? it.submitButtonVisible}}
+            <br />
+            <input type="submit" name="submit" value="{{=it.tr.confirmButtonText}}" />
+            {{? typeof it.bannedUser != "undefined" && !it.hasOwnProperties(it.bannedUser.bans)}}
+                <input type="submit" name="submit" value="{{=it.tr.removeButtonText}}"
+                       onclick="event.preventDefault(); lord.removeBannedUser(this); return false;" />
+            {{?}}
+        {{?}}
+    </form>
+    <hr />
+    <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
+          action="/{{=it.site.pathPrefix}}action/delall" onsubmit="lord.delall(event, this); return false;">
+        <div class="scrollAreaH60" name="hiddenBoards">
+            {{~it.boards :brd}}
+                {{? it.compareRegisteredUserLevels(it.user.level(brd.name), "MODER") >= 0}}
+                    <input type="checkbox" name="board_{{=brd.name}}"
+                           value="{{=brd.name}}">[{{=brd.name}}] {{=brd.title}}</input>
+                    <br />
+                {{?}}
+            {{~}}
+        </div>
         <br />
-    </div>
-{{~}}
+        <input type="submit" name="submit" value="{{=it.tr.delallButtonText}}" />
+    </form>
+</div>

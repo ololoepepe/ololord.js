@@ -281,7 +281,7 @@ lord.showSettings = function() {
     var c = {};
     var model = { settings: lord.settings() };
     c.model = merge.recursive(model,
-            lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true));
+            lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")]));
     c.div = lord.template("settingsDialog", c.model);
     $("[name='exportSettingsButton'], [name='importSettingsButton'], [name='synchronizationButton']", c.div).button();
     lord.showDialog(c.div, {
@@ -316,7 +316,7 @@ lord.showFavorites = function() {
     var div = lord.id("favorites");
     if (div)
         return;
-    var model = lord.model(["base", "tr"], true);
+    var model = lord.model(["base", "tr"]);
     model.favorites = lord.toArray(lord.getLocalObject("favoriteThreads", {}));
     div = lord.template("favoritesDialog", model);
     lord.showDialog(div, {
@@ -629,7 +629,7 @@ lord.trackDrop = function(e) {
 };
 
 lord.addTrack = function(track) {
-    var model = merge.recursive(track, lord.model(["base", "tr"], true));
+    var model = merge.recursive(track, lord.model(["base", "tr"]));
     lord.id("playerTracks").appendChild(lord.template("playerTrack", model));
     lord.currentTracks[track.fileName] = track;
 };
@@ -640,7 +640,7 @@ lord.editAudioTags = function(el, e) {
     var fileName = lord.data("fileName", el, true);
     var c = {};
     lord.api("fileInfo", { fileName: fileName }).then(function(fileInfo) {
-        c.model = merge.recursive({ fileInfo: fileInfo }, lord.model(["base", "tr"], true));
+        c.model = merge.recursive({ fileInfo: fileInfo }, lord.model(["base", "tr"]));
         c.div = lord.template("editAudioTagsDialog", c.model);
         return lord.showDialog(c.div, { title: "editAudioTagsText" });
     }).then(function(result) {
@@ -677,7 +677,7 @@ lord.editAudioTags = function(el, e) {
             var pnode = lord.id("track/" + fileName);
             if (pnode) {
                 var selected = lord.hasClass(pnode, "selected");
-                var model = merge.recursive(t, lord.model(["base", "tr"], true));
+                var model = merge.recursive(t, lord.model(["base", "tr"]));
                 var node = lord.template("playerTrack", model);
                 if (selected)
                     lord.addClass(node, "selected");
@@ -946,7 +946,7 @@ lord.editSpells = function() {
 };
 
 lord.showHiddenPostList = function() {
-    var model = lord.model(["base", "tr"], true);
+    var model = lord.model(["base", "tr"]);
     model.hiddenPosts = lord.toArray(lord.getLocalObject("hiddenPosts", {}));
     var div = lord.template("hiddenPostList", model);
     return lord.showDialog(div, {
@@ -968,7 +968,7 @@ lord.editUserCss = function() {
     var c = {};
     if (lord.getLocalObject("sourceHighlightingEnabled", false)) {
         c.editor = CodeMirror(div, {
-            mode: "javascript",
+            mode: "css",
             lineNumbers: true,
             autofocus: true,
             value: lord.getLocalObject("userCss", "")
@@ -1109,7 +1109,7 @@ lord.updateChat = function(keys) {
                 }
             } else {
                 var contacts = lord.queryOne(".chatContactList", lord.chatDialog);
-                var model = lord.model(["base", "tr"], true);
+                var model = lord.model(["base", "tr"]);
                 model.contact = { key: key };
                 contacts.appendChild(lord.template("chatContact", model));
             }
@@ -1159,7 +1159,7 @@ lord.showChat = function(key) {
         if (img.src.replace("chat_message.gif", "") != img.src)
             img.src = img.src.replace("chat_message.gif", "chat.png");
     });
-    var model = lord.model(["base", "tr"], true);
+    var model = lord.model(["base", "tr"]);
     model.contacts = [];
     lord.forIn(lord.getLocalObject("chats", {}), function(_, key) {
         model.contacts.push({ key: key });
@@ -1424,7 +1424,7 @@ lord.initializeOnLoadBase = function() {
         img.src = "/" + lord.data("sitePathPrefix") + "img/hide.png";
     }
     var settings = lord.settings();
-    var model = lord.model(["base", "tr", "boards"], true);
+    var model = lord.model(["base", "tr", "boards"]);
     if (lord.data("boardName"))
         model.board = lord.model("board/" + lord.data("boardName")).board;
     model.settings = settings;
@@ -1499,7 +1499,8 @@ lord.initializeOnLoadBase = function() {
         value: 0,
         disabled: true
     });
-    lord.checkPlaylist();
+    if (lord.id("player"))
+        lord.checkPlaylist();
     if (lord.queryOne(".track", lord.id("playerTracks")) && lord.getSessionObject("playerPlaying", false))
         lord.playerPlayPause(null, lord.getSessionObject("playerCurrentTime", 0));
     var w = $(window);

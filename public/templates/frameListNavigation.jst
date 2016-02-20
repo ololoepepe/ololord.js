@@ -55,14 +55,14 @@
                                                   class="buttonImage" width="16" height="16"></a>]</span>
     {{?}}
     <br />
-    {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+    {{? it.user.isModer()}}
         {{? it.deviceType != "mobile"}}
-            <img src="/{{=it.site.pathPrefix}}img/manage.png" class="buttonImage" width="16" height="16">
+            <img src="/{{=it.site.pathPrefix}}img/gear.png" class="buttonImage" width="16" height="16">
             <a href="/{{=it.site.pathPrefix}}manage.html" target="page">{{=it.tr.toManagePageText}}</a>
         {{??}}
             <span class="nowrap">
             [<a href="/{{=it.site.pathPrefix}}manage.html" target="page"
-                title="{{=it.tr.toManagePageText}}"><img src="/{{=it.site.pathPrefix}}img/manage.png"
+                title="{{=it.tr.toManagePageText}}"><img src="/{{=it.site.pathPrefix}}img/gear.png"
                                                          class="buttonImage" width="16" height="16"></a>]</span>
         {{?}}
         <br />

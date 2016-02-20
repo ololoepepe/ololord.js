@@ -4,7 +4,6 @@
 [done] Fix Coub video information retrieving
 [done] Use Multiparty instead of Formidable for form parsing
 [done] Implement uptime command; add uptime information to base data
-[done] Use NPM crock-then-redis package instead of then-redis package
 [done] Fix regeneration on user ban
 [done] Fix regeneration on post deletion
 [done] Log form fields of POST requests
@@ -35,10 +34,15 @@
 [done] Prevent unsupported media formats from adding to player
 [done] Simplify client-side script API
 
+[done] Use NPM read package instead of readline and readline-sync packages
+
+* Use NPM ioredis package instead of redis and then-redis packages
 * Optimize spells
 * Fix referenced/referring posts when moving a thread
 * Implement different access levels for different boards
 * Use web interface for user access level management and registration
+* Implement boards management page
+* Implement content management page
 * Use Elasticsearch or other search engine [not sure if needed]
 * Write detailed DB schema documentation
 * Write client scripts API documentation

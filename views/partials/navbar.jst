@@ -3,7 +3,7 @@
         var settings = lord.settings();
         if (settings.stickyToolbar)
             return;
-        var model = lord.model(["base", "tr", "boards"], true);
+        var model = lord.model(["base", "tr", "boards"]);
         if (lord.data("boardName"))
             model.board = lord.model("board/" + lord.data("boardName")).board;
         model.settings = settings;

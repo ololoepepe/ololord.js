@@ -35,9 +35,9 @@
                              title="{{=it.tr.toFaqPageText}}"><img src="/{{=it.site.pathPrefix}}img/question.png"
                                                                    class="buttonImage"
                                                                    width="16" height="16"></a>]</span>
-{{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+{{? it.user.isModer()}}
     <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}manage.html"
-                                 title="{{=it.tr.toManagePageText}}"><img src="/{{=it.site.pathPrefix}}img/manage.png"
+                                 title="{{=it.tr.toManagePageText}}"><img src="/{{=it.site.pathPrefix}}img/gear.png"
                                                                           class="buttonImage"
                                                                           width="16" height="16"></a>]</span>
 {{?}}

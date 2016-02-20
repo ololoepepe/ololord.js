@@ -155,7 +155,7 @@ module.exports.toUTC = function(date) {
 
 module.exports.hashpass = function(req) {
     var s = req.cookies.hashpass;
-    if (typeof s != "string" || !s.match(/^([0-9a-fA-F]){40}$/))
+    if (!module.exports.mayBeHashpass(s))
         return;
     return s;
 };
@@ -416,13 +416,9 @@ module.exports.splitCommand = function(cmd) {
     };
 };
 
-module.exports.password = function(pwd) {
-    if (!pwd)
-        return null;
-    var sha1 = Crypto.createHash("sha1");
-    sha1.update(pwd);
-    return sha1.digest("hex");
-}
+module.exports.mayBeHashpass = function(password) {
+    return (typeof password == "string") && password.match(/^([0-9a-fA-F]){40}$/);
+};
 
 module.exports.parseForm = function(req) {
     if (req.formFields) {
@@ -514,6 +510,14 @@ module.exports.preferIPv4 = function(ip) {
         //
     }
     return ip;
+};
+
+module.exports.sha1 = function(data) {
+    if (!Util.isString(data) && !Util.isBuffer(data))
+        return null;
+    var sha1 = Crypto.createHash("sha1");
+    sha1.update(data);
+    return sha1.digest("hex");
 };
 
 module.exports.sha256 = function(data) {

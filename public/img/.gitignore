@@ -1,6 +1,7 @@
 *
 !3rdparty/
 !404/
+!ban_level/
 !banners/
 !flags/
 !markup/
@@ -42,6 +43,7 @@
 !fill_form.png
 !fixed.png
 !frame.png
+!gear.png
 !gif_file.png
 !go.png
 !hide.png
@@ -55,7 +57,6 @@
 !loading.gif
 !login.png
 !logout.png
-!manage.png
 !markup.png
 !markup_vk_1.png
 !markup_vk_2.png

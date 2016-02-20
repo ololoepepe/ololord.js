@@ -40,7 +40,7 @@
 </div>
 <script type="text/javascript">
     (function() {
-        var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
+        var model = lord.model(["tr", "board/" + lord.data("boardName")]);
         model.settings = lord.settings();
         document.open();
         document.write(lord.template("boardPageUpper", model, true));
@@ -69,7 +69,7 @@
 </div>
 <script type="text/javascript">
     (function() {
-        var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
+        var model = lord.model(["tr", "board/" + lord.data("boardName")]);
         model.settings = lord.settings();
         document.open();
         document.write(lord.template("boardPageLower", model, true));
@@ -79,7 +79,7 @@
 <hr />
 <script type="text/javascript">
     (function() {
-        var model = lord.model(["base", "tr", "board/" + lord.data("boardName")], true);
+        var model = lord.model(["base", "tr", "board/" + lord.data("boardName")]);
         model.pageCount = +lord.data("pageCount");
         model.currentPage = +lord.data("currentPage");
         document.open();

@@ -11,23 +11,30 @@
         {{=it.title}}
     </h1>
 </div>
-<div id="bannedUsers">
-    {{ for (var ip in it.bannedUsers) { }}
-        {{ if (!it.bannedUsers.hasOwnProperty(ip)) continue; }}
-        {{ var user = { ip: ip, bans: it.bannedUsers[ip] }; }}
-        <div id="user{{=user.ip}}">
-            {{#def.userBan}}
-            <br />
-        </div>
-    {{ } }}
-</div>    
-<hr />
 <div>
-    {{? typeof user != "undefined"}}
-        {{ user = undefined; }}
-    {{?}}
-    {{#def.userBan}}
-</div>
+    <ul class="tabWidget nowrap">
+        <li data-index="0"
+            class="activated"><a onclick="lord.activateTab(this); return false;">{{=it.tr.bansTabText}}</a></li>
+        <li data-index="1"><a onclick="lord.activateTab(this); return false;">{{=it.tr.usersTabText}}</a></li>
+        <li data-index="2"><a onclick="lord.activateTab(this); return false;">{{=it.tr.boardsTabText}}</a></li>
+        <li data-index="3"><a onclick="lord.activateTab(this); return false;">{{=it.tr.contentTabText}}</a></li>
+    </ul>
+    <div>
+        <div id="bans" data-index="0" class="loadingMessage">
+            <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+            <h1 style="display: inline;">{{=it.tr.loadingBansMessage}}</h1>
+        </div>
+        <div data-index="1" style="display: none;">
+            Coming soon...
+        </div>
+        <div data-index="2" style="display: none;">
+            Coming soon...
+        </div>
+        <div data-index="3" style="display: none;">
+            Coming soon...
+        </div>
+    </div>
+</div> 
 {{#def.customFooter}}
 </body>
 </html>

@@ -63,6 +63,9 @@ Actual file name must be config-dev.json.
         },
         "youtubeApiKey": ""
     },
+    "permissions": {
+        "seeUserIp": "ADMIN"
+    },
     "site": {
         "locale": "en",
         "protocol": "http",

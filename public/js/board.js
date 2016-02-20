@@ -79,7 +79,7 @@ var lord = lord || {};
         isAudioType: lord.isAudioType,
         isVideoType: lord.isVideoType,
         isImageType: lord.isImageType
-    }, lord.model(["base", "tr"], true));
+    }, lord.model(["base", "tr"]));
     this.node = lord.template("movablePlayer", model);
     this.trackInfo = lord.queryOne(".movablePlayerTrackInfo", this.node);
     this.contentContainer = lord.queryOne(".movablePlayerContent", this.node);
@@ -687,28 +687,11 @@ lord.traverseChildren = function(elem) {
     return children;
 };
 
-lord.appendExtrasToModel = function(model) {
-    var settings = lord.settings();
-    var locale = model.site.locale;
-    var dateFormat = model.site.dateFormat;
-    var timeOffset = model.site.timeOffset;
-    model.settings = settings;
-    model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
-    model.formattedDate = function(date) {
-        return moment(date).utcOffset(timeOffset).locale(locale).format(dateFormat);
-    };
-    model.minimalisticPostform = function() {
-        return settings.minimalisticPostform;
-    };
-    model.customPostBodyPart = lord.customPostBodyPart;
-    model.customPostHeaderPart = lord.customPostHeaderPart;
-};
-
 lord.createPostNode = function(post, permanent, threadInfo) {
     if (typeof permanent == "undefined")
         permanent = true;
     var c = {};
-    c.model = lord.model(["base", "tr", "boards", "board/" + post.boardName], true);
+    c.model = lord.model(["base", "tr", "boards", "board/" + post.boardName]);
     var p;
     if (threadInfo) {
         p = Promise.resolve(threadInfo);
@@ -724,7 +707,6 @@ lord.createPostNode = function(post, permanent, threadInfo) {
         c.model.post = post;
         c.model.isThreadPage = !!lord.data("threadNumber");
         c.model.archived = !!lord.data("archived");
-        lord.appendExtrasToModel(c.model);
         c.node = lord.template("post", c.model);
         if (lord.deviceType("mobile"))
             lord.setTooltips(c.node);
@@ -754,7 +736,7 @@ lord.createPostNode = function(post, permanent, threadInfo) {
     }).then(function() {
         if (!permanent || !post.referencedPosts || post.referencedPosts.length < 1)
             return Promise.resolve(c.node);
-        var model = lord.model(["base", "board/" + lord.data("boardName")], true);
+        var model = lord.model(["base", "board/" + lord.data("boardName")]);
         model.settings = lord.settings();
         post.referencedPosts.filter(function(reference) {
             return reference.boardName == lord.data("boardName") && lord.id(reference.postNumber);
@@ -1109,7 +1091,7 @@ lord.chatWithUser = function(el) {
 lord.deletePost = function(el) {
     var c = {};
     var postNumber = +lord.data("number", el, true);
-    var model = lord.model(["base", "tr"], true);
+    var model = lord.model(["base", "tr"]);
     model.boardName = lord.data("boardName", el, true);
     model.postNumber = postNumber;
     c.div = lord.node("div");
@@ -1183,7 +1165,7 @@ lord.moveThread = function(el) {
     if (!boardName || isNaN(threadNumber) || threadNumber <= 0)
         return;
     var c = {};
-    var model = lord.model(["base", "tr", "boards"], true);
+    var model = lord.model(["base", "tr", "boards"]);
     model.boardName = boardName;
     model.threadNumber = threadNumber;
     c.div = lord.template("moveThreadDialog", model);
@@ -1206,7 +1188,7 @@ lord.banUser = function(el) {
     if (!boardName || isNaN(postNumber) || postNumber <= 0)
         return;
     var c = {};
-    c.model = lord.model(["base", "tr", "boards"], true);
+    c.model = lord.model(["base", "tr", "boards"]);
     var settings = lord.settings();
     var locale = c.model.site.locale;
     var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : c.model.site.timeOffset;
@@ -1223,11 +1205,9 @@ lord.banUser = function(el) {
         c.userIp = ip.ipv4 || ip.ip;
         return lord.api("bannedUser", { ip: c.userIp });
     }).then(function(model) {
-        if (model)
-            c.model.bannedUser = model;
+        c.model.bannedUser = model;
         c.model.boardName = boardName;
         c.model.postNumber = postNumber;
-        c.model.userIp = c.userIp;
         c.div = lord.template("userBan", c.model);
         lord.query("[name='expires'], [name^='banExpires_']", c.div).forEach(function(inp) {
             $(inp).change(function(){
@@ -1323,7 +1303,7 @@ lord.addFiles = function(el) {
         return;
     var boardName = lord.data("boardName");
     var c = {};
-    var model = lord.model(["base", "tr", "board/" + boardName], true);
+    var model = lord.model(["base", "tr", "board/" + boardName]);
     model.settings = lord.settings();
     model.boardName = boardName;
     model.postNumber = postNumber;
@@ -1371,7 +1351,7 @@ lord.editPost = function(el) {
         });
     }).then(function(thread) {
         c.model.thread = thread;
-        c.model = merge.recursive(c.model, lord.model(["base", "tr", "board/" + boardName], true));
+        c.model = merge.recursive(c.model, lord.model(["base", "tr", "board/" + boardName]));
         c.model.settings = lord.settings();
         c.model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
         c.model.customEditPostDialogPart = lord.customEditPostDialogPart;
@@ -1593,7 +1573,7 @@ lord.drawOnImage = function(a) {
 };
 
 lord.deleteFile = function(el) {
-    var model = lord.model(["base", "tr"], true);
+    var model = lord.model(["base", "tr"]);
     model.fileName = lord.data("fileName", el, true);
     var div = lord.node("div");
     div.appendChild(lord.node("text", lord.text("enterPasswordText")));
@@ -2336,7 +2316,7 @@ lord.addThreadToFavorites = function(boardName, threadNumber) {
         span.appendChild(lord.node("text", lord.text("removeThreadFromFavoritesText")));
         if (!div)
             return Promise.resolve();
-        var model = lord.model(["base", "tr"], true);
+        var model = lord.model(["base", "tr"]);
         model.favorite = {
             boardName: boardName,
             threadNumber: threadNumber,
@@ -2488,11 +2468,10 @@ lord.appendDraft = function(draft, visible) {
     if (!drafts)
         return;
     lord.switchDraftsVisibility(typeof visible == "boolean" ? visible : true);
-    var model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true);
+    var model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")]);
     model.settings = lord.settings();
     model.draft = draft;
     model.draft.user = model.user;
-    lord.appendExtrasToModel(model);
     var settings = lord.settings();
     var locale = model.site.locale;
     var dateFormat = model.site.dateFormat;
@@ -2871,10 +2850,9 @@ lord.expandThread = function(thread) {
     thread.appendChild(div);
     var threadNumber = +thread.id.replace("thread", "");
     var c = {};
-    c.model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true);
+    c.model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")]);
     c.model.settings = lord.settings();
     lord.api(threadNumber, {}, lord.data("boardName") + "/res").then(function(model) {
-        lord.appendExtrasToModel(c.model);
         thread.removeChild(div);
         c.model.thread = model.thread;
         c.model.thread.expanded = !lord.data("expanded", thread);
@@ -3165,8 +3143,7 @@ lord.showPostActionsMenu = function(e, input, postNumber) {
         customPostMenuAction: lord.customPostMenuAction,
         isThreadPage: +lord.data("threadNumber")
     };
-    model = merge.recursive(model, lord.model(["base", "tr", "board/" + lord.data("boardName")], true));
-    lord.appendExtrasToModel(model);
+    model = merge.recursive(model, lord.model(["base", "tr", "board/" + lord.data("boardName")]));
     if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile"))
         model.hideActionShortcut = lord.hotkey("hidePost");
     post.appendChild(lord.template("postActionsMenu", model));
@@ -3235,9 +3212,8 @@ lord.appendHotkeyShortcuts = function() {
 lord.initializeOnLoadBoard = function() {
     $(".postBody", document.body).css("maxWidth", ($(window).width() - 30) + "px");
     var c = {};
-    c.model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")], true);
+    c.model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")]);
     c.model.settings = lord.settings();
-    lord.appendExtrasToModel(c.model);
     c.threadOrBoard = (+lord.data("threadNumber") || +lord.data("currentPage") >= 0);
     var threadNumber = +lord.data("threadNumber");
     if (threadNumber) {

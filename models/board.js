@@ -243,40 +243,6 @@ var getThread = function(board, number) {
     });
 };
 
-module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNumber) {
-    if (!(board instanceof Board))
-        return Promise.reject(Tools.translate("Invalid board"));
-    threadNumber = +(threadNumber || 0);
-    if (isNaN(threadNumber) || threadNumber < 1)
-        return Promise.reject(Tools.translate("Invalid thread"));
-    lastPostNumber = +(lastPostNumber || 0);
-    if (isNaN(lastPostNumber) || lastPostNumber < 0)
-        lastPostNumber = 0;
-    var c = {};
-    return Database.registeredUserLevel(hashpass).then(function(level) {
-        c.level = level;
-        return Database.getThreads(board.name, {
-            limit: 1,
-            withPostNumbers: 1,
-            filterFunction: function(thread) {
-                return thread.number == threadNumber;
-            }
-        });
-    }).then(function(threads) {
-        if (threads.length != 1)
-            return Promise.reject(Tools.translate("No such thread"));
-        c.thread = threads[0];
-        return Database.threadPosts(board.name, c.thread.number, {
-            withFileInfos: true,
-            withReferences: true,
-            withExtraData: true,
-            filterFunction: function(post) {
-                return post.number > lastPostNumber;
-            }
-        });
-    });
-};
-
 module.exports.getThreadLastPostNumber = function(boardName, threadNumber) {
     var board = Board.board(boardName);
     if (!(board instanceof Board))
@@ -307,14 +273,11 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
     if (isNaN(number) || number < 1)
         return Promise.reject(Tools.translate("Invalid thread"));
     var c = {};
-    return Database.registeredUserLevel(hashpass).then(function(level) {
-        c.level = level;
-        return Database.getThreads(board.name, {
-            limit: 1,
-            filterFunction: function(thread) {
-                return thread.number == number;
-            }
-        });
+    return Database.getThreads(board.name, {
+        limit: 1,
+        filterFunction: function(thread) {
+            return thread.number == number;
+        }
     }).then(function(threads) {
         if (threads.length != 1)
             return Promise.reject(Tools.translate("No such thread"));

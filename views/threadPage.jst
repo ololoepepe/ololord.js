@@ -34,7 +34,7 @@
 </div>
 <script type="text/javascript">
     (function() {
-        var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
+        var model = lord.model(["tr", "board/" + lord.data("boardName")]);
         model.settings = lord.settings();
         model.thread = {
             archived: lord.data("archived"),
@@ -78,7 +78,7 @@
 {{~}}
 <script type="text/javascript">
     (function() {
-        var model = lord.model(["tr", "board/" + lord.data("boardName")], true);
+        var model = lord.model(["tr", "board/" + lord.data("boardName")]);
         model.settings = lord.settings();
         model.thread = {
             archived: lord.data("archived"),

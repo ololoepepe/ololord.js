@@ -63,8 +63,9 @@ audio {
 }
 
 .scrollAreaH60 {
-    overflow: auto;
+    overflow-y: auto;
     max-height: 60px;
+    max-width: 300px;
 }
 
 .hidePostformRulesButton {
@@ -1106,5 +1107,13 @@ input.buttonImage {
 }
 
 .movablePlayerDurationSlider {
+    display: inline-block;
+}
+
+div.bannedUser {
+    padding: 4px;
+}
+
+.banLevelSelect {
     display: inline-block;
 }

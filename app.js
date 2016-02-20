@@ -134,10 +134,8 @@ if (cluster.isMaster) {
         var ready = 0;
         Global.IPC.installHandler("ready", function() {
             ++ready;
-            if (ready == count) {
-                var commands = require("./helpers/commands");
-                var rl = commands();
-            }
+            if (ready == count)
+                require("./helpers/commands")();
         });
         var lastFileName;
         var fileName = function() {

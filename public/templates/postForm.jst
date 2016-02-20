@@ -13,7 +13,7 @@
                 {{ out += it.customPostFormField[0](it); }}
             {{?}}
             <tr>
-                {{? it.minimalisticPostform()}}
+                {{? it.settings.minimalisticPostform}}
                     <td class="postformField nowrap" colspan="2">
                        <input type="text" maxlength="{{=it.board.maxEmailLength}}" name="email" class="postFormInput"
                               placeholder="{{=it.tr.postFormPlaceholderEmail}}" />
@@ -32,7 +32,7 @@
                 {{ out += it.customPostFormField[10](it); }}
             {{?}}
             <tr>
-                {{? it.minimalisticPostform()}}
+                {{? it.settings.minimalisticPostform}}
                     <td class="postformField" colspan="2">
                         <input type="text" maxlength="{{=it.board.maxNameLength}}" name="name" class="postFormInput"
                                placeholder="{{=it.tr.postFormPlaceholderName}}" />
@@ -50,7 +50,7 @@
                 {{ out += it.customPostFormField[20](it); }}
             {{?}}
             <tr>
-                {{? it.minimalisticPostform()}}
+                {{? it.settings.minimalisticPostform}}
                     <td class="postformField" colspan="2">
                         <input type="text" maxlength="{{=it.board.maxSubjectLength}}" name="subject"
                                class="postFormInput" placeholder="{{=it.tr.postFormPlaceholderSubject}}" />
@@ -69,7 +69,7 @@
                 {{ out += it.customPostFormField[30](it); }}
             {{?}}
             <tr>
-                {{? it.minimalisticPostform()}}
+                {{? it.settings.minimalisticPostform}}
                     <td class="postformField" colspan="2">
                         <div class="symbolCounterContainer postFormInput">
                             <textarea name="text" rows="10" cols="41"
@@ -93,7 +93,7 @@
                 {{?}}
             </tr>
             <tr>
-                {{? !it.minimalisticPostform()}}
+                {{? !it.settings.minimalisticPostform}}
                     <td class="postformLabel">
                         <a class="hidePostformMarkupButton" />
                         <a href="javascript:void(0);"
@@ -101,14 +101,14 @@
                            class="hidePostformRulesButton">{{? it.settings.hidePostformRules}}{{=it.tr.showPostformRulesText}}{{??}}{{=it.tr.hidePostformRulesText}}{{?}}</a>
                     </td>
                 {{?}}
-                <td {{? it.minimalisticPostform()}}colspan="2"{{?}} class="postformField submitContainer">
+                <td {{? it.settings.minimalisticPostform}}colspan="2"{{?}} class="postformField submitContainer">
                     <input type="submit" name="submit" class="button" value="{{=it.tr.postFormButtonSubmit}}" />
                 </td>
             </tr>
             {{? it.customPostFormField && it.customPostFormField[40]}}
                 {{ out += it.customPostFormField[40](it); }}
             {{?}}
-            {{? !it.minimalisticPostform()}}
+            {{? !it.settings.minimalisticPostform}}
                 <tr name="postformMarkup">
                     <td class="postformLabel">
                     </td>
@@ -240,12 +240,12 @@
                 {{ out += it.customPostFormField[50](it); }}
             {{?}}
             <tr>
-                {{? !it.minimalisticPostform()}}
+                {{? !it.settings.minimalisticPostform}}
                     <td class="postformLabel">
                         <b>{{=it.tr.postFormLabelMarkupMode}}</b>
                     </td>
                 {{?}}
-                <td class="postformField" {{? it.minimalisticPostform()}}colspan="2"{{?}}>
+                <td class="postformField" {{? it.settings.minimalisticPostform}}colspan="2"{{?}}>
                     <select name="markupMode" class="select">
                         {{~it.markupModes :mode}}
                             <option {{? mode.name == it.settings.markupMode}}selected="true"{{?}}
@@ -258,12 +258,12 @@
                 {{ out += it.customPostFormField[60](it); }}
             {{?}}
             <tr>
-                {{? !it.minimalisticPostform()}}
+                {{? !it.settings.minimalisticPostform}}
                     <td class="postformLabel">
                         <b>{{=it.tr.postFormLabelOptions}}</b>
                     </td>
                 {{?}}
-                <td class="postformField" {{? it.minimalisticPostform()}}colspan="2"{{?}}>
+                <td class="postformField" {{? it.settings.minimalisticPostform}}colspan="2"{{?}}>
                     {{? it.customPostFormOption && it.customPostFormOption[0]}}
                         {{ out += it.customPostFormOption[0](it); }}
                     {{?}}
@@ -285,7 +285,7 @@
                     {{? it.customPostFormOption && it.customPostFormOption[30]}}
                         {{ out += it.customPostFormOption[30](it); }}
                     {{?}}
-                    {{? it.compareRegisteredUserLevels(it.user.level, "MODER") >= 0}}
+                    {{? it.user.isModer()}}
                         <a href="javascript:void(0);" onclick="lord.markup('raw-html'); return false;"
                            style="display: inline-block; vertical-align: top;" title='{{=it.tr.markupHtml}}'
                            name="markupHtml"><img src="/{{=it.site.pathPrefix}}img/html.png" class="signImage"></a>
@@ -307,12 +307,12 @@
             {{?}}
             {{? it.board.maxFileCount > 0}}
                 <tr>
-                    {{? !it.minimalisticPostform()}}
+                    {{? !it.settings.minimalisticPostform}}
                         <td class="postformLabel">
                             <b>{{=it.tr.postFormInputFile}}</b>
                         </td>
                     {{?}}
-                    <td class="postformField" {{? it.minimalisticPostform()}}colspan="2"{{?}}>
+                    <td class="postformField" {{? it.settings.minimalisticPostform}}colspan="2"{{?}}>
                         {{#def.fileInputs}}
                     </td>
                 </tr>
@@ -321,7 +321,7 @@
                 {{ out += it.customPostFormField[80](it); }}
             {{?}}
             <tr>
-                {{? it.minimalisticPostform()}}
+                {{? it.settings.minimalisticPostform}}
                     <td class="postformField" colspan="2">
                         <input type="password" maxlength="{{=it.board.maxPasswordLength}}" name="password"
                                class="postFormInput" placeholder="{{=it.tr.postFormPlaceholderPassword}}" />
@@ -340,7 +340,7 @@
                 {{ out += it.customPostFormField[90](it); }}
             {{?}}
             <tr>
-                {{? !it.minimalisticPostform()}}
+                {{? !it.settings.minimalisticPostform}}
                     <td class="postformLabel">
                         <b>{{=it.tr.postFormLabelCaptcha}}</b>
                     </td>
@@ -354,7 +354,7 @@
             {{? it.customPostFormField && it.customPostFormField[100]}}
                 {{ out += it.customPostFormField[100](it); }}
             {{?}}
-            {{? !it.minimalisticPostform()}}
+            {{? !it.settings.minimalisticPostform}}
                 <tr>
                     <td colspan="2" class="postformRules">
                         <ul {{? it.settings.hidePostformRules}}style="display: none;"{{?}}>
