@@ -209,8 +209,12 @@ window.addEventListener("load", function load() {
             collapsible: true,
             heightStyle: "content"
         });
+        if (!lord.id("users"))
+            return Promise.resolve();
         return lord.api("registeredUsers");
     }).then(function(users) {
+        if (!users)
+            return Promise.resolve();
         var div = lord.id("users");
         lord.removeChildren(div);
         lord.removeClass(div, "loadingMessage");
