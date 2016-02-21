@@ -41,11 +41,12 @@
 [done] Improve delall boards selecting
 [done] Improve ban dialog/form UI
 [done] Use NPM ioredis package instead of redis and then-redis packages
+[done] Fix referenced/referring posts when moving a thread
 
 * Optimize spells
-* Fix referenced/referring posts when moving a thread
 * Implement boards management page
 * Implement content management page
+* Implement user action permissions
 * Use Elasticsearch or other search engine [not sure if needed]
 * Write detailed DB schema documentation
 * Write client scripts API documentation

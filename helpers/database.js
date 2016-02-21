@@ -1149,7 +1149,7 @@ var addReferencedPosts = function(post, referencedPosts, nogenerate) {
     });
 };
 
-var removePost = function(boardName, postNumber, leaveFileInfos) {
+var removePost = function(boardName, postNumber, leaveFileInfos, leaveReferences) {
     var board = Board.board(boardName);
     if (!board)
         return Promise.reject(Tools.translate("Invalid board"));
@@ -1162,10 +1162,14 @@ var removePost = function(boardName, postNumber, leaveFileInfos) {
     }).then(function() {
         return db.hdel("posts", boardName + ":" + postNumber);
     }).then(function() {
+        if (leaveReferences)
+            return Promise.resolve();
         return rerenderReferringPosts(c.post);
     }).catch(function(err) {
         Global.error(err);
     }).then(function() {
+        if (leaveReferences)
+            return Promise.resolve();
         return removeReferencedPosts(c.post);
     }).catch(function(err) {
         Global.error(err);
@@ -1225,7 +1229,7 @@ var removePost = function(boardName, postNumber, leaveFileInfos) {
 
 module.exports.removePost = removePost;
 
-var removeThread = function(boardName, threadNumber, archived, leaveFileInfos) {
+var removeThread = function(boardName, threadNumber, archived, leaveFileInfos, leaveReferences) {
     var key = (archived ? "archivedThreads:" : "threads:") + boardName;
     return db.sadd("threadsPlannedForDeletion", boardName + ":" + threadNumber).then(function() {
         return db.hdel(key, threadNumber);
@@ -1241,7 +1245,7 @@ var removeThread = function(boardName, threadNumber, archived, leaveFileInfos) {
                 var p = Promise.resolve();
                 c.postNumbers.forEach(function(postNumber) {
                     p = p.then(function() {
-                        return removePost(boardName, postNumber, leaveFileInfos);
+                        return removePost(boardName, postNumber, leaveFileInfos, leaveReferences);
                     });
                 });
                 return p;
@@ -2026,23 +2030,16 @@ module.exports.moveThread = function(req, fields) {
     }).then(function() {
         return mkpath(targetThumbPath);
     }).then(function() {
-        var promises = c.posts.map(function(post) {
+        return Tools.series(c.posts, function(post) {
+            var oldPostNumber = post.number;
             post.number = c.postNumberMap[post.number];
             post.threadNumber = c.thread.number;
             post.boardName = targetBoard.name;
             var referencedPosts = post.referencedPosts;
-            referencedPosts.forEach(function(ref) {
-                if (ref.boardName != sourceBoard.name)
-                    return;
-                var newPostNumber = c.postNumberMap[ref.postNumber];
-                if (!newPostNumber)
-                    return;
-                ref.postNumber = newPostNumber;
-                ref.threadNumber = c.thread.number;
-            });
             delete post.referencedPosts;
             var extraData = post.extraData;
             delete post.extraData;
+            var referringPosts = post.referringPosts;
             delete post.referringPosts;
             var fileInfos = post.fileInfos;
             fileInfos.forEach(function(fileInfo) {
@@ -2050,6 +2047,8 @@ module.exports.moveThread = function(req, fields) {
                 fileInfo.postNumber = post.number;
             });
             delete post.fileInfos;
+            c.toRerender = {};
+            c.toUpdate = {};
             if (post.rawText) {
                 Tools.forIn(c.postNumberMap, function(newPostNumber, previousPostNumber) {
                     var rx = new RegExp(`>>/${sourceBoard.name}/${previousPostNumber}`, "g");
@@ -2057,11 +2056,63 @@ module.exports.moveThread = function(req, fields) {
                     rx = new RegExp(`>>${previousPostNumber}`, "g");
                     post.rawText = post.rawText.replace(rx, `>>${newPostNumber}`);
                 });
+                referencedPosts.forEach(function(ref) {
+                    if (ref.boardName != sourceBoard.name)
+                        return;
+                    var rx = new RegExp(`>>${ref.postNumber}`, "g");
+                    post.rawText = post.rawText.replace(rx, `>>/${sourceBoard.name}/${ref.postNumber}`);
+                });
             }
             return db.hset("posts", targetBoard.name + ":" + post.number, JSON.stringify(post)).then(function() {
                 return targetBoard.storeExtraData(post.number, extraData);
             }).then(function() {
-                return addReferencedPosts(post, referencedPosts);
+                return Tools.series(referencedPosts, function(ref) {
+                    var nref;
+                    if (ref.boardName == sourceBoard.name && ref.threadNumber == threadNumber) {
+                        nref = {
+                            boardName: targetBoard.name,
+                            threadNumber: post.threadNumber,
+                            postNumber: c.postNumberMap[ref.postNumber]
+                        };
+                    } else {
+                        c.toUpdate[ref.boardName + ":" + ref.threadNumber] = {
+                            boardName: ref.boardName,
+                            threadNumber: ref.threadNumber
+                        };
+                        nref = ref;
+                    }
+                    return db.hdel(`referencedPosts:${sourceBoard.name}:${oldPostNumber}`,
+                            `${ref.boardName}:${ref.postNumber}`).then(function() {
+                        return db.hset(`referencedPosts:${targetBoard.name}:${post.number}`,
+                                `${nref.boardName}:${nref.postNumber}`, JSON.stringify(nref));
+                    });
+                });
+            }).then(function() {
+                return Tools.series(referringPosts, function(ref) {
+                    var nref;
+                    if (ref.boardName == sourceBoard.name && ref.threadNumber == threadNumber) {
+                        nref = {
+                            boardName: targetBoard.name,
+                            threadNumber: post.threadNumber,
+                            postNumber: c.postNumberMap[ref.postNumber]
+                        };
+                    } else {
+                        c.toRerender[ref.boardName + ":" + ref.postNumber] = {
+                            boardName: ref.boardName,
+                            postNumber: ref.postNumber
+                        };
+                        c.toUpdate[ref.boardName + ":" + ref.threadNumber] = {
+                            boardName: ref.boardName,
+                            threadNumber: ref.threadNumber
+                        };
+                        nref = ref;
+                    }
+                    return db.hdel(`referringPosts:${sourceBoard.name}:${oldPostNumber}`,
+                            `${ref.boardName}:${ref.postNumber}`).then(function() {
+                        return db.hset(`referringPosts:${targetBoard.name}:${post.number}`,
+                                `${nref.boardName}:${nref.postNumber}`, JSON.stringify(nref));
+                    });
+                });
             }).then(function() {
                 return db.sadd("userPostNumbers:" + post.user.ip + ":" + targetBoard.name, post.number);
             }).then(function() {
@@ -2086,7 +2137,6 @@ module.exports.moveThread = function(req, fields) {
                 });
             });
         });
-        return Promise.all(promises);
     }).then(function() {
         return db.hset("threads:" + targetBoard.name, c.thread.number, JSON.stringify(c.thread));
     }).then(function() {
@@ -2095,7 +2145,45 @@ module.exports.moveThread = function(req, fields) {
         return db.sadd("threadPostNumbers:" + targetBoard.name + ":" + c.thread.number,
             Tools.toArray(c.postNumberMap));
     }).then(function() {
-        return removeThread(sourceBoard.name, threadNumber, false, true);
+        return Tools.series(c.posts, function(post) {
+            return markup(post.boardName, post.rawText, {
+                markupModes: post.markup,
+                referencedPosts: {},
+                accessLevel: post.user.level
+            }).then(function(text) {
+                post.text = text;
+                return db.hset("posts", post.boardName + ":" + post.postNumber, JSON.stringify(post));
+            });
+        });
+    }).then(function() {
+        return Tools.series(c.toRerender, function(o) {
+            return getPost(o.boardName, o.postNumber).then(function(p) {
+                if (!p.rawText)
+                    return Promise.resolve();
+                Tools.forIn(c.postNumberMap, function(newPostNumber, previousPostNumber) {
+                    var rx = new RegExp(`>>/${sourceBoard.name}/${previousPostNumber}`, "g");
+                    p.rawText = p.rawText.replace(rx, `>>/${targetBoard.name}/${newPostNumber}`);
+                    if (o.boardName == sourceBoard.name) {
+                        rx = new RegExp(`>>${previousPostNumber}`, "g");
+                        p.rawText = p.rawText.replace(rx, `>>/${targetBoard.name}/${newPostNumber}`);
+                    }
+                });
+                return markup(p.boardName, p.rawText, {
+                    markupModes: p.markup,
+                    referencedPosts: {},
+                    accessLevel: p.user.level
+                }).then(function(text) {
+                    p.text = text;
+                    return db.hset("posts", p.boardName + ":" + p.number, JSON.stringify(p));
+                });
+            });
+        });
+    }).then(function() {
+        return Tools.series(c.toUpdate, function(o) {
+            return Global.generate(o.boardName, o.threadNumber, o.threadNumber, "create");
+        });
+    }).then(function() {
+        return removeThread(sourceBoard.name, threadNumber, false, true, true);
     }).then(function() {
         Global.generate(sourceBoard.name, threadNumber, threadNumber, "delete")
         return Global.generate(targetBoard.name, c.thread.number, c.thread.number, "create");
