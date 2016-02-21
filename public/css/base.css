@@ -1119,6 +1119,10 @@ div.bannedUser {
     white-space: nowrap;
 }
 
+div.registeredUser {
+    padding: 4px;
+}
+
 #vkontakteLoginButton {
     display: inline-block;
     position: relative;

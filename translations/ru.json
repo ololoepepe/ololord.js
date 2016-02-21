@@ -367,6 +367,29 @@
             "value": "Запрещены постинг и чтение"
         }
     },
+    "No level": {
+        "accessLevelNoneDescription": {
+            "value": "Уровень не задан"
+        }
+    },
+    "User": {
+        "accessLevelUserDescription": {
+            "value": "Пользователь"
+        },
+        "postMenuCategoryUserText": {
+            "value": "Пользователь"
+        }
+    },
+    "Moderator": {
+        "accessLevelModerDescription": {
+            "value": "Модератор"
+        }
+    },
+    "Administrator": {
+        "accessLevelAdminDescription": {
+            "value": "Администратор"
+        }
+    },
     "Reason:": {
         "banReasonLabelText": {
             "value": "Причина:"
@@ -2595,11 +2618,6 @@
             "value": "Тред"
         }
     },
-    "User": {
-        "postMenuCategoryUserText": {
-            "value": "Пользователь"
-        }
-    },
     "Somebody is chatting here already": {
         "_default": {
             "value": "Здесь уже кто-то чатится"
@@ -2700,9 +2718,19 @@
             "value": "Загрузка банов..."
         }
     },
+    "Loading users...": {
+        "loadingUsersMessage": {
+            "value": "Загрузка пользователей..."
+        }
+    },
     "New ban...": {
         "newBanText": {
             "value": "Новый бан..."
+        }
+    },
+    "New user...": {
+        "newUserText": {
+            "value": "Новый пользователь..."
         }
     },
     "A user with this hashpass is already registered": {
@@ -2748,6 +2776,16 @@
     "Generate hashpass": {
         "generateHashpassButtonText": {
             "value": "Сгенерировать хешпасс"
+        }
+    },
+    "Invalid hashpass": {
+        "_default": {
+            "value": "Недействительный хешпасс"
+        }
+    },
+    "Are you sure?": {
+        "confirmationText": {
+            "value": "Вы уверены?"
         }
     }
 }

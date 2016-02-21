@@ -33,14 +33,17 @@
 [done] Add custom player for media file previews
 [done] Prevent unsupported media formats from adding to player
 [done] Simplify client-side script API
-
 [done] Use NPM read package instead of readline and readline-sync packages
+[done] Implement different access levels for different boards
+[done] Implement superuser
+[done] Use web interface for user access level management and user registration
+[done] Move translations to a separate module
+[done] Improve delall boards selecting
+[done] Improve ban dialog/form UI
 
 * Use NPM ioredis package instead of redis and then-redis packages
 * Optimize spells
 * Fix referenced/referring posts when moving a thread
-* Implement different access levels for different boards
-* Use web interface for user access level management and registration
 * Implement boards management page
 * Implement content management page
 * Use Elasticsearch or other search engine [not sure if needed]

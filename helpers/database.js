@@ -497,8 +497,8 @@ module.exports.registerUser = function(password, levels, ips, notHashpass) {
     if (invalidBoard)
         return Promise.reject(Tools.translate("Invalid board"));
     var invalidLevel = Tools.toArray(levels).some(function(level) {
-        if (compareRegisteredUserLevels(level, registeredUserLevels.User) < 0
-            || compareRegisteredUserLevels(level, registeredUserLevels.Superuser) >= 0) {
+        if (compareRegisteredUserLevels(level, RegisteredUserLevels.User) < 0
+            || compareRegisteredUserLevels(level, RegisteredUserLevels.Superuser) >= 0) {
             return true;
         }
     });
@@ -532,14 +532,13 @@ module.exports.registerUser = function(password, levels, ips, notHashpass) {
             });
         });
     }).then(function() {
-        return Promise.resolve();
+        return Promise.resolve(hashpass);
     });
 };
 
-module.exports.unregisterUser = function(password, notHashpass) {
-    if (!password)
-        return Promise.reject(Tools.translate("Invalid password"));
-    var hashpass = toHashpass(password, notHashpass);
+module.exports.unregisterUser = function(hashpass) {
+    if (!hashpass || !Tools.mayBeHashpass(hashpass))
+        return Promise.reject(Tools.translate("Invalid hashpass"));
     return db.del("registeredUserLevels:" + hashpass).then(function(result) {
         if (!result)
             return Promise.reject(Tools.translate("No user with this hashpass"));
@@ -557,10 +556,9 @@ module.exports.unregisterUser = function(password, notHashpass) {
     });
 };
 
-module.exports.setRegisteredUserLevels = function(password, levels, notHashpass) {
-    if (!password)
-        return Promise.reject(Tools.translate("Invalid password"));
-    var hashpass = toHashpass(password, notHashpass);
+module.exports.updateRegisteredUser = function(hashpass, levels, ips, notHashpass) {
+    if (!hashpass || !Tools.mayBeHashpass(hashpass))
+        return Promise.reject(Tools.translate("Invalid hashpass"));
     if (!Tools.hasOwnProperties(levels))
         return Promise.reject(Tools.translate("Access level is not specified for any board"));
     var invalidBoard = Object.keys(levels).some(function(boardName) {
@@ -570,26 +568,13 @@ module.exports.setRegisteredUserLevels = function(password, levels, notHashpass)
     if (invalidBoard)
         return Promise.reject(Tools.translate("Invalid board"));
     var invalidLevel = Tools.toArray(levels).some(function(level) {
-        if (compareRegisteredUserLevels(level, registeredUserLevels.User) < 0
-            || compareRegisteredUserLevels(level, registeredUserLevels.Superuser) >= 0) {
+        if (compareRegisteredUserLevels(level, RegisteredUserLevels.User) < 0
+            || compareRegisteredUserLevels(level, RegisteredUserLevels.Superuser) >= 0) {
             return true;
         }
     });
     if (invalidLevel)
         return Promise.reject(Tools.translate("Invalid access level"));
-    return db.del("registeredUserLevels:" + hashpass).then(function(result) {
-        if (!result)
-            return Promise.reject(Tools.translate("No user with this hashpass"));
-        return db.hmset("registeredUserLevels:" + hashpass, levels);
-    }).then(function() {
-        return Promise.resolve();
-    });
-};
-
-module.exports.setRegisteredUserIps = function(password, ips, notHashpass) {
-    if (!password)
-        return Promise.reject(Tools.translate("Invalid password"));
-    var hashpass = toHashpass(password, notHashpass);
     var invalidIp;
     if (Util.isArray(ips)) {
         invalidIp = ips.some(function(ip, i) {
@@ -601,9 +586,11 @@ module.exports.setRegisteredUserIps = function(password, ips, notHashpass) {
     }
     if (invalidIp)
         return Promise.reject(Tools.translate("Invalid IP address"));
-    return db.exists("registeredUserLevels:" + hashpass).then(function(result) {
+    return db.del("registeredUserLevels:" + hashpass).then(function(result) {
         if (!result)
             return Promise.reject(Tools.translate("No user with this hashpass"));
+        return db.hmset("registeredUserLevels:" + hashpass, levels);
+    }).then(function() {
         return db.smembers("registeredUserIps:" + hashpass);
     }).then(function(ips) {
         if (!ips)
@@ -623,6 +610,37 @@ module.exports.setRegisteredUserIps = function(password, ips, notHashpass) {
         });
     }).then(function() {
         return Promise.resolve();
+    });
+};
+
+var registeredUser = function(hashpass) {
+    var user = { hashpass: hashpass };
+    return db.hgetall("registeredUserLevels:" + hashpass).then(function(levels) {
+        if (!levels || !Tools.hasOwnProperties(levels))
+            return Promise.reject(Tools.translate("No user with this hashpass"));
+        user.levels = levels;
+        return db.smembers("registeredUserIps:" + hashpass);
+    }).then(function(ips) {
+        user.ips = ips || [];
+        return Promise.resolve(user);
+    });
+};
+
+module.exports.registeredUser = registeredUser;
+
+module.exports.registeredUsers = function() {
+    var users = [];
+    return db.keys("registeredUserLevels:*").then(function(keys) {
+        return Tools.series(keys.map(function(key) {
+            return key.split(":")[1];
+        }), function(hashpass) {
+            return registeredUser(hashpass).then(function(user) {
+                users.push(user);
+                return Promise.resolve();
+            });
+        });
+    }).then(function() {
+        return Promise.resolve(users);
     });
 };
 

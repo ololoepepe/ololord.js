@@ -30,11 +30,56 @@ lord.banUser = function(e, form) {
     }).catch(lord.handleError);
 };
 
+lord.registerUser = function(e, form) {
+    e.preventDefault();
+    var c = {};
+    var inp = lord.nameOne("password", form);
+    var password = inp.value;
+    if ("text" == inp.type) {
+        return lord.post(form.action, new FormData(form)).then(function(result) {
+            return lord.api("registeredUser", { hashpass: result.hashpass });
+        }).then(function(user) {
+            lord.createRegisteredUser(user);
+            return Promise.resolve();
+        }).catch(lord.handleError);
+    } else {
+        var action = "/" + lord.data("sitePathPrefix") + "action/updateRegisteredUser";
+        return lord.post(action, new FormData(form)).then(function() {
+            return lord.api("registeredUser", { hashpass: password });
+        }).then(function(user) {
+            var previous = $(form).closest("div")[0];
+            lord.createRegisteredUser(user, previous);
+            return Promise.resolve();
+        }).catch(lord.handleError);
+    }
+};
+
 lord.removeBannedUser = function(btn) {
     var div = $(btn).closest(".bannedUser")[0];
     lord.removeSelf(div.previousElementSibling);
     lord.removeSelf(div);
     $("#bans").accordion("refresh");
+};
+
+lord.removeRegisteredUser = function(btn) {
+    var div = $(btn).closest(".registeredUser")[0];
+    var hashpass = $(btn).closest("form").find("[name='password']")[0].value;
+    var cdiv = lord.node("div");
+    cdiv.appendChild(lord.node("text", lord.text("confirmationText")));
+    lord.showDialog(cdiv, { title: lord.text("confirmationText") }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var formData = new FormData();
+        formData.append("hashpass", hashpass);
+        return lord.post("/" + lord.data("sitePathPrefix") + "action/unregisterUser", formData);
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        lord.removeSelf(div.previousElementSibling);
+        lord.removeSelf(div);
+        $("#users").accordion("refresh");
+        return Promise.resolve();
+    }).catch(lord.handleError);
 };
 
 lord.bansSelectAll = function(e, btn) {
@@ -55,6 +100,15 @@ lord.bansSelectAll = function(e, btn) {
                 inp.value = reason;
             }
         });
+    });
+};
+
+lord.userAccessLevelsSelectAll = function(e, btn) {
+    e.preventDefault();
+    var form = $(btn).closest("form")[0];
+    var levelInd = lord.nameOne("level", form).selectedIndex;
+    lord.query("select[name^='accessLevel_']", form).forEach(function(sel) {
+        sel.selectedIndex = levelInd;
     });
 };
 
@@ -117,17 +171,54 @@ lord.createBannedUser = function(user, replaced) {
     return node;
 };
 
+lord.createRegisteredUser = function(user, replaced) {
+    var div = lord.id("users");
+    var model = lord.model(["base", "tr", "boards"]);
+    model.registeredUser = user;
+    var node = lord.template("registeredUser", model);
+    if (replaced) {
+        div.replaceChild(node, replaced);
+    } else {
+        var h3 = lord.node("h3");
+        h3.appendChild(lord.node("text", (user && user.hashpass) || lord.text("newUserText")));
+        var empty = lord.queryOne(".registeredUser:not([name])", div);
+        if (empty) {
+            div.insertBefore(node, empty.previousElementSibling);
+            div.insertBefore(h3, node);
+        } else {
+            div.appendChild(h3);
+            div.appendChild(node);
+        }
+    }
+    if (lord.hasClass(div, "ui-accordion"))
+        $(div).accordion("refresh");
+    return node;
+};
+
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
     lord.api("bannedUsers").then(function(users) {
-        var bans = lord.id("bans");
-        lord.removeChildren(bans);
-        lord.removeClass(bans, "loadingMessage");
+        var div = lord.id("bans");
+        lord.removeChildren(div);
+        lord.removeClass(div, "loadingMessage");
         (users || []).forEach(function(user) {
             lord.createBannedUser(user);
         });
         lord.createBannedUser();
-        $(bans).accordion({
+        $(div).accordion({
+            collapsible: true,
+            heightStyle: "content"
+        });
+        return lord.api("registeredUsers");
+    }).then(function(users) {
+        var div = lord.id("users");
+        lord.removeChildren(div);
+        lord.removeClass(div, "loadingMessage");
+        (users || []).forEach(function(user) {
+            lord.createRegisteredUser(user);
+        });
+        lord.createRegisteredUser();
+        $(div).accordion({
             collapsible: true,
             heightStyle: "content"
         });

@@ -466,7 +466,7 @@ module.exports.proxy = function() {
     };
 };
 
-module.exports.correctAddress = function(ip) {
+var correctAddress = function(ip) {
     if (!ip)
         return null;
     if ("::1" == ip)
@@ -492,6 +492,8 @@ module.exports.correctAddress = function(ip) {
     }
     return null;
 };
+
+module.exports.correctAddress = correctAddress;
 
 module.exports.preferIPv4 = function(ip) {
     if (!ip)
@@ -528,13 +530,15 @@ module.exports.sha256 = function(data) {
     return sha256.digest("hex");
 };
 
-module.exports.withoutDuplicates = function(arr) {
+var withoutDuplicates = function(arr) {
     if (!arr || !Util.isArray(arr))
         return arr;
     return arr.filter(function(item, i) {
         return arr.indexOf(item) == i;
     });
 };
+
+module.exports.withoutDuplicates = withoutDuplicates;
 
 module.exports.remove = function(arr, what, both) {
     if (!arr || !Util.isArray(arr))
@@ -678,4 +682,20 @@ module.exports.postSubject = function(post, maxLength) {
     if (!isNaN(maxLength) && maxLength > 3 && title.length > maxLength)
         title = title.substr(0, maxLength - 3) + "...";
     return title;
+};
+
+module.exports.ipList = function(s) {
+    var ips = (s || "").split(/\s+/).filter(function(ip) {
+        return ip;
+    });
+    //TODO: IP ranges
+    var err = ips.some(function(ip, i) {
+        ip = correctAddress(ip);
+        if (!ip)
+            return true;
+        ips[i] = ip;
+    });
+    if (err)
+        return translate("Invalid IP address");
+    return withoutDuplicates(ips);
 };

@@ -100,23 +100,6 @@ read.installHandler("remove", function(args) {
 });
 
 var requestPassword = function() {
-    /*var password = ReadLineSync.question("Enter password: ", {
-        hideEchoBack: true,
-        mask: ""
-    });
-    if (!password || !Tools.mayBeHashpass(password)) {
-        return {
-            password: password || null,
-            notHashpass: false
-        };
-    }
-    var notHashpass = ReadLineSync.question("That is a hashpass, isn't it? [Yes/no] ");
-    notHashpass = (notHashpass || "").toLowerCase();
-    notHashpass = (notHashpass && notHashpass != "yes" && notHashpass != "y");
-    return {
-        password: password,
-        notHashpass: notHashpass
-    };*/
     var c = {};
     console.log(Tools.translate("Enter password: "));
     return read({
@@ -146,9 +129,9 @@ read.installHandler("add-superuser", function() {
         c.notHashpass = result.notHashpass;
         return read(Tools.translate("Enter superuser IP list (separate by spaces): "));
     }).then(function(result) {
-        var ips = (result || "").split(/\s+/).filter(function(ip) {
-            return ip;
-        });
+        var ips = Tools.ipList(result);
+        if (typeof ips == "string")
+            return Promise.reject(ips);
         return Database.addSuperuser(c.password, ips, c.notHashpass);
     }).then(function() {
         return Promise.resolve("OK");

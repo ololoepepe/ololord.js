@@ -41,6 +41,7 @@
 !postActionsMenu.jst
 !postForm.jst
 !postReference.jst
+!registeredUser.jst
 !rpgEditPostDialogPart.jst
 !rpgPostBodyPart.jst
 !rpgPostFormField.jst

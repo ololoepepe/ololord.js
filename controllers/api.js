@@ -237,6 +237,45 @@ router.get("/api/bannedUser.json", function(req, res) {
     });
 });
 
+router.get("/api/registeredUsers.json", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    Database.registeredUsers().then(function(users) {
+        users.forEach(function(user) {
+            user.ips = user.ips.map(function(ip) {
+                var ipv4 = Tools.preferIPv4(ip);
+                var o = { ip: ip };
+                if (ipv4 && ipv4 != ip)
+                    o.ipv4 = ipv4;
+                return o;
+            });
+        });
+        res.json(users);
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
+router.get("/api/registeredUser.json", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    var hashpass = req.query.hashpass;
+    if (!Tools.mayBeHashpass(hashpass))
+        return controller.error(res, Tools.translate("Invalid hashpass"), true);
+    Database.registeredUser(hashpass).then(function(user) {
+        user.ips = user.ips.map(function(ip) {
+            var ipv4 = Tools.preferIPv4(ip);
+            var o = { ip: ip };
+            if (ipv4 && ipv4 != ip)
+                o.ipv4 = ipv4;
+            return o;
+        });
+        res.json(user);
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
 router.get("/api/fileHeaders.json", function(req, res) {
     if (!req.query.url)
         return controller.error(res, Tools.translate("Invalid URL"), true);
