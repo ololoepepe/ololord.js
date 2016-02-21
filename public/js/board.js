@@ -2364,7 +2364,7 @@ lord.showLoadingPostsPopup = function(text) {
         lord.loadingImage.src = "/" + lord.data("sitePathPrefix") + "img/loading.gif";
     }
     span.appendChild(lord.loadingImage.cloneNode(true));
-    span.appendChild(lord.node("text", " " + lord.text(text || "loadingPostsText")));
+    span.appendChild(lord.node("text", " " + lord.text(text || "loadingPostsMessage")));
     return lord.showPopup(span, {
         type: "node",
         timeout: lord.Billion
