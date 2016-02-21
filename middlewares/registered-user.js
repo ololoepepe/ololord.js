@@ -4,6 +4,7 @@ var Tools = require("../helpers/tools");
 
 module.exports = function(req, res, next) {
     Database.registeredUserLevels(req).then(function(levels) {
+        levels = levels || {};
         var maxLevel = Tools.toArray(levels).sort(function() {
             return -1 * Database.compareRegisteredUserLevels(arguments);
         });
