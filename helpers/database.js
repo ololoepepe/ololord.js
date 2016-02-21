@@ -2348,8 +2348,10 @@ module.exports.delall = function(req, ip, boardNames) {
     });
     if (err)
         return Promise.reject(Tools.translate("Not enough rights"));
+    var deletedThreads = {};
+    var updatedThreads = {};
     return registeredUserLevelsByIp(ip).then(function(levels) {
-        err = boardNames.some(function(boardNames) {
+        err = boardNames.some(function(boardName) {
             var level = req.level(boardName);
             if (!req.isSuperuser(boardName) && compareRegisteredUserLevels(level, levels[boardName]) <= 0)
                 return true;
@@ -2360,11 +2362,33 @@ module.exports.delall = function(req, ip, boardNames) {
             return db.smembers(`userPostNumbers:${ip}:${boardName}`).then(function(postNumbers) {
                 return Tools.series(postNumbers, function(postNumber) {
                     return getPost(boardName, postNumber).then(function(post) {
-                        return (post.threadNumber == post.number) ? removeThread(post.boardName, post.number)
-                            : removePost(post.boardName, post.number);
+                        var key = post.boardName + ":" + post.threadNumber;
+                        var thread = {
+                            boardName: post.boardName,
+                            number: post.threadNumber,
+                            postNumber: post.number
+                        };
+                        if (post.threadNumber == post.number) {
+                            deletedThreads[key] = thread;
+                            if (updatedThreads.hasOwnProperty(key))
+                                delete updatedThreads[key];
+                            return removeThread(post.boardName, post.number);
+                        } else {
+                            if (!deletedThreads.hasOwnProperty(key))
+                                updatedThreads[key] = thread;
+                            return removePost(post.boardName, post.number);
+                        }
                     });
                 });
             });
+        });
+    }).then(function() {
+        return Tools.series(updatedThreads, function(thread) {
+            return Global.generate(thread.boardName, thread.number, thread.postNumber, "edit");
+        });
+    }).then(function() {
+        return Tools.series(deletedThreads, function(thread) {
+            return Global.generate(thread.boardName, thread.number, thread.number, "delete");
         });
     }).then(function() {
         return Promise.resolve();

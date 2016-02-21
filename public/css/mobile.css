@@ -161,3 +161,7 @@ input.buttonImage {
 .movablePlayerVolumeSlider {
     display: none;
 }
+
+div.bannedUser {
+    overflow-x: auto;
+}

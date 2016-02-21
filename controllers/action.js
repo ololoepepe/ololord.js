@@ -436,9 +436,9 @@ router.post("/action/delall", function(req, res) {
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
-        c.boardNames = Tools.filterIn(c.fields, function(boardName, key) {
+        c.boardNames = Tools.toArray(Tools.filterIn(c.fields, function(boardName, key) {
             return /^board_\S+$/.test(key);
-        });
+        }));
         if (c.boardNames.length < 1)
             return Promise.reject(Tools.translate("No board specified"));
         return controller.checkBan(req, res, c.boardNames, true);

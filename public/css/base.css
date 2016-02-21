@@ -1116,4 +1116,11 @@ div.bannedUser {
 
 .banLevelSelect {
     display: inline-block;
+    white-space: nowrap;
+}
+
+#vkontakteLoginButton {
+    display: inline-block;
+    position: relative;
+    top: 5px;
 }

@@ -449,16 +449,15 @@ controller.translationsModel = function() {
     translate("Posts left:", "captchaQuotaText");
     translate("Show rules", "showPostformRulesText");
     translate("Hide rules", "hidePostformRulesText");
-    translate("\"Log in\", you say? On an imageboard? I am out!<br />"
-        + "Please, wait a sec. The login systyem does NOT store any data on the server. "
-        + "It only stores a cookie on your PC to allow post editing, deleting, etc. without "
-        + "entering password every time, and nothing else.<br />"
-        + "Well, actually, the admin may register someone manually (if he is a fag), "
-        + "but there is no way to register through the web.", "loginSystemDescriptionText");
+    translate("The login systyem does NOT store any data on the server. "
+        + "It only stores a cookie on your PC to allow post deleting, etc. without "
+        + "entering password every time.<br />"
+        + "It is also used for moderator/administrator authentication.", "loginSystemDescriptionText");
     translate("When logging in with Vkontakte, you may omit the login, "
         + "but to be logged in with the same login on each browser, you have to specify it.<br />"
         + "When logged in with Vkontakte, you are able to attach your VK audio.<br />"
-        + "This does not affect your anonymity in any way.", "loginSystemVkontakteDescriptionText");
+        + "This does not affect your anonymity in any way (the files are downloaded by the server "
+        + "and no links to your VK page are shown).", "loginSystemVkontakteDescriptionText");
     translate("SFW - safe for work (no socially condemned content)\n"
         + "R-15 - restricted for 15 years (contains ecchi, idols, violence)\n"
         + "R-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\n"
@@ -622,6 +621,8 @@ controller.translationsModel = function() {
     translate("User", "postMenuCategoryUserText");
     translate("Your browser can not play files of this type", "unsupportedMediaTypeText");
     translate("New ban...", "newBanText");
+    translate("Hashpass:", "hashpassLabelText");
+    translate("Generate hashpass", "generateHashpassButtonText");
     Board.boardNames().forEach(function(boardName) {
         Board.board(boardName).addTranslations(translate);
     });

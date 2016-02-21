@@ -68,11 +68,9 @@ lord.delall = function(e, form) {
     e.preventDefault();
     var formData = new FormData(form);
     formData.append("userIp", $(form).parent().find("[name='userIp']")[0].value);
-    console.log($(form).parent().find("[name='userIp']")[0].value);
-    return;
-    return lord.post(form.action, formData).then(function(result) {
-        if (result.errorMessage)
-            return Promise.reject(result);
+    return lord.post(form.action, formData).then(function() {
+        lord.reloadPage();
+        return Promise.resolve();
     }).catch(function(err) {
         console.log(err);
     });

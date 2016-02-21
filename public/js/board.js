@@ -1182,33 +1182,47 @@ lord.moveThread = function(el) {
     }).catch(lord.handleError);
 };
 
+lord.editBanReason = function(a) {
+    var inp = $(a).closest("tr").find("[name^='banReason_'], [name='reason']")[0];
+    var div = lord.node("div");
+    var input = lord.node("input");
+    input.type = "text";
+    input.size = 40;
+    input.value = inp.value;
+    div.appendChild(input);
+    lord.showDialog(div, { title: lord.text("editBanReasonText") }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        inp.value = input.value;
+        return Promise.resolve();
+    }).catch(lord.handleError);
+};
+
 lord.banUser = function(el) {
     var boardName = lord.data("boardName", el, true);
     var postNumber = +lord.data("number", el, true);
     if (!boardName || isNaN(postNumber) || postNumber <= 0)
         return;
-    var c = {};
-    c.model = lord.model(["base", "tr", "boards"]);
+    var model = lord.model(["base", "tr", "boards"]);
     var settings = lord.settings();
-    var locale = c.model.site.locale;
-    var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : c.model.site.timeOffset;
-    c.model.settings = settings;
-    c.model.formattedDate = function(date) {
-        return moment(date).utcOffset(timeOffset).locale(locale).format("DD/MM/YYYY HH:mm");
+    var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
+    model.formattedDate = function(date) {
+        return moment(date).utcOffset(timeOffset).locale(model.site.locale).format("DD/MM/YYYY HH:mm");
     };
+    var c = {};
     lord.api("userIp", {
         boardName: boardName,
         postNumber: postNumber
     }).then(function(ip) {
         if (!ip)
             return Promise.reject("noSuchPostErrorText");
-        c.userIp = ip.ipv4 || ip.ip;
-        return lord.api("bannedUser", { ip: c.userIp });
-    }).then(function(model) {
-        c.model.bannedUser = model;
-        c.model.boardName = boardName;
-        c.model.postNumber = postNumber;
-        c.div = lord.template("userBan", c.model);
+        return lord.api("bannedUser", { ip: ip.ip });
+    }).then(function(user) {
+        model.bannedUser = user;
+        model.boardName = boardName;
+        model.postNumber = postNumber;
+        c.div = lord.template("userBan", model);
+        $(".banLevelSelect", c.div).buttonset();
         lord.query("[name='expires'], [name^='banExpires_']", c.div).forEach(function(inp) {
             $(inp).change(function(){
                 $(this).attr("value", $(inp).val());
@@ -1220,7 +1234,7 @@ lord.banUser = function(el) {
             });
         });
         $(".xdsoft_datetimepicker").css("zIndex", 11000);
-        return lord.showDialog(c.div, { title: "banUserText" });
+        return lord.showDialog(c.div, { title: lord.text("banUserText") + ": " + (user.ipv4 || user.ip) });
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -1241,12 +1255,14 @@ lord.clearDate = function(inputName) {
 
 lord.bansSelectAll = function(e, btn) {
     e.preventDefault();
-    var form = btn.parentNode;
-    var levelInd = lord.nameOne("level", form).selectedIndex;
+    var form = $(btn).closest("form")[0];
+    var level = lord.query("[name='level'] > input", form).filter(function(inp) {
+        return inp.checked;
+    })[0].value;
     var expires = lord.nameOne("expires", form).value;
     var reason = lord.nameOne("reason", form).value;
-    lord.query("div", form).forEach(function(div) {
-        lord.queryOne("select", div).selectedIndex = levelInd;
+    lord.name("board", form).forEach(function(div) {
+        $(".banLevelSelect > input[value='" + level + "']", div).click();
         lord.query("input", div).forEach(function(inp) {
             if (inp.name.substr(0, 11) == "banExpires_") {
                 inp.value = expires;
@@ -1260,16 +1276,14 @@ lord.bansSelectAll = function(e, btn) {
 
 lord.delall = function(e, form) {
     e.preventDefault();
-    var boardName = lord.nameOne("boardName", form);
-    boardName = boardName.options[boardName.selectedIndex].value;
-    if (!boardName)
-        return;
-    lord.post(form.action, new FormData(form)).then(function(result) {
-        if (!result)
-            return Promise.resolve();
-        window.location = "/" + lord.data("sitePathPrefix") + (("*" != boardName) ? boardName : "");
+    var formData = new FormData(form);
+    formData.append("userIp", $(form).parent().find("[name='userIp']")[0].value);
+    return lord.post(form.action, formData).then(function(result) {
+        lord.reloadPage();
         return Promise.resolve();
-    }).catch(lord.handleError);
+    }).catch(function(err) {
+        console.log(err);
+    });
 };
 
 lord.insertPostNumber = function(postNumber) {
