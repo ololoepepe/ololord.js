@@ -40,8 +40,8 @@
 [done] Move translations to a separate module
 [done] Improve delall boards selecting
 [done] Improve ban dialog/form UI
+[done] Use NPM ioredis package instead of redis and then-redis packages
 
-* Use NPM ioredis package instead of redis and then-redis packages
 * Optimize spells
 * Fix referenced/referring posts when moving a thread
 * Implement boards management page

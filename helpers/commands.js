@@ -146,40 +146,6 @@ read.installHandler("remove-superuser", function() {
     });
 });
 
-/*read.installHandler("register-user", function() {
-    var password = requestPassword();
-    if (!password)
-        return Promise.reject("Invalid password");
-    var c = {};
-    return read("Enter level: USER | MODER | ADMIN\nYour choice: ").then(function(answer) {
-        if (!Tools.contains(["USER", "MODER", "ADMIN"], answer))
-            return Promise.reject("Invalid level");
-        c.level = answer;
-        return read("Enter boards:\n"
-            + "Separate board names by spaces.\n"
-            + "* - any board\n"
-            + "Your choice: ");
-    }).then(function(answer) {
-        c.boardNames = answer.split(/\s+/gi);
-        if (!Tools.mayBeHashpass(password))
-            password = Tools.sha1(password);
-        var availableBoardNames = Board.boardNames();
-        for (var i = 0; i < c.boardNames.length; ++i) {
-            var boardName = c.boardNames[i];
-            if ("*" != boardName && !Tools.contains(availableBoardNames, boardName))
-                return Promise.reject("Invalid board(s)");
-        }
-        return read("Enter user IP (zero, one or more, separated by commas):\n"
-            + "[ip][,ip]...\n"
-            + "List: ");
-    }).then(function(answer) {
-        c.ips = answer ? answer.split(".") : [];
-        return Database.registerUser(password, c.level, c.boardNames, c.ips);
-    }).then(function() {
-        return Promise.resolve("OK");
-    });
-});*/
-
 read.installHandler("rerender-posts", function(args) {
     var boards = Board.boardNames();
     if (args) {

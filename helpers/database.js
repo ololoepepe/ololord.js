@@ -6,7 +6,7 @@ var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Path = require("path");
 var promisify = require("promisify-node");
-var Redis = require("crock-then-redis");
+var Redis = require("ioredis");
 var SQLite3 = require("sqlite3");
 var Util = require("util");
 
@@ -26,7 +26,13 @@ var Ratings = {};
 var RegisteredUserLevels = {};
 var BanLevels = {};
 
-var db = Redis.createClient();
+var db = new Redis({
+    port: config("system.redis.port", 6379),
+    host: config("system.redis.host", "127.0.0.1"),
+    family: config("system.redis.family", 4),
+    password: config("system.redis.password", ""),
+    db: config("system.redis.db", 0)
+});
 var dbGeo = new SQLite3.Database(__dirname + "/../geolocation/ip2location.sqlite");
 
 module.exports.db = db;
@@ -35,19 +41,21 @@ db.tmp_hmget = db.hmget;
 db.hmget = function(key, hashes) {
     if (!hashes || (Util.isArray(hashes) && hashes.length <= 0))
         return Promise.resolve([]);
-    return db.tmp_hmget.apply(db, [key].concat(hashes));
+    return db.tmp_hmget.apply(db, arguments);
 };
 
 db.tmp_sadd = db.sadd;
 db.sadd = function(key, members) {
     if (!members || (Util.isArray(members) && members.length <= 0))
-        return Promise.resolve();
-    return db.tmp_sadd.apply(db, [key].concat(members));
+        return Promise.resolve(0);
+    return db.tmp_sadd.apply(db, arguments);
 };
 
 db.tmp_srem = db.srem;
 db.srem = function(key, members) {
-    return db.tmp_srem.apply(db, [key].concat(members));
+    if (!members || (Util.isArray(members) && members.length <= 0))
+        return Promise.resolve(0);
+    return db.tmp_srem.apply(db, arguments);
 };
 
 Ratings["SafeForWork"] = "SFW";
