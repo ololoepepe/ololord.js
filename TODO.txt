@@ -1,3 +1,4 @@
+* Improve image scaling
 * Optimize spells
 * Implement boards management page
 * Implement content management page

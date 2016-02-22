@@ -2,6 +2,36 @@
 
 var lord = lord || {};
 
+/*Constants*/
+
+lord.MovablePlayerBorderWidth = 5;
+lord.BaseScaleFactor = 10 * 1000 * 1000 * 1000;
+
+/*Variables*/
+
+lord.postPreviews = {};
+lord.lastPostPreview = null;
+lord.lastPostPreviewTimer = null;
+lord.postPreviewMask = null;
+lord.movablePlayers = {};
+lord.currentMovablePlayer = null;
+lord.lastPostFormPosition = "";
+lord.files = null;
+lord.filesMap = null;
+lord.spells = null;
+lord.worker = new Worker("/js/worker.js");
+lord.workerTasks = {};
+lord.customPostFormField = {};
+lord.customPostFormOption = {};
+lord.customPostMenuAction = {};
+lord.customEditPostDialogPart = {};
+lord.customPostHeaderPart = {};
+lord.customPostBodyPart = {};
+lord.autoUpdateTimer = null;
+lord.blinkTimer = null;
+lord.pageVisible = "visible";
+lord.loadingImage = null;
+
 /*Classes*/
 
 /*constructor*/ lord.AutoUpdateTimer = function(intervalSeconds) {
@@ -66,12 +96,14 @@ var lord = lord || {};
 };
 
 /*constructor*/ lord.MovablePlayer = function(fileInfo, options) {
-    this.imageZoomSensitivity = (options && options.imageZoomSensitivity) || 25;
+    this.imageZoomSensitivity = Math.floor((options && options.imageZoomSensitivity) || 25);
+    if (this.imageZoomSensitivity < 1 || this.imageZoomSensitivity > 100)
+        this.imageZoomSensitivity = 25;
     this.minimumContentWidth = (options && options.minimumContentWidth)
         || (lord.isImageType(fileInfo.mimeType) ? 50 : 200);
     this.minimumContentHeight = (options && options.minimumContentHeight)
         || (lord.isImageType(fileInfo.mimeType) ? 50 : 200);
-    this.scaleFactor = 1;
+    this.scaleFactor = lord.BaseScaleFactor * 100;
     this.scaleFactorModifier = 1;
     this.fileInfo = fileInfo;
     var model = merge.recursive({
@@ -205,6 +237,11 @@ var lord = lord || {};
     };
 };
 
+/*private*/ lord.MovablePlayer.prototype.scaled = function(n, factor) {
+    factor = +factor || this.scaleFactor;
+    return Math.round((+n || 0) * (factor / lord.BaseScaleFactor / 100));
+};
+
 /*private*/ lord.MovablePlayer.prototype.updateButtons = function() {
     this.playPauseButton.src = this.playPauseButton.src.replace(/\/(play|pause)\.png$/,
         "/" + (this.content.paused ? "play" : "pause") + ".png");
@@ -310,30 +347,21 @@ var lord = lord || {};
 
 /*private*/ lord.MovablePlayer.prototype.resetScale = function() {
     var container = $(this.contentContainer);
-    var width = this.scaleFactor * this.fileInfo.width;
-    var height = this.scaleFactor * this.fileInfo.height;
-    var dx = (width - container.width()) / 2;
-    var dy = (height - container.height()) / 2;
+    var previousContainerWidth = container.width();
+    var previousContainerHeight = container.height();
+    var width = this.scaled(this.fileInfo.width);
+    var height = this.scaled(this.fileInfo.height);
     container.width(width);
     container.height(height);
+    var dx = (container.width() - previousContainerWidth) / 2;
+    var dy = (container.height() - previousContainerHeight) / 2;
     var node = $(this.node);
     var pos = node.position();
     node.css({
-        top: pos.top - dx,
-        left: pos.left - dy
+        top: (pos.top - dy) + "px",
+        left: (pos.left - dx) + "px"
     });
-    var text = parseFloat((this.scaleFactor * 100).toString().substr(0, 5)) + "%";
-    if (this.scalePopup) {
-        this.scalePopup.resetText(text);
-        this.scalePopup.resetTimeout(lord.Second);
-        clearTimeout(this.scalePopupTimer);
-    } else {
-        this.scalePopup = lord.showPopup(text, { "timeout": lord.Second });
-    }
-    this.scalePopupTimer = setTimeout((function() {
-        this.scalePopup = null;
-        this.scalePopupTimer = null;
-    }).bind(this), lord.Second);
+    this.showScalePopup();
 };
 
 /*private*/ lord.MovablePlayer.prototype.mousewheelHandler = function(e) {
@@ -344,24 +372,22 @@ var lord = lord || {};
     var previousScaleFactor = this.scaleFactor;
     var previousScaleFactorModifier = this.scaleFactorModifier;
     if (imageZoomSensitivity < 0) {
-        while (((this.scaleFactor * 100) + (imageZoomSensitivity / this.scaleFactorModifier)) <= 0)
+        while ((this.scaleFactor + imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier) <= 0)
             this.scaleFactorModifier *= 10;
     } else {
-        //NOTE: This is shitty, because floating point calculations are shitty
-        var d = (this.scaleFactor * 100) / (imageZoomSensitivity / this.scaleFactorModifier);
-        var s = parseFloat(d.toString().substr(0, 5));
-        while (!lord.nearlyEqual(s - Math.floor(s), 0, 1 / 1000000)) {
-            this.scaleFactorModifier *= 10;
-            d = (this.scaleFactor * 100) / (imageZoomSensitivity / this.scaleFactorModifier);
-            s = parseFloat(d.toString().substr(0, 5));
+        var changed = false;
+        while ((this.scaleFactor * this.scaleFactorModifier - imageZoomSensitivity * lord.BaseScaleFactor) >= 0) {
+            this.scaleFactorModifier /= 10;
+            changed = true;
         }
+        if (changed)
+            this.scaleFactorModifier *= 10;
     }
-    this.scaleFactor += (imageZoomSensitivity / this.scaleFactorModifier) / 100;
-    if ((this.scaleFactor * this.fileInfo.width) < this.minimumContentWidth
-        || (this.scaleFactor * this.fileInfo.height) < this.minimumContentHeight) {
+    this.scaleFactor += (imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier);
+    if (this.scaled(this.fileInfo.width) < this.minimumContentWidth
+        || this.scaled(this.fileInfo.height) < this.minimumContentHeight) {
         this.scaleFactor = previousScaleFactor;
         this.scaleFactorModifier = previousScaleFactorModifier;
-        return;
     }
     this.resetScale();
 };
@@ -398,38 +424,36 @@ var lord = lord || {};
 /*public*/ lord.MovablePlayer.prototype.reset = function() {
     var width = this.fileInfo.width;
     var height = this.fileInfo.height;
+    var toolbarHeight = lord.queryOne(".toolbar.sticky") ? $(".toolbar.sticky").height() : 0;
     var w = $(window);
     var windowWidth = w.width();
     var windowHeight = w.height();
     var borderWidth = 2 * lord.MovablePlayerBorderWidth;
-    this.scaleFactor = 1;
+    this.scaleFactor = lord.BaseScaleFactor * 100;
     this.scaleFactorModifier = 1;
-    var toolbarHeight = lord.queryOne(".toolbar.sticky") ? $(".toolbar.sticky").height() : 0;
     if (width > (windowWidth - borderWidth) || height > (windowHeight - borderWidth - toolbarHeight)) {
-        while ((this.scaleFactor * this.fileInfo.width) >= (windowWidth - borderWidth)) {
-            if (((this.scaleFactor * 100) - (this.imageZoomSensitivity / this.scaleFactorModifier)) > 0) {
-                this.scaleFactor = ((this.scaleFactor * 100)
-                    - (this.imageZoomSensitivity / this.scaleFactorModifier)) / 100;
-            } else {
+        while (this.scaled(this.fileInfo.width) >= (windowWidth - borderWidth)) {
+            if ((this.scaleFactor - this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier) > 0)
+                this.scaleFactor -= (this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier);
+            else
                 this.scaleFactorModifier *= 10;
-            }
         }
-        while ((this.scaleFactor * this.fileInfo.height) >= (windowHeight - borderWidth - toolbarHeight)) {
-            if (((this.scaleFactor * 100) - (this.imageZoomSensitivity / this.scaleFactorModifier)) > 0) {
-                this.scaleFactor = ((this.scaleFactor * 100)
-                    - (this.imageZoomSensitivity / this.scaleFactorModifier)) / 100;
-            } else {
+        while (this.scaled(this.fileInfo.height) >= (windowHeight - borderWidth - toolbarHeight)) {
+            if ((this.scaleFactor - this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier) > 0)
+                this.scaleFactor -= (this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier);
+            else
                 this.scaleFactorModifier *= 10;
-            }
         }
     }
     this.resetScale();
-    width *= this.scaleFactor;
-    height *= this.scaleFactor;
+    width = this.scaled(width);
+    height = this.scaled(height);
     var node = $(this.node);
+    var containerWidth = width + borderWidth;
+    var containerHeight = height + borderWidth;
     node.css({
-        top: ((windowHeight - height + borderWidth + toolbarHeight) / 2) + "px",
-        left: ((windowWidth - width + borderWidth) / 2) + "px",
+        top: ((windowHeight - containerHeight) / 2 + toolbarHeight) + "px",
+        left: ((windowWidth - containerWidth) / 2) + "px",
     });
     if (lord.isAudioType(this.fileInfo.mimeType) || lord.isVideoType(this.fileInfo.mimeType)) {
         this.content.currentTime = 0;
@@ -439,34 +463,22 @@ var lord = lord || {};
     }
 };
 
-/*Constants*/
-
-lord.MovablePlayerBorderWidth = 5;
-
-/*Variables*/
-
-lord.postPreviews = {};
-lord.lastPostPreview = null;
-lord.lastPostPreviewTimer = null;
-lord.postPreviewMask = null;
-lord.movablePlayers = {};
-lord.currentMovablePlayer = null;
-lord.lastPostFormPosition = "";
-lord.files = null;
-lord.filesMap = null;
-lord.spells = null;
-lord.worker = new Worker("/js/worker.js");
-lord.workerTasks = {};
-lord.customPostFormField = {};
-lord.customPostFormOption = {};
-lord.customPostMenuAction = {};
-lord.customEditPostDialogPart = {};
-lord.customPostHeaderPart = {};
-lord.customPostBodyPart = {};
-lord.autoUpdateTimer = null;
-lord.blinkTimer = null;
-lord.pageVisible = "visible";
-lord.loadingImage = null;
+/*public*/ lord.MovablePlayer.prototype.showScalePopup = function() {
+    var width = this.scaled(this.fileInfo.width);
+    var height = this.scaled(this.fileInfo.height);
+    var text = width + "x" + height + " (" + (this.scaleFactor / lord.BaseScaleFactor) + "%)";
+    if (this.scalePopup) {
+        this.scalePopup.resetText(text);
+        this.scalePopup.resetTimeout(lord.Second);
+        clearTimeout(this.scalePopupTimer);
+    } else {
+        this.scalePopup = lord.showPopup(text, { "timeout": lord.Second });
+    }
+    this.scalePopupTimer = setTimeout((function() {
+        this.scalePopup = null;
+        this.scalePopupTimer = null;
+    }).bind(this), lord.Second);
+};
 
 /*Functions*/
 
@@ -2273,6 +2285,7 @@ lord.showImage = function(a, mimeType, width, height) {
     }
     lord.movablePlayers[href] = lord.currentMovablePlayer;
     lord.currentMovablePlayer.show();
+    lord.currentMovablePlayer.showScalePopup();
     if (lord.getLocalObject("showLeafButtons", true)) {
         lord.query(".leafButton").forEach(function(a) {
             a.style.display = "";

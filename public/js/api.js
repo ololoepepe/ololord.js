@@ -16,218 +16,6 @@ if (typeof $ != "undefined") {
 
 var lord = lord || {};
 
-/*Classes*/
-
-/*constructor*/ lord.PopupMessage = function(text, options) {
-    this.hideTimer = null;
-    this.text = text;
-    this.timeout = (options && !isNaN(+options.timeout)) ? +options.timeout : 5 * 1000;
-    this.classNames = (options && typeof options.classNames == "string") ? options.classNames : "";
-    if (options && typeof options.type == "string" && lord.in(["critical", "warning"], options.type.toLowerCase()))
-        this.classNames += options.type.toLowerCase() + (("" != this.classNames) ? " " : "");
-    this.html = (options && typeof options.type == "string" && options.type.toLowerCase() == "html");
-    this.node = (options && typeof options.type == "string" && options.type.toLowerCase() == "node");
-    this.msg = lord.node("div");
-    lord.addClass(this.msg, "popup");
-    lord.addClass(this.msg, this.classNames);
-    this.msg.onclick = this.hide.bind(this);
-    if (lord.popups.length > 0) {
-        var prev = lord.popups[lord.popups.length - 1];
-        this.msg.style.top = (prev.msg.offsetTop + prev.msg.offsetHeight + 5) + "px";
-    }
-    if (this.html)
-        this.msg.innerHTML = text;
-    else if (this.node)
-        this.msg.appendChild(text);
-    else
-        this.msg.appendChild(lord.node("text", text));
-};
-
-/*public*/ lord.PopupMessage.prototype.show = function() {
-    if (this.hideTimer)
-        return;
-    document.body.appendChild(this.msg);
-    lord.popups.push(this);
-    this.hideTimer = setTimeout(this.hide.bind(this), this.timeout);
-};
-
-/*public*/ lord.PopupMessage.prototype.hide = function() {
-    if (!this.hideTimer)
-        return;
-    clearTimeout(this.hideTimer);
-    this.hideTimer = null;
-    var offsH = this.msg.offsetHeight + 5;
-    document.body.removeChild(this.msg);
-    var ind = lord.popups.indexOf(this);
-    if (ind < 0)
-        return;
-    lord.popups.splice(ind, 1);
-    for (var i = ind; i < lord.popups.length; ++i) {
-        var top = +lord.popups[i].msg.style.top.replace("px", "");
-        top -= offsH;
-        lord.popups[i].msg.style.top = top + "px";
-    }
-};
-
-/*public*/ lord.PopupMessage.prototype.resetTimeout = function(timeout) {
-    if (!this.hideTimer)
-        return;
-    clearTimeout(this.hideTimer);
-    this.timeout = (!isNaN(+timeout)) ? +timeout : 5 * 1000;
-    this.hideTimer = setTimeout(this.hide.bind(this), this.timeout);
-};
-
-/*public*/ lord.PopupMessage.prototype.resetText = function(text, options) {
-    var offsH = this.msg.offsetHeight;
-    this.text = text;
-    this.classNames = (options && typeof options.classNames == "string") ? options.classNames : "";
-    if (options && typeof options.type == "string" && lord.in(["critical", "warning"], options.type.toLowerCase()))
-        this.classNames += options.type.toLowerCase() + (("" != this.classNames) ? " " : "");
-    this.html = (options && typeof options.type == "string" && options.type.toLowerCase() == "html");
-    this.node = (options && typeof options.type == "string" && options.type.toLowerCase() == "node");
-    this.msg.className = "";
-    lord.addClass(this.msg, "popup");
-    lord.addClass(this.msg, this.classNames);
-    lord.removeChildren(this.msg);
-    if (this.html)
-        this.msg.innerHTML = text;
-    else if (this.node)
-        this.msg.appendChild(text);
-    else
-        this.msg.appendChild(lord.node("text", text));
-    if (!this.hideTimer)
-        return;
-    var ind = lord.popups.indexOf(this);
-    if (ind < 0)
-        return;
-    offsH = this.msg.offsetHeight - offsH;
-    for (var i = ind + 1; i < lord.popups.length; ++i) {
-        var top = +lord.popups[i].msg.style.top.replace("px", "");
-        top += offsH;
-        lord.popups[i].msg.style.top = top + "px";
-    }
-};
-
-/*constructor*/ lord.OverlayProgressBar = function(options) {
-    this.visible = false;
-    this.max = (options && +options.max >= 0) ? +options.max : 100;
-    this.value = (options && +options.value <= this.max) ? +options.value : 0;
-    this.mask = lord.node("div");
-    lord.addClass(this.mask, "overlayMask");
-    this.progressBar = lord.node("progress");
-    this.progressBar.max = this.max;
-    this.progressBar.value = this.value;
-    lord.addClass(this.progressBar, "overlayProgressBar");
-    var _this = this;
-    var createCancelButton = function(callback) {
-        _this.cancelButton = lord.node("button");
-        lord.addClass(_this.cancelButton, "button overlayProgressBarCancelButton");
-        _this.cancelButton.onclick = function() {
-            _this.cancelButton.disabled = true;
-            callback();
-        };
-        _this.cancelButton.appendChild(lord.node("text", "Cancel"));
-        lord.removeChildren(_this.cancelButton);
-        _this.cancelButton.appendChild(lord.node("text", lord.text("cancelButtonText")));
-    };
-    if (options && typeof options.cancelCallback == "function")
-        createCancelButton(options.cancelCallback);
-    else
-        this.cancelButton = null;
-    if (options && typeof options.finishCallback == "function") {
-        this.finishCallback = options.finishCallback;
-    } else {
-        this.finishCallback = function() {
-            _this.hide();
-        };
-    }
-    if (options && options.xhr) {
-        if (!this.cancelButton)
-            createCancelButton(options.xhr.abort);
-        options.xhr.upload.onprogress = function(e) {
-            if (!e.lengthComputable)
-                return;
-            _this.max = e.total;
-            _this.progressBar.max = _this.max;
-            _this.progress(e.loaded);
-        };
-        options.xhr.upload.onload = function() {
-            _this.max = 0;
-            _this.value = 0;
-            _this.progressBar.removeAttribute("max");
-            _this.progressBar.removeAttribute("value");
-        };
-        options.xhr.onprogress = function(e) {
-            if (!e.lengthComputable)
-                return;
-            _this.max = e.total;
-            _this.progressBar.max = _this.max;
-            _this.progress(e.loaded);
-        };
-        options.xhr.onload = function() {
-            _this.max = 0;
-            _this.value = 0;
-            _this.progressBar.removeAttribute("max");
-            _this.progressBar.removeAttribute("value");
-            _this.finishCallback();
-        };
-    } else {
-        this.finishOnMaxValue = true;
-    }
-};
-
-/*public*/ lord.OverlayProgressBar.prototype.progress = function(value) {
-    value = +value;
-    if (isNaN(value) || value < 0 || value > this.max)
-        return;
-    this.value = value;
-    this.progressBar.value = this.value;
-    if (this.finishOnMaxValue && this.value == this.max)
-        this.finishCallback();
-};
-
-/*public*/ lord.OverlayProgressBar.prototype.show = function() {
-    if (this.visible)
-        return;
-    this.visible = true;
-    document.body.appendChild(this.mask);
-    document.body.appendChild(this.progressBar);
-    if (this.cancelButton)
-        document.body.appendChild(this.cancelButton);
-};
-
-/*public*/ lord.OverlayProgressBar.prototype.showDelayed = function(delay) {
-    var _this = this;
-    this.mustShow = true;
-    setTimeout(function() {
-        if (!_this.mustShow)
-            return;
-        _this.show();
-    }, delay || 0);
-};
-
-/*public*/ lord.OverlayProgressBar.prototype.hide = function() {
-    this.mustShow = false;
-    this.mustHide = false;
-    if (!this.visible)
-        return;
-    this.visible = false;
-    if (this.cancelButton)
-        document.body.removeChild(this.cancelButton);
-    document.body.removeChild(this.progressBar);
-    document.body.removeChild(this.mask);
-};
-
-/*public*/ lord.OverlayProgressBar.prototype.hideDelayed = function(delay) {
-    var _this = this;
-    this.mustHide = true;
-    setTimeout(function() {
-        if (!_this.mustHide)
-            return;
-        _this.hide();
-    }, delay || 0);
-};
-
 /*Constants*/
 
 lord.Second = 1000;
@@ -504,8 +292,219 @@ lord.unloading = false;
 lord.leftChain = [];
 lord.rightChain = [];
 lord.models = {};
-//lord.partials = null;
 lord.templates = {};
+
+/*Classes*/
+
+/*constructor*/ lord.PopupMessage = function(text, options) {
+    this.hideTimer = null;
+    this.text = text;
+    this.timeout = (options && !isNaN(+options.timeout)) ? +options.timeout : 5 * 1000;
+    this.classNames = (options && typeof options.classNames == "string") ? options.classNames : "";
+    if (options && typeof options.type == "string" && lord.in(["critical", "warning"], options.type.toLowerCase()))
+        this.classNames += options.type.toLowerCase() + (("" != this.classNames) ? " " : "");
+    this.html = (options && typeof options.type == "string" && options.type.toLowerCase() == "html");
+    this.node = (options && typeof options.type == "string" && options.type.toLowerCase() == "node");
+    this.msg = lord.node("div");
+    lord.addClass(this.msg, "popup");
+    lord.addClass(this.msg, this.classNames);
+    this.msg.onclick = this.hide.bind(this);
+    if (lord.popups.length > 0) {
+        var prev = lord.popups[lord.popups.length - 1];
+        this.msg.style.top = (prev.msg.offsetTop + prev.msg.offsetHeight + 5) + "px";
+    }
+    if (this.html)
+        this.msg.innerHTML = text;
+    else if (this.node)
+        this.msg.appendChild(text);
+    else
+        this.msg.appendChild(lord.node("text", text));
+};
+
+/*public*/ lord.PopupMessage.prototype.show = function() {
+    if (this.hideTimer)
+        return;
+    document.body.appendChild(this.msg);
+    lord.popups.push(this);
+    this.hideTimer = setTimeout(this.hide.bind(this), this.timeout);
+};
+
+/*public*/ lord.PopupMessage.prototype.hide = function() {
+    if (!this.hideTimer)
+        return;
+    clearTimeout(this.hideTimer);
+    this.hideTimer = null;
+    var offsH = this.msg.offsetHeight + 5;
+    document.body.removeChild(this.msg);
+    var ind = lord.popups.indexOf(this);
+    if (ind < 0)
+        return;
+    lord.popups.splice(ind, 1);
+    for (var i = ind; i < lord.popups.length; ++i) {
+        var top = +lord.popups[i].msg.style.top.replace("px", "");
+        top -= offsH;
+        lord.popups[i].msg.style.top = top + "px";
+    }
+};
+
+/*public*/ lord.PopupMessage.prototype.resetTimeout = function(timeout) {
+    if (!this.hideTimer)
+        return;
+    clearTimeout(this.hideTimer);
+    this.timeout = (!isNaN(+timeout)) ? +timeout : 5 * 1000;
+    this.hideTimer = setTimeout(this.hide.bind(this), this.timeout);
+};
+
+/*public*/ lord.PopupMessage.prototype.resetText = function(text, options) {
+    var offsH = this.msg.offsetHeight;
+    this.text = text;
+    this.classNames = (options && typeof options.classNames == "string") ? options.classNames : "";
+    if (options && typeof options.type == "string" && lord.in(["critical", "warning"], options.type.toLowerCase()))
+        this.classNames += options.type.toLowerCase() + (("" != this.classNames) ? " " : "");
+    this.html = (options && typeof options.type == "string" && options.type.toLowerCase() == "html");
+    this.node = (options && typeof options.type == "string" && options.type.toLowerCase() == "node");
+    this.msg.className = "";
+    lord.addClass(this.msg, "popup");
+    lord.addClass(this.msg, this.classNames);
+    lord.removeChildren(this.msg);
+    if (this.html)
+        this.msg.innerHTML = text;
+    else if (this.node)
+        this.msg.appendChild(text);
+    else
+        this.msg.appendChild(lord.node("text", text));
+    if (!this.hideTimer)
+        return;
+    var ind = lord.popups.indexOf(this);
+    if (ind < 0)
+        return;
+    offsH = this.msg.offsetHeight - offsH;
+    for (var i = ind + 1; i < lord.popups.length; ++i) {
+        var top = +lord.popups[i].msg.style.top.replace("px", "");
+        top += offsH;
+        lord.popups[i].msg.style.top = top + "px";
+    }
+};
+
+/*constructor*/ lord.OverlayProgressBar = function(options) {
+    this.visible = false;
+    this.max = (options && +options.max >= 0) ? +options.max : 100;
+    this.value = (options && +options.value <= this.max) ? +options.value : 0;
+    this.mask = lord.node("div");
+    lord.addClass(this.mask, "overlayMask");
+    this.progressBar = lord.node("progress");
+    this.progressBar.max = this.max;
+    this.progressBar.value = this.value;
+    lord.addClass(this.progressBar, "overlayProgressBar");
+    var _this = this;
+    var createCancelButton = function(callback) {
+        _this.cancelButton = lord.node("button");
+        lord.addClass(_this.cancelButton, "button overlayProgressBarCancelButton");
+        _this.cancelButton.onclick = function() {
+            _this.cancelButton.disabled = true;
+            callback();
+        };
+        _this.cancelButton.appendChild(lord.node("text", "Cancel"));
+        lord.removeChildren(_this.cancelButton);
+        _this.cancelButton.appendChild(lord.node("text", lord.text("cancelButtonText")));
+    };
+    if (options && typeof options.cancelCallback == "function")
+        createCancelButton(options.cancelCallback);
+    else
+        this.cancelButton = null;
+    if (options && typeof options.finishCallback == "function") {
+        this.finishCallback = options.finishCallback;
+    } else {
+        this.finishCallback = function() {
+            _this.hide();
+        };
+    }
+    if (options && options.xhr) {
+        if (!this.cancelButton)
+            createCancelButton(options.xhr.abort);
+        options.xhr.upload.onprogress = function(e) {
+            if (!e.lengthComputable)
+                return;
+            _this.max = e.total;
+            _this.progressBar.max = _this.max;
+            _this.progress(e.loaded);
+        };
+        options.xhr.upload.onload = function() {
+            _this.max = 0;
+            _this.value = 0;
+            _this.progressBar.removeAttribute("max");
+            _this.progressBar.removeAttribute("value");
+        };
+        options.xhr.onprogress = function(e) {
+            if (!e.lengthComputable)
+                return;
+            _this.max = e.total;
+            _this.progressBar.max = _this.max;
+            _this.progress(e.loaded);
+        };
+        options.xhr.onload = function() {
+            _this.max = 0;
+            _this.value = 0;
+            _this.progressBar.removeAttribute("max");
+            _this.progressBar.removeAttribute("value");
+            _this.finishCallback();
+        };
+    } else {
+        this.finishOnMaxValue = true;
+    }
+};
+
+/*public*/ lord.OverlayProgressBar.prototype.progress = function(value) {
+    value = +value;
+    if (isNaN(value) || value < 0 || value > this.max)
+        return;
+    this.value = value;
+    this.progressBar.value = this.value;
+    if (this.finishOnMaxValue && this.value == this.max)
+        this.finishCallback();
+};
+
+/*public*/ lord.OverlayProgressBar.prototype.show = function() {
+    if (this.visible)
+        return;
+    this.visible = true;
+    document.body.appendChild(this.mask);
+    document.body.appendChild(this.progressBar);
+    if (this.cancelButton)
+        document.body.appendChild(this.cancelButton);
+};
+
+/*public*/ lord.OverlayProgressBar.prototype.showDelayed = function(delay) {
+    var _this = this;
+    this.mustShow = true;
+    setTimeout(function() {
+        if (!_this.mustShow)
+            return;
+        _this.show();
+    }, delay || 0);
+};
+
+/*public*/ lord.OverlayProgressBar.prototype.hide = function() {
+    this.mustShow = false;
+    this.mustHide = false;
+    if (!this.visible)
+        return;
+    this.visible = false;
+    if (this.cancelButton)
+        document.body.removeChild(this.cancelButton);
+    document.body.removeChild(this.progressBar);
+    document.body.removeChild(this.mask);
+};
+
+/*public*/ lord.OverlayProgressBar.prototype.hideDelayed = function(delay) {
+    var _this = this;
+    this.mustHide = true;
+    setTimeout(function() {
+        if (!_this.mustHide)
+            return;
+        _this.hide();
+    }, delay || 0);
+};
 
 /*Functions*/
 
