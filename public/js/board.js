@@ -453,7 +453,7 @@ lord.loadingImage = null;
     var containerWidth = width + borderWidth;
     var containerHeight = height + borderWidth;
     node.css({
-        top: ((windowHeight - containerHeight) / 2 + toolbarHeight) + "px",
+        top: ((windowHeight - containerHeight - toolbarHeight) / 2 + toolbarHeight) + "px",
         left: ((windowWidth - containerWidth) / 2) + "px",
     });
     if (lord.isAudioType(this.fileInfo.mimeType) || lord.isVideoType(this.fileInfo.mimeType)) {
