@@ -376,7 +376,7 @@ lord.loadingImage = null;
             this.scaleFactorModifier *= 10;
     } else {
         var changed = false;
-        while (this.scaleFactorModifier > 1
+        while (this.scaleFactorModifier >= 1
             && (this.scaleFactor * this.scaleFactorModifier - imageZoomSensitivity * lord.BaseScaleFactor) >= 0) {
             this.scaleFactorModifier /= 10;
             changed = true;
