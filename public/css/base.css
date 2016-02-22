@@ -827,12 +827,17 @@ input.buttonImage {
 
 .chatContactList {
     overflow-y: auto;
-    min-width: 50px;
+    height: 100%;
+    padding: 4px;
 }
 
 .chatContact {
     white-space: nowrap;
     cursor: pointer;
+}
+
+.chatContact ~ .chatContact {
+    margin-top: 2px;
 }
 
 .chatTarget {
@@ -845,9 +850,6 @@ input.buttonImage {
     padding-right: 4px;
     padding-bottom: 5px;
     overflow-y: auto;
-    min-width: 200px;
-    min-height: 400px;
-    max-width: 600px;
 }
 
 .chatMessage {
@@ -872,12 +874,18 @@ input.buttonImage {
 
 .chatInput {
     box-sizing: border-box;
-    width: 100%;
+    width: -moz-calc(100% - 4px);
+    width: -webkit-calc(100% - 4px);
+    width: -o-calc(100% - 4px);
+    width: calc(100% - 4px);
 }
 
 .chatSendButton {
     box-sizing: border-box;
-    width: 100%;
+    width: -moz-calc(100% - 4px);
+    width: -webkit-calc(100% - 4px);
+    width: -o-calc(100% - 4px);
+    width: calc(100% - 4px);
 }
 
 .loadingMessage {
@@ -1110,8 +1118,25 @@ input.buttonImage {
     display: inline-block;
 }
 
+.bannedUserHeader {
+    padding: 4px;
+    display: block;
+    font-size: 1.1em;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+.registeredUserHeader {
+    padding: 4px;
+    display: block;
+    font-size: 1.1em;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
 div.bannedUser {
     padding: 4px;
+    margin-bottom: 4px;
 }
 
 .banLevelSelect {
@@ -1121,6 +1146,7 @@ div.bannedUser {
 
 div.registeredUser {
     padding: 4px;
+    margin-bottom: 4px;
 }
 
 #vkontakteLoginButton {

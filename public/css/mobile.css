@@ -165,3 +165,28 @@ input.buttonImage {
 div.bannedUser {
     overflow-x: auto;
 }
+
+.chatContactList {
+    min-width: 100px;
+    max-width: 100px;
+}
+
+.chatContact > input[type="image"] {
+    display: none;
+}
+
+.chatContactList:hover {
+    min-width: 150px;
+    max-width: 150px;
+}
+
+.chatContactList:hover > .chatContact > input[type="image"] {
+    display: inline;
+}
+
+.chatHistory {
+    min-width: 200px;
+    max-width: 200px;
+    min-height: 400px;
+    max-height: 400px;
+}

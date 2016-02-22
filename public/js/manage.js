@@ -146,23 +146,29 @@ lord.createBannedUser = function(user, replaced) {
         $(inp).change(function(){
             $(this).attr("value", $(inp).val());
         });
+        var now = lord.now();
+        now.setTime(now.getTime() + (30 *lord.Minute));
+        var currentDate = model.formattedDate(now.toISOString());
         $(inp).datetimepicker({
             i18n: { format: "YYYY/MM/DD HH:mm" },
             mask: true,
-            value: inp.value
+            value: inp.value,
+            minDate: currentDate.split(" ")[0],
+            minTime: currentDate.split(" ")[1]
         });
     });
     if (replaced) {
         bans.replaceChild(node, replaced);
     } else {
-        var h3 = lord.node("h3");
-        h3.appendChild(lord.node("text", (user && (user.ipv4 || user.ip)) || lord.text("newBanText")));
+        var span = lord.node("span");
+        lord.addClass(span, "bannedUserHeader");
+        span.appendChild(lord.node("text", (user && (user.ipv4 || user.ip)) || lord.text("newBanText")));
         var empty = lord.queryOne(".bannedUser:not([name])", bans);
         if (empty) {
             bans.insertBefore(node, empty.previousElementSibling);
-            bans.insertBefore(h3, node);
+            bans.insertBefore(span, node);
         } else {
-            bans.appendChild(h3);
+            bans.appendChild(span);
             bans.appendChild(node);
         }
     }
@@ -179,14 +185,15 @@ lord.createRegisteredUser = function(user, replaced) {
     if (replaced) {
         div.replaceChild(node, replaced);
     } else {
-        var h3 = lord.node("h3");
-        h3.appendChild(lord.node("text", (user && user.hashpass) || lord.text("newUserText")));
+        var span = lord.node("span");
+        lord.addClass(span, "registeredUserHeader");
+        span.appendChild(lord.node("text", (user && user.hashpass) || lord.text("newUserText")));
         var empty = lord.queryOne(".registeredUser:not([name])", div);
         if (empty) {
             div.insertBefore(node, empty.previousElementSibling);
-            div.insertBefore(h3, node);
+            div.insertBefore(span, node);
         } else {
-            div.appendChild(h3);
+            div.appendChild(span);
             div.appendChild(node);
         }
     }
@@ -207,7 +214,10 @@ window.addEventListener("load", function load() {
         lord.createBannedUser();
         $(div).accordion({
             collapsible: true,
-            heightStyle: "content"
+            heightStyle: "content",
+            icons: false,
+            header: "span.bannedUserHeader",
+            active: false
         });
         if (!lord.id("users"))
             return Promise.resolve();
@@ -224,7 +234,10 @@ window.addEventListener("load", function load() {
         lord.createRegisteredUser();
         $(div).accordion({
             collapsible: true,
-            heightStyle: "content"
+            heightStyle: "content",
+            icons: false,
+            header: "span.registeredUserHeader",
+            active: false
         });
     }).catch(lord.handleError);
 }, false);

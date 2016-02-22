@@ -10,7 +10,7 @@
         {{? typeof it.registeredUser != "undefined"}}
             <input type="hidden" name="password" value="{{=it.registeredUser.hashpass}}" />
         {{??}}
-            <input type="text" name="password" size="44" placeholder="{{=it.tr.loginPlaceholderText}}" />
+            <input type="text" name="password" size="48" placeholder="{{=it.tr.loginPlaceholderText}}" />
         {{?}}
         {{ var accessLevels = []; }}
         {{ accessLevels.push({ level: "NONE", description: it.tr.accessLevelNoneDescription } ); }}
@@ -56,7 +56,7 @@
         </table>
         <br />
         <textarea name="ips" placeholder="IP: <192.168.0.1>, [192.168.1.100, ...]"
-                  rows="2" cols="44">{{? typeof it.registeredUser != "undefined"}}{{=it.registeredUser.ips.map(function(ip) { return ip.ipv4 || ip.ip; }).join(" ")}}{{?}}</textarea>
+                  rows="2" cols="48">{{? typeof it.registeredUser != "undefined"}}{{=it.registeredUser.ips.map(function(ip) { return ip.ipv4 || ip.ip; }).join(" ")}}{{?}}</textarea>
         <br />
         <input type="submit" name="submit" value="{{=it.tr.confirmButtonText}}" />
         {{? typeof it.registeredUser != "undefined"}}

@@ -257,6 +257,10 @@ ul.tabWidget > li.activated {
     font-style: italic;
 }
 
+.chatContactList {
+    border: 1px solid #800000;
+}
+
 .chatContact:hover {
     color: #800000;
     background: #F0D0B6;
@@ -281,7 +285,7 @@ ul.tabWidget > li.activated {
 }
 
 .chatHistory {
-    border: 1px solid black;
+    border: 1px solid #800000;
 }
 
 .chatMessage {
@@ -335,5 +339,13 @@ ul.tabWidget > li.activated {
 }
 
 .track.selected > .trackInfo {
+    font-weight: bold;
+}
+
+.bannedUserHeader {
+    font-weight: bold;
+}
+
+.registeredUserHeader {
     font-weight: bold;
 }
