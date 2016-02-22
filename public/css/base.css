@@ -832,8 +832,12 @@ input.buttonImage {
 }
 
 .chatContact {
-    white-space: nowrap;
     cursor: pointer;
+}
+
+.chatContact > input[type="image"] {
+    float: right;
+    margin-top: 2px;
 }
 
 .chatContact ~ .chatContact {
