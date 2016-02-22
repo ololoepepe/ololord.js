@@ -1,7 +1,5 @@
 <div>
     {{? it.settings.stickyToolbar}}
-        <br />
-        <br />
         <div class="toolbar sticky">
     {{??}}
         <div class="toolbar" style="margin-top: 0px;">
@@ -11,7 +9,7 @@
         [<input type="image" name="favoritesButton" title="{{=it.tr.showFavoritesText}}" class="buttonImage"
                 src="/{{=it.site.pathPrefix}}img/favorite.png" onclick="lord.showFavorites(); return false;" />]
         [<a onclick="lord.switchMumWatching(); return false;" name="switchMumWatchingButton"
-            title="{{=it.tr.mumWatchingText}}"><img src="/{{=it.site.pathPrefix}}img/mum_not_watching.png"
+            title="{{=it.tr.mumWatchingText}}"><img src="/{{=it.site.pathPrefix}}img/show.png"
                                                     class="buttonImage"></a>]
         {{? it.user.loggedIn}}
             <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/logout"

@@ -1,5 +1,5 @@
 lord.customPostFormField[30] = function(it) {
-    if (it.includeThreadScripts)
+    if (it.isThreadPage)
         return "";
     return lord.template("echoPostFormField", it, true);
 };
@@ -18,9 +18,6 @@ lord.customEditPostDialogPart[30] = function(it, thread, post) {
 lord.customPostBodyPart[0] = function(it, thread, post) {
     if (!post.extraData || !+lord.data("threadNumber"))
         return "";
-    var model = {
-        link: post.extraData,
-        deviceType: it.deviceType
-    };
+    var model = { link: post.extraData };
     return lord.template("echoPostBodyPart", model, true);
 };

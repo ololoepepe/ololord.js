@@ -1,23 +1,21 @@
 /*Photon*/
 
-body {
+.ui-tooltip {
+    border: 1px solid #CCCCCC !important;
+}
+
+.ui-tooltip-content {
+    font-family: Verdana,sans-serif;
+    background-color: #DDDDDD;
+}
+
+.ui-tooltip-content::after {
+    border-color: #CCCCCC transparent;
+}
+
+body  {
     background-color: #EEEEEE;
     font-family: Verdana,sans-serif;
-}
-
-body.desktop {
-    font-size: 14.4px;
-}
-
-.ui-widget {
-    font-size: 14.4px !important;
-}
-
-body.mobile {
-    -moz-text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
-    font-size: 14px;
 }
 
 a {
@@ -26,7 +24,6 @@ a {
 
 a.expandCollapse {
     color: #444444;
-    cursor: pointer;
 }
 
 a:hover {
@@ -35,16 +32,11 @@ a:hover {
 
 a.expandCollapse:hover {
     color: #666666;
-    cursor: pointer
-}
-
-audio {
-    width: 500px;
 }
 
 hr {
-    color: #CCCCCC; /*IE*/
-    background-color: #CCCCCC; /*Firefox, Opera, Safari*/
+    color: #CCCCCC;
+    background-color: #CCCCCC;
     border: 0px none;
     height: 1px;
     clear: both;
@@ -53,7 +45,6 @@ hr {
 .select {
     background: #EAEAEA;
     border: 1px solid #CCCCCC;
-    cursor: pointer;
 }
 
 .selectOption {
@@ -67,26 +58,16 @@ hr {
 .button {
     background: #EAEAEA;
     border: 1px solid #CCCCCC;
-    cursor: pointer;
 }
 
 .checkbox {
     background: #EAEAEA;
     border: 1px solid #CCCCCC;
-    cursor: pointer;
 }
 
 .popup {
     background-color: #DDDDDD;
     border: 1px solid #BBBBBB;
-    position: fixed;
-    top: 35px;
-    right: 5px;
-    z-index: 9950;
-    vertical-align: middle;
-    text-align: center;
-    padding: 10px 10px 10px 10px;
-    cursor: pointer;
 }
 
 .critical {
@@ -101,128 +82,27 @@ hr {
 
 .favorites {
     background-color: #EEEEEE;
-    min-width: 300px;
-    min-height: 400px;
-    padding: 2px 2px 2px 2px;
 }
 
 .favorites > div {
     background-color: #DDDDDD;
     border: 1px solid #CCCCCC;
-    padding: 2px 2px 2px 2px;
-    margin-top: 4px;
-}
-
-.centerForm {
-    /**/
-}
-
-.inlineForm {
-    display: inline;
 }
 
 .scrollAreaH60 {
-    overflow: auto;
-    max-height: 60px;
     border: 1px solid #CCCCCC;
-}
-
-.hidePostformRulesButton {
-    display: block;
-    text-decoration: none;
-    font-size: 0.7em;
-    margin-left: 30px;
-    cursor: pointer;
-}
-
-.hidePostformMarkupButton {
-    display: block;
-    text-decoration: none;
-    text-align: right;
-    font-size: 0.7em;
-    margin-left: auto;
-    margin-right: 5px;
-    cursor: pointer;
-}
-
-.hiddenPostLink {
-    text-decoration: line-through;
-}
-
-.nowrap {
-    white-space: nowrap;
-}
-
-.wrap {
-    white-space: normal;
 }
 
 .postSequenceNumber {
     color: green;
-    font-size: 75%;
 }
 
 .hiddenPostList > div:nth-child(even) {
     background-color: #EEEEEE;
-    margin-top: 3px;
-    margin-bottom: 3px;
 }
-
-/*
-    Ban
-*/
 
 .ban {
     background-color: #DDDDDD;
-    margin-left: 80px;
-    margin-right: 80px;
-}
-
-/*
-    Banner
-*/
-
-.banner {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-}
-
-/*
-    Board
-*/
-
-#postForm {
-    overflow-x: auto;
-}
-
-blockquote {
-    margin-top: 14.4px;
-    margin-left: 25px;
-    margin-right: 25px;
-    margin-bottom: 14.4px;
-    padding-top: 10px;
-    overflow-y: auto;
-    overflow-x: auto;
-    max-height: 300px;
-    box-sizing: border-box;
-    max-width: 1200px;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-word;
-    -ms-hyphens: auto;
-    -moz-hyphens: auto;
-    -webkit-hyphens: auto;
-    hyphens: auto;
-}
-
-blockquote.mobile {
-    max-width: 550px;
-}
-
-blockquote.expand {
-    max-height: none;
 }
 
 span.spoiler, span.spoiler a, span.spoiler .cspoilerTitle, span.spoiler .quotation {
@@ -247,12 +127,7 @@ span.spoiler:hover .quotation {
 }
 
 .spoilerMarkupButton {
-    border: none;
-    height: 20px;
     background-color: #EEEEEE;
-    vertical-align: middle;
-    padding-left: 0px;
-    padding-right: 0px;
 }
 
 .spoilerMarkupButton.spoiler {
@@ -261,12 +136,10 @@ span.spoiler:hover .quotation {
 
 span.tooltip {
     color: #304070;
-    cursor: help;
 }
 
 span.newPostCount {
     color: green;
-    font-size: 75%;
 }
 
 .postLimitReached {
@@ -277,48 +150,11 @@ span.newPostCount {
     color: olive;
 }
 
-.pages {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    width: 70%;
-}
-
-.pagesItem {
-    white-space: nowrap;
-}
-
-.postingDisabledMessage {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    white-space: nowrap;
-}
-
-.postformMarkup {
-    text-align: left;
-	white-space: normal;
-}
-
-.postformRules {
-    text-align: left;
-	font-size: 0.7em;
-	max-width: 400px;
-	white-space: normal;
-}
-
 .quotation {
     color: #789922;
 }
 
-.fileByLinkButton {
-    cursor: pointer;
-}
-
 .cspoilerTitle {
-    cursor: pointer;
     color: #304070;
 }
 
@@ -327,296 +163,45 @@ span.newPostCount {
     border: 1px solid #CCCCCC;
 }
 
-/*
-    Catalog
-*/
-
 .catalogContainer {
-    box-sizing: border-box;
     color: #333333;
-    padding-bottom: 0px;
-    padding-left: 0px;
-    padding-right: 0px;
-    padding-top: 0px;
-    text-align: center;
 }
 
 .catalogItem {
     background-color: #DDDDDD;
     border: 1px solid #CCCCCC;
-    box-sizing: border-box;
     color: #333333;
-    display: inline-block;
-    height: 450px;
-    min-height: 450px;
-    margin-bottom: 10px;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-top: 10px;
-    overflow: hidden;
-    padding-bottom: 5px;
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-top: 5px;
-    position: relative;
-    text-align: center;
-    vertical-align:top;
-    width: 240px;
-    word-wrap: break-word;
-}
-
-.catalogItem:hover {
-    height: auto;
-}
-
-/*
-    Board image
-*/
-
-.theImage {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-}
-
-/*
-    Board video
-*/
-
-.theVideo {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-}
-
-/*
-    Board /mlp/
-*/
-
-.theButton {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-}
-
-.hiddenElement {
-    display: none;
-}
-
-/*
-    Create action
-*/
-
-.createAction {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    white-space: nowrap;
-}
-
-.createAction > div {
-    display: inline-block;
-}
-
-.createAction > div > div {
-    display: block;
-}
-
-.postFormVisible {
-    display: block;
-}
-
-.postFormTextarea {
-    font-size: 14px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.postFormTable {
-    display: inline;
-}
-
-.postformLabel {
-    text-align: right;
-}
-
-.postformField {
-    text-align: left;
-}
-
-.symbolCounter {
-    font-size: 0.8em;
-    position: absolute;
-    right: 12px;
-    bottom: 7px;
-    color: #333333;
-    opacity: 0.6;
-}
-
-.symbolCounterContainer {
-    position: relative;
-    display: inline-block;
 }
 
 .opSign {
     color: green;
 }
 
-/*
-    Create action /pr/
-*/
-
-.codechaContainer {
-    white-space: normal;
-}
-
-/*
-    Error
-*/
-
 .error {
     background-color: #DDDDDD;
-    margin-left: 80px;
-    margin-right: 80px;
-    text-align: center;
 }
-
-/*
-    Home
-*/
 
 .rules {
     background-color: #DDDDDD;
     border: 1px solid #CCCCCC;
-    margin-left: 5%;
-    margin-right: 5%;
-    padding: 10px;
 }
 
 .news {
     background-color: #DDDDDD;
-    margin-left: 5%;
-    margin-right: 5%;
-    padding: 10px;
 }
-
-.sectionHeader {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    white-space: nowrap;
-}
-
-/*
-    IP ban
-*/
-
-.ipBan {
-    background-color: #DDDDDD;
-    margin-left: 80px;
-    margin-right: 80px;
-}
-
-/*
-    Navbar
-*/
-
-.navbar {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    width: 70%;
-    font-size: 1.2em;
-}
-
-.postingSpeedBar {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    width: 70%;
-}
-
-.friendsBar {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    width: 70%;
-}
-
-.navbar.navbarFrame {
-    text-align: left;
-    margin-left: 4px;
-    font-size: 1em;
-}
-
-.navbar.navbarFrame.mobile {
-    text-align: left;
-    margin-left: 4px;
-    font-size: 1.2em;
-}
-
-.navbarItem {
-    white-space: nowrap;
-}
-
-/*
-    Not found
-*/
-
-/*.theImage <- Board image*/
-
-/*
-    Post
-*/
 
 .post {
     background-color: #DDDDDD;
     border: 1px solid #CCCCCC;
-    margin-top: 4px;
-    margin-bottom: 4px;
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-right: 4px;
-    overflow-x: auto;
-    display: table;
-    padding-bottom: 4px;
 }
 
 .draft {
     background-color: #DDDDDD;
     border: 1px solid #CCCCCC;
-    margin-top: 4px;
-    margin-bottom: 4px;
-    padding-top: 10px;
-    padding-left: 10px;
-    overflow-x: auto;
-    display: table;
-}
-
-.opPost {
-    overflow-x: auto;
-    display: table;
-    padding-bottom: 4px;
 }
 
 .newPost {
     background-color: #CDCDCD;
-}
-
-.hidden > .postBody {
-    display: none;
-}
-
-.opPost.hidden ~ .post {
-    display: none;
 }
 
 .post:target, .opPost:target {
@@ -625,115 +210,16 @@ span.newPostCount {
 
 .post.temporary {
     border: 1px solid #000000;
-    display: block;
-    box-sizing: border-box;
-    overflow-x: hidden;
-}
-
-.thread.hidden > .omittedPosts {
-    display: none;
-}
-
-.thread.hidden > .threadPosts {
-    display: none;
-}
-
-.postHeader.desktop {
-    white-space: nowrap;
-}
-
-.postFileName, .postFileSize {
-    white-space: nowrap;
-}
-
-.postFileName.mobile {
-    font-size: 0.9em;
 }
 
 .postFileSize {
-    font-size: 0.8em;
     color: #444444;
-}
-
-.postFileSize.mobile {
-    font-size: 0.6em;
-}
-
-.postFileFile > a > img.mumWatching:not(:hover) {
-    opacity: 0.05;
-}
-
-.postFileSearch {
-    padding-bottom: 4px;
-}
-
-.postToThread > a > button {
-    font-size: 1.2em;
-}
-
-.postToThread.mobile {
-    display: block;
-}
-
-.postToThread.mobile > a > button {
-    width: 100%;
 }
 
 .menu {
     background: #DDDDDD !important;
     border: 1px solid #CCCCCC !important;
     font-family: Verdana,sans-serif !important;
-    white-space: nowrap;
-    box-sizing: border-box;
-    position: absolute;
-    width: auto;
-    display: none;
-    list-style-type: none;
-    padding: 2px;
-    z-index: 9999;
-}
-
-.menu > li {
-    padding: 2px;
-}
-
-.menu > li > a {
-    text-decoration: none;
-}
-
-#markupUnorderedListActionsMenu {
-    padding-left: 20px;
-}
-
-#markupOrderedListActionsMenu {
-    padding-left: 30px;
-}
-
-.postBody {
-    text-align: left;
-}
-
-.postFile {
-    display: inline-block;
-    vertical-align: top;
-}
-
-.shrink {
-    width: 100%;
-}
-
-.postFile ~ .postFile {
-    padding-left: 20px;
-}
-
-.postText {
-    vertical-align: top;
-    white-space: normal;
-}
-
-.postFiles > .postText {
-    display: inline-block;
-    max-width: 80%;
 }
 
 .bannedFor {
@@ -746,30 +232,10 @@ span.newPostCount {
 
 .postSubject {
     font-weight: bold;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-word;
-    -ms-hyphens: auto;
-    -moz-hyphens: auto;
-    -webkit-hyphens: auto;
-    hyphens: auto;
-}
-
-.postSubject.mobile {
-    font-size: 0.8em;
 }
 
 .tripcode {
     color: green;
-}
-
-.tripcode.mobile {
-    font-size: 0.8em;
-    display: block;
-}
-
-.postDateTime.mobile {
-    font-size: 0.8em;
 }
 
 .moderName {
@@ -777,297 +243,38 @@ span.newPostCount {
     color: blue;
 }
 
-.someName {
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-word;
-    -ms-hyphens: auto;
-    -moz-hyphens: auto;
-    -webkit-hyphens: auto;
-    hyphens: auto;
-}
-
-.someName.mobile {
-    font-size: 0.8em;
-}
-
-.navigationButton {
-    position: fixed;
-    right: 20px;
-    z-index: 9910;
-    opacity: 0.5;
-}
-
-.navigationButton:hover {
-    opacity: 1;
-}
-
-.navigationButtonBottom {
-    bottom: 30px;
-}
-
-.navigationButtonTop {
-    top: 30px;
-}
-
-.leafButton {
-    position: fixed;
-    top: 50%;
-    z-index: 9910;
-    opacity: 0.5;
-}
-
-.leafButton:hover {
-    opacity: 1;
-}
-
-.leafButtonPrevious {
-    left: 20px;
-}
-
-.leafButtonNext {
-    right: 20px;
-}
-
-.movableImage {
-    position: fixed;
-    z-index: 9905;
-    border: 5px solid #777777;
-    padding: 0;
-    line-height: 0;
-}
-
-.postformFile {
-    border: 1px dashed #777777;
-    text-align: justify;
-}
-
 .postformFile.drag {
     background-color: #DDDDDD;
     border: 1px dashed #555555;
 }
 
-.postformFile ~ .postformFile {
-    margin-top: 5px;
-}
-
-.postformFilePreview {
-    max-width: 100px;
-    max-height: 100px;
-    display: inline-block;
-    vertical-align: middle;
-}
-
-.postformFileInput {
-    display: inline-block;
-    position: absolute;
-    left: -10px;
-    top: -10px;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-}
-
-.postformFileText {
-    display: inline-block;
-    vertical-align: top;
-    white-space: normal;
-}
-
-.postformFileRemoveButton {
-    display: inline-block;
-    vertical-align: top;
-}
-
-.postformFileRemoveImage {
-    vertical-align: top !important;
-}
-
 .referencedBy {
-    font-size: 0.8em;
     color: #555555;
 }
 
-.tabWidget {
-    text-align: center;
-}
-
 ul.tabWidget > li {
-    display: inline;
     background-color: #DDDDDD;
-    padding: 5px 10px 5px 10px;
     border: 1px solid #CCCCCC;
-    border-left: none;
 }
 
 ul.tabWidget > li > a {
     color: black;
-    text-decoration: none;
-    cursor: pointer;
 }
 
 ul.tabWidget > li.activated {
     background-color: #AAAAAA;
+    border: 1px solid #666666;
 }
 
-/*
-    Rules
-*/
-
-/*.rules <- Home*/
-
-/*
-    Search action
-*/
-
-.searchAction {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: right;
-}
-
-.searchAction > form {
-    display: inline-block;
-    width: 50%;
-}
-
-.searchAction.mobile > form {
-    text-align: left;
-    white-space: nowrap;
-    width: 98%;
-}
-
-.searchActionInput {
-    width: 60%;
-}
-
-.searchActionSelect {
-    width: 30%;
-}
-
-/*
-    Settings bar
-*/
-
-.toolbar {
-    display: block;
-    font-size: 0.9em;
-    padding-bottom: 5px;
-    text-align: center;
-    overflow-x: auto;
-    font-size: 1.2em;
-    position: relative;
-    top: -8px;
-    z-index: 1;
+ul.tabWidget > li.activated > a {
+    color: white;
 }
 
 .toolbar.sticky {
-    position: fixed;
-    top: 0px;
     background-color: #EEEEEE;
-    width: 99%;
-    padding-bottom: 0px;
 }
-
-/*
-    Thread
-*/
-
-/*blockquote <- Board*/
-
-blockquote.blockquoteThread {
-    max-height: 800px;
-}
-
-blockquote.blockquoteThread.expand {
-    max-height: none;
-}
-
-.codeBlock {
-    font-family: monospace;
-    white-space: pre;
-    word-break: normal;
-    word-wrap: normal;
-    overflow-wrap: normal;
-    padding-left: 20px !important;
-    border: 1px solid #AAAAAA;
-    overflow-x: auto;
-    max-width: 800px;
-    -ms-hyphens: none;
-    -moz-hyphens: none;
-    -webkit-hyphens: none;
-    hyphens: none;
-}
-
-.codeBlock.mobile {
-    max-width: 300px;
-}
-
-/*span.spoiler, span.spoiler a <- Board*/
-
-/*span.spoiler:hover <- Board*/
-
-/*span.spoiler:hover a <- Board*/
-
-.theMessage {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    white-space: nowrap;
-}
-
-.threadActions {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: left;
-    white-space: nowrap;
-    overflow-x: auto;
-}
-
-/*
-    Thread echo
-*/
-
-.externalThreadFrame {
-    width: 300px;
-    height: 400px;
-    float: right;
-    position: fixed;
-    top: 200px;
-    right: 0px;
-    z-index: 9920;
-}
-
-.externalThreadFrame.mobile {
-    width: 120px;
-    height: 240px;
-}
-
-.externalThreadFrame:hover {
-    width: 90%;
-    height: 100%;
-    top: 0px;
-}
-
-/*
-    Title
-*/
-
-.theTitle {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    overflow-x: auto;
-}
-
-/* Vote */
 
 .vote {
-    display: table;
     background-color: #CCCCCC;
     border: 1px solid #BBBBBB;
 }
@@ -1080,177 +287,8 @@ blockquote.blockquoteThread.expand {
     font-style: italic;
 }
 
-/* Settings dialog */
-
-.settingsDialog {
-    /**/
-}
-
-/* Playlist */
-
-.track {
-    background-color: #DDDDDD;
-    border: 1px solid #CCCCCC;
-    padding: 2px 2px 2px 2px;
-    display: table;
-}
-
-.track ~ .track {
-    margin-top: 5px;
-}
-
-.track > audio {
-    width: 600px;
-}
-
-#recaptcha_image_cell {
-    background-color: inherit;
-}
-
-#recaptcha_response_field {
-    background-color: inherit;
-}
-
-.stretchedPost {
-    width: 99%;
-}
-
-.login {
-    text-align: center;
-    white-space: nowrap;
-}
-
-.loginDescription {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.loginDescription.desktop {
-    max-width: 80%;
-    margin-left: 10%;
-}
-
-.buttonImage {
-    vertical-align: middle;
-    opacity: 0.65;
-}
-
-.buttonImage:disabled {
-    opacity: 0.4;
-}
-
-.buttonImage:hover {
-    opacity: 1;
-}
-
-.buttonImage:disabled:hover {
-    opacity: 0.4;
-}
-
-input.buttonImage {
-    background-color: transparent;
-}
-
-.signImage {
-    vertical-align: middle;
-}
-
-.boardSelectContainer {
-    display: inline-block;
-    vertical-align: top;
-    width: 16px;
-    overflow: hidden;
-}
-
-.boardSelect {
-    border: none;
-    background: url("../img/boards.png") left top no-repeat;
-    width: 36px;
-}
-
-.boardSelectForm {
-    display: inline;
-}
-
-.alignCenter {
-    text-align: center;
-}
-
-.temporaryPostOverlayMask {
-    position: fixed;
-    left: 0px;
-    top: 0px;
-    right: 0px;
-    bottom: 0px;
-    z-index: 9000;
-    background-color: #000000;
-    opacity: 0.6;
-}
-
-.overlayMask {
-    position: fixed;
-    left: 0px;
-    top: 0px;
-    right: 0px;
-    bottom: 0px;
-    z-index: 100500;
-    background-color: #000000;
-    opacity: 0.6;
-}
-
-.overlayProgressBar {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    width: 400px;
-    height: 50px;
-    margin-top: -25px;
-    margin-left: -200px;
-    z-index: 100501;        
-}
-
-.overlayProgressBarCancelButton {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    margin-top: -15px;
-    margin-left: -40px;
-    width: 80px;
-    height: 30px;
-    z-index: 100502;
-}
-
-.numberSize3 {
-    width: 40px;
-}
-
-.postFormInput {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.submitContainer {
-    text-align: center;
-}
-
-.submitContainer > input {
-    font-size: 1.2em;
-    width: 100%;
-    border-color: #FF6600;
-}
-
-.cursorPointer {
-	cursor: pointer;
-}
-
 .chatContactList {
-    overflow-y: auto;
-    min-width: 50px;
-}
-
-.chatContact {
-    white-space: nowrap;
-    cursor: pointer;
+    border: 1px solid #CCCCCC;
 }
 
 .chatContact:hover {
@@ -1274,103 +312,70 @@ input.buttonImage {
 
 .chatTarget {
     background-color: #DDDDDD;
-    white-space: nowrap;
 }
 
 .chatHistory {
-    padding-left: 8px;
-    padding-top: 5px;
-    padding-right: 4px;
-    padding-bottom: 5px;
-    border: 1px solid black;
-    overflow-y: auto;
-    min-width: 200px;
-    min-height: 400px;
-    max-width: 600px;
-}
-
-.chatHistory.mobile {
-    max-width: 300px;
+    border: 1px solid #CCCCCC;
 }
 
 .chatMessage {
     border: 1px solid #CCCCCC;
-    margin-bottom: 4px;
-    border-radius: 6px;
     background-color: #DDDDDD;
-    padding: 4px;
 }
 
 .chatMessageDate {
-    margin-bottom: 8px;
     border-bottom: 1px dotted black;
-}
-
-.chatMessageText {
-    padding-left: 8px;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-word;
-    -ms-hyphens: auto;
-    -moz-hyphens: auto;
-    -webkit-hyphens: auto;
-    hyphens: auto;
-}
-
-.chatInput {
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.chatSendButton {
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.loadingMessage {
-    text-align: center;
-}
-
-[id^="vk_post_"] {
-    padding: 4px 5px 4px 5px;
-}
-
-.overflowContainer {
-    overflow-x: auto;
-}
-
-.select[name="codeLang"] {
-    height: 20px;
-    vertical-align: middle;
 }
 
 .bordered {
     border: 1px solid #CCCCCC;
 }
 
-.ui-tooltip {
-    border: 1px solid #CCCCCC !important;
-    z-index: 11000 !important;
+.submitContainer > input {
+    border-color: #FF6600;
 }
 
-.ui-tooltip-content {
-    font-family: Verdana,sans-serif;
+.hideReason {
+    font-weight: bold;
+}
+
+#player {
+    background-color: #EEEEEE;
+    border: 1px solid #CCCCCC;
+}
+
+#player.minimized {
     background-color: #DDDDDD;
 }
 
-.ui-tooltip-content::after {
-    content: '';
-    position: absolute;
-    border-style: solid;
-    display: block;
-    width: 0;
-    top: -10px;
-    left: 85px;
-    border-color: #CCCCCC transparent;
-    border-width: 0 10px 10px;
+.playerHeader {
+    background-color: #DDDDDD;
+    border: 1px solid #CCCCCC;
 }
 
-.archivalThreadLink {
-    font-size: 1.2em;
-    margin-left: 10px;
+.track {
+    background-color: #DDDDDD;
+    border: 1px solid #CCCCCC;
+}
+
+.track:hover {
+    background-color: #CCCCCC;
+    border: 1px solid #BBBBBB;
+}
+
+.track.selected {
+    background-color: #AAAAAA;
+    border: 1px solid #666666;
+}
+
+.track.selected > .trackInfo {
+    font-weight: bold;
+}
+
+.bannedUserHeader {
+    font-weight: bold;
+}
+
+.registeredUserHeader {
+    font-weight: bold;
 }

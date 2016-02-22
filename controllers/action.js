@@ -34,7 +34,6 @@ var getFiles = function(fields, files, transaction) {
         return true;
     });
     var promises = Tools.mapIn(tmpFiles, function(file, fieldName) {
-        file.fieldName = fieldName;
         setFileRating(file, file.fieldName.substr(5));
         transaction.filePaths.push(file.path);
         return Tools.mimeType(file.path).then(function(mimeType) {
@@ -46,7 +45,7 @@ var getFiles = function(fields, files, transaction) {
         tmpFiles = files;
         var urls = [];
         Tools.forIn(fields, function(url, key) {
-            if (key.substr(0, 9) != "file_url_")
+            if (!/^file_url_\S+$/.test(key))
                 return;
             urls.push({
                 url: url,
@@ -187,7 +186,7 @@ router.post("/action/markupText", function(req, res) {
         return markup(c.board.name, c.fields.text, {
             markupModes: markupModes,
             referencedPosts: {},
-            accessLevel: req.level
+            accessLevel: req.level(c.board.name)
         });
     }).then(function(text) {
         var data = {
@@ -384,7 +383,7 @@ router.post("/action/editAudioTags", function(req, res) {
 });
 
 router.post("/action/banUser", function(req, res) {
-    if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
+    if (!req.isModer())
         return controller.error(res, Tools.translate("Not enough rights"), true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
@@ -394,7 +393,7 @@ router.post("/action/banUser", function(req, res) {
         c.postNumber = +result.fields.postNumber;
         c.userIp = result.fields.userIp;
         Tools.forIn(result.fields, function(value, name) {
-            if (name.substr(0, 9) != "banBoard_")
+            if (!/^banBoard_\S+$/.test(name))
                 return;
             var level = result.fields["banLevel_" + value];
             if ("NONE" == level)
@@ -432,16 +431,83 @@ router.post("/action/banUser", function(req, res) {
 });
 
 router.post("/action/delall", function(req, res) {
-    if (Database.compareRegisteredUserLevels(req.level, "MODER") < 0)
+    if (!req.isModer())
         return controller.error(res, Tools.translate("Not enough rights"), true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
-        return controller.checkBan(req, res, c.fields.boardName, true);
+        c.boardNames = Tools.toArray(Tools.filterIn(c.fields, function(boardName, key) {
+            return /^board_\S+$/.test(key);
+        }));
+        if (c.boardNames.length < 1)
+            return Promise.reject(Tools.translate("No board specified"));
+        return controller.checkBan(req, res, c.boardNames, true);
     }).then(function() {
-        return Database.delall(req, c.fields);
+        return Database.delall(req, c.fields.userIp, c.boardNames);
     }).then(function(result) {
         res.send({});
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
+var getRegisteredUserData = function(fields) {
+    var levels = {};
+    var password = fields.password;
+    var ips = Tools.ipList(fields.ips);
+    if (typeof ips == "string")
+        return Promise.reject(ips);
+    Tools.forIn(fields, function(value, name) {
+        if (!/^accessLevelBoard_\S+$/.test(name))
+            return;
+        var level = fields["accessLevel_" + value];
+        if ("NONE" == level)
+            return;
+        levels[value] = level;
+    });
+    return Promise.resolve({
+        password: password,
+        levels: levels,
+        ips: ips
+    });
+};
+
+router.post("/action/registerUser", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    Tools.parseForm(req).then(function(result) {
+        return getRegisteredUserData(result.fields);
+    }).then(function(result) {
+        return Database.registerUser(result.password, result.levels, result.ips);
+    }).then(function(hashpass) {
+        res.json({ hashpass: hashpass });
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
+router.post("/action/unregisterUser", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    var c = {};
+    Tools.parseForm(req).then(function(result) {
+        return Database.unregisterUser(result.fields.hashpass);
+    }).then(function(result) {
+        res.send({});
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
+router.post("/action/updateRegisteredUser", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    Tools.parseForm(req).then(function(result) {
+        return getRegisteredUserData(result.fields);
+    }).then(function(result) {
+        return Database.updateRegisteredUser(result.password, result.levels, result.ips);
+    }).then(function() {
+        res.json({});
     }).catch(function(err) {
         controller.error(res, err, true);
     });

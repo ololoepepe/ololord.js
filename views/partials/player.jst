@@ -1,0 +1,53 @@
+<div id="player" class="minimized">
+    <div class="playerMinimized">
+        <div>
+            <span class="playerMinimizedActionsDesktop">
+                <a href="javascript:void(0);" onclick="lord.setPlayerVisible(event, true);"
+                   title="{{=it.tr.maximizePlayerText}}"><img src="/{{=it.site.pathPrefix}}img/player/16/player.png"
+                                                              class="buttonImage" width="16" height="16"></a>
+                <input type="image" onclick="lord.playerPlayPause(event); return false;" name="playerPlayPauseButton"
+                       title="{{=it.tr.playerPlayText}}" src="/{{=it.site.pathPrefix}}img/player/16/play.png"
+                       class="buttonImage" width="16" height="16" disabled="true" />
+                <input type="image" onclick="lord.playerPrevious(event); return false;"
+                       title="{{=it.tr.playerPreviousTrackText}}" class="buttonImage" width="16" height="16"
+                       src="/{{=it.site.pathPrefix}}img/player/16/previous.png"
+                       name="playerPreviousTrackButton" disabled="true" />
+                <input type="image" onclick="lord.playerNext(event); return false;" name="playerNextTrackButton"
+                       title="{{=it.tr.playerNextTrackText}}" class="buttonImage" width="16" height="16"
+                       src="/{{=it.site.pathPrefix}}img/player/16/next.png" disabled="true" />
+            </span>
+            <span class="playerMinimizedActionsMobile" onclick="lord.setPlayerVisible(event, true);">
+                <input type="image" onclick="lord.playerPlayPause(event); return false;" name="playerPlayPauseButton"
+                       title="{{=it.tr.playerPlayText}}" src="/{{=it.site.pathPrefix}}img/player/16/play.png"
+                       class="buttonImage" width="16" height="16" disabled="true" />
+                {{=it.tr.maximizePlayerText}}
+            </span>
+        </div>
+    </div>
+    <div class="playerMaximized">
+        <div class="playerHeader">
+            <input type="image" onclick="lord.playerPlayPause(event); return false;" name="playerPlayPauseButton"
+                   title="{{=it.tr.playerPlayText}}" src="/{{=it.site.pathPrefix}}img/player/32/play.png"
+                   class="buttonImage" width="32" height="32" disabled="true" />
+            <input type="image" onclick="lord.playerPrevious(event); return false;" name="playerPreviousTrackButton"
+                   title="{{=it.tr.playerPreviousTrackText}}" class="buttonImage" width="32" height="32"
+                   src="/{{=it.site.pathPrefix}}img/player/32/previous.png" disabled="true" />
+            <input type="image" onclick="lord.playerNext(event); return false;" name="playerNextTrackButton"
+                   title="{{=it.tr.playerNextTrackText}}" class="buttonImage" width="32" height="32"
+                   src="/{{=it.site.pathPrefix}}img/player/32/next.png" disabled="true" />
+            <div id="playerTrackInfo"></div>
+            <input type="image" onclick="lord.playerMute(event); return false;" name="playerMuteButton"
+                   title="{{=it.tr.playerMuteText}}" src="/{{=it.site.pathPrefix}}img/player/32/volume_on.png"
+                   class="buttonImage" width="32" height="32" disabled="true" />
+        </div>
+        <div id="playerTrackTags" class="playerHeader" style="display: none;"></div>
+        <div class="playerHeader">
+            <div id="playerDurationSlider"></div>
+            <div id="playerVolumeSlider"></div>
+        </div>
+        <div id="playerTracks"></div>
+        <a id="playerMinimizeButton" href="javascript:void(0);" onclick="lord.setPlayerVisible(event, false);"
+           title="{{=it.tr.minimizePlayerText}}"><img src="/{{=it.site.pathPrefix}}img/player/32/hide.png"
+                                                      class="buttonImage" width="32" height="32"></a>
+    </div>
+</div>

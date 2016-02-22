@@ -1,6 +1,5 @@
 {{~[it.draft] :post}}
-    <div id="draft/{{=post.createdAt}}" class="draft{{? !it.settings.shrinkPosts}} stretchedPost{{?}}"
-         data-key="{{=post.key}}" data-created-at="{{=post.createdAt}}">
+    <div id="draft/{{=post.createdAt}}" class="draft" data-key="{{=post.key}}" data-created-at="{{=post.createdAt}}">
         <div class="postHeader">
             {{#def.postSubject}}
             {{#def.postName}}
@@ -8,10 +7,9 @@
                 <span class="opSign">[OP]</span>
             {{?}}
             {{? post.options.showTripcode && post.tripcode}}
-                <span class="tripcode {{=it.deviceType}}">{{=post.tripcode}}</span>
+                <span class="tripcode">{{=post.tripcode}}</span>
             {{?}}
-            <span class="postDateTime {{=it.deviceType}}"
-                  name="dateTime">{{ out += it.formattedDate(post.createdAt); }}</span>
+            <span class="postDateTime" name="dateTime">{{ out += it.formattedDate(post.createdAt); }}</span>
             [<a href="javascript:void(0);" name="fillFormWithDraft" onclick="lord.fillFormWithDraft(this); return false;"
                 title="{{=it.tr.fillFormWithDraftText}}"><img src="/{{=it.site.pathPrefix}}img/fill_form.png"
                                                               class="buttonImage"></a>]

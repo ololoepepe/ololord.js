@@ -1,9 +1,9 @@
 <head data-site-path-prefix="{{=it.site.pathPrefix}}">
     <title>{{=it.title}}</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link id="favicon" rel="shortcut icon" href="/{{=it.site.pathPrefix}}favicon.ico">
     <link rel="stylesheet" type="text/css" href="/{{=it.site.pathPrefix}}css/3rdparty/jquery.datetimepicker.css">
+    <link rel="stylesheet" type="text/css" href="/{{=it.site.pathPrefix}}css/base.css">
     {{? !it.noJavaScript}}
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery-1.11.3.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/isInViewport.min.js"></script>
@@ -18,7 +18,6 @@
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jszip.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jszip-utils.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/FileSaver.min.js"></script>
-        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base.js"></script>
         <script id="model-base" type="application/json"></script>
         <script id="model-boards" type="application/json">{{=it.models.boards}}</script>
         <script id="model-tr" type="application/json">{{=it.models.tr}}</script>
@@ -30,20 +29,48 @@
         {{~it.publicTemplates :template}}
             <script id="template-{{=template.name}}" type="application/jst">{{=template.data}}</script>
         {{~}}
-        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/bottom.js"></script>
+        <script type="text/javascript">
+            lord.models = {};
+            lord.partials = {};
+            lord.templates = {};
+
+            (function() {
+                var baseModelHtml = lord.get("misc/base.json") || "";
+                ["base", "boards", "tr", "partials", "templates"].forEach(function(modelName) {
+                    var html = ("base" == modelName) ? baseModelHtml : lord.id("model-" + modelName).innerHTML;
+                    lord.models[modelName] = JSON.parse(html);
+                });
+                lord.model("partials").forEach(function(partialName) {
+                    var html = lord.id("partial-" + partialName).innerHTML;
+                    lord.partials[partialName] = html;
+                });
+                var templates = {};
+                lord.model("templates").forEach(function(templateName) {
+                    var html = lord.id("template-" + templateName).innerHTML;
+                    templates[templateName] = html;
+                });
+                ["custom-footer", "custom-header"].forEach(function(templateName) {
+                    var html = lord.get("templates/" + templateName + ".jst");
+                    if (html)
+                        templates[templateName] = html;
+                });
+                lord.forIn(templates, function(html, templateName) {
+                    if (!lord.addTemplate(templateName, html))
+                        return;
+                });
+            })();
+        </script>
+        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/base.js"></script>
         {{? it.site.vkontakte.integrationEnabled }}
             <script type="text/javascript" src="//vk.com/js/api/openapi.js"></script>
         {{?}}
-        {{? it.includeBoardScripts}}
+        {{? it.isBoardPage}}
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/sha1.min.js"></script>
+            <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery.knob.min.js"></script>
             {{? it.site.twitter.integrationEnabled }}
                 <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/twitter.js"></script>
             {{?}}
             <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/board.js"></script>
-            {{? it.includeThreadScripts}}
-                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery.knob.min.js"></script>
-                <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/thread.js"></script>
-            {{?}}
         {{?}}
         {{? it.extraScripts}}
             {{~it.extraScripts :script}}
@@ -56,5 +83,86 @@
                 {{?}}
             {{~}}
         {{?}}
+        <script type="text/javascript">
+            (function() {
+                var settings = lord.settings();
+                document.open();
+                if (lord.deviceType("mobile")) {
+                    document.write('<meta name="viewport" content="width=device-width, initial-scale=1.0, '
+                        + 'maximum-scale=1.0, user-scalable=no" />');
+                }
+                var prefix = lord.model("base").site.pathPrefix;
+                document.write('<link rel="stylesheet" type="text/css" href="/' + prefix + 'css/' + lord.deviceType()
+                    + '.css">');
+                document.write('<link rel="stylesheet" type="text/css" href="/' + prefix + 'css/' + settings.style.name
+                    + '.css">');
+                var s = '<style type="text/css">';
+                if (!settings.shrinkPosts)
+                    s += '.post, .opPost, .draft { width: 99%; }';
+                if (lord.compareRatings(settings.maxAllowedRating, "R-18G") < 0) {
+                    var selectors = [];
+                    var size = lord.deviceType("mobile") ? "140px" : "200px";
+                    var addSelector = function(rating) {
+                        var sel = 'a[data-rating="' + rating + '"]';
+                        selectors.push(sel);
+                        var dots = "..";
+                        if (/\/((res|arch)\/\d+|catalog|archive)\.html$/.test(window.location.href))
+                            dots += "/..";
+                        s += sel + '{ background: url("' + dots + '/img/' + rating.toLowerCase() + '.png") center center; '
+                            + 'width: ' + size + '; height: ' + size + '; }';
+                    };
+                    addSelector("R-18G");
+                    ["R-18", "R-15"].forEach(function(rating) {
+                        if (lord.compareRatings(settings.maxAllowedRating, rating) < 0)
+                            addSelector(rating);
+                    });
+                    var createSelector = function(selector) {
+                        selector = selector || "";
+                        var sel = selectors[0] + selector;
+                        selectors.slice(1).forEach(function(ss) {
+                            sel += ", " + ss + selector;
+                        });
+                        return sel;
+                    };
+                    s += createSelector() + '{ display: inline-block; }';
+                    s += createSelector(" > img") + '{ display: none; }';
+                }
+                s += '</style>';
+                var appendScript = function(path) {
+                    s += '<script type="text/javascript" src="/' + prefix + path + '"></s' + 'cript>';
+                };
+                if (lord.model("base").user.isModer())
+                    appendScript("js/3rdparty/jquery.datetimepicker.js");
+                if (settings.sourceHighlightingEnabled) {
+                    appendScript("js/3rdparty/codemirror/codemirror.min.js");
+                    appendScript("js/3rdparty/codemirror/javascript.min.js");
+                    appendScript("js/3rdparty/codemirror/css.min.js");
+                    lord.createStylesheetLink("3rdparty/codemirror.css", true);
+                }
+                if (settings.paintingEnabled) {
+                    appendScript("js/3rdparty/react-with-addons.min.js");
+                    appendScript("js/3rdparty/literallycanvas.min.js");
+                    lord.createStylesheetLink("3rdparty/literallycanvas.css", true);
+                }
+                if (settings.userJavaScriptEnabled) {
+                    s += '<script type="text/javascript">' + lord.getLocalObject("userJavaScript", "")
+                        + "</s" + "cript>";
+                }
+                document.write(s);
+                document.close();
+                lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
+                lord.createStylesheetLink("3rdparty/jquery-ui/" + settings.style.name + "/jquery-ui.min.css", true);
+                if (settings.userCssEnabled) {
+                    var css = lord.getLocalObject("userCss", "");
+                    var style = lord.node("style");
+                    style.type = "text/css";
+                    if (style.styleSheet)
+                        style.styleSheet.cssText = css;
+                    else
+                        style.appendChild(lord.node("text", css));
+                    lord.queryOne("head").appendChild(style);
+                }
+            })();
+        </script>
     {{?}}
 </head>

@@ -2,7 +2,6 @@
 !custom
 !partials
 !addFilesDialog.jst
-!archiveThread.jst
 !banner.jst
 !boardPageLower.jst
 !boardPageUpper.jst
@@ -32,15 +31,17 @@
 !googleRecaptchaWidget.jst
 !hiddenPostList.jst
 !hotkeysDialog.jst
+!movablePlayer.jst
 !moveThreadDialog.jst
 !navbar.jst
 !notFoundImage.jst
 !pagination.jst
-!playlistItem.jst
+!playerTrack.jst
 !post.jst
+!postActionsMenu.jst
 !postForm.jst
-!postingSpeed.jst
 !postReference.jst
+!registeredUser.jst
 !rpgEditPostDialogPart.jst
 !rpgPostBodyPart.jst
 !rpgPostFormField.jst

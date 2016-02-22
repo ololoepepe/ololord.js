@@ -1,17 +1,30 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<body class="mobile" {{#def.baseData}}>
-<div id="toolbarPlaceholder" style="display: none;"></div>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
-<br />
-<div id="searchPlaceholder" style="display: none;"></div>
+<body {{#def.baseData}}>
+{{#def.toolbar}}
+{{#def.player}}
+{{#def.customHeader}}
+{{#def.searchAction}}
 <div class="theTitle">
     <h1>
         {{=it.tr.welcomeMessage}}
     </h1>
 </div>
-<div id="customContentPlaceholder" style="display: none;"></div>
-<div id="customFooterPlaceholder" style="display: none;"></div>
+<script type="text/javascript">
+    (function() {
+        if (!lord.addTemplate("custom-home", lord.get("templates/custom-home.jst")))
+            return;
+        var model = lord.model(["base", "tr", "boards"]);
+        model.settings = lord.settings();
+        var data = lord.template("custom-home", model, true);
+        if (!data)
+            return;
+        document.open();
+        document.write(data);
+        document.close();
+    })();
+</script>
+{{#def.customFooter}}
 </body>
 </html>

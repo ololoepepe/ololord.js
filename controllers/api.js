@@ -55,7 +55,7 @@ router.get("/api/userIp.json", function(req, res) {
     }).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("No such post"));
-        if (Database.compareRegisteredUserLevels(req.level, Database.RegisteredUserLevels.Moder) < 0)
+        if (!Database.compareRegisteredUserLevels(req.level(), config("permissions.seeUserIp", "ADMIN")) < 0)
             return Promise.reject(Tools.translate("Not enough rights"));
         var result = { ip: post.user.ip };
         var ipv4 = Tools.preferIPv4(post.user.ip);
@@ -184,18 +184,92 @@ router.get("/api/captchaQuota.json", function(req, res) {
     });
 });
 
+router.get("/api/bannedUsers.json", function(req, res) {
+    if (!req.isModer())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    Database.userBans().then(function(users) {
+        var newUsers = [];
+        Tools.forIn(users, function(bans, ip) {
+            var newBans = {};
+            Tools.forIn(bans, function(ban, boardName) {
+                if (!req.isModer(boardName))
+                    return;
+                newBans[boardName] = ban;
+            });
+            var user = {
+                ip: ip,
+                bans: newBans
+            };
+            var ipv4 = Tools.preferIPv4(ip);
+            if (ipv4 && ipv4 != ip)
+                user.ipv4 = ipv4;
+            newUsers.push(user);
+        });
+        res.json(newUsers);
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
 router.get("/api/bannedUser.json", function(req, res) {
-    var ip = req.query.ip;
+    var ip = Tools.correctAddress(req.query.ip);
     if (!ip)
         return controller.error(res, Tools.translate("Invalid IP address"), true);
+    if (!req.isModer())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
     Database.userBans(ip).then(function(bans) {
+        var newBans = {};
+        Tools.forIn(bans, function(ban, boardName) {
+            if (!req.isModer(boardName))
+                return;
+            newBans[boardName] = ban;
+        });
         var user = {
             ip: ip,
-            bans: bans
+            bans: newBans
         };
         var ipv4 = Tools.preferIPv4(ip);
         if (ipv4 && ipv4 != ip)
             user.ipv4 = ipv4;
+        res.json(user);
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
+router.get("/api/registeredUsers.json", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    Database.registeredUsers().then(function(users) {
+        users.forEach(function(user) {
+            user.ips = user.ips.map(function(ip) {
+                var ipv4 = Tools.preferIPv4(ip);
+                var o = { ip: ip };
+                if (ipv4 && ipv4 != ip)
+                    o.ipv4 = ipv4;
+                return o;
+            });
+        });
+        res.json(users);
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
+router.get("/api/registeredUser.json", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    var hashpass = req.query.hashpass;
+    if (!Tools.mayBeHashpass(hashpass))
+        return controller.error(res, Tools.translate("Invalid hashpass"), true);
+    Database.registeredUser(hashpass).then(function(user) {
+        user.ips = user.ips.map(function(ip) {
+            var ipv4 = Tools.preferIPv4(ip);
+            var o = { ip: ip };
+            if (ipv4 && ipv4 != ip)
+                o.ipv4 = ipv4;
+            return o;
+        });
         res.json(user);
     }).catch(function(err) {
         controller.error(res, err, true);

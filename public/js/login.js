@@ -28,6 +28,12 @@ lord.doLogin = function(event, form) {
     lord.loginImplementation(form);
 };
 
+lord.generateHashpass = function() {
+    var form = lord.id("loginForm");
+    var hashpass = lord.nameOne("hashpass", form).value;
+    prompt(lord.text("hashpassLabelText"), sha1(hashpass));
+};
+
 lord.vkAuth = function() {
     VK.Auth.login(function(response) {
         if (!response.session)

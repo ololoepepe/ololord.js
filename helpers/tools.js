@@ -5,11 +5,11 @@ var ChildProcess = require("child_process");
 var Crypto = require("crypto");
 var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
-var Formidable = require("formidable");
 var FS = require("q-io/fs");
 var FSSync = require("fs-ext");
 var merge = require("merge");
 var mkpath = require("mkpath");
+var Multiparty = require("multiparty");
 var Path = require("path");
 var promisify = require("promisify-node");
 var Util = require("util");
@@ -32,7 +32,7 @@ var rootZones = require("../misc/root-zones.json").reduce(function(acc, zone) {
     return acc;
 }, {});
 
-mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/formidable");
+mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/form");
 
 var ExternalLinkRegexpPattern = (function() {
     var schema = "https?:\\/\\/|ftp:\\/\\/";
@@ -61,7 +61,7 @@ var forIn = function(obj, f) {
 
 module.exports.forIn = forIn;
 
-module.exports.mapIn = function(obj, f) {
+var mapIn = function(obj, f) {
     if (!obj || typeof f != "function")
         return;
     var arr = [];
@@ -71,6 +71,8 @@ module.exports.mapIn = function(obj, f) {
     }
     return arr;
 };
+
+module.exports.mapIn = mapIn;
 
 module.exports.filterIn = function(obj, f) {
     if (!obj || typeof f != "function")
@@ -86,15 +88,15 @@ module.exports.filterIn = function(obj, f) {
     return nobj;
 };
 
-module.exports.toArray = function(obj) {
+var toArray = function(obj) {
     var arr = [];
-    var i = 0;
     forIn(obj, function(val) {
-        arr[i] = val;
-        ++i;
+        arr.push(val);
     });
     return arr;
 };
+
+module.exports.toArray = toArray;
 
 module.exports.extend = function(Child, Parent) {
     var F = function() {};
@@ -153,7 +155,7 @@ module.exports.toUTC = function(date) {
 
 module.exports.hashpass = function(req) {
     var s = req.cookies.hashpass;
-    if (typeof s != "string" || !s.match(/^([0-9a-fA-F]){40}$/))
+    if (!module.exports.mayBeHashpass(s))
         return;
     return s;
 };
@@ -204,8 +206,10 @@ module.exports.styles = function() {
     styles = [];
     var path = __dirname + "/../public/css";
     FSSync.readdirSync(path).forEach(function(fileName) {
-        if (fileName.split(".").pop() != "css")
+        if (fileName.split(".").pop() != "css"
+            || ["base", "desktop", "mobile"].indexOf(fileName.split(".").shift()) >= 0) {
             return;
+        }
         var name = fileName.split(".").shift();
         var str = FSSync.readFileSync(path + "/" + fileName, "utf8");
         var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(str);
@@ -412,29 +416,39 @@ module.exports.splitCommand = function(cmd) {
     };
 };
 
-module.exports.password = function(pwd) {
-    if (!pwd)
-        return null;
-    var sha1 = Crypto.createHash("sha1");
-    sha1.update(pwd);
-    return sha1.digest("hex");
-}
+module.exports.mayBeHashpass = function(password) {
+    return (typeof password == "string") && password.match(/^([0-9a-fA-F]){40}$/);
+};
 
 module.exports.parseForm = function(req) {
-    var form = new Formidable.IncomingForm();
-    form.uploadDir = config("system.tmpPath", __dirname + "/../tmp") + "/formidable";
-    form.hash = "sha1";
+    if (req.formFields) {
+        return Promise.resolve({
+            fields: req.formFields,
+            files: req.formFiles || []
+        });
+    }
+    var form = new Multiparty.Form();
+    form.uploadDir = config("system.tmpPath", __dirname + "/../tmp") + "/form";
+    form.autoFields = true;
+    form.autoFiles = true;
     form.maxFieldsSize = 5 * 1024 * 1024;
     return new Promise(function(resolve, reject) {
         form.parse(req, function(err, fields, files) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve({
-                    fields: fields,
-                    files: files
-                });
-            }
+            if (err)
+                return reject(err);
+            forIn(fields, function(val, key) {
+                if (1 == val.length)
+                    fields[key] = val[0];
+            });
+            resolve({
+                fields: fields,
+                files: toArray(files).reduce(function(acc, files) {
+                    return acc.concat(files);
+                }, []).map(function(file) {
+                    file.name = file.originalFilename;
+                    return file;
+                })
+            });
         });
     });
 };
@@ -452,7 +466,7 @@ module.exports.proxy = function() {
     };
 };
 
-module.exports.correctAddress = function(ip) {
+var correctAddress = function(ip) {
     if (!ip)
         return null;
     if ("::1" == ip)
@@ -479,6 +493,8 @@ module.exports.correctAddress = function(ip) {
     return null;
 };
 
+module.exports.correctAddress = correctAddress;
+
 module.exports.preferIPv4 = function(ip) {
     if (!ip)
         return null;
@@ -498,6 +514,14 @@ module.exports.preferIPv4 = function(ip) {
     return ip;
 };
 
+module.exports.sha1 = function(data) {
+    if (!Util.isString(data) && !Util.isBuffer(data))
+        return null;
+    var sha1 = Crypto.createHash("sha1");
+    sha1.update(data);
+    return sha1.digest("hex");
+};
+
 module.exports.sha256 = function(data) {
     if (!data)
         return null;
@@ -506,13 +530,15 @@ module.exports.sha256 = function(data) {
     return sha256.digest("hex");
 };
 
-module.exports.withoutDuplicates = function(arr) {
+var withoutDuplicates = function(arr) {
     if (!arr || !Util.isArray(arr))
         return arr;
     return arr.filter(function(item, i) {
         return arr.indexOf(item) == i;
     });
 };
+
+module.exports.withoutDuplicates = withoutDuplicates;
 
 module.exports.remove = function(arr, what, both) {
     if (!arr || !Util.isArray(arr))
@@ -604,7 +630,7 @@ module.exports.writeFile = function(path, data) {
 };
 
 module.exports.removeFile = function(path) {
-    var c = { noclose: true };
+    var c = {};
     return openFile(path, "w").then(function(fd) {
         c.fd = fd;
         return flockFile(c.fd, "ex");
@@ -615,23 +641,10 @@ module.exports.removeFile = function(path) {
         return flockFile(c.fd, "un");
     }).then(function() {
         c.locked = false;
+        return closeFile(c.fd);
+    }).then(function() {
         return Promise.resolve();
     }).catch(recover.bind(null, c));
-};
-
-var controller;
-
-module.exports.controllerHtml = function(req, res, f, keys) {
-    if (!controller)
-        controller = require("./controller"); //NOTE: Circular dependency workaround
-    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
-    var args = [f, ifModifiedSince].concat(Array.prototype.slice.call(arguments, 3));
-    return controller.html.apply(controller, args).then(function(data) {
-        res.setHeader("Last-Modified", data.lastModified.toUTCString());
-        if (+ifModifiedSince >= +data.lastModified)
-            res.status(304);
-        res.send(data.data);
-    });
 };
 
 module.exports.series = function(arr, f) {
@@ -669,4 +682,20 @@ module.exports.postSubject = function(post, maxLength) {
     if (!isNaN(maxLength) && maxLength > 3 && title.length > maxLength)
         title = title.substr(0, maxLength - 3) + "...";
     return title;
+};
+
+module.exports.ipList = function(s) {
+    var ips = (s || "").split(/\s+/).filter(function(ip) {
+        return ip;
+    });
+    //TODO: IP ranges
+    var err = ips.some(function(ip, i) {
+        ip = correctAddress(ip);
+        if (!ip)
+            return true;
+        ips[i] = ip;
+    });
+    if (err)
+        return translate("Invalid IP address");
+    return withoutDuplicates(ips);
 };

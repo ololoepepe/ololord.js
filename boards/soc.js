@@ -110,4 +110,18 @@ board.renderPost = function(post) {
     });
 };
 
+board.customPostHeaderPart = function(n, it, thread, post) {
+    return {
+        100: function(it, thread, post) {
+            var model = merge.recursive(it, post.extraData || {
+                likeCount: 0,
+                dislikeCount: 0
+            });
+            model.thread = thread;
+            model.post = post;
+            return controller.sync("socPostHeaderPart", model);
+        }
+    };
+};
+
 module.exports = board;

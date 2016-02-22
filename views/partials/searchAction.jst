@@ -1,0 +1,10 @@
+<script type="text/javascript">
+    (function() {
+        var model = lord.model(["base", "tr", "boards"]);
+        if (lord.data("boardName"))
+            model.board = lord.model("board/" + lord.data("boardName")).board;
+        document.open();
+        document.write(lord.template("searchAction", model, true));
+        document.close();
+    })();
+</script>

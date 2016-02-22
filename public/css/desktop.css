@@ -1,0 +1,142 @@
+body {
+    font-size: 14.4px;
+}
+
+input, select {
+    font-size: 14.4px;
+}
+
+blockquote {
+    max-width: 1200px;
+}
+
+.navbar.navbarFrame {
+    font-size: 1em;
+}
+
+.postHeader {
+    white-space: nowrap;
+}
+
+.postFileSize {
+    font-size: 0.8em;
+}
+
+.postFileSearch {
+    padding-bottom: 4px;
+}
+
+.searchAction > form {
+    width: 50%;
+}
+
+.externalThreadFrame {
+    width: 300px;
+    height: 400px;
+}
+
+.login {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.loginDescription {
+    max-width: 80%;
+    margin-left: 10%;
+}
+
+.buttonImage {
+    vertical-align: middle;
+    opacity: 0.65;
+}
+
+.buttonImage:disabled {
+    opacity: 0.4;
+}
+
+.buttonImage:hover {
+    opacity: 1;
+}
+
+.buttonImage:disabled:hover {
+    opacity: 0.4;
+}
+
+input.buttonImage {
+    background-color: transparent;
+}
+
+.signImage {
+    vertical-align: middle;
+}
+
+.postText {
+    display: inline-block;
+    max-width: 100%;
+}
+
+.postFile ~ .postText {
+    max-width: -moz-calc(100% - 220px);
+    max-width: -webkit-calc(100% - 220px);
+    max-width: -o-calc(100% - 220px);
+    max-width: calc(100% - 220px);
+}
+
+.postFile ~ .postFile ~ .postText {
+    display: block;
+    max-width: 100%;
+}
+
+.postToThreadMobile {
+    display: none;
+}
+
+#player {
+    width: 400px;
+}
+
+.playerMinimizedActionsDesktop {
+    display: inline-block;
+}
+
+.playerMinimizedActionsMobile {
+    display: none;
+}
+
+#playerTrackInfo {
+    font-size: 1.2em;
+}
+
+#playerDurationSlider {
+    width: 68%;
+}
+
+#playerVolumeSlider {
+    display: inline-block;
+    width: 26%;
+}
+
+#playerTrackTags {
+    font-size: 1.2em;
+}
+
+.movablePlayerDurationSlider {
+    width: 68%;
+}
+
+.movablePlayerVolumeSlider {
+    display: inline-block;
+    width: 26%;
+}
+
+.chatContactList {
+    min-width: 150px;
+    max-width: 150px;
+}
+
+.chatHistory {
+    min-width: 400px;
+    max-width: 400px;
+    min-height: 600px;
+    max-height: 600px;
+}

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<body class="mobile" {{#def.baseData}}>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
+<body {{#def.baseData}}>
+{{#def.customHeader}}
 <div class="theTitle">
     <h1>
         {{=it.title}}
@@ -32,9 +32,13 @@
                size="30" autofocus="true" />
         <input type="submit" class="button" name="submit" value="{{=it.tr.loginText}}" />
     </form>
-    {{? it.site.vkontakte.integrationEnabled}}
-        <div id="vkontakteLoginButton" onclick="lord.vkAuth();"></div>
-    {{?}}
+    <div>
+        <input type="submit" class="button" value="{{=it.tr.generateHashpassButtonText}}"
+               onclick="event.preventDefault(); lord.generateHashpass(); return false;" />
+        {{? it.site.vkontakte.integrationEnabled}}
+            <div id="vkontakteLoginButton" onclick="lord.vkAuth();"></div>
+        {{?}}
+    </div>
 </div>
 <div class="loginDescription">
     {{=it.tr.loginSystemDescriptionText}}
@@ -44,6 +48,6 @@
         {{=it.tr.loginSystemVkontakteDescriptionText}}
     </div>
 {{?}}
-<div id="customFooterPlaceholder" style="display: none;"></div>
+{{#def.customFooter}}
 </body>
 </html>

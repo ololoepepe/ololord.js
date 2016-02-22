@@ -7,15 +7,31 @@ var Tools = require("../helpers/tools");
 var router = express.Router();
 
 router.get("/", function(req, res) {
-    var f = function() {
-        var model = {};
-        model.title = Tools.translate("ololord.js", "pageTitle");
-        model.extraScripts = [ { fileName: "home.js" } ];
-        return controller("home", model);
-    };
-    Tools.controllerHtml(req, res, f.bind(null), "home").catch(function(err) {
-        controller.error(res, err);
-    });
+    controller.sendCachedHTML(req, res, "home");
 });
+
+router.generateHTML = function() {
+    var result = {};
+    var model = {};
+    model.title = Tools.translate("ololord.js", "pageTitle");
+    model.extraScripts = [ { fileName: "home.js" } ];
+    return controller("home", model).then(function(data) {
+        result["home"] = data;
+        var model = {};
+        model.title = Tools.translate("Error 404", "pageTitle");
+        model.notFoundMessage = Tools.translate("Page or file not found", "notFoundMessage");
+        var path = __dirname + "/../public/img/404";
+        return FS.list(path).then(function(fileNames) {
+            model.notFoundImageFileNames = fileNames.filter(function(fileName) {
+                return fileName != ".gitignore";
+            });
+            return controller("notFound", model);
+        }).then(function(data) {
+            result["notFound"] = data;
+        });
+    }).then(function() {
+        return Promise.resolve(result);
+    });
+};
 
 module.exports = router;

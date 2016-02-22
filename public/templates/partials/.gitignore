@@ -1,15 +1,9 @@
 *
-!addFilesForm.jst
 !chatContact.jst
 !createAction.jst
-!deleteFileForm.jst
-!deletePostForm.jst
-!editAudioTagsForm.jst
-!editPostForm.jst
 !favoritesElement.jst
 !fileInputs.jst
 !innerNavbar.jst
-!moveThreadForm.jst
 !postFile.jst
 !postFileThumb.jst
 !post.jst
@@ -17,6 +11,4 @@
 !postReference.jst
 !postReferringPosts.jst
 !postSubject.jst
-!setVotingOpenedForm.jst
-!userBan.jst
 !.gitignore

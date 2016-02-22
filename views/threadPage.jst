@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<body class="mobile" {{#def.baseData}} data-thread-number="{{=it.threadNumber}}"
-      {{? it.archived}}data-archived="true"{{?}}>
+<body {{#def.baseData}}
+      data-thread-number="{{=it.threadNumber}}"
+      {{? it.thread.archived}}data-archived="true"{{?}}
+      {{? it.thread.postingEnabled}}data-posting-enabled="true"{{?}}
+      {{? it.thread.postLimitReached}}data-post-limit-reached="true"{{?}}
+      {{? it.thread.bumpLimitReached}}data-bump-limit-reached="true"{{?}}>
 <script id="model-postformRules" type="application/json">{{ out += JSON.stringify(it.postformRules); }}</script>
 {{? it.site.vkontakte.integrationEnabled }}
     <script type="text/javascript">
@@ -20,31 +24,76 @@
     {{#def.leafButton}}
 {{~}}
 <a id="top"></a>
-<div id="toolbarPlaceholder" style="display: none;"></div>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
-<br />
-<div id="searchPlaceholder" style="display: none;"></div>
-<div id="bannerPlaceholder" style="display: none;"></div>
+{{#def.toolbar}}
+{{#def.player}}
+{{#def.customHeader}}
+{{#def.searchAction}}
+{{#def.banner}}
 <div class="theTitle">
     <h1>{{!it.title}}</h1>
 </div>
-<div id="upperPlaceholder" style="display: none;"></div>
+<script type="text/javascript">
+    (function() {
+        var model = lord.model(["tr", "board/" + lord.data("boardName")]);
+        model.settings = lord.settings();
+        model.thread = {
+            archived: lord.data("archived"),
+            postingEnabled: lord.data("postingEnabled"),
+            postLimitReached: lord.data("postLimitReached"),
+            bumpLimitReached: lord.data("bumpLimitReached")
+        };
+        document.open();
+        document.write(lord.template("threadPageUpper", model, true));
+        document.close();
+    })();
+</script>
 <hr />
 {{~["Top"] :position}}
     {{#def.threadActions}}
 {{~}}
-<div id="threads" class="loadingMessage">
-    <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
-    <h1 style="display: inline;">{{=it.tr.loadingPostsMessage}}</h1>
+<hr />
+<div id="threads">
+    {{~[it.thread] :thread}}
+        <div id="thread{{=thread.opPost.number}}" class="thread"{{? thread.expanded}} data-expanded="true"{{?}}>
+            {{~[thread.opPost] :post}}
+                {{#def.post}}
+            {{~}}
+            {{? thread.omittedPosts > 0}}
+                <div class="omittedPosts">
+                    {{=it.tr.omittedPostsText}} {{=thread.omittedPosts}}   
+                </div>
+            {{?}}
+            <div class="threadPosts">
+                {{~thread.lastPosts :post}}
+                    {{#def.post}}
+                {{~}}
+            </div>
+        </div>
+    {{~}}
 </div>
 <input id="afterAllPosts" type="hidden" />
 <hr />
 {{~["Bottom"] :position}}
     {{#def.threadActions}}
 {{~}}
-<div id="lowerPlaceholder" style="display: none;"></div>
-<div id="navbarPlaceholder" style="display: none;"></div>
+<script type="text/javascript">
+    (function() {
+        var model = lord.model(["tr", "board/" + lord.data("boardName")]);
+        model.settings = lord.settings();
+        model.thread = {
+            archived: lord.data("archived"),
+            postingEnabled: lord.data("postingEnabled"),
+            postLimitReached: lord.data("postLimitReached"),
+            bumpLimitReached: lord.data("bumpLimitReached")
+        };
+        document.open();
+        document.write(lord.template("threadPageLower", model, true));
+        document.close();
+    })();
+</script>
+{{#def.navbar}}
+<hr />
 <a id="bottom"></a>
-<div id="customFooterPlaceholder" style="display: none;"></div>
+{{#def.customFooter}}
 </body>
 </html>

@@ -1,0 +1,67 @@
+<div {{? typeof it.registeredUser != "undefined"}}name="{{=it.registeredUser.hashpass}}"{{?}} class="registeredUser">
+    <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
+          action="/{{=it.site.pathPrefix}}action/registerUser" onsubmit="lord.registerUser(event, this); return false;">
+        {{? it.boardName}}
+            <input type="hidden" name="boardName" value="{{=it.boardName}}" />
+        {{?}}
+        {{? it.postNumber}}
+            <input type="hidden" name="postNumber" value="{{=it.postNumber}}" />
+        {{?}}
+        {{? typeof it.registeredUser != "undefined"}}
+            <input type="hidden" name="password" value="{{=it.registeredUser.hashpass}}" />
+        {{??}}
+            <input type="text" name="password" size="48" placeholder="{{=it.tr.loginPlaceholderText}}" />
+        {{?}}
+        {{ var accessLevels = []; }}
+        {{ accessLevels.push({ level: "NONE", description: it.tr.accessLevelNoneDescription } ); }}
+        {{ accessLevels.push({ level: "USER", description: it.tr.accessLevelUserDescription } ); }}
+        {{ accessLevels.push({ level: "MODER", description: it.tr.accessLevelModerDescription } ); }}
+        {{ accessLevels.push({ level: "ADMIN", description: it.tr.accessLevelAdminDescription } ); }}
+        <table>
+            <tbody>
+                {{~it.boards :board}}
+                    <tr name="board">
+                        {{? typeof it.registeredUser != "undefined"}}
+                            {{ var accessLevel = it.registeredUser.levels[board.name]; }}
+                        {{?}}
+                        <td>
+                            <input type="hidden" name="accessLevelBoard_{{=board.name}}" value="{{=board.name}}" />
+                            /{{=board.name}}/
+                        </td>
+                        <td>
+                            <select name="accessLevel_{{=board.name}}" class="select">
+                                {{~accessLevels :level}}
+                                    <option {{? (typeof accessLevel != "undefined" && accessLevel == level.level) || (typeof accesslevel == "undefined" && "NONE" == level.level)}}selected="true"{{?}}
+                                            value="{{=level.level}}">{{=level.description}}</option>
+                                {{~}}
+                            </select>
+                        </td>
+                    </tr>
+                {{~}}
+                <tr>
+                    <td>
+                        <input type="submit" name="submit" value="{{=it.tr.selectAllText}}"
+                               onclick="lord.userAccessLevelsSelectAll(event, this); return false;" />
+                    </td>
+                    <td>
+                        <select name="level" class="select">
+                            {{~accessLevels :level}}
+                                <option {{? "NONE" == level.level}}selected="true"{{?}}
+                                        value="{{=level.level}}">{{=level.description}}</option>
+                            {{~}}
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <br />
+        <textarea name="ips" placeholder="IP: <192.168.0.1>, [192.168.1.100, ...]"
+                  rows="2" cols="48">{{? typeof it.registeredUser != "undefined"}}{{=it.registeredUser.ips.map(function(ip) { return ip.ipv4 || ip.ip; }).join(" ")}}{{?}}</textarea>
+        <br />
+        <input type="submit" name="submit" value="{{=it.tr.confirmButtonText}}" />
+        {{? typeof it.registeredUser != "undefined"}}
+            <input type="submit" name="submit" value="{{=it.tr.removeButtonText}}"
+                   onclick="event.preventDefault(); lord.removeRegisteredUser(this); return false;" />
+        {{?}}
+    </form>
+</div>

@@ -12,4 +12,18 @@ board.postExtraData = function(req, fields, _, oldPost) {
     return Promise.resolve(oldPost ? oldPost.extraData : (req.headers["user-agent"] || null));
 };
 
+board.customPostBodyPart = function(n, it, thread, post) {
+    return {
+        20: function(it, thread, post) {
+            if (!post.extraData)
+                return "";
+            var model = {
+                userAgent: post.extraData,
+                post: post
+            };
+            return controller.sync("dPostBodyPart", model);
+        }
+    };
+};
+
 module.exports = board;

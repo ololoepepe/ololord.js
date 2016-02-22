@@ -14,13 +14,28 @@ Example:
             "backups": 100,
             "middleware": {
                 "before": "ddos",
+                "exclude": [
+                    { "string": "/action/deletePost" },
+                    {
+                        "regexp": "^/action/create[a-z]+$",
+                        "flags": "i"
+                    }
+                ],
                 "verbosity": "all"
             }
         },
         "fileDownloadProxy": "127.0.0.1:3128",
         "fileDownloadProxyAuth": "user:password",
         "searchLimit": 100,
-        "tmpPath": "/tmp/ramdisk"
+        "tmpPath": "/tmp/ramdisk",
+        "regenerateCacheOnStartup": false,
+        "redis": {
+            "port": 6379,
+            "host": "127.0.0.1",
+            "family": 4,
+            "password": "",
+            "db": 0
+        }
     },
     "server": {
         "port": 8080,
@@ -54,6 +69,9 @@ Example:
                 { "source": "http://ajax.aspnetcdn.com/ajax/jquery.validate/1.14.0/jquery.validate.min.js" }
             ]
         }
+    },
+    "permissions": {
+        "seeUserIp": "MODER"
     },
     "board": {
         "bumpLimit": 500,

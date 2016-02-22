@@ -166,6 +166,15 @@
                                value="{{=it.settings.viewPostPreviewDelay}}" />
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        {{=it.tr.hidePostPreviewDelayLabelText}}
+                    </td>
+                    <td>
+                        <input type="number" min="0" name="hidePostPreviewDelay" class="numberSize4"
+                               value="{{=it.settings.hidePostPreviewDelay}}" />
+                    </td>
+                </tr>
             </tbody>
         </table>
         <table data-index="2" style="display: none;">
@@ -390,6 +399,12 @@
                     <td colspan="2">
                         <input type="checkbox" name="chatEnabled"
                                {{? it.settings.chatEnabled}}checked="true"{{?}} /><label>{{=it.tr.chatLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="checkbox" name="drawingEnabled"
+                               {{? it.settings.drawingEnabled}}checked="true"{{?}} /><label>{{=it.tr.drawingLabelText}}</label>
                     </td>
                 </tr>
                 <tr>

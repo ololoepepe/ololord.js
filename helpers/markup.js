@@ -206,7 +206,7 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
         return Promise.resolve(defaultHtml);
     return HTTP.request({
         method: "GET",
-        url: `https://coub.com/api/oembed.json?url=coub.com/view/${videoId}`,
+        url: `https://coub.com/api/oembed.json?url=http://coub.com/view/${videoId}`,
         timeout: Tools.Minute
     }).then(function(response) {
         if (response.status != 200)

@@ -5,6 +5,7 @@ var expressCluster = require("express-cluster");
 var Log4JS = require("log4js");
 var OS = require("os");
 
+var Cache = require("./helpers/cache");
 var config = require("./helpers/config");
 var controller = require("./helpers/controller");
 var BoardModel = require("./models/board");
@@ -87,12 +88,6 @@ var spawnCluster = function() {
                         });
                     });
                 });
-                Global.IPC.installHandler("addToCached", function(data) {
-                    controller.addToCached(data);
-                });
-                Global.IPC.installHandler("removeFromCached", function(data) {
-                    return controller.removeFromCached(data);
-                });
                 Global.IPC.installHandler("doGenerate", function(data) {
                     var f = BoardModel[`do_${data.funcName}`];
                     if (typeof f != "function")
@@ -123,62 +118,48 @@ if (cluster.isMaster) {
     Database.initialize().then(function() {
         return controller.initialize();
     }).then(function() {
-        console.log("Generating cache, please, wait...");
-        return BoardModel.generate();
-    }).then(function() {
-        if (!config("server.rss.enabled", true))
-            return Promise.resolve();
-        console.log("Generating RSS, please, wait...");
-        setInterval(function() {
-            BoardModel.generateRss(true).catch(function(err) {
-                Global.error(err.stack || err);
-            });
-        }, config("server.rss.ttl", 60) * Tools.Minute);
-        return BoardModel.generateRss(true).catch(function(err) {
-            Global.error(err.stack || err);
-        }).then(function() {
-            return Promise.resolve();
-        });
+        if (config("server.rss.enabled", true)) {
+            setInterval(function() {
+                BoardModel.generateRSS().catch(function(err) {
+                    Global.error(err.stack || err);
+                });
+            }, config("server.rss.ttl", 60) * Tools.Minute);
+        }
+        if (config("system.regenerateCacheOnStartup", true))
+            return controller.regenerate();
+        return Promise.resolve();
     }).then(function() {
         console.log("Spawning workers, please, wait...");
         spawnCluster();
         var ready = 0;
         Global.IPC.installHandler("ready", function() {
             ++ready;
-            if (ready == count) {
-                var commands = require("./helpers/commands");
-                var rl = commands();
-            }
+            if (ready == count)
+                require("./helpers/commands")();
         });
-        var fileNames = {};
-        var fileName = function(boardName) {
+        var lastFileName;
+        var fileName = function() {
             var fn = "" + Tools.now().valueOf();
-            if (fn != fileNames[boardName]) {
-                fileNames[boardName] = fn;
+            if (fn != lastFileName) {
+                lastFileName = fn;
                 return Promise.resolve(fn);
             }
             return new Promise(function(resolve, reject) {
                 setTimeout(function() {
-                    fileName(boardName).then(function(fn) {
+                    fileName().then(function(fn) {
                         resolve(fn);
                     });
                 }, 1);
             });
         };
-        Global.IPC.installHandler("fileName", function(boardName) {
-            return fileName(boardName);
+        Global.IPC.installHandler("fileName", function() {
+            return fileName();
         });
         Global.IPC.installHandler("generate", function(data) {
             return BoardModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);
         });
-        Global.IPC.installHandler("addToCached", function(data) {
-            controller.addToCached(data);
-            return Global.IPC.send("addToCached", data);
-        });
-        Global.IPC.installHandler("removeFromCached", function(data) {
-            return Global.IPC.send("removeFromCached", data).then(function() {
-                return controller.removeFromCached(data, true);
-            });
+        Global.IPC.installHandler("generateArchive", function(data) {
+            return BoardModel.scheduleGenerateArchive(data);
         });
     }).catch(function(err) {
         Global.error(err.stack || err);
@@ -195,14 +176,8 @@ if (cluster.isMaster) {
             Global.error(err.stack || err);
         });
     };
-    Global.addToCached = function(keyParts) {
-        controller.addToCached(keyParts);
-        return Global.IPC.send("addToCached", keyParts).catch(function(err) {
-            Global.error(err.stack || err);
-        });
-    };
-    Global.removeFromCached = function(keyParts) {
-        return Global.IPC.send("removeFromCached", ["thread"].concat(keyParts)).catch(function(err) {
+    Global.generateArchive = function(boardName) {
+        return Global.IPC.send("generateArchive", boardName).catch(function(err) {
             Global.error(err.stack || err);
         });
     };

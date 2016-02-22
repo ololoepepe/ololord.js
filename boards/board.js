@@ -164,10 +164,41 @@ var Board = function(name, title, options) {
     defineSetting(this, "threadsPerPage", 20);
     Object.defineProperty(this, "launchDate", {
         get: function() {
-            return new Date(config("board." + name + ".launchDate", config("board.launchDate")));
+            return new Date(config("board." + name + ".launchDate", config("board.launchDate", new Date())));
         },
         configurable: true
     });
+};
+
+/*public*/ Board.prototype.info = function() {
+    var model = {
+        name: this.name,
+        title: this.title,
+        defaultUserName: this.defaultUserName,
+        showWhois: this.showWhois,
+        hidden: this.hidden,
+        postingEnabled: this.postingEnabled,
+        captchaEnabled: this.captchaEnabled,
+        maxEmailLength: this.maxEmailLength,
+        maxNameLength: this.maxNameLength,
+        maxSubjectLength: this.maxSubjectLength,
+        maxTextLength: this.maxTextLength,
+        maxPasswordLength: this.maxPasswordLength,
+        maxFileCount: this.maxFileCount,
+        maxFileSize: this.maxFileSize,
+        maxLastPosts: this.maxLastPosts,
+        markupElements: this.markupElements,
+        supportedFileTypes: this.supportedFileTypes,
+        supportedCaptchaEngines: this.supportedCaptchaEngines,
+        bumpLimit: this.bumpLimit,
+        postLimit: this.postLimit,
+        bannerFileNames: this.bannerFileNames,
+        launchDate: this.launchDate.toISOString()
+    };
+    this.customBoardInfoFields().forEach(function(field) {
+        model[field] = board[field];
+    });
+    return model;
 };
 
 /*public*/ Board.prototype.customBoardInfoFields = function() {
@@ -230,6 +261,14 @@ var Board = function(name, title, options) {
 };
 
 /*public*/ Board.prototype.addTranslations = function(translate) {
+    //
+};
+
+/*public*/ Board.prototype.customPostHeaderPart = function() {
+    //
+};
+
+/*public*/ Board.prototype.customPostBodyPart = function() {
     //
 };
 
@@ -324,7 +363,7 @@ var getRules = function(boardName) {
 };
 
 /*public*/ Board.prototype.generateFileName = function(file) {
-    return Global.IPC.send("fileName", this.name).then(function(base) {
+    return Global.IPC.send("fileName").then(function(base) {
         var ext = Path.extname(file.name);
         if (Util.isString(ext))
             ext = ext.substr(1);
@@ -341,9 +380,8 @@ var getRules = function(boardName) {
     var p;
     if (!file.hash) {
         p = FS.read(file.path, "b").then(function(data) {
-            var sha1 = Crypto.createHash("sha1");
-            sha1.update(data);
-            file.hash = sha1.digest("hex");
+            file.hash = Tools.sha1(data);
+            return Promise.resolve();
         });
     } else {
         p = Promise.resolve();
@@ -410,10 +448,12 @@ var getRules = function(boardName) {
                     resolve(metadata);
                 });
             }).then(function(metadata) {
-                file.dimensions = {
-                    width: metadata.streams[0].width,
-                    height: metadata.streams[0].height
-                };
+                if (!isNaN(+metadata.streams[0].width) && !isNaN(+metadata.streams[0].height)) {
+                    file.dimensions = {
+                        width: metadata.streams[0].width,
+                        height: metadata.streams[0].height
+                    };
+                }
                 file.extraData.duration = durationToString(metadata.format.duration);
                 file.extraData.bitrate = Math.floor(+metadata.format.bit_rate / 1024);
                 file.thumbPath += ".png";

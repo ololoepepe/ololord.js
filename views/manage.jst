@@ -1,33 +1,45 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<body class="mobile" {{#def.baseData}}>
-<div id="toolbarPlaceholder" style="display: none;"></div>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
-<br />
-<div id="searchPlaceholder" style="display: none;"></div>
+<body {{#def.baseData}}>
+{{#def.toolbar}}
+{{#def.player}}
+{{#def.customHeader}}
+{{#def.searchAction}}
 <div class="theTitle">
     <h1>
         {{=it.title}}
     </h1>
 </div>
-<div id="bannedUsers">
-    {{ for (var ip in it.bannedUsers) { }}
-        {{ if (!it.bannedUsers.hasOwnProperty(ip)) continue; }}
-        {{ var user = { ip: ip, bans: it.bannedUsers[ip] }; }}
-        <div id="user{{=user.ip}}">
-            {{#def.userBan}}
-            <br />
-        </div>
-    {{ } }}
-</div>    
-<hr />
 <div>
-    {{? typeof user != "undefined"}}
-        {{ user = undefined; }}
-    {{?}}
-    {{#def.userBan}}
-</div>
-<div id="customFooterPlaceholder" style="display: none;"></div>
+    <ul class="tabWidget nowrap">
+        <li data-index="0"
+            class="activated"><a onclick="lord.activateTab(this); return false;">{{=it.tr.bansTabText}}</a></li>
+        {{? it.superuserContentVisible}}
+            <li data-index="1"><a onclick="lord.activateTab(this); return false;">{{=it.tr.usersTabText}}</a></li>
+            <li data-index="2"><a onclick="lord.activateTab(this); return false;">{{=it.tr.boardsTabText}}</a></li>
+            <li data-index="3"><a onclick="lord.activateTab(this); return false;">{{=it.tr.contentTabText}}</a></li>
+        {{?}}
+    </ul>
+    <div>
+        <div id="bans" data-index="0" class="loadingMessage">
+            <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+            <h1 style="display: inline;">{{=it.tr.loadingBansMessage}}</h1>
+        </div>
+        {{? it.superuserContentVisible}}
+            <div id="users" data-index="1" class="loadingMessage" style="display: none;">
+                <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+                <h1 style="display: inline;">{{=it.tr.loadingUsersMessage}}</h1>
+            </div>
+            <div data-index="2" style="display: none;">
+                Coming soon... [planned for v1.1.0]
+            </div>
+            <div data-index="3" style="display: none;">
+                Coming soon... [planned for v1.1.0]
+            </div>
+        {{?}}
+    </div>
+</div> 
+{{#def.customFooter}}
 </body>
 </html>

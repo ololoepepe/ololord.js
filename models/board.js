@@ -9,6 +9,7 @@ var Util = require("util");
 var XML2JS = require("xml2js");
 
 var Board = require("../boards");
+var Cache = require("../helpers/cache");
 var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
@@ -18,33 +19,12 @@ var Tools = require("../helpers/tools");
 var scheduledGeneratePages = {};
 var scheduledGenerateThread = {};
 var scheduledGenerateCatalog = {};
+var scheduledGenerateArchive = {};
 var pageCounts = {};
 var workerLoads = {};
 
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-json");
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-rss");
-
-var cachePath = function() {
-    var args = [];
-    Array.prototype.slice.call(arguments, 0).forEach(function(arg) {
-        args = args.concat(arg);
-    });
-    var path = args.join("-");
-    return config("system.tmpPath", __dirname + "/../tmp") + "/cache-json" + (path ? ("/" + path + ".json") : "");
-};
-
-module.exports.cachePath = cachePath;
-
-var rssCachePath = function() {
-    var args = [];
-    Array.prototype.slice.call(arguments, 0).forEach(function(arg) {
-        args = args.concat(arg);
-    });
-    var path = args.join("-");
-    return config("system.tmpPath", __dirname + "/../tmp") + "/cache-rss" + (path ? ("/" + path + ".xml") : "");
-};
-
-module.exports.rssCachePath = rssCachePath;
 
 module.exports.getLastPostNumbers = function(boardNames) {
     if (!Util.isArray(boardNames))
@@ -59,26 +39,16 @@ module.exports.getPosts = function(posts) {
     if (!posts || posts.length < 1)
         return Promise.resolve([]);
     var c = { posts: [] };
-    var p = Database.getPost(posts[0].boardName, posts[0].postNumber, {
-        withFileInfos: true,
-        withReferences: true,
-        withExtraData: true
-    }).then(function(post) {
-        c.posts.push(post);
-    });
-    posts.slice(1).forEach(function(post) {
-        p = p.then(function() {
-            return Database.getPost(post.boardName, post.postNumber, {
-                withFileInfos: true,
-                withReferences: true,
-                withExtraData: true
-            });
+    return Tools.series(posts, function(post) {
+        return Database.getPost(post.boardName, post.postNumber, {
+            withFileInfos: true,
+            withReferences: true,
+            withExtraData: true
         }).then(function(post) {
             c.posts.push(post);
             return Promise.resolve();
         });
-    });
-    return p.then(function() {
+    }).then(function() {
         return Promise.resolve(c.posts);
     });
 };
@@ -96,8 +66,6 @@ module.exports.getBoardPage = function(board, page, json, ifModifiedSince) {
     page = +(page || 0);
     if (isNaN(page) || page < 0 || page >= pageCounts[board.name])
         return Promise.reject(Tools.translate("Invalid page number"));
-    if (json)
-        return Tools.readFile(cachePath("page", board.name, page), ifModifiedSince);
     var model = {
         pageCount: pageCounts[board.name],
         currentPage: page,
@@ -162,13 +130,12 @@ var getPage = function(board, page) {
         });
         return Promise.all(promises);
     }).then(function() {
-        c.model = {
-            threads: [],
+        var model = {
             pageCount: c.pageCount,
             currentPage: page
         };
-        c.threads.forEach(function(thread) {
-            var threadModel = {
+        model.threads = c.threads.map(function(thread) {
+            return {
                 opPost: thread.opPost,
                 lastPosts: thread.lastPosts.reverse(),
                 postCount: thread.postCount,
@@ -183,13 +150,8 @@ var getPage = function(board, page) {
                 omittedPosts: ((thread.postCount > (board.maxLastPosts + 1))
                     ? (thread.postCount - board.maxLastPosts - 1) : 0)
             };
-            c.model.threads.push(threadModel);
         });
-        return Database.lastPostNumber(board.name);
-    }).then(function(lastPostNumber) {
-        c.model.lastPostNumber = lastPostNumber;
-        c.model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
-        return Promise.resolve(c.model);
+        return Promise.resolve(model);
     });
 };
 
@@ -200,12 +162,6 @@ var getThreadPage = function(archived, board, number, json, ifModifiedSince) {
     if (isNaN(number) || number < 1)
         return Promise.reject(Tools.translate("Invalid thread"));
     var c = {};
-    if (json) {
-        if (archived)
-            return Tools.readFile(`${__dirname}/../public/${board.name}/arch/${number}.json`, ifModifiedSince);
-        else
-            return Tools.readFile(cachePath("thread", board.name, number), ifModifiedSince);
-    }
     return Database.getThread(board.name, number, archived).then(function(thread) {
         if (!thread)
             return Promise.reject(Tools.translate("No such thread"));
@@ -234,14 +190,6 @@ var getThreadPage = function(archived, board, number, json, ifModifiedSince) {
         c.model.lastPostNumber = lastPostNumber;
         return Promise.resolve(c.model);
     });
-};
-
-module.exports.getThreadPage = function(board, number, json, ifModifiedSince) {
-    return getThreadPage(false, board, number, json, ifModifiedSince);
-};
-
-module.exports.getArchivedThreadPage = function(board, number, json, ifModifiedSince) {
-    return getThreadPage(true, board, number, json, ifModifiedSince);
 };
 
 var getThread = function(board, number) {
@@ -295,40 +243,6 @@ var getThread = function(board, number) {
     });
 };
 
-module.exports.getLastPosts = function(board, hashpass, threadNumber, lastPostNumber) {
-    if (!(board instanceof Board))
-        return Promise.reject(Tools.translate("Invalid board"));
-    threadNumber = +(threadNumber || 0);
-    if (isNaN(threadNumber) || threadNumber < 1)
-        return Promise.reject(Tools.translate("Invalid thread"));
-    lastPostNumber = +(lastPostNumber || 0);
-    if (isNaN(lastPostNumber) || lastPostNumber < 0)
-        lastPostNumber = 0;
-    var c = {};
-    return Database.registeredUserLevel(hashpass).then(function(level) {
-        c.level = level;
-        return Database.getThreads(board.name, {
-            limit: 1,
-            withPostNumbers: 1,
-            filterFunction: function(thread) {
-                return thread.number == threadNumber;
-            }
-        });
-    }).then(function(threads) {
-        if (threads.length != 1)
-            return Promise.reject(Tools.translate("No such thread"));
-        c.thread = threads[0];
-        return Database.threadPosts(board.name, c.thread.number, {
-            withFileInfos: true,
-            withReferences: true,
-            withExtraData: true,
-            filterFunction: function(post) {
-                return post.number > lastPostNumber;
-            }
-        });
-    });
-};
-
 module.exports.getThreadLastPostNumber = function(boardName, threadNumber) {
     var board = Board.board(boardName);
     if (!(board instanceof Board))
@@ -359,14 +273,11 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
     if (isNaN(number) || number < 1)
         return Promise.reject(Tools.translate("Invalid thread"));
     var c = {};
-    return Database.registeredUserLevel(hashpass).then(function(level) {
-        c.level = level;
-        return Database.getThreads(board.name, {
-            limit: 1,
-            filterFunction: function(thread) {
-                return thread.number == number;
-            }
-        });
+    return Database.getThreads(board.name, {
+        limit: 1,
+        filterFunction: function(thread) {
+            return thread.number == number;
+        }
     }).then(function(threads) {
         if (threads.length != 1)
             return Promise.reject(Tools.translate("No such thread"));
@@ -392,50 +303,9 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
 module.exports.getCatalogPage = function(board, sortMode, json, ifModifiedSince) {
     if (!(board instanceof Board))
         return Promise.reject(Tools.translate("Invalid board"));
-    if (json) {
-        sortMode = (sortMode || "date").toLowerCase();
-        if (["recent", "bumps"].indexOf(sortMode) < 0)
-            sortMode = "date";
-        return Tools.readFile(cachePath("catalog", sortMode, board.name), ifModifiedSince);
-    }
     return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
         return Promise.resolve({ lastPostNumber: lastPostNumber });
     });
-};
-
-module.exports.getArchivePage = function(board, json) {
-    if (!(board instanceof Board))
-        return Promise.reject(Tools.translate("Invalid board"));
-    if (json) {
-        var model = {};
-        var path = `${__dirname}/../public/${board.name}/arch`;
-        return FS.exists(path).then(function(exists) {
-            if (!exists)
-                return Promise.resolve([]);
-            return FS.list(path);
-        }).then(function(fileNames) {
-            model.threads = fileNames.map(function(fileName) {
-                return {
-                    boardName: board.name,
-                    number: +fileName.split(".").shift()
-                };
-            });
-            return Database.lastPostNumber(board.name);
-        }).then(function(lastPostNumber) {
-            model.lastPostNumber = lastPostNumber;
-            model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
-            return Promise.resolve(model);
-        });
-    }
-    return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
-        return Promise.resolve({ lastPostNumber: lastPostNumber });
-    });
-};
-
-module.exports.getRss = function(board, ifModifiedSince) {
-    if (!(board instanceof Board))
-        return Promise.reject(Tools.translate("Invalid board"));
-    return Tools.readFile(rssCachePath(board.name), ifModifiedSince);
 };
 
 var getCatalog = function(board, sortMode) {
@@ -464,7 +334,7 @@ var getCatalog = function(board, sortMode) {
         });
         return Promise.all(promises);
     }).then(function() {
-        c.model = { threads: [] };
+        var model = {};
         var sortFunction = Board.sortThreadsByCreationDate;
         switch ((sortMode || "date").toLowerCase()) {
         case "recent":
@@ -476,9 +346,8 @@ var getCatalog = function(board, sortMode) {
         default:
             break;
         }
-        c.threads.sort(sortFunction);
-        c.threads.forEach(function(thread) {
-            var threadModel = {
+        model.threads = c.threads.sort(sortFunction).map(function(thread) {
+            return {
                 opPost: thread.opPost,
                 postCount: thread.postCount,
                 bumpLimit: board.bumpLimit,
@@ -490,13 +359,8 @@ var getCatalog = function(board, sortMode) {
                 unbumpable: thread.unbumpable,
                 postingEnabled: (board.postingEnabled && !thread.closed)
             };
-            c.model.threads.push(threadModel);
         });
-        return Database.lastPostNumber(board.name);
-    }).then(function(lastPostNumber) {
-        c.model.lastPostNumber = lastPostNumber;
-        c.model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
-        return Promise.resolve(c.model);
+        return Promise.resolve(model);
     });
 };
 
@@ -511,31 +375,50 @@ module.exports.pageCount = function(boardName) {
 };
 
 var renderThread = function(board, thread) {
-    var p = Promise.resolve();
-    if (thread.lastPosts) {
-        thread.lastPosts.forEach(function(post) {
-            p = p.then(function() {
-                return board.renderPost(post, null, thread.opPost);
-            });
+    var p = board.renderPost(thread.opPost, null, thread.opPost);
+    if (!thread.lastPosts)
+        return p;
+    return p.then(function() {
+        return Tools.series(thread.lastPosts, function(post) {
+            return board.renderPost(post, null, thread.opPost);
         });
-    }
-    p = p.then(function() {
-        return board.renderPost(thread.opPost, null, thread.opPost);
     });
-    return p;
 };
+
+var generateThreadHTML = function(board, threadNumber, model, nowrite) {
+    model.title = model.thread.title || (board.title + " — " + model.thread.number);
+    model.isBoardPage = true;
+    model.isThreadPage = true;
+    model.board = controller.boardModel(board).board;
+    model.extraScripts = board.extraScripts();
+    model.tr = controller.translationsModel();
+    model.threadNumber = model.thread.number;
+    return board.postformRules().then(function(rules) {
+        model.postformRules = rules;
+        model.customPostHeaderPart = board.customPostHeaderPart() || {};
+        model.customPostBodyPart = board.customPostBodyPart() || {};
+        return controller("threadPage", model);
+    }).then(function(data) {
+        if (nowrite)
+            return Promise.resolve(data);
+        return Cache.setHTML(`thread-${board.name}-${threadNumber}`, data);
+    });
+};
+
+module.exports.generateThreadHTML = generateThreadHTML;
 
 var generateThread = function(boardName, threadNumber) {
     var board = Board.board(boardName);
-    if (!(board instanceof Board))
+    if (!board)
         return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
-    var threadPath = cachePath("thread", boardName, threadNumber);
-    return getThread(board, threadNumber).then(function(json) {
-        c.json = json;
-        return renderThread(board, c.json.thread);
+    return getThread(board, threadNumber).then(function(model) {
+        c.model = model;
+        return renderThread(board, c.model.thread);
     }).then(function() {
-        return Tools.writeFile(threadPath, JSON.stringify(c.json));
+        return Cache.setJSON(`thread-${boardName}-${threadNumber}`, JSON.stringify(c.model));
+    }).then(function() {
+        return generateThreadHTML(board, threadNumber, c.model);
     });
 };
 
@@ -545,120 +428,113 @@ var generateThreads = function(boardName) {
         return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     return Database.getThreads(boardName).then(function(threads) {
-        var p = (threads.length > 0) ? generateThread(boardName, threads[0].number) : Promise.resolve();
-        threads.slice(1).forEach(function(thread) {
-            p = p.then(function() {
-                return generateThread(boardName, thread.number);
-            });
+        return Tools.series(threads, function(thread) {
+            return generateThread(boardName, thread.number);
         });
-        return p;
     });
 };
 
-var generatePage = function(boardName, page, accumulator) {
+var generatePage = function(boardName, pageNumber) {
     var board = Board.board(boardName);
-    return getPage(board, page).then(function(json) {
-        var path = cachePath("page", boardName, page);
-        var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
-        json.threads.slice(1).forEach(function(thread) {
-            p = p.then(function() {
-                return renderThread(board, thread);
-            })
+    var c = {};
+    return getPage(board, pageNumber).then(function(model) {
+        c.model = model;
+        return Tools.series(model.threads, function(thread) {
+            return renderThread(board, thread);
         });
-        p.then(function() {
-            var data = JSON.stringify(json);
-            if (accumulator) {
-                accumulator.push({
-                    path: path,
-                    data: data
-                });
-                return Promise.resolve();
-            }
-            return Tools.writeFile(path, data);
-        });
-        return p;
+    }).then(function() {
+        return Database.lastPostNumber(board.name);
+    }).then(function(lastPostNumber) {
+        c.model.lastPostNumber = lastPostNumber;
+        c.model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
+        return Cache.setJSON(`page-${board.name}-${pageNumber}`, JSON.stringify(c.model));
+    }).then(function() {
+        c.model.title = board.title;
+        c.model.isBoardPage = true;
+        c.model.board = controller.boardModel(board).board;
+        c.model.extraScripts = board.extraScripts();
+        c.model.tr = controller.translationsModel();
+        return board.postformRules();
+    }).then(function(rules) {
+        c.model.postformRules = rules;
+        c.model.customPostHeaderPart = board.customPostHeaderPart() || {};
+        c.model.customPostBodyPart = board.customPostBodyPart() || {};
+        return controller("boardPage", c.model);
+    }).then(function(data) {
+        return Cache.setHTML(`page-${board.name}-${pageNumber}`, data);
     });
 };
 
-var generatePages = function(boardName, nowrite) {
+var generatePages = function(boardName) {
     return module.exports.pageCount(boardName).then(function(pageCount) {
         pageCounts[boardName] = pageCount;
         var pageNumbers = [];
         for (var i = 0; i < pageCount; ++i)
             pageNumbers.push(i);
-        var accumulator = nowrite ? [] : undefined;
-        var p = (pageNumbers.length > 0) ? generatePage(boardName, pageNumbers[0], accumulator) : Promise.resolve();
-        pageNumbers.slice(1).forEach(function(page) {
-            p = p.then(function() {
-                return generatePage(boardName, page, accumulator);
-            });
-        });
-        return p.then(function() {
-            return Promise.resolve(accumulator);
+        return Tools.series(pageNumbers, function(pageNumber) {
+            return generatePage(boardName, pageNumber);
         });
     });
 };
 
-var generateCatalog = function(boardName, nowrite) {
+var generateCatalog = function(boardName) {
     var board = Board.board(boardName);
-    var c = {};
-    return getCatalog(board, "date").then(function(json) {
-        var path = cachePath("catalog", "date", boardName);
-        var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
-        json.threads.slice(1).forEach(function(thread) {
-            p = p.then(function() {
+    return Tools.series(["date", "recent", "bumps"], function(sortMode) {
+        var c = {};
+        return getCatalog(board, sortMode).then(function(model) {
+            c.model = model;
+            return Tools.series(c.model.threads, function(thread) {
                 return renderThread(board, thread);
-            })
+            });
+        }).then(function() {
+            return Database.lastPostNumber(board.name);
+        }).then(function(lastPostNumber) {
+            c.model.lastPostNumber = lastPostNumber;
+            c.model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
+            return Cache.setJSON(`catalog-${sortMode}-${board.name}`, JSON.stringify(c.model));
+        }).then(function() {
+            c.model.title = board.title;
+            c.model.isBoardPage = true;
+            c.model.board = controller.boardModel(board).board;
+            c.model.sortMode = sortMode;
+            c.model.tr = controller.translationsModel();
+            return controller("catalogPage", c.model);
+        }).then(function(data) {
+            return Cache.setHTML(`catalog-${sortMode}-${board.name}`, data);
         });
-        p.then(function() {
-            var data = JSON.stringify(json);
-            if (nowrite) {
-                c.datePath = path;
-                c.dateData = data;
-                return Promise.resolve();
-            }
-            return Tools.writeFile(path, data);
+    });
+};
+
+var generateArchive = function(boardName) {
+    var board = Board.board(boardName);
+    var model = {};
+    var path = `${__dirname}/../public/${board.name}/arch`;
+    return FS.exists(path).then(function(exists) {
+        if (!exists)
+            return Promise.resolve([]);
+        return FS.list(path);
+    }).then(function(fileNames) {
+        model.threads = fileNames.filter(function(fileName) {
+            return fileName.split(".").pop() == "json";
+        }).map(function(fileName) {
+            return {
+                boardName: board.name,
+                number: +fileName.split(".").shift()
+            };
         });
-        return p;
+        return Database.lastPostNumber(board.name);
+    }).then(function(lastPostNumber) {
+        model.lastPostNumber = lastPostNumber;
+        model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
+        return Cache.setJSON(`archive-${board.name}`, JSON.stringify(model));
     }).then(function() {
-        return getCatalog(board, "recent");
-    }).then(function(json) {
-        var path = cachePath("catalog", "recent", boardName);
-        var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
-        json.threads.slice(1).forEach(function(thread) {
-            p = p.then(function() {
-                return renderThread(board, thread);
-            })
-        });
-        p.then(function() {
-            var data = JSON.stringify(json);
-            if (nowrite) {
-                c.recentPath = path;
-                c.recentData = data;
-                return Promise.resolve();
-            }
-            return Tools.writeFile(path, data);
-        });
-        return p;
-    }).then(function() {
-        return getCatalog(board, "bumps");
-    }).then(function(json) {
-        var path = cachePath("catalog", "bumps", boardName);
-        var p = (json.threads.length > 0) ? renderThread(board, json.threads[0]) : Promise.resolve();
-        json.threads.slice(1).forEach(function(thread) {
-            p = p.then(function() {
-                return renderThread(board, thread);
-            })
-        });
-        return p.then(function() {
-            var data = JSON.stringify(json);
-            if (nowrite) {
-                c.bumpsPath = path;
-                c.bumpsData = data;
-                return Promise.resolve(c);
-            }
-            return Tools.writeFile(path, data);
-        });
+        model.title = board.title;
+        //model.isBoardPage = true;
+        model.board = controller.boardModel(board).board;
+        model.tr = controller.translationsModel();
+        return controller("archivePage", model);
+    }).then(function(data) {
+        return Cache.setHTML(`archive-${board.name}`, data);
     });
 };
 
@@ -667,6 +543,8 @@ var generateBoard = function(boardName) {
         return generateThreads(boardName);
     }).then(function() {
         return generateCatalog(boardName);
+    }).then(function() {
+        return generateArchive(boardName);
     });
 };
 
@@ -771,11 +649,11 @@ module.exports.do_generateThread = function(key, data) {
     }
     case "edit": {
         var c = {};
-        var threadPath = cachePath("thread", boardName, threadNumber);
+        var threadId = `thread-${boardName}-${threadNumber}`;
         var board = Board.board(boardName);
         if (!board)
             return Promise.reject(Tools.translate("Invalid board"));
-        return Tools.readFile(threadPath).then(function(data) {
+        return Cache.getJSON(threadId).then(function(data) {
             c.thread = JSON.parse(data.data);
             c.lastPosts = c.thread.thread.lastPosts.reduce(function(acc, post) {
                 acc[post.number] = post;
@@ -827,12 +705,16 @@ module.exports.do_generateThread = function(key, data) {
             return p;
         }).then(function() {
             c.thread.thread.lastPosts = Tools.toArray(c.lastPosts);
-            return Tools.writeFile(threadPath, JSON.stringify(c.thread));
+            return Cache.setJSON(threadId, JSON.stringify(c.thread));
+        }).then(function() {
+            return generateThreadHTML(board, threadNumber, c.thread);
         });
     }
     case "delete": {
         return Database.db.sadd("deletedThreads", data.boardName + ":" + data.threadNumber).then(function() {
-            return Tools.removeFile(cachePath("thread", boardName, threadNumber));
+            return Cache.removeJSON(`thread-${boardName}-${threadNumber}`);
+        }).then(function() {
+            return Cache.removeHTML(`thread-${boardName}-${threadNumber}`);
         });
     }
     default:
@@ -842,32 +724,121 @@ module.exports.do_generateThread = function(key, data) {
 };
 
 module.exports.do_generatePages = function(boardName) {
-    var c = {};
-    return generatePages(boardName, true).then(function(pages) {
-        c.pages = pages;
-        var p = (c.pages.length > 0) ? Tools.writeFile(c.pages[0].path, c.pages[0].data) : Promise.resolve();
-        c.pages.slice(1).forEach(function(page) {
-            p = p.then(function() {
-                return Tools.writeFile(page.path, page.data);
-            });
-        });
-        return p;
-    });
+    return generatePages(boardName);
 };
 
 module.exports.do_generateCatalog = function(boardName) {
-    var c = {};
-    return generateCatalog(boardName, true).then(function(catalog) {
-        c.catalog = catalog;
-        return Tools.writeFile(c.catalog.datePath, c.catalog.dateData);
-    }).then(function() {
-        Tools.writeFile(c.catalog.recentPath, c.catalog.recentData);
-    }).then(function() {
-        Tools.writeFile(c.catalog.bumpsPath, c.catalog.bumpsData);
+    return generateCatalog(boardName);
+};
+
+module.exports.do_generateArchive = function(boardName) {
+    return generateArchive(boardName);
+};
+
+module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNumber, action) {
+    return Database.db.sismember("deletedThreads", boardName + ":" + threadNumber).then(function(result) {
+        if (result)
+            return Promise.resolve();
+        if (threadNumber == postNumber) {
+            if ("edit" == action)
+                action = "create";
+        } else {
+            action = "edit";
+        }
+        return addTask(scheduledGenerateThread, boardName + ":" + threadNumber, "generateThread", {
+            boardName: boardName,
+            threadNumber: threadNumber,
+            action: action
+        });
     });
 };
 
-module.exports.do_generateRss = function() {
+module.exports.scheduleGeneratePages = function(boardName) {
+    return addTask(scheduledGeneratePages, boardName, "generatePages");
+};
+
+module.exports.scheduleGenerateCatalog = function(boardName) {
+    return addTask(scheduledGenerateCatalog, boardName, "generateCatalog");
+};
+
+module.exports.scheduleGenerateArchive = function(boardName) {
+    return addTask(scheduledGenerateArchive, boardName, "generateArchive");
+};
+
+module.exports.scheduleGenerate = function(boardName, threadNumber, postNumber, action) {
+    var p = Promise.resolve();
+    switch (action) {
+    case "create":
+        p = p.then(function() {
+            return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+        }).then(function() {
+            module.exports.scheduleGeneratePages(boardName).then(function() {
+                module.exports.scheduleGenerateCatalog(boardName);
+            }).then(function() {
+                module.exports.scheduleGenerateArchive(boardName);
+            });
+            return Promise.resolve();
+        });
+        break;
+    case "edit":
+    case "delete":
+        if (threadNumber == postNumber) {
+            p = p.then(function() {
+                return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+            }).then(function() {
+                return module.exports.scheduleGeneratePages(boardName);
+            }).then(function() {
+                module.exports.scheduleGenerateCatalog(boardName).then(function() {
+                    module.exports.scheduleGenerateArchive(boardName);
+                });
+                return Promise.resolve();
+            });
+        } else {
+            p = p.then(function() {
+                module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action).then(function() {
+                    return module.exports.scheduleGeneratePages(boardName);
+                }).then(function() {
+                    module.exports.scheduleGenerateCatalog(boardName).then(function() {
+                        module.exports.scheduleGenerateArchive(boardName);
+                    });
+                });
+                return Promise.resolve();
+            });
+        }
+        break;
+    default:
+        p = p.then(function() {
+            module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action).then(function() {
+                return module.exports.scheduleGeneratePages(boardName);
+            }).then(function() {
+                module.exports.scheduleGenerateCatalog(boardName).then(function() {
+                    module.exports.scheduleGenerateArchive(boardName);
+                });
+            });
+            return Promise.resolve();
+        });
+        break;
+    }
+    return p;
+};
+
+module.exports.initialize = function() {
+    return Tools.series(Board.boardNames(), function(boardName) {
+        return module.exports.pageCount(boardName).then(function(pageCount) {
+            pageCounts[boardName] = pageCount;
+            return Promise.resolve();
+        });
+    }).then(function() {
+        return Database.db.del("deletedThreads");
+    });
+};
+
+module.exports.generateJSON = function() {
+    var boardNames = Board.boardNames();
+    return Tools.series(boardNames, generateBoard);
+};
+
+module.exports.generateRSS = function(currentProcess) {
     var site = {
         protocol: config("site.protocol", "http"),
         domain: config("site.domain", "localhost:8080"),
@@ -963,128 +934,7 @@ module.exports.do_generateRss = function() {
                 },
                 cdata: true
             });
-            return Tools.writeFile(rssCachePath(boardName), builder.buildObject(doc));
+            return Cache.setRSS(boardName, builder.buildObject(doc));
         });
-    });
-};
-
-module.exports.generateRss = function(currentProcess) {
-    return currentProcess ? module.exports.do_generateRss() : performTask("generateRss");
-};
-
-module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNumber, action) {
-    return Database.db.sismember("deletedThreads", boardName + ":" + threadNumber).then(function(result) {
-        if (result)
-            return Promise.resolve();
-        if (threadNumber == postNumber) {
-            if ("edit" == action)
-                action = "create";
-        } else {
-            action = "edit";
-        }
-        return addTask(scheduledGenerateThread, boardName + ":" + threadNumber, "generateThread", {
-            boardName: boardName,
-            threadNumber: threadNumber,
-            action: action
-        });
-    });
-};
-
-module.exports.scheduleGeneratePages = function(boardName) {
-    return addTask(scheduledGeneratePages, boardName, "generatePages");
-};
-
-module.exports.scheduleGenerateCatalog = function(boardName) {
-    return addTask(scheduledGenerateCatalog, boardName, "generateCatalog");
-};
-
-module.exports.scheduleGenerate = function(boardName, threadNumber, postNumber, action) {
-    var p = Promise.resolve();
-    switch (action) {
-    case "create":
-        p = p.then(function() {
-            return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
-        }).then(function() {
-            module.exports.scheduleGeneratePages(boardName).then(function() {
-                module.exports.scheduleGenerateCatalog(boardName);
-            });
-            return Promise.resolve();
-        });
-        break;
-    case "edit":
-    case "delete":
-        if (threadNumber == postNumber) {
-            p = p.then(function() {
-                return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
-            }).then(function() {
-                return module.exports.scheduleGeneratePages(boardName);
-            }).then(function() {
-                module.exports.scheduleGenerateCatalog(boardName);
-                return Promise.resolve();
-            });
-        } else {
-            p = p.then(function() {
-                module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action).then(function() {
-                    return module.exports.scheduleGeneratePages(boardName);
-                }).then(function() {
-                    module.exports.scheduleGenerateCatalog(boardName);
-                });
-                return Promise.resolve();
-            });
-        }
-        break;
-    default:
-        p = p.then(function() {
-            module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action).then(function() {
-                return module.exports.scheduleGeneratePages(boardName);
-            }).then(function() {
-                module.exports.scheduleGenerateCatalog(boardName);
-            });
-            return Promise.resolve();
-        });
-        break;
-    }
-    return p;
-};
-
-module.exports.generate = function() {
-    return module.exports.cleanup().then(function() {
-        var boardNames = Board.boardNames();
-        var p = (boardNames.length > 0) ? generateBoard(boardNames[0]) : Promise.resolve();
-        boardNames.slice(1).forEach(function(boardName) {
-            p = p.then(function(boarName) {
-                return generateBoard(boardName);
-            });
-        });
-        return p;
-    });
-};
-
-module.exports.cleanup = function() {
-    var path = cachePath();
-    return FS.list(path).then(function(fileNames) {
-        fileNames = fileNames.filter(function(fileName) {
-            return ".gitignore" != fileName;
-        }).map(function(fileName) {
-            return path + "/" + fileName;
-        });
-        var p = (fileNames.length > 0) ? Tools.removeFile(fileNames[0]) : Promise.resolve();
-        fileNames.slice(1).forEach(function(fileName) {
-            p = p.then(function() {
-                return Tools.removeFile(fileName);
-            });
-        });
-        return p;
-    });
-};
-
-module.exports.initialize = function() {
-    return Tools.series(Board.boardNames(), function(boardName) {
-        return module.exports.pageCount(boardName).then(function(pageCount) {
-            pageCounts[boardName] = pageCount;
-            return Promise.resolve();
-        });
-    }).then(function() {
-        return Database.db.del("deletedThreads");
     });
 };

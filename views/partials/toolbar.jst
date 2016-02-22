@@ -1,0 +1,25 @@
+<script type="text/javascript">
+    (function() {
+        var settings = lord.settings();
+        var model = lord.model(["base", "tr", "boards"]);
+        if (lord.data("boardName"))
+            model.board = lord.model("board/" + lord.data("boardName")).board;
+        if (model.user.loggedIn) {
+            if (model.user.isSuperuser())
+                model.loginMessageText = lord.text("loginMessageSuperuserText");
+            else if (model.user.isAdmin())
+                model.loginMessageText = lord.text("loginMessageAdminText");
+            else if (model.user.isModer())
+                model.loginMessageText = lord.text("loginMessageModerText");
+            else if (model.user.isUser())
+                model.loginMessageText = lord.text("loginMessageUserText");
+            else
+                model.loginMessageText = lord.text("loginMessageNoneText");
+        }
+        document.open();
+        document.write(lord.template("toolbar", model, true));
+        document.close();
+        if (settings.stickyToolbar)
+            $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
+    })();
+</script>

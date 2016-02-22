@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<body class="mobile" {{#def.baseData}}>
-<div id="toolbarPlaceholder" style="display: none;"></div>
-<div id="customHeaderPlaceholder" style="display: none;"></div>
-<br />
-<div id="searchPlaceholder" style="display: none;"></div>
+<body {{#def.baseData}}>
+{{#def.toolbar}}
+{{#def.player}}
+{{#def.customHeader}}
+{{#def.searchAction}}
 <div class="theTitle">
     <h1>{{=it.tr.searchResultsMessage}}</h1>
 </div>
@@ -13,6 +13,6 @@
     <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
     <h1 style="display: inline;">{{=it.tr.searchingMessage}}</h1>
 </div>
-<div id="customFooterPlaceholder" style="display: none;"></div>
+{{#def.customFooter}}
 </body>
 </html>

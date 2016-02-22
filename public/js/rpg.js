@@ -19,7 +19,7 @@ lord.addVoteVariant = function(el) {
             return;
         ++lastN;
     });
-    var model = lord.model(["base", "tr"], true);
+    var model = lord.model(["base", "tr"]);
     model.number = lastN + 1;
     parent.appendChild(lord.template("voteVariant", model));
 };
@@ -64,7 +64,7 @@ lord.vote = function(event, form) {
 lord.setVotingOpened = function(el, opened) {
     var c = {};
     var postNumber = +lord.data("number", el, true);
-    c.model = lord.model(["base", "tr", "board/rpg"], true);
+    c.model = lord.model(["base", "tr", "board/rpg"]);
     c.model.showSubmitButton = false;
     c.model.opened = opened;
     c.model.postNumber = postNumber;
@@ -82,10 +82,9 @@ lord.setVotingOpened = function(el, opened) {
 };
 
 lord.customPostFormField[50] = function(it) {
-    if (it.includeThreadScripts) {
+    if (it.isThreadPage) {
         var ownPosts = lord.getLocalObject("ownPosts", {});
-        var opPost = it.thread.opPost;
-        if (!ownPosts[opPost.boardName + "/" + opPost.number])
+        if (!ownPosts["rpg/" + it.thread.number])
             return "";
     }
     var model = {
@@ -114,11 +113,37 @@ lord.customPostBodyPart[20] = function(it, thread, post) {
     var model = merge.recursive(it, post.extraData);
     model.thread = thread;
     model.post = post;
-    var ownVotes = lord.getLocalObject("ownVotes", {});
-    model.voted = !!ownVotes[post.number];
-    model.checkOwnVoteVariant = function(variant) {
-        var ids = ownVotes[post.number];
-        return ids && ids[variant.id];
-    };
     return lord.template("rpgPostBodyPart", model, true);
 };
+
+lord.postProcessors.push(function(post) {
+    var postNumber = lord.data("number", post);
+    var ownPosts = lord.getLocalObject("ownPosts", {});
+    var ownVotes = lord.getLocalObject("ownVotes", {});
+    var ids = ownVotes[postNumber];
+    var form = lord.queryOne(".vote > form", post);
+    var voteVariants = lord.nameOne("voteVariants", post);
+    if (!voteVariants)
+        return;
+    if (ownPosts["rpg/" + postNumber]) {
+        if (form)
+            form.parentNode.replaceChild(voteVariants, form);
+        lord.query("input", voteVariants).forEach(function(input) {
+            input.setAttribute("disabled", true);
+        });
+    }
+    if (ids) {
+        lord.query("input", voteVariants).forEach(function(input) {
+            input.setAttribute("disabled", true);
+            if (ids[input.value])
+                input.setAttribute("checked", true);
+        });
+        if (form) {
+            form.action = form.action.replace(/\/vote$/, "/unvote");
+            var btn = lord.nameOne("buttonVote", form);
+            btn.setAttribute("name", "buttonUnvote");
+            btn.src = btn.src.replace(/\/vote\.png$/, "/unvote.png");
+            btn.title = lord.text("unvoteActionText");
+        }
+    }
+});
