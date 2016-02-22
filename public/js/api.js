@@ -1519,7 +1519,7 @@ lord.get = function(what, enableCache) {
     var xhr = new XMLHttpRequest();
     if (!enableCache)
         what += ((what.indexOf("?") >= 0) ? "&" : "?") + "_random_=" + Math.random();
-    xhr.open("get", "/" + lordData.site.pathPrefix + what, false);
+    xhr.open("get", what, false);
     xhr.send(null);
     if (xhr.status === 200)
         return xhr.responseText;

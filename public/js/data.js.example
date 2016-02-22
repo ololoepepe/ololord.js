@@ -1,5 +1,0 @@
-var lordData = {
-    site: {
-        pathPrefix: "" /*MUST be present*/
-    }
-};
