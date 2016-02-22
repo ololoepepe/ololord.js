@@ -57,7 +57,8 @@ read.installHandler("help", function() {
         + "If value is not specified, you will be prompted to enter it");
     console.log("get <path> - Print an option (config.json)");
     console.log("remove <path> - Remove option (config.json)");
-    console.log("add-superuser - Register a user");
+    console.log("add-superuser - Register a superuser");
+    console.log("remove-superuser - Unregister a superuser");
     console.log("rerender-posts [board] - Rerenders all posts (workers are closed and then opened again)");
     console.log("stop - Closes all workers, preventing incoming connections");
     console.log("start - Opens workers for connections if closed");
