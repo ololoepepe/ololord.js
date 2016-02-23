@@ -2,6 +2,10 @@
     font-size: 14.4px !important;
 }
 
+.ui-menu .ui-menu-item {
+    list-style-image: none !important;
+}
+
 header {
     padding-top: 2px;
     padding-bottom: 8px;
