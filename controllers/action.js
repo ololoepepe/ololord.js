@@ -636,6 +636,8 @@ router.post("/action/search", function(req, res) {
             else
                 c.query.possiblePhrases.push(phrase.toLowerCase());
         });
+        c.model.phrases = c.query.requiredPhrases.concat(c.query.excludedPhrases).concat(c.query.possiblePhrases);
+        c.model.phrases = Tools.withoutDuplicates(c.model.phrases);
         return Database.findPosts(c.query, boardName);
     }).then(function(posts) {
         c.model.searchResults = posts.map(function(post) {
@@ -646,14 +648,6 @@ router.post("/action/search", function(req, res) {
             var subject = post.subject || text;
             if (subject.length > 100)
                 subject = subject.substr(0, 97) + "...";
-            c.query.requiredPhrases.concat(c.query.possiblePhrases).forEach(function(phrase) {
-                var ind = text.toLowerCase().indexOf(phrase);
-                while (ind >= 0) {
-                    var nphrase = "<b><font color=\"red\">" + phrase + "</font></b>";
-                    text = text.substr(0, ind) + nphrase + text.substr(ind + phrase.length);
-                    ind = text.toLowerCase().indexOf(phrase, ind + nphrase.length);
-                }
-            });
             return {
                 boardName: post.boardName,
                 postNumber: post.number,

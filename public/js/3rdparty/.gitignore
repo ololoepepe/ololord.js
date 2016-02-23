@@ -5,6 +5,7 @@
 !isInViewport.min.js
 !jquery-1.11.3.min.js
 !jquery-ui.min.js
+!jquitelight.min.js
 !jquery.datetimepicker.js
 !jquery.knob.min.js
 !jszip.min.js

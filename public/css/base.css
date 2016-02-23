@@ -1158,3 +1158,31 @@ div.registeredUser {
     position: relative;
     top: 5px;
 }
+
+.searchResult {
+    margin-top: -16px;
+    margin-bottom: 4px;
+    padding: 4px;
+    overflow-x: auto;
+    display: table;
+}
+
+.searchResultLink, .searchResultThread, .searchResultText {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
+.searchResultText {
+    margin-top: 14.4px;
+    margin-left: 25px;
+    margin-right: 25px;
+    margin-bottom: 14.4px;
+    padding-top: 10px;
+    overflow-y: auto;
+    overflow-x: auto;
+}

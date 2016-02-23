@@ -1,3 +1,6 @@
+[done] Fix search results displaying
+[done] Improve search page UI
+
 * Improve image scaling
 * Optimize spells
 * Implement boards management page

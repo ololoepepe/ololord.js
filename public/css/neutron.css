@@ -472,3 +472,13 @@ textarea {
 .registeredUserHeader {
     font-weight: bold;
 }
+
+.searchResult {
+    background-color: #2C2C2C;
+    border: 1px solid #575757;
+    border-radius: 5px;
+}
+
+.searchResultHighlighted {
+    background-color: darkred;
+}

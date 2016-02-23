@@ -12,7 +12,10 @@ router.get("/search.html", function(req, res) {
 router.generateHTML = function() {
     var model = {};
     model.title = Tools.translate("Search", "pageTitle");
-    model.extraScripts = [ { fileName: "search.js" } ];
+    model.extraScripts = [
+        { fileName: "3rdparty/jquitelight.min.js" },
+        { fileName: "search.js" }
+    ];
     return controller("search", model).then(function(data) {
         return Promise.resolve({ "search": data });
     });

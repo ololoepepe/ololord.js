@@ -349,3 +349,11 @@ ul.tabWidget > li.activated {
 .registeredUserHeader {
     font-weight: bold;
 }
+
+.searchResult {
+    background-color: #F0E0D6;
+}
+
+.searchResultHighlighted {
+    background-color: yellow;
+}
