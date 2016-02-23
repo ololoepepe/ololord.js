@@ -380,3 +380,7 @@ ul.tabWidget > li.activated {
 .searchResultHighlighted {
     background-color: yellow;
 }
+
+.delallHeader {
+    font-weight: bold;
+}

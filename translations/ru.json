@@ -395,9 +395,9 @@
             "value": "Причина:"
         }
     },
-    "Delete all user posts on selected board": {
-        "delallButtonText": {
-            "value": "Удалить все посты пользователя на выбранной доске"
+    "Delete all user posts on boards:": {
+        "delallHeaderText": {
+            "value": "Удалить все посты пользователя на досках:"
         }
     },
     "Codecha - programmers' CAPTCHA": {

@@ -1240,10 +1240,14 @@ lord.banUser = function(el) {
             $(inp).change(function(){
                 $(this).attr("value", $(inp).val());
             });
+            var now = lord.now();
+            now.setTime(now.getTime() + (30 *lord.Minute));
+            var currentDate = model.formattedDate(now.toISOString());
             $(inp).datetimepicker({
                 i18n: { format: "YYYY/MM/DD HH:mm" },
                 mask: true,
-                value: inp.value
+                value: inp.value,
+                minDate: currentDate
             });
         });
         $(".xdsoft_datetimepicker").css("zIndex", 11000);

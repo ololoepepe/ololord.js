@@ -482,3 +482,7 @@ textarea {
 .searchResultHighlighted {
     background-color: darkred;
 }
+
+.delallHeader {
+    font-weight: bold;
+}

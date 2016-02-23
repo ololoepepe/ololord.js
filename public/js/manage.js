@@ -153,8 +153,7 @@ lord.createBannedUser = function(user, replaced) {
             i18n: { format: "YYYY/MM/DD HH:mm" },
             mask: true,
             value: inp.value,
-            minDate: currentDate.split(" ")[0],
-            minTime: currentDate.split(" ")[1]
+            minDate: currentDate
         });
     });
     if (replaced) {

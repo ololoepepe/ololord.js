@@ -388,3 +388,7 @@ ul.tabWidget > li.activated > a {
 .searchResultHighlighted {
     background-color: yellow;
 }
+
+.delallHeader {
+    font-weight: bold;
+}

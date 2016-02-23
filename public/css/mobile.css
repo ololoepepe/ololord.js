@@ -190,3 +190,23 @@ div.bannedUser {
     min-height: 400px;
     max-height: 400px;
 }
+
+.registeredUserHashpassInput {
+    box-sizing: border-box;
+    width: -moz-calc(100% - 8px);
+    width: -webkit-calc(100% - 8px);
+    width: -o-calc(100% - 8px);
+    width: calc(100% - 8px);
+}
+
+.registeredUserIpsInput {
+    box-sizing: border-box;
+    width: -moz-calc(100% - 8px);
+    width: -webkit-calc(100% - 8px);
+    width: -o-calc(100% - 8px);
+    width: calc(100% - 8px);
+}
+
+.banExpiresInput {
+    width: 130px;
+}

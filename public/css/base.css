@@ -1134,10 +1134,13 @@ input.buttonImage {
     cursor: pointer;
 }
 
+.delallHeader {
+    margin-bottom: 4px;
+}
+
 .registeredUserHeader {
     padding: 4px;
     display: block;
-    font-size: 1.1em;
     margin-bottom: 4px;
     cursor: pointer;
 }
@@ -1189,4 +1192,8 @@ div.registeredUser {
     padding-top: 10px;
     overflow-y: auto;
     overflow-x: auto;
+}
+
+.userBanIpInput {
+    width: 280px;
 }
