@@ -1,6 +1,7 @@
 [done] Fix search results displaying
 [done] Improve search page UI
 [done] Fix post form list markup buttons style
+[done] Optimize delall
 
 * Improve image scaling
 * Optimize spells

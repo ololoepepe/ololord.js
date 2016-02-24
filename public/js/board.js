@@ -1298,9 +1298,7 @@ lord.delall = function(e, form) {
     return lord.post(form.action, formData).then(function(result) {
         lord.reloadPage();
         return Promise.resolve();
-    }).catch(function(err) {
-        console.log(err);
-    });
+    }).catch(lord.handleError);
 };
 
 lord.insertPostNumber = function(postNumber) {
