@@ -1,6 +1,6 @@
 Actual name must be bans.json.
 
-IP addresses must be in IPv6 form, even if they are just aliases for IPv4 addresses like in the following example.
+IP addresses may be in IPv4 or IPv6 form.
 
 Example:
 
@@ -9,8 +9,8 @@ Example:
         "level": "NO_ACCESS",
         "reason": "peedor"
     },
-    "::7f00:1": {
+    "127.0.0.1": {
         "level": "READ_ONLY",
-        "reason:" "sooqa"
+        "reason": "sooqa"
     }
 }

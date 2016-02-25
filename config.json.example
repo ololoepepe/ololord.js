@@ -1,4 +1,6 @@
-Actual file name must be config-dev.json.
+Actual file name must be config.json.
+
+Example:
 
 {
     "system": {
@@ -11,7 +13,7 @@ Actual file name must be config-dev.json.
             "maxSize": 1048576,
             "backups": 100,
             "middleware": {
-                "before": "",
+                "before": "ddos",
                 "exclude": [
                     { "string": "/action/deletePost" },
                     {
@@ -19,12 +21,13 @@ Actual file name must be config-dev.json.
                         "flags": "i"
                     }
                 ],
-                "verbosity": "ip"
+                "verbosity": "all"
             }
         },
         "fileDownloadProxy": "",
         "fileDownloadProxyAuth": "",
         "searchLimit": 100,
+        "tmpPath": "/tmp/ramdisk",
         "regenerateCacheOnStartup": false,
         "redis": {
             "port": 6379,
@@ -83,8 +86,8 @@ Actual file name must be config-dev.json.
         "maxSearchQueryLength": 50,
         "vkontakte": {
             "integrationEnabled": false,
-            "appId": 0,
-            "accessToken": ""
+            "appId": "Your VK app ID",
+            "accessToken": "Your VK access token"
         },
         "twitter": {
             "integrationEnabled": true
@@ -101,17 +104,17 @@ Actual file name must be config-dev.json.
         "postLimit": 1000,
         "threadLimit": 200,
         "threadsPerPage": 20,
-        "archiveLimit": 0,
+        "archiveLimit": 1000,
         "captchaEnabled": true,
         "captchaQuota": 10,
-        "launchDate": "",
+        "launchDate": "2015-02-12T21:00:00",
         "maxFileSize": 15728640,
         "b": {
             "captchaQuota": 0
         },
         "soc": {
             "hidden": true,
-            "launchDate": ""
+            "launchDate": "2015-02-16T20:00:00"
         },
         "int": {
             "showWhois": true
@@ -134,25 +137,25 @@ Actual file name must be config-dev.json.
     },
     "captcha": {
         "google-recaptcha": {
-            "privateKey": "",
-            "publicKey": ""
+            "privateKey": "Your Google reCAPTCHA private key",
+            "publicKey": "Your Google reCAPTCHA public key"
         },
         "google-recaptcha-v1": {
-            "privateKey": "",
-            "publicKey": ""
+            "privateKey": "Your Google reCAPTCHA v1 private key",
+            "publicKey": "Your Google reCAPTCHA v1 public key"
         },
         "yandex-captcha-elatm": {
-            "privateKey": ""
+            "privateKey": "Your Yandex captcha private key"
         },
         "yandex-captcha-estd": {
-            "privateKey": ""
+            "privateKey": "Your Yandex captcha private key"
         },
         "yandex-captcha-rus": {
-            "privateKey": ""
+            "privateKey": "Your Yandex captcha private key"
         },
         "codecha": {
-            "privateKey": "",
-            "publicKey": ""
+            "privateKey": "Your Codecha private key",
+            "publicKey": "Your Codecha public key"
         }
     }
 }

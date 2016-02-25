@@ -19,7 +19,7 @@ var templates = {};
 var publicPartials;
 var publicTemplates;
 var langNames = require("../misc/lang-names.json");
-var ipBans = FSSync.exists(__dirname + "/../misc/bans.json") ? require("../misc/bans.json") : {};
+var ipBans = {};
 
 var controller;
 
@@ -460,3 +460,12 @@ var config = require("./config");
 var Database = require("./database");
 var markup = require("./markup");
 var Tools = require("./tools");
+
+var tmpBans = FSSync.existsSync(__dirname + "/../misc/bans.json") ? require("../misc/bans.json") : {};
+
+Tools.forIn(tmpBans, function(ban, ip) {
+    ip = Tools.correctAddress(ip);
+    if (!ip)
+        return;
+    ipBans[ip] = ban;
+});
