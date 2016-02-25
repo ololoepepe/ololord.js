@@ -24,7 +24,7 @@ lord.Hour = 60 * lord.Minute;
 lord.Day = 24 * lord.Hour;
 lord.Year = 365 * lord.Day;
 lord.Billion = 2 * 1000 * 1000 * 1000;
-lord.SettingsStoredInCookies = ["deviceType", "time", "timeZoneOffset", "captchaEngine"];
+lord.SettingsStoredInCookies = ["deviceType", "captchaEngine"];
 //
 lord.keyboardMap = [
   "", // [0]
@@ -1495,6 +1495,7 @@ lord.model = function(modelName) {
         };
         if (!model.user)
             model.user = {};
+        model.user.vkAuth = lord.getCookie("vkAuth", "");
         model.user.level = function(boardName) {
             if (!boardName)
                 return maxLevel;
@@ -1588,9 +1589,9 @@ lord.now = function() {
 lord.settings = function() {
     return {
         deviceType: lord.getCookie("deviceType", "auto"),
-        time: lord.getCookie("time", "server"),
-        timeZoneOffset: lord.getCookie("timeZoneOffset", -lord.now().getTimezoneOffset()),
-        captchaEngine: { id: lord.getCookie("captchaEngine", "google-recaptcha") },
+        time: lord.getLocalObject("time", "server"),
+        timeZoneOffset: lord.getLocalObject("timeZoneOffset", -lord.now().getTimezoneOffset()),
+        captchaEngine: { id: lord.getLocalObject("captchaEngine", "google-recaptcha") },
         style: { name: lord.getLocalObject("style", "photon") },
         codeStyle: { name: lord.getLocalObject("codeStyle", "default") },
         shrinkPosts: lord.getLocalObject("shrinkPosts", true),

@@ -68,7 +68,7 @@ Captcha.captchaIds = function() {
 };
 
 //NOTE: Must implement the following methods:
-//checkCaptcha(req, fields) -> {ok: boolean, message: string}
+//checkCaptcha(req, fields) -> Promise.resolve() / Promise.reject(err)
 //widgetHtml() -> string
 //or
 //widgetTemplate() -> string

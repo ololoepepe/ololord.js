@@ -190,8 +190,7 @@ controller.baseModel = function(req) {
             ip: (req ? req.ip : undefined),
             hashpass: (req ? req.hashpass : undefined),
             levels: (req ? (req.levels || {}) : undefined),
-            loggedIn: (req ? !!req.hashpass : undefined),
-            vkAuth: (req ? req.vkAuth : undefined)
+            loggedIn: (req ? !!req.hashpass : undefined)
         },
         styles: Tools.styles(),
         codeStyles: Tools.codeStyles(),
