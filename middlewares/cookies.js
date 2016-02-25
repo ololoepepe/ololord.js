@@ -13,8 +13,6 @@ module.exports = function(req, res, next) {
         deviceType = req.cookies.deviceType;
     }
     req.hashpass = Tools.hashpass(req);
-    req.settings = {
-        deviceType: deviceType
-    };
+    req.deviceType = deviceType;
     next();
 };

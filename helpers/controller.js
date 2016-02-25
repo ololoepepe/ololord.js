@@ -243,7 +243,7 @@ controller.boardModel = function(board) {
 };
 
 controller.settingsModel = function(req) {
-    return { settings: (req ? req.settings : {}) };
+    return { settings: (req ? { deviceType: req.deviceType } : {}) };
 };
 
 controller.translationsModel = function() {
