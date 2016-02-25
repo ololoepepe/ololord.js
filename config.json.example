@@ -3,127 +3,21 @@ Actual file name must be config.json.
 Example:
 
 {
-    "system": {
-        "workerCount": 1,
-        "log": {
-            "targets": [
-                "console",
-                "file"
-            ],
-            "maxSize": 1048576,
-            "backups": 100,
-            "middleware": {
-                "before": "ddos",
-                "exclude": [
-                    { "string": "/action/deletePost" },
-                    {
-                        "regexp": "^/action/create[a-z]+$",
-                        "flags": "i"
-                    }
-                ],
-                "verbosity": "all"
-            }
-        },
-        "fileDownloadProxy": "",
-        "fileDownloadProxyAuth": "",
-        "searchLimit": 100,
-        "tmpPath": "/tmp/ramdisk",
-        "regenerateCacheOnStartup": false,
-        "redis": {
-            "port": 6379,
-            "host": "127.0.0.1",
-            "family": 4,
-            "password": "",
-            "db": 0
-        }
-    },
-    "server": {
-        "port": 8080,
-        "ddosProtection": {
-            "enabled": true,
-            "static": false,
-            "errorData": "Not so fast!",
-            "errorCode": 429,
-            "weight": 1,
-            "maxWeight": 10,
-            "checkInterval": 1000,
-            "rules": [
-                {
-                    "regexp": "^/api.*",
-                    "maxWeight": 6,
-                    "queueSize": 4
-                },
-                {
-                    "string": "/action/search",
-                    "maxWeight": 1
-                },
-                {
-                    "regexp": ".*",
-                    "maxWeight": 16
-                }
-            ]
-        },
-        "rss": {
-            "enabled": true,
-            "ttl": 60,
-            "postCount": 500
-        },
-        "chat": {
-            "ttl": 10080
-        },
-        "youtubeApiKey": ""
-    },
-    "permissions": {
-        "seeUserIp": "ADMIN"
-    },
-    "site": {
-        "locale": "en",
-        "protocol": "http",
-        "domain": "localhost:8080",
-        "dateFormat": "MM/DD/YYYY HH:mm:ss",
-        "timeOffset": 0,
-        "tripcodeSalt": "ololo",
-        "maxSearchQueryLength": 50,
-        "vkontakte": {
-            "integrationEnabled": false,
-            "appId": "Your VK app ID",
-            "accessToken": "Your VK access token"
-        },
-        "twitter": {
-            "integrationEnabled": true
-        },
-        "extraScripts": {
-            "boardPage": [
-                { "fileName": "custom/myScript.js" },
-                { "source": "http://ajax.aspnetcdn.com/ajax/jquery.validate/1.14.0/jquery.validate.min.js" }
-            ]
-        }
-    },
     "board": {
-        "bumpLimit": 500,
-        "postLimit": 1000,
-        "threadLimit": 200,
-        "threadsPerPage": 20,
         "archiveLimit": 1000,
+        "bumpLimit": 500,
         "captchaEnabled": true,
         "captchaQuota": 10,
         "launchDate": "2015-02-12T21:00:00",
         "maxFileSize": 15728640,
-        "b": {
-            "captchaQuota": 0
-        },
-        "soc": {
-            "hidden": true,
-            "launchDate": "2015-02-16T20:00:00"
-        },
-        "int": {
-            "showWhois": true
-        },
-        "rf": {
-            "postingEnabled": false
-        },
+        "postLimit": 1000,
+        "threadLimit": 200,
+        "threadsPerPage": 20,
         "3dpd": {
             "maxFileCount": 3
+        },
+        "b": {
+            "captchaQuota": 0
         },
         "echo": {
             "acceptedExternalBoardLinks": [
@@ -133,6 +27,16 @@ Example:
                 "https://boards.4chan.org/[a-z]+/thread/\\d+/[a-zA-Z0-9\\-_]+",
                 "https?://2ch.hk/[a-z]+/res/\\d+\\.html"
             ]
+        },
+        "int": {
+            "showWhois": true
+        },
+        "rf": {
+            "postingEnabled": false
+        },
+        "soc": {
+            "hidden": true,
+            "launchDate": "2015-02-16T20:00:00"
         }
     },
     "captcha": {
@@ -157,5 +61,101 @@ Example:
             "privateKey": "Your Codecha private key",
             "publicKey": "Your Codecha public key"
         }
+    },
+    "permissions": {
+        "seeUserIp": "ADMIN"
+    },
+    "server": {
+        "chat": {
+            "ttl": 10080
+        },
+        "ddosProtection": {
+            "checkInterval": 1000,
+            "enabled": true,
+            "errorCode": 429,
+            "errorData": "Not so fast!",
+            "maxWeight": 10,
+            "rules": [
+                {
+                    "maxWeight": 6,
+                    "queueSize": 4,
+                    "regexp": "^/api.*"
+                },
+                {
+                    "maxWeight": 1,
+                    "string": "/action/search"
+                },
+                {
+                    "maxWeight": 16,
+                    "regexp": ".*"
+                }
+            ],
+            "static": false,
+            "weight": 1
+        },
+        "port": 8080,
+        "rss": {
+            "enabled": true,
+            "postCount": 500,
+            "ttl": 60
+        },
+        "youtubeApiKey": ""
+    },
+    "site": {
+        "dateFormat": "MM/DD/YYYY HH:mm:ss",
+        "domain": "localhost:8080",
+        "extraScripts": {
+            "boardPage": [
+                { "fileName": "custom/myScript.js" },
+                { "source": "http://ajax.aspnetcdn.com/ajax/jquery.validate/1.14.0/jquery.validate.min.js" }
+            ]
+        },
+        "locale": "en",
+        "maxSearchQueryLength": 50,
+        "protocol": "http",
+        "timeOffset": 0,
+        "tripcodeSalt": "ololo",
+        "twitter": {
+            "integrationEnabled": true
+        },
+        "vkontakte": {
+            "integrationEnabled": false,
+            "appId": "Your VK app ID",
+            "accessToken": "Your VK access token"
+        }
+    },
+    "system": {
+        "fileDownloadProxy": "",
+        "fileDownloadProxyAuth": "",
+        "log": {
+            "backups": 100,
+            "maxSize": 1048576,
+            "middleware": {
+                "before": "ddos",
+                "exclude": [
+                    { "string": "/action/deletePost" },
+                    {
+                        "regexp": "^/action/create[a-z]+$",
+                        "flags": "i"
+                    }
+                ],
+                "verbosity": "all"
+            },
+            "targets": [
+                "console",
+                "file"
+            ]
+        },
+        "redis": {
+            "port": 6379,
+            "host": "127.0.0.1",
+            "family": 4,
+            "password": "",
+            "db": 0
+        },
+        "regenerateCacheOnStartup": false,
+        "searchLimit": 100,
+        "tmpPath": "/tmp/ramdisk",
+        "workerCount": 1
     }
 }
