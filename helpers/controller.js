@@ -36,10 +36,10 @@ controller = function(templateName, modelData) {
         boards: JSON.stringify(controller.boardsModel()),
         tr: JSON.stringify(controller.translationsModel()),
         partials: JSON.stringify(publicPartials.map(function(partial) {
-            return partial.name
+            return partial.name;
         })),
         templates: JSON.stringify(publicTemplates.map(function(partial) {
-            return partial.name
+            return partial.name;
         }))
     };
     var timeOffset = config("site.timeOffset", 0);
@@ -61,6 +61,12 @@ controller = function(templateName, modelData) {
         modelData.extraScripts = modelData.extraScripts.concat(extraScripts);
     }
     return Promise.resolve(template(modelData));
+};
+
+controller.publicPartialNames = function() {
+    return publicPartials.map(function(partial) {
+        return partial.name;
+    });
 };
 
 controller.sync = function(templateName, modelData) {

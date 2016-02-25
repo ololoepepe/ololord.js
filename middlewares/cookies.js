@@ -14,8 +14,7 @@ module.exports = function(req, res, next) {
     }
     req.hashpass = Tools.hashpass(req);
     req.settings = {
-        deviceType: deviceType,
-        captchaEngine: (Captcha.captcha(req.cookies.captchaEngine) || Captcha.captcha("google-recaptcha"))
+        deviceType: deviceType
     };
     next();
 };

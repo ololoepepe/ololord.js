@@ -18,7 +18,11 @@ lord.banUser = function(e, form) {
     e.preventDefault();
     var c = {};
     var ip = lord.nameOne("userIp", form).value;
-    return lord.post(form.action, new FormData(form)).then(function() {
+    var formData = new FormData(form);
+    var settings = lord.settings();
+    var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : lord.model("base").site.timeOffset;
+    formData.append("timeOffset", timeOffset);
+    return lord.post(form.action, formData).then(function() {
         return lord.api("bannedUser", { ip: ip });
     }).then(function(user) {
         var previous = $(form).closest("div")[0];

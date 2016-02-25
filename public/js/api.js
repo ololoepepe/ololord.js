@@ -24,7 +24,7 @@ lord.Hour = 60 * lord.Minute;
 lord.Day = 24 * lord.Hour;
 lord.Year = 365 * lord.Day;
 lord.Billion = 2 * 1000 * 1000 * 1000;
-lord.SettingsStoredInCookies = ["deviceType", "captchaEngine"];
+lord.SettingsStoredInCookies = ["deviceType"];
 //
 lord.keyboardMap = [
   "", // [0]

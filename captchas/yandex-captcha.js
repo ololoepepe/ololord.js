@@ -62,7 +62,6 @@ yandexElatmCaptcha.apiRoutes = function() {
             var captcha = captchaMap[req.query.type];
             if (!captcha)
                 return controller.error(res, Tools.translate("Invalid captcha type"), true);
-            var captcha = req.settings.captchaEngine;
             var type = captcha.id.split("-").pop();
             var query = `key=${encodeURIComponent(captcha.privateKey)}&type=${type}`;
             var url = "http://cleanweb-api.yandex.ru/1.0/get-captcha?" + query;

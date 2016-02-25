@@ -400,8 +400,9 @@ router.post("/action/banUser", function(req, res) {
                 return;
             var expiresAt = result.fields["banExpires_" + value];
             if (expiresAt) {
-                var timeOffset = ("local" == req.settings.time) ? +req.settings.timeZoneOffset
-                    : config("site.timeOffset", 0);
+                var timeOffset = +c.fields.timeOffset;
+                if (isNaN(timeOffset) || timeOffset < -720 || timeOffset > 840)
+                    timeOffset = config("site.timeOffset", 0);
                 var hours = Math.floor(timeOffset / 60);
                 var minutes = Math.abs(timeOffset) % 60;
                 var tz = ((timeOffset > 0) ? "+" : "") + ((Math.abs(hours) < 10) ? "0" : "") + hours + ":"
