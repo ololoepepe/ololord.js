@@ -3172,7 +3172,8 @@ lord.showPostActionsMenu = function(e, input, postNumber) {
             isInFavorites: fav.hasOwnProperty(lord.data("boardName") + "/" + lord.data("threadNumber", post))
         },
         customPostMenuAction: lord.customPostMenuAction,
-        isThreadPage: +lord.data("threadNumber")
+        isThreadPage: +lord.data("threadNumber"),
+        archived: !!lord.data("archived")
     };
     model = merge.recursive(model, lord.model(["base", "tr", "board/" + lord.data("boardName")]));
     if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile"))

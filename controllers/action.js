@@ -194,8 +194,8 @@ router.post("/action/markupText", function(req, res) {
             text: text || null,
             rawText: c.fields.text || null,
             options: {
-                signAsOp: !!c.fields.signAsOp,
-                showTripcode: !!req.hashpass && !!c.fields.tripcode
+                signAsOp: ("true" == c.fields.signAsOp),
+                showTripcode: !!req.hashpass && ("true" == c.fields.tripcode)
             },
             createdAt: date.toISOString()
         };
@@ -279,7 +279,10 @@ router.post("/action/editPost", function(req, res) {
     }).then(function() {
         return Database.editPost(req, c.fields);
     }).then(function(result) {
-        res.send({});
+        res.send({
+            boardName: c.boardName,
+            postNumber: c.postNumber
+        });
     }).catch(function(err) {
         controller.error(res, err, true);
     });
@@ -389,8 +392,6 @@ router.post("/action/banUser", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         c.bans = [];
         c.fields = result.fields;
-        c.boardName = result.fields.boardName;
-        c.postNumber = +result.fields.postNumber;
         c.userIp = result.fields.userIp;
         Tools.forIn(result.fields, function(value, name) {
             if (!/^banBoard_\S+$/.test(name))
@@ -421,8 +422,6 @@ router.post("/action/banUser", function(req, res) {
                 postNumber: +result.fields["banPostNumber_" + value] || null
             });
         });
-        return controller.checkBan(req, res, c.boardName, true);
-    }).then(function() {
         return Database.banUser(req, c.fields.userIp, c.bans);
     }).then(function(result) {
         res.send({});

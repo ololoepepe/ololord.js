@@ -2,8 +2,8 @@
 [done] Improve search page UI
 [done] Fix post form list markup buttons style
 [done] Optimize delall
+[done] Write server scripts API documentation
 
-* Improve image scaling
 * Optimize spells
 * Implement boards management page
 * Implement content management page
@@ -11,4 +11,3 @@
 * Use Elasticsearch or other search engine [not sure if needed]
 * Write detailed DB schema documentation
 * Write client scripts API documentation
-* Write server scripts API documentation

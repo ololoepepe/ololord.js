@@ -979,7 +979,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             name: (fields.name || null),
             number: c.postNumber,
             options: {
-                showTripcode: !!req.hashpass && !!fields.tripcode,
+                showTripcode: !!req.hashpass && ("true" == fields.tripcode),
                 signAsOp: ("true" == fields.signAsOp)
             },
             rawText: rawText,
@@ -1950,6 +1950,8 @@ module.exports.deletePost = function(req, res, fields) {
         }
         c.isThread = post.threadNumber == post.number;
         c.archived = ("true" == fields.archived);
+        if (c.archived && !c.isThread)
+            return Promise.reject(Tools.translate("Deleting posts from archived threads is not allowed"));
         return (c.isThread) ? removeThread(board.name, postNumber, { archived: c.archived })
             : removePost(board.name, postNumber);
     }).then(function() {
@@ -2433,7 +2435,7 @@ module.exports.banUser = function(req, ip, bans) {
                     updateBan(ip, boardName, ban.postNumber).catch(function(err) {
                         Global.error(err.stack || err);
                     });
-                }, Math.ceil(ttl * Tools.Second * 1.002)); //NOTE: Adding extra delay
+                }, Math.ceil(ttl * Tools.Second + Tools.Second)); //NOTE: Adding extra delay
                 return db.expire(key, ttl);
             }).then(function() {
                 if (!ban.postNumber)
@@ -2545,7 +2547,7 @@ module.exports.initialize = function() {
                         updateBan(ip, boardName, ban.postNumber).catch(function(err) {
                             Global.error(err.stack || err);
                         });
-                    }, Math.ceil(ttl * Tools.Second * 1.002)); //NOTE: Adding extra delay
+                    }, Math.ceil(ttl * Tools.Second + Tools.Second)); //NOTE: Adding extra delay
                     return Promise.resolve();
                 });
             });

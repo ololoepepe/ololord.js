@@ -2787,5 +2787,10 @@
         "confirmationText": {
             "value": "Вы уверены?"
         }
+    },
+    "Deleting posts from archived threads is not allowed": {
+        "_default": {
+            "value": "Удаление постов из архивных тредов запрещено"
+        }
     }
 }
