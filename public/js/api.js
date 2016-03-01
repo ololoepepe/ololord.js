@@ -1038,10 +1038,6 @@ lord.showDialog = function(body, options) {
     });
 };
 
-lord.isHashpass = function(s) {
-    return !!s.match(/([0-9a-fA-F]{8}\-){4}[0-9a-fA-F]{8}/g);
-};
-
 lord.generateImageHash = function(imageData, sizeX, sizeY) {
     sizeX = +sizeX;
     sizeY = +sizeY;
@@ -1201,19 +1197,6 @@ lord.playSound = function() {
     lord.sound.play();
 };
 
-lord.nearlyEqual = function(a, b, epsilon) {
-    var absA = Math.abs(a);
-    var absB = Math.abs(b);
-    var diff = Math.abs(a - b);
-    if (a == b) {
-        return true;
-    } else if (a == 0 || b == 0 || diff < Number.MIN_VALUE) {
-        return diff < (epsilon * Number.MIN_VALUE);
-    } else {
-        return diff / (absA + absB) < epsilon;
-    }
-};
-
 lord.hash = function(hash) {
     if (typeof hash == "undefined")
         return window.location.hash.substr(1, window.location.hash.length - 1);
@@ -1367,10 +1350,6 @@ lord.compareRatings = function(r1, r2) {
         return 1;
     else
         return 0;
-};
-
-lord.escaped = function(text) {
-    return $("<div />").text(text).html();
 };
 
 lord.model = function(modelName) {
