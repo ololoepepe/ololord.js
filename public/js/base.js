@@ -1444,6 +1444,10 @@ lord.initializeOnLoadBase = function() {
         if (favoritesButton)
             favoritesButton.title += " (" + key("showFavorites") + ")";
     }
+    $(".searchAction").hover(function() {
+        $(".searchActionSelect", this).removeClass("hiddenElement");
+        $(".searchActionInput", this).css("width", "60%");
+    });
     if (lord.getLocalObject("showNewPosts", true))
         lord.showNewPosts();
     if (lord.getLocalObject("chatEnabled", true))

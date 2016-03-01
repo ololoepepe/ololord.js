@@ -4,8 +4,11 @@
 [done] Optimize delall
 [done] Show new post count only if the site was visited at least once
 [done] Write server scripts API documentation
+[done] Show search action board select on hover (hide by default)
 
 * Optimize spells
+* Use iframes instead of old HTML frames
+* Improve slider handle colors
 * Implement boards management page
 * Implement content management page
 * Implement user action permissions

@@ -3,7 +3,7 @@
           enctype="multipart/form-data">
         <input type="text" class="input searchActionInput" maxlength="{{=it.maxSearchQueryLength}}" name="query"
                {{? it.deviceType != "mobile"}}placeholder="{{=it.tr.searchInputPlaceholder}}"{{?}} value="" />
-        <select name="board" class="select searchActionSelect">
+        <select name="board" class="select searchActionSelect hiddenElement">
             <option value="*" selected="true">[*] {{=it.tr.allBoardsText}}</option>
             {{~it.boards :brd}}
                 <option value="{{=brd.name}}">[{{=brd.name}}] {{=brd.title}}</option>
