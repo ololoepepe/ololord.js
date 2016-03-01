@@ -1059,6 +1059,14 @@ input.buttonImage {
     overflow-y: auto;
 }
 
+#playerTracks:empty {
+    height: 340px;
+    background-image: url("../img/add_to_playlist.png");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
 .trackInfo {
     display: inline-block;
 }
