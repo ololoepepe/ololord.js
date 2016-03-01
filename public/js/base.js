@@ -1444,7 +1444,7 @@ lord.initializeOnLoadBase = function() {
         if (favoritesButton)
             favoritesButton.title += " (" + key("showFavorites") + ")";
     }
-    $(".searchAction").hover(function() {
+    $(".searchAction > form").hover(function() {
         $(".searchActionSelect", this).removeClass("hiddenElement");
         $(".searchActionInput", this).css("width", "60%");
     });
