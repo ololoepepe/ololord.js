@@ -289,8 +289,6 @@ lord.keyboardMap = [
 
 lord.popups = [];
 lord.unloading = false;
-lord.leftChain = [];
-lord.rightChain = [];
 lord.models = {};
 lord.templates = {};
 
@@ -578,11 +576,11 @@ lord.setLocalObject = function(key, value) {
 
 lord.removeLocalObject = function(key) {
     if (!key || typeof key != "string")
-        return;
+        return false;
     try {
         return localStorage.removeItem(key);
     } catch (ex) {
-        //
+        return false;
     }
 };
 
@@ -613,19 +611,19 @@ lord.setSessionObject = function(key, value) {
 
 lord.removeSessionObject = function(key) {
     if (!key || typeof key != "string")
-        return;
+        return false;
     try {
         return sessionStorage.removeItem(key);
     } catch (ex) {
-        //
+        return false;
     }
 };
 
-lord.in = function(arr, obj, strict) {
+lord.in = function(arr, val, strict) {
     if (!arr || !arr.length)
         return false;
     for (var i = 0; i < arr.length; ++i) {
-        if ((strict && obj === arr[i]) || (!strict && obj == arr[i]))
+        if ((strict && val === arr[i]) || (!strict && val == arr[i]))
             return true;
     }
     return false;
@@ -722,59 +720,6 @@ lord.last = function(arr) {
     if (!arr || !arr.length)
         return null;
     return arr[arr.length - 1];
-};
-
-lord.equal = function(x, y) {
-    var p;
-    if (isNaN(x) && isNaN(y) && typeof x === "number" && typeof y === "number")
-        return true;
-    if (x === y)
-        return true;
-    if ((typeof x === "function" && typeof y === "function") ||
-        (x instanceof Date && y instanceof Date) ||
-        (x instanceof RegExp && y instanceof RegExp) ||
-        (x instanceof String && y instanceof String) ||
-        (x instanceof Number && y instanceof Number)) {
-        return x.toString() === y.toString();
-    }
-    if (!(x instanceof Object && y instanceof Object))
-        return false;
-    if (x.isPrototypeOf(y) || y.isPrototypeOf(x))
-        return false;
-    if (x.constructor !== y.constructor)
-        return false;
-    if (x.prototype !== y.prototype)
-        return false;
-    if (lord.leftChain.indexOf(x) > -1 || lord.rightChain.indexOf(y) > -1)
-         return false;
-    for (p in y) {
-        if (y.hasOwnProperty(p) !== x.hasOwnProperty(p))
-            return false;
-        else if (typeof y[p] !== typeof x[p])
-            return false;
-    }
-    for (p in x) {
-        if (y.hasOwnProperty(p) !== x.hasOwnProperty(p))
-            return false;
-        else if (typeof y[p] !== typeof x[p])
-            return false;
-        switch (typeof (x[p])) {
-        case "object":
-        case "function":
-            lord.leftChain.push(x);
-            lord.rightChain.push(y);
-            if (!equal(x[p], y[p]))
-                return false;
-            lord.leftChain.pop();
-            lord.rightChain.pop();
-            break;
-        default:
-            if (x[p] !== y[p])
-                return false;
-            break;
-        }
-    }
-    return true;
 };
 
 lord.gently = function(obj, f, options) {
@@ -899,18 +844,6 @@ lord.name = function(name, parent) {
 
 lord.nameOne = function(name, parent) {
     return lord.queryOne("[name='" + name + "']", parent);
-};
-
-lord.contains = function(s, subs) {
-    if (typeof s == "string" && typeof subs == "string")
-        return s.replace(subs, "") != s;
-    if (!s || !s.length || s.length < 1)
-        return false;
-    for (var i = 0; i < s.length; ++i) {
-        if (lord.equal(s[i], subs))
-            return true;
-    }
-    return false;
 };
 
 lord.addClass = function(element, classNames) {

@@ -43,7 +43,6 @@ lord._defineHotkey("markupCode", "Alt+C");
 
 /*Variables*/
 
-lord.chatTasks = {};
 lord.chatDialog = null;
 lord.lastChatCheckDate = lord.getLocalObject("lastChatCheckDate", null);
 lord.notificationQueue = [];
@@ -834,17 +833,20 @@ lord.showNewPosts = function() {
     var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
     var currentBoardName = lord.data("boardName");
     lord.api("lastPostNumbers").then(function(result) {
+        var getNewPostCount = function(boardName) {
+            if (!boardName || currentBoardName == boardName || !result[boardName])
+                return 0;
+            var lastPostNumber = lastPostNumbers[boardName];
+            if (!lastPostNumber)
+                return 0;
+            var newPostCount = result[boardName] - lastPostNumber;
+            return (newPostCount > 0) ? newPostCount : 0;
+        };
         if (lord.deviceType("mobile")) {
             lord.query(".boardSelect").forEach(function(sel) {
                 lord.query("option", sel).forEach(function(opt) {
-                    var boardName = lord.data("boardName", opt);
-                    if (!boardName || currentBoardName == boardName || !result[boardName])
-                        return;
-                    var lastPostNumber = lastPostNumbers[boardName];
-                    if (!lastPostNumber)
-                        lastPostNumber = 0;
-                    var newPostCount = result[boardName] - lastPostNumber;
-                    if (newPostCount <= 0)
+                    var newPostCount = getNewPostCount(lord.data("boardName", opt));
+                    if (!newPostCount)
                         return;
                     opt.insertBefore(lord.node("text", "+" + newPostCount + " "), opt.childNodes[0]);
                 });
@@ -855,14 +857,8 @@ lord.showNewPosts = function() {
                     var a = lord.queryOne("a", item);
                     if (!a)
                         return;
-                    var boardName = lord.data("boardName", a);
-                    if (!boardName || currentBoardName == boardName || !result[boardName])
-                        return;
-                    var lastPostNumber = lastPostNumbers[boardName];
-                    if (!lastPostNumber)
-                        lastPostNumber = 0;
-                    var newPostCount = result[boardName] - lastPostNumber;
-                    if (newPostCount <= 0)
+                    var newPostCount = getNewPostCount(lord.data("boardName", a));
+                    if (!newPostCount)
                         return;
                     var span = lord.node("span");
                     lord.addClass(span, "newPostCount");
@@ -873,10 +869,14 @@ lord.showNewPosts = function() {
                 });
             });
         }
-        if (typeof result[currentBoardName] == "number") {
+        lord.forIn(result, function(lastPostNumber, boardName) {
+            if (lastPostNumbers[boardName])
+                return;
+            lastPostNumbers[boardName] = lastPostNumber;
+        });
+        if (typeof result[currentBoardName] == "number")
             lastPostNumbers[currentBoardName] = result[currentBoardName];
-            lord.setLocalObject("lastPostNumbers", lastPostNumbers);
-        }
+        lord.setLocalObject("lastPostNumbers", lastPostNumbers);
     }).catch(lord.handleError);
 };
 

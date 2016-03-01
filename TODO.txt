@@ -2,6 +2,7 @@
 [done] Improve search page UI
 [done] Fix post form list markup buttons style
 [done] Optimize delall
+[done] Show new post count only if the site was visited at least once
 [done] Write server scripts API documentation
 
 * Optimize spells
