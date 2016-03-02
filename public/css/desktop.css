@@ -108,25 +108,44 @@ input.buttonImage {
 }
 
 #playerDurationSlider {
-    width: 68%;
+    width: -moz-calc(75% - 12px);
+    width: -webkit-calc(75% - 12px);
+    width: -o-calc(75% - 12px);
+    width: calc(75% - 12px);
 }
 
 #playerVolumeSlider {
     display: inline-block;
-    width: 26%;
+    width: -moz-calc(25% - 12px);
+    width: -webkit-calc(25% - 12px);
+    width: -o-calc(25% - 12px);
+    width: calc(25% - 12px);
 }
 
 #playerTrackTags {
     font-size: 1.2em;
 }
 
+.movablePlayerConstrolsSliders {
+    width: -moz-calc(100% - 44px);
+    width: -webkit-calc(100% - 44px);
+    width: -o-calc(100% - 44px);
+    width: calc(100% - 44px);
+}
+
 .movablePlayerDurationSlider {
-    width: 68%;
+    width: -moz-calc(75% - 12px);
+    width: -webkit-calc(75% - 12px);
+    width: -o-calc(75% - 12px);
+    width: calc(75% - 12px);
 }
 
 .movablePlayerVolumeSlider {
     display: inline-block;
-    width: 26%;
+    width: -moz-calc(25% - 12px);
+    width: -webkit-calc(25% - 12px);
+    width: -o-calc(25% - 12px);
+    width: calc(25% - 12px);
 }
 
 .chatContactList {

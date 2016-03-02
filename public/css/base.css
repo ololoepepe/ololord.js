@@ -6,6 +6,10 @@
     list-style-image: none !important;
 }
 
+.ui-slider-handle {
+    width: 8px !important;
+}
+
 header {
     padding-top: 2px;
     padding-bottom: 8px;
@@ -1019,6 +1023,8 @@ input.buttonImage {
 
 #playerDurationSlider {
     display: inline-block;
+    margin-left: 6px;
+    margin-right: 6px;
 }
 
 #playerTrackInfo {
@@ -1115,10 +1121,6 @@ input.buttonImage {
     position: relative;
     top: 4px;
     text-align: center;
-    width: -moz-calc(100% - 44px);
-    width: -webkit-calc(100% - 44px);
-    width: -o-calc(100% - 44px);
-    width: calc(100% - 44px);
 }
 
 .movablePlayerConstrolsSliders > .ui-slider {
@@ -1132,6 +1134,8 @@ input.buttonImage {
 
 .movablePlayerDurationSlider {
     display: inline-block;
+    margin-left: 6px;
+    margin-right: 6px;
 }
 
 .bannedUserHeader {

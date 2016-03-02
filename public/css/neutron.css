@@ -22,6 +22,10 @@
     filter: invert(0);
 }
 
+.ui-slider-handle {
+    border-radius: 0px !important;
+}
+
 body  {
     background-color: #212121;
     color: #698CC0;
