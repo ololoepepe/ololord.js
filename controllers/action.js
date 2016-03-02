@@ -194,8 +194,8 @@ router.post("/action/markupText", function(req, res) {
             text: text || null,
             rawText: c.fields.text || null,
             options: {
-                signAsOp: !!c.fields.signAsOp,
-                showTripcode: !!req.hashpass && !!c.fields.tripcode
+                signAsOp: ("true" == c.fields.signAsOp),
+                showTripcode: !!req.hashpass && ("true" == c.fields.tripcode)
             },
             createdAt: date.toISOString()
         };
@@ -279,7 +279,10 @@ router.post("/action/editPost", function(req, res) {
     }).then(function() {
         return Database.editPost(req, c.fields);
     }).then(function(result) {
-        res.send({});
+        res.send({
+            boardName: c.boardName,
+            postNumber: c.postNumber
+        });
     }).catch(function(err) {
         controller.error(res, err, true);
     });
@@ -389,8 +392,6 @@ router.post("/action/banUser", function(req, res) {
     Tools.parseForm(req).then(function(result) {
         c.bans = [];
         c.fields = result.fields;
-        c.boardName = result.fields.boardName;
-        c.postNumber = +result.fields.postNumber;
         c.userIp = result.fields.userIp;
         Tools.forIn(result.fields, function(value, name) {
             if (!/^banBoard_\S+$/.test(name))
@@ -400,8 +401,9 @@ router.post("/action/banUser", function(req, res) {
                 return;
             var expiresAt = result.fields["banExpires_" + value];
             if (expiresAt) {
-                var timeOffset = ("local" == req.settings.time) ? +req.settings.timeZoneOffset
-                    : config("site.timeOffset", 0);
+                var timeOffset = +c.fields.timeOffset;
+                if (isNaN(timeOffset) || timeOffset < -720 || timeOffset > 840)
+                    timeOffset = config("site.timeOffset", 0);
                 var hours = Math.floor(timeOffset / 60);
                 var minutes = Math.abs(timeOffset) % 60;
                 var tz = ((timeOffset > 0) ? "+" : "") + ((Math.abs(hours) < 10) ? "0" : "") + hours + ":"
@@ -420,8 +422,6 @@ router.post("/action/banUser", function(req, res) {
                 postNumber: +result.fields["banPostNumber_" + value] || null
             });
         });
-        return controller.checkBan(req, res, c.boardName, true);
-    }).then(function() {
         return Database.banUser(req, c.fields.userIp, c.bans);
     }).then(function(result) {
         res.send({});
@@ -636,6 +636,8 @@ router.post("/action/search", function(req, res) {
             else
                 c.query.possiblePhrases.push(phrase.toLowerCase());
         });
+        c.model.phrases = c.query.requiredPhrases.concat(c.query.excludedPhrases).concat(c.query.possiblePhrases);
+        c.model.phrases = Tools.withoutDuplicates(c.model.phrases);
         return Database.findPosts(c.query, boardName);
     }).then(function(posts) {
         c.model.searchResults = posts.map(function(post) {
@@ -646,14 +648,6 @@ router.post("/action/search", function(req, res) {
             var subject = post.subject || text;
             if (subject.length > 100)
                 subject = subject.substr(0, 97) + "...";
-            c.query.requiredPhrases.concat(c.query.possiblePhrases).forEach(function(phrase) {
-                var ind = text.toLowerCase().indexOf(phrase);
-                while (ind >= 0) {
-                    var nphrase = "<b><font color=\"red\">" + phrase + "</font></b>";
-                    text = text.substr(0, ind) + nphrase + text.substr(ind + phrase.length);
-                    ind = text.toLowerCase().indexOf(phrase, ind + nphrase.length);
-                }
-            });
             return {
                 boardName: post.boardName,
                 postNumber: post.number,

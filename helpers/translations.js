@@ -261,7 +261,7 @@ module.exports = function(tr) {
     translate("Administrator", "accessLevelAdminDescription");
     translate("Expires:", "banExpiresLabelText");
     translate("Reason:", "banReasonLabelText");
-    translate("Delete all user posts on selected board", "delallButtonText");
+    translate("Delete all user posts on boards:", "delallHeaderText");
     translate("All", "selectAllText");
     translate("Ban reason", "editBanReasonText");
     translate("Board:", "banBoardLabelText");

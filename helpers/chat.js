@@ -29,8 +29,10 @@ module.exports.sendMessage = function(req, boardName, postNumber, text) {
         c.receiverHash = createHash(post.user);
         return Database.db.zrange("chat:" + c.key, 0, 0);
     }).then(function(msg) {
-        if (msg && msg.length > 0 && JSON.parse(msg[0]).senderHash != c.senderHash)
+        if (msg && msg.length > 0 && JSON.parse(msg[0]).senderHash != c.senderHash
+            && JSON.parse(msg[0]).receiverHash != c.senderHash) {
             return Promise.reject(Tools.translate("Somebody is chatting here already"));
+        }
         return Database.db.sadd("chats:" + c.senderHash, c.key);
     }).then(function() {
         return Database.db.sadd("chats:" + c.receiverHash, c.key);

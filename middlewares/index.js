@@ -65,14 +65,14 @@ var log = function(req, res, next) {
 
 module.exports = [];
 
-if (config("system.log.middleware.before", "") == "all") {
+if (config("system.log.middleware.before", "all") == "all") {
     module.exports.push(log);
 }
 
 module.exports.push(require("./ip-fix"));
 
 var setupDdos = function() {
-    if (config("system.log.middleware.before", "") == "ddos")
+    if (config("system.log.middleware.before", "all") == "ddos")
         module.exports.push(log);
 
     if (config("server.ddosProtection.enabled", true)) {
@@ -103,7 +103,7 @@ var setupDdos = function() {
 };
 
 var setupStatic = function() {
-    if (config("system.log.middleware.before", "") == "static")
+    if (config("system.log.middleware.before", "all") == "static")
         module.exports.push(log);
     module.exports.push(express.static(__dirname + "/../public"));
 };
@@ -116,7 +116,7 @@ if (config("server.ddosProtection.static", false)) {
     setupDdos();
 }
 
-if (config("system.log.middleware.before", "") == "middleware")
+if (config("system.log.middleware.before", "all") == "middleware")
     module.exports.push(log);
 
 module.exports = module.exports.concat([
@@ -126,5 +126,5 @@ module.exports = module.exports.concat([
     require("./registered-user")
 ]);
 
-if (config("system.log.middleware.before", "") == "request")
+if (config("system.log.middleware.before", "all") == "request")
     module.exports.push(log);

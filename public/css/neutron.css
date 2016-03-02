@@ -22,6 +22,16 @@
     filter: invert(0);
 }
 
+.ui-slider {
+    border-radius: 0px !important;
+    border: 1px solid #698CC0 !important;
+}
+
+.ui-slider-handle {
+    border-radius: 0px !important;
+    border: 1px solid #698CC0 !important;
+}
+
 body  {
     background-color: #212121;
     color: #698CC0;
@@ -470,5 +480,19 @@ textarea {
 }
 
 .registeredUserHeader {
+    font-weight: bold;
+}
+
+.searchResult {
+    background-color: #2C2C2C;
+    border: 1px solid #575757;
+    border-radius: 5px;
+}
+
+.searchResultHighlighted {
+    background-color: darkred;
+}
+
+.delallHeader {
     font-weight: bold;
 }

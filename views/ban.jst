@@ -18,7 +18,11 @@
                 <b>{{=it.tr.banBoardLabelText}}</b>
             </td>
             <td>
-                {{=it.ban.boardName}}
+                {{? it.ban.boardName}}
+                    {{=it.ban.boardName}}
+                {{??}}
+                    {{=it.tr.allBoardsText}}
+                {{?}}
             </td>
         </tr>
         <tr>
@@ -33,14 +37,16 @@
                 {{?}}
             </td>
         </tr>
-        <tr>
-            <td>
-                <b>{{=it.tr.banDateTimeLabelText}}</b>
-            </td>
-            <td name="formattedDate">
-                {{ out += it.formattedDate(it.ban.createdAt); }}
-            </td>
-        </tr>
+        {{? it.ban.createdAt}}
+            <tr>
+                <td>
+                    <b>{{=it.tr.banDateTimeLabelText}}</b>
+                </td>
+                <td name="formattedDate">
+                    {{ out += it.formattedDate(it.ban.createdAt); }}
+                </td>
+            </tr>
+        {{?}}
         {{? it.ban.reason}}
             <tr>
                 <td>
@@ -51,16 +57,18 @@
                 </td>
             </tr>
         {{?}}
-        {{? it.ban.expiresAt}}
-            <tr>
-                <td>
-                    <b>{{=it.tr.banExpiresLabelText}}</b>
-                </td>
-                <td name="formattedDate">
-                    {{ out += it.formattedDate(ban.expiresAt); }}
-                </td>
-            </tr>
-        {{?}}
+        <tr>
+            <td>
+                <b>{{=it.tr.banExpiresLabelText}}</b>
+            </td>
+            <td {{? it.ban.expiresAt}}name="formattedDate"{{?}}>
+                {{? it.ban.expiresAt}}
+                    {{ out += it.formattedDate(it.ban.expiresAt); }}
+                {{??}}
+                    {{=it.tr.banExpiresNeverText}}
+                {{?}}
+            </td>
+        </tr>
     </table>
 </div>
 {{#def.customFooter}}

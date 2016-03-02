@@ -1,6 +1,6 @@
 {
   "name": "ololord.js",
-  "version": "1.0.0-beta",
+  "version": "1.0.0-rc",
   "description": "Imageboard engine in JavaScript to rule them all",
   "main": "app.js",
   "scripts": {
@@ -50,7 +50,6 @@
     "random-js": "^1.0.8",
     "read": "^1.0.7",
     "sqlite3": "^3.1.1",
-    "stream-browserify": "^2.0.1",
     "uuid": "^2.0.1",
     "xml2js": "^0.4.15",
     "xregexp": "^3.0.0"

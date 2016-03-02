@@ -335,7 +335,7 @@ board.renderPost = function(post) {
     });
 };
 
-board.customPostBodyPart = function(n, it, thread, post) {
+board.customPostBodyPart = function() {
     return {
         20: function(it, thread, post) {
             if (!post.extraData)

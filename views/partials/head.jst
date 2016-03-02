@@ -10,7 +10,6 @@
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery-ui.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/Promise.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/doT.min.js"></script>
-        <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/data.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/api.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/merge.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/uuid.js"></script>
@@ -35,7 +34,7 @@
             lord.templates = {};
 
             (function() {
-                var baseModelHtml = lord.get("misc/base.json") || "";
+                var baseModelHtml = lord.get("/{{=it.site.pathPrefix}}misc/base.json") || "";
                 ["base", "boards", "tr", "partials", "templates"].forEach(function(modelName) {
                     var html = ("base" == modelName) ? baseModelHtml : lord.id("model-" + modelName).innerHTML;
                     lord.models[modelName] = JSON.parse(html);
@@ -50,7 +49,7 @@
                     templates[templateName] = html;
                 });
                 ["custom-footer", "custom-header"].forEach(function(templateName) {
-                    var html = lord.get("templates/" + templateName + ".jst");
+                    var html = lord.get("/{{=it.site.pathPrefix}}templates/" + templateName + ".jst");
                     if (html)
                         templates[templateName] = html;
                 });
@@ -98,7 +97,7 @@
                     + '.css">');
                 var s = '<style type="text/css">';
                 if (!settings.shrinkPosts)
-                    s += '.post, .opPost, .draft { width: 99%; }';
+                    s += '.post, .opPost, .draft, .searchResult { width: 99%; }';
                 if (lord.compareRatings(settings.maxAllowedRating, "R-18G") < 0) {
                     var selectors = [];
                     var size = lord.deviceType("mobile") ? "140px" : "200px";

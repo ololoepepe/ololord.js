@@ -139,7 +139,11 @@ input.buttonImage {
 }
 
 #playerDurationSlider {
-    width: 96%;
+    width: -moz-calc(100% - 6px);
+    width: -webkit-calc(100% - 6px);
+    width: -o-calc(100% - 6px);
+    width: calc(100% - 6px);
+    margin-right: 0px;
 }
 
 #playerVolumeSlider {
@@ -154,8 +158,19 @@ input.buttonImage {
     font-size: 1.1em;
 }
 
+.movablePlayerConstrolsSliders {
+    width: -moz-calc(100% - 28px);
+    width: -webkit-calc(100% - 28px);
+    width: -o-calc(100% - 28px);
+    width: calc(100% - 28px);
+}
+
 .movablePlayerDurationSlider {
-    width: 96%;
+    width: -moz-calc(100% - 6px);
+    width: -webkit-calc(100% - 6px);
+    width: -o-calc(100% - 6px);
+    width: calc(100% - 6px);
+    margin-right: 0px;
 }
 
 .movablePlayerVolumeSlider {
@@ -189,4 +204,24 @@ div.bannedUser {
     max-width: 200px;
     min-height: 400px;
     max-height: 400px;
+}
+
+.registeredUserHashpassInput {
+    box-sizing: border-box;
+    width: -moz-calc(100% - 8px);
+    width: -webkit-calc(100% - 8px);
+    width: -o-calc(100% - 8px);
+    width: calc(100% - 8px);
+}
+
+.registeredUserIpsInput {
+    box-sizing: border-box;
+    width: -moz-calc(100% - 8px);
+    width: -webkit-calc(100% - 8px);
+    width: -o-calc(100% - 8px);
+    width: calc(100% - 8px);
+}
+
+.banExpiresInput {
+    width: 130px;
 }

@@ -29,6 +29,10 @@ window.addEventListener("load", function load() {
                 }
             }
         }
+        $(".searchResultLink, .searchResultText").mark(model.phrases, {
+            markData: { "class": "searchResultHighlighted" },
+            ignoreCase: false
+        });
     }).catch(function(err) {
         lord.handleError(err);
         searchResultsPlaceholder.parentNode.removeChild(searchResultsPlaceholder);

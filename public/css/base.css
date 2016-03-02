@@ -2,6 +2,14 @@
     font-size: 14.4px !important;
 }
 
+.ui-menu .ui-menu-item {
+    list-style-image: none !important;
+}
+
+.ui-slider-handle {
+    width: 8px !important;
+}
+
 header {
     padding-top: 2px;
     padding-bottom: 8px;
@@ -617,7 +625,7 @@ ul.tabWidget > li > a {
 }
 
 .searchActionInput {
-    width: 60%;
+    width: 90%;
 }
 
 .searchActionSelect {
@@ -1015,6 +1023,8 @@ input.buttonImage {
 
 #playerDurationSlider {
     display: inline-block;
+    margin-left: 6px;
+    margin-right: 6px;
 }
 
 #playerTrackInfo {
@@ -1053,6 +1063,14 @@ input.buttonImage {
 
 #playerTracks {
     overflow-y: auto;
+}
+
+#playerTracks:empty {
+    height: 340px;
+    background-image: url("../img/add_to_playlist.png");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
 }
 
 .trackInfo {
@@ -1103,10 +1121,6 @@ input.buttonImage {
     position: relative;
     top: 4px;
     text-align: center;
-    width: -moz-calc(100% - 44px);
-    width: -webkit-calc(100% - 44px);
-    width: -o-calc(100% - 44px);
-    width: calc(100% - 44px);
 }
 
 .movablePlayerConstrolsSliders > .ui-slider {
@@ -1120,6 +1134,8 @@ input.buttonImage {
 
 .movablePlayerDurationSlider {
     display: inline-block;
+    margin-left: 6px;
+    margin-right: 6px;
 }
 
 .bannedUserHeader {
@@ -1130,10 +1146,13 @@ input.buttonImage {
     cursor: pointer;
 }
 
+.delallHeader {
+    margin-bottom: 4px;
+}
+
 .registeredUserHeader {
     padding: 4px;
     display: block;
-    font-size: 1.1em;
     margin-bottom: 4px;
     cursor: pointer;
 }
@@ -1157,4 +1176,36 @@ div.registeredUser {
     display: inline-block;
     position: relative;
     top: 5px;
+}
+
+.searchResult {
+    margin-top: -16px;
+    margin-bottom: 4px;
+    padding: 4px;
+    overflow-x: auto;
+    display: table;
+}
+
+.searchResultLink, .searchResultThread, .searchResultText {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
+.searchResultText {
+    margin-top: 14.4px;
+    margin-left: 25px;
+    margin-right: 25px;
+    margin-bottom: 14.4px;
+    padding-top: 10px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.userBanIpInput {
+    width: 280px;
 }

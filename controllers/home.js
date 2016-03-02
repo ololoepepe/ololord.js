@@ -14,7 +14,6 @@ router.generateHTML = function() {
     var result = {};
     var model = {};
     model.title = Tools.translate("ololord.js", "pageTitle");
-    model.extraScripts = [ { fileName: "home.js" } ];
     return controller("home", model).then(function(data) {
         result["home"] = data;
         var model = {};

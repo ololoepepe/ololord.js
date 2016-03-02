@@ -19,7 +19,7 @@ var templates = {};
 var publicPartials;
 var publicTemplates;
 var langNames = require("../misc/lang-names.json");
-var ipBans = FSSync.exists(__dirname + "/../misc/bans.json") ? require("../misc/bans.json") : {};
+var ipBans = {};
 
 var controller;
 
@@ -36,10 +36,10 @@ controller = function(templateName, modelData) {
         boards: JSON.stringify(controller.boardsModel()),
         tr: JSON.stringify(controller.translationsModel()),
         partials: JSON.stringify(publicPartials.map(function(partial) {
-            return partial.name
+            return partial.name;
         })),
         templates: JSON.stringify(publicTemplates.map(function(partial) {
-            return partial.name
+            return partial.name;
         }))
     };
     var timeOffset = config("site.timeOffset", 0);
@@ -61,6 +61,12 @@ controller = function(templateName, modelData) {
         modelData.extraScripts = modelData.extraScripts.concat(extraScripts);
     }
     return Promise.resolve(template(modelData));
+};
+
+controller.publicPartialNames = function() {
+    return publicPartials.map(function(partial) {
+        return partial.name;
+    });
 };
 
 controller.sync = function(templateName, modelData) {
@@ -190,8 +196,7 @@ controller.baseModel = function(req) {
             ip: (req ? req.ip : undefined),
             hashpass: (req ? req.hashpass : undefined),
             levels: (req ? (req.levels || {}) : undefined),
-            loggedIn: (req ? !!req.hashpass : undefined),
-            vkAuth: (req ? req.vkAuth : undefined)
+            loggedIn: (req ? !!req.hashpass : undefined)
         },
         styles: Tools.styles(),
         codeStyles: Tools.codeStyles(),
@@ -238,7 +243,7 @@ controller.boardModel = function(board) {
 };
 
 controller.settingsModel = function(req) {
-    return { settings: (req ? req.settings : {}) };
+    return { settings: (req ? { deviceType: req.deviceType } : {}) };
 };
 
 controller.translationsModel = function() {
@@ -455,3 +460,12 @@ var config = require("./config");
 var Database = require("./database");
 var markup = require("./markup");
 var Tools = require("./tools");
+
+var tmpBans = FSSync.existsSync(__dirname + "/../misc/bans.json") ? require("../misc/bans.json") : {};
+
+Tools.forIn(tmpBans, function(ban, ip) {
+    ip = Tools.correctAddress(ip);
+    if (!ip)
+        return;
+    ipBans[ip] = ban;
+});

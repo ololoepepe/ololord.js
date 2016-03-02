@@ -979,7 +979,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             name: (fields.name || null),
             number: c.postNumber,
             options: {
-                showTripcode: !!req.hashpass && !!fields.tripcode,
+                showTripcode: !!req.hashpass && ("true" == fields.tripcode),
                 signAsOp: ("true" == fields.signAsOp)
             },
             rawText: rawText,
@@ -1089,12 +1089,14 @@ module.exports.createPost = function(req, fields, files, transaction) {
     });
 };
 
-var rerenderReferringPosts = function(post) {
+var rerenderReferringPosts = function(post, options) {
     return db.hgetall("referringPosts:" + post.boardName + ":" + post.number).then(function(referringPosts) {
         return Tools.series(referringPosts, function(ref) {
             ref = JSON.parse(ref);
-            if (ref.boardName == post.boardName && ref.threadNumber == post.threadNumber)
+            if (options && options.removingThread
+                    && ref.boardName == post.boardName && ref.threadNumber == post.threadNumber) {
                 return Promise.resolve();
+            }
             return rerenderPost(ref.boardName, ref.postNumber, true);
         });
     });
@@ -1149,7 +1151,7 @@ var addReferencedPosts = function(post, referencedPosts, nogenerate) {
     });
 };
 
-var removePost = function(boardName, postNumber, leaveFileInfos, leaveReferences) {
+var removePost = function(boardName, postNumber, options) {
     var board = Board.board(boardName);
     if (!board)
         return Promise.reject(Tools.translate("Invalid board"));
@@ -1162,13 +1164,13 @@ var removePost = function(boardName, postNumber, leaveFileInfos, leaveReferences
     }).then(function() {
         return db.hdel("posts", boardName + ":" + postNumber);
     }).then(function() {
-        if (leaveReferences)
+        if (options && options.leaveReferences)
             return Promise.resolve();
-        return rerenderReferringPosts(c.post);
+        return rerenderReferringPosts(c.post, { removingThread: options && options.removingThread });
     }).catch(function(err) {
         Global.error(err);
     }).then(function() {
-        if (leaveReferences)
+        if (options && options.leaveReferences)
             return Promise.resolve();
         return removeReferencedPosts(c.post);
     }).catch(function(err) {
@@ -1183,7 +1185,7 @@ var removePost = function(boardName, postNumber, leaveFileInfos, leaveReferences
             return db.hget("fileInfos", name);
         }));
     }).then(function(fileInfos) {
-        if (leaveFileInfos)
+        if (options && options.leaveFileInfos)
             return Promise.resolve();
         c.fileInfos = [];
         c.paths = [];
@@ -1197,13 +1199,13 @@ var removePost = function(boardName, postNumber, leaveFileInfos, leaveReferences
         });
         return db.del("postFileInfoNames:" + boardName + ":" + postNumber);
     }).then(function() {
-        if (leaveFileInfos)
+        if (options && options.leaveFileInfos)
             return Promise.resolve();
         return Promise.all(c.fileInfoNames.map(function(name) {
             return db.hdel("fileInfos", name);
         }));
     }).then(function() {
-        if (leaveFileInfos)
+        if (options && options.leaveFileInfos)
             return Promise.resolve();
         return removeFileHashes(c.fileInfos);
     }).then(function() {
@@ -1216,7 +1218,7 @@ var removePost = function(boardName, postNumber, leaveFileInfos, leaveReferences
             subject: c.post.subject
         });
     }).then(function() {
-        if (!leaveFileInfos) {
+        if (!options || !options.leaveFileInfos) {
             c.paths.forEach(function(path) {
                 return FS.remove(path).catch(function(err) {
                     Global.error(err.stack || err);
@@ -1229,8 +1231,8 @@ var removePost = function(boardName, postNumber, leaveFileInfos, leaveReferences
 
 module.exports.removePost = removePost;
 
-var removeThread = function(boardName, threadNumber, archived, leaveFileInfos, leaveReferences) {
-    var key = (archived ? "archivedThreads:" : "threads:") + boardName;
+var removeThread = function(boardName, threadNumber, options) {
+    var key = ((options && options.archived) ? "archivedThreads:" : "threads:") + boardName;
     return db.sadd("threadsPlannedForDeletion", boardName + ":" + threadNumber).then(function() {
         return db.hdel(key, threadNumber);
     }).then(function() {
@@ -1242,13 +1244,13 @@ var removeThread = function(boardName, threadNumber, archived, leaveFileInfos, l
                 c.postNumbers = result;
                 return db.del("threadPostNumbers:" + boardName + ":" + threadNumber);
             }).then(function() {
-                var p = Promise.resolve();
-                c.postNumbers.forEach(function(postNumber) {
-                    p = p.then(function() {
-                        return removePost(boardName, postNumber, leaveFileInfos, leaveReferences);
+                return Tools.series(c.postNumbers, function(postNumber) {
+                    return removePost(boardName, postNumber, {
+                        leaveFileInfos: options && options.leaveFileInfos,
+                        leaveReferences: options && options.leaveReferences,
+                        removingThread: true
                     });
                 });
-                return p;
             }).then(function() {
                 return db.srem("threadsPlannedForDeletion", boardName + ":" + threadNumber);
             }).catch(function(err) {
@@ -1283,7 +1285,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
             c.archivedThreads.sort(Board.sortThreadsByDate);
             if (c.archivedThreads.length <= 0 || c.archivedThreads.length < board.archiveLimit)
                 return Promise.resolve();
-            return removeThread(board.name, c.archivedThreads.pop().number, true);
+            return removeThread(board.name, c.archivedThreads.pop().number, { archived: true });
         }).then(function() {
             c.thread = c.threads.pop();
             if (board.archiveLimit <= 0)
@@ -1948,7 +1950,10 @@ module.exports.deletePost = function(req, res, fields) {
         }
         c.isThread = post.threadNumber == post.number;
         c.archived = ("true" == fields.archived);
-        return (c.isThread) ? removeThread(board.name, postNumber, c.archived) : removePost(board.name, postNumber);
+        if (c.archived && !c.isThread)
+            return Promise.reject(Tools.translate("Deleting posts from archived threads is not allowed"));
+        return (c.isThread) ? removeThread(board.name, postNumber, { archived: c.archived })
+            : removePost(board.name, postNumber);
     }).then(function() {
         var p;
         if (c.isThread && c.archived) {
@@ -2183,7 +2188,10 @@ module.exports.moveThread = function(req, fields) {
             return Global.generate(o.boardName, o.threadNumber, o.threadNumber, "create");
         });
     }).then(function() {
-        return removeThread(sourceBoard.name, threadNumber, false, true, true);
+        return removeThread(sourceBoard.name, threadNumber, {
+            leaveFileInfos: true,
+            leaveReferences: true
+        });
     }).then(function() {
         Global.generate(sourceBoard.name, threadNumber, threadNumber, "delete")
         return Global.generate(targetBoard.name, c.thread.number, c.thread.number, "create");
@@ -2427,7 +2435,7 @@ module.exports.banUser = function(req, ip, bans) {
                     updateBan(ip, boardName, ban.postNumber).catch(function(err) {
                         Global.error(err.stack || err);
                     });
-                }, Math.ceil(ttl * Tools.Second * 1.002)); //NOTE: Adding extra delay
+                }, Math.ceil(ttl * Tools.Second + Tools.Second)); //NOTE: Adding extra delay
                 return db.expire(key, ttl);
             }).then(function() {
                 if (!ban.postNumber)
@@ -2464,6 +2472,7 @@ module.exports.delall = function(req, ip, boardNames) {
         return Promise.reject(Tools.translate("Not enough rights"));
     var deletedThreads = {};
     var updatedThreads = {};
+    var deletedPosts = {};
     return registeredUserLevelsByIp(ip).then(function(levels) {
         err = boardNames.some(function(boardName) {
             var level = req.level(boardName);
@@ -2474,27 +2483,45 @@ module.exports.delall = function(req, ip, boardNames) {
             return Promise.reject(Tools.translate("Not enough rights"));
         return Tools.series(boardNames, function(boardName) {
             return db.smembers(`userPostNumbers:${ip}:${boardName}`).then(function(postNumbers) {
+                var posts = [];
                 return Tools.series(postNumbers, function(postNumber) {
                     return getPost(boardName, postNumber).then(function(post) {
-                        var key = post.boardName + ":" + post.threadNumber;
-                        var thread = {
-                            boardName: post.boardName,
-                            number: post.threadNumber,
-                            postNumber: post.number
-                        };
+                        posts.push(post);
+                        return Promise.resolve();
+                    });
+                }).then(function() {
+                    posts.forEach(function(post) {
                         if (post.threadNumber == post.number) {
-                            deletedThreads[key] = thread;
-                            if (updatedThreads.hasOwnProperty(key))
-                                delete updatedThreads[key];
-                            return removeThread(post.boardName, post.number);
-                        } else {
-                            if (!deletedThreads.hasOwnProperty(key))
-                                updatedThreads[key] = thread;
-                            return removePost(post.boardName, post.number);
+                            deletedThreads[post.boardName + ":" + post.threadNumber] = {
+                                boardName: post.boardName,
+                                number: post.threadNumber
+                            };
                         }
                     });
+                    posts.forEach(function(post) {
+                        var key = `${post.boardName}:${post.threadNumber}`;
+                        if (deletedThreads.hasOwnProperty(key))
+                            return;
+                        updatedThreads[key] = {
+                            boardName: post.boardName,
+                            number: post.threadNumber
+                        };
+                        deletedPosts[`${post.boardName}:${post.number}`] = {
+                            boardName: post.boardName,
+                            number: post.number
+                        };
+                    });
+                    return Promise.resolve();
                 });
             });
+        });
+    }).then(function() {
+        return Tools.series(deletedPosts, function(post) {
+            return removePost(post.boardName, post.number);
+        });
+    }).then(function() {
+        return Tools.series(deletedThreads, function(thread) {
+            return removeThread(thread.boardName, thread.number);
         });
     }).then(function() {
         return Tools.series(updatedThreads, function(thread) {
@@ -2520,7 +2547,7 @@ module.exports.initialize = function() {
                         updateBan(ip, boardName, ban.postNumber).catch(function(err) {
                             Global.error(err.stack || err);
                         });
-                    }, Math.ceil(ttl * Tools.Second * 1.002)); //NOTE: Adding extra delay
+                    }, Math.ceil(ttl * Tools.Second + Tools.Second)); //NOTE: Adding extra delay
                     return Promise.resolve();
                 });
             });

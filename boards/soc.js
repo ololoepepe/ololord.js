@@ -110,7 +110,7 @@ board.renderPost = function(post) {
     });
 };
 
-board.customPostHeaderPart = function(n, it, thread, post) {
+board.customPostHeaderPart = function() {
     return {
         100: function(it, thread, post) {
             var model = merge.recursive(it, post.extraData || {
