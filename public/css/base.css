@@ -484,6 +484,7 @@ span.newPostCount {
     box-sizing: border-box;
     vertical-align: top;
     white-space: normal;
+    min-width: 200px;
 }
 
 .postSubject {
