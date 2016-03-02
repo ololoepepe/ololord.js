@@ -13,6 +13,14 @@
     border-color: #CCCCCC transparent;
 }
 
+.ui-slider {
+    border: 1px solid black !important;
+}
+
+.ui-slider-handle {
+    border: 1px solid black !important;
+}
+
 body  {
     background-color: #EEEEEE;
     font-family: Verdana,sans-serif;
