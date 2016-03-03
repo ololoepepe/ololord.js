@@ -1560,10 +1560,12 @@ lord.draw = function(options) {
     var subdiv = lord.node("div");
     var width = options ? options.width : +width;
     if (!width || width < 0)
-        width = ($(window).width() - 150);
+        width = $(window).width() - 150;
     var height = options ? options.height : +height;
     if (!height || height < 0)
-        height = ($(window).height() - 150);
+        height = $(window).height() - 150;
+    width = Math.min(Math.max(width + 62, 420), $(window).width() - 150);
+    height = Math.min(Math.max(height + 32, 360), $(window).height() - 150);
     $(subdiv).width(width).height(height);
     div.appendChild(subdiv);
     var c = {};
