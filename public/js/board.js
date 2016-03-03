@@ -1265,8 +1265,9 @@ lord.banUser = function(el) {
     }).catch(lord.handleError);
 };
 
-lord.clearDate = function(inputName) {
-    var inp = lord.queryOne("[name='" + inputName + "']");
+lord.clearDate = function(a, inputName) {
+    var form = $(a).closest("form")[0];
+    var inp = lord.nameOne(inputName, form);
     inp.value = "____/__/__ __:__";
     $(inp).attr("value", "");
 };
