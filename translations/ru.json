@@ -2818,5 +2818,10 @@
         "resetFileScaleOnOpeningLabelText": {
             "value": "Сбрасывать масштаб картинок при каждом открытии"
         }
+    },
+    "Default": {
+        "dafaultCanvasBackgroundColorButtonText": {
+            "value": "По умолчанию"
+        }
     }
 }

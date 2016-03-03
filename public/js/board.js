@@ -2010,6 +2010,13 @@ lord.attachFileByLink = function(a) {
     lord.fileAddedCommon(div);
 };
 
+lord.setDrawingBackgroundColor = function(btn, color) {
+    color = color || "rgba(255, 255, 255, 1)";
+    var table = $(btn).closest("table")[0];
+    var ic = lord.nameOne("backgroundColor", table);
+    $(ic).minicolors("value", color);
+};
+
 lord.setDrawingDimensions = function(btn, width, height) {
     var table = $(btn).closest("table")[0];
     var iw = lord.nameOne("width", table);

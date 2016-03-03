@@ -5,8 +5,9 @@
                 <td>
                     {{=it.tr.canvasBackgroundColorLabelText}}
                 </td>
-                <td>
+                <td class="nowrap">
                     <input type="text" name="backgroundColor" class="input" value="{{=it.options.backgroundColor}}" />
+                    <button onclick="lord.setDrawingBackgroundColor(this); return false;">{{=it.tr.dafaultCanvasBackgroundColorButtonText}}</button>
                 </td>
             </tr>
             <tr>
