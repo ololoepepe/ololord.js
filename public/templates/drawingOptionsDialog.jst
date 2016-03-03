@@ -1,0 +1,41 @@
+<div>
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    {{=it.tr.canvasBackgroundColorLabelText}}
+                </td>
+                <td>
+                    <input type="text" name="backgroundColor" class="input" value="{{=it.options.backgroundColor}}" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{=it.tr.canvasDimensionsLabelText}}
+                </td>
+                <td>
+                    <input type="number" name="width" min="0" max="9999" class="numberSize3"
+                           value="{{=it.options.width}}" />
+                    x
+                    <input type="number" name="height" min="0" max="9999" class="numberSize3"
+                           value="{{=it.options.height}}" />
+                    {{=it.tr.canvasDimensionsDescriptionText}}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="nowrap">
+                    <button onclick="lord.setDrawingDimensions(this, 300, 300); return false;">300x300</button>
+                    <button onclick="lord.setDrawingDimensions(this, 400, 300); return false;">400x300</button>
+                    <button onclick="lord.setDrawingDimensions(this, 640, 480); return false;">640x480</button>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="nowrap">
+                    <button onclick="lord.setDrawingDimensions(this, 800, 600); return false;">800x600</button>
+                    <button onclick="lord.setDrawingDimensions(this, 1024, 768); return false;">1024x768</button>
+                    <button onclick="lord.setDrawingDimensions(this, 1600, 1200); return false;">1600x1200</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

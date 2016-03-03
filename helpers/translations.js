@@ -389,5 +389,9 @@ module.exports = function(tr) {
     translate("Hashpass:", "hashpassLabelText");
     translate("Generate hashpass", "generateHashpassButtonText");
     translate("Are you sure?", "confirmationText");
+    translate("Dimensions:", "canvasDimensionsLabelText");
+    translate("0 — default", "canvasDimensionsDescriptionText");
+    translate("Background color:", "canvasBackgroundColorLabelText");
+    translate("Drawing options", "drawingOptionsDialogTitle");
     return tr;
 };

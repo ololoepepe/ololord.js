@@ -2792,5 +2792,35 @@
         "_default": {
             "value": "Удаление постов из архивных тредов запрещено"
         }
+    },
+    "Enter password: ": {
+        "_default": {
+            "value": "Введите пароль: "
+        }
+    },
+    "That is a hashpass, isn't it? [Yes/no]: ": {
+        "_default": {
+            "value": "Это хешпасс, верно? [Yes/no]: "
+        }
+    },
+    "Dimensions:": {
+        "canvasDimensionsLabelText": {
+            "value": "Размеры:"
+        }
+    },
+    "0 — default": {
+        "canvasDimensionsDescriptionText": {
+            "value": "0 — по умолчанию"
+        }
+    },
+    "Background color:": {
+        "canvasBackgroundColorLabelText": {
+            "value": "Цвет фона:"
+        }
+    },
+    "Drawing options": {
+        "drawingOptionsDialogTitle": {
+            "value": "Параметры рисования"
+        }
     }
 }

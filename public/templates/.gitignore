@@ -18,6 +18,7 @@
 !deletePostDialog.jst
 !dPostBodyPart.jst
 !draft.jst
+!drawingOptionsDialog.jst
 !echoEditPostDialogPart.jst
 !echoPostBodyPart.jst
 !echoPostFormField.jst

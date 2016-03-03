@@ -1540,11 +1540,11 @@ lord.attachDrawnFile = function(lc, fileName, div) {
     lord.fileAddedCommon(div);
 };
 
-lord.draw = function(width, height, imageUrl) {
+lord.draw = function(options) {
     var backgroundShape;
-    if (imageUrl) {
+    if (options && options.imageUrl) {
         var backgroundImage = new Image();
-        backgroundImage.src = imageUrl;
+        backgroundImage.src = options.imageUrl;
         backgroundShape = LC.createShape("Image", {
             x: 0,
             y: 0,
@@ -1552,11 +1552,12 @@ lord.draw = function(width, height, imageUrl) {
         });
     }
     var div = lord.node("div");
+    $(div).css("background-color", "white");
     var subdiv = lord.node("div");
-    width = +width;
+    var width = options ? options.width : +width;
     if (!width || width < 0)
         width = 400;
-    height = +height;
+    var height = options ? options.height : +height;
     if (!height || height < 0)
         height = 400;
     $(subdiv).width(width).height(height);
@@ -1576,10 +1577,12 @@ lord.draw = function(width, height, imageUrl) {
         ],
         afterShow: function() {
             $(div).width(width).height(height);
-            var options = { imageURLPrefix: "/" + lord.data("sitePathPrefix") + "img/3rdparty/literallycanvas" };
+            var opt = { imageURLPrefix: "/" + lord.data("sitePathPrefix") + "img/3rdparty/literallycanvas" };
             if (backgroundShape)
-                options.backgroundShapes = [backgroundShape];
-            c.lc = LC.init(div, options);
+                opt.backgroundShapes = [backgroundShape];
+            else
+                opt.backgroundColor = options && options.backgroundColor;
+            c.lc = LC.init(div, opt);
         }
     }).then(function(result) {
         return Promise.resolve({
@@ -1595,7 +1598,11 @@ lord.drawOnImage = function(a) {
     var file = $(a).closest(".postFile")[0];
     if (!file)
         return;
-    lord.draw(+lord.data("width", file), +lord.data("height", file), lord.data("href", file)).then(function(result) {
+    lord.draw({
+        width: +lord.data("width", file),
+        height: +lord.data("height", file),
+        imageUrl: lord.data("href", file)
+    }).then(function(result) {
         if (!result.accepted)
             return;
         lord.attachDrawnFile(result.lc, lord.data("fileName", file));
@@ -1987,6 +1994,14 @@ lord.attachFileByLink = function(a) {
     lord.fileAddedCommon(div);
 };
 
+lord.setDrawingDimensions = function(btn, width, height) {
+    var table = $(btn).closest("table")[0];
+    var iw = lord.nameOne("width", table);
+    var ih = lord.nameOne("height", table);
+    iw.value = width;
+    ih.value = height;
+};
+
 lord.attachFileByDrawing = function(a) {
     var div = a.parentNode;
     var p;
@@ -1994,7 +2009,7 @@ lord.attachFileByDrawing = function(a) {
     if (file && file.name && /\.(jpe?g|png|gif)$/i.test(file.name)) {
         p = lord.readAs(file, "DataURL").then(function(url) {
             return new Promise(function(resolve, reject) {
-                var timer =setTimeout(reject, 15 * lord.Second);
+                var timer = setTimeout(reject, 15 * lord.Second);
                 var img = new Image();
                 img.onload = function() {
                     clearTimeout(timer);
@@ -2008,15 +2023,50 @@ lord.attachFileByDrawing = function(a) {
             });
         });
     } else {
-        p = Promise.resolve({
-            width: $(window).width() - 150,
-            height: $(window).height() - 150
+        var model = lord.model(["base", "tr"]);
+        model.options = {
+            width: lord.getLocalObject("drawingBackgroundWidth", 0),
+            height: lord.getLocalObject("drawingBackgroundHeight", 0),
+            backgroundColor: lord.getLocalObject("drawingBackgroundColor", "rgba(255, 255, 255, 1)")
+        };
+        var dlg = lord.template("drawingOptionsDialog", model);
+        p = lord.showDialog(dlg, {
+            title: "drawingOptionsDialogTitle",
+            afterShow: function() {
+                $(dlg).css({ minHeight: "180px" });
+                $("button", dlg).button();
+                $("input[name='backgroundColor']", dlg).minicolors({
+                    control: "wheel",
+                    position: "bottom right",
+                    format: "rgb",
+                    opacity: true
+                });
+            }
+        }).then(function(result) {
+            if (!result)
+                return Promise.resolve();
+            var width = +lord.nameOne("width", dlg).value;
+            var height = +lord.nameOne("height", dlg).value;
+            var backgroundColor = $("input[name='backgroundColor']", dlg).minicolors("value");
+            lord.setLocalObject("drawingBackgroundWidth", width);
+            lord.setLocalObject("drawingBackgroundHeight", height);
+            lord.setLocalObject("drawingBackgroundColor", backgroundColor);
+            return Promise.resolve({
+                width: width || ($(window).width() - 150),
+                height: height || ($(window).height() - 150),
+                backgroundColor: backgroundColor
+            });
         });
     }
     p.then(function(result) {
         if (!result)
             return Promise.resolve({ accepted: false });
-        return lord.draw(result.width, result.height, result.url);
+        return lord.draw({
+            width: result.width,
+            height: result.height,
+            imageUrl: result.url,
+            backgroundColor: result.backgroundColor
+        });
     }).then(function(result) {
         if (!result.accepted)
             return;

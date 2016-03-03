@@ -138,10 +138,12 @@
                     appendScript("js/3rdparty/codemirror/css.min.js");
                     lord.createStylesheetLink("3rdparty/codemirror.css", true);
                 }
-                if (settings.paintingEnabled) {
+                if (settings.drawingEnabled) {
                     appendScript("js/3rdparty/react-with-addons.min.js");
                     appendScript("js/3rdparty/literallycanvas.min.js");
+                    appendScript("js/3rdparty/jquery.minicolors.min.js");
                     lord.createStylesheetLink("3rdparty/literallycanvas.css", true);
+                    lord.createStylesheetLink("3rdparty/jquery.minicolors.css", true);
                 }
                 if (settings.userJavaScriptEnabled) {
                     s += '<script type="text/javascript">' + lord.getLocalObject("userJavaScript", "")
