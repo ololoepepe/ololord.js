@@ -396,5 +396,6 @@ module.exports = function(tr) {
     translate("Auto", "canvasBackgroundAutoSizeButtonText");
     translate("Drawing is disabled. Enable it in the \"Other\" tab of the settings dialog "
         + "(the \"Enable drawing tools\" checkbox).", "drawingDisabledWarningText");
+    translate("Reset image scale on every opening:", "resetFileScaleOnOpeningLabelText");
     return tr;
 };

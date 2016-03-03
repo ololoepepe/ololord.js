@@ -207,6 +207,12 @@
                 </tr>
                 <tr>
                     <td colspan="2">
+                        <input type="checkbox" name="resetFileScaleOnOpening"
+                               {{? it.settings.resetFileScaleOnOpening}}checked="true"{{?}} /><label>{{=it.tr.resetFileScaleOnOpeningLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
                         <input type="checkbox" name="playAudioVideoImmediately"
                                {{? it.settings.playAudioVideoImmediately}}checked="true"{{?}} /><label>{{=it.tr.playAudioVideoImmediatelyLabelText}}</label>
                     </td>

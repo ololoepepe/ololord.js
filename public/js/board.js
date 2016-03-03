@@ -2352,7 +2352,10 @@ lord.showImage = function(a, mimeType, width, height) {
         loop: lord.getLocalObject("loopAudioVideo", false),
         play: lord.getLocalObject("playAudioVideoImmediately", true) && 500
     });
-    if (!lord.movablePlayers[href]) {
+    if (lord.movablePlayers[href]) {
+        if (lord.getLocalObject("resetFileScaleOnOpening", false))
+            lord.currentMovablePlayer.reset();
+    } else {
         lord.currentMovablePlayer.on("requestClose", function(e) {
             e.cancel();
             lord.hideImage();

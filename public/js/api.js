@@ -1544,6 +1544,7 @@ lord.settings = function() {
         sourceHighlightingEnabled: lord.getLocalObject("sourceHighlightingEnabled", false),
         chatEnabled: lord.getLocalObject("chatEnabled", true),
         drawingEnabled: lord.getLocalObject("drawingEnabled", true),
+        resetFileScaleOnOpening: lord.getLocalObject("resetFileScaleOnOpening", false),
         closeFilesByClickingOnly: lord.getLocalObject("closeFilesByClickingOnly", false),
         viewPostPreviewDelay: lord.getLocalObject("viewPostPreviewDelay", 200),
         hidePostPreviewDelay: lord.getLocalObject("hidePostPreviewDelay", 1000),

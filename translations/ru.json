@@ -2813,5 +2813,10 @@
         "drawingDisabledWarningText": {
             "value": "Рисование отключено. Включите его на вкладке \"Прочее\" диалога настроек (флажок \"Включить инструменты для рисования\")."
         }
+    },
+    "Reset image scale on every opening:": {
+        "resetFileScaleOnOpeningLabelText": {
+            "value": "Сбрасывать масштаб картинок при каждом открытии:"
+        }
     }
 }
