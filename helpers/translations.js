@@ -390,8 +390,11 @@ module.exports = function(tr) {
     translate("Generate hashpass", "generateHashpassButtonText");
     translate("Are you sure?", "confirmationText");
     translate("Dimensions:", "canvasDimensionsLabelText");
-    translate("0 — default", "canvasDimensionsDescriptionText");
+    translate("0 — determine automatically", "canvasDimensionsDescriptionText");
     translate("Background color:", "canvasBackgroundColorLabelText");
     translate("Drawing options", "drawingOptionsDialogTitle");
+    translate("Auto", "canvasBackgroundAutoSizeButtonText");
+    translate("Drawing is disabled. Enable it in the \"Other\" tab of the settings dialog "
+        + "(the \"Enable drawing tools\" checkbox).", "drawingDisabledWarningText");
     return tr;
 };

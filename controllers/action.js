@@ -136,29 +136,29 @@ var testParameters = function(fields, files, creatingThread) {
     var maxFileSize = board.maxFileSize;
     var maxFileCount = board.maxFileCount;
     if (email.length > board.maxEmailLength)
-        return Promise.reject(Tools.translate("E-mail is too long", "error"));
+        return Promise.reject(Tools.translate("E-mail is too long"));
     if (name.length > board.maxNameLength)
-        return Promise.reject(Tools.translate("Name is too long", "error"));
+        return Promise.reject(Tools.translate("Name is too long"));
     if (subject.length > board.maxSubjectLength)
-        return Promise.reject(Tools.translate("Subject is too long", "error"));
+        return Promise.reject(Tools.translate("Subject is too long"));
     if (text.length > board.maxTextFieldLength)
-        return Promise.reject(Tools.translate("Comment is too long", "error"));
+        return Promise.reject(Tools.translate("Comment is too long"));
     if (password.length > board.maxPasswordLength)
-        return Promise.reject(Tools.translate("Password is too long", "error"));
+        return Promise.reject(Tools.translate("Password is too long"));
     if (creatingThread && maxFileCount && !fileCount)
-        return Promise.reject(Tools.translate("Attempt to create a thread without attaching a file", "error"));
+        return Promise.reject(Tools.translate("Attempt to create a thread without attaching a file"));
     if (text.length < 1 && !fileCount)
-        return Promise.reject(Tools.translate("Both file and comment are missing", "error"));
+        return Promise.reject(Tools.translate("Both file and comment are missing"));
     if (fileCount > maxFileCount) {
-        return Promise.reject(Tools.translate("Too many files", "error"));
+        return Promise.reject(Tools.translate("Too many files"));
     } else {
         var err = files.reduce(function(err, file) {
             if (err)
                 return err;
             if (file.size > maxFileSize)
-                return Tools.translate("File is too big", "error");
+                return Tools.translate("File is too big");
             if (board.supportedFileTypes.indexOf(file.mimeType) < 0)
-                return Tools.translate("File type is not supported", "error");
+                return Tools.translate("File type is not supported");
         }, "");
         if (err)
             return Promise.reject(err);
@@ -177,7 +177,7 @@ router.post("/action/markupText", function(req, res) {
         return controller.checkBan(req, res, c.board.name, true);
     }).then(function() {
         if (c.fields.text.length > c.board.maxTextFieldLength)
-            return Promise.reject(Tools.translate("Comment is too long", "error"));
+            return Promise.reject(Tools.translate("Comment is too long"));
         var markupModes = [];
         Tools.forIn(markup.MarkupModes, function(val) {
             if (c.fields.markupMode && c.fields.markupMode.indexOf(val) >= 0)
@@ -309,15 +309,15 @@ router.post("/action/addFiles", function(req, res) {
         var maxFileSize = c.board.maxFileSize;
         var maxFileCount = c.board.maxFileCount;
         if (fileCount > maxFileCount) {
-            return Promise.reject(Tools.translate("Too many files", "error"));
+            return Promise.reject(Tools.translate("Too many files"));
         } else {
             var err = c.files.reduce(function(err, file) {
                 if (err)
                     return err;
                 if (file.size > maxFileSize)
-                    return Tools.translate("File is too big", "error");
+                    return Tools.translate("File is too big");
                 if (c.board.supportedFileTypes.indexOf(file.mimeType) < 0)
-                    return Tools.translate("File type is not supported", "error");
+                    return Tools.translate("File type is not supported");
             }, "");
             if (err)
                 return Promise.reject(err);

@@ -1551,15 +1551,19 @@ lord.draw = function(options) {
             image: backgroundImage
         });
     }
+    var imageSize = {
+        width: (options && +options.width > 0) ? +options.width : 0,
+        height: (options && +options.height > 0) ? +options.height : 0
+    };
     var div = lord.node("div");
     $(div).css("background-color", "white");
     var subdiv = lord.node("div");
     var width = options ? options.width : +width;
     if (!width || width < 0)
-        width = 400;
+        width = ($(window).width() - 150);
     var height = options ? options.height : +height;
     if (!height || height < 0)
-        height = 400;
+        height = ($(window).height() - 150);
     $(subdiv).width(width).height(height);
     div.appendChild(subdiv);
     var c = {};
@@ -1577,7 +1581,10 @@ lord.draw = function(options) {
         ],
         afterShow: function() {
             $(div).width(width).height(height);
-            var opt = { imageURLPrefix: "/" + lord.data("sitePathPrefix") + "img/3rdparty/literallycanvas" };
+            var opt = {
+                imageURLPrefix: "/" + lord.data("sitePathPrefix") + "img/3rdparty/literallycanvas",
+                imageSize: imageSize
+            };
             if (backgroundShape)
                 opt.backgroundShapes = [backgroundShape];
             else
@@ -1593,6 +1600,13 @@ lord.draw = function(options) {
 };
 
 lord.drawOnImage = function(a) {
+    if (!lord.getLocalObject("drawingEnabled", true)) {
+        lord.showPopup(lord.text("drawingDisabledWarningText"), {
+            type: "warning",
+            timeout: 8 * lord.Second
+        });
+        return;
+    }
     if (!a)
         return;
     var file = $(a).closest(".postFile")[0];
@@ -2003,6 +2017,13 @@ lord.setDrawingDimensions = function(btn, width, height) {
 };
 
 lord.attachFileByDrawing = function(a) {
+    if (!lord.getLocalObject("drawingEnabled", true)) {
+        lord.showPopup(lord.text("drawingDisabledWarningText"), {
+            type: "warning",
+            timeout: 8 * lord.Second
+        });
+        return;
+    }
     var div = a.parentNode;
     var p;
     var file = div.file || div.fileBackup;
@@ -2052,8 +2073,8 @@ lord.attachFileByDrawing = function(a) {
             lord.setLocalObject("drawingBackgroundHeight", height);
             lord.setLocalObject("drawingBackgroundColor", backgroundColor);
             return Promise.resolve({
-                width: width || ($(window).width() - 150),
-                height: height || ($(window).height() - 150),
+                width: width,
+                height: height,
                 backgroundColor: backgroundColor
             });
         });
