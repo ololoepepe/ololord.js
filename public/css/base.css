@@ -316,13 +316,7 @@ span.newPostCount {
     text-align: center;
 }
 
-.rules {
-    margin-left: 5%;
-    margin-right: 5%;
-    padding: 10px;
-}
-
-.news {
+.sectionBody {
     margin-left: 5%;
     margin-right: 5%;
     padding: 10px;

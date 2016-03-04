@@ -189,13 +189,9 @@ span.newPostCount {
     background-color: #DDDDDD;
 }
 
-.rules {
+.sectionBody {
     background-color: #DDDDDD;
     border: 1px solid #CCCCCC;
-}
-
-.news {
-    background-color: #DDDDDD;
 }
 
 .post {
