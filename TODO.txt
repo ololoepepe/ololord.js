@@ -1,6 +1,10 @@
 * Optimize spells
 * Use iframes instead of old HTML frames
+* Use vorpal for commands handling
+* Use commander for command line options handling
+* Implement LaTeX markup (use mathjax-node)
 * Implement boards management page
 * Implement content management page
 * Implement user action permissions
-* Use Elasticsearch or other search engine [not sure if needed]
+* Consider using Elasticsearch or other search engine [not sure if needed]
+* COnsider using markdown-it as a parser [not sure if needed]
