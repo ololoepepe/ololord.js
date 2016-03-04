@@ -1559,14 +1559,16 @@ lord.draw = function(options) {
     var div = lord.node("div");
     $(div).css("background-color", "white");
     var subdiv = lord.node("div");
+    var dwidth = lord.deviceType("mobile") ? 10 : 150;
+    var dheight = lord.deviceType("mobile") ? 20 : 150;
     var width = options ? options.width : +width;
     if (!width || width < 0)
-        width = $(window).width() - 150;
+        width = $(window).width() - dwidth;
     var height = options ? options.height : +height;
     if (!height || height < 0)
-        height = $(window).height() - 150;
-    width = Math.min(Math.max(width + 62, 420), $(window).width() - 150);
-    height = Math.min(Math.max(height + 32, 360), $(window).height() - 150);
+        height = $(window).height() - dheight;
+    width = Math.min(Math.max(width + 62, 420), $(window).width() - dwidth);
+    height = Math.min(Math.max(height + 32, 360), $(window).height() - dheight);
     $(subdiv).width(width).height(height);
     div.appendChild(subdiv);
     var c = {};
