@@ -741,9 +741,6 @@ lord.createPostNode = function(post, permanent, threadInfo) {
                 lastPostNumbers[post.boardName] = post.number;
                 lord.setLocalObject("lastPostNumbers", lastPostNumbers);
             }
-            lord.files = null;
-            lord.filesMap = null;
-            lord.initFiles();
         }
         return lord.processPosts(c.node).catch(lord.handleError);
     }).then(function() {
@@ -893,9 +890,7 @@ lord.globalOnclick = function(e) {
         lord.hideImage();
 };
 
-lord.initFiles = function() {
-    if (lord.files)
-        return;
+lord.initFiles = function(reset) {
     lord.files = [];
     lord.filesMap = {};
     lord.query(".postFile").forEach(function(td) {
@@ -2551,6 +2546,7 @@ lord.submitted = function(event, form) {
                     }
                     lord.createPostNode(result, true).then(function(post) {
                         threadPosts.appendChild(post);
+                        lord.initFiles();
                     }).catch(lord.handleError);
                 }
             }
@@ -2982,6 +2978,7 @@ lord.expandThread = function(thread) {
     }).then(function(nthread) {
         lord.processPosts(nthread);
         thread.parentNode.replaceChild(nthread, thread);
+        lord.initFiles();
     }).catch(lord.handleError);
 };
 
@@ -3583,6 +3580,7 @@ lord.updateThread = function(silent) {
             };
             document.body.insertBefore(post, before);
         });
+        lord.initFiles();
         var board = lord.model("board/" + boardName).board;
         var bumpLimitReached = c.sequenceNumber >= board.bumpLimit;
         var postLimitReached = c.sequenceNumber >= board.postLimit;
