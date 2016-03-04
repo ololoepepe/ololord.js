@@ -522,7 +522,11 @@ span.newPostCount {
 
 .leafButton {
     position: fixed;
-    top: 50%;
+    height: 32px;
+    top: -moz-calc(50% - 16px);
+    top: -webkit-calc(50% - 16px);
+    top: -o-calc(50% - 16px);
+    top: calc(50% - 16px);
     z-index: 9910;
     opacity: 0.5;
 }
