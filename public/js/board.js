@@ -1117,6 +1117,11 @@ lord.deletePost = function(el) {
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
+        var ownPosts = lord.getLocalObject("ownPosts", {});
+        var key = model.boardName + "/" + postNumber;
+        if (ownPosts.hasOwnProperty(key))
+            delete ownPosts[key];
+        lord.setLocalObject("ownPosts", ownPosts);
         var post = lord.id(postNumber);
         if (!post)
             return Promise.reject("noSuchPostErrorText");
