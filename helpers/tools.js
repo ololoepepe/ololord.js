@@ -515,7 +515,7 @@ module.exports.preferIPv4 = function(ip) {
 };
 
 module.exports.sha1 = function(data) {
-    if (!Util.isString(data) && !Util.isBuffer(data))
+    if (!data || (!Util.isString(data) && !Util.isBuffer(data)))
         return null;
     var sha1 = Crypto.createHash("sha1");
     sha1.update(data);
