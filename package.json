@@ -39,6 +39,7 @@
     "imagemagick": "^0.1.3",
     "ioredis": "^1.15.1",
     "ip-address": "^5.0.2",
+    "jdenticon": "^1.3.2",
     "log4js": "^0.6.29",
     "merge": "^1.2.0",
     "mkpath": "^1.0.0",

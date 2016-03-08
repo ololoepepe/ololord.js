@@ -5,6 +5,7 @@ var ffmpeg = require("fluent-ffmpeg");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Image = Canvas.Image;
+var Jdenticon = require("jdenticon");
 var Path = require("path");
 var promisify = require("promisify-node");
 var Util = require("util");
@@ -31,23 +32,8 @@ var boards = {};
 
 var generateRandomImage = function(hash, mimeType, thumbPath) {
     var canvas = new Canvas(200, 200);
-    var list = [
-        { x: 0, y: 0, w: 200, h: 200 },
-        { x: 25, y: 25, w: 50, h: 50 },
-        { x: 125, y: 25, w: 50, h: 50 },
-        { x: 25, y: 125, w: 50, h: 50 },
-        { x: 125, y: 125, w: 50, h: 50 }
-    ];
     var ctx = canvas.getContext("2d");
-    for (var i = 0; i < 20; i += 4) {
-        var r = parseInt(hash.substr(i, 2), 16);
-        var g = parseInt(hash.substr(i + 2, 2), 16);
-        var b = parseInt(hash.substr(i + 4, 2), 16);
-        var a = i ? 0.7 : 1;
-        var rect = list.shift();
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
-        ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
-    }
+    Jdenticon.drawIcon(ctx, hash, 200);
     return FS.read(__dirname + "/../public/img/" + mimeType.replace("/", "_") + "_logo.png", "b").then(function(data) {
         var img = new Image;
         img.src = data;
