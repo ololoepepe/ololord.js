@@ -2823,5 +2823,10 @@
         "dafaultCanvasBackgroundColorButtonText": {
             "value": "По умолчанию"
         }
+    },
+    "Update player automatically": {
+        "autoUpdatePlayerLabelText": {
+            "value": "Автоматически обновлять плеер"
+        }
     }
 }

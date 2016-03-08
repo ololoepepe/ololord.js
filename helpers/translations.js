@@ -292,6 +292,7 @@ module.exports = function(tr) {
     translate("Highlight code (page reload required)", "sourceHighlightingLabelText");
     translate("Enable private chat", "chatLabelText");
     translate("Enable drawing tools", "drawingLabelText");
+    translate("Update player automatically", "autoUpdatePlayerLabelText");
     translate("Private chat", "chatText");
     translate("New private message", "newChatMessageText");
     translate("Send", "sendChatMessageButtonText");

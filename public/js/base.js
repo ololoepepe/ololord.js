@@ -748,7 +748,8 @@ lord.checkPlaylist = function() {
         }
     }
     lord.updatePlayerButtons();
-    setTimeout(lord.checkPlaylist, lord.Second);
+    if (lord.getLocalObject("autoUpdatePlayer", !lord.deviceType("mobile")))
+        setTimeout(lord.checkPlaylist, lord.Second);
 };
 
 lord.expandCollapseSpoiler = function(titleSpan) {
