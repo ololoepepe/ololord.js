@@ -948,6 +948,10 @@ input.buttonImage {
     content: " (You) (OP)";
 }
 
+.hideReason {
+    font-size: 75%;
+}
+
 #player {
     position: fixed;
     height: 80%;

@@ -1034,7 +1034,7 @@ lord.showDialog = function(body, options) {
                 $(body).dialog("option", "width", this.lastWidth);
                 $(body).dialog("option", "position", this.lastPosition);
             }
-        })
+        });
     });
 };
 
