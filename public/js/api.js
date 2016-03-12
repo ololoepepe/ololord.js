@@ -1518,6 +1518,7 @@ lord.settings = function() {
         showAutoUpdateDesktopNotifications: lord.getLocalObject("showAutoUpdateDesktopNotifications", true),
         playAutoUpdateSound: lord.getLocalObject("playAutoUpdateSound", false),
         soundNotificationsVolume: lord.getLocalObject("soundNotificationsVolume", 100),
+        addExpander: lord.getLocalObject("addExpander", true),
         signOpPostLinks: lord.getLocalObject("signOpPostLinks", true),
         signOwnPostLinks: lord.getLocalObject("signOwnPostLinks", true),
         showLeafButtons: lord.getLocalObject("showLeafButtons", true),

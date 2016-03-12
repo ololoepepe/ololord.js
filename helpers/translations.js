@@ -128,6 +128,7 @@ module.exports = function(tr) {
     translate("Auto update interval (sec):", "autoUpdateIntervalLabelText");
     translate("Show desktop notifications", "showAutoUpdateDesktopNotificationsLabelText");
     translate("Play sound", "playAutoUpdateSoundLabelText");
+    translate("Expand long posts on click", "addExpanderLabelText");
     translate("Mark OP post links", "signOpPostLinksLabelText");
     translate("Mark own post links", "signOwnPostLinksLabelText");
     translate("Post preview appearance delay (ms):", "viewPostPreviewDelayLabelText");
@@ -399,5 +400,7 @@ module.exports = function(tr) {
         + "(the \"Enable drawing tools\" checkbox).", "drawingDisabledWarningText");
     translate("Reset image scale on every opening", "resetFileScaleOnOpeningLabelText");
     translate("Default", "dafaultCanvasBackgroundColorButtonText");
+    translate("Show full text", "expandPostTextText");
+    translate("Collapse text", "collapsePostTextText");
     return tr;
 };

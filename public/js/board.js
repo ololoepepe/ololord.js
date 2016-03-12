@@ -483,6 +483,28 @@ lord.loadingImage = null;
 
 /*Functions*/
 
+lord.checkExpander = function(post) {
+    var bq = $("blockquote", post);
+    if (bq[0].scrollHeight <= bq.innerHeight())
+        return;
+    var a = lord.node("a");
+    a.appendChild(lord.node("text", lord.text("expandPostTextText")));
+    a.href = "javascript:void(0);";
+    lord.addClass(a, "postTextExpander");
+    var expanded = false;
+    a.onclick = function() {
+        expanded = !expanded;
+        bq.css("maxHeight", expanded ? "none" : "");
+        lord.removeChildren(a);
+        a.appendChild(lord.node("text", lord.text(expanded ? "collapsePostTextText" : "expandPostTextText")));
+        if (expanded)
+            a.parentNode.insertBefore(a, a.parentNode.firstChild);
+        else
+            a.parentNode.appendChild(a);
+    };
+    bq.parent()[0].appendChild(a);
+};
+
 lord.postProcessors.push(function(post) {
     if (lord.getLocalObject("mumWatching", false)) {
         lord.query(".postFileFile > a > img", post).forEach(function(img) {
@@ -491,6 +513,9 @@ lord.postProcessors.push(function(post) {
     }
     return Promise.resolve();
 });
+
+if (lord.getLocalObject("addExpander", true))
+    lord.postProcessors.push(lord.checkExpander);
 
 (function() {
     var settings = lord.settings();
@@ -793,6 +818,8 @@ lord.updatePost = function(postNumber) {
         return lord.createPostNode(model, true);
     }).then(function(newPost) {
         post.parentNode.replaceChild(newPost, post);
+        if (lord.getLocalObject("addExpander", true))
+            lord.checkExpander(newPost);
         return Promise.resolve();
     });
 };
@@ -2551,6 +2578,8 @@ lord.submitted = function(event, form) {
                     }
                     lord.createPostNode(result, true).then(function(post) {
                         threadPosts.appendChild(post);
+                        if (lord.getLocalObject("addExpander", true))
+                            lord.checkExpander(post);
                         lord.initFiles();
                     }).catch(lord.handleError);
                 }
@@ -3584,6 +3613,8 @@ lord.updateThread = function(silent) {
                 lord.removeClass(post, "newPost");
             };
             document.body.insertBefore(post, before);
+            if (lord.getLocalObject("addExpander", true))
+                lord.checkExpander(post);
         });
         lord.initFiles();
         var board = lord.model("board/" + boardName).board;

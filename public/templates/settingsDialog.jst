@@ -147,6 +147,12 @@
                 </tr>
                 <tr>
                     <td colspan="2">
+                        <input type="checkbox" name="addExpander"
+                               {{? it.settings.addExpander}}checked="false"{{?}} /><label>{{=it.tr.addExpanderLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
                         <input type="checkbox" name="signOpPostLinks"
                                {{? it.settings.signOpPostLinks}}checked="true"{{?}} /><label>{{=it.tr.signOpPostLinksLabelText}}</label>
                     </td>
