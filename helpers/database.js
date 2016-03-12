@@ -738,7 +738,8 @@ var lastPostNumber = function(boardName) {
 module.exports.lastPostNumber = lastPostNumber;
 
 var nextPostNumber = function(boardName, incrby) {
-    if (!Tools.contains(Board.boardNames(), boardName))
+    var board = Board.board(boardName);
+    if (!board)
         return Promise.reject(Tools.translate("Invalid board"));
     incrby = +incrby;
     if (isNaN(incrby) || incrby < 1)
@@ -746,6 +747,8 @@ var nextPostNumber = function(boardName, incrby) {
     return db.hincrby("postCounters", boardName, incrby).then(function(number) {
         if (!number)
             return 0;
+        if (1 == incrby && board.skippedGetOrder > 0 && !(number % Math.pow(10, board.skippedGetOrder)))
+            return nextPostNumber(boardName, incrby);
         return number;
     });
 };

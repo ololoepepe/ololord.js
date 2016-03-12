@@ -91,6 +91,7 @@ var Board = function(name, title, options) {
         },
         configurable: true
     });
+    defineSetting(this, "skippedGetOrder", 0);
     defineSetting(this, "captchaQuota", 0);
     defineSetting(this, "enabled", true);
     defineSetting(this, "hidden", false);
