@@ -163,7 +163,6 @@ var youtubeVideoStartTime = function(href) {
     if (!href)
         return null;
     var t = URL.parse(href, true).query.t;
-    console.log(href, URL.parse(href));
     if (!t)
         return null;
     var match = t.match(/((\d+)h)?((\d+)m)?((\d+)s)?/);
