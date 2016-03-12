@@ -1326,7 +1326,10 @@ lord.expandCollapseYoutubeVideo = function(a) {
     } else {
         lord.addClass(a.parentNode, "expand");
         var iframe = lord.node("iframe");
-        iframe.src = "https://youtube.com/embed/" + videoId + "?autoplay=1";
+        var start = +lord.data("start", a, true);
+        if (isNaN(start) || start <= 0)
+            start = 0;
+        iframe.src = "https://youtube.com/embed/" + videoId + "?autoplay=1&start=" + start;
         iframe.allowfullscreen = true;
         iframe.frameborder = "0px";
         iframe.height = "360";
