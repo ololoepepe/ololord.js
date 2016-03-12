@@ -1322,9 +1322,9 @@ lord.expandCollapseYoutubeVideo = function(a) {
         a.parentNode.removeChild(a.nextSibling);
         a.parentNode.removeChild(a.nextSibling);
         a.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"), a.childNodes[0]);
-        lord.removeClass(a.parentNode, "expand");
+        $(a).closest("blockquote").removeClass("expand");
     } else {
-        lord.addClass(a.parentNode, "expand");
+        $(a).closest("blockquote").addClass("expand");
         var iframe = lord.node("iframe");
         var start = +lord.data("start", a, true);
         if (isNaN(start) || start <= 0)
@@ -1357,9 +1357,9 @@ lord.expandCollapseCoubVideo = function(a) {
         a.parentNode.removeChild(a.nextSibling);
         a.parentNode.removeChild(a.nextSibling);
         a.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"), a.childNodes[0]);
-        lord.removeClass(a.parentNode, "expand");
+        $(a).closest("blockquote").removeClass("expand");
     } else {
-        lord.addClass(a.parentNode, "expand");
+        $(a).closest("blockquote").addClass("expand");
         var iframe = lord.node("iframe");
         iframe.src = "https://coub.com/embed/" + videoId
             + "?muted=false&autostart=false&originalSize=false&hideTopBar=false&startWithHD=false";
