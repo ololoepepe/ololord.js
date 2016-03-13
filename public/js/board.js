@@ -1584,7 +1584,7 @@ lord.draw = function(options) {
         height: (options && +options.height > 0) ? +options.height : 0
     };
     var div = lord.node("div");
-    $(div).css("background-color", "white");
+    lord.addClass(div, "checkerboardBackground");
     var subdiv = lord.node("div");
     var dwidth = lord.deviceType("mobile") ? 10 : 150;
     var dheight = lord.deviceType("mobile") ? 20 : 150;
@@ -1618,10 +1618,12 @@ lord.draw = function(options) {
                 imageSize: imageSize
             };
             if (backgroundShape)
-                opt.backgroundShapes = [backgroundShape];
+                opt.backgroundColor = "rgba(255, 255, 255, 0)";
             else
                 opt.backgroundColor = options && options.backgroundColor;
             c.lc = LC.init(div, opt);
+            if (backgroundShape)
+                c.lc.saveShape(backgroundShape);
         }
     }).then(function(result) {
         return Promise.resolve({

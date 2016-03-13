@@ -1216,3 +1216,20 @@ div.registeredUser {
 .postTextExpander {
     margin-left: 20px;
 }
+
+div.ui-widget-content.ui-dialog-content.checkerboardBackground {
+    background-image:
+        -moz-linear-gradient(45deg, #666666 25%, transparent 25%), 
+        -moz-linear-gradient(-45deg, #666666 25%, transparent 25%),
+        -moz-linear-gradient(45deg, transparent 75%, #666666 75%),
+        -moz-linear-gradient(-45deg, #999999 75%, #666666 75%);
+    background-image:
+        -webkit-gradient(linear, 0 100%, 100% 0, color-stop(.25, #666666), color-stop(.25, transparent)), 
+        -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, #666666), color-stop(.25, transparent)),
+        -webkit-gradient(linear, 0 100%, 100% 0, color-stop(.75, transparent), color-stop(.75, #666666)),
+        -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.75, #999999), color-stop(.75, #666666));
+    -moz-background-size: 16px 16px;
+    background-size: 16px 16px;
+    -webkit-background-size: 16px 17px;
+    background-position: 0 0, 8px 0, 8px -8px, 0px 8px;
+}
