@@ -67,7 +67,7 @@ lord.getImageHash = function(url, width, height) {
     if (!url || isNaN(width) || width <= 0 || isNaN(height) || height < 0)
         return Promise.resolve(null);
     var xhr = new XMLHttpRequest();
-    xhr.open("get", url, true);
+    xhr.open("get", url.replace("https:", "").replace("http:", ""), true);
     xhr.responseType = "arraybuffer";
     return new Promise(function(resolve, reject) {
         xhr.onreadystatechange = function() {

@@ -748,7 +748,8 @@ lord.checkPlaylist = function() {
         }
     }
     lord.updatePlayerButtons();
-    setTimeout(lord.checkPlaylist, lord.Second);
+    if (lord.getLocalObject("autoUpdatePlayer", !lord.deviceType("mobile")))
+        setTimeout(lord.checkPlaylist, lord.Second);
 };
 
 lord.expandCollapseSpoiler = function(titleSpan) {
@@ -1321,11 +1322,14 @@ lord.expandCollapseYoutubeVideo = function(a) {
         a.parentNode.removeChild(a.nextSibling);
         a.parentNode.removeChild(a.nextSibling);
         a.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"), a.childNodes[0]);
-        lord.removeClass(a.parentNode, "expand");
+        $(a).closest("blockquote").removeClass("expand");
     } else {
-        lord.addClass(a.parentNode, "expand");
+        $(a).closest("blockquote").addClass("expand");
         var iframe = lord.node("iframe");
-        iframe.src = "https://youtube.com/embed/" + videoId + "?autoplay=1";
+        var start = +lord.data("start", a, true);
+        if (isNaN(start) || start <= 0)
+            start = 0;
+        iframe.src = "https://youtube.com/embed/" + videoId + "?autoplay=1&start=" + start;
         iframe.allowfullscreen = true;
         iframe.frameborder = "0px";
         iframe.height = "360";
@@ -1353,9 +1357,9 @@ lord.expandCollapseCoubVideo = function(a) {
         a.parentNode.removeChild(a.nextSibling);
         a.parentNode.removeChild(a.nextSibling);
         a.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"), a.childNodes[0]);
-        lord.removeClass(a.parentNode, "expand");
+        $(a).closest("blockquote").removeClass("expand");
     } else {
-        lord.addClass(a.parentNode, "expand");
+        $(a).closest("blockquote").addClass("expand");
         var iframe = lord.node("iframe");
         iframe.src = "https://coub.com/embed/" + videoId
             + "?muted=false&autostart=false&originalSize=false&hideTopBar=false&startWithHD=false";

@@ -1034,7 +1034,7 @@ lord.showDialog = function(body, options) {
                 $(body).dialog("option", "width", this.lastWidth);
                 $(body).dialog("option", "position", this.lastPosition);
             }
-        })
+        });
     });
 };
 
@@ -1518,6 +1518,7 @@ lord.settings = function() {
         showAutoUpdateDesktopNotifications: lord.getLocalObject("showAutoUpdateDesktopNotifications", true),
         playAutoUpdateSound: lord.getLocalObject("playAutoUpdateSound", false),
         soundNotificationsVolume: lord.getLocalObject("soundNotificationsVolume", 100),
+        addExpander: lord.getLocalObject("addExpander", true),
         signOpPostLinks: lord.getLocalObject("signOpPostLinks", true),
         signOwnPostLinks: lord.getLocalObject("signOwnPostLinks", true),
         showLeafButtons: lord.getLocalObject("showLeafButtons", true),
@@ -1543,7 +1544,9 @@ lord.settings = function() {
         userJavaScriptEnabled: lord.getLocalObject("userJavaScriptEnabled", true),
         sourceHighlightingEnabled: lord.getLocalObject("sourceHighlightingEnabled", false),
         chatEnabled: lord.getLocalObject("chatEnabled", true),
-        paintingEnabled: lord.getLocalObject("paintingEnabled", true),
+        drawingEnabled: lord.getLocalObject("drawingEnabled", true),
+        autoUpdatePlayer: lord.getLocalObject("autoUpdatePlayer", !lord.deviceType("mobile")),
+        resetFileScaleOnOpening: lord.getLocalObject("resetFileScaleOnOpening", false),
         closeFilesByClickingOnly: lord.getLocalObject("closeFilesByClickingOnly", false),
         viewPostPreviewDelay: lord.getLocalObject("viewPostPreviewDelay", 200),
         hidePostPreviewDelay: lord.getLocalObject("hidePostPreviewDelay", 1000),

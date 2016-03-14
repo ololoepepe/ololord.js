@@ -49,36 +49,27 @@
         }
     },
     "E-mail is too long": {
-        "error": {
-            "value": "Эл. почта слишком длинная"
-        },
         "_default": {
-            "value": "E-mail is too long"
+            "value": "Эл. почта слишком длинная"
         }
     },
     "Name is too long": {
-        "error": {
-            "value": "Имя слишком длинное"
-        },
         "_default": {
-            "value": "Name is too long"
+            "value": "Имя слишком длинное"
         }
     },
     "Subject is too long": {
-        "error": {
-            "value": "Тема слишком длинная"
-        },
         "_default": {
-            "value": "Subject is too long"
+            "value": "Тема слишком длинная"
         }
     },
     "Comment is too long": {
-        "error": {
+        "_default": {
             "value": "Комментарий слишком длинный"
         }
     },
     "Password is too long": {
-        "error": {
+        "_default": {
             "value": "Пароль слишком длинный"
         }
     },
@@ -173,33 +164,27 @@
         }
     },
     "Attempt to create a thread without attaching a file": {
-        "error": {
+        "_default": {
             "value": "Попытка создать тред без прикрепления файла"
         }
     },
     "Both file and comment are missing": {
-        "error": {
-            "value": "Отсутствуют и файл, и комментарий"
-        },
         "_default": {
-            "value": "Both file and comment are missing"
+            "value": "Отсутствуют и файл, и комментарий"
         }
     },
     "Too many files": {
-        "error": {
-            "value": "Слишком много файлов"
-        },
         "_default": {
-            "value": "Too many files"
+            "value": "Слишком много файлов"
         }
     },
     "File is too big": {
-        "error": {
+        "_default": {
             "value": "Файл слишком большой"
         }
     },
     "File type is not supported": {
-        "error": {
+        "_default": {
             "value": "Тип файла не поддерживается"
         }
     },
@@ -1547,10 +1532,6 @@
         }
     },
     "Loading posts...": {
-        "loadingPostsText": {
-            "value": "Загрузка постов...",
-            "_obsolete": true
-        },
         "loadingPostsMessage": {
             "value": "Загрузка постов..."
         }
@@ -2791,6 +2772,76 @@
     "Deleting posts from archived threads is not allowed": {
         "_default": {
             "value": "Удаление постов из архивных тредов запрещено"
+        }
+    },
+    "Enter password: ": {
+        "_default": {
+            "value": "Введите пароль: "
+        }
+    },
+    "That is a hashpass, isn't it? [Yes/no]: ": {
+        "_default": {
+            "value": "Это хешпасс, верно? [Yes/no]: "
+        }
+    },
+    "Dimensions:": {
+        "canvasDimensionsLabelText": {
+            "value": "Размеры:"
+        }
+    },
+    "Background color:": {
+        "canvasBackgroundColorLabelText": {
+            "value": "Цвет фона:"
+        }
+    },
+    "Drawing options": {
+        "drawingOptionsDialogTitle": {
+            "value": "Параметры рисования"
+        }
+    },
+    "0 — determine automatically": {
+        "canvasDimensionsDescriptionText": {
+            "value": "0 — определять автоматически"
+        }
+    },
+    "Auto": {
+        "canvasBackgroundAutoSizeButtonText": {
+            "value": "Авто"
+        }
+    },
+    "Drawing is disabled. Enable it in the \"Other\" tab of the settings dialog (the \"Enable drawing tools\" checkbox).": {
+        "drawingDisabledWarningText": {
+            "value": "Рисование отключено. Включите его на вкладке \"Прочее\" диалога настроек (флажок \"Включить инструменты для рисования\")."
+        }
+    },
+    "Reset image scale on every opening": {
+        "resetFileScaleOnOpeningLabelText": {
+            "value": "Сбрасывать масштаб картинок при каждом открытии"
+        }
+    },
+    "Default": {
+        "dafaultCanvasBackgroundColorButtonText": {
+            "value": "По умолчанию"
+        }
+    },
+    "Update player automatically": {
+        "autoUpdatePlayerLabelText": {
+            "value": "Автоматически обновлять плеер"
+        }
+    },
+    "Expand long posts on click": {
+        "addExpanderLabelText": {
+            "value": "Раскрывать длинные посты по клику"
+        }
+    },
+    "Show full text": {
+        "expandPostTextText": {
+            "value": "Показать текст полностью"
+        }
+    },
+    "Collapse text": {
+        "collapsePostTextText": {
+            "value": "Свернуть текст"
         }
     }
 }

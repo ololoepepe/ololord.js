@@ -128,6 +128,7 @@ module.exports = function(tr) {
     translate("Auto update interval (sec):", "autoUpdateIntervalLabelText");
     translate("Show desktop notifications", "showAutoUpdateDesktopNotificationsLabelText");
     translate("Play sound", "playAutoUpdateSoundLabelText");
+    translate("Expand long posts on click", "addExpanderLabelText");
     translate("Mark OP post links", "signOpPostLinksLabelText");
     translate("Mark own post links", "signOwnPostLinksLabelText");
     translate("Post preview appearance delay (ms):", "viewPostPreviewDelayLabelText");
@@ -292,6 +293,7 @@ module.exports = function(tr) {
     translate("Highlight code (page reload required)", "sourceHighlightingLabelText");
     translate("Enable private chat", "chatLabelText");
     translate("Enable drawing tools", "drawingLabelText");
+    translate("Update player automatically", "autoUpdatePlayerLabelText");
     translate("Private chat", "chatText");
     translate("New private message", "newChatMessageText");
     translate("Send", "sendChatMessageButtonText");
@@ -389,5 +391,16 @@ module.exports = function(tr) {
     translate("Hashpass:", "hashpassLabelText");
     translate("Generate hashpass", "generateHashpassButtonText");
     translate("Are you sure?", "confirmationText");
+    translate("Dimensions:", "canvasDimensionsLabelText");
+    translate("0 — determine automatically", "canvasDimensionsDescriptionText");
+    translate("Background color:", "canvasBackgroundColorLabelText");
+    translate("Drawing options", "drawingOptionsDialogTitle");
+    translate("Auto", "canvasBackgroundAutoSizeButtonText");
+    translate("Drawing is disabled. Enable it in the \"Other\" tab of the settings dialog "
+        + "(the \"Enable drawing tools\" checkbox).", "drawingDisabledWarningText");
+    translate("Reset image scale on every opening", "resetFileScaleOnOpeningLabelText");
+    translate("Default", "dafaultCanvasBackgroundColorButtonText");
+    translate("Show full text", "expandPostTextText");
+    translate("Collapse text", "collapsePostTextText");
     return tr;
 };

@@ -48,7 +48,7 @@
                             <td class="nowrap">
                                 <input type="text" name="banExpires_{{=board.name}}" class="banExpiresInput"
                                        {{? typeof ban != "undefined" && ban.expiresAt}}value="{{ out += it.formattedDate(ban.expiresAt); }}"{{?}} />
-                                <a href="javascript:void(0);" onclick="lord.clearDate('banExpires_{{=board.name}}'); return false;">
+                                <a href="javascript:void(0);" onclick="lord.clearDate(this, 'banExpires_{{=board.name}}'); return false;">
                                     <img src="/{{=it.site.pathPrefix}}img/clear.png" class="buttonImage" title="{{=it.tr.clearDateFieldText}}" /></a>
                             </td>
                             <td>
@@ -82,7 +82,7 @@
                     </td>
                     <td class="nowrap">
                         <input type="text" name="expires" class="banExpiresInput" />
-                        <a href="javascript:void(0);" onclick="lord.clearDate('expires'); return false;">
+                        <a href="javascript:void(0);" onclick="lord.clearDate(this, 'expires'); return false;">
                             <img src="/{{=it.site.pathPrefix}}img/clear.png" class="buttonImage" title="{{=it.tr.clearDateFieldText}}" /></a>
                     </td>
                     <td>

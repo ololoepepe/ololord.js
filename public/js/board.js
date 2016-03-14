@@ -483,6 +483,28 @@ lord.loadingImage = null;
 
 /*Functions*/
 
+lord.checkExpander = function(post) {
+    var bq = $("blockquote", post);
+    if (bq[0].scrollHeight <= bq.innerHeight())
+        return;
+    var a = lord.node("a");
+    a.appendChild(lord.node("text", lord.text("expandPostTextText")));
+    a.href = "javascript:void(0);";
+    lord.addClass(a, "postTextExpander");
+    var expanded = false;
+    a.onclick = function() {
+        expanded = !expanded;
+        bq.css("maxHeight", expanded ? "none" : "");
+        lord.removeChildren(a);
+        a.appendChild(lord.node("text", lord.text(expanded ? "collapsePostTextText" : "expandPostTextText")));
+        if (expanded)
+            a.parentNode.insertBefore(a, a.parentNode.firstChild);
+        else
+            a.parentNode.appendChild(a);
+    };
+    bq.parent()[0].appendChild(a);
+};
+
 lord.postProcessors.push(function(post) {
     if (lord.getLocalObject("mumWatching", false)) {
         lord.query(".postFileFile > a > img", post).forEach(function(img) {
@@ -491,6 +513,9 @@ lord.postProcessors.push(function(post) {
     }
     return Promise.resolve();
 });
+
+if (lord.getLocalObject("addExpander", true))
+    lord.postProcessors.push(lord.checkExpander);
 
 (function() {
     var settings = lord.settings();
@@ -741,9 +766,6 @@ lord.createPostNode = function(post, permanent, threadInfo) {
                 lastPostNumbers[post.boardName] = post.number;
                 lord.setLocalObject("lastPostNumbers", lastPostNumbers);
             }
-            lord.files = null;
-            lord.filesMap = null;
-            lord.initFiles();
         }
         return lord.processPosts(c.node).catch(lord.handleError);
     }).then(function() {
@@ -796,6 +818,8 @@ lord.updatePost = function(postNumber) {
         return lord.createPostNode(model, true);
     }).then(function(newPost) {
         post.parentNode.replaceChild(newPost, post);
+        if (lord.getLocalObject("addExpander", true))
+            lord.checkExpander(newPost);
         return Promise.resolve();
     });
 };
@@ -893,9 +917,7 @@ lord.globalOnclick = function(e) {
         lord.hideImage();
 };
 
-lord.initFiles = function() {
-    if (lord.files)
-        return;
+lord.initFiles = function(reset) {
     lord.files = [];
     lord.filesMap = {};
     lord.query(".postFile").forEach(function(td) {
@@ -1122,6 +1144,11 @@ lord.deletePost = function(el) {
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
+        var ownPosts = lord.getLocalObject("ownPosts", {});
+        var key = model.boardName + "/" + postNumber;
+        if (ownPosts.hasOwnProperty(key))
+            delete ownPosts[key];
+        lord.setLocalObject("ownPosts", ownPosts);
         var post = lord.id(postNumber);
         if (!post)
             return Promise.reject("noSuchPostErrorText");
@@ -1265,8 +1292,9 @@ lord.banUser = function(el) {
     }).catch(lord.handleError);
 };
 
-lord.clearDate = function(inputName) {
-    var inp = lord.queryOne("[name='" + inputName + "']");
+lord.clearDate = function(a, inputName) {
+    var form = $(a).closest("form")[0];
+    var inp = lord.nameOne(inputName, form);
     inp.value = "____/__/__ __:__";
     $(inp).attr("value", "");
 };
@@ -1540,25 +1568,34 @@ lord.attachDrawnFile = function(lc, fileName, div) {
     lord.fileAddedCommon(div);
 };
 
-lord.draw = function(width, height, imageUrl) {
+lord.draw = function(options) {
     var backgroundShape;
-    if (imageUrl) {
+    if (options && options.imageUrl) {
         var backgroundImage = new Image();
-        backgroundImage.src = imageUrl;
+        backgroundImage.src = options.imageUrl;
         backgroundShape = LC.createShape("Image", {
             x: 0,
             y: 0,
             image: backgroundImage
         });
     }
+    var imageSize = {
+        width: (options && +options.width > 0) ? +options.width : 0,
+        height: (options && +options.height > 0) ? +options.height : 0
+    };
     var div = lord.node("div");
+    lord.addClass(div, "checkerboardBackground");
     var subdiv = lord.node("div");
-    width = +width;
+    var dwidth = lord.deviceType("mobile") ? 10 : 150;
+    var dheight = lord.deviceType("mobile") ? 20 : 150;
+    var width = options ? options.width : +width;
     if (!width || width < 0)
-        width = 400;
-    height = +height;
+        width = $(window).width() - dwidth;
+    var height = options ? options.height : +height;
     if (!height || height < 0)
-        height = 400;
+        height = $(window).height() - dheight;
+    width = Math.min(Math.max(width + 62, 420), $(window).width() - dwidth);
+    height = Math.min(Math.max(height + 32, 360), $(window).height() - dheight);
     $(subdiv).width(width).height(height);
     div.appendChild(subdiv);
     var c = {};
@@ -1576,10 +1613,17 @@ lord.draw = function(width, height, imageUrl) {
         ],
         afterShow: function() {
             $(div).width(width).height(height);
-            var options = { imageURLPrefix: "/" + lord.data("sitePathPrefix") + "img/3rdparty/literallycanvas" };
+            var opt = {
+                imageURLPrefix: "/" + lord.data("sitePathPrefix") + "img/3rdparty/literallycanvas",
+                imageSize: imageSize
+            };
             if (backgroundShape)
-                options.backgroundShapes = [backgroundShape];
-            c.lc = LC.init(div, options);
+                opt.backgroundColor = "rgba(255, 255, 255, 0)";
+            else
+                opt.backgroundColor = options && options.backgroundColor;
+            c.lc = LC.init(div, opt);
+            if (backgroundShape)
+                c.lc.saveShape(backgroundShape);
         }
     }).then(function(result) {
         return Promise.resolve({
@@ -1590,12 +1634,23 @@ lord.draw = function(width, height, imageUrl) {
 };
 
 lord.drawOnImage = function(a) {
+    if (!lord.getLocalObject("drawingEnabled", true)) {
+        lord.showPopup(lord.text("drawingDisabledWarningText"), {
+            type: "warning",
+            timeout: 8 * lord.Second
+        });
+        return;
+    }
     if (!a)
         return;
     var file = $(a).closest(".postFile")[0];
     if (!file)
         return;
-    lord.draw(+lord.data("width", file), +lord.data("height", file), lord.data("href", file)).then(function(result) {
+    lord.draw({
+        width: +lord.data("width", file),
+        height: +lord.data("height", file),
+        imageUrl: lord.data("href", file)
+    }).then(function(result) {
         if (!result.accepted)
             return;
         lord.attachDrawnFile(result.lc, lord.data("fileName", file));
@@ -1987,14 +2042,36 @@ lord.attachFileByLink = function(a) {
     lord.fileAddedCommon(div);
 };
 
+lord.setDrawingBackgroundColor = function(btn, color) {
+    color = color || "rgba(255, 255, 255, 1)";
+    var table = $(btn).closest("table")[0];
+    var ic = lord.nameOne("backgroundColor", table);
+    $(ic).minicolors("value", color);
+};
+
+lord.setDrawingDimensions = function(btn, width, height) {
+    var table = $(btn).closest("table")[0];
+    var iw = lord.nameOne("width", table);
+    var ih = lord.nameOne("height", table);
+    iw.value = width;
+    ih.value = height;
+};
+
 lord.attachFileByDrawing = function(a) {
+    if (!lord.getLocalObject("drawingEnabled", true)) {
+        lord.showPopup(lord.text("drawingDisabledWarningText"), {
+            type: "warning",
+            timeout: 8 * lord.Second
+        });
+        return;
+    }
     var div = a.parentNode;
     var p;
     var file = div.file || div.fileBackup;
     if (file && file.name && /\.(jpe?g|png|gif)$/i.test(file.name)) {
         p = lord.readAs(file, "DataURL").then(function(url) {
             return new Promise(function(resolve, reject) {
-                var timer =setTimeout(reject, 15 * lord.Second);
+                var timer = setTimeout(reject, 15 * lord.Second);
                 var img = new Image();
                 img.onload = function() {
                     clearTimeout(timer);
@@ -2008,15 +2085,50 @@ lord.attachFileByDrawing = function(a) {
             });
         });
     } else {
-        p = Promise.resolve({
-            width: $(window).width() - 150,
-            height: $(window).height() - 150
+        var model = lord.model(["base", "tr"]);
+        model.options = {
+            width: lord.getLocalObject("drawingBackgroundWidth", 0),
+            height: lord.getLocalObject("drawingBackgroundHeight", 0),
+            backgroundColor: lord.getLocalObject("drawingBackgroundColor", "rgba(255, 255, 255, 1)")
+        };
+        var dlg = lord.template("drawingOptionsDialog", model);
+        p = lord.showDialog(dlg, {
+            title: "drawingOptionsDialogTitle",
+            afterShow: function() {
+                $(dlg).css({ minHeight: "180px" });
+                $("button", dlg).button();
+                $("input[name='backgroundColor']", dlg).minicolors({
+                    control: "wheel",
+                    position: "bottom right",
+                    format: "rgb",
+                    opacity: true
+                });
+            }
+        }).then(function(result) {
+            if (!result)
+                return Promise.resolve();
+            var width = +lord.nameOne("width", dlg).value;
+            var height = +lord.nameOne("height", dlg).value;
+            var backgroundColor = $("input[name='backgroundColor']", dlg).minicolors("value");
+            lord.setLocalObject("drawingBackgroundWidth", width);
+            lord.setLocalObject("drawingBackgroundHeight", height);
+            lord.setLocalObject("drawingBackgroundColor", backgroundColor);
+            return Promise.resolve({
+                width: width,
+                height: height,
+                backgroundColor: backgroundColor
+            });
         });
     }
     p.then(function(result) {
         if (!result)
             return Promise.resolve({ accepted: false });
-        return lord.draw(result.width, result.height, result.url);
+        return lord.draw({
+            width: result.width,
+            height: result.height,
+            imageUrl: result.url,
+            backgroundColor: result.backgroundColor
+        });
     }).then(function(result) {
         if (!result.accepted)
             return;
@@ -2281,7 +2393,10 @@ lord.showImage = function(a, mimeType, width, height) {
         loop: lord.getLocalObject("loopAudioVideo", false),
         play: lord.getLocalObject("playAudioVideoImmediately", true) && 500
     });
-    if (!lord.movablePlayers[href]) {
+    if (lord.movablePlayers[href]) {
+        if (lord.getLocalObject("resetFileScaleOnOpening", false))
+            lord.currentMovablePlayer.reset();
+    } else {
         lord.currentMovablePlayer.on("requestClose", function(e) {
             e.cancel();
             lord.hideImage();
@@ -2465,6 +2580,9 @@ lord.submitted = function(event, form) {
                     }
                     lord.createPostNode(result, true).then(function(post) {
                         threadPosts.appendChild(post);
+                        if (lord.getLocalObject("addExpander", true))
+                            lord.checkExpander(post);
+                        lord.initFiles();
                     }).catch(lord.handleError);
                 }
             }
@@ -2896,6 +3014,7 @@ lord.expandThread = function(thread) {
     }).then(function(nthread) {
         lord.processPosts(nthread);
         thread.parentNode.replaceChild(nthread, thread);
+        lord.initFiles();
     }).catch(lord.handleError);
 };
 
@@ -3496,7 +3615,10 @@ lord.updateThread = function(silent) {
                 lord.removeClass(post, "newPost");
             };
             document.body.insertBefore(post, before);
+            if (lord.getLocalObject("addExpander", true))
+                lord.checkExpander(post);
         });
+        lord.initFiles();
         var board = lord.model("board/" + boardName).board;
         var bumpLimitReached = c.sequenceNumber >= board.bumpLimit;
         var postLimitReached = c.sequenceNumber >= board.postLimit;

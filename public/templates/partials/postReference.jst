@@ -1,3 +1,3 @@
-<a href="/{{=it.site.pathPrefix}}{{=reference.boardName}}/res/{{=reference.threadNumber}}.html#{{=reference.postNumber}}"
+<a href="/{{=it.site.pathPrefix}}{{=reference.boardName}}/res/{{=reference.threadNumber}}.html{{? reference.threadNumber != reference.postNumber}}#{{=reference.postNumber}}{{?}}"
    data-board-name="{{=reference.boardName}}" data-post-number="{{=reference.postNumber}}"
    data-thread-number="{{=reference.threadNumber}}">&gt;&gt;{{? reference.boardName != it.board.name}}/{{=reference.boardName}}/{{?}}{{=reference.postNumber}}</a>

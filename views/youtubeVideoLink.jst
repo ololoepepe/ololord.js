@@ -1,11 +1,12 @@
 <span data-video-id="{{=it.info.id}}" data-video-title="{{=it.info.title}}"
       data-video-author="{{=it.info.channelTitle}}"
       {{? it.info.thumbnails.medium}}data-thumb-url="{{=it.info.thumbnails.medium.url}}"
-      data-thumb-width="{{=it.info.thumbnails.medium.width}}" data-thumb-height="{{=it.info.thumbnails.medium.height}}"{{?}}>
+      data-thumb-width="{{=it.info.thumbnails.medium.width}}" data-thumb-height="{{=it.info.thumbnails.medium.height}}"{{?}}
+      {{? it.info.start}}data-start="{{=it.info.start}}"{{?}}>
     <img title="YouTube" src="https://youtube.com/favicon.ico" class="signImage noInvert" width="16" height="16">
     <a {{? it.info.thumbnails.medium}}onmouseover="lord.showVideoThumb(event, this);"
        onmousemove="lord.moveVideoThumb(event, this);" onmouseout="lord.hideVideoThumb(event, this);"{{?}}
        title="{{=it.info.channelTitle}}" href="{{=it.info.href}}">{{!it.info.title}}</a>
     <a href="javascript:void(0);" class="expandCollapse"
        onclick="lord.expandCollapseYoutubeVideo(this); return false;">[{{=it.tr.expandVideoText}}]</a>
-<span>
+</span>

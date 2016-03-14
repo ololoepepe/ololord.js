@@ -1,5 +1,6 @@
 var Highlight = require("highlight.js");
 var HTTP = require("q-io/http");
+var URL = require("url");
 var XRegExp = require("xregexp");
 
 var Board = require("../boards");
@@ -158,8 +159,29 @@ var getTwitterEmbeddedHtml = function(href, defaultHtml) {
     });
 };
 
+var youtubeVideoStartTime = function(href) {
+    if (!href)
+        return null;
+    var t = URL.parse(href, true).query.t;
+    if (!t)
+        return null;
+    var match = t.match(/((\d+)h)?((\d+)m)?((\d+)s)?/);
+    if (!match)
+        return null;
+    var start = 0;
+    if (match[2])
+        start += +match[2] * 3600;
+    if (match[4])
+        start += +match[4] * 60;
+    if (match[6])
+        start += +match[6];
+    if (isNaN(start) || start <= 0)
+        return null;
+    return start;
+};
+
 var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
-    var match = href.match(/^https?\:\/\/.*youtube\.com\/.*v\=([^\/#\?]+).*$/);
+    var match = href.match(/^https?\:\/\/.*youtube\.com\/.*v\=([^\/#\?&]+).*$/);
     var videoId = match ? match[1] : null;
     if (!videoId) {
         match = href.match(/^https?\:\/\/youtu\.be\/([^\/#\?]+).*$/);
@@ -184,6 +206,7 @@ var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
             var info = response.items[0].snippet;
             info.id = videoId;
             info.href = href;
+            info.start = youtubeVideoStartTime(href);
             var html = controller.sync("youtubeVideoLink", { info: info });
             if (!html)
                 return Promise.reject(Tools.translate("Failed to create YouTube video link"));

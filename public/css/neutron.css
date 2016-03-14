@@ -201,11 +201,7 @@ span.newPostCount {
     color: #698CC0;
 }
 
-.rules {
-    background-color: #2C2C2C;
-}
-
-.news {
+.sectionBody {
     background-color: #2C2C2C;
 }
 
@@ -361,15 +357,7 @@ ul.tabWidget > li.activated > a {
     border: 1px solid #575757;
 }
 
-.buttonImage {
-    -webkit-filter: invert(1);
-    -moz-filter: invert(1);
-    -ms-filter: invert(1);
-    -o-filter: invert(1);
-    filter: invert(1);
-}
-
-.signImage {
+.invertableImage, .buttonImage, .signImage, .boardSelect {
     -webkit-filter: invert(1);
     -moz-filter: invert(1);
     -ms-filter: invert(1);
@@ -383,14 +371,6 @@ ul.tabWidget > li.activated > a {
     -ms-filter: invert(0);
     -o-filter: invert(0);
     filter: invert(0);
-}
-
-.boardSelect {
-    -webkit-filter: invert(1);
-    -moz-filter: invert(1);
-    -ms-filter: invert(1);
-    -o-filter: invert(1);
-    filter: invert(1);
 }
 
 input:not([type='image']) { /*Yep, this is NOT a class*/
