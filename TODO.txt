@@ -1,3 +1,5 @@
+* Statistics
+* OP-moderation
 * Add ability to select drawable and not drawable image background for drawing tools
 * Optimize spells
 * Use Underscore.js or lodash instead of custom utility functions
