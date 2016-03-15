@@ -1,5 +1,5 @@
-* Statistics
-* OP-moderation
+* Add statistics
+* Implement OP-moderation
 * Add ability to select drawable and not drawable image background for drawing tools
 * Optimize spells
 * Use Underscore.js or lodash instead of custom utility functions
@@ -12,3 +12,6 @@
 * Implement user action permissions
 * Consider using Elasticsearch or other search engine [not sure if needed]
 * Consider using markdown-it as a parser [not sure if needed]
+
+[done] Fix banning using post actions menu
+[done] Optimize management page
