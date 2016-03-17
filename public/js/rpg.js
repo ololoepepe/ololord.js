@@ -89,6 +89,7 @@ lord.customPostFormField[50] = function(it) {
     }
     var model = {
         site: it.site,
+        settings: it.settings,
         tr: merge.clone(it.tr),
         board: merge.clone(it.board),
         minimalisticPostform: it.minimalisticPostform

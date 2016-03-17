@@ -14,4 +14,5 @@
 * Consider using markdown-it as a parser [not sure if needed]
 
 [done] Fix banning using post actions menu
+[done] Fix /rpg/ custom post form field creation
 [done] Optimize management page
