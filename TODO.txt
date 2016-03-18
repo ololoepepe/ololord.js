@@ -17,3 +17,4 @@
 [done] Fix /rpg/ custom post form field creation
 [done] Optimize management page
 [done] Improve board customization system
+[done] Make board set reloadable; implement "reloadBoards" command
