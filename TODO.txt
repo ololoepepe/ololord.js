@@ -12,9 +12,3 @@
 * Implement user action permissions
 * Consider using Elasticsearch or other search engine [not sure if needed]
 * Consider using markdown-it as a parser [not sure if needed]
-
-[done] Fix banning using post actions menu
-[done] Fix /rpg/ custom post form field creation
-[done] Optimize management page
-[done] Improve board customization system
-[done] Make board set reloadable; implement "reloadBoards" command
