@@ -3,6 +3,7 @@ var Util = require("util");
 
 var Board = require("./board");
 var Captcha = require("../captchas");
+var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
 
 FSSync.readdirSync(__dirname).forEach(function(file) {
@@ -18,41 +19,55 @@ FSSync.readdirSync(__dirname).forEach(function(file) {
     }
 });
 
-Board.addBoard(new Board("3dpd", Tools.translate.noop("3D pron", "boardTitle")));
+if (config("board.useDefaultBoards", true)) {
+    Board.addBoard(new Board("3dpd", Tools.translate.noop("3D pron", "boardTitle")));
 
-Board.addBoard(new Board("a", Tools.translate.noop("/a/nime", "boardTitle"),
-    { defaultUserName: Tools.translate.noop("Kamina", "defaultUserName") }));
+    Board.addBoard(new Board("a", Tools.translate.noop("/a/nime", "boardTitle"),
+        { defaultUserName: Tools.translate.noop("Kamina", "defaultUserName") }));
 
-Board.addBoard(new Board("b", Tools.translate.noop("/b/rotherhood", "boardTitle")));
+    Board.addBoard(new Board("b", Tools.translate.noop("/b/rotherhood", "boardTitle")));
 
-Board.addBoard(new Board("cg", Tools.translate.noop("Console games", "boardTitle")));
+    Board.addBoard(new Board("cg", Tools.translate.noop("Console games", "boardTitle")));
 
-Board.addBoard(new Board("h", Tools.translate.noop("/h/entai", "boardTitle")));
+    Board.addBoard(require("./templates/with-user-agents")("d",
+        Tools.translate.noop("Board /d/iscussion", "boardTitle")));
+    Board.addBoard(require("./templates/with-external-links")("echo",
+        Tools.translate.noop("Boardsphere echo", "boardTitle")));
 
-Board.addBoard(new Board("int", "/int/ernational",
-    { defaultUserName: Tools.translate.noop("Vladimir Putin", "defaultUserName") }));
+    Board.addBoard(new Board("h", Tools.translate.noop("/h/entai", "boardTitle")));
 
-Board.addBoard(new Board("mlp", Tools.translate.noop("My Little Pony", "boardTitle")));
+    Board.addBoard(new Board("int", "/int/ernational",
+        { defaultUserName: Tools.translate.noop("Vladimir Putin", "defaultUserName") }));
 
-Board.addBoard(new Board("po", Tools.translate.noop("/po/litics", "boardTitle"),
-    { defaultUserName: Tools.translate.noop("Armchair warrior", "defaultUserName") }));
+    Board.addBoard(new Board("mlp", Tools.translate.noop("My Little Pony", "boardTitle")));
 
-board = new Board("pr", Tools.translate.noop("/pr/ogramming", "boardTitle"));
-Object.defineProperty(board, "supportedCaptchaEngines", {
-    get: function() {
-        return [Captcha.captcha("codecha").info()];
-    }
-});
-Object.defineProperty(board, "markupElements", {
-    value: board.markupElements.concat(Board.MarkupElements.CodeMarkupElement)
-});
-Board.addBoard(board);
+    Board.addBoard(new Board("po", Tools.translate.noop("/po/litics", "boardTitle"),
+        { defaultUserName: Tools.translate.noop("Armchair warrior", "defaultUserName") }));
 
-Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"),
-    { defaultUserName: Tools.translate.noop("Whiner", "defaultUserName") }));
+    board = new Board("pr", Tools.translate.noop("/pr/ogramming", "boardTitle"));
+    board.defineProperty("supportedCaptchaEngines", function() {
+        var ids = config("board.pr.supportedCaptchaEngines",
+            config("board.supportedCaptchaEngines", ["codecha"]));
+        if (!Util.isArray(ids))
+            ids = [];
+        return ids.map(function(id) {
+            return Captcha.captcha(id).info();
+        });
+    });
+    board.defineSetting("markupElements", board.markupElements.concat(Board.MarkupElements.CodeMarkupElement));
+    Board.addBoard(board);
 
-Board.addBoard(new Board("vg", Tools.translate.noop("Video games", "boardTitle"),
-    { defaultUserName: Tools.translate.noop("PC Nobleman", "defaultUserName") }));
+    Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"),
+        { defaultUserName: Tools.translate.noop("Whiner", "defaultUserName") }));
+
+    Board.addBoard(require("./templates/with-votings")("rpg",
+        Tools.translate.noop("Role-playing games", "boardTitle")));
+    Board.addBoard(require("./templates/with-likes")("soc", Tools.translate.noop("Social life", "boardTitle"),
+        { defaultUserName: Tools.translate.noop("Life of the party", "defaultUserName") }));
+
+    Board.addBoard(new Board("vg", Tools.translate.noop("Video games", "boardTitle"),
+        { defaultUserName: Tools.translate.noop("PC Nobleman", "defaultUserName") }));
+}
 
 Board._banners = {};
 Board.boardNames().forEach(function(boardName) {

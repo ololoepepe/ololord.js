@@ -19,15 +19,6 @@ var Tools = require("../helpers/tools");
 var ImageMagick = promisify("imagemagick");
 var musicMetadata = promisify("musicmetadata");
 
-var defineSetting = function(o, name, def) {
-    Object.defineProperty(o, name, {
-        get: function() {
-            return config("board." + o.name + "." + name, config("board." + name, def));
-        },
-        configurable: true
-    });
-};
-
 var boards = {};
 
 var generateRandomImage = function(hash, mimeType, thumbPath) {
@@ -60,50 +51,37 @@ var durationToString = function(duration) {
 };
 
 var Board = function(name, title, options) {
-    Object.defineProperty(this, "name", {
-        value: name,
-        configurable: true
+    this.defineProperty("name", name);
+    this.defineSetting("title", function() {
+        return Tools.translate(title);
     });
-    Object.defineProperty(this, "title", {
-        get: function() {
-            return Tools.translate(title);
-        },
-        configurable: true
+    this.defineProperty("defaultUserName", function() {
+        var def;
+        if (options && options.defaultUserName)
+            def = Tools.translate(options && options.defaultUserName);
+        else
+            def = Tools.translate("Anonymous", "defaultUserName");
+        return config("board." + name + ".defaultUserName", config("board.defaultUserName", def));
     });
-    Object.defineProperty(this, "defaultUserName", {
-        get: function() {
-            if (options && options.defaultUserName)
-                return Tools.translate(options && options.defaultUserName);
-            else
-                return Tools.translate("Anonymous", "defaultUserName");
-        },
-        configurable: true
+    this.defineProperty("captchaEnabled", function() {
+        return config("board.captchaEnabled", true) && config("board." + name + ".captchaEnabled", true);
     });
-    Object.defineProperty(this, "captchaEnabled", {
-        get: function() {
-            return config("board.captchaEnabled", true) && config("board." + name + ".captchaEnabled", true);
-        },
-        configurable: true
+    this.defineProperty("bannerFileNames", function() {
+        return Board._banners[name];
     });
-    Object.defineProperty(this, "bannerFileNames", {
-        get: function() {
-            return Board._banners[name];
-        },
-        configurable: true
-    });
-    defineSetting(this, "skippedGetOrder", 0);
-    defineSetting(this, "captchaQuota", 0);
-    defineSetting(this, "enabled", true);
-    defineSetting(this, "hidden", false);
-    defineSetting(this, "maxEmailLength", 150);
-    defineSetting(this, "maxNameLength", 50);
-    defineSetting(this, "maxSubjectLength", 150);
-    defineSetting(this, "maxTextLength", 15000);
-    defineSetting(this, "maxPasswordLength", 50);
-    defineSetting(this, "maxFileCount", 1);
-    defineSetting(this, "maxFileSize", 10 * 1024 * 1024);
-    defineSetting(this, "maxLastPosts", 3);
-    defineSetting(this, "markupElements", [
+    this.defineSetting("skippedGetOrder", 0);
+    this.defineSetting("captchaQuota", 0);
+    this.defineSetting("enabled", true);
+    this.defineSetting("hidden", false);
+    this.defineSetting("maxEmailLength", 150);
+    this.defineSetting("maxNameLength", 50);
+    this.defineSetting("maxSubjectLength", 150);
+    this.defineSetting("maxTextLength", 15000);
+    this.defineSetting("maxPasswordLength", 50);
+    this.defineSetting("maxFileCount", 1);
+    this.defineSetting("maxFileSize", 10 * 1024 * 1024);
+    this.defineSetting("maxLastPosts", 3);
+    this.defineSetting("markupElements", [
         Board.MarkupElements.BoldMarkupElement,
         Board.MarkupElements.ItalicsMarkupElement,
         Board.MarkupElements.StrikedOutMarkupElement,
@@ -117,21 +95,18 @@ var Board = function(name, title, options) {
         Board.MarkupElements.SuperscriptMarkupElement,
         Board.MarkupElements.UrlMarkupElement
     ]);
-    defineSetting(this, "postingEnabled", true);
-    defineSetting(this, "showWhois", false);
-    Object.defineProperty(this, "supportedCaptchaEngines", {
-        get: function() {
-            var ids = config("board." + name + ".supportedCaptchaEngines",
-                config("board.supportedCaptchaEngines", Captcha.captchaIds()));
-            if (!Util.isArray(ids))
-                ids = [];
-            return ids.map(function(id) {
-                return Captcha.captcha(id).info();
-            });
-        },
-        configurable: true
+    this.defineSetting("postingEnabled", true);
+    this.defineSetting("showWhois", false);
+    this.defineProperty("supportedCaptchaEngines", function() {
+        var ids = config("board." + name + ".supportedCaptchaEngines",
+            config("board.supportedCaptchaEngines", Captcha.captchaIds()));
+        if (!Util.isArray(ids))
+            ids = [];
+        return ids.map(function(id) {
+            return Captcha.captcha(id).info();
+        });
     });
-    defineSetting(this, "supportedFileTypes", [
+    this.defineSetting("supportedFileTypes", [
         "application/ogg",
         "application/pdf",
         "audio/mpeg",
@@ -144,17 +119,40 @@ var Board = function(name, title, options) {
         "video/ogg",
         "video/webm"
     ]);
-    defineSetting(this, "bumpLimit", 500);
-    defineSetting(this, "postLimit", 1000);
-    defineSetting(this, "threadLimit", 200);
-    defineSetting(this, "archiveLimit", 0);
-    defineSetting(this, "threadsPerPage", 20);
-    Object.defineProperty(this, "launchDate", {
+    this.defineSetting("bumpLimit", 500);
+    this.defineSetting("postLimit", 1000);
+    this.defineSetting("threadLimit", 200);
+    this.defineSetting("archiveLimit", 0);
+    this.defineSetting("threadsPerPage", 20);
+    this.defineProperty("launchDate", function() {
+        return new Date(config("board." + name + ".launchDate", config("board.launchDate", new Date())));
+    });
+};
+
+/*public*/ Board.prototype.defineSetting = function(name, def) {
+    var _this = this;
+    Object.defineProperty(this, name, {
         get: function() {
-            return new Date(config("board." + name + ".launchDate", config("board.launchDate", new Date())));
+            return config("board." + _this.name + "." + name,
+                config("board." + name, (typeof def == "function") ? def() : def));
         },
         configurable: true
     });
+};
+
+/*public*/ Board.prototype.defineProperty = function(name, value) {
+    var _this = this;
+    if (typeof value == "function") {
+        Object.defineProperty(this, name, {
+            get: value,
+            configurable: true
+        });
+    } else {
+        Object.defineProperty(this, name, {
+            value: value,
+            configurable: true
+        });
+    }
 };
 
 /*public*/ Board.prototype.info = function() {
@@ -241,10 +239,6 @@ var Board = function(name, title, options) {
 
 /*public*/ Board.prototype.testParameters = function(req, fields, files, creatingThread) {
     return Promise.resolve();
-};
-
-/*public*/ Board.prototype.defineSetting = function(name, def) {
-    return defineSetting(this, name, def);
 };
 
 /*public*/ Board.prototype.addTranslations = function(translate) {

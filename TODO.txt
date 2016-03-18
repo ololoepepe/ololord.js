@@ -16,3 +16,4 @@
 [done] Fix banning using post actions menu
 [done] Fix /rpg/ custom post form field creation
 [done] Optimize management page
+[done] Improve board customization system
