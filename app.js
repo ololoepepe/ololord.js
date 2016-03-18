@@ -94,6 +94,10 @@ var spawnCluster = function() {
                         return Promise.reject("Invalid generator function");
                     return f.call(BoardModel, data.key, data.data);
                 });
+                Global.IPC.installHandler("reloadBoards", function() {
+                    require("./boards/board").initialize();
+                    return Promise.resolve();
+                });
                 Global.IPC.send("ready").catch(function(err) {
                     Global.error(err);
                 });

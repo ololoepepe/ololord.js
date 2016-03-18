@@ -146,21 +146,6 @@ lord.createBannedUser = function(user, replaced) {
         return moment(date).utcOffset(timeOffset).locale(model.site.locale).format("YYYY/MM/DD HH:mm");
     };
     var node = lord.template("userBan", model);
-    $(".banLevelSelect", node).buttonset();
-    lord.query("[name='expires'], [name^='banExpires_']", node).forEach(function(inp) {
-        $(inp).change(function(){
-            $(this).attr("value", $(inp).val());
-        });
-        var now = lord.now();
-        now.setTime(now.getTime() + (30 *lord.Minute));
-        var currentDate = model.formattedDate(now.toISOString());
-        $(inp).datetimepicker({
-            i18n: { format: "YYYY/MM/DD HH:mm" },
-            mask: true,
-            value: inp.value,
-            minDate: currentDate
-        });
-    });
     if (replaced) {
         bans.replaceChild(node, replaced);
     } else {
@@ -212,16 +197,47 @@ window.addEventListener("load", function load() {
         var div = lord.id("bans");
         lord.removeChildren(div);
         lord.removeClass(div, "loadingMessage");
-        (users || []).forEach(function(user) {
+        lord.gently(users || [], function(user) {
             lord.createBannedUser(user);
-        });
-        lord.createBannedUser();
+        }, {
+            n: 5,
+            delay: 10
+        }).then(function() {
+           lord.createBannedUser(); 
+        }).catch(lord.handleError);
         $(div).accordion({
             collapsible: true,
             heightStyle: "content",
             icons: false,
             header: "span.bannedUserHeader",
-            active: false
+            active: false,
+            beforeActivate: function(e, ui) {
+                var node = ui.newPanel[0];
+                if (!node || node.processed)
+                    return;
+                var settings = lord.settings();
+                var model = lord.model("base");
+                var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
+                var formattedDate = function(date) {
+                    return moment(date).utcOffset(timeOffset).locale(model.site.locale).format("YYYY/MM/DD HH:mm");
+                };
+                $(".banLevelSelect", node).buttonset();
+                lord.query("[name='expires'], [name^='banExpires_']", node).forEach(function(inp) {
+                    $(inp).change(function(){
+                        $(this).attr("value", $(inp).val());
+                    });
+                    var now = lord.now();
+                    now.setTime(now.getTime() + (30 *lord.Minute));
+                    var currentDate = formattedDate(now.toISOString());
+                    $(inp).datetimepicker({
+                        i18n: { format: "YYYY/MM/DD HH:mm" },
+                        mask: true,
+                        value: inp.value,
+                        minDate: currentDate
+                    });
+                });
+                node.processed = true;
+            }
         });
         if (!lord.id("users"))
             return Promise.resolve();
@@ -232,10 +248,14 @@ window.addEventListener("load", function load() {
         var div = lord.id("users");
         lord.removeChildren(div);
         lord.removeClass(div, "loadingMessage");
-        (users || []).forEach(function(user) {
+        lord.gently(users || [], function(user) {
             lord.createRegisteredUser(user);
-        });
-        lord.createRegisteredUser();
+        }, {
+            n: 5,
+            delay: 10
+        }).then(function() {
+           lord.createRegisteredUser(); 
+        }).catch(lord.handleError);
         $(div).accordion({
             collapsible: true,
             heightStyle: "content",

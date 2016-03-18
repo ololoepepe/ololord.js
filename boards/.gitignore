@@ -1,8 +1,5 @@
 *
+!templates/
 !board.js
-!d.js
-!echo.js
 !index.js
-!rpg.js
-!soc.js
 !.gitignore
