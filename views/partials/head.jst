@@ -143,7 +143,7 @@
                 };
                 if (lord.model("base").user.isModer())
                     appendScript("js/3rdparty/jquery.datetimepicker.js");
-                if (settings.sourceHighlightingEnabled && !/\/manage\.html$/.test(window.location.path)) {
+                if (settings.sourceHighlightingEnabled && !/\/manage\.html$/.test(window.location.pathname)) {
                     appendScript("js/3rdparty/codemirror/codemirror.min.js");
                     appendScript("js/3rdparty/codemirror/javascript.min.js");
                     appendScript("js/3rdparty/codemirror/css.min.js");

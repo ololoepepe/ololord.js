@@ -219,7 +219,11 @@ lord.initFileTree = function() {
         lbl.appendChild(lord.node("text", lord.text("currentDirectoryLabelText") + " " + data.rel));
         $("#renameDirectory, #deleteDirectory").button("enable");
     }).on("filetreecollapsed", function(e, data) {
-        lord.currentDirectories.pop();
+        var i = lord.currentDirectories.length - 1;
+        while (i >= 0 && lord.currentDirectories[i] !== data.rel)
+            --i;
+        if (i >= 0)
+            lord.currentDirectories.splice(i, lord.currentDirectories.length - i);
         var dir = lord.currentDirectories.slice(-1)[0];
         var lbl = lord.id("currentDirectoryLabel");
         lord.removeChildren(lbl);
@@ -305,7 +309,10 @@ lord.editFile = function() {
         return;
     var modes = {
         "js": "javascript",
-        "json": "javascript",
+        "json": {
+            name: "javascript",
+            json: true
+        },
         "css": "css",
         "html": "htmlmixed",
         "jst": "htmlmixed"
@@ -316,6 +323,7 @@ lord.editFile = function() {
         var subdiv = lord.node("div");
         $(subdiv).width($(window).width() - 100).height($(window).height() - 150);
         div.appendChild(subdiv);
+        console.log(modes[lord.currentFile.split(".").pop()]);
         editor = CodeMirror(subdiv, {
             mode: modes[lord.currentFile.split(".").pop()] || "",
             lineNumbers: true,
