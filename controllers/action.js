@@ -683,6 +683,8 @@ router.post("/action/superuserAddFile", function(req, res) {
     }).catch(function(err) {
         if ("ENOENT" == err.code)
             controller.notFound(res);
+        else if ("ENOTDIR" == err.code)
+            controller.error(res, Tools.translate("Not a directory"), true);
         else
             controller.error(res, err, true);
     });
@@ -701,6 +703,8 @@ router.post("/action/superuserEditFile", function(req, res) {
     }).catch(function(err) {
         if ("ENOENT" == err.code)
             controller.notFound(res);
+        else if ("EISDIR" == err.code)
+            controller.error(res, Tools.translate("Not a file"), true);
         else
             controller.error(res, err, true);
     });

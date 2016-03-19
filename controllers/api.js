@@ -350,6 +350,8 @@ router.get("/api/fileTree.json", function(req, res) {
     }).catch(function(err) {
         if ("ENOENT" == err.code)
             controller.notFound(res);
+        else if ("ENOTDIR" == err.code)
+            controller.error(res, Tools.translate("Not a directory"), true);
         else
             controller.error(res, err, true);
     });
@@ -363,6 +365,8 @@ router.get("/api/fileContent.json", function(req, res) {
     }).catch(function(err) {
         if ("ENOENT" == err.code)
             controller.notFound(res);
+        else if ("EISDIR" == err.code)
+            controller.error(res, Tools.translate("Not a file"), true);
         else
             controller.error(res, err, true);
     });

@@ -2004,9 +2004,6 @@
     "Boards": {
         "boardsText": {
             "value": "Доски"
-        },
-        "boardsTabText": {
-            "value": "Доски"
         }
     },
     "Console games": {
@@ -2975,6 +2972,16 @@
     "Reload everything": {
         "reloadAllButtonText": {
             "value": "Перезагрузить все"
+        }
+    },
+    "Not a directory": {
+        "_default": {
+            "value": "Объект не является папкой"
+        }
+    },
+    "Not a file": {
+        "_default": {
+            "value": "Объект не является файлом"
         }
     }
 }

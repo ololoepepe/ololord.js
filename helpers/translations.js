@@ -122,7 +122,6 @@ module.exports = function(tr) {
     translate("Other", "otherTabText");
     translate("Bans", "bansTabText");
     translate("Users", "usersTabText");
-    translate("Boards", "boardsTabText");
     translate("Content", "contentTabText");
     translate("Auto update threads by default", "autoUpdateThreadsByDefaultLabelText");
     translate("Auto update interval (sec):", "autoUpdateIntervalLabelText");

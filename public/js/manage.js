@@ -450,9 +450,6 @@ lord.loadTabContent = function(tab) {
             });
         }).catch(lord.handleError);
         break;
-    case "boards":
-        //TODO
-        break;
     case "content":
         $(".directoryActions > button").button();
         $(".fileActions > button").button();
