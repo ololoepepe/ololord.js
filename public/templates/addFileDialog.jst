@@ -1,0 +1,35 @@
+<div>
+    <form class="centerForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
+          action="/{{=it.site.pathPrefix}}action/superuserAddFile">
+        <input type="hidden" name="dir" value="{{=it.dir}}" />
+        {{? it.isDir}}
+            <input type="hidden" name="isDir" value="true" />
+        {{?}}
+        <table>
+            <tbody>
+                <tr>
+                    <td>
+                        {{? it.isDir}}
+                            <b>{{=it.tr.directoryNameLabelText}}</b>
+                        {{??}}
+                            <b>{{=it.tr.fileNameLabelText}}</b>
+                        {{?}}
+                    </td>
+                    <td>
+                        <input type="text" name="fileName" value="" />
+                    </td>
+                </tr>
+                {{? !it.isDir}}
+                    <tr>
+                        <td>
+                            <b>{{=it.tr.fileLabelText}}</b>
+                        </td>
+                        <td>
+                            <input type="file" name="file" />
+                        </td>
+                    </tr>
+                {{?}}
+            </tbody>
+        </table>
+    </form>
+</div>

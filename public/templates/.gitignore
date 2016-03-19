@@ -1,6 +1,7 @@
 *
 !custom
 !partials
+!addFileDialog.jst
 !addFilesDialog.jst
 !banner.jst
 !boardPageLower.jst
@@ -43,6 +44,8 @@
 !postForm.jst
 !postReference.jst
 !registeredUser.jst
+!renameFileDialog.jst
+!rerenderPostsDialog.jst
 !rpgEditPostDialogPart.jst
 !rpgPostBodyPart.jst
 !rpgPostFormField.jst

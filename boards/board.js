@@ -237,6 +237,10 @@ Board.boards = {};
     return [];
 };
 
+/*public*/ Board.prototype.extraStylesheets = function() {
+    return [];
+};
+
 /*public*/ Board.prototype.testParameters = function(req, fields, files, creatingThread) {
     return Promise.resolve();
 };

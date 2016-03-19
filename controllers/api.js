@@ -1,4 +1,5 @@
 var express = require("express");
+var FS = require("q-io/fs");
 var HTTP = require("q-io/http");
 var Util = require("util");
 
@@ -321,6 +322,49 @@ router.get("/api/synchronization.json", function(req, res) {
         res.json(data ? JSON.parse(data) : null);
     }).catch(function(err) {
         controller.error(res, err, true);
+    });
+});
+
+router.get("/api/fileTree.json", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    var dir = req.query.dir;
+    if (dir.slice(-1)[0] != "/")
+        dir += "/";
+    var path = __dirname + "/../" + dir;
+    var c = { reply: "<ul class='jqueryFileTree'>" };
+    FS.list(path).then(function(list) {
+        return Tools.series(list, function(file) {
+            return FS.stat(path + "/" + file).then(function(stat) {
+                var a = `<a rel="${Tools.toHtml(dir + file)}">${Tools.toHtml(file)}</a>`;
+                if (stat.isDirectory())
+                    c.reply += `<li class="directory collapsed">${a}</li>`;
+                else if (stat.isFile())
+                    c.reply += `<li class="file ext_${file.split(".").pop() || ""}">${a}</li>`;
+                return Promise.resolve();
+            });
+        });
+    }).then(function() {
+        c.reply += "</ul>";
+        res.json({ html: c.reply });
+    }).catch(function(err) {
+        if ("ENOENT" == err.code)
+            controller.notFound(res);
+        else
+            controller.error(res, err, true);
+    });
+});
+
+router.get("/api/fileContent.json", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    return FS.read(__dirname + "/../" + req.query.fileName).then(function(content) {
+        res.json({ content: content });
+    }).catch(function(err) {
+        if ("ENOENT" == err.code)
+            controller.notFound(res);
+        else
+            controller.error(res, err, true);
     });
 });
 

@@ -22,7 +22,7 @@ configFileName = Path.resolve(__dirname + "/..", configFileName);
 var config = {};
 if (FSSync.existsSync(configFileName)) {
     console.log("[" + process.pid + "] Using config file: \"" + configFileName + "\"...");
-    var config = require(configFileName);
+    config = JSON.parse(FSSync.readFileSync(configFileName, "UTF-8"));
 }
 
 var setHooks = {};
@@ -81,18 +81,29 @@ c.remove = function(key) {
     return prev;
 };
 
-c.setConfigFile = function(fileName) {
-    configFileName = fileName;
-    config = require(fileName);
-    for (var key in setHooks) {
-        if (!setHooks.hasOwnProperty(key))
-            return;
-        setHooks[key](c(key));
+c.installSetHook = function(key, hook) {
+    setHooks[key] = hook;
+};
+
+c.reload = function() {
+    config = {};
+    if (FSSync.existsSync(configFileName)) {
+        console.log("[" + process.pid + "] Using config file: \"" + configFileName + "\"...");
+        config = JSON.parse(FSSync.readFileSync(configFileName, "UTF-8"));
+        for (var key in setHooks) {
+            if (!setHooks.hasOwnProperty(key))
+                return;
+            setHooks[key](c(key));
+        }
     }
 };
 
-c.installSetHook = function(key, hook) {
-    setHooks[key] = hook;
+c.setConfigFile = function(fileName) {
+    fileName = fileName || process.argv[2];
+    if (!fileName)
+        fileName = __dirname + "/../config.json";
+    configFileName = Path.resolve(__dirname + "/..", fileName);
+    c.reload();
 };
 
 module.exports = c;

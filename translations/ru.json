@@ -1404,6 +1404,9 @@
     "Delete file": {
         "deleteFileText": {
             "value": "Удалить файл"
+        },
+        "deleteFileButtonText": {
+            "value": "Удалить файл"
         }
     },
     "Posting speed:": {
@@ -2842,6 +2845,136 @@
     "Collapse text": {
         "collapsePostTextText": {
             "value": "Свернуть текст"
+        }
+    },
+    "Current directory:": {
+        "currentDirectoryLabelText": {
+            "value": "Текущая папка:"
+        }
+    },
+    "Current file:": {
+        "currentFileLabelText": {
+            "value": "Текущий файл:"
+        }
+    },
+    "Add file": {
+        "addFileButtonText": {
+            "value": "Добавить файл"
+        }
+    },
+    "Add directory": {
+        "addDirectoryButtonText": {
+            "value": "Добавить папку"
+        }
+    },
+    "Rename directory": {
+        "renameDirectoryButtonText": {
+            "value": "Переименовать папку"
+        }
+    },
+    "Delete directory": {
+        "deleteDirectoryButtonText": {
+            "value": "Удалить папку"
+        }
+    },
+    "Edit file": {
+        "editFileButtonText": {
+            "value": "Редактировать файл"
+        }
+    },
+    "Rename file": {
+        "renameFileButtonText": {
+            "value": "Переименовать файл"
+        }
+    },
+    "Adding file": {
+        "addFileDialogTitle": {
+            "value": "Добавление файла"
+        }
+    },
+    "File name:": {
+        "fileNameLabelText": {
+            "value": "Имя файла:"
+        }
+    },
+    "File:": {
+        "fileLabelText": {
+            "value": "Файл:"
+        }
+    },
+    "Adding directory": {
+        "addDirectoryDialogTitle": {
+            "value": "Добавление папки"
+        }
+    },
+    "Renaming file": {
+        "renameFileDialogTitle": {
+            "value": "Переименование файла"
+        }
+    },
+    "Renaming directory": {
+        "renameDirectoryDialogTitle": {
+            "value": "Переименование папки"
+        }
+    },
+    "Deleting file": {
+        "deleteFileDialogTitle": {
+            "value": "Удаление файла"
+        }
+    },
+    "Deleting directory": {
+        "deleteDirectoryDialogTitle": {
+            "value": "Удаление папки"
+        }
+    },
+    "Directory name:": {
+        "directoryNameLabelText": {
+            "value": "Имя папки:"
+        }
+    },
+    "Server actions": {
+        "serverActionLabelText": {
+            "value": "Действия над сервером"
+        }
+    },
+    "Connection with the server will be lost, and the server will become unavailable for some time. You will have to reload the page manually.": {
+        "reloadWarningText": {
+            "value": "Соединение с сервером будет потеряно, и сервер будет недоступен в течение некоторого времени. Вам придется перезагрузить страницу вручную."
+        }
+    },
+    "Regenerate cache": {
+        "regenerateCacheButtonText": {
+            "value": "Сгенерировать кеш заново"
+        }
+    },
+    "Rerender posts": {
+        "rerenderPostsButtonText": {
+            "value": "Отрендерить посты заново"
+        }
+    },
+    "Rebuild post search index": {
+        "rebuildSearchIndexButtonText": {
+            "value": "Пересоздать индекс поиска постов"
+        }
+    },
+    "Reload boards": {
+        "reloadBoardsButtonText": {
+            "value": "Перезагрузить доски"
+        }
+    },
+    "Reload config": {
+        "reloadConfigButtonText": {
+            "value": "Перезагрузить конфиг"
+        }
+    },
+    "Reload templates": {
+        "reloadTemplatesButtonText": {
+            "value": "Перезагрузить шаблоны"
+        }
+    },
+    "Reload everything": {
+        "reloadAllButtonText": {
+            "value": "Перезагрузить все"
         }
     }
 }

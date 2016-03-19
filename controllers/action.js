@@ -11,6 +11,7 @@ var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
+var Global = require("../helpers/global");
 var markup = require("../helpers/markup");
 var Tools = require("../helpers/tools");
 var vk = require("../helpers/vk")(config("site.vkontakte.accessToken", ""));
@@ -657,6 +658,174 @@ router.post("/action/search", function(req, res) {
             };
         });
         res.send(c.model);
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
+router.post("/action/superuserAddFile", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    Tools.parseForm(req).then(function(result) {
+        var dir = result.fields.dir;
+        if (dir.slice(-1)[0] != "/")
+            dir += "/";
+        var path = __dirname + "/../" + dir + result.fields.fileName;
+        var files = Tools.toArray(result.files);
+        if ("true" == result.fields.isDir)
+            return FS.makeDirectory(path);
+        else if (files.length < 1)
+            return FS.write(path, "");
+        else
+            return FS.move(files[0].path, path);
+    }).then(function() {
+        res.json({});
+    }).catch(function(err) {
+        if ("ENOENT" == err.code)
+            controller.notFound(res);
+        else
+            controller.error(res, err, true);
+    });
+});
+
+router.post("/action/superuserEditFile", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    Tools.parseForm(req).then(function(result) {
+        var path = __dirname + "/../" + result.fields.fileName;
+        return FS.write(path, result.fields.content);
+    }).then(function() {
+        res.json({});
+    }).catch(function(err) {
+        if ("ENOENT" == err.code)
+            controller.notFound(res);
+        else
+            controller.error(res, err, true);
+    });
+});
+
+router.post("/action/superuserRenameFile", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    Tools.parseForm(req).then(function(result) {
+        var oldPath = __dirname + "/../" + result.fields.oldFileName;
+        var newPath = oldPath.split("/").slice(0, -1).join("/") + "/" + result.fields.fileName;
+        return FS.rename(oldPath, newPath);
+    }).then(function() {
+        res.json({});
+    }).catch(function(err) {
+        if ("ENOENT" == err.code)
+            controller.notFound(res);
+        else
+            controller.error(res, err, true);
+    });
+});
+
+router.post("/action/superuserDeleteFile", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    Tools.parseForm(req).then(function(result) {
+        var path = __dirname + "/../" + result.fields.fileName;
+        return FS.removeTree(path);
+    }).then(function() {
+        res.json({});
+    }).catch(function(err) {
+        if ("ENOENT" == err.code)
+            controller.notFound(res);
+        else
+            controller.error(res, err, true);
+    });
+});
+
+router.post("/action/superuserRegenerateCache", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    Global.IPC.send("stop").then(function() {
+        return Global.IPC.send("regenerateCache");
+    }).then(function() {
+        return Global.IPC.send("start");
+    }).then(function() {
+        res.json({});
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
+router.post("/action/superuserRerenderPosts", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    var c = { boardNames: [] };
+    Tools.parseForm(req).then(function(result) {
+        Tools.forIn(result.fields, function(value, name) {
+            if (!/^board_\S+$/.test(name))
+                return;
+            c.boardNames.push(value);
+        });
+        if (c.boardNames.length < 1)
+            c.boardNames = Board.boardNames();
+        return Global.IPC.send("stop");
+    }).then(function() {
+        return Database.rerenderPosts(c.boardNames);
+    }).then(function() {
+        return Global.IPC.send("start");
+    }).then(function() {
+        res.json({});
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
+router.post("/action/superuserRebuildSearchIndex", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    Global.IPC.send("stop").then(function() {
+        return Database.rebuildSearchIndex();
+    }).then(function() {
+        return Global.IPC.send("start");
+    }).then(function() {
+        res.json({});
+    }).catch(function(err) {
+        controller.error(res, err, true);
+    });
+});
+
+router.post("/action/superuserReload", function(req, res) {
+    if (!req.isSuperuser())
+        return controller.error(res, Tools.translate("Not enough rights"), true);
+    var c = { list: [] };
+    Tools.parseForm(req).then(function(result) {
+        if ("true" == result.fields.boards)
+            c.list.push("boards");
+        if ("true" == result.fields.config)
+            c.list.push("config");
+        if ("true" == result.fields.templates)
+            c.list.push("templates");
+        if (c.list.length < 1)
+            return Promise.resolve();
+        return Global.IPC.send("stop");
+    }).then(function() {
+        return Tools.series(c.list, function(action) {
+            switch (action) {
+            case "boards":
+                Board.initialize();
+                return Global.IPC.send("reloadBoards");
+            case "config":
+                config.reload();
+                return Global.IPC.send("reloadConfig");
+            case "controller":
+                return controller.initialize();
+            default:
+                return Promise.resolve();
+            }
+        });
+    }).then(function() {
+        if (c.list.length < 1)
+            return Promise.resolve();
+        return Global.IPC.send("start");
+    }).then(function() {
+        res.json({});
     }).catch(function(err) {
         controller.error(res, err, true);
     });

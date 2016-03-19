@@ -1,6 +1,7 @@
 *
-!jquery-ui/
 !highlight.js
+!jquery-ui/
+!jQueryFileTree/
 !codemirror.css
 !jquery.datetimepicker.css
 !jquery.minicolors.css

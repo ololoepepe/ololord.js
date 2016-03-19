@@ -1,3 +1,7 @@
+lord.loadedTabContent = {};
+lord.currentDirectories = ["./"];
+lord.currentFile = null;
+
 lord.editBanReason = function(a) {
     var inp = $(a).closest("tr").find("[name^='banReason_'], [name='reason']")[0];
     var div = lord.node("div");
@@ -191,6 +195,272 @@ lord.createRegisteredUser = function(user, replaced) {
     return node;
 };
 
+lord.initFileTree = function() {
+    lord.currentFile = null;
+    lord.currentDirectories = ["./"];
+    var lbl = lord.id("currentDirectoryLabel");
+    lord.removeChildren(lbl);
+    lbl.appendChild(lord.node("text", lord.text("currentDirectoryLabelText") + " ./"));
+    lbl = lord.id("currentFileLabel");
+    lord.removeChildren(lbl);
+    lbl.appendChild(lord.node("text", lord.text("currentFileLabelText")));
+    var ndiv = lord.node("div");
+    ndiv.id = "contentFileTree";
+    var odiv = lord.id("contentFileTree");
+    odiv.parentNode.replaceChild(ndiv, odiv);
+    $("#contentFileTree").fileTree({
+        root: "./",
+        script: "/" + lord.data("sitePathPrefix") + "api/fileTree",
+        multiFolder: false
+    }).on("filetreeexpanded", function(e, data) {
+        lord.currentDirectories.push(data.rel);
+        var lbl = lord.id("currentDirectoryLabel");
+        lord.removeChildren(lbl);
+        lbl.appendChild(lord.node("text", lord.text("currentDirectoryLabelText") + " " + data.rel));
+    }).on("filetreecollapsed", function(e, data) {
+        lord.currentDirectories.pop();
+        var lbl = lord.id("currentDirectoryLabel");
+        lord.removeChildren(lbl);
+        lbl.appendChild(lord.node("text", lord.text("currentDirectoryLabelText") + " "
+            + lord.currentDirectories.slice(-1)[0]));
+    }).on("filetreeclicked", function(e, data) {
+        $(".fileActions > button").button("enable");
+        lord.currentFile = data.rel;
+        var lbl = lord.id("currentFileLabel");
+        lord.removeChildren(lbl);
+        lbl.appendChild(lord.node("text", lord.text("currentFileLabelText") + " " + data.rel));
+    });
+    $(".fileActions > button").button("disable");
+};
+
+lord.addFile = function(isDir) {
+    var dir = lord.currentDirectories.slice(-1)[0];
+    var model = lord.model(["base", "tr"]);
+    model.dir = dir;
+    model.isDir = isDir;
+    var div = lord.template("addFileDialog", model);
+    lord.showDialog(div, { title: isDir ? "addDirectoryDialogTitle" : "addFileDialogTitle" }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", div);
+        return lord.post(form.action, new FormData(form));
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        lord.initFileTree();
+    }).catch(lord.handleError);
+};
+
+lord.renameFile = function(isDir) {
+    if (!isDir && !lord.currentFile)
+        return;
+    var dir = lord.currentDirectories.slice(-1)[0];
+    var model = lord.model(["base", "tr"]);
+    model.oldFileName = isDir ? dir : lord.currentFile;
+    var div = lord.template("renameFileDialog", model);
+    lord.showDialog(div, {
+        title: isDir ? "renameDirectoryDialogTitle" : "renameFileDialogTitle",
+        afterShow: function() {
+            lord.nameOne("fileName", div).select();
+        }
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", div);
+        return lord.post(form.action, new FormData(form));
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        lord.initFileTree();
+    }).catch(lord.handleError);
+};
+
+lord.deleteFile = function(isDir) {
+    if (!isDir && !lord.currentFile)
+        return;
+    var dir = lord.currentDirectories.slice(-1)[0];
+    var div = lord.node("div");
+    div.appendChild(lord.node("text", lord.text("confirmationText")));
+    lord.showDialog(div,
+        { title: isDir ? "deleteDirectoryDialogTitle" : "deleteFileDialogTitle" }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var formData = new FormData();
+        formData.append("fileName", isDir ? dir : lord.currentFile);
+        return lord.post("/" + lord.data("sitePathPrefix") + "action/superuserDeleteFile", formData);
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        lord.initFileTree();
+        lord.initFileTree();
+    }).catch(lord.handleError);
+};
+
+lord.editFile = function() {
+    if (!lord.currentFile)
+        return;
+    var modes = {
+        "js": "javascript",
+        "json": "javascript",
+        "css": "css",
+        "html": "htmlmixed"
+    };
+    var editor;
+    lord.api("fileContent", { fileName: lord.currentFile }).then(function(result) {
+        var div = lord.node("div");
+        var subdiv = lord.node("div");
+        $(subdiv).width($(window).width() - 100).height($(window).height() - 150);
+        div.appendChild(subdiv);
+        editor = CodeMirror(subdiv, {
+            mode: modes[lord.currentFile.split(".").pop()] || "",
+            lineNumbers: true,
+            autofocus: true,
+            value: result.content
+        });
+        return lord.showDialog(div, {
+            afterShow: function() {
+                editor.refresh();
+                $(".CodeMirror", subdiv).css("height", "100%");
+            }
+        });
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var formData = new FormData();
+        formData.append("fileName", lord.currentFile);
+        formData.append("content", editor.getValue());
+        return lord.post("/" + lord.data("sitePathPrefix") + "action/superuserEditFile", formData);
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        lord.initFileTree();
+    }).catch(lord.handleError);
+};
+
+lord.regenerateCache = function() {
+    var div = lord.node("div");
+    div.appendChild(lord.node("text", lord.text("reloadWarningText")));
+    lord.showDialog(div, { title: lord.text("confirmationText") }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var formData = new FormData();
+        return lord.post("/" + lord.data("sitePathPrefix") + "action/superuserRegenerateCache", formData);
+    }).catch(lord.handleError);
+};
+
+lord.rerenderPosts = function() {
+    var div = lord.template("rerenderPostsDialog", lord.model(["base", "tr", "boards"]));
+    lord.showDialog(div, { title: lord.text("confirmationText") }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", div);
+        return lord.post(form.action, new FormData(form));
+    }).catch(lord.handleError);
+};
+
+lord.rebuildSearchIndex = function() {
+    var div = lord.node("div");
+    lord.showDialog(div, { title: lord.text("confirmationText") }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var formData = new FormData();
+        return lord.post("/" + lord.data("sitePathPrefix") + "action/superuserRebuildSearchIndex", formData);
+    }).catch(lord.handleError);
+};
+
+lord.reloadBoards = function() {
+    var div = lord.node("div");
+    div.appendChild(lord.node("text", lord.text("reloadWarningText")));
+    lord.showDialog(div, { title: lord.text("confirmationText") }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var formData = new FormData();
+        formData.append("boards", "true");
+        return lord.post("/" + lord.data("sitePathPrefix") + "action/superuserReload", formData);
+    }).catch(lord.handleError);
+};
+
+lord.reloadConfig = function() {
+    var div = lord.node("div");
+    div.appendChild(lord.node("text", lord.text("reloadWarningText")));
+    lord.showDialog(div, { title: lord.text("confirmationText") }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var formData = new FormData();
+        formData.append("config", "true");
+        return lord.post("/" + lord.data("sitePathPrefix") + "action/superuserReload", formData);
+    }).catch(lord.handleError);
+};
+
+lord.reloadTemplates = function() {
+    var div = lord.node("div");
+    div.appendChild(lord.node("text", lord.text("reloadWarningText")));
+    lord.showDialog(div, { title: lord.text("confirmationText") }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var formData = new FormData();
+        formData.append("templates", "true");
+        return lord.post("/" + lord.data("sitePathPrefix") + "action/superuserReload", formData);
+    }).catch(lord.handleError);
+};
+
+lord.reloadAll = function() {
+    var div = lord.node("div");
+    div.appendChild(lord.node("text", lord.text("reloadWarningText")));
+    lord.showDialog(div, { title: lord.text("confirmationText") }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var formData = new FormData();
+        formData.append("boards", "true");
+        formData.append("config", "true");
+        formData.append("templates", "true");
+        return lord.post("/" + lord.data("sitePathPrefix") + "action/superuserReload", formData);
+    }).catch(lord.handleError);
+};
+
+lord.loadTabContent = function(tab) {
+    if (lord.loadedTabContent[tab])
+        return;
+    switch (tab) {
+    case "users":
+        if (!lord.id("users"))
+            break;
+        lord.api("registeredUsers").then(function(users) {
+            var div = lord.id("users");
+            lord.removeChildren(div);
+            lord.removeClass(div, "loadingMessage");
+            lord.gently(users || [], function(user) {
+                lord.createRegisteredUser(user);
+            }, {
+                n: 5,
+                delay: 10
+            }).then(function() {
+               lord.createRegisteredUser(); 
+            }).catch(lord.handleError);
+            $(div).accordion({
+                collapsible: true,
+                heightStyle: "content",
+                icons: false,
+                header: "span.registeredUserHeader",
+                active: false
+            });
+        }).catch(lord.handleError);
+        break;
+    case "boards":
+        //TODO
+        break;
+    case "content":
+        $(".directoryActions > button").button();
+        $(".fileActions > button").button();
+        $(".serverActions > button").button();
+        lord.initFileTree();
+        break;
+    default:
+        break;
+    }
+    lord.loadedTabContent[tab] = {};
+};
+
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
     lord.api("bannedUsers").then(function(users) {
@@ -238,30 +508,6 @@ window.addEventListener("load", function load() {
                 });
                 node.processed = true;
             }
-        });
-        if (!lord.id("users"))
-            return Promise.resolve();
-        return lord.api("registeredUsers");
-    }).then(function(users) {
-        if (!users)
-            return Promise.resolve();
-        var div = lord.id("users");
-        lord.removeChildren(div);
-        lord.removeClass(div, "loadingMessage");
-        lord.gently(users || [], function(user) {
-            lord.createRegisteredUser(user);
-        }, {
-            n: 5,
-            delay: 10
-        }).then(function() {
-           lord.createRegisteredUser(); 
-        }).catch(lord.handleError);
-        $(div).accordion({
-            collapsible: true,
-            heightStyle: "content",
-            icons: false,
-            header: "span.registeredUserHeader",
-            active: false
         });
     }).catch(lord.handleError);
 }, false);

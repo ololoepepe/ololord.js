@@ -4,6 +4,15 @@
     <link id="favicon" rel="shortcut icon" href="/{{=it.site.pathPrefix}}favicon.ico">
     <link rel="stylesheet" type="text/css" href="/{{=it.site.pathPrefix}}css/3rdparty/jquery.datetimepicker.css">
     <link rel="stylesheet" type="text/css" href="/{{=it.site.pathPrefix}}css/base.css">
+    {{? it.extraStylesheets}}
+        {{~it.extraStylesheets :stylesheet}}
+            {{? stylesheet.source}}
+                <link rel="stylesheet" type="text/css"  href="{{=stylesheet.source}}">
+            {{?? stylesheet.fileName}}
+                <link rel="stylesheet" type="text/css"  href="/{{=it.site.pathPrefix}}css/{{=stylesheet.fileName}}">
+            {{?}}
+        {{~}}
+    {{?}}
     {{? !it.noJavaScript}}
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/jquery-1.11.3.min.js"></script>
         <script type="text/javascript" src="/{{=it.site.pathPrefix}}js/3rdparty/isInViewport.min.js"></script>
@@ -134,7 +143,7 @@
                 };
                 if (lord.model("base").user.isModer())
                     appendScript("js/3rdparty/jquery.datetimepicker.js");
-                if (settings.sourceHighlightingEnabled) {
+                if (settings.sourceHighlightingEnabled && !/\/manage\.html$/.test(window.location.path)) {
                     appendScript("js/3rdparty/codemirror/codemirror.min.js");
                     appendScript("js/3rdparty/codemirror/javascript.min.js");
                     appendScript("js/3rdparty/codemirror/css.min.js");

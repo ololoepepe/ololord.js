@@ -1233,3 +1233,7 @@ div.ui-widget-content.ui-dialog-content.checkerboardBackground {
     -webkit-background-size: 16px 17px;
     background-position: 0 0, 8px 0, 8px -8px, 0px 8px;
 }
+
+.serverActions ~ .serverActions {
+    margin-top: 10px;
+}

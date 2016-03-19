@@ -64,6 +64,7 @@ read.installHandler("help", function() {
     console.log("start - Opens workers for connections if closed");
     console.log("regenerate - Regenerates the cache (workers are closed and then opened again)");
     console.log("reload-boards - Reloads the boards");
+    console.log("reload-config [fileName] - Reloads the config file");
     console.log("reload-templates - Reloads the templates and the partials (including public ones)");
     console.log("rebuild-search-index - Rebuilds post search index");
     console.log("uptime - Show server uptime");
@@ -197,6 +198,20 @@ read.installHandler("reload-boards", function(args) {
     return Global.IPC.send("stop").then(function() {
         Board.initialize();
         return Global.IPC.send("reloadBoards");
+    }).then(function() {
+        return Global.IPC.send("start");
+    }).then(function() {
+        return Promise.resolve("OK");
+    });
+});
+
+read.installHandler("reload-config", function(args) {
+    return Global.IPC.send("stop").then(function() {
+        if (args)
+            config.setConfigFile(args);
+        else
+            config.reload();
+        return Global.IPC.send("reloadConfig", args);
     }).then(function() {
         return Global.IPC.send("start");
     }).then(function() {

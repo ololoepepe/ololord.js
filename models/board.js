@@ -391,6 +391,7 @@ var generateThreadHTML = function(board, threadNumber, model, nowrite) {
     model.isThreadPage = true;
     model.board = controller.boardModel(board).board;
     model.extraScripts = board.extraScripts();
+    model.extraStylesheets = board.extraStylesheets();
     model.tr = controller.translationsModel();
     model.threadNumber = model.thread.number;
     return board.postformRules().then(function(rules) {
@@ -453,6 +454,7 @@ var generatePage = function(boardName, pageNumber) {
         c.model.isBoardPage = true;
         c.model.board = controller.boardModel(board).board;
         c.model.extraScripts = board.extraScripts();
+        c.model.extraStylesheets = board.extraStylesheets();
         c.model.tr = controller.translationsModel();
         return board.postformRules();
     }).then(function(rules) {

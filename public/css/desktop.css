@@ -177,3 +177,20 @@ input.buttonImage {
 .banExpiresInput {
     width: 120px;
 }
+
+.contentFileTreeColumn {
+    display: inline-block;
+}
+
+.contentFileActionColumn {
+    display: inline-block;
+    vertical-align: top;
+}
+
+#contentFileTree {
+    min-width: 300px;
+    height: 500px;
+    overflow-x: auto;
+    overflow-y: auto;
+    box-sizing: border-box;
+}

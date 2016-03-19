@@ -98,6 +98,13 @@ var spawnCluster = function() {
                     require("./boards/board").initialize();
                     return Promise.resolve();
                 });
+                Global.IPC.installHandler("reloadConfig", function(data) {
+                    if (data)
+                        config.setConfigFile(data);
+                    else
+                        config.reload();
+                    return Promise.resolve();
+                });
                 Global.IPC.send("ready").catch(function(err) {
                     Global.error(err);
                 });
@@ -164,6 +171,21 @@ if (cluster.isMaster) {
         });
         Global.IPC.installHandler("generateArchive", function(data) {
             return BoardModel.scheduleGenerateArchive(data);
+        });
+        Global.IPC.installHandler("stop", function() {
+            return Global.IPC.send("stop");
+        });
+        Global.IPC.installHandler("start", function() {
+            return Global.IPC.send("start");
+        });
+        Global.IPC.installHandler("reloadBoards", function() {
+            return Global.IPC.send("reloadBoards");
+        });
+        Global.IPC.installHandler("reloadConfig", function() {
+            return Global.IPC.send("reloadConfig");
+        });
+        Global.IPC.installHandler("regenerateCache", function() {
+            return controller.regenerate();
         });
     }).catch(function(err) {
         Global.error(err.stack || err);

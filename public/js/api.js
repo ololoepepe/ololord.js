@@ -1169,7 +1169,7 @@ lord.activateTab = function(a) {
     lord.arr(widget.childNodes).forEach(function(node) {
         if (node.nodeType != 1) //Element
             return;
-        node.style.display = ((node == page) ? "block" : "none");
+        node.style.display = ((node == page) ? "" : "none");
     });
     lord.query("ul > li", header.parentNode).forEach(function(node) {
         lord.removeClass(node, "activated");
