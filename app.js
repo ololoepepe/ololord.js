@@ -179,9 +179,11 @@ if (cluster.isMaster) {
             return Global.IPC.send("start");
         });
         Global.IPC.installHandler("reloadBoards", function() {
+            require("./boards/board").initialize();
             return Global.IPC.send("reloadBoards");
         });
         Global.IPC.installHandler("reloadConfig", function() {
+            config.reload();
             return Global.IPC.send("reloadConfig");
         });
         Global.IPC.installHandler("regenerateCache", function() {

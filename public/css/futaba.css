@@ -362,3 +362,7 @@ ul.tabWidget > li.activated {
 .delallHeader {
     font-weight: bold;
 }
+
+ul.jqueryFileTree a {
+    color: #800000 !important;
+}

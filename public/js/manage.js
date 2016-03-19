@@ -217,12 +217,15 @@ lord.initFileTree = function() {
         var lbl = lord.id("currentDirectoryLabel");
         lord.removeChildren(lbl);
         lbl.appendChild(lord.node("text", lord.text("currentDirectoryLabelText") + " " + data.rel));
+        $("#renameDirectory, #deleteDirectory").button("enable");
     }).on("filetreecollapsed", function(e, data) {
         lord.currentDirectories.pop();
+        var dir = lord.currentDirectories.slice(-1)[0];
         var lbl = lord.id("currentDirectoryLabel");
         lord.removeChildren(lbl);
-        lbl.appendChild(lord.node("text", lord.text("currentDirectoryLabelText") + " "
-            + lord.currentDirectories.slice(-1)[0]));
+        lbl.appendChild(lord.node("text", lord.text("currentDirectoryLabelText") + " " + dir));
+        if ("./" == dir)
+            $("#renameDirectory, #deleteDirectory").button("disable");
     }).on("filetreeclicked", function(e, data) {
         $(".fileActions > button").button("enable");
         lord.currentFile = data.rel;
@@ -230,6 +233,7 @@ lord.initFileTree = function() {
         lord.removeChildren(lbl);
         lbl.appendChild(lord.node("text", lord.text("currentFileLabelText") + " " + data.rel));
     });
+    $("#renameDirectory, #deleteDirectory").button("disable");
     $(".fileActions > button").button("disable");
 };
 

@@ -809,10 +809,8 @@ router.post("/action/superuserReload", function(req, res) {
         return Tools.series(c.list, function(action) {
             switch (action) {
             case "boards":
-                Board.initialize();
                 return Global.IPC.send("reloadBoards");
             case "config":
-                config.reload();
                 return Global.IPC.send("reloadConfig");
             case "controller":
                 return controller.initialize();

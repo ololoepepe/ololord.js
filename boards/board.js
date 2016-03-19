@@ -639,12 +639,16 @@ Board.sortThreadsByPostCount = function(a, b) {
 };
 
 Board.initialize = function() {
+    var reinit = Tools.hasOwnProperties(Board.boards);
     Board.boards = {};
 
     FSSync.readdirSync(__dirname).forEach(function(file) {
-        if ("index.js" == file || "js" != file.split(".").pop())
+        if ("index.js" == file || "board.js" == file || "js" != file.split(".").pop())
             return;
-        var board = require("./" + file.split(".").shift());
+        var id = "./" + file.split(".").shift();
+        if (reinit)
+            delete require.cache[require.resolve(id)];
+        var board = require(id);
         if (Util.isArray(board)) {
             board.forEach(function(board) {
                 Board.addBoard(board);
