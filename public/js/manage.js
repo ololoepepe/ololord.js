@@ -307,7 +307,8 @@ lord.editFile = function() {
         "js": "javascript",
         "json": "javascript",
         "css": "css",
-        "html": "htmlmixed"
+        "html": "htmlmixed",
+        "jst": "htmlmixed"
     };
     var editor;
     lord.api("fileContent", { fileName: lord.currentFile }).then(function(result) {
