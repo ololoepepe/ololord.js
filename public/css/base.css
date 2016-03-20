@@ -1237,3 +1237,7 @@ div.ui-widget-content.ui-dialog-content.checkerboardBackground {
 .serverActions ~ .serverActions {
     margin-top: 10px;
 }
+
+#frequentlyUsedFileActions {
+    max-width: 500px;
+}
