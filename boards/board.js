@@ -336,6 +336,8 @@ var getRules = function(boardName) {
 };
 
 /*public*/ Board.prototype.postformRules = function() {
+    if (this._postformRules)
+        return Promise.resolve(this._postformRules);
     var c = {};
     var _this = this;
     return getRules().then(function(rules) {
@@ -345,15 +347,30 @@ var getRules = function(boardName) {
         c.specific = rules;
         for (var i = c.specific.length - 1; i >= 0; --i) {
             var rule = c.specific[i];
+            var rxExcept = /^#include\s+except(\((\d+(\,\d+)*)\))$/;
+            var rxSeveral = /^#include\s+(\d+(\,\d+)*)$/;
             if ("#include all" == rule) {
                 Array.prototype.splice.apply(c.specific, [i, 1].concat(c.common));
-            } else if (/^#include\s+\d+$/.test(rule)) {
-                var n = +rule.replace(/#include\s+/, "");
-                if (n >= 0 && n < c.common.length)
-                    c.specific.splice(i, 1, c.common[n]);
+            } else if (rxExcept.test(rule)) {
+                var excluded = rule.match(rxExcept)[2].split(",").map(function(n) {
+                    return +n;
+                });
+                Array.prototype.splice.apply(c.specific, [i, 1].concat(c.common.filter(function(_, i) {
+                    return excluded.indexOf(i) < 0;
+                })));
+            } else if (rxSeveral.test(rule)) {
+                var included = rule.match(rxSeveral)[1].split(",").map(function(n) {
+                    return +n;
+                }).filter(function(n) {
+                    return n >= 0 && n < c.common.length;
+                }).map(function(n) {
+                    return c.common[n];
+                });
+                Array.prototype.splice.apply(c.specific, [i, 1].concat(included));
             }
         };
-        return Promise.resolve((c.specific.length > 0) ? c.specific : c.common);
+        _this._postformRules = (c.specific.length > 0) ? c.specific : c.common;
+        return Promise.resolve(_this._postformRules);
     });
 };
 

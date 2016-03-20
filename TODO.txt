@@ -1,4 +1,4 @@
-* Improve post form rules system
+* Add built-in captcha
 * Add statistics
 * Add ability to select drawable and not drawable image background for drawing tools
 * Optimize spells
@@ -13,3 +13,4 @@
 [done] Implement content management page
 [done] Implement OP moderation
 [done] Implement user action permissions
+[done] Improve post form rules system
