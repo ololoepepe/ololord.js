@@ -2988,5 +2988,10 @@
         "frequentlyUsedFilesLabelText": {
             "value": "Часто используемые файлы"
         }
+    },
+    "Node captcha": {
+        "_default": {
+            "value": "Node captcha"
+        }
     }
 }

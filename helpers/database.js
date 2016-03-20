@@ -1089,8 +1089,8 @@ var checkCaptcha = function(req, fields) {
             return false;
         };
         if (!ceid || !isSupported(ceid)) {
-            if (isSupported("google-recaptcha"))
-                ceid = "google-recaptcha";
+            if (isSupported("node-captcha"))
+                ceid = "node-captcha";
             else
                 ceid = supportedCaptchaEngines[0].id;
         }

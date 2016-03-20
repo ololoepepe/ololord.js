@@ -36,6 +36,7 @@
 !movablePlayer.jst
 !moveThreadDialog.jst
 !navbar.jst
+!nodeCaptchaWidget.jst
 !notFoundImage.jst
 !pagination.jst
 !playerTrack.jst

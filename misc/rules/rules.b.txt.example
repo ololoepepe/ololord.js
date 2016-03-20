@@ -4,3 +4,10 @@ Example:
 
 #include all
 Extra rule
+
+Another example:
+
+#include except(0,1,3)
+Extra rule
+#include 3
+#include 0,1
