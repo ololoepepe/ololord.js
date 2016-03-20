@@ -10,6 +10,7 @@ var Chat = require("../helpers/chat");
 var controller = require("../helpers/controller");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");
+var Permissions = require("../helpers/permissions");
 var Tools = require("../helpers/tools");
 
 var router = express.Router();
@@ -52,12 +53,12 @@ router.get("/api/userIp.json", function(req, res) {
     if (!req.query.boardName)
         return controller.error(res, Tools.translate("Invalid board"), true);
     controller.checkBan(req, res, req.query.boardName).then(function() {
+        if (Database.compareRegisteredUserLevels(req.level(), Permissions.seeUserIp()) < 0)
+            return Promise.reject(Tools.translate("Not enough rights"));
         return Database.getPost(req.query.boardName, +req.query.postNumber);
     }).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("No such post"));
-        if (!Database.compareRegisteredUserLevels(req.level(), config("permissions.seeUserIp", "ADMIN")) < 0)
-            return Promise.reject(Tools.translate("Not enough rights"));
         var result = { ip: post.user.ip };
         var ipv4 = Tools.preferIPv4(post.user.ip);
         if (ipv4 && ipv4 != post.user.ip)

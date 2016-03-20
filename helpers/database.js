@@ -20,6 +20,7 @@ var config = require("./config");
 var controller = require("./controller");
 var Global = require("./global");
 var markup = require("./markup");
+var Permissions = require("./permissions");
 var Tools = require("./tools");
 
 var Ratings = {};
@@ -100,6 +101,33 @@ var sortedReferensces = function(references) {
     }).map(function(ref) {
         delete ref.createdAt;
         return ref;
+    });
+};
+
+var checkPermissions = function(req, board, post, permission, password) {
+    if (req.isSuperuser())
+        return Promise.resolve(true);
+    if (compareRegisteredUserLevels(req.level(board.name), Permissions[permission]()) >= 0) {
+        if (compareRegisteredUserLevels(req.level(board.name), post.user.level) > 0)
+            return Promise.resolve(true);
+        if (req.hashpass && req.hashpass == post.user.hashpass)
+            return Promise.resolve(true);
+        if (password && password == post.user.password)
+            return Promise.resolve(true);
+    }
+    if (!board.opModeration)
+        return Promise.resolve(false);
+    return db.hget("threads:" + board.name, post.threadNumber).then(function(thread) {
+        thread = JSON.parse(thread);
+        if (thread.user.ip != req.ip && (!req.hashpass || req.hashpass != thread.user.hashpass))
+            return Promise.resolve(false);
+        if (compareRegisteredUserLevels(req.level(board.name), post.user.level) >= 0)
+            return Promise.resolve(true);
+        if (req.hashpass && req.hashpass == post.user.hashpass)
+            return Promise.resolve(true);
+        if (password && password == post.user.password)
+            return Promise.resolve(true);
+        return Promise.resolve(false);
     });
 };
 
@@ -1728,11 +1756,11 @@ module.exports.addFiles = function(req, fields, files, transaction) {
     if (isNaN(postNumber) || postNumber <= 0)
         return Promise.reject(Tools.translate("Invalid post number"));
     return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
-        if ((!req.hashpass || req.hashpass != post.user.hashpass)
-            && !req.isSuperuser() && (compareRegisteredUserLevels(req.level(board.name), post.user.level) <= 0)) {
-            return Promise.reject(Tools.translate("Not enough rights"));
-        }
         c.post = post;
+        return checkPermissions(req, board, post, "addFilesToPost");
+    }).then(function(result) {
+        if (!result)
+            return Promise.reject(Tools.translate("Not enough rights"));
         return postFileInfoNames(board.name, c.post.number);
     }).then(function(names) {
         if (names.length + files.length > board.maxFileCount)
@@ -1777,12 +1805,12 @@ module.exports.editPost = function(req, fields) {
     return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("Invalid post"));
-        if ((!req.hashpass || req.hashpass != post.user.hashpass)
-            && !req.isSuperuser() && (compareRegisteredUserLevels(req.level(board.name), post.user.level) <= 0)) {
-            return Promise.reject(Tools.translate("Not enough rights"));
-        }
         c.post = post;
-        return postFileInfoNames(post.boardName, post.number);
+        return checkPermissions(req, board, post, "editPost");
+    }).then(function(result) {
+        if (!result)
+            return Promise.reject(Tools.translate("Not enough rights"));
+        return postFileInfoNames(c.post.boardName, c.post.number);
     }).then(function(numbers) {
         if (!rawText && numbers.length < 1)
             return Promise.reject(Tools.translate("Both file and comment are missing"));
@@ -1938,7 +1966,6 @@ module.exports.deletePost = function(req, res, fields) {
     var postNumber = +fields.postNumber;
     if (isNaN(postNumber) || postNumber <= 0)
         return Promise.reject(Tools.translate("Invalid post number"));
-    var password = Tools.sha1(fields.password);
     var c = {};
     return controller.checkBan(req, res, board.name, true).then(function() {
         return getPost(board.name, postNumber);
@@ -1946,15 +1973,14 @@ module.exports.deletePost = function(req, res, fields) {
         if (!post)
             return Promise.reject(Tools.translate("Invalid post"));
         c.post = post;
-        if ((!password || password != post.user.password)
-            && (!req.hashpass || req.hashpass != post.user.hashpass)
-            && !req.isSuperuser() && (compareRegisteredUserLevels(req.level(board.name), post.user.level) <= 0)) {
-            return Promise.reject(Tools.translate("Not enough rights"));
-        }
         c.isThread = post.threadNumber == post.number;
         c.archived = ("true" == fields.archived);
         if (c.archived && !c.isThread)
             return Promise.reject(Tools.translate("Deleting posts from archived threads is not allowed"));
+        return checkPermissions(req, board, post, "deletePost", Tools.sha1(fields.password));
+    }).then(function(result) {
+        if (!result)
+            return Promise.reject(Tools.translate("Not enough rights"));
         return (c.isThread) ? removeThread(board.name, postNumber, { archived: c.archived })
             : removePost(board.name, postNumber);
     }).then(function() {
@@ -2210,7 +2236,6 @@ module.exports.deleteFile = function(req, res, fields) {
     var fileName = fields.fileName;
     if (!fileName)
         return Promise.reject(Tools.translate("Invalid file name"));
-    var password = Tools.sha1(fields.password);
     var c = {};
     return db.hget("fileInfos", fileName).then(function(fileInfo) {
         if (!fileInfo)
@@ -2219,12 +2244,10 @@ module.exports.deleteFile = function(req, res, fields) {
         return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
     }).then(function(post) {
         c.post = post;
-        if ((!password || password != post.user.password)
-            && (!req.hashpass || req.hashpass != post.user.hashpass)
-            && !req.isSuperuser()
-            && (compareRegisteredUserLevels(req.level(c.fileInfo.boardName), post.user.level) <= 0)) {
+        return checkPermissions(req, board, post, "deleteFile", Tools.sha1(fields.password));
+    }).then(function(result) {
+        if (!result)
             return Promise.reject(Tools.translate("Not enough rights"));
-        }
         return controller.checkBan(req, res, c.post.boardName, true);
     }).then(function() {
         return postFileInfoNames(c.post.boardName, c.post.number);
