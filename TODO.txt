@@ -1,3 +1,4 @@
+* Improve post form rules system
 * Add statistics
 * Add ability to select drawable and not drawable image background for drawing tools
 * Optimize spells

@@ -105,6 +105,13 @@ var Board = function(name, title, options) {
             return Captcha.captcha(id).info();
         });
     });
+    this.defineProperty("permissions", function() {
+        var p = {};
+        Tools.forIn(require("../helpers/permissions").Permissions, function(defLevel, key) {
+            p[key] = config("board." + name + ".permissions." + key, config("permissions." + key, defLevel));
+        });
+        return p;
+    });
     this.defineSetting("supportedFileTypes", [
         "application/ogg",
         "application/pdf",
@@ -179,7 +186,9 @@ Board.boards = {};
         bumpLimit: this.bumpLimit,
         postLimit: this.postLimit,
         bannerFileNames: this.bannerFileNames,
-        launchDate: this.launchDate.toISOString()
+        launchDate: this.launchDate.toISOString(),
+        permissions: this.permissions,
+        opModeration: this.opModeration
     };
     this.customBoardInfoFields().forEach(function(field) {
         model[field] = board[field];

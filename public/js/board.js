@@ -3275,6 +3275,7 @@ lord.showPostActionsMenu = function(e, input, postNumber) {
     var post = lord.id(postNumber);
     if (!post)
         return;
+    var boardName = lord.data("boardName");
     var fav = lord.getLocalObject("favoriteThreads", {});
     var model = {
         post: {
@@ -3282,14 +3283,14 @@ lord.showPostActionsMenu = function(e, input, postNumber) {
             rawText: lord.queryOne("blockquote", post).textContent,
             fileInfos: lord.query(".postFile", post),
             isOp: lord.hasClass(post, "opPost"),
-            hidden: !!lord.getLocalObject("hiddenPosts", {})[lord.data("boardName") + "/" + postNumber]
+            hidden: lord.getLocalObject("hiddenPosts", {}).hasOwnProperty(boardName + "/" + postNumber)
         },
         thread: {
             fixed: lord.data("fixed", post),
             closed: lord.data("closed", post),
             unbumpable: lord.data("unbumpable", post),
             expanded: lord.data("expanded", post),
-            isInFavorites: fav.hasOwnProperty(lord.data("boardName") + "/" + lord.data("threadNumber", post))
+            isInFavorites: fav.hasOwnProperty(boardName + "/" + lord.data("threadNumber", post))
         },
         customPostMenuAction: lord.customPostMenuAction,
         isThreadPage: +lord.data("threadNumber"),

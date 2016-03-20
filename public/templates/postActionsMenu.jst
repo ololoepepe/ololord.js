@@ -17,7 +17,7 @@
     {{? it.customPostMenuAction && it.customPostMenuAction[20]}}
         {{ out += it.customPostMenuAction[20](it, it.thread, it.post); }}
     {{?}}
-    {{? !it.archived && it.user.isModer(it.board.name)}}
+    {{? !it.archived && (it.user.isModer(it.board.name) || it.board.opModeration)}}
         <li>
             <a name="editButton" target="_blank" href="javascript:void(0);"
                onclick="lord.editPost(this); return false;">
@@ -27,7 +27,7 @@
     {{? it.customPostMenuAction && it.customPostMenuAction[30]}}
         {{ out += it.customPostMenuAction[30](it, it.thread, it.post); }}
     {{?}}
-    {{? it.user.isModer(it.board.name) && (it.post.fileInfos.length < it.board.maxFileCount) && !it.archived}}
+    {{? (it.user.isModer(it.board.name) || it.board.opModeration) && (it.post.fileInfos.length < it.board.maxFileCount) && !it.archived}}
         <li>
             <a name="addFileButton" target="_blank" href="javascript:void(0);"
                onclick="lord.addFiles(this); return false;">
@@ -45,7 +45,7 @@
     {{? it.customPostMenuAction && it.customPostMenuAction[50]}}
         {{ out += it.customPostMenuAction[50](it, it.thread, it.post); }}
     {{?}}
-    {{? !it.archived || it.post.isOp}}
+    {{? (!it.archived || it.post.isOp) && (it.compareRegisteredUserLevels(it.user.level(it.board.name), it.board.permissions.deletePost) >= 0 || it.board.opModeration)}}
         <li>
             <a name="deleteButton" target="_blank" href="javascript:void(0);"
                onclick="lord.deletePost(this); return false;">
@@ -89,7 +89,7 @@
         {{? it.customPostMenuAction && it.customPostMenuAction[100]}}
             {{ out += it.customPostMenuAction[100](it, it.thread, it.post); }}
         {{?}}
-        {{? it.user.isModer(it.board.name) && !it.archived}}
+        {{? !it.archived && it.user.isModer(it.board.name)}}
             <li>
                 <a name="fixButton" href="javascript:void(0);"
                    onclick="lord.setThreadFixed(this, {{=!it.thread.fixed}}); return false;">
