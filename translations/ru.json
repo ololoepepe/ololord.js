@@ -2983,5 +2983,10 @@
         "_default": {
             "value": "Объект не является файлом"
         }
+    },
+    "Frequently used files": {
+        "frequentlyUsedFilesLabelText": {
+            "value": "Часто используемые файлы"
+        }
     }
 }

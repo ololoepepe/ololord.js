@@ -241,6 +241,30 @@ lord.initFileTree = function() {
     $(".fileActions > button").button("disable");
 };
 
+lord.refreshFrequentlyUsedFiles = function() {
+    var div = lord.id("frequentlyUsedFileActions");
+    lord.removeChildren(div);
+    lord.toArray(lord.getLocalObject("frequentlyUsedFiles", {})).sort(function(file1, file2) {
+        if (file1.count < file2.count)
+            return 1;
+        else if (file1.count > file2.count)
+            return -1;
+        else
+            return 0;
+    }).slice(0, 10).forEach(function(file, i) {
+        if (!i)
+            lord.id("frequentlyUsedFileActionsContainer").style.display = "";
+        var btn = lord.node("button");
+        btn.appendChild(lord.node("text", file.name));
+        btn.onclick = function() {
+            lord.editFile(file.name);
+        };
+        $(btn).button();
+        div.appendChild(btn);
+        div.appendChild(lord.node("text", " "));
+    });
+};
+
 lord.addFile = function(isDir) {
     var dir = lord.currentDirectories.slice(-1)[0];
     var model = lord.model(["base", "tr"]);
@@ -304,9 +328,20 @@ lord.deleteFile = function(isDir) {
     }).catch(lord.handleError);
 };
 
-lord.editFile = function() {
-    if (!lord.currentFile)
+lord.editFile = function(fileName) {
+    if (!fileName && !lord.currentFile)
         return;
+    fileName = fileName || lord.currentFile;
+    var fileNames = lord.getLocalObject("frequentlyUsedFiles", {});
+    if (fileNames.hasOwnProperty(fileName)) {
+        fileNames[fileName].count += 1;
+    } else {
+        fileNames[fileName] = {
+            name: fileName,
+            count: 1
+        };
+    }
+    lord.setLocalObject("frequentlyUsedFiles", fileNames);
     var modes = {
         "js": "javascript",
         "json": {
@@ -318,14 +353,13 @@ lord.editFile = function() {
         "jst": "htmlmixed"
     };
     var editor;
-    lord.api("fileContent", { fileName: lord.currentFile }).then(function(result) {
+    lord.api("fileContent", { fileName: fileName }).then(function(result) {
         var div = lord.node("div");
         var subdiv = lord.node("div");
         $(subdiv).width($(window).width() - 100).height($(window).height() - 150);
         div.appendChild(subdiv);
-        console.log(modes[lord.currentFile.split(".").pop()]);
         editor = CodeMirror(subdiv, {
-            mode: modes[lord.currentFile.split(".").pop()] || "",
+            mode: modes[fileName.split(".").pop()] || "",
             lineNumbers: true,
             autofocus: true,
             value: result.content
@@ -340,14 +374,18 @@ lord.editFile = function() {
         if (!result)
             return Promise.resolve();
         var formData = new FormData();
-        formData.append("fileName", lord.currentFile);
+        formData.append("fileName", fileName);
         formData.append("content", editor.getValue());
         return lord.post("/" + lord.data("sitePathPrefix") + "action/superuserEditFile", formData);
     }).then(function(result) {
+        lord.refreshFrequentlyUsedFiles();
         if (!result)
             return Promise.resolve();
         lord.initFileTree();
-    }).catch(lord.handleError);
+    }).catch(function(err) {
+        lord.handleError(err);
+        lord.refreshFrequentlyUsedFiles();
+    });
 };
 
 lord.regenerateCache = function() {
@@ -464,6 +502,7 @@ lord.loadTabContent = function(tab) {
         $(".fileActions > button").button();
         $(".serverActions > button").button();
         lord.initFileTree();
+        lord.refreshFrequentlyUsedFiles();
         break;
     default:
         break;

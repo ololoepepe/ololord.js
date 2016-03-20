@@ -403,6 +403,7 @@ module.exports = function(tr) {
     translate("Collapse text", "collapsePostTextText");
     translate("Current directory:", "currentDirectoryLabelText");
     translate("Current file:", "currentFileLabelText");
+    translate("Frequently used files", "frequentlyUsedFilesLabelText");
     translate("Add file", "addFileButtonText");
     translate("Add directory", "addDirectoryButtonText");
     translate("Rename directory", "renameDirectoryButtonText");
