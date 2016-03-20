@@ -13,4 +13,4 @@
 [done] Implement OP moderation
 [done] Implement user action permissions
 [done] Improve post form rules system
-[done] Add built-in captcha
+[done] Add built-in captcha ("node-captcha")

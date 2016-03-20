@@ -379,13 +379,7 @@ lord.editFile = function(fileName) {
         return lord.post("/" + lord.data("sitePathPrefix") + "action/superuserEditFile", formData);
     }).then(function(result) {
         lord.refreshFrequentlyUsedFiles();
-        if (!result)
-            return Promise.resolve();
-        lord.initFileTree();
-    }).catch(function(err) {
-        lord.handleError(err);
-        lord.refreshFrequentlyUsedFiles();
-    });
+    }).catch(lord.handleError);
 };
 
 lord.regenerateCache = function() {
