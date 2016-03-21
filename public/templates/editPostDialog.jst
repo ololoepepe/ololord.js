@@ -50,10 +50,10 @@
                     </td>
                     <td class="postformField">
                         <div class="symbolCounterContainer">
-                            <span class="symbolCounter"><span name="used"></span>/{{=it.board.maxTextLength}}</span>
                             <textarea name="text" rows="10" cols="36" placeholder="{{=it.tr.postFormTextPlaceholder}}"
                                       oninput="lord.countSymbols(this);"
                                       class="postFormTextarea">{{? it.post.rawText}}{{=it.post.rawText}}{{?}}</textarea>
+                            <span class="symbolCounter"><span name="used"></span>/{{=it.board.maxTextLength}}</span>
                         </div>
                     </td>
                 </tr>

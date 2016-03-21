@@ -1424,7 +1424,12 @@ lord.editPost = function(el) {
         document.body.removeChild(c.div);
         $(c.div).css("visibility", "");
         $(c.div).css("position", "");
-        return lord.showDialog(c.div, { title: "editPostText" });
+        return lord.showDialog(c.div, {
+            title: "editPostText",
+            afterShow: function() {
+                lord.countSymbols(lord.nameOne("text", c.div));
+            }
+        });
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
@@ -2292,7 +2297,9 @@ lord.markup = function(tag) {
     case "sup":
     case "sub":
     case "raw-html":
-    case "url": {
+    case "url":
+    case "latex":
+    case "inline-latex": {
         wrap("[" + tag + "]", "[/" + tag + "]");
         break;
     }
@@ -3383,7 +3390,8 @@ lord.initializeOnLoadBoard = function() {
         c.model.customPostFormField = lord.customPostFormField;
         c.model.customPostFormOption = lord.customPostFormOption;
         c.model.postformRules = JSON.parse(lord.id("model-postformRules").innerHTML);
-        lord.id("hiddenPostForm").appendChild(lord.template("postForm", c.model));
+        var form = lord.template("postForm", c.model);
+        lord.id("hiddenPostForm").appendChild(form);
         lord.arr(lord.id("options").childNodes).forEach(function(node) {
             if (3 != node.nodeType)
                 return;
@@ -3391,6 +3399,22 @@ lord.initializeOnLoadBoard = function() {
         });
         $("#options").buttonset();
         $("[name='markupHtml'], [name='optionDraft']").button();
+        var textarea = lord.nameOne("text", form);
+        if (!lord.deviceType("mobile")) {
+            $(textarea).bind("mouseup mousemove", function() {
+                if (this.oldwidth === null)
+                    this.oldwidth = this.style.width;
+                if (this.oldheight === null)
+                    this.oldheight = this.style.height;
+                if (this.style.width != this.oldwidth || this.style.height != this.oldheight) {
+                    $(this).resize();
+                    this.oldwidth  = this.style.width;
+                    this.oldheight = this.style.height;
+                }
+            }).resize(function() {
+                $("#markup").width($(this).width() + 8);
+            }).width(400).resize();
+        }
         var captcha = lord.selectCaptchaEngine();
         var appendCaptchaWidgetToContainer = function(container) {
             if (captcha && captcha.widgetHtml)

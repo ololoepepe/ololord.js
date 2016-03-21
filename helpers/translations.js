@@ -190,6 +190,8 @@ module.exports = function(tr) {
     translate("Ordered list", "markupOrderedList");
     translate("List item", "markupListItem");
     translate("Raw HTML", "markupHtml");
+    translate("Inline LaTeX", "markupInlineLatex");
+    translate("LaTeX", "markupLatex");
     translate("Markup mode:", "postFormLabelMarkupMode");
     translate("Options:", "postFormLabelOptions");
     translate("OP", "postFormLabelSignAsOp");

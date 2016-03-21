@@ -558,7 +558,9 @@ Board.MarkupElements = {
     SubscriptMarkupElement: "SUBSCRIPT",
     SuperscriptMarkupElement: "SUPERSCRIPT",
     UrlMarkupElement: "URL",
-    CodeMarkupElement: "CODE"
+    CodeMarkupElement: "CODE",
+    LatexMarkupElement: "LATEX",
+    InlineLatexMarkupElement: "INLINE_LATEX"
 };
 
 Board.MimeTypesForExtensions = {};
@@ -720,7 +722,8 @@ Board.initialize = function() {
                 return Captcha.captcha(id).info();
             });
         });
-        board.defineSetting("markupElements", board.markupElements.concat(Board.MarkupElements.CodeMarkupElement));
+        board.defineSetting("markupElements", board.markupElements.concat(Board.MarkupElements.CodeMarkupElement,
+            Board.MarkupElements.LatexMarkupElement, Board.MarkupElements.InlineLatexMarkupElement));
         Board.addBoard(board);
 
         Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"),

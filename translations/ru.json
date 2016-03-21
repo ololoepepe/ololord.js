@@ -2993,5 +2993,15 @@
         "_default": {
             "value": "Node captcha"
         }
+    },
+    "Inline LaTeX": {
+        "markupInlineLatex": {
+            "value": "Встраиваемый LaTeX"
+        }
+    },
+    "LaTeX": {
+        "markupLatex": {
+            "value": "LaTeX"
+        }
     }
 }

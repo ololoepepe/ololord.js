@@ -288,7 +288,10 @@ lord.showSettings = function() {
         buttons: [
             "cancel",
             "ok"
-        ]
+        ],
+        afterShow: function() {
+            $(":focus", c.div).blur();
+        }
     }).then(function(accepted) {
         if (!accepted)
             return;

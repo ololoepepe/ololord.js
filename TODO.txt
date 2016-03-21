@@ -5,11 +5,13 @@
 * Use iframes instead of old HTML frames
 * Use vorpal for commands handling
 * Use commander for command line options handling
-* Implement LaTeX markup (use mathjax-node)
 * Consider using Elasticsearch or other search engine [not sure if needed]
 * Consider using markdown-it as a parser [not sure if needed]
 
 [done] Fix archived threads sorting
+[done] Fix settings dialog select auto focusing on mobile devices
+[done] Improve textarea symbol counter
+[done] Implement LaTeX markup (use mathjax-node)
 [done] Implement content management page
 [done] Implement OP moderation
 [done] Implement user action permissions

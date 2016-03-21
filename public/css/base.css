@@ -294,11 +294,10 @@ span.newPostCount {
 }
 
 .symbolCounter {
+    display: block;
+    text-align: right;
     font-size: 0.8em;
-    position: absolute;
-    right: 12px;
-    bottom: 7px;
-    opacity: 0.6;
+    padding-right: 4px;
 }
 
 .symbolCounterContainer {
@@ -1240,4 +1239,9 @@ div.ui-widget-content.ui-dialog-content.checkerboardBackground {
 
 #frequentlyUsedFileActions {
     max-width: 500px;
+}
+
+#markup {
+    box-sizing: border-box;
+    display: inline-block;
 }
