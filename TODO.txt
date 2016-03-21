@@ -9,6 +9,7 @@
 * Consider using Elasticsearch or other search engine [not sure if needed]
 * Consider using markdown-it as a parser [not sure if needed]
 
+[done] Fix archived threads sorting
 [done] Implement content management page
 [done] Implement OP moderation
 [done] Implement user action permissions

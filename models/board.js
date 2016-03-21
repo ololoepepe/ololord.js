@@ -516,13 +516,27 @@ var generateArchive = function(boardName) {
             return Promise.resolve([]);
         return FS.list(path);
     }).then(function(fileNames) {
-        model.threads = fileNames.filter(function(fileName) {
+        var fileNames = fileNames.filter(function(fileName) {
             return fileName.split(".").pop() == "json";
-        }).map(function(fileName) {
-            return {
-                boardName: board.name,
-                number: +fileName.split(".").shift()
-            };
+        });
+        model.threads = [];
+        return Tools.series(fileNames, function(fileName) {
+            return FS.stat(path + "/" + fileName).then(function(stats) {
+                model.threads.push({
+                    boardName: board.name,
+                    number: +fileName.split(".").shift(),
+                    birthtime: stats.node.birthtime
+                });
+            });
+        });
+    }).then(function() {
+        model.threads = model.threads.sort(function(t1, t2) {
+            if (t1.birthtime > t2.birthtime)
+                return -1;
+            else if (t1.birthtime < t2.birthtime)
+                return 1;
+            else
+                return 0;
         });
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
@@ -531,7 +545,6 @@ var generateArchive = function(boardName) {
         return Cache.setJSON(`archive-${board.name}`, JSON.stringify(model));
     }).then(function() {
         model.title = board.title;
-        //model.isBoardPage = true;
         model.board = controller.boardModel(board).board;
         model.tr = controller.translationsModel();
         return controller("archivePage", model);
