@@ -1245,3 +1245,17 @@ div.ui-widget-content.ui-dialog-content.checkerboardBackground {
     box-sizing: border-box;
     display: inline-block;
 }
+
+.frameList {
+    display: inline-block;
+    overflow-x: auto;
+}
+
+.frameContent {
+    display: inline-block;
+}
+
+.frameContent > iframe {
+    width: 100%;
+    height: 100%;
+}

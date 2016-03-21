@@ -225,3 +225,14 @@ div.bannedUser {
 .banExpiresInput {
     width: 130px;
 }
+
+.frameList {
+    width: 80px;
+}
+
+.frameContent {
+    width: -moz-calc(100% - 88px);
+    width: -webkit-calc(100% - 88px);
+    width: -o-calc(100% - 88px);
+    width: calc(100% - 88px);
+}

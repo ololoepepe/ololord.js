@@ -194,3 +194,14 @@ input.buttonImage {
     overflow-y: auto;
     box-sizing: border-box;
 }
+
+.frameList {
+    width: 240px;
+}
+
+.frameContent {
+    width: -moz-calc(100% - 248px);
+    width: -webkit-calc(100% - 248px);
+    width: -o-calc(100% - 248px);
+    width: calc(100% - 248px);
+}

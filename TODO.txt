@@ -2,7 +2,6 @@
 * Add ability to select drawable and not drawable image background for drawing tools
 * Optimize spells
 * Use Underscore.js or lodash instead of custom utility functions
-* Use iframes instead of old HTML frames
 * Use vorpal for commands handling
 * Use commander for command line options handling
 * Consider using Elasticsearch or other search engine [not sure if needed]
@@ -17,3 +16,4 @@
 [done] Implement user action permissions
 [done] Improve post form rules system
 [done] Add built-in captcha ("node-captcha")
+[done] Use iframes instead of old HTML frames

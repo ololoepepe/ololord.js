@@ -16,6 +16,7 @@
             else
                 model.loginMessageText = lord.text("loginMessageNoneText");
         }
+        model.inIframe = lord.inIframe();
         document.open();
         document.write(lord.template("toolbar", model, true));
         document.close();

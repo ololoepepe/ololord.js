@@ -1533,6 +1533,8 @@ lord.initializeOnLoadBase = function() {
 
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
+    if (/\/frame.html$/.test(window.location.pathname))
+        return;
     lord.initializeOnLoadBase();
     lord.checkFavoriteThreads();
 }, false);
