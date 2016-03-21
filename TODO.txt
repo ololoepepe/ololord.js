@@ -10,6 +10,7 @@
 [done] Fix archived threads sorting
 [done] Fix settings dialog select auto focusing on mobile devices
 [done] Improve textarea symbol counter
+[done] Improve textarea and markup group resizing
 [done] Implement LaTeX markup (use mathjax-node)
 [done] Implement content management page
 [done] Implement OP moderation

@@ -1875,6 +1875,24 @@ lord.removeExifData = function(data) {
     });
 };
 
+lord.checkPostformTextareaSize = function() {
+    if (lord.deviceType("mobile"))
+        return;
+    var form = lord.id("postForm");
+    var textarea = lord.nameOne("text", form);
+    var pwidth = $(textarea).width();
+    $(textarea).css("minWidth", 400).width(400).resize();
+    var w = lord.query(".postformFile", form).map(function(div) {
+        return $(div).width();
+    }).sort(function(w1, w2) {
+        return w1 - w2;
+    }).pop();
+    if ($(textarea).width() < (w - 6))
+        $(textarea).width(w).css("minWidth", w).resize();
+    else
+        $(textarea).width(pwidth).resize();
+};
+
 lord.fileAddedCommon = function(div) {
     if (!div || (!div.file && !div.fileUrl))
         return;
@@ -1912,6 +1930,7 @@ lord.fileAddedCommon = function(div) {
     p.then(function(txt) {
         txt = fileName + " " + txt;
         lord.queryOne(".postformFileText", div).appendChild(lord.node("text", txt));
+        lord.checkPostformTextareaSize();
     }).catch(lord.handleError);
     var _uuid = uuid.v1();
     div.fileName = "file_" + (div.fileUrl ? "url_" : "") + _uuid;
@@ -1957,6 +1976,10 @@ lord.fileAddedCommon = function(div) {
             img.src = url;
             if ("neutron" == lord.settings().style.name)
                 lord.addClass(img, "noInvert");
+            img.addEventListener("load", function load() {
+                img.removeEventListener("load", load, false);
+                lord.checkPostformTextareaSize();
+            }, false);
         }).catch(lord.handleError);
     };
     if (fileNameFull.match(/\.(jpe?g|png|gif)$/i) && lord.getLocalObject("showAttachedFilePreview", true)) {
@@ -2189,6 +2212,7 @@ lord.removeFile = function(div) {
         lord.clearFileInput(div);
         lord.queryOne("a.postformFileRemoveButton", div).style.display = "none";
     }
+    lord.checkPostformTextareaSize();
 };
 
 lord.browseFile = function(e, div) {
