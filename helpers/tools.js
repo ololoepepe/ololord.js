@@ -7,6 +7,7 @@ var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
 var FSSync = require("fs-ext");
+var MathJax = require("mathjax-node/lib/mj-single.js");
 var merge = require("merge");
 var mkpath = require("mkpath");
 var Multiparty = require("multiparty");
@@ -31,6 +32,9 @@ var rootZones = require("../misc/root-zones.json").reduce(function(acc, zone) {
     acc[zone] = {};
     return acc;
 }, {});
+
+MathJax.config({ MathJax: {} });
+MathJax.start();
 
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/form");
 
@@ -698,4 +702,21 @@ module.exports.ipList = function(s) {
     if (err)
         return translate("Invalid IP address");
     return withoutDuplicates(ips);
+};
+
+module.exports.markupLatex = function(text, inline) {
+    return new Promise(function(resolve, reject) {
+        MathJax.typeset({
+            math: text,
+            format: inline ? "inline-TeX" : "TeX",
+            svg: true
+        }, function(data) {
+            if (data.errors)
+                return reject(errors[0] || errors);
+            var html = data.svg;
+            if (!inline)
+                html = '<div style="text-align: center; padding: 8px; padding-bottom: 4px;">' + html + "</div>";
+            resolve(html);
+        });
+    });
 };

@@ -2997,11 +2997,24 @@
     "Inline LaTeX": {
         "markupInlineLatex": {
             "value": "Встраиваемый LaTeX"
+        },
+        "inlineLatexText": {
+            "value": "Встраиваемый LaTeX"
         }
     },
     "LaTeX": {
         "markupLatex": {
             "value": "LaTeX"
+        }
+    },
+    "LaTeX code markup": {
+        "latexMarkup": {
+            "value": "Разметка LaTeX-кода"
+        }
+    },
+    "Block LaTeX": {
+        "latexText": {
+            "value": "Блочный LaTeX"
         }
     }
 }

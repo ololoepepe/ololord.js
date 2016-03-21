@@ -1,6 +1,5 @@
 var Highlight = require("highlight.js");
 var HTTP = require("q-io/http");
-var MathJax = require("mathjax-node/lib/mj-single.js");
 var URL = require("url");
 var XRegExp = require("xregexp");
 
@@ -96,9 +95,6 @@ var ListTypes = {
     c: "circle",
     s: "square"
 };
-
-MathJax.config({ MathJax: {} });
-MathJax.start();
 
 var isEscaped = function(s, pos) {
     if (pos <= 0 || pos >= s.length)
@@ -715,21 +711,7 @@ var convertMarkup = function(_, text, matchs, _, options) {
 
 var convertLatex = function(inline, _, text, matchs, _, options) {
     options.type = SkipTypes.HtmlSkip;
-    return (new Promise(function(resolve, reject) {
-        MathJax.typeset({
-            math: text,
-            format: inline ? "inline-TeX" : "TeX",
-            svg: true
-        }, function(data) {
-            if (data.errors)
-                return reject(errors[0] || errors);
-            resolve(data.svg);
-        });
-    })).then(function(html) {
-        if (!inline)
-            html = '<div style="text-align: center; padding: 8px; padding-bottom: 4px;">' + html + "</div>";
-        return Promise.resolve(html);
-    });
+    return Tools.markupLatex(text, inline);
 };
 
 var convertUrl = function(info, text, matchs, matche, options) {
