@@ -3,6 +3,8 @@ var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Path = require("path");
 
+var Global = require("./global");
+
 var contains = function(s, subs) {
     if (typeof s == "string" && typeof subs == "string")
         return s.replace(subs, "") != s;
@@ -15,7 +17,7 @@ var contains = function(s, subs) {
     return false;
 };
 
-var configFileName = process.argv[2];
+var configFileName = Global.Program.configFile;
 if (!configFileName)
     configFileName = __dirname + "/../config.json";
 configFileName = Path.resolve(__dirname + "/..", configFileName);
@@ -23,6 +25,8 @@ var config = {};
 if (FSSync.existsSync(configFileName)) {
     console.log("[" + process.pid + "] Using config file: \"" + configFileName + "\"...");
     config = JSON.parse(FSSync.readFileSync(configFileName, "UTF-8"));
+} else {
+    console.log("[" + process.pid + "] Using default config...");
 }
 
 var setHooks = {};
@@ -95,11 +99,13 @@ c.reload = function() {
                 return;
             setHooks[key](c(key));
         }
+    } else {
+        console.log("[" + process.pid + "] Using default config...");
     }
 };
 
 c.setConfigFile = function(fileName) {
-    fileName = fileName || process.argv[2];
+    fileName = fileName || Global.Program.configFile;
     if (!fileName)
         fileName = __dirname + "/../config.json";
     configFileName = Path.resolve(__dirname + "/..", fileName);
