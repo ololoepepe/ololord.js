@@ -20,14 +20,14 @@ var generateHTML = function(superuserContentVisible) {
     model.title = Tools.translate("Management", "pageTitle");
     model.extraScripts = [ { fileName: "manage.js" } ];
     if (superuserContentVisible) {
-        model.extraScripts.push({ fileName: "3rdparty/jQueryFileTree.js", noEmbed: true });
+        model.extraScripts.push({ fileName: "3rdparty/jQueryFileTree.js" });
         model.extraScripts.push({ fileName: "3rdparty/codemirror/codemirror.min.js" });
         model.extraScripts.push({ fileName: "3rdparty/codemirror/javascript.min.js" });
         model.extraScripts.push({ fileName: "3rdparty/codemirror/css.min.js" });
         model.extraScripts.push({ fileName: "3rdparty/codemirror/xml.min.js" });
         model.extraScripts.push({ fileName: "3rdparty/codemirror/htmlmixed.min.js" });
         model.extraStylesheets = [
-            { fileName: "3rdparty/jQueryFileTree/jQueryFileTree.min.css" },
+            { fileName: "3rdparty/jQueryFileTree/jQueryFileTree.min.css", noEmbed: true },
             { fileName: "3rdparty/codemirror.css" }
         ];
     }
