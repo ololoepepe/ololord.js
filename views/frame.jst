@@ -32,7 +32,7 @@
                         if (nsrc == q.src.replace(/\/$/, ""))
                             return;
                         q.src = nsrc;
-                        q = lord.mapIn(q, function(val, key) {
+                        q = lord.map(q, function(val, key) {
                             return key + "=" + val;
                         }).reduce(function(acc, p) {
                             return acc ? ("&" + p) : p;

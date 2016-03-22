@@ -18,6 +18,7 @@
     {{ out += it.script("3rdparty/jquery-ui.min.js"); }}
     {{ out += it.script("3rdparty/Promise.min.js"); }}
     {{ out += it.script("3rdparty/doT.min.js"); }}
+    {{ out += it.script("3rdparty/underscore-min.js"); }}
     {{ out += it.script("api.js"); }}
     {{ out += it.script("3rdparty/merge.min.js"); }}
     {{ out += it.script("3rdparty/uuid.js"); }}
@@ -61,7 +62,7 @@
                 if (html)
                     templates[templateName] = html;
             });
-            lord.forIn(templates, function(html, templateName) {
+            lord.each(templates, function(html, templateName) {
                 if (!lord.addTemplate(templateName, html))
                     return;
             });

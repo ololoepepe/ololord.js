@@ -2,7 +2,7 @@ lord.customResetForm = function(form) {
     var parent = lord.nameOne("voteVariants", form);
     if (!parent)
         return;
-    lord.arr(parent.children).forEach(function(el) {
+    lord.toArray(parent.children).forEach(function(el) {
         parent.removeChild(el);
     });
     var text = lord.nameOne("voteText", form);

@@ -74,9 +74,9 @@ lord.lastWindowSize = {
             moment.locale(locale);
             var oldDate = date;
             date = moment(date, dateFormat).add(timeOffset, "minutes").locale(locale).format(dateFormat);
-            lord.removeChildren(span);
+            $(span).empty();
             span.appendChild(lord.node("text", date));
-            lord.addClass(span, "processedFormattedDate");
+            $(span).addClass("processedFormattedDate");
         });
     };
 
@@ -176,7 +176,7 @@ lord.setLocalData = function(o, includeSettings, includeCustom) {
         if (!doMerge)
             return lord.setLocalObject(key, val);
         var src = lord.getLocalObject(key, {});
-        lord.forIn(val, function(v, k) {
+        lord.each(val, function(v, k) {
             if (typeof doMerge == "function")
                 doMerge(src, k, v);
             else
@@ -326,7 +326,7 @@ lord.showFavorites = function() {
         buttons: [ "close" ]
     }).then(function() {
         var favoriteThreads = lord.getLocalObject("favoriteThreads", {});
-        lord.forIn(favoriteThreads, function(fav) {
+        lord.each(favoriteThreads, function(fav) {
             fav.previousLastPostNumber = fav.lastPostNumber;
         });
         lord.setLocalObject("favoriteThreads", favoriteThreads);
@@ -345,9 +345,9 @@ lord.switchMumWatching = function() {
     img.src = "/" + lord.data("sitePathPrefix") + "img/" + (watching ? "show" : "hide") + ".png";
     lord.query(".postFileFile > a > img").forEach(function(img) {
         if (watching)
-            lord.removeClass(img, "mumWatching");
+            $(img).removeClass("mumWatching");
         else
-            lord.addClass(img, "mumWatching");
+            $(img).addClass("mumWatching");
     });
     lord.setLocalObject("mumWatching", !watching);
 };
@@ -395,7 +395,7 @@ lord.durationToString = function(duration) {
 
 lord.updatePlayerTrackTags = function() {
     var tags = lord.id("playerTrackTags");
-    lord.removeChildren(tags);
+    $(tags).empty();
     tags.style.display = "none";
     if (!lord.currentTrack)
         return lord.updatePlayerTracksHeight();
@@ -416,7 +416,7 @@ lord.updatePlayerTrackTags = function() {
 
 lord.updatePlayerTrackInfo = function() {
     var info = lord.id("playerTrackInfo");
-    lord.removeChildren(info);
+    $(info).empty();
     if (!lord.currentTrack)
         return;
     var s = lord.durationToString(lord.playerElement.currentTime) + " / " + lord.currentTrack.duration;
@@ -427,7 +427,7 @@ lord.resetPlayerSource = function(track) {
     if (lord.playerElement) {
         if (!lord.playerElement.paused)
             lord.playerElement.pause();
-        lord.removeSelf(lord.playerElement);
+        $(lord.playerElement).remove();
     }
     $("#playerDurationSlider").slider("destroy");
     $("#playerDurationSlider").slider({
@@ -567,7 +567,7 @@ lord.playerMute = function(e) {
 };
 
 lord.playTrack = function(el) {
-    if (lord.hasClass(el, "selected") && lord.playerElement) {
+    if ($(el).hasClass("selected") && lord.playerElement) {
         if (!lord.playerElement.paused)
             return;
         if (el.id.replace(/^track\//, "") == lord.currentTrack.fileName) {
@@ -577,9 +577,9 @@ lord.playTrack = function(el) {
         }
     }
     lord.query(".track.selected", lord.id("playerTracks")).forEach(function(div) {
-        lord.removeClass(div, "selected");
+        $(div).removeClass("selected");
     });
-    lord.addClass(el, "selected");
+    $(el).addClass("selected");
     lord.currentTrack = lord.currentTracks[el.id.replace(/^track\//, "")];
     lord.resetPlayerSource(lord.currentTrack);
     lord.playerElement.play();
@@ -678,11 +678,11 @@ lord.editAudioTags = function(el, e) {
             var t = lord.currentTracks[fileName];
             var pnode = lord.id("track/" + fileName);
             if (pnode) {
-                var selected = lord.hasClass(pnode, "selected");
+                var selected = $(pnode).hasClass("selected");
                 var model = merge.recursive(t, lord.model(["base", "tr"]));
                 var node = lord.template("playerTrack", model);
                 if (selected)
-                    lord.addClass(node, "selected");
+                    $(node).addClass("selected");
                 lord.id("playerTracks").replaceChild(node, pnode);
             }
         }
@@ -704,7 +704,7 @@ lord.removeFromPlaylist = function(e, a) {
     if (!exists)
         return;
     lord.setLocalObject("playerTracks", tracks);
-    lord.removeSelf(lord.id("track/" + fileName));
+    $(lord.id("track/" + fileName)).remove();
     if (lord.currentTracks.hasOwnProperty(fileName))
         delete lord.currentTracks[fileName];
 };
@@ -714,7 +714,7 @@ lord.checkPlaylist = function() {
     reorder == reorder && (reorder != lord.WindowID);
     var lastCurrentTrack;
     if (reorder) {
-        lord.removeChildren(lord.id("playerTracks"));
+        $("#playerTracks").empty();
         lord.currentTracks = {};
         lastCurrentTrack = lord.currentTrack;
         lord.currentTrack = null;
@@ -725,9 +725,9 @@ lord.checkPlaylist = function() {
             acc[track.fileName] = track;
             return acc;
         }, {});
-        lord.forIn(lord.currentTracks, function(track) {
+        lord.each(lord.currentTracks, function(track) {
             if (!trackMap.hasOwnProperty(track.fileName))
-                lord.removeSelf(lord.id("track/" + track.fileName));
+                $(lord.id("track/" + track.fileName)).remove();
         });
     }
     tracks.forEach(function(track) {
@@ -745,8 +745,7 @@ lord.checkPlaylist = function() {
         else if (tracks.length > 0)
             lord.currentTrack = tracks[0];
         if (lord.currentTrack) {
-            lord.addClass(lord.id("track/" + lord.currentTrack.fileName),
-                "selected");
+            $(lord.id("track/" + lord.currentTrack.fileName)).addClass("selected");
             lord.updatePlayerTrackTags();
         }
     }
@@ -779,7 +778,7 @@ lord.removeThreadFromFavorites = function(boardName, threadNumber) {
     var img = lord.queryOne("img", btn);
     img.src = img.src.replace("favorite_active.png", "favorite.png");
     var span = lord.queryOne("span", btn);
-    lord.removeChildren(span);
+    $(span).empty();
     span.appendChild(lord.node("text", lord.text("addThreadToFavoritesText")));
 };
 
@@ -816,7 +815,7 @@ lord.checkFavoriteThreads = function() {
                     if (!postDiv)
                         return;
                     var fnt = lord.queryOne("font", postDiv);
-                    lord.removeChildren(fnt);
+                    $(fnt).empty();
                     var diff = fav.lastPostNumber - fav.previousLastPostNumber;
                     fnt.appendChild(lord.node("text", "+" + diff));
                 } else if (!sameThread) {
@@ -865,7 +864,7 @@ lord.showNewPosts = function() {
                     if (!newPostCount)
                         return;
                     var span = lord.node("span");
-                    lord.addClass(span, "newPostCount");
+                    $(span).addClass("newPostCount");
                     span.appendChild(lord.node("text", "+" + newPostCount));
                     var parent = a.parentNode;
                     parent.insertBefore(span, a);
@@ -873,7 +872,7 @@ lord.showNewPosts = function() {
                 });
             });
         }
-        lord.forIn(result, function(lastPostNumber, boardName) {
+        lord.each(result, function(lastPostNumber, boardName) {
             if (lastPostNumbers[boardName])
                 return;
             lastPostNumbers[boardName] = lastPostNumber;
@@ -1039,7 +1038,7 @@ lord.hotkey_showSettings = function() {
 
 lord.interceptHotkey = function(e) {
     if (!e || e.type != "keyup" || (e.target.tagName && !e.metaKey && !e.altKey && !e.ctrlKey
-        && lord.in(["TEXTAREA", "INPUT", "BUTTON"], e.target.tagName))) {
+        && lord.contains(["TEXTAREA", "INPUT", "BUTTON"], e.target.tagName))) {
         return;
     }
     var hotkeys = lord.getLocalObject("hotkeys", {});
@@ -1065,7 +1064,7 @@ lord.interceptHotkey = function(e) {
 
 lord.populateChatHistory = function(key) {
     var history = lord.nameOne("history", lord.chatDialog);
-    lord.removeChildren(history);
+    $(history).empty();
     var model = lord.model("base");
     var settings = lord.settings();
     var timeOffset = ("local" == settings.time) ? +settings.timeZoneOffset : model.site.timeOffset;
@@ -1089,7 +1088,7 @@ lord.updateChat = function(keys) {
         var div = lord.node("div");
         var a = lord.node("a");
         var img = lord.node("img");
-        lord.addClass(img, "buttonImage");
+        $(img).addClass("buttonImage");
         img.src = "/" + lord.data("sitePathPrefix") + "img/chat_message.gif";
         a.title = lord.text("chatText");
         a.appendChild(img);
@@ -1104,11 +1103,11 @@ lord.updateChat = function(keys) {
         keys.forEach(function(key) {
             var div = lord.nameOne(key, lord.chatDialog);
             if (div) {
-                if (lord.hasClass(div, "selected")) {
+                if ($(div).hasClass("selected")) {
                     lord.populateChatHistory(key);
                 } else {
                     var newMessages = lord.queryOne(".chatContactNewMessages", div);
-                    lord.removeChildren(newMessages);
+                    $(newMessages).empty();
                     newMessages.appendChild(lord.node("text", "!!!"));
                 }
             } else {
@@ -1131,7 +1130,7 @@ lord.checkChats = function() {
         lord.setLocalObject("lastChatCheckDate", lord.lastChatCheckDate);
         var keys = [];
         var chats = lord.getLocalObject("chats", {});
-        lord.forIn(model.chats, function(messages, key) {
+        lord.each(model.chats, function(messages, key) {
             if (!chats[key])
                 chats[key] = [];
             var list = chats[key];
@@ -1165,7 +1164,7 @@ lord.showChat = function(key) {
     });
     var model = lord.model(["base", "tr"]);
     model.contacts = [];
-    lord.forIn(lord.getLocalObject("chats", {}), function(_, key) {
+    lord.each(lord.getLocalObject("chats", {}), function(_, key) {
         model.contacts.push({ key: key });
     });
     lord.chatDialog = lord.template("chatDialog", model);
@@ -1190,12 +1189,12 @@ lord.selectChatContact = function(key) {
     if (!div)
         return;
     var newMessages = lord.queryOne(".chatContactNewMessages", div);
-    lord.removeChildren(newMessages);
+    $(newMessages).empty();
     var contactList = lord.queryOne(".chatContactList", lord.chatDialog);
     var previous = lord.queryOne(".chatContact.selected", contactList);
     if (previous)
-        lord.removeClass(previous, "selected");
-    lord.addClass(div, "selected");
+        $(previous).removeClass("selected");
+    $(div).addClass("selected");
     lord.populateChatHistory(key);
     lord.nameOne("sendMessageButton", lord.chatDialog).disabled = false;
     lord.nameOne("message", lord.chatDialog).disabled = false;
@@ -1223,9 +1222,9 @@ lord.deleteChat = function(key) {
         var contact = lord.nameOne(key, lord.chatDialog);
         if (!contact)
             return Promise.resolve();
-        if (lord.hasClass(contact, "selected")) {
-            lord.removeChildren(lord.nameOne("targetKey", lord.chatDialog));
-            lord.removeChildren(lord.nameOne("history", lord.chatDialog));
+        if ($(contact).hasClass("selected")) {
+            $(lord.nameOne("targetKey", lord.chatDialog)).empty();
+            $(lord.nameOne("history", lord.chatDialog)).empty();
             lord.nameOne("sendMessageButton", lord.chatDialog).disabled = true;
             lord.nameOne("message", lord.chatDialog).disabled = true;
         }
@@ -1298,7 +1297,7 @@ lord.showVideoThumb = function(e, a) {
     a.img.width = thumbWidth;
     a.img.height = thumbHeight;
     a.img.src = thumbUrl;
-    lord.addClass(a.img, "movableImage");
+    $(a.img).addClass("movableImage");
     a.img.style.left = (e.clientX + 30) + "px";
     a.img.style.top = (e.clientY - 10) + "px";
     document.body.appendChild(a.img);
@@ -1520,7 +1519,7 @@ lord.initializeOnLoadBase = function() {
             width: w.width(),
             height: w.height()
         };
-        if (n.height != lord.lastWindowSize.height && !lord.hasClass(lord.id("player"), "minimized"))
+        if (n.height != lord.lastWindowSize.height && !$("#player").hasClass("minimized"))
             lord.updatePlayerTracksHeight();
         if (n.width != lord.lastWindowSize.width) {
             $(".postBody").css("maxWidth", (n.width - 30) + "px");
@@ -1533,7 +1532,7 @@ lord.initializeOnLoadBase = function() {
 
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
-    if (/\/frame.html$/.test(window.location.pathname))
+    if (/\/(frame|login).html$/.test(window.location.pathname))
         return;
     lord.initializeOnLoadBase();
     lord.checkFavoriteThreads();

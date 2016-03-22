@@ -23,7 +23,7 @@ if (typeof $ != "undefined") {
 
 /*ololord global object*/
 
-var lord = lord || {};
+var lord = lord || _.noConflict();
 
 /*Constants*/
 
@@ -308,13 +308,15 @@ lord.templates = {};
     this.text = text;
     this.timeout = (options && !isNaN(+options.timeout)) ? +options.timeout : 5 * 1000;
     this.classNames = (options && typeof options.classNames == "string") ? options.classNames : "";
-    if (options && typeof options.type == "string" && lord.in(["critical", "warning"], options.type.toLowerCase()))
+    if (options && typeof options.type == "string" && lord.contains(["critical", "warning"],
+        options.type.toLowerCase())) {
         this.classNames += options.type.toLowerCase() + (("" != this.classNames) ? " " : "");
+    }
     this.html = (options && typeof options.type == "string" && options.type.toLowerCase() == "html");
     this.node = (options && typeof options.type == "string" && options.type.toLowerCase() == "node");
     this.msg = lord.node("div");
-    lord.addClass(this.msg, "popup");
-    lord.addClass(this.msg, this.classNames);
+    $(this.msg).addClass("popup");
+    $(this.msg).addClass(this.classNames);
     this.msg.onclick = this.hide.bind(this);
     if (lord.popups.length > 0) {
         var prev = lord.popups[lord.popups.length - 1];
@@ -366,14 +368,16 @@ lord.templates = {};
     var offsH = this.msg.offsetHeight;
     this.text = text;
     this.classNames = (options && typeof options.classNames == "string") ? options.classNames : "";
-    if (options && typeof options.type == "string" && lord.in(["critical", "warning"], options.type.toLowerCase()))
+    if (options && typeof options.type == "string" && lord.contains(["critical", "warning"],
+        options.type.toLowerCase())) {
         this.classNames += options.type.toLowerCase() + (("" != this.classNames) ? " " : "");
+    }
     this.html = (options && typeof options.type == "string" && options.type.toLowerCase() == "html");
     this.node = (options && typeof options.type == "string" && options.type.toLowerCase() == "node");
     this.msg.className = "";
-    lord.addClass(this.msg, "popup");
-    lord.addClass(this.msg, this.classNames);
-    lord.removeChildren(this.msg);
+    $(this.msg).addClass("popup");
+    $(this.msg).addClass(this.classNames);
+    $(this.msg).empty();
     if (this.html)
         this.msg.innerHTML = text;
     else if (this.node)
@@ -398,21 +402,21 @@ lord.templates = {};
     this.max = (options && +options.max >= 0) ? +options.max : 100;
     this.value = (options && +options.value <= this.max) ? +options.value : 0;
     this.mask = lord.node("div");
-    lord.addClass(this.mask, "overlayMask");
+    $(this.mask).addClass("overlayMask");
     this.progressBar = lord.node("progress");
     this.progressBar.max = this.max;
     this.progressBar.value = this.value;
-    lord.addClass(this.progressBar, "overlayProgressBar");
+    $(this.progressBar).addClass("overlayProgressBar");
     var _this = this;
     var createCancelButton = function(callback) {
         _this.cancelButton = lord.node("button");
-        lord.addClass(_this.cancelButton, "button overlayProgressBarCancelButton");
+        $(_this.cancelButton).addClass("button overlayProgressBarCancelButton");
         _this.cancelButton.onclick = function() {
             _this.cancelButton.disabled = true;
             callback();
         };
         _this.cancelButton.appendChild(lord.node("text", "Cancel"));
-        lord.removeChildren(_this.cancelButton);
+        $(_this.cancelButton).empty();
         _this.cancelButton.appendChild(lord.node("text", lord.text("cancelButtonText")));
     };
     if (options && typeof options.cancelCallback == "function")
@@ -628,25 +632,6 @@ lord.removeSessionObject = function(key) {
     }
 };
 
-lord.in = function(arr, val, strict) {
-    if (!arr || !arr.length)
-        return false;
-    for (var i = 0; i < arr.length; ++i) {
-        if ((strict && val === arr[i]) || (!strict && val == arr[i]))
-            return true;
-    }
-    return false;
-};
-
-lord.arr = function(obj) {
-    var arr = [];
-    if (!obj || !obj.length)
-        return arr;
-    for (var i = 0; i < obj.length; ++i)
-        arr.push(obj[i]);
-    return arr;
-};
-
 lord.hasOwnProperties = function(obj) {
     if (!obj)
         return false;
@@ -655,80 +640,6 @@ lord.hasOwnProperties = function(obj) {
             return true;
     }
     return false;
-};
-
-lord.forIn = function(obj, f) {
-    if (!obj || typeof f != "function")
-        return;
-    for (var x in obj) {
-        if (obj.hasOwnProperty(x))
-            f(obj[x], x);
-    }
-};
-
-lord.mapIn = function(obj, f) {
-    if (!obj || typeof f != "function")
-        return;
-    var arr = [];
-    for (var x in obj) {
-        if (obj.hasOwnProperty(x))
-            arr.push(f(obj[x], x));
-    }
-    return arr;
-};
-
-lord.filterIn = function(obj, f) {
-    if (!obj || typeof f != "function")
-        return;
-    var nobj = {};
-    for (var x in obj) {
-        if (obj.hasOwnProperty(x)) {
-            var item = obj[x];
-            if (f(item, x))
-                nobj[x] = item;
-        }
-    }
-    return nobj;
-};
-
-lord.toArray = function(obj) {
-    var arr = [];
-    var i = 0;
-    for (var x in obj) {
-        if (obj.hasOwnProperty(x)) {
-            arr[i] = obj[x];
-            ++i;
-        }
-    }
-    return arr;
-};
-
-lord.removeChildren = function(el) {
-    if (!el || typeof el.removeChild != "function")
-        return;
-    while (el.firstChild)
-        el.removeChild(el.firstChild);
-};
-
-lord.removeSelf = function(el) {
-    if (!el || !el.parentNode || typeof el.parentNode.removeChild != "function")
-        return;
-    el.parentNode.removeChild(el);
-};
-
-lord.wrap = function(el, wrapper) {
-    if (!el || !wrapper || !el.parentNode || typeof el.parentNode.replaceChild != "function"
-        || typeof wrapper.appendChild != "function") {
-        return;
-    }
-    el.parentNode.replaceChild(wrapper, el);
-    wrapper.appendChild(el);
-};
-
-lord.last = function(arr) {
-    if (!arr || !arr.length)
-        return null;
-    return arr[arr.length - 1];
 };
 
 lord.gently = function(obj, f, options) {
@@ -847,45 +758,17 @@ lord.queryOne = function(query, parent) {
     return parent.querySelector(query);
 };
 
-lord.name = function(name, parent) {
-    return lord.query("[name='" + name + "']", parent);
-};
+Object.defineProperty(lord, "name", {
+    value: function(name, parent) {
+        return lord.query("[name='" + name + "']", parent);
+    },
+    writable: false,
+    enumerable: true,
+    configurable: false
+}); //NOTE: A hack to prevent Underscore.js from overwriting this property
 
 lord.nameOne = function(name, parent) {
     return lord.queryOne("[name='" + name + "']", parent);
-};
-
-lord.addClass = function(element, classNames) {
-    if (!element || !element.tagName || !classNames || typeof classNames != "string")
-        return;
-    lord.arr(classNames.split(" ")).forEach(function(className) {
-        if (!className)
-            return;
-        if (lord.hasClass(element, className))
-            return;
-        if (element.className)
-            element.className += " " + className;
-        else
-            element.className = className;
-    });
-};
-
-lord.hasClass = function(element, className) {
-    if (!element || !element.tagName || !className || typeof className != "string")
-        return false;
-    return !!element.className.match(new RegExp("(^| )" + className + "( |$)"));
-};
-
-lord.removeClass = function(element, classNames) {
-    if (!element || !element.tagName || !classNames || typeof classNames != "string")
-        return;
-    lord.arr(classNames.split(" ")).forEach(function(className) {
-        if (!className)
-            return;
-        element.className = element.className.replace(new RegExp("(^| )" + className + "$"), "");
-        element.className = element.className.replace(new RegExp("^" + className + "( |$)"), "");
-        element.className = element.className.replace(new RegExp(" " + className + " "), " ");
-    });
 };
 
 lord.node = function(type, text) {
@@ -1175,15 +1058,15 @@ lord.activateTab = function(a) {
     var header = tab.parentNode;
     var widget = lord.queryOne("div", header.parentNode);
     var page = lord.queryOne("[data-index='" + tabIndex + "']", widget);
-    lord.arr(widget.childNodes).forEach(function(node) {
+    lord.toArray(widget.childNodes).forEach(function(node) {
         if (node.nodeType != 1) //Element
             return;
         node.style.display = ((node == page) ? "" : "none");
     });
     lord.query("ul > li", header.parentNode).forEach(function(node) {
-        lord.removeClass(node, "activated");
+        $(node).removeClass("activated");
     });
-    lord.addClass(tab, "activated");
+    $(tab).addClass("activated");
 };
 
 lord.notificationsEnabled = function() {
@@ -1264,28 +1147,35 @@ lord.addTemplate = function(name, html) {
     return true;
 };
 
-lord.template = function(templateName, model, noparse) {
-    var template = lord.templates[templateName];
-    if (!template)
-        return null;
-    if (!model)
-        return template;
-    var html = template(model);
-    if (noparse)
-        return html;
-    var nodes = $.parseHTML(html, document, true);
-    var node;
-    for (var i = 0; i < nodes.length; ++i) {
-        if (1 == nodes[i].nodeType) {
-            node = nodes[i];
-            break;
+lord._template = lord.template;
+
+Object.defineProperty(lord, "template", {
+    value: function(templateName, model, noparse) {
+        var template = lord.templates[templateName];
+        if (!template)
+            return null;
+        if (!model)
+            return template;
+        var html = template(model);
+        if (noparse)
+            return html;
+        var nodes = $.parseHTML(html, document, true);
+        var node;
+        for (var i = 0; i < nodes.length; ++i) {
+            if (1 == nodes[i].nodeType) {
+                node = nodes[i];
+                break;
+            }
         }
-    }
-    if (!node)
-        return null;
-    lord.scriptWorkaround(node);
-    return node;
-};
+        if (!node)
+            return null;
+        lord.scriptWorkaround(node);
+        return node;
+    },
+    writable: false,
+    enumerable: true,
+    configurable: false
+}); //NOTE: A hack to prevent Underscore.js from overwriting this property
 
 lord.createDocumentFragment = function(html) {
     var temp = document.createElement("div");
@@ -1428,7 +1318,7 @@ lord.model = function(modelName) {
             Admin: "ADMIN",
             Superuser: "SUPERUSER"
         };
-        lord.forIn(levelMap, function(lvl, key) {
+        lord.each(levelMap, function(lvl, key) {
             model.user["is" + key] = test.bind(model.user, lvl);
         });
         model.customPostBodyPart = lord.customPostBodyPart;
@@ -1451,7 +1341,7 @@ lord.get = function(what, enableCache) {
 lord.api = function(entity, parameters, prefix) {
     prefix = prefix || "api";
     var query = "";
-    lord.forIn(parameters, function(val, key) {
+    lord.each(parameters, function(val, key) {
         if (!Array.isArray(val))
             val = [val];
         val.forEach(function(val) {
@@ -1503,9 +1393,16 @@ lord.post = function(action, formData, progressBarContext, progressBarOptions) {
     });
 };
 
-lord.now = function() {
-    return new Date();
-};
+lord._now = lord.now;
+
+Object.defineProperty(lord, "now", {
+    value: function() {
+        return new Date();
+    },
+    writable: false,
+    enumerable: true,
+    configurable: false
+}); //NOTE: A hack to prevent Underscore.js from overwriting this property
 
 lord.settings = function() {
     return {
@@ -1567,7 +1464,7 @@ lord.settings = function() {
 lord.setSettings = function(model) {
     if (!model)
         return;
-    lord.forIn(model, function(val, key) {
+    lord.each(model, function(val, key) {
         if (lord.SettingsStoredInCookies.indexOf(key) >= 0) {
             lord.setCookie(key, val, {
                 "expires": lord.Billion,
@@ -1643,14 +1540,6 @@ lord.handleError = function(error) {
         text = lord.text("errorUnknownText");
     }
     lord.showPopup(text, {type: "critical"});
-};
-
-lord.toMap = function(arr, keyGenerator) {
-    var map = {};
-    arr.forEach(function(item) {
-        map[keyGenerator(item)] = item;
-    });
-    return map;
 };
 
 lord.readAs = function(blob, method) {

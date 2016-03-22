@@ -19,6 +19,7 @@
 !react-with-addons.min.js
 !sha1.min.js
 !twitter.js
+!underscore-min.js
 !uuid.js
 !vk-openapi.js
 !.gitignore

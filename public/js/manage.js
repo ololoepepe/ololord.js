@@ -64,8 +64,8 @@ lord.registerUser = function(e, form) {
 
 lord.removeBannedUser = function(btn) {
     var div = $(btn).closest(".bannedUser")[0];
-    lord.removeSelf(div.previousElementSibling);
-    lord.removeSelf(div);
+    $(div.previousElementSibling).remove();
+    $(div).remove();
     $("#bans").accordion("refresh");
 };
 
@@ -83,8 +83,8 @@ lord.removeRegisteredUser = function(btn) {
     }).then(function(result) {
         if (!result)
             return Promise.resolve();
-        lord.removeSelf(div.previousElementSibling);
-        lord.removeSelf(div);
+        $(div.previousElementSibling).remove();
+        $(div).remove();
         $("#users").accordion("refresh");
         return Promise.resolve();
     }).catch(lord.handleError);
@@ -154,7 +154,7 @@ lord.createBannedUser = function(user, replaced) {
         bans.replaceChild(node, replaced);
     } else {
         var span = lord.node("span");
-        lord.addClass(span, "bannedUserHeader");
+        $(span).addClass("bannedUserHeader");
         span.appendChild(lord.node("text", (user && (user.ipv4 || user.ip)) || lord.text("newBanText")));
         var empty = lord.queryOne(".bannedUser:not([name])", bans);
         if (empty) {
@@ -165,7 +165,7 @@ lord.createBannedUser = function(user, replaced) {
             bans.appendChild(node);
         }
     }
-    if (lord.hasClass(bans, "ui-accordion"))
+    if ($(bans).hasClass("ui-accordion"))
         $(bans).accordion("refresh");
     return node;
 };
@@ -179,7 +179,7 @@ lord.createRegisteredUser = function(user, replaced) {
         div.replaceChild(node, replaced);
     } else {
         var span = lord.node("span");
-        lord.addClass(span, "registeredUserHeader");
+        $(span).addClass("registeredUserHeader");
         span.appendChild(lord.node("text", (user && user.hashpass) || lord.text("newUserText")));
         var empty = lord.queryOne(".registeredUser:not([name])", div);
         if (empty) {
@@ -190,7 +190,7 @@ lord.createRegisteredUser = function(user, replaced) {
             div.appendChild(node);
         }
     }
-    if (lord.hasClass(div, "ui-accordion"))
+    if ($(div).hasClass("ui-accordion"))
         $(div).accordion("refresh");
     return node;
 };
@@ -199,10 +199,10 @@ lord.initFileTree = function() {
     lord.currentFile = null;
     lord.currentDirectories = ["./"];
     var lbl = lord.id("currentDirectoryLabel");
-    lord.removeChildren(lbl);
+    $(lbl).empty();
     lbl.appendChild(lord.node("text", lord.text("currentDirectoryLabelText") + " ./"));
     lbl = lord.id("currentFileLabel");
-    lord.removeChildren(lbl);
+    $(lbl).empty();
     lbl.appendChild(lord.node("text", lord.text("currentFileLabelText")));
     var ndiv = lord.node("div");
     ndiv.id = "contentFileTree";
@@ -215,7 +215,7 @@ lord.initFileTree = function() {
     }).on("filetreeexpanded", function(e, data) {
         lord.currentDirectories.push(data.rel);
         var lbl = lord.id("currentDirectoryLabel");
-        lord.removeChildren(lbl);
+        $(lbl).empty();
         lbl.appendChild(lord.node("text", lord.text("currentDirectoryLabelText") + " " + data.rel));
         $("#renameDirectory, #deleteDirectory").button("enable");
     }).on("filetreecollapsed", function(e, data) {
@@ -226,7 +226,7 @@ lord.initFileTree = function() {
             lord.currentDirectories.splice(i, lord.currentDirectories.length - i);
         var dir = lord.currentDirectories.slice(-1)[0];
         var lbl = lord.id("currentDirectoryLabel");
-        lord.removeChildren(lbl);
+        $(lbl).empty();
         lbl.appendChild(lord.node("text", lord.text("currentDirectoryLabelText") + " " + dir));
         if ("./" == dir)
             $("#renameDirectory, #deleteDirectory").button("disable");
@@ -234,7 +234,7 @@ lord.initFileTree = function() {
         $(".fileActions > button").button("enable");
         lord.currentFile = data.rel;
         var lbl = lord.id("currentFileLabel");
-        lord.removeChildren(lbl);
+        $(lbl).empty();
         lbl.appendChild(lord.node("text", lord.text("currentFileLabelText") + " " + data.rel));
     });
     $("#renameDirectory, #deleteDirectory").button("disable");
@@ -243,7 +243,7 @@ lord.initFileTree = function() {
 
 lord.refreshFrequentlyUsedFiles = function() {
     var div = lord.id("frequentlyUsedFileActions");
-    lord.removeChildren(div);
+    $(div).empty();
     lord.toArray(lord.getLocalObject("frequentlyUsedFiles", {})).sort(function(file1, file2) {
         if (file1.count < file2.count)
             return 1;
@@ -472,15 +472,15 @@ lord.loadTabContent = function(tab) {
             break;
         lord.api("registeredUsers").then(function(users) {
             var div = lord.id("users");
-            lord.removeChildren(div);
-            lord.removeClass(div, "loadingMessage");
+            $(div).empty();
+            $(div).removeClass("loadingMessage");
             lord.gently(users || [], function(user) {
                 lord.createRegisteredUser(user);
             }, {
                 n: 5,
                 delay: 10
             }).then(function() {
-               lord.createRegisteredUser(); 
+               lord.createRegisteredUser();
             }).catch(lord.handleError);
             $(div).accordion({
                 collapsible: true,
@@ -508,15 +508,15 @@ window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
     lord.api("bannedUsers").then(function(users) {
         var div = lord.id("bans");
-        lord.removeChildren(div);
-        lord.removeClass(div, "loadingMessage");
+        $(div).empty();
+        $(div).removeClass("loadingMessage");
         lord.gently(users || [], function(user) {
             lord.createBannedUser(user);
         }, {
             n: 5,
             delay: 10
         }).then(function() {
-           lord.createBannedUser(); 
+           lord.createBannedUser();
         }).catch(lord.handleError);
         $(div).accordion({
             collapsible: true,
