@@ -1,6 +1,5 @@
 * Optimize spells
 * Use Underscore.js or lodash instead of custom utility functions
-* Use vorpal for commands handling
 * Consider using Elasticsearch or other search engine [not sure if needed]
 * Consider using markdown-it as a parser [not sure if needed]
 * Consider adding statistics [not sure if needed]
@@ -20,3 +19,4 @@
 [done] Use "device" instead of "express-device"
 [done] Implement script/stylesheet embedding
 [done] Use commander for command line options handling
+[done] Use vorpal for commands handling
