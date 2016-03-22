@@ -1,10 +1,10 @@
-* Add statistics
 * Optimize spells
 * Use Underscore.js or lodash instead of custom utility functions
 * Use vorpal for commands handling
 * Use commander for command line options handling
 * Consider using Elasticsearch or other search engine [not sure if needed]
 * Consider using markdown-it as a parser [not sure if needed]
+* Consider adding statistics [not sure if needed]
 
 [done] Fix archived threads sorting
 [done] Fix settings dialog select auto focusing on mobile devices
@@ -19,3 +19,4 @@
 [done] Use iframes instead of old HTML frames
 [done] Add ability to select drawable and not drawable image background for drawing tools
 [done] Use "device" instead of "express-device"
+[done] Implement script/stylesheet embedding

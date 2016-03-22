@@ -63,6 +63,10 @@ Example:
         }
     },
     "permissions": {
+        "addFilesToPost: "MODER",
+        "deleteFile": 0,
+        "deletePost": 0,
+        "editPost": "MODER",
         "seeUserIp": "ADMIN"
     },
     "server": {
@@ -125,6 +129,8 @@ Example:
         }
     },
     "system": {
+        "embedScripts": true,
+        "embedStylesheets": true,
         "fileDownloadProxy": "",
         "fileDownloadProxyAuth": "",
         "log": {

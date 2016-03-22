@@ -48,6 +48,32 @@ controller = function(templateName, modelData) {
     baseModelData.formattedDate = function(date) {
         return moment(date).utcOffset(timeOffset).locale(locale).format(format);
     };
+    baseModelData.script = function(name, noEmbed) {
+        if (!noEmbed && config("system.embedScripts", true)) {
+            try {
+                var data = FSSync.readFileSync(__dirname + "/../public/js/" + name, "utf8");
+                return `<script type="text/javascript">${data}</script>`;
+            } catch (err) {
+                console.error(err);
+                return "";
+            }
+        } else {
+            return `<script type="text/javascript" src="/${baseModelData.site.pathPrefix}js/${name}"></script>`;
+        }
+    };
+    baseModelData.stylesheet = function(name, noEmbed) {
+        if (!noEmbed && config("system.embedStylesheets", true)) {
+            try {
+                var data = FSSync.readFileSync(__dirname + "/../public/css/" + name, "utf8");
+                return `<style type="text/css">${data}</style>`;
+            } catch (err) {
+                console.error(err);
+                return "";
+            }
+        } else {
+            return `<link rel="stylesheet" type="text/css" href="/${baseModelData.site.pathPrefix}css/${name}">`;
+        }
+    };
     if (!modelData)
         modelData = {};
     var template = templates[templateName];
