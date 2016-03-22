@@ -20,7 +20,7 @@ var generateHTML = function(superuserContentVisible) {
     model.title = Tools.translate("Management", "pageTitle");
     model.extraScripts = [ { fileName: "manage.js" } ];
     if (superuserContentVisible) {
-        model.extraScripts.push({ fileName: "3rdparty/jQueryFileTree.js" });
+        model.extraScripts.push({ fileName: "3rdparty/jQueryFileTree.js", noEmbed: true });
         model.extraScripts.push({ fileName: "3rdparty/codemirror/codemirror.min.js" });
         model.extraScripts.push({ fileName: "3rdparty/codemirror/javascript.min.js" });
         model.extraScripts.push({ fileName: "3rdparty/codemirror/css.min.js" });
