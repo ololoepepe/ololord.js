@@ -3016,5 +3016,20 @@
         "latexText": {
             "value": "Блочный LaTeX"
         }
+    },
+    "Backgdound type:": {
+        "canvasBackgroundTypeLabelText": {
+            "value": "Тип фона:"
+        }
+    },
+    "Drawable": {
+        "checkboxBackgroundDrawableLabel": {
+            "value": "Часть рисунка"
+        }
+    },
+    "Not drawable": {
+        "checkboxBackgroundNotDrawableLabel": {
+            "value": "Фон"
+        }
     }
 }

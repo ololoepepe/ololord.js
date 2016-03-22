@@ -392,6 +392,9 @@ module.exports = function(tr) {
     translate("Hashpass:", "hashpassLabelText");
     translate("Generate hashpass", "generateHashpassButtonText");
     translate("Are you sure?", "confirmationText");
+    translate("Backgdound type:", "canvasBackgroundTypeLabelText");
+    translate("Drawable", "checkboxBackgroundDrawableLabel");
+    translate("Not drawable", "checkboxBackgroundNotDrawableLabel");
     translate("Dimensions:", "canvasDimensionsLabelText");
     translate("0 — determine automatically", "canvasDimensionsDescriptionText");
     translate("Background color:", "canvasBackgroundColorLabelText");

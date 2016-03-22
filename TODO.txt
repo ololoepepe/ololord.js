@@ -1,5 +1,4 @@
 * Add statistics
-* Add ability to select drawable and not drawable image background for drawing tools
 * Optimize spells
 * Use Underscore.js or lodash instead of custom utility functions
 * Use vorpal for commands handling
@@ -18,3 +17,4 @@
 [done] Improve post form rules system
 [done] Add built-in captcha ("node-captcha")
 [done] Use iframes instead of old HTML frames
+[done] Add ability to select drawable and not drawable image background for drawing tools

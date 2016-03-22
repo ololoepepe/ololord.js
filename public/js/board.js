@@ -1623,12 +1623,14 @@ lord.draw = function(options) {
                 imageURLPrefix: "/" + lord.data("sitePathPrefix") + "img/3rdparty/literallycanvas",
                 imageSize: imageSize
             };
-            if (backgroundShape)
-                opt.backgroundColor = "rgba(255, 255, 255, 0)";
-            else
+            if (backgroundShape && (!options || !options.backgroundDrawable))
+                opt.backgroundShapes = [backgroundShape];
+            if (options && options.backgroundColor)
                 opt.backgroundColor = options && options.backgroundColor;
+            else
+                opt.backgroundColor = "rgba(255, 255, 255, 0)";
             c.lc = LC.init(div, opt);
-            if (backgroundShape)
+            if (backgroundShape && options && options.backgroundDrawable)
                 c.lc.saveShape(backgroundShape);
         }
     }).then(function(result) {
@@ -1652,12 +1654,42 @@ lord.drawOnImage = function(a) {
     var file = $(a).closest(".postFile")[0];
     if (!file)
         return;
-    lord.draw({
-        width: +lord.data("width", file),
-        height: +lord.data("height", file),
-        imageUrl: lord.data("href", file)
+    var model = lord.model(["base", "tr"]);
+    model.options = {
+        backgroundColor: lord.getLocalObject("drawingBackgroundColor", "rgba(255, 255, 255, 1)"),
+        backgroundDrawable: lord.getLocalObject("backgroundDrawable", true)
+    };
+    model.drawingOnImage = true;
+    var dlg = lord.template("drawingOptionsDialog", model);
+    lord.showDialog(dlg, {
+        title: "drawingOptionsDialogTitle",
+        afterShow: function() {
+            $(dlg).css({ minHeight: "180px" });
+            $("button", dlg).button();
+            $("[name='backgroundTypeGroup']", dlg).buttonset();
+            $("input[name='backgroundColor']", dlg).minicolors({
+                control: "wheel",
+                position: "bottom right",
+                format: "rgb",
+                opacity: true
+            });
+        }
     }).then(function(result) {
-        if (!result.accepted)
+        if (!result)
+            return Promise.resolve();
+        var backgroundColor = $("input[name='backgroundColor']", dlg).minicolors("value");
+        var backgroundDrawable = !!lord.queryOne("#checkboxBackgroundDrawable", dlg).checked;
+        lord.setLocalObject("drawingBackgroundColor", backgroundColor);
+        lord.setLocalObject("backgroundDrawable", backgroundDrawable);
+        return lord.draw({
+            width: +lord.data("width", file),
+            height: +lord.data("height", file),
+            imageUrl: lord.data("href", file),
+            backgroundColor: backgroundColor,
+            backgroundDrawable: backgroundDrawable
+        });
+    }).then(function(result) {
+        if (!result || !result.accepted)
             return;
         lord.attachDrawnFile(result.lc, lord.data("fileName", file));
     }).catch(lord.handleError);
@@ -2105,12 +2137,44 @@ lord.attachFileByDrawing = function(a) {
                 img.onload = function() {
                     clearTimeout(timer);
                     resolve({
-                        url: url,
+                        imageUrl: url,
                         width: img.width,
                         height: img.height
                     });
                 };
                 img.src = url;
+            });
+        }).then(function(options) {
+            var model = lord.model(["base", "tr"]);
+            model.options = {
+                backgroundColor: lord.getLocalObject("drawingBackgroundColor", "rgba(255, 255, 255, 1)"),
+                backgroundDrawable: lord.getLocalObject("backgroundDrawable", true)
+            };
+            model.drawingOnImage = true;
+            var dlg = lord.template("drawingOptionsDialog", model);
+            return lord.showDialog(dlg, {
+                title: "drawingOptionsDialogTitle",
+                afterShow: function() {
+                    $(dlg).css({ minHeight: "180px" });
+                    $("button", dlg).button();
+                    $("[name='backgroundTypeGroup']", dlg).buttonset();
+                    $("input[name='backgroundColor']", dlg).minicolors({
+                        control: "wheel",
+                        position: "bottom right",
+                        format: "rgb",
+                        opacity: true
+                    });
+                }
+            }).then(function(result) {
+                if (!result)
+                    return Promise.resolve();
+                var backgroundColor = $("input[name='backgroundColor']", dlg).minicolors("value");
+                var backgroundDrawable = !!lord.queryOne("#checkboxBackgroundDrawable", dlg).checked;
+                lord.setLocalObject("drawingBackgroundColor", backgroundColor);
+                lord.setLocalObject("backgroundDrawable", backgroundDrawable);
+                options.backgroundColor = backgroundColor;
+                options.backgroundDrawable = backgroundDrawable;
+                return Promise.resolve(options);
             });
         });
     } else {
@@ -2120,6 +2184,7 @@ lord.attachFileByDrawing = function(a) {
             height: lord.getLocalObject("drawingBackgroundHeight", 0),
             backgroundColor: lord.getLocalObject("drawingBackgroundColor", "rgba(255, 255, 255, 1)")
         };
+        model.drawingOnImage = false;
         var dlg = lord.template("drawingOptionsDialog", model);
         p = lord.showDialog(dlg, {
             title: "drawingOptionsDialogTitle",
@@ -2152,12 +2217,7 @@ lord.attachFileByDrawing = function(a) {
     p.then(function(result) {
         if (!result)
             return Promise.resolve({ accepted: false });
-        return lord.draw({
-            width: result.width,
-            height: result.height,
-            imageUrl: result.url,
-            backgroundColor: result.backgroundColor
-        });
+        return lord.draw(result);
     }).then(function(result) {
         if (!result.accepted)
             return;
