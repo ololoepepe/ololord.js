@@ -172,7 +172,7 @@ controller.checkBan = function(req, res, boardNames, write) {
     });
 };
 
-controller.baseModel = function(req) {
+controller.baseModel = function() {
     return {
         server: {
             uptime: process.uptime()
@@ -192,15 +192,8 @@ controller.baseModel = function(req) {
                 integrationEnabled: !!config("site.twitter.integrationEnabled", true)
             }
         },
-        user: {
-            ip: (req ? req.ip : undefined),
-            hashpass: (req ? req.hashpass : undefined),
-            levels: (req ? (req.levels || {}) : undefined),
-            loggedIn: (req ? !!req.hashpass : undefined)
-        },
         styles: Tools.styles(),
         codeStyles: Tools.codeStyles(),
-        deviceType: ((req && req.device.type == "desktop") ? "desktop" : "mobile"),
         availableCodeLangs: Highlight.listLanguages().map(function(lang) {
             return {
                 id: lang,
@@ -240,10 +233,6 @@ controller.boardModel = function(board) {
     if (Util.isString(board))
         board = Board.board(board);
     return board ? { board: board.info() } : null;
-};
-
-controller.settingsModel = function(req) {
-    return { settings: (req ? { deviceType: req.deviceType } : {}) };
 };
 
 controller.translationsModel = function() {

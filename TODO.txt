@@ -18,3 +18,4 @@
 [done] Add built-in captcha ("node-captcha")
 [done] Use iframes instead of old HTML frames
 [done] Add ability to select drawable and not drawable image background for drawing tools
+[done] Use "device" instead of "express-device"

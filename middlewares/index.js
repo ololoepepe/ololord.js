@@ -1,6 +1,5 @@
 var cookieParser = require("cookie-parser");
 var ddos = require("ddos-express");
-var device = require("express-device");
 var express = require("express");
 
 var config = require("../helpers/config");
@@ -121,7 +120,6 @@ if (config("system.log.middleware.before", "all") == "middleware")
 
 module.exports = module.exports.concat([
     cookieParser(),
-    device.capture(),
     require("./cookies"),
     require("./registered-user")
 ]);
