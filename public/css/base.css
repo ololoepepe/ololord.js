@@ -150,6 +150,11 @@ blockquote {
     hyphens: auto;
 }
 
+blockquote.draftBlockquote {
+    max-height: none;
+    overflow-y: none;
+}
+
 blockquote.expand {
     max-height: none;
 }

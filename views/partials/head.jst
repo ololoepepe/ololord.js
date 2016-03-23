@@ -122,7 +122,7 @@
             if (!settings.shrinkPosts)
                 s += '.post, .opPost, .draft, .searchResult { width: 99%; }';
             if (settings.addExpander)
-                s += 'blockquote { overflow-y: hidden; }';
+                s += 'blockquote:not(.draftBlockquote) { overflow-y: hidden; }';
             if (lord.compareRatings(settings.maxAllowedRating, "R-18G") < 0) {
                 var selectors = [];
                 var size = lord.deviceType("mobile") ? "140px" : "200px";
