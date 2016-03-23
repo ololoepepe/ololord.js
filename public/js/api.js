@@ -33,7 +33,6 @@ lord.Hour = 60 * lord.Minute;
 lord.Day = 24 * lord.Hour;
 lord.Year = 365 * lord.Day;
 lord.Billion = 2 * 1000 * 1000 * 1000;
-lord.SettingsStoredInCookies = ["deviceType"];
 //
 lord.keyboardMap = [
   "", // [0]
@@ -1401,7 +1400,7 @@ Object.defineProperty(lord, "now", {
 
 lord.settings = function() {
     return {
-        deviceType: lord.getCookie("deviceType", "auto"),
+        deviceType: lord.getLocalObject("deviceType", "auto"),
         time: lord.getLocalObject("time", "server"),
         timeZoneOffset: lord.getLocalObject("timeZoneOffset", -lord.now().getTimezoneOffset()),
         captchaEngine: { id: lord.getLocalObject("captchaEngine", "node-captcha") },
@@ -1460,14 +1459,7 @@ lord.setSettings = function(model) {
     if (!model)
         return;
     lord.each(model, function(val, key) {
-        if (lord.SettingsStoredInCookies.indexOf(key) >= 0) {
-            lord.setCookie(key, val, {
-                "expires": lord.Billion,
-                "path": "/"
-            });
-        } else {
-            lord.setLocalObject(key, val);
-        }
+        lord.setLocalObject(key, val);
     });
 };
 

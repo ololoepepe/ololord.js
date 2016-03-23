@@ -54,7 +54,7 @@
                         desktop: {},
                         mobile: {}
                     };
-                    var deviceType = lord.getCookie("deviceType", "auto");
+                    var deviceType = lord.getLocalObject("deviceType", "auto");
                     if (!deviceTypes.hasOwnProperty(deviceType)) {
                         var md = new MobileDetect(window.navigator.userAgent);
                         deviceType = md.mobile() ? "mobile" : "desktop";
