@@ -1,5 +1,4 @@
 * Optimize spells
-* Determine device type on the client side
 * Consider using Elasticsearch or other search engine [not sure if needed]
 * Consider using markdown-it as a parser [not sure if needed]
 * Consider adding statistics [not sure if needed]
@@ -16,7 +15,7 @@
 [done] Add built-in captcha ("node-captcha")
 [done] Use iframes instead of old HTML frames
 [done] Add ability to select drawable and not drawable image background for drawing tools
-[done] Use "device" instead of "express-device"
+[done] Determine device type on the client side
 [done] Implement script/stylesheet embedding
 [done] Use commander for command line options handling
 [done] Use vorpal for commands handling

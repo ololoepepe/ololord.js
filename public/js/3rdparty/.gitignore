@@ -14,6 +14,7 @@
 !jszip-utils.min.js
 !literallycanvas.min.js
 !merge.min.js
+!mobile-detect.min.js
 !moment-with-locales.min.js
 !Promise.min.js
 !react-with-addons.min.js

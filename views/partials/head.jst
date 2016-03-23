@@ -26,6 +26,7 @@
     {{ out += it.script("3rdparty/jszip.min.js"); }}
     {{ out += it.script("3rdparty/jszip-utils.min.js"); }}
     {{ out += it.script("3rdparty/FileSaver.min.js"); }}
+    {{ out += it.script("3rdparty/mobile-detect.min.js"); }}
     <script id="model-base" type="application/json"></script>
     <script id="model-boards" type="application/json">{{=it.models.boards}}</script>
     <script id="model-tr" type="application/json">{{=it.models.tr}}</script>
@@ -45,8 +46,21 @@
         (function() {
             var baseModelHtml = lord.get("/{{=it.site.pathPrefix}}misc/base.json") || "";
             ["base", "boards", "tr", "partials", "templates"].forEach(function(modelName) {
-                var html = ("base" == modelName) ? baseModelHtml : lord.id("model-" + modelName).innerHTML;
+                var isBase = ("base" == modelName);
+                var html = isBase ? baseModelHtml : lord.id("model-" + modelName).innerHTML;
                 lord.models[modelName] = JSON.parse(html);
+                if (isBase) {
+                    var deviceTypes = {
+                        desktop: {},
+                        mobile: {}
+                    };
+                    var deviceType = lord.getCookie("deviceType", "auto");
+                    if (!deviceTypes.hasOwnProperty(deviceType)) {
+                        var md = new MobileDetect(window.navigator.userAgent);
+                        deviceType = md.mobile() ? "mobile" : "desktop";
+                    }
+                    lord.models[modelName].deviceType = deviceType;
+                }
             });
             lord.model("partials").forEach(function(partialName) {
                 var html = lord.id("partial-" + partialName).innerHTML;
