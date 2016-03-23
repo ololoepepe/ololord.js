@@ -858,8 +858,7 @@ module.exports.generateRSS = function(currentProcess) {
         protocol: config("site.protocol", "http"),
         domain: config("site.domain", "localhost:8080"),
         pathPrefix: config("site.pathPrefix", ""),
-        locale: config("site.locale", "en"),
-        dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss")
+        locale: config("site.locale", "en")
     };
     var rssPostCount = config("server.rss.postCount", 500);
     return Tools.series(Board.boardNames(), function(boardName) {
@@ -892,7 +891,7 @@ module.exports.generateRSS = function(currentProcess) {
                 link: link,
                 description: description,
                 language: site.locale,
-                pubDate: moment(Tools.now()).utc().locale("en").format("ddd, DD MMM YYYY hh:mm:ss +0000"),
+                pubDate: moment(Tools.now()).utc().locale("en").format("ddd, DD MMM YYYY HH:mm:ss +0000"),
                 ttl: ("" + config("server.rss.ttl", 60)),
                 "atom:link": {
                     $: {
@@ -927,11 +926,12 @@ module.exports.generateRSS = function(currentProcess) {
                     return"<img src=\"" + site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName
                         + "/thumb/" + fileInfo.thumb.name + "\"><br />";
                 }) + (post.text || "") + "\n";
+                if (post.boardName == "d" && post.number == 486)
                 return {
                     title: title,
                     link: link,
                     description: description,
-                    pubDate: moment(post.createdAt).utc().locale("en").format("ddd, DD MMM YYYY hh:mm:ss +0000"),
+                    pubDate: moment(post.createdAt).utc().locale("en").format("ddd, DD MMM YYYY HH:mm:ss +0000"),
                     guid: {
                         _: link + "#" + post.number,
                         $: { isPermalink: true }
