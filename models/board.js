@@ -926,7 +926,6 @@ module.exports.generateRSS = function(currentProcess) {
                     return"<img src=\"" + site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName
                         + "/thumb/" + fileInfo.thumb.name + "\"><br />";
                 }) + (post.text || "") + "\n";
-                if (post.boardName == "d" && post.number == 486)
                 return {
                     title: title,
                     link: link,
