@@ -371,7 +371,7 @@ lord.updatePlayerTracksHeight = function() {
 
 lord.setPlayerVisible = function(e, visible) {
     e.stopPropagation();
-    lord[visible ? "removeClass" : "addClass"](lord.id("player"), "minimized");
+    $("#player")[visible ? "removeClass" : "addClass"]("minimized");
     if (visible)
         lord.updatePlayerTracksHeight();
 };

@@ -714,8 +714,10 @@ module.exports.markupLatex = function(text, inline) {
             if (data.errors)
                 return reject(data.errors[0] || data.errors);
             var html = data.svg;
-            if (!inline)
-                html = '<div style="text-align: center; padding: 8px; padding-bottom: 4px;">' + html + "</div>";
+            if (inline)
+                html = `<span class="inlineLatex">${html}</span>`;
+            else
+                html = `<div class="blockLatex">${html}</div>`;
             resolve(html);
         });
     });

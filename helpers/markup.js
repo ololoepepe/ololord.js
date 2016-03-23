@@ -841,6 +841,10 @@ var processPostText = function(boardName, text, options) {
                 op: new RegExp("/\\-\\-code\\s+(" + langs + ")\\s+", "gi"),
                 cl: /\s+\\\\\\-\\-/g
             });
+        }).then(function() {
+            return process(info, convertLatex.bind(null, false), { op: "$$$" });
+        }).then(function() {
+            return process(info, convertLatex.bind(null, true), { op: "$$" });
         });
     }
     if (markupModes.indexOf(MarkupModes.BBCode) >= 0) {
@@ -976,10 +980,6 @@ var processPostText = function(boardName, text, options) {
             return process(info, convertCSpoiler, { op: "%%%" });
         }).then(function() {
             return process(info, convertMarkup, { op: "%%" });
-        }).then(function() {
-            return process(info, convertLatex.bind(null, false), { op: "$$$" });
-        }).then(function() {
-            return process(info, convertLatex.bind(null, true), { op: "$$" });
         });
     }
     if (markupModes.indexOf(MarkupModes.BBCode) >= 0) {

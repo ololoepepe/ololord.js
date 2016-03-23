@@ -1259,3 +1259,13 @@ div.ui-widget-content.ui-dialog-content.checkerboardBackground {
     width: 100%;
     height: 100%;
 }
+
+.blockLatex {
+    text-align: center;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 8px;
+    padding-bottom: 0px;
+    max-width: 100%;
+    overflow-x: auto;
+}
