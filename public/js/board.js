@@ -2300,9 +2300,7 @@ lord.browseFile = function(e, div) {
 
 lord.setPostformRulesVisible = function(visible) {
     var hide = !visible;
-    lord.setCookie("hidePostformRules", hide, {
-        "expires": lord.Billion, "path": "/"
-    });
+    lord.setLocalObject("hidePostformRules");
     lord.queryAll(".postformRules > ul").forEach(function(ul) {
         ul.style.display = hide ? "none" : "";
     });
@@ -2608,7 +2606,7 @@ lord.submitted = function(event, form) {
         form = lord.id("postForm");
     var btn = lord.nameOne("submit", form);
     var markupMode = lord.nameOne("markupMode", form);
-    lord.setCookie("markupMode", markupMode.options[markupMode.selectedIndex].value);
+    lord.setLocalObject("markupMode", markupMode.options[markupMode.selectedIndex].value);
     btn.disabled = true;
     btn.value = "0%";
     var formData = new FormData(form);
@@ -2858,7 +2856,7 @@ lord.resetPostForm = function() {
     }
     var markupMode = lord.nameOne("markupMode", postForm);
     for (var i = 0; i < markupMode.options.length; ++i) {
-        if (markupMode.options[i].value == lord.getCookie("markupMode", "EXTENDED_WAKABA_MARK,BB_CODE")) {
+        if (markupMode.options[i].value == lord.getLocalObject("markupMode", "EXTENDED_WAKABA_MARK,BB_CODE")) {
             markupMode.selectedIndex = i;
             break;
         }
