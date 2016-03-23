@@ -69,7 +69,7 @@ lord.lastWindowSize = {
         if (!parent)
             parent = document.body;
         var q = "[name='dateTime']:not(.processedFormattedDate), [name='formattedDate']:not(.processedFormattedDate)";
-        lord.query(q, parent).forEach(function(span) {
+        lord.queryAll(q, parent).forEach(function(span) {
             var date = span.textContent.replace(/^\s+/, "").replace(/\s+$/, "");
             moment.locale(locale);
             var oldDate = date;
@@ -297,7 +297,7 @@ lord.showSettings = function() {
             return;
         var model = {};
         model.hiddenBoards = [];
-        lord.query("input, select", c.div).forEach(function(el) {
+        lord.queryAll("input, select", c.div).forEach(function(el) {
             var key = el.name;
             var val;
             if (el.tagName == "select")
@@ -343,7 +343,7 @@ lord.switchMumWatching = function() {
     var watching = lord.getLocalObject("mumWatching", false);
     var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
     img.src = "/" + lord.data("sitePathPrefix") + "img/" + (watching ? "show" : "hide") + ".png";
-    lord.query(".postFileFile > a > img").forEach(function(img) {
+    lord.queryAll(".postFileFile > a > img").forEach(function(img) {
         if (watching)
             $(img).removeClass("mumWatching");
         else
@@ -487,18 +487,18 @@ lord.resetPlayerSource = function(track) {
 };
 
 lord.updatePlayerButtons = function() {
-    lord.name("playerPlayPauseButton", lord.id("player")).forEach(function(btn) {
+    lord.nameAll("playerPlayPauseButton", lord.id("player")).forEach(function(btn) {
         btn.disabled = !lord.playerElement && !lord.currentTrack;
         btn.src = btn.src.replace(/\/(play|pause)\.png$/,
             "/" + ((!lord.playerElement || lord.playerElement.paused) ? "play" : "pause") + ".png");
         btn.title = lord.text((!lord.playerElement || lord.playerElement.paused) ? "playerPlayText"
             : "playerPauseText");
     });
-    lord.query("[name='playerPreviousTrackButton'], [name='playerNextTrackButton']",
+    lord.queryAll("[name='playerPreviousTrackButton'], [name='playerNextTrackButton']",
         lord.id("player")).forEach(function(btn) {
         btn.disabled = !lord.playerElement;
     });
-    lord.name("playerMuteButton", lord.id("player")).forEach(function(btn) {
+    lord.nameAll("playerMuteButton", lord.id("player")).forEach(function(btn) {
         btn.disabled = !lord.playerElement;
         btn.src = btn.src.replace(/(on|off)\.png$/,
             ((!lord.playerElement || lord.playerElement.volume) ? "on" : "off") + ".png");
@@ -534,7 +534,7 @@ lord.playerPreviousOrNext = function(next, e) {
         return;
     var el = current[next ? "nextElementSibling" : "previousElementSibling"];
     if (!el && e) {
-        var list = lord.query(".track", lord.id("playerTracks"));
+        var list = lord.queryAll(".track", lord.id("playerTracks"));
         if (!list)
             return;
         el = list[next ? "shift" : "pop"]();
@@ -576,7 +576,7 @@ lord.playTrack = function(el) {
             return;
         }
     }
-    lord.query(".track.selected", lord.id("playerTracks")).forEach(function(div) {
+    lord.queryAll(".track.selected", lord.id("playerTracks")).forEach(function(div) {
         $(div).removeClass("selected");
     });
     $(el).addClass("selected");
@@ -846,8 +846,8 @@ lord.showNewPosts = function() {
             return (newPostCount > 0) ? newPostCount : 0;
         };
         if (lord.deviceType("mobile")) {
-            lord.query(".boardSelect").forEach(function(sel) {
-                lord.query("option", sel).forEach(function(opt) {
+            lord.queryAll(".boardSelect").forEach(function(sel) {
+                lord.queryAll("option", sel).forEach(function(opt) {
                     var newPostCount = getNewPostCount(lord.data("boardName", opt));
                     if (!newPostCount)
                         return;
@@ -855,8 +855,8 @@ lord.showNewPosts = function() {
                 });
             });
         } else {
-            lord.query(".navbar, .toolbar").forEach(function(navbar) {
-                lord.query(".navbarItem", navbar).forEach(function(item) {
+            lord.queryAll(".navbar, .toolbar").forEach(function(navbar) {
+                lord.queryAll(".navbarItem", navbar).forEach(function(item) {
                     var a = lord.queryOne("a", item);
                     if (!a)
                         return;
@@ -898,7 +898,7 @@ lord.editHotkeys = function() {
     lord.showDialog(c.div).then(function(accepted) {
         if (!accepted)
             return;
-        lord.query("input", c.div).forEach(function(el) {
+        lord.queryAll("input", c.div).forEach(function(el) {
             var name = el.name;
             var value = el.value || lord.DefaultHotkeys.dir[name];
             c.hotkeys.dir[name] = value;
@@ -1080,7 +1080,7 @@ lord.populateChatHistory = function(key) {
 
 lord.updateChat = function(keys) {
     if (!lord.chatDialog) {
-        lord.query(".navbarItem > [name='chatButton']").forEach(function(a) {
+        lord.queryAll(".navbarItem > [name='chatButton']").forEach(function(a) {
             var img = lord.queryOne("img", a);
             if (img.src.replace("chat_message.gif", "") == img.src)
                 img.src = img.src.replace("chat.png", "chat_message.gif");
@@ -1157,7 +1157,7 @@ lord.checkChats = function() {
 };
 
 lord.showChat = function(key) {
-    lord.query(".navbarItem > [name='chatButton']").forEach(function(a) {
+    lord.queryAll(".navbarItem > [name='chatButton']").forEach(function(a) {
         var img = lord.queryOne("img", a);
         if (img.src.replace("chat_message.gif", "") != img.src)
             img.src = img.src.replace("chat_message.gif", "chat.png");

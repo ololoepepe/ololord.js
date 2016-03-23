@@ -93,14 +93,14 @@ lord.removeRegisteredUser = function(btn) {
 lord.bansSelectAll = function(e, btn) {
     e.preventDefault();
     var form = $(btn).closest("form")[0];
-    var level = lord.query("[name='level'] > input", form).filter(function(inp) {
+    var level = lord.queryAll("[name='level'] > input", form).filter(function(inp) {
         return inp.checked;
     })[0].value;
     var expires = lord.nameOne("expires", form).value;
     var reason = lord.nameOne("reason", form).value;
-    lord.name("board", form).forEach(function(div) {
+    lord.nameAll("board", form).forEach(function(div) {
         $(".banLevelSelect > input[value='" + level + "']", div).click();
-        lord.query("input", div).forEach(function(inp) {
+        lord.queryAll("input", div).forEach(function(inp) {
             if (inp.name.substr(0, 11) == "banExpires_") {
                 inp.value = expires;
                 $(inp).attr("value", expires);
@@ -115,7 +115,7 @@ lord.userAccessLevelsSelectAll = function(e, btn) {
     e.preventDefault();
     var form = $(btn).closest("form")[0];
     var levelInd = lord.nameOne("level", form).selectedIndex;
-    lord.query("select[name^='accessLevel_']", form).forEach(function(sel) {
+    lord.queryAll("select[name^='accessLevel_']", form).forEach(function(sel) {
         sel.selectedIndex = levelInd;
     });
 };
@@ -535,7 +535,7 @@ window.addEventListener("load", function load() {
                     return moment(date).utcOffset(timeOffset).locale(model.site.locale).format("YYYY/MM/DD HH:mm");
                 };
                 $(".banLevelSelect", node).buttonset();
-                lord.query("[name='expires'], [name^='banExpires_']", node).forEach(function(inp) {
+                lord.queryAll("[name='expires'], [name^='banExpires_']", node).forEach(function(inp) {
                     $(inp).change(function(){
                         $(this).attr("value", $(inp).val());
                     });

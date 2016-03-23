@@ -736,7 +736,7 @@ lord.id = function(id) {
     return document.getElementById(id);
 };
 
-lord.query = function(query, parent) {
+lord.queryAll = function(query, parent) {
     if (typeof query != "string")
         return null;
     if (!parent)
@@ -758,14 +758,9 @@ lord.queryOne = function(query, parent) {
     return parent.querySelector(query);
 };
 
-Object.defineProperty(lord, "name", {
-    value: function(name, parent) {
-        return lord.query("[name='" + name + "']", parent);
-    },
-    writable: false,
-    enumerable: true,
-    configurable: false
-}); //NOTE: A hack to prevent Underscore.js from overwriting this property
+lord.nameAll = function(name, parent) {
+    return lord.queryAll("[name='" + name + "']", parent);
+};
 
 lord.nameOne = function(name, parent) {
     return lord.queryOne("[name='" + name + "']", parent);
@@ -1063,7 +1058,7 @@ lord.activateTab = function(a) {
             return;
         node.style.display = ((node == page) ? "" : "none");
     });
-    lord.query("ul > li", header.parentNode).forEach(function(node) {
+    lord.queryAll("ul > li", header.parentNode).forEach(function(node) {
         $(node).removeClass("activated");
     });
     $(tab).addClass("activated");
@@ -1112,7 +1107,7 @@ lord.data = function(key, el, bubble) {
 lord.scriptWorkaround = function(parent) {
     if (!parent)
         parent = document;
-    lord.query("script", parent).forEach(function(script) {
+    lord.queryAll("script", parent).forEach(function(script) {
         var nscript = lord.node("script");
         nscript.type = script.type;
         if (script.src)

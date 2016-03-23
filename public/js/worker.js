@@ -1,6 +1,8 @@
-/*ololord global object*/
+/*Importing scripts*/
 
-var lord = lord || {};
+importScripts("3rdparty/Promise.min.js");
+importScripts("3rdparty/underscore-min.js");
+importScripts("api.js");
 
 /*Constants*/
 
@@ -781,9 +783,6 @@ lord.message_getImageHash = function(data) {
         return Promise.reject("invalidDataErrorText");
     return lord.getImageHash(data.href, data.width, data.height);
 };
-
-importScripts("3rdparty/Promise.min.js");
-importScripts("api.js");
 
 self.addEventListener("message", function(message) {
     try {
