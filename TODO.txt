@@ -24,3 +24,4 @@
 [done] Use vorpal for commands handling
 [done] Use Underscore.js instead of custom utility functions
 [done] Use jQuery methods instead of custom utility functions
+[done] Cache image hashes (for spells)

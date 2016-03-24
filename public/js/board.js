@@ -1506,10 +1506,13 @@ lord.applySpells = function(posts, force) {
         }).then(function() {
             return lord.doWork("processPosts", {
                 posts: list,
-                spells: lord.spells
+                spells: lord.spells,
+                imageHashes: lord.getLocalObject("imageHashes", {})
             });
-        }).then(function(list) {
-            var map = list ? list.reduce(function(acc, data) {
+        }).then(function(result) {
+            if (result)
+                lord.setLocalObject("imageHashes", result.imageHashes);
+            var map = (result && result.posts) ? result.posts.reduce(function(acc, data) {
                 acc[data.postNumber] = data;
                 return acc;
             }, {}) : {};
