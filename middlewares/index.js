@@ -9,12 +9,19 @@ var Tools = require("../helpers/tools");
 var excludePaths = {};
 var excludeRules = [];
 
-config("system.log.middleware.exclude", []).forEach(function(rule) {
-    if (rule.regexp)
-        excludeRules.push(new RegExp(rule.regexp, rule.flags));
-    else if (rule.string)
-        excludePaths[rule.string] = {};
-});
+var resetExcluded = function(val, key) {
+    excludePaths = {};
+    excludeRules = [];
+    (val || []).forEach(function(rule) {
+        if (rule.regexp)
+            excludeRules.push(new RegExp(rule.regexp, rule.flags));
+        else if (rule.string)
+            excludePaths[rule.string] = {};
+    });
+};
+
+config.installSetHook("system.log.middleware.exclude", resetExcluded);
+resetExcluded(config("system.log.middleware.exclude", []));
 
 var exclude = function(path) {
     if (excludePaths.hasOwnProperty(path))

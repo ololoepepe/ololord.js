@@ -59,7 +59,7 @@ c.set = function(key, value) {
     var prev = o[p];
     o[p] = value;
     var hook = setHooks[key];
-    if (hook)
+    if (typeof hook == "function")
         hook(value, key);
     FS.write(configFileName, JSON.stringify(config, null, 4));
     return prev;
@@ -94,13 +94,16 @@ c.reload = function() {
     if (FSSync.existsSync(configFileName)) {
         console.log("[" + process.pid + "] Using config file: \"" + configFileName + "\"...");
         config = JSON.parse(FSSync.readFileSync(configFileName, "UTF-8"));
-        for (var key in setHooks) {
-            if (!setHooks.hasOwnProperty(key))
-                return;
-            setHooks[key](c(key));
-        }
     } else {
         console.log("[" + process.pid + "] Using default config...");
+    }
+    for (var key in setHooks) {
+        if (!setHooks.hasOwnProperty(key))
+            return;
+        var hook = setHooks[key];
+        if (typeof hook != "function")
+            return;
+        setHooks[key](c(key), key);
     }
 };
 
