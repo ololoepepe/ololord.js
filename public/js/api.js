@@ -1306,6 +1306,11 @@ lord.model = function(modelName) {
                 return maxLevel;
             return lord.models.base.user.levels[boardName] || null;
         };
+        model.hasPermission = function(board, permission) {
+            if (!permission || !board || !board.permissions.hasOwnProperty(permission))
+                return false;
+            return lord.compareRegisteredUserLevels(model.user.level(board.name), board.permissions[permission]) >= 0;
+        };
         var levelMap = {
             User: "USER",
             Moder: "MODER",

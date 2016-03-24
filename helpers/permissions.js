@@ -7,7 +7,8 @@ var p = {
     deleteFile: null,
     deletePost: null,
     editPost: "MODER",
-    seeUserIp: "ADMIN"
+    seeUserIp: "ADMIN",
+    useRawHTMLMarkup: "MODER"
 };
 
 Tools.forIn(p, function(defLevel, key) {

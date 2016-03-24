@@ -298,7 +298,7 @@
                     {{? it.customPostFormOption && it.customPostFormOption[30]}}
                         {{ out += it.customPostFormOption[30](it); }}
                     {{?}}
-                    {{? it.user.isModer(it.board.name)}}
+                    {{? it.hasPermission(it.board, "useRawHTMLMarkup")}}
                         <a href="javascript:void(0);" onclick="lord.markup('raw-html'); return false;"
                            style="display: inline-block; vertical-align: top;" title='{{=it.tr.markupHtml}}'
                            name="markupHtml"><img src="/{{=it.site.pathPrefix}}img/html.png" class="signImage"></a>

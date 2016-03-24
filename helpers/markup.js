@@ -8,6 +8,7 @@ var config = require("./config");
 var controller = require("./controller");
 var Database = require("./database");
 var Global = require("./global");
+var Permissions = require("./permissions");
 var Tools = require("./tools");
 
 var langNames = require("../misc/lang-names.json");
@@ -848,7 +849,7 @@ var processPostText = function(boardName, text, options) {
         });
     }
     if (markupModes.indexOf(MarkupModes.BBCode) >= 0) {
-        if (Database.compareRegisteredUserLevels(accessLevel, Database.RegisteredUserLevels.Moder) >= 0) {
+        if (Database.compareRegisteredUserLevels(accessLevel, Permissions.useRawHTMLMarkup()) >= 0) {
             p = p.then(function() {
                 return process(info, convertHtml, {
                     op: "[raw-html]",

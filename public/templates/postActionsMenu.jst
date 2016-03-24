@@ -45,7 +45,7 @@
     {{? it.customPostMenuAction && it.customPostMenuAction[50]}}
         {{ out += it.customPostMenuAction[50](it, it.thread, it.post); }}
     {{?}}
-    {{? (!it.archived || it.post.isOp) && (it.compareRegisteredUserLevels(it.user.level(it.board.name), it.board.permissions.deletePost) >= 0 || it.board.opModeration)}}
+    {{? (!it.archived || it.post.isOp) && (it.hasPermission(it.board, "deletePost") || it.board.opModeration)}}
         <li>
             <a name="deleteButton" target="_blank" href="javascript:void(0);"
                onclick="lord.deletePost(this); return false;">
