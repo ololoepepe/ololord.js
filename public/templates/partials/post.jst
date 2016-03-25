@@ -4,6 +4,7 @@
      data-number="{{=post.number}}"
      data-thread-number="{{=post.threadNumber}}"
      data-file-count={{=post.fileInfos.length}}
+     {{? post.plainText}}data-plain-text="{{!post.plainText}}"{{?}}
      {{? post.isOp}}
         data-is-op="true"
         {{? thread.fixed}}data-fixed="true"{{?}}

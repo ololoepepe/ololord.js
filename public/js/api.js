@@ -641,6 +641,15 @@ lord.hasOwnProperties = function(obj) {
     return false;
 };
 
+lord.chunk = function(array, size) {
+    return array.reduce(function(res, item, index) {
+        if (index % size === 0)
+            res.push([]);
+        res[res.length - 1].push(item);
+        return res;
+    }, []);
+};
+
 lord.gently = function(obj, f, options) {
     if (!obj || typeof f != "function")
         return Promise.reject("invalidArgumentsErrorText");
@@ -922,124 +931,6 @@ lord.showDialog = function(body, options) {
             }
         });
     });
-};
-
-lord.generateImageHash = function(imageData, sizeX, sizeY) {
-    sizeX = +sizeX;
-    sizeY = +sizeY;
-    if (!imageData || isNaN(sizeX) || isNaN(sizeY))
-        return null;
-    var buf = new Uint8Array(imageData);
-    var oldw = sizeX;
-    var oldh = sizeY;
-    var size = oldw * oldh;
-    for (var i = 0, j = 0; i < size; i++, j += 4)
-        buf[i] = buf[j] * 0.3 + buf[j + 1] * 0.59 + buf[j + 2] * 0.11;
-    var newh = 8;
-    var neww = 8;
-    var levels = 3;
-    var areas = 256 / levels;
-    var values = 256 / (levels - 1);
-    var hash = 0;
-    for (var i = 0; i < newh; i++) {
-        for (var j = 0; j < neww; j++) {
-            var tmp = i / (newh - 1) * (oldh - 1);
-            var l = Math.min(tmp | 0, oldh - 2);
-            var u = tmp - l;
-            tmp = j / (neww - 1) * (oldw - 1);
-            var c = Math.min(tmp | 0, oldw - 2);
-            var t = tmp - c;
-            var first = buf[l * oldw + c] * ((1 - t) * (1 - u));
-            first += buf[l * oldw + c + 1] * (t * (1 - u));
-            first += buf[(l + 1) * oldw + c + 1] * (t * u);
-            first += buf[(l + 1) * oldw + c] * ((1 - t) * u);
-            first /= areas;
-            first = values * (first | 0);
-            hash = (hash << 4) + Math.min(first, 255);
-            var g = hash & 4026531840;
-            if (g)
-                hash ^= g >>> 24;
-            hash &= ~g;
-        }
-    }
-    return hash;
-};
-
-lord.getPlainText = function(node) {
-    if (!node)
-        return "";
-    function normalize(a) {
-        if (!a)
-            return "";
-        a = a.replace(/ +/g, " ").replace(/[\t]+/gm, "").replace(/[ ]+$/gm, "").replace(/^[ ]+/gm, "");
-        a = a.replace(/\n+/g, "\n").replace(/\n+$/, "").replace(/^\n+/, "").replace(/\nNEWLINE\n/g, "\n\n");
-        return a.replace(/NEWLINE\n/g, "\n\n");
-    }
-    function removeWhiteSpace(node) {
-        var isWhite = function(node) {
-            return !(/[^\t\n\r ]/.test(node.nodeValue));
-        };
-        var ws = [];
-        var findWhite = function(node) {
-            for(var i = 0; i < node.childNodes.length; i++) {
-                var n = node.childNodes[i];
-                if (n.nodeType == 3 && isWhite(n))
-                    ws.push(n);
-                else if (n.hasChildNodes())
-                    findWhite(n);
-            }
-        };
-        findWhite(node);
-        for(var i = 0; i < ws.length; i++)
-            ws[i].parentNode.removeChild(ws[i]);
-    }
-    function sty(n, prop) {
-        if (n.style[prop])
-            return n.style[prop];
-        var s = n.currentStyle || n.ownerDocument.defaultView.getComputedStyle(n, null);
-        if (n.tagName == "SCRIPT")
-            return "none";
-        if(!s[prop])
-            return ("LI,P,TR".indexOf(n.tagName) > -1) ? "block" : n.style[prop];
-        if (s[prop] =="block" && n.tagName=="TD")
-            return "feaux-inline";
-        return s[prop];
-    }
-    var blockTypeNodes = "table-row,block,list-item";
-    function isBlock(n) {
-        var s = sty(n, "display") || "feaux-inline";
-        if (blockTypeNodes.indexOf(s) > -1)
-            return true;
-        return false;
-    }
-    function recurse(n) {
-        if (/pre/.test(sty(n, "whiteSpace"))) {
-            t += n.innerHTML.replace(/\t/g, " ").replace(/\n/g, " ");
-            return "";
-        }
-        var s = sty(n, "display");
-        if (s == "none")
-            return "";
-        var gap = isBlock(n) ? "\n" : " ";
-        t += gap;
-        for (var i = 0; i < n.childNodes.length; i++) {
-            var c = n.childNodes[i];
-            if (c.nodeType == 3)
-                t += c.nodeValue;
-            if (c.childNodes.length)
-                recurse(c);
-        }
-        t += gap;
-        return t;
-    }
-    node = node.cloneNode(true);
-    node.innerHTML = node.innerHTML.replace(/<br>/g, "\n");
-    var paras = node.getElementsByTagName("p");
-    for (var i = 0; i < paras.length; i++)
-        paras[i].innerHTML += "NEWLINE";
-    var t = "";
-    removeWhiteSpace(node);
-    return normalize(recurse(node));
 };
 
 lord.activateTab = function(a) {

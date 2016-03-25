@@ -17,7 +17,7 @@ var contains = function(s, subs) {
     return false;
 };
 
-var configFileName = Global.Program.configFile;
+var configFileName = Global.Program && Global.Program.configFile;
 if (!configFileName)
     configFileName = __dirname + "/../config.json";
 configFileName = Path.resolve(__dirname + "/..", configFileName);
@@ -108,7 +108,7 @@ c.reload = function() {
 };
 
 c.setConfigFile = function(fileName) {
-    fileName = fileName || Global.Program.configFile;
+    fileName = fileName || (Global.Program && Global.Program.configFile);
     if (!fileName)
         fileName = __dirname + "/../config.json";
     configFileName = Path.resolve(__dirname + "/..", fileName);

@@ -1,11 +1,8 @@
 var Address6 = require("ip-address").Address6;
-var Canvas = require("canvas");
 var Crypto = require("crypto");
 var ffmpeg = require("fluent-ffmpeg");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
-var Image = Canvas.Image;
-var Jdenticon = require("jdenticon");
 var Path = require("path");
 var promisify = require("promisify-node");
 var Util = require("util");
@@ -18,20 +15,6 @@ var Tools = require("../helpers/tools");
 
 var ImageMagick = promisify("imagemagick");
 var musicMetadata = promisify("musicmetadata");
-
-var generateRandomImage = function(hash, mimeType, thumbPath) {
-    var canvas = new Canvas(200, 200);
-    var ctx = canvas.getContext("2d");
-    Jdenticon.drawIcon(ctx, hash, 200);
-    return FS.read(__dirname + "/../public/img/" + mimeType.replace("/", "_") + "_logo.png", "b").then(function(data) {
-        var img = new Image;
-        img.src = data;
-        ctx.drawImage(img, 0, 0, 200, 200);
-        return new Promise(function(resolve, reject) {
-            canvas.pngStream().pipe(FSSync.createWriteStream(thumbPath).on("error", reject).on("finish", resolve));
-        });
-    });
-};
 
 var durationToString = function(duration) {
     duration = Math.floor(+duration);
@@ -431,7 +414,7 @@ var getRules = function(boardName) {
                 if (metadata && metadata.picture && metadata.picture.length > 0)
                     return FS.write(thumbPath, metadata.picture[0].data);
                 else
-                    return generateRandomImage(file.hash, file.mimeType, thumbPath);
+                    return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
             }).then(function() {
                 return ImageMagick.identify(thumbPath);
             }).then(function(info) {
@@ -475,7 +458,7 @@ var getRules = function(boardName) {
             }).catch(function(err) {
                 Global.error(err.stack || err);
                 file.thumbPath = thumbPath;
-                return generateRandomImage(file.hash, file.mimeType, thumbPath);
+                return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
             }).then(function() {
                 return ImageMagick.identify(file.thumbPath);
             }).then(function(info) {
@@ -517,6 +500,9 @@ var getRules = function(boardName) {
                     width: info.width,
                     height: info.height
                 };
+                return FS.read(file.path + suffix, "b");
+            }).then(function(data) {
+                file.ihash = Tools.generateImageHash(data, file.dimensions.width, file.dimensions.height);
             });
         } else if (Tools.isPdfType(file.mimeType)) {
             file.dimensions = null;

@@ -590,19 +590,20 @@ lord.getPostData = function(post) {
         var files = [];
         lord.queryAll(".postFile", post).forEach(function(file) {
             files.push({
-                "href": lord.data("href", file),
-                "mimeType": lord.data("mimeType", file),
-                "size": +lord.data("sizeKB", file),
-                "sizeText": lord.data("sizeText", file),
-                "width": +lord.data("width", file),
-                "height": +lord.data("height", file)
+                href: lord.data("href", file),
+                mimeType: lord.data("mimeType", file),
+                ihash: +lord.data("ihash", file) || null,
+                size: +lord.data("sizeKB", file),
+                sizeText: lord.data("sizeText", file),
+                width: +lord.data("width", file),
+                height: +lord.data("height", file)
             });
         });
         var mailto = lord.queryOne(".mailtoName", post);
         var trip = lord.queryOne(".tripcode", post);
         data.hidden = !!lord.getLocalObject("hiddenPosts", {})[currentBoardName + "/" + postNumber];
         data.innerHTML = post.innerHTML;
-        data.text = lord.getPlainText(blockquote);
+        data.text = lord.data("plainText", post) || "";
         data.textHTML = blockquote.innerHTML;
         data.mailto = (mailto ? mailto.href : null);
         data.tripcode = (trip ? trip.value : null);
@@ -1494,35 +1495,27 @@ lord.applySpells = function(posts, force) {
             lord.strikeOutHiddenPostLinks();
             return Promise.resolve();
         }
-        var list = [];
-        return lord.gently(posts, function(post) {
-            var data = lord.getPostData(post);
-            if (!data)
-                return;
-            list.push(data);
-        }, {
-            delay: 10,
-            n: 10
-        }).then(function() {
+        var promises = lord.chunk(posts, 100).map(function(list, i) {
+            var data = list.map(lord.getPostData.bind(lord));
             return lord.doWork("processPosts", {
-                posts: list,
-                spells: lord.spells,
-                imageHashes: lord.getLocalObject("imageHashes", {})
+                posts: data,
+                spells: lord.spells
+            }).then(function(result) {
+                var map = (result && result.posts) ? result.posts.reduce(function(acc, data) {
+                    acc[data.postNumber] = data;
+                    return acc;
+                }, {}) : {};
+                list.forEach(function(post) {
+                    lord.processPost(hiddenPosts, post, map[+post.id]);
+                });
+                lord.setLocalObject("hiddenPosts", hiddenPosts);
+                lord.strikeOutHiddenPostLinks();
+                return Promise.resolve();
             });
-        }).then(function(result) {
-            if (result)
-                lord.setLocalObject("imageHashes", result.imageHashes);
-            var map = (result && result.posts) ? result.posts.reduce(function(acc, data) {
-                acc[data.postNumber] = data;
-                return acc;
-            }, {}) : {};
-            posts.forEach(function(post) {
-                lord.processPost(hiddenPosts, post, map[+post.id]);
-            });
-            lord.setLocalObject("hiddenPosts", hiddenPosts);
-            lord.strikeOutHiddenPostLinks();
-            return Promise.resolve();
         });
+        return Promise.all(promises);
+    }).then(function() {
+        return Promise.resolve();
     });
 };
 
@@ -1532,24 +1525,17 @@ lord.hideByImage = function(a) {
     var file = $(a).closest(".postFile")[0];
     if (!file)
         return;
-    var c = {};
-    lord.doWork("getImageHash", {
-        href: lord.data("href", file),
-        width: +lord.data("width", file),
-        height: +lord.data("height", file)
-    }).then(function(hash) {
-        if (!hash)
-            return Promise.reject("failedToGenerateHashErrorText");
-        c.hash = hash;
-        var spells = lord.getLocalObject("spells", lord.DefaultSpells);
-        if (spells && spells[spells.length - 1] != "\n")
-            spells += "\n";
-        spells += "#ihash(" + c.hash + ")";
-        lord.setLocalObject("spells", spells);
-        if (!lord.getLocalObject("spellsEnabled", true))
-            return Promise.resolve();
-        return lord.applySpells(lord.queryAll(".post, .opPost"), true);
-    }).catch(lord.handleError);
+    var hash = +lord.data("ihash", file);
+    if (!hash)
+        return;
+    var spells = lord.getLocalObject("spells", lord.DefaultSpells);
+    if (spells && spells[spells.length - 1] != "\n")
+        spells += "\n";
+    spells += "#ihash(" + hash + ")";
+    lord.setLocalObject("spells", spells);
+    if (!lord.getLocalObject("spellsEnabled", true))
+        return;
+    lord.applySpells(lord.queryAll(".post, .opPost"), true).catch(lord.handleError);
 };
 
 lord.lcToFile = function(lc, fileName) {

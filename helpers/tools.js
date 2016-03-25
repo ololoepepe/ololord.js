@@ -1,5 +1,6 @@
 var Address4 = require("ip-address").Address4;
 var Address6 = require("ip-address").Address6;
+var Canvas = require("canvas");
 var ChildProcess = require("child_process");
 var Crypto = require("crypto");
 var equal = require("deep-equal");
@@ -7,6 +8,8 @@ var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
 var FSSync = require("fs-ext");
 var HTMLToText = require("html-to-text");
+var Image = Canvas.Image;
+var Jdenticon = require("jdenticon");
 var MathJax = require("mathjax-node/lib/mj-single.js");
 var merge = require("merge");
 var mkpath = require("mkpath");
@@ -727,6 +730,61 @@ module.exports.markupLatex = function(text, inline) {
             else
                 html = `<div class="blockLatex">${html}</div>`;
             resolve(html);
+        });
+    });
+};
+
+module.exports.generateImageHash = function(imageData, sizeX, sizeY) {
+    sizeX = +sizeX;
+    sizeY = +sizeY;
+    if (!imageData || isNaN(sizeX) || isNaN(sizeY))
+        return null;
+    var buf = new Uint8Array(imageData);
+    var oldw = sizeX;
+    var oldh = sizeY;
+    var size = oldw * oldh;
+    for (var i = 0, j = 0; i < size; i++, j += 4)
+        buf[i] = buf[j] * 0.3 + buf[j + 1] * 0.59 + buf[j + 2] * 0.11;
+    var newh = 8;
+    var neww = 8;
+    var levels = 3;
+    var areas = 256 / levels;
+    var values = 256 / (levels - 1);
+    var hash = 0;
+    for (var i = 0; i < newh; i++) {
+        for (var j = 0; j < neww; j++) {
+            var tmp = i / (newh - 1) * (oldh - 1);
+            var l = Math.min(tmp | 0, oldh - 2);
+            var u = tmp - l;
+            tmp = j / (neww - 1) * (oldw - 1);
+            var c = Math.min(tmp | 0, oldw - 2);
+            var t = tmp - c;
+            var first = buf[l * oldw + c] * ((1 - t) * (1 - u));
+            first += buf[l * oldw + c + 1] * (t * (1 - u));
+            first += buf[(l + 1) * oldw + c + 1] * (t * u);
+            first += buf[(l + 1) * oldw + c] * ((1 - t) * u);
+            first /= areas;
+            first = values * (first | 0);
+            hash = (hash << 4) + Math.min(first, 255);
+            var g = hash & 4026531840;
+            if (g)
+                hash ^= g >>> 24;
+            hash &= ~g;
+        }
+    }
+    return hash;
+};
+
+module.exports.generateRandomImage = function(hash, mimeType, thumbPath) {
+    var canvas = new Canvas(200, 200);
+    var ctx = canvas.getContext("2d");
+    Jdenticon.drawIcon(ctx, hash, 200);
+    return FS.read(__dirname + "/../public/img/" + mimeType.replace("/", "_") + "_logo.png", "b").then(function(data) {
+        var img = new Image;
+        img.src = data;
+        ctx.drawImage(img, 0, 0, 200, 200);
+        return new Promise(function(resolve, reject) {
+            canvas.pngStream().pipe(FSSync.createWriteStream(thumbPath).on("error", reject).on("finish", resolve));
         });
     });
 };
