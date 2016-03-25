@@ -26,6 +26,19 @@ var workerLoads = {};
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-json");
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-rss");
 
+var postSubject = function(post, maxLength) {
+    var title = "";
+    if (post.subject)
+        title = post.subject;
+    else if (post.text)
+        title = Tools.plainText(post.text);
+    title = title.replace(/\r*\n+/gi, "");
+    maxLength = +maxLength;
+    if (!isNaN(maxLength) && maxLength > 3 && title.length > maxLength)
+        title = title.substr(0, maxLength - 3) + "...";
+    return title;
+};
+
 module.exports.getLastPostNumbers = function(boardNames) {
     if (!Util.isArray(boardNames))
         return Promise.resolve([]);
@@ -172,7 +185,7 @@ var getThreadPage = function(archived, board, number, json, ifModifiedSince) {
         c.model = {};
         var postCount = c.thread.postNumbers.length;
         var threadModel = {
-            title: Tools.postSubject(c.opPost, 50) || null,
+            title: postSubject(c.opPost, 50) || null,
             number: c.thread.number,
             bumpLimit: board.bumpLimit,
             postLimit: board.postLimit,
@@ -221,7 +234,7 @@ var getThread = function(board, number) {
     }).then(function(postCount) {
         c.model = {};
         var threadModel = {
-            title: Tools.postSubject(c.opPost, 50) || null,
+            title: postSubject(c.opPost, 50) || null,
             number: c.thread.number,
             bumpLimit: board.bumpLimit,
             postLimit: board.postLimit,
@@ -917,7 +930,7 @@ module.exports.generateRSS = function(currentProcess) {
                 title += " ";
                 if (!isOp)
                     title += "\"";
-                title += Tools.postSubject(post, 150) || post.number;
+                title += postSubject(post, 150) || post.number;
                 if (!isOp)
                     title += "\"";
                 var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/res/"

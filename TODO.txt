@@ -25,3 +25,4 @@
 [done] Use Underscore.js instead of custom utility functions
 [done] Use jQuery methods instead of custom utility functions
 [done] Cache image hashes (for spells)
+[done] Use "html-to-text" instead of "cheerio"

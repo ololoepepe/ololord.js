@@ -1,12 +1,12 @@
 var Address4 = require("ip-address").Address4;
 var Address6 = require("ip-address").Address6;
-var Cheerio = require("cheerio");
 var ChildProcess = require("child_process");
 var Crypto = require("crypto");
 var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
 var FSSync = require("fs-ext");
+var HTMLToText = require("html-to-text");
 var MathJax = require("mathjax-node/lib/mj-single.js");
 var merge = require("merge");
 var mkpath = require("mkpath");
@@ -14,6 +14,7 @@ var Multiparty = require("multiparty");
 var Path = require("path");
 var promisify = require("promisify-node");
 var Util = require("util");
+var UUID = require("uuid");
 var XRegExp = require("xregexp");
 
 var config = require("./config");
@@ -675,17 +676,24 @@ module.exports.generateTripcode = function(source) {
     return "!" + md5.digest("base64").substr(0, 10);
 };
 
-module.exports.postSubject = function(post, maxLength) {
-    var title = "";
-    if (post.subject)
-        title = post.subject;
-    else if (post.text)
-        title = Cheerio.load("<div>" + post.text + "</div>")(":root").text();
-    title = title.replace(/\r*\n+/gi, "");
-    maxLength = +maxLength;
-    if (!isNaN(maxLength) && maxLength > 3 && title.length > maxLength)
-        title = title.substr(0, maxLength - 3) + "...";
-    return title;
+module.exports.plainText = function(text, options) {
+    if (!text)
+        return "";
+    text = "" + text;
+    var uuid = UUID.v4();
+    if (options && options.brToNewline)
+        text = text.replace(/<br \/>/g, uuid);
+    else
+        text = text.replace(/<br \/>/g, " ");
+    text = HTMLToText.fromString(text, {
+        wordwrap: null,
+        linkHrefBaseUrl: config("site.protocol", "http") + "://" + config("site.domain", "localhost:8080"),
+        hideLinkHrefIfSameAsText: true,
+        ignoreImages: true
+    });
+    if (options && options.brToNewline)
+        text = text.split(uuid).join("\n");
+    return text;
 };
 
 module.exports.ipList = function(s) {
