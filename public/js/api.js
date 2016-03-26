@@ -1334,6 +1334,7 @@ lord.settings = function() {
         hideUserNames: lord.getLocalObject("hideUserNames", false),
         strikeOutHiddenPostLinks: lord.getLocalObject("strikeOutHiddenPostLinks", true),
         spellsEnabled: lord.getLocalObject("spellsEnabled", true),
+        ihashDistance: lord.getLocalObject("ihashDistance", 15),
         showNewPosts: lord.getLocalObject("showNewPosts", true),
         hotkeysEnabled: lord.getLocalObject("hotkeysEnabled", true),
         userCssEnabled: lord.getLocalObject("userCssEnabled", true),

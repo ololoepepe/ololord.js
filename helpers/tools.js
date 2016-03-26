@@ -15,6 +15,7 @@ var merge = require("merge");
 var mkpath = require("mkpath");
 var Multiparty = require("multiparty");
 var Path = require("path");
+var phash = require("phash-image");
 var promisify = require("promisify-node");
 var Util = require("util");
 var UUID = require("uuid");
@@ -734,45 +735,10 @@ module.exports.markupLatex = function(text, inline) {
     });
 };
 
-module.exports.generateImageHash = function(imageData, sizeX, sizeY) {
-    sizeX = +sizeX;
-    sizeY = +sizeY;
-    if (!imageData || isNaN(sizeX) || isNaN(sizeY))
-        return null;
-    var buf = new Uint8Array(imageData);
-    var oldw = sizeX;
-    var oldh = sizeY;
-    var size = oldw * oldh;
-    for (var i = 0, j = 0; i < size; i++, j += 4)
-        buf[i] = buf[j] * 0.3 + buf[j + 1] * 0.59 + buf[j + 2] * 0.11;
-    var newh = 8;
-    var neww = 8;
-    var levels = 3;
-    var areas = 256 / levels;
-    var values = 256 / (levels - 1);
-    var hash = 0;
-    for (var i = 0; i < newh; i++) {
-        for (var j = 0; j < neww; j++) {
-            var tmp = i / (newh - 1) * (oldh - 1);
-            var l = Math.min(tmp | 0, oldh - 2);
-            var u = tmp - l;
-            tmp = j / (neww - 1) * (oldw - 1);
-            var c = Math.min(tmp | 0, oldw - 2);
-            var t = tmp - c;
-            var first = buf[l * oldw + c] * ((1 - t) * (1 - u));
-            first += buf[l * oldw + c + 1] * (t * (1 - u));
-            first += buf[(l + 1) * oldw + c + 1] * (t * u);
-            first += buf[(l + 1) * oldw + c] * ((1 - t) * u);
-            first /= areas;
-            first = values * (first | 0);
-            hash = (hash << 4) + Math.min(first, 255);
-            var g = hash & 4026531840;
-            if (g)
-                hash ^= g >>> 24;
-            hash &= ~g;
-        }
-    }
-    return hash;
+module.exports.generateImageHash = function(fileName) {
+    return phash(fileName, true).then(function(hash) {
+        return Promise.resolve(hash.toString());
+    });
 };
 
 module.exports.generateRandomImage = function(hash, mimeType, thumbPath) {

@@ -371,6 +371,15 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>
+                        {{=it.tr.ihashDistanceLabelText}}
+                    </td>
+                    <td>
+                        <input type="number" min="1" max="1000" name="ihashDistance" class="numberSize3"
+                               value="{{=it.settings.ihashDistance}}" />
+                    </td>
+                </tr>
+                <tr>
                     <td colspan="2" class="nowrap">
                         <button class="button" onclick="lord.editSpells();">{{=it.tr.editSpellsText}}</button>
                     </td>

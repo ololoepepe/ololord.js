@@ -11,7 +11,9 @@ module.exports = function(tr) {
     translate("Version without frame", "normalVersionText");
     translate("F.A.Q.", "toFaqPageText");
     translate("Management", "toManagePageText");
-    translate("Hide by image hash", "hideByImageText");
+    translate("Hide by image", "hideByImageText");
+    translate("Hide by image hash", "hideByImageHashText");
+    translate("Hide by image size", "hideByImageSizeText");
     translate("Draw on this image", "drawOnImageText");
     translate("Answer", "toThread");
     translate("Answers:", "referencedByText");
@@ -435,5 +437,6 @@ module.exports = function(tr) {
     translate("Reload config", "reloadConfigButtonText");
     translate("Reload templates", "reloadTemplatesButtonText");
     translate("Reload everything", "reloadAllButtonText");
+    translate("Image similarity:", "ihashDistanceLabelText");
     return tr;
 };

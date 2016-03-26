@@ -1,5 +1,6 @@
 *
 !codemirror
+!BigInteger.min.js
 !doT.min.js
 !FileSaver.min.js
 !isInViewport.min.js

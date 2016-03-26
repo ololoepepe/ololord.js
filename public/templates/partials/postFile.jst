@@ -30,9 +30,21 @@
            <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.deleteFileText}}"
                 class="buttonImage" /></a>
         {{? fileInfo.mimeType.substr(0, 6) == "image/"}}
-            <a name="hideByImageButton" onclick="lord.hideByImage(this); return false;">
-                <img src="/{{=it.site.pathPrefix}}img/hide.png" title="{{=it.tr.hideByImageText}}"
-                     class="buttonImage" /></a>
+            <input type="image" src="/{{=it.site.pathPrefix}}img/hide.png" class="buttonImage"
+                   title="{{=it.tr.hideByImageText}}"
+                   onclick="lord.showMenu(event, this, '#image{{=fileInfo.name.replace(".", "-")}}HideMenu'); return false;" />
+            <ul id="image{{=fileInfo.name.replace(".", "-")}}HideMenu" name="hideByImageButton" class="menu">
+                <li class="nowrap">
+                    <a href="javascript:void(0);"
+                       onclick="lord.hideByImage(this, false);">{{=it.tr.hideByImageSizeText}}</a>
+                </li>
+                {{? fileInfo.ihash && "0" != fileInfo.ihash && "image/gif" != fileInfo.mimeType}}
+                    <li class="nowrap">
+                        <a href="javascript:void(0);"
+                           onclick="lord.hideByImage(this, true);">{{=it.tr.hideByImageHashText}}</a>
+                    </li>
+                {{?}}
+            </ul>
             <a name="drawOnImageButton" onclick="lord.drawOnImage(this); return false;">
                 <img src="/{{=it.site.pathPrefix}}img/draw.png" title="{{=it.tr.drawOnImageText}}"
                      class="buttonImage" /></a>

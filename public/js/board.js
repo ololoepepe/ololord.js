@@ -1499,7 +1499,8 @@ lord.applySpells = function(posts, force) {
             var data = list.map(lord.getPostData.bind(lord));
             return lord.doWork("processPosts", {
                 posts: data,
-                spells: lord.spells
+                spells: lord.spells,
+                options: { ihashDistance: lord.getLocalObject("ihashDistance", 10) }
             }).then(function(result) {
                 var map = (result && result.posts) ? result.posts.reduce(function(acc, data) {
                     acc[data.postNumber] = data;
@@ -1519,19 +1520,28 @@ lord.applySpells = function(posts, force) {
     });
 };
 
-lord.hideByImage = function(a) {
+lord.hideByImage = function(a, byHash) {
     if (!a)
         return;
     var file = $(a).closest(".postFile")[0];
     if (!file)
         return;
+    if (lord.data("mimeType", file).substr(0, 6) != "image/")
+        return;
     var hash = +lord.data("ihash", file);
-    if (!hash)
+    if (byHash && !hash)
         return;
     var spells = lord.getLocalObject("spells", lord.DefaultSpells);
     if (spells && spells[spells.length - 1] != "\n")
         spells += "\n";
-    spells += "#ihash(" + hash + ")";
+    if (byHash) {
+        spells += "#ihash(" + hash + ")";
+    } else {
+        var size = +lord.data("sizeKB", file);
+        var width = +lord.data("width", file);
+        var height = +lord.data("height", file);
+        spells += "#img(=" + size + "@" + width + "x" + height + ")";
+    }
     lord.setLocalObject("spells", spells);
     if (!lord.getLocalObject("spellsEnabled", true))
         return;

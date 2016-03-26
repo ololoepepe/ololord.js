@@ -2,6 +2,7 @@
 
 importScripts("3rdparty/Promise.min.js");
 importScripts("3rdparty/underscore-min.js");
+importScripts("3rdparty/BigInteger.min.js");
 importScripts("api.js");
 
 /*Constants*/
@@ -62,6 +63,17 @@ lord.TokenTypes = [{
 }];
 
 /*Functions*/
+
+lord.hammingDistance = function(hash1, hash2, max) {
+    max = max || 1000;
+    var dist = 0;
+    var val = bigInt(hash1).xor(bigInt(hash2));
+    while (dist < max && val.toString() !== "0") {
+        ++dist;
+        val = val.and(val.subtract(1));
+    }
+    return dist;
+};
 
 lord.parseSpells = function(text) {
     if (typeof text != "string")
@@ -563,7 +575,7 @@ lord.spell_imgn = function(post, args) {
     return Promise.resolve(null);
 };
 
-lord.spell_ihash = function(post, args) {
+lord.spell_ihash = function(post, args, options) {
     args = +args;
     if (!post || !args || args <= 0 || !post.files)
         return Promise.resolve(null);
@@ -573,7 +585,7 @@ lord.spell_ihash = function(post, args) {
         var f = post.files[i];
         if (!f)
             return f(i + 1);
-        if (f.ihash && f.ihash == args)
+        if (f.ihash && lord.hammingDistance(f.ihash, args, options.ihashDistance + 1) <= options.ihashDistance)
             return Promise.resolve({ "hidden": "#ihash(" + args + "): " + f.href.split("/").pop() });
         return Promise.resolve(null);
     };
@@ -644,25 +656,25 @@ lord.spell_rep = function(post, args) {
     return Promise.resolve({ "replacements": [ { "innerHTML": nih } ] });
 };
 
-lord.applySpell = function(post, spell) {
+lord.applySpell = function(post, spell, options) {
     if (!post || !spell)
         return Promise.resolve(null);
     switch (spell.type) {
     case "SPELL": {
-        return lord.applySpell(post, spell.value);
+        return lord.applySpell(post, spell.value, options);
     }
     case "spell": {
         if (spell.board && post.board != spell.board)
             return Promise.resolve(null);
         if (spell.thread && post.thread != spell.thread)
             return Promise.resolve(null);
-        return lord["spell_" + spell.name](post, spell.args);
+        return lord["spell_" + spell.name](post, spell.args, options);
     }
     case "|": {
         var f = function(i) {
             if (i >= spell.value.length)
                 return Promise.resolve(null);
-            return lord.applySpell(post, spell.value[i].value).then(function(result) {
+            return lord.applySpell(post, spell.value[i].value, options).then(function(result) {
                 if (result && result.hidden)
                     return Promise.resolve(result);
                 return f(i + 1);
@@ -674,7 +686,7 @@ lord.applySpell = function(post, spell) {
         var f = function(i) {
             if (i >= spell.value.length)
                 return Promise.resolve(null);
-            return lord.applySpell(post, spell.value[i].value).then(function(result) {
+            return lord.applySpell(post, spell.value[i].value, options).then(function(result) {
                 if (!result || !result.hidden)
                     return Promise.resolve(null);
                 return (i < spell.value.length - 1) ? f(i + 1) : result;
@@ -683,7 +695,7 @@ lord.applySpell = function(post, spell) {
         return f(0);
     }
     case "!": {
-        var result = lord.applySpell(post, spell.value);
+        var result = lord.applySpell(post, spell.value, options);
         return Promise.resolve((!result || !result.hidden) ? { "hidden": "!not" } : null);
     }
     default: {
@@ -693,14 +705,14 @@ lord.applySpell = function(post, spell) {
     return Promise.resolve(null);
 };
 
-lord.applySpells = function(post, spells) {
+lord.applySpells = function(post, spells, options) {
     if (!post || !spells || spells.length < 1)
         return Promise.resolve(null);
     var npost = { replacements: [] };
     var promises = spells.map(function(spell) {
         if (npost.hidden && ("SPELL" != spell.value.type || "rep" != spell.value.value.name))
             return Promise.resolve();
-        return lord.applySpell(post, spell.value).then(function(result) {
+        return lord.applySpell(post, spell.value, options).then(function(result) {
             if (!result)
                 return Promise.resolve();
             npost.hidden = result.hidden;
@@ -714,7 +726,7 @@ lord.applySpells = function(post, spells) {
     });
 };
 
-lord.processPosts = function(posts, spells) {
+lord.processPosts = function(posts, spells, options) {
     if (!posts)
         return Promise.reject("internalErrorText");
     var data = { posts: [] };
@@ -726,7 +738,7 @@ lord.processPosts = function(posts, spells) {
         var p = Promise.resolve();
         if (spells && !post.hidden) {
             p = p.then(function() {
-                return lord.applySpells(post, spells);
+                return lord.applySpells(post, spells, options);
             }).then(function(result) {
                 if (result) {
                     npost.hidden = result.hidden;
@@ -753,7 +765,8 @@ lord.message_parseSpells = function(data) {
 lord.message_processPosts = function(data) {
     if (!data)
         return Promise.reject("invalidDataErrorText");
-    return lord.processPosts(data.posts, data.spells);
+    var options = { ihashDistance: (data.options && data.options.ihashDistance) || 15 };
+    return lord.processPosts(data.posts, data.spells, options);
 };
 
 self.addEventListener("message", function(message) {

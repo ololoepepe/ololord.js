@@ -500,9 +500,11 @@ var getRules = function(boardName) {
                     width: info.width,
                     height: info.height
                 };
-                return FS.read(file.path + suffix, "b");
-            }).then(function(data) {
-                file.ihash = Tools.generateImageHash(data, file.dimensions.width, file.dimensions.height);
+                if ("image/gif" != file.mimeType) {
+                    return Tools.generateImageHash(file.path + suffix).then(function(hash) {
+                        file.ihash = hash;
+                    });
+                }
             });
         } else if (Tools.isPdfType(file.mimeType)) {
             file.dimensions = null;

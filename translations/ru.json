@@ -1544,11 +1544,6 @@
             "value": "Поиск постов..."
         }
     },
-    "Hide by image hash": {
-        "hideByImageText": {
-            "value": "Скрывать по хешу картинки"
-        }
-    },
     "Rating:": {
         "ratingLabelText": {
             "value": "Рейтинг:"
@@ -3146,6 +3141,26 @@
     "Quits the application.": {
         "_default": {
             "value": "Завершает выполнение приложения."
+        }
+    },
+    "Image similarity:": {
+        "ihashDistanceLabelText": {
+            "value": "Схожесть картинок:"
+        }
+    },
+    "Hide by image hash": {
+        "hideByImageHashText": {
+            "value": "Скрывать по хешу картинки"
+        }
+    },
+    "Hide by image": {
+        "hideByImageText": {
+            "value": "Скрывать по картинке"
+        }
+    },
+    "Hide by image size": {
+        "hideByImageSizeText": {
+            "value": "Скрывать по размеру картинки"
         }
     }
 }
