@@ -83,6 +83,14 @@ lord.lastWindowSize = {
     lord.pageProcessors.push(lord.processFomattedDate);
 })();
 
+lord.pageProcessors.push(function() {
+    if (lord.getLocalObject("mumWatching", false)) {
+        lord.queryAll(".banner > a > img").forEach(function(img) {
+            $(img).addClass("mumWatching");
+        });
+    }
+});
+
 lord.logoutImplementation = function(form, vk) {
     lord.setCookie("hashpass", "", {
         expires: lord.Billion,
@@ -343,7 +351,7 @@ lord.switchMumWatching = function() {
     var watching = lord.getLocalObject("mumWatching", false);
     var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
     img.src = "/" + lord.data("sitePathPrefix") + "img/" + (watching ? "show" : "hide") + ".png";
-    lord.queryAll(".postFileFile > a > img").forEach(function(img) {
+    lord.queryAll(".postFileFile > a > img, .banner > a > img").forEach(function(img) {
         if (watching)
             $(img).removeClass("mumWatching");
         else

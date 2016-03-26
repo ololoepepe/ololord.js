@@ -420,7 +420,7 @@ span.newPostCount {
     white-space: nowrap;
 }
 
-.postFileFile > a > img.mumWatching:not(:hover) {
+.mumWatching:not(:hover) {
     opacity: 0.05;
 }
 

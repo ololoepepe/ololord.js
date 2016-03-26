@@ -26,3 +26,4 @@
 [done] Use "html-to-text" instead of "cheerio"
 [done] Optimize spells
 [done] Add ability to hide posts by image size
+[done] Make "Mum watching!" mode apply to banners
