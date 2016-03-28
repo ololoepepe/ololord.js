@@ -358,12 +358,7 @@ lord.editFile = function(fileName) {
         var subdiv = lord.node("div");
         $(subdiv).width($(window).width() - 100).height($(window).height() - 150);
         div.appendChild(subdiv);
-        editor = CodeMirror(subdiv, {
-            mode: modes[fileName.split(".").pop()] || "",
-            lineNumbers: true,
-            autofocus: true,
-            value: result.content
-        });
+        editor = lord.createCodemirrorEditor(subdiv, modes[fileName.split(".").pop()] || "", result.content);
         return lord.showDialog(div, {
             afterShow: function() {
                 editor.refresh();

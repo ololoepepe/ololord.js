@@ -974,27 +974,35 @@ lord.removeHidden = function(el) {
     lord.setLocalObject("hiddenPosts", list);
 };
 
+lord.createCodemirrorEditor = function(parent, mode, value) {
+    return CodeMirror(parent, {
+        mode: mode,
+        indentUnit: 4,
+        lineNumbers: true,
+        autofocus: true,
+        value: value
+    });
+};
+
 lord.editUserCss = function() {
     var div = lord.node("div");
+    var subdiv = lord.node("div");
+    $(subdiv).width($(window).width() - 100).height($(window).height() - 150);
+    div.appendChild(subdiv);
     var c = {};
     if (lord.getLocalObject("sourceHighlightingEnabled", false)) {
-        c.editor = CodeMirror(div, {
-            mode: "css",
-            lineNumbers: true,
-            autofocus: true,
-            value: lord.getLocalObject("userCss", "")
-        });
+        c.editor = lord.createCodemirrorEditor(subdiv, "css", lord.getLocalObject("userCss", ""));
     } else {
         var ta = lord.node("textarea");
-        ta.rows = 10;
-        ta.cols = 43;
+        ta.style = "box-sizing: border-box; width: 100%; height: 100%";
         ta.value = lord.getLocalObject("userCss", "");
-        div.appendChild(ta);
+        subdiv.appendChild(ta);
     }
     lord.showDialog(div, {
         afterShow: function() {
             if (c.editor)
                 c.editor.refresh();
+            $(".CodeMirror", subdiv).css("height", "100%");
         }
     }).then(function(result) {
         if (!result)
@@ -1006,25 +1014,23 @@ lord.editUserCss = function() {
 
 lord.editUserJavaScript = function() {
     var div = lord.node("div");
+    var subdiv = lord.node("div");
+    $(subdiv).width($(window).width() - 100).height($(window).height() - 150);
+    div.appendChild(subdiv);
     var c = {};
     if (lord.getLocalObject("sourceHighlightingEnabled", false)) {
-        c.editor = CodeMirror(div, {
-            mode: "javascript",
-            lineNumbers: true,
-            autofocus: true,
-            value: lord.getLocalObject("userJavaScript", "")
-        });
+        c.editor = lord.createCodemirrorEditor(subdiv, "javascript", lord.getLocalObject("userJavaScript", ""));
     } else {
         var ta = lord.node("textarea");
-        ta.rows = 10;
-        ta.cols = 43;
+        ta.style = "box-sizing: border-box; width: 100%; height: 100%";
         ta.value = lord.getLocalObject("userJavaScript", "");
-        div.appendChild(ta);
+        subdiv.appendChild(ta);
     }
     lord.showDialog(div, {
         afterShow: function() {
             if (c.editor)
                 c.editor.refresh();
+            $(".CodeMirror", subdiv).css("height", "100%");
         }
     }).then(function(result) {
         if (!result)

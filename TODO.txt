@@ -27,3 +27,4 @@
 [done] Optimize spells
 [done] Add ability to hide posts by image size
 [done] Make "Mum watching!" mode apply to banners
+[done] Improve user CSS/JS editing
