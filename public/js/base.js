@@ -786,7 +786,6 @@ lord.expandCollapseSpoiler = function(titleSpan) {
                 ++blockquote[0]._expand;
             blockquote.addClass("expand");
         }
-        console.log(blockquote[0]._expand);
     }
 };
 
