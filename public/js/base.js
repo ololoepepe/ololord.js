@@ -773,6 +773,21 @@ lord.expandCollapseSpoiler = function(titleSpan) {
         return;
     var expanded = (bodySpan.style.display != "none");
     bodySpan.style.display = expanded ? "none" : "block";
+    var blockquote = $(span).closest("blockquote");
+    if (blockquote[0]) {
+        if (expanded) {
+            --blockquote[0]._expand;
+            if (blockquote[0]._expand <= 0)
+                blockquote.removeClass("expand");
+        } else {
+            if (!blockquote[0]._expand)
+                blockquote[0]._expand = 1;
+            else
+                ++blockquote[0]._expand;
+            blockquote.addClass("expand");
+        }
+        console.log(blockquote[0]._expand);
+    }
 };
 
 lord.removeThreadFromFavorites = function(boardName, threadNumber) {
@@ -1334,13 +1349,24 @@ lord.expandCollapseYoutubeVideo = function(a) {
     var videoId = lord.data("videoId", a, true);
     if (!videoId)
         return;
+    var blockquote = $(a).closest("blockquote");
     if (a.lordExpanded) {
         a.parentNode.removeChild(a.nextSibling);
         a.parentNode.removeChild(a.nextSibling);
         a.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"), a.childNodes[0]);
-        $(a).closest("blockquote").removeClass("expand");
+        if (blockquote[0]) {
+            --blockquote[0]._expand;
+            if (blockquote[0]._expand <= 0)
+                blockquote.removeClass("expand");
+        }
     } else {
-        $(a).closest("blockquote").addClass("expand");
+        if (blockquote[0]) {
+            if (!blockquote[0]._expand)
+                blockquote[0]._expand = 1;
+            else
+                ++blockquote[0]._expand;
+            blockquote.addClass("expand");
+        }
         var iframe = lord.node("iframe");
         var start = +lord.data("start", a, true);
         if (isNaN(start) || start <= 0)
@@ -1369,13 +1395,20 @@ lord.expandCollapseCoubVideo = function(a) {
     var videoId = lord.data("videoId", a, true);
     if (!videoId)
         return;
+    var blockquote = $(a).closest("blockquote");
     if (a.lordExpanded) {
         a.parentNode.removeChild(a.nextSibling);
         a.parentNode.removeChild(a.nextSibling);
         a.replaceChild(lord.node("text", "[" + lord.text("expandVideoText") + "]"), a.childNodes[0]);
-        $(a).closest("blockquote").removeClass("expand");
+        --blockquote._expand;
+        if (blockquote._expand <= 0)
+            blockquote.removeClass("expand");
     } else {
-        $(a).closest("blockquote").addClass("expand");
+        if (!blockquote._expand)
+            blockquote._expand = 1;
+        else
+            ++blockquote._expand;
+        blockquote.addClass("expand");
         var iframe = lord.node("iframe");
         iframe.src = "https://coub.com/embed/" + videoId
             + "?muted=false&autostart=false&originalSize=false&hideTopBar=false&startWithHD=false";
