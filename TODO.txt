@@ -31,3 +31,4 @@
 [done] Improve user CSS/JS editing
 [done] Improve expand/collapse post handling
 [done] Log path on 404 error
+[done] Block hotkeys while a dialog is opened

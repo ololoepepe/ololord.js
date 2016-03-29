@@ -1055,8 +1055,9 @@ lord.hotkey_showSettings = function() {
 };
 
 lord.interceptHotkey = function(e) {
-    if (!e || e.type != "keyup" || (e.target.tagName && !e.metaKey && !e.altKey && !e.ctrlKey
-        && lord.contains(["TEXTAREA", "INPUT", "BUTTON"], e.target.tagName))) {
+    if (lord.dialogs.length > 0 || !e || e.type != "keyup"
+        || (e.target.tagName && !e.metaKey && !e.altKey && !e.ctrlKey
+            && lord.contains(["TEXTAREA", "INPUT", "BUTTON"], e.target.tagName))) {
         return;
     }
     var hotkeys = lord.getLocalObject("hotkeys", {});

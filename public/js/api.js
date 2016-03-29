@@ -299,6 +299,7 @@ lord.popups = [];
 lord.unloading = false;
 lord.models = {};
 lord.templates = {};
+lord.dialogs = [];
 
 /*Classes*/
 
@@ -881,7 +882,7 @@ lord.showDialog = function(body, options) {
         }).filter(function(button) {
             return button;
         });
-        $(body).dialog({
+        var dlg = $(body).dialog({
             title: lord.text(options && options.title),
             modal: true,
             buttons: buttons,
@@ -890,6 +891,7 @@ lord.showDialog = function(body, options) {
             maxHeight: $(window).height() - 20,
             maxWidth: $(window).width() - 40,
             close: function() {
+                lord.dialogs.pop();
                 resolve(false);
                 $(this).dialog("destroy").remove();
             },
@@ -903,7 +905,8 @@ lord.showDialog = function(body, options) {
                 if (lord.scrollHandler)
                     lord.scrollHandler();
             }
-        }).parent().find(".ui-dialog-titlebar").dblclick(function() {
+        });
+        dlg.parent().find(".ui-dialog-titlebar").dblclick(function() {
             this.isMaximized = !this.isMaximized;
             if (this.isMaximized) {
                 this.lastHeight = $(body).closest(".ui-dialog").height() + 8;
@@ -930,6 +933,7 @@ lord.showDialog = function(body, options) {
                 $(body).dialog("option", "position", this.lastPosition);
             }
         });
+        lord.dialogs.push(dlg);
     });
 };
 
