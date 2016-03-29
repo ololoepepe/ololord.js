@@ -10,7 +10,7 @@ var router = express.Router();
 
 router.get("/manage.html", function(req, res) {
     if (!req.isModer())
-        return controller.error(res, Tools.translate("Not enough rights"));
+        return controller.error(req, res, Tools.translate("Not enough rights"));
     var superuserContentVisible = req.isSuperuser();
     controller.sendCachedHTML(req, res, `manage-${superuserContentVisible ? "superuser" : "moder"}`);
 });

@@ -28,7 +28,7 @@ var getFiles = function(fields, files, transaction) {
     var tmpFiles = Tools.filterIn(files, function(file) {
         if (file.size < 1) {
             FS.remove(file.path).catch(function(err) {
-                Global.error(err.stack || err);
+                Global.error(req, err.stack || err);
             });
             return false;
         }
@@ -204,7 +204,7 @@ router.post("/action/markupText", function(req, res) {
             data.tripcode = Tools.generateTripcode(req.hashpass);
         res.send(data);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -235,7 +235,7 @@ router.post("/action/createPost", function(req, res) {
         });
     }).catch(function(err) {
         transaction.rollback();
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -266,7 +266,7 @@ router.post("/action/createThread", function(req, res) {
         });
     }).catch(function(err) {
         transaction.rollback();
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -285,7 +285,7 @@ router.post("/action/editPost", function(req, res) {
             postNumber: c.postNumber
         });
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -332,7 +332,7 @@ router.post("/action/addFiles", function(req, res) {
         });
     }).catch(function(err) {
         transaction.rollback();
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -346,7 +346,7 @@ router.post("/action/deletePost", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -356,7 +356,7 @@ router.post("/action/deleteFile", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -372,7 +372,7 @@ router.post("/action/moveThread", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -382,13 +382,13 @@ router.post("/action/editAudioTags", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
 router.post("/action/banUser", function(req, res) {
     if (!req.isModer())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.bans = [];
@@ -427,13 +427,13 @@ router.post("/action/banUser", function(req, res) {
     }).then(function(result) {
         res.send({});
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
 router.post("/action/delall", function(req, res) {
     if (!req.isModer())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
         c.fields = result.fields;
@@ -448,7 +448,7 @@ router.post("/action/delall", function(req, res) {
     }).then(function(result) {
         res.send({});
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -475,7 +475,7 @@ var getRegisteredUserData = function(fields) {
 
 router.post("/action/registerUser", function(req, res) {
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     Tools.parseForm(req).then(function(result) {
         return getRegisteredUserData(result.fields);
     }).then(function(result) {
@@ -483,13 +483,13 @@ router.post("/action/registerUser", function(req, res) {
     }).then(function(hashpass) {
         res.json({ hashpass: hashpass });
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
 router.post("/action/unregisterUser", function(req, res) {
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     var c = {};
     Tools.parseForm(req).then(function(result) {
         return Database.unregisterUser(result.fields.hashpass);
@@ -502,7 +502,7 @@ router.post("/action/unregisterUser", function(req, res) {
 
 router.post("/action/updateRegisteredUser", function(req, res) {
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     Tools.parseForm(req).then(function(result) {
         return getRegisteredUserData(result.fields);
     }).then(function(result) {
@@ -510,7 +510,7 @@ router.post("/action/updateRegisteredUser", function(req, res) {
     }).then(function() {
         res.json({});
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -526,7 +526,7 @@ router.post("/action/setThreadFixed", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -542,7 +542,7 @@ router.post("/action/setThreadClosed", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -558,7 +558,7 @@ router.post("/action/setThreadUnbumpable", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -569,7 +569,7 @@ router.post("/action/sendChatMessage", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -580,7 +580,7 @@ router.post("/action/deleteChatMessages", function(req, res) {
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -602,7 +602,7 @@ router.post("/action/synchronize", function(req, res) {
     }).then(function() {
         res.send({});
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
@@ -659,13 +659,13 @@ router.post("/action/search", function(req, res) {
         });
         res.send(c.model);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
 router.post("/action/superuserAddFile", function(req, res) {
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     Tools.parseForm(req).then(function(result) {
         var dir = result.fields.dir;
         if (dir.slice(-1)[0] != "/")
@@ -682,19 +682,19 @@ router.post("/action/superuserAddFile", function(req, res) {
         res.json({});
     }).catch(function(err) {
         if ("ENOENT" == err.code)
-            controller.notFound(res);
+            controller.notFound(req, res);
         else if ("ENOTDIR" == err.code)
-            controller.error(res, Tools.translate("Not a directory"), true);
+            controller.error(req, res, Tools.translate("Not a directory"), true);
         else
-            controller.error(res, err, true);
+            controller.error(req, res, err, true);
     });
 });
 
 router.post("/action/superuserEditFile", function(req, res) {
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     Tools.parseForm(req).then(function(result) {
         var path = __dirname + "/../" + result.fields.fileName;
         return FS.write(path, result.fields.content);
@@ -702,17 +702,17 @@ router.post("/action/superuserEditFile", function(req, res) {
         res.json({});
     }).catch(function(err) {
         if ("ENOENT" == err.code)
-            controller.notFound(res);
+            controller.notFound(req, res);
         else if ("EISDIR" == err.code)
-            controller.error(res, Tools.translate("Not a file"), true);
+            controller.error(req, res, Tools.translate("Not a file"), true);
         else
-            controller.error(res, err, true);
+            controller.error(req, res, err, true);
     });
 });
 
 router.post("/action/superuserRenameFile", function(req, res) {
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     Tools.parseForm(req).then(function(result) {
         var oldPath = __dirname + "/../" + result.fields.oldFileName;
         var newPath = oldPath.split("/").slice(0, -1).join("/") + "/" + result.fields.fileName;
@@ -721,7 +721,7 @@ router.post("/action/superuserRenameFile", function(req, res) {
         res.json({});
     }).catch(function(err) {
         if ("ENOENT" == err.code)
-            controller.notFound(res);
+            controller.notFound(req, res);
         else
             controller.error(res, err, true);
     });
@@ -729,7 +729,7 @@ router.post("/action/superuserRenameFile", function(req, res) {
 
 router.post("/action/superuserDeleteFile", function(req, res) {
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     Tools.parseForm(req).then(function(result) {
         var path = __dirname + "/../" + result.fields.fileName;
         return FS.removeTree(path);
@@ -737,7 +737,7 @@ router.post("/action/superuserDeleteFile", function(req, res) {
         res.json({});
     }).catch(function(err) {
         if ("ENOENT" == err.code)
-            controller.notFound(res);
+            controller.notFound(req, res);
         else
             controller.error(res, err, true);
     });
@@ -745,7 +745,7 @@ router.post("/action/superuserDeleteFile", function(req, res) {
 
 router.post("/action/superuserRegenerateCache", function(req, res) {
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     Global.IPC.send("stop").then(function() {
         return Global.IPC.send("regenerateCache");
     }).then(function() {
@@ -753,13 +753,13 @@ router.post("/action/superuserRegenerateCache", function(req, res) {
     }).then(function() {
         res.json({});
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
 router.post("/action/superuserRerenderPosts", function(req, res) {
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     var c = { boardNames: [] };
     Tools.parseForm(req).then(function(result) {
         Tools.forIn(result.fields, function(value, name) {
@@ -777,13 +777,13 @@ router.post("/action/superuserRerenderPosts", function(req, res) {
     }).then(function() {
         res.json({});
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
 router.post("/action/superuserRebuildSearchIndex", function(req, res) {
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     Global.IPC.send("stop").then(function() {
         return Database.rebuildSearchIndex();
     }).then(function() {
@@ -791,13 +791,13 @@ router.post("/action/superuserRebuildSearchIndex", function(req, res) {
     }).then(function() {
         res.json({});
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 
 router.post("/action/superuserReload", function(req, res) {
     if (!req.isSuperuser())
-        return controller.error(res, Tools.translate("Not enough rights"), true);
+        return controller.error(req, res, Tools.translate("Not enough rights"), true);
     var c = { list: [] };
     Tools.parseForm(req).then(function(result) {
         if ("true" == result.fields.boards)
@@ -829,7 +829,7 @@ router.post("/action/superuserReload", function(req, res) {
     }).then(function() {
         res.json({});
     }).catch(function(err) {
-        controller.error(res, err, true);
+        controller.error(req, res, err, true);
     });
 });
 

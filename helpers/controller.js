@@ -108,14 +108,11 @@ controller.sync = function(templateName, modelData) {
     return template(modelData);
 };
 
-controller.error = function(res, error, ajax) {
-    if (error) {
-        Global.error(error);
-        if (error.stack)
-            Global.error(error.stack);
-    }
+controller.error = function(req, res, error, ajax) {
     if (!ajax && Util.isNumber(error) && 404 == error)
-        return controller.notFound(res);
+        return controller.notFound(req, res);
+    if (error)
+        Global.error(Tools.preferIPv4(req.ip), req.path, error.stack || error);
     var f = function(error) {
         var model = {};
         model.title = Tools.translate("Error", "pageTitle");
@@ -168,11 +165,12 @@ controller.error = function(res, error, ajax) {
     }
 };
 
-controller.notFound = function(res) {
+controller.notFound = function(req, res) {
     Cache.getHTML("notFound").then(function(data) {
         res.status(404).send(data.data);
+        Global.error(Tools.preferIPv4(req.ip), req.baseUrl, 404);
     }).catch(function(err) {
-        controller.error(res, err);
+        controller.error(req, res, err);
     });
 };
 
@@ -421,7 +419,7 @@ var sendCachedContent = function(req, res, id, type, ajax) {
         res.send(result.data);
     }).catch(function(err) {
         if ("ENOENT" == err.code)
-            controller.notFound(res);
+            controller.notFound(req, res);
         else
             controller.error(res, err, ajax);
     });
