@@ -1,3 +1,4 @@
+* Log path on 404 error
 * Consider using Elasticsearch or other search engine [not sure if needed]
 * Consider using markdown-it as a parser [not sure if needed]
 * Consider adding statistics [not sure if needed]
@@ -27,5 +28,6 @@
 [done] Optimize spells
 [done] Add ability to hide posts by image size
 [done] Make "Mum watching!" mode apply to banners
+[done] Make "Mum watching!" mode apply before full page loading
 [done] Improve user CSS/JS editing
 [done] Improve expand/collapse post handling

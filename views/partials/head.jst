@@ -152,6 +152,11 @@
                 s += createSelector(" > img") + '{ display: none; }';
             }
             s += '</style>';
+            if (lord.getLocalObject("mumWatching", false)) {
+                document.write('<style id="mumWatchingStylesheet" type="text/css">'
+                    + '.postFileFile > a > img:not(:hover), .banner > a > img:not(:hover) { opacity: 0.05 !important; }'
+                    + '</style>');
+            }
             var appendScript = function(path) {
                 s += '<script type="text/javascript" src="/' + prefix + path + '"></s' + 'cript>';
             };

@@ -420,10 +420,6 @@ span.newPostCount {
     white-space: nowrap;
 }
 
-.mumWatching:not(:hover) {
-    opacity: 0.05;
-}
-
 .postFileSearch {
     padding-bottom: 4px;
 }

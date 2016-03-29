@@ -505,15 +505,6 @@ lord.checkExpander = function(post) {
     bq.parent()[0].appendChild(a);
 };
 
-lord.postProcessors.push(function(post) {
-    if (lord.getLocalObject("mumWatching", false)) {
-        lord.queryAll(".postFileFile > a > img", post).forEach(function(img) {
-            $(img).addClass("mumWatching");
-        });
-    }
-    return Promise.resolve();
-});
-
 if (lord.getLocalObject("addExpander", true))
     lord.postProcessors.push(lord.checkExpander);
 

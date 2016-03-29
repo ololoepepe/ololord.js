@@ -83,14 +83,6 @@ lord.lastWindowSize = {
     lord.pageProcessors.push(lord.processFomattedDate);
 })();
 
-lord.pageProcessors.push(function() {
-    if (lord.getLocalObject("mumWatching", false)) {
-        lord.queryAll(".banner > a > img").forEach(function(img) {
-            $(img).addClass("mumWatching");
-        });
-    }
-});
-
 lord.logoutImplementation = function(form, vk) {
     lord.setCookie("hashpass", "", {
         expires: lord.Billion,
@@ -348,16 +340,14 @@ lord.removeFavorite = function(el) {
 };
 
 lord.switchMumWatching = function() {
-    var watching = lord.getLocalObject("mumWatching", false);
+    var watching = !lord.getLocalObject("mumWatching", false);
     var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
-    img.src = "/" + lord.data("sitePathPrefix") + "img/" + (watching ? "show" : "hide") + ".png";
-    lord.queryAll(".postFileFile > a > img, .banner > a > img").forEach(function(img) {
-        if (watching)
-            $(img).removeClass("mumWatching");
-        else
-            $(img).addClass("mumWatching");
-    });
-    lord.setLocalObject("mumWatching", !watching);
+    img.src = "/" + lord.data("sitePathPrefix") + "img/" + (watching ? "hide" : "show") + ".png";
+    if (watching)
+        lord.insertMumWatchingStylesheet();
+    else
+        $("#mumWatchingStylesheet").remove();
+    lord.setLocalObject("mumWatching", watching);
 };
 
 lord.isMediaTypeSupported = function(mimeType) {
@@ -1466,15 +1456,23 @@ lord.setTooltips = function(parent) {
     });
 };
 
+lord.insertMumWatchingStylesheet = function() {
+    var style = lord.node("style");
+    style.id = "mumWatchingStylesheet";
+    var css = ".postFileFile > a > img:not(:hover), .banner > a > img:not(:hover) { opacity: 0.05 !important; }";
+    style.type = "text/css";
+    if (style.styleSheet)
+        style.styleSheet.cssText = css;
+    else
+        style.appendChild(lord.node("text", css));
+    document.head.appendChild(style);
+};
+
 lord.initializeOnLoadBase = function() {
     lord.hashChangeHandler(lord.hash());
     lord.series(lord.pageProcessors, function(f) {
         return f();
     }).catch(lord.handleError);
-    if (lord.getLocalObject("mumWatching", false)) {
-        var img = lord.queryOne("[name='switchMumWatchingButton'] > img");
-        img.src = "/" + lord.data("sitePathPrefix") + "img/hide.png";
-    }
     var settings = lord.settings();
     var model = lord.model(["base", "tr", "boards"]);
     if (lord.data("boardName"))
