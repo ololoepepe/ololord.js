@@ -31,7 +31,7 @@ window.addEventListener("load", function load() {
         }
         $(".searchResultLink, .searchResultText").mark(model.phrases, {
             markData: { "class": "searchResultHighlighted" },
-            ignoreCase: false
+            ignoreCase: true
         });
     }).catch(function(err) {
         lord.handleError(err);

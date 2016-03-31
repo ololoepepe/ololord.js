@@ -152,6 +152,41 @@ if (cluster.isMaster) {
             ++ready;
             if (ready == count)
                 require("./helpers/commands")();
+            //TODO
+            /*var elasticsearch = require("elasticsearch");
+            var client = new elasticsearch.Client({
+                host: 'localhost:9200',
+                log: 'trace'
+            });
+            console.time("index");
+            client.index({
+                index: "ololord.js",
+                type: "posts",
+                body: {
+                    text: "test piss shit ddd"
+                }
+            }).then(function() {
+                console.timeEnd("index");
+                return new Promise(function(resolve) {
+                    setTimeout(resolve, 3000);
+                });
+            }).then(function() {
+                console.time("find");
+                return client.search({
+                    index: "ololord.js",
+                    type: "posts",
+                    size: 4,
+                    body: {
+                        query: {
+                            match: {
+                                text: "piss"
+                            }
+                        }
+                    }
+                })
+            }).then(function() {
+                console.timeEnd("find");
+            });*/
         });
         var lastFileName;
         var fileName = function() {

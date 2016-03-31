@@ -247,7 +247,7 @@ vorpal.installHandler("reload-templates", function(args) {
 vorpal.installHandler("rebuild-search-index", function(args) {
     return this.prompt({
         type: "confirm",
-        name: "rerbuild",
+        name: "rebuild",
         default: true,
         message: Tools.translate("Are you sure? ")
     }).then(function(result) {
