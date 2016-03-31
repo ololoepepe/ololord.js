@@ -490,6 +490,7 @@ controller.generateStatistics = function() {
         var bo = {
             name: board.name,
             title: board.title,
+            hidden: board.hidden,
             diskUsage: 0
         };
         var path = __dirname + "/../public/" + board.name + "/";
