@@ -506,7 +506,7 @@ controller.generateStatistics = function() {
             return Tools.du(path + "src");
         }).catch(function(err) {
             if ("ENOENT" != err.code)
-                console.error(err.stack || err);
+                Global.error(err.stack || err);
             return Tools.du(path + "src");
         }).then(function(size) {
             bo.diskUsage += size;
@@ -514,7 +514,7 @@ controller.generateStatistics = function() {
             return Tools.du(path + "thumb");
         }).catch(function(err) {
             if ("ENOENT" != err.code)
-                console.error(err.stack || err);
+                Global.error(err.stack || err);
             return Tools.du(path + "thumb");
         }).then(function(size) {
             bo.diskUsage += size;
@@ -522,7 +522,7 @@ controller.generateStatistics = function() {
             return Tools.du(path + "arch");
         }).catch(function(err) {
             if ("ENOENT" != err.code)
-                console.error(err.stack || err);
+                Global.error(err.stack || err);
             return Tools.du(path + "arch");
         }).then(function(size) {
             bo.diskUsage += size;
@@ -530,7 +530,7 @@ controller.generateStatistics = function() {
             return Promise.resolve();
         }).catch(function(err) {
             if ("ENOENT" != err.code)
-                console.error(err.stack || err);
+                Global.error(err.stack || err);
             return Promise.resolve();
         }).then(function() {
             o.boards.push(bo);

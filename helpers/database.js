@@ -367,7 +367,7 @@ var getPost = function(boardName, postNumber, options) {
     }).then(function(banned) {
         c.post.bannedFor = banned;
         return Promise.resolve(c.post);
-    });;
+    });
     if (!opts || (!options.withFileInfos && !options.withReferences && !options.withExtraData))
         return p;
     return p.then(function() {
@@ -377,6 +377,7 @@ var getPost = function(boardName, postNumber, options) {
         var promises = [];
         if (options.withFileInfos) {
             promises.push(postFileInfoNames(boardName, postNumber).then(function(names) {
+                c.names = names;
                 return Promise.all(names.map(function(name) {
                     return db.hget("fileInfos", name);
                 }));
@@ -1476,9 +1477,7 @@ module.exports.findPosts = function(query, boardName) {
         index: "ololord.js",
         type: "posts",
         size: config("system.searchLimit", 100),
-        body: {
-            query: q
-        }
+        body: { query: q }
     }).then(function(result) {
         return result.hits.hits.map(function(hit) {
             return {

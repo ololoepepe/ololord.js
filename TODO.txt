@@ -2,6 +2,7 @@
 [done] Fix settings dialog select auto focusing on mobile devices
 [done] Fix incorrect cookies usage (use localStorage)
 [done] Fix RSS time
+[done] Fix RSS post order
 [done] Fix draft text overflow
 [done] Improve textarea symbol counter
 [done] Improve textarea and markup group resizing
