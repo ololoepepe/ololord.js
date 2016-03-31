@@ -1,4 +1,3 @@
-* Consider using markdown-it as a parser [not sure if needed]
 * Consider adding statistics [not sure if needed]
 
 [done] Fix archived threads sorting
