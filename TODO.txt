@@ -1,5 +1,3 @@
-* Consider adding statistics [not sure if needed]
-
 [done] Fix archived threads sorting
 [done] Fix settings dialog select auto focusing on mobile devices
 [done] Fix incorrect cookies usage (use localStorage)
@@ -32,3 +30,4 @@
 [done] Block hotkeys while a dialog is opened
 [done] Use Elasticsearch instead of custom search system
 [done] Highlight search phrases case-insensetively
+[done] Implement statistics (posting speed, file count, disk usage)

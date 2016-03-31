@@ -455,12 +455,90 @@ controller.regenerate = function() {
     }).then(function() {
         if (!config("server.rss.enabled", true))
             return Promise.resolve();
-        console.log("Generating RSS, please, wait...");
-        return BoardModel.generateRSS().catch(function(err) {
+        console.log("Generating statistics, please, wait...");
+        return controller.generateStatistics().catch(function(err) {
+            Global.error(err.stack || err);
+        }).then(function() {
+            console.log("Generating RSS, please, wait...");
+            return BoardModel.generateRSS();
+        }).catch(function(err) {
             Global.error(err.stack || err);
         }).then(function() {
             return Promise.resolve();
         });
+    });
+};
+
+controller.generateStatistics = function() {
+    var o = {
+        boards: [],
+        total: {
+            postCount: 0,
+            fileCount: 0,
+            diskUsage: 0
+        }
+    };
+    var ld = Tools.now().valueOf();
+    var brd;
+    return Tools.series(Board.boardNames(), function(boardName) {
+        var board = Board.board(boardName);
+        var bld = board.launchDate.valueOf();
+        if (!brd || bld < ld) {
+            brd = board;
+            ld = bld;
+        }
+        var bo = {
+            name: board.name,
+            title: board.title,
+            diskUsage: 0
+        };
+        var path = __dirname + "/../public/" + board.name + "/";
+        return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
+            o.total.postCount += lastPostNumber;
+            bo.postCount = lastPostNumber;
+            bo.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
+            return FS.list(path + "src");
+        }).then(function(list) {
+            var fileCount = list ? list.length : 0;
+            bo.fileCount = fileCount;
+            o.total.fileCount += fileCount;
+            return Tools.du(path + "src");
+        }).catch(function(err) {
+            if ("ENOENT" != err.code)
+                console.error(err.stack || err);
+            return Tools.du(path + "src");
+        }).then(function(size) {
+            bo.diskUsage += size;
+            o.total.diskUsage += size;
+            return Tools.du(path + "thumb");
+        }).catch(function(err) {
+            if ("ENOENT" != err.code)
+                console.error(err.stack || err);
+            return Tools.du(path + "thumb");
+        }).then(function(size) {
+            bo.diskUsage += size;
+            o.total.diskUsage += size;
+            return Tools.du(path + "arch");
+        }).catch(function(err) {
+            if ("ENOENT" != err.code)
+                console.error(err.stack || err);
+            return Tools.du(path + "arch");
+        }).then(function(size) {
+            bo.diskUsage += size;
+            o.total.diskUsage += size;
+            return Promise.resolve();
+        }).catch(function(err) {
+            if ("ENOENT" != err.code)
+                console.error(err.stack || err);
+            return Promise.resolve();
+        }).then(function() {
+            o.boards.push(bo);
+            return Promise.resolve();
+        });
+    }).then(function() {
+        o.total.postingSpeed = controller.postingSpeedString(brd, o.total.postCount);
+        Cache.setJSON(`statistics`, JSON.stringify(o));
+        return Promise.resolve();
     });
 };
 

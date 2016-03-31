@@ -3,6 +3,7 @@ var Address6 = require("ip-address").Address6;
 var Canvas = require("canvas");
 var ChildProcess = require("child_process");
 var Crypto = require("crypto");
+var du = require("du");
 var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
@@ -678,6 +679,16 @@ module.exports.generateRandomImage = function(hash, mimeType, thumbPath) {
         ctx.drawImage(img, 0, 0, 200, 200);
         return new Promise(function(resolve, reject) {
             canvas.pngStream().pipe(FSSync.createWriteStream(thumbPath).on("error", reject).on("finish", resolve));
+        });
+    });
+};
+
+module.exports.du = function(path) {
+    return new Promise(function(resolve, reject) {
+        du(path, function(err, size) {
+            if (err)
+                return reject(err);
+            resolve(size);
         });
     });
 };

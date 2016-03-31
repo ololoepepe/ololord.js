@@ -134,6 +134,13 @@ if (cluster.isMaster) {
     Database.initialize().then(function() {
         return controller.initialize();
     }).then(function() {
+        if (config("server.statistics.enabled", true)) {
+            setInterval(function() {
+                controller.generateStatistics().catch(function(err) {
+                    Global.error(err.stack || err);
+                });
+            }, config("server.statistics.ttl", 60) * Tools.Minute);
+        }
         if (config("server.rss.enabled", true)) {
             setInterval(function() {
                 BoardModel.generateRSS().catch(function(err) {
