@@ -46,6 +46,9 @@
             <div id="playerVolumeSlider"></div>
         </div>
         <div id="playerTracks"></div>
+        <a id="playerAddRadioButton" href="javascript:void(0);" onclick="lord.playerAddRadio(); return false;"
+           title="{{=it.tr.addRadioText}}"><img src="/{{=it.site.pathPrefix}}img/player/32/radio_add.png"
+                                                      class="buttonImage" width="32" height="32"></a>
         <a id="playerMinimizeButton" href="javascript:void(0);" onclick="lord.setPlayerVisible(event, false);"
            title="{{=it.tr.minimizePlayerText}}"><img src="/{{=it.site.pathPrefix}}img/player/32/hide.png"
                                                       class="buttonImage" width="32" height="32"></a>

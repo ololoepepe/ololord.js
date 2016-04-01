@@ -39,6 +39,7 @@ module.exports = function(tr) {
     translate("Delete", "deletePostText");
     translate("Hide", "hidePostText");
     translate("Show", "showPostText");
+    translate("Add radio stream", "addRadioText");
     translate("Minimize player", "minimizePlayerText");
     translate("Maximize player", "maximizePlayerText");
     translate("Play", "playerPlayText");
@@ -47,6 +48,8 @@ module.exports = function(tr) {
     translate("Next track", "playerNextTrackText");
     translate("Mute", "playerMuteText");
     translate("Unmute", "playerUnmuteText");
+    translate("Title:", "playerRadioTitleLabelText");
+    translate("URL:", "playerRadioURLLabelText");
     translate("Last modified:", "modificationDateTimeText");
     translate("User was banned for this post", "bannedForText");
     translate("Delete file", "deleteFileText");

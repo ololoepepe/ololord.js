@@ -3,6 +3,7 @@
 !partials
 !addFileDialog.jst
 !addFilesDialog.jst
+!addRadioDialog.jst
 !banner.jst
 !boardPageLower.jst
 !boardPageUpper.jst

@@ -428,6 +428,9 @@
     "Title:": {
         "audioTagTitleText": {
             "value": "Название:"
+        },
+        "playerRadioTitleLabelText": {
+            "value": "Название:"
         }
     },
     "Year:": {
@@ -1571,6 +1574,9 @@
     },
     "URL:": {
         "linkLabelText": {
+            "value": "Ссылка:"
+        },
+        "playerRadioURLLabelText": {
             "value": "Ссылка:"
         }
     },
@@ -3161,6 +3167,11 @@
     "Hide by image size": {
         "hideByImageSizeText": {
             "value": "Скрывать по размеру картинки"
+        }
+    },
+    "Add radio stream": {
+        "addRadioText": {
+            "value": "Добавить радио-поток"
         }
     }
 }

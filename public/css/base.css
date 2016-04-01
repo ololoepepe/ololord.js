@@ -1057,6 +1057,13 @@ input.buttonImage {
     right: 4px;
 }
 
+#playerAddRadioButton {
+    display: inline-block;
+    position: absolute;
+    right: 50px;
+    bottom: 16px;
+}
+
 #playerMinimizeButton {
     display: inline-block;
     position: absolute;
