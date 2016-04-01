@@ -272,7 +272,7 @@ var renderFileInfo = function(fi) {
             fi.sizeTooltip += "]";
             if (ed.year)
                 fi.sizeTooltip += " (" + ed.year + ")";
-        } else if (Tools.isVideoType(fi.mimeType)) {
+        } else if (Tools.isVideoType(fi.mimeType) && ed.bitrate) {
             fi.sizeTooltip = ed.bitrate + Tools.translate("kbps", "kbps");
         }
     }
@@ -449,8 +449,9 @@ var getRules = function(boardName) {
                         height: metadata.streams[0].height
                     };
                 }
-                file.extraData.duration = durationToString(metadata.format.duration);
-                file.extraData.bitrate = Math.floor(+metadata.format.bit_rate / 1024);
+                file.extraData.duration = +metadata.format.duration ? durationToString(metadata.format.duration)
+                    : metadata.format.duration;
+                file.extraData.bitrate = +metadata.format.bit_rate ? Math.floor(+metadata.format.bit_rate / 1024) : 0;
                 file.thumbPath += ".png";
                 return new Promise(function(resolve, reject) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
