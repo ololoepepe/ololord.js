@@ -26,6 +26,19 @@ var workerLoads = {};
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-json");
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-rss");
 
+var postSubject = function(post, maxLength) {
+    var title = "";
+    if (post.subject)
+        title = post.subject;
+    else if (post.text)
+        title = Tools.plainText(post.text);
+    title = title.replace(/\r*\n+/gi, "");
+    maxLength = +maxLength;
+    if (!isNaN(maxLength) && maxLength > 3 && title.length > maxLength)
+        title = title.substr(0, maxLength - 3) + "...";
+    return title;
+};
+
 module.exports.getLastPostNumbers = function(boardNames) {
     if (!Util.isArray(boardNames))
         return Promise.resolve([]);
@@ -172,7 +185,7 @@ var getThreadPage = function(archived, board, number, json, ifModifiedSince) {
         c.model = {};
         var postCount = c.thread.postNumbers.length;
         var threadModel = {
-            title: Tools.postSubject(c.opPost, 50) || null,
+            title: postSubject(c.opPost, 50) || null,
             number: c.thread.number,
             bumpLimit: board.bumpLimit,
             postLimit: board.postLimit,
@@ -221,7 +234,7 @@ var getThread = function(board, number) {
     }).then(function(postCount) {
         c.model = {};
         var threadModel = {
-            title: Tools.postSubject(c.opPost, 50) || null,
+            title: postSubject(c.opPost, 50) || null,
             number: c.thread.number,
             bumpLimit: board.bumpLimit,
             postLimit: board.postLimit,
@@ -391,6 +404,7 @@ var generateThreadHTML = function(board, threadNumber, model, nowrite) {
     model.isThreadPage = true;
     model.board = controller.boardModel(board).board;
     model.extraScripts = board.extraScripts();
+    model.extraStylesheets = board.extraStylesheets();
     model.tr = controller.translationsModel();
     model.threadNumber = model.thread.number;
     return board.postformRules().then(function(rules) {
@@ -453,6 +467,7 @@ var generatePage = function(boardName, pageNumber) {
         c.model.isBoardPage = true;
         c.model.board = controller.boardModel(board).board;
         c.model.extraScripts = board.extraScripts();
+        c.model.extraStylesheets = board.extraStylesheets();
         c.model.tr = controller.translationsModel();
         return board.postformRules();
     }).then(function(rules) {
@@ -514,13 +529,27 @@ var generateArchive = function(boardName) {
             return Promise.resolve([]);
         return FS.list(path);
     }).then(function(fileNames) {
-        model.threads = fileNames.filter(function(fileName) {
+        var fileNames = fileNames.filter(function(fileName) {
             return fileName.split(".").pop() == "json";
-        }).map(function(fileName) {
-            return {
-                boardName: board.name,
-                number: +fileName.split(".").shift()
-            };
+        });
+        model.threads = [];
+        return Tools.series(fileNames, function(fileName) {
+            return FS.stat(path + "/" + fileName).then(function(stats) {
+                model.threads.push({
+                    boardName: board.name,
+                    number: +fileName.split(".").shift(),
+                    birthtime: stats.node.birthtime
+                });
+            });
+        });
+    }).then(function() {
+        model.threads = model.threads.sort(function(t1, t2) {
+            if (t1.birthtime > t2.birthtime)
+                return -1;
+            else if (t1.birthtime < t2.birthtime)
+                return 1;
+            else
+                return 0;
         });
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
@@ -529,7 +558,6 @@ var generateArchive = function(boardName) {
         return Cache.setJSON(`archive-${board.name}`, JSON.stringify(model));
     }).then(function() {
         model.title = board.title;
-        //model.isBoardPage = true;
         model.board = controller.boardModel(board).board;
         model.tr = controller.translationsModel();
         return controller("archivePage", model);
@@ -843,98 +871,105 @@ module.exports.generateRSS = function(currentProcess) {
         protocol: config("site.protocol", "http"),
         domain: config("site.domain", "localhost:8080"),
         pathPrefix: config("site.pathPrefix", ""),
-        locale: config("site.locale", "en"),
-        dateFormat: config("site.dateFormat", "MM/DD/YYYY hh:mm:ss")
+        locale: config("site.locale", "en")
     };
     var rssPostCount = config("server.rss.postCount", 500);
-    return Tools.series(Board.boardNames(), function(boardName) {
-        var board = Board.board(boardName);
-        var title = Tools.translate("Feed", "channelTitle") + " " + site.domain + "/" + site.pathPrefix + boardName;
-        var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName;
-        var description = Tools.translate("Last posts from board", "channelDescription") + " /" + boardName + "/";
-        var atomLink = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/rss.xml";
-        var posts = [];
-        var c = {};
-        var f = function() {
-            if (posts.length >= rssPostCount || c.threads.length < 1)
-                return Promise.resolve();
-            return Database.threadPosts(boardName, c.threads.shift().number, {
-                limit: (rssPostCount - posts.length),
-                withFileInfos: true
-            }).then(function(result) {
-                posts = posts.concat(result);
-                return f();
-            });
-        };
-        var doc = {
-            $: {
-                version: "2.0",
-                "xmlns:dc": "http://purl.org/dc/elements/1.1/",
-                "xmlns:atom": "http://www.w3.org/2005/Atom"
-            },
-            channel: {
-                title: title,
-                link: link,
-                description: description,
-                language: site.locale,
-                pubDate: moment(Tools.now()).utc().locale("en").format("ddd, DD MMM YYYY hh:mm:ss +0000"),
-                ttl: ("" + config("server.rss.ttl", 60)),
-                "atom:link": {
-                    $: {
-                        href: atomLink,
-                        rel: "self",
-                        type: "application/rss+xml"
-                    }
-                }
-            }
-        };
-        return Database.getThreads(boardName).then(function(threads) {
-            threads.sort(Board.sortThreadsByDate);
-            c.threads = threads;
-            return f();
-        }).then(function() {
-            doc.channel.item = posts.map(function(post) {
-                var title;
-                var isOp = post.number == post.threadNumber;
-                if (isOp)
-                    title = "[" + Tools.translate("New thread", "itemTitle") + "]";
-                else
-                    title = Tools.translate("Reply to thread", "itemTitle");
-                title += " ";
-                if (!isOp)
-                    title += "\"";
-                title += Tools.postSubject(post, 150) || post.number;
-                if (!isOp)
-                    title += "\"";
-                var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/res/"
-                    + post.threadNumber + ".html";
-                var description = "\n" + post.fileInfos.map(function(fileInfo) {
-                    return"<img src=\"" + site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName
-                        + "/thumb/" + fileInfo.thumb.name + "\"><br />";
-                }) + (post.text || "") + "\n";
-                return {
+    var postNumbers = {};
+    Board.boardNames().forEach(function(boardName) {
+        postNumbers[boardName] = [];
+    });
+    var feedTranslated = Tools.translate("Feed", "channelTitle");
+    return Database.db.hkeys("posts").then(function(keys) {
+        keys.forEach(function(key) {
+            postNumbers[key.split(":").shift()].push(+key.split(":").pop());
+        });
+        return Tools.series(Board.boardNames(), function(boardName) {
+            var board = Board.board(boardName);
+            var title = feedTranslated + " " + site.domain + "/" + site.pathPrefix + boardName;
+            var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName;
+            var description = Tools.translate("Last posts from board", "channelDescription") + " /" + boardName + "/";
+            var atomLink = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/rss.xml";
+            var doc = {
+                $: {
+                    version: "2.0",
+                    "xmlns:dc": "http://purl.org/dc/elements/1.1/",
+                    "xmlns:atom": "http://www.w3.org/2005/Atom"
+                },
+                channel: {
                     title: title,
                     link: link,
                     description: description,
-                    pubDate: moment(post.createdAt).utc().locale("en").format("ddd, DD MMM YYYY hh:mm:ss +0000"),
-                    guid: {
-                        _: link + "#" + post.number,
-                        $: { isPermalink: true }
+                    language: site.locale,
+                    pubDate: moment(Tools.now()).utc().locale("en").format("ddd, DD MMM YYYY HH:mm:ss +0000"),
+                    ttl: ("" + config("server.rss.ttl", 60)),
+                    "atom:link": {
+                        $: {
+                            href: atomLink,
+                            rel: "self",
+                            type: "application/rss+xml"
+                        }
+                    }
+                }
+            };
+            var posts = [];
+            return Tools.series(postNumbers[boardName].sort(function(pn1, pn2) {
+                if (pn1 < pn2)
+                    return 1;
+                else if (pn1 > pn2)
+                    return -1;
+                else
+                    return 0;
+            }).slice(0, rssPostCount).reverse(), function(postNumber) {
+                return Database.getPost(boardName, postNumber, { withFileInfos: true }).then(function(post) {
+                    posts.push(post);
+                    return Promise.resolve();
+                });
+            }).then(function() {
+                doc.channel.item = posts.map(function(post) {
+                    var title;
+                    var isOp = post.number == post.threadNumber;
+                    if (isOp)
+                        title = "[" + Tools.translate("New thread", "itemTitle") + "]";
+                    else
+                        title = Tools.translate("Reply to thread", "itemTitle");
+                    title += " ";
+                    if (!isOp)
+                        title += "\"";
+                    title += postSubject(post, 150) || post.number;
+                    if (!isOp)
+                        title += "\"";
+                    var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/res/"
+                        + post.threadNumber + ".html";
+                    var description = "\n" + post.fileInfos.map(function(fileInfo) {
+                        if (!fileInfo)
+                            return ""; //NOTE: Normally that should not happen
+                        return "<img src=\"" + site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName
+                            + "/thumb/" + fileInfo.thumb.name + "\"><br />";
+                    }).join("\n") + (post.text || "") + "\n";
+                    return {
+                        title: title,
+                        link: link,
+                        description: description,
+                        pubDate: moment(post.createdAt).utc().locale("en").format("ddd, DD MMM YYYY HH:mm:ss +0000"),
+                        guid: {
+                            _: link + "#" + post.number,
+                            $: { isPermalink: true }
+                        },
+                        "dc:creator": (post.name || board.defaultUserName)
+                    };
+                });
+            }).then(function() {
+                var builder = new XML2JS.Builder({
+                    rootName: "rss",
+                    renderOpts: {
+                        pretty: true,
+                        indent: "    ",
+                        newline: "\n"
                     },
-                    "dc:creator": (post.name || board.defaultUserName)
-                };
+                    cdata: true
+                });
+                return Cache.setRSS(boardName, builder.buildObject(doc));
             });
-        }).then(function() {
-            var builder = new XML2JS.Builder({
-                rootName: "rss",
-                renderOpts: {
-                    pretty: true,
-                    indent: "    ",
-                    newline: "\n"
-                },
-                cdata: true
-            });
-            return Cache.setRSS(boardName, builder.buildObject(doc));
         });
     });
 };

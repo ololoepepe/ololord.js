@@ -7,7 +7,7 @@
         if (lord.data("boardName"))
             model.board = lord.model("board/" + lord.data("boardName")).board;
         model.settings = settings;
-        model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
+        model.inIframe = lord.inIframe();
         document.open();
         document.write(lord.template("navbar", model, true));
         document.close();

@@ -43,7 +43,7 @@ module.exports = function(name, title, options) {
                     Global.generate("soc", JSON.parse(post).threadNumber, c.postNumber, "edit");
                     res.send({});
                 }).catch(function(err) {
-                    controller.error(res, err, true);
+                    controller.error(req, res, err, true);
                 });
             }
         },
@@ -77,7 +77,7 @@ module.exports = function(name, title, options) {
                     Global.generate("soc", JSON.parse(post).threadNumber, c.postNumber, "edit");
                     res.send({});
                 }).catch(function(err) {
-                    controller.error(res, err, true);
+                    controller.error(req, res, err, true);
                 });
             }
         }];

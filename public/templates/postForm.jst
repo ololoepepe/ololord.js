@@ -83,11 +83,11 @@
                     </td>
                     <td class="postformField">
                         <div class="symbolCounterContainer postFormInput">
-                            <span class="symbolCounter"><span name="used">0</span>/{{=it.board.maxTextLength}}</span>
                             <textarea name="text" rows="10" cols="41" class="postFormTextarea"
                                       placeholder="{{=it.tr.postFormTextPlaceholder}} {{=it.board.maxTextLength}}"
                                       {{? "mobile" != it.deviceType}}style="min-width: 400px;"{{?}}
                                       oninput="lord.countSymbols(this);"></textarea>
+                            <span class="symbolCounter"><span name="used">0</span>/{{=it.board.maxTextLength}}</span>
                         </div>
                     </td>
                 {{?}}
@@ -218,19 +218,32 @@
                                        onclick="lord.markup('url'); return false;" name="markupUrl"
                                        title="{{=it.tr.markupUrl}}" class="buttonImage bordered" width="40" height="20" />
                             {{?}}
+                            {{? it.board.markupElements.indexOf("LATEX") >= 0}}
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/latex.png"
+                                       onclick="lord.markup('latex'); return false;" name="markupLatex"
+                                       title="{{=it.tr.markupLatex}}"
+                                       class="buttonImage bordered" width="51" height="20" />
+                            {{?}}
+                            {{? it.board.markupElements.indexOf("INLINE_LATEX") >= 0}}
+                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/inline_latex.png"
+                                       onclick="lord.markup('inline-latex'); return false;" name="markupInlineLatex"
+                                       title="{{=it.tr.markupInlineLatex}}"
+                                       class="buttonImage bordered" width="99" height="20" />
+                            {{?}}
                             {{? it.board.markupElements.indexOf("CODE") >= 0}}
-                                <br />
-                                <select name="codeLang" class="select" title="{{=it.tr.markupCodeLang}}"
-                                        onchange="lord.changeLastCodeLang(this);">
-                                    <option value="-" selected="true">-----</option>
-                                    {{~it.availableCodeLangs :lang}}
-                                        <option value="{{=lang.id}}">{{=lang.name}}</option>
-                                    {{~}}
-                                </select>
-                                <input type="image" src="/{{=it.site.pathPrefix}}img/markup/code.png"
-                                       onclick="lord.markup('code'); return false;" name="markupCode"
-                                       title="{{=it.tr.markupCode}}" class="buttonImage bordered" width="40"
-                                       height="20" />
+                                <span class="nowrap">
+                                    <select name="codeLang" class="select" title="{{=it.tr.markupCodeLang}}"
+                                            onchange="lord.changeLastCodeLang(this);">
+                                        <option value="-" selected="true">-----</option>
+                                        {{~it.availableCodeLangs :lang}}
+                                            <option value="{{=lang.id}}">{{=lang.name}}</option>
+                                        {{~}}
+                                    </select>
+                                    <input type="image" src="/{{=it.site.pathPrefix}}img/markup/code.png"
+                                           onclick="lord.markup('code'); return false;" name="markupCode"
+                                           title="{{=it.tr.markupCode}}" class="buttonImage bordered" width="40"
+                                           height="20" />
+                                </span>
                             {{?}}
                         </span>
                     </td>
@@ -285,7 +298,7 @@
                     {{? it.customPostFormOption && it.customPostFormOption[30]}}
                         {{ out += it.customPostFormOption[30](it); }}
                     {{?}}
-                    {{? it.user.isModer(it.board.name)}}
+                    {{? it.hasPermission(it.board, "useRawHTMLMarkup")}}
                         <a href="javascript:void(0);" onclick="lord.markup('raw-html'); return false;"
                            style="display: inline-block; vertical-align: top;" title='{{=it.tr.markupHtml}}'
                            name="markupHtml"><img src="/{{=it.site.pathPrefix}}img/html.png" class="signImage"></a>

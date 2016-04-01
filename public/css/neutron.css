@@ -476,3 +476,7 @@ textarea {
 .delallHeader {
     font-weight: bold;
 }
+
+ul.jqueryFileTree a {
+    color: #698CC0 !important;
+}

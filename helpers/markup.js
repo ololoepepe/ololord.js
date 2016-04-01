@@ -8,6 +8,7 @@ var config = require("./config");
 var controller = require("./controller");
 var Database = require("./database");
 var Global = require("./global");
+var Permissions = require("./permissions");
 var Tools = require("./tools");
 
 var langNames = require("../misc/lang-names.json");
@@ -709,6 +710,11 @@ var convertMarkup = function(_, text, matchs, _, options) {
     return Promise.resolve(text);
 };
 
+var convertLatex = function(inline, _, text, matchs, _, options) {
+    options.type = SkipTypes.HtmlSkip;
+    return Tools.markupLatex(text, inline);
+};
+
 var convertUrl = function(info, text, matchs, matche, options) {
     if (!text)
         return Promise.resolve("");
@@ -836,10 +842,14 @@ var processPostText = function(boardName, text, options) {
                 op: new RegExp("/\\-\\-code\\s+(" + langs + ")\\s+", "gi"),
                 cl: /\s+\\\\\\-\\-/g
             });
+        }).then(function() {
+            return process(info, convertLatex.bind(null, false), { op: "$$$" });
+        }).then(function() {
+            return process(info, convertLatex.bind(null, true), { op: "$$" });
         });
     }
     if (markupModes.indexOf(MarkupModes.BBCode) >= 0) {
-        if (Database.compareRegisteredUserLevels(accessLevel, Database.RegisteredUserLevels.Moder) >= 0) {
+        if (Database.compareRegisteredUserLevels(accessLevel, Permissions.useRawHTMLMarkup()) >= 0) {
             p = p.then(function() {
                 return process(info, convertHtml, {
                     op: "[raw-html]",
@@ -876,6 +886,16 @@ var processPostText = function(boardName, text, options) {
             return process(info, convertNomarkup, {
                 op: "[n]",
                 cl: "[/n]"
+            });
+        }).then(function() {
+            return process(info, convertLatex.bind(null, false), {
+                op: "[latex]",
+                cl: "[/latex]"
+            });
+        }).then(function() {
+            return process(info, convertLatex.bind(null, true), {
+                op: "[l]",
+                cl: "[/l]"
             });
         });
     }

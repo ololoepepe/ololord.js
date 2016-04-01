@@ -1,9 +1,11 @@
 *
 !codemirror
+!BigInteger.min.js
 !doT.min.js
 !FileSaver.min.js
 !isInViewport.min.js
 !jquery-1.11.3.min.js
+!jQueryFileTree.js
 !jquery-ui.min.js
 !jquitelight.min.js
 !jquery.datetimepicker.js
@@ -13,10 +15,13 @@
 !jszip-utils.min.js
 !literallycanvas.min.js
 !merge.min.js
+!mobile-detect.min.js
 !moment-with-locales.min.js
 !Promise.min.js
 !react-with-addons.min.js
 !sha1.min.js
 !twitter.js
+!underscore-min.js
 !uuid.js
+!vk-openapi.js
 !.gitignore

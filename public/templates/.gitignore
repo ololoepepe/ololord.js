@@ -1,6 +1,7 @@
 *
 !custom
 !partials
+!addFileDialog.jst
 !addFilesDialog.jst
 !banner.jst
 !boardPageLower.jst
@@ -35,6 +36,7 @@
 !movablePlayer.jst
 !moveThreadDialog.jst
 !navbar.jst
+!nodeCaptchaWidget.jst
 !notFoundImage.jst
 !pagination.jst
 !playerTrack.jst
@@ -43,6 +45,8 @@
 !postForm.jst
 !postReference.jst
 !registeredUser.jst
+!renameFileDialog.jst
+!rerenderPostsDialog.jst
 !rpgEditPostDialogPart.jst
 !rpgPostBodyPart.jst
 !rpgPostFormField.jst

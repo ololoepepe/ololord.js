@@ -1,8 +1,73 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
-<frameset cols="{{? it.deviceType != "mobile"}}210{{??}}80{{?}},*">
-    <frame src="/{{=it.site.pathPrefix}}frameList.html" name="list" noresize="" scrolling="auto" frameborder="1"></frame>
-    <frame src="/{{=it.site.pathPrefix}}" name="page" noresize=""></frame>
-</frameset>
+<body {{#def.baseData}}>
+<div class="frameList">
+    <div class="theTitle">
+        <img src="/{{=it.site.pathPrefix}}favicon.ico" title="{{=it.title}}">
+    </div>
+    <br />
+    <div>
+        <script type="text/javascript">
+            (function() {
+                var model = lord.model(["base", "tr", "boards"]);
+                model.settings = lord.settings();
+                model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
+                document.open();
+                document.write(lord.template("frameListNavigation", model, true));
+                document.close();
+                window.addEventListener("load", function load() {
+                    window.removeEventListener("load", load, false);
+                    $(".frameList").height($(window).height() - 20);
+                    $(".frameContent").height($(window).height() - 20);
+                    var w = $(window);
+                    w.resize(function() {
+                        var h = $(w).height() - 20;
+                        $(".frameList").height(h);
+                        $(".frameContent").height(h);
+                    });
+                    setInterval(function() {
+                        var q = $.getQueryParameters();
+                        var nsrc = lord.id("frameContent").contentWindow.location.pathname.replace(/\/$/, "");
+                        if (nsrc == q.src.replace(/\/$/, ""))
+                            return;
+                        q.src = nsrc;
+                        q = lord.map(q, function(val, key) {
+                            return key + "=" + val;
+                        }).reduce(function(acc, p) {
+                            return acc ? ("&" + p) : p;
+                        }, "");
+                        window.history.replaceState({}, window.title,
+                            window.location.href.split("?").shift() + "?" + q);
+                    }, lord.Second);
+                }, false);
+
+                lord.setIframeSrc = function(a) {
+                    if (!a)
+                        return;
+                    lord.id("frameContent").src = a.href;
+                };
+
+                lord.escapeIframe = function() {
+                    var src = $.getQueryParameters().src;
+                    if (src)
+                        window.location.pathname = src;
+                    else
+                        window.location = src || lord.id("frameContent").src;
+                };
+            })();
+        </script>
+    </div>
+</div>
+<div class="frameContent">
+    <script type="text/javascript">
+        (function() {
+            var src = $.getQueryParameters().src || "/{{=it.site.pathPrefix}}";
+            document.open();
+            document.write('<iframe id="frameContent" src="' + src + '" frameborder="0"></iframe>');
+            document.close();
+        })();
+    </script>
+</div>
+</body>
 </html>

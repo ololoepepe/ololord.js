@@ -5,12 +5,17 @@ var expressCluster = require("express-cluster");
 var Log4JS = require("log4js");
 var OS = require("os");
 
+var Global = require("./helpers/global");
+Global.Program = require("commander");
+Global.Program.version("1.1.0-beta")
+    .option("-c, --config-file <file>", "Path to the config.json file")
+    .parse(process.argv);
+
 var Cache = require("./helpers/cache");
 var config = require("./helpers/config");
 var controller = require("./helpers/controller");
 var BoardModel = require("./models/board");
 var Database = require("./helpers/database");
-var Global = require("./helpers/global");
 var Tools = require("./helpers/tools");
 
 Global.IPC = require("./helpers/ipc")(cluster);
@@ -54,7 +59,7 @@ var spawnCluster = function() {
         app.use(require("./middlewares"));
         app.use(require("./controllers"));
         app.use("*", function(req, res) {
-            controller.notFound(res);
+            controller.notFound(req, res);
         });
 
         BoardModel.initialize().then(function() {
@@ -98,6 +103,13 @@ var spawnCluster = function() {
                     require("./boards/board").initialize();
                     return Promise.resolve();
                 });
+                Global.IPC.installHandler("reloadConfig", function(data) {
+                    if (data)
+                        config.setConfigFile(data);
+                    else
+                        config.reload();
+                    return Promise.resolve();
+                });
                 Global.IPC.send("ready").catch(function(err) {
                     Global.error(err);
                 });
@@ -122,6 +134,13 @@ if (cluster.isMaster) {
     Database.initialize().then(function() {
         return controller.initialize();
     }).then(function() {
+        if (config("server.statistics.enabled", true)) {
+            setInterval(function() {
+                controller.generateStatistics().catch(function(err) {
+                    Global.error(err.stack || err);
+                });
+            }, config("server.statistics.ttl", 60) * Tools.Minute);
+        }
         if (config("server.rss.enabled", true)) {
             setInterval(function() {
                 BoardModel.generateRSS().catch(function(err) {
@@ -164,6 +183,23 @@ if (cluster.isMaster) {
         });
         Global.IPC.installHandler("generateArchive", function(data) {
             return BoardModel.scheduleGenerateArchive(data);
+        });
+        Global.IPC.installHandler("stop", function() {
+            return Global.IPC.send("stop");
+        });
+        Global.IPC.installHandler("start", function() {
+            return Global.IPC.send("start");
+        });
+        Global.IPC.installHandler("reloadBoards", function() {
+            require("./boards/board").initialize();
+            return Global.IPC.send("reloadBoards");
+        });
+        Global.IPC.installHandler("reloadConfig", function() {
+            config.reload();
+            return Global.IPC.send("reloadConfig");
+        });
+        Global.IPC.installHandler("regenerateCache", function() {
+            return controller.regenerate();
         });
     }).catch(function(err) {
         Global.error(err.stack || err);

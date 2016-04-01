@@ -86,7 +86,7 @@ module.exports = function(name, title, options) {
                     Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
                     res.send({});
                 }).catch(function(err) {
-                    controller.error(res, err, true);
+                    controller.error(req, res, err, true);
                 });
             }
         },
@@ -130,7 +130,7 @@ module.exports = function(name, title, options) {
                     Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
                     res.send({});
                 }).catch(function(err) {
-                    controller.error(res, err, true);
+                    controller.error(req, res, err, true);
                 });
             }
         },
@@ -160,7 +160,7 @@ module.exports = function(name, title, options) {
                     Global.generate("rpg", c.post.threadNumber, c.post.number, "edit");
                     res.send({});
                 }).catch(function(err) {
-                    controller.error(res, err, true);
+                    controller.error(req, res, err, true);
                 });
             }
         }];

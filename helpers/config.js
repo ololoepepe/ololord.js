@@ -3,6 +3,8 @@ var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Path = require("path");
 
+var Global = require("./global");
+
 var contains = function(s, subs) {
     if (typeof s == "string" && typeof subs == "string")
         return s.replace(subs, "") != s;
@@ -15,14 +17,16 @@ var contains = function(s, subs) {
     return false;
 };
 
-var configFileName = process.argv[2];
+var configFileName = Global.Program && Global.Program.configFile;
 if (!configFileName)
     configFileName = __dirname + "/../config.json";
 configFileName = Path.resolve(__dirname + "/..", configFileName);
 var config = {};
 if (FSSync.existsSync(configFileName)) {
     console.log("[" + process.pid + "] Using config file: \"" + configFileName + "\"...");
-    var config = require(configFileName);
+    config = JSON.parse(FSSync.readFileSync(configFileName, "UTF-8"));
+} else {
+    console.log("[" + process.pid + "] Using default config...");
 }
 
 var setHooks = {};
@@ -55,7 +59,7 @@ c.set = function(key, value) {
     var prev = o[p];
     o[p] = value;
     var hook = setHooks[key];
-    if (hook)
+    if (typeof hook == "function")
         hook(value, key);
     FS.write(configFileName, JSON.stringify(config, null, 4));
     return prev;
@@ -81,18 +85,34 @@ c.remove = function(key) {
     return prev;
 };
 
-c.setConfigFile = function(fileName) {
-    configFileName = fileName;
-    config = require(fileName);
+c.installSetHook = function(key, hook) {
+    setHooks[key] = hook;
+};
+
+c.reload = function() {
+    config = {};
+    if (FSSync.existsSync(configFileName)) {
+        console.log("[" + process.pid + "] Using config file: \"" + configFileName + "\"...");
+        config = JSON.parse(FSSync.readFileSync(configFileName, "UTF-8"));
+    } else {
+        console.log("[" + process.pid + "] Using default config...");
+    }
     for (var key in setHooks) {
         if (!setHooks.hasOwnProperty(key))
             return;
-        setHooks[key](c(key));
+        var hook = setHooks[key];
+        if (typeof hook != "function")
+            return;
+        setHooks[key](c(key), key);
     }
 };
 
-c.installSetHook = function(key, hook) {
-    setHooks[key] = hook;
+c.setConfigFile = function(fileName) {
+    fileName = fileName || (Global.Program && Global.Program.configFile);
+    if (!fileName)
+        fileName = __dirname + "/../config.json";
+    configFileName = Path.resolve(__dirname + "/..", fileName);
+    c.reload();
 };
 
 module.exports = c;

@@ -57,6 +57,9 @@ router.generateHTML = function() {
     translate("Supported languages", "supportedCodeLanguagesText");
     translate("Language name", "codeLanguageNameText");
     translate("Language ID", "codeLanguageIdText");
+    translate("LaTeX code markup", "latexMarkup");
+    translate("Block LaTeX", "latexText");
+    translate("Inline LaTeX", "inlineLatexText");
     model.tr = tr;
     model.strikedoutTextWakaba = (new Array(tr.strikedoutText.length + 1)).join("^H");
     model.codeToMarkup = "static const int x = 0;";
@@ -75,7 +78,15 @@ router.generateHTML = function() {
     });
     if (config("site.twitter.integrationEnabled", true))
         model.extraScripts = [ { fileName: "3rdparty/twitter.js" } ];
-    return controller("markup", model).then(function(data) {
+    model.latexToMarkup = "v=v_0+\\frac{at^2}{2}";
+    model.inlineLatexToMarkup = "E=mc^2";
+    return Tools.markupLatex(model.latexToMarkup).then(function(html) {
+        model.markedUpLatex = html;
+        return Tools.markupLatex(model.inlineLatexToMarkup, true);
+    }).then(function(html) {
+        model.markedUpInlineLatex = html;
+        return controller("markup", model);
+    }).then(function(data) {
         return Promise.resolve({ "markup": data });
     });
 };

@@ -61,7 +61,7 @@ yandexElatmCaptcha.apiRoutes = function() {
         handler: function(req, res) {
             var captcha = captchaMap[req.query.type];
             if (!captcha)
-                return controller.error(res, Tools.translate("Invalid captcha type"), true);
+                return controller.error(req, res, Tools.translate("Invalid captcha type"), true);
             var type = captcha.id.split("-").pop();
             var query = `key=${encodeURIComponent(captcha.privateKey)}&type=${type}`;
             var url = "http://cleanweb-api.yandex.ru/1.0/get-captcha?" + query;
@@ -96,7 +96,7 @@ yandexElatmCaptcha.apiRoutes = function() {
             }).then(function(result) {
                 res.send(result);
             }).catch(function(err) {
-                controller.error(res, err, true);
+                controller.error(req, res, err, true);
             });
         }
     }];

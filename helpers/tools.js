@@ -1,18 +1,25 @@
 var Address4 = require("ip-address").Address4;
 var Address6 = require("ip-address").Address6;
-var Cheerio = require("cheerio");
+var Canvas = require("canvas");
 var ChildProcess = require("child_process");
 var Crypto = require("crypto");
+var du = require("du");
 var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
 var FSSync = require("fs-ext");
+var HTMLToText = require("html-to-text");
+var Image = Canvas.Image;
+var Jdenticon = require("jdenticon");
+var MathJax = require("mathjax-node/lib/mj-single.js");
 var merge = require("merge");
 var mkpath = require("mkpath");
 var Multiparty = require("multiparty");
 var Path = require("path");
+var phash = require("phash-image");
 var promisify = require("promisify-node");
 var Util = require("util");
+var UUID = require("uuid");
 var XRegExp = require("xregexp");
 
 var config = require("./config");
@@ -31,6 +38,9 @@ var rootZones = require("../misc/root-zones.json").reduce(function(acc, zone) {
     acc[zone] = {};
     return acc;
 }, {});
+
+MathJax.config({ MathJax: {} });
+MathJax.start();
 
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/form");
 
@@ -280,79 +290,6 @@ module.exports.isPdfType = function(mimeType) {
 
 module.exports.isImageType = function(mimeType) {
     return mimeType.substr(0, 6) == "image/";
-};
-
-var getWords = function(text) {
-    if (!text)
-        return [];
-    var rx = XRegExp("^\\pL|[0-9]$");
-    var words = [];
-    var word = "";
-    var pos = 0;
-    for (var i = 0; i < text.length; ++i) {
-        var c = text[i];
-        if (rx.test(c)) {
-            word += c;
-        } else if (word.length > 0) {
-            words.push({
-                word: word.toLowerCase(),
-                pos: pos
-            });
-            word = "";
-            ++pos;
-        }
-    }
-    if (word.length > 0) {
-        words.push({
-            word: word.toLowerCase(),
-            pos: pos
-        });
-    }
-    return words;
-};
-
-module.exports.getWords = getWords;
-
-module.exports.indexPost = function(post, wordIndex) {
-    if (!wordIndex)
-        wordIndex = {};
-    ["rawText", "subject"].forEach(function(source) {
-        var words = getWords(post[source]);
-        for (var i = 0; i < words.length; ++i) {
-            var word = words[i];
-            if (!wordIndex.hasOwnProperty(word.word))
-                wordIndex[word.word] = [];
-            wordIndex[word.word].push({
-                boardName: post.boardName,
-                postNumber: post.number,
-                source: source,
-                position: word.pos
-            });
-        }
-    });
-    return wordIndex;
-};
-
-module.exports.complement = function(map1, map2) {
-    var map = {};
-    forIn(map1, function(value, key) {
-        if (!map2.hasOwnProperty(key))
-            map[key] = value;
-    });
-    return map;
-};
-
-module.exports.intersection = function(map1, map2) {
-    var map = {};
-    forIn(map1, function(value, key) {
-        if (map2.hasOwnProperty(key))
-            map[key] = value;
-    });
-    return hasOwnProperties(map1) ? map : map2;
-}
-
-module.exports.sum = function(map1, map2) {
-    return merge.recursive(map1, map2);
 };
 
 module.exports.splitCommand = function(cmd) {
@@ -671,17 +608,24 @@ module.exports.generateTripcode = function(source) {
     return "!" + md5.digest("base64").substr(0, 10);
 };
 
-module.exports.postSubject = function(post, maxLength) {
-    var title = "";
-    if (post.subject)
-        title = post.subject;
-    else if (post.text)
-        title = Cheerio.load("<div>" + post.text + "</div>")(":root").text();
-    title = title.replace(/\r*\n+/gi, "");
-    maxLength = +maxLength;
-    if (!isNaN(maxLength) && maxLength > 3 && title.length > maxLength)
-        title = title.substr(0, maxLength - 3) + "...";
-    return title;
+module.exports.plainText = function(text, options) {
+    if (!text)
+        return "";
+    text = "" + text;
+    var uuid = UUID.v4();
+    if (options && options.brToNewline)
+        text = text.replace(/<br \/>/g, uuid);
+    else
+        text = text.replace(/<br \/>/g, " ");
+    text = HTMLToText.fromString(text, {
+        wordwrap: null,
+        linkHrefBaseUrl: config("site.protocol", "http") + "://" + config("site.domain", "localhost:8080"),
+        hideLinkHrefIfSameAsText: true,
+        ignoreImages: true
+    });
+    if (options && options.brToNewline)
+        text = text.split(uuid).join("\n");
+    return text;
 };
 
 module.exports.ipList = function(s) {
@@ -698,4 +642,53 @@ module.exports.ipList = function(s) {
     if (err)
         return translate("Invalid IP address");
     return withoutDuplicates(ips);
+};
+
+module.exports.markupLatex = function(text, inline) {
+    return new Promise(function(resolve, reject) {
+        MathJax.typeset({
+            math: text,
+            format: inline ? "inline-TeX" : "TeX",
+            svg: true
+        }, function(data) {
+            if (data.errors)
+                return reject(data.errors[0] || data.errors);
+            var html = data.svg;
+            if (inline)
+                html = `<span class="inlineLatex">${html}</span>`;
+            else
+                html = `<div class="blockLatex">${html}</div>`;
+            resolve(html);
+        });
+    });
+};
+
+module.exports.generateImageHash = function(fileName) {
+    return phash(fileName, true).then(function(hash) {
+        return Promise.resolve(hash.toString());
+    });
+};
+
+module.exports.generateRandomImage = function(hash, mimeType, thumbPath) {
+    var canvas = new Canvas(200, 200);
+    var ctx = canvas.getContext("2d");
+    Jdenticon.drawIcon(ctx, hash, 200);
+    return FS.read(__dirname + "/../public/img/" + mimeType.replace("/", "_") + "_logo.png", "b").then(function(data) {
+        var img = new Image;
+        img.src = data;
+        ctx.drawImage(img, 0, 0, 200, 200);
+        return new Promise(function(resolve, reject) {
+            canvas.pngStream().pipe(FSSync.createWriteStream(thumbPath).on("error", reject).on("finish", resolve));
+        });
+    });
+};
+
+module.exports.du = function(path) {
+    return new Promise(function(resolve, reject) {
+        du(path, function(err, size) {
+            if (err)
+                return reject(err);
+            resolve(size);
+        });
+    });
 };

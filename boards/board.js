@@ -1,11 +1,8 @@
 var Address6 = require("ip-address").Address6;
-var Canvas = require("canvas");
 var Crypto = require("crypto");
 var ffmpeg = require("fluent-ffmpeg");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
-var Image = Canvas.Image;
-var Jdenticon = require("jdenticon");
 var Path = require("path");
 var promisify = require("promisify-node");
 var Util = require("util");
@@ -18,20 +15,6 @@ var Tools = require("../helpers/tools");
 
 var ImageMagick = promisify("imagemagick");
 var musicMetadata = promisify("musicmetadata");
-
-var generateRandomImage = function(hash, mimeType, thumbPath) {
-    var canvas = new Canvas(200, 200);
-    var ctx = canvas.getContext("2d");
-    Jdenticon.drawIcon(ctx, hash, 200);
-    return FS.read(__dirname + "/../public/img/" + mimeType.replace("/", "_") + "_logo.png", "b").then(function(data) {
-        var img = new Image;
-        img.src = data;
-        ctx.drawImage(img, 0, 0, 200, 200);
-        return new Promise(function(resolve, reject) {
-            canvas.pngStream().pipe(FSSync.createWriteStream(thumbPath).on("error", reject).on("finish", resolve));
-        });
-    });
-};
 
 var durationToString = function(duration) {
     duration = Math.floor(+duration);
@@ -68,6 +51,7 @@ var Board = function(name, title, options) {
         return Board._banners[name];
     });
     this.defineSetting("skippedGetOrder", 0);
+    this.defineSetting("opModeration", false);
     this.defineSetting("captchaQuota", 0);
     this.defineSetting("enabled", true);
     this.defineSetting("hidden", false);
@@ -103,6 +87,13 @@ var Board = function(name, title, options) {
         return ids.map(function(id) {
             return Captcha.captcha(id).info();
         });
+    });
+    this.defineProperty("permissions", function() {
+        var p = {};
+        Tools.forIn(require("../helpers/permissions").Permissions, function(defLevel, key) {
+            p[key] = config("board." + name + ".permissions." + key, config("permissions." + key, defLevel));
+        });
+        return p;
     });
     this.defineSetting("supportedFileTypes", [
         "application/ogg",
@@ -178,7 +169,9 @@ Board.boards = {};
         bumpLimit: this.bumpLimit,
         postLimit: this.postLimit,
         bannerFileNames: this.bannerFileNames,
-        launchDate: this.launchDate.toISOString()
+        launchDate: this.launchDate.toISOString(),
+        permissions: this.permissions,
+        opModeration: this.opModeration
     };
     this.customBoardInfoFields().forEach(function(field) {
         model[field] = board[field];
@@ -234,6 +227,10 @@ Board.boards = {};
 };
 
 /*public*/ Board.prototype.extraScripts = function() {
+    return [];
+};
+
+/*public*/ Board.prototype.extraStylesheets = function() {
     return [];
 };
 
@@ -322,6 +319,8 @@ var getRules = function(boardName) {
 };
 
 /*public*/ Board.prototype.postformRules = function() {
+    if (this._postformRules)
+        return Promise.resolve(this._postformRules);
     var c = {};
     var _this = this;
     return getRules().then(function(rules) {
@@ -331,15 +330,30 @@ var getRules = function(boardName) {
         c.specific = rules;
         for (var i = c.specific.length - 1; i >= 0; --i) {
             var rule = c.specific[i];
+            var rxExcept = /^#include\s+except(\((\d+(\,\d+)*)\))$/;
+            var rxSeveral = /^#include\s+(\d+(\,\d+)*)$/;
             if ("#include all" == rule) {
                 Array.prototype.splice.apply(c.specific, [i, 1].concat(c.common));
-            } else if (/^#include\s+\d+$/.test(rule)) {
-                var n = +rule.replace(/#include\s+/, "");
-                if (n >= 0 && n < c.common.length)
-                    c.specific.splice(i, 1, c.common[n]);
+            } else if (rxExcept.test(rule)) {
+                var excluded = rule.match(rxExcept)[2].split(",").map(function(n) {
+                    return +n;
+                });
+                Array.prototype.splice.apply(c.specific, [i, 1].concat(c.common.filter(function(_, i) {
+                    return excluded.indexOf(i) < 0;
+                })));
+            } else if (rxSeveral.test(rule)) {
+                var included = rule.match(rxSeveral)[1].split(",").map(function(n) {
+                    return +n;
+                }).filter(function(n) {
+                    return n >= 0 && n < c.common.length;
+                }).map(function(n) {
+                    return c.common[n];
+                });
+                Array.prototype.splice.apply(c.specific, [i, 1].concat(included));
             }
         };
-        return Promise.resolve((c.specific.length > 0) ? c.specific : c.common);
+        _this._postformRules = (c.specific.length > 0) ? c.specific : c.common;
+        return Promise.resolve(_this._postformRules);
     });
 };
 
@@ -400,7 +414,7 @@ var getRules = function(boardName) {
                 if (metadata && metadata.picture && metadata.picture.length > 0)
                     return FS.write(thumbPath, metadata.picture[0].data);
                 else
-                    return generateRandomImage(file.hash, file.mimeType, thumbPath);
+                    return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
             }).then(function() {
                 return ImageMagick.identify(thumbPath);
             }).then(function(info) {
@@ -444,7 +458,7 @@ var getRules = function(boardName) {
             }).catch(function(err) {
                 Global.error(err.stack || err);
                 file.thumbPath = thumbPath;
-                return generateRandomImage(file.hash, file.mimeType, thumbPath);
+                return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
             }).then(function() {
                 return ImageMagick.identify(file.thumbPath);
             }).then(function(info) {
@@ -486,6 +500,11 @@ var getRules = function(boardName) {
                     width: info.width,
                     height: info.height
                 };
+                if ("image/gif" != file.mimeType) {
+                    return Tools.generateImageHash(file.path + suffix).then(function(hash) {
+                        file.ihash = hash;
+                    });
+                }
             });
         } else if (Tools.isPdfType(file.mimeType)) {
             file.dimensions = null;
@@ -527,7 +546,9 @@ Board.MarkupElements = {
     SubscriptMarkupElement: "SUBSCRIPT",
     SuperscriptMarkupElement: "SUPERSCRIPT",
     UrlMarkupElement: "URL",
-    CodeMarkupElement: "CODE"
+    CodeMarkupElement: "CODE",
+    LatexMarkupElement: "LATEX",
+    InlineLatexMarkupElement: "INLINE_LATEX"
 };
 
 Board.MimeTypesForExtensions = {};
@@ -635,12 +656,16 @@ Board.sortThreadsByPostCount = function(a, b) {
 };
 
 Board.initialize = function() {
+    var reinit = Tools.hasOwnProperties(Board.boards);
     Board.boards = {};
 
     FSSync.readdirSync(__dirname).forEach(function(file) {
-        if ("index.js" == file || "js" != file.split(".").pop())
+        if ("index.js" == file || "board.js" == file || "js" != file.split(".").pop())
             return;
-        var board = require("./" + file.split(".").shift());
+        var id = "./" + file.split(".").shift();
+        if (reinit)
+            delete require.cache[require.resolve(id)];
+        var board = require(id);
         if (Util.isArray(board)) {
             board.forEach(function(board) {
                 Board.addBoard(board);
@@ -685,7 +710,8 @@ Board.initialize = function() {
                 return Captcha.captcha(id).info();
             });
         });
-        board.defineSetting("markupElements", board.markupElements.concat(Board.MarkupElements.CodeMarkupElement));
+        board.defineSetting("markupElements", board.markupElements.concat(Board.MarkupElements.CodeMarkupElement,
+            Board.MarkupElements.LatexMarkupElement, Board.MarkupElements.InlineLatexMarkupElement));
         Board.addBoard(board);
 
         Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"),

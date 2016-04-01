@@ -16,6 +16,8 @@
             else
                 model.loginMessageText = lord.text("loginMessageNoneText");
         }
+        model.inIframe = lord.inIframe();
+        model.mumWatching = lord.getLocalObject("mumWatching", false);
         document.open();
         document.write(lord.template("toolbar", model, true));
         document.close();

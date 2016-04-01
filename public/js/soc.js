@@ -39,7 +39,7 @@ lord.postProcessors.push(function(post) {
     if (!likeArea)
         return;
     if (+ownLikes[postNumber] > 0)
-        lord.wrap(lord.nameOne("likeCount", likeArea), lord.node("b"));
+        $(lord.nameOne("likeCount", likeArea)).wrap(lord.node("b"));
     else if (+ownLikes[postNumber] < 0)
-        lord.wrap(lord.nameOne("dislikeCount", likeArea), lord.node("b"));
+        $(lord.nameOne("dislikeCount", likeArea)).wrap(lord.node("b"));
 });

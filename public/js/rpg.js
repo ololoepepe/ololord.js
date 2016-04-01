@@ -2,7 +2,7 @@ lord.customResetForm = function(form) {
     var parent = lord.nameOne("voteVariants", form);
     if (!parent)
         return;
-    lord.arr(parent.children).forEach(function(el) {
+    lord.toArray(parent.children).forEach(function(el) {
         parent.removeChild(el);
     });
     var text = lord.nameOne("voteText", form);
@@ -12,9 +12,9 @@ lord.customResetForm = function(form) {
 lord.addVoteVariant = function(el) {
     var form = el.parentNode.parentNode;
     var parent = lord.nameOne("voteVariants", form);
-    var variants = lord.query("div > input", parent);
+    var variants = lord.queryAll("div > input", parent);
     var lastN = 0;
-    lord.query("div > input", parent).forEach(function(inp) {
+    lord.queryAll("div > input", parent).forEach(function(inp) {
         if (isNaN(inp.name.substr(12)))
             return;
         ++lastN;
@@ -29,7 +29,7 @@ lord.removeVoteVariant = function(el) {
     var parent = div.parentNode;
     parent.removeChild(div);
     var i = 0;
-    lord.query("div > input", parent).forEach(function(inp) {
+    lord.queryAll("div > input", parent).forEach(function(inp) {
         if (isNaN(inp.name.substr(12)))
             return;
         ++i;
@@ -44,11 +44,11 @@ lord.vote = function(event, form) {
         var postNumber = +lord.nameOne("postNumber", form).value;
         if (form.action.split("/").pop() == "vote") {
             var ids = {};
-            lord.query("[type='checkbox']", form).forEach(function(cbox) {
+            lord.queryAll("[type='checkbox']", form).forEach(function(cbox) {
                 if (cbox.checked)
                     ids[cbox.value] = 1;
             });
-            lord.query("[type='radio']", form).forEach(function(radio) {
+            lord.queryAll("[type='radio']", form).forEach(function(radio) {
                 if (radio.checked)
                     ids[radio.value] = 1;
             });
@@ -129,12 +129,12 @@ lord.postProcessors.push(function(post) {
     if (ownPosts["rpg/" + postNumber]) {
         if (form)
             form.parentNode.replaceChild(voteVariants, form);
-        lord.query("input", voteVariants).forEach(function(input) {
+        lord.queryAll("input", voteVariants).forEach(function(input) {
             input.setAttribute("disabled", true);
         });
     }
     if (ids) {
-        lord.query("input", voteVariants).forEach(function(input) {
+        lord.queryAll("input", voteVariants).forEach(function(input) {
             input.setAttribute("disabled", true);
             if (ids[input.value])
                 input.setAttribute("checked", true);

@@ -1404,6 +1404,9 @@
     "Delete file": {
         "deleteFileText": {
             "value": "Удалить файл"
+        },
+        "deleteFileButtonText": {
+            "value": "Удалить файл"
         }
     },
     "Posting speed:": {
@@ -1539,11 +1542,6 @@
     "Searching for posts...": {
         "searchingMessage": {
             "value": "Поиск постов..."
-        }
-    },
-    "Hide by image hash": {
-        "hideByImageText": {
-            "value": "Скрывать по хешу картинки"
         }
     },
     "Rating:": {
@@ -2000,9 +1998,6 @@
     },
     "Boards": {
         "boardsText": {
-            "value": "Доски"
-        },
-        "boardsTabText": {
             "value": "Доски"
         }
     },
@@ -2782,7 +2777,8 @@
     "That is a hashpass, isn't it? [Yes/no]: ": {
         "_default": {
             "value": "Это хешпасс, верно? [Yes/no]: "
-        }
+        },
+        "_obsolete": true
     },
     "Dimensions:": {
         "canvasDimensionsLabelText": {
@@ -2842,6 +2838,329 @@
     "Collapse text": {
         "collapsePostTextText": {
             "value": "Свернуть текст"
+        }
+    },
+    "Current directory:": {
+        "currentDirectoryLabelText": {
+            "value": "Текущая папка:"
+        }
+    },
+    "Current file:": {
+        "currentFileLabelText": {
+            "value": "Текущий файл:"
+        }
+    },
+    "Add file": {
+        "addFileButtonText": {
+            "value": "Добавить файл"
+        }
+    },
+    "Add directory": {
+        "addDirectoryButtonText": {
+            "value": "Добавить папку"
+        }
+    },
+    "Rename directory": {
+        "renameDirectoryButtonText": {
+            "value": "Переименовать папку"
+        }
+    },
+    "Delete directory": {
+        "deleteDirectoryButtonText": {
+            "value": "Удалить папку"
+        }
+    },
+    "Edit file": {
+        "editFileButtonText": {
+            "value": "Редактировать файл"
+        }
+    },
+    "Rename file": {
+        "renameFileButtonText": {
+            "value": "Переименовать файл"
+        }
+    },
+    "Adding file": {
+        "addFileDialogTitle": {
+            "value": "Добавление файла"
+        }
+    },
+    "File name:": {
+        "fileNameLabelText": {
+            "value": "Имя файла:"
+        }
+    },
+    "File:": {
+        "fileLabelText": {
+            "value": "Файл:"
+        }
+    },
+    "Adding directory": {
+        "addDirectoryDialogTitle": {
+            "value": "Добавление папки"
+        }
+    },
+    "Renaming file": {
+        "renameFileDialogTitle": {
+            "value": "Переименование файла"
+        }
+    },
+    "Renaming directory": {
+        "renameDirectoryDialogTitle": {
+            "value": "Переименование папки"
+        }
+    },
+    "Deleting file": {
+        "deleteFileDialogTitle": {
+            "value": "Удаление файла"
+        }
+    },
+    "Deleting directory": {
+        "deleteDirectoryDialogTitle": {
+            "value": "Удаление папки"
+        }
+    },
+    "Directory name:": {
+        "directoryNameLabelText": {
+            "value": "Имя папки:"
+        }
+    },
+    "Server actions": {
+        "serverActionLabelText": {
+            "value": "Действия над сервером"
+        }
+    },
+    "Connection with the server will be lost, and the server will become unavailable for some time. You will have to reload the page manually.": {
+        "reloadWarningText": {
+            "value": "Соединение с сервером будет потеряно, и сервер будет недоступен в течение некоторого времени. Вам придется перезагрузить страницу вручную."
+        }
+    },
+    "Regenerate cache": {
+        "regenerateCacheButtonText": {
+            "value": "Сгенерировать кеш заново"
+        }
+    },
+    "Rerender posts": {
+        "rerenderPostsButtonText": {
+            "value": "Отрендерить посты заново"
+        }
+    },
+    "Rebuild post search index": {
+        "rebuildSearchIndexButtonText": {
+            "value": "Пересоздать индекс поиска постов"
+        }
+    },
+    "Reload boards": {
+        "reloadBoardsButtonText": {
+            "value": "Перезагрузить доски"
+        }
+    },
+    "Reload config": {
+        "reloadConfigButtonText": {
+            "value": "Перезагрузить конфиг"
+        }
+    },
+    "Reload templates": {
+        "reloadTemplatesButtonText": {
+            "value": "Перезагрузить шаблоны"
+        }
+    },
+    "Reload everything": {
+        "reloadAllButtonText": {
+            "value": "Перезагрузить все"
+        }
+    },
+    "Not a directory": {
+        "_default": {
+            "value": "Объект не является папкой"
+        }
+    },
+    "Not a file": {
+        "_default": {
+            "value": "Объект не является файлом"
+        }
+    },
+    "Frequently used files": {
+        "frequentlyUsedFilesLabelText": {
+            "value": "Часто используемые файлы"
+        }
+    },
+    "Node captcha": {
+        "_default": {
+            "value": "Node captcha"
+        }
+    },
+    "Inline LaTeX": {
+        "markupInlineLatex": {
+            "value": "Встраиваемый LaTeX"
+        },
+        "inlineLatexText": {
+            "value": "Встраиваемый LaTeX"
+        }
+    },
+    "LaTeX": {
+        "markupLatex": {
+            "value": "LaTeX"
+        }
+    },
+    "LaTeX code markup": {
+        "latexMarkup": {
+            "value": "Разметка LaTeX-кода"
+        }
+    },
+    "Block LaTeX": {
+        "latexText": {
+            "value": "Блочный LaTeX"
+        }
+    },
+    "Backgdound type:": {
+        "canvasBackgroundTypeLabelText": {
+            "value": "Тип фона:"
+        }
+    },
+    "Drawable": {
+        "checkboxBackgroundDrawableLabel": {
+            "value": "Часть рисунка"
+        }
+    },
+    "Not drawable": {
+        "checkboxBackgroundNotDrawableLabel": {
+            "value": "Фон"
+        }
+    },
+    "That is a hashpass, isn't it? ": {
+        "_default": {
+            "value": "Это хешпасс, верно? "
+        }
+    },
+    "Respawns worker processes with the passed exit code.": {
+        "_default": {
+            "value": "Респавнит рабочие процессы с использованием указанного кода выхода."
+        }
+    },
+    "Invalid command. Type 'help' for commands": {
+        "_default": {
+            "value": "Недействительная команда. Введите 'help', чтобы посмотреть список команд"
+        }
+    },
+    "Enter value for": {
+        "_default": {
+            "value": "Введите значение для"
+        }
+    },
+    "Sets the option (config.json) at the key specified. If no value is specified, prompts to enter it.": {
+        "_default": {
+            "value": "Устанавливает опцию (config.json), соответствующую ключу. Если значение не указано, предлагается ввести его."
+        }
+    },
+    "Value for": {
+        "_default": {
+            "value": "Значение для"
+        }
+    },
+    "Prints the option (config.json) at the key specified.": {
+        "_default": {
+            "value": "Выводит опцию (config.json), соответствующую ключу."
+        }
+    },
+    "Removes the option (config.json) at the key specified.": {
+        "_default": {
+            "value": "Удаляет опцию (config.json), соответствующую ключу."
+        }
+    },
+    "Registers a superuser.": {
+        "_default": {
+            "value": "Регистрирует суперпользователя."
+        }
+    },
+    "Unregisters a superuser.": {
+        "_default": {
+            "value": "Удаляет суперпользователя."
+        }
+    },
+    "Are you sure? ": {
+        "_default": {
+            "value": "Вы уверены? "
+        }
+    },
+    "Rerenders all posts (workers are closed and then opened again).": {
+        "_default": {
+            "value": "Рендерит все посты заново (рабочие процессы закрываются, а затем открываются снова)."
+        }
+    },
+    "Closes all workers, preventing incoming connections.": {
+        "_default": {
+            "value": "Закрывает рабочие процессы, предотвращая новые входящие подключения."
+        }
+    },
+    "Opens workers for connections if closed.": {
+        "_default": {
+            "value": "Открывает рабочие процессы для соединений, если они закрыты."
+        }
+    },
+    "Regenerates the cache (workers are closed and then opened again).": {
+        "_default": {
+            "value": "Заново генерирует кеш (рабочие процессы закрываются, а затем открываются снова)."
+        }
+    },
+    "Reloads the boards.": {
+        "_default": {
+            "value": "Перезагружает доски."
+        }
+    },
+    "Reloads the config file.": {
+        "_default": {
+            "value": "Перезагружает конфигурационный файл."
+        }
+    },
+    "Reloads the templates and the partials (including public ones).": {
+        "_default": {
+            "value": "Перезагружает шаблоны (включая публичные)."
+        }
+    },
+    "Rebuilds post search index.": {
+        "_default": {
+            "value": "Пересоздает индекс посика постов."
+        }
+    },
+    "Shows server uptime.": {
+        "_default": {
+            "value": "Показывает время работы сервера."
+        }
+    },
+    "Type 'help' for commands": {
+        "_default": {
+            "value": "Введите 'help' чтобы посмотреть список команд"
+        }
+    },
+    "Cancelled": {
+        "_default": {
+            "value": "Отменено"
+        }
+    },
+    "Quits the application.": {
+        "_default": {
+            "value": "Завершает выполнение приложения."
+        }
+    },
+    "Image similarity:": {
+        "ihashDistanceLabelText": {
+            "value": "Схожесть картинок:"
+        }
+    },
+    "Hide by image hash": {
+        "hideByImageHashText": {
+            "value": "Скрывать по хешу картинки"
+        }
+    },
+    "Hide by image": {
+        "hideByImageText": {
+            "value": "Скрывать по картинке"
+        }
+    },
+    "Hide by image size": {
+        "hideByImageSizeText": {
+            "value": "Скрывать по размеру картинки"
         }
     }
 }

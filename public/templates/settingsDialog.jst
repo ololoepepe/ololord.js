@@ -1,5 +1,4 @@
 <div class="settingsDialog">
-    <span class="ui-helper-hidden-accessible"><input type="text" /></span>
     <ul class="tabWidget nowrap">
         <li data-index="0"
             class="activated"><a onclick="lord.activateTab(this); return false;">{{=it.tr.generalTabText}}</a></li>
@@ -369,6 +368,15 @@
                     <td colspan="2">
                         <input type="checkbox" name="spellsEnabled"
                                {{? it.settings.spellsEnabled}}checked="true"{{?}} /><label>{{=it.tr.spellsLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{=it.tr.ihashDistanceLabelText}}
+                    </td>
+                    <td>
+                        <input type="number" min="1" max="1000" name="ihashDistance" class="numberSize3"
+                               value="{{=it.settings.ihashDistance}}" />
                     </td>
                 </tr>
                 <tr>
