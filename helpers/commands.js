@@ -263,13 +263,13 @@ vorpal.installHandler("uptime", function() {
     var format = function(seconds) {
         var pad = function(s) {
             return (s < 10 ? "0" : "") + s;
-        }
+        };
         var days = Math.floor(seconds / (24 * 60 * 60));
         var hours = Math.floor(seconds % (24 * 60 * 60) / (60 * 60));
         var minutes = Math.floor(seconds % (60 * 60) / 60);
         var seconds = Math.floor(seconds % 60);
         return days + " days " + pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
-    }
+    };
     return Promise.resolve(format(process.uptime()));
 }, { description: Tools.translate("Shows server uptime.") });
 

@@ -1471,8 +1471,12 @@ module.exports.findPosts = function(query, boardName) {
         q.bool.must = (q.bool.must || []).concat({ match_phrase: { boardName: boardName } });
     if (query.excludedPhrases && query.excludedPhrases.length > 0)
         q.bool.must_not = query.excludedPhrases.map(mapPhrase);
-    if (query.possiblePhrases && query.possiblePhrases.length > 0)
-        q.bool.should = query.possiblePhrases.map(mapPhrase);
+    if (query.possiblePhrases && query.possiblePhrases.length > 0) {
+        if (query.requiredPhrases && query.requiredPhrases.length > 0)
+            q.bool.should = query.possiblePhrases.map(mapPhrase);
+        else
+            q.bool.must = (q.bool.must || []).concat({ bool: { should: query.possiblePhrases.map(mapPhrase) } });
+    }
     return es.search({
         index: "ololord.js",
         type: "posts",
