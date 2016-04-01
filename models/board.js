@@ -881,7 +881,10 @@ module.exports.generateRSS = function(currentProcess) {
     var feedTranslated = Tools.translate("Feed", "channelTitle");
     return Database.db.hkeys("posts").then(function(keys) {
         keys.forEach(function(key) {
-            postNumbers[key.split(":").shift()].push(+key.split(":").pop());
+            var list = postNumbers[key.split(":").shift()];
+            if (!list)
+                return;
+            list.push(+key.split(":").pop());
         });
         return Tools.series(Board.boardNames(), function(boardName) {
             var board = Board.board(boardName);
