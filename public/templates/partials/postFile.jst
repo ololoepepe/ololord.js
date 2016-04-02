@@ -83,6 +83,8 @@
             <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false;"
                title="{{=it.tr.editAudioTagsText}}">
                 <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png" class="buttonImage"></a>
+        {{?}}
+        {{? "application/ogg" == fileInfo.mimeType || fileInfo.mimeType.substr(0, 6) == "audio/" || fileInfo.mimeType.substr(0, 6) == "video/"}}
             <a href="javascript:void(0);" onclick="lord.addToPlaylist(this); return false;"
                title="{{=it.tr.addToPlaylistText}}">
                 <img src="/{{=it.site.pathPrefix}}img/player/16/player.png" class="buttonImage"></a>

@@ -18,9 +18,11 @@
                href="/{{=it.site.pathPrefix}}{{=it.boardName}}/src/{{=it.fileName}}"
                download="{{=it.fileName}}"><img class="buttonImage" width="16" height="16"
                                                 src="/{{=it.site.pathPrefix}}img/player/16/download.png"></a>
-            <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false"
-               title="{{=it.tr.editAudioTagsText}}"><img class="buttonImage" width="16" height="16"
-                                                         src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
+            {{? "application/ogg" == it.mimeType || it.mimeType.substr(0, 6) == "audio/"}}
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false"
+                   title="{{=it.tr.editAudioTagsText}}"><img class="buttonImage" width="16" height="16"
+                                                              src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
+            {{?}}
         {{?}}
         <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);"
            title="{{=it.tr.removeFromPlaylistText}}"><img class="buttonImage" width="16" height="16"

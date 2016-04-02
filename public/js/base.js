@@ -54,6 +54,411 @@ lord.lastWindowSize = {
     height: $(window).height()
 };
 
+/*Classes*/
+
+/*constructor*/ lord.MovablePlayer = function(fileInfo, options) {
+    this.imageZoomSensitivity = Math.floor((options && options.imageZoomSensitivity) || 25);
+    if (this.imageZoomSensitivity < 1 || this.imageZoomSensitivity > 100)
+        this.imageZoomSensitivity = 25;
+    this.minimumContentWidth = (options && options.minimumContentWidth)
+        || (lord.isImageType(fileInfo.mimeType) ? 50 : 200);
+    this.minimumContentHeight = (options && options.minimumContentHeight)
+        || (lord.isImageType(fileInfo.mimeType) ? 50 : 200);
+    this.scaleFactor = lord.BaseScaleFactor * 100;
+    this.scaleFactorModifier = 1;
+    this.fileInfo = fileInfo;
+    var model = merge.recursive({
+        fileInfo: this.fileInfo,
+        isAudioType: lord.isAudioType,
+        isVideoType: lord.isVideoType,
+        isImageType: lord.isImageType
+    }, lord.model(["base", "tr"]));
+    this.playlistMode = options && options.playlistMode;
+    this.node = lord.template("movablePlayer", model);
+    this.trackInfo = lord.queryOne(".movablePlayerTrackInfo", this.node);
+    this.contentContainer = lord.queryOne(".movablePlayerContent", this.node);
+    this.contentImage = this.contentContainer.firstElementChild;
+    this.content = this.contentContainer.lastElementChild;
+    this.contentImage.addEventListener("mousedown", this.mousedownHandler.bind(this), false);
+    this.contentImage.addEventListener("mouseup", this.mouseupHandler.bind(this), false);
+    this.contentImage.addEventListener("mousemove", this.mousemoveHandler.bind(this), false);
+    this.contentImage.addEventListener("mousewheel", this.mousewheelHandler.bind(this), false);
+    this.contentImage.addEventListener("DOMMouseScroll", this.mousewheelHandler.bind(this), false); //Firefox
+    this.controls = lord.queryOne(".movablePlayerControls", this.node);
+    $(this.controls).click(function(e) {
+        e.stopPropagation();
+    });
+    $(this.contentImage).click(function(e) {
+        e.stopPropagation();
+    });
+    if (!lord.isImageType(this.fileInfo.mimeType)) {
+        var _this = this;
+        if (!this.playlistMode) {
+            var defVol = lord.getLocalObject("defaultAudioVideoVolume", 100) / 100;
+            var remember = lord.getLocalObject("rememberAudioVideoVolume", false);
+            var volume = remember ? lord.getLocalObject("audioVideoVolume", defVol) : defVol;
+            if (!volume)
+                this.lastVolume = 0.01;
+        }
+        this.content.volume = volume;
+        this.playPauseButton = lord.nameOne("playerPlayPauseButton", this.controls);
+        this.muteButton = lord.nameOne("playerMuteButton", this.controls);
+        this.durationSlider = lord.queryOne(".movablePlayerDurationSlider", this.controls);
+        this.volumeSlider = lord.queryOne(".movablePlayerVolumeSlider", this.controls);
+        this.content.addEventListener("volumechange", function() {
+            if (+$(_this.volumeSlider).slider("value") == _this.content.volume)
+                return;
+            $(_this.volumeSlider).slider("value", _this.content.volume);
+            _this.updateButtons();
+        }, false);
+        this.playPauseButton.addEventListener("click", (function() {
+            this.content[this.content.paused ? "play" : "pause"]();
+            this.updateButtons();
+        }).bind(this), false);
+        this.muteButton.addEventListener("click", (function() {
+            if (this.content.volume) {
+                this.lastVolume = this.content.volume;
+                this.content.volume = 0;
+                $(this.volumeSlider).slider("value", 0);
+            } else {
+                this.content.volume = this.lastVolume || volume;
+                $(this.volumeSlider).slider("value", this.lastVolume);
+            }
+            this.updateButtons();
+        }).bind(this), false);
+        if (options && options.loop)
+            this.content.loop = true;
+        this.controls.addEventListener("mouseover", (function() {
+            this.preventHideControls = true;
+            if (this.controlsHideTimer) {
+                clearInterval(this.controlsHideTimer);
+                this.controlsHideTimer = null;
+            }
+        }).bind(this), false);
+        this.controls.addEventListener("mouseleave", (function() {
+            this.preventHideControls = false;
+            this.controlsHideTimer = setTimeout(this.hideControls.bind(this), lord.Second);
+        }).bind(this), false);
+        this.content.addEventListener("pause", (function() {
+            this.updateButtons();
+        }).bind(this), false);
+        this.content.addEventListener("ended", (function() {
+            this.updateButtons();
+        }).bind(this), false);
+        this.content.addEventListener("timeupdate", (function() {
+            if (this.userSliding)
+                return;
+            try {
+                //NOTE: Required to prevent calling the .slider method after the player node is deleted
+                $(this.durationSlider).slider("value", this.content.currentTime);
+            } catch (err) {
+                //Do nothing
+            }
+            this.updateTrackInfo();
+        }).bind(this), false);
+        this.content.addEventListener("durationchange", (function() {
+            $(this.durationSlider).slider("destroy");
+            $(this.durationSlider).slider({
+                min: 0,
+                max: this.content.duration,
+                step: 1,
+                value: 0,
+                start: function() {
+                    _this.userSliding = true;
+                },
+                stop: function() {
+                    _this.userSliding = false;
+                    _this.content.currentTime = +$(this).slider("value");
+                }
+            });
+        }).bind(this), false);
+        $(this.durationSlider).slider({
+            min: 0,
+            max: 0,
+            step: 0,
+            value: 0,
+            disabled: true
+        });
+        $(this.volumeSlider).slider({
+            min: 0,
+            max: 1,
+            step: 0.01,
+            value: volume,
+            slide: function() {
+                var volume = +$(this).slider("value");
+                _this.content.volume = volume;
+                _this.updateButtons();
+            }
+        });
+        if (options && options.play) {
+            if (+options.play > 0) {
+                setTimeout((function() {
+                    this.content.play();
+                    this.updateButtons();
+                }).bind(this), +options.play);
+            } else {
+                this.content.play();
+                this.updateButtons();
+            }
+        }
+        this.updateTrackInfo();
+    } else {
+        lord.queryOne(".movablePlayerConstrolsSliders", this.controls).style.display = "none";
+    }
+    this.visible = false;
+    this.isInitialized = false;
+    this.eventListeners = {
+        requestClose: []
+    };
+};
+
+/*private*/ lord.MovablePlayer.prototype.scaled = function(n, factor) {
+    factor = +factor || this.scaleFactor;
+    return Math.round((+n || 0) * (factor / lord.BaseScaleFactor / 100));
+};
+
+/*private*/ lord.MovablePlayer.prototype.updateButtons = function() {
+    this.playPauseButton.src = this.playPauseButton.src.replace(/\/(play|pause)\.png$/,
+        "/" + (this.content.paused ? "play" : "pause") + ".png");
+    this.playPauseButton.title = lord.text(this.content.paused ? "playerPlayText" : "playerPauseText");
+    this.muteButton.src = this.muteButton.src.replace(/(on|off)\.png$/, (this.content.volume ? "on" : "off") + ".png");
+    this.muteButton.title = lord.text(this.content.volume ? "playerMuteText" : "playerUnmuteText");
+};
+
+/*private*/ lord.MovablePlayer.prototype.updateTrackInfo = function() {
+    $(this.trackInfo).empty();
+    var s = lord.durationToString(this.content.currentTime) + " / " + lord.durationToString(this.content.duration);
+    this.trackInfo.appendChild(lord.node("text", s));
+};
+
+/*private*/ lord.MovablePlayer.prototype.dispatchEvent = function(e) {
+    if (typeof e != "object")
+        return false;
+    var listeners = this.eventListeners[e.type];
+    if (!listeners)
+        return false;
+    var c = false;
+    e.cancel = function() {
+        c = true;
+    };
+    var cancelled = listeners.some(function(f) {
+        f(e);
+        if (c)
+            return true;
+    });
+    if (cancelled)
+        return true;
+    if (typeof e.action == "function")
+        e.action.call(e);
+    return true;
+};
+
+/*private*/ lord.MovablePlayer.prototype.hideControls = function() {
+    this.trackInfo.style.display = "none";
+    this.controls.style.display = "none";
+    this.controlsHideTimer = null;
+};
+
+/*private*/ lord.MovablePlayer.prototype.mousedownHandler = function(e) {
+    if (e.button)
+        return;
+    e.preventDefault();
+    e.stopPropagation();
+    this.isMoving = true;
+    this.mouseStartPosition = {
+        x: e.clientX,
+        y: e.clientY
+    };
+    this.mousePositon = merge.recursive(true, this.mouseStartPosition);
+};
+
+/*private*/ lord.MovablePlayer.prototype.mouseupHandler = function(e) {
+    if (e.button)
+        return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (!this.isMoving)
+        return;
+    this.isMoving = false;
+    if (this.mouseStartPosition.x === e.clientX && this.mouseStartPosition.y === e.clientY) {
+        this.dispatchEvent({
+            type: "requestClose",
+            action: (function() {
+                this.hide();
+            }).bind(this)
+        });
+    }
+};
+
+/*private*/ lord.MovablePlayer.prototype.mousemoveHandler = function(e) {
+    if (!lord.isImageType(this.fileInfo.mimeType)) {
+        if ("none" == this.controls.style.display) {
+            this.trackInfo.style.display = "";
+            this.controls.style.display = "";
+            if (!this.preventHideControls)
+                this.controlsHideTimer = setTimeout(this.hideControls.bind(this), lord.Second);
+        } else if (this.controlsHideTimer) {
+            clearInterval(this.controlsHideTimer);
+            this.controlsHideTimer = null;
+            if (!this.preventHideControls)
+                this.controlsHideTimer = setTimeout(this.hideControls.bind(this), lord.Second);
+        }
+    }
+    if (!this.isMoving)
+        return;
+    e.preventDefault();
+    e.stopPropagation();
+    var dx = e.clientX - this.mousePositon.x;
+    var dy = e.clientY - this.mousePositon.y;
+    this.mousePositon.x = e.clientX;
+    this.mousePositon.y = e.clientY;
+    var node = $(this.node);
+    var pos = node.position();
+    node.css({
+        top: pos.top + dy,
+        left: pos.left + dx
+    });
+};
+
+/*private*/ lord.MovablePlayer.prototype.resetScale = function() {
+    var container = $(this.contentContainer);
+    var previousContainerWidth = container.width();
+    var previousContainerHeight = container.height();
+    var width = this.scaled(this.fileInfo.width);
+    var height = this.scaled(this.fileInfo.height);
+    container.width(width);
+    container.height(height);
+    var dx = (container.width() - previousContainerWidth) / 2;
+    var dy = (container.height() - previousContainerHeight) / 2;
+    var node = $(this.node);
+    var pos = node.position();
+    node.css({
+        top: (pos.top - dy) + "px",
+        left: (pos.left - dx) + "px"
+    });
+    this.showScalePopup();
+};
+
+/*private*/ lord.MovablePlayer.prototype.mousewheelHandler = function(e) {
+    e.preventDefault();
+    var imageZoomSensitivity = this.imageZoomSensitivity;
+    if ((e.wheelDelta || -e.detail) < 0)
+        imageZoomSensitivity *= -1;
+    var previousScaleFactor = this.scaleFactor;
+    var previousScaleFactorModifier = this.scaleFactorModifier;
+    if (imageZoomSensitivity < 0) {
+        while ((this.scaleFactor + imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier) <= 0)
+            this.scaleFactorModifier *= 10;
+    } else {
+        var changed = false;
+        while (this.scaleFactorModifier >= 1
+            && (this.scaleFactor * this.scaleFactorModifier - imageZoomSensitivity * lord.BaseScaleFactor) >= 0) {
+            this.scaleFactorModifier /= 10;
+            changed = true;
+        }
+        if (changed)
+            this.scaleFactorModifier *= 10;
+    }
+    this.scaleFactor += (imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier);
+    if (this.scaled(this.fileInfo.width) < this.minimumContentWidth
+        || this.scaled(this.fileInfo.height) < this.minimumContentHeight) {
+        this.scaleFactor = previousScaleFactor;
+        this.scaleFactorModifier = previousScaleFactorModifier;
+    }
+    this.resetScale();
+};
+
+/*public*/ lord.MovablePlayer.prototype.on = function(eventType, handler) {
+    if (!this.eventListeners.hasOwnProperty(eventType) || typeof handler != "function")
+        return false;
+    this.eventListeners[eventType].push(handler);
+    return true;
+};
+
+/*public*/ lord.MovablePlayer.prototype.show = function() {
+    if (this.visible)
+        return;
+    document.body.appendChild(this.node);
+    this.visible = true;
+    if (!this.isInitialized) {
+        this.reset();
+        this.isInitialized = true;
+    }
+};
+
+/*public*/ lord.MovablePlayer.prototype.hide = function() {
+    if (!this.visible)
+        return;
+    if (!lord.isImageType(this.fileInfo.mimeType)) {
+        if (!this.playlistMode)
+            lord.setLocalObject("audioVideoVolume", +this.content.volume);
+        this.content.pause();
+    }
+    document.body.removeChild(this.node);
+    this.visible = false;
+};
+
+/*public*/ lord.MovablePlayer.prototype.reset = function() {
+    var width = this.fileInfo.width;
+    var height = this.fileInfo.height;
+    var toolbarHeight = lord.queryOne(".toolbar.sticky") ? $(".toolbar.sticky").height() : 0;
+    var w = $(window);
+    var windowWidth = w.width();
+    var windowHeight = w.height();
+    var borderWidth = 2 * lord.MovablePlayerBorderWidth;
+    this.scaleFactor = lord.BaseScaleFactor * 100;
+    this.scaleFactorModifier = 1;
+    if (width > (windowWidth - borderWidth) || height > (windowHeight - borderWidth - toolbarHeight)) {
+        while (this.scaled(this.fileInfo.width) >= (windowWidth - borderWidth)) {
+            if ((this.scaleFactor - this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier) > 0)
+                this.scaleFactor -= (this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier);
+            else
+                this.scaleFactorModifier *= 10;
+        }
+        while (this.scaled(this.fileInfo.height) >= (windowHeight - borderWidth - toolbarHeight)) {
+            if ((this.scaleFactor - this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier) > 0)
+                this.scaleFactor -= (this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier);
+            else
+                this.scaleFactorModifier *= 10;
+        }
+    }
+    this.resetScale();
+    width = this.scaled(width);
+    height = this.scaled(height);
+    var node = $(this.node);
+    var containerWidth = width + borderWidth;
+    var containerHeight = height + borderWidth;
+    node.css({
+        top: ((windowHeight - containerHeight - toolbarHeight) / 2 + toolbarHeight) + "px",
+        left: ((windowWidth - containerWidth) / 2) + "px",
+    });
+    if (lord.isAudioType(this.fileInfo.mimeType) || lord.isVideoType(this.fileInfo.mimeType)) {
+        this.content.currentTime = 0;
+        if (!this.playlistMode) {
+            var defVol = lord.getLocalObject("defaultAudioVideoVolume", 100) / 100;
+            var remember = lord.getLocalObject("rememberAudioVideoVolume", false);
+            this.content.volume = remember ? lord.getLocalObject("audioVideoVolume", defVol) : defVol;
+        }
+    }
+};
+
+/*public*/ lord.MovablePlayer.prototype.showScalePopup = function() {
+    var width = this.scaled(this.fileInfo.width);
+    var height = this.scaled(this.fileInfo.height);
+    var text = width + "x" + height + " (" + (this.scaleFactor / lord.BaseScaleFactor) + "%)";
+    if (this.scalePopup) {
+        this.scalePopup.resetText(text);
+        this.scalePopup.resetTimeout(lord.Second);
+        clearTimeout(this.scalePopupTimer);
+    } else {
+        this.scalePopup = lord.showPopup(text, { "timeout": lord.Second });
+    }
+    this.scalePopupTimer = setTimeout((function() {
+        this.scalePopup = null;
+        this.scalePopupTimer = null;
+    }).bind(this), lord.Second);
+};
+
 /*Functions*/
 
 (function() {
@@ -427,7 +832,10 @@ lord.resetPlayerSource = function(track) {
     if (lord.playerElement) {
         if (!lord.playerElement.paused)
             lord.playerElement.pause();
-        $(lord.playerElement).remove();
+        if (lord.playerElement.movablePlayer)
+            $(lord.playerElement.movablePlayer.node).remove();
+        else
+            $(lord.playerElement).remove();
     }
     $("#playerDurationSlider").slider("destroy");
     $("#playerDurationSlider").slider({
@@ -437,19 +845,46 @@ lord.resetPlayerSource = function(track) {
         value: 0,
         disabled: true
     });
-    lord.playerElement = lord.node("audio");
+    var movablePlayer;
+    if (track.mimeType && track.mimeType.substr(0, 6) == "video/") {
+        movablePlayer = new lord.MovablePlayer({
+            href: "/" + lord.data("sitePathPrefix") + track.boardName + "/src/" + track.fileName,
+            mimeType: track.mimeType,
+            width: track.width,
+            height: track.height
+        }, {
+            imageZoomSensitivity: lord.getLocalObject("imageZoomSensitivity", 25),
+            minimumContentWidth: 200,
+            minimumContentHeight: 100,
+            loop: false,
+            play: false
+        });
+        movablePlayer.on("requestClose", function(e) {
+            e.cancel();
+            lord.playerPlayPause();
+            movablePlayer.hide();
+        }, false);
+        lord.playerElement = movablePlayer.content;
+        lord.playerElement.movablePlayer = movablePlayer;
+        movablePlayer.show();
+    } else {
+        lord.playerElement = lord.node("audio");
+    }
     var defVol = lord.getLocalObject("defaultAudioVideoVolume", 100) / 100;
     lord.playerElement.volume = lord.getLocalObject("playerVolume", defVol);
-    lord.playerElement.style.display = "none";
+    if (!movablePlayer)
+        lord.playerElement.style.display = "none";
     lord.setLocalObject("playerLastTrack", track);
-    var source = lord.node("source");
-    if (track.mimeType)
-        source.type = track.mimeType;
-    if (track.href)
-        source.src = track.href;
-    else
-        source.src = "/" + lord.data("sitePathPrefix") + track.boardName + "/src/" + track.fileName;
-    lord.playerElement.appendChild(source);
+    if (!movablePlayer) {
+        var source = lord.node("source");
+        if (track.mimeType)
+            source.type = track.mimeType;
+        if (track.href)
+            source.src = track.href;
+        else
+            source.src = "/" + lord.data("sitePathPrefix") + track.boardName + "/src/" + track.fileName;
+        lord.playerElement.appendChild(source);
+    }
     lord.playerElement.addEventListener("play", function() {
         lord.setSessionObject("playerPlaying", true);
     }, false);
@@ -461,6 +896,8 @@ lord.resetPlayerSource = function(track) {
     }, false);
     lord.playerElement.addEventListener("volumechange", function() {
         lord.setLocalObject("playerVolume", lord.playerElement.volume);
+        if (+$("#playerVolumeSlider").slider("value") != lord.playerElement.volume)
+            $("#playerVolumeSlider").slider("value", lord.playerElement.volume);
         lord.updatePlayerButtons();
     }, false);
     lord.playerElement.addEventListener("timeupdate", function() {
@@ -489,7 +926,8 @@ lord.resetPlayerSource = function(track) {
         }, false);
     }
     lord.updatePlayerTrackInfo();
-    document.body.appendChild(lord.playerElement);
+    if (!movablePlayer)
+        document.body.appendChild(lord.playerElement);
 };
 
 lord.updatePlayerButtons = function() {
@@ -544,9 +982,13 @@ lord.playerPlayPause = function(e, time) {
         lord.playerElement[lord.playerElement.paused ? "play" : "pause"]();
         if (!isNaN(+time) && +time >= 0 && lord.playerElement.paused)
             lord.playerElement.currentTime = +time;
+        if (lord.playerElement.movablePlayer)
+            lord.playerElement.movablePlayer.updateButtons();
     } else if (lord.currentTrack) {
         lord.resetPlayerSource(lord.currentTrack);
         lord.playerElement.play();
+        if (lord.playerElement.movablePlayer)
+            lord.playerElement.movablePlayer.updateButtons();
         if (!isNaN(+time) && +time >= 0)
             lord.playerElement.currentTime = +time;
     } else {
@@ -602,6 +1044,10 @@ lord.playTrack = function(el) {
             return;
         if (el.id.replace(/^track\//, "") == lord.currentTrack.fileName) {
             lord.playerElement.play();
+            if (lord.playerElement.movablePlayer) {
+                lord.playerElement.movablePlayer.show();
+                lord.playerElement.movablePlayer.updateButtons();
+            }
             lord.updatePlayerButtons();
             return;
         }
@@ -613,6 +1059,8 @@ lord.playTrack = function(el) {
     lord.currentTrack = lord.currentTracks[el.id.replace(/^track\//, "")];
     lord.resetPlayerSource(lord.currentTrack);
     lord.playerElement.play();
+    if (lord.playerElement.movablePlayer)
+        lord.playerElement.movablePlayer.updateButtons();
     lord.updatePlayerButtons();
     lord.updatePlayerTrackTags();
 };
