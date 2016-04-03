@@ -33,7 +33,7 @@ module.exports = function(tr) {
     translate("Move", "moveThreadText");
     translate("Show IP", "showUserIpText");
     translate("Ban", "banUserText");
-    translate("Download all files as a .zip archive", "downloadThreadText");
+    translate("Download all files", "downloadThreadFilesText");
     translate("Add to favorites", "addThreadToFavoritesText");
     translate("Remove thread from favorites", "removeThreadFromFavoritesText");
     translate("Delete", "deletePostText");

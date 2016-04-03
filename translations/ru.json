@@ -1389,9 +1389,9 @@
             "value": "Найти соус..."
         }
     },
-    "Download all files as a .zip archive": {
-        "downloadThreadText": {
-            "value": "Скачать все файлы в виде .zip-архива"
+    "Download all files": {
+        "downloadThreadFilesText": {
+            "value": "Скачать все файлы"
         }
     },
     "Last modified:": {

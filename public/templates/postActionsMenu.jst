@@ -71,9 +71,10 @@
             {{ out += it.customPostMenuAction[80](it, it.thread, it.post); }}
         {{?}}
         <li>
-            <a name="downloadButton" href="javascript:void(0);" onclick="lord.downloadThread(this); return false;">
+            <a name="downloadFilesButton" href="javascript:void(0);"
+               onclick="lord.downloadThreadFiles(this); return false;">
                 <img src="/{{=it.site.pathPrefix}}img/download.png" class="signImage" />
-                {{=it.tr.downloadThreadText}}</a>
+                {{=it.tr.downloadThreadFilesText}}</a>
         </li>
         {{? it.customPostMenuAction && it.customPostMenuAction[90]}}
             {{ out += it.customPostMenuAction[90](it, it.thread, it.post); }}

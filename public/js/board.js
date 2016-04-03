@@ -2589,7 +2589,7 @@ lord.signOwnPostLinks = function(parent, ownPosts) {
     });
 };
 
-lord.downloadThread = function(el) {
+lord.downloadThreadFiles = function(el) {
     var suffix = lord.data("archived", el, true) ? "arch" : "res";
     var p;
     var title;
