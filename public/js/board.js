@@ -2973,7 +2973,7 @@ lord.hotkey = function(name, hotkeys) {
 
 lord.showPostActionsMenu = function(e, input, postNumber) {
     var id = "post" + postNumber + "ActionsMenu";
-    $(lord.id(id)).remove();
+    $("#" + id).remove();
     var post = lord.id(postNumber);
     if (!post)
         return;
@@ -3002,6 +3002,18 @@ lord.showPostActionsMenu = function(e, input, postNumber) {
     if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile"))
         model.hideActionShortcut = lord.hotkey("hidePost");
     post.appendChild(lord.template("postActionsMenu", model));
+    return lord.showMenu(e, input, "#" + id);
+};
+
+lord.showImageSearchMenu = function(e, input, fileName) {
+    var id = "file" + fileName.replace(".", "-") + "SearchMenu";
+    $("#" + id).remove();
+    var file = lord.id("file" + fileName);
+    if (!file)
+        return;
+    var model = lord.model(["base", "board/" + lord.data("boardName")]);
+    model.fileInfo = { name: fileName };
+    file.appendChild(lord.template("imageSearchMenu", model));
     return lord.showMenu(e, input, "#" + id);
 };
 
