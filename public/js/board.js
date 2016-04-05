@@ -267,7 +267,7 @@ lord.processPost = function(hiddenPosts, post, data) {
     if (!thread)
         return;
     $(thread).addClass("hidden");
-}
+};
 
 lord.removeReferences = function(postNumber, referencedOnly) {
     postNumber = +postNumber;
@@ -1082,7 +1082,10 @@ lord.setPostHidden = function(el) {
     if (!hidden) {
         lord.addPostToHidden(null, boardName, postNumber, threadNumber);
     } else if (list[boardName + "/" + postNumber]) {
-        delete list[boardName + "/" + postNumber];
+        if (list[boardName + "/" + postNumber].reason)
+            list[boardName + "/" + postNumber] = false;
+        else
+            delete list[boardName + "/" + postNumber];
         lord.setLocalObject("hiddenPosts", list);
     }
     lord.strikeOutHiddenPostLinks();

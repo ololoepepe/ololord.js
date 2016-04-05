@@ -1,2 +1,2 @@
 * Implement hiding posts by similar text
-* Do not hide posts with spells again if they are removed from hidden post list manually
+* Implement adding post to favorites

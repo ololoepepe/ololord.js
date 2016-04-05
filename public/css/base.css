@@ -110,6 +110,10 @@ audio {
     font-size: 75%;
 }
 
+.hiddenPostList {
+    min-width: 350px;
+}
+
 .hiddenPostList > div:nth-child(even) {
     margin-top: 3px;
     margin-bottom: 3px;

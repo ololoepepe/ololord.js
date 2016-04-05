@@ -1443,7 +1443,9 @@ lord.editSpells = function() {
 
 lord.showHiddenPostList = function() {
     var model = lord.model(["base", "tr"]);
-    model.hiddenPosts = lord.toArray(lord.getLocalObject("hiddenPosts", {}));
+    model.hiddenPosts = lord.toArray(lord.getLocalObject("hiddenPosts", {})).filter(function(hiddenPost) {
+        return hiddenPost;
+    });
     var div = lord.template("hiddenPostList", model);
     return lord.showDialog(div, {
         title: "hiddenPostListText",
@@ -1455,7 +1457,13 @@ lord.removeHidden = function(el) {
     var div = el.parentNode;
     div.parentNode.removeChild(div);
     var list = lord.getLocalObject("hiddenPosts", {});
-    delete list[lord.data("boardName", div) + "/" + lord.data("postNumber", div)];
+    var key = lord.data("boardName", div) + "/" + lord.data("postNumber", div);
+    if (!list.hasOwnProperty(key))
+        return;
+    if (list[key].reason)
+        list[key] = false;
+    else
+        delete list[key];
     lord.setLocalObject("hiddenPosts", list);
 };
 
