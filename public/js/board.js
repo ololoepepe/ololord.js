@@ -126,7 +126,7 @@ lord.postProcessors.push(function(post) {
     if (!postText[0])
         return;
     var postFile = postText.parent().find(".postFile");
-    postText.css("max-width", "calc(100% - " + postFile.width() + "px)");
+    postText.css("max-width", "calc(100% - " + (postFile.width() + 5) + "px)");
 });
 
 if (lord.getLocalObject("addExpander", true))
