@@ -130,7 +130,9 @@ lord.postProcessors.push(function textWidthProcessor(post) {
         var width = Math.ceil(postText.position().left - postText.parent().position().left);
         postText.css("max-width", "calc(100% - " + width + "px)");
     } else {
-        $(postFile.find(".postFileThumbImage").load(textWidthProcessor.bind(null, post)));
+        postFile.find(".postFileThumbImage").load(function() {
+            textWidthProcessor(post);
+        });
     }
 });
 
