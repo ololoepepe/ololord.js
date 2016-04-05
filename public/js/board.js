@@ -119,6 +119,16 @@ lord.checkExpander = function(post) {
     bq.parent()[0].appendChild(a);
 };
 
+lord.postProcessors.push(function(post) {
+    if ($(".postFile ~ .postFile ~ .postText").length > 0)
+        return;
+    var postText = $(".postFile ~ .postText", post);
+    if (!postText[0])
+        return;
+    var postFile = postText.parent().find(".postFile");
+    postText.css("max-width", "calc(100% - " + postFile.width() + "px)");
+});
+
 if (lord.getLocalObject("addExpander", true))
     lord.postProcessors.push(lord.checkExpander);
 
