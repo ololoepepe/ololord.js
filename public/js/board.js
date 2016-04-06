@@ -126,7 +126,9 @@ lord.postProcessors.push(function textWidthProcessor(post) {
         postText.css("max-width", "calc(100% - " + width + "px)");
     } else {
         postFile.find(".postFileThumbImage").load(function() {
-            textWidthProcessor(post);
+            setTimeout(function() {
+                textWidthProcessor(post);
+            }, 10);
         });
     }
 });
