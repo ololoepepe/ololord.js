@@ -4,6 +4,8 @@ var lord = lord || {};
 
 /*Constants*/
 
+lord.MovablePlayerBorderWidth = 5;
+lord.BaseScaleFactor = 10 * 1000 * 1000 * 1000;
 lord.WindowID = uuid.v4();
 lord.DefaultSpells = "#wipe(samelines,samewords,longwords,symbols,capslock,numbers,whitespace)";
 lord.DefaultHotkeys = {

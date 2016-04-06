@@ -2,11 +2,6 @@
 
 var lord = lord || {};
 
-/*Constants*/
-
-lord.MovablePlayerBorderWidth = 5;
-lord.BaseScaleFactor = 10 * 1000 * 1000 * 1000;
-
 /*Variables*/
 
 lord.postPreviews = {};

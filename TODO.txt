@@ -1,1 +1,3 @@
+* Implement board group support
+* Implement board sorting
 * Implement hiding posts by similar text
