@@ -20,7 +20,7 @@ lord.loginImplementation = function(form, session) {
             path: "/"
         });
     }
-    window.location = window.location.search.substr(8);
+    window.location = URI(window.location.href).search(true).source;
 };
 
 lord.doLogin = function(event, form) {

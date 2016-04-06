@@ -1463,7 +1463,11 @@ var mapPhrase = function(phrase) {
     };
 };
 
-module.exports.findPosts = function(query, boardName) {
+module.exports.findPosts = function(query, boardName, page) {
+    page = +page;
+    if (!page || page < 0)
+        page = 0;
+    var startFrom = page * config("system.searchLimit", 100);
     var q = { bool: {} };
     if (query.requiredPhrases && query.requiredPhrases.length > 0)
         q.bool.must = query.requiredPhrases.map(mapPhrase);
@@ -1480,18 +1484,23 @@ module.exports.findPosts = function(query, boardName) {
     return es.search({
         index: "ololord.js",
         type: "posts",
+        from: startFrom,
         size: config("system.searchLimit", 100),
         body: { query: q }
     }).then(function(result) {
-        return result.hits.hits.map(function(hit) {
-            return {
-                boardName: hit._id.split(":").shift(),
-                number: +hit._id.split(":").pop(),
-                threadNumber: +hit._source.threadNumber,
-                plainText: hit._source.plainText,
-                subject: hit._source.subject
-            };
-        });
+        return {
+            posts: result.hits.hits.map(function(hit) {
+                return {
+                    boardName: hit._id.split(":").shift(),
+                    number: +hit._id.split(":").pop(),
+                    threadNumber: +hit._source.threadNumber,
+                    plainText: hit._source.plainText,
+                    subject: hit._source.subject
+                };
+            }),
+            total: result.hits.total,
+            max: config("system.searchLimit", 100)
+        };
     });
 };
 

@@ -618,6 +618,7 @@ router.post("/action/search", function(req, res) {
         var boardName = fields.boardName || "";
         if ("*" == boardName)
             boardName = "";
+        var page = fields.page || 0;
         c.model.searchQuery = c.query;
         c.model.searchBoard = boardName;
         c.phrases = Tools.splitCommand(c.query);
@@ -639,8 +640,9 @@ router.post("/action/search", function(req, res) {
         });
         c.model.phrases = c.query.requiredPhrases.concat(c.query.excludedPhrases).concat(c.query.possiblePhrases);
         c.model.phrases = Tools.withoutDuplicates(c.model.phrases);
-        return Database.findPosts(c.query, boardName);
-    }).then(function(posts) {
+        return Database.findPosts(c.query, boardName, page);
+    }).then(function(result) {
+        var posts = result.posts;
         c.model.searchResults = posts.map(function(post) {
             var text = post.plainText || "";
             text = text.replace(/\r*\n+/g, " ");
@@ -657,6 +659,8 @@ router.post("/action/search", function(req, res) {
                 text: text
             };
         });
+        c.model.total = result.total;
+        c.model.max = result.max;
         res.send(c.model);
     }).catch(function(err) {
         controller.error(req, res, err, true);

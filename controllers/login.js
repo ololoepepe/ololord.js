@@ -14,6 +14,7 @@ router.generateHTML = function() {
     model.title = Tools.translate("Login", "loginButtonText");
     model.extraScripts = [
         { fileName: "3rdparty/sha1.min.js" },
+        { fileName: "3rdparty/URI.min.js" },
         { fileName: "login.js" }
     ];
     return controller("login", model).then(function(data) {
