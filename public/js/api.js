@@ -901,7 +901,8 @@ lord.showDialog = function(body, options) {
             },
             open: (options ? options.afterShow : undefined),
             beforeClose: function() {
-                $("body").css({ overflow: "inherit" });
+                if (lord.dialogs.length == 1)
+                    $("body").css({ overflow: "inherit" });
                 if (lord.scrollHandler)
                     lord.scrollHandler();
             }

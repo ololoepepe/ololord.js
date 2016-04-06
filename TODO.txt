@@ -1,2 +1,3 @@
 * Implement hiding posts by similar text
 * Implement adding post to favorites
+* Add search results pagination
