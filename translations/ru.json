@@ -1882,21 +1882,6 @@
             "value": "Google reCAPTCHA v1"
         }
     },
-    "Yandex captcha (Latin)": {
-        "_default": {
-            "value": "Yandex captcha (Latin)"
-        }
-    },
-    "Yandex captcha (digits)": {
-        "_default": {
-            "value": "Yandex captcha (digits)"
-        }
-    },
-    "Yandex captcha (Cyrillic)": {
-        "_default": {
-            "value": "Yandex captcha (Cyrillic)"
-        }
-    },
     "Target board": {
         "targetBoardLabelText": {
             "value": "Целевая доска"
