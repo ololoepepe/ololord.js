@@ -2066,6 +2066,50 @@ lord.initializeOnLoadBase = function() {
     });
 };
 
+lord.processBoardGroups = function(model) {
+    if (lord.hasOwnProperties(model.boardGroups)) {
+        var addDefault = false;
+        model.boardGroups = lord.map(model.boardGroups, function(group, name) {
+            group.name = name;
+            group.boards = model.boards.reduce(function(acc, board) {
+                if (model.settings.hiddenBoards.indexOf(board.name) >= 0 || board.hidden)
+                    return acc;
+                if (!board.groupName)
+                    addDefault = true;
+                else if (name == board.groupName)
+                    acc.push(board);
+                return acc;
+            }, []);
+            return group;
+        });
+        if (addDefault) {
+            model.boardGroups.push({
+                name: "",
+                boards: model.boards.reduce(function(acc, board) {
+                    if (model.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden && !board.groupName)
+                        acc.push(board);
+                    return acc;
+                }, [])
+            });
+        }
+        model.boardGroups = model.boardGroups.filter(function(group) {
+            return group.boards.length > 0;
+        });
+        model.boardGroups.sort(function(g1, g2) {
+            if (g1.priority && g2.priority)
+                return (g1.priority < g2.priority) ? -1 : ((g1.priority > g2.priority) ? 1 : 0);
+            return (g1.name < g2.name) ? -1 : ((g1.name > g2.name) ? 1 : 0);
+        });
+        model.boardGroups.forEach(function(group) {
+            group.boards.sort(function(b1, b2) {
+                if (b1.priority && b2.priority)
+                    return (b1.priority < b2.priority) ? -1 : ((b1.priority > b2.priority) ? 1 : 0);
+                return (b1.name < b2.name) ? -1 : ((b1.name > b2.name) ? 1 : 0);
+            });
+        });
+    }
+};
+
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
     if (/\/(frame|login).html$/.test(window.location.pathname))
