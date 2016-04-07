@@ -122,21 +122,21 @@ lord.postProcessors.push(function textWidthProcessor(post, retry) {
         return;
     var postFile = postText.parent().find(".postFile");
     if (post.parentNode && post.parentNode.tagName) {
-        if (retry) {
+        var width = Math.ceil(postText.position().left - postText.parent().position().left);
+        if (retry && retry.width != width) {
             setTimeout(function() {
-                textWidthProcessor(post);
-            }, 10);
+                textWidthProcessor(post, { width: width });
+            }, 100);
         } else {
-            var width = Math.ceil(postText.position().left - postText.parent().position().left);
             postText.css("max-width", "calc(100% - " + width + "px)");
         }
     } else if (retry) {
         setTimeout(function() {
-            textWidthProcessor(post, true);
+            textWidthProcessor(post, {});
         }, 100);
     } else {
         postFile.find(".postFileThumbImage").load(function() {
-            textWidthProcessor(post, true);
+            textWidthProcessor(post, {});
         });
     }
 });
