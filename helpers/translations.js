@@ -442,5 +442,6 @@ module.exports = function(tr) {
     translate("Reload everything", "reloadAllButtonText");
     translate("Image similarity:", "ihashDistanceLabelText");
     translate("Infinite scroll", "infiniteScrollLabelText");
+    translate("Page", "pageText");
     return tr;
 };

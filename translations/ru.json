@@ -3164,5 +3164,10 @@
         "infiniteScrollLabelText": {
             "value": "Бесконечная прокрутка"
         }
+    },
+    "Page": {
+        "pageText": {
+            "value": "Страница"
+        }
     }
 }

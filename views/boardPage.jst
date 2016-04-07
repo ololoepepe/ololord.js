@@ -91,7 +91,8 @@
                             return !lord.id("thread" + thread.opPost.number);
                         });
                         var model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")]);
-                        var html = threads.map(function(thread) {
+                        var html = '<hr /><div style="font-size: 2em; text-align: center;">' + model.tr.pageText + " "
+                            + infiniteScrollPage + '</div>' + threads.map(function(thread) {
                             model.thread = thread;
                             return "<hr />" + lord.template("thread", model, true);
                         }).join("");

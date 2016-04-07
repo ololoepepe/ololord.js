@@ -122,8 +122,14 @@ lord.postProcessors.push(function textWidthProcessor(post, retry) {
         return;
     var postFile = postText.parent().find(".postFile");
     if (post.parentNode && post.parentNode.tagName) {
-        var width = Math.ceil(postText.position().left - postText.parent().position().left);
-        postText.css("max-width", "calc(100% - " + width + "px)");
+        if (retry) {
+            setTimeout(function() {
+                textWidthProcessor(post);
+            }, 10);
+        } else {
+            var width = Math.ceil(postText.position().left - postText.parent().position().left);
+            postText.css("max-width", "calc(100% - " + width + "px)");
+        }
     } else if (retry) {
         setTimeout(function() {
             textWidthProcessor(post, true);
