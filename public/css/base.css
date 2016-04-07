@@ -654,6 +654,10 @@ ul.tabWidget > li > a {
     padding-bottom: 0px;
 }
 
+.navbarBoardGroup {
+    word-spacing: -2px;
+}
+
 blockquote.blockquoteThread {
     max-height: none;
 }

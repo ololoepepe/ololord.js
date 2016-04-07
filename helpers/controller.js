@@ -250,7 +250,10 @@ controller.boardsModel = function() {
     var boards = Board.boardNames().map(function(boardName) {
         return Board.board(boardName).info();
     });
-    return { boards: boards };
+    return {
+        boards: boards,
+        boardGroups: config("boardGroups", {})
+    };
 };
 
 controller.boardModel = function(board) {

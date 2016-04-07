@@ -36,13 +36,29 @@ var Board = function(name, title, options) {
     this.defineSetting("title", function() {
         return Tools.translate(title);
     });
+    this.defineProperty("priority", function() {
+        var def;
+        if (options && !isNaN(+options.priority) && +options.priority)
+            def = +options.priority;
+        else
+            def = 0;
+        return config("board." + name + ".priority", config("board.priority", def));
+    });
     this.defineProperty("defaultUserName", function() {
         var def;
         if (options && options.defaultUserName)
-            def = Tools.translate(options && options.defaultUserName);
+            def = Tools.translate(options.defaultUserName);
         else
             def = Tools.translate("Anonymous", "defaultUserName");
         return config("board." + name + ".defaultUserName", config("board.defaultUserName", def));
+    });
+    this.defineProperty("groupName", function() {
+        var def;
+        if (options && options.groupName)
+            def = options.groupName;
+        else
+            def = "";
+        return config("board." + name + ".groupName", config("board.groupName", def));
     });
     this.defineProperty("captchaEnabled", function() {
         return config("board.captchaEnabled", true) && config("board." + name + ".captchaEnabled", true);
@@ -151,6 +167,7 @@ Board.boards = {};
         name: this.name,
         title: this.title,
         defaultUserName: this.defaultUserName,
+        groupName: this.groupName,
         showWhois: this.showWhois,
         hidden: this.hidden,
         postingEnabled: this.postingEnabled,
