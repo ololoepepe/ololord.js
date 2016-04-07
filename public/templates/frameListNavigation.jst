@@ -1,19 +1,25 @@
 <div class="navbar navbarFrame">
-    {{~it.boards :board}}
-        {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
-            {{? it.deviceType != "mobile"}}
-                <span class="navbarItem navbarItemBoard">
-                    [{{=board.name}}]
-                    <a href="/{{=it.site.pathPrefix}}{{=board.name}}" onclick="lord.setIframeSrc(this); return false;"
-                       data-board="{{=board.name}}">{{=board.title}}</a></span>
-                <br />
-            {{??}}
-                <span class="navbarItem navbarItemBoard">
-                    [<a href="/{{=it.site.pathPrefix}}{{=board.name}}" onclick="lord.setIframeSrc(this); return false;"
-                        title="{{=board.title}}" data-board="{{=board.name}}">{{=board.name}}</a>]</span>
-                <br />
-            {{?}}
+    {{~it.boardGroups :group}}
+        {{? group.title}}
+            <b>{{!group.title}}</b>
+            <br />
         {{?}}
+        {{~group.boards :board}}
+            {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+                {{? it.deviceType != "mobile"}}
+                    <span class="navbarItem navbarItemBoard">
+                        [{{=board.name}}]
+                        <a href="/{{=it.site.pathPrefix}}{{=board.name}}" onclick="lord.setIframeSrc(this); return false;"
+                           data-board="{{=board.name}}">{{=board.title}}</a></span>
+                    <br />
+                {{??}}
+                    <span class="navbarItem navbarItemBoard">
+                        [<a href="/{{=it.site.pathPrefix}}{{=board.name}}" onclick="lord.setIframeSrc(this); return false;"
+                            title="{{=board.title}}" data-board="{{=board.name}}">{{=board.name}}</a>]</span>
+                    <br />
+                {{?}}
+            {{?}}
+        {{~}}
     {{~}}
     {{? it.deviceType != "mobile"}}
         <img src="/{{=it.site.pathPrefix}}img/markup.png" class="buttonImage" width="16" height="16">
