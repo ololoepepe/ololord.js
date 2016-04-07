@@ -2096,15 +2096,17 @@ lord.processBoardGroups = function(model) {
             return group.boards.length > 0;
         });
         model.boardGroups.sort(function(g1, g2) {
-            if (g1.priority && g2.priority)
-                return (g1.priority < g2.priority) ? -1 : ((g1.priority > g2.priority) ? 1 : 0);
-            return (g1.name < g2.name) ? -1 : ((g1.name > g2.name) ? 1 : 0);
+            if (!g1.priority && !g2.priority)
+                return (g1.name < g2.name) ? -1 : ((g1.name > g2.name) ? 1 : 0);
+            return ((g1.priority || 0) < (g2.priority || 0)) ? -1
+                : (((g1.priority || 0) > (g2.priority || 0)) ? 1 : 0);
         });
         model.boardGroups.forEach(function(group) {
             group.boards.sort(function(b1, b2) {
-                if (b1.priority && b2.priority)
-                    return (b1.priority < b2.priority) ? -1 : ((b1.priority > b2.priority) ? 1 : 0);
-                return (b1.name < b2.name) ? -1 : ((b1.name > b2.name) ? 1 : 0);
+                if (!b1.priority && !b2.priority)
+                    return (b1.name < b2.name) ? -1 : ((b1.name > b2.name) ? 1 : 0);
+                return ((b1.priority || 0) < (b2.priority || 0)) ? -1
+                    : (((b1.priority || 0) > (b2.priority || 0)) ? 1 : 0);
             });
         });
     }
