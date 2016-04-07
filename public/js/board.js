@@ -114,7 +114,7 @@ lord.checkExpander = function(post) {
     bq.parent()[0].appendChild(a);
 };
 
-lord.postProcessors.push(function textWidthProcessor(post) {
+lord.postProcessors.push(function textWidthProcessor(post, retry) {
     if ($(".postFile ~ .postFile ~ .postText").length > 0)
         return;
     var postText = $(".postFile ~ .postText", post);
@@ -124,11 +124,13 @@ lord.postProcessors.push(function textWidthProcessor(post) {
     if (post.parentNode && post.parentNode.tagName) {
         var width = Math.ceil(postText.position().left - postText.parent().position().left);
         postText.css("max-width", "calc(100% - " + width + "px)");
+    } else if (retry) {
+        setTimeout(function() {
+            textWidthProcessor(post, true);
+        }, 100);
     } else {
         postFile.find(".postFileThumbImage").load(function() {
-            setTimeout(function() {
-                textWidthProcessor(post);
-            }, 10);
+            textWidthProcessor(post, true);
         });
     }
 });
@@ -3348,10 +3350,15 @@ lord.updateThread = function(silent) {
             return Promise.resolve();
         c.threadInfo = threadInfo;
         c.sequenceNumber = c.posts[c.posts.length - 1].sequenceNumber;
-        var promises = c.posts.map(function(post) {
-            return lord.createPostNode(post, true, c.threadInfo);
+        var posts = [];
+        return lord.series(c.posts, function(post) {
+            return lord.createPostNode(post, true, c.threadInfo).then(function(node) {
+                posts.push(node);
+                return Promise.resolve();
+            });
+        }).then(function() {
+            return Promise.resolve(posts);
         });
-        return Promise.all(promises);
     }).then(function(posts) {
         if (!posts || !posts.length || posts.length < 1)
             return Promise.resolve();

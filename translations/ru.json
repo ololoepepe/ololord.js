@@ -2358,7 +2358,8 @@
     "Invalid captcha type": {
         "_default": {
             "value": "Недействительный тип капчи"
-        }
+        },
+        "_obsolete": true
     },
     "Invalid URL": {
         "_default": {
@@ -3157,6 +3158,11 @@
     "Add radio stream": {
         "addRadioText": {
             "value": "Добавить радио-поток"
+        }
+    },
+    "Infinite scroll": {
+        "infiniteScrollLabelText": {
+            "value": "Бесконечная прокрутка"
         }
     }
 }
