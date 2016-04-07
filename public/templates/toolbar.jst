@@ -23,7 +23,7 @@
                 onclick="lord.redirectToLoginPage();"><img src="/{{=it.site.pathPrefix}}img/login.png"
                                                            class="buttonImage" title="{{=it.tr.loginText}}"></a>]
         {{?}}
-        {{? "mobile" != it.deviceType}}
+        {{? "mobile" == it.deviceType}}
             |
         {{?}}
         {{#def.innerNavbar}}
