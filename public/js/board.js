@@ -1209,7 +1209,7 @@ lord.draw = function(options) {
     var backgroundShape;
     if (options && options.imageUrl) {
         var backgroundImage = new Image();
-        backgroundImage.src = options.imageUrl;
+        backgroundImage.src = options.imageUrl.replace(/^https?\:/, window.location.protocol);
         backgroundShape = LC.createShape("Image", {
             x: 0,
             y: 0,
