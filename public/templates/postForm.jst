@@ -337,7 +337,8 @@
                 {{? it.settings.minimalisticPostform}}
                     <td class="postformField" colspan="2">
                         <input type="password" maxlength="{{=it.board.maxPasswordLength}}" name="password"
-                               class="postFormInput" placeholder="{{=it.tr.postFormPlaceholderPassword}}" />
+                               value="{{=it.password}}" class="postFormInput"
+                               placeholder="{{=it.tr.postFormPlaceholderPassword}}" />
                     </td>
                 {{??}}
                     <td class="postformLabel">
@@ -345,7 +346,7 @@
                     </td>
                     <td class="postformField">
                         <input type="password" maxlength="{{=it.board.maxPasswordLength}}" name="password"
-                               class="postFormInput" />
+                               value="{{=it.password}}" class="postFormInput" />
                     </td>
                 {{?}}
             </tr>

@@ -1209,6 +1209,7 @@ lord.model = function(modelName) {
         });
         model.customPostBodyPart = lord.customPostBodyPart;
         model.customPostHeaderPart = lord.customPostHeaderPart;
+        model.password = lord.getLocalObject("password", "");
         return model;
     }
 };

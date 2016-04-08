@@ -103,6 +103,16 @@
                 </tr>
                 <tr>
                     <td colspan="2">
+                        {{=it.tr.postFormLabelPassword}}
+                        <input type="password" name="password" size="20" value="{{=it.password}}" />
+                        <button onclick="lord.showHidePassword(this); return false;"
+                                name="showHidePasswordButton">{{=it.tr.showPasswordButtonText}}</button>
+                        <button onclick="lord.newPassword(this); return false;"
+                                name="newPasswordButton">{{=it.tr.newPasswordButtonText}}</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
                         <button onclick="lord.exportSettings(); return false;"
                                 name="exportSettingsButton">{{=it.tr.exportSettingsButtonText}}</button>
                         <button onclick="lord.importSettings(); return false;"

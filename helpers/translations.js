@@ -385,6 +385,10 @@ module.exports = function(tr) {
     translate("Synchronize", "synchronizationText");
     translate("Synchronize settings", "synchronizeSettingsLabelText");
     translate("Synchronize CSS and JS", "synchronizeCssAndJsLabelText");
+    translate("Synchronize password", "synchronizePasswordLabelText");
+    translate("Show", "showPasswordButtonText");
+    translate("Hide", "hidePasswordButtonText");
+    translate("New", "newPasswordButtonText");
     translate("No password specified, and not logged in", "noPasswordNotLoggedInError");
     translate("Synchronization data will be available within 5 minutes", "synchronizationTimeoutText");
     translate("Synchronization completed successfully", "synchronizationSuccessfulText");

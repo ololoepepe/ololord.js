@@ -55,6 +55,10 @@ lord.lastWindowSize = {
     width: $(window).width(),
     height: $(window).height()
 };
+if (typeof lord.getLocalObject("password") != "string") {
+    lord.setLocalObject("password",
+        lord.sample("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 10).join(""));
+}
 
 /*Classes*/
 
@@ -536,7 +540,7 @@ lord.preventOnclick = function(event) {
     return false;
 };
 
-lord.localData = function(includeSettings) {
+lord.localData = function(includeSettings, includeCustom, includePassword) {
     var o = {};
     if (includeSettings)
         o.settings = lord.settings();
@@ -545,10 +549,15 @@ lord.localData = function(includeSettings) {
             def = {};
         o[key] = lord.getLocalObject(key, def);
     };
+    if (includeCustom) {
+        f("userCss", "");
+        f("userJavaScript", "");
+    }
+    if (includePassword)
+        f("password");
     f("favoriteThreads");
     f("ownPosts");
     f("spells", "");
-    f("userJavaScript", "");
     f("hotkeys", {});
     f("hiddenPosts", {});
     f("lastCodeLang", "");
@@ -557,7 +566,6 @@ lord.localData = function(includeSettings) {
     f("playerTracks", []);
     f("lastChatCheckDate", null);
     f("audioVideoVolume", 1);
-    f("userCss", "");
     f("ownLikes");
     f("ownVotes");
     f("lastPostNumbers");
@@ -566,7 +574,7 @@ lord.localData = function(includeSettings) {
     return o;
 };
 
-lord.setLocalData = function(o, includeSettings, includeCustom) {
+lord.setLocalData = function(o, includeSettings, includeCustom, includePassword) {
     if (includeSettings && o.settings) {
         if (o.settings.captchaEngine.id)
             o.settings.captchaEngine = o.settings.captchaEngine.id;
@@ -595,6 +603,8 @@ lord.setLocalData = function(o, includeSettings, includeCustom) {
         f("userCss");
         f("userJavaScript");
     }
+    if (includePassword)
+        f("password");
     f("favoriteThreads", true);
     f("ownPosts", true);
     f("spells");
@@ -634,7 +644,7 @@ lord.setLocalData = function(o, includeSettings, includeCustom) {
 };
 
 lord.exportSettings = function() {
-    prompt(lord.text("copySettingsHint"), JSON.stringify(lord.localData(true)));
+    prompt(lord.text("copySettingsHint"), JSON.stringify(lord.localData(true, true, true)));
 };
 
 lord.importSettings = function() {
@@ -648,7 +658,7 @@ lord.importSettings = function() {
         lord.handleError(err);
         return;
     }
-    lord.setLocalData(o, true, true);
+    lord.setLocalData(o, true, true, true);
 };
 
 lord.synchronize = function() {
@@ -669,12 +679,14 @@ lord.synchronize = function() {
         }
         var settings = !!lord.nameOne("synchronizeSettings", div).checked;
         var cssJs = !!lord.nameOne("synchronizeCssAndJs", div).checked;
+        var pwd = !!lord.nameOne("synchronizePassword", div).checked;
         return lord.api("synchronization", { key: password }).then(function(result) {
             if (result)
-                lord.setLocalData(result, settings, cssJs);
+                lord.setLocalData(result, settings, cssJs, pwd);
             var formData = new FormData();
             formData.append("key", password);
-            formData.append("data", JSON.stringify(lord.localData(settings)));
+            console.log(settings, cssJs, pwd);
+            formData.append("data", JSON.stringify(lord.localData(settings, cssJs, pwd)));
             return lord.post("/" + lord.data("sitePathPrefix") + "action/synchronize", formData);
         }).then(function() {
             lord.showPopup(lord.text("synchronizationSuccessfulText"));
@@ -683,13 +695,31 @@ lord.synchronize = function() {
     }).catch(lord.handleError);
 };
 
+lord.showHidePassword = function(btn) {
+    var inp = lord.nameOne("password", btn.parentNode);
+    inp.type = ("password" == inp.type) ? "text" : "password";
+    $("span", btn).empty().append(lord.node("text", lord.text(("password" == inp.type) ? "showPasswordButtonText"
+        : "hidePasswordButtonText")));
+};
+
+lord.newPassword = function(btn) {
+    var inp = lord.nameOne("password", btn.parentNode);
+    var pwd = lord.sample("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 10).join("");
+    lord.setLocalObject("password", pwd);
+    inp.value = pwd;
+    var form = lord.id("postForm");
+    if (form)
+        lord.nameOne("password", form).setAttribute("value", pwd);
+};
+
 lord.showSettings = function() {
     var c = {};
     var model = { settings: lord.settings() };
     c.model = merge.recursive(model,
             lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")]));
     c.div = lord.template("settingsDialog", c.model);
-    $("[name='exportSettingsButton'], [name='importSettingsButton'], [name='synchronizationButton']", c.div).button();
+    $("[name='exportSettingsButton'], [name='importSettingsButton'], [name='synchronizationButton'], "
+        + "[name='showHidePasswordButton'], [name='newPasswordButton']", c.div).button();
     lord.showDialog(c.div, {
         title: "settingsDialogTitle",
         buttons: [
@@ -2067,49 +2097,50 @@ lord.initializeOnLoadBase = function() {
 };
 
 lord.processBoardGroups = function(model) {
-    if (lord.hasOwnProperties(model.boardGroups)) {
-        var addDefault = false;
-        model.boardGroups = lord.map(model.boardGroups, function(group, name) {
-            group.name = name;
-            group.boards = model.boards.reduce(function(acc, board) {
-                if (model.settings.hiddenBoards.indexOf(board.name) >= 0 || board.hidden)
-                    return acc;
-                if (!board.groupName)
-                    addDefault = true;
-                else if (name == board.groupName)
-                    acc.push(board);
+    var addDefault = false;
+    model.boardGroups = lord.map(model.boardGroups, function(group, name) {
+        group.name = name;
+        group.boards = model.boards.reduce(function(acc, board) {
+            if (model.settings.hiddenBoards.indexOf(board.name) >= 0 || board.hidden)
                 return acc;
-            }, []);
-            return group;
-        });
-        if (addDefault) {
-            model.boardGroups.push({
-                name: "",
-                boards: model.boards.reduce(function(acc, board) {
-                    if (model.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden && !board.groupName)
-                        acc.push(board);
-                    return acc;
-                }, [])
-            });
-        }
-        model.boardGroups = model.boardGroups.filter(function(group) {
-            return group.boards.length > 0;
-        });
-        model.boardGroups.sort(function(g1, g2) {
-            if (!g1.priority && !g2.priority)
-                return (g1.name < g2.name) ? -1 : ((g1.name > g2.name) ? 1 : 0);
-            return ((g1.priority || 0) < (g2.priority || 0)) ? -1
-                : (((g1.priority || 0) > (g2.priority || 0)) ? 1 : 0);
-        });
-        model.boardGroups.forEach(function(group) {
-            group.boards.sort(function(b1, b2) {
-                if (!b1.priority && !b2.priority)
-                    return (b1.name < b2.name) ? -1 : ((b1.name > b2.name) ? 1 : 0);
-                return ((b1.priority || 0) < (b2.priority || 0)) ? -1
-                    : (((b1.priority || 0) > (b2.priority || 0)) ? 1 : 0);
-            });
+            if (!board.groupName)
+                addDefault = true;
+            else if (name == board.groupName)
+                acc.push(board);
+            return acc;
+        }, []);
+        return group;
+    });
+    if (addDefault || model.boardGroups.length < 1) {
+        var noGroups = (model.boardGroups.length < 1);
+        model.boardGroups.push({
+            name: "",
+            boards: model.boards.reduce(function(acc, board) {
+                if (noGroups || (model.settings.hiddenBoards.indexOf(board.name) < 0
+                    && !board.hidden && !board.groupName)) {
+                    acc.push(board);
+                }
+                return acc;
+            }, [])
         });
     }
+    model.boardGroups = model.boardGroups.filter(function(group) {
+        return group.boards.length > 0;
+    });
+    model.boardGroups.sort(function(g1, g2) {
+        if (!g1.priority && !g2.priority)
+            return (g1.name < g2.name) ? -1 : ((g1.name > g2.name) ? 1 : 0);
+        return ((g1.priority || 0) < (g2.priority || 0)) ? -1
+            : (((g1.priority || 0) > (g2.priority || 0)) ? 1 : 0);
+    });
+    model.boardGroups.forEach(function(group) {
+        group.boards.sort(function(b1, b2) {
+            if (!b1.priority && !b2.priority)
+                return (b1.name < b2.name) ? -1 : ((b1.name > b2.name) ? 1 : 0);
+            return ((b1.priority || 0) < (b2.priority || 0)) ? -1
+                : (((b1.priority || 0) > (b2.priority || 0)) ? 1 : 0);
+        });
+    });
 };
 
 window.addEventListener("load", function load() {

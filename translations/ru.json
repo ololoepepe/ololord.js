@@ -1317,10 +1317,16 @@
     "Hide": {
         "hidePostText": {
             "value": "Скрыть"
+        },
+        "hidePasswordButtonText": {
+            "value": "Скрыть"
         }
     },
     "Show": {
         "showPostText": {
+            "value": "Показать"
+        },
+        "showPasswordButtonText": {
             "value": "Показать"
         }
     },
@@ -3168,6 +3174,16 @@
     "Page": {
         "pageText": {
             "value": "Страница"
+        }
+    },
+    "Synchronize password": {
+        "synchronizePasswordLabelText": {
+            "value": "Синхронизировать пароль"
+        }
+    },
+    "New": {
+        "newPasswordButtonText": {
+            "value": "Новый"
         }
     }
 }

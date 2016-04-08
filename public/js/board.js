@@ -2241,6 +2241,7 @@ lord.submitted = function(event, form) {
     lord.setLocalObject("markupMode", markupMode.options[markupMode.selectedIndex].value);
     btn.disabled = true;
     btn.value = "0%";
+    lord.setLocalObject("password", lord.nameOne("password", form).value || "");
     var formData = new FormData(form);
     lord.queryAll(".postformFile", form).forEach(function(div) {
         if (div.file)
