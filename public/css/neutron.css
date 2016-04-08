@@ -43,7 +43,7 @@ a {
 }
 
 a.expandCollapse {
-    color: #444444;
+    color: #AAAAAA;
 }
 
 a:hover {
@@ -51,7 +51,7 @@ a:hover {
 }
 
 a.expandCollapse:hover {
-    color: #666666;
+    color: #CCCCCC;
 }
 
 hr {
@@ -135,6 +135,14 @@ span.spoiler:hover {
 
 span.spoiler:hover a {
     color: #EEFEBB;
+}
+
+span.spoiler:hover > span[data-video-id] > a.expandCollapse {
+    color: #AAAAAA;
+}
+
+span.spoiler:hover > span[data-video-id] > a.expandCollapse:hover {
+    color: #CCCCCC;
 }
 
 span.spoiler:hover .cspoilerTitle {
