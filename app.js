@@ -131,7 +131,20 @@ var spawnCluster = function() {
 };
 
 if (cluster.isMaster) {
-    Database.initialize().then(function() {
+    var FS = require("q-io/fs");
+    var path = __dirname + "/public/node-captcha";
+    FS.list(path).then(function(fileNames) {
+        Tools.series(fileNames.filter(function(fileName) {
+            return fileName.split(".").pop() == "png" && /^[0-9]+$/.test(fileName.split(".").shift());
+        }), function(fileName) {
+            return FS.remove(path + "/" + fileName);
+        });
+    }).catch(function(err) {
+        console.error(err);
+        return Promise.resolve();
+    }).then(function() {
+        return Database.initialize();
+    }).then(function() {
         return controller.initialize();
     }).then(function() {
         if (config("server.statistics.enabled", true)) {
