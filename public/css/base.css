@@ -20,6 +20,14 @@ footer {
     padding-bottom: 2px;
 }
 
+.spoiler > span[data-video-id] > img {
+    visibility: hidden;
+}
+
+.spoiler:hover > span[data-video-id] > img {
+    visibility: visible;
+}
+
 a.expandCollapse {
     cursor: pointer;
 }
