@@ -104,7 +104,8 @@
                 <tr>
                     <td colspan="2">
                         {{=it.tr.postFormLabelPassword}}
-                        <input type="password" name="password" size="20" value="{{=it.password}}" />
+                        <input type="password" name="password" size="20" value="{{=it.password}}"
+                               oninput="lord.passwordChanged(this);" />
                         <button onclick="lord.showHidePassword(this); return false;"
                                 name="showHidePasswordButton">{{=it.tr.showPasswordButtonText}}</button>
                         <button onclick="lord.newPassword(this); return false;"

@@ -695,6 +695,14 @@ lord.synchronize = function() {
     }).catch(lord.handleError);
 };
 
+lord.passwordChanged = function(inp) {
+    var pwd = inp.value || "";
+    lord.setLocalObject("password", pwd);
+    var form = lord.id("postForm");
+    if (form)
+        lord.nameOne("password", form).setAttribute("value", pwd);
+};
+
 lord.showHidePassword = function(btn) {
     var inp = lord.nameOne("password", btn.parentNode);
     inp.type = ("password" == inp.type) ? "text" : "password";
@@ -705,11 +713,8 @@ lord.showHidePassword = function(btn) {
 lord.newPassword = function(btn) {
     var inp = lord.nameOne("password", btn.parentNode);
     var pwd = lord.sample("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 10).join("");
-    lord.setLocalObject("password", pwd);
     inp.value = pwd;
-    var form = lord.id("postForm");
-    if (form)
-        lord.nameOne("password", form).setAttribute("value", pwd);
+    lord.passwordChanged(inp);
 };
 
 lord.showSettings = function() {
