@@ -1910,6 +1910,15 @@ lord.removeFile = function(div) {
         lord.queryOne("a.postformFileRemoveButton", div).style.display = "none";
     }
     lord.checkPostformTextareaSize();
+    for (var i = 0; i < parent.children.length; ++i) {
+        var c = parent.children[i];
+        if ("none" == lord.queryOne("a.postformFileRemoveButton", c).style.display)
+            return;
+    }
+    var ndiv = div.cloneNode(true);
+    lord.queryOne("a.postformFileRemoveButton", ndiv).style.display = "none";
+    lord.clearFileInput(ndiv);
+    parent.appendChild(ndiv);
 };
 
 lord.browseFile = function(e, div) {
