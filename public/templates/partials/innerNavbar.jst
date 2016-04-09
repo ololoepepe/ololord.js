@@ -15,6 +15,9 @@
             <option value="" class="selectOption"></option>
         </select>
     </div>]
+    {{? it.isToolbar}}
+        <br />
+    {{?}}
 {{??}}
     {{~it.boardGroups :group}}
         {{? group.title}}
@@ -32,9 +35,6 @@
             ]
         </span>
     {{~}}
-{{?}}
-{{? it.isToolbar}}
-    <br />
 {{?}}
 <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}"
                              title="{{=it.tr.toHomePageText}}"><img src="/{{=it.site.pathPrefix}}img/homepage.png"
