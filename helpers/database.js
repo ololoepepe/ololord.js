@@ -1736,6 +1736,10 @@ module.exports.editPost = function(req, fields) {
         if (!post)
             return Promise.reject(Tools.translate("Invalid post"));
         c.post = post;
+        return db.hget("threads:" + board.name, c.post.threadNumber);
+    }).then(function(thread) {
+        if (!thread)
+            return Promise.reject(Tools.translate("No such thread"));
         return checkPermissions(req, board, post, "editPost");
     }).then(function(result) {
         if (!result)

@@ -2138,7 +2138,7 @@
             "value": "Попытка прикрепить голосвание не будучи ОПом"
         }
     },
-    "No vote text provided": {
+    "No voting text provided": {
         "_default": {
             "value": "Не указан текст голосования"
         }
