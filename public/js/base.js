@@ -2099,6 +2099,8 @@ lord.initializeOnLoadBase = function() {
         }
         lord.lastWindowSize = n;
     });
+    if (lord.getLocalObject("stickyToolbar", true))
+        $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
 };
 
 lord.processBoardGroups = function(model) {

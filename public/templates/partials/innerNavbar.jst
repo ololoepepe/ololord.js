@@ -1,5 +1,6 @@
 {{? "mobile" == it.deviceType}}
-    [<div class="boardSelectContainer">
+    [{{=it.tr.boardsText}}:
+    <div class="boardSelectContainer">
         <select name="url" class="boardSelect" title="{{=it.tr.boardSelectTooltip}}"
                 onchange="(function(sel) { var val = sel.options[sel.selectedIndex].value; if (val) location = val; })(this);">
             <option selected="true" value="" class="selectOption"></option>
@@ -31,6 +32,9 @@
             ]
         </span>
     {{~}}
+{{?}}
+{{? it.isToolbar}}
+    <br />
 {{?}}
 <span class="navbarItem">[<a href="/{{=it.site.pathPrefix}}"
                              title="{{=it.tr.toHomePageText}}"><img src="/{{=it.site.pathPrefix}}img/homepage.png"
