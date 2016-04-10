@@ -593,22 +593,40 @@ module.exports.removeFile = function(path) {
     }).catch(recover.bind(null, c));
 };
 
-module.exports.series = function(arr, f) {
+module.exports.series = function(arr, f, container) {
+    if (container && typeof container != "object")
+        container = [];
+    var isArray = Util.isArray(container);
+    var isObject = (typeof container == "object");
     var p = Promise.resolve();
     if (Util.isArray(arr)) {
-        arr.forEach(function(el) {
+        arr.forEach(function(el, i) {
             p = p.then(function() {
                 return f(el);
+            }).then(function(result) {
+                if (isArray)
+                    container.push(result);
+                else if (isObject)
+                    container[i] = result;
             });
         });
     } else if (Util.isObject(arr)) {
         forIn(arr, function(el, key) {
             p = p.then(function() {
                 return f(el, key);
+            }).then(function(result) {
+                if (isArray)
+                    container.push(result);
+                else if (isObject)
+                    container[key] = result;
             });
         });
     }
-    return p;
+    if (!container)
+        return p;
+    return p.then(function() {
+        return Promise.resolve(container);
+    });
 };
 
 module.exports.generateTripcode = function(source) {

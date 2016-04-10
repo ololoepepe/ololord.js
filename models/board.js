@@ -51,19 +51,13 @@ module.exports.getLastPostNumbers = function(boardNames) {
 module.exports.getPosts = function(posts) {
     if (!posts || posts.length < 1)
         return Promise.resolve([]);
-    var c = { posts: [] };
     return Tools.series(posts, function(post) {
         return Database.getPost(post.boardName, post.postNumber, {
             withFileInfos: true,
             withReferences: true,
             withExtraData: true
-        }).then(function(post) {
-            c.posts.push(post);
-            return Promise.resolve();
         });
-    }).then(function() {
-        return Promise.resolve(c.posts);
-    });
+    }, true);
 };
 
 module.exports.getFileInfos = function(list, hashpass) {
@@ -443,7 +437,6 @@ var generateThreads = function(boardName) {
     var board = Board.board(boardName);
     if (!(board instanceof Board))
         return Promise.reject(Tools.translate("Invalid board"));
-    var c = {};
     return Database.getThreads(boardName).then(function(threads) {
         return Tools.series(threads, function(thread) {
             return generateThread(boardName, thread.number);
