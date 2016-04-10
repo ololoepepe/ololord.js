@@ -205,7 +205,7 @@ var getThreadPage = function(archived, board, number, json, ifModifiedSince) {
     });
 };
 
-var getThread = function(board, number) {
+var getThread = function(board, number, archived) {
     if (!(board instanceof Board))
         return Promise.reject(Tools.translate("Invalid board"));
     number = +(number || 0);
@@ -217,7 +217,8 @@ var getThread = function(board, number) {
         withPostNumbers: 1,
         filterFunction: function(thread) {
             return thread.number == number;
-        }
+        },
+        archived: !!archived
     }).then(function(threads) {
         if (threads.length != 1)
             return Promise.reject(Tools.translate("No such thread"));
@@ -255,6 +256,8 @@ var getThread = function(board, number) {
         return Promise.resolve(c.model);
     });
 };
+
+module.exports.getThread = getThread;
 
 module.exports.getThreadLastPostNumber = function(boardName, threadNumber) {
     var board = Board.board(boardName);
@@ -529,7 +532,7 @@ var generateArchive = function(boardName) {
             return Promise.resolve([]);
         return FS.list(path);
     }).then(function(fileNames) {
-        var fileNames = fileNames.filter(function(fileName) {
+        fileNames = fileNames.filter(function(fileName) {
             return fileName.split(".").pop() == "json";
         });
         model.threads = [];

@@ -162,7 +162,7 @@ if (cluster.isMaster) {
             }, config("server.rss.ttl", 60) * Tools.Minute);
         }
         if (config("system.regenerateCacheOnStartup", true))
-            return controller.regenerate();
+            return controller.regenerate(config("system.regenerateArchive", false));
         return Promise.resolve();
     }).then(function() {
         console.log("Spawning workers, please, wait...");
@@ -211,8 +211,8 @@ if (cluster.isMaster) {
             config.reload();
             return Global.IPC.send("reloadConfig");
         });
-        Global.IPC.installHandler("regenerateCache", function() {
-            return controller.regenerate();
+        Global.IPC.installHandler("regenerateCache", function(regenerateArchive) {
+            return controller.regenerate(regenerateArchive);
         });
     }).catch(function(err) {
         Global.error(err.stack || err);

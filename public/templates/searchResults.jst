@@ -4,11 +4,11 @@
             <div class="searchResult">
                 <div class="searchResultLink">
                     {{=(it.page * it.max + index + 1)}}.
-                    <a href="/{{=it.site.pathPrefix}}{{=result.boardName}}/res/{{=result.threadNumber}}.html{{? result.threadNumber != result.postNumber}}#{{=result.postNumber}}{{?}}"
+                    <a href="/{{=it.site.pathPrefix}}{{=result.boardName}}/{{? result.archived}}arch{{??}}res{{?}}/{{=result.threadNumber}}.html{{? result.threadNumber != result.postNumber}}#{{=result.postNumber}}{{?}}"
                        target="_blank">{{!result.subject}}</a>
                 </div>
                 <div class="searchResultThread">
-                    <span class="quotation">/{{=result.boardName}}/res/{{=result.threadNumber}}.html{{? result.threadNumber != result.postNumber}}#{{=result.postNumber}}{{?}}</span>
+                    <span class="quotation">/{{=result.boardName}}/{{? result.archived}}arch{{??}}res{{?}}/{{=result.threadNumber}}.html{{? result.threadNumber != result.postNumber}}#{{=result.postNumber}}{{?}}</span>
                 </div>
                 {{? result.text}}
                     <div class="searchResultText">

@@ -108,6 +108,15 @@ var toArray = function(obj) {
 
 module.exports.toArray = toArray;
 
+module.exports.promiseIf = function(condition, ifTrue, ifFalse) {
+    if (condition)
+        return ifTrue();
+    else if (typeof ifFalse == "function")
+        return ifFalse();
+    else
+        return Promise.resolve();
+};
+
 module.exports.extend = function(Child, Parent) {
     var F = function() {};
     F.prototype = Parent.prototype;

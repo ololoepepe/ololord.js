@@ -440,7 +440,7 @@ controller.sendCachedRSS = function(req, res, id) {
     return sendCachedContent(req, res, id, Cache.Types.RSS);
 };
 
-controller.regenerate = function() {
+controller.regenerate = function(regenerateArchived) {
     return Cache.cleanup().then(function() {
         return Tools.series(["JSON", "HTML"], function(type) {
             console.log(`Generating ${type} cache, please, wait...`);
@@ -453,6 +453,42 @@ controller.regenerate = function() {
                         return Cache[`set${type}`](id, data);
                     });
                 });
+            });
+        });
+    }).then(function() {
+        if (!regenerateArchived)
+            return Promise.resolve();
+        console.log(`Generating archived threads cache, please, wait...`);
+        return Tools.series(Board.boardNames(), function(boardName) {
+            var archPath = `${__dirname}/../public/${boardName}/arch`;
+            return FS.exists(archPath).then(function(exists) {
+                return Tools.promiseIf(exists, function() {
+                    var board = Board.board(boardName);
+                    return FS.list(archPath).then(function(fileNames) {
+                        return Tools.series(fileNames.filter(function(fileName) {
+                            return fileName.split(".").pop() == "json";
+                        }), function(fileName) {
+                            var threadNumber = +fileName.split(".").shift();
+                            var c = {};
+                            return BoardModel.getThread(board, threadNumber, true).then(function(model) {
+                                c.model = model;
+                                return Tools.writeFile(`${archPath}/${threadNumber}.json`, JSON.stringify(c.model));
+                            }).then(function() {
+                                return BoardModel.generateThreadHTML(board, threadNumber, c.model, true);
+                            }).then(function(data) {
+                                return Tools.writeFile(`${archPath}/${threadNumber}.html`, data);
+                            }).catch(function(err) {
+                                Global.error(err.stack || err);
+                            }).then(function() {
+                                return Promise.resolve();
+                            });
+                        });
+                    });
+                });
+            }).catch(function(err) {
+                Global.error(err.stack || err);
+            }).then(function() {
+                return Promise.resolve();
             });
         });
     }).then(function() {

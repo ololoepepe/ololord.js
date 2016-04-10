@@ -1312,6 +1312,27 @@ module.exports.createThread = function(req, fields, files, transaction) {
                 c.thread.archived = true;
                 return db.hset("archivedThreads:" + board.name, c.thread.number, JSON.stringify(c.thread));
             }).then(function() {
+                return db.smembers("threadPostNumbers:" + board.name + ":" + c.thread.number);
+            }).then(function(numbers) {
+                return Tools.series(numbers.map(function(number) {
+                    return +number;
+                }), function(number) {
+                    return es.get({
+                        index: "ololord.js",
+                        type: "posts",
+                        id: board.name + ":" + number
+                    }).then(function(data) {
+                        var body = data._source;
+                        body.archived = true;
+                        return es.index({
+                            index: "ololord.js",
+                            type: "posts",
+                            id: board.name + ":" + number,
+                            body: body
+                        });
+                    });
+                });
+            }).then(function() {
                 c.archPath = `${__dirname}/../public/${board.name}/arch`;
                 //NOTE: Yep, no return here for the sake of speed
                 var oldThreadNumber = c.thread.number;
@@ -1495,7 +1516,8 @@ module.exports.findPosts = function(query, boardName, page) {
                     number: +hit._id.split(":").pop(),
                     threadNumber: +hit._source.threadNumber,
                     plainText: hit._source.plainText,
-                    subject: hit._source.subject
+                    subject: hit._source.subject,
+                    archived: !!hit._source.archived
                 };
             }),
             total: result.hits.total,
@@ -1599,7 +1621,7 @@ var rebuildPostSearchIndex = function(boardName, postNumber) {
                 boardName: boardName,
                 threadNumber: post.threadNumber
             }
-        })
+        });
     });
 };
 
@@ -1740,7 +1762,7 @@ module.exports.editPost = function(req, fields) {
     }).then(function(thread) {
         if (!thread)
             return Promise.reject(Tools.translate("No such thread"));
-        return checkPermissions(req, board, post, "editPost");
+        return checkPermissions(req, board, c.post, "editPost");
     }).then(function(result) {
         if (!result)
             return Promise.reject(Tools.translate("Not enough rights"));

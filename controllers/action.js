@@ -655,6 +655,7 @@ router.post("/action/search", function(req, res) {
                 boardName: post.boardName,
                 postNumber: post.number,
                 threadNumber: post.threadNumber,
+                archived: post.archived,
                 subject: subject,
                 text: text
             };
@@ -750,15 +751,19 @@ router.post("/action/superuserDeleteFile", function(req, res) {
 router.post("/action/superuserRegenerateCache", function(req, res) {
     if (!req.isSuperuser())
         return controller.error(req, res, Tools.translate("Not enough rights"), true);
-    Global.IPC.send("stop").then(function() {
-        return Global.IPC.send("regenerateCache");
+    var c = {};
+    Tools.parseForm(req).then(function(result) {
+        c.regenerateArchive = ("true" == result.fields.regenerateArchive);
+        return Global.IPC.send("stop");
+    }).then(function() {
+        return Global.IPC.send("regenerateCache", c.regenerateArchive);
     }).then(function() {
         return Global.IPC.send("start");
     }).then(function() {
         res.json({});
     }).catch(function(err) {
         controller.error(req, res, err, true);
-    });
+    });;
 });
 
 router.post("/action/superuserRerenderPosts", function(req, res) {

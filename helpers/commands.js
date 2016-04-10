@@ -72,6 +72,11 @@ vorpal.installHandler = function(cmd, f, options) {
         else
             command.alias(options.alias);
     }
+    if (options && Util.isArray(options.options)) {
+        options.options.forEach(function(opt) {
+            command.option(opt.value, opt.description || undefined);
+        });
+    }
 };
 
 vorpal.find("exit").remove();
@@ -198,15 +203,23 @@ vorpal.installHandler("start", function() {
     });
 }, { description: Tools.translate("Opens workers for connections if closed.") });
 
-vorpal.installHandler("regenerate", function() {
+vorpal.installHandler("regenerate", function(args) {
     return Global.IPC.send("stop").then(function() {
-        return controller.regenerate();
+        return controller.regenerate(args.options && !!args.options.archive);
     }).then(function() {
         return Global.IPC.send("start");
     }).then(function() {
         return Promise.resolve("OK");
     });
-}, { description: Tools.translate("Regenerates the cache (workers are closed and then opened again).") });
+}, {
+    description: Tools.translate("Regenerates the cache (workers are closed and then opened again)."),
+    options: [
+        {
+            value: "-a, --archive",
+            description: Tools.translate("Regenerate archived threads, too.")
+        }
+    ]
+});
 
 vorpal.installHandler("reload-boards", function() {
     return Global.IPC.send("stop").then(function() {

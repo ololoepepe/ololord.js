@@ -3185,5 +3185,15 @@
         "newPasswordButtonText": {
             "value": "Новый"
         }
+    },
+    "Regenerate archived threads, too.": {
+        "_default": {
+            "value": "Также сгенерировать заново архивные треды."
+        }
+    },
+    "Regenerate archived threads": {
+        "regenerateArchivedThreadsLabelText": {
+            "value": "Сгенерировать заново архивные треды"
+        }
     }
 }
