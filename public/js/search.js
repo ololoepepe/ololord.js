@@ -3,8 +3,10 @@ window.addEventListener("load", function load() {
     var searchResultsPlaceholder = lord.id("searchResultsPlaceholder");
     var search = URI(window.location.href).search(true);
     var query = search.query;
-    if (!query)
+    if (!query) {
+        $(searchResultsPlaceholder).remove();
         return;
+    }
     var boardName = search.board;
     var page = +search.page || 0;
     var formData = new FormData();
@@ -40,6 +42,6 @@ window.addEventListener("load", function load() {
         });
     }).catch(function(err) {
         lord.handleError(err);
-        searchResultsPlaceholder.parentNode.removeChild(searchResultsPlaceholder);
+        $(searchResultsPlaceholder).remove();
     });
 }, false);

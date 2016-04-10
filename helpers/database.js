@@ -2244,7 +2244,7 @@ var userBans = function(ip, boardNames) {
             return Tools.series(ips, function(ip) {
                 return userBans(ip, boardNames);
             }, {});
-        })
+        });
     }
     ip = Tools.correctAddress(ip);
     if (!boardNames)
@@ -2255,7 +2255,8 @@ var userBans = function(ip, boardNames) {
         return db.get(`userBans:${ip}:${boardName}`).then(function(ban) {
             if (!ban)
                 return Promise.resolve();
-            return JSON.parse(ban);
+
+            return Promise.resolve(JSON.parse(ban));
         });
     }, {}).then(function(bans) {
         return Tools.filterIn(bans, function(ban) {

@@ -3366,15 +3366,9 @@ lord.updateThread = function(silent) {
             return Promise.resolve();
         c.threadInfo = threadInfo;
         c.sequenceNumber = c.posts[c.posts.length - 1].sequenceNumber;
-        var posts = [];
         return lord.series(c.posts, function(post) {
-            return lord.createPostNode(post, true, c.threadInfo).then(function(node) {
-                posts.push(node);
-                return Promise.resolve();
-            });
-        }).then(function() {
-            return Promise.resolve(posts);
-        });
+            return lord.createPostNode(post, true, c.threadInfo);
+        }, true);
     }).then(function(posts) {
         if (!posts || !posts.length || posts.length < 1)
             return Promise.resolve();

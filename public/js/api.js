@@ -653,7 +653,7 @@ lord.gently = function(obj, f, options) {
     if (isNaN(n) || n < 1)
         n = 1;
     return new Promise(function(resolve, reject) {
-        if (Array.isArray(obj)) {
+        if (lord.isArray(obj)) {
             var arr = obj;
             var ind = 0;
             var g = function() {
@@ -1137,7 +1137,7 @@ lord.compareRatings = function(r1, r2) {
 };
 
 lord.model = function(modelName) {
-    if (Array.isArray(modelName)) {
+    if (lord.isArray(modelName)) {
         var models = modelName.map(function(modelName) {
             return lord.model(modelName);
         });
@@ -1233,7 +1233,7 @@ lord.api = function(entity, parameters, prefix) {
     prefix = prefix || "api";
     var query = "";
     lord.each(parameters, function(val, key) {
-        if (!Array.isArray(val))
+        if (!lord.isArray(val))
             val = [val];
         val.forEach(function(val) {
             if (query)
@@ -1451,22 +1451,40 @@ lord.readAs = function(blob, method) {
     });
 };
 
-lord.series = function(arr, f) {
+lord.series = function(arr, f, container) {
+    if (container && typeof container != "object")
+        container = [];
+    var isArray = lord.isArray(container);
+    var isObject = (typeof container == "object");
     var p = Promise.resolve();
-    if (Array.isArray(arr)) {
+    if (lord.isArray(arr)) {
         arr.forEach(function(el) {
             p = p.then(function() {
                 return f(el);
+            }).then(function(result) {
+                if (isArray)
+                    container.push(result);
+                else if (isObject)
+                    container[el] = result;
             });
         });
-    } else if (typeof arr == "object") {
-        forIn(arr, function(el, key) {
+    } else if (lord.isObject(arr)) {
+        lord.each(arr, function(el, key) {
             p = p.then(function() {
                 return f(el, key);
+            }).then(function(result) {
+                if (isArray)
+                    container.push(result);
+                else if (isObject)
+                    container[key] = result;
             });
         });
     }
-    return p;
+    if (!container)
+        return p;
+    return p.then(function() {
+        return Promise.resolve(container);
+    });
 };
 
 lord.inIframe = function() {

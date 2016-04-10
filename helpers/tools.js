@@ -600,14 +600,14 @@ module.exports.series = function(arr, f, container) {
     var isObject = (typeof container == "object");
     var p = Promise.resolve();
     if (Util.isArray(arr)) {
-        arr.forEach(function(el, i) {
+        arr.forEach(function(el) {
             p = p.then(function() {
                 return f(el);
             }).then(function(result) {
                 if (isArray)
                     container.push(result);
                 else if (isObject)
-                    container[i] = result;
+                    container[el] = result;
             });
         });
     } else if (Util.isObject(arr)) {

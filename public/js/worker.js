@@ -729,30 +729,22 @@ lord.applySpells = function(post, spells, options) {
 lord.processPosts = function(posts, spells, options) {
     if (!posts)
         return Promise.reject("internalErrorText");
-    var data = { posts: [] };
     return lord.series(posts, function(post) {
         var npost = {
             "boardName": post.boardName,
             "postNumber": post.postNumber
         };
-        var p = Promise.resolve();
-        if (spells && !post.hidden) {
-            p = p.then(function() {
-                return lord.applySpells(post, spells, options);
-            }).then(function(result) {
-                if (result) {
-                    npost.hidden = result.hidden;
-                    npost.replacements = result.replacements;
-                }
-                return Promise.resolve();
-            });
-        }
-        return p.then(function() {
-            data.posts.push(npost);
-            return Promise.resolve();
+        if (!spells || post.hidden)
+            return Promise.resolve(npost);
+        return lord.applySpells(post, spells, options).then(function(result) {
+            if (result) {
+                npost.hidden = result.hidden;
+                npost.replacements = result.replacements;
+            }
+            return Promise.resolve(npost);
         });
-    }).then(function() {
-        return Promise.resolve(data);
+    }, []).then(function(posts) {
+        return Promise.resolve({ posts: posts });
     });
 };
 
