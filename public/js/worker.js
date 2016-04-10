@@ -743,7 +743,7 @@ lord.processPosts = function(posts, spells, options) {
             }
             return Promise.resolve(npost);
         });
-    }, []).then(function(posts) {
+    }, true).then(function(posts) {
         return Promise.resolve({ posts: posts });
     });
 };
