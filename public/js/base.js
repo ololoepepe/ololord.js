@@ -1643,7 +1643,7 @@ lord.updateChat = function(keys) {
         div.appendChild(lord.node("text", " " + lord.text("newChatMessageText") + " [" + lastKey + "]"));
         lord.showPopup(div, { type: "node" });
         if (lord.soundEnabled())
-            lord.playSound();
+            lord.playSound("message");
     } else {
         keys.forEach(function(key) {
             var div = lord.nameOne(key, lord.chatDialog);

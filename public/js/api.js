@@ -958,16 +958,20 @@ lord.soundEnabled = function() {
     return lord.getLocalObject("playAutoUpdateSound", false);
 };
 
-lord.playSound = function() {
-    if (!lord.sound) {
-        lord.sound = lord.node("audio");
+lord.playSound = function(type) {
+    type = type || "signal";
+    if (["signal", "message"].indexOf(type) < 0)
+        return;
+    var key = "sound_" + type;
+    if (!lord[key]) {
+        lord[key] = lord.node("audio");
         var source = lord.node("source");
-        source.type = "audio/ogg";
-        source.src = "/" + lord.data("sitePathPrefix") + "audio/signal.ogg";
-        lord.sound.volume = lord.getLocalObject("soundNotificationsVolume", 100) / 100;
-        lord.sound.appendChild(source);
+        source.type = "audio/mp3";
+        source.src = "/" + lord.data("sitePathPrefix") + "audio/" + type + ".mp3";
+        lord[key].volume = lord.getLocalObject("soundNotificationsVolume", 100) / 100;
+        lord[key].appendChild(source);
     }
-    lord.sound.play();
+    lord[key].play();
 };
 
 lord.hash = function(hash) {
