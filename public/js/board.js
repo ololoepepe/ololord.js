@@ -2243,7 +2243,7 @@ lord.showLoadingPostsPopup = function(text) {
 lord.submitted = function(event, form) {
     if (event)
         event.preventDefault();
-    if (!form);
+    if (!form)
         form = lord.id("postForm");
     var btn = lord.nameOne("submit", form);
     var markupMode = lord.nameOne("markupMode", form);
