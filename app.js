@@ -7,7 +7,7 @@ var OS = require("os");
 
 var Global = require("./helpers/global");
 Global.Program = require("commander");
-Global.Program.version("1.1.0-beta")
+Global.Program.version("1.1.0-rc")
     .option("-c, --config-file <file>", "Path to the config.json file")
     .parse(process.argv);
 
