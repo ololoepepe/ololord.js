@@ -84,7 +84,7 @@ lord.setVotingOpened = function(el, opened) {
 lord.customPostFormField[50] = function(it) {
     if (it.isThreadPage) {
         var ownPosts = lord.getLocalObject("ownPosts", {});
-        if (!ownPosts["rpg/" + it.thread.number])
+        if (!ownPosts[lord.data("boardName") + "/" + it.thread.number])
             return "";
     }
     var model = {
@@ -94,7 +94,7 @@ lord.customPostFormField[50] = function(it) {
         board: merge.clone(it.board),
         minimalisticPostform: it.minimalisticPostform
     };
-    return lord.template("rpgPostFormField", model, true);
+    return lord.template("withVotingsPostFormField", model, true);
 };
 
 lord.customEditPostDialogPart[50] = function(it, thread, post) {
@@ -105,7 +105,7 @@ lord.customEditPostDialogPart[50] = function(it, thread, post) {
         model = merge.clone(it);
     model.thread = thread;
     model.post = post;
-    return lord.template("rpgEditPostDialogPart", model, true);
+    return lord.template("withVotingsEditPostDialogPart", model, true);
 };
 
 lord.customPostBodyPart[20] = function(it, thread, post) {
@@ -114,7 +114,8 @@ lord.customPostBodyPart[20] = function(it, thread, post) {
     var model = merge.recursive(it, post.extraData);
     model.thread = thread;
     model.post = post;
-    return lord.template("rpgPostBodyPart", model, true);
+    model.archived = !!lord.data("archived");
+    return lord.template("withVotingsPostBodyPart", model, true);
 };
 
 lord.postProcessors.push(function(post) {
@@ -126,7 +127,7 @@ lord.postProcessors.push(function(post) {
     var voteVariants = lord.nameOne("voteVariants", post);
     if (!voteVariants)
         return;
-    if (ownPosts["rpg/" + postNumber]) {
+    if (ownPosts[lord.data("boardName") + "/" + postNumber]) {
         if (form)
             form.parentNode.replaceChild(voteVariants, form);
         lord.queryAll("input", voteVariants).forEach(function(input) {

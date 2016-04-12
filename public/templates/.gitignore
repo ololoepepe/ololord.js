@@ -3,6 +3,7 @@
 !partials
 !addFileDialog.jst
 !addFilesDialog.jst
+!addRadioDialog.jst
 !banner.jst
 !boardPageLower.jst
 !boardPageUpper.jst
@@ -33,6 +34,7 @@
 !googleRecaptchaWidget.jst
 !hiddenPostList.jst
 !hotkeysDialog.jst
+!imageSearchMenu.jst
 !movablePlayer.jst
 !moveThreadDialog.jst
 !navbar.jst
@@ -47,14 +49,10 @@
 !registeredUser.jst
 !renameFileDialog.jst
 !rerenderPostsDialog.jst
-!rpgEditPostDialogPart.jst
-!rpgPostBodyPart.jst
-!rpgPostFormField.jst
 !searchAction.jst
 !searchResults.jst
 !settingsDialog.jst
 !setVotingOpenedDialog.jst
-!socPostHeaderPart.jst
 !synchronizationDialog.jst
 !thread.jst
 !threadPageLower.jst
@@ -63,5 +61,8 @@
 !userBan.jst
 !vkAudioList.jst
 !voteVariant.jst
-!yandexCaptchaWidget.jst
+!withLikesPostHeaderPart.jst
+!withVotingsEditPostDialogPart.jst
+!withVotingsPostBodyPart.jst
+!withVotingsPostFormField.jst
 !.gitignore

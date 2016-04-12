@@ -11,8 +11,8 @@
         <script type="text/javascript">
             (function() {
                 var model = lord.model(["base", "tr", "boards"]);
-                model.settings = lord.settings();
                 model.compareRegisteredUserLevels = lord.compareRegisteredUserLevels;
+                lord.processBoardGroups(model);
                 document.open();
                 document.write(lord.template("frameListNavigation", model, true));
                 document.close();
@@ -27,7 +27,7 @@
                         $(".frameContent").height(h);
                     });
                     setInterval(function() {
-                        var q = $.getQueryParameters();
+                        var q = URI(window.location.href).search(true);
                         var nsrc = lord.id("frameContent").contentWindow.location.pathname.replace(/\/$/, "");
                         if (nsrc == q.src.replace(/\/$/, ""))
                             return;
@@ -49,7 +49,7 @@
                 };
 
                 lord.escapeIframe = function() {
-                    var src = $.getQueryParameters().src;
+                    var src = URI(window.location.href).search(true).src;
                     if (src)
                         window.location.pathname = src;
                     else
@@ -62,7 +62,7 @@
 <div class="frameContent">
     <script type="text/javascript">
         (function() {
-            var src = $.getQueryParameters().src || "/{{=it.site.pathPrefix}}";
+            var src = URI(window.location.href).search(true).src || "/{{=it.site.pathPrefix}}";
             document.open();
             document.write('<iframe id="frameContent" src="' + src + '" frameborder="0"></iframe>');
             document.close();

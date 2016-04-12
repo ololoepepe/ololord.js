@@ -12,6 +12,7 @@ router.get("/frame.html", function(req, res) {
 var generateFrame = function() {
     var model = {};
     model.title = Tools.translate("ololord.js", "pageTitle");
+    model.extraScripts = [ { fileName: "3rdparty/URI.min.js" } ];
     return controller("frame", model);
 };
 

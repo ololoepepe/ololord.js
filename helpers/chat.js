@@ -62,25 +62,21 @@ module.exports.getMessages = function(req, lastRequestDate) {
     var chats = {};
     var date = Tools.now().toISOString();
     return Database.db.smembers("chats:" + hash).then(function(keys) {
-        var p = Promise.resolve();
-        (keys || []).forEach(function(key) {
-            p = p.then(function() {
-                return Database.db.zrangebyscore("chat:" + key, lastRequestDate, Infinity).then(function(list) {
-                    list = (list || []).map(function(msg) {
-                        return JSON.parse(msg);
-                    }).map(function(msg) {
-                        return {
-                            text: msg.text,
-                            date: msg.date,
-                            type: ((hash == msg.senderHash) ? "out" : "in")
-                        };
-                    });
-                    if (list.length > 0)
-                        chats[key] = list;
+        return Tools.series(keys, function(key) {
+            return Database.db.zrangebyscore("chat:" + key, lastRequestDate, Infinity).then(function(list) {
+                list = (list || []).map(function(msg) {
+                    return JSON.parse(msg);
+                }).map(function(msg) {
+                    return {
+                        text: msg.text,
+                        date: msg.date,
+                        type: ((hash == msg.senderHash) ? "out" : "in")
+                    };
                 });
+                if (list.length > 0)
+                    chats[key] = list;
             });
         });
-        return p;
     }).then(function() {
         return Promise.resolve({
             lastRequestDate: date,

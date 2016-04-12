@@ -51,19 +51,13 @@ module.exports.getLastPostNumbers = function(boardNames) {
 module.exports.getPosts = function(posts) {
     if (!posts || posts.length < 1)
         return Promise.resolve([]);
-    var c = { posts: [] };
     return Tools.series(posts, function(post) {
         return Database.getPost(post.boardName, post.postNumber, {
             withFileInfos: true,
             withReferences: true,
             withExtraData: true
-        }).then(function(post) {
-            c.posts.push(post);
-            return Promise.resolve();
         });
-    }).then(function() {
-        return Promise.resolve(c.posts);
-    });
+    }, true);
 };
 
 module.exports.getFileInfos = function(list, hashpass) {
@@ -205,7 +199,7 @@ var getThreadPage = function(archived, board, number, json, ifModifiedSince) {
     });
 };
 
-var getThread = function(board, number) {
+var getThread = function(board, number, archived) {
     if (!(board instanceof Board))
         return Promise.reject(Tools.translate("Invalid board"));
     number = +(number || 0);
@@ -217,7 +211,8 @@ var getThread = function(board, number) {
         withPostNumbers: 1,
         filterFunction: function(thread) {
             return thread.number == number;
-        }
+        },
+        archived: !!archived
     }).then(function(threads) {
         if (threads.length != 1)
             return Promise.reject(Tools.translate("No such thread"));
@@ -255,6 +250,8 @@ var getThread = function(board, number) {
         return Promise.resolve(c.model);
     });
 };
+
+module.exports.getThread = getThread;
 
 module.exports.getThreadLastPostNumber = function(boardName, threadNumber) {
     var board = Board.board(boardName);
@@ -440,7 +437,6 @@ var generateThreads = function(boardName) {
     var board = Board.board(boardName);
     if (!(board instanceof Board))
         return Promise.reject(Tools.translate("Invalid board"));
-    var c = {};
     return Database.getThreads(boardName).then(function(threads) {
         return Tools.series(threads, function(thread) {
             return generateThread(boardName, thread.number);
@@ -529,7 +525,7 @@ var generateArchive = function(boardName) {
             return Promise.resolve([]);
         return FS.list(path);
     }).then(function(fileNames) {
-        var fileNames = fileNames.filter(function(fileName) {
+        fileNames = fileNames.filter(function(fileName) {
             return fileName.split(".").pop() == "json";
         });
         model.threads = [];
@@ -881,7 +877,10 @@ module.exports.generateRSS = function(currentProcess) {
     var feedTranslated = Tools.translate("Feed", "channelTitle");
     return Database.db.hkeys("posts").then(function(keys) {
         keys.forEach(function(key) {
-            postNumbers[key.split(":").shift()].push(+key.split(":").pop());
+            var list = postNumbers[key.split(":").shift()];
+            if (!list)
+                return;
+            list.push(+key.split(":").pop());
         });
         return Tools.series(Board.boardNames(), function(boardName) {
             var board = Board.board(boardName);

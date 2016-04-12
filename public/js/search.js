@@ -1,16 +1,23 @@
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
     var searchResultsPlaceholder = lord.id("searchResultsPlaceholder");
-    var match = window.location.search.match(/^\?query\=([^&]+)&board\=(.+)$/);
-    if (!match)
-        return searchResultsPlaceholder.parentNode.removeChild(searchResultsPlaceholder);
-    var query = decodeURIComponent(match[1].split("+").join(" "));
-    var boardName = decodeURIComponent(match[2]);
+    var search = URI(window.location.href).search(true);
+    var query = search.query;
+    if (!query) {
+        $(searchResultsPlaceholder).remove();
+        return;
+    }
+    var boardName = search.board;
+    var page = +search.page || 0;
     var formData = new FormData();
     formData.append("query", query);
-    formData.append("boardName", boardName);
+    formData.append("boardName", boardName || "*");
+    formData.append("page", page);
     lord.post("/" + lord.data("sitePathPrefix") + "action/search", formData).then(function(model) {
         model = merge.recursive(lord.model(["base", "tr"]), model);
+        model.page = page;
+        model.boardName = boardName || "*";
+        model.query = query;
         var data = lord.template("searchResults", model);
         searchResultsPlaceholder.parentNode.replaceChild(data, searchResultsPlaceholder);
         var inp = lord.queryOne(".searchAction > form > [name='query']");
@@ -35,6 +42,6 @@ window.addEventListener("load", function load() {
         });
     }).catch(function(err) {
         lord.handleError(err);
-        searchResultsPlaceholder.parentNode.removeChild(searchResultsPlaceholder);
+        $(searchResultsPlaceholder).remove();
     });
 }, false);

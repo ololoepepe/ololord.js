@@ -1,6 +1,7 @@
-<div class="track" id="track/{{=it.fileName}}" class="track" onclick="lord.playTrack(this);"
+<div class="track" id="track/{{? it.fileName}}{{=it.fileName}}{{??}}{{=it.href}}{{?}}" class="track" onclick="lord.playTrack(this);"
      ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);"
-     data-board-name="{{=it.boardName}}" data-file-name="{{=it.fileName}}" draggable="true">
+     {{? it.boardName}}data-board-name="{{=it.boardName}}"{{?}} {{? it.fileName}}data-file-name="{{=it.fileName}}"{{?}}
+     {{? it.href}}data-href="{{=it.href}}"{{?}} draggable="true">
     <span class="trackInfo">
         {{? it.artist || it.title || it.year}}
             <br />
@@ -11,14 +12,18 @@
         {{?}}
     </span>
     <span class="trackActions">
-        {{=it.duration}}{{? it.bitrate}} | {{=it.bitrate}}kbps{{?}}
-        <a title="{{=it.tr.downloadPlaylistFileText}}" draggable="false" onclick="event.stopPropagation();"
-           href="/{{=it.site.pathPrefix}}{{=it.boardName}}/src/{{=it.fileName}}"
-           download="{{=it.fileName}}"><img class="buttonImage" width="16" height="16"
-                                            src="/{{=it.site.pathPrefix}}img/player/16/download.png"></a>
-        <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false"
-           title="{{=it.tr.editAudioTagsText}}"><img class="buttonImage" width="16" height="16"
-                                                     src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
+        {{? it.duration}}
+            {{=it.duration}}{{? it.bitrate}} | {{=it.bitrate}}kbps{{?}}
+            <a title="{{=it.tr.downloadPlaylistFileText}}" draggable="false" onclick="event.stopPropagation();"
+               href="/{{=it.site.pathPrefix}}{{=it.boardName}}/src/{{=it.fileName}}"
+               download="{{=it.fileName}}"><img class="buttonImage" width="16" height="16"
+                                                src="/{{=it.site.pathPrefix}}img/player/16/download.png"></a>
+            {{? "application/ogg" == it.mimeType || it.mimeType.substr(0, 6) == "audio/"}}
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false"
+                   title="{{=it.tr.editAudioTagsText}}"><img class="buttonImage" width="16" height="16"
+                                                              src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png"></a>
+            {{?}}
+        {{?}}
         <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);"
            title="{{=it.tr.removeFromPlaylistText}}"><img class="buttonImage" width="16" height="16"
                                                           src="/{{=it.site.pathPrefix}}img/player/16/delete.png"></a>

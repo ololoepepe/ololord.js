@@ -2,11 +2,6 @@
 
 var lord = lord || {};
 
-/*Constants*/
-
-lord.MovablePlayerBorderWidth = 5;
-lord.BaseScaleFactor = 10 * 1000 * 1000 * 1000;
-
 /*Variables*/
 
 lord.postPreviews = {};
@@ -95,392 +90,6 @@ lord.loadingImage = null;
     this.update();
 };
 
-/*constructor*/ lord.MovablePlayer = function(fileInfo, options) {
-    this.imageZoomSensitivity = Math.floor((options && options.imageZoomSensitivity) || 25);
-    if (this.imageZoomSensitivity < 1 || this.imageZoomSensitivity > 100)
-        this.imageZoomSensitivity = 25;
-    this.minimumContentWidth = (options && options.minimumContentWidth)
-        || (lord.isImageType(fileInfo.mimeType) ? 50 : 200);
-    this.minimumContentHeight = (options && options.minimumContentHeight)
-        || (lord.isImageType(fileInfo.mimeType) ? 50 : 200);
-    this.scaleFactor = lord.BaseScaleFactor * 100;
-    this.scaleFactorModifier = 1;
-    this.fileInfo = fileInfo;
-    var model = merge.recursive({
-        fileInfo: this.fileInfo,
-        isAudioType: lord.isAudioType,
-        isVideoType: lord.isVideoType,
-        isImageType: lord.isImageType
-    }, lord.model(["base", "tr"]));
-    this.node = lord.template("movablePlayer", model);
-    this.trackInfo = lord.queryOne(".movablePlayerTrackInfo", this.node);
-    this.contentContainer = lord.queryOne(".movablePlayerContent", this.node);
-    this.contentImage = this.contentContainer.firstElementChild;
-    this.content = this.contentContainer.lastElementChild;
-    this.contentImage.addEventListener("mousedown", this.mousedownHandler.bind(this), false);
-    this.contentImage.addEventListener("mouseup", this.mouseupHandler.bind(this), false);
-    this.contentImage.addEventListener("mousemove", this.mousemoveHandler.bind(this), false);
-    this.contentImage.addEventListener("mousewheel", this.mousewheelHandler.bind(this), false);
-    this.contentImage.addEventListener("DOMMouseScroll", this.mousewheelHandler.bind(this), false); //Firefox
-    this.controls = lord.queryOne(".movablePlayerControls", this.node);
-    $(this.controls).click(function(e) {
-        e.stopPropagation();
-    });
-    $(this.contentImage).click(function(e) {
-        e.stopPropagation();
-    });
-    if (!lord.isImageType(this.fileInfo.mimeType)) {
-        var _this = this;
-        var defVol = lord.getLocalObject("defaultAudioVideoVolume", 100) / 100;
-        var remember = lord.getLocalObject("rememberAudioVideoVolume", false);
-        var volume = remember ? lord.getLocalObject("audioVideoVolume", defVol) : defVol;
-        if (!volume)
-            this.lastVolume = 0.01;
-        this.content.volume = volume;
-        this.playPauseButton = lord.nameOne("playerPlayPauseButton", this.controls);
-        this.muteButton = lord.nameOne("playerMuteButton", this.controls);
-        this.durationSlider = lord.queryOne(".movablePlayerDurationSlider", this.controls);
-        this.volumeSlider = lord.queryOne(".movablePlayerVolumeSlider", this.controls);
-        this.playPauseButton.addEventListener("click", (function() {
-            this.content[this.content.paused ? "play" : "pause"]();
-            this.updateButtons();
-        }).bind(this), false);
-        this.muteButton.addEventListener("click", (function() {
-            if (this.content.volume) {
-                this.lastVolume = this.content.volume;
-                this.content.volume = 0;
-                $(this.volumeSlider).slider("value", 0);
-            } else {
-                this.content.volume = this.lastVolume || volume;
-                $(this.volumeSlider).slider("value", this.lastVolume);
-            }
-            this.updateButtons();
-        }).bind(this), false);
-        if (options && options.loop)
-            this.content.loop = true;
-        this.controls.addEventListener("mouseover", (function() {
-            this.preventHideControls = true;
-            if (this.controlsHideTimer) {
-                clearInterval(this.controlsHideTimer);
-                this.controlsHideTimer = null;
-            }
-        }).bind(this), false);
-        this.controls.addEventListener("mouseleave", (function() {
-            this.preventHideControls = false;
-            this.controlsHideTimer = setTimeout(this.hideControls.bind(this), lord.Second);
-        }).bind(this), false);
-        this.content.addEventListener("pause", (function() {
-            this.updateButtons();
-        }).bind(this), false);
-        this.content.addEventListener("ended", (function() {
-            this.updateButtons();
-        }).bind(this), false);
-        this.content.addEventListener("timeupdate", (function() {
-            if (this.userSliding)
-                return;
-            $(this.durationSlider).slider("value", this.content.currentTime);
-            this.updateTrackInfo();
-        }).bind(this), false);
-        this.content.addEventListener("durationchange", (function() {
-            $(this.durationSlider).slider("destroy");
-            $(this.durationSlider).slider({
-                min: 0,
-                max: this.content.duration,
-                step: 1,
-                value: 0,
-                start: function() {
-                    _this.userSliding = true;
-                },
-                stop: function() {
-                    _this.userSliding = false;
-                    _this.content.currentTime = +$(this).slider("value");
-                }
-            });
-        }).bind(this), false);
-        $(this.durationSlider).slider({
-            min: 0,
-            max: 0,
-            step: 0,
-            value: 0,
-            disabled: true
-        });
-        $(this.volumeSlider).slider({
-            min: 0,
-            max: 1,
-            step: 0.01,
-            value: volume,
-            slide: function() {
-                var volume = +$(this).slider("value");
-                _this.content.volume = volume;
-                _this.updateButtons();
-            }
-        });
-        if (options && options.play) {
-            if (+options.play > 0) {
-                setTimeout((function() {
-                    this.content.play();
-                    this.updateButtons();
-                }).bind(this), +options.play);
-            } else {
-                this.content.play();
-                this.updateButtons();
-            }
-        }
-        this.updateTrackInfo();
-    } else {
-        lord.queryOne(".movablePlayerConstrolsSliders", this.controls).style.display = "none";
-    }
-    this.visible = false;
-    this.isInitialized = false;
-    this.eventListeners = {
-        requestClose: []
-    };
-};
-
-/*private*/ lord.MovablePlayer.prototype.scaled = function(n, factor) {
-    factor = +factor || this.scaleFactor;
-    return Math.round((+n || 0) * (factor / lord.BaseScaleFactor / 100));
-};
-
-/*private*/ lord.MovablePlayer.prototype.updateButtons = function() {
-    this.playPauseButton.src = this.playPauseButton.src.replace(/\/(play|pause)\.png$/,
-        "/" + (this.content.paused ? "play" : "pause") + ".png");
-    this.playPauseButton.title = lord.text(this.content.paused ? "playerPlayText" : "playerPauseText");
-    this.muteButton.src = this.muteButton.src.replace(/(on|off)\.png$/, (this.content.volume ? "on" : "off") + ".png");
-    this.muteButton.title = lord.text(this.content.volume ? "playerMuteText" : "playerUnmuteText");
-};
-
-/*private*/ lord.MovablePlayer.prototype.updateTrackInfo = function() {
-    $(this.trackInfo).empty();
-    var s = lord.durationToString(this.content.currentTime) + " / " + lord.durationToString(this.content.duration);
-    this.trackInfo.appendChild(lord.node("text", s));
-};
-
-/*private*/ lord.MovablePlayer.prototype.dispatchEvent = function(e) {
-    if (typeof e != "object")
-        return false;
-    var listeners = this.eventListeners[e.type];
-    if (!listeners)
-        return false;
-    var c = false;
-    e.cancel = function() {
-        c = true;
-    };
-    var cancelled = listeners.some(function(f) {
-        f(e);
-        if (c)
-            return true;
-    });
-    if (cancelled)
-        return true;
-    if (typeof e.action == "function")
-        e.action.call(e);
-    return true;
-};
-
-/*private*/ lord.MovablePlayer.prototype.hideControls = function() {
-    this.trackInfo.style.display = "none";
-    this.controls.style.display = "none";
-    this.controlsHideTimer = null;
-};
-
-/*private*/ lord.MovablePlayer.prototype.mousedownHandler = function(e) {
-    if (e.button)
-        return;
-    e.preventDefault();
-    e.stopPropagation();
-    this.isMoving = true;
-    this.mouseStartPosition = {
-        x: e.clientX,
-        y: e.clientY
-    };
-    this.mousePositon = merge.recursive(true, this.mouseStartPosition);
-};
-
-/*private*/ lord.MovablePlayer.prototype.mouseupHandler = function(e) {
-    if (e.button)
-        return;
-    e.preventDefault();
-    e.stopPropagation();
-    if (!this.isMoving)
-        return;
-    this.isMoving = false;
-    if (this.mouseStartPosition.x === e.clientX && this.mouseStartPosition.y === e.clientY) {
-        this.dispatchEvent({
-            type: "requestClose",
-            action: (function() {
-                this.hide();
-            }).bind(this)
-        });
-    }
-};
-
-/*private*/ lord.MovablePlayer.prototype.mousemoveHandler = function(e) {
-    if (!lord.isImageType(this.fileInfo.mimeType)) {
-        if ("none" == this.controls.style.display) {
-            this.trackInfo.style.display = "";
-            this.controls.style.display = "";
-            if (!this.preventHideControls)
-                this.controlsHideTimer = setTimeout(this.hideControls.bind(this), lord.Second);
-        } else if (this.controlsHideTimer) {
-            clearInterval(this.controlsHideTimer);
-            this.controlsHideTimer = null;
-            if (!this.preventHideControls)
-                this.controlsHideTimer = setTimeout(this.hideControls.bind(this), lord.Second);
-        }
-    }
-    if (!this.isMoving)
-        return;
-    e.preventDefault();
-    e.stopPropagation();
-    var dx = e.clientX - this.mousePositon.x;
-    var dy = e.clientY - this.mousePositon.y;
-    this.mousePositon.x = e.clientX;
-    this.mousePositon.y = e.clientY;
-    var node = $(this.node);
-    var pos = node.position();
-    node.css({
-        top: pos.top + dy,
-        left: pos.left + dx
-    });
-};
-
-/*private*/ lord.MovablePlayer.prototype.resetScale = function() {
-    var container = $(this.contentContainer);
-    var previousContainerWidth = container.width();
-    var previousContainerHeight = container.height();
-    var width = this.scaled(this.fileInfo.width);
-    var height = this.scaled(this.fileInfo.height);
-    container.width(width);
-    container.height(height);
-    var dx = (container.width() - previousContainerWidth) / 2;
-    var dy = (container.height() - previousContainerHeight) / 2;
-    var node = $(this.node);
-    var pos = node.position();
-    node.css({
-        top: (pos.top - dy) + "px",
-        left: (pos.left - dx) + "px"
-    });
-    this.showScalePopup();
-};
-
-/*private*/ lord.MovablePlayer.prototype.mousewheelHandler = function(e) {
-    e.preventDefault();
-    var imageZoomSensitivity = this.imageZoomSensitivity;
-    if ((e.wheelDelta || -e.detail) < 0)
-        imageZoomSensitivity *= -1;
-    var previousScaleFactor = this.scaleFactor;
-    var previousScaleFactorModifier = this.scaleFactorModifier;
-    if (imageZoomSensitivity < 0) {
-        while ((this.scaleFactor + imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier) <= 0)
-            this.scaleFactorModifier *= 10;
-    } else {
-        var changed = false;
-        while (this.scaleFactorModifier >= 1
-            && (this.scaleFactor * this.scaleFactorModifier - imageZoomSensitivity * lord.BaseScaleFactor) >= 0) {
-            this.scaleFactorModifier /= 10;
-            changed = true;
-        }
-        if (changed)
-            this.scaleFactorModifier *= 10;
-    }
-    this.scaleFactor += (imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier);
-    if (this.scaled(this.fileInfo.width) < this.minimumContentWidth
-        || this.scaled(this.fileInfo.height) < this.minimumContentHeight) {
-        this.scaleFactor = previousScaleFactor;
-        this.scaleFactorModifier = previousScaleFactorModifier;
-    }
-    this.resetScale();
-};
-
-/*public*/ lord.MovablePlayer.prototype.on = function(eventType, handler) {
-    if (!this.eventListeners.hasOwnProperty(eventType) || typeof handler != "function")
-        return false;
-    this.eventListeners[eventType].push(handler);
-    return true;
-};
-
-/*public*/ lord.MovablePlayer.prototype.show = function() {
-    if (this.visible)
-        return;
-    document.body.appendChild(this.node);
-    this.visible = true;
-    if (!this.isInitialized) {
-        this.reset();
-        this.isInitialized = true;
-    }
-};
-
-/*public*/ lord.MovablePlayer.prototype.hide = function() {
-    if (!this.visible)
-        return;
-    if (!lord.isImageType(this.fileInfo.mimeType)) {
-        lord.setLocalObject("audioVideoVolume", +this.content.volume);
-        this.content.pause();
-    }
-    document.body.removeChild(this.node);
-    this.visible = false;
-};
-
-/*public*/ lord.MovablePlayer.prototype.reset = function() {
-    var width = this.fileInfo.width;
-    var height = this.fileInfo.height;
-    var toolbarHeight = lord.queryOne(".toolbar.sticky") ? $(".toolbar.sticky").height() : 0;
-    var w = $(window);
-    var windowWidth = w.width();
-    var windowHeight = w.height();
-    var borderWidth = 2 * lord.MovablePlayerBorderWidth;
-    this.scaleFactor = lord.BaseScaleFactor * 100;
-    this.scaleFactorModifier = 1;
-    if (width > (windowWidth - borderWidth) || height > (windowHeight - borderWidth - toolbarHeight)) {
-        while (this.scaled(this.fileInfo.width) >= (windowWidth - borderWidth)) {
-            if ((this.scaleFactor - this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier) > 0)
-                this.scaleFactor -= (this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier);
-            else
-                this.scaleFactorModifier *= 10;
-        }
-        while (this.scaled(this.fileInfo.height) >= (windowHeight - borderWidth - toolbarHeight)) {
-            if ((this.scaleFactor - this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier) > 0)
-                this.scaleFactor -= (this.imageZoomSensitivity * lord.BaseScaleFactor / this.scaleFactorModifier);
-            else
-                this.scaleFactorModifier *= 10;
-        }
-    }
-    this.resetScale();
-    width = this.scaled(width);
-    height = this.scaled(height);
-    var node = $(this.node);
-    var containerWidth = width + borderWidth;
-    var containerHeight = height + borderWidth;
-    node.css({
-        top: ((windowHeight - containerHeight - toolbarHeight) / 2 + toolbarHeight) + "px",
-        left: ((windowWidth - containerWidth) / 2) + "px",
-    });
-    if (lord.isAudioType(this.fileInfo.mimeType) || lord.isVideoType(this.fileInfo.mimeType)) {
-        this.content.currentTime = 0;
-        var defVol = lord.getLocalObject("defaultAudioVideoVolume", 100) / 100;
-        var remember = lord.getLocalObject("rememberAudioVideoVolume", false);
-        this.content.volume = remember ? lord.getLocalObject("audioVideoVolume", defVol) : defVol;
-    }
-};
-
-/*public*/ lord.MovablePlayer.prototype.showScalePopup = function() {
-    var width = this.scaled(this.fileInfo.width);
-    var height = this.scaled(this.fileInfo.height);
-    var text = width + "x" + height + " (" + (this.scaleFactor / lord.BaseScaleFactor) + "%)";
-    if (this.scalePopup) {
-        this.scalePopup.resetText(text);
-        this.scalePopup.resetTimeout(lord.Second);
-        clearTimeout(this.scalePopupTimer);
-    } else {
-        this.scalePopup = lord.showPopup(text, { "timeout": lord.Second });
-    }
-    this.scalePopupTimer = setTimeout((function() {
-        this.scalePopup = null;
-        this.scalePopupTimer = null;
-    }).bind(this), lord.Second);
-};
-
 /*Functions*/
 
 lord.checkExpander = function(post) {
@@ -504,6 +113,33 @@ lord.checkExpander = function(post) {
     };
     bq.parent()[0].appendChild(a);
 };
+
+lord.postProcessors.push(function textWidthProcessor(post, retry) {
+    if ($(".postFile ~ .postFile ~ .postText").length > 0)
+        return;
+    var postText = $(".postFile ~ .postText", post);
+    if (!postText[0])
+        return;
+    var postFile = postText.parent().find(".postFile");
+    if (post.parentNode && post.parentNode.tagName) {
+        var width = Math.ceil(postText.position().left - postText.parent().position().left);
+        if (retry && retry.width != width) {
+            setTimeout(function() {
+                textWidthProcessor(post, { width: width });
+            }, 100);
+        } else {
+            postText.css("max-width", "calc(100% - " + width + "px)");
+        }
+    } else if (retry) {
+        setTimeout(function() {
+            textWidthProcessor(post, {});
+        }, 100);
+    } else {
+        postFile.find(".postFileThumbImage").load(function() {
+            textWidthProcessor(post, {});
+        });
+    }
+});
 
 if (lord.getLocalObject("addExpander", true))
     lord.postProcessors.push(lord.checkExpander);
@@ -643,7 +279,7 @@ lord.processPost = function(hiddenPosts, post, data) {
     if (!thread)
         return;
     $(thread).addClass("hidden");
-}
+};
 
 lord.removeReferences = function(postNumber, referencedOnly) {
     postNumber = +postNumber;
@@ -1458,7 +1094,10 @@ lord.setPostHidden = function(el) {
     if (!hidden) {
         lord.addPostToHidden(null, boardName, postNumber, threadNumber);
     } else if (list[boardName + "/" + postNumber]) {
-        delete list[boardName + "/" + postNumber];
+        if (list[boardName + "/" + postNumber].reason)
+            list[boardName + "/" + postNumber] = false;
+        else
+            delete list[boardName + "/" + postNumber];
         lord.setLocalObject("hiddenPosts", list);
     }
     lord.strikeOutHiddenPostLinks();
@@ -1570,7 +1209,7 @@ lord.draw = function(options) {
     var backgroundShape;
     if (options && options.imageUrl) {
         var backgroundImage = new Image();
-        backgroundImage.src = options.imageUrl;
+        backgroundImage.src = options.imageUrl.replace(/^https?\:/, window.location.protocol);
         backgroundShape = LC.createShape("Image", {
             x: 0,
             y: 0,
@@ -1718,6 +1357,7 @@ lord.addToPlaylist = function(a) {
     });
     if (exists)
         return;
+    var title = (mimeType.substr(0, 6) == "video/") ? fileName : lord.data("audioTagTitle", a, true);
     tracks.push({
         boardName: lord.data("boardName", a, true),
         fileName: fileName,
@@ -1726,8 +1366,10 @@ lord.addToPlaylist = function(a) {
         duration: lord.data("duration", a, true),
         album: lord.data("audioTagAlbum", a, true),
         artist: lord.data("audioTagArtist", a, true),
-        title: lord.data("audioTagTitle", a, true),
-        year: lord.data("audioTagYear", a, true)
+        title: title,
+        year: lord.data("audioTagYear", a, true),
+        width: +lord.data("width", a, true),
+        height: +lord.data("height", a, true)
     });
     lord.setLocalObject("playerTracks", tracks);
     lord.checkPlaylist();
@@ -2268,6 +1910,15 @@ lord.removeFile = function(div) {
         lord.queryOne("a.postformFileRemoveButton", div).style.display = "none";
     }
     lord.checkPostformTextareaSize();
+    for (var i = 0; i < parent.children.length; ++i) {
+        var c = parent.children[i];
+        if ("none" == lord.queryOne("a.postformFileRemoveButton", c).style.display)
+            return;
+    }
+    var ndiv = div.cloneNode(true);
+    lord.queryOne("a.postformFileRemoveButton", ndiv).style.display = "none";
+    lord.clearFileInput(ndiv);
+    parent.appendChild(ndiv);
 };
 
 lord.browseFile = function(e, div) {
@@ -2592,13 +2243,14 @@ lord.showLoadingPostsPopup = function(text) {
 lord.submitted = function(event, form) {
     if (event)
         event.preventDefault();
-    if (!form);
+    if (!form)
         form = lord.id("postForm");
     var btn = lord.nameOne("submit", form);
     var markupMode = lord.nameOne("markupMode", form);
     lord.setLocalObject("markupMode", markupMode.options[markupMode.selectedIndex].value);
     btn.disabled = true;
     btn.value = "0%";
+    lord.setLocalObject("password", lord.nameOne("password", form).value || "");
     var formData = new FormData(form);
     lord.queryAll(".postformFile", form).forEach(function(div) {
         if (div.file)
@@ -2972,7 +2624,7 @@ lord.signOwnPostLinks = function(parent, ownPosts) {
     });
 };
 
-lord.downloadThread = function(el) {
+lord.downloadThreadFiles = function(el) {
     var suffix = lord.data("archived", el, true) ? "arch" : "res";
     var p;
     var title;
@@ -3356,7 +3008,7 @@ lord.hotkey = function(name, hotkeys) {
 
 lord.showPostActionsMenu = function(e, input, postNumber) {
     var id = "post" + postNumber + "ActionsMenu";
-    $(lord.id(id)).remove();
+    $("#" + id).remove();
     var post = lord.id(postNumber);
     if (!post)
         return;
@@ -3385,6 +3037,18 @@ lord.showPostActionsMenu = function(e, input, postNumber) {
     if (lord.getLocalObject("hotkeysEnabled", true) && !lord.deviceType("mobile"))
         model.hideActionShortcut = lord.hotkey("hidePost");
     post.appendChild(lord.template("postActionsMenu", model));
+    return lord.showMenu(e, input, "#" + id);
+};
+
+lord.showImageSearchMenu = function(e, input, fileName) {
+    var id = "file" + fileName.replace(".", "-") + "SearchMenu";
+    $("#" + id).remove();
+    var file = lord.id("file" + fileName);
+    if (!file)
+        return;
+    var model = lord.model(["base", "board/" + lord.data("boardName")]);
+    model.fileInfo = { name: fileName };
+    file.appendChild(lord.template("imageSearchMenu", model));
     return lord.showMenu(e, input, "#" + id);
 };
 
@@ -3702,10 +3366,9 @@ lord.updateThread = function(silent) {
             return Promise.resolve();
         c.threadInfo = threadInfo;
         c.sequenceNumber = c.posts[c.posts.length - 1].sequenceNumber;
-        var promises = c.posts.map(function(post) {
+        return lord.series(c.posts, function(post) {
             return lord.createPostNode(post, true, c.threadInfo);
-        });
-        return Promise.all(promises);
+        }, true);
     }).then(function(posts) {
         if (!posts || !posts.length || posts.length < 1)
             return Promise.resolve();

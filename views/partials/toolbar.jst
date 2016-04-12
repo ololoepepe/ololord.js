@@ -18,6 +18,7 @@
         }
         model.inIframe = lord.inIframe();
         model.mumWatching = lord.getLocalObject("mumWatching", false);
+        lord.processBoardGroups(model);
         document.open();
         document.write(lord.template("toolbar", model, true));
         document.close();

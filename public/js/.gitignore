@@ -11,9 +11,8 @@
 !login.js
 !manage.js
 !node-captcha-script.js
-!rpg.js
 !search.js
-!soc.js
+!with-likes.js
+!with-votings.js
 !worker.js
-!yandex-captcha-script.js
 !.gitignore

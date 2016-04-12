@@ -250,7 +250,10 @@ controller.boardsModel = function() {
     var boards = Board.boardNames().map(function(boardName) {
         return Board.board(boardName).info();
     });
-    return { boards: boards };
+    return {
+        boards: boards,
+        boardGroups: config("boardGroups", {})
+    };
 };
 
 controller.boardModel = function(board) {
@@ -437,7 +440,7 @@ controller.sendCachedRSS = function(req, res, id) {
     return sendCachedContent(req, res, id, Cache.Types.RSS);
 };
 
-controller.regenerate = function() {
+controller.regenerate = function(regenerateArchived) {
     return Cache.cleanup().then(function() {
         return Tools.series(["JSON", "HTML"], function(type) {
             console.log(`Generating ${type} cache, please, wait...`);
@@ -450,6 +453,42 @@ controller.regenerate = function() {
                         return Cache[`set${type}`](id, data);
                     });
                 });
+            });
+        });
+    }).then(function() {
+        if (!regenerateArchived)
+            return Promise.resolve();
+        console.log(`Generating archived threads cache, please, wait...`);
+        return Tools.series(Board.boardNames(), function(boardName) {
+            var archPath = `${__dirname}/../public/${boardName}/arch`;
+            return FS.exists(archPath).then(function(exists) {
+                return Tools.promiseIf(exists, function() {
+                    var board = Board.board(boardName);
+                    return FS.list(archPath).then(function(fileNames) {
+                        return Tools.series(fileNames.filter(function(fileName) {
+                            return fileName.split(".").pop() == "json";
+                        }), function(fileName) {
+                            var threadNumber = +fileName.split(".").shift();
+                            var c = {};
+                            return BoardModel.getThread(board, threadNumber, true).then(function(model) {
+                                c.model = model;
+                                return Tools.writeFile(`${archPath}/${threadNumber}.json`, JSON.stringify(c.model));
+                            }).then(function() {
+                                return BoardModel.generateThreadHTML(board, threadNumber, c.model, true);
+                            }).then(function(data) {
+                                return Tools.writeFile(`${archPath}/${threadNumber}.html`, data);
+                            }).catch(function(err) {
+                                Global.error(err.stack || err);
+                            }).then(function() {
+                                return Promise.resolve();
+                            });
+                        });
+                    });
+                });
+            }).catch(function(err) {
+                Global.error(err.stack || err);
+            }).then(function() {
+                return Promise.resolve();
             });
         });
     }).then(function() {
@@ -480,61 +519,77 @@ controller.generateStatistics = function() {
     };
     var ld = Tools.now().valueOf();
     var brd;
-    return Tools.series(Board.boardNames(), function(boardName) {
-        var board = Board.board(boardName);
-        var bld = board.launchDate.valueOf();
-        if (!brd || bld < ld) {
-            brd = board;
-            ld = bld;
-        }
-        var bo = {
-            name: board.name,
-            title: board.title,
-            hidden: board.hidden,
-            diskUsage: 0
-        };
-        var path = __dirname + "/../public/" + board.name + "/";
-        return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
-            o.total.postCount += lastPostNumber;
-            bo.postCount = lastPostNumber;
-            bo.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
-            return FS.list(path + "src");
-        }).then(function(list) {
-            var fileCount = list ? list.length : 0;
-            bo.fileCount = fileCount;
-            o.total.fileCount += fileCount;
-            return Tools.du(path + "src");
-        }).catch(function(err) {
-            if ("ENOENT" != err.code)
-                Global.error(err.stack || err);
-            return Tools.du(path + "src");
-        }).then(function(size) {
-            bo.diskUsage += size;
-            o.total.diskUsage += size;
-            return Tools.du(path + "thumb");
-        }).catch(function(err) {
-            if ("ENOENT" != err.code)
-                Global.error(err.stack || err);
-            return Tools.du(path + "thumb");
-        }).then(function(size) {
-            bo.diskUsage += size;
-            o.total.diskUsage += size;
-            return Tools.du(path + "arch");
-        }).catch(function(err) {
-            if ("ENOENT" != err.code)
-                Global.error(err.stack || err);
-            return Tools.du(path + "arch");
-        }).then(function(size) {
-            bo.diskUsage += size;
-            o.total.diskUsage += size;
-            return Promise.resolve();
-        }).catch(function(err) {
-            if ("ENOENT" != err.code)
-                Global.error(err.stack || err);
-            return Promise.resolve();
-        }).then(function() {
-            o.boards.push(bo);
-            return Promise.resolve();
+    return Database.db.keys("userPostNumbers:*").then(function(keys) {
+        var uniqueUsers = Board.boardNames().reduce(function(acc, boardName) {
+            acc[boardName] = 0;
+            return acc;
+        }, {});
+        var users = {};
+        keys.forEach(function(key) {
+            var boardName = key.split(":").pop();
+            if (!uniqueUsers.hasOwnProperty(boardName))
+                return;
+            users[key.split(":").slice(1, -1).join(":")] = {};
+            ++uniqueUsers[boardName];
+        });
+        o.total.uniqueIPCount = Object.keys(users).length;
+        return Tools.series(Board.boardNames(), function(boardName) {
+            var board = Board.board(boardName);
+            var bld = board.launchDate.valueOf();
+            if (!brd || bld < ld) {
+                brd = board;
+                ld = bld;
+            }
+            var bo = {
+                name: board.name,
+                title: board.title,
+                hidden: board.hidden,
+                diskUsage: 0,
+                uniqueIPCount: uniqueUsers[board.name]
+            };
+            var path = __dirname + "/../public/" + board.name + "/";
+            return Database.lastPostNumber(board.name).then(function(lastPostNumber) {
+                o.total.postCount += lastPostNumber;
+                bo.postCount = lastPostNumber;
+                bo.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
+                return FS.list(path + "src");
+            }).then(function(list) {
+                var fileCount = list ? list.length : 0;
+                bo.fileCount = fileCount;
+                o.total.fileCount += fileCount;
+                return Tools.du(path + "src");
+            }).catch(function(err) {
+                if ("ENOENT" != err.code)
+                    Global.error(err.stack || err);
+                return Tools.du(path + "src");
+            }).then(function(size) {
+                bo.diskUsage += size;
+                o.total.diskUsage += size;
+                return Tools.du(path + "thumb");
+            }).catch(function(err) {
+                if ("ENOENT" != err.code)
+                    Global.error(err.stack || err);
+                return Tools.du(path + "thumb");
+            }).then(function(size) {
+                bo.diskUsage += size;
+                o.total.diskUsage += size;
+                return Tools.du(path + "arch");
+            }).catch(function(err) {
+                if ("ENOENT" != err.code)
+                    Global.error(err.stack || err);
+                return Tools.du(path + "arch");
+            }).then(function(size) {
+                bo.diskUsage += size;
+                o.total.diskUsage += size;
+                return Promise.resolve();
+            }).catch(function(err) {
+                if ("ENOENT" != err.code)
+                    Global.error(err.stack || err);
+                return Promise.resolve();
+            }).then(function() {
+                o.boards.push(bo);
+                return Promise.resolve();
+            });
         });
     }).then(function() {
         o.total.postingSpeed = controller.postingSpeedString(brd, o.total.postCount);

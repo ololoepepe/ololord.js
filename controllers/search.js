@@ -14,6 +14,7 @@ router.generateHTML = function() {
     model.title = Tools.translate("Search", "pageTitle");
     model.extraScripts = [
         { fileName: "3rdparty/jquitelight.min.js" },
+        { fileName: "3rdparty/URI.min.js" },
         { fileName: "search.js" }
     ];
     return controller("search", model).then(function(data) {

@@ -36,13 +36,29 @@ var Board = function(name, title, options) {
     this.defineSetting("title", function() {
         return Tools.translate(title);
     });
+    this.defineProperty("priority", function() {
+        var def;
+        if (options && !isNaN(+options.priority) && +options.priority)
+            def = +options.priority;
+        else
+            def = 0;
+        return config("board." + name + ".priority", config("board.priority", def));
+    });
     this.defineProperty("defaultUserName", function() {
         var def;
         if (options && options.defaultUserName)
-            def = Tools.translate(options && options.defaultUserName);
+            def = Tools.translate(options.defaultUserName);
         else
             def = Tools.translate("Anonymous", "defaultUserName");
         return config("board." + name + ".defaultUserName", config("board.defaultUserName", def));
+    });
+    this.defineProperty("groupName", function() {
+        var def;
+        if (options && options.groupName)
+            def = options.groupName;
+        else
+            def = "";
+        return config("board." + name + ".groupName", config("board.groupName", def));
     });
     this.defineProperty("captchaEnabled", function() {
         return config("board.captchaEnabled", true) && config("board." + name + ".captchaEnabled", true);
@@ -151,6 +167,7 @@ Board.boards = {};
         name: this.name,
         title: this.title,
         defaultUserName: this.defaultUserName,
+        groupName: this.groupName,
         showWhois: this.showWhois,
         hidden: this.hidden,
         postingEnabled: this.postingEnabled,
@@ -272,7 +289,7 @@ var renderFileInfo = function(fi) {
             fi.sizeTooltip += "]";
             if (ed.year)
                 fi.sizeTooltip += " (" + ed.year + ")";
-        } else if (Tools.isVideoType(fi.mimeType)) {
+        } else if (Tools.isVideoType(fi.mimeType) && ed.bitrate) {
             fi.sizeTooltip = ed.bitrate + Tools.translate("kbps", "kbps");
         }
     }
@@ -449,8 +466,9 @@ var getRules = function(boardName) {
                         height: metadata.streams[0].height
                     };
                 }
-                file.extraData.duration = durationToString(metadata.format.duration);
-                file.extraData.bitrate = Math.floor(+metadata.format.bit_rate / 1024);
+                file.extraData.duration = +metadata.format.duration ? durationToString(metadata.format.duration)
+                    : metadata.format.duration;
+                file.extraData.bitrate = +metadata.format.bit_rate ? Math.floor(+metadata.format.bit_rate / 1024) : 0;
                 file.thumbPath += ".png";
                 return new Promise(function(resolve, reject) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);

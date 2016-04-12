@@ -7,7 +7,7 @@ var OS = require("os");
 
 var Global = require("./helpers/global");
 Global.Program = require("commander");
-Global.Program.version("1.1.0-beta")
+Global.Program.version("1.1.0-rc")
     .option("-c, --config-file <file>", "Path to the config.json file")
     .parse(process.argv);
 
@@ -131,7 +131,20 @@ var spawnCluster = function() {
 };
 
 if (cluster.isMaster) {
-    Database.initialize().then(function() {
+    var FS = require("q-io/fs");
+    var path = __dirname + "/public/node-captcha";
+    FS.list(path).then(function(fileNames) {
+        Tools.series(fileNames.filter(function(fileName) {
+            return fileName.split(".").pop() == "png" && /^[0-9]+$/.test(fileName.split(".").shift());
+        }), function(fileName) {
+            return FS.remove(path + "/" + fileName);
+        });
+    }).catch(function(err) {
+        console.error(err);
+        return Promise.resolve();
+    }).then(function() {
+        return Database.initialize();
+    }).then(function() {
         return controller.initialize();
     }).then(function() {
         if (config("server.statistics.enabled", true)) {
@@ -149,7 +162,7 @@ if (cluster.isMaster) {
             }, config("server.rss.ttl", 60) * Tools.Minute);
         }
         if (config("system.regenerateCacheOnStartup", true))
-            return controller.regenerate();
+            return controller.regenerate(config("system.regenerateArchive", false));
         return Promise.resolve();
     }).then(function() {
         console.log("Spawning workers, please, wait...");
@@ -198,8 +211,8 @@ if (cluster.isMaster) {
             config.reload();
             return Global.IPC.send("reloadConfig");
         });
-        Global.IPC.installHandler("regenerateCache", function() {
-            return controller.regenerate();
+        Global.IPC.installHandler("regenerateCache", function(regenerateArchive) {
+            return controller.regenerate(regenerateArchive);
         });
     }).catch(function(err) {
         Global.error(err.stack || err);

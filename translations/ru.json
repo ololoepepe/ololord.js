@@ -428,6 +428,9 @@
     "Title:": {
         "audioTagTitleText": {
             "value": "Название:"
+        },
+        "playerRadioTitleLabelText": {
+            "value": "Название:"
         }
     },
     "Year:": {
@@ -1314,10 +1317,16 @@
     "Hide": {
         "hidePostText": {
             "value": "Скрыть"
+        },
+        "hidePasswordButtonText": {
+            "value": "Скрыть"
         }
     },
     "Show": {
         "showPostText": {
+            "value": "Показать"
+        },
+        "showPasswordButtonText": {
             "value": "Показать"
         }
     },
@@ -1386,9 +1395,9 @@
             "value": "Найти соус..."
         }
     },
-    "Download all files as a .zip archive": {
-        "downloadThreadText": {
-            "value": "Скачать все файлы в виде .zip-архива"
+    "Download all files": {
+        "downloadThreadFilesText": {
+            "value": "Скачать все файлы"
         }
     },
     "Last modified:": {
@@ -1571,6 +1580,9 @@
     },
     "URL:": {
         "linkLabelText": {
+            "value": "Ссылка:"
+        },
+        "playerRadioURLLabelText": {
             "value": "Ссылка:"
         }
     },
@@ -1876,21 +1888,6 @@
             "value": "Google reCAPTCHA v1"
         }
     },
-    "Yandex captcha (Latin)": {
-        "_default": {
-            "value": "Yandex captcha (Latin)"
-        }
-    },
-    "Yandex captcha (digits)": {
-        "_default": {
-            "value": "Yandex captcha (digits)"
-        }
-    },
-    "Yandex captcha (Cyrillic)": {
-        "_default": {
-            "value": "Yandex captcha (Cyrillic)"
-        }
-    },
     "Target board": {
         "targetBoardLabelText": {
             "value": "Целевая доска"
@@ -2141,7 +2138,7 @@
             "value": "Попытка прикрепить голосвание не будучи ОПом"
         }
     },
-    "No vote text provided": {
+    "No voting text provided": {
         "_default": {
             "value": "Не указан текст голосования"
         }
@@ -2367,7 +2364,8 @@
     "Invalid captcha type": {
         "_default": {
             "value": "Недействительный тип капчи"
-        }
+        },
+        "_obsolete": true
     },
     "Invalid URL": {
         "_default": {
@@ -3161,6 +3159,41 @@
     "Hide by image size": {
         "hideByImageSizeText": {
             "value": "Скрывать по размеру картинки"
+        }
+    },
+    "Add radio stream": {
+        "addRadioText": {
+            "value": "Добавить радио-поток"
+        }
+    },
+    "Infinite scroll": {
+        "infiniteScrollLabelText": {
+            "value": "Бесконечная прокрутка"
+        }
+    },
+    "Page": {
+        "pageText": {
+            "value": "Страница"
+        }
+    },
+    "Synchronize password": {
+        "synchronizePasswordLabelText": {
+            "value": "Синхронизировать пароль"
+        }
+    },
+    "New": {
+        "newPasswordButtonText": {
+            "value": "Новый"
+        }
+    },
+    "Regenerate archived threads, too.": {
+        "_default": {
+            "value": "Также сгенерировать заново архивные треды."
+        }
+    },
+    "Regenerate archived threads": {
+        "regenerateArchivedThreadsLabelText": {
+            "value": "Сгенерировать заново архивные треды"
         }
     }
 }

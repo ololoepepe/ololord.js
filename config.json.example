@@ -39,6 +39,20 @@ Example:
             "launchDate": "2015-02-16T20:00:00"
         }
     },
+    "boardGroups": {
+        "thematic": {
+            "priority": 1,
+            "title": "Thematic"
+        },
+        "adult": {
+            "priority": 2,
+            "title": "For adults"
+        },
+        "other": {
+            "priority": 3,
+            "title": "Other"
+        }
+    },
     "captcha": {
         "google-recaptcha": {
             "privateKey": "Your Google reCAPTCHA private key",

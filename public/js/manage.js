@@ -380,10 +380,17 @@ lord.editFile = function(fileName) {
 lord.regenerateCache = function() {
     var div = lord.node("div");
     div.appendChild(lord.node("text", lord.text("reloadWarningText")));
+    div.appendChild(lord.node("br"));
+    var inp = lord.node("input");
+    inp.type = "checkbox";
+    div.appendChild(inp);
+    div.appendChild(lord.node("text", lord.text("regenerateArchivedThreadsLabelText")));
     lord.showDialog(div, { title: lord.text("confirmationText") }).then(function(result) {
         if (!result)
             return Promise.resolve();
         var formData = new FormData();
+        if (inp.checked)
+            formData.append("regenerateArchive", "true");
         return lord.post("/" + lord.data("sitePathPrefix") + "action/superuserRegenerateCache", formData);
     }).catch(lord.handleError);
 };

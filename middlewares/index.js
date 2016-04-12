@@ -90,6 +90,31 @@ var setupDdos = function() {
             checkInterval: config("server.ddosProtection.checkInterval", 1000),
             rules: config("server.ddosProtection.rules", [
                 {
+                    string: "/misc/base.json",
+                    maxWeight: 6,
+                    queueSize: 4
+                },
+                {
+                    string: "/api/chatMessages.json",
+                    maxWeight: 4,
+                    queueSize: 2
+                },
+                {
+                    string: "/api/lastPostNumbers.json",
+                    maxWeight: 4,
+                    queueSize: 2
+                },
+                {
+                    string: "/api/captchaQuota.json",
+                    maxWeight: 4,
+                    queueSize: 2
+                },
+                {
+                    string: "/api/lastPostNumber.json",
+                    maxWeight: 4,
+                    queueSize: 2
+                },
+                {
                     regexp: "^/api.*",
                     maxWeight: 6,
                     queueSize: 4

@@ -50,39 +50,14 @@
                      class="buttonImage" /></a>
             <input type="image" src="/{{=it.site.pathPrefix}}img/search.png" class="buttonImage"
                    title="{{=it.tr.findSourceText}}"
-                   onclick="lord.showMenu(event, this, '#file{{=fileInfo.name.replace(".", "-")}}SearchMenu'); return false;" />
-            <ul id="file{{=fileInfo.name.replace(".", "-")}}SearchMenu" class="menu">
-                <li class="nowrap">
-                    <a href="//www.google.com/searchbyimage?image_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-                       target="_blank">
-                        <img src="//www.google.com/favicon.ico" width="16" height="16" class="signImage noInvert" /> Google</a>
-                </li>
-                <li class="nowrap">
-                    <a href="//yandex.ru/images/search?rpt=imageview&img_url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-                       target="_blank">
-                        <img src="//www.yandex.ru/favicon.ico" width="16" height="16" class="signImage noInvert" /> Yandex</a>
-                </li>
-                <li class="nowrap">
-                    <a href="//tineye.com/search/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-                       target="_blank">
-                        <img src="//tineye.com/favicon.ico" width="16" height="16" class="signImage noInvert" /> TinEye</a>
-                </li>
-                <li class="nowrap">
-                    <a href="//saucenao.com/search.php?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-                       target="_blank">
-                        <img src="//saucenao.com/favicon.ico" width="16" height="16" class="signImage noInvert"/> SauceNAO</a>
-                </li>
-                <li class="nowrap">
-                    <a href="http://iqdb.org/?url={{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=it.board.name}}/src/{{=fileInfo.name}}"
-                       target="_blank">
-                        <img src="//iqdb.org/favicon.ico" width="16" height="16" class="signImage noInvert" /> Iqdb</a>
-                </li>
-            </ul>
+                   onclick="lord.showImageSearchMenu(event, this, '{{=fileInfo.name}}'); return false;" />
         {{?}}
         {{? "application/ogg" == fileInfo.mimeType || fileInfo.mimeType.substr(0, 6) == "audio/"}}
             <a href="javascript:void(0);" onclick="lord.editAudioTags(this); return false;"
                title="{{=it.tr.editAudioTagsText}}">
                 <img src="/{{=it.site.pathPrefix}}img/audio_edit_tags.png" class="buttonImage"></a>
+        {{?}}
+        {{? "application/ogg" == fileInfo.mimeType || fileInfo.mimeType.substr(0, 6) == "audio/" || fileInfo.mimeType.substr(0, 6) == "video/"}}
             <a href="javascript:void(0);" onclick="lord.addToPlaylist(this); return false;"
                title="{{=it.tr.addToPlaylistText}}">
                 <img src="/{{=it.site.pathPrefix}}img/player/16/player.png" class="buttonImage"></a>

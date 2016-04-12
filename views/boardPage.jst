@@ -69,10 +69,63 @@
 </div>
 <script type="text/javascript">
     (function() {
+        var infScroll = lord.getLocalObject("infiniteScroll", lord.deviceType("mobile"));
+        if (infScroll) {
+            var w = $(window);
+            var loading = false;
+            var infiniteScrollPage;
+	        w.scroll(function() {
+	            if (loading)
+	                return;
+	            var pageCount = +lord.data("pageCount");
+	            if (isNaN(infiniteScrollPage))
+    	            infiniteScrollPage = +lord.data("currentPage");
+    	        if (infiniteScrollPage >= pageCount - 1)
+    	            return;
+    		    if ($(document).height() - w.height() == w.scrollTop()) {
+    		        loading = true;
+    		        ++infiniteScrollPage;
+                    $("#infiniteScrollLoading").show();
+                    lord.api(infiniteScrollPage, {}, lord.data("boardName")).then(function(pageModel) {
+                        var threads = pageModel.threads.filter(function(thread) {
+                            return !lord.id("thread" + thread.opPost.number);
+                        });
+                        var model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")]);
+                        var html = '<hr /><div style="font-size: 2em; text-align: center;">' + model.tr.pageText + " "
+                            + infiniteScrollPage + '</div>' + threads.map(function(thread) {
+                            model.thread = thread;
+                            return "<hr />" + lord.template("thread", model, true);
+                        }).join("");
+                        $("#infiniteScrollLoading").hide();
+                        lord.id("threads").innerHTML += html;
+                        return lord.series(threads.map(function(thread) {
+                            return lord.id("thread" + thread.opPost.number);
+                        }), function(thread) {
+                            return lord.processPosts(thread);
+                        });
+                    }).then(function() {
+                        lord.initFiles();
+                        $("#infiniteScrollLoading").hide();
+                        loading = false;
+                    }).catch(function(err) {
+                        $("#infiniteScrollLoading").hide();
+                        loading = false;
+                        lord.handleError(err);
+                    });
+		        }
+	        });
+        }
         var model = lord.model(["tr", "board/" + lord.data("boardName")]);
         model.settings = lord.settings();
         document.open();
-        document.write(lord.template("boardPageLower", model, true));
+        var s = lord.template("boardPageLower", model, true);
+        if (infScroll) {
+            s += '<div id="infiniteScrollLoading" class="loadingMessage" style="display: none;">'
+                + '<img src="/{{=it.site.pathPrefix}}img/loading_big.gif">'
+                + '<h1 style="display: inline;">{{=it.tr.loadingThreadsMessage}}</h1>'
+                + '</div>';
+        }
+        document.write(s);
         document.close();
     })();
 </script>

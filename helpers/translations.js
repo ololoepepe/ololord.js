@@ -33,12 +33,13 @@ module.exports = function(tr) {
     translate("Move", "moveThreadText");
     translate("Show IP", "showUserIpText");
     translate("Ban", "banUserText");
-    translate("Download all files as a .zip archive", "downloadThreadText");
+    translate("Download all files", "downloadThreadFilesText");
     translate("Add to favorites", "addThreadToFavoritesText");
     translate("Remove thread from favorites", "removeThreadFromFavoritesText");
     translate("Delete", "deletePostText");
     translate("Hide", "hidePostText");
     translate("Show", "showPostText");
+    translate("Add radio stream", "addRadioText");
     translate("Minimize player", "minimizePlayerText");
     translate("Maximize player", "maximizePlayerText");
     translate("Play", "playerPlayText");
@@ -47,6 +48,8 @@ module.exports = function(tr) {
     translate("Next track", "playerNextTrackText");
     translate("Mute", "playerMuteText");
     translate("Unmute", "playerUnmuteText");
+    translate("Title:", "playerRadioTitleLabelText");
+    translate("URL:", "playerRadioURLLabelText");
     translate("Last modified:", "modificationDateTimeText");
     translate("User was banned for this post", "bannedForText");
     translate("Delete file", "deleteFileText");
@@ -382,6 +385,10 @@ module.exports = function(tr) {
     translate("Synchronize", "synchronizationText");
     translate("Synchronize settings", "synchronizeSettingsLabelText");
     translate("Synchronize CSS and JS", "synchronizeCssAndJsLabelText");
+    translate("Synchronize password", "synchronizePasswordLabelText");
+    translate("Show", "showPasswordButtonText");
+    translate("Hide", "hidePasswordButtonText");
+    translate("New", "newPasswordButtonText");
     translate("No password specified, and not logged in", "noPasswordNotLoggedInError");
     translate("Synchronization data will be available within 5 minutes", "synchronizationTimeoutText");
     translate("Synchronization completed successfully", "synchronizationSuccessfulText");
@@ -438,5 +445,8 @@ module.exports = function(tr) {
     translate("Reload templates", "reloadTemplatesButtonText");
     translate("Reload everything", "reloadAllButtonText");
     translate("Image similarity:", "ihashDistanceLabelText");
+    translate("Infinite scroll", "infiniteScrollLabelText");
+    translate("Page", "pageText");
+    translate("Regenerate archived threads", "regenerateArchivedThreadsLabelText");
     return tr;
 };

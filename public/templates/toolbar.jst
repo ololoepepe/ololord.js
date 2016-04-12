@@ -23,9 +23,7 @@
                 onclick="lord.redirectToLoginPage();"><img src="/{{=it.site.pathPrefix}}img/login.png"
                                                            class="buttonImage" title="{{=it.tr.loginText}}"></a>]
         {{?}}
-        {{? "mobile" != it.deviceType}}
-            |
-        {{?}}
+        {{ it.isToolbar = true; }}
         {{#def.innerNavbar}}
         {{? it.settings.stickyToolbar}}
             <hr style="margin-top: 3px; margin-bottom: 0px;" />

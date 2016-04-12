@@ -20,6 +20,14 @@ footer {
     padding-bottom: 2px;
 }
 
+.spoiler > span[data-video-id] > img {
+    visibility: hidden;
+}
+
+.spoiler:hover > span[data-video-id] > img {
+    visibility: visible;
+}
+
 a.expandCollapse {
     cursor: pointer;
 }
@@ -108,6 +116,10 @@ audio {
 
 .postSequenceNumber {
     font-size: 75%;
+}
+
+.hiddenPostList {
+    min-width: 350px;
 }
 
 .hiddenPostList > div:nth-child(even) {
@@ -339,7 +351,7 @@ span.newPostCount {
     margin-left: auto;
     margin-right: auto;
     text-align: center;
-    width: 70%;
+    width: 99%;
     font-size: 1.2em;
 }
 
@@ -648,6 +660,10 @@ ul.tabWidget > li > a {
     top: 0px;
     width: 99%;
     padding-bottom: 0px;
+}
+
+.navbarBoardGroup {
+    word-spacing: -2px;
 }
 
 blockquote.blockquoteThread {
@@ -1057,6 +1073,13 @@ input.buttonImage {
     right: 4px;
 }
 
+#playerAddRadioButton {
+    display: inline-block;
+    position: absolute;
+    right: 50px;
+    bottom: 16px;
+}
+
 #playerMinimizeButton {
     display: inline-block;
     position: absolute;
@@ -1182,7 +1205,6 @@ div.registeredUser {
 }
 
 .searchResult {
-    margin-top: -16px;
     margin-bottom: 4px;
     padding: 4px;
     overflow-x: auto;

@@ -29,7 +29,8 @@ lord.customPostHeaderPart[100] = function(it, thread, post) {
     });
     model.thread = thread;
     model.post = post;
-    return lord.template("socPostHeaderPart", model, true);
+    model.archived = !!lord.data("archived");
+    return lord.template("withLikesPostHeaderPart", model, true);
 };
 
 lord.postProcessors.push(function(post) {

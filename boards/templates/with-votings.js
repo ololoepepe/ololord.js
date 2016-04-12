@@ -29,11 +29,16 @@ module.exports = function(name, title, options) {
                 Tools.parseForm(req).then(function(result) {
                     c.postNumber = +result.fields.postNumber;
                     c.fields = result.fields;
-                    return Database.getPost("rpg", c.postNumber);
+                    return Database.db.hget("posts", board.name + ":" + c.postNumber);
                 }).then(function(post) {
                     if (!post)
                         return Promise.reject(Tools.translate("No such post"));
-                    if (req.ip == post.user.ip)
+                    c.post = JSON.parse(post);
+                    return Database.db.hget("threads:" + board.name, c.post.threadNumber);
+                }).then(function(thread) {
+                    if (!thread)
+                        return Promise.reject(Tools.translate("No such thread"));
+                    if (req.ip == c.post.user.ip)
                         return Promise.reject(Tools.translate("You can not participate in your own voting"));
                     return Board.prototype.loadExtraData.call(_this, c.postNumber);
                 }).then(function(extraData) {
@@ -81,9 +86,7 @@ module.exports = function(name, title, options) {
                 }).then(function() {
                     return Database.db.sadd("voteUsers:" + c.postNumber, req.ip);
                 }).then(function() {
-                    return Database.db.hget("posts", "rpg:" + c.postNumber);
-                }).then(function(post) {
-                    Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
+                    Global.generate(board.name, c.post.threadNumber, c.postNumber, "edit");
                     res.send({});
                 }).catch(function(err) {
                     controller.error(req, res, err, true);
@@ -98,6 +101,15 @@ module.exports = function(name, title, options) {
                 Tools.parseForm(req).then(function(result) {
                     c.postNumber = +result.fields.postNumber;
                     c.fields = result.fields;
+                    return Database.db.hget("posts", board.name + ":" + c.postNumber);
+                }).then(function(post) {
+                    if (!post)
+                        return Promise.reject(Tools.translate("No such post"));
+                    c.post = JSON.parse(post);
+                    return Database.db.hget("threads:" + board.name, c.post.threadNumber);
+                }).then(function(thread) {
+                    if (!thread)
+                        return Promise.reject(Tools.translate("No such thread"));
                     return _this.loadExtraData(c.postNumber);
                 }).then(function(extraData) {
                     if (!extraData)
@@ -125,9 +137,7 @@ module.exports = function(name, title, options) {
                 }).then(function() {
                     return Database.db.srem("voteUsers:" + c.postNumber, req.ip);
                 }).then(function() {
-                    return Database.db.hget("posts", "rpg:" + c.postNumber);
-                }).then(function(post) {
-                    Global.generate("rpg", JSON.parse(post).threadNumber, c.postNumber, "edit");
+                    Global.generate(board.name, c.post.threadNumber, c.postNumber, "edit");
                     res.send({});
                 }).catch(function(err) {
                     controller.error(req, res, err, true);
@@ -142,12 +152,18 @@ module.exports = function(name, title, options) {
                 Tools.parseForm(req).then(function(result) {
                     c.password = Tools.sha1(result.fields.password);
                     c.opened = "true" == result.fields.opened;
-                    return Database.getPost("rpg", +result.fields.postNumber);
+                    return Database.db.hget("posts", board.name + ":" + +result.fields.postNumber);
                 }).then(function(post) {
-                    c.post = post;
+                    if (!post)
+                        return Promise.reject(Tools.translate("No such post"));
+                    c.post = JSON.parse(post);
+                    return Database.db.hget("threads:" + board.name, c.post.threadNumber);
+                }).then(function(thread) {
+                    if (!thread)
+                        return Promise.reject(Tools.translate("No such thread"));
                     if ((!c.password || c.password != post.user.password)
                         && (!req.hashpass || req.hashpass != post.user.hashpass)
-                        && (Database.compareRegisteredUserLevels(req.level("rpg"), post.user.level) <= 0)) {
+                        && (Database.compareRegisteredUserLevels(req.level(board.name), post.user.level) <= 0)) {
                         return Promise.reject(Tools.translate("Not enough rights"));
                     }
                     return Board.prototype.loadExtraData.call(_this, post.number);
@@ -157,7 +173,7 @@ module.exports = function(name, title, options) {
                     extraData.disabled = !c.opened;
                     return Board.prototype.storeExtraData.call(_this, c.post.number, extraData);
                 }).then(function(result) {
-                    Global.generate("rpg", c.post.threadNumber, c.post.number, "edit");
+                    Global.generate(board.name, c.post.threadNumber, c.post.number, "edit");
                     res.send({});
                 }).catch(function(err) {
                     controller.error(req, res, err, true);
@@ -167,7 +183,7 @@ module.exports = function(name, title, options) {
     };
 
     board.extraScripts = function() {
-        return [ { fileName: "rpg.js" } ];
+        return [ { fileName: "with-votings.js" } ];
     };
 
     board.addTranslations = function(translate) {
@@ -185,8 +201,6 @@ module.exports = function(name, title, options) {
     };
 
     board.postExtraData = function(req, fields, _, oldPost) {
-        if (!fields.voteText)
-            return Promise.reject(Tools.translate("No vote text provided"));
         var oldVariants = [];
         var newVariants = [];
         Tools.forIn(fields, function(value, key) {
@@ -209,6 +223,8 @@ module.exports = function(name, title, options) {
         });
         if (oldVariants.length < 1 && newVariants.length < 1)
             return Promise.resolve(null);
+        if (!fields.voteText)
+            return Promise.reject(Tools.translate("No voting text provided"));
         var p;
         if (fields.thread) {
             p = Database.getPost(fields.board, +fields.thread).then(function(opPost) {
@@ -344,7 +360,8 @@ module.exports = function(name, title, options) {
                 var model = merge.recursive(it, post.extraData);
                 model.thread = thread;
                 model.post = post;
-                return controller.sync("rpgPostBodyPart", model);
+                model.archived = thread.archived;
+                return controller.sync("withVotingsPostBodyPart", model);
             }
         };
     };
