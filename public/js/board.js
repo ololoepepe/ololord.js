@@ -293,7 +293,7 @@ lord.removeReferences = function(postNumber, referencedOnly) {
         if ($(parent).hasClass("referencedBy")) {
             parent.removeChild(a);
             if (parent.children.length <= 1)
-                parent.style.display = "none";
+                parent.parentNode.style.display = "none";
         } else if (!referencedOnly) {
             parent.replaceChild(lord.node("text", a.textContent), a);
         }
