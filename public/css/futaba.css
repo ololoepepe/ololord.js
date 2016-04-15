@@ -20,6 +20,7 @@
 body  {
     background-color: #FFFFEE;
     color: #800000;
+    font-size: inherit;
 }
 
 a {
