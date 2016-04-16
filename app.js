@@ -9,6 +9,7 @@ var Global = require("./helpers/global");
 Global.Program = require("commander");
 Global.Program.version("1.1.0-rc")
     .option("-c, --config-file <file>", "Path to the config.json file")
+    .option("-r, --regenerate", "Regenerate the cache on startup")
     .parse(process.argv);
 
 var Cache = require("./helpers/cache");
@@ -161,7 +162,7 @@ if (cluster.isMaster) {
                 });
             }, config("server.rss.ttl", 60) * Tools.Minute);
         }
-        if (config("system.regenerateCacheOnStartup", true))
+        if (Global.Program.regenerate || config("system.regenerateCacheOnStartup", true))
             return controller.regenerate(config("system.regenerateArchive", false));
         return Promise.resolve();
     }).then(function() {
