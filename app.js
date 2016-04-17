@@ -111,6 +111,16 @@ var spawnCluster = function() {
                         config.reload();
                     return Promise.resolve();
                 });
+                Global.IPC.installHandler("getConnectionIPs", function() {
+                    return Promise.resolve(Tools.mapIn(sockets, function(socket) {
+                        return socket.ip;
+                    }).filter(function(ip) {
+                        return ip;
+                    }).reduce(function(acc, ip) {
+                        acc[ip] = 1;
+                        return acc;
+                    }, {}));
+                });
                 Global.IPC.send("ready").catch(function(err) {
                     Global.error(err);
                 });

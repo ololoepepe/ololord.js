@@ -593,6 +593,18 @@ controller.generateStatistics = function() {
         });
     }).then(function() {
         o.total.postingSpeed = controller.postingSpeedString(brd, o.total.postCount);
+        return Global.IPC.send("getConnectionIPs");
+    }).then(function(data) {
+        o.online = Object.keys(data.reduce(function(acc, ips) {
+            Tools.forIn(ips, function(_, ip) {
+                acc[ip] = 1;
+            });
+            return acc;
+        }, {})).length;
+    }).catch(function(err) {
+        Global.error(err);
+        return Promise.resolve();
+    }).then(function() {
         Cache.setJSON(`statistics`, JSON.stringify(o));
         return Promise.resolve();
     });
