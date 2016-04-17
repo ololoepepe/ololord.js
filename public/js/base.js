@@ -1401,6 +1401,8 @@ lord.showNewPosts = function() {
                     parent.insertBefore(lord.node("text", " "), a);
                 });
             });
+            if (lord.getLocalObject("stickyToolbar", true))
+                $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
         }
         lord.each(result, function(lastPostNumber, boardName) {
             if (lastPostNumbers[boardName])
