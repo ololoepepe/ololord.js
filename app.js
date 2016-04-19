@@ -142,22 +142,28 @@ var spawnCluster = function() {
 };
 
 if (cluster.isMaster) {
+    console.log("1");
     var FS = require("q-io/fs");
     var path = __dirname + "/public/node-captcha";
+    console.log("2");
     FS.list(path).then(function(fileNames) {
-        Tools.series(fileNames.filter(function(fileName) {
+        return Tools.series(fileNames.filter(function(fileName) {
             return fileName.split(".").pop() == "png" && /^[0-9]+$/.test(fileName.split(".").shift());
         }), function(fileName) {
             return FS.remove(path + "/" + fileName);
         });
+        console.log("3");
     }).catch(function(err) {
         console.error(err);
         return Promise.resolve();
     }).then(function() {
+        console.log("4");
         return Database.initialize();
     }).then(function() {
+        console.log("5");
         return controller.initialize();
     }).then(function() {
+        console.log("6");
         if (config("server.statistics.enabled", true)) {
             setInterval(function() {
                 controller.generateStatistics().catch(function(err) {
@@ -172,6 +178,7 @@ if (cluster.isMaster) {
                 });
             }, config("server.rss.ttl", 60) * Tools.Minute);
         }
+        console.log("7");
         if (Global.Program.regenerate || config("system.regenerateCacheOnStartup", true))
             return controller.regenerate(config("system.regenerateArchive", false));
         return Promise.resolve();
