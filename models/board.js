@@ -965,6 +965,7 @@ module.exports.generateRSS = function(currentProcess) {
                         indent: "    ",
                         newline: "\n"
                     },
+                    allowSurrogateChars: true,
                     cdata: true
                 });
                 return Cache.setRSS(boardName, builder.buildObject(doc));
