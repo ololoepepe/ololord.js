@@ -31,7 +31,12 @@ lord.doLogin = function(event, form) {
 lord.generateHashpass = function() {
     var form = lord.id("loginForm");
     var hashpass = lord.nameOne("hashpass", form).value;
-    prompt(lord.text("hashpassLabelText"), sha1(hashpass));
+    lord.prompt({
+        title: "hashpassLabelText",
+        value: sha1(hashpass),
+        style: { minWidth: "350px" },
+        readOnly: true
+    });
 };
 
 lord.vkAuth = function() {

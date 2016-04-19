@@ -1494,3 +1494,52 @@ lord.inIframe = function() {
         return true;
     }
 };
+
+lord.prompt = function(options) {
+    var div = lord.node("div");
+    if (options && options.label) {
+        div.appendChild(lord.node("text"), lord.text(options.label));
+        div.appendChild(lord.node("br"));
+    }
+    var inp;
+    switch (options && options.type) {
+    case "password":
+        inp = lord.node("input");
+        inp.type = "password";
+        break;
+    case "textarea":
+        inp = lord.node("textarea");
+        break;
+    case "input":
+    default:
+        inp = lord.node("input");
+        inp.type = "text";
+        break;
+    }
+    if (options && options.readOnly)
+        inp.readOnly = true;
+    if (options && options.value)
+        inp.value = options.value;
+    var style = {
+        boxSizing: "border-box",
+        width: "100%"
+    };
+    if (options && typeof options.style == "object")
+        style = merge(style, options.style);
+    $(inp).css(style);
+    div.appendChild(inp);
+    return lord.showDialog(div, {
+        title: options && options.title,
+        afterShow: function() {
+            if (!options || typeof options.select == "undefined" || options.select)
+                inp.select();
+        }
+    }).then(function(result) {
+        if (!result)
+            return Promise.resolve({ accepted: false });
+        return Promise.resolve({
+            accepted: true,
+            value: inp.value
+        });
+    });
+};

@@ -644,21 +644,38 @@ lord.setLocalData = function(o, includeSettings, includeCustom, includePassword)
 };
 
 lord.exportSettings = function() {
-    prompt(lord.text("copySettingsHint"), JSON.stringify(lord.localData(true, true, true)));
+    lord.prompt({
+        title: "copySettingsHint",
+        value: JSON.stringify(lord.localData(true, true, true)),
+        type: "textarea",
+        style: {
+            minWidth: "350px",
+            minHeight: "300px"
+        },
+        readOnly: true
+    }).catch(lord.handleError);
 };
 
 lord.importSettings = function() {
-    var s = prompt(lord.text("pasteSettingsHint"));
-    if (!s)
-        return;
-    var o;
-    try {
-        o = JSON.parse(s);
-    } catch(err) {
-        lord.handleError(err);
-        return;
-    }
-    lord.setLocalData(o, true, true, true);
+    lord.prompt({
+        title: "pasteSettingsHint",
+        type: "textarea",
+        style: {
+            minWidth: "350px",
+            minHeight: "300px"
+        }
+    }).then(function(result) {
+        if (!result.accepted)
+            return;
+        var o;
+        try {
+            o = JSON.parse(result.value);
+        } catch(err) {
+            lord.handleError(err);
+            return;
+        }
+        lord.setLocalData(o, true, true, true);
+    }).catch(lord.handleError);
 };
 
 lord.synchronize = function() {

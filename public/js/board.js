@@ -1732,12 +1732,17 @@ lord.fileSelected = function(div) {
 
 lord.attachFileByLink = function(a) {
     var div = a.parentNode;
-    var url = prompt(lord.text("linkLabelText"), div.fileUrl);
-    if (null === url)
-        return;
-    lord.clearFileInput(div);
-    div.fileUrl = url;
-    lord.fileAddedCommon(div);
+    lord.prompt({
+        title: "linkLabelText",
+        value: div.fileUrl,
+        style: { minWidth: "350px" }
+    }).then(function(result) {
+        if (!result.accepted || !result.value)
+            return;
+        lord.clearFileInput(div);
+        div.fileUrl = result.value;
+        lord.fileAddedCommon(div);
+    }).catch(lord.handleError);
 };
 
 lord.setDrawingBackgroundColor = function(btn, color) {
@@ -2222,7 +2227,11 @@ lord.showUserIp = function(a) {
         boardName: boardName,
         postNumber: postNumber
     }).then(function(result) {
-        prompt("IP:", result.ipv4 || result.ip);
+        return lord.prompt({
+            title: "IP:",
+            value: result.ipv4 || result.ip,
+            readOnly: true
+        });
     }).catch(lord.handleError);
 };
 
