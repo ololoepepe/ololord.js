@@ -527,7 +527,13 @@ var recover = function(c, err) {
     });
 };
 
-module.exports.readFile = function(path, ifModifiedSince) {
+var ContentTypeMap = {
+    "html": "text/html",
+    "json": "application/json",
+    "xml": "text/xml"
+};
+
+module.exports.readFile = function(path, ifModifiedSince, res) {
     var c = {};
     return openFile(path, "r").then(function(fd) {
         c.fd = fd;
@@ -536,15 +542,34 @@ module.exports.readFile = function(path, ifModifiedSince) {
         c.locked = true;
         return FS.stat(path);
     }).then(function(stats) {
-        c.lastModified = stats.node.mtime;
-        if (ifModifiedSince && +ifModifiedSince >= +stats.mtime)
+        c.lastModified = new Date(stats.node.mtime.toUTCString());
+        if (ifModifiedSince && +ifModifiedSince >= +c.lastModified)
             return Promise.resolve();
         if (stats.size <= 0)
             return Promise.resolve();
-        c.buffer = new Buffer(stats.size);
-        return readData(c.fd, c.buffer, 0, c.buffer.length, null);
+        return module.exports.promiseIf(res, function() {
+            var contentType = ContentTypeMap[path.split(".").pop()];
+            if (contentType)
+                res.setHeader("Content-Type", contentType);
+            res.setHeader("Last-Modified", c.lastModified.toUTCString());
+            var rs = FSSync.createReadStream(path);
+            rs.pipe(res);
+            return new Promise(function(resolve, reject) {
+                rs.on("end", function() {
+                    resolve();
+                });
+                rs.on("error", function(err) {
+                    reject(err);
+                });
+            });
+        }, function() {
+            c.buffer = new Buffer(stats.size);
+            return readData(c.fd, c.buffer, 0, c.buffer.length, null).then(function() {
+                c.data = c.buffer ? c.buffer.toString("utf8") : "";
+                return Promise.resolve();
+            });
+        });
     }).then(function() {
-        c.data = c.buffer ? c.buffer.toString("utf8") : "";
         return flockFile(c.fd, "un");
     }).then(function() {
         c.locked = false;

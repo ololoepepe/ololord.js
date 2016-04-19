@@ -47,7 +47,7 @@ var cleanup = function(type) {
     });
 };
 
-var get = function(type, id, ifModifiedSince) {
+var get = function(type, id, ifModifiedSince, res) {
     switch (type) {
     case Types.HTML:
     case Types.JSON:
@@ -58,7 +58,7 @@ var get = function(type, id, ifModifiedSince) {
     }
     if (ifModifiedSince && !Util.isDate(ifModifiedSince))
         ifModifiedSince = new Date(ifModifiedSince);
-    return Tools.readFile(Paths[type] + "/" + id + "." + Extensions[type], ifModifiedSince);
+    return Tools.readFile(Paths[type] + "/" + id + "." + Extensions[type], ifModifiedSince, res);
 };
 
 var path = function(type, id) {
@@ -119,16 +119,16 @@ module.exports.cleanupRSS = function() {
     return cleanup(Types.RSS);
 };
 
-module.exports.getHTML = function(id, ifModifiedSince) {
-    return get(Types.HTML, id, ifModifiedSince);
+module.exports.getHTML = function(id, ifModifiedSince, res) {
+    return get(Types.HTML, id, ifModifiedSince, res);
 };
 
-module.exports.getJSON = function(id, ifModifiedSince) {
-    return get(Types.JSON, id, ifModifiedSince);
+module.exports.getJSON = function(id, ifModifiedSince, res) {
+    return get(Types.JSON, id, ifModifiedSince, res);
 };
 
-module.exports.getRSS = function(id, ifModifiedSince) {
-    return get(Types.RSS, id, ifModifiedSince);
+module.exports.getRSS = function(id, ifModifiedSince, res) {
+    return get(Types.RSS, id, ifModifiedSince, res);
 };
 
 module.exports.pathHTML = function() {

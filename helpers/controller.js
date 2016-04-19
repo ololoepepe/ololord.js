@@ -415,11 +415,11 @@ controller.postingSpeedString = function(board, lastPostNumber) {
 
 var sendCachedContent = function(req, res, id, type, ajax) {
     var ifModifiedSince = new Date(req.headers["if-modified-since"]);
-    return Cache[`get${type}`](id, ifModifiedSince).then(function(result) {
-        res.setHeader("Last-Modified", result.lastModified.toUTCString());
+    return Cache[`get${type}`](id, ifModifiedSince, res).then(function(result) {
         if (+ifModifiedSince >= +result.lastModified)
-            res.status(304);
-        res.send(result.data);
+            res.sendStatus(304);
+        else
+            res.end();
     }).catch(function(err) {
         if ("ENOENT" == err.code)
             controller.notFound(req, res);
