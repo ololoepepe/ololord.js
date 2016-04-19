@@ -3057,6 +3057,8 @@ lord.showImageSearchMenu = function(e, input, fileName) {
         return;
     var model = lord.model(["base", "board/" + lord.data("boardName")]);
     model.fileInfo = { name: fileName };
+    model.siteProtocol = window.location.protocol;
+    model.siteDomain = window.location.host;
     file.appendChild(lord.template("imageSearchMenu", model));
     return lord.showMenu(e, input, "#" + id);
 };
