@@ -2482,13 +2482,25 @@ module.exports.initialize = function() {
             return Tools.series(bans, function(ban, boardName) {
                 return db.ttl(`userBans:${ip}:${boardName}`).then(function(ttl) {
                     if (ttl <= 0)
-                        return Promise.resolve();
+                        return Promise.resolve(null);
+                    return Promise.resolve({
+                        ip: ip,
+                        boardName: boardName,
+                        postNumber: ban.postNumber,
+                        ttl: ttl
+                    });
+                });
+            });
+        }, true).then(function(bans) {
+            return Promise.resolve(function() {
+                bans.filter(function(ban) {
+                    return ban;
+                }).forEach(function(ban) {
                     setTimeout(function() {
-                        updateBan(ip, boardName, ban.postNumber).catch(function(err) {
+                        updateBan(ban.ip, ban.boardName, ban.postNumber).catch(function(err) {
                             Global.error(err.stack || err);
                         });
-                    }, Math.ceil(ttl * Tools.Second + Tools.Second)); //NOTE: Adding extra delay
-                    return Promise.resolve();
+                    }, Math.ceil(ban.ttl * Tools.Second + Tools.Second)); //NOTE: Adding extra delay
                 });
             });
         });

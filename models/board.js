@@ -573,7 +573,6 @@ var generateBoard = function(boardName) {
 };
 
 var performTask = function(funcName, key, data) {
-    console.log(funcName, key,  workerLoads, Object.keys(cluster.workers), cluster.isMaster);
     var workerId = Object.keys(cluster.workers).map(function(id) {
         return {
             id: id,
