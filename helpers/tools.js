@@ -561,6 +561,9 @@ module.exports.readFile = function(path, ifModifiedSince, res) {
                 rs.on("error", function(err) {
                     reject(err);
                 });
+                res.on("close", function() {
+                    reject("Cancelled");
+                });
             });
         }, function() {
             c.buffer = new Buffer(stats.size);

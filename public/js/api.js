@@ -1533,7 +1533,8 @@ lord.prompt = function(options) {
         afterShow: function() {
             if (!options || typeof options.select == "undefined" || options.select)
                 inp.select();
-        }
+        },
+        buttons: ((options && options.readOnly) ? ["close"] : ["cancel", "ok"])
     }).then(function(result) {
         if (!result)
             return Promise.resolve({ accepted: false });

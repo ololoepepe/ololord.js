@@ -71,9 +71,8 @@ var log = function(req, res, next) {
 
 module.exports = [];
 
-if (config("system.log.middleware.before", "all") == "all") {
+if (config("system.log.middleware.before", "all") == "all")
     module.exports.push(log);
-}
 
 module.exports.push(require("./ip-fix"));
 
