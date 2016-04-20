@@ -7,11 +7,11 @@ var Tools = require("../helpers/tools");
 
 module.exports = function(req, res, next) {
     console.log(req.ip, req.connection.remoteAddress, req.headers["x-forwarded-for"], req.headers["x-client-ip"], req.socket.ip);
-    if (req.socket.ip) {
+    /*if (req.socket.ip) {
         Object.defineProperty(req, "ip", { value: req.socket.ip });
         next();
         return;
-    }
+    }*/
     var trueIp = Tools.correctAddress(req.ip || req.connection.remoteAddress);
     if (!trueIp)
         return res.sendStatus(500);
@@ -34,6 +34,6 @@ module.exports = function(req, res, next) {
         trueIp = address;
     }
     Object.defineProperty(req, "ip", { value: trueIp });
-    Object.defineProperty(req.socket, "ip", { value: trueIp });
+    //Object.defineProperty(req.socket, "ip", { value: trueIp });
     next();
 };
