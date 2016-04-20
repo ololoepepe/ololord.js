@@ -6,7 +6,7 @@ var controller = require("../helpers/controller");
 var Tools = require("../helpers/tools");
 
 module.exports = function(req, res, next) {
-    console.log(req.ip, req.connection.remoteAddress, req.socket.ip);
+    console.log(req.ip, req.connection.remoteAddress, req.headers["x-forwarded-for"], req.socket.ip);
     if (req.socket.ip) {
         Object.defineProperty(req, "ip", { value: req.socket.ip });
         next();
