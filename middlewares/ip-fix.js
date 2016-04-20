@@ -6,11 +6,12 @@ var controller = require("../helpers/controller");
 var Tools = require("../helpers/tools");
 
 module.exports = function(req, res, next) {
-    console.log(req.ip, req.connection.remoteAddress, req.headers["x-forwarded-for"], req.headers["x-client-ip"], req.socket.ip);
+    console.log(req.connection.remoteAddress, req.headers["x-forwarded-for"], req.headers["x-client-ip"], req.socket.ip, req.path);
     if (!req.socket)
         console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
     if (req.socket.ip) {
         Object.defineProperty(req, "ip", { value: req.socket.ip });
+        console.log(req.connection.remoteAddress, req.headers["x-forwarded-for"], req.headers["x-client-ip"], req.socket.ip, req.path, "go1");
         next();
         return;
     }
@@ -37,5 +38,6 @@ module.exports = function(req, res, next) {
     }
     Object.defineProperty(req, "ip", { value: trueIp });
     Object.defineProperty(req.socket, "ip", { value: trueIp });
+    console.log(req.connection.remoteAddress, req.headers["x-forwarded-for"], req.headers["x-client-ip"], req.socket.ip, req.path, "go2");
     next();
 };
