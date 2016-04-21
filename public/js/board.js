@@ -123,7 +123,9 @@ lord.postProcessors.push(function textWidthProcessor(post, retry) {
     var postFile = postText.parent().find(".postFile");
     if (post.parentNode && post.parentNode.tagName) {
         var width = Math.ceil(postText.position().left - postText.parent().position().left);
-        if (retry && retry.width != width) {
+        if (!width || (retry && retry.width != width)) {
+            if (!width)
+                postText.css("max-width", "calc(100% - " + (postText.parent().width() + 10) + "px)");
             setTimeout(function() {
                 textWidthProcessor(post, { width: width });
             }, 100);
