@@ -13,7 +13,7 @@
 </div>
 <script type="text/javascript">
     (function() {
-        if (!lord.addTemplate("custom-home", lord.get("/{{=it.site.pathPrefix}}templates/custom-home.jst")))
+        if (!lord.addTemplate("custom-home", lord.get("/{{=it.site.pathPrefix}}templates/custom-home.jst", true)))
             return;
         var model = lord.model(["base", "tr", "boards"]);
         model.settings = lord.settings();

@@ -1,1 +1,2 @@
 * Implement hiding posts by similar text
+* Improve static content serving: (flock, )unlink, overwrite(, funlock)

@@ -44,7 +44,7 @@
         lord.templates = {};
 
         (function() {
-            var baseModelHtml = lord.get("/{{=it.site.pathPrefix}}misc/base.json") || "";
+            var baseModelHtml = lord.get("/{{=it.site.pathPrefix}}misc/base.json", true) || "";
             ["base", "boards", "tr", "partials", "templates"].forEach(function(modelName) {
                 var isBase = ("base" == modelName);
                 var html = isBase ? baseModelHtml : lord.id("model-" + modelName).innerHTML;
@@ -72,7 +72,7 @@
                 templates[templateName] = html;
             });
             ["custom-footer", "custom-header"].forEach(function(templateName) {
-                var html = lord.get("/{{=it.site.pathPrefix}}templates/" + templateName + ".jst");
+                var html = lord.get("/{{=it.site.pathPrefix}}templates/" + templateName + ".jst", true);
                 if (html)
                     templates[templateName] = html;
             });
