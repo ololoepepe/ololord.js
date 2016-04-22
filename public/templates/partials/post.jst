@@ -133,15 +133,23 @@
             {{ out += it.customPostBodyPart[0](it, thread, post); }}
         {{?}}
         <div class="postFiles">
-            {{~post.fileInfos :fileInfo}}
-                {{#def.postFile}}
-            {{~}}
-            {{? it.customPostBodyPart && it.customPostBodyPart[10]}}
-                {{ out += it.customPostBodyPart[10](it, thread, post); }}
-            {{?}}
-            <div class="postText">
-                <blockquote {{? it.isThreadPage}}class="blockquoteThread"{{?}}
-                            id="post{{=post.number}}Text">{{ out += (post.text || ""); }}</blockquote>
+            <div class="postFilesInner">
+                <div class="postFilesInnerRow">
+                    {{~post.fileInfos :fileInfo}}
+                        {{#def.postFile}}
+                    {{~}}
+                    {{? it.customPostBodyPart && it.customPostBodyPart[10]}}
+                        {{ out += it.customPostBodyPart[10](it, thread, post); }}
+                    {{?}}
+                    {{? post.fileInfos.length > 1}}
+                        </div>
+                        <div class="postFilesInnerRow">
+                    {{?}}
+                    <div class="postText">
+                        <blockquote {{? it.isThreadPage}}class="blockquoteThread"{{?}}
+                                    id="post{{=post.number}}Text">{{ out += (post.text || ""); }}</blockquote>
+                    </div>
+                </div>
             </div>
         </div>
         {{? it.customPostBodyPart && it.customPostBodyPart[20]}}

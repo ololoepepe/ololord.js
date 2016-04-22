@@ -35,56 +35,21 @@ blockquote {
     height: 400px;
 }
 
-.login {
-    text-align: center;
-    white-space: nowrap;
-}
-
 .loginDescription {
     max-width: 80%;
     margin-left: 10%;
 }
 
-.buttonImage {
-    vertical-align: middle;
-    opacity: 0.65;
+.postFilesInner {
+    display: table;
 }
 
-.buttonImage:disabled {
-    opacity: 0.4;
+.postFilesInnerRow {
+    display: table;
 }
 
-.buttonImage:hover {
-    opacity: 1;
-}
-
-.buttonImage:disabled:hover {
-    opacity: 0.4;
-}
-
-input.buttonImage {
-    background-color: transparent;
-}
-
-.signImage {
-    vertical-align: middle;
-}
-
-.postText {
-    display: inline-block;
-    max-width: 100%;
-}
-
-.postFile ~ .postText {
-    max-width: -moz-calc(100% - 205px);
-    max-width: -webkit-calc(100% - 205px);
-    max-width: -o-calc(100% - 205px);
-    max-width: calc(100% - 205px);
-}
-
-.postFile ~ .postFile ~ .postText {
-    display: block;
-    max-width: 100%;
+.postFile {
+    display: table-cell;
 }
 
 .postToThreadMobile {

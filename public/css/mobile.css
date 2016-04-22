@@ -70,34 +70,16 @@ blockquote {
     height: 240px;
 }
 
-.login {
-    text-align: center;
-    white-space: nowrap;
+.postFilesInner {
+    display: block;
 }
 
-.buttonImage {
-    vertical-align: middle;
-    opacity: 0.65;
+.postFilesInnerRow {
+    display: block;
 }
 
-.buttonImage:disabled {
-    opacity: 0.4;
-}
-
-.buttonImage:hover {
-    opacity: 1;
-}
-
-.buttonImage:disabled:hover {
-    opacity: 0.4;
-}
-
-input.buttonImage {
-    background-color: transparent;
-}
-
-.signImage {
-    vertical-align: middle;
+.postFile {
+    display: inline-block;
 }
 
 .boardSelectContainer {
