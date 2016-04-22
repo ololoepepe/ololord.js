@@ -13,7 +13,7 @@
 </div>
 <script type="text/javascript">
     (function() {
-        if (!lord.addTemplate("custom-faq", lord.get("/{{=it.site.pathPrefix}}templates/custom-faq.jst", true)))
+        if (!lord.addTemplate("custom-faq", lord.get("/{{=it.site.pathPrefix}}templates/custom-faq.jst")))
             return;
         var model = lord.model(["base", "tr", "boards"]);
         model.settings = lord.settings();

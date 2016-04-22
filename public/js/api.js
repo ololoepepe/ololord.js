@@ -1220,8 +1220,8 @@ lord.model = function(modelName) {
 
 lord.get = function(what, enableCache) {
     var xhr = new XMLHttpRequest();
-    if (!enableCache)
-        what += ((what.indexOf("?") >= 0) ? "&" : "?") + "_random_=" + Math.random();
+    /*if (!enableCache)
+        what += ((what.indexOf("?") >= 0) ? "&" : "?") + "_random_=" + Math.random();*/
     xhr.open("get", what, false);
     xhr.send(null);
     if (xhr.status === 200)
@@ -1245,8 +1245,8 @@ lord.api = function(entity, parameters, prefix) {
     return new Promise(function(resolve, reject) {
         $.ajax({
             url: "/" + lord.data("sitePathPrefix") + prefix + "/" + entity + ".json" + query,
-            dataType: "json",
-            cache: lord.getLocalObject("apiRequestCachingEnabled", false)
+            dataType: "json"/*,
+            cache: lord.getLocalObject("apiRequestCachingEnabled", false)*/
         }).then(function(result) {
             if (lord.checkError(result))
                 reject(result);
