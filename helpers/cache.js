@@ -24,20 +24,3 @@ module.exports.writeFile = function(fileName, data) {
 module.exports.removeFile = function(fileName) {
     return FS.remove(rootPath + "/" + fileName);
 };
-
-/*module.exports.moveFile = function(fileName, targetPath) {
-    var filePath = rootPath + "/" + fileName;
-    var tmpFilePath = filePath + ".tmp";
-    var path = filePath.split("/").slice(0, -1).join("/");
-    return FS.exists(targetPath).then(function(exists) {
-        if (exists)
-            return Promise.resolve();
-        return FS.makeTree(targetPath);
-    }).then(function() {
-        return FS.read(filePath);
-    }).then(function(data) {
-        return FS.write(targetPath, data);
-    }).then(function() {
-        return FS.remove(filePath);
-    });
-};*/

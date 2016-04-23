@@ -69,7 +69,6 @@ var spawnCluster = function() {
             switch (err.status) {
             case 404:
                 Global.error(Tools.preferIPv4(req.ip), err.path, 404);
-                //res.status(404).sendFile("notFound.html", { root: require("./helpers/cache").Paths.HTML });
                 res.status(404).sendFile("notFound.html", { root: __dirname + "/public" });
                 break;
             default:
