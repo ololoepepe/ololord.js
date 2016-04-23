@@ -5,10 +5,6 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/search.html", function(req, res, next) {
-    controller.sendCachedHTML(req, res, next, "search");
-});
-
 router.generateHTML = function() {
     var model = {};
     model.title = Tools.translate("Search", "pageTitle");
@@ -18,7 +14,7 @@ router.generateHTML = function() {
         { fileName: "search.js" }
     ];
     return controller("search", model).then(function(data) {
-        return Promise.resolve({ "search": data });
+        return Promise.resolve({ "search.html": data });
     });
 };
 

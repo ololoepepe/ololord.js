@@ -1,6 +1,3 @@
 *
-!cache-html
-!cache-json
-!cache-rss
 !form/
 !.gitignore

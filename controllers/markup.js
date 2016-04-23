@@ -9,10 +9,6 @@ var langNames = require("../misc/lang-names.json");
 
 var router = express.Router();
 
-router.get("/markup.html", function(req, res, next) {
-    controller.sendCachedHTML(req, res, next, "markup");
-});
-
 router.generateHTML = function() {
     var model = {};
     model.title = Tools.translate("Markup", "pageTitle");
@@ -87,7 +83,7 @@ router.generateHTML = function() {
         model.markedUpInlineLatex = html;
         return controller("markup", model);
     }).then(function(data) {
-        return Promise.resolve({ "markup": data });
+        return Promise.resolve({ "markup.html": data });
     });
 };
 

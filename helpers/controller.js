@@ -21,11 +21,7 @@ var publicTemplates;
 var langNames = require("../misc/lang-names.json");
 var ipBans = {};
 
-var controller;
-
-mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-html");
-
-controller = function(templateName, modelData) {
+var controller = function(templateName, modelData) {
     var baseModelData = merge.recursive(controller.baseModel(), controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
@@ -347,7 +343,7 @@ controller.postingSpeedString = function(board, lastPostNumber) {
     }
 };
 
-var sendCachedContent = function(req, res, next, id, type, ajax) {
+/*var sendCachedContent = function(req, res, next, id, type, ajax) {
     var ifModifiedSince = new Date(req.headers["if-modified-since"]);
     return Cache[`get${type}`](id, ifModifiedSince, res).then(function(result) {
         if (+ifModifiedSince >= +result.lastModified)
@@ -359,32 +355,18 @@ var sendCachedContent = function(req, res, next, id, type, ajax) {
             err.status = 404;
         next(err);
     });
-};
-
-controller.sendCachedHTML = function(req, res, next, id) {
-    return sendCachedContent(req, res, next, id, Cache.Types.HTML);
-};
-
-controller.sendCachedJSON = function(req, res, next, id) {
-    return sendCachedContent(req, res, next, id, Cache.Types.JSON);
-};
-
-controller.sendCachedRSS = function(req, res, next, id) {
-    return sendCachedContent(req, res, next, id, Cache.Types.RSS);
-};
+};*/
 
 controller.regenerate = function(regenerateArchived) {
-    return Cache.cleanup().then(function() {
-        return Tools.series(["JSON", "HTML"], function(type) {
-            console.log(`Generating ${type} cache, please, wait...`);
-            return Tools.series(require("../controllers").routers, function(router) {
-                var f = router[`generate${type}`];
-                if (typeof f != "function")
-                    return Promise.resolve();
-                return f.call(router).then(function(result) {
-                    return Tools.series(result, function(data, id) {
-                        return Cache[`set${type}`](id, data);
-                    });
+    return Tools.series(["JSON", "HTML"], function(type) {
+        console.log(`Generating ${type} cache, please, wait...`);
+        return Tools.series(require("../controllers").routers, function(router) {
+            var f = router[`generate${type}`];
+            if (typeof f != "function")
+                return Promise.resolve();
+            return f.call(router).then(function(result) {
+                return Tools.series(result, function(data, id) {
+                    return Cache.writeFile(id, data);
                 });
             });
         });
@@ -538,8 +520,7 @@ controller.generateStatistics = function() {
         Global.error(err);
         return Promise.resolve();
     }).then(function() {
-        Cache.setJSON(`statistics`, JSON.stringify(o));
-        return Promise.resolve();
+        return Cache.writeFile("misc/statistics.json", JSON.stringify(o));
     });
 };
 

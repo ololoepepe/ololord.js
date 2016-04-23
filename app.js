@@ -13,7 +13,6 @@ Global.Program.version("1.1.0-rc")
     .option("-r, --regenerate", "Regenerate the cache on startup")
     .parse(process.argv);
 
-var Cache = require("./helpers/cache");
 var config = require("./helpers/config");
 var controller = require("./helpers/controller");
 var BoardModel = require("./models/board");
@@ -70,8 +69,8 @@ var spawnCluster = function() {
             switch (err.status) {
             case 404:
                 Global.error(Tools.preferIPv4(req.ip), err.path, 404);
-                res.status(404).sendFile("notFound.html", { root: Cache.Paths.HTML });
-                //res.status(404).sendFile("notFound.html", { root: __dirname + "/../public" });
+                //res.status(404).sendFile("notFound.html", { root: require("./helpers/cache").Paths.HTML });
+                res.status(404).sendFile("notFound.html", { root: __dirname + "/public" });
                 break;
             default:
                 Global.error(Tools.preferIPv4(req.ip), req.path, err.stack || err);

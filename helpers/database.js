@@ -1305,8 +1305,8 @@ module.exports.createThread = function(req, fields, files, transaction) {
                 //NOTE: Yep, no return here for the sake of speed
                 var oldThreadNumber = c.thread.number;
                 mkpath(c.archPath).then(function() {
-                    c.sourceId = `thread-${board.name}-${oldThreadNumber}`;
-                    return Cache.getJSON(c.sourceId);
+                    c.sourceId = `${board.name}/${oldThreadNumber}.json`;
+                    return Cache.readFile(c.sourceId);
                 }).then(function(data) {
                     c.model = JSON.parse(data.data);
                     c.model.thread.archived = true;
@@ -1316,9 +1316,9 @@ module.exports.createThread = function(req, fields, files, transaction) {
                 }).then(function(data) {
                     return Tools.writeFile(`${c.archPath}/${oldThreadNumber}.html`, data);
                 }).then(function() {
-                    return Cache.removeJSON(c.sourceId);
+                    return Cache.removeFile(c.sourceId);
                 }).then(function() {
-                    return Cache.removeHTML(c.sourceId);
+                    return Cache.removeFile(`${board.name}/${oldThreadNumber}.html`);
                 }).catch(function(err) {
                     Global.error(err);
                 });

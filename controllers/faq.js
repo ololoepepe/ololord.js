@@ -5,15 +5,11 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/faq.html", function(req, res, next) {
-    controller.sendCachedHTML(req, res, next, "faq");
-});
-
 router.generateHTML = function() {
     var model = {};
     model.title = Tools.translate("F.A.Q.", "pageTitle");
     return controller("faq", model).then(function(data) {
-        return Promise.resolve({ "faq": data });
+        return Promise.resolve({ "faq.html": data });
     });
 };
 

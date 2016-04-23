@@ -5,10 +5,6 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/login.html", function(req, res, next) {
-    controller.sendCachedHTML(req, res, next, "login");
-});
-
 router.generateHTML = function() {
     var model = {};
     model.title = Tools.translate("Login", "loginButtonText");
@@ -18,7 +14,7 @@ router.generateHTML = function() {
         { fileName: "login.js" }
     ];
     return controller("login", model).then(function(data) {
-        return Promise.resolve({ "login": data });
+        return Promise.resolve({ "login.html": data });
     });
 };
 
