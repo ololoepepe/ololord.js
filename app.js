@@ -4,6 +4,7 @@ var cluster = require("cluster");
 var expressCluster = require("express-cluster");
 var Log4JS = require("log4js");
 var OS = require("os");
+var Util = require("util");
 
 var Global = require("./helpers/global");
 Global.Program = require("commander");
@@ -59,8 +60,42 @@ var spawnCluster = function() {
 
         app.use(require("./middlewares"));
         app.use(require("./controllers"));
-        app.use("*", function(req, res) {
-            controller.notFound(req, res);
+        app.use("*", function(req, res, next) {
+            var err = new Error();
+            err.status = 404;
+            err.path = req.baseUrl;
+            next(err);
+        });
+        app.use(function(err, req, res, next) {
+            switch (err.status) {
+            case 404:
+                Global.error(Tools.preferIPv4(req.ip), err.path, 404);
+                res.status(404).sendFile("notFound.html", { root: Cache.Paths.HTML });
+                //res.status(404).sendFile("notFound.html", { root: __dirname + "/../public" });
+                break;
+            default:
+                Global.error(Tools.preferIPv4(req.ip), req.path, err.stack || err);
+                var model = {};
+                if (err.ban) {
+                    model.title = Tools.translate("Ban", "pageTitle");
+                    model.ban = err.ban;
+                } else {
+                    model.title = Tools.translate("Error", "pageTitle");
+                    if (Util.isError(err)) {
+                        model.errorMessage = Tools.translate("Internal error", "errorMessage");
+                        model.errorDescription = err.message;
+                    } else if (err.error) {
+                        model.errorMessage = error.description ? err.error
+                            : Tools.translate("Error", "errorMessage");
+                        model.errorDescription = err.description || err.error;
+                    } else {
+                        model.errorMessage = Tools.translate("Error", "errorMessage");
+                        model.errorDescription = Util.isString(err) ? err : "";
+                    }
+                }
+                res.json(model);
+                break;
+            }
         });
 
         BoardModel.initialize().then(function() {

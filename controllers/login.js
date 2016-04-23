@@ -5,8 +5,8 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/login.html", function(req, res) {
-    controller.sendCachedHTML(req, res, "login");
+router.get("/login.html", function(req, res, next) {
+    controller.sendCachedHTML(req, res, next, "login");
 });
 
 router.generateHTML = function() {

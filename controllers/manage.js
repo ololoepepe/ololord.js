@@ -8,9 +8,9 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/manage.html", function(req, res) {
+router.get("/manage.html", function(req, res, next) {
     if (!req.isModer())
-        return controller.error(req, res, Tools.translate("Not enough rights"));
+        return next(Tools.translate("Not enough rights"));
     var superuserContentVisible = req.isSuperuser();
     controller.sendCachedHTML(req, res, `manage-${superuserContentVisible ? "superuser" : "moder"}`);
 });

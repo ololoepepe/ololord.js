@@ -50,7 +50,7 @@ codecha.apiRoutes = function() {
     return [{
         method: "get",
         path: "/codechaChallenge.json",
-        handler: function(req, res) {
+        handler: function(req, res, next) {
             var url = `http://codecha.org/api/challenge?k=${codecha.publicKey}`;
             return HTTP.request({
                 url: url,
@@ -67,7 +67,7 @@ codecha.apiRoutes = function() {
             }).then(function(result) {
                 res.send({ challenge: result });
             }).catch(function(err) {
-                controller.error(req, res, err, true);
+                next(err);
             });
         }
     }];

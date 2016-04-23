@@ -5,8 +5,8 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/search.html", function(req, res) {
-    controller.sendCachedHTML(req, res, "search");
+router.get("/search.html", function(req, res, next) {
+    controller.sendCachedHTML(req, res, next, "search");
 });
 
 router.generateHTML = function() {

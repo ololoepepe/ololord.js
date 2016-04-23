@@ -108,72 +108,6 @@ controller.sync = function(templateName, modelData) {
     return template(modelData);
 };
 
-controller.error = function(req, res, error, ajax) {
-    if (!ajax && Util.isNumber(error) && 404 == error)
-        return controller.notFound(req, res);
-    if (error)
-        Global.error(Tools.preferIPv4(req.ip), req.path, error.stack || error);
-    var f = function(error) {
-        var model = {};
-        model.title = Tools.translate("Error", "pageTitle");
-        if (Util.isError(error)) {
-            model.errorMessage = Tools.translate("Internal error", "errorMessage");
-            model.errorDescription = error.message;
-        } else if (Util.isObject(error) && (error.error || error.ban)) {
-            if (error.ban) {
-                model.ban = error.ban;
-            } else {
-                model.errorMessage = error.description ? error.error : Tools.translate("Error", "errorMessage");
-                model.errorDescription = error.description || error.error;
-            }
-        } else {
-            model.errorMessage = Tools.translate("Error", "errorMessage");
-            model.errorDescription = (error && Util.isString(error)) ? error
-                : ((404 == error) ? Tools.translate("404 (not found)", "errorMessage") : "");
-        }
-        return model;
-    };
-    var g = function(error) {
-        try {
-            res.send(f(error));
-        } catch (err) {
-            return Promise.reject(err);
-        }
-        return Promise.resolve();
-    };
-    var h = function(error) {
-        try {
-            res.send(error);
-        } catch (err) {
-            return Promise.reject(err);
-        }
-        return Promise.resolve();
-    };
-    if (Util.isObject(error) && error.ban) {
-        var model = {};
-        model.title = Tools.translate("Ban", "pageTitle");
-        model.ban = error.ban;
-        if (ajax)
-            return h(error);
-        return controller("ban", model).then(function(data) {
-            res.send(data);
-        }).catch(h);
-    } else {
-        return ajax ? g(error) : controller("error", f(error)).then(function(data) {
-            res.send(data);
-        }).catch(g);
-    }
-};
-
-controller.notFound = function(req, res) {
-    Cache.getHTML("notFound").then(function(data) {
-        res.status(404).send(data.data);
-        Global.error(Tools.preferIPv4(req.ip), req.baseUrl, 404);
-    }).catch(function(err) {
-        controller.error(req, res, err);
-    });
-};
-
 controller.checkBan = function(req, res, boardNames, write) {
     var ip = Tools.correctAddress(req.ip);
     var ban = ipBans[ip];
@@ -413,7 +347,7 @@ controller.postingSpeedString = function(board, lastPostNumber) {
     }
 };
 
-var sendCachedContent = function(req, res, id, type, ajax) {
+var sendCachedContent = function(req, res, next, id, type, ajax) {
     var ifModifiedSince = new Date(req.headers["if-modified-since"]);
     return Cache[`get${type}`](id, ifModifiedSince, res).then(function(result) {
         if (+ifModifiedSince >= +result.lastModified)
@@ -422,22 +356,21 @@ var sendCachedContent = function(req, res, id, type, ajax) {
             res.end();
     }).catch(function(err) {
         if ("ENOENT" == err.code)
-            controller.notFound(req, res);
-        else
-            controller.error(res, err, ajax);
+            err.status = 404;
+        next(err);
     });
 };
 
-controller.sendCachedHTML = function(req, res, id) {
-    return sendCachedContent(req, res, id, Cache.Types.HTML);
+controller.sendCachedHTML = function(req, res, next, id) {
+    return sendCachedContent(req, res, next, id, Cache.Types.HTML);
 };
 
-controller.sendCachedJSON = function(req, res, id) {
-    return sendCachedContent(req, res, id, Cache.Types.JSON);
+controller.sendCachedJSON = function(req, res, next, id) {
+    return sendCachedContent(req, res, next, id, Cache.Types.JSON);
 };
 
-controller.sendCachedRSS = function(req, res, id) {
-    return sendCachedContent(req, res, id, Cache.Types.RSS);
+controller.sendCachedRSS = function(req, res, next, id) {
+    return sendCachedContent(req, res, next, id, Cache.Types.RSS);
 };
 
 controller.regenerate = function(regenerateArchived) {

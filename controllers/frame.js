@@ -5,8 +5,8 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/frame.html", function(req, res) {
-    controller.sendCachedHTML(req, res, "frame");
+router.get("/frame.html", function(req, res, next) {
+    controller.sendCachedHTML(req, res, next, "frame");
 });
 
 var generateFrame = function() {

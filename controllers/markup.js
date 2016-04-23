@@ -9,8 +9,8 @@ var langNames = require("../misc/lang-names.json");
 
 var router = express.Router();
 
-router.get("/markup.html", function(req, res) {
-    controller.sendCachedHTML(req, res, "markup");
+router.get("/markup.html", function(req, res, next) {
+    controller.sendCachedHTML(req, res, next, "markup");
 });
 
 router.generateHTML = function() {

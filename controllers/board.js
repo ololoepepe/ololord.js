@@ -13,123 +13,153 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/:boardName", function(req, res) {
+router.get("/:boardName", function(req, res, next) {
     var board = Board.board(req.params.boardName);
-    if (!board)
-        return controller.error(req, res, 404);
+    if (!board) {
+        var err = new Error();
+        err.status = 404;
+        return next(err);
+    }
     controller.checkBan(req, res, board.name).then(function() {
-        controller.sendCachedHTML(req, res, `page-${board.name}-0`);
+        controller.sendCachedHTML(req, res, next, `page-${board.name}-0`);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        next(err);
     });
 });
 
-router.get("/:boardName/catalog.html", function(req, res) {
+router.get("/:boardName/catalog.html", function(req, res, next) {
     var board = Board.board(req.params.boardName);
-    if (!board)
-        return controller.error(req, res, 404);
+    if (!board) {
+        var err = new Error();
+        err.status = 404;
+        return next(err);
+    }
     controller.checkBan(req, res, board.name).then(function() {
         var sortMode = (req.query.sort || "date").toLowerCase();
         if (["recent", "bumps"].indexOf(sortMode) < 0)
             sortMode = "date";
-        controller.sendCachedHTML(req, res, `catalog-${sortMode}-${board.name}`);
+        controller.sendCachedHTML(req, res, next, `catalog-${sortMode}-${board.name}`);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        next(err);
     });
 });
 
-router.get("/:boardName/catalog.json", function(req, res) {
+router.get("/:boardName/catalog.json", function(req, res, next) {
     var board = Board.board(req.params.boardName);
-    if (!board)
-        return controller.error(req, res, 404, true);
+    if (!board) {
+        var err = new Error();
+        err.status = 404;
+        return next(err);
+    }
     var c = {};
     controller.checkBan(req, res, board.name).then(function() {
         var sortMode = (req.query.sort || "date").toLowerCase();
         if (["recent", "bumps"].indexOf(sortMode) < 0)
             sortMode = "date";
-        controller.sendCachedJSON(req, res, `catalog-${sortMode}-${board.name}`);
+        controller.sendCachedJSON(req, res, next, `catalog-${sortMode}-${board.name}`);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/:boardName/archive.html", function(req, res) {
+router.get("/:boardName/archive.html", function(req, res, next) {
     var board = Board.board(req.params.boardName);
-    if (!board)
-        return controller.error(req, res, 404);
+    if (!board) {
+        var err = new Error();
+        err.status = 404;
+        return next(err);
+    }
     controller.checkBan(req, res, board.name).then(function() {
-        controller.sendCachedHTML(req, res, `archive-${board.name}`);
+        controller.sendCachedHTML(req, res, next, `archive-${board.name}`);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        next(err);
     });
 });
 
-router.get("/:boardName/archive.json", function(req, res) {
+router.get("/:boardName/archive.json", function(req, res, next) {
     var board = Board.board(req.params.boardName);
-    if (!board)
-        return controller.error(req, res, 404, true);
+    if (!board) {
+        var err = new Error();
+        err.status = 404;
+        return next(err);
+    }
     controller.checkBan(req, res, board.name).then(function() {
-        controller.sendCachedJSON(req, res, `archive-${board.name}`);
+        controller.sendCachedJSON(req, res, next, `archive-${board.name}`);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/:boardName/rss.xml", function(req, res) {
+router.get("/:boardName/rss.xml", function(req, res, next) {
     var board = Board.board(req.params.boardName);
-    if (!board)
-        return controller.error(req, res, 404);
+    if (!board) {
+        var err = new Error();
+        err.status = 404;
+        return next(err);
+    }
     var c = {};
     controller.checkBan(req, res, board.name).then(function() {
-        controller.sendCachedRSS(req, res, board.name);
+        controller.sendCachedRSS(req, res, next, board.name);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        next(err);
     });
 });
 
-router.get("/:boardName/:page.html", function(req, res) {
+router.get("/:boardName/:page.html", function(req, res, next) {
     var board = Board.board(req.params.boardName);
-    if (!board)
-        return controller.error(req, res, 404);
+    if (!board) {
+        var err = new Error();
+        err.status = 404;
+        return next(err);
+    }
     controller.checkBan(req, res, board.name).then(function() {
-        controller.sendCachedHTML(req, res, `page-${board.name}-${req.params.page}`);
+        controller.sendCachedHTML(req, res, next, `page-${board.name}-${req.params.page}`);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        next(err);
     });
 });
 
-router.get("/:boardName/:page.json", function(req, res) {
+router.get("/:boardName/:page.json", function(req, res, next) {
     var board = Board.board(req.params.boardName);
-    if (!board)
-        return controller.error(req, res, 404, true);
+    if (!board) {
+        var err = new Error();
+        err.status = 404;
+        return next(err);
+    }
     var c = {};
     controller.checkBan(req, res, board.name).then(function() {
-        controller.sendCachedJSON(req, res, `page-${board.name}-${req.params.page}`);
+        controller.sendCachedJSON(req, res, next, `page-${board.name}-${req.params.page}`);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        next(err);
     });
 });
 
-router.get("/:boardName/res/:threadNumber.html", function(req, res) {
+router.get("/:boardName/res/:threadNumber.html", function(req, res, next) {
     var board = Board.board(req.params.boardName);
-    if (!board)
-        return controller.error(req, res, 404);
+    if (!board) {
+        var err = new Error();
+        err.status = 404;
+        return next(err);
+    }
     controller.checkBan(req, res, board.name).then(function() {
-        controller.sendCachedHTML(req, res, `thread-${board.name}-${req.params.threadNumber}`);
+        controller.sendCachedHTML(req, res, next, `thread-${board.name}-${req.params.threadNumber}`);
     }).catch(function(err) {
-        controller.error(req, res, err);
+        next(err);
     });
 });
 
-router.get("/:boardName/res/:threadNumber.json", function(req, res) {
+router.get("/:boardName/res/:threadNumber.json", function(req, res, next) {
     var board = Board.board(req.params.boardName);
-    if (!board)
-        return controller.error(req, res, 404, true);
+    if (!board) {
+        var err = new Error();
+        err.status = 404;
+        return next(err);
+    }
     var c = {};
     controller.checkBan(req, res, board.name).then(function() {
-        controller.sendCachedJSON(req, res, `thread-${board.name}-${req.params.threadNumber}`);
+        controller.sendCachedJSON(req, res, next, `thread-${board.name}-${req.params.threadNumber}`);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 

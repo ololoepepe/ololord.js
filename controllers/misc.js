@@ -31,8 +31,8 @@ router.get("/misc/partials.json", function(req, res) {
     res.json(controller.publicPartialNames());
 });
 
-router.get("/misc/statistics.json", function(req, res) {
-    controller.sendCachedJSON(req, res, "statistics");
+router.get("/misc/statistics.json", function(req, res, next) {
+    controller.sendCachedJSON(req, res, next, "statistics");
 });
 
 module.exports = router;
