@@ -343,20 +343,6 @@ controller.postingSpeedString = function(board, lastPostNumber) {
     }
 };
 
-/*var sendCachedContent = function(req, res, next, id, type, ajax) {
-    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
-    return Cache[`get${type}`](id, ifModifiedSince, res).then(function(result) {
-        if (+ifModifiedSince >= +result.lastModified)
-            res.sendStatus(304);
-        else
-            res.end();
-    }).catch(function(err) {
-        if ("ENOENT" == err.code)
-            err.status = 404;
-        next(err);
-    });
-};*/
-
 controller.regenerate = function(regenerateArchived) {
     return Tools.series(["JSON", "HTML"], function(type) {
         console.log(`Generating ${type} cache, please, wait...`);
@@ -387,11 +373,11 @@ controller.regenerate = function(regenerateArchived) {
                             var c = {};
                             return BoardModel.getThread(board, threadNumber, true).then(function(model) {
                                 c.model = model;
-                                return Tools.writeFile(`${archPath}/${threadNumber}.json`, JSON.stringify(c.model));
+                                return FS.write(`${archPath}/${threadNumber}.json`, JSON.stringify(c.model));
                             }).then(function() {
                                 return BoardModel.generateThreadHTML(board, threadNumber, c.model, true);
                             }).then(function(data) {
-                                return Tools.writeFile(`${archPath}/${threadNumber}.html`, data);
+                                return FS.write(`${archPath}/${threadNumber}.html`, data);
                             }).catch(function(err) {
                                 Global.error(err.stack || err);
                             }).then(function() {

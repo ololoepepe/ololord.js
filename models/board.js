@@ -1,6 +1,5 @@
 var cluster = require("cluster");
 var FS = require("q-io/fs");
-var FSSync = require("fs-ext");
 var merge = require("merge");
 var mkpath = require("mkpath");
 var moment = require("moment");
@@ -676,7 +675,7 @@ module.exports.do_generateThread = function(key, data) {
         if (!board)
             return Promise.reject(Tools.translate("Invalid board"));
         return Cache.readFile(threadId).then(function(data) {
-            c.thread = JSON.parse(data.data);
+            c.thread = JSON.parse(data);
             c.lastPosts = c.thread.thread.lastPosts.reduce(function(acc, post) {
                 acc[post.number] = post;
                 return acc;

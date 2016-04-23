@@ -1305,20 +1305,20 @@ module.exports.createThread = function(req, fields, files, transaction) {
                 //NOTE: Yep, no return here for the sake of speed
                 var oldThreadNumber = c.thread.number;
                 mkpath(c.archPath).then(function() {
-                    c.sourceId = `${board.name}/${oldThreadNumber}.json`;
+                    c.sourceId = `${board.name}/res/${oldThreadNumber}.json`;
                     return Cache.readFile(c.sourceId);
                 }).then(function(data) {
-                    c.model = JSON.parse(data.data);
+                    c.model = JSON.parse(data);
                     c.model.thread.archived = true;
-                    return Tools.writeFile(`${c.archPath}/${oldThreadNumber}.json`, JSON.stringify(c.model));
+                    return FS.write(`${c.archPath}/${oldThreadNumber}.json`, JSON.stringify(c.model));
                 }).then(function() {
                     return BoardModel.generateThreadHTML(board, oldThreadNumber, c.model, true);
                 }).then(function(data) {
-                    return Tools.writeFile(`${c.archPath}/${oldThreadNumber}.html`, data);
+                    return FS.write(`${c.archPath}/${oldThreadNumber}.html`, data);
                 }).then(function() {
                     return Cache.removeFile(c.sourceId);
                 }).then(function() {
-                    return Cache.removeFile(`${board.name}/${oldThreadNumber}.html`);
+                    return Cache.removeFile(`${board.name}/res/${oldThreadNumber}.html`);
                 }).catch(function(err) {
                     Global.error(err);
                 });
@@ -1905,8 +1905,8 @@ module.exports.deletePost = function(req, res, fields) {
         var p;
         if (c.isThread && c.archived) {
             var path = `${__dirname}/../public/${board.name}/arch/${postNumber}.`;
-            p = Tools.removeFile(path + "json").then(function() {
-                return Tools.removeFile(path + "html");
+            p = FS.remove(path + "json").then(function() {
+                return FS.remove(path + "html");
             }).then(function() {
                 return Global.generateArchive(board.name);
             });

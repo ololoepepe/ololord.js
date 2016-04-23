@@ -7,7 +7,7 @@ var du = require("du");
 var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
-var FSSync = require("fs-ext");
+var FSSync = require("fs");
 var HTMLToText = require("html-to-text");
 var Image = Canvas.Image;
 var Jdenticon = require("jdenticon");
@@ -501,124 +501,6 @@ module.exports.remove = function(arr, what, both) {
                 what.splice(i, 1);
         }
     }
-};
-
-var openFile = promisify(FSSync.open);
-var closeFile = promisify(FSSync.close);
-var flockFile = promisify(FSSync.flock);
-var readData = promisify(FSSync.read);
-var writeData = promisify(FSSync.write);
-
-var recover = function(c, err) {
-    if (!c.fd)
-        return Promise.reject(err);
-    return flockFile(c.fd, "un").catch(function(err) {
-        Global.error(err.stack || err);
-        return Promise.resolve();
-    }).then(function() {
-        if (c.noclose)
-            return Promise.resolve();
-        return closeFile(c.fd);
-    }).catch(function(err) {
-        Global.error(err.stack || err);
-        return Promise.resolve();
-    }).then(function() {
-        return Promise.reject(err);
-    });
-};
-
-var ContentTypeMap = {
-    "html": "text/html",
-    "json": "application/json",
-    "xml": "text/xml"
-};
-
-module.exports.readFile = function(path, ifModifiedSince, res) {
-    var c = {};
-    return openFile(path, "r").then(function(fd) {
-        c.fd = fd;
-        return flockFile(c.fd, "sh");
-    }).then(function() {
-        c.locked = true;
-        return FS.stat(path);
-    }).then(function(stats) {
-        c.lastModified = new Date(stats.node.mtime.toUTCString());
-        if (ifModifiedSince && +ifModifiedSince >= +c.lastModified)
-            return Promise.resolve();
-        if (stats.size <= 0)
-            return Promise.resolve();
-        return module.exports.promiseIf(res, function() {
-            var contentType = ContentTypeMap[path.split(".").pop()];
-            if (contentType)
-                res.setHeader("Content-Type", contentType);
-            res.setHeader("Last-Modified", c.lastModified.toUTCString());
-            var rs = FSSync.createReadStream(path);
-            rs.pipe(res);
-            return new Promise(function(resolve, reject) {
-                rs.on("end", function() {
-                    resolve();
-                });
-                rs.on("error", function(err) {
-                    reject(err);
-                });
-                res.on("close", function() {
-                    reject("Cancelled");
-                });
-            });
-        }, function() {
-            c.buffer = new Buffer(stats.size);
-            return readData(c.fd, c.buffer, 0, c.buffer.length, null).then(function() {
-                c.data = c.buffer ? c.buffer.toString("utf8") : "";
-                return Promise.resolve();
-            });
-        });
-    }).then(function() {
-        return flockFile(c.fd, "un");
-    }).then(function() {
-        c.locked = false;
-        return closeFile(c.fd);
-    }).then(function() {
-        return Promise.resolve({
-            data: c.data,
-            lastModified: c.lastModified
-        });
-    }).catch(recover.bind(null, c));
-};
-
-module.exports.writeFile = function(path, data) {
-    var c = {};
-    return openFile(path, "w").then(function(fd) {
-        c.fd = fd;
-        return flockFile(c.fd, "ex");
-    }).then(function() {
-        c.locked = true;
-        return writeData(c.fd, data, null, "utf8");
-    }).then(function() {
-        return flockFile(c.fd, "un");
-    }).then(function() {
-        c.locked = false;
-        return closeFile(c.fd);
-    }).then(function() {
-        return Promise.resolve(c.data);
-    }).catch(recover.bind(null, c));
-};
-
-module.exports.removeFile = function(path) {
-    var c = {};
-    return openFile(path, "w").then(function(fd) {
-        c.fd = fd;
-        return flockFile(c.fd, "ex");
-    }).then(function() {
-        c.locked = true;
-        return FS.remove(path);
-    }).then(function() {
-        return flockFile(c.fd, "un");
-    }).then(function() {
-        c.locked = false;
-        return closeFile(c.fd);
-    }).then(function() {
-        return Promise.resolve();
-    }).catch(recover.bind(null, c));
 };
 
 module.exports.series = function(arr, f, container) {
