@@ -1635,11 +1635,11 @@ lord.populateChatHistory = function(key) {
     model.formattedDate = function(date) {
         return moment(date).utcOffset(timeOffset).locale(model.site.locale).format(model.site.dateFormat);
     };
-    var messages = lord.getLocalObject("chats", {})[key] || [];
-    messages = messages.map(function(message) {
+    (lord.getLocalObject("chats", {})[key] || []).forEach(function(message) {
         var m = merge.recursive(model, message);
         history.appendChild(lord.template("chatMessage", m));
     });
+    $(history).animate({ scrollTop: $(history).prop("scrollHeight") }, 100);
 };
 
 lord.updateChat = function(keys) {
@@ -1762,6 +1762,7 @@ lord.selectChatContact = function(key) {
     lord.populateChatHistory(key);
     lord.nameOne("sendMessageButton", lord.chatDialog).disabled = false;
     lord.nameOne("message", lord.chatDialog).disabled = false;
+    lord.nameOne("message", lord.chatDialog).focus();
 };
 
 lord.deleteChat = function(key) {
