@@ -1321,3 +1321,7 @@ input.buttonImage {
 .signImage {
     vertical-align: middle;
 }
+
+.archiveThreads {
+    text-align: center;
+}
