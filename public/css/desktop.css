@@ -48,8 +48,24 @@ blockquote {
     display: table;
 }
 
+.postFilesInnerBlock {
+    display: block;
+}
+
+.postFilesInnerRowBlock {
+    display: block;
+}
+
+.postText {
+    display: table-cell;
+}
+
 .postFile {
     display: table-cell;
+}
+
+.postFileInlineBlock {
+    display: inline-block;
 }
 
 .postToThreadMobile {

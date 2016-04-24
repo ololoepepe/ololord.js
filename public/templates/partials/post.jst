@@ -133,8 +133,8 @@
             {{ out += it.customPostBodyPart[0](it, thread, post); }}
         {{?}}
         <div class="postFiles">
-            <div class="postFilesInner">
-                <div class="postFilesInnerRow">
+            <div class="{{? post.fileInfos.length > 1}}postFilesInnerBlock{{??}}postFilesInner{{?}}">
+                <div class="{{? post.fileInfos.length > 1}}postFilesInnerRowBlock{{??}}postFilesInnerRow{{?}}">
                     {{~post.fileInfos :fileInfo}}
                         {{#def.postFile}}
                     {{~}}
@@ -143,7 +143,7 @@
                     {{?}}
                     {{? post.fileInfos.length > 1}}
                         </div>
-                        <div class="postFilesInnerRow">
+                        <div class="{{? post.fileInfos.length > 1}}postFilesInnerRowBlock{{??}}postFilesInnerRow{{?}}">
                     {{?}}
                     <div class="postText">
                         <blockquote {{? it.isThreadPage}}class="blockquoteThread"{{?}}

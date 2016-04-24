@@ -486,7 +486,6 @@ span.newPostCount {
 }
 
 .postText {
-    display: table-cell;
     box-sizing: border-box;
     vertical-align: top;
     white-space: normal;

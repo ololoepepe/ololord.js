@@ -1,4 +1,4 @@
-<div id="file{{=fileInfo.name}}" class="postFile"
+<div id="file{{=fileInfo.name}}" class="postFile{{? post.fileInfos.length > 1}} postFileInlineBlock{{?}}"
     data-href="{{=it.site.protocol}}://{{=it.site.domain}}/{{=it.site.pathPrefix}}{{=post.boardName}}/src/{{=fileInfo.name}}"
     data-file-name="{{=fileInfo.name}}"
     data-mime-type="{{=fileInfo.mimeType}}"
