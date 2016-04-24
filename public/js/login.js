@@ -14,6 +14,7 @@ lord.loginImplementation = function(form, session) {
         expires: ((session && !realHashpass) ? session.expire : lord.Billion),
         path: "/"
     });
+    lord.removeLocalObject("lastChatCheckDate");
     if (session) {
         lord.setCookie("vkAuth", "true", {
             expires: session.expire,
