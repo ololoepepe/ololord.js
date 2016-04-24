@@ -1393,7 +1393,7 @@ lord.showNewPosts = function() {
             return (newPostCount > 0) ? newPostCount : 0;
         };
         if (typeof lord.newPostCountReceived == "function") {
-            lord.newPostCountReceived(lord.model("boards").reduce(function(acc, board) {
+            lord.newPostCountReceived(lord.model("boards").boards.reduce(function(acc, board) {
                 var count = getNewPostCount(board.name);
                 if (count > 0)
                     acc[board.name] = count;
