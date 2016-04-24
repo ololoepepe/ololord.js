@@ -1392,6 +1392,14 @@ lord.showNewPosts = function() {
             var newPostCount = result[boardName] - lastPostNumber;
             return (newPostCount > 0) ? newPostCount : 0;
         };
+        if (typeof lord.newPostCountReceived == "function") {
+            lord.newPostCountReceived(lord.model("boards").reduce(function(acc, board) {
+                var count = getNewPostCount(board.name);
+                if (count > 0)
+                    acc[board.name] = count;
+                return acc;
+            }, {}));
+        }
         if (lord.deviceType("mobile")) {
             lord.queryAll(".boardSelect").forEach(function(sel) {
                 lord.queryAll("option", sel).forEach(function(opt) {
