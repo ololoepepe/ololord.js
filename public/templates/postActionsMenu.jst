@@ -145,8 +145,7 @@
     {{? it.customPostMenuAction && it.customPostMenuAction[170]}}
         {{ out += it.customPostMenuAction[170](it, it.thread, it.post); }}
     {{?}}
-    {{? it.user.isModer(it.board.name)}}
-        <!--TODO: level may vary-->
+    {{? it.user.isModer()}}
         <li>
             <a name="ipButton" href="javascript:void(0);" onclick="lord.showUserIp(this); return false;">
                 <img src="/{{=it.site.pathPrefix}}img/ip.png" class="signImage" />

@@ -53,7 +53,7 @@ router.get("/api/userIp.json", function(req, res, next) {
     if (!req.query.boardName)
         return next(Tools.translate("Invalid board"));
     controller.checkBan(req, res, req.query.boardName).then(function() {
-        if (Database.compareRegisteredUserLevels(req.level(), Permissions.seeUserIp()) < 0)
+        if (!req.isModer())
             return Promise.reject(Tools.translate("Not enough rights"));
         return Database.getPost(req.query.boardName, +req.query.postNumber);
     }).then(function(post) {

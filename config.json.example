@@ -80,8 +80,7 @@ Example:
         "addFilesToPost: "MODER",
         "deleteFile": 0,
         "deletePost": 0,
-        "editPost": "MODER",
-        "seeUserIp": "ADMIN"
+        "editPost": "MODER"
     },
     "server": {
         "chat": {
