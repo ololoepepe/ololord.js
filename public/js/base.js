@@ -2051,8 +2051,15 @@ lord.initializeOnLoadBase = function() {
             favoritesButton.title += " (" + key("showFavorites") + ")";
     }
     $(".searchAction > form").hover(function() {
-        $(".searchActionSelect", this).removeClass("hiddenElement");
-        $(".searchActionInput", this).css("width", "60%");
+        lord.searchActionHovered = true;
+    }, function() {
+        lord.searchActionHovered = false;
+    });
+    $(".searchAction > form").focusin(function() {
+        $(".searchActionOptionsContainer", this).css("display", "");
+    }).focusout(function() {
+        if (!lord.searchActionHovered)
+            $(".searchActionOptionsContainer", this).css("display", "none");
     });
     if (lord.getLocalObject("showNewPosts", true))
         lord.showNewPosts();

@@ -20,14 +20,14 @@ window.addEventListener("load", function load() {
         model.query = query;
         var data = lord.template("searchResults", model);
         searchResultsPlaceholder.parentNode.replaceChild(data, searchResultsPlaceholder);
-        var inp = lord.queryOne(".searchAction > form > [name='query']");
+        var inp = lord.queryOne(".searchAction > form > .searchActionInputContainer > [name='query']");
         if (inp) {
             inp = $(inp);
             if (model.searchQuery)
                 inp.attr("value", model.searchQuery);
             inp.focus().select();
         }
-        var sel = lord.queryOne(".searchAction > form > [name='board']");
+        var sel = lord.queryOne(".searchAction > form > .searchActionOptionsContainer > [name='board']");
         if (sel) {
             for (var i = 0; i < sel.options.length; ++i) {
                 if (boardName == sel.options[i].value) {
