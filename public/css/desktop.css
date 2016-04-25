@@ -30,6 +30,20 @@ blockquote {
     width: 50%;
 }
 
+.searchActionInput {
+    width: -moz-calc(100% - 30px);
+    width: -webkit-calc(100% - 30px);
+    width: -o-calc(100% - 30px);
+    width: calc(100% - 30px);
+}
+
+.searchActionOptionsContainer {
+    width: -moz-calc(100% - 44px);
+    width: -webkit-calc(100% - 44px);
+    width: -o-calc(100% - 44px);
+    width: calc(100% - 44px);
+}
+
 .externalThreadFrame {
     width: 300px;
     height: 400px;

@@ -639,13 +639,6 @@ ul.tabWidget > li > a {
     width: 100%;
 }
 
-.searchActionInput {
-    width: -moz-calc(100% - 30px);
-    width: -webkit-calc(100% - 30px);
-    width: -o-calc(100% - 30px);
-    width: calc(100% - 30px);
-}
-
 .searchActionOptionsContainer {
     position: absolute;
     top: -moz-calc(100% + 4px);
@@ -653,10 +646,6 @@ ul.tabWidget > li > a {
     top: -o-calc(100% + 4px);
     top: calc(100% + 4px);
     left: 8px;
-    width: -moz-calc(100% - 44px);
-    width: -webkit-calc(100% - 44px);
-    width: -o-calc(100% - 44px);
-    width: calc(100% - 44px);
     padding: 4px;
     text-align: left;
 }
