@@ -567,6 +567,8 @@ var checkLangsMatch = function(info, matchs, matche) {
 };
 
 var checkExternalLink = function(info, matchs) {
+    if (matchs.index > 0 && ["@", "#"].indexOf(info.text[matchs.index - 1]) >= 0)
+        return false;
     return /^\d+\.\d+\.\d+\.\d+$/.test(matchs[2]) || Tools.externalLinkRootZoneExists(matchs[4]);
 };
 
@@ -919,7 +921,7 @@ var processPostText = function(boardName, text, options) {
             }, { checkFunction: checkExternalLink });
         }).then(function() {
             return process(info, convertProtocol, {
-                op: /(mailto|irc|news):(\S+)/gi,
+                op: /(mailto|irc|news)\:(\S+)/gi,
                 cl: null
             });
         }).then(function() {
