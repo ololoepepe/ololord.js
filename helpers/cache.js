@@ -1,5 +1,7 @@
 var FS = require("q-io/fs");
 
+var Tools = require("./tools");
+
 var rootPath = __dirname + "/../public";
 
 module.exports.readFile = function(fileName) {
@@ -7,18 +9,7 @@ module.exports.readFile = function(fileName) {
 };
 
 module.exports.writeFile = function(fileName, data) {
-    var filePath = rootPath + "/" + fileName;
-    var tmpFilePath = filePath + ".tmp";
-    var path = filePath.split("/").slice(0, -1).join("/");
-    return FS.exists(path).then(function(exists) {
-        if (exists)
-            return Promise.resolve();
-        return FS.makeTree(path);
-    }).then(function() {
-        return FS.write(tmpFilePath, data);
-    }).then(function() {
-        return FS.rename(tmpFilePath, filePath);
-    });
+    return Tools.writeFile(rootPath + "/" + fileName, data);
 };
 
 module.exports.removeFile = function(fileName) {

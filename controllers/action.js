@@ -88,7 +88,7 @@ var getFiles = function(fields, files, transaction) {
                 c.size = data.length;
                 if (c.size < 1)
                     return Promise.reject(Tools.translate("File is empty"));
-                return FS.write(path, data);
+                return Tools.writeFile(path, data);
             }).then(function() {
                 c.file = {
                     name: url.url.split("/").pop(),
@@ -680,7 +680,7 @@ router.post("/action/superuserAddFile", function(req, res, next) {
         if ("true" == result.fields.isDir)
             return FS.makeDirectory(path);
         else if (files.length < 1)
-            return FS.write(path, "");
+            return Tools.writeFile(path, "");
         else
             return FS.move(files[0].path, path);
     }).then(function() {
@@ -699,7 +699,7 @@ router.post("/action/superuserEditFile", function(req, res, next) {
         return next(Tools.translate("Not enough rights"));
     Tools.parseForm(req).then(function(result) {
         var path = __dirname + "/../" + result.fields.fileName;
-        return FS.write(path, result.fields.content);
+        return Tools.writeFile(path, result.fields.content);
     }).then(function() {
         res.json({});
     }).catch(function(err) {

@@ -771,6 +771,26 @@ module.exports.getFileInfosByHashes = function(hashes) {
     }, true);
 };
 
+var waitForFile = function(filePath, options) { //TODO: That is not okay
+    var delay = (options && options.delay) || 50;
+    var retry = (options && retry) || 4;
+    var f = function() {
+        return FS.exists(filePath).then(function(exists) {
+            return Tools.promiseIf(exists, function() {
+                return Promise.resolve();
+            }, function() {
+                if (!retry)
+                    return Promise.reject((options && options.error) || "File not found");
+                --retry;
+                return (new Promise(function(resolve, reject) {
+                    setTimeout(resolve, delay);
+                })).then(retry);
+            });
+        });
+    };
+    return f();
+};
+
 var processFile = function(board, file, transaction) {
     return board.generateFileName(file).then(function(fn) {
         var targetFilePath = __dirname + "/../public/" + board.name + "/src/" + fn.name;
@@ -783,10 +803,8 @@ var processFile = function(board, file, transaction) {
             return FS.copy(sourceFilePath, targetFilePath).then(function() {
                 return FS.copy(sourceThumbPath, targetThumbPath);
             }).then(function() {
-                return FS.exists(targetThumbPath);
-            }).then(function(exists) {
-                if (!exists)
-                    return Promise.reject(Tools.translate("Failed to copy file"));
+                return waitForFile(targetThumbPath, { error: Tools.translate("Failed to copy file") }); //TODO: Fix
+            }).then(function() {
                 return getFileInfo({ fileName: file.name });
             }).then(function(fileInfo) {
                 return {
@@ -813,10 +831,8 @@ var processFile = function(board, file, transaction) {
                 transaction.filePaths.push(file.thumbPath);
                 return FS.move(file.thumbPath, targetThumbPath);
             }).then(function() {
-                return FS.exists(targetThumbPath);
-            }).then(function(exists) {
-                if (!exists)
-                    return Promise.reject(Tools.translate("Failed to copy file"));
+                return waitForFile(targetThumbPath, { error: Tools.translate("Failed to copy file") }); //TODO: Fix
+            }).then(function() {
                 return {
                     dimensions: file.dimensions,
                     extraData: file.extraData,
