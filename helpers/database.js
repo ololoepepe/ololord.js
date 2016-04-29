@@ -2183,6 +2183,9 @@ module.exports.deleteFile = function(req, res, fields) {
         return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
     }).then(function(post) {
         c.post = post;
+        var board = Board.board(c.fileInfo.boardName);
+        if (!board)
+            return Promise.reject(Tools.translate("Invalid board"));
         return checkPermissions(req, board, post, "deleteFile", Tools.sha1(fields.password));
     }).then(function(result) {
         if (!result)
