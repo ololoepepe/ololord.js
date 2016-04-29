@@ -453,13 +453,14 @@ var getRules = function(boardName) {
             });
         } else if (Tools.isVideoType(file.mimeType)) {
             file.extraData = {};
-            return new Promise(function(resolve, reject) {
+            var defaultThumb = false;
+            return (new Promise(function(resolve, reject) {
                 ffmpeg.ffprobe(file.path, function(err, metadata) {
                     if (err)
                         return reject(err);
                     resolve(metadata);
                 });
-            }).then(function(metadata) {
+            })).then(function(metadata) {
                 if (!isNaN(+metadata.streams[0].width) && !isNaN(+metadata.streams[0].height)) {
                     file.dimensions = {
                         width: metadata.streams[0].width,
@@ -476,10 +477,17 @@ var getRules = function(boardName) {
             }).catch(function(err) {
                 Global.error(err.stack || err);
                 file.thumbPath = thumbPath;
+                defaultThumb = true;
                 return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
             }).then(function() {
                 return ImageMagick.identify(file.thumbPath);
             }).then(function(info) {
+                if (!file.dimensions && !defaultThumb) {
+                    file.dimensions = {
+                        width: info.width,
+                        height: info.height
+                    };
+                }
                 if (info.width <= 200 && info.height <= 200)
                     return Promise.resolve();
                 return ImageMagick.convert([

@@ -1,2 +1,2 @@
 * Implement hiding posts by similar text
-* Improve static content serving: (flock, )unlink, overwrite(, funlock)
+* Use SockJS (WebSocket wrapping/emulation lib)

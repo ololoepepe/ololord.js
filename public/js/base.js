@@ -233,7 +233,9 @@ if (typeof lord.getLocalObject("password") != "string") {
 
 /*private*/ lord.MovablePlayer.prototype.updateTrackInfo = function() {
     $(this.trackInfo).empty();
-    var s = lord.durationToString(this.content.currentTime) + " / " + lord.durationToString(this.content.duration);
+    var s = lord.durationToString(this.content.currentTime);
+    if (+this.content.duration && +this.content.duration < lord.Billion)
+        s += " / " + lord.durationToString(this.content.duration);
     this.trackInfo.appendChild(lord.node("text", s));
 };
 
