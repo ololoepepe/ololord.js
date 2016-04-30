@@ -1,2 +1,3 @@
 * Implement hiding posts by similar text
 * Use SockJS (WebSocket wrapping/emulation lib)
+* Refactor: use ES-2015 features
