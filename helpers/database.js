@@ -2274,7 +2274,6 @@ var userBans = function(ip, boardNames) {
         return db.get(`userBans:${ip}:${boardName}`).then(function(ban) {
             if (!ban)
                 return Promise.resolve();
-
             return Promise.resolve(JSON.parse(ban));
         });
     }, {}).then(function(bans) {
@@ -2387,19 +2386,21 @@ module.exports.banUser = function(req, ip, bans) {
                 if (!ban)
                     return Promise.resolve();
                 return db.del(key).then(function() {
+                    if (!ban.postNumber)
+                        return Promise.resolve();
+                    return db.hdel("userBanPostNumbers", key, ban.postNumber);
+                }).then(function() {
                     return updatePostBanInfo(boardName, ban.postNumber);
                 });
             }
             return db.set(key, JSON.stringify(ban)).then(function() {
                 if (!ban.expiresAt)
                     return Promise.resolve();
-                var ttl = Math.ceil((+ban.expiresAt - +Tools.now()) / 1000);
-                setTimeout(function() {
-                    updateBan(ip, boardName, ban.postNumber).catch(function(err) {
-                        Global.error(err.stack || err);
-                    });
-                }, Math.ceil(ttl * Tools.Second + Tools.Second)); //NOTE: Adding extra delay
-                return db.expire(key, ttl);
+                return db.expire(key, Math.ceil((+ban.expiresAt - +Tools.now()) / 1000));
+            }).then(function() {
+                if (!ban.postNumber)
+                    return Promise.resolve();
+                return db.hset("userBanPostNumbers", key, ban.postNumber);
             }).then(function() {
                 if (!ban.postNumber)
                     return Promise.resolve();
@@ -2496,32 +2497,48 @@ module.exports.delall = function(req, ip, boardNames) {
 };
 
 module.exports.initialize = function() {
-    return userBans().then(function(users) {
-        return Tools.series(users, function(bans, ip) {
-            return Tools.series(bans, function(ban, boardName) {
-                return db.ttl(`userBans:${ip}:${boardName}`).then(function(ttl) {
-                    if (ttl <= 0)
-                        return Promise.resolve(null);
-                    return Promise.resolve({
-                        ip: ip,
-                        boardName: boardName,
-                        postNumber: ban.postNumber,
-                        ttl: ttl
-                    });
-                });
+    //NOTE: Enabling "key expired" notifications
+    var CHANNEL = `__keyevent@${config("system.redis.db", 0)}__:expired`;
+    var dbs = new Redis({
+        port: config("system.redis.port", 6379),
+        host: config("system.redis.host", "127.0.0.1"),
+        family: config("system.redis.family", 4),
+        password: config("system.redis.password", ""),
+        db: config("system.redis.db", 0)
+    });
+    var initialized = false;
+    var query = [];
+    var updateBanOnMessage = function(message) {
+        var ip = message.split(":").slice(1, -1).join(":");
+        var boardName = message.split(":").pop();
+        var postNumber = 0;
+        db.hget("userBanPostNumbers", message).then(function(pn) {
+            if (!pn)
+                return Promise.resolve();
+            postNumber = +pn;
+            return db.hdel("userBanPostNumbers", message);
+        }).then(function() {
+            updateBan(ip, boardName, postNumber).catch(function(err) {
+                Global.error(err.stack || err);
             });
-        }, true).then(function(bans) {
-            return Promise.resolve(function() {
-                bans.filter(function(ban) {
-                    return ban;
-                }).forEach(function(ban) {
-                    setTimeout(function() {
-                        updateBan(ban.ip, ban.boardName, ban.postNumber).catch(function(err) {
-                            Global.error(err.stack || err);
-                        });
-                    }, Math.ceil(ban.ttl * Tools.Second + Tools.Second)); //NOTE: Adding extra delay
-                });
-            });
+        });
+    };
+    dbs.on("message", function(channel, message) {
+        if (CHANNEL != channel)
+            return;
+        if (!initialized) {
+            query.push(message);
+            return;
+        }
+        updateBanOnMessage(message);
+    });
+    return db.config("SET", "notify-keyspace-events", "Ex").then(function() {
+        dbs.subscribe(CHANNEL).catch(function(err) {
+            Global.error(err);
+        });
+        return Promise.resolve(function() {
+            initialized = true;
+            query.forEach(updateBanOnMessage);
         });
     });
 };
