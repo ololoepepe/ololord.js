@@ -17,6 +17,7 @@ nodeCaptcha.info = function() {
     inf.size = config("captcha.node-captcha.size", 6);
     inf.height = config("captcha.node-captcha.height", 60);
     inf.width = config("captcha.node-captcha.width", Math.round((inf.size * inf.height) / 1.8));
+    inf.ttl = config("captcha.node-captcha.ttl", 5 * Tools.Minute);
     return inf;
 };
 
@@ -28,13 +29,15 @@ nodeCaptcha.checkCaptcha = function(req, fields) {
     if (!response)
         return Promise.reject(Tools.translate("Captcha is empty"));
     var c = nodeCaptcha.challenges[challenge];
-    if (!c || response !== c.response)
+    if (!c)
         return Promise.reject(Tools.translate("Invalid captcha"));
     clearTimeout(c.timer);
     FS.remove(__dirname + "/../public/node-captcha/" + c.fileName).catch(function(err) {
         Global.error(err);
     });
     delete nodeCaptcha.challenges[challenge];
+    if (response !== c.response)
+        return Promise.reject(Tools.translate("Captcha is solved incorrectly"));
     return Promise.resolve();
 };
 
@@ -82,7 +85,8 @@ nodeCaptcha.apiRoutes = function() {
                 };
                 res.send({
                     challenge: challenge,
-                    fileName: fileName
+                    fileName: fileName,
+                    ttl: config("captcha.node-captcha.ttl", 5 * Tools.Minute)
                 });
             });
         }

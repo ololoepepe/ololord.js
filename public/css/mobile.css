@@ -61,8 +61,21 @@ blockquote {
 
 .searchAction > form {
     text-align: left;
-    white-space: nowrap;
-    width: 98%;
+    width: 100%;
+}
+
+.searchActionInput {
+    width: -moz-calc(100% - 42px);
+    width: -webkit-calc(100% - 42px);
+    width: -o-calc(100% - 42px);
+    width: calc(100% - 42px);
+}
+
+.searchActionOptionsContainer {
+    width: -moz-calc(100% - 54px);
+    width: -webkit-calc(100% - 54px);
+    width: -o-calc(100% - 54px);
+    width: calc(100% - 54px);
 }
 
 .externalThreadFrame {
@@ -70,34 +83,20 @@ blockquote {
     height: 240px;
 }
 
-.login {
-    text-align: center;
-    white-space: nowrap;
+.postFilesInner {
+    display: block;
 }
 
-.buttonImage {
-    vertical-align: middle;
-    opacity: 0.65;
+.postFilesInnerRow {
+    display: block;
 }
 
-.buttonImage:disabled {
-    opacity: 0.4;
+.postText {
+    display: block;
 }
 
-.buttonImage:hover {
-    opacity: 1;
-}
-
-.buttonImage:disabled:hover {
-    opacity: 0.4;
-}
-
-input.buttonImage {
-    background-color: transparent;
-}
-
-.signImage {
-    vertical-align: middle;
+.postFile {
+    display: inline-block;
 }
 
 .boardSelectContainer {

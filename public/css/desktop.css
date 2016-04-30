@@ -30,14 +30,23 @@ blockquote {
     width: 50%;
 }
 
+.searchActionInput {
+    width: -moz-calc(100% - 30px);
+    width: -webkit-calc(100% - 30px);
+    width: -o-calc(100% - 30px);
+    width: calc(100% - 30px);
+}
+
+.searchActionOptionsContainer {
+    width: -moz-calc(100% - 44px);
+    width: -webkit-calc(100% - 44px);
+    width: -o-calc(100% - 44px);
+    width: calc(100% - 44px);
+}
+
 .externalThreadFrame {
     width: 300px;
     height: 400px;
-}
-
-.login {
-    text-align: center;
-    white-space: nowrap;
 }
 
 .loginDescription {
@@ -45,46 +54,32 @@ blockquote {
     margin-left: 10%;
 }
 
-.buttonImage {
-    vertical-align: middle;
-    opacity: 0.65;
+.postFilesInner {
+    display: table;
 }
 
-.buttonImage:disabled {
-    opacity: 0.4;
+.postFilesInnerRow {
+    display: table;
 }
 
-.buttonImage:hover {
-    opacity: 1;
+.postFilesInnerBlock {
+    display: block;
 }
 
-.buttonImage:disabled:hover {
-    opacity: 0.4;
-}
-
-input.buttonImage {
-    background-color: transparent;
-}
-
-.signImage {
-    vertical-align: middle;
+.postFilesInnerRowBlock {
+    display: block;
 }
 
 .postText {
+    display: table-cell;
+}
+
+.postFile {
+    display: table-cell;
+}
+
+.postFileInlineBlock {
     display: inline-block;
-    max-width: 100%;
-}
-
-.postFile ~ .postText {
-    max-width: -moz-calc(100% - 205px);
-    max-width: -webkit-calc(100% - 205px);
-    max-width: -o-calc(100% - 205px);
-    max-width: calc(100% - 205px);
-}
-
-.postFile ~ .postFile ~ .postText {
-    display: block;
-    max-width: 100%;
 }
 
 .postToThreadMobile {

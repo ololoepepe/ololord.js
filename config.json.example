@@ -80,8 +80,7 @@ Example:
         "addFilesToPost: "MODER",
         "deleteFile": 0,
         "deletePost": 0,
-        "editPost": "MODER",
-        "seeUserIp": "ADMIN"
+        "editPost": "MODER"
     },
     "server": {
         "chat": {
@@ -168,6 +167,9 @@ Example:
                 "console",
                 "file"
             ]
+        },
+        "phash": {
+            "enabled": true
         },
         "redis": {
             "port": 6379,

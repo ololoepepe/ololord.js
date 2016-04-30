@@ -771,6 +771,26 @@ module.exports.getFileInfosByHashes = function(hashes) {
     }, true);
 };
 
+var waitForFile = function(filePath, options) { //TODO: That is not okay
+    var delay = (options && options.delay) || 50;
+    var retry = (options && retry) || 4;
+    var f = function() {
+        return FS.exists(filePath).then(function(exists) {
+            return Tools.promiseIf(exists, function() {
+                return Promise.resolve();
+            }, function() {
+                if (!retry)
+                    return Promise.reject((options && options.error) || "File not found");
+                --retry;
+                return (new Promise(function(resolve, reject) {
+                    setTimeout(resolve, delay);
+                })).then(retry);
+            });
+        });
+    };
+    return f();
+};
+
 var processFile = function(board, file, transaction) {
     return board.generateFileName(file).then(function(fn) {
         var targetFilePath = __dirname + "/../public/" + board.name + "/src/" + fn.name;
@@ -783,10 +803,8 @@ var processFile = function(board, file, transaction) {
             return FS.copy(sourceFilePath, targetFilePath).then(function() {
                 return FS.copy(sourceThumbPath, targetThumbPath);
             }).then(function() {
-                return FS.exists(targetThumbPath);
-            }).then(function(exists) {
-                if (!exists)
-                    return Promise.reject(Tools.translate("Failed to copy file"));
+                return waitForFile(targetThumbPath, { error: Tools.translate("Failed to copy file") }); //TODO: Fix
+            }).then(function() {
                 return getFileInfo({ fileName: file.name });
             }).then(function(fileInfo) {
                 return {
@@ -813,10 +831,8 @@ var processFile = function(board, file, transaction) {
                 transaction.filePaths.push(file.thumbPath);
                 return FS.move(file.thumbPath, targetThumbPath);
             }).then(function() {
-                return FS.exists(targetThumbPath);
-            }).then(function(exists) {
-                if (!exists)
-                    return Promise.reject(Tools.translate("Failed to copy file"));
+                return waitForFile(targetThumbPath, { error: Tools.translate("Failed to copy file") }); //TODO: Fix
+            }).then(function() {
                 return {
                     dimensions: file.dimensions,
                     extraData: file.extraData,
@@ -1305,20 +1321,20 @@ module.exports.createThread = function(req, fields, files, transaction) {
                 //NOTE: Yep, no return here for the sake of speed
                 var oldThreadNumber = c.thread.number;
                 mkpath(c.archPath).then(function() {
-                    c.sourceId = `thread-${board.name}-${oldThreadNumber}`;
-                    return Cache.getJSON(c.sourceId);
+                    c.sourceId = `${board.name}/res/${oldThreadNumber}.json`;
+                    return Cache.readFile(c.sourceId);
                 }).then(function(data) {
-                    c.model = JSON.parse(data.data);
+                    c.model = JSON.parse(data);
                     c.model.thread.archived = true;
-                    return Tools.writeFile(`${c.archPath}/${oldThreadNumber}.json`, JSON.stringify(c.model));
+                    return FS.write(`${c.archPath}/${oldThreadNumber}.json`, JSON.stringify(c.model));
                 }).then(function() {
                     return BoardModel.generateThreadHTML(board, oldThreadNumber, c.model, true);
                 }).then(function(data) {
-                    return Tools.writeFile(`${c.archPath}/${oldThreadNumber}.html`, data);
+                    return FS.write(`${c.archPath}/${oldThreadNumber}.html`, data);
                 }).then(function() {
-                    return Cache.removeJSON(c.sourceId);
+                    return Cache.removeFile(c.sourceId);
                 }).then(function() {
-                    return Cache.removeHTML(c.sourceId);
+                    return Cache.removeFile(`${board.name}/res/${oldThreadNumber}.html`);
                 }).catch(function(err) {
                     Global.error(err);
                 });
@@ -1905,8 +1921,8 @@ module.exports.deletePost = function(req, res, fields) {
         var p;
         if (c.isThread && c.archived) {
             var path = `${__dirname}/../public/${board.name}/arch/${postNumber}.`;
-            p = Tools.removeFile(path + "json").then(function() {
-                return Tools.removeFile(path + "html");
+            p = FS.remove(path + "json").then(function() {
+                return FS.remove(path + "html");
             }).then(function() {
                 return Global.generateArchive(board.name);
             });
@@ -2167,6 +2183,9 @@ module.exports.deleteFile = function(req, res, fields) {
         return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
     }).then(function(post) {
         c.post = post;
+        var board = Board.board(c.fileInfo.boardName);
+        if (!board)
+            return Promise.reject(Tools.translate("Invalid board"));
         return checkPermissions(req, board, post, "deleteFile", Tools.sha1(fields.password));
     }).then(function(result) {
         if (!result)
@@ -2255,7 +2274,6 @@ var userBans = function(ip, boardNames) {
         return db.get(`userBans:${ip}:${boardName}`).then(function(ban) {
             if (!ban)
                 return Promise.resolve();
-
             return Promise.resolve(JSON.parse(ban));
         });
     }, {}).then(function(bans) {
@@ -2368,19 +2386,21 @@ module.exports.banUser = function(req, ip, bans) {
                 if (!ban)
                     return Promise.resolve();
                 return db.del(key).then(function() {
+                    if (!ban.postNumber)
+                        return Promise.resolve();
+                    return db.hdel("userBanPostNumbers", key, ban.postNumber);
+                }).then(function() {
                     return updatePostBanInfo(boardName, ban.postNumber);
                 });
             }
             return db.set(key, JSON.stringify(ban)).then(function() {
                 if (!ban.expiresAt)
                     return Promise.resolve();
-                var ttl = Math.ceil((+ban.expiresAt - +Tools.now()) / 1000);
-                setTimeout(function() {
-                    updateBan(ip, boardName, ban.postNumber).catch(function(err) {
-                        Global.error(err.stack || err);
-                    });
-                }, Math.ceil(ttl * Tools.Second + Tools.Second)); //NOTE: Adding extra delay
-                return db.expire(key, ttl);
+                return db.expire(key, Math.ceil((+ban.expiresAt - +Tools.now()) / 1000));
+            }).then(function() {
+                if (!ban.postNumber)
+                    return Promise.resolve();
+                return db.hset("userBanPostNumbers", key, ban.postNumber);
             }).then(function() {
                 if (!ban.postNumber)
                     return Promise.resolve();
@@ -2477,20 +2497,48 @@ module.exports.delall = function(req, ip, boardNames) {
 };
 
 module.exports.initialize = function() {
-    return userBans().then(function(users) {
-        return Tools.series(users, function(bans, ip) {
-            return Tools.series(bans, function(ban, boardName) {
-                return db.ttl(`userBans:${ip}:${boardName}`).then(function(ttl) {
-                    if (ttl <= 0)
-                        return Promise.resolve();
-                    setTimeout(function() {
-                        updateBan(ip, boardName, ban.postNumber).catch(function(err) {
-                            Global.error(err.stack || err);
-                        });
-                    }, Math.ceil(ttl * Tools.Second + Tools.Second)); //NOTE: Adding extra delay
-                    return Promise.resolve();
-                });
+    //NOTE: Enabling "key expired" notifications
+    var CHANNEL = `__keyevent@${config("system.redis.db", 0)}__:expired`;
+    var dbs = new Redis({
+        port: config("system.redis.port", 6379),
+        host: config("system.redis.host", "127.0.0.1"),
+        family: config("system.redis.family", 4),
+        password: config("system.redis.password", ""),
+        db: config("system.redis.db", 0)
+    });
+    var initialized = false;
+    var query = [];
+    var updateBanOnMessage = function(message) {
+        var ip = message.split(":").slice(1, -1).join(":");
+        var boardName = message.split(":").pop();
+        var postNumber = 0;
+        db.hget("userBanPostNumbers", message).then(function(pn) {
+            if (!pn)
+                return Promise.resolve();
+            postNumber = +pn;
+            return db.hdel("userBanPostNumbers", message);
+        }).then(function() {
+            updateBan(ip, boardName, postNumber).catch(function(err) {
+                Global.error(err.stack || err);
             });
+        });
+    };
+    dbs.on("message", function(channel, message) {
+        if (CHANNEL != channel)
+            return;
+        if (!initialized) {
+            query.push(message);
+            return;
+        }
+        updateBanOnMessage(message);
+    });
+    return db.config("SET", "notify-keyspace-events", "Ex").then(function() {
+        dbs.subscribe(CHANNEL).catch(function(err) {
+            Global.error(err);
+        });
+        return Promise.resolve(function() {
+            initialized = true;
+            query.forEach(updateBanOnMessage);
         });
     });
 };

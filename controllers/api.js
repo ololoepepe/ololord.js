@@ -15,9 +15,9 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/api/post.json", function(req, res) {
+router.get("/api/post.json", function(req, res, next) {
     if (!req.query.boardName)
-        return controller.error(req, res, Tools.translate("Invalid board"), true);
+        return next(Tools.translate("Invalid board"));
     controller.checkBan(req, res, req.query.boardName).then(function() {
         return boardModel.getPosts([{
             boardName: req.query.boardName,
@@ -45,15 +45,15 @@ router.get("/api/post.json", function(req, res) {
     }).then(function(post) {
         res.json(post || null);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/userIp.json", function(req, res) {
+router.get("/api/userIp.json", function(req, res, next) {
     if (!req.query.boardName)
-        return controller.error(req, res, Tools.translate("Invalid board"), true);
+        return next(Tools.translate("Invalid board"));
     controller.checkBan(req, res, req.query.boardName).then(function() {
-        if (Database.compareRegisteredUserLevels(req.level(), Permissions.seeUserIp()) < 0)
+        if (!req.isModer())
             return Promise.reject(Tools.translate("Not enough rights"));
         return Database.getPost(req.query.boardName, +req.query.postNumber);
     }).then(function(post) {
@@ -65,13 +65,13 @@ router.get("/api/userIp.json", function(req, res) {
             result.ipv4 = ipv4;
         res.json(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/threadInfo.json", function(req, res) {
+router.get("/api/threadInfo.json", function(req, res, next) {
     if (!req.query.boardName)
-        return controller.error(req, res, Tools.translate("Invalid board"), true);
+        return next(Tools.translate("Invalid board"));
     controller.checkBan(req, res, req.query.boardName).then(function() {
         var board = Board.board(req.query.boardName);
         var threadNumber = +req.query.threadNumber;
@@ -79,24 +79,24 @@ router.get("/api/threadInfo.json", function(req, res) {
     }).then(function(thread) {
         res.json(thread);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/fileInfo.json", function(req, res) {
+router.get("/api/fileInfo.json", function(req, res, next) {
     boardModel.getFileInfos([{
         fileName: req.query.fileName,
         fileHash: req.query.fileHash
     }], req.hashpass).then(function(fileInfos) {
         res.json(fileInfos[0]);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/fileExistence.json", function(req, res) {
+router.get("/api/fileExistence.json", function(req, res, next) {
     if (!req.query.fileName && !req.query.fileHash)
-        return controller.error(req, res, Tools.translate("Neither file name nor hash is specified", "error"), true);
+        return next(Tools.translate("Neither file name nor hash is specified", "error"));
     var identifier = req.query.fileName || req.query.fileHash;
     var p;
     if (req.query.fileName)
@@ -106,11 +106,11 @@ router.get("/api/fileExistence.json", function(req, res) {
     p.then(function(exists) {
         res.json(!!exists);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/lastPostNumbers.json", function(req, res) {
+router.get("/api/lastPostNumbers.json", function(req, res, next) {
     var boardNames = req.query.boardNames;
     if (boardNames && !Util.isArray(boardNames))
         boardNames = [boardNames];
@@ -125,23 +125,23 @@ router.get("/api/lastPostNumbers.json", function(req, res) {
         });
         res.json(r);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/lastPostNumber.json", function(req, res) {
+router.get("/api/lastPostNumber.json", function(req, res, next) {
     if (!req.query.boardName)
-        return controller.error(req, res, Tools.translate("Invalid board"), true);
+        return next(Tools.translate("Invalid board"));
     controller.checkBan(req, res, req.query.boardName).then(function() {
         return boardModel.getLastPostNumbers([req.query.boardName]);
     }).then(function(lastPostNumbers) {
         res.json({ lastPostNumber: lastPostNumbers[0] });
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/threadLastPostNumbers.json", function(req, res) {
+router.get("/api/threadLastPostNumbers.json", function(req, res, next) {
     var threads = req.query.threads;
     if (Util.isString(threads))
         threads = [threads];
@@ -158,37 +158,37 @@ router.get("/api/threadLastPostNumbers.json", function(req, res) {
     }).then(function(results) {
         res.json(results);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/threadLastPostNumber.json", function(req, res) {
+router.get("/api/threadLastPostNumber.json", function(req, res, next) {
     if (!req.query.boardName)
-        return controller.error(req, res, Tools.translate("Invalid board"), true);
+        return next(Tools.translate("Invalid board"));
     controller.checkBan(req, res, req.query.boardName).then(function() {
         return boardModel.getThreadLastPostNumber(req.query.boardName, req.query.threadNumber);
     }).then(function(number) {
         res.json({ lastPostNumber: number });
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/captchaQuota.json", function(req, res) {
+router.get("/api/captchaQuota.json", function(req, res, next) {
     if (!req.query.boardName)
-        return controller.error(req, res, Tools.translate("Invalid board"), true);
+        return next(Tools.translate("Invalid board"));
     controller.checkBan(req, res, req.query.boardName).then(function() {
         return Database.getUserCaptchaQuota(req.query.boardName, req.ip);
     }).then(function(quota) {
         res.json({ quota: quota });
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/bannedUsers.json", function(req, res) {
+router.get("/api/bannedUsers.json", function(req, res, next) {
     if (!req.isModer())
-        return controller.error(req, res, Tools.translate("Not enough rights"), true);
+        return next(Tools.translate("Not enough rights"));
     Database.userBans().then(function(users) {
         var newUsers = [];
         Tools.forIn(users, function(bans, ip) {
@@ -209,16 +209,16 @@ router.get("/api/bannedUsers.json", function(req, res) {
         });
         res.json(newUsers);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/bannedUser.json", function(req, res) {
+router.get("/api/bannedUser.json", function(req, res, next) {
     var ip = Tools.correctAddress(req.query.ip);
     if (!ip)
-        return controller.error(req, res, Tools.translate("Invalid IP address"), true);
+        return next(Tools.translate("Invalid IP address"));
     if (!req.isModer())
-        return controller.error(req, res, Tools.translate("Not enough rights"), true);
+        return next(Tools.translate("Not enough rights"));
     Database.userBans(ip).then(function(bans) {
         var newBans = {};
         Tools.forIn(bans, function(ban, boardName) {
@@ -235,13 +235,13 @@ router.get("/api/bannedUser.json", function(req, res) {
             user.ipv4 = ipv4;
         res.json(user);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/registeredUsers.json", function(req, res) {
+router.get("/api/registeredUsers.json", function(req, res, next) {
     if (!req.isSuperuser())
-        return controller.error(req, res, Tools.translate("Not enough rights"), true);
+        return next(Tools.translate("Not enough rights"));
     Database.registeredUsers().then(function(users) {
         users.forEach(function(user) {
             user.ips = user.ips.map(function(ip) {
@@ -254,16 +254,16 @@ router.get("/api/registeredUsers.json", function(req, res) {
         });
         res.json(users);
     }).catch(function(err) {
-        controller.error(res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/registeredUser.json", function(req, res) {
+router.get("/api/registeredUser.json", function(req, res, next) {
     if (!req.isSuperuser())
-        return controller.error(req, res, Tools.translate("Not enough rights"), true);
+        return next(Tools.translate("Not enough rights"));
     var hashpass = req.query.hashpass;
     if (!Tools.mayBeHashpass(hashpass))
-        return controller.error(req, res, Tools.translate("Invalid hashpass"), true);
+        return next(Tools.translate("Invalid hashpass"));
     Database.registeredUser(hashpass).then(function(user) {
         user.ips = user.ips.map(function(ip) {
             var ipv4 = Tools.preferIPv4(ip);
@@ -274,13 +274,13 @@ router.get("/api/registeredUser.json", function(req, res) {
         });
         res.json(user);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/fileHeaders.json", function(req, res) {
+router.get("/api/fileHeaders.json", function(req, res, next) {
     if (!req.query.url)
-        return controller.error(req, res, Tools.translate("Invalid URL"), true);
+        return next(Tools.translate("Invalid URL"));
     var proxy = Tools.proxy();
     var p;
     if (proxy) {
@@ -304,31 +304,31 @@ router.get("/api/fileHeaders.json", function(req, res) {
             return Promise.reject(Tools.translate("Failed to get file headers"));
         res.json(response.headers);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/chatMessages.json", function(req, res) {
+router.get("/api/chatMessages.json", function(req, res, next) {
     Chat.getMessages(req, req.query.lastRequestDate).then(function(result) {
         res.json(result);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/synchronization.json", function(req, res) {
+router.get("/api/synchronization.json", function(req, res, next) {
     if (!req.query.key)
-        return controller.error(req, res, Tools.translate("No key specified"), true);
+        return next(Tools.translate("No key specified"));
     Database.db.get("synchronizationData:" + req.query.key).then(function(data) {
         res.json(data ? JSON.parse(data) : null);
     }).catch(function(err) {
-        controller.error(req, res, err, true);
+        next(err);
     });
 });
 
-router.get("/api/fileTree.json", function(req, res) {
+router.get("/api/fileTree.json", function(req, res, next) {
     if (!req.isSuperuser())
-        return controller.error(req, res, Tools.translate("Not enough rights"), true);
+        return next(Tools.translate("Not enough rights"));
     var dir = req.query.dir;
     if (dir.slice(-1)[0] != "/")
         dir += "/";
@@ -350,26 +350,24 @@ router.get("/api/fileTree.json", function(req, res) {
         res.json({ html: c.reply });
     }).catch(function(err) {
         if ("ENOENT" == err.code)
-            controller.notFound(req, res);
+            err.status = 404;
         else if ("ENOTDIR" == err.code)
-            controller.error(req, res, Tools.translate("Not a directory"), true);
-        else
-            controller.error(req, res, err, true);
+            err = Tools.translate("Not a directory");
+        next(err);
     });
 });
 
-router.get("/api/fileContent.json", function(req, res) {
+router.get("/api/fileContent.json", function(req, res, next) {
     if (!req.isSuperuser())
-        return controller.error(req, res, Tools.translate("Not enough rights"), true);
+        return next(Tools.translate("Not enough rights"));
     return FS.read(__dirname + "/../" + req.query.fileName).then(function(content) {
         res.json({ content: content });
     }).catch(function(err) {
         if ("ENOENT" == err.code)
-            controller.notFound(req, res);
+            err.status = 404;
         else if ("EISDIR" == err.code)
-            controller.error(req, res, Tools.translate("Not a file"), true);
-        else
-            controller.error(req, res, err, true);
+            err = Tools.translate("Not a file");
+        next(err);
     });
 });
 

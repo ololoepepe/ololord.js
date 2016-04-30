@@ -3195,5 +3195,10 @@
         "regenerateArchivedThreadsLabelText": {
             "value": "Сгенерировать заново архивные треды"
         }
+    },
+    "Captcha is solved incorrectly": {
+        "_default": {
+            "value": "Капча решена неправильно"
+        }
     }
 }

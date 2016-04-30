@@ -4,14 +4,15 @@ var cluster = require("cluster");
 var expressCluster = require("express-cluster");
 var Log4JS = require("log4js");
 var OS = require("os");
+var Util = require("util");
 
 var Global = require("./helpers/global");
 Global.Program = require("commander");
-Global.Program.version("1.1.0-rc")
+Global.Program.version("1.1.0-rc2")
     .option("-c, --config-file <file>", "Path to the config.json file")
+    .option("-r, --regenerate", "Regenerate the cache on startup")
     .parse(process.argv);
 
-var Cache = require("./helpers/cache");
 var config = require("./helpers/config");
 var controller = require("./helpers/controller");
 var BoardModel = require("./models/board");
@@ -58,8 +59,41 @@ var spawnCluster = function() {
 
         app.use(require("./middlewares"));
         app.use(require("./controllers"));
-        app.use("*", function(req, res) {
-            controller.notFound(req, res);
+        app.use("*", function(req, res, next) {
+            var err = new Error();
+            err.status = 404;
+            err.path = req.baseUrl;
+            next(err);
+        });
+        app.use(function(err, req, res, next) {
+            switch (err.status) {
+            case 404:
+                Global.error(Tools.preferIPv4(req.ip), err.path, 404);
+                res.status(404).sendFile("notFound.html", { root: __dirname + "/public" });
+                break;
+            default:
+                Global.error(Tools.preferIPv4(req.ip), req.path, err.stack || err);
+                var model = {};
+                if (err.ban) {
+                    model.title = Tools.translate("Ban", "pageTitle");
+                    model.ban = err.ban;
+                } else {
+                    model.title = Tools.translate("Error", "pageTitle");
+                    if (Util.isError(err)) {
+                        model.errorMessage = Tools.translate("Internal error", "errorMessage");
+                        model.errorDescription = err.message;
+                    } else if (err.error) {
+                        model.errorMessage = error.description ? err.error
+                            : Tools.translate("Error", "errorMessage");
+                        model.errorDescription = err.description || err.error;
+                    } else {
+                        model.errorMessage = Tools.translate("Error", "errorMessage");
+                        model.errorDescription = Util.isString(err) ? err : "";
+                    }
+                }
+                res.json(model);
+                break;
+            }
         });
 
         BoardModel.initialize().then(function() {
@@ -110,6 +144,16 @@ var spawnCluster = function() {
                         config.reload();
                     return Promise.resolve();
                 });
+                Global.IPC.installHandler("getConnectionIPs", function() {
+                    return Promise.resolve(Tools.mapIn(sockets, function(socket) {
+                        return socket.ip;
+                    }).filter(function(ip) {
+                        return ip;
+                    }).reduce(function(acc, ip) {
+                        acc[ip] = 1;
+                        return acc;
+                    }, {}));
+                });
                 Global.IPC.send("ready").catch(function(err) {
                     Global.error(err);
                 });
@@ -133,8 +177,9 @@ var spawnCluster = function() {
 if (cluster.isMaster) {
     var FS = require("q-io/fs");
     var path = __dirname + "/public/node-captcha";
+    var initCallback;
     FS.list(path).then(function(fileNames) {
-        Tools.series(fileNames.filter(function(fileName) {
+        return Tools.series(fileNames.filter(function(fileName) {
             return fileName.split(".").pop() == "png" && /^[0-9]+$/.test(fileName.split(".").shift());
         }), function(fileName) {
             return FS.remove(path + "/" + fileName);
@@ -144,7 +189,8 @@ if (cluster.isMaster) {
         return Promise.resolve();
     }).then(function() {
         return Database.initialize();
-    }).then(function() {
+    }).then(function(cb) {
+        initCallback = cb;
         return controller.initialize();
     }).then(function() {
         if (config("server.statistics.enabled", true)) {
@@ -161,7 +207,7 @@ if (cluster.isMaster) {
                 });
             }, config("server.rss.ttl", 60) * Tools.Minute);
         }
-        if (config("system.regenerateCacheOnStartup", true))
+        if (Global.Program.regenerate || config("system.regenerateCacheOnStartup", true))
             return controller.regenerate(config("system.regenerateArchive", false));
         return Promise.resolve();
     }).then(function() {
@@ -170,8 +216,10 @@ if (cluster.isMaster) {
         var ready = 0;
         Global.IPC.installHandler("ready", function() {
             ++ready;
-            if (ready == count)
+            if (ready == count) {
+                initCallback();
                 require("./helpers/commands")();
+            }
         });
         var lastFileName;
         var fileName = function() {

@@ -7,7 +7,7 @@ var du = require("du");
 var equal = require("deep-equal");
 var escapeHtml = require("escape-html");
 var FS = require("q-io/fs");
-var FSSync = require("fs-ext");
+var FSSync = require("fs");
 var HTMLToText = require("html-to-text");
 var Image = Canvas.Image;
 var Jdenticon = require("jdenticon");
@@ -503,96 +503,6 @@ module.exports.remove = function(arr, what, both) {
     }
 };
 
-var openFile = promisify(FSSync.open);
-var closeFile = promisify(FSSync.close);
-var flockFile = promisify(FSSync.flock);
-var readData = promisify(FSSync.read);
-var writeData = promisify(FSSync.write);
-
-var recover = function(c, err) {
-    if (!c.fd)
-        return Promise.reject(err);
-    return flockFile(c.fd, "un").catch(function(err) {
-        Global.error(err.stack || err);
-        return Promise.resolve();
-    }).then(function() {
-        if (c.noclose)
-            return Promise.resolve();
-        return closeFile(c.fd);
-    }).catch(function(err) {
-        Global.error(err.stack || err);
-        return Promise.resolve();
-    }).then(function() {
-        return Promise.reject(err);
-    });
-};
-
-module.exports.readFile = function(path, ifModifiedSince) {
-    var c = {};
-    return openFile(path, "r").then(function(fd) {
-        c.fd = fd;
-        return flockFile(c.fd, "sh");
-    }).then(function() {
-        c.locked = true;
-        return FS.stat(path);
-    }).then(function(stats) {
-        c.lastModified = stats.node.mtime;
-        if (ifModifiedSince && +ifModifiedSince >= +stats.mtime)
-            return Promise.resolve();
-        if (stats.size <= 0)
-            return Promise.resolve();
-        c.buffer = new Buffer(stats.size);
-        return readData(c.fd, c.buffer, 0, c.buffer.length, null);
-    }).then(function() {
-        c.data = c.buffer ? c.buffer.toString("utf8") : "";
-        return flockFile(c.fd, "un");
-    }).then(function() {
-        c.locked = false;
-        return closeFile(c.fd);
-    }).then(function() {
-        return Promise.resolve({
-            data: c.data,
-            lastModified: c.lastModified
-        });
-    }).catch(recover.bind(null, c));
-};
-
-module.exports.writeFile = function(path, data) {
-    var c = {};
-    return openFile(path, "w").then(function(fd) {
-        c.fd = fd;
-        return flockFile(c.fd, "ex");
-    }).then(function() {
-        c.locked = true;
-        return writeData(c.fd, data, null, "utf8");
-    }).then(function() {
-        return flockFile(c.fd, "un");
-    }).then(function() {
-        c.locked = false;
-        return closeFile(c.fd);
-    }).then(function() {
-        return Promise.resolve(c.data);
-    }).catch(recover.bind(null, c));
-};
-
-module.exports.removeFile = function(path) {
-    var c = {};
-    return openFile(path, "w").then(function(fd) {
-        c.fd = fd;
-        return flockFile(c.fd, "ex");
-    }).then(function() {
-        c.locked = true;
-        return FS.remove(path);
-    }).then(function() {
-        return flockFile(c.fd, "un");
-    }).then(function() {
-        c.locked = false;
-        return closeFile(c.fd);
-    }).then(function() {
-        return Promise.resolve();
-    }).catch(recover.bind(null, c));
-};
-
 module.exports.series = function(arr, f, container) {
     if (container && typeof container != "object")
         container = [];
@@ -717,5 +627,19 @@ module.exports.du = function(path) {
                 return reject(err);
             resolve(size);
         });
+    });
+};
+
+module.exports.writeFile = function(filePath, data) {
+    var tmpFilePath = filePath + ".tmp";
+    var path = filePath.split("/").slice(0, -1).join("/");
+    return FS.exists(path).then(function(exists) {
+        if (exists)
+            return Promise.resolve();
+        return FS.makeTree(path);
+    }).then(function() {
+        return FS.write(tmpFilePath, data);
+    }).then(function() {
+        return FS.rename(tmpFilePath, filePath);
     });
 };

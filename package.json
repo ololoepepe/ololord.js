@@ -1,6 +1,6 @@
 {
   "name": "ololord.js",
-  "version": "1.1.0-rc",
+  "version": "1.1.0-rc2",
   "description": "Imageboard engine in JavaScript to rule them all",
   "main": "app.js",
   "scripts": {
@@ -29,13 +29,12 @@
     "deep-equal": "^1.0.1",
     "dot": "^1.0.3",
     "du": "^0.1.0",
-    "elasticsearch": "^10.1.3",
+    "elasticsearch": "^11.0.1",
     "escape-html": "^1.0.3",
     "express": "^4.13.3",
     "express-cluster": "0.0.4",
     "fast-csv": "^0.6.0",
     "fluent-ffmpeg": "^2.0.1",
-    "fs-ext": "^0.5.0",
     "highlight.js": "^8.9.1",
     "html-to-text": "^2.0.0",
     "imagemagick": "^0.1.3",
@@ -43,6 +42,7 @@
     "ip-address": "^5.0.2",
     "jdenticon": "^1.3.2",
     "log4js": "^0.6.29",
+    "mathjax-node": "^0.5.1",
     "merge": "^1.2.0",
     "mkpath": "^1.0.0",
     "moment": "^2.10.6",
@@ -56,7 +56,7 @@
     "sqlite3": "^3.1.1",
     "uuid": "^2.0.1",
     "vorpal": "^1.10.8",
-    "xml2js": "^0.4.15",
+    "xml2js": "^0.4.16",
     "xregexp": "^3.0.0"
   },
   "engines": {

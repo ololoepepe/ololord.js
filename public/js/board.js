@@ -114,33 +114,6 @@ lord.checkExpander = function(post) {
     bq.parent()[0].appendChild(a);
 };
 
-lord.postProcessors.push(function textWidthProcessor(post, retry) {
-    if ($(".postFile ~ .postFile ~ .postText").length > 0)
-        return;
-    var postText = $(".postFile ~ .postText", post);
-    if (!postText[0])
-        return;
-    var postFile = postText.parent().find(".postFile");
-    if (post.parentNode && post.parentNode.tagName) {
-        var width = Math.ceil(postText.position().left - postText.parent().position().left);
-        if (retry && retry.width != width) {
-            setTimeout(function() {
-                textWidthProcessor(post, { width: width });
-            }, 100);
-        } else {
-            postText.css("max-width", "calc(100% - " + width + "px)");
-        }
-    } else if (retry) {
-        setTimeout(function() {
-            textWidthProcessor(post, {});
-        }, 100);
-    } else {
-        postFile.find(".postFileThumbImage").load(function() {
-            textWidthProcessor(post, {});
-        });
-    }
-});
-
 if (lord.getLocalObject("addExpander", true))
     lord.postProcessors.push(lord.checkExpander);
 
@@ -293,7 +266,7 @@ lord.removeReferences = function(postNumber, referencedOnly) {
         if ($(parent).hasClass("referencedBy")) {
             parent.removeChild(a);
             if (parent.children.length <= 1)
-                parent.style.display = "none";
+                parent.parentNode.style.display = "none";
         } else if (!referencedOnly) {
             parent.replaceChild(lord.node("text", a.textContent), a);
         }
@@ -551,7 +524,7 @@ lord.initFiles = function(reset) {
     lord.files = [];
     lord.filesMap = {};
     lord.queryAll(".postFile").forEach(function(td) {
-        var href = lord.data("href", td);
+        var href = lord.data("href", td).replace(/^https?\:\/\/[^\/]+/, "");
         var mimeType = lord.data("mimeType", td);
         if ("application/pdf" == mimeType
             || ((lord.isAudioType(mimeType) || lord.isVideoType(mimeType)) && !lord.isMediaTypeSupported(mimeType))) {
@@ -1209,7 +1182,7 @@ lord.draw = function(options) {
     var backgroundShape;
     if (options && options.imageUrl) {
         var backgroundImage = new Image();
-        backgroundImage.src = options.imageUrl.replace(/^https?\:/, window.location.protocol);
+        backgroundImage.src = options.imageUrl.replace(/^https?\:\/\/[^\/]+/, "");
         backgroundShape = LC.createShape("Image", {
             x: 0,
             y: 0,
@@ -1732,12 +1705,17 @@ lord.fileSelected = function(div) {
 
 lord.attachFileByLink = function(a) {
     var div = a.parentNode;
-    var url = prompt(lord.text("linkLabelText"), div.fileUrl);
-    if (null === url)
-        return;
-    lord.clearFileInput(div);
-    div.fileUrl = url;
-    lord.fileAddedCommon(div);
+    lord.prompt({
+        title: "linkLabelText",
+        value: div.fileUrl,
+        style: { minWidth: "350px" }
+    }).then(function(result) {
+        if (!result.accepted || !result.value)
+            return;
+        lord.clearFileInput(div);
+        div.fileUrl = result.value;
+        lord.fileAddedCommon(div);
+    }).catch(lord.handleError);
 };
 
 lord.setDrawingBackgroundColor = function(btn, color) {
@@ -2222,7 +2200,11 @@ lord.showUserIp = function(a) {
         boardName: boardName,
         postNumber: postNumber
     }).then(function(result) {
-        prompt("IP:", result.ipv4 || result.ip);
+        return lord.prompt({
+            title: "IP:",
+            value: result.ipv4 || result.ip,
+            readOnly: true
+        });
     }).catch(lord.handleError);
 };
 
@@ -2358,7 +2340,7 @@ lord.appendDraft = function(draft, visible) {
     var model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")]);
     model.settings = lord.settings();
     model.draft = draft;
-    model.draft.user = model.user;
+    model.draft.user = { level: model.user.level(lord.data("boardName")) };
     var settings = lord.settings();
     var locale = model.site.locale;
     var dateFormat = model.site.dateFormat;
@@ -3048,6 +3030,8 @@ lord.showImageSearchMenu = function(e, input, fileName) {
         return;
     var model = lord.model(["base", "board/" + lord.data("boardName")]);
     model.fileInfo = { name: fileName };
+    model.siteProtocol = window.location.protocol;
+    model.siteDomain = window.location.host;
     file.appendChild(lord.template("imageSearchMenu", model));
     return lord.showMenu(e, input, "#" + id);
 };

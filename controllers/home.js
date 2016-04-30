@@ -6,16 +6,12 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/", function(req, res) {
-    controller.sendCachedHTML(req, res, "home");
-});
-
 router.generateHTML = function() {
     var result = {};
     var model = {};
     model.title = Tools.translate("ololord.js", "pageTitle");
     return controller("home", model).then(function(data) {
-        result["home"] = data;
+        result["index.html"] = data;
         var model = {};
         model.title = Tools.translate("Error 404", "pageTitle");
         model.notFoundMessage = Tools.translate("Page or file not found", "notFoundMessage");
@@ -26,7 +22,7 @@ router.generateHTML = function() {
             });
             return controller("notFound", model);
         }).then(function(data) {
-            result["notFound"] = data;
+            result["notFound.html"] = data;
         });
     }).then(function() {
         return Promise.resolve(result);

@@ -400,3 +400,8 @@ ul.tabWidget > li.activated {
 ul.jqueryFileTree a {
     color: black !important;
 }
+
+.searchActionOptionsContainer {
+    background-color: #D6DAF0;
+    border: 1px solid #CCCCCC;
+}

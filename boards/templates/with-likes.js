@@ -16,7 +16,7 @@ module.exports = function(name, title, options) {
         return [{
             method: "post",
             path: "/like",
-            handler: function(req, res) {
+            handler: function(req, res, next) {
                 var c = {};
                 Tools.parseForm(req).then(function(result) {
                     c.postNumber = +result.fields.postNumber;
@@ -50,14 +50,14 @@ module.exports = function(name, title, options) {
                     Global.generate(board.name, c.post.threadNumber, c.postNumber, "edit");
                     res.send({});
                 }).catch(function(err) {
-                    controller.error(req, res, err, true);
+                    next(err);
                 });
             }
         },
         {
             method: "post",
             path: "/dislike",
-            handler: function(req, res) {
+            handler: function(req, res, next) {
                 var c = {};
                 Tools.parseForm(req).then(function(result) {
                     c.postNumber = +result.fields.postNumber;
@@ -91,7 +91,7 @@ module.exports = function(name, title, options) {
                     Global.generate(board.name, c.post.threadNumber, c.postNumber, "edit");
                     res.send({});
                 }).catch(function(err) {
-                    controller.error(req, res, err, true);
+                    next(err);
                 });
             }
         }];

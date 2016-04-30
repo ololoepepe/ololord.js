@@ -15,70 +15,75 @@
     <ul class="tabWidget nowrap">
         <li data-index="0"
             class="activated"><a onclick="lord.activateTab(this); return false;">{{=it.tr.bansTabText}}</a></li>
-        {{? it.superuserContentVisible}}
-            <li data-index="1"><a onclick="lord.activateTab(this); lord.loadTabContent('users'); return false;">{{=it.tr.usersTabText}}</a></li>
-            <li data-index="2"><a onclick="lord.activateTab(this); lord.loadTabContent('content'); return false;">{{=it.tr.contentTabText}}</a></li>
-        {{?}}
+        <script type="text/javascript">
+            (function() {
+                if (lord.compareRegisteredUserLevels(lord.model("base").user.level(), "SUPERUSER") < 0)
+                    return;
+                var s = '<li data-index="1"><a onclick="lord.activateTab(this); lord.loadTabContent(\'users\'); return false;">{{=it.tr.usersTabText}}</a></li>\n'
+                    + '<li data-index="2"><a onclick="lord.activateTab(this); lord.loadTabContent(\'content\'); return false;">{{=it.tr.contentTabText}}</a></li>';
+                document.open();
+                document.write(s);
+                document.close();
+            })();
+        </script>
     </ul>
     <div>
         <div id="bans" data-index="0" class="loadingMessage">
             <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
             <h1 style="display: inline;">{{=it.tr.loadingBansMessage}}</h1>
         </div>
-        {{? it.superuserContentVisible}}
-            <div id="users" data-index="1" class="loadingMessage" style="display: none;">
-                <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
-                <h1 style="display: inline;">{{=it.tr.loadingUsersMessage}}</h1>
-            </div>
-            <div id="content" data-index="2" style="display: none;">
-                <div class="contentFileTreeColumn"><div id="contentFileTree"></div></div>
-                <div class="contentFileActionColumn">
-                    <div>
-                        <h3 id="currentDirectoryLabel">
-                            {{=it.tr.currentDirectoryLabelText}} ./
-                        </h3>
-                        <div class="directoryActions">
-                            <button id="addFile" onclick="lord.addFile();">{{=it.tr.addFileButtonText}}</button>
-                            <button id="addDirectory" onclick="lord.addFile(true);">{{=it.tr.addDirectoryButtonText}}</button>
-                            <button id="renameDirectory" onclick="lord.renameFile(true);">{{=it.tr.renameDirectoryButtonText}}</button>
-                            <button id="deleteDirectory" onclick="lord.deleteFile(true);">{{=it.tr.deleteDirectoryButtonText}}</button>
-                        </div>
+        <div id="users" data-index="1" class="loadingMessage" style="display: none;">
+            <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
+            <h1 style="display: inline;">{{=it.tr.loadingUsersMessage}}</h1>
+        </div>
+        <div id="content" data-index="2" style="display: none;">
+            <div class="contentFileTreeColumn"><div id="contentFileTree"></div></div>
+            <div class="contentFileActionColumn">
+                <div>
+                    <h3 id="currentDirectoryLabel">
+                        {{=it.tr.currentDirectoryLabelText}} ./
+                    </h3>
+                    <div class="directoryActions">
+                        <button id="addFile" onclick="lord.addFile();">{{=it.tr.addFileButtonText}}</button>
+                        <button id="addDirectory" onclick="lord.addFile(true);">{{=it.tr.addDirectoryButtonText}}</button>
+                        <button id="renameDirectory" onclick="lord.renameFile(true);">{{=it.tr.renameDirectoryButtonText}}</button>
+                        <button id="deleteDirectory" onclick="lord.deleteFile(true);">{{=it.tr.deleteDirectoryButtonText}}</button>
                     </div>
-                    <div>
-                        <h3 id="currentFileLabel">
-                            {{=it.tr.currentFileLabelText}}
-                        </h3>
-                        <div class="fileActions">
-                            <button id="editFile" onclick="lord.editFile();">{{=it.tr.editFileButtonText}}</button>
-                            <button id="renameFile" onclick="lord.renameFile();">{{=it.tr.renameFileButtonText}}</button>
-                            <button id="deleteFile" onclick="lord.deleteFile();">{{=it.tr.deleteFileButtonText}}</button>
-                        </div>
+                </div>
+                <div>
+                    <h3 id="currentFileLabel">
+                        {{=it.tr.currentFileLabelText}}
+                    </h3>
+                    <div class="fileActions">
+                        <button id="editFile" onclick="lord.editFile();">{{=it.tr.editFileButtonText}}</button>
+                        <button id="renameFile" onclick="lord.renameFile();">{{=it.tr.renameFileButtonText}}</button>
+                        <button id="deleteFile" onclick="lord.deleteFile();">{{=it.tr.deleteFileButtonText}}</button>
                     </div>
-                    <div id="frequentlyUsedFileActionsContainer" style="display: none;">
-                        <h3>
-                            {{=it.tr.frequentlyUsedFilesLabelText}}
-                        </h3>
-                        <div id="frequentlyUsedFileActions"></div>
+                </div>
+                <div id="frequentlyUsedFileActionsContainer" style="display: none;">
+                    <h3>
+                        {{=it.tr.frequentlyUsedFilesLabelText}}
+                    </h3>
+                    <div id="frequentlyUsedFileActions"></div>
+                </div>
+                <div>
+                    <h3>
+                        {{=it.tr.serverActionLabelText}}
+                    </h3>
+                    <div class="serverActions">
+                        <button onclick="lord.regenerateCache();">{{=it.tr.regenerateCacheButtonText}}</button>
+                        <button onclick="lord.rerenderPosts();">{{=it.tr.rerenderPostsButtonText}}</button>
+                        <button onclick="lord.rebuildSearchIndex();">{{=it.tr.rebuildSearchIndexButtonText}}</button>
                     </div>
-                    <div>
-                        <h3>
-                            {{=it.tr.serverActionLabelText}}
-                        </h3>
-                        <div class="serverActions">
-                            <button onclick="lord.regenerateCache();">{{=it.tr.regenerateCacheButtonText}}</button>
-                            <button onclick="lord.rerenderPosts();">{{=it.tr.rerenderPostsButtonText}}</button>
-                            <button onclick="lord.rebuildSearchIndex();">{{=it.tr.rebuildSearchIndexButtonText}}</button>
-                        </div>
-                        <div class="serverActions">
-                            <button onclick="lord.reloadBoards();">{{=it.tr.reloadBoardsButtonText}}</button>
-                            <button onclick="lord.reloadConfig();">{{=it.tr.reloadConfigButtonText}}</button>
-                            <button onclick="lord.reloadTemplates();">{{=it.tr.reloadTemplatesButtonText}}</button>
-                            <button onclick="lord.reloadAll();">{{=it.tr.reloadAllButtonText}}</button>
-                        </div>
+                    <div class="serverActions">
+                        <button onclick="lord.reloadBoards();">{{=it.tr.reloadBoardsButtonText}}</button>
+                        <button onclick="lord.reloadConfig();">{{=it.tr.reloadConfigButtonText}}</button>
+                        <button onclick="lord.reloadTemplates();">{{=it.tr.reloadTemplatesButtonText}}</button>
+                        <button onclick="lord.reloadAll();">{{=it.tr.reloadAllButtonText}}</button>
                     </div>
                 </div>
             </div>
-        {{?}}
+        </div>
     </div>
 </div> 
 {{#def.customFooter}}

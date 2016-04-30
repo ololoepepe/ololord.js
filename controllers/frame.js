@@ -5,20 +5,12 @@ var Tools = require("../helpers/tools");
 
 var router = express.Router();
 
-router.get("/frame.html", function(req, res) {
-    controller.sendCachedHTML(req, res, "frame");
-});
-
-var generateFrame = function() {
+router.generateHTML = function() {
     var model = {};
     model.title = Tools.translate("ololord.js", "pageTitle");
     model.extraScripts = [ { fileName: "3rdparty/URI.min.js" } ];
-    return controller("frame", model);
-};
-
-router.generateHTML = function() {
-    return generateFrame().then(function(data) {
-        return Promise.resolve({ frame: data });
+    return controller("frame", model).then(function(data) {
+        return Promise.resolve({ "frame.html": data });
     });
 };
 

@@ -16,7 +16,7 @@
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{=it.board.title}}</a>
     </h1>
 </div>
-<div id="threads">
+<div id="threads" class="archiveThreads">
     {{~it.threads :thread}}
         <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/arch/{{=thread.number}}.html"
            class="archivalThreadLink">{{=thread.number}}.html</a>

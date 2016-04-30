@@ -17,7 +17,7 @@
     </h1>
     {{=it.tr.sortingModeLabelText}}
     <select name="catalogSortingModeSelect" class="select"
-            onchange="location = '/{{=it.site.pathPrefix}}{{=it.board.name}}/catalog.html?sort=' + this.options[this.selectedIndex].value;">
+            onchange="location = '/{{=it.site.pathPrefix}}{{=it.board.name}}/catalog' + ((this.selectedIndex > 0) ? ('-' + this.options[this.selectedIndex].value) : '') + '.html';">
         <option value="date"
                 {{? it.sortMode == "date"}}selected="true"{{?}}>{{=it.tr.sortingModeDateLabelText}}</option>
         <option value="recent"

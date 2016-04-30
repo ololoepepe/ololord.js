@@ -21,11 +21,7 @@ var publicTemplates;
 var langNames = require("../misc/lang-names.json");
 var ipBans = {};
 
-var controller;
-
-mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-html");
-
-controller = function(templateName, modelData) {
+var controller = function(templateName, modelData) {
     var baseModelData = merge.recursive(controller.baseModel(), controller.translationsModel());
     baseModelData = merge.recursive(baseModelData, controller.boardsModel());
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
@@ -106,72 +102,6 @@ controller.sync = function(templateName, modelData) {
         return null;
     modelData = merge.recursive(baseModelData, modelData);
     return template(modelData);
-};
-
-controller.error = function(req, res, error, ajax) {
-    if (!ajax && Util.isNumber(error) && 404 == error)
-        return controller.notFound(req, res);
-    if (error)
-        Global.error(Tools.preferIPv4(req.ip), req.path, error.stack || error);
-    var f = function(error) {
-        var model = {};
-        model.title = Tools.translate("Error", "pageTitle");
-        if (Util.isError(error)) {
-            model.errorMessage = Tools.translate("Internal error", "errorMessage");
-            model.errorDescription = error.message;
-        } else if (Util.isObject(error) && (error.error || error.ban)) {
-            if (error.ban) {
-                model.ban = error.ban;
-            } else {
-                model.errorMessage = error.description ? error.error : Tools.translate("Error", "errorMessage");
-                model.errorDescription = error.description || error.error;
-            }
-        } else {
-            model.errorMessage = Tools.translate("Error", "errorMessage");
-            model.errorDescription = (error && Util.isString(error)) ? error
-                : ((404 == error) ? Tools.translate("404 (not found)", "errorMessage") : "");
-        }
-        return model;
-    };
-    var g = function(error) {
-        try {
-            res.send(f(error));
-        } catch (err) {
-            return Promise.reject(err);
-        }
-        return Promise.resolve();
-    };
-    var h = function(error) {
-        try {
-            res.send(error);
-        } catch (err) {
-            return Promise.reject(err);
-        }
-        return Promise.resolve();
-    };
-    if (Util.isObject(error) && error.ban) {
-        var model = {};
-        model.title = Tools.translate("Ban", "pageTitle");
-        model.ban = error.ban;
-        if (ajax)
-            return h(error);
-        return controller("ban", model).then(function(data) {
-            res.send(data);
-        }).catch(h);
-    } else {
-        return ajax ? g(error) : controller("error", f(error)).then(function(data) {
-            res.send(data);
-        }).catch(g);
-    }
-};
-
-controller.notFound = function(req, res) {
-    Cache.getHTML("notFound").then(function(data) {
-        res.status(404).send(data.data);
-        Global.error(Tools.preferIPv4(req.ip), req.baseUrl, 404);
-    }).catch(function(err) {
-        controller.error(req, res, err);
-    });
 };
 
 controller.checkBan = function(req, res, boardNames, write) {
@@ -413,45 +343,16 @@ controller.postingSpeedString = function(board, lastPostNumber) {
     }
 };
 
-var sendCachedContent = function(req, res, id, type, ajax) {
-    var ifModifiedSince = new Date(req.headers["if-modified-since"]);
-    return Cache[`get${type}`](id, ifModifiedSince).then(function(result) {
-        res.setHeader("Last-Modified", result.lastModified.toUTCString());
-        if (+ifModifiedSince >= +result.lastModified)
-            res.status(304);
-        res.send(result.data);
-    }).catch(function(err) {
-        if ("ENOENT" == err.code)
-            controller.notFound(req, res);
-        else
-            controller.error(res, err, ajax);
-    });
-};
-
-controller.sendCachedHTML = function(req, res, id) {
-    return sendCachedContent(req, res, id, Cache.Types.HTML);
-};
-
-controller.sendCachedJSON = function(req, res, id) {
-    return sendCachedContent(req, res, id, Cache.Types.JSON);
-};
-
-controller.sendCachedRSS = function(req, res, id) {
-    return sendCachedContent(req, res, id, Cache.Types.RSS);
-};
-
 controller.regenerate = function(regenerateArchived) {
-    return Cache.cleanup().then(function() {
-        return Tools.series(["JSON", "HTML"], function(type) {
-            console.log(`Generating ${type} cache, please, wait...`);
-            return Tools.series(require("../controllers").routers, function(router) {
-                var f = router[`generate${type}`];
-                if (typeof f != "function")
-                    return Promise.resolve();
-                return f.call(router).then(function(result) {
-                    return Tools.series(result, function(data, id) {
-                        return Cache[`set${type}`](id, data);
-                    });
+    return Tools.series(["JSON", "HTML"], function(type) {
+        console.log(`Generating ${type} cache, please, wait...`);
+        return Tools.series(require("../controllers").routers, function(router) {
+            var f = router[`generate${type}`];
+            if (typeof f != "function")
+                return Promise.resolve();
+            return f.call(router).then(function(result) {
+                return Tools.series(result, function(data, id) {
+                    return Cache.writeFile(id, data);
                 });
             });
         });
@@ -472,11 +373,11 @@ controller.regenerate = function(regenerateArchived) {
                             var c = {};
                             return BoardModel.getThread(board, threadNumber, true).then(function(model) {
                                 c.model = model;
-                                return Tools.writeFile(`${archPath}/${threadNumber}.json`, JSON.stringify(c.model));
+                                return FS.write(`${archPath}/${threadNumber}.json`, JSON.stringify(c.model));
                             }).then(function() {
                                 return BoardModel.generateThreadHTML(board, threadNumber, c.model, true);
                             }).then(function(data) {
-                                return Tools.writeFile(`${archPath}/${threadNumber}.html`, data);
+                                return FS.write(`${archPath}/${threadNumber}.html`, data);
                             }).catch(function(err) {
                                 Global.error(err.stack || err);
                             }).then(function() {
@@ -593,8 +494,19 @@ controller.generateStatistics = function() {
         });
     }).then(function() {
         o.total.postingSpeed = controller.postingSpeedString(brd, o.total.postCount);
-        Cache.setJSON(`statistics`, JSON.stringify(o));
+        return Global.IPC.send("getConnectionIPs");
+    }).then(function(data) {
+        o.online = Object.keys(data.reduce(function(acc, ips) {
+            Tools.forIn(ips, function(_, ip) {
+                acc[ip] = 1;
+            });
+            return acc;
+        }, {})).length;
+    }).catch(function(err) {
+        Global.error(err);
         return Promise.resolve();
+    }).then(function() {
+        return Cache.writeFile("misc/statistics.json", JSON.stringify(o));
     });
 };
 

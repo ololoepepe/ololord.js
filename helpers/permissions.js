@@ -7,7 +7,6 @@ var p = {
     deleteFile: null,
     deletePost: null,
     editPost: "MODER",
-    seeUserIp: "ADMIN",
     useRawHTMLMarkup: "MODER"
 };
 

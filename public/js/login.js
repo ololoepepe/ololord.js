@@ -14,6 +14,7 @@ lord.loginImplementation = function(form, session) {
         expires: ((session && !realHashpass) ? session.expire : lord.Billion),
         path: "/"
     });
+    lord.removeLocalObject("lastChatCheckDate");
     if (session) {
         lord.setCookie("vkAuth", "true", {
             expires: session.expire,
@@ -31,7 +32,12 @@ lord.doLogin = function(event, form) {
 lord.generateHashpass = function() {
     var form = lord.id("loginForm");
     var hashpass = lord.nameOne("hashpass", form).value;
-    prompt(lord.text("hashpassLabelText"), sha1(hashpass));
+    lord.prompt({
+        title: "hashpassLabelText",
+        value: sha1(hashpass),
+        style: { minWidth: "350px" },
+        readOnly: true
+    });
 };
 
 lord.vkAuth = function() {

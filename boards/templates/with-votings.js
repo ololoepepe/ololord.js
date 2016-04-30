@@ -24,7 +24,7 @@ module.exports = function(name, title, options) {
         return [{
             method: "post",
             path: "/vote",
-            handler: function(req, res) {
+            handler: function(req, res, next) {
                 var c = {};
                 Tools.parseForm(req).then(function(result) {
                     c.postNumber = +result.fields.postNumber;
@@ -89,14 +89,14 @@ module.exports = function(name, title, options) {
                     Global.generate(board.name, c.post.threadNumber, c.postNumber, "edit");
                     res.send({});
                 }).catch(function(err) {
-                    controller.error(req, res, err, true);
+                    next(err);
                 });
             }
         },
         {
             method: "post",
             path: "/unvote",
-            handler: function(req, res) {
+            handler: function(req, res, next) {
                 var c = {};
                 Tools.parseForm(req).then(function(result) {
                     c.postNumber = +result.fields.postNumber;
@@ -140,14 +140,14 @@ module.exports = function(name, title, options) {
                     Global.generate(board.name, c.post.threadNumber, c.postNumber, "edit");
                     res.send({});
                 }).catch(function(err) {
-                    controller.error(req, res, err, true);
+                    next(err);
                 });
             }
         },
         {
             method: "post",
             path: "/setVotingOpened",
-            handler: function(req, res) {
+            handler: function(req, res, next) {
                 var c = {};
                 Tools.parseForm(req).then(function(result) {
                     c.password = Tools.sha1(result.fields.password);
@@ -176,7 +176,7 @@ module.exports = function(name, title, options) {
                     Global.generate(board.name, c.post.threadNumber, c.post.number, "edit");
                     res.send({});
                 }).catch(function(err) {
-                    controller.error(req, res, err, true);
+                    next(err);
                 });
             }
         }];

@@ -1,6 +1,5 @@
 var cluster = require("cluster");
 var FS = require("q-io/fs");
-var FSSync = require("fs-ext");
 var merge = require("merge");
 var mkpath = require("mkpath");
 var moment = require("moment");
@@ -22,9 +21,6 @@ var scheduledGenerateCatalog = {};
 var scheduledGenerateArchive = {};
 var pageCounts = {};
 var workerLoads = {};
-
-mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-json");
-mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/cache-rss");
 
 var postSubject = function(post, maxLength) {
     var title = "";
@@ -412,7 +408,7 @@ var generateThreadHTML = function(board, threadNumber, model, nowrite) {
     }).then(function(data) {
         if (nowrite)
             return Promise.resolve(data);
-        return Cache.setHTML(`thread-${board.name}-${threadNumber}`, data);
+        return Cache.writeFile(`${board.name}/res/${threadNumber}.html`, data);
     });
 };
 
@@ -427,7 +423,7 @@ var generateThread = function(boardName, threadNumber) {
         c.model = model;
         return renderThread(board, c.model.thread);
     }).then(function() {
-        return Cache.setJSON(`thread-${boardName}-${threadNumber}`, JSON.stringify(c.model));
+        return Cache.writeFile(`${board.name}/res/${threadNumber}.json`, JSON.stringify(c.model));
     }).then(function() {
         return generateThreadHTML(board, threadNumber, c.model);
     });
@@ -457,7 +453,7 @@ var generatePage = function(boardName, pageNumber) {
     }).then(function(lastPostNumber) {
         c.model.lastPostNumber = lastPostNumber;
         c.model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
-        return Cache.setJSON(`page-${board.name}-${pageNumber}`, JSON.stringify(c.model));
+        return Cache.writeFile(`${board.name}/${pageNumber}.json`, JSON.stringify(c.model));
     }).then(function() {
         c.model.title = board.title;
         c.model.isBoardPage = true;
@@ -472,7 +468,7 @@ var generatePage = function(boardName, pageNumber) {
         c.model.customPostBodyPart = board.customPostBodyPart() || {};
         return controller("boardPage", c.model);
     }).then(function(data) {
-        return Cache.setHTML(`page-${board.name}-${pageNumber}`, data);
+        return Cache.writeFile(`${board.name}/${(pageNumber > 0) ? pageNumber : "index"}.html`, data);
     });
 };
 
@@ -502,7 +498,8 @@ var generateCatalog = function(boardName) {
         }).then(function(lastPostNumber) {
             c.model.lastPostNumber = lastPostNumber;
             c.model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
-            return Cache.setJSON(`catalog-${sortMode}-${board.name}`, JSON.stringify(c.model));
+            return Cache.writeFile(`${board.name}/catalog${("date" != sortMode) ? ("-" + sortMode) : ""}.json`,
+                JSON.stringify(c.model));
         }).then(function() {
             c.model.title = board.title;
             c.model.isBoardPage = true;
@@ -511,7 +508,7 @@ var generateCatalog = function(boardName) {
             c.model.tr = controller.translationsModel();
             return controller("catalogPage", c.model);
         }).then(function(data) {
-            return Cache.setHTML(`catalog-${sortMode}-${board.name}`, data);
+            return Cache.writeFile(`${board.name}/catalog${("date" != sortMode) ? ("-" + sortMode) : ""}.html`, data);
         });
     });
 };
@@ -551,14 +548,14 @@ var generateArchive = function(boardName) {
     }).then(function(lastPostNumber) {
         model.lastPostNumber = lastPostNumber;
         model.postingSpeed = controller.postingSpeedString(board, lastPostNumber);
-        return Cache.setJSON(`archive-${board.name}`, JSON.stringify(model));
+        return Cache.writeFile(`${board.name}/archive.json`, JSON.stringify(model));
     }).then(function() {
         model.title = board.title;
         model.board = controller.boardModel(board).board;
         model.tr = controller.translationsModel();
         return controller("archivePage", model);
     }).then(function(data) {
-        return Cache.setHTML(`archive-${board.name}`, data);
+        return Cache.writeFile(`${board.name}/archive.html`, data);
     });
 };
 
@@ -673,12 +670,12 @@ module.exports.do_generateThread = function(key, data) {
     }
     case "edit": {
         var c = {};
-        var threadId = `thread-${boardName}-${threadNumber}`;
+        var threadId = `${boardName}/res/${threadNumber}.json`;
         var board = Board.board(boardName);
         if (!board)
             return Promise.reject(Tools.translate("Invalid board"));
-        return Cache.getJSON(threadId).then(function(data) {
-            c.thread = JSON.parse(data.data);
+        return Cache.readFile(threadId).then(function(data) {
+            c.thread = JSON.parse(data);
             c.lastPosts = c.thread.thread.lastPosts.reduce(function(acc, post) {
                 acc[post.number] = post;
                 return acc;
@@ -729,16 +726,16 @@ module.exports.do_generateThread = function(key, data) {
             return p;
         }).then(function() {
             c.thread.thread.lastPosts = Tools.toArray(c.lastPosts);
-            return Cache.setJSON(threadId, JSON.stringify(c.thread));
+            return Cache.writeFile(threadId, JSON.stringify(c.thread));
         }).then(function() {
             return generateThreadHTML(board, threadNumber, c.thread);
         });
     }
     case "delete": {
         return Database.db.sadd("deletedThreads", data.boardName + ":" + data.threadNumber).then(function() {
-            return Cache.removeJSON(`thread-${boardName}-${threadNumber}`);
+            return Cache.removeFile(threadId);
         }).then(function() {
-            return Cache.removeHTML(`thread-${boardName}-${threadNumber}`);
+            return Cache.removeFile(`${boardName}/res/${threadNumber}.html`);
         });
     }
     default:
@@ -965,9 +962,10 @@ module.exports.generateRSS = function(currentProcess) {
                         indent: "    ",
                         newline: "\n"
                     },
+                    allowSurrogateChars: true,
                     cdata: true
                 });
-                return Cache.setRSS(boardName, builder.buildObject(doc));
+                return Cache.writeFile(`${board.name}/rss.xml`, builder.buildObject(doc));
             });
         });
     });
