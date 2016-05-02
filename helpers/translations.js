@@ -448,5 +448,7 @@ module.exports = function(tr) {
     translate("Infinite scroll", "infiniteScrollLabelText");
     translate("Page", "pageText");
     translate("Regenerate archived threads", "regenerateArchivedThreadsLabelText");
+    translate("Show search field", "showSearchActionText");
+    translate("Hide search field", "hideSearchActionText");
     return tr;
 };

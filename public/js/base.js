@@ -2055,17 +2055,6 @@ lord.initializeOnLoadBase = function() {
         if (favoritesButton)
             favoritesButton.title += " (" + key("showFavorites") + ")";
     }
-    $(".searchAction > form").hover(function() {
-        lord.searchActionHovered = true;
-    }, function() {
-        lord.searchActionHovered = false;
-    });
-    $(".searchAction > form").focusin(function() {
-        $(".searchActionOptionsContainer", this).css("display", "");
-    }).focusout(function() {
-        if (!lord.searchActionHovered)
-            $(".searchActionOptionsContainer", this).css("display", "none");
-    });
     if (lord.getLocalObject("showNewPosts", true))
         lord.showNewPosts();
     if (lord.getLocalObject("chatEnabled", true))
@@ -2140,6 +2129,21 @@ lord.initializeOnLoadBase = function() {
         }
         lord.lastWindowSize = n;
     });
+    if (lord.getLocalObject("stickyToolbar", true))
+        $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
+};
+
+lord.showHideSearchAction = function(a) {
+    var sa = lord.queryOne(".searchAction");
+    var visible = !sa.style.display;
+    var img = lord.queryOne("img", a);
+    img.src = img.src.replace(/search(_hide)?\.png$/, visible ? "search.png" : "search_hide.png");
+    a.title = lord.text(visible ? "showSearchActionText" : "hideSearchActionText");
+    sa.style.display = visible ? "none" : "";
+    if (!visible) {
+        $(a).closest(".toolbar, .navbar").append(sa);
+        $(sa).find(".searchActionInput").focus().select();
+    }
     if (lord.getLocalObject("stickyToolbar", true))
         $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
 };

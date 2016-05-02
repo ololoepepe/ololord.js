@@ -1,4 +1,4 @@
-<div class="searchAction">
+<div class="searchAction" {{? !/\/search\.html$/.test(window.location.pathname)}}style="display: none;"{{?}}>
     <form method="get" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}search.html"
           enctype="multipart/form-data">
         <div class="searchActionInputContainer">
@@ -7,7 +7,7 @@
             <input style="background: url(/{{=it.site.pathPrefix}}img/search.png) center no-repeat; border: solid 0px; width: 16px; height: 16px;"
                    type="submit" title="{{=it.tr.searchButtonText}}" class="buttonImage" value="" />
         </div>
-        <div class="searchActionOptionsContainer" style="display: none;">
+        <div class="searchActionOptionsContainer">
             <select name="board" class="select searchActionSelect"
                     onchange="$(this).closest('.searchAction').find('.searchActionInput').focus();">
                 <option value="*" selected="true">[*] {{=it.tr.allBoardsText}}</option>

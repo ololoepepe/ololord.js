@@ -2420,7 +2420,8 @@
     "404 (not found)": {
         "errorMessage": {
             "value": "404 (не найдено)"
-        }
+        },
+        "_obsolete": true
     },
     "Invalid page number": {
         "_default": {
@@ -3199,6 +3200,16 @@
     "Captcha is solved incorrectly": {
         "_default": {
             "value": "Капча решена неправильно"
+        }
+    },
+    "Show search field": {
+        "showSearchActionText": {
+            "value": "Показать поиск"
+        }
+    },
+    "Hide search field": {
+        "hideSearchActionText": {
+            "value": "Скрыть поиск"
         }
     }
 }
