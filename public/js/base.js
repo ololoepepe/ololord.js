@@ -1139,24 +1139,27 @@ lord.trackDrop = function(e) {
     if (!draggedTrack || !replacedTrack)
         return;
     var draggedFileName = lord.data("fileName", draggedTrack);
+    var draggedHref = lord.data("href", draggedTrack);
     var replacedFileName = lord.data("fileName", replacedTrack);
+    var replacedHref = lord.data("href", replacedTrack);
     var draggedIndex;
     var replacedIndex;
     var tracks = lord.getLocalObject("playerTracks", []);
     tracks.some(function(track, i) {
-        if (draggedFileName == track.fileName) {
+        if ((track.fileName && draggedFileName == track.fileName) || (track.href && draggedHref == track.href)) {
             draggedIndex = i;
             if (replacedIndex >= 0)
                 return true;
         }
-        if (replacedFileName == track.fileName) {
+        if ((track.fileName && replacedFileName == track.fileName) || (track.href && replacedHref == track.href)) {
             replacedIndex = i;
             if (draggedIndex >= 0)
                 return true;
         }
     });
-    if (draggedIndex >= 0 && replacedIndex >= 0 && draggedIndex != replacedIndex)
-        tracks.splice(replacedIndex, 0, tracks.splice(draggedIndex, 1)[0]);
+    if (draggedIndex < 0 || replacedIndex < 0 || draggedIndex == replacedIndex)
+        return;
+    tracks.splice(replacedIndex, 0, tracks.splice(draggedIndex, 1)[0]);
     lord.setLocalObject("playerTracks", tracks);
     lord.setLocalObject("playerMustReorder", lord.WindowID);
     lord.checkPlaylist();

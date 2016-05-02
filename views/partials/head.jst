@@ -7,7 +7,7 @@
     {{? it.extraStylesheets}}
         {{~it.extraStylesheets :stylesheet}}
             {{? stylesheet.source}}
-                <link rel="stylesheet" type="text/css"  href="{{=stylesheet.source}}">
+                <link rel="stylesheet" type="text/css" href="{{=stylesheet.source}}">
             {{?? stylesheet.fileName}}
                 {{ out += it.stylesheet(stylesheet.fileName, stylesheet.noEmbed); }}
             {{?}}
