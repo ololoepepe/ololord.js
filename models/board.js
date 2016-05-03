@@ -285,6 +285,16 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
             return thread.number == number;
         }
     }).then(function(threads) {
+        if (threads.length == 1)
+            return Promise.resolve(threads);
+        return Database.getThreads(board.name, {
+            limit: 1,
+            filterFunction: function(thread) {
+                return thread.number == number;
+            },
+            archived: true
+        });
+    }).then(function(threads) {
         if (threads.length != 1)
             return Promise.reject(Tools.translate("No such thread"));
         c.thread = threads[0];
