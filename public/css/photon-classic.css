@@ -245,6 +245,7 @@ span.newPostCount {
 
 .postSubject {
     font-weight: bold;
+    color: #002244;
 }
 
 .tripcode {
@@ -422,4 +423,8 @@ ul.jqueryFileTree a {
 
 .theTitle {
     color: #FF6600;
+}
+
+.postformLabel {
+    color: #002244;
 }
