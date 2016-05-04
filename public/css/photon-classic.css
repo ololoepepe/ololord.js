@@ -1,11 +1,11 @@
-/*Photon*/
+/*Photon Classic*/
 
 .ui-tooltip {
     border: 1px solid #CCCCCC !important;
 }
 
 .ui-tooltip-content {
-    font-family: Verdana,sans-serif;
+    font-family: "Trebuchet MS", Trebuchet, tahoma, serif;
     background-color: #DDDDDD;
 }
 
@@ -23,7 +23,8 @@
 
 body  {
     background-color: #EEEEEE;
-    font-family: Verdana,sans-serif;
+    font-family: "Trebuchet MS", Trebuchet, tahoma, serif;
+    font-size: inherit;
 }
 
 a {
@@ -102,7 +103,7 @@ hr {
 }
 
 .postSequenceNumber {
-    color: green;
+    color: #0066FF;
 }
 
 .hiddenPostList > div:nth-child(even) {
@@ -231,7 +232,7 @@ span.newPostCount {
 .menu {
     background: #DDDDDD !important;
     border: 1px solid #CCCCCC !important;
-    font-family: Verdana,sans-serif !important;
+    font-family: "Trebuchet MS", Trebuchet, tahoma, serif !important;
 }
 
 .bannedFor {
@@ -252,7 +253,12 @@ span.newPostCount {
 
 .moderName {
     font-weight: bold;
-    color: blue;
+    color: red;
+}
+
+.userName {
+    font-weight: bold;
+    color: #004A99;
 }
 
 .postformFile.drag {
