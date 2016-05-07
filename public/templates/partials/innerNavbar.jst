@@ -61,6 +61,13 @@
                                                                           class="buttonImage"
                                                                           width="16" height="16"></a>]</span>
 {{?}}
+{{? !/\/search\.html$/.test(window.location.pathname)}}
+    <span class="navbarItem">[<a href="javascript:void(0);" name="searchButton"
+                                 onclick="lord.showHideSearchAction(this); return false;"
+                                 title="{{=it.tr.showSearchActionText}}"><img src="/{{=it.site.pathPrefix}}img/search.png"
+                                                                              class="buttonImage"
+                                                                              width="16" height="16"></a>]</span>
+{{?}}
 {{? it.settings.chatEnabled}}
     <span class="navbarItem">[<a href="javascript:void(0);" name="chatButton" onclick="lord.showChat(); return false;"
                                  title="{{=it.tr.chatText}}"><img src="/{{=it.site.pathPrefix}}img/chat.png"

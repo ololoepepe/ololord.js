@@ -1139,24 +1139,27 @@ lord.trackDrop = function(e) {
     if (!draggedTrack || !replacedTrack)
         return;
     var draggedFileName = lord.data("fileName", draggedTrack);
+    var draggedHref = lord.data("href", draggedTrack);
     var replacedFileName = lord.data("fileName", replacedTrack);
+    var replacedHref = lord.data("href", replacedTrack);
     var draggedIndex;
     var replacedIndex;
     var tracks = lord.getLocalObject("playerTracks", []);
     tracks.some(function(track, i) {
-        if (draggedFileName == track.fileName) {
+        if ((track.fileName && draggedFileName == track.fileName) || (track.href && draggedHref == track.href)) {
             draggedIndex = i;
             if (replacedIndex >= 0)
                 return true;
         }
-        if (replacedFileName == track.fileName) {
+        if ((track.fileName && replacedFileName == track.fileName) || (track.href && replacedHref == track.href)) {
             replacedIndex = i;
             if (draggedIndex >= 0)
                 return true;
         }
     });
-    if (draggedIndex >= 0 && replacedIndex >= 0 && draggedIndex != replacedIndex)
-        tracks.splice(replacedIndex, 0, tracks.splice(draggedIndex, 1)[0]);
+    if (draggedIndex < 0 || replacedIndex < 0 || draggedIndex == replacedIndex)
+        return;
+    tracks.splice(replacedIndex, 0, tracks.splice(draggedIndex, 1)[0]);
     lord.setLocalObject("playerTracks", tracks);
     lord.setLocalObject("playerMustReorder", lord.WindowID);
     lord.checkPlaylist();
@@ -2052,17 +2055,6 @@ lord.initializeOnLoadBase = function() {
         if (favoritesButton)
             favoritesButton.title += " (" + key("showFavorites") + ")";
     }
-    $(".searchAction > form").hover(function() {
-        lord.searchActionHovered = true;
-    }, function() {
-        lord.searchActionHovered = false;
-    });
-    $(".searchAction > form").focusin(function() {
-        $(".searchActionOptionsContainer", this).css("display", "");
-    }).focusout(function() {
-        if (!lord.searchActionHovered)
-            $(".searchActionOptionsContainer", this).css("display", "none");
-    });
     if (lord.getLocalObject("showNewPosts", true))
         lord.showNewPosts();
     if (lord.getLocalObject("chatEnabled", true))
@@ -2137,6 +2129,21 @@ lord.initializeOnLoadBase = function() {
         }
         lord.lastWindowSize = n;
     });
+    if (lord.getLocalObject("stickyToolbar", true))
+        $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
+};
+
+lord.showHideSearchAction = function(a) {
+    var sa = lord.queryOne(".searchAction");
+    var visible = !sa.style.display;
+    var img = lord.queryOne("img", a);
+    img.src = img.src.replace(/search(_hide)?\.png$/, visible ? "search.png" : "search_hide.png");
+    a.title = lord.text(visible ? "showSearchActionText" : "hideSearchActionText");
+    sa.style.display = visible ? "none" : "";
+    if (!visible) {
+        $(a).closest(".toolbar, .navbar").append(sa);
+        $(sa).find(".searchActionInput").focus().select();
+    }
     if (lord.getLocalObject("stickyToolbar", true))
         $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
 };

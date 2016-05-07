@@ -640,12 +640,8 @@ ul.tabWidget > li > a {
 }
 
 .searchActionOptionsContainer {
-    position: absolute;
-    top: -moz-calc(100% + 4px);
-    top: -webkit-calc(100% + 4px);
-    top: -o-calc(100% + 4px);
-    top: calc(100% + 4px);
-    left: 8px;
+    margin-top: 4px;
+    margin-left: 8px;
     padding: 4px;
     text-align: left;
 }
