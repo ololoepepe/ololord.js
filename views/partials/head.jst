@@ -201,8 +201,8 @@
                 lord.queryOne("head").appendChild(style);
             {{?}}
             if (settings.userCssEnabled) {
-                css = lord.getLocalObject("userCss", "");
-                style = lord.node("style");
+                var css = lord.getLocalObject("userCss", "");
+                var style = lord.node("style");
                 style.type = "text/css";
                 if (style.styleSheet)
                     style.styleSheet.cssText = css;
