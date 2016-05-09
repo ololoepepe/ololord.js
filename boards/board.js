@@ -163,6 +163,7 @@ Board.boards = {};
 };
 
 /*public*/ Board.prototype.info = function() {
+    var _this = this;
     var model = {
         name: this.name,
         title: this.title,
@@ -191,7 +192,7 @@ Board.boards = {};
         opModeration: this.opModeration
     };
     this.customBoardInfoFields().forEach(function(field) {
-        model[field] = board[field];
+        model[field] = _this[field];
     });
     return model;
 };
