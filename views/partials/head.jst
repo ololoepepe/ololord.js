@@ -181,9 +181,28 @@
             document.close();
             lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
             lord.createStylesheetLink("3rdparty/jquery-ui/" + settings.style.name + "/jquery-ui.min.css", true);
-            if (settings.userCssEnabled) {
-                var css = lord.getLocalObject("userCss", "");
+            {{? it.isBoardPage}}
+                var css = "";
+                lord.each(lord.getLocalObject("hiddenPosts", {}), function(val, key) {
+                    if (key.split("/").shift() != "{{=it.board.name}}" || !val)
+                        return;
+                    var pn = key.split("/").pop();
+                    css += '[data-number="' + pn + '"] > .postBody { display: none; }\n';
+                    css += '#thread' + pn + ' > .omittedPosts { display: none; }\n';
+                    css += '#thread' + pn + ' > .threadPosts { display: none; }\n';
+                });
                 var style = lord.node("style");
+                style.id = "tmpHiddenPosts";
+                style.type = "text/css";
+                if (style.styleSheet)
+                    style.styleSheet.cssText = css;
+                else
+                    style.appendChild(lord.node("text", css));
+                lord.queryOne("head").appendChild(style);
+            {{?}}
+            if (settings.userCssEnabled) {
+                css = lord.getLocalObject("userCss", "");
+                style = lord.node("style");
                 style.type = "text/css";
                 if (style.styleSheet)
                     style.styleSheet.cssText = css;

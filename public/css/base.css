@@ -410,10 +410,6 @@ span.newPostCount {
     display: none;
 }
 
-.opPost.hidden ~ .post {
-    display: none;
-}
-
 .post.temporary {
     display: block;
     box-sizing: border-box;

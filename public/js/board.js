@@ -1119,6 +1119,7 @@ lord.applySpells = function(posts, force) {
         });
         return Promise.all(promises);
     }).then(function() {
+        $("tmpHiddenPosts").remove();
         return Promise.resolve();
     });
 };
@@ -2696,8 +2697,15 @@ lord.processPosts = function(parent) {
                 span.style.display = "none";
             });
         }
-        if (lord.getLocalObject("spellsEnabled", true))
+        if (lord.getLocalObject("spellsEnabled", true)) {
             lord.applySpells(posts).catch(lord.handleError);
+        } else {
+            var hiddenPosts = lord.getLocalObject("hiddenPosts", {});
+            posts.forEach(function(post) {
+                lord.processPost(hiddenPosts, post);
+            });
+            $("tmpHiddenPosts").remove();
+        }
         return Promise.resolve();
     });
 };
