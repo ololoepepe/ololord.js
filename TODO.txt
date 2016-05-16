@@ -3,3 +3,4 @@
 * Refactor: use ES-2015 features
 * Add ability to edit file ratings
 * Add ability to use Redis cluster
+* Implement better sidebar
