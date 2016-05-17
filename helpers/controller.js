@@ -128,9 +128,6 @@ controller.checkBan = function(req, res, boardNames, write) {
 
 controller.baseModel = function() {
     return {
-        server: {
-            uptime: process.uptime()
-        },
         site: {
             protocol: config("site.protocol", "http"),
             domain: config("site.domain", "localhost:8080"),
@@ -502,6 +499,7 @@ controller.generateStatistics = function() {
             });
             return acc;
         }, {})).length;
+        o.uptime = process.uptime();
     }).catch(function(err) {
         Global.error(err);
         return Promise.resolve();
