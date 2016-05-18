@@ -182,7 +182,19 @@
             lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
             lord.createStylesheetLink("3rdparty/jquery-ui/" + settings.style.name + "/jquery-ui.min.css", true);
             {{? it.isBoardPage}}
-                var css = "";
+                var style = lord.node("style");
+                style.id = "postBodySize";
+                style.type = "text/css";
+                var m = lord.deviceType("mobile") ? 0 : 270;
+                var k = lord.deviceType("mobile") ? 0 : 30;
+                var css = ".postBody { max-width: " + ($(window).width() - 30) + "px; }";
+                css += ".postFile ~ .postText > blockquote { max-width: " + ($(window).width() - (30 + k + m)) + "px; }";
+                if (style.styleSheet)
+                    style.styleSheet.cssText = css;
+                else
+                    style.appendChild(lord.node("text", css));
+                document.head.appendChild(style);
+                css = "";
                 lord.each(lord.getLocalObject("hiddenPosts", {}), function(val, key) {
                     if (key.split("/").shift() != "{{=it.board.name}}" || !val)
                         return;
@@ -191,7 +203,7 @@
                     css += '#thread' + pn + ' > .omittedPosts { display: none; }\n';
                     css += '#thread' + pn + ' > .threadPosts { display: none; }\n';
                 });
-                var style = lord.node("style");
+                style = lord.node("style");
                 style.id = "tmpHiddenPosts";
                 style.type = "text/css";
                 if (style.styleSheet)

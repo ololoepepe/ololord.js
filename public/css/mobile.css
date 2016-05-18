@@ -9,10 +9,6 @@ body {
     cursor: pointer;
 }
 
-blockquote {
-    max-width: 550px;
-}
-
 .navbar.navbarFrame {
     font-size: 1.2em;
 }

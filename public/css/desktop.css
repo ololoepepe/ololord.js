@@ -6,10 +6,6 @@ input, select {
     font-size: 14.4px;
 }
 
-blockquote {
-    max-width: 1200px;
-}
-
 .navbar.navbarFrame {
     font-size: 1em;
 }

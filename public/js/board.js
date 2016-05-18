@@ -2673,7 +2673,6 @@ lord.downloadThreadFiles = function(el) {
 lord.processPosts = function(parent) {
     if (!parent)
         parent = document.body;
-    $(".postBody", parent).css("maxWidth", ($(window).width() - 30) + "px");
     var posts = ($(parent).hasClass("post") || $(parent).hasClass("opPost")) ? [parent]
         : lord.queryAll(".post, .opPost", parent);
     return lord.series(lord.postProcessors, function(f) {
@@ -3104,7 +3103,7 @@ lord.appendHotkeyShortcuts = function() {
 };
 
 lord.initializeOnLoadBoard = function() {
-    $(".postBody", document.body).css("maxWidth", ($(window).width() - 30) + "px");
+    lord.adjustPostBodySize();
     var c = {};
     c.model = lord.model(["base", "tr", "boards", "board/" + lord.data("boardName")]);
     c.model.settings = lord.settings();

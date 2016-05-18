@@ -2029,6 +2029,24 @@ lord.insertMumWatchingStylesheet = function() {
     document.head.appendChild(style);
 };
 
+lord.adjustPostBodySize = function(width) {
+    var style = lord.id("postBodySize");
+    if (!style)
+        return;
+    var nstyle = lord.node("style");
+    nstyle.id = "postBodySize";
+    nstyle.type = "text/css";
+    width = width || $(window).width();
+    var m = lord.deviceType("mobile") ? 0 : 270;
+    var css = ".postBody { max-width: " + (width - 30) + "px; }\n";
+    css += ".postFile ~ .postText > blockquote { max-width: " + (width - m) + "px; }";
+    if (nstyle.styleSheet)
+        nstyle.styleSheet.cssText = css;
+    else
+        nstyle.appendChild(lord.node("text", css));
+    document.head.replaceChild(nstyle, style);
+};
+
 lord.initializeOnLoadBase = function() {
     lord.hashChangeHandler(lord.hash());
     lord.series(lord.pageProcessors, function(f) {
@@ -2123,7 +2141,7 @@ lord.initializeOnLoadBase = function() {
         if (n.height != lord.lastWindowSize.height && !$("#player").hasClass("minimized"))
             lord.updatePlayerTracksHeight();
         if (n.width != lord.lastWindowSize.width) {
-            $(".postBody").css("maxWidth", (n.width - 30) + "px");
+            lord.adjustPostBodySize(n.width);
             if (lord.getLocalObject("stickyToolbar", true))
                 $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
         }
