@@ -1,0 +1,59 @@
+<aside id="sidebar" {{? !it.sidebarVisible}}style="display: none;"{{?}}>
+    <input type="image" name="sidebarButton" title="{{=it.tr.hideSidebarButtonText}}" class="buttonImage"
+           src="/{{=it.site.pathPrefix}}favicon.ico" width="20" height="20"
+           onclick="lord.showHideSidebar(); return false;" />
+    <div id="sidebarButtons">
+        {{? it.user.loggedIn}}
+            <form method="post" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}action/logout"
+                  enctype="application/x-www-form-urlencoded" class="inlineForm"
+                  onsubmit="lord.doLogout(event, this); return false;">
+                [<input type="image" name="submit" src="/{{=it.site.pathPrefix}}img/logout.png" class="buttonImage"
+                        title="{{=it.tr.logoutText}}{{? it.loginMessageText}} [{{=it.loginMessageText}}]{{?}}" />]
+            </form>
+        {{??}}
+            [<a href="javascript:void(0);"
+                onclick="lord.redirectToLoginPage();"><img src="/{{=it.site.pathPrefix}}img/login.png"
+                                                           class="buttonImage" title="{{=it.tr.loginText}}"></a>]
+        {{?}}
+        {{? it.user.isModer()}}
+        [<a href="/{{=it.site.pathPrefix}}manage.html"
+            title="{{=it.tr.toManagePageText}}"><img src="/{{=it.site.pathPrefix}}img/gear.png"
+                                                     class="buttonImage" width="16" height="16"></a>]
+        {{?}}
+        [<input type="image" name="settingsButton" title="{{=it.tr.settingsButtonText}}" class="buttonImage"
+                src="/{{=it.site.pathPrefix}}img/settings.png" onclick="lord.showSettings(); return false;" />]
+    </div>
+    <div id="sidebarContent">
+        <div class="navbar navbarFrame">
+            {{~it.boardGroups :group}}
+                {{? group.title}}
+                    <b>{{!group.title}}</b>
+                    <br />
+                {{?}}
+                {{~group.boards :board}}
+                    {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
+                        <span class="navbarItem navbarItemBoard wrap">
+                            <a href="/{{=it.site.pathPrefix}}{{=board.name}}"
+                               data-board="{{=board.name}}">{{=board.title}}</a></span>
+                        <br />
+                    {{?}}
+                {{~}}
+            {{~}}
+            <hr />
+            <img src="/{{=it.site.pathPrefix}}img/markup.png" class="buttonImage" width="16" height="16">
+            <a href="/{{=it.site.pathPrefix}}markup.html">{{=it.tr.toMarkupPageText}}</a>
+            <br />
+            <img src="/{{=it.site.pathPrefix}}img/homepage.png" class="buttonImage" width="16" height="16">
+            <a href="/{{=it.site.pathPrefix}}">{{=it.tr.toHomePageText}}</a>
+            <br />
+            <img src="/{{=it.site.pathPrefix}}img/question.png" class="buttonImage" width="16" height="16">
+            <a href="/{{=it.site.pathPrefix}}faq.html">{{=it.tr.toFaqPageText}}</a>
+            <br />
+            {{? it.user.isModer()}}
+                <img src="/{{=it.site.pathPrefix}}img/gear.png" class="buttonImage" width="16" height="16">
+                <a href="/{{=it.site.pathPrefix}}manage.html">{{=it.tr.toManagePageText}}</a>
+                <br />
+            {{?}}
+        </div>
+    </div>
+</aside>

@@ -12,6 +12,8 @@
 {{? it.board.captchaEnabled}}
     <div id="hiddenCaptcha" style="display: none;"></div>
 {{?}}
+{{#def.sidebar}}
+{{#def.content}}
 {{~["top", "bottom"] :target}}
     {{#def.navigationButton}}
 {{~}}
@@ -145,5 +147,6 @@
 {{#def.postingSpeed}}
 <a id="bottom"></a>
 {{#def.customFooter}}
+</div>
 </body>
 </html>

@@ -494,3 +494,12 @@ ul.jqueryFileTree a {
     border: 1px solid #575757;
     border-radius: 5px;
 }
+
+#sidebar {
+    background-color: #212121;
+    border-right: 1px solid #575757;
+}
+
+#sidebarContent {
+    border-top: 1px solid #575757;
+}

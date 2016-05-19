@@ -29,7 +29,6 @@
 !editPostDialog.jst
 !favoritesDialog.jst
 !favoritesElement.jst
-!frameListNavigation.jst
 !googleRecaptchaV1Widget.jst
 !googleRecaptchaWidget.jst
 !hiddenPostList.jst
@@ -53,6 +52,7 @@
 !searchResults.jst
 !settingsDialog.jst
 !setVotingOpenedDialog.jst
+!sidebar.jst
 !synchronizationDialog.jst
 !thread.jst
 !threadPageLower.jst

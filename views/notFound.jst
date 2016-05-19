@@ -4,6 +4,8 @@
 <body {{#def.baseData}}>
 <script id="model-notFoundImageFileNames"
         type="application/json">{{ out += JSON.stringify(it.notFoundImageFileNames); }}</script>
+{{#def.sidebar}}
+{{#def.content}}
 {{#def.toolbar}}
 {{#def.player}}
 {{#def.customHeader}}
@@ -24,5 +26,6 @@
     })();
 </script>
 {{#def.customFooter}}
+</div>
 </body>
 </html>

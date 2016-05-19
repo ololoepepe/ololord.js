@@ -1,6 +1,7 @@
 *
 !banner.jst
 !baseData.jst
+!content.jst
 !customFooter.jst
 !customHeader.jst
 !head.jst
@@ -10,6 +11,7 @@
 !player.jst
 !postingSpeed.jst
 !searchAction.jst
+!sidebar.jst
 !threadActions.jst
 !toolbar.jst
 !.gitignore

@@ -187,8 +187,9 @@
                 style.type = "text/css";
                 var m = lord.deviceType("mobile") ? 0 : 270;
                 var k = lord.deviceType("mobile") ? 0 : 30;
-                var css = ".postBody { max-width: " + ($(window).width() - 30) + "px; }";
-                css += ".postFile ~ .postText > blockquote { max-width: " + ($(window).width() - (30 + k + m)) + "px; }";
+                var z = (!lord.deviceType("mobile") && lord.getLocalObject("sidebarVisible", true)) ? 178 : 0;
+                var css = ".postBody { max-width: " + ($(window).width() - (30 + z)) + "px; }";
+                css += ".postFile ~ .postText > blockquote { max-width: " + ($(window).width() - (30 + k + m + z)) + "px; }";
                 if (style.styleSheet)
                     style.styleSheet.cssText = css;
                 else

@@ -27,16 +27,10 @@ input, select {
 }
 
 .searchActionInput {
-    width: -moz-calc(100% - 30px);
-    width: -webkit-calc(100% - 30px);
-    width: -o-calc(100% - 30px);
     width: calc(100% - 30px);
 }
 
 .searchActionOptionsContainer {
-    width: -moz-calc(100% - 44px);
-    width: -webkit-calc(100% - 44px);
-    width: -o-calc(100% - 44px);
     width: calc(100% - 44px);
 }
 
@@ -99,17 +93,11 @@ input, select {
 }
 
 #playerDurationSlider {
-    width: -moz-calc(75% - 12px);
-    width: -webkit-calc(75% - 12px);
-    width: -o-calc(75% - 12px);
     width: calc(75% - 12px);
 }
 
 #playerVolumeSlider {
     display: inline-block;
-    width: -moz-calc(25% - 12px);
-    width: -webkit-calc(25% - 12px);
-    width: -o-calc(25% - 12px);
     width: calc(25% - 12px);
 }
 
@@ -118,24 +106,15 @@ input, select {
 }
 
 .movablePlayerConstrolsSliders {
-    width: -moz-calc(100% - 44px);
-    width: -webkit-calc(100% - 44px);
-    width: -o-calc(100% - 44px);
     width: calc(100% - 44px);
 }
 
 .movablePlayerDurationSlider {
-    width: -moz-calc(75% - 12px);
-    width: -webkit-calc(75% - 12px);
-    width: -o-calc(75% - 12px);
     width: calc(75% - 12px);
 }
 
 .movablePlayerVolumeSlider {
     display: inline-block;
-    width: -moz-calc(25% - 12px);
-    width: -webkit-calc(25% - 12px);
-    width: -o-calc(25% - 12px);
     width: calc(25% - 12px);
 }
 
@@ -191,8 +170,14 @@ input, select {
 }
 
 .frameContent {
-    width: -moz-calc(100% - 248px);
-    width: -webkit-calc(100% - 248px);
-    width: -o-calc(100% - 248px);
     width: calc(100% - 248px);
+}
+
+#sidebar {
+    z-index: 1;
+}
+
+#sidebarContent {
+    top: 25px;
+    height: calc(100% - 25px);
 }

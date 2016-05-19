@@ -450,5 +450,7 @@ module.exports = function(tr) {
     translate("Regenerate archived threads", "regenerateArchivedThreadsLabelText");
     translate("Show search field", "showSearchActionText");
     translate("Hide search field", "hideSearchActionText");
+    translate("Show sidebar", "showSidebarButtonText");
+    translate("Hide sidebar", "hideSidebarButtonText");
     return tr;
 };

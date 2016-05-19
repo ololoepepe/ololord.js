@@ -3211,5 +3211,15 @@
         "hideSearchActionText": {
             "value": "Скрыть поиск"
         }
+    },
+    "Show sidebar": {
+        "showSidebarButtonText": {
+            "value": "Показать боковую панель"
+        }
+    },
+    "Hide sidebar": {
+        "hideSidebarButtonText": {
+            "value": "Скрыть боковую панель"
+        }
     }
 }

@@ -1432,8 +1432,7 @@ lord.showNewPosts = function() {
                     parent.insertBefore(lord.node("text", " "), a);
                 });
             });
-            if (lord.getLocalObject("stickyToolbar", true))
-                $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
+            lord.adjustContentPadding();
         }
         lord.each(result, function(lastPostNumber, boardName) {
             if (lastPostNumbers[boardName])
@@ -2029,16 +2028,16 @@ lord.insertMumWatchingStylesheet = function() {
     document.head.appendChild(style);
 };
 
-lord.adjustPostBodySize = function(width) {
+lord.adjustPostBodySize = function() {
     var style = lord.id("postBodySize");
     if (!style)
         return;
     var nstyle = lord.node("style");
     nstyle.id = "postBodySize";
     nstyle.type = "text/css";
-    width = width || $(window).width();
+    var width = $("#content").width();
     var m = lord.deviceType("mobile") ? 0 : 270;
-    var css = ".postBody { max-width: " + (width - 30) + "px; }\n";
+    var css = ".postBody { max-width: " + (width - 14) + "px; }\n";
     css += ".postFile ~ .postText > blockquote { max-width: " + (width - m) + "px; }";
     if (nstyle.styleSheet)
         nstyle.styleSheet.cssText = css;
@@ -2046,6 +2045,12 @@ lord.adjustPostBodySize = function(width) {
         nstyle.appendChild(lord.node("text", css));
     document.head.replaceChild(nstyle, style);
 };
+
+lord.adjustContentPadding = function() {
+    if (!lord.getLocalObject("stickyToolbar", true))
+        return;
+    $("#content").css("padding-top", ($(".toolbar.sticky").height() + 4) + "px");
+}
 
 lord.initializeOnLoadBase = function() {
     lord.hashChangeHandler(lord.hash());
@@ -2141,14 +2146,42 @@ lord.initializeOnLoadBase = function() {
         if (n.height != lord.lastWindowSize.height && !$("#player").hasClass("minimized"))
             lord.updatePlayerTracksHeight();
         if (n.width != lord.lastWindowSize.width) {
-            lord.adjustPostBodySize(n.width);
-            if (lord.getLocalObject("stickyToolbar", true))
-                $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
+            lord.adjustPostBodySize();
+            lord.adjustContentPadding();
         }
         lord.lastWindowSize = n;
     });
-    if (lord.getLocalObject("stickyToolbar", true))
-        $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
+    lord.adjustContentPadding();
+    if (lord.deviceType("mobile")) {
+        lord.detectSwipe(document.body, function(e) {
+            var sidebar = lord.id("sidebar");
+            var visible = !sidebar.style.display;
+            if (Math.abs(e.distanceX) < 100)
+                return;
+            if ((e.types.indexOf("swiperight") >= 0 && !visible) || (e.types.indexOf("swipeleft") >= 0 && visible))
+                lord.showHideSidebar();
+        });
+    }
+};
+
+lord.showHideSidebar = function() {
+    var sidebar = lord.id("sidebar");
+    var visible = !sidebar.style.display;
+    sidebar.style.display = visible ? "none" : "";
+    lord.setLocalObject("sidebarVisible", !visible);
+    if (!lord.deviceType("mobile")) {
+        $("#content").css({
+            left: (visible ? 8 : 208) + "px",
+            width: "calc(100% - " + (visible ? 16 : 216) + "px)"
+        });
+        $(".toolbar.sticky").css({
+            left: (visible ? 0 : 201) + "px",
+            width: "calc(100% - " + (visible ? 0 : 201) + "px)"
+        });
+    }
+    $(".toolbar > [name='sidebarButton'], #sidebarButtonPlaceholder").css("display", visible ? "" : "none");
+    lord.adjustPostBodySize();
+    lord.adjustContentPadding();
 };
 
 lord.showHideSearchAction = function(a) {

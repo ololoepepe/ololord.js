@@ -10,6 +10,10 @@
     width: 8px !important;
 }
 
+body {
+    margin: 0px;
+}
+
 header {
     padding-top: 2px;
     padding-bottom: 8px;
@@ -530,9 +534,6 @@ span.newPostCount {
 .leafButton {
     position: fixed;
     height: 32px;
-    top: -moz-calc(50% - 16px);
-    top: -webkit-calc(50% - 16px);
-    top: -o-calc(50% - 16px);
     top: calc(50% - 16px);
     z-index: 9910;
     opacity: 0.5;
@@ -630,6 +631,8 @@ ul.tabWidget > li > a {
 .searchAction > form {
     display: inline-block;
     position: relative;
+    padding-top: 4px;
+    padding-right: 4px;
 }
 
 .searchActionInputContainer {
@@ -651,14 +654,14 @@ ul.tabWidget > li > a {
     overflow-x: auto;
     font-size: 1.2em;
     position: relative;
-    top: -8px;
+    top: 0px;
+    left: 0px;
     z-index: 1;
 }
 
 .toolbar.sticky {
     position: fixed;
-    top: 0px;
-    width: 99%;
+    width: 100%;
     padding-bottom: 0px;
 }
 
@@ -901,17 +904,11 @@ input.buttonImage {
 
 .chatInput {
     box-sizing: border-box;
-    width: -moz-calc(100% - 4px);
-    width: -webkit-calc(100% - 4px);
-    width: -o-calc(100% - 4px);
     width: calc(100% - 4px);
 }
 
 .chatSendButton {
     box-sizing: border-box;
-    width: -moz-calc(100% - 4px);
-    width: -webkit-calc(100% - 4px);
-    width: -o-calc(100% - 4px);
     width: calc(100% - 4px);
 }
 
@@ -1325,4 +1322,56 @@ input.buttonImage {
 
 .archiveThreads {
     text-align: center;
+}
+
+.toolbar > [name="sidebarButton"] {
+    position: absolute;
+    left: 4px;
+    top: 3px;
+}
+
+#sidebarButtonPlaceholder {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 4px;
+    margin-top: 3px;
+    width: 20px;
+    height: 20px;
+    visibility: none;
+}
+
+#sidebar {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 200px;
+    height: 100%;
+}
+
+#sidebar > [name="sidebarButton"] {
+    position: absolute;
+    left: 4px;
+    top: 3px;
+}
+
+#sidebarButtons {
+    position: absolute;
+    right: 4px;
+    top: 0px;
+    font-size: 1.2em;
+}
+
+#sidebarContent {
+    position: absolute;
+    left: 0px;
+    width: 100%;
+    padding-top: 8px;
+}
+
+#content {
+    position: absolute;
+    top: 0px;
+    left: 8px;
+    height: 100%;
+    width: calc(100% - 16px);
 }

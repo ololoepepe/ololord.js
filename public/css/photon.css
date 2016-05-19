@@ -417,3 +417,12 @@ ul.jqueryFileTree a {
 .theTitle {
     color: #FF6600;
 }
+
+#sidebar {
+    background-color: #EEEEEE;
+    border-right: 1px solid #CCCCCC;
+}
+
+#sidebarContent {
+    border-top: 1px solid #CCCCCC;
+}

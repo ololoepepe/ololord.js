@@ -57,23 +57,14 @@ body {
 
 .searchAction > form {
     text-align: left;
-    width: -moz-calc(100% - 2px);
-    width: -webkit-calc(100% - 2px);
-    width: -o-calc(100% - 2px);
     width: calc(100% - 2px);
 }
 
 .searchActionInput {
-    width: -moz-calc(100% - 42px);
-    width: -webkit-calc(100% - 42px);
-    width: -o-calc(100% - 42px);
     width: calc(100% - 42px);
 }
 
 .searchActionOptionsContainer {
-    width: -moz-calc(100% - 54px);
-    width: -webkit-calc(100% - 54px);
-    width: -o-calc(100% - 54px);
     width: calc(100% - 54px);
 }
 
@@ -137,9 +128,6 @@ body {
 }
 
 #playerDurationSlider {
-    width: -moz-calc(100% - 6px);
-    width: -webkit-calc(100% - 6px);
-    width: -o-calc(100% - 6px);
     width: calc(100% - 6px);
     margin-right: 0px;
 }
@@ -157,16 +145,10 @@ body {
 }
 
 .movablePlayerConstrolsSliders {
-    width: -moz-calc(100% - 28px);
-    width: -webkit-calc(100% - 28px);
-    width: -o-calc(100% - 28px);
     width: calc(100% - 28px);
 }
 
 .movablePlayerDurationSlider {
-    width: -moz-calc(100% - 6px);
-    width: -webkit-calc(100% - 6px);
-    width: -o-calc(100% - 6px);
     width: calc(100% - 6px);
     margin-right: 0px;
 }
@@ -206,17 +188,11 @@ div.bannedUser {
 
 .registeredUserHashpassInput {
     box-sizing: border-box;
-    width: -moz-calc(100% - 8px);
-    width: -webkit-calc(100% - 8px);
-    width: -o-calc(100% - 8px);
     width: calc(100% - 8px);
 }
 
 .registeredUserIpsInput {
     box-sizing: border-box;
-    width: -moz-calc(100% - 8px);
-    width: -webkit-calc(100% - 8px);
-    width: -o-calc(100% - 8px);
     width: calc(100% - 8px);
 }
 
@@ -229,8 +205,14 @@ div.bannedUser {
 }
 
 .frameContent {
-    width: -moz-calc(100% - 88px);
-    width: -webkit-calc(100% - 88px);
-    width: -o-calc(100% - 88px);
     width: calc(100% - 88px);
+}
+
+#sidebar {
+    z-index: 2;
+}
+
+#sidebarContent {
+    top: 46px;
+    height: calc(100% - 46px);
 }

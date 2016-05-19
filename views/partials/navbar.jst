@@ -6,7 +6,6 @@
         var model = lord.model(["base", "tr", "boards"]);
         if (lord.data("boardName"))
             model.board = lord.model("board/" + lord.data("boardName")).board;
-        model.inIframe = lord.inIframe();
         lord.processBoardGroups(model);
         document.open();
         document.write(lord.template("navbar", model, true));

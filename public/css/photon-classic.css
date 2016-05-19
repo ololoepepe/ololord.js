@@ -428,3 +428,12 @@ ul.jqueryFileTree a {
 .postformLabel {
     color: #002244;
 }
+
+#sidebar {
+    background-color: #EEEEEE;
+    border-right: 1px solid #CCCCCC;
+}
+
+#sidebarContent {
+    border-top: 1px solid #CCCCCC;
+}
