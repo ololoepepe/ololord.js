@@ -2980,9 +2980,10 @@ lord.showMenu = function(e, input, selector) {
         }
     }
     lord.currentMenu = $(selector);
+    var k = (!lord.deviceType("mobile") && lord.getLocalObject("sidebarVisible", true)) ? 200 : 0;
     lord.currentMenu.menu({ items: "> :not(.ui-widget-header)" }).toggle().position({
         my: "left top",
-        at: "left bottom+2px",
+        at: "left-" + k + "px bottom+2px",
         of: $(input),
         collision: "fit flip"
     }).show();

@@ -2038,7 +2038,7 @@ lord.adjustPostBodySize = function() {
     var width = $("#content").width();
     var m = lord.deviceType("mobile") ? 0 : 270;
     var css = ".postBody { max-width: " + (width - 14) + "px; }\n";
-    css += ".postFile ~ .postText > blockquote, .blockLatex { max-width: " + (width - m) + "px; }";
+    css += ".postFile ~ .postText > blockquote, .blockLatex, .codeBlock { max-width: " + (width - m) + "px; }";
     if (nstyle.styleSheet)
         nstyle.styleSheet.cssText = css;
     else
