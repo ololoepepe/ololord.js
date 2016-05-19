@@ -1,5 +1,4 @@
 *
-!custom
 !partials
 !addFileDialog.jst
 !addFilesDialog.jst
@@ -26,6 +25,7 @@
 !echoPostFormField.jst
 !echoPostSubject.jst
 !editAudioTagsDialog.jst
+!editFileRatingDialog.jst
 !editPostDialog.jst
 !favoritesDialog.jst
 !favoritesElement.jst

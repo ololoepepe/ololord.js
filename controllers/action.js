@@ -360,6 +360,16 @@ router.post("/action/deleteFile", function(req, res, next) {
     });
 });
 
+router.post("/action/editFileRating", function(req, res, next) {
+    Tools.parseForm(req).then(function(result) {
+        return Database.editFileRating(req, res, result.fields);
+    }).then(function(result) {
+        res.send(result);
+    }).catch(function(err) {
+        next(err);
+    });
+});
+
 router.post("/action/moveThread", function(req, res, next) {
     var c = {};
     Tools.parseForm(req).then(function(result) {

@@ -3221,5 +3221,10 @@
         "hideSidebarButtonText": {
             "value": "Скрыть боковую панель"
         }
+    },
+    "Edit file rating": {
+        "editFileRatingText": {
+            "value": "Редактировать рейтинг файла"
+        }
     }
 }

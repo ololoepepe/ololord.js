@@ -2219,6 +2219,38 @@ module.exports.deleteFile = function(req, res, fields) {
     });
 };
 
+module.exports.editFileRating = function(req, res, fields) {
+    var c = {};
+    var password = Tools.sha1(fields.password);
+    return getFileInfo({ fileName: fields.fileName }).then(function(fileInfo) {
+        c.fileInfo = fileInfo;
+        return controller.checkBan(req, res, c.fileInfo.boardName, true);
+    }).then(function() {
+        return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
+    }).then(function(post) {
+        if (!post)
+            return Promise.reject(Tools.translate("Invalid post"));
+        c.post = post;
+        if ((!password || password != post.user.password)
+            && (!req.hashpass || req.hashpass != post.user.hashpass)
+            && !req.isSuperuser()
+            && (compareRegisteredUserLevels(req.level(c.fileInfo.boardName), post.user.level) <= 0)) {
+            return Promise.reject(Tools.translate("Not enough rights"));
+        }
+        c.fileInfo.rating = "SFW";
+        if (["R-15", "R-18", "R-18G"].indexOf(fields.rating) >= 0)
+            c.fileInfo.rating = fields.rating;
+        return db.hset("fileInfos", c.fileInfo.name, JSON.stringify(c.fileInfo));
+    }).then(function() {
+        Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
+        return {
+            boardName: c.post.boardName,
+            threadNumber: c.post.threadNumber,
+            postNumber: c.post.number
+        };
+    });
+};
+
 module.exports.editAudioTags = function(req, res, fields) {
     var c = {};
     var password = Tools.sha1(fields.password);

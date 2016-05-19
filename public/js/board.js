@@ -1317,6 +1317,23 @@ lord.deleteFile = function(el) {
     }).catch(lord.handleError);
 };
 
+lord.editFileRating = function(el) {
+    var model = lord.model(["base", "tr"]);
+    model.fileInfo = {
+        name: lord.data("fileName", el, true),
+        rating: lord.data("rating", el, true)
+    };
+    var div = lord.template("editFileRatingDialog", model);
+    lord.showDialog(div, { title: "editFileRatingText" }).then(function(result) {
+        if (!result)
+            return Promise.resolve();
+        var form = lord.queryOne("form", div);
+        return lord.post(form.action, new FormData(form));
+    }).then(function(result) {
+        return lord.updatePost(+lord.data("number", el, true));
+    }).catch(lord.handleError);
+};
+
 lord.addToPlaylist = function(a) {
     var mimeType = lord.data("mimeType", a, true);
     if (!lord.isMediaTypeSupported(mimeType)) {

@@ -53,6 +53,7 @@ module.exports = function(tr) {
     translate("Last modified:", "modificationDateTimeText");
     translate("User was banned for this post", "bannedForText");
     translate("Delete file", "deleteFileText");
+    translate("Edit file rating", "editFileRatingText");
     translate("Find source...", "findSourceText");
     translate("Edit audio file tags", "editAudioTagsText");
     translate("Add to playlist", "addToPlaylistText");
