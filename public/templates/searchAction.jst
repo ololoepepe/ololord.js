@@ -1,4 +1,4 @@
-<div class="searchAction" {{? !/\/search\.html$/.test(window.location.pathname)}}style="display: none;"{{?}}>
+<div class="searchAction" {{? !/\/search\.html$/.test(window.location.pathname)}}style="display: none;"{{??}}style="position: static; marginTop: 4px;"{{?}}>
     <form method="get" accept-charset="utf-8" action="/{{=it.site.pathPrefix}}search.html"
           enctype="multipart/form-data">
         <div class="searchActionInputContainer">

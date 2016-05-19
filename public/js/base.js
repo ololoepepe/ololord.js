@@ -2173,8 +2173,6 @@ lord.showHideSearchAction = function(a) {
         }
         $(sa).find(".searchActionInput").focus().select();
     }
-    if (lord.getLocalObject("stickyToolbar", true))
-        $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
 };
 
 lord.processBoardGroups = function(model) {
