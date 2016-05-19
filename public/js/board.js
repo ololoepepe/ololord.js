@@ -2592,7 +2592,7 @@ lord.strikeOutHiddenPostLinks = function(parent) {
 
 lord.signOpPostLinks = function(parent) {
     if (!parent)
-        parent = document.body;
+        parent = lord.id("content");
     lord.queryAll("a", parent).forEach(function(a) {
         lord.signOpPostLink(a);
     });
@@ -2600,7 +2600,7 @@ lord.signOpPostLinks = function(parent) {
 
 lord.signOwnPostLinks = function(parent, ownPosts) {
     if (!parent)
-        parent = document.body;
+        parent = lord.id("content");
     ownPosts = ownPosts || lord.getLocalObject("ownPosts", {});
     lord.queryAll("a", parent).forEach(function(a) {
         lord.signOwnPostLink(a, ownPosts);
@@ -2672,7 +2672,7 @@ lord.downloadThreadFiles = function(el) {
 
 lord.processPosts = function(parent) {
     if (!parent)
-        parent = document.body;
+        parent = lord.id("content");
     var posts = ($(parent).hasClass("post") || $(parent).hasClass("opPost")) ? [parent]
         : lord.queryAll(".post, .opPost", parent);
     return lord.series(lord.postProcessors, function(f) {
@@ -3214,7 +3214,7 @@ lord.initializeOnLoadBoard = function() {
             }
         }
     }
-    lord.processPosts(document.body);
+    lord.processPosts(lord.id("content"));
     var lastLang = lord.getLocalObject("lastCodeLang", "-");
     var sel = lord.queryOne(".postformMarkup > span > [name='codeLang']");
     if (sel) {
@@ -3245,7 +3245,7 @@ lord.initializeOnLoadThread = function() {
 
 lord.scrollHandler = function() {
     var k = 1300;
-    var top = ((window.innerHeight + window.scrollY + k) >= document.body.offsetHeight);
+    var top = ((window.innerHeight + window.scrollY + k) >= lord.id("content").scrollHeight);
     var bottom = (window.scrollY <= k);
     lord.queryOne(".navigationButtonTop").style.display = bottom ? "none" : "";
     lord.queryOne(".navigationButtonBottom").style.display = top ? "none" : "";
@@ -3372,7 +3372,7 @@ lord.updateThread = function(silent) {
                 post.onmouseover = undefined;
                 $(post).removeClass("newPost");
             };
-            document.body.insertBefore(post, before);
+            lord.id("content").insertBefore(post, before);
             if (lord.getLocalObject("addExpander", true))
                 lord.checkExpander(post);
         });

@@ -1286,7 +1286,6 @@ div.ui-widget-content.ui-dialog-content.checkerboardBackground {
     margin-bottom: 0px;
     padding-top: 8px;
     padding-bottom: 0px;
-    max-width: 100%;
     overflow-x: auto;
 }
 
@@ -1366,6 +1365,19 @@ input.buttonImage {
     left: 0px;
     width: 100%;
     padding-top: 8px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+#sidebarFooter {
+    position: absolute;
+    left: 4px;
+    bottom: 4px;
+    width: calc(100% - 8px);
+}
+
+#sidebarFooter > select {
+    width: calc(100%);
 }
 
 #content {

@@ -2038,7 +2038,7 @@ lord.adjustPostBodySize = function() {
     var width = $("#content").width();
     var m = lord.deviceType("mobile") ? 0 : 270;
     var css = ".postBody { max-width: " + (width - 14) + "px; }\n";
-    css += ".postFile ~ .postText > blockquote { max-width: " + (width - m) + "px; }";
+    css += ".postFile ~ .postText > blockquote, .blockLatex { max-width: " + (width - m) + "px; }";
     if (nstyle.styleSheet)
         nstyle.styleSheet.cssText = css;
     else
@@ -2162,6 +2162,14 @@ lord.initializeOnLoadBase = function() {
                 lord.showHideSidebar();
         });
     }
+};
+
+lord.changeStyle = function(style) {
+    var	link = lord.queryOne("link[href$='" + lord.settings().style.name + ".css']");
+    link.href = link.href.replace(link.href.split("/").pop(), style + ".css");
+    link = lord.queryOne("link[href$='" + lord.settings().style.name + "/jquery-ui.min.css']");
+    link.href = link.href.replace(link.href.split("/")[link.href.split("/").length - 2], style);
+    lord.setLocalObject("style", style);
 };
 
 lord.showHideSidebar = function() {

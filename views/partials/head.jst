@@ -189,7 +189,7 @@
                 var k = lord.deviceType("mobile") ? 0 : 30;
                 var z = (!lord.deviceType("mobile") && lord.getLocalObject("sidebarVisible", true)) ? 178 : 0;
                 var css = ".postBody { max-width: " + ($(window).width() - (30 + z)) + "px; }";
-                css += ".postFile ~ .postText > blockquote { max-width: " + ($(window).width() - (30 + k + m + z)) + "px; }";
+                css += ".postFile ~ .postText > blockquote, .blockLatex { max-width: " + ($(window).width() - (30 + k + m + z)) + "px; }";
                 if (style.styleSheet)
                     style.styleSheet.cssText = css;
                 else

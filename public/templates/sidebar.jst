@@ -15,11 +15,6 @@
                 onclick="lord.redirectToLoginPage();"><img src="/{{=it.site.pathPrefix}}img/login.png"
                                                            class="buttonImage" title="{{=it.tr.loginText}}"></a>]
         {{?}}
-        {{? it.user.isModer()}}
-        [<a href="/{{=it.site.pathPrefix}}manage.html"
-            title="{{=it.tr.toManagePageText}}"><img src="/{{=it.site.pathPrefix}}img/gear.png"
-                                                     class="buttonImage" width="16" height="16"></a>]
-        {{?}}
         [<input type="image" name="settingsButton" title="{{=it.tr.settingsButtonText}}" class="buttonImage"
                 src="/{{=it.site.pathPrefix}}img/settings.png" onclick="lord.showSettings(); return false;" />]
     </div>
@@ -32,9 +27,9 @@
                 {{?}}
                 {{~group.boards :board}}
                     {{? it.settings.hiddenBoards.indexOf(board.name) < 0 && !board.hidden}}
-                        <span class="navbarItem navbarItemBoard wrap">
+                        <span class="navbarItem navbarItemBoard" style="white-space: normal;">
                             <a href="/{{=it.site.pathPrefix}}{{=board.name}}"
-                               data-board="{{=board.name}}">{{=board.title}}</a></span>
+                               data-board-name="{{=board.name}}">{{=board.title}}</a></span>
                         <br />
                     {{?}}
                 {{~}}
@@ -55,5 +50,13 @@
                 <br />
             {{?}}
         </div>
+    </div>
+    <div id="sidebarFooter">
+        <select onchange="(function(sel) { lord.changeStyle(sel.options[sel.selectedIndex].value); })(this);"
+                class="select">
+            {{~it.styles :style}}
+                <option value="{{=style.name}}" {{? style.name == it.settings.style.name}}selected="true"{{?}}>{{=style.title}}</option>
+            {{~}}
+        </select>
     </div>
 </aside>
