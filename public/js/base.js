@@ -1406,6 +1406,22 @@ lord.showNewPosts = function() {
                 return acc;
             }, {}));
         }
+        lord.queryAll(".navbar, .toolbar").forEach(function(navbar) {
+            lord.queryAll(".navbarItem", navbar).forEach(function(item) {
+                var a = lord.queryOne("a", item);
+                if (!a)
+                    return;
+                var newPostCount = getNewPostCount(lord.data("boardName", a));
+                if (!newPostCount)
+                    return;
+                var span = lord.node("span");
+                $(span).addClass("newPostCount");
+                span.appendChild(lord.node("text", "+" + newPostCount));
+                var parent = a.parentNode;
+                parent.insertBefore(span, a);
+                parent.insertBefore(lord.node("text", " "), a);
+            });
+        });
         if (lord.deviceType("mobile")) {
             lord.queryAll(".boardSelect").forEach(function(sel) {
                 lord.queryAll("option", sel).forEach(function(opt) {
@@ -1416,22 +1432,6 @@ lord.showNewPosts = function() {
                 });
             });
         } else {
-            lord.queryAll(".navbar, .toolbar").forEach(function(navbar) {
-                lord.queryAll(".navbarItem", navbar).forEach(function(item) {
-                    var a = lord.queryOne("a", item);
-                    if (!a)
-                        return;
-                    var newPostCount = getNewPostCount(lord.data("boardName", a));
-                    if (!newPostCount)
-                        return;
-                    var span = lord.node("span");
-                    $(span).addClass("newPostCount");
-                    span.appendChild(lord.node("text", "+" + newPostCount));
-                    var parent = a.parentNode;
-                    parent.insertBefore(span, a);
-                    parent.insertBefore(lord.node("text", " "), a);
-                });
-            });
             lord.adjustContentPadding();
         }
         lord.each(result, function(lastPostNumber, boardName) {
