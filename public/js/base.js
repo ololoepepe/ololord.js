@@ -2049,7 +2049,12 @@ lord.adjustPostBodySize = function() {
 lord.adjustContentPadding = function() {
     if (!lord.getLocalObject("stickyToolbar", true))
         return;
-    $("#content").css("padding-top", ($(".toolbar.sticky").height() + 4) + "px");
+    var height = $(".toolbar.sticky").height();
+    $("#content").css("padding-top", (height + 4) + "px");
+    $("#sidebarContent").css({
+        top: (height - 1) + "px",
+        height: "calc(100% - " + (height - 1) + "px)"
+    });
 }
 
 lord.initializeOnLoadBase = function() {

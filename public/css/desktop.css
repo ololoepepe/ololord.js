@@ -176,8 +176,3 @@ input, select {
 #sidebar {
     z-index: 1;
 }
-
-#sidebarContent {
-    top: 25px;
-    height: calc(100% - 25px);
-}

@@ -211,8 +211,3 @@ div.bannedUser {
 #sidebar {
     z-index: 2;
 }
-
-#sidebarContent {
-    top: 46px;
-    height: calc(100% - 46px);
-}
