@@ -2053,7 +2053,7 @@ lord.adjustContentPadding = function() {
     $("#content").css("padding-top", (height + 4) + "px");
     $("#sidebarContent").css({
         top: (height - 1) + "px",
-        height: "calc(100% - " + (height - 1) + "px)"
+        height: ($("#sidebarContent").parent().height() - (height + 43)) + "px"
     });
 }
 
