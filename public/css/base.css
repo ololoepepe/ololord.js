@@ -621,8 +621,9 @@ ul.tabWidget > li > a {
 
 .searchAction {
     display: block;
-    margin-left: auto;
-    margin-right: auto;
+    position: fixed;
+    right: 0px;
+    width: 100%;
     text-align: right;
 }
 
@@ -636,7 +637,7 @@ ul.tabWidget > li > a {
 }
 
 .searchActionOptionsContainer {
-    margin-top: 4px;
+    margin-top: 0px;
     margin-left: 8px;
     padding: 4px;
     text-align: left;

@@ -2153,13 +2153,24 @@ lord.initializeOnLoadBase = function() {
 
 lord.showHideSearchAction = function(a) {
     var sa = lord.queryOne(".searchAction");
-    var visible = !sa.style.display;
     var img = lord.queryOne("img", a);
+    var visible = /search_hide\.png$/.test(img.src);
+    lord.nameAll("searchButton").forEach(function(btn) {
+        var img = lord.queryOne("img", btn);
+        img.src = img.src.replace(/search(_hide)?\.png$/, "search.png");
+    });
     img.src = img.src.replace(/search(_hide)?\.png$/, visible ? "search.png" : "search_hide.png");
     a.title = lord.text(visible ? "showSearchActionText" : "hideSearchActionText");
+    $(sa).css("top", ($(".toolbar").height() + 4) + "px");
     sa.style.display = visible ? "none" : "";
     if (!visible) {
-        $(a).closest(".toolbar, .navbar").append(sa);
+        if (!lord.getLocalObject("stickyToolbar", true)) {
+            $(a).closest(".toolbar, .navbar").append(sa);
+            $(sa).css({
+                position: "static",
+                marginTop: "4px"
+            });
+        }
         $(sa).find(".searchActionInput").focus().select();
     }
     if (lord.getLocalObject("stickyToolbar", true))

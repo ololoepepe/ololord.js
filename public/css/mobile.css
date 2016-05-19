@@ -57,7 +57,10 @@ body {
 
 .searchAction > form {
     text-align: left;
-    width: 100%;
+    width: -moz-calc(100% - 2px);
+    width: -webkit-calc(100% - 2px);
+    width: -o-calc(100% - 2px);
+    width: calc(100% - 2px);
 }
 
 .searchActionInput {

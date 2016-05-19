@@ -416,7 +416,7 @@ ul.jqueryFileTree a {
     color: black !important;
 }
 
-.searchActionOptionsContainer {
+.searchAction > form {
     background-color: #DDDDDD;
     border: 1px solid #CCCCCC;
 }
