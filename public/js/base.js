@@ -1494,19 +1494,19 @@ lord.assignHotkey = function(e, inp) {
     return false;
 };
 
-lord.editSpells = function() {
+lord.editSpells = function(apply) {
     var ta = lord.node("textarea");
     ta.rows = 10;
     ta.cols = 43;
     ta.value = lord.getLocalObject("spells", lord.DefaultSpells);
-    lord.showDialog(ta).then(function(result) {
+    lord.showDialog(ta, { title: "editSpellsText" }).then(function(result) {
         if (!result)
             return Promise.resolve();
         var spells = ta.value;
         lord.setLocalObject("spells", spells);
-        if (!lord.doWork || !lord.getLocalObject("spellsEnabled", true))
-            return;
-        return lord.doWork("parseSpells", spells);
+        if (!apply || !lord.applySpells || !lord.getLocalObject("spellsEnabled", true))
+            return Promise.resolve();
+        return lord.applySpells(lord.queryAll(".post, .opPost"), true);
     }).catch(lord.handleError);
 };
 

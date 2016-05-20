@@ -15,6 +15,8 @@
                 onclick="lord.redirectToLoginPage();"><img src="/{{=it.site.pathPrefix}}img/login.png"
                                                            class="buttonImage" title="{{=it.tr.loginText}}"></a>]
         {{?}}
+        [<input type="image" name="spellsButton" title="{{=it.tr.editSpellsText}}" class="buttonImage"
+                src="/{{=it.site.pathPrefix}}img/wand.png" onclick="lord.editSpells(true); return false;" />]
         [<input type="image" name="settingsButton" title="{{=it.tr.settingsButtonText}}" class="buttonImage"
                 src="/{{=it.site.pathPrefix}}img/settings.png" onclick="lord.showSettings(); return false;" />]
     </div>
