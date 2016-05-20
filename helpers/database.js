@@ -28,13 +28,36 @@ var Ratings = {};
 var RegisteredUserLevels = {};
 var BanLevels = {};
 
-var db = new Redis({
-    port: config("system.redis.port", 6379),
-    host: config("system.redis.host", "127.0.0.1"),
-    family: config("system.redis.family", 4),
-    password: config("system.redis.password", ""),
-    db: config("system.redis.db", 0)
-});
+var createRedisClient = function() {
+    var redisNodes = config("system.redis.nodes");
+    if (Util.isArray(redisNodes) && redisNodes.length > 0) {
+        return new Redis.Cluster(redisNodes, {
+            clusterRetryStrategy: config("system.redis.clusterRetryStrategy", function(times) {
+                return Math.min(100 + times * 2, 2000);
+            }),
+            enableReadyCheck: config("system.redis.enableReadyCheck", false),
+            scaleReads: config("system.redis.scaleReads", "master"),
+            maxRedirections: config("system.redis.maxRedirections", 16),
+            retryDelayOnFailover: config("system.redis.retryDelayOnFailover", 100),
+            retryDelayOnClusterDown: config("system.redis.retryDelayOnClusterDown", 100),
+            retryDelayOnTryAgain: config("system.redis.retryDelayOnTryAgain", 100),
+            redisOptions: {
+                password: config("system.redis.password", ""),
+                db: config("system.redis.db", 0)
+            }
+        });
+    } else {
+        return new Redis({
+            port: config("system.redis.port", 6379),
+            host: config("system.redis.host", "127.0.0.1"),
+            family: config("system.redis.family", 4),
+            password: config("system.redis.password", ""),
+            db: config("system.redis.db", 0)
+        });
+    }
+};
+
+var db = createRedisClient();
 var dbGeo = new SQLite3.Database(__dirname + "/../geolocation/ip2location.sqlite");
 var es = new Elasticsearch.Client({ host: config("system.elasticsearch.host", "localhost:9200") });
 
@@ -2531,13 +2554,7 @@ module.exports.delall = function(req, ip, boardNames) {
 module.exports.initialize = function() {
     //NOTE: Enabling "key expired" notifications
     var CHANNEL = `__keyevent@${config("system.redis.db", 0)}__:expired`;
-    var dbs = new Redis({
-        port: config("system.redis.port", 6379),
-        host: config("system.redis.host", "127.0.0.1"),
-        family: config("system.redis.family", 4),
-        password: config("system.redis.password", ""),
-        db: config("system.redis.db", 0)
-    });
+    var dbs = createRedisClient();
     var initialized = false;
     var query = [];
     var updateBanOnMessage = function(message) {
