@@ -503,3 +503,23 @@ ul.jqueryFileTree a {
 #sidebarContent {
     border-top: 1px solid #575757;
 }
+
+#postForm {
+    background-color: #212121;
+}
+
+#postForm.floatingPostForm {
+    border: 2px solid #575757;
+    border-radius: 5px;
+}
+
+.postFormHeader {
+    background-color: #2C2C2C;
+    border: 1px solid #575757;
+    border-radius: 5px;
+}
+
+#postForm.floatingPostForm > .postFormHeader {
+    border: none;
+    border-bottom: 1px solid #575757;
+}

@@ -2,6 +2,6 @@
 * Use SockJS (WebSocket wrapping/emulation lib)
 * Refactor: use ES-2015 features
 * Add ability to use Redis cluster
-* Implement movable postform
 [done] Implement better sidebar
 [done] Add ability to edit file ratings
+[done] Implement movable postform

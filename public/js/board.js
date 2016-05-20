@@ -26,6 +26,7 @@ lord.autoUpdateTimer = null;
 lord.blinkTimer = null;
 lord.pageVisible = "visible";
 lord.loadingImage = null;
+lord.postFormFixed = true;
 
 /*Classes*/
 
@@ -577,7 +578,76 @@ lord.addPostToHidden = function(hiddenPosts, boardName, postNumber, threadNumber
         lord.setLocalObject("hiddenPosts", hiddenPosts);
 };
 
+lord.makeFormFloat = function(e) {
+    e.preventDefault();
+    var container = postForm.parentNode;
+    var match = container.id.match(/^postFormContainer(Top|Bottom)$/);
+    if (match)
+        lord.id("showHidePostFormButton" + match[1]).innerHTML = lord.text("showPostFormText");
+    var pos = $("#postForm").offset();
+    pos.left -= window.scrollX;
+    pos.top -= window.scrollY;
+    var setPos = function(p) {
+        $("#postForm").css({
+            left: p.left + "px",
+            top: p.top + "px"
+        });
+    };
+    setPos(pos);
+    $("#postForm").addClass("floatingPostForm");
+    var previous = {
+        x: e.clientX,
+        y: e.clientY
+    };
+    $("#postForm .postFormHeaderLabel").css("display", "none");
+    $("#postForm .postFormHeader").removeAttr("draggable").on("mousedown", function(e) {
+        previous = {
+            x: e.clientX,
+            y: e.clientY
+        };
+    }).on("mouseup", function(e) {
+        previous = null;
+    });
+    $(document.body).on("mousemove", function(e) {
+        if (!previous)
+            return;
+        pos.left += e.clientX - previous.x;
+        pos.top += e.clientY - previous.y;
+        setPos(pos);
+        previous = {
+            x: e.clientX,
+            y: e.clientY
+        };
+    });
+};
+
+lord.makeFormNotFloat = function() {
+    $("#postForm").removeClass("floatingPostForm");
+    $("#postForm .postFormHeaderLabel").css("display", "");
+    $("#postForm .postFormHeader").attr("draggable", true).off("mousedown").off("mouseup");
+    $(document.body).off("mousemove");
+};
+
+lord.setPostFormFixed = function() {
+    lord.postFormFixed = !lord.postFormFixed;
+    var img = lord.queryOne("#postForm [name='fixPostFormButton'] > img");
+    img.src = img.src.replace(/(fixed|unfix)\.png$/, lord.postFormFixed ? "fixed.png" : "unfix.png");
+    lord.queryOne("#postForm [name='fixPostFormButton']").title =
+        lord.text(lord.postFormFixed ? "postFormFixedButtonText" : "postFormUnfixedButtonText");
+};
+
+lord.closePostForm = function() {
+    lord.makeFormNotFloat();
+    lord.hidePostForm();
+};
+
 lord.showHidePostForm = function(el) {
+    if ($("#postForm").hasClass("floatingPostForm")) {
+        if (lord.postFormFixed)
+            return;
+        lord.makeFormNotFloat();
+        lord.hidePostForm();
+    }
     var postForm = lord.id("postForm");
     var position = lord.data("position", el);
     var container = postForm.parentNode;
@@ -599,6 +669,12 @@ lord.quickReply = function(el) {
     var post = lord.id(postNumber);
     if (!post)
         return;
+    if ($("#postForm").hasClass("floatingPostForm")) {
+        if (lord.postFormFixed)
+            return;
+        lord.makeFormNotFloat();
+        lord.hidePostForm();
+    }
     var postForm = lord.id("postForm");
     var targetContainer = post.parentNode;
     var same = (postForm.parentNode == targetContainer
@@ -1937,7 +2013,7 @@ lord.browseFile = function(e, div) {
 
 lord.setPostformRulesVisible = function(visible) {
     var hide = !visible;
-    lord.setLocalObject("hidePostformRules");
+    lord.setLocalObject("hidePostformRules", hide);
     lord.queryAll(".postformRules > ul").forEach(function(ul) {
         ul.style.display = hide ? "none" : "";
     });
@@ -2292,8 +2368,10 @@ lord.submitted = function(event, form) {
             resetButton();
             var threadId = +lord.nameOne("threadNumber", postForm).value;
             lord.resetPostForm();
-            if (["postFormContainerTop", "postFormContainerBottom"].indexOf(form.parentNode.id) < 0)
+            if (["postFormContainerTop", "postFormContainerBottom"].indexOf(form.parentNode.id) < 0
+                && (!$("#postForm").hasClass("floatingPostForm") || !lord.postFormFixed)) {
                 lord.hidePostForm();
+            }
             lord.resetCaptcha();
             var currentThreadNumber = lord.data("threadNumber");
             if (currentThreadNumber) {

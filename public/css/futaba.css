@@ -389,3 +389,21 @@ ul.jqueryFileTree a {
 #sidebarContent {
     border-top: 1px solid #BBBBBB;
 }
+
+#postForm {
+    background-color: #FFFFEE;
+}
+
+#postForm.floatingPostForm {
+    border: 2px solid #800000;
+}
+
+.postFormHeader {
+    background-color: #F0E0D6;
+    border: 1px solid #800000;
+}
+
+#postForm.floatingPostForm > .postFormHeader {
+    border: none;
+    border-bottom: 1px solid #800000;
+}

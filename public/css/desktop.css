@@ -176,3 +176,43 @@ input, select {
 #sidebar {
     z-index: 1;
 }
+
+#postForm {
+    display: inline-block;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+#postForm.floatingPostForm {
+    position: fixed;
+    z-index: 3;
+    overflow: hidden;
+}
+
+.postFormHeader {
+    position: relative;
+    height: 20px;
+    top: 0px;
+    width: calc(100% - 8px);
+    left: 4px;
+    text-align: left;
+    padding-left: 2px;
+    cursor: pointer;
+}
+
+#postForm.floatingPostForm > .postFormHeader {
+    width: calc(100% + 6px);
+    left: -4px;
+}
+
+.postFormHeaderButtons {
+    display: inline-block;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    padding: 2px;
+}
+
+.postFormHeaderButtons .buttonImage {
+    vertical-align: top;
+}

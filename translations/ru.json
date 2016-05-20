@@ -827,6 +827,9 @@
         },
         "closeThreadText": {
             "value": "Закрыть"
+        },
+        "closePostFormButtonText": {
+            "value": "Закрыть"
         }
     },
     "Remove thread from favorites": {
@@ -1256,6 +1259,9 @@
     "Fixed": {
         "fixedText": {
             "value": "Закрепленный"
+        },
+        "postFormFixedButtonText": {
+            "value": "Fixed"
         }
     },
     "Fix": {
@@ -2361,12 +2367,6 @@
             "value": "Не удалось вызвать метод"
         }
     },
-    "Invalid captcha type": {
-        "_default": {
-            "value": "Недействительный тип капчи"
-        },
-        "_obsolete": true
-    },
     "Invalid URL": {
         "_default": {
             "value": "Недействительный URL"
@@ -2416,12 +2416,6 @@
         "_default": {
             "value": "Поисковый запрос слишком длинный"
         }
-    },
-    "404 (not found)": {
-        "errorMessage": {
-            "value": "404 (не найдено)"
-        },
-        "_obsolete": true
     },
     "Invalid page number": {
         "_default": {
@@ -2772,12 +2766,6 @@
         "_default": {
             "value": "Введите пароль: "
         }
-    },
-    "That is a hashpass, isn't it? [Yes/no]: ": {
-        "_default": {
-            "value": "Это хешпасс, верно? [Yes/no]: "
-        },
-        "_obsolete": true
     },
     "Dimensions:": {
         "canvasDimensionsLabelText": {
@@ -3225,6 +3213,16 @@
     "Edit file rating": {
         "editFileRatingText": {
             "value": "Редактировать рейтинг файла"
+        }
+    },
+    "Start dragging to make post form float": {
+        "postFormHeaderLabelText": {
+            "value": "Потяните, чтобы сделать форму плавающей"
+        }
+    },
+    "Not fixed": {
+        "postFormUnfixedButtonText": {
+            "value": "Не закреплена"
         }
     }
 }

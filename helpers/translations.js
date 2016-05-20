@@ -453,5 +453,9 @@ module.exports = function(tr) {
     translate("Hide search field", "hideSearchActionText");
     translate("Show sidebar", "showSidebarButtonText");
     translate("Hide sidebar", "hideSidebarButtonText");
+    translate("Start dragging to make post form float", "postFormHeaderLabelText");
+    translate("Fixed", "postFormFixedButtonText");
+    translate("Not fixed", "postFormUnfixedButtonText");
+    translate("Close", "closePostFormButtonText");
     return tr;
 };
