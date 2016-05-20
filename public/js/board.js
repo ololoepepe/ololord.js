@@ -3150,7 +3150,7 @@ lord.showPostActionsMenu = function(e, input, postNumber) {
             rawText: lord.queryOne("blockquote", post).textContent,
             fileInfos: lord.queryAll(".postFile", post),
             isOp: $(post).hasClass("opPost"),
-            hidden: lord.getLocalObject("hiddenPosts", {}).hasOwnProperty(boardName + "/" + postNumber)
+            hidden: lord.getLocalObject("hiddenPosts", {})[boardName + "/" + postNumber]
         },
         thread: {
             fixed: lord.data("fixed", post),
