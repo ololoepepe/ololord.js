@@ -37,10 +37,10 @@
             "value": "Внутренняя ошибка"
         },
         "_default": {
-            "value": "Internal error"
+            "value": "Внутренняя ошибка"
         },
         "internalErrorText": {
-            "value": "Internal error"
+            "value": "Внутренняя ошибка"
         }
     },
     "Anonymous": {
@@ -3223,6 +3223,11 @@
     "Not fixed": {
         "postFormUnfixedButtonText": {
             "value": "Не закреплена"
+        }
+    },
+    "Hide similar": {
+        "hideSimilarPostsText": {
+            "value": "Скрыть похожие"
         }
     }
 }

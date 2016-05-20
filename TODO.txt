@@ -1,7 +1,7 @@
-* Implement hiding posts by similar text
 * Use SockJS (WebSocket wrapping/emulation lib)
 * Refactor: use ES-2015 features
 [done] Implement better sidebar
 [done] Add ability to edit file ratings
 [done] Implement movable postform
 [done] Add ability to use Redis cluster
+[done] Implement hiding posts by similar text

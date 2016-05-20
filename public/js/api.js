@@ -1592,3 +1592,9 @@ lord.detectSwipe = function(el, callback) {
         }, false);
     })();
 };
+
+lord.getWords = function(text) {
+    if (typeof text != "string")
+        return [];
+    return text.replace(/\s+/g, " ").replace(new XRegExp("[^\\p{L} ]", "gi"), "").trim().substring(0, 800).split(" ");
+};

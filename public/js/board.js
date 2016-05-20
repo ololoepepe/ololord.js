@@ -1122,6 +1122,36 @@ lord.editPost = function(el) {
     }).catch(lord.handleError);
 };
 
+lord.hideSimilarPosts = function(el) {
+    var boardName = lord.data("boardName", el, true);
+    var postNumber = +lord.data("number", el, true);
+    var threadNumber = +lord.data("threadNumber", el, true);
+    var text = lord.data("plainText", el, true);
+    if (!boardName || isNaN(postNumber) || postNumber < 1 || isNaN(threadNumber) || threadNumber < 1 || !text)
+        return;
+    var post = lord.id(postNumber);
+    if (!post)
+        return;
+    var thread = lord.id("thread" + postNumber);
+    var hidden = $(post).hasClass("hidden");
+    if (hidden)
+        return;
+    var similarText = lord.getLocalObject("similarText", {});
+    var key = boardName + "/" + postNumber;
+    if (similarText.hasOwnProperty(key))
+        return;
+    similarText[key] = lord.getWords(text);
+    lord.setLocalObject("similarText", similarText);
+    $(post).addClass("hidden");
+    $(lord.queryOne(".hideReason", post)).empty();
+    if (thread)
+        $(thread).addClass("hidden");
+    var reason = "similar to >>/" + boardName + "/" + postNumber;
+    lord.addPostToHidden(null, boardName, postNumber, threadNumber, reason);
+    lord.strikeOutHiddenPostLinks();
+    lord.applySpells(lord.queryAll(".post, .opPost")).catch(lord.handleError);
+};
+
 lord.setPostHidden = function(el) {
     var boardName = lord.data("boardName", el, true);
     var postNumber = +lord.data("number", el, true);
@@ -1140,14 +1170,20 @@ lord.setPostHidden = function(el) {
     if (thread)
         $(thread)[fName]("hidden");
     var list = lord.getLocalObject("hiddenPosts", {});
+    var key = boardName + "/" + postNumber;
     if (!hidden) {
         lord.addPostToHidden(null, boardName, postNumber, threadNumber);
-    } else if (list[boardName + "/" + postNumber]) {
-        if (list[boardName + "/" + postNumber].reason)
-            list[boardName + "/" + postNumber] = false;
+    } else if (list[key]) {
+        if (list[key].reason)
+            list[key] = false;
         else
-            delete list[boardName + "/" + postNumber];
+            delete list[key];
         lord.setLocalObject("hiddenPosts", list);
+        var similarText = lord.getLocalObject("similarText", {});
+        if (similarText.hasOwnProperty(key)) {
+            delete similarText[key];
+            lord.setLocalObject("similarText", similarText);
+        }
     }
     lord.strikeOutHiddenPostLinks();
 };
@@ -1176,10 +1212,19 @@ lord.applySpells = function(posts, force) {
         }
         var promises = lord.chunk(posts, 100).map(function(list, i) {
             var data = list.map(lord.getPostData.bind(lord));
+            var similartext = "";
+            try {
+                similarText = localStorage.getItem("similarText") || "";
+            } catch (ex) {
+                similarText = "";
+            }
             return lord.doWork("processPosts", {
                 posts: data,
                 spells: lord.spells,
-                options: { ihashDistance: lord.getLocalObject("ihashDistance", 10) }
+                options: {
+                    ihashDistance: lord.getLocalObject("ihashDistance", 10),
+                    similarText: similarText
+                }
             }).then(function(result) {
                 var map = (result && result.posts) ? result.posts.reduce(function(acc, data) {
                     acc[data.postNumber] = data;

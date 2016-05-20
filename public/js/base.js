@@ -563,6 +563,7 @@ lord.localData = function(includeSettings, includeCustom, includePassword) {
     f("spells", "");
     f("hotkeys", {});
     f("hiddenPosts", {});
+    f("similarText", {});
     f("lastCodeLang", "");
     f("chats");
     f("drafts");
@@ -613,6 +614,7 @@ lord.setLocalData = function(o, includeSettings, includeCustom, includePassword)
     f("spells");
     f("hotkeys");
     f("hiddenPosts");
+    f("similarText");
     f("lastCodeLang");
     f("chats", function(src, key, value) {
         if (!src.hasOwnProperty(key))
@@ -1526,14 +1528,29 @@ lord.removeHidden = function(el) {
     var div = el.parentNode;
     div.parentNode.removeChild(div);
     var list = lord.getLocalObject("hiddenPosts", {});
-    var key = lord.data("boardName", div) + "/" + lord.data("postNumber", div);
+    var boardName = lord.data("boardName", div);
+    var postNumber = lord.data("postNumber", div);
+    var key = boardName + "/" + postNumber;
     if (!list.hasOwnProperty(key))
         return;
+    var post = lord.id(postNumber);
+    if (post && lord.data("boardName", post) == boardName && $(post).hasClass("hidden")) {
+        var thread = lord.id("thread" + postNumber);
+        $(post).removeClass("hidden");
+        $(lord.queryOne(".hideReason", post)).empty();
+        if (thread)
+            $(thread).removeClass("hidden");
+    }
     if (list[key].reason)
         list[key] = false;
     else
         delete list[key];
     lord.setLocalObject("hiddenPosts", list);
+    var similarText = lord.getLocalObject("similarText", {});
+    if (similarText.hasOwnProperty(key)) {
+        delete similarText[key];
+        lord.setLocalObject("similarText", similarText);
+    }
 };
 
 lord.createCodemirrorEditor = function(parent, mode, value) {

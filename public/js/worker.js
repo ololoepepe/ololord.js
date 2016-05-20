@@ -3,6 +3,7 @@
 importScripts("3rdparty/Promise.min.js");
 importScripts("3rdparty/underscore-min.js");
 importScripts("3rdparty/BigInteger.min.js");
+importScripts("3rdparty/xregexp-all.min.js");
 importScripts("api.js");
 
 /*Constants*/
@@ -709,7 +710,32 @@ lord.applySpells = function(post, spells, options) {
     if (!post || !spells || spells.length < 1)
         return Promise.resolve(null);
     var npost = { replacements: [] };
-    var promises = spells.map(function(spell) {
+    var words = lord.getWords(post.text);
+    var len = words.length;
+    options.similarText.some(function(sample) {
+        var i = sample.words.length;
+        var slen = i;
+        var slen2 = i;
+        var n = 0;
+	    if (len < slen * 0.4 || len > slen * 3)
+    		return;
+        while (i--) {
+            if (slen > 6 && sample.words[i].length < 3) {
+                --slen2;
+                continue;
+            }
+            var j = len;
+            while (j--) {
+                if(words[j] === sample.words[i] || sample.words[i].match(/>>\d+/) && words[j].match(/>>\d+/))
+                    n++;
+            }
+        }
+        if (n < slen2 * 0.4 || len > slen2 * 3)
+            return;
+        npost.hidden = "similar to >>/" + sample.boardName + "/" + sample.postNumber;
+        return true;
+    });
+    return lord.series(spells, function(spell) {
         if (npost.hidden && ("SPELL" != spell.value.type || "rep" != spell.value.value.name))
             return Promise.resolve();
         return lord.applySpell(post, spell.value, options).then(function(result) {
@@ -720,8 +746,7 @@ lord.applySpells = function(post, spells, options) {
                 npost.replacements = npost.replacements.concat(result.replacements);
             return Promise.resolve();
         });
-    });
-    return Promise.all(promises).then(function() {
+    }).then(function() {
         return Promise.resolve(npost);
     });
 };
@@ -757,7 +782,22 @@ lord.message_parseSpells = function(data) {
 lord.message_processPosts = function(data) {
     if (!data)
         return Promise.reject("invalidDataErrorText");
-    var options = { ihashDistance: (data.options && data.options.ihashDistance) || 15 };
+    var similarText = {};
+    try {
+        similarText = (data.options && data.options.similarText && JSON.parse(data.options.similarText)) || {};
+    } catch (ex) {
+        similarText = {};
+    }
+    var options = {
+        ihashDistance: (data.options && data.options.ihashDistance) || 15,
+        similarText: lord.reduce(similarText, function(acc, val, key) {
+            return acc.concat({
+                words: val,
+                boardName: key.split("/").shift(),
+                postNumber: key.split("/").pop()
+            });
+        }, [])
+    };
     return lord.processPosts(data.posts, data.spells, options);
 };
 

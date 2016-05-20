@@ -87,6 +87,7 @@ module.exports = function(tr) {
     translate("Previous post (in thread/on board)", "hotkeyPreviousPostLabelText");
     translate("Next post (inthread/on board)", "hotkeyNextPostLabelText");
     translate("Hide post/thread", "hotkeyHidePostLabelText");
+    translate("Hide similar", "hideSimilarPostsText");
     translate("Go to thread", "hotkeyGoToThreadLabelText");
     translate("Expand thread", "hotkeyExpandThreadLabelText");
     translate("Expand post file", "hotkeyExpandImageLabelText");
