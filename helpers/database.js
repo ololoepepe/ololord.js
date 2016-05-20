@@ -42,6 +42,8 @@ var createRedisClient = function() {
             retryDelayOnClusterDown: config("system.redis.retryDelayOnClusterDown", 100),
             retryDelayOnTryAgain: config("system.redis.retryDelayOnTryAgain", 100),
             redisOptions: {
+                host: config("system.redis.host", "127.0.0.1"),
+                port: config("system.redis.port", 6379),
                 family: config("system.redis.family", 4),
                 password: config("system.redis.password", ""),
                 db: config("system.redis.db", 0)
