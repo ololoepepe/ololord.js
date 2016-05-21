@@ -109,6 +109,8 @@ module.exports = function(server) {
             }
         });
         conn.on("close", function() {
+            if (ddosProtection)
+                --connectionCount[conn.ip];
             if (connectionsIP.hasOwnProperty(conn.ip)) {
                 var list = connectionsIP[conn.ip];
                 list.some(function(c, i) {
