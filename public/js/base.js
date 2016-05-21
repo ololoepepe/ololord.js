@@ -1816,6 +1816,10 @@ lord.wsHandlers["newChatMessage"] = function(msg) {
 };
 
 lord.checkChats = function() {
+    if (!lord.getLocalObject("useWebSockets", true)) {
+        if (lord.checkChats.timer)
+            clearTimeout(lord.checkChats.timer);
+    }
     lord.api("chatMessages", { lastRequestDate: lord.lastChatCheckDate || "" }).then(function(model) {
         if (!model)
             return Promise.resolve();
@@ -1841,8 +1845,14 @@ lord.checkChats = function() {
         lord.setLocalObject("chats", chats);
         if (keys.length > 0)
             lord.updateChat(keys);
+        if (!lord.getLocalObject("useWebSockets", true)) {
+            lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord),
+                lord.chatDialog ? (5 * lord.Second) : lord.Minute);
+        }
     }).catch(function(err) {
         lord.handleError(err);
+        if (!lord.getLocalObject("useWebSockets", true))
+            lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), lord.Minute);
     });
 };
 
@@ -1929,21 +1939,34 @@ lord.sendChatMessage = function() {
         return;
     var message = lord.nameOne("message", lord.chatDialog);
     var key = $(contact).attr("name");
-    lord.sendWSMessage("sendChatMessage", {
-        boardName: key.split(":").shift(),
-        postNumber: +key.split(":").pop(),
-        text: message.value
-    }).then(function(msg) {
-        message.value = "";
-        $(message).focus();
-        var chats = lord.getLocalObject("chats", {});
-        if (!chats[key])
-            chats[key] = [msg];
-        else
-            chats[key].push(msg);
-        lord.setLocalObject("chats", chats);
-        lord.updateChat([key]);
-    }).catch(lord.handleError);
+    if (lord.getLocalObject("useWebSockets", true)) {
+        lord.sendWSMessage("sendChatMessage", {
+            boardName: key.split(":").shift(),
+            postNumber: +key.split(":").pop(),
+            text: message.value
+        }).then(function(msg) {
+            message.value = "";
+            $(message).focus();
+            var chats = lord.getLocalObject("chats", {});
+            if (!chats[key])
+                chats[key] = [msg];
+            else
+                chats[key].push(msg);
+            lord.setLocalObject("chats", chats);
+            lord.updateChat([key]);
+        }).catch(lord.handleError);
+    } else {
+        var formData = new FormData();
+        formData.append("text", message.value);
+        formData.append("boardName", key.split(":").shift());
+        formData.append("postNumber", +key.split(":").pop());
+        var path = "/" + lord.data("sitePathPrefix") + "action/sendChatMessage";
+        return lord.post(path, formData).then(function(result) {
+            message.value = "";
+            $(message).focus();
+            lord.checkChats();
+        }).catch(lord.handleError);
+    }
 };
 
 lord.checkNotificationQueue = function() {

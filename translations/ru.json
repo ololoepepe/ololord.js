@@ -3229,5 +3229,15 @@
         "hideSimilarPostsText": {
             "value": "Скрыть похожие"
         }
+    },
+    "Use WebSockets": {
+        "useWebSockets": {
+            "value": "Use WebSockets"
+        }
+    },
+    "+-s+": {
+        "+-a+": {
+            "value": "+-s+"
+        }
     }
 }

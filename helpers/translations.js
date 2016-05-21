@@ -106,6 +106,7 @@ module.exports = function(tr) {
     translate("Style:", "styleLabelText");
     translate("Code style:", "codeStyleLabelText");
     translate("Shrink posts", "postShrinkingLabelText");
+    translate("Use WebSockets", "useWebSockets");
     translate("Sticky toolbar", "stickyToolbarLabelText");
     translate("Time:", "timeLabelText");
     translate("Device type:", "deviceTypeLabelText");
