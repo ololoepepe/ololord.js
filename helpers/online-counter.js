@@ -25,3 +25,7 @@ module.exports.unique = function() {
         o[ip] = 1;
     return o;
 };
+
+module.exports.clear = function() {
+    users.clear();
+};

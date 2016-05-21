@@ -143,6 +143,7 @@ var spawnCluster = function() {
                                 delete sockets[socketId];
                                 socket.destroy();
                             });
+                            OnlineCounter.clear();
                             console.log("[" + process.pid + "] Closed");
                             resolve();
                         });
