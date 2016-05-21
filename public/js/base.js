@@ -1819,7 +1819,7 @@ if (lord.getLocalObject("useWebSockets", true)) {
         lord.setLocalObject("chats", chats);
         lord.updateChat([key]);
     };
-});
+}
 
 lord.checkChats = function() {
     if (!lord.getLocalObject("useWebSockets", true)) {
