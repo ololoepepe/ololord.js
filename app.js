@@ -103,6 +103,7 @@ var spawnCluster = function() {
         BoardModel.initialize().then(function() {
             return controller.initialize();
         }).then(function() {
+            var sockets = {};
             var nextSocketId = 0;
             var server = HTTP.createServer(app);
             var ws = new WebSocket(server);
@@ -138,6 +139,10 @@ var spawnCluster = function() {
                 Global.IPC.installHandler("stop", function() {
                     return new Promise(function(resolve, reject) {
                         server.close(function() {
+                            Tools.forIn(sockets, function(socket, socketId) {
+                                delete sockets[socketId];
+                                socket.destroy();
+                            });
                             console.log("[" + process.pid + "] Closed");
                             resolve();
                         });
@@ -174,6 +179,13 @@ var spawnCluster = function() {
                 });
                 Global.IPC.send("ready").catch(function(err) {
                     Global.error(err);
+                });
+            });
+            server.on("connection", function(socket) {
+                var socketId = ++nextSocketId;
+                sockets[socketId] = socket;
+                socket.on("close", function() {
+                    delete sockets[socketId];
                 });
             });
         }).catch(function(err) {
