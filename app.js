@@ -2,6 +2,7 @@
 
 var cluster = require("cluster");
 var expressCluster = require("express-cluster");
+var HTTP = require("http");
 var Log4JS = require("log4js");
 var OS = require("os");
 var Util = require("util");
@@ -18,6 +19,7 @@ var controller = require("./helpers/controller");
 var BoardModel = require("./models/board");
 var Database = require("./helpers/database");
 var Tools = require("./helpers/tools");
+var WebSocket = require("./helpers/websocket");
 
 Global.IPC = require("./helpers/ipc")(cluster);
 
@@ -101,7 +103,9 @@ var spawnCluster = function() {
         }).then(function() {
             var sockets = {};
             var nextSocketId = 0;
-            var server = app.listen(config("server.port", 8080), function() {
+            var server = HTTP.createServer(app);
+            var ws = new WebSocket(server);
+            server.listen(config("server.port", 8080), function() {
                 console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080) + "...");
                 Global.IPC.installHandler("exit", function(status) {
                     process.exit(status);
@@ -193,23 +197,9 @@ if (cluster.isMaster) {
         initCallback = cb;
         return controller.initialize();
     }).then(function() {
-        if (config("server.statistics.enabled", true)) {
-            setInterval(function() {
-                controller.generateStatistics().catch(function(err) {
-                    Global.error(err.stack || err);
-                });
-            }, config("server.statistics.ttl", 60) * Tools.Minute);
-        }
-        if (config("server.rss.enabled", true)) {
-            setInterval(function() {
-                BoardModel.generateRSS().catch(function(err) {
-                    Global.error(err.stack || err);
-                });
-            }, config("server.rss.ttl", 60) * Tools.Minute);
-        }
-        if (Global.Program.regenerate || config("system.regenerateCacheOnStartup", true))
-            return controller.regenerate(config("system.regenerateArchive", false));
-        return Promise.resolve();
+        if (!Global.Program.regenerate && !config("system.regenerateCacheOnStartup", true))
+            return Promise.resolve();
+        return controller.regenerate(config("system.regenerateArchive", false));
     }).then(function() {
         console.log("Spawning workers, please, wait...");
         spawnCluster();
@@ -218,6 +208,20 @@ if (cluster.isMaster) {
             ++ready;
             if (ready == count) {
                 initCallback();
+                if (config("server.statistics.enabled", true)) {
+                    setInterval(function() {
+                        controller.generateStatistics().catch(function(err) {
+                            Global.error(err.stack || err);
+                        });
+                    }, config("server.statistics.ttl", 60) * Tools.Minute);
+                }
+                if (config("server.rss.enabled", true)) {
+                    setInterval(function() {
+                        BoardModel.generateRSS().catch(function(err) {
+                            Global.error(err.stack || err);
+                        });
+                    }, config("server.rss.ttl", 60) * Tools.Minute);
+                }
                 require("./helpers/commands")();
             }
         });

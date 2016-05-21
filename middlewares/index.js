@@ -151,9 +151,14 @@ if (config("system.log.middleware.before", "all") == "middleware")
 
 module.exports = module.exports.concat([
     cookieParser(),
-    require("./cookies"),
+    function(req, res, next) {
+        req.hashpass = Tools.hashpass(req);
+        next();
+    },
     require("./registered-user")
 ]);
 
 if (config("system.log.middleware.before", "all") == "request")
     module.exports.push(log);
+
+module.exports.push(require("./cookies"));

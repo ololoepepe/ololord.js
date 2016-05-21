@@ -28,7 +28,8 @@
     {{ out += it.script("3rdparty/jszip-utils.min.js"); }}
     {{ out += it.script("3rdparty/FileSaver.min.js"); }}
     {{ out += it.script("3rdparty/mobile-detect.min.js"); }}
-    <script id="model-base" type="application/json"></script>
+    {{ out += it.script("3rdparty/sockjs-1.1.0.min.js"); }}
+    <script id="model-base" type="application/json">{{=it.models.base}}</script>
     <script id="model-boards" type="application/json">{{=it.models.boards}}</script>
     <script id="model-tr" type="application/json">{{=it.models.tr}}</script>
     <script id="model-partials" type="application/json">{{=it.models.partials}}</script>
@@ -45,12 +46,25 @@
         lord.templates = {};
 
         (function() {
-            var baseModelHtml = lord.get("/{{=it.site.pathPrefix}}misc/base.json") || "";
             ["base", "boards", "tr", "partials", "templates"].forEach(function(modelName) {
-                var isBase = ("base" == modelName);
-                var html = isBase ? baseModelHtml : lord.id("model-" + modelName).innerHTML;
+                var html = lord.id("model-" + modelName).innerHTML;
                 lord.models[modelName] = JSON.parse(html);
-                if (isBase) {
+                if ("base" == modelName) {
+                    console.log(lord.getCookie("tmp_levels"));
+                    var levels = {};
+                    try {
+                        levels = JSON.parse(lord.getCookie("tmp_levels"));
+                    } catch (ex) {
+                        levels = {};
+                    }
+                    var hashpass = lord.getCookie("hashpass");
+                    lord.models[modelName].user = {
+                        ip: lord.getCookie("tmp_ip"),
+                        levels: levels,
+                        hashpass: hashpass,
+                        loggedIn: !!hashpass
+                    };
+                    console.log(lord.models[modelName].user);
                     var deviceTypes = {
                         desktop: {},
                         mobile: {}
