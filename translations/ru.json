@@ -3231,7 +3231,7 @@
         }
     },
     "Use WebSockets": {
-        "useWebSockets": {
+        "useWebSocketsLabelText": {
             "value": "Использовать WebSockets"
         }
     }

@@ -52,6 +52,8 @@ lord.pageProcessors = [];
 lord.postProcessors = [];
 lord.currentTracks = {};
 (function() {
+    if (!lord.getLocalObject("useWebSockets", true))
+        return;
     var options = {};
     var transports = lord.model("base").site.ws.transports;
     if (transports)
@@ -562,6 +564,8 @@ if (typeof lord.getLocalObject("password") != "string") {
 })();
 
 lord.sendWSMessage = function(type, data) {
+    if (!lord.getLocalObject("useWebSockets", true))
+        return Promise.reject("WebSockets are disabled");
     return (lord.wsOpen || Promise.resolve()).then(function() {
         return new Promise(function(resolve, reject) {
             var id = uuid.v1();
