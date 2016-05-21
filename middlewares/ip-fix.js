@@ -5,8 +5,10 @@ var config = require("../helpers/config");
 var controller = require("../helpers/controller");
 var Tools = require("../helpers/tools");
 
+var fast = config("system.fastIPRetrieving", false);
+
 module.exports = function(req, res, next) {
-    if (req.socket.ip) {
+    if (fast && req.socket.ip) {
         Object.defineProperty(req, "ip", { value: req.socket.ip });
         next();
         return;
@@ -33,6 +35,7 @@ module.exports = function(req, res, next) {
         trueIp = address;
     }
     Object.defineProperty(req, "ip", { value: trueIp });
-    Object.defineProperty(req.socket, "ip", { value: trueIp });
+    if (fast)
+        Object.defineProperty(req.socket, "ip", { value: trueIp });
     next();
 };
