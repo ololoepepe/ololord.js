@@ -59,14 +59,16 @@ module.exports = function(server) {
         if (ddosProtection) {
             var count = (connectionCount[conn.ip] || 0) + 1;
             if (count > connectionLimit) {
-                Global.error("DDoS detected (WebSocket/connection):", conn.ip, count, connectionLimit);
+                Global.error("DDoS detected (WebSocket/connection):",
+                    Tools.preferIPv4(conn.ip), count, connectionLimit);
                 return conn.end();
             }
             connectionCount[conn.ip] = count;
         }
         conn.on("data", function(message) {
             if (ddosProtection && message.length > maxMessageLength) {
-                Global.error("DDoS detected (WebSocket/message):", conn.ip, message.length, maxMessageLength);
+                Global.error("DDoS detected (WebSocket/message):",
+                    Tools.preferIPv4(conn.ip), message.length, maxMessageLength);
                 return conn.end();
             }
             try {
@@ -92,7 +94,7 @@ module.exports = function(server) {
             default:
                 var handler = handlers[message.type];
                 if (!handler) {
-                    Global.error("Unknown WebSocket message type:", conn.ip, message.type);
+                    Global.error("Unknown WebSocket message type:", Tools.preferIPv4(conn.ip), message.type);
                     break;
                 }
                 handler(function(data, error) {

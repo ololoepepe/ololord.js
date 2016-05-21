@@ -126,7 +126,7 @@ var spawnCluster = function() {
                         }, ip, receiver.hashpass);
                     }
                 }).catch(function(err) {
-                    Global.error("WebSocket:", conn.ip, msg.type, err.stack || err);
+                    Global.error("WebSocket:", Tools.preferIPv4(conn.ip), msg.type, err.stack || err);
                     reply(null, err);
                 });
             });
