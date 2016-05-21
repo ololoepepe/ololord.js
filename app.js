@@ -217,7 +217,7 @@ if (cluster.isMaster) {
         initCallback = cb;
         return controller.initialize();
     }).then(function() {
-        if (Global.Program.regenerate && !config("system.regenerateCacheOnStartup", true)) {
+        if (Global.Program.regenerate || config("system.regenerateCacheOnStartup", true)) {
             return controller.regenerate(config("system.regenerateArchive", false));
         } else {
             console.log("Generating statistics, please, wait...");
