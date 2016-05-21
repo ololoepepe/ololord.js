@@ -1197,13 +1197,13 @@ var removePost = function(boardName, postNumber, options) {
             return Promise.resolve();
         return rerenderReferringPosts(c.post, { removingThread: options && options.removingThread });
     }).catch(function(err) {
-        Global.error(err);
+        Global.error(err.stack || err);
     }).then(function() {
         if (options && options.leaveReferences)
             return Promise.resolve();
         return removeReferencedPosts(c.post);
     }).catch(function(err) {
-        Global.error(err);
+        Global.error(err.stack || err);
     }).then(function() {
         return db.srem("userPostNumbers:" + c.post.user.ip + ":" + board.name, postNumber);
     }).then(function() {
@@ -1362,7 +1362,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
                 }).then(function() {
                     return Cache.removeFile(`${board.name}/res/${oldThreadNumber}.html`);
                 }).catch(function(err) {
-                    Global.error(err);
+                    Global.error(err.stack || err);
                 });
                 return Promise.resolve();
             });
@@ -2233,7 +2233,7 @@ module.exports.deleteFile = function(req, res, fields) {
         paths.push(__dirname + "/../public/" + c.post.boardName + "/thumb/" + c.fileInfo.thumb.name);
         paths.forEach(function(path) {
             FS.remove(path).catch(function(err) {
-                Global.error(err);
+                Global.error(err.stack || err);
             });
         });
         Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
@@ -2586,7 +2586,7 @@ module.exports.initialize = function() {
     });
     return db.config("SET", "notify-keyspace-events", "Ex").then(function() {
         dbs.subscribe(CHANNEL).catch(function(err) {
-            Global.error(err);
+            Global.error(err.stack || err);
         });
         return Promise.resolve(function() {
             initialized = true;
