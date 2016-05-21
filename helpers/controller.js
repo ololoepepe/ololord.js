@@ -141,6 +141,9 @@ controller.baseModel = function() {
             },
             twitter: {
                 integrationEnabled: !!config("site.twitter.integrationEnabled", true)
+            },
+            ws: {
+                transports: config("site.ws.transports", "")
             }
         },
         styles: Tools.styles(),

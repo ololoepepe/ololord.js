@@ -55,6 +55,7 @@ var spawnCluster = function() {
 
         var express = require("express");
 
+        var Chat = require("./helpers/chat");
         var controller = require("./helpers/controller");
 
         var app = express();
@@ -105,6 +106,30 @@ var spawnCluster = function() {
             var nextSocketId = 0;
             var server = HTTP.createServer(app);
             var ws = new WebSocket(server);
+            ws.installHandler("sendChatMessage", function(reply, msg, conn) {
+                var data = msg.data || {};
+                Chat.sendMessage({
+                    ip: conn.ip,
+                    hashpass: conn.hashpass
+                }, data.boardName, data.postNumber, data.text, ws).then(function(result) {
+                    var message = result.message;
+                    message.type = "out";
+                    reply(message);
+                    if (result.senderHash != result.receiverHash) {
+                        message.type = "in";
+                        var receiver = result.receiver;
+                        var ip = receiver.hashpass ? null : receiver.ip;
+                        ws.sendMessage("newChatMessage", {
+                            message: message,
+                            boardName: data.boardName,
+                            postNumber: data.postNumber
+                        }, ip, receiver.hashpass);
+                    }
+                }).catch(function(err) {
+                    Global.error("WebSocket:", conn.ip, msg.type, err.stack || err);
+                    reply(null, err);
+                });
+            });
             server.listen(config("server.port", 8080), function() {
                 console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080) + "...");
                 Global.IPC.installHandler("exit", function(status) {

@@ -51,6 +51,60 @@ lord.notificationQueue = [];
 lord.pageProcessors = [];
 lord.postProcessors = [];
 lord.currentTracks = {};
+(function() {
+    var options = {};
+    var transports = lord.model("base").site.ws.transports;
+    if (transports)
+        options.transports = transports;
+    lord.wsMessages = {};
+    lord.ws = new SockJS("/" + lord.model("base").site.pathPrefix + "ws", null, options);
+    lord.wsHandlers = {};
+    lord.wsOpen = new Promise(function(resolve, reject) {
+        lord.ws.onopen = function() {
+            lord.ws.send(JSON.stringify({
+                type: "init",
+                data: { hashpass: lord.getCookie("hashpass") }
+            }));
+        };
+        lord.ws.onmessage = function(message) {
+            try {
+                message = JSON.parse(message.data);
+            } catch (err) {
+                lord.handleError(err);
+                return;
+            }
+            if ("init" == message.type) {
+                resolve();
+                delete lord.wsOpen;
+            } else {
+                var msg = lord.wsMessages[message.id];
+                if (!msg) {
+                    if ("_error" == message.id) {
+                        lord.handleError(message.error);
+                    } else {
+                        var handler = lord.wsHandlers[message.type];
+                        if (handler)
+                            handler(message);
+                    }
+                    return;
+                }
+                delete lord.wsMessages[message.id];
+                if (!message.error)
+                    msg.resolve(message.data);
+                else
+                    msg.reject(message.error);
+            }
+        };
+        lord.ws.onclose = function() {
+            lord.wsClosed = true;
+            if (!lord.wsOpen)
+                return;
+            reject("Socket closed");
+            delete lord.wsOpen;
+        };
+    });
+    lord.wsOpen.catch(lord.handleError);
+})();
 lord.lastWindowSize = {
     width: $(window).width(),
     height: $(window).height()
@@ -496,6 +550,25 @@ if (typeof lord.getLocalObject("password") != "string") {
     lord.pageProcessors.push(lord.processFomattedDate);
 })();
 
+lord.sendWSMessage = function(type, data) {
+    return (lord.wsOpen || Promise.resolve()).then(function() {
+        return new Promise(function(resolve, reject) {
+            var id = uuid.v1();
+            lord.wsMessages[id] = {
+                resolve: resolve,
+                reject: reject
+            };
+            if (lord.wsClosed)
+                return reject("Socket closed");
+            lord.ws.send(JSON.stringify({
+                id: id,
+                type: type,
+                data: data
+            }));
+        });
+    });
+};
+
 lord.logoutImplementation = function(form, vk) {
     lord.setCookie("hashpass", "", {
         expires: lord.Billion,
@@ -707,7 +780,6 @@ lord.synchronize = function() {
                 lord.setLocalData(result, settings, cssJs, pwd);
             var formData = new FormData();
             formData.append("key", password);
-            console.log(settings, cssJs, pwd);
             formData.append("data", JSON.stringify(lord.localData(settings, cssJs, pwd)));
             return lord.post("/" + lord.data("sitePathPrefix") + "action/synchronize", formData);
         }).then(function() {
@@ -1714,9 +1786,25 @@ lord.updateChat = function(keys) {
     }
 };
 
+lord.wsHandlers["newChatMessage"] = function(msg) {
+    var chats = lord.getLocalObject("chats", {});
+    var data = msg.data;
+    var key = data.boardName + ":" + data.postNumber;
+    if (!chats[key])
+        chats[key] = [];
+    var list = chats[key];
+    var message = data.message;
+    for (var i = 0; i < list.length; ++i) {
+        var m = list[i];
+        if (message.type == m.type && message.date == m.date && message.text == m.text)
+            return;
+    }
+    list.push(message);
+    lord.setLocalObject("chats", chats);
+    lord.updateChat([key]);
+};
+
 lord.checkChats = function() {
-    if (lord.checkChats.timer)
-        clearTimeout(lord.checkChats.timer);
     lord.api("chatMessages", { lastRequestDate: lord.lastChatCheckDate || "" }).then(function(model) {
         if (!model)
             return Promise.resolve();
@@ -1742,11 +1830,8 @@ lord.checkChats = function() {
         lord.setLocalObject("chats", chats);
         if (keys.length > 0)
             lord.updateChat(keys);
-        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord),
-            lord.chatDialog ? (5 * lord.Second) : lord.Minute);
     }).catch(function(err) {
         lord.handleError(err);
-        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), lord.Minute);
     });
 };
 
@@ -1832,15 +1917,21 @@ lord.sendChatMessage = function() {
     if (!contact)
         return;
     var message = lord.nameOne("message", lord.chatDialog);
-    var formData = new FormData();
     var key = $(contact).attr("name");
-    formData.append("text", message.value);
-    formData.append("boardName", key.split(":").shift());
-    formData.append("postNumber", +key.split(":").pop());
-    return lord.post("/" + lord.data("sitePathPrefix") + "action/sendChatMessage", formData).then(function(result) {
+    lord.sendWSMessage("sendChatMessage", {
+        boardName: key.split(":").shift(),
+        postNumber: +key.split(":").pop(),
+        text: message.value
+    }).then(function(msg) {
         message.value = "";
         $(message).focus();
-        lord.checkChats();
+        var chats = lord.getLocalObject("chats", {});
+        if (!chats[key])
+            chats[key] = [msg];
+        else
+            chats[key].push(msg);
+        lord.setLocalObject("chats", chats);
+        lord.updateChat([key]);
     }).catch(lord.handleError);
 };
 
@@ -2072,7 +2163,7 @@ lord.adjustContentPadding = function() {
         top: (height - 1) + "px",
         height: ($("#sidebarContent").parent().height() - (height + 43)) + "px"
     });
-}
+};
 
 lord.initializeOnLoadBase = function() {
     lord.hashChangeHandler(lord.hash());
@@ -2287,7 +2378,7 @@ lord.processBoardGroups = function(model) {
 
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
-    if (/\/(frame|login).html$/.test(window.location.pathname))
+    if (/\/login.html$/.test(window.location.pathname))
         return;
     lord.initializeOnLoadBase();
     lord.checkFavoriteThreads();

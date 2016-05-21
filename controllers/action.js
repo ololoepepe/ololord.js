@@ -575,9 +575,12 @@ router.post("/action/setThreadUnbumpable", function(req, res, next) {
 router.post("/action/sendChatMessage", function(req, res, next) {
     Tools.parseForm(req).then(function(result) {
         var fields = result.fields;
-        return Chat.sendMessage(req, fields.boardName, +fields.postNumber, fields.text);
+        return Chat.sendMessage({
+            ip: req.ip,
+            hashpass: req.hashpass
+        }, fields.boardName, +fields.postNumber, fields.text);
     }).then(function(result) {
-        res.send(result);
+        res.send({});
     }).catch(function(err) {
         next(err);
     });
@@ -586,7 +589,10 @@ router.post("/action/sendChatMessage", function(req, res, next) {
 router.post("/action/deleteChatMessages", function(req, res, next) {
     Tools.parseForm(req).then(function(result) {
         var fields = result.fields;
-        return Chat.deleteMessages(req, fields.boardName, fields.postNumber);
+        return Chat.deleteMessages({
+            ip: req.ip,
+            hashpass: req.hashpass
+        }, fields.boardName, fields.postNumber);
     }).then(function(result) {
         res.send(result);
     }).catch(function(err) {

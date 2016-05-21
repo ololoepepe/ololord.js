@@ -309,7 +309,10 @@ router.get("/api/fileHeaders.json", function(req, res, next) {
 });
 
 router.get("/api/chatMessages.json", function(req, res, next) {
-    Chat.getMessages(req, req.query.lastRequestDate).then(function(result) {
+    Chat.getMessages({
+        ip: req.ip,
+        hashpass: req.hashpass
+    }, req.query.lastRequestDate).then(function(result) {
         res.json(result);
     }).catch(function(err) {
         next(err);

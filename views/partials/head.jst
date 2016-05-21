@@ -50,7 +50,6 @@
                 var html = lord.id("model-" + modelName).innerHTML;
                 lord.models[modelName] = JSON.parse(html);
                 if ("base" == modelName) {
-                    console.log(lord.getCookie("tmp_levels"));
                     var levels = {};
                     try {
                         levels = JSON.parse(lord.getCookie("tmp_levels"));
@@ -64,7 +63,6 @@
                         hashpass: hashpass,
                         loggedIn: !!hashpass
                     };
-                    console.log(lord.models[modelName].user);
                     var deviceTypes = {
                         desktop: {},
                         mobile: {}
