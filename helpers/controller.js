@@ -48,7 +48,7 @@ var controller = function(templateName, modelData) {
         if (!noEmbed && config("system.embedScripts", true)) {
             try {
                 var data = FSSync.readFileSync(__dirname + "/../public/js/" + name, "utf8");
-                return `<script type="text/javascript">${data}</script>`;
+                return `<script type="text/javascript">${data.split("</script>").join("</scr'+'ipt>")}</script>`;
             } catch (err) {
                 console.error(err);
                 return "";
