@@ -114,6 +114,7 @@ lord.currentTracks = {};
             setTimeout(f, retryCount * lord.Second);
         });
     };
+    f();
 })();
 lord.lastWindowSize = {
     width: $(window).width(),
