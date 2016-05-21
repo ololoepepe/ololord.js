@@ -1801,23 +1801,25 @@ lord.updateChat = function(keys) {
     }
 };
 
-lord.wsHandlers["newChatMessage"] = function(msg) {
-    var chats = lord.getLocalObject("chats", {});
-    var data = msg.data;
-    var key = data.boardName + ":" + data.postNumber;
-    if (!chats[key])
-        chats[key] = [];
-    var list = chats[key];
-    var message = data.message;
-    for (var i = 0; i < list.length; ++i) {
-        var m = list[i];
-        if (message.type == m.type && message.date == m.date && message.text == m.text)
-            return;
-    }
-    list.push(message);
-    lord.setLocalObject("chats", chats);
-    lord.updateChat([key]);
-};
+if (lord.getLocalObject("useWebSockets", true)) {
+    lord.wsHandlers["newChatMessage"] = function(msg) {
+        var chats = lord.getLocalObject("chats", {});
+        var data = msg.data;
+        var key = data.boardName + ":" + data.postNumber;
+        if (!chats[key])
+            chats[key] = [];
+        var list = chats[key];
+        var message = data.message;
+        for (var i = 0; i < list.length; ++i) {
+            var m = list[i];
+            if (message.type == m.type && message.date == m.date && message.text == m.text)
+                return;
+        }
+        list.push(message);
+        lord.setLocalObject("chats", chats);
+        lord.updateChat([key]);
+    };
+});
 
 lord.checkChats = function() {
     if (!lord.getLocalObject("useWebSockets", true)) {
