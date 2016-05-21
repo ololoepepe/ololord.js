@@ -3,6 +3,7 @@ var Util = require("util");
 
 var config = require("./config");
 var Global = require("./global");
+var OnlineCounter = require("./online-counter");
 var Tools = require("./tools");
 
 module.exports = function(server) {
@@ -56,6 +57,7 @@ module.exports = function(server) {
             trueIp = address;
         }
         Object.defineProperty(conn, "ip", { value: trueIp });
+        OnlineCounter.alive(conn.ip);
         if (ddosProtection) {
             var count = (connectionCount[conn.ip] || 0) + 1;
             if (count > connectionLimit) {
@@ -66,6 +68,7 @@ module.exports = function(server) {
             connectionCount[conn.ip] = count;
         }
         conn.on("data", function(message) {
+            OnlineCounter.alive(conn.ip);
             if (ddosProtection && message.length > maxMessageLength) {
                 Global.error("DDoS detected (WebSocket/message):",
                     Tools.preferIPv4(conn.ip), message.length, maxMessageLength);

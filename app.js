@@ -18,6 +18,7 @@ var config = require("./helpers/config");
 var controller = require("./helpers/controller");
 var BoardModel = require("./models/board");
 var Database = require("./helpers/database");
+var OnlineCounter = require("./helpers/online-counter");
 var Tools = require("./helpers/tools");
 var WebSocket = require("./helpers/websocket");
 
@@ -102,7 +103,6 @@ var spawnCluster = function() {
         BoardModel.initialize().then(function() {
             return controller.initialize();
         }).then(function() {
-            var sockets = {};
             var nextSocketId = 0;
             var server = HTTP.createServer(app);
             var ws = new WebSocket(server);
@@ -141,10 +141,6 @@ var spawnCluster = function() {
                             console.log("[" + process.pid + "] Closed");
                             resolve();
                         });
-                        Tools.forIn(sockets, function(socket, socketId) {
-                            delete sockets[socketId];
-                            socket.destroy();
-                        });
                     });
                 });
                 Global.IPC.installHandler("start", function() {
@@ -174,24 +170,10 @@ var spawnCluster = function() {
                     return Promise.resolve();
                 });
                 Global.IPC.installHandler("getConnectionIPs", function() {
-                    return Promise.resolve(Tools.mapIn(sockets, function(socket) {
-                        return socket.ip;
-                    }).filter(function(ip) {
-                        return ip;
-                    }).reduce(function(acc, ip) {
-                        acc[ip] = 1;
-                        return acc;
-                    }, {}));
+                    return Promise.resolve(OnlineCounter.unique());
                 });
                 Global.IPC.send("ready").catch(function(err) {
                     Global.error(err);
-                });
-            });
-            server.on("connection", function(socket) {
-                var socketId = ++nextSocketId;
-                sockets[socketId] = socket;
-                socket.on("close", function() {
-                    delete sockets[socketId];
                 });
             });
         }).catch(function(err) {
@@ -222,9 +204,14 @@ if (cluster.isMaster) {
         initCallback = cb;
         return controller.initialize();
     }).then(function() {
-        if (!Global.Program.regenerate && !config("system.regenerateCacheOnStartup", true))
-            return Promise.resolve();
-        return controller.regenerate(config("system.regenerateArchive", false));
+        if (Global.Program.regenerate && !config("system.regenerateCacheOnStartup", true)) {
+            return controller.regenerate(config("system.regenerateArchive", false));
+        } else {
+            console.log("Generating statistics, please, wait...");
+            return controller.generateStatistics().catch(function(err) {
+                Global.error(err.stack || err);
+            });
+        }
     }).then(function() {
         console.log("Spawning workers, please, wait...");
         spawnCluster();

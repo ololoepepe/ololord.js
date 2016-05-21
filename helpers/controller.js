@@ -496,12 +496,12 @@ controller.generateStatistics = function() {
         o.total.postingSpeed = controller.postingSpeedString(brd, o.total.postCount);
         return Global.IPC.send("getConnectionIPs");
     }).then(function(data) {
-        o.online = Object.keys(data.reduce(function(acc, ips) {
+        o.online = data.reduce(function(acc, ips) {
             Tools.forIn(ips, function(_, ip) {
-                acc[ip] = 1;
+                acc.add(ip);
             });
             return acc;
-        }, {})).length;
+        }, new Set()).size;
         o.uptime = process.uptime();
     }).catch(function(err) {
         Global.error(err);

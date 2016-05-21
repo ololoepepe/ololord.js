@@ -176,6 +176,10 @@ Example:
                 "file"
             ]
         },
+        "onlineCounter": {
+            "interval": 60000,
+            "quota": 300000
+        },
         "phash": {
             "enabled": true
         },
