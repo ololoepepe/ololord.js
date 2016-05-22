@@ -3597,7 +3597,7 @@ lord.setAutoUpdateEnabled = function(enabled) {
             boardName: boardName,
             threadNumber: threadNumber,
         }).then(function(msg) {
-            //Do nothing
+            lord.updateThread(true);
         }).catch(lord.handleError);
     }
     if (enabled) {
