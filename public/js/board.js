@@ -59,7 +59,7 @@ lord.postFormFixed = true;
     var _this = this;
     ["Top", "Bottom"].forEach(function(position) {
         if (_this.useWebSockets) {
-            var color = (_this.secondsLeft % 2) ? "#8D8D8D" : "#2F2F2F";
+            var color = (_this.secondsLeft % 2) ? "#5E5E5E" : "#2F2F2F";
             $("#autoUpdate" + position).trigger("configure", { fgColor: color });
         } else {
             $("#autoUpdate" + position).val(_this.secondsLeft).trigger("change");
