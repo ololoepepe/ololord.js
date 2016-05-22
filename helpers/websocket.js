@@ -6,6 +6,15 @@ var Global = require("./global");
 var OnlineCounter = require("./online-counter");
 var Tools = require("./tools");
 
+var sendMessage = function(type, data) {
+    if (!this)
+        return;
+    this.write(JSON.stringify({
+        type: type,
+        data: data
+    }));
+};
+
 module.exports = function(server) {
     var ddosProtection = config("server.ddosProtection.enabled", true);
     var connectionLimit = config("server.ddosProtection.ws.connectionLimit", 10);
@@ -67,6 +76,8 @@ module.exports = function(server) {
             }
             connectionCount[conn.ip] = count;
         }
+        Object.defineProperty(conn, "ws", { value: this });
+        conn.sendMessage = sendMessage;
         conn.on("data", function(message) {
             OnlineCounter.alive(conn.ip);
             if (ddosProtection && message.length > maxMessageLength) {
@@ -92,7 +103,7 @@ module.exports = function(server) {
                     else
                         connectionsHashpass[conn.hashpass] = [conn];
                 }
-                conn.write(JSON.stringify({ type: message.type }));
+                conn.sendMessage(message.type);
                 break;
             default:
                 var handler = handlers[message.type];
@@ -100,14 +111,52 @@ module.exports = function(server) {
                     Global.error("Unknown WebSocket message type:", Tools.preferIPv4(conn.ip), message.type);
                     break;
                 }
-                handler(function(data, error) {
+                var replyData = function(data) {
                     conn.write(JSON.stringify({
                         id: message.id,
                         type: message.type,
-                        data: data,
+                        data: data
+                    }));
+                };
+                var replyErr = function(err) {
+                    conn.write(JSON.stringify({
+                        id: message.id,
+                        type: message.type,
                         error: error
                     }));
-                }, message, conn);
+                };
+                try {
+                    var p = handler(message, conn);
+                    if (typeof p.then == "function" && typeof p.catch == "function") {
+                        p.then(function(data) {
+                            try {
+                                replyData(data);
+                            } catch (ex) {
+                                //Do nothing
+                            }
+                        }).catch(function(err) {
+                            Global.error("WebSocket:", Tools.preferIPv4(conn.ip), message.type, err.stack || err);
+                            try {
+                                replyErr(err);
+                            } catch (ex) {
+                                //Do nothing
+                            }
+                        });
+                    } else {
+                        try {
+                            replyData(p);
+                        } catch (ex) {
+                            //Do nothing
+                        }
+                    }
+                } catch (ex) {
+                    Global.error("WebSocket:", Tools.preferIPv4(conn.ip), message.type, err.stack || err);
+                    try {
+                        replyErr(err);
+                    } catch (ex) {
+                        //Do nothing
+                    }
+                }
                 break;
             }
         });

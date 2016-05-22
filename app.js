@@ -108,15 +108,13 @@ var spawnCluster = function() {
             var nextSocketId = 0;
             var server = HTTP.createServer(app);
             var ws = new WebSocket(server);
-            ws.installHandler("sendChatMessage", function(reply, msg, conn) {
+            ws.installHandler("sendChatMessage", function(msg, conn) {
                 var data = msg.data || {};
-                Chat.sendMessage({
+                return Chat.sendMessage({
                     ip: conn.ip,
                     hashpass: conn.hashpass
                 }, data.boardName, data.postNumber, data.text, ws).then(function(result) {
                     var message = result.message;
-                    message.type = "out";
-                    reply(message);
                     if (result.senderHash != result.receiverHash) {
                         message.type = "in";
                         var receiver = result.receiver;
@@ -127,9 +125,8 @@ var spawnCluster = function() {
                             postNumber: data.postNumber
                         }, ip, receiver.hashpass);
                     }
-                }).catch(function(err) {
-                    Global.error("WebSocket:", Tools.preferIPv4(conn.ip), msg.type, err.stack || err);
-                    reply(null, err);
+                    message.type = "out";
+                    return Promise.resolve(message);
                 });
             });
             server.listen(config("server.port", 8080), function() {

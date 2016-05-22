@@ -1838,8 +1838,9 @@ lord.checkChats = function() {
             if (!chats[key])
                 chats[key] = [];
             var list = chats[key];
-            if (messages.length > 0)
-                keys.push(key);
+            if (messages.length < 1)
+                return;
+            var any = false;
             messages.forEach(function(message) {
                 for (var i = 0; i < list.length; ++i) {
                     var msg = list[i];
@@ -1847,7 +1848,10 @@ lord.checkChats = function() {
                         return;
                 }
                 list.push(message);
+                any = true;
             });
+            if (any)
+                keys.push(key);
         });
         lord.setLocalObject("chats", chats);
         if (keys.length > 0)
