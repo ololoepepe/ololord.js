@@ -127,7 +127,7 @@ module.exports = function(server) {
                 };
                 try {
                     var p = handler(message, conn);
-                    if (typeof p.then == "function" && typeof p.catch == "function") {
+                    if (p && typeof p.then == "function" && typeof p.catch == "function") {
                         p.then(function(data) {
                             try {
                                 replyData(data);
@@ -150,7 +150,7 @@ module.exports = function(server) {
                         }
                     }
                 } catch (ex) {
-                    Global.error("WebSocket:", Tools.preferIPv4(conn.ip), message.type, err.stack || err);
+                    Global.error("WebSocket:", Tools.preferIPv4(conn.ip), message.type, ex.stack || ex);
                     try {
                         replyErr(err);
                     } catch (ex) {

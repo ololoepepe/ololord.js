@@ -129,6 +129,28 @@ var spawnCluster = function() {
                     return Promise.resolve(message);
                 });
             });
+            var subscriptions = new Map();
+            ws.installHandler("subscribeToThreadUpdates", function(msg, conn) {
+                var data = msg.data || {};
+                var key = data.boardName + "/" + data.threadNumber;
+                if (subscriptions.has(key)) {
+                    subscriptions.get(key).add(conn);
+                } else {
+                    var s = new Set();
+                    s.add(conn);
+                    subscriptions.set(key, s);
+                }
+            });
+            ws.installHandler("unsubscribeFromThreadUpdates", function(msg, conn) {
+                var data = msg.data || {};
+                var key = data.boardName + "/" + data.threadNumber;
+                var s = subscriptions.get(key);
+                if (!s)
+                    return;
+                s.delete(conn);
+                if (s.size < 1)
+                    subscriptions.delete(key);
+            });
             server.listen(config("server.port", 8080), function() {
                 console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080) + "...");
                 Global.IPC.installHandler("exit", function(status) {
@@ -171,6 +193,17 @@ var spawnCluster = function() {
                         config.setConfigFile(data);
                     else
                         config.reload();
+                    return Promise.resolve();
+                });
+                Global.IPC.installHandler("notifyAboutNewPosts", function(data) {
+                    Tools.forIn(data, function(_, key) {
+                        var s = subscriptions.get(key);
+                        if (!s)
+                            return;
+                        s.forEach(function(conn) {
+                            conn.sendMessage("newPost");
+                        });
+                    });
                     return Promise.resolve();
                 });
                 Global.IPC.installHandler("getConnectionIPs", function() {
@@ -285,6 +318,9 @@ if (cluster.isMaster) {
         Global.IPC.installHandler("reloadConfig", function() {
             config.reload();
             return Global.IPC.send("reloadConfig");
+        });
+        Global.IPC.installHandler("notifyAboutNewPosts", function(data) {
+            return Global.IPC.send("notifyAboutNewPosts", data);
         });
         Global.IPC.installHandler("regenerateCache", function(regenerateArchive) {
             return controller.regenerate(regenerateArchive);

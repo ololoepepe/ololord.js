@@ -31,6 +31,7 @@ lord.postFormFixed = true;
 /*Classes*/
 
 /*constructor*/ lord.AutoUpdateTimer = function(intervalSeconds) {
+    this.useWebSockets = lord.getLocalObject("useWebSockets", true);
     this.intervalSeconds = intervalSeconds;
     this.updateTimer = null;
     this.countdownTimer = null;
@@ -57,7 +58,12 @@ lord.postFormFixed = true;
         return;
     var _this = this;
     ["Top", "Bottom"].forEach(function(position) {
-        $("#autoUpdate" + position).val(_this.secondsLeft).trigger("change");
+        if (_this.useWebSockets) {
+            var color = (_this.secondsLeft % 2) ? "#8D8D8D" : "#2F2F2F";
+            $("#autoUpdate" + position).trigger("configure", { fgColor: color });
+        } else {
+            $("#autoUpdate" + position).val(_this.secondsLeft).trigger("change");
+        }
     });
 };
 
@@ -65,9 +71,8 @@ lord.postFormFixed = true;
     if (this.updateTimer)
         return;
     this.updateTimer = setInterval((function() {
-        var boardName = lord.data("boardName");
-        var threadNumber = +lord.data("threadNumber");
-        lord.updateThread(true);
+        if (!this.useWebSockets)
+            lord.updateThread(true);
         if (this.countdownTimer) {
             clearInterval(this.countdownTimer);
             this.createCountdownTimer();
@@ -3374,7 +3379,7 @@ lord.initializeOnLoadBoard = function() {
 
 lord.initializeOnLoadThread = function() {
     lord.addVisibilityChangeListener(lord.visibilityChangeListener);
-    var enabled = lord.getLocalObject("autoUpdate", {})[+lord.data("threadNumber")];
+    var enabled = lord.getLocalObject("autoUpdate", {})[lord.data("boardName") + "/" +lord.data("threadNumber")];
     if (true === enabled || (false !== enabled && lord.getLocalObject("autoUpdateThreadsByDefault", false)))
         lord.setAutoUpdateEnabled(true);
 };
@@ -3445,6 +3450,12 @@ lord.blinkFaviconNewMessage = function() {
     else
         link.href = link.href.replace("favicon_newmessage.ico", "favicon.ico");
 };
+
+if (lord.getLocalObject("useWebSockets", true)) {
+    lord.wsHandlers["newPost"] = function(msg) {
+        lord.updateThread(true);
+    };
+}
 
 lord.updateThread = function(silent) {
     var boardName = lord.data("boardName");
@@ -3576,6 +3587,19 @@ lord.updateThread = function(silent) {
 };
 
 lord.setAutoUpdateEnabled = function(enabled) {
+    var list = lord.getLocalObject("autoUpdate", {});
+    var boardName = lord.data("boardName");
+    var threadNumber = +lord.data("threadNumber");
+    list[boardName + "/" + threadNumber] = enabled;
+    lord.setLocalObject("autoUpdate", list);
+    if (lord.getLocalObject("useWebSockets", true)) {
+        lord.sendWSMessage((enabled ? "subscribeToThreadUpdates" : "unsubscribeFromThreadUpdates"), {
+            boardName: boardName,
+            threadNumber: threadNumber,
+        }).then(function(msg) {
+            //Do nothing
+        }).catch(lord.handleError);
+    }
     if (enabled) {
         var intervalSeconds = lord.getLocalObject("autoUpdateInterval", 15);
         lord.autoUpdateTimer = new lord.AutoUpdateTimer(intervalSeconds);
@@ -3584,10 +3608,6 @@ lord.setAutoUpdateEnabled = function(enabled) {
         lord.autoUpdateTimer.stop();
         lord.autoUpdateTimer = null;
     }
-    var list = lord.getLocalObject("autoUpdate", {});
-    var threadNumber = +lord.data("threadNumber");
-    list[threadNumber] = enabled;
-    lord.setLocalObject("autoUpdate", list);
 };
 
 window.addEventListener("load", function load() {

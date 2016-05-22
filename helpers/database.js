@@ -1,6 +1,7 @@
 var Address4 = require("ip-address").Address4;
 var Address6 = require("ip-address").Address6;
 var bigInt = require("big-integer");
+var cluster = require("cluster");
 var Crypto = require("crypto");
 var Elasticsearch = require("elasticsearch");
 var FS = require("q-io/fs");
@@ -66,6 +67,24 @@ var es = new Elasticsearch.Client({ host: config("system.elasticsearch.host", "l
 
 module.exports.db = db;
 module.exports.es = es;
+
+var hasNewPosts = new Set();
+
+if (!cluster.isMaster) {
+    setInterval(function() {
+        var o = {};
+        for (var key of hasNewPosts)
+            o[key] = 1;
+        hasNewPosts.clear();
+        if (!Tools.hasOwnProperties(o))
+            return;
+        return Global.IPC.send("notifyAboutNewPosts", o).then(function() {
+            //Do nothing
+        }).catch(function(err) {
+            Global.error(err.stack || err);
+        });
+    }, Tools.Second);
+}
 
 db.tmp_hmget = db.hmget;
 db.hmget = function(key, hashes) {
@@ -1114,6 +1133,7 @@ module.exports.createPost = function(req, fields, files, transaction) {
         c.post = post;
         return Global.generate(post.boardName, post.threadNumber, post.number, "create");
     }).then(function() {
+        hasNewPosts.add(c.post.boardName + "/" + c.post.threadNumber);
         return Promise.resolve(c.post);
     });
 };
