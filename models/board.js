@@ -237,7 +237,8 @@ var getThread = function(board, number, archived) {
             postCount: postCount,
             postingEnabled: (board.postingEnabled && !c.thread.closed),
             opPost: c.opPost,
-            lastPosts: c.posts
+            lastPosts: c.posts,
+            archived: !!archived
         };
         c.model.thread = threadModel;
         return Database.lastPostNumber(board.name);

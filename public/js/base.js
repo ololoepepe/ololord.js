@@ -65,6 +65,7 @@ lord.currentTracks = {};
         lord.ws = new SockJS("/" + lord.model("base").site.pathPrefix + "ws", null, options);
         lord.wsOpen = new Promise(function(resolve, reject) {
             lord.ws.onopen = function() {
+                retryCount = 0;
                 lord.ws.send(JSON.stringify({
                     type: "init",
                     data: { hashpass: lord.getCookie("hashpass") }

@@ -12,6 +12,7 @@ Global.Program = require("commander");
 Global.Program.version("1.1.0")
     .option("-c, --config-file <file>", "Path to the config.json file")
     .option("-r, --regenerate", "Regenerate the cache on startup")
+    .option("-a, --archive", "Regenerate archived threads, too")
     .parse(process.argv);
 
 var config = require("./helpers/config");
@@ -218,7 +219,7 @@ if (cluster.isMaster) {
         return controller.initialize();
     }).then(function() {
         if (Global.Program.regenerate || config("system.regenerateCacheOnStartup", true)) {
-            return controller.regenerate(config("system.regenerateArchive", false));
+            return controller.regenerate(Global.Program.archive || config("system.regenerateArchive", false));
         } else {
             console.log("Generating statistics, please, wait...");
             return controller.generateStatistics().catch(function(err) {

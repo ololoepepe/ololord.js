@@ -3323,11 +3323,6 @@ lord.initializeOnLoadBoard = function() {
                 lord.postFormLoaded();
         }).catch(lord.handleError);
     }
-    if (lord.queryOne(".opPost[data-archived='true']")) {
-        lord.nameAll("backButton").forEach(function(btn) {
-            btn.href += "/archive.html";
-        });
-    }
     if (lord.deviceType("mobile"))
         lord.setTooltips();
     var threadNumber = +lord.data("threadNumber");

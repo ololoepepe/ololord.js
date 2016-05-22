@@ -39,7 +39,7 @@
         var model = lord.model(["tr", "board/" + lord.data("boardName")]);
         model.settings = lord.settings();
         model.thread = {
-            archived: lord.data("archived"),
+            archived: {{=it.thread.archived}},
             postingEnabled: lord.data("postingEnabled"),
             postLimitReached: lord.data("postLimitReached"),
             bumpLimitReached: lord.data("bumpLimitReached")
@@ -83,7 +83,7 @@
         var model = lord.model(["tr", "board/" + lord.data("boardName")]);
         model.settings = lord.settings();
         model.thread = {
-            archived: lord.data("archived"),
+            archived: {{=it.thread.archived}},
             postingEnabled: lord.data("postingEnabled"),
             postLimitReached: lord.data("postLimitReached"),
             bumpLimitReached: lord.data("bumpLimitReached")
