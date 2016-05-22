@@ -17,19 +17,21 @@
     </div>]
 {{??}}
     {{~it.boardGroups :group}}
-        {{? group.title}}
-            {{!group.title}}
-        {{?}}
-        <span class="navbarBoardGroup">
-            [
-            {{~group.boards :board:index}}
-                <span class="navbarItem navbarItemBoard"><a href="/{{=it.site.pathPrefix}}{{=board.name}}"
-                      title="{{=board.title}}" data-board-name="{{=board.name}}">{{=board.name}}</a></span>
-                {{? index < group.boards.length - 1}}
-                    /
-                {{?}}
-            {{~}}
-            ]
+        <span class="nowrap">
+            {{? group.title}}
+                {{!group.title}}
+            {{?}}
+            <span class="navbarBoardGroup">
+                [
+                {{~group.boards :board:index}}
+                    <span class="navbarItem navbarItemBoard"><a href="/{{=it.site.pathPrefix}}{{=board.name}}"
+                          title="{{=board.title}}" data-board-name="{{=board.name}}">{{=board.name}}</a></span>
+                    {{? index < group.boards.length - 1}}
+                        /
+                    {{?}}
+                {{~}}
+                ]
+            </span>
         </span>
     {{~}}
 {{?}}

@@ -437,6 +437,7 @@ lord.clearFileInput = function(div) {
     if (!div)
         return;
     lord.queryOne("img.postformFilePreview", div).src = "/" + lord.data("sitePathPrefix") + "img/addfile.png";
+    $("img.postformFilePreview", div).removeClass("noInvert");
     $(lord.queryOne("span.postformFileText", div)).empty();
     lord.removeFileHash(div);
     if (div.hasOwnProperty("fileInput"))
@@ -1760,6 +1761,7 @@ lord.fileAddedCommon = function(div) {
         lord.readAs(div.file, "DataURL").then(function(url) {
             var img = lord.queryOne("img", div);
             img.src = url;
+            $(img).addClass("noInvert");
             if ("neutron" == lord.settings().style.name)
                 $(img).addClass("noInvert");
             img.addEventListener("load", function load() {
@@ -1902,6 +1904,7 @@ lord.attachFileByDrawing = function(a) {
                     });
                 };
                 img.src = url;
+                $(img).addClass("noInvert");
             });
         }).then(function(options) {
             var model = lord.model(["base", "tr"]);
