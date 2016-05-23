@@ -66,34 +66,14 @@ hr {
 }
 
 .select {
-    background-color: #2A3037;
-    border: 1px solid rgba(255,255,255,.18);
-    color: #A7A7A7;
-    -webkit-transition-property: background-color,border-color,box-shadow;
-    -webkit-transition-duration: .4s;
-    transition-property: background-color,border-color,box-shadow;
-    -o-transition-duration: .4s;
-    -o-transition-property: background-color,border-color,box-shadow;
-    -moz-transition-duration: .4s;
-    -moz-transition-property: background-color,border-color,box-shadow;
-    transition-duration: .4s;
-}
-
-.select:focus {
-    background-color: #1D2228;
-    border: 1px solid rgba(55,201,153,.62);
-    color: #D8D8D8;
-    outline: none;
-    box-shadow: inset 0 0 40px rgba(55,201,153,.32);
-}
-
-.select:hover {
-    background-color: #1D2228;
+    background-color: #C7C7C7;
+    border: 1px solid #C7C7C7;
+    color: #323232;
 }
 
 .selectOption {
-    background-color: #2A3037;
-    color: #A7A7A7;
+    background-color: #C7C7C7;
+    color: #323232;
     -webkit-filter: invert(0);
     -moz-filter: invert(0);
     -ms-filter: invert(0);
