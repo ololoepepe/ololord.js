@@ -87,10 +87,12 @@
             {{ out += it.customPostHeaderPart[100](it, thread, post); }}
         {{?}}
         <span class="nowrap">
+            <span class="postNumber">
             #<a href="/{{=it.site.pathPrefix}}{{=it.board.name}}/res/{{=post.threadNumber}}.html{{? post.threadNumber != post.number}}#{{=post.number}}{{?}}"
                 {{? thread.postingEnabled && !thread.archived}}onclick="lord.insertPostNumber({{=post.number}}); return false;"{{?}}
                 name="number" data-board-name="{{=post.boardName}}" data-post-number="{{=post.number}}"
                 data-thread-number="{{=post.threadNumber}}">{{=post.number}}</a>
+            </span>
             {{? it.customPostHeaderPart && it.customPostHeaderPart[110]}}
                 {{ out += it.customPostHeaderPart[110](it, thread, post); }}
             {{?}}

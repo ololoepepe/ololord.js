@@ -365,6 +365,14 @@ ul.tabWidget > li.activated > a {
     border: 1px solid #575757;
 }
 
+.borderRadius {
+    border-radius: 5px;
+}
+
+.halfTransparentBackground {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
 .invertableImage, .buttonImage, .signImage, .boardSelect {
     -webkit-filter: invert(1);
     -moz-filter: invert(1);
