@@ -2314,7 +2314,7 @@ lord.initializeOnLoadBase = function() {
         lord.detectSwipe(document.body, function(e) {
             var sidebar = lord.id("sidebar");
             var visible = !sidebar.style.display;
-            if (Math.abs(e.distanceX) < 100)
+            if (Math.abs(e.distanceY) >= 30 || Math.abs(e.distanceX) < 100)
                 return;
             if ((e.types.indexOf("swiperight") >= 0 && !visible) || (e.types.indexOf("swipeleft") >= 0 && visible))
                 lord.showHideSidebar();
