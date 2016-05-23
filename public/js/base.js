@@ -2203,10 +2203,10 @@ lord.adjustContentPadding = function() {
     if (!lord.getLocalObject("stickyToolbar", true))
         return;
     var height = $(".toolbar.sticky").height();
-    $("#content").css("padding-top", (height + 4) + "px");
+    $("#content").css("padding-top", (height + 6) + "px");
     $("#sidebarContent").css({
-        top: (height - 1) + "px",
-        height: ($("#sidebarContent").parent().height() - (height + 43)) + "px"
+        top: (height + 2) + "px",
+        height: ($("#sidebarContent").parent().height() - (height + 44)) + "px"
     });
 };
 
@@ -2329,6 +2329,12 @@ lord.changeStyle = function(style) {
     link = lord.queryOne("link[href$='" + lord.settings().style.name + "/jquery-ui.min.css']");
     link.href = link.href.replace(link.href.split("/")[link.href.split("/").length - 2], style);
     lord.setLocalObject("style", style);
+    lord.adjustContentPadding();
+    for (var i = 0.5; i <= 4; i *= 2) {
+        setTimeout(function() {
+            lord.adjustContentPadding();
+        }, i * lord.Second);
+    }
 };
 
 lord.showHideSidebar = function() {

@@ -304,6 +304,7 @@ ul.tabWidget > li.activated > a {
 
 .toolbar.sticky {
     background-color: #212121;
+    border-bottom: 1px solid #575757;
 }
 
 .vote {
