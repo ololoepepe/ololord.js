@@ -211,3 +211,7 @@ div.bannedUser {
 #sidebar {
     z-index: 2;
 }
+
+#sidebarFooter > select {
+    font-size: 1.2em;
+}
