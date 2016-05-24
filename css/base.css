@@ -26,6 +26,10 @@ a:hover {
     z-index: 1;
 }
 
+.toolbar a {
+    font-size: 1em;
+}
+
 .buttonImage {
     vertical-align: middle;
     opacity: 0.65;
