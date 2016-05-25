@@ -17,20 +17,6 @@ a:hover {
     color: #0066FF;
 }
 
-label {
-    white-space: nowrap;
-}
-
-fieldset {
-    border: none;
-    padding: 0px;
-}
-
-fieldset.fieldset {
-    border: 1px solid black;
-    padding: 4px;
-}
-
 .toolbar {
     display: block;
     font-size: 0.9em;
@@ -70,56 +56,4 @@ fieldset.fieldset {
 
 input.buttonImage {
     background-color: transparent;
-}
-
-.accordionHeader {
-    display: inline-block;
-    width: 100%;
-    padding: 4px;
-    font-size: 1.1em;
-}
-
-div.accordionBody {
-    padding: 4px;
-    width: 100%;
-}
-
-#optionsWrapper {
-    display: inline-block;
-    width: calc(33%);
-}
-
-#preview {
-    display: inline-block;
-    width: calc(66%);
-    vertical-align: top;
-    margin-left: 0px;
-    border: 1px solid red;
-    padding: 0px;
-}
-
-#options {    
-    width: calc(100% - 10px);
-}
-
-.sectionHeader {
-    font-weight: bold;
-}
-
-.hexColor {
-    width: 70px !important;
-}
-
-.rgbaColor {
-    width: 175px !important;
-}
-
-#fontFamily {
-    width: 200px;
-}
-
-#preview > iframe {
-    width: 100%;
-    height: 600px;
-    border: 0px;
 }

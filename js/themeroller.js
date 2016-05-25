@@ -186,6 +186,62 @@ lord.createTheme = function() {
                 type: "value",
                 value: "invert(1)"
             }
+        },
+        "a": {
+            "color": {
+                type: "minicolors",
+                selector: "#linkFontColor"
+            }
+        },
+        "a:hover": {
+            "color": {
+                type: "minicolors",
+                selector: "#linkHoverFontColor"
+            }
+        },
+        ".cspoilerTitle": {
+            "color": {
+                type: "minicolors",
+                selector: "#collapsibleTitleFontColor"
+            }
+        },
+        ".cspoilerTitle:hover": {
+            "color": {
+                type: "minicolors",
+                selector: "#collapsibleTitleHoverFontColor"
+            }
+        },
+        ".cspoilerBody": {
+            "background-color": {
+                type: "minicolors",
+                selector: "#collapsibleBodyBackgroundColor"
+            },
+            "border": [
+                {
+                    selector: "#collapsibleBodyBorderWidth",
+                    type: "select"
+                },
+                {
+                    selector: "#collapsibleBodyBorderType",
+                    type: "select"
+                },
+                {
+                    selector: "#collapsibleBodyBorderColor",
+                    type: "minicolors"
+                }
+            ]
+        },
+        "a.expandCollapse": {
+            "color": {
+                type: "minicolors",
+                selector: "#collapsibleTitleFontColor"
+            }
+        },
+        "a.expandCollapse:hover": {
+            "color": {
+                type: "minicolors",
+                selector: "#collapsibleTitleHoverFontColor"
+            }
         }
     }, function(attributes, selector) {
         if (attributes.enabledSelector) {
@@ -235,6 +291,12 @@ lord.previewTheme = function() {
         style.appendChild(lord.node("text", css));
     lord.previewWindow.document.head.replaceChild(style, lord.previewWindow.document.getElementById("themeStylesheet"));
     lord.cssView.setValue(css);
+};
+
+lord.showHideCSS = function() {
+    var show = !!$("#cssView")[0].style.display;
+    $("#cssView")[0].style.display = show ? "" : "none";
+    $("#cssView").parent().find("a").empty().text(show ? "Hide CSS" : "Show CSS");
 };
 
 window.addEventListener("load", function load() {

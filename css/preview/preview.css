@@ -1,0 +1,10 @@
+a[data-rating="R-18"] {
+    background: url("../../img/r-18.png") center center;
+    width: 200px;
+    height: 133px;
+    display: inline-block;
+}
+
+a[data-rating="R-18"] > img {
+    display: none;
+}

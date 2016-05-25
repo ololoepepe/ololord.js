@@ -6,9 +6,143 @@
     <title>ololord.js – Theme preview</title>
     <link rel="stylesheet" type="text/css" href="/ololord.js/css/preview/base.css">
     <link id="platformStylesheet" rel="stylesheet" type="text/css" href="/ololord.js/css/preview/desktop.css">
+    <link rel="stylesheet" type="text/css" href="/ololord.js/css/preview/preview.css">
     <style id="themeStylesheet" type="text/css"></style>
+    <script type ="text/javascript" src="/ololord.js/js/3rdparty/jquery-1.11.3.min.js"></script>
+    <script type ="text/javascript" src="/ololord.js/js/3rdparty/jquery-ui.min.js"></script>
+    <script type ="text/javascript" src="/ololord.js/js/preview.js"></script>
 </head>
 <body>
+<div>
+    <div class="toolbar stiky">
+        <input type="image" name="sidebarButton" title="Show sidebar" class="buttonImage"
+               src="/ololord.js/favicon.ico" width="20" height="20" onclick="return false;" />
+        <div id="sidebarButtonPlaceholder"></div>
+        [<input type="image" name="favoritesButton" title="Show favorites" class="buttonImage"
+                src="/ololord.js/img/favorite.png" onclick="return false;" />]
+        [<a name="switchMumWatchingButton"
+            title="Mum is watching me!"><img src="/ololord.js/img/show.png" class="buttonImage"></a>]
+        <span class="nowrap">
+            Thematics
+            <span class="navbarBoardGroup">
+                [
+                <span class="navbarItem navbarItemBoard"><a href="javascript:void(0);"
+                          title="/a/nime">a</a></span>
+                /
+                <span class="navbarItem navbarItemBoard"><a href="javascript:void(0);"
+                          title="/h/entai">h</a></span>
+                ]
+            </span>
+        </span>
+        <span class="nowrap">
+            Other
+            <span class="navbarBoardGroup">
+                [
+                <span class="navbarItem navbarItemBoard"><a href="javascript:void(0);"
+                          title="/b/rotherhood">b</a></span>
+                /
+                <span class="navbarItem navbarItemBoard"><a href="javascript:void(0);"
+                          title="Board /d/iscussion">d</a></span>
+                ]
+            </span>
+        </span>
+        <span class="nowrap">
+            <span class="navbarItem">[<a href="javascript:void(0);"
+                                         title="Home"><img src="/ololord.js/img/homepage.png"
+                                                           class="buttonImage" width="16" height="16"></a>]</span>
+            <span class="navbarItem">[<a href="javascript:void(0);"
+                                         title="Markup"><img src="/ololord.js/img/markup.png" class="buttonImage"
+                                                             width="16" height="16"></a>]</span>
+            <span class="navbarItem">[<a href="javascript:void(0);"
+                                         title="F.A.Q."><img src="/ololord.js/img/question.png" class="buttonImage"
+                                                             width="16" height="16"></a>]</span>
+            <span class="navbarItem">[<a href="javascript:void(0);" name="searchButton"
+                                         title="Hide search"><img src="/ololord.js/img/search_hide.png" class="buttonImage"
+                                                                  width="16" height="16"></a>]</span>
+            <span class="navbarItem">[<a href="javascript:void(0);" name="chatButton"
+                                         title="Private chat"><img src="/ololord.js/img/chat.png" class="buttonImage"
+                                                                   width="16" height="16"></a>]</span>
+        </span>
+        <div class="searchAction" style="top: 30px;">
+            <form method="get" onsubmit="return false;">
+                <div class="searchActionInputContainer">
+                    <input type="text" class="input searchActionInput" name="query"
+                           placeholder="Search: possible +required -excluded" value="" />
+                    <input style="background: url(/ololord.js/img/search.png) center no-repeat; border: solid 0px; width: 16px; height: 16px;"
+                           type="submit" title="Search" class="buttonImage" value="" />
+                </div>
+                <div class="searchActionOptionsContainer">
+                    <select name="board" class="select searchActionSelect"
+                            onchange="$(this).closest('.searchAction').find('.searchActionInput').focus();">
+                        <option value="*" selected="true">[*] All boards</option>
+                        <option value="a">[a] /a/nime</option>
+                        <option value="b">[b] /b/rotherhood</option>
+                        <option value="d">[d] /d/iscussion</option>
+                        <option value="h">[h] /h/entai</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="player" class="minimized">
+    <div class="playerMinimized">
+        <div>
+            <span class="playerMinimizedActionsDesktop">
+                <a href="javascript:void(0);" onclick="lord.setPlayerVisible(event, true);"
+                   title="Maximize"><img src="/ololord.js/img/player/16/player.png"
+                                         class="buttonImage" width="16" height="16"></a>
+                <input type="image" onclick="return false;" name="playerPlayPauseButton" title="Play"
+                       src="/ololord.js/img/player/16/play.png" class="buttonImage" width="16" height="16"
+                       disabled="true" />
+                <input type="image" onclick="return false;" title="Previous track" class="buttonImage" width="16"
+                       height="16" src="/ololord.js/img/player/16/previous.png" name="playerPreviousTrackButton"
+                       disabled="true" />
+                <input type="image" onclick="return false;" name="playerNextTrackButton" title="Next track"
+                       class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/next.png"
+                       disabled="true" />
+            </span>
+            <span class="playerMinimizedActionsMobile" onclick="lord.setPlayerVisible(event, true);">
+                <input type="image" onclick="return false;" name="playerPlayPauseButton" title="Play"
+                       src="/ololord.js/img/player/16/play.png" class="buttonImage" width="16" height="16"
+                       disabled="true" />
+                Maximize
+            </span>
+        </div>
+    </div>
+    <div class="playerMaximized">
+        <div class="playerHeader">
+            <input type="image" onclick="lord.playerPlayPause(event); return false;" name="playerPlayPauseButton"
+                   title="{{=it.tr.playerPlayText}}" src="/ololord.js/img/player/32/play.png"
+                   class="buttonImage" width="32" height="32" disabled="true" />
+            <input type="image" onclick="lord.playerPrevious(event); return false;" name="playerPreviousTrackButton"
+                   title="{{=it.tr.playerPreviousTrackText}}" class="buttonImage" width="32" height="32"
+                   src="/ololord.js/img/player/32/previous.png" disabled="true" />
+            <input type="image" onclick="lord.playerNext(event); return false;" name="playerNextTrackButton"
+                   title="{{=it.tr.playerNextTrackText}}" class="buttonImage" width="32" height="32"
+                   src="/ololord.js/img/player/32/next.png" disabled="true" />
+            <div id="playerTrackInfo"></div>
+            <input type="image" onclick="lord.playerMute(event); return false;" name="playerMuteButton"
+                   title="{{=it.tr.playerMuteText}}" src="/ololord.js/img/player/32/volume_on.png"
+                   class="buttonImage" width="32" height="32" disabled="true" />
+        </div>
+        <div id="playerTrackTags" class="playerHeader" style="display: none;"></div>
+        <div class="playerHeader">
+            <div id="playerDurationSlider"></div>
+            <div id="playerVolumeSlider"></div>
+        </div>
+        <div id="playerTracks"></div>
+        <a id="playerAddRadioButton" href="javascript:void(0);" onclick="lord.playerAddRadio(); return false;"
+           title="{{=it.tr.addRadioText}}"><img src="/ololord.js/img/player/32/radio_add.png"
+                                                      class="buttonImage" width="32" height="32"></a>
+        <a id="playerMinimizeButton" href="javascript:void(0);" onclick="lord.setPlayerVisible(event, false);"
+           title="{{=it.tr.minimizePlayerText}}"><img src="/ololord.js/img/player/32/hide.png"
+                                                      class="buttonImage" width="32" height="32"></a>
+    </div>
+</div>
+<div class="banner">
+    <a href="javascript:void(0);" title="/h/entai"><img src="/ololord.js/img/1.png"></a>
+</div>
 <div class="theTitle">
     <h1>
         /b/rotherhood
@@ -22,6 +156,26 @@
            title="RSS feed"><img src="/ololord.js/img/rss.png" class="buttonImage" width="24" height="24"></a>
     </h1>
 </div>
+<div>
+    <hr />
+    <div id="createActionContainerTop" class="createAction">
+        <div id="postFormContainerTop">
+            <div>[<a id="showHidePostFormButtonTop" href="javascript:void(0);">Show post form</a>]</div>
+        </div>
+    </div>
+    <div class="postingDisabledMessage">
+        <h2>This is an archived thread. Posting is disabled.</h2>
+    </div>
+    <div class="postingDisabledMessage">
+        <h2>Posting is disabled on this board</h2>
+    </div>
+    <div class="theMessage">
+        <h2 class="postLimitReached">Post limit reached.</h2>
+    </div>
+    <div class="theMessage" name="bumpLimitReached">
+        <h3 class="bumpLimitReached">Bump limit reached.</h3>
+    </div>
+</div>
 <div id="threads">
     <hr />
     <div id="thread1" class="thread">
@@ -29,7 +183,7 @@
             <div class="postHeader">
                 <span class="nowrap"> </span>
                 <span class="postSubject">
-                    Post subject
+                    Post subject of an OP-post
                 </span>
                 <span class="someName">
                     <span class="userName defaultUserName">Anonymous</span>
@@ -46,7 +200,7 @@
                                                                                     class="buttonImage"></a>]</span>
                     <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
                                                               class="buttonImage" name="postActions"
-                                                              title="Действия над постом" onclick="return false;">]</span>
+                                                              title="Post actions" onclick="return false;">]</span>
                     <span name="toThread" class="postToThread postToThreadDesktop">
                         [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
                     </span>
@@ -61,36 +215,60 @@
                                     <a href="javascript:void(0);">1463902552939.jpg</a>
                                 </div>
                                 <div class="postFileSize" >
-                                    (220.97KB, 255x550)
+                                    (25.01KB, 500x332)
                                 </div>
                                 <div class="postFileSearch">
                                     <a href="javascript:void(0);" name="deleteFileButton">
-                                        <img src="/ololord.js/img/delete.png" title="Удалить файл"
+                                        <img src="/ololord.js/img/delete.png" title="Delete file"
                                              class="buttonImage" /></a>
                                     <a href="javascript:void(0);" name="editFileRatingButton">
-                                        <img src="/img/shield.png" title="Редактировать рейтинг файла"
+                                        <img src="/ololord.js/img/shield.png" title="Edit file rating"
                                              class="buttonImage" /></a>
                                     <input type="image" src="/ololord.js/img/hide.png" class="buttonImage"
-                                           title="Скрывать по картинке" onclick="return false;" />
+                                           title="Hide by image" onclick="return false;" />
                                     <ul id="image1463902552939-pngHideMenu" name="hideByImageButton" class="menu">
                                         <li class="nowrap">
                                             <a href="javascript:void(0);">Hide by image size</a>
                                         </li>
                                     </ul>
                                     <a name="drawOnImageButton" onclick="return false;">
-                                        <img src="/ololord.js/img/draw.png" title="Рисовать на этой картинке"
+                                        <img src="/ololord.js/img/draw.png" title="Draw on this image"
                                              class="buttonImage" /></a>
                                     <input type="image" src="/ololord.js/img/search.png" class="buttonImage"
-                                           title="Найти соус..." onclick="return false;" />
+                                           title="Find sauce..." onclick="return false;" />
                                 </div>
                                 <div class="postFileFile">
                                     <a href="javascript:void(0);" data-rating="SFW">
-                                        <img src="/ololord.js/img/files/1463902552939s.jpg" class="postFileThumbImage">
+                                        <img src="/ololord.js/img/1463902552939s.jpg" class="postFileThumbImage">
                                     </a>
                                 </div>
                             </div>
                             <div class="postText">
-                                <blockquote id="post1Text"><strong>First, please, read the F.A.Q.: <a href="javascript:void(0);">https://site.com/faq.html</a>.</strong><br /><br />Some text.<br /><br />Referenced post: <a href="javascript:void(0);">&gt;&gt;/d/100</a><br /><br /></blockquote>
+                                <blockquote id="post1Text">
+                                    Normal text
+                                    <br />
+                                    <strong>BOLD</strong>
+                                    <br />
+                                    <em>italics</em>
+                                    <br />
+                                    <s>striked out</s>
+                                    <br />
+                                    <u>Underlined</u>
+                                    <br />
+                                    <span class="spoiler">Spoiler</span>
+                                    <br />
+                                    <font face="monospace">monospace</font>
+                                    <br />
+                                    <a href="javascript:void(0);">https://site.com/link.html</a>
+                                    <br />
+                                    <a href="javascript:void(0);">&gt;&gt;/d/100</a>
+                                    <br />
+                                    <span class="cspoiler"><span class="cspoilerTitle" onclick="lord.expandCollapseSpoiler(this);">collapsible spoiler</span><span class="cspoilerBody" style="display: none;">some text</span></span>
+                                    <br />
+                                    <span class="quotation">&gt;quotation</span>
+                                    <br />
+                                    <div class="codeBlock cpp hljs" title="C++"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>;</div>
+                                </blockquote>
                             </div>
                         </div>
                     </div>
@@ -102,6 +280,68 @@
                     </span>
                 </div>
             </div>
+            <ul id="post1ActionsMenu" class="menu ui-menu ui-widget ui-widget-content" role="menu" tabindex="0"
+                style="display: block; top: 470px; left: 488px;" aria-activedescendant="ui-id-1">
+                <li class="ui-widget-header">Post</li>
+                <li class="ui-menu-item" id="ui-id-1" tabindex="-1" role="menuitem">
+                    <a name="sourceTextButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/source_text.png" class="signImage"> Source text</a>
+                </li>    
+                <li class="ui-menu-item" id="ui-id-2" tabindex="-1" role="menuitem">
+                    <a name="editButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/edit.png" class="signImage"> Edit</a>
+                </li>
+                <li class="ui-menu-item" id="ui-id-3" tabindex="-1" role="menuitem">
+                    <a name="hideButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/hide.png" class="signImage"> Hide (H)</a>
+                </li>
+                <li class="ui-menu-item" id="ui-id-4" tabindex="-1" role="menuitem">
+                    <a name="hideSimilarPostsButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/similar.png" class="signImage"> Hide similar</a>
+                </li>
+                <li class="ui-menu-item" id="ui-id-5" tabindex="-1" role="menuitem">
+                    <a name="deleteButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/delete.png" class="signImage"> Delete</a>
+                </li>
+                <li class="ui-widget-header">Thread</li>        
+                <li class="ui-menu-item" id="ui-id-6" tabindex="-1" role="menuitem">
+                    <a name="addToFavoritesButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/favorite.png" class="signImage"> <span>Add to favorites</span></a>
+                </li>
+                <li class="ui-menu-item" id="ui-id-7" tabindex="-1" role="menuitem">
+                    <a name="downloadFilesButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/download.png" class="signImage"> Download all files</a>
+                </li>
+                <li class="ui-menu-item" id="ui-id-8" tabindex="-1" role="menuitem">
+                    <a name="fixButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/fixed.png" class="signImage"> Fix</a>
+                </li>
+                <li class="ui-menu-item" id="ui-id-9" tabindex="-1" role="menuitem">
+                    <a name="closeButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/closed.png" class="signImage"> Close</a>
+                </li>
+                <li class="ui-menu-item" id="ui-id-10" tabindex="-1" role="menuitem">
+                    <a name="setUnbumpableButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/anchor.png" class="signImage"> Disallow bumping</a>
+                </li>
+                <li class="ui-menu-item" id="ui-id-11" tabindex="-1" role="menuitem">
+                    <a name="moveButton" target="_blank" href="javascript:void(0);">
+                        <img src="/ololord.js/img/move.png" class="signImage"> Move</a>
+                </li>
+                <li class="ui-widget-header">User</li>
+                <li class="ui-menu-item" id="ui-id-12" tabindex="-1" role="menuitem">
+                    <a name="chatButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/chat.png" class="signImage"> Private chat</a>
+                </li>
+                <li class="ui-menu-item" id="ui-id-13" tabindex="-1" role="menuitem">
+                    <a name="ipButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/ip.png" class="signImage"> Show IP-address</a>
+                </li>
+                <li class="ui-menu-item" id="ui-id-14" tabindex="-1" role="menuitem">
+                    <a name="banButton" href="javascript:void(0);">
+                        <img src="/ololord.js/img/ban.png" class="signImage"> Ban</a>
+                </li>
+            </ul>
         </div>
         <div class="omittedPosts">
             Posts omitted: 4
@@ -113,9 +353,9 @@
                     <span class="postSubject">
                     </span>
                     <span class="someName">
-                        <!--a class="mailtoName" href="mailto:{{=post.email}}">{{? post.name}}{{!post.name}}{{??}}{{!it.board.defaultUserName}}{{?}}</a-->
                         <span class="moderName">Moderator</span>
                     </span>
+                    <span class="opSign">[OP]</span>
                     <span class="nowrap postDateTime" name="dateTime">22/05/2016 Sun 10:35:52</span>
                     <span class="nowrap">
                         <span class="postNumber">
@@ -128,7 +368,7 @@
                                                                                         class="buttonImage"></a>]</span>
                         <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
                                                                   class="buttonImage" name="postActions"
-                                                                  title="Действия над постом" onclick="return false;">]</span>
+                                                                  title="Post actions" onclick="return false;">]</span>
                         <span name="toThread" class="postToThread postToThreadDesktop">
                             [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
                         </span>
@@ -143,52 +383,505 @@
                                         <a href="javascript:void(0);">1463902552939.jpg</a>
                                     </div>
                                     <div class="postFileSize" >
-                                        (220.97KB, 255x550)
+                                        (25.01KB, 500x332)
                                     </div>
                                     <div class="postFileSearch">
                                         <a href="javascript:void(0);" name="deleteFileButton">
-                                            <img src="/ololord.js/img/delete.png" title="Удалить файл"
+                                            <img src="/ololord.js/img/delete.png" title="Delete file"
                                                  class="buttonImage" /></a>
                                         <a href="javascript:void(0);" name="editFileRatingButton">
-                                            <img src="/img/shield.png" title="Редактировать рейтинг файла"
+                                            <img src="/ololord.js/img/shield.png" title="Edit file rating"
                                                  class="buttonImage" /></a>
                                         <input type="image" src="/ololord.js/img/hide.png" class="buttonImage"
-                                               title="Скрывать по картинке" onclick="return false;" />
+                                               title="Hide by image" onclick="return false;" />
                                         <ul id="image1463902552939-pngHideMenu" name="hideByImageButton" class="menu">
                                             <li class="nowrap">
                                                 <a href="javascript:void(0);">Hide by image size</a>
                                             </li>
                                         </ul>
                                         <a name="drawOnImageButton" onclick="return false;">
-                                            <img src="/ololord.js/img/draw.png" title="Рисовать на этой картинке"
+                                            <img src="/ololord.js/img/draw.png" title="Draw on this image"
                                                  class="buttonImage" /></a>
                                         <input type="image" src="/ololord.js/img/search.png" class="buttonImage"
-                                               title="Найти соус..." onclick="return false;" />
+                                               title="Find sauce..." onclick="return false;" />
                                     </div>
                                     <div class="postFileFile">
                                         <a href="javascript:void(0);" data-rating="SFW">
-                                            <img src="/ololord.js/img/files/1463902552939s.jpg" class="postFileThumbImage">
+                                            <img src="/ololord.js/img/1463902552939s.jpg" class="postFileThumbImage">
                                         </a>
                                     </div>
                                 </div>
                                 <div class="postText">
-                                    <blockquote id="post1Text"></blockquote>
+                                    <blockquote id="post6Text">
+                                        Normal text
+                                        <br />
+                                        <strong>BOLD</strong>
+                                        <br />
+                                        <em>italics</em><div class="vote">
+                                        <br />
+                                        <s>striked out</s>
+                                        <br />
+                                        <u>Underlined</u>
+                                        <br />
+                                        <span class="spoiler">Spoiler</span>
+                                        <br />
+                                        <font face="monospace">monospace</font>
+                                        <br />
+                                        <a href="javascript:void(0);">https://site.com/link.html</a>
+                                        <br />
+                                        <a href="javascript:void(0);">&gt;&gt;/d/100</a>
+                                        <br />
+                                        <span class="cspoiler"><span class="cspoilerTitle" onclick="lord.expandCollapseSpoiler(this);">collapsible spoiler</span><span class="cspoilerBody" style="display: none;">some text</span></span>
+                                        <br />
+                                        <span class="quotation">&gt;quotation</span>
+                                        <br />
+                                        <div class="codeBlock cpp hljs" title="C++"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>;</div>
+                                    </blockquote>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div name="referencedByContainer">
                         <span name="referencedBy" class="referencedBy">
-                            Repliesы:
+                            Replies:
                             <a href="javascript:void(0);">&gt;&gt;7</a>
                         </span>
                     </div>
                 </div>
             </div>
-            <!--Post-->
-            <!--Post-->
+            <div id="7" class="post">
+                <div class="postHeader">
+                    <span class="nowrap"> </span>
+                    <span class="postSubject">
+                    </span>
+                    <img src="/ololord.js/img/registered.png" class="signImage" title="This user is registered">
+                    <span class="someName">
+                        <a class="mailtoName" href="mailto:sage">Anonymous</a>
+                    </span>
+                    <span class="tripcode">!iqJ4ggOa3l</span>
+                    <span class="nowrap postDateTime" name="dateTime">22/05/2016 Sun 10:35:52</span>
+                    <span class="nowrap">
+                        <span class="postNumber">
+                            #<a href="javascript:void(0);" name="number">7</a>
+                        </span>
+                        <span class="postSequenceNumber">7</span>
+                        <span class="hideReason"></span>
+                        <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
+                                                             title="Быстрый ответ"><img src="/ololord.js/img/reply.png"
+                                                                                        class="buttonImage"></a>]</span>
+                        <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
+                                                                  class="buttonImage" name="postActions"
+                                                                  title="Post actions" onclick="return false;">]</span>
+                        <span name="toThread" class="postToThread postToThreadDesktop">
+                            [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
+                        </span>
+                    </span>
+                </div>
+                <div class="postBody">
+                    <div class="postFiles">
+                        <div class="postFilesInner">
+                            <div class="postFilesInnerRow">
+                                <div class="postText">
+                                    <blockquote id="post7Text">
+                                        <span class="quotation">&gt;quotation: <strong>BOLD</strong>, <em>italics</em>, <s>striked out</s>, <u>Underlined</u>, <font face="monospace">monospace</font>, <a href="javascript:void(0);">&gt;&gt;5</a></span>
+                                        <br />
+                                        <span class="quotation">&gt;quotation: <span class="spoiler">Spoiler</span></span>
+                                        <br />
+                                        <span class="cspoiler"><span class="cspoilerTitle" onclick="lord.expandCollapseSpoiler(this);">collapsible spoiler</span><span class="cspoilerBody" style="display: none;"><div class="codeBlock cpp hljs" title="C++"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>;</div></span></span>
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="8" class="post">
+                <div class="postHeader">
+                    <span class="nowrap"> </span>
+                    <span class="postSubject">
+                    </span>
+                    <span class="someName">
+                        <font color="red">Admin</font>
+                    </span>
+                    <span class="nowrap postDateTime" name="dateTime">22/05/2016 Sun 10:35:52</span>
+                    <span class="nowrap">
+                        <span class="postNumber">
+                            #<a href="javascript:void(0);" name="number">8</a>
+                        </span>
+                        <span class="postSequenceNumber">8</span>
+                        <span class="hideReason"></span>
+                        <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
+                                                             title="Быстрый ответ"><img src="/ololord.js/img/reply.png"
+                                                                                        class="buttonImage"></a>]</span>
+                        <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
+                                                                  class="buttonImage" name="postActions"
+                                                                  title="Post actions" onclick="return false;">]</span>
+                        <span name="toThread" class="postToThread postToThreadDesktop">
+                            [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
+                        </span>
+                    </span>
+                </div>
+                <div class="postBody">
+                    <div class="postFiles">
+                        <div class="postFilesInner">
+                            <div class="postFilesInnerRow">
+                                <div class="postText">
+                                    <blockquote id="post8Text">
+                                        Voting.
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vote">
+                        <div name="voteText" class="voteText">
+                            <img name="voteClosedImg" src="/ololord.js/img/closed.png" class="signImage noInvert"
+                                 title="Voting is closed">
+                            Wanna make some cool stylesheet?
+                        </div>
+                        <div name="voteVariants">
+                            <input type="radio" name="voteGroup" value="yep" />
+                            Yep!
+                            <span class="voteCount">(vote count: 156)</span>
+                            </br />
+                            <input type="radio" name="voteGroup" value="nope" disabled="true" />
+                            Nope!
+                            <span class="voteCount">(vote count: 23)</span>
+                        </div>
+                        <input type="image" src="/ololord.js/img/vote.png" name="buttonVote" disabled="true"
+                               title="Vote" width="24" height="24" class="buttonImage noInvert" />
+                        <a href="javascript:void(0);"
+                           title="Open voting"><img src="/ololord.js/img/open_voting.png"
+                                                    width="24" height="24" class="buttonImage noInvert"></a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+<div>
+    <hr />
+    <div id="createActionContainerBottom" class="createAction">
+        <div id="postFormContainerBottom">
+            <div>[<a id="showHidePostFormButtonBottom" href="javascript:void(0);">Hide post form</a>]</div>
+            <form id="postForm" onsubmit="return false;">
+                <div class="postFormHeader">
+                    <span class="postFormHeaderLabel">Start dragging to make post form float</span>
+                    <div class="postFormHeaderButtons">
+                        <a name="fixPostFormButton" href="javascript:void(0);" title="Fixed">
+                            <img src="/ololord.js/img/fixed.png" class="buttonImage" /></a>
+                        <a name="closePostFormButton" href="javascript:void(0);" title="Close">
+                            <img src="/ololord.js/img/clear.png" class="buttonImage" /></a>
+                    </div>
+                </div>
+                <table class="postFormTable">
+                    <tbody>
+                        <tr>
+                            <td class="postformLabel">
+                                <b>E-mail:</b>
+                            </td>
+                            <td class="postformField">
+                                <input type="text" name="email" class="postFormInput" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="postformLabel">
+                                <b>Name:</b>
+                            </td>
+                            <td class="postformField">
+                                <input type="text" name="name" class="postFormInput" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="postformLabel">
+                                <b>Subject:</b>
+                            </td>
+                            <td class="postformField">
+                                <input type="text" name="subject" class="postFormInput" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="postformLabel">
+                                <b>Text:</b>
+                            </td>
+                            <td class="postformField">
+                                <div class="symbolCounterContainer postFormInput">
+                                    <textarea name="text" rows="10" cols="41" class="postFormTextarea"
+                                              placeholder="Comment. Max length: 1500" style="min-width: 400px;"
+                                              oninput="lord.countSymbols(this);"></textarea>
+                                    <span class="symbolCounter"><span name="used">0</span>/15000</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="postformLabel">
+                                <a href="javascript:void(0);"
+                                   class="hidePostformMarkupButton">Hide post form markup</a>
+                                <a href="javascript:void(0);"
+                                   class="hidePostformRulesButton">Hide post form rules</a>
+                            </td>
+                            <td class="postformField submitContainer">
+                                <input type="submit" name="submit" class="button" value="Submit (Alt+Enter)" />
+                            </td>
+                        </tr>
+                        <tr name="postformMarkup">
+                            <td class="postformLabel">
+                            </td>
+                            <td class="postformMarkup">
+                                <span id="markup">
+                                    <input type="image" src="/ololord.js/img/markup/bold.png" name="markupBold"
+                                           title=Bold" class="buttonImage bordered" width="20" height="20" />
+                                    <input type="image" src="/ololord.js/img/markup/italics.png" name="markupItalics"
+                                           title="Italics" class="buttonImage bordered" width="20" height="20" />
+                                    <input type="image" src="/ololord.js/img/markup/strikedout.png"
+                                           name="markupStrikedOut" title="Striked out" class="buttonImage bordered"
+                                           width="20" height="20" />
+                                    <input type="image" src="/ololord.js/img/markup/underlined.png"
+                                           name="markupUnderlined" title="Underlined" class="buttonImage bordered"
+                                           width="20" height="20" />
+                                    <button name="markupSpoiler" class="spoilerMarkupButton bordered"
+                                            title="Spoiler"><span class="spoiler">ab</span></button>
+                                    <input type="image" src="/ololord.js/img/markup/quotation.png"
+                                           name="markupQuotation" title="Quotation" class="buttonImage bordered"
+                                           width="20" height="20" />
+                                    <input type="image" src="/ololord.js/img/markup/ul.png"
+                                           class="buttonImage bordered" title="Unordered list" />
+                                    <input type="image" src="/ololord.js/img/markup/ol.png"
+                                           class="buttonImage bordered" title="Ordered list" />
+                                    <input type="image" src="/ololord.js/img/markup/li.png" name="markupListItem"
+                                           title="List item" class="buttonImage bordered" width="24" height="20" />
+                                    <input type="image" src="/ololord.js/img/markup/subscript.png"
+                                           name="markupSubscript" title="Subscript"
+                                           class="buttonImage bordered" width="36" height="20" />
+                                    <input type="image" src="/ololord.js/img/markup/superscript.png"
+                                           name="markupSuperscript" title="Superscript"
+                                           class="buttonImage bordered" width="20" height="20" />
+                                    <input type="image" src="/ololord.js/img/markup/url.png" name="markupUrl"
+                                           title="URL" class="buttonImage bordered" width="40" height="20" />
+                                    <input type="image" src="/ololord.js/img/markup/latex.png" name="markupLatex"
+                                           title="LaTeX" class="buttonImage bordered" width="51" height="20" />
+                                    <input type="image" src="/ololord.js/img/markup/inline_latex.png"
+                                           name="markupInlineLatex" title="Inline LaTeX"
+                                           class="buttonImage bordered" width="99" height="20" />
+                                    <span class="nowrap">
+                                        <select name="codeLang" class="select" title="Code">
+                                            <option value="-" selected="true">-----</option>
+                                            <option value="bash">bash</option>
+                                            <option value="cpp">C++</option>
+                                            <option value="javascript">JavaScript</option>
+                                        </select>
+                                        <input type="image" src="/ololord.js/img/markup/code.png" name="markupCode"
+                                               title="Code" class="buttonImage bordered" width="40"
+                                               height="20" />
+                                    </span>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="postformLabel">
+                                <b>Markup mode:</b>
+                            </td>
+                            <td class="postformField">
+                                <select name="markupMode" class="select">
+                                    <option selected="true" value="Extanded WakabaMark and bbCode">Extanded WakabaMark and bbCode</option>
+                                    <option value="Extended WakabaMark only">Extended WakabaMark only</option>
+                                    <option value="bbCode only">bbCode only</option>
+                                    <option value="No markup">No markup</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="postformLabel">
+                                <b>Options:</b>
+                            </td>
+                            <td class="postformField">
+                                <span id="options">
+                                    <input id="checkboxOp" type="checkbox" name="signAsOp"
+                                           value="true" /><label for="checkboxOp">Sign as OP:</label>
+                                    <input id="checkboxTripcode" type="checkbox" name="tripcode" 
+                                           value="true" /><label for="checkboxTripcode">Tripcode</label>
+                                </span>
+                                <a href="javascript:void(0);"
+                                   style="display: inline-block; vertical-align: top;" title='"Raw" HTML'
+                                   name="markupHtml"><img src="/ololord.js/img/html.png" class="signImage"></a>
+                                <a href="javascript:void(0);" name="optionDraft"
+                                   style="display: inline-block; vertical-align: top;"
+                                   title="To drafts"><img src="/ololord.js/img/draft.png" class="signImage"></a>
+                            </td>
+                        </tr>
+                            <tr>
+                                <td class="postformLabel">
+                                    <b>File(s):</b>
+                                </td>
+                                <td class="postformField">
+                                    <div class="postformFile" ondragover="return lord.fileDragOver(event, this);"
+                                         ondragleave="return lord.fileDragLeave(event, this);" title="Select file">
+                                        <img class="postformFilePreview signImage" src="/ololord.js/img/addfile.png">
+                                        <a class="fileByLinkButton" onclick="return lord.preventOnclick(event);"
+                                           title="Attach file by link"><img class="buttonImage" width="32" height="32"
+                                                                            src="/ololord.js/img/addfile_link.png"></a>
+                                        <a onclick="return lord.preventOnclick(event);" class="fileByLinkButton"
+                                           title="Attach file by drawing"><img class="buttonImage" width="32"
+                                                                               height="32"
+                                                                               src="/ololord.js/img/draw_big.png"></a>
+                                        <span class="postformFileText"></span>
+                                    <div name="ratingSelectContainer">
+                                        <span>Rating:</span>
+                                        <select name="file_rating">
+                                            <option value="SFW" selected="true"
+                                                    onclick="return lord.preventOnclick(event);">SFW</option>
+                                            <option value="R-15"
+                                                    onclick="return lord.preventOnclick(event);">R-15</option>
+                                            <option value="R-18"
+                                                    onclick="return lord.preventOnclick(event);">R-18</option>
+                                            <option value="R-18G"
+                                                    onclick="return lord.preventOnclick(event);">R-18G</option>
+                                        </select>
+                                        <img src="/ololord.js/img/question.png" class="signImage"
+                                             title="SFW - safe for work (no socially condemned content)\nR-15 - restricted for 15 years (contains ecchi, idols, violence)\nR-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\nR-18G - restricted for 18 years, guidance advised (shemale, death, guro, scat, defecation, urination, etc.)">
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="postformLabel">
+                                <b>Password:</b>
+                            </td>
+                            <td class="postformField">
+                                <input type="password" name="password"
+                                       value="12345678" class="postFormInput" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="postformLabel">
+                                <b>Captcha:</b>
+                            </td>
+                            <td id="captchaContainer" class="postformField">
+                                <span class="noCaptchaText">You don't have to enter captcha</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="postformRules">
+                                <ul>
+                                    <li>Never speak about /b/.</li>
+                                    <li><b>NEVER</b> speak about /b/!</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div>
+        <center>[<a id="draftsVisibilitySwitch" href="javascript:void(0);">Hide drafts</a>]</center>
+    </div>
+    <div id="drafts">
+        <hr />
+        <center><h2>Drafts</h2></center>
+    </div>
+</div>
+<div class="pages">
+    <span class="pagesItem metaPage">
+        [<a href="javascript:void(0);">Previous page</a>]
+    </span>
+    <span class="pagesItem">
+        [<a href="javascript:void(0);">0</a>]
+    </span>
+    <span class="pagesItem currentPage">
+        [<b>1</b>]
+    </span>
+    <span class="pagesItem">
+        [<a href="javascript:void(0);">2</a>]
+    </span>
+    <span class="pagesItem metaPage">
+        [<a href="javascript:void(0);">Nex tage</a>]
+    </span>
+</div>
+<hr />
+<div class="postingSpeedBar">
+    <span class="navbarItem">[Posting speed: 3.6 post(s)/hour.]</span>
+</div>
+<div id="5" class="post temporary" style="width: auto; position: absolute; max-width: 500px; left: 450px; top: 1117px; z-index: 9001;">
+    <div class="postHeader">
+        <span class="nowrap"> </span>
+        <span class="postSubject">
+            Some subject
+        </span>
+        <span class="someName">
+            <span class="userName defaultUserName">Anonymous</span>
+        </span>
+        <span class="nowrap postDateTime" name="dateTime">22/05/2016 Sun 10:35:52</span>
+        <span class="nowrap">
+            <span class="postNumber">
+                #<a href="javascript:void(0);" name="number">5</a>
+            </span>
+            <span class="postSequenceNumber">5</span>
+            <span class="hideReason"></span>
+            <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
+                                                 title="Быстрый ответ"><img src="/ololord.js/img/reply.png"
+                                                                            class="buttonImage"></a>]</span>
+            <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
+                                                      class="buttonImage" name="postActions"
+                                                      title="Post actions" onclick="return false;">]</span>
+            <span name="toThread" class="postToThread postToThreadDesktop">
+                [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
+            </span>
+        </span>
+    </div>
+    <div class="postBody">
+        <div class="postFiles">
+            <div class="postFilesInner">
+                <div class="postFilesInnerRow">
+                    <div id="file1463902552939.jpg" class="postFile">
+                        <div class="postFileName">
+                            <a href="javascript:void(0);">1463902552939.jpg</a>
+                        </div>
+                        <div class="postFileSize" >
+                            (25.01KB, 500x332)
+                        </div>
+                        <div class="postFileSearch">
+                            <a href="javascript:void(0);" name="deleteFileButton">
+                                <img src="/ololord.js/img/delete.png" title="Delete file" class="buttonImage" /></a>
+                            <a href="javascript:void(0);" name="editFileRatingButton">
+                                <img src="/ololord.js/img/shield.png" title="Edit file rating" class="buttonImage" /></a>
+                            <input type="image" src="/ololord.js/img/hide.png" class="buttonImage"
+                                   title="Hide by image" onclick="return false;" />
+                            <ul id="image1463902552939-pngHideMenu" name="hideByImageButton" class="menu">
+                                <li class="nowrap">
+                                    <a href="javascript:void(0);">Hide by image size</a>
+                                </li>
+                            </ul>
+                            <a name="drawOnImageButton" onclick="return false;">
+                                <img src="/ololord.js/img/draw.png" title="Draw on this image"
+                                     class="buttonImage" /></a>
+                            <input type="image" src="/ololord.js/img/search.png" class="buttonImage"
+                                   title="Find sauce..." onclick="return false;" />
+                        </div>
+                        <div class="postFileFile">
+                            <a href="javascript:void(0);" data-rating="R-18">
+                                <img src="/ololord.js/img/1463902552939s.jpg" class="postFileThumbImage">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="postText">
+                        <blockquote id="post6Text">
+                            This is a post preview.
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div name="referencedByContainer">
+            <span name="referencedBy" class="referencedBy">
+                Replies:
+                <a href="javascript:void(0);">&gt;&gt;7</a>
+            </span>
+        </div>
+    </div>
+</div>
+<div class="popup">Popup message</div>
+<div class="popup warning" style="top: 78px;">Popup warning</div>
+<div class="popup critical" style="top: 121px;">Popup error</div>
 </body>
 </html>

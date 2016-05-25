@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width">
     <title>ololord.js – ThemeRoller</title>
     <link rel="stylesheet" type="text/css" href="/ololord.js/css/base.css">
+    <link rel="stylesheet" type="text/css" href="/ololord.js/css/themeroller.css">
     <link rel="stylesheet" type="text/css" href="/ololord.js/css/3rdparty/jquery-ui/jquery-ui.min.css">
     <link rel="stylesheet" type="text/css" href="/ololord.js/css/3rdparty/jquery.minicolors.css">
     <link rel="stylesheet" type="text/css" href="/ololord.js/css/3rdparty/codemirror.css">
@@ -212,6 +213,56 @@
                         </div>
                     </div>
                 </div>
+                <div>
+                    <span class="accordionHeader">Text</span>
+                    <div class="accordionBody">
+                        <div class="sectionHeader">Links</div>
+                        <div class="sectionBody">
+                            <label>Font color: <input id="linkFontColor" class="hexColor" type="text"
+                                                      value="#FF6600" /></label>
+                            <label>Hover font color: <input id="linkHoverFontColor" class="hexColor" type="text"
+                                                            value="#0066FF" /></label>
+                        </div>
+                        <div class="sectionHeader">Collapsible</div>
+                        <div class="sectionBody">
+                            <label>Title font color: <input id="collapsibleTitleFontColor" class="hexColor" type="text"
+                                                            value="#E08060" /></label>
+                            <label>Title hover font color: <input id="collapsibleTitleHoverFontColor" class="hexColor"
+                                                                  type="text" value="#F09070" /></label>
+                            <label>Body background color: <input id="collapsibleBodyBackgroundColor" class="hexColor"
+                                                                 type="text" value="#DDEDAA" /></label>
+                            <fieldset class="fieldset">
+                                <legend>Body border</legend>
+                                <label>Border color: <input id="collapsibleBodyBorderColor" class="hexColor"
+                                                            type="text" value="#CCCCCC" /></label>
+                                <label>Border type:
+                                    <select id="collapsibleBodyBorderType">
+                                        <option value="none">none</option>
+                                        <option value="dotted">dotted</option>
+                                        <option value="dashed">dashed</option>
+                                        <option value="solid" selected="true">solid</option>
+                                        <option value="double">double</option>
+                                        <option value="groove">groove</option>
+                                        <option value="ridge">ridge</option>
+                                        <option value="inset">inset</option>
+                                        <option value="outset">outset</option>
+                                    </select>
+                                </label>
+                                <label>Border width:
+                                    <select id="collapsibleBodyBorderWidth">
+                                        <option value="1" selected="true">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="thin">thin</option>
+                                        <option value="medium">medium</option>
+                                        <option value="thick">thick</option>
+                                    </select>
+                                </label>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="preview">
@@ -219,7 +270,10 @@
         </div>
     </div>
     <div id="actions">
-        <div id="cssView"></div>
+        <div>
+            <a href="javascript:void(0);" onclick="lord.showHideCSS();">Show CSS</a>
+            <div id="cssView" style="display: none;"></div>
+        </div>
         <!--button id="createThemeButton" onclick="lord.createTheme();">Create theme</button-->
     </div>
 </body>
