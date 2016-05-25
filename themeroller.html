@@ -5,13 +5,222 @@
     <meta name="viewport" content="width=device-width">
     <title>ololord.js – ThemeRoller</title>
     <link rel="stylesheet" type="text/css" href="/ololord.js/css/base.css">
+    <link rel="stylesheet" type="text/css" href="/ololord.js/css/3rdparty/jquery-ui/jquery-ui.min.css">
+    <link rel="stylesheet" type="text/css" href="/ololord.js/css/3rdparty/jquery.minicolors.css">
+    <link rel="stylesheet" type="text/css" href="/ololord.js/css/3rdparty/codemirror.css">
+    <script type ="text/javascript" src="/ololord.js/js/3rdparty/jquery-1.11.3.min.js"></script>
+    <script type ="text/javascript" src="/ololord.js/js/3rdparty/jquery-ui.min.js"></script>
+    <script type ="text/javascript" src="/ololord.js/js/3rdparty/jquery.minicolors.min.js"></script>
+    <script type ="text/javascript" src="/ololord.js/js/3rdparty/underscore-min.js"></script>
+    <script type ="text/javascript" src="/ololord.js/js/3rdparty/codemirror/codemirror.min.js"></script>
+    <script type ="text/javascript" src="/ololord.js/js/3rdparty/codemirror/css.min.js"></script>
+    <script type ="text/javascript" src="/ololord.js/js/themeroller.js"></script>
 </head>
 <body>
     <div class="toolbar">
+        <span style="display: inline-block; position: absolute; left: 4px;">This is a DEMO!</span>
+        [<a href="/ololord.js"
+            title="ThemeRoller"><img src="/ololord.js/img/homepage.png" class="buttonImage"
+                                     width="16" height="16"> Home</a>]
         [<a href="/ololord.js/themeroller.html"
             title="ThemeRoller"><img src="/ololord.js/img/themeroller.png" class="buttonImage"
                                      width="16" height="16"> ThemeRoller</a>]
     </div>
-    Here be content.
+    <div id="wrapper">
+        <div id="optionsWrapper">
+            <div id="options">
+                <div>
+                    <span class="accordionHeader">Base</span>
+                    <div class="accordionBody">
+                        <div class="sectionHeader">Font</div>
+                        <div class="sectionBody">
+                            <label>Family: <input id="bodyFontFamily" type="text" value="Verdana,sans-serif" /></label>
+                            <label>Color: <input id="bodyFontColor" class="hexColor" type="text"
+                                                 value="#000000" /></label>
+                            <label>Weight:
+                                <select id="bodyFontWeight">
+                                    <option value="normal" selected="true">normal</option>
+                                    <option value="bold">bold</option>
+                                    <option value="bolder">bolder</option>
+                                    <option value="lighter">lighter</option>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                    <option value="300">300</option>
+                                    <option value="400">400</option>
+                                    <option value="500">500</option>
+                                    <option value="600">600</option>
+                                    <option value="700">700</option>
+                                    <option value="800">800</option>
+                                    <option value="900">900</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="sectionHeader">Background</div>
+                        <div class="sectionBody">
+                            <label>Color: <input id="bodyBackgroundColor" class="rgbaColor" type="text"
+                                                 value="rgba(238, 238,238, 1)" /></label>
+                        </div>
+                        <div class="sectionHeader">Other</div>
+                        <div class="sectionBody">
+                            <label><input id="invertImages" type="checkbox" /> Invert images</label>
+                        </div>
+                    </div>
+                    </div>
+                    <div>
+                    <span class="accordionHeader">Post</span>
+                    <div class="accordionBody">
+                        <div class="sectionHeader">Normal</div>
+                        <div class="sectionBody">
+                            <label>Background color: <input id="postBackgroundColor" class="rgbaColor" type="text"
+                                                            value="rgb(221, 221, 221, 1)" /></label>
+                            <label>Border color: <input id="postBorderColor" class="hexColor" type="text"
+                                                        value="#CCCCCC" /></label>
+                            <label>Border type:
+                                <select id="postBorderType">
+                                    <option value="none">none</option>
+                                    <option value="dotted">dotted</option>
+                                    <option value="dashed">dashed</option>
+                                    <option value="solid" selected="true">solid</option>
+                                    <option value="double">double</option>
+                                    <option value="groove">groove</option>
+                                    <option value="ridge">ridge</option>
+                                    <option value="inset">inset</option>
+                                    <option value="outset">outset</option>
+                                </select>
+                            </label>
+                            <label>Border width:
+                                <select id="postBorderWidth">
+                                    <option value="1" selected="true">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="thin">thin</option>
+                                    <option value="medium">medium</option>
+                                    <option value="thick">thick</option>
+                                </select>
+                            </label>
+                            <label><input id="postIcon" type="checkbox" /> Icon</label>
+                        </div>
+                        <div class="sectionHeader">OP</div>
+                        <div class="sectionBody">
+                            <fieldset>
+                                <input id="postOPBackgroundColorEnabled" type="checkbox" />
+                                <label>Background color: <input id="postOPBackgroundColor" class="rgbaColor"
+                                                                type="text" value="rgb(221, 221, 221, 1)" /></label>
+                            </fieldset>
+                            <fieldset class="fieldset">
+                                <legend><input id="postOPBorderEnabled" type="checkbox" /> Border</legend>
+                                <label>Border color: <input id="postOPBorderColor" class="hexColor" type="text"
+                                                            value="#CCCCCC" /></label>
+                                <label>Border type:
+                                    <select id="postOPBorderType">
+                                        <option value="none" selected="true">none</option>
+                                        <option value="dotted">dotted</option>
+                                        <option value="dashed">dashed</option>
+                                        <option value="solid">solid</option>
+                                        <option value="double">double</option>
+                                        <option value="groove">groove</option>
+                                        <option value="ridge">ridge</option>
+                                        <option value="inset">inset</option>
+                                        <option value="outset">outset</option>
+                                    </select>
+                                </label>
+                                <label>Border width:
+                                    <select id="postOPBorderWidth">
+                                        <option value="1" selected="true">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="thin">thin</option>
+                                        <option value="medium">medium</option>
+                                        <option value="thick">thick</option>
+                                    </select>
+                                </label>
+                            </fieldset>
+                            <label><input id="postOPIcon" type="checkbox" /> Icon</label>
+                        </div>
+                        <div class="sectionHeader">Targeted</div>
+                        <div class="sectionBody">
+                            <fieldset>
+                                <input id="postTargetedBackgroundColorEnabled" type="checkbox" />
+                                <label>Background color: <input id="postTargetedBackgroundColor" class="rgbaColor"
+                                                                type="text" value="rgb(238, 238, 238, 1)" /></label>
+                            </fieldset>
+                            <fieldset class="fieldset">
+                                <legend><input id="postTargetedBorderEnabled" type="checkbox"
+                                               checked="true" /> Border</legend>
+                                <label>Border color: <input id="postTargetedBorderColor" class="hexColor" type="text"
+                                                            value="#EEDACB" /></label>
+                                <label>Border type:
+                                    <select id="postTargetedBorderType">
+                                        <option value="none">none</option>
+                                        <option value="dotted">dotted</option>
+                                        <option value="dashed" selected="true">dashed</option>
+                                        <option value="solid">solid</option>
+                                        <option value="double">double</option>
+                                        <option value="groove">groove</option>
+                                        <option value="ridge">ridge</option>
+                                        <option value="inset">inset</option>
+                                        <option value="outset">outset</option>
+                                    </select>
+                                </label>
+                                <label>Border width:
+                                    <select id="postTargetedBorderWidth">
+                                        <option value="1">1</option>
+                                        <option value="2" selected="true">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="thin">thin</option>
+                                        <option value="medium">medium</option>
+                                        <option value="thick">thick</option>
+                                    </select>
+                                </label>
+                            </fieldset>
+                        </div>
+                        <div class="sectionHeader">Temporary</div>
+                        <div class="sectionBody">
+                            <fieldset class="fieldset">
+                                <legend><input id="postTemporaryBorderEnabled" type="checkbox"
+                                               checked="true" /> Border</legend>
+                                <label>Border color: <input id="postTemporaryBorderColor" class="hexColor" type="text"
+                                                            value="#000000" /></label>
+                                <label>Border type:
+                                    <select id="postTemporaryBorderType">
+                                        <option value="none">none</option>
+                                        <option value="dotted">dotted</option>
+                                        <option value="dashed">dashed</option>
+                                        <option value="solid" selected="true">solid</option>
+                                        <option value="double">double</option>
+                                        <option value="groove">groove</option>
+                                        <option value="ridge">ridge</option>
+                                        <option value="inset">inset</option>
+                                        <option value="outset">outset</option>
+                                    </select>
+                                </label>
+                                <label>Border width:
+                                    <select id="postTemporaryBorderWidth">
+                                        <option value="1" selected="true">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="thin">thin</option>
+                                        <option value="medium">medium</option>
+                                        <option value="thick">thick</option>
+                                    </select>
+                                </label>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="preview">
+            <iframe src="/ololord.js/preview/index.html"></iframe>
+        </div>
+    </div>
+    <div id="actions">
+        <div id="cssView"></div>
+        <!--button id="createThemeButton" onclick="lord.createTheme();">Create theme</button-->
+    </div>
 </body>
 </html>

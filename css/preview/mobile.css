@@ -1,0 +1,217 @@
+body {
+    -moz-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    font-size: 14px;
+}
+
+.spoiler {
+    cursor: pointer;
+}
+
+.navbar.navbarFrame {
+    font-size: 1.2em;
+}
+
+.postFileName {
+    font-size: 0.9em;
+}
+
+.postFileSize {
+    font-size: 0.6em;
+}
+
+.postFileSearch {
+    padding-bottom: 4px;
+}
+
+.postFileThumbImage {
+    max-width: 140px;
+    max-height: 140px;
+}
+
+.postToThread {
+    display: block;
+}
+
+.postToThread > a > button {
+    width: 100%;
+}
+
+.postSubject {
+    font-size: 0.8em;
+}
+
+.tripcode {
+    font-size: 0.8em;
+    display: block;
+}
+
+.postDateTime {
+    font-size: 0.8em;
+}
+
+.someName {
+    font-size: 0.8em;
+}
+
+.searchAction > form {
+    text-align: left;
+    width: calc(100% - 2px);
+}
+
+.searchActionInput {
+    width: calc(100% - 42px);
+}
+
+.searchActionOptionsContainer {
+    width: calc(100% - 54px);
+}
+
+.externalThreadFrame {
+    width: 120px;
+    height: 240px;
+}
+
+.postFilesInner {
+    display: block;
+}
+
+.postFilesInnerRow {
+    display: block;
+}
+
+.postText {
+    display: block;
+}
+
+.postFile {
+    display: inline-block;
+}
+
+.boardSelectContainer {
+    display: inline-block;
+    vertical-align: top;
+    width: 16px;
+    overflow: hidden;
+}
+
+.boardSelect {
+    cursor: pointer;
+    border: none;
+    background: url("../img/boards.png") left top no-repeat;
+    width: 36px;
+}
+
+.boardSelectForm {
+    display: inline;
+}
+
+.postToThreadDesktop {
+    display: none;
+}
+
+#player {
+    width: 80%;
+}
+
+.playerMinimizedActionsDesktop {
+    display: none;
+}
+
+.playerMinimizedActionsMobile {
+    display: inline-block;
+}
+
+#playerTrackInfo {
+    font-size: 1.1em;
+}
+
+#playerDurationSlider {
+    width: calc(100% - 6px);
+    margin-right: 0px;
+}
+
+#playerVolumeSlider {
+    display: none;
+}
+
+[name='playerMuteButton'] {
+    display: none;
+}
+
+#playerTrackTags {
+    font-size: 1.1em;
+}
+
+.movablePlayerConstrolsSliders {
+    width: calc(100% - 28px);
+}
+
+.movablePlayerDurationSlider {
+    width: calc(100% - 6px);
+    margin-right: 0px;
+}
+
+.movablePlayerVolumeSlider {
+    display: none;
+}
+
+div.bannedUser {
+    overflow-x: auto;
+}
+
+.chatContactList {
+    min-width: 100px;
+    max-width: 100px;
+}
+
+.chatContact > input[type="image"] {
+    display: none;
+}
+
+.chatContactList:hover {
+    min-width: 150px;
+    max-width: 150px;
+}
+
+.chatContactList:hover > .chatContact > input[type="image"] {
+    display: inline;
+}
+
+.chatHistory {
+    min-width: 200px;
+    max-width: 200px;
+    min-height: 400px;
+    max-height: 400px;
+}
+
+.registeredUserHashpassInput {
+    box-sizing: border-box;
+    width: calc(100% - 8px);
+}
+
+.registeredUserIpsInput {
+    box-sizing: border-box;
+    width: calc(100% - 8px);
+}
+
+.banExpiresInput {
+    width: 130px;
+}
+
+.frameList {
+    width: 80px;
+}
+
+.frameContent {
+    width: calc(100% - 88px);
+}
+
+#sidebar {
+    z-index: 2;
+}
+
+#sidebarFooter > select {
+    font-size: 1.2em;
+}
