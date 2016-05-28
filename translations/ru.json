@@ -1294,7 +1294,7 @@
             "value": "В этом треде постинг запрещен"
         },
         "_default": {
-            "value": "Posting is disabled in this thread"
+            "value": ""В этом треде постинг запрещен"
         }
     },
     "This thread is archived. Posting is disabled": {
@@ -1307,7 +1307,7 @@
             "value": "Достигнут лимит постов"
         },
         "_default": {
-            "value": "Post limit reached"
+            "value": "Достигнут лимит постов"
         }
     },
     "This user is registered": {
@@ -1361,7 +1361,7 @@
             "value": "Отмотать наверх"
         }
     },
-    "Answer": {
+    "Reply": {
         "toThread": {
             "value": "Ответ"
         }
@@ -1391,7 +1391,7 @@
             "value": "Байт(а)"
         }
     },
-    "Answers:": {
+    "Replies:": {
         "referencedByText": {
             "value": "Ответы:"
         }

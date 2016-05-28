@@ -237,6 +237,10 @@ span.newPostCount {
     cursor: pointer;
 }
 
+.cspoilerBody {
+    padding: 4px;
+}
+
 .catalogContainer {
     box-sizing: border-box;
     padding-bottom: 0px;
@@ -865,11 +869,11 @@ input.buttonImage {
 
 .chatContact {
     cursor: pointer;
+    padding: 2px 4px 2px 4px;
 }
 
 .chatContact > input[type="image"] {
     float: right;
-    margin-top: 2px;
 }
 
 .chatContact ~ .chatContact {
@@ -1401,4 +1405,16 @@ input.buttonImage {
     left: 8px;
     height: 100%;
     width: calc(100% - 16px);
+}
+
+.bannedUserHeader {
+    font-weight: bold;
+}
+
+.registeredUserHeader {
+    font-weight: bold;
+}
+
+.delallHeader {
+    font-weight: bold;
 }

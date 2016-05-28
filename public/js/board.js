@@ -251,7 +251,8 @@ lord.processPost = function(hiddenPosts, post, data) {
     var info = hiddenPosts[boardName + "/" + postNumber];
     if (!info)
         return;
-    $(post).addClass("hidden");
+    if (!$(post).hasClass("temporary"))
+        $(post).addClass("hidden");
     if (info.reason)
         lord.queryOne(".hideReason", post).appendChild(lord.node("text", info.reason));
     var thread = lord.id("thread" + postNumber);
@@ -1507,8 +1508,6 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
         lord.nameAll("toThread", post).forEach(function(el) {
             $(el).remove();
         });
-        $(post).removeClass("opPost hidden");
-        $(post).addClass("post temporary");
         p = Promise.resolve(post);
     } else {
         p = lord.api("post", {
@@ -1519,6 +1518,8 @@ lord.viewPost = function(a, boardName, postNumber, hiddenPost) {
         });
     }
     p.then(function(post) {
+        $(post).removeClass("opPost hidden");
+        $(post).addClass("post temporary");
         if (!lord.deviceType("mobile")) {
             post.onmouseout = function(event) {
                 var next = post;

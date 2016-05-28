@@ -15,8 +15,8 @@ module.exports = function(tr) {
     translate("Hide by image hash", "hideByImageHashText");
     translate("Hide by image size", "hideByImageSizeText");
     translate("Draw on this image", "drawOnImageText");
-    translate("Answer", "toThread");
-    translate("Answers:", "referencedByText");
+    translate("Reply", "toThread");
+    translate("Replies:", "referencedByText");
     translate("Fixed", "fixedText");
     translate("The thread is closed", "closedText");
     translate("To drafts", "addToDraftsText");
