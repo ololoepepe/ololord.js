@@ -742,6 +742,7 @@ blockquote.blockquoteThread.expand {
 
 .vote {
     display: table;
+    padding: 4px;
 }
 
 #recaptcha_image_cell {
