@@ -548,7 +548,12 @@ lord.styleSelectors = {
                 selector: "#sectionBodyBorderColor",
                 type: "minicolors"
             }
-        ]
+        ],
+        "border-radius": {
+            enabledSelector: "#borderRadiusEnabled",
+            selector: "#borderRadius",
+            type: "number"
+        }
     },
     ".voteText": {
         "font-weight": {
