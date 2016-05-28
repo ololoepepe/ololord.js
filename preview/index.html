@@ -14,7 +14,7 @@
 </head>
 <body>
 <div>
-    <div class="toolbar stiky">
+    <div class="toolbar sticky">
         <input type="image" name="sidebarButton" title="Show sidebar" class="buttonImage"
                src="/ololord.js/favicon.ico" width="20" height="20" onclick="return false;" />
         <div id="sidebarButtonPlaceholder"></div>
@@ -26,8 +26,8 @@
             Thematics
             <span class="navbarBoardGroup">
                 [
-                <span class="navbarItem navbarItemBoard"><a href="javascript:void(0);"
-                          title="/a/nime">a</a></span>
+                <span class="navbarItem navbarItemBoard"><span class="newPostCount">+3</span>
+                    <a href="javascript:void(0);" title="/a/nime">a</a></span>
                 /
                 <span class="navbarItem navbarItemBoard"><a href="javascript:void(0);"
                           title="/h/entai">h</a></span>
@@ -112,32 +112,241 @@
     </div>
     <div class="playerMaximized">
         <div class="playerHeader">
-            <input type="image" onclick="lord.playerPlayPause(event); return false;" name="playerPlayPauseButton"
-                   title="{{=it.tr.playerPlayText}}" src="/ololord.js/img/player/32/play.png"
-                   class="buttonImage" width="32" height="32" disabled="true" />
-            <input type="image" onclick="lord.playerPrevious(event); return false;" name="playerPreviousTrackButton"
-                   title="{{=it.tr.playerPreviousTrackText}}" class="buttonImage" width="32" height="32"
-                   src="/ololord.js/img/player/32/previous.png" disabled="true" />
-            <input type="image" onclick="lord.playerNext(event); return false;" name="playerNextTrackButton"
-                   title="{{=it.tr.playerNextTrackText}}" class="buttonImage" width="32" height="32"
-                   src="/ololord.js/img/player/32/next.png" disabled="true" />
-            <div id="playerTrackInfo"></div>
-            <input type="image" onclick="lord.playerMute(event); return false;" name="playerMuteButton"
-                   title="{{=it.tr.playerMuteText}}" src="/ololord.js/img/player/32/volume_on.png"
-                   class="buttonImage" width="32" height="32" disabled="true" />
+            <input type="image" onclick="return false;" name="playerPlayPauseButton" title="Play" src="/ololord.js/img/player/32/play.png" class="buttonImage" width="32" height="32">
+            <input type="image" onclick="lreturn false;" name="playerPreviousTrackButton" title="Next track" class="buttonImage" width="32" height="32" src="/ololord.js/img/player/32/previous.png">
+            <input type="image" onclick="return false;" name="playerNextTrackButton" title="Previous track" class="buttonImage" width="32" height="32" src="/ololord.js/img/player/32/next.png">
+            <div id="playerTrackInfo">00:01:34</div>
+            <input type="image" onclick="lord.playerMute(event); return false;" name="playerMuteButton" title="Mute" src="/ololord.js/img/player/32/volume_on.png" class="buttonImage" width="32" height="32">
         </div>
-        <div id="playerTrackTags" class="playerHeader" style="display: none;"></div>
+        <div id="playerTrackTags" class="playerHeader">DIAL M FOR MOGUAI — BEATBOX (Radio Box) [Dream Dance Vol. 10] </div>
         <div class="playerHeader">
-            <div id="playerDurationSlider"></div>
-            <div id="playerVolumeSlider"></div>
+            <div id="playerDurationSlider" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 41.048%;"></span></div>
+            <div id="playerVolumeSlider" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 73%;"></span></div>
         </div>
-        <div id="playerTracks"></div>
-        <a id="playerAddRadioButton" href="javascript:void(0);" onclick="lord.playerAddRadio(); return false;"
-           title="{{=it.tr.addRadioText}}"><img src="/ololord.js/img/player/32/radio_add.png"
-                                                      class="buttonImage" width="32" height="32"></a>
-        <a id="playerMinimizeButton" href="javascript:void(0);" onclick="lord.setPlayerVisible(event, false);"
-           title="{{=it.tr.minimizePlayerText}}"><img src="/ololord.js/img/player/32/hide.png"
-                                                      class="buttonImage" width="32" height="32"></a>
+        <div id="playerTracks" style="max-height: 597px;"><div class="track" id="track/1429898536466.mp3">
+    <span class="trackInfo">
+        
+            <br>
+            Megadeth
+            —
+            She-Wolf
+            
+        
+    </span>
+    <span class="trackActions">
+        
+            00:03:36 | 256kbps
+            <a title="Скачать файл" draggable="false" onclick="event.stopPropagation();" href="/b/src/1429898536466.mp3" download="1429898536466.mp3"><img class="buttonImage" width="16" height="16" src="/img/player/16/download.png"></a>
+            
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false" title="Редактировать теги аудиофайла"><img class="buttonImage" width="16" height="16" src="/img/audio_edit_tags.png"></a>
+            
+        
+        <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);" title="Удалить из плей-листа"><img class="buttonImage" width="16" height="16" src="/img/player/16/delete.png"></a>
+    </span>
+</div><div class="track" id="track/1429897519527.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1429897519527.mp3" draggable="true">
+    <span class="trackInfo">
+        
+            <br>
+            Noisia, Calyx &amp; Teebee
+            —
+            Hyenas
+            (2013)
+        
+    </span>
+    <span class="trackActions">
+        
+            00:05:23 | 334kbps
+            <a title="Скачать файл" draggable="false" onclick="event.stopPropagation();" href="/b/src/1429897519527.mp3" download="1429897519527.mp3"><img class="buttonImage" width="16" height="16" src="/img/player/16/download.png"></a>
+            
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false" title="Редактировать теги аудиофайла"><img class="buttonImage" width="16" height="16" src="/img/audio_edit_tags.png"></a>
+            
+        
+        <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);" title="Удалить из плей-листа"><img class="buttonImage" width="16" height="16" src="/img/player/16/delete.png"></a>
+    </span>
+</div><div class="track" id="track/1429967253911.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1429967253911.mp3" draggable="true">
+    <span class="trackInfo">
+        
+            <br>
+            Phace
+            —
+            Cold Champagne
+            (2005)
+        
+    </span>
+    <span class="trackActions">
+        
+            00:06:25 | 321kbps
+            <a title="Скачать файл" draggable="false" onclick="event.stopPropagation();" href="/b/src/1429967253911.mp3" download="1429967253911.mp3"><img class="buttonImage" width="16" height="16" src="/img/player/16/download.png"></a>
+            
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false" title="Редактировать теги аудиофайла"><img class="buttonImage" width="16" height="16" src="/img/audio_edit_tags.png"></a>
+            
+        
+        <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);" title="Удалить из плей-листа"><img class="buttonImage" width="16" height="16" src="/img/player/16/delete.png"></a>
+    </span>
+</div><div class="track" id="track/1429993286590.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1429993286590.mp3" draggable="true">
+    <span class="trackInfo">
+        
+            <br>
+            MARIO DE BELLIS - CITY LIGHTS.mp3
+            
+            
+            (2001)
+        
+    </span>
+    <span class="trackActions">
+        
+            00:03:37 | 320kbps
+            <a title="Скачать файл" draggable="false" onclick="event.stopPropagation();" href="/b/src/1429993286590.mp3" download="1429993286590.mp3"><img class="buttonImage" width="16" height="16" src="/img/player/16/download.png"></a>
+            
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false" title="Редактировать теги аудиофайла"><img class="buttonImage" width="16" height="16" src="/img/audio_edit_tags.png"></a>
+            
+        
+        <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);" title="Удалить из плей-листа"><img class="buttonImage" width="16" height="16" src="/img/player/16/delete.png"></a>
+    </span>
+</div><div class="track" id="track/1430586847226.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1430586847226.mp3" draggable="true">
+    <span class="trackInfo">
+        
+            <br>
+            Antiform
+            —
+            Rewinder
+            (2009)
+        
+    </span>
+    <span class="trackActions">
+        
+            00:05:50 | 320kbps
+            <a title="Скачать файл" draggable="false" onclick="event.stopPropagation();" href="/b/src/1430586847226.mp3" download="1430586847226.mp3"><img class="buttonImage" width="16" height="16" src="/img/player/16/download.png"></a>
+            
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false" title="Редактировать теги аудиофайла"><img class="buttonImage" width="16" height="16" src="/img/audio_edit_tags.png"></a>
+            
+        
+        <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);" title="Удалить из плей-листа"><img class="buttonImage" width="16" height="16" src="/img/player/16/delete.png"></a>
+    </span>
+</div><div class="track" id="track/1431107156667.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1431107156667.mp3" draggable="true">
+    <span class="trackInfo">
+        
+            <br>
+            Chris.Su
+            —
+            Datahub (Mindscape Remix)
+            (2012)
+        
+    </span>
+    <span class="trackActions">
+        
+            00:05:44 | 325kbps
+            <a title="Скачать файл" draggable="false" onclick="event.stopPropagation();" href="/b/src/1431107156667.mp3" download="1431107156667.mp3"><img class="buttonImage" width="16" height="16" src="/img/player/16/download.png"></a>
+            
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false" title="Редактировать теги аудиофайла"><img class="buttonImage" width="16" height="16" src="/img/audio_edit_tags.png"></a>
+            
+        
+        <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);" title="Удалить из плей-листа"><img class="buttonImage" width="16" height="16" src="/img/player/16/delete.png"></a>
+    </span>
+</div><div class="track" id="track/1433926648696.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1433926648696.mp3" draggable="true">
+    <span class="trackInfo">
+        
+            <br>
+            Black Sun Empire &amp; State of Mind ft. PNC
+            —
+            Until The World Ends
+            
+        
+    </span>
+    <span class="trackActions">
+        
+            00:05:43 | 320kbps
+            <a title="Скачать файл" draggable="false" onclick="event.stopPropagation();" href="/b/src/1433926648696.mp3" download="1433926648696.mp3"><img class="buttonImage" width="16" height="16" src="/img/player/16/download.png"></a>
+            
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false" title="Редактировать теги аудиофайла"><img class="buttonImage" width="16" height="16" src="/img/audio_edit_tags.png"></a>
+            
+        
+        <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);" title="Удалить из плей-листа"><img class="buttonImage" width="16" height="16" src="/img/player/16/delete.png"></a>
+    </span>
+</div><div class="track" id="track/1434604884447.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1434604884447.mp3" draggable="true">
+    <span class="trackInfo">
+        
+            <br>
+            666
+            —
+            La Tierra Ya Destruida
+            (1998)
+        
+    </span>
+    <span class="trackActions">
+        
+            00:06:19 | 270kbps
+            <a title="Скачать файл" draggable="false" onclick="event.stopPropagation();" href="/b/src/1434604884447.mp3" download="1434604884447.mp3"><img class="buttonImage" width="16" height="16" src="/img/player/16/download.png"></a>
+            
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false" title="Редактировать теги аудиофайла"><img class="buttonImage" width="16" height="16" src="/img/audio_edit_tags.png"></a>
+            
+        
+        <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);" title="Удалить из плей-листа"><img class="buttonImage" width="16" height="16" src="/img/player/16/delete.png"></a>
+    </span>
+</div><div class="track" id="track/1434777744851.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1434777744851.mp3" draggable="true">
+    <span class="trackInfo">
+        
+            <br>
+            Asumi Kana, Matsuki Miyu &amp; Ootsubo Yuka
+            —
+            Taiyou Iwaku Moeyo Chaos
+            (2012)
+        
+    </span>
+    <span class="trackActions">
+        
+            00:03:53 | 321kbps
+            <a title="Скачать файл" draggable="false" onclick="event.stopPropagation();" href="/b/src/1434777744851.mp3" download="1434777744851.mp3"><img class="buttonImage" width="16" height="16" src="/img/player/16/download.png"></a>
+            
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false" title="Редактировать теги аудиофайла"><img class="buttonImage" width="16" height="16" src="/img/audio_edit_tags.png"></a>
+            
+        
+        <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);" title="Удалить из плей-листа"><img class="buttonImage" width="16" height="16" src="/img/player/16/delete.png"></a>
+    </span>
+</div><div class="track" id="track/1434777733464.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1434777733464.mp3" draggable="true">
+    <span class="trackInfo">
+        
+            <br>
+            Ushiro kara Haiyoritai G
+            —
+            Koi wa Konton no Reiya
+            (2013)
+        
+    </span>
+    <span class="trackActions">
+        
+            00:04:02 | 324kbps
+            <a title="Скачать файл" draggable="false" onclick="event.stopPropagation();" href="/b/src/1434777733464.mp3" download="1434777733464.mp3"><img class="buttonImage" width="16" height="16" src="/img/player/16/download.png"></a>
+            
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false" title="Редактировать теги аудиофайла"><img class="buttonImage" width="16" height="16" src="/img/audio_edit_tags.png"></a>
+            
+        
+        <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);" title="Удалить из плей-листа"><img class="buttonImage" width="16" height="16" src="/img/player/16/delete.png"></a>
+    </span>
+</div><div class="track" id="track/1434862062697.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1434862062697.mp3" draggable="true">
+    <span class="trackInfo">
+        
+            <br>
+            miko
+            —
+            チルノのパーフェクトさんすう教室
+            (2008.11.02)
+        
+    </span>
+    <span class="trackActions">
+        
+            00:04:40 | 320kbps
+            <a title="Скачать файл" draggable="false" onclick="event.stopPropagation();" href="/b/src/1434862062697.mp3" download="1434862062697.mp3"><img class="buttonImage" width="16" height="16" src="/img/player/16/download.png"></a>
+            
+                <a href="javascript:void(0);" onclick="lord.editAudioTags(this, event); return false;" draggable="false" title="Редактировать теги аудиофайла"><img class="buttonImage" width="16" height="16" src="/img/audio_edit_tags.png"></a>
+            
+        
+        <a href="javascript:void(0);" draggable="false" onclick="lord.removeFromPlaylist(event, this);" title="Удалить из плей-листа"><img class="buttonImage" width="16" height="16" src="/img/player/16/delete.png"></a>
+    </span>
+</div>
+</div>
+        <a id="playerAddRadioButton" href="javascript:void(0);" onclick="lord.playerAddRadio(); return false;" title="Добавить радио-поток"><img src="/img/player/32/radio_add.png" class="buttonImage" width="32" height="32"></a>
+        <a id="playerMinimizeButton" href="javascript:void(0);" onclick="lord.setPlayerVisible(event, false);" title="Свернуть плеер"><img src="/img/player/32/hide.png" class="buttonImage" width="32" height="32"></a>
     </div>
 </div>
 <div class="banner">
@@ -259,6 +468,8 @@
                                     <br />
                                     <font face="monospace">monospace</font>
                                     <br />
+                                    <span class="tooltip" title="Some extra information">Tooltip</span>
+                                    <br />
                                     <a href="javascript:void(0);">https://site.com/link.html</a>
                                     <br />
                                     <a href="javascript:void(0);">&gt;&gt;/d/100</a>
@@ -272,6 +483,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div>
+                    <span class="bannedFor">User was banned for this post</span>
                 </div>
                 <div name="referencedByContainer">
                     <span name="referencedBy" class="referencedBy">
@@ -289,7 +503,7 @@
                 </li>    
                 <li class="ui-menu-item" id="ui-id-2" tabindex="-1" role="menuitem">
                     <a name="editButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/edit.png" class="signImage"> Edit</a>
+                        <img src="/ololord.js/img/edit.png" class="signImage"> Edit [HOVER]</a>
                 </li>
                 <li class="ui-menu-item" id="ui-id-3" tabindex="-1" role="menuitem">
                     <a name="hideButton" href="javascript:void(0);">
@@ -312,9 +526,9 @@
                     <a name="downloadFilesButton" href="javascript:void(0);">
                         <img src="/ololord.js/img/download.png" class="signImage"> Download all files</a>
                 </li>
-                <li class="ui-menu-item" id="ui-id-8" tabindex="-1" role="menuitem">
+                <li class="ui-menu-item ui-state-active" id="ui-id-8" tabindex="-1" role="menuitem">
                     <a name="fixButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/fixed.png" class="signImage"> Fix</a>
+                        <img src="/ololord.js/img/fixed.png" class="signImage"> Fix [ACTIVE]</a>
                 </li>
                 <li class="ui-menu-item" id="ui-id-9" tabindex="-1" role="menuitem">
                     <a name="closeButton" href="javascript:void(0);">
@@ -351,6 +565,7 @@
                 <div class="postHeader">
                     <span class="nowrap"> </span>
                     <span class="postSubject">
+                        Some subject
                     </span>
                     <span class="someName">
                         <span class="moderName">Moderator</span>
@@ -427,6 +642,8 @@
                                         <br />
                                         <font face="monospace">monospace</font>
                                         <br />
+                                        <span class="tooltip" title="Some extra information">Tooltip</span>
+                                        <br />
                                         <a href="javascript:void(0);">https://site.com/link.html</a>
                                         <br />
                                         <a href="javascript:void(0);">&gt;&gt;/d/100</a>
@@ -483,9 +700,11 @@
                             <div class="postFilesInnerRow">
                                 <div class="postText">
                                     <blockquote id="post7Text">
+                                        <strong>THIS</strong>, <em>is</em>, <s>a targeted</s>, <u>post</u>.
+                                        <br />
                                         <span class="quotation">&gt;quotation: <strong>BOLD</strong>, <em>italics</em>, <s>striked out</s>, <u>Underlined</u>, <font face="monospace">monospace</font>, <a href="javascript:void(0);">&gt;&gt;5</a></span>
                                         <br />
-                                        <span class="quotation">&gt;quotation: <span class="spoiler">Spoiler</span></span>
+                                        <span class="quotation">&gt;quotation: <span class="spoiler">Spoiler</span></span>, <span class="tooltip" title="Some extra information">tooltip</span>
                                         <br />
                                         <span class="cspoiler"><span class="cspoilerTitle" onclick="lord.expandCollapseSpoiler(this);">collapsible spoiler</span><span class="cspoilerBody" style="display: none;"><div class="codeBlock cpp hljs" title="C++"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>;</div></span></span>
                                     </blockquote>
@@ -493,9 +712,15 @@
                             </div>
                         </div>
                     </div>
+                    <div>
+                        <span class="modificationDateTime">
+                            Last modified:
+                            <span class="processedFormattedDate" name="formattedDate">23/05/2016 Mon 13:20:15</span>
+                        </span>
+                    </div>
                 </div>
             </div>
-            <div id="8" class="post">
+            <div id="8" class="post newPost">
                 <div class="postHeader">
                     <span class="nowrap"> </span>
                     <span class="postSubject">
@@ -527,7 +752,7 @@
                             <div class="postFilesInnerRow">
                                 <div class="postText">
                                     <blockquote id="post8Text">
-                                        Voting.
+                                        Voting. [A new post.]
                                     </blockquote>
                                 </div>
                             </div>
@@ -556,6 +781,34 @@
                     </div>
                 </div>
             </div>
+            <div id="9" class="post hidden">
+                <div class="postHeader">
+                    <span class="nowrap"> </span>
+                    <span class="postSubject">
+                    </span>
+                    <span class="someName">
+                        <span class="userName defaultUserName">Anonymous</span>
+                    </span>
+                    <span class="nowrap postDateTime" name="dateTime">22/05/2016 Sun 10:35:52</span>
+                    <span class="nowrap">
+                        <span class="postNumber">
+                            #<a href="javascript:void(0);" name="number">8</a>
+                        </span>
+                        <span class="postSequenceNumber">8</span>
+                        <span class="hideReason">#wipe(longwords)</span>
+                        <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
+                                                             title="Быстрый ответ"><img src="/ololord.js/img/reply.png"
+                                                                                        class="buttonImage"></a>]</span>
+                        <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
+                                                                  class="buttonImage" name="postActions"
+                                                                  title="Post actions" onclick="return false;">]</span>
+                        <span name="toThread" class="postToThread postToThreadDesktop">
+                            [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
+                        </span>
+                    </span>
+                </div>
+                <div class="postBody">
+            </div>
         </div>
     </div>
 </div>
@@ -565,12 +818,13 @@
         <div id="postFormContainerBottom">
             <div>[<a id="showHidePostFormButtonBottom" href="javascript:void(0);">Hide post form</a>]</div>
             <form id="postForm" onsubmit="return false;">
-                <div class="postFormHeader">
+                <div class="postFormHeader" ondragstart="lord.makeFormFloat(event);" draggable="true">
                     <span class="postFormHeaderLabel">Start dragging to make post form float</span>
                     <div class="postFormHeaderButtons">
                         <a name="fixPostFormButton" href="javascript:void(0);" title="Fixed">
                             <img src="/ololord.js/img/fixed.png" class="buttonImage" /></a>
-                        <a name="closePostFormButton" href="javascript:void(0);" title="Close">
+                        <a name="closePostFormButton" href="javascript:void(0);" title="Close"
+                           onclick="lord.closePostForm(); return false;">
                             <img src="/ololord.js/img/clear.png" class="buttonImage" /></a>
                     </div>
                 </div>
@@ -697,7 +951,7 @@
                             <td class="postformField">
                                 <span id="options">
                                     <input id="checkboxOp" type="checkbox" name="signAsOp"
-                                           value="true" /><label for="checkboxOp">Sign as OP:</label>
+                                           value="true" /><label for="checkboxOp">OP</label>
                                     <input id="checkboxTripcode" type="checkbox" name="tripcode" 
                                            value="true" /><label for="checkboxTripcode">Tripcode</label>
                                 </span>
@@ -882,6 +1136,131 @@
 </div>
 <div class="popup">Popup message</div>
 <div class="popup warning" style="top: 78px;">Popup warning</div>
-<div class="popup critical" style="top: 121px;">Popup error</div>
+<div class="popup critical" style="top: 121px;">Popup critical</div>
+<div id="ui-id-3" role="tooltip" class="ui-tooltip ui-widget ui-corner-all ui-widget-content"
+     style="position: absolute; left: 272px; top: 34px; width: 200px; display: block;">
+    <div class="ui-tooltip-content">
+        Some useful tooltip
+    </div>
+</div>
+<div class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-front ui-dialog-buttons ui-draggable ui-resizable"
+     tabindex="-1" role="dialog" aria-describedby="ui-id-27" aria-labelledby="ui-id-28"
+     style="position: absolute; height: auto; width: auto; top: 285px; left: 750px; display: block; z-index: 101;">
+    <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix ui-draggable-handle">
+        <span id="ui-id-28" class="ui-dialog-title">Dialog</span>
+        <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only ui-dialog-titlebar-close"
+                type="button" role="button" title="Закрыть">
+            <span class="ui-button-icon-primary ui-icon ui-icon-closethick"></span>
+            <span class="ui-button-text">Close</span>
+        </button>
+    </div>
+    <div class="settingsDialog ui-dialog-content ui-widget-content" id="ui-id-27"
+         style="display: block; width: auto; min-height: 33px; max-height: 834px; height: auto;">
+        <ul class="tabWidget nowrap">
+            <li data-index="0" class="activated"><a href="javascript:void(0);">Activated tab</a></li>
+            <li data-index="1"><a href="javascript:void(0);">Normal tab</a></li>
+            <li data-index="2"><a href="javascript:void(0);">Another tab</a></li>
+        </ul>
+        <div>
+            <div data-index="0">
+                Tab content:
+                <br />
+                <input type="text" value="Normal input" />
+                <input type="text" value="Input class='.input'" class="input" />
+                <br />
+                <button type="text">Normal button</button>
+                <button type="text" class="button">Button class="button"</button>
+                <br />
+                <select>
+                    <option>Normal select</option>
+                    <option>Another option</option>
+                </select>
+                <select class="select">
+                    <option>Select class="select"</option>
+                    <option>Another option</option>
+                </select>
+                <br />
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="vertical-align: top;">
+                                <div class="chatContactList" style="min-width: 90px; width: 90px;">
+                                    <div name="b:5343" class="chatContact">
+                                        <span class="chatContactNewMessages"></span>
+                                        /b/5343
+                                        <input type="image" src="/ololord.js/img/delete.png" onclick="return false;"
+                                               class="buttonImage" title="Delete this chat">
+                                    </div>
+                                    <div name="b:36733" class="chatContact selected">
+                                        <span class="chatContactNewMessages"></span>
+                                        /b/36733
+                                        <input type="image" src="/ololord.js/img/delete.png" onclick="return false;"
+                                               class="buttonImage" title="Delete this chat">
+                                    </div>
+                                    <div name="b:28561" class="chatContact">
+                                        <span class="chatContactNewMessages"></span>
+                                        /b/28561
+                                        <input type="image" src="/ololord.js/img/delete.png" onclick="return false;"
+                                               class="buttonImage" title="Delete this chat">
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="chatHistory" name="history" style="min-height: 120px; height: 120px; min-width: 200px; width: 200px;">
+                                    <div class="chatMessage">
+                                        <div class="chatMessageDate">
+                                            <img src="/ololord.js/img/message_in.png" class="signImage" width="16"
+                                                  height="16">
+                                            22/12/2015 Tue 21:19:43
+                                        </div>
+                                        <div class="chatMessageText">Hi!</div>
+                                    </div>
+                                    <div class="chatMessage">
+                                        <div class="chatMessageDate">
+                                            <img src="/ololord.js/img/message_out.png" class="signImage" width="16"
+                                                 height="16">
+                                            22/12/2015 вт 21:25:51
+                                        </div>
+                                        <div class="chatMessageText">Hello!</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <input type="text" class="chatInput" name="message"
+                                           placeholder="Enter your message here" />
+                                </div>
+                                <div>
+                                    <button name="sendMessageButton" class="button chatSendButton">Send</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+        <div class="ui-dialog-buttonset">
+            <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
+                    role="button">
+                <span class="ui-button-text">Cancel</span>
+            </button>
+            <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
+                    role="button">
+                <span class="ui-button-text">Accept</span>
+            </button>
+        </div>
+    </div>
+    <div class="ui-resizable-handle ui-resizable-n" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-e" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-s" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-w" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-sw" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-ne" style="z-index: 90;"></div>
+    <div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90;"></div>
+</div>
+<div class="sectionBody" style="position: absolute; top: 600px; left: 650px; text-align: center; width: 300px; height: 450px;">
+    Some section with some data.
+</div>
 </body>
 </html>

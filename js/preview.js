@@ -63,9 +63,79 @@ lord.setPlayerVisible = function(e, visible) {
     if (visible)
         lord.updatePlayerTracksHeight();
 };
+
+lord.fileDragOver = function(e, div) {
+    e.preventDefault();
+    $(div).addClass("drag");
+    return false;
+};
+
+lord.fileDragLeave = function(e, div) {
+    e.preventDefault();
+    $(div).removeClass("drag");
+    return false;
+};
+
+lord.makeFormFloat = function(e) {
+    e.preventDefault();
+    var pos = $("#postForm").offset();
+    pos.left -= window.scrollX;
+    pos.top -= window.scrollY;
+    var setPos = function(p) {
+        $("#postForm").css({
+            left: p.left + "px",
+            top: p.top + "px"
+        });
+    };
+    setPos(pos);
+    $("#postForm").addClass("floatingPostForm");
+    var previous = {
+        x: e.clientX,
+        y: e.clientY
+    };
+    $("#postForm .postFormHeaderLabel").css("display", "none");
+    $("#postForm .postFormHeader").removeAttr("draggable").on("mousedown", function(e) {
+        previous = {
+            x: e.clientX,
+            y: e.clientY
+        };
+    }).on("mouseup", function(e) {
+        previous = null;
+    });
+    $(document.body).on("mousemove", function(e) {
+        if (!previous)
+            return;
+        pos.left += e.clientX - previous.x;
+        pos.top += e.clientY - previous.y;
+        setPos(pos);
+        previous = {
+            x: e.clientX,
+            y: e.clientY
+        };
+    });
+};
+
+lord.closePostForm = function() {
+    $("#postForm").removeClass("floatingPostForm");
+    $("#postForm .postFormHeaderLabel").css("display", "");
+    $("#postForm .postFormHeader").attr("draggable", true).off("mousedown").off("mouseup");
+    $(document.body).off("mousemove");
+};
         
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load);
     $("#options").buttonset();
     $("[name='markupHtml'], [name='optionDraft']").button();
+    $(".menu li.ui-menu-item").mouseover(function() {
+        $(this).addClass("ui-state-hover");
+    }).mouseout(function() {
+        $(this).removeClass("ui-state-hover");
+    });
+    var height = $(".toolbar.sticky").height();
+    $("body").css("padding-top", (height + 6) + "px");
+    //var target = $(":target");
+    //var offset = target.offset();
+    //var scrollto = offset.top - $(".toolbar.sticky").height() - 26;
+    var scrollto = 0;
+    $("html, body").animate({ scrollTop: scrollto }, 0);
 }, false);
