@@ -1754,6 +1754,29 @@ lord.showHideJqueryUICSS = function() {
     $("#jqueryUICSSView").parent().find("a[name='jqueryuicss']").empty().text(show ? "Hide jQuery UI CSS" : "Show jQuery UI CSS");
 };
 
+lord.roll = function() {
+    var name = $("#styleName")[0].value.toLowerCase().replace(/\s\//gi, "-");
+    if (!name)
+        return alert("No name specified");
+    var title = $("#styleTitle")[0].value;
+    if (!title)
+        return alert("No title specified");
+    var zip = new JSZip();
+    zip.file(name + ".css", "/*" + title + "*/\n\n" + lord.cssView.getValue());
+    var thrdparty = zip.folder("3rdparty");
+    thrdparty = thrdparty.folder("jquery-ui");
+    thrdparty = thrdparty.folder(name);
+    thrdparty.file("jquery-ui.min.css", lord.jqueryUICSSView.getValue());
+    var images = thrdparty.folder("images");
+    var url = "/ololord.js/css/3rdparty/jquery-ui/images/ui-icons_000000_256x240.png";
+    JSZipUtils.getBinaryContent(url, function(err, data) {
+        if (err)
+            return alert("An error occured");
+        images.file("ui-icons_000000_256x240.png", data, { binary: true });
+        saveAs(zip.generate({ "type": "blob" }), name + ".zip");
+    });
+};
+
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load);
     $("#options > div").accordion({

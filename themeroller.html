@@ -11,8 +11,7 @@
     <link rel="stylesheet" type="text/css" href="/ololord.js/css/3rdparty/jquery.minicolors.css">
     <link rel="stylesheet" type="text/css" href="/ololord.js/css/3rdparty/codemirror.css">
 <!--NOTE: No error here, really "text/css"-->
-<script id="jqueryUIBaseCSS" type="text/css">
-.ui-helper-hidden {
+<script id="jqueryUIBaseCSS" type="text/css">.ui-helper-hidden {
     display: none;
 }
 
@@ -1282,6 +1281,9 @@ button.ui-button::-moz-focus-inner {
     <script type ="text/javascript" src="/ololord.js/js/3rdparty/jquery-ui.min.js"></script>
     <script type ="text/javascript" src="/ololord.js/js/3rdparty/jquery.minicolors.min.js"></script>
     <script type ="text/javascript" src="/ololord.js/js/3rdparty/underscore-min.js"></script>
+    <script type ="text/javascript" src="/ololord.js/js/3rdparty/FileSaver.min.js"></script>
+    <script type ="text/javascript" src="/ololord.js/js/3rdparty/jszip.min.js"></script>
+    <script type ="text/javascript" src="/ololord.js/js/3rdparty/jszip-utils.min.js"></script>
     <script type ="text/javascript" src="/ololord.js/js/3rdparty/codemirror/codemirror.min.js"></script>
     <script type ="text/javascript" src="/ololord.js/js/3rdparty/codemirror/css.min.js"></script>
     <script type ="text/javascript" src="/ololord.js/js/themeroller.js"></script>
@@ -2182,6 +2184,12 @@ button.ui-button::-moz-focus-inner {
                     </div>
                 </div>
             </div>
+            <div>
+                <label>Style name: <input id="styleName" type="text"  /></label>
+            </div>
+            <div>
+                <label>Style title: <input id="styleTitle" type="text"  /></label>
+            </div>
         </div>
         <div id="preview">
             <iframe src="/ololord.js/preview/index.html#7"></iframe>
@@ -2191,7 +2199,9 @@ button.ui-button::-moz-focus-inner {
         <div>
             <div>
                 <a name="css" href="javascript:void(0);" onclick="lord.showHideCSS();">Show CSS</a>
-                <a name="jqueryuicss" href="javascript:void(0);" onclick="lord.showHideJqueryUICSS();">Show jQuery UI CSS</a>
+                <a name="jqueryuicss" href="javascript:void(0);"
+                   onclick="lord.showHideJqueryUICSS();">Show jQuery UI CSS</a>
+                <button onclick="lord.roll();">Roll!</button>
             </div>
             <div id="cssView" style="display: none;"></div>
             <div id="jqueryUICSSView" style="display: none;"></div>
