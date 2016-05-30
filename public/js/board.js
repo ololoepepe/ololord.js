@@ -556,7 +556,7 @@ lord.nextOrPreviousFile = function(previous) {
     var href = lord.currentMovablePlayer.fileInfo.href;
     if (!href)
         return null;
-    var ind = lord.filesMap[href];
+    var ind = lord.filesMap[href.replace(/^https?\:\/\/[^\/]+/, "")];
     if (ind < 0)
         return null;
     if (!!previous)
