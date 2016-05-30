@@ -51,74 +51,8 @@ lord.notificationQueue = [];
 lord.pageProcessors = [];
 lord.postProcessors = [];
 lord.currentTracks = {};
-(function() {
-    if (!lord.getLocalObject("useWebSockets", true))
-        return;
-    var options = {};
-    var transports = lord.model("base").site.ws.transports;
-    if (transports)
-        options.transports = transports;
-    lord.wsMessages = {};
-    var retryCount = 0;
-    lord.wsHandlers = {};
-    var f = function() {
-        lord.ws = new SockJS("/" + lord.model("base").site.pathPrefix + "ws", null, options);
-        lord.wsOpen = new Promise(function(resolve, reject) {
-            lord.ws.onopen = function() {
-                retryCount = 0;
-                lord.ws.send(JSON.stringify({
-                    type: "init",
-                    data: { hashpass: lord.getCookie("hashpass") }
-                }));
-            };
-            lord.ws.onmessage = function(message) {
-                try {
-                    message = JSON.parse(message.data);
-                } catch (err) {
-                    lord.handleError(err);
-                    return;
-                }
-                if ("init" == message.type) {
-                    resolve();
-                    delete lord.wsOpen;
-                } else {
-                    var msg = lord.wsMessages[message.id];
-                    if (!msg) {
-                        if ("_error" == message.id) {
-                            lord.handleError(message.error);
-                        } else {
-                            var handler = lord.wsHandlers[message.type];
-                            if (handler)
-                                handler(message);
-                        }
-                        return;
-                    }
-                    delete lord.wsMessages[message.id];
-                    if (!message.error)
-                        msg.resolve(message.data);
-                    else
-                        msg.reject(message.error);
-                }
-            };
-            lord.ws.onclose = function() {
-                lord.wsClosed = true;
-                if (!lord.wsOpen)
-                    return;
-                reject("Socket closed");
-                delete lord.wsOpen;
-            };
-        });
-        lord.wsOpen.catch(function(err) {
-            ++retryCount;
-            if (retryCount > 5)
-                lord.handleError(err);
-            if (retryCount > 10)
-                return;
-            setTimeout(f, retryCount * lord.Second);
-        });
-    };
-    f();
-})();
+lord.wsMessages = {};
+lord.wsHandlers = {};
 lord.lastWindowSize = {
     width: $(window).width(),
     height: $(window).height()
@@ -2212,6 +2146,70 @@ lord.adjustContentPadding = function() {
 
 lord.initializeOnLoadBase = function() {
     lord.hashChangeHandler(lord.hash());
+    if (lord.getLocalObject("useWebSockets", true)) {
+        var options = {};
+        var transports = lord.model("base").site.ws.transports;
+        if (transports)
+            options.transports = transports;
+        var retryCount = 0;
+        var f = function() {
+            lord.ws = new SockJS("/" + lord.model("base").site.pathPrefix + "ws", null, options);
+            lord.wsOpen = new Promise(function(resolve, reject) {
+                lord.ws.onopen = function() {
+                    retryCount = 0;
+                    lord.ws.send(JSON.stringify({
+                        type: "init",
+                        data: { hashpass: lord.getCookie("hashpass") }
+                    }));
+                };
+                lord.ws.onmessage = function(message) {
+                    try {
+                        message = JSON.parse(message.data);
+                    } catch (err) {
+                        lord.handleError(err);
+                        return;
+                    }
+                    if ("init" == message.type) {
+                        resolve();
+                        delete lord.wsOpen;
+                    } else {
+                        var msg = lord.wsMessages[message.id];
+                        if (!msg) {
+                            if ("_error" == message.id) {
+                                lord.handleError(message.error);
+                            } else {
+                                var handler = lord.wsHandlers[message.type];
+                                if (handler)
+                                    handler(message);
+                            }
+                            return;
+                        }
+                        delete lord.wsMessages[message.id];
+                        if (!message.error)
+                            msg.resolve(message.data);
+                        else
+                            msg.reject(message.error);
+                    }
+                };
+                lord.ws.onclose = function() {
+                    lord.wsClosed = true;
+                    if (!lord.wsOpen)
+                        return;
+                    reject("Socket closed");
+                    delete lord.wsOpen;
+                };
+            });
+            lord.wsOpen.catch(function(err) {
+                ++retryCount;
+                if (retryCount > 5)
+                    lord.handleError(err);
+                if (retryCount > 10)
+                    return;
+                setTimeout(f, retryCount * lord.Second);
+            });
+        };
+        f();
+    }
     lord.series(lord.pageProcessors, function(f) {
         return f();
     }).catch(lord.handleError);
