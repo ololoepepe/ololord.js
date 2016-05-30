@@ -116,9 +116,7 @@ router.get("/api/lastPostNumbers.json", function(req, res, next) {
         boardNames = [boardNames];
     if (!boardNames)
         boardNames = Board.boardNames();
-    controller.checkBan(req, res, boardNames).then(function() {
-        return boardModel.getLastPostNumbers(boardNames);
-    }).then(function(lastPostNumbers) {
+    boardModel.getLastPostNumbers(boardNames).then(function(lastPostNumbers) {
         var r = {};
         lastPostNumbers.forEach(function(lastPostNumber, i) {
             r[boardNames[i]] = lastPostNumber;
@@ -132,9 +130,7 @@ router.get("/api/lastPostNumbers.json", function(req, res, next) {
 router.get("/api/lastPostNumber.json", function(req, res, next) {
     if (!req.query.boardName)
         return next(Tools.translate("Invalid board"));
-    controller.checkBan(req, res, req.query.boardName).then(function() {
-        return boardModel.getLastPostNumbers([req.query.boardName]);
-    }).then(function(lastPostNumbers) {
+    boardModel.getLastPostNumbers([req.query.boardName]).then(function(lastPostNumbers) {
         res.json({ lastPostNumber: lastPostNumbers[0] });
     }).catch(function(err) {
         next(err);
