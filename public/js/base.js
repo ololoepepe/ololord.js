@@ -531,7 +531,7 @@ lord.logoutImplementation = function(form, vk) {
             path: "/"
         });
     }
-    lord.reloadPage();
+    window.location = "/" + lord.data("sitePathPrefix") + "redirect?source=" + window.location.pathname;
 };
 
 lord.doLogout = function(event, form) {

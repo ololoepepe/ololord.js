@@ -63,6 +63,11 @@ var spawnCluster = function() {
         var app = express();
 
         app.use(require("./middlewares"));
+        app.use("/redirect", function(req, res, next) {
+            if (!req.query.source)
+                return next();
+            res.redirect(307, "/" + config("site.pathPrefix", "") + req.query.source.replace(/^\//, ""));
+        });
         app.use(require("./controllers"));
         app.use("*", function(req, res, next) {
             var err = new Error();
