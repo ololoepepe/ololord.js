@@ -41,7 +41,7 @@
                     <a href="javascript:void(0);"
                        onclick="lord.hideByImage(this, false);">{{=it.tr.hideByImageSizeText}}</a>
                 </li>
-                {{? fileInfo.ihash && "0" != fileInfo.ihash && "image/gif" != fileInfo.mimeType}}
+                {{? fileInfo.ihash && "0" != fileInfo.ihash}}
                     <li class="nowrap">
                         <a href="javascript:void(0);"
                            onclick="lord.hideByImage(this, true);">{{=it.tr.hideByImageHashText}}</a>
