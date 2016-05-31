@@ -1486,25 +1486,30 @@ var Transaction = function() {
 };
 
 Transaction.prototype.rollback = function() {
-    this.filePaths.forEach(function(path) {
-        FS.exists(path).then(function(exists) {
+    var _this = this;
+    Tools.series(_this.filePaths, function(path) {
+        return FS.exists(path).then(function(exists) {
             if (!exists)
-                return;
-            FS.remove(path).catch(function(err) {
+                return Promise.resolve();
+            return FS.remove(path).catch(function(err) {
                 Global.error(err.stack || err);
             });
         });
+    }).then(function() {
+        if (_this.threadNumber <= 0)
+            return Promise.resolve();
+        return removeThread(_this.board.name, _this.threadNumber).catch(function(err) {
+            Global.error(err.stack || err);
+        });
+    }).then(function() {
+        if (_this.postNumber <= 0)
+            return Promise.resolve();
+        return removePost(_this.board.name, _this.postNumber).catch(function(err) {
+            Global.error(err.stack || err);
+        });
+    }).catch(function(err) {
+        Global.error(err.stack || err);
     });
-    if (this.threadNumber > 0) {
-        removeThread(this.board.name, this.threadNumber).catch(function(err) {
-            console.log(err);
-        });
-    }
-    if (this.postNumber > 0) {
-        removePost(this.board.name, this.postNumber).catch(function(err) {
-            console.log(err);
-        });
-    }
 };
 
 module.exports.Transaction = Transaction;
