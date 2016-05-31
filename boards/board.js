@@ -297,7 +297,7 @@ var renderFileInfo = function(fi) {
 };
 
 /*public*/ Board.prototype.renderPost = function(post, req, opPost) {
-    post.fileInfos.forEach(function(fileInfo) {
+    (post.fileInfos || []).forEach(function(fileInfo) {
         renderFileInfo(fileInfo);
     });
     post.rawSubject = post.subject;
@@ -527,8 +527,8 @@ var getRules = function(boardName) {
                     width: info.width,
                     height: info.height
                 };
-                if (config("system.phash.enabled", true) && "image/gif" != file.mimeType) {
-                    return Tools.generateImageHash(file.path + suffix).then(function(hash) {
+                if (config("system.phash.enabled", true)) {
+                    return Tools.generateImageHash(thumbPath).then(function(hash) {
                         file.ihash = hash;
                     });
                 }
