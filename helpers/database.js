@@ -1495,10 +1495,16 @@ Transaction.prototype.rollback = function() {
             });
         });
     });
-    if (this.threadNumber > 0)
-        removeThread(this.board.name, this.threadNumber);
-    if (this.postNumber > 0)
-        removePost(this.board.name, this.postNumber);
+    if (this.threadNumber > 0) {
+        removeThread(this.board.name, this.threadNumber).catch(function(err) {
+            console.log(err);
+        });
+    }
+    if (this.postNumber > 0) {
+        removePost(this.board.name, this.postNumber).catch(function(err) {
+            console.log(err);
+        });
+    }
 };
 
 module.exports.Transaction = Transaction;
