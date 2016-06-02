@@ -1832,10 +1832,10 @@ lord.roll = function() {
     var title = $("#styleTitle")[0].value;
     if (!title)
         return alert("No title specified");
-    var text = "/*" + title + "*/\n\n/*jQuery UI*/\n\n" + lord.cssView.getValue() + "\n\n/*The style*/\n\n"
-        + lord.jqueryUICSSView.getValue();
+    var text = "/*" + title + "*/\n\n/*jQuery UI*/\n\n" + lord.cssView.getValue() + "\n\n";
+    text += "/*The style*/\n\n" + lord.jqueryUICSSView.getValue();
     var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
-    saveAs(blob, name + ".zip");
+    saveAs(blob, name + ".css");
 };
 
 window.addEventListener("load", function load() {
