@@ -1419,3 +1419,16 @@ input.buttonImage {
 .delallHeader {
     font-weight: bold;
 }
+
+.sidebarGroup ~ .sidebarGroup {
+    margin-top: 4px;
+}
+
+.sidebarGroupBody {
+    padding: 4px;
+}
+
+.sidebarGroupTitle {
+    font-weight: bold;
+    padding: 2px 4px 2px 4px;
+}

@@ -408,3 +408,7 @@ ul.jqueryFileTree a {
     border: none;
     border-bottom: 1px solid #800000;
 }
+
+.sidebarGroupTitle {
+    background-color: #F0E0D6;
+}
