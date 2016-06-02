@@ -22,10 +22,12 @@ lord.styleSelectors = {
     },
     "hr": {
         "height": {
+            enabledSelector: "#hrNormalEnabled",
             selector: "#hrHeight",
             type: "number"
         },
         "border": {
+            disabledSelector: "#hrDefaultEnabled",
             type: "value",
             value: "none"
         },
