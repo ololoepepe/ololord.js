@@ -1310,6 +1310,72 @@ lord.styleSelectors = {
             value: "bold"
         },
     },
+    ".sidebarGroup": {
+        "border": [
+            {
+                selector: "#postBorderWidth",
+                type: "select"
+            },
+            {
+                selector: "#postBorderType",
+                type: "select"
+            },
+            {
+                selector: "#postBorderColor",
+                type: "minicolors"
+            }
+        ],
+        "border-radius": {
+            enabledSelector: "#borderRadiusEnabled",
+            selector: "#borderRadius",
+            type: "number"
+        }
+    },
+    ".sidebarGroup ~ .sidebarGroup": {
+        "margin-top": {
+            type: "value",
+            value: "4px"
+        }
+    },
+    ".sidebarGroupTitle": {
+        "font-weight": {
+            type: "value",
+            value: "bold"
+        },
+        "padding": {
+            type: "value",
+            value: "2px 4px 2px 4px"
+        },
+        "background-color": {
+            selector: "#postBackgroundColor",
+            type: "minicolors"
+        },
+        "border-bottom": [
+            {
+                selector: "#postBorderWidth",
+                type: "select"
+            },
+            {
+                selector: "#postBorderType",
+                type: "select"
+            },
+            {
+                selector: "#postBorderColor",
+                type: "minicolors"
+            }
+        ],
+        "border-radius": {
+            enabledSelector: "#borderRadiusEnabled",
+            selector: "#borderRadius",
+            type: "number"
+        }
+    },
+    ".sidebarGroupBody": {
+        "padding": {
+            type: "value",
+            value: "4px"
+        }
+    },
     ".searchResultHighlighted": {
         "background-color": {
             selector: "#searchResultHighlightedBackgroundColor",
