@@ -1304,7 +1304,11 @@ button.ui-button::-moz-focus-inner {
                     <div class="accordionBody">
                         <div class="sectionHeader">Font</div>
                         <div class="sectionBody">
-                            <label>Family: <input id="bodyFontFamily" type="text" value="Verdana,sans-serif" /></label>
+                            <fieldset>
+                                <input id="bodyFontFamilyEnabled" type="checkbox" checked="true" />
+                                <label>Family: <input id="bodyFontFamily" type="text"
+                                                      value="Verdana,sans-serif" /></label>
+                            </fieldset>
                             <label>Color: <input id="bodyFontColor" class="hexColor" type="text"
                                                  value="#000000" /></label>
                             <label>Weight:

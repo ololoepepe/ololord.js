@@ -7,6 +7,7 @@ lord.styleSelectors = {
             type: "minicolors"
         },
         "font-family": {
+            enabledSelector: "#bodyFontFamilyEnabled",
             selector: "#bodyFontFamily",
             type: "text"
         },
@@ -1410,6 +1411,7 @@ lord.styleSelectors = {
 lord.jqueryUIStyleSelectors = {
     ".ui-widget": {
         "font-family": {
+            enabledSelector: "#bodyFontFamilyEnabled",
             selector: "#bodyFontFamily",
             type: "text"
         },
@@ -1609,6 +1611,7 @@ lord.jqueryUIStyleSelectors = {
     },
     ".ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button": {
         "font-family": {
+            enabledSelector: "#bodyFontFamilyEnabled",
             selector: "#bodyFontFamily",
             type: "text"
         },
@@ -1688,6 +1691,7 @@ lord.jqueryUIStyleSelectors = {
     },
     ".ui-tooltip-content": {
         "font-family": {
+            enabledSelector: "#bodyFontFamilyEnabled",
             selector: "#bodyFontFamily",
             type: "text"
         },
