@@ -1725,7 +1725,7 @@ lord.getAttributeValue = function(data) {
     case "checkbox":
         return !!el[0].checked;
     case "minicolors":
-        return el.minicolors("value").toUpperCase();
+        return el.minicolors("value").toUpperCase().replace("RGBA", "rgba").replace("RGB", "rgb");
     case "number":
         return +el[0].value;
     case "text":
