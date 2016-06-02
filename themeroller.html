@@ -2204,12 +2204,16 @@ button.ui-button::-moz-focus-inner {
                 <a name="css" href="javascript:void(0);" onclick="lord.showHideCSS();">Show CSS</a>
                 <a name="jqueryuicss" href="javascript:void(0);"
                    onclick="lord.showHideJqueryUICSS();">Show jQuery UI CSS</a>
+                <button onclick="lord.import();">Import</button>
+                <button onclick="lord.export();">Export</button>
                 <button onclick="lord.roll();">Roll!</button>
+                
             </div>
             <div id="cssView" style="display: none;"></div>
             <div id="jqueryUICSSView" style="display: none;"></div>
         </div>
         <!--button id="createThemeButton" onclick="lord.createTheme();">Create theme</button-->
     </div>
+    <input id="importInput" type="file" style="display: none;" onchange="lord.readyImport();" />
 </body>
 </html>

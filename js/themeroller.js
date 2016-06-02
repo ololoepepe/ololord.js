@@ -1831,6 +1831,79 @@ lord.showHideJqueryUICSS = function() {
     $("#jqueryUICSSView").parent().find("a[name='jqueryuicss']").empty().text(show ? "Hide jQuery UI CSS" : "Show jQuery UI CSS");
 };
 
+lord.import = function() {
+    $("#importInput").click();
+};
+
+lord.readyImport = function() {
+    var textReader = new FileReader();
+    (new Promise(function(resolve, reject) {
+        textReader.onload = function(e) {
+            resolve(e.target.result);
+        };
+        textReader.onerror = function(e) {
+            reject(e.getMessage());
+        };
+        textReader.readAsText($("#importInput")[0].files[0]);
+    })).then(function(text) {
+        var o = {};
+        try {
+            o = JSON.parse(text);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+        for (var id in o) {
+            if (!o.hasOwnProperty(id))
+                continue;
+            var inp = $("#" + id)[0];
+            if (!inp)
+                continue;
+            switch ((inp.tagName || "").toUpperCase()) {
+            case "INPUT":
+                if ($(inp).hasClass("minicolors-input"))
+                    $(inp).minicolors("value", o[id]);
+                else if (["checkbox", "radio"].indexOf(inp.type.toLowerCase()) >= 0)
+                    inp.checked = !!o[id];
+                else
+                    inp.value = o[id];
+                break;
+            case "SELECT":
+                inp.selectedIndex = o[id];
+                break;
+            default:
+                break;
+            }
+        }
+        lord.styleChanged();
+    }).catch(function(err) {
+        alert(err);
+    });
+};
+
+lord.export = function() {
+    var name = $("#styleName")[0].value.toLowerCase().replace(/\s\//gi, "-");
+    if (!name)
+        return alert("No name specified");
+    var o = {};
+    console.log($("#options"));
+    $("#options").find("input").each(function(_, inp) {
+        switch (inp.type.toLowerCase()) {
+        case "checkbox":
+        case "radio":
+            o[inp.id] = !!inp.checked;
+            break;
+        default:
+            o[inp.id] = inp.value;
+            break;
+        }
+    });
+    $("#options").find("select").each(function(_, sel) {
+        o[sel.id] = sel.selectedIndex;
+    });
+    var blob = new Blob([JSON.stringify(o, null, 4)], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, name + "-option.json");
+};
+
 lord.roll = function() {
     var name = $("#styleName")[0].value.toLowerCase().replace(/\s\//gi, "-");
     if (!name)
