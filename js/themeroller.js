@@ -1404,53 +1404,6 @@ lord.styleSelectors = {
             selector: "#borderRadius",
             type: "number"
         }
-    },
-    ".ui-slider, .ui-slider-handle": {
-        "border-radius": {
-            enabledSelector: "#borderRadiusEnabled",
-            type: "value",
-            value: "0px",
-            important: true
-        },
-        "border": [
-            {
-                enabledSelector: "#playerSliderBorderEnabled",
-                type: "value",
-                value: "1px solid"
-            },
-            {
-                enabledSelector: "#playerSliderBorderEnabled",
-                selector: "#playerSliderBorderColor",
-                type: "minicolors"
-            },
-            {
-                enabledSelector: "#playerSliderBorderEnabled",
-                type: "value",
-                value: "!important"
-            }
-        ]
-    },
-    ".ui-tooltip-content": {
-        "font-family": {
-            selector: "#bodyFontFamily",
-            type: "text"
-        },
-        "background-color": {
-            selector: "#tooltipBackgroundColor",
-            type: "minicolors"
-        }
-    },
-    ".ui-tooltip-content::after": {
-        "border-color": [
-            {
-                selector: "#tooltipBorderColor",
-                type: "minicolors"
-            },
-            {
-                type: "value",
-                value: "transparent"
-            }
-        ]
     }
 };
 
@@ -1707,6 +1660,53 @@ lord.jqueryUIStyleSelectors = {
                 value: "!important"
             }
         ]
+    },
+    ".ui-slider, .ui-slider-handle": {
+        "border-radius": {
+            enabledSelector: "#borderRadiusEnabled",
+            type: "value",
+            value: "0px",
+            important: true
+        },
+        "border": [
+            {
+                enabledSelector: "#playerSliderBorderEnabled",
+                type: "value",
+                value: "1px solid"
+            },
+            {
+                enabledSelector: "#playerSliderBorderEnabled",
+                selector: "#playerSliderBorderColor",
+                type: "minicolors"
+            },
+            {
+                enabledSelector: "#playerSliderBorderEnabled",
+                type: "value",
+                value: "!important"
+            }
+        ]
+    },
+    ".ui-tooltip-content": {
+        "font-family": {
+            selector: "#bodyFontFamily",
+            type: "text"
+        },
+        "background-color": {
+            selector: "#tooltipBackgroundColor",
+            type: "minicolors"
+        }
+    },
+    ".ui-tooltip-content::after": {
+        "border-color": [
+            {
+                selector: "#tooltipBorderColor",
+                type: "minicolors"
+            },
+            {
+                type: "value",
+                value: "transparent"
+            }
+        ]
     }
 };
 
@@ -1833,19 +1833,9 @@ lord.roll = function() {
     if (!title)
         return alert("No title specified");
     var zip = new JSZip();
-    zip.file(name + ".css", "/*" + title + "*/\n\n" + lord.cssView.getValue());
-    var thrdparty = zip.folder("3rdparty");
-    thrdparty = thrdparty.folder("jquery-ui");
-    thrdparty = thrdparty.folder(name);
-    thrdparty.file("jquery-ui.min.css", lord.jqueryUICSSView.getValue());
-    var images = thrdparty.folder("images");
-    var url = "/ololord.js/css/3rdparty/jquery-ui/images/ui-icons_000000_256x240.png";
-    JSZipUtils.getBinaryContent(url, function(err, data) {
-        if (err)
-            return alert("An error occured");
-        images.file("ui-icons_000000_256x240.png", data, { binary: true });
-        saveAs(zip.generate({ "type": "blob" }), name + ".zip");
-    });
+    zip.file(name + ".css", "/*" + title + "*/\n\n/*jQuery UI*/\n\n" + lord.cssView.getValue()
+        + "\n\n/*The style*/\n\n" + lord.jqueryUICSSView.getValue());
+    saveAs(zip.generate({ "type": "blob" }), name + ".zip");
 };
 
 window.addEventListener("load", function load() {
