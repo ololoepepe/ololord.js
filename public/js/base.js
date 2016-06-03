@@ -1438,13 +1438,13 @@ lord.showNewPosts = function() {
                 var boardName = lord.data("boardName", a);
                 if (!boardName)
                     return;
-                var newPostCount = getNewPostCount(boardName);
-                if (!newPostCount)
-                    return;
                 var parent = a.parentNode;
                 var span = lord.queryOne(".newPostCount", parent);
                 if (span)
                     $(span).remove();
+                var newPostCount = getNewPostCount(boardName);
+                if (!newPostCount)
+                    return;
                 span = lord.node("span");
                 $(span).addClass("newPostCount");
                 span.appendChild(lord.node("text", "+" + newPostCount + " "));
@@ -1458,11 +1458,11 @@ lord.showNewPosts = function() {
                     if (!boardName)
                         return;
                     var newPostCount = getNewPostCount(boardName);
-                    if (!newPostCount)
-                        return;
                     var span = lord.queryOne(".newPostCount", opt);
                     if (span)
                         $(span).remove();
+                    if (!newPostCount)
+                        return;
                     span = lord.node("span");
                     $(span).addClass("newPostCount");
                     span.appendChild(lord.node("text", "+" + newPostCount + " "));
