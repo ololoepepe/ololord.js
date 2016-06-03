@@ -522,7 +522,12 @@ lord.styleSelectors = {
                 selector: "#sectionBodyBorderColor",
                 type: "minicolors"
             }
-        ]
+        ],
+        "border-radius": {
+            enabledSelector: "#borderRadiusEnabled",
+            selector: "#borderRadius",
+            type: "number"
+        }
     },
     ".vote": {
         "background-color": {
@@ -1016,7 +1021,12 @@ lord.styleSelectors = {
                 selector: "#buttonClassedBorderColor",
                 type: "minicolors"
             }
-        ]
+        ],
+        "border-radius": {
+            enabledSelector: "#borderRadiusEnabled",
+            selector: "#borderRadius",
+            type: "number"
+        }
     },
     ".submitContainer > input": {
         "border": [
