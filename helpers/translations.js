@@ -425,6 +425,7 @@ module.exports = function(tr) {
     translate("Add directory", "addDirectoryButtonText");
     translate("Rename directory", "renameDirectoryButtonText");
     translate("Delete directory", "deleteDirectoryButtonText");
+    translate("Download file", "downloadFileButtonText");
     translate("Edit file", "editFileButtonText");
     translate("Rename file", "renameFileButtonText");
     translate("Delete file", "deleteFileButtonText");

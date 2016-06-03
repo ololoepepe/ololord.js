@@ -233,6 +233,9 @@ lord.initFileTree = function() {
     }).on("filetreeclicked", function(e, data) {
         $(".fileActions > button").button("enable");
         lord.currentFile = data.rel;
+        var TEXT_FORMATS = ["txt", "js", "json", "jst", "html", "xml", "md", "example", "gitignore"];
+        if (TEXT_FORMATS.indexOf(lord.currentFile.split(".").pop()) < 0)
+            $("#editFile").button("disable");
         var lbl = lord.id("currentFileLabel");
         $(lbl).empty();
         lbl.appendChild(lord.node("text", lord.text("currentFileLabelText") + " " + data.rel));
@@ -325,6 +328,25 @@ lord.deleteFile = function(isDir) {
             return Promise.resolve();
         lord.initFileTree();
         lord.initFileTree();
+    }).catch(lord.handleError);
+};
+
+lord.downloadFile = function() {
+    if (!lord.currentFile)
+        return;
+    lord.api("fileContent", { fileName: lord.currentFile }).then(function(result) {
+        var blob;
+        if ("Buffer" == result.content.type) {
+            var buffer = new ArrayBuffer(result.content.data.length);
+            var arr = new Uint8Array(buffer);
+            result.content.data.forEach(function(b, i) {
+                arr[i] = b;
+            });
+            blob = new Blob([buffer]);
+        } else {
+            blob = new Blob([result.content], {type: "text/plain;charset=utf-8"});
+        }
+        saveAs(blob, lord.currentFile.split("/").pop());
     }).catch(lord.handleError);
 };
 

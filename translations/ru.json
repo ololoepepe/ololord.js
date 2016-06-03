@@ -685,6 +685,9 @@
     "Download file": {
         "downloadPlaylistFileText": {
             "value": "Скачать файл"
+        },
+        "downloadFileButtonText": {
+            "value": "Скачать файл"
         }
     },
     "Search": {

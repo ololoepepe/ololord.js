@@ -57,6 +57,8 @@
                         {{=it.tr.currentFileLabelText}}
                     </h3>
                     <div class="fileActions">
+                        <button id="downloadFile"
+                                onclick="lord.downloadFile();">{{=it.tr.downloadFileButtonText}}</button>
                         <button id="editFile" onclick="lord.editFile();">{{=it.tr.editFileButtonText}}</button>
                         <button id="renameFile" onclick="lord.renameFile();">{{=it.tr.renameFileButtonText}}</button>
                         <button id="deleteFile" onclick="lord.deleteFile();">{{=it.tr.deleteFileButtonText}}</button>
