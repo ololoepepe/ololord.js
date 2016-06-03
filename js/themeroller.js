@@ -11,6 +11,11 @@ lord.styleSelectors = {
             selector: "#bodyFontFamily",
             type: "text"
         },
+        "font-size": {
+            enabledSelector: "#defaultBodyFontSize",
+            type: "value",
+            value: "inherit"
+        },
         "color": {
             selector: "#bodyFontColor",
             type: "minicolors"

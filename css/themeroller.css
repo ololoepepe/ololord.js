@@ -58,11 +58,11 @@ div.accordionBody {
     width: 200px;
 }
 
-#borderRadius {
-    width: 30px;
+#bodyFontSize {
+    width: 50px;
 }
 
-#hrHeight {
+#borderRadius, #hrHeight {
     width: 30px;
 }
 
