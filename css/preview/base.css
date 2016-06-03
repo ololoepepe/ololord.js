@@ -24,12 +24,20 @@ footer {
     padding-bottom: 2px;
 }
 
-.spoiler > span[data-video-id] > img {
-    visibility: hidden;
+.spoiler * {
+    opacity: 0;
 }
 
-.spoiler:hover > span[data-video-id] > img {
-    visibility: visible;
+.spoiler:hover * {
+    opacity: 1;
+}
+
+.spoiler:hover .spoiler {
+    opacity: 0;
+}
+
+.spoiler:hover .spoiler:hover {
+    opacity: 1;
 }
 
 a.expandCollapse {

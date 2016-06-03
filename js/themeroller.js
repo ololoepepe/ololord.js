@@ -335,20 +335,6 @@ lord.styleSelectors = {
             selector: "#spoilerHoverFontColor"
         }
     },
-    ".spoiler *": {
-        "opacity": {
-            type: "value",
-            value: "0",
-            nopx: true
-        }
-    },
-    ".spoiler:hover *": {
-        "opacity": {
-            type: "value",
-            value: "1",
-            nopx: true
-        }
-    },
     ".quotation": {
         "color": {
             type: "minicolors",
