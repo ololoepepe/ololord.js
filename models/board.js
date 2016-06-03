@@ -744,7 +744,7 @@ module.exports.do_generateThread = function(key, data) {
     }
     case "delete": {
         return Database.db.sadd("deletedThreads", data.boardName + ":" + data.threadNumber).then(function() {
-            return Cache.removeFile(threadId);
+            return Cache.removeFile(`${boardName}/res/${threadNumber}.json`);
         }).then(function() {
             return Cache.removeFile(`${boardName}/res/${threadNumber}.html`);
         });
