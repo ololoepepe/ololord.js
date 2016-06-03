@@ -167,7 +167,8 @@
             s += '</style>';
             if (lord.getLocalObject("mumWatching", false)) {
                 document.write('<style id="mumWatchingStylesheet" type="text/css">'
-                    + '.postFileFile > a > img:not(:hover), .banner > a > img:not(:hover) { opacity: 0.05 !important; }'
+                    + '.postFileFile > a > img:not(:hover), .banner > a > img:not(:hover), '
+                    + '.hideIfMumWatching:not(:hover) { opacity: 0.05 !important; }'
                     + '</style>');
             }
             var appendScript = function(path) {

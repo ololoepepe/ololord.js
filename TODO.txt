@@ -1,5 +1,7 @@
 * Refactor: use ES-2015 features
 * Remove React dependency
+* Optimize HTML structure
+* Embed search results into page (no separate search page)
 [done] Implement better sidebar
 [done] Add ability to edit file ratings
 [done] Implement movable postform

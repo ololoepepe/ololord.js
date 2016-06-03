@@ -2130,7 +2130,8 @@ lord.setTooltips = function(parent) {
 lord.insertMumWatchingStylesheet = function() {
     var style = lord.node("style");
     style.id = "mumWatchingStylesheet";
-    var css = ".postFileFile > a > img:not(:hover), .banner > a > img:not(:hover) { opacity: 0.05 !important; }";
+    var css = ".postFileFile > a > img:not(:hover), .banner > a > img:not(:hover), .hideIfMumWatching:not(:hover) ";
+    css += "{ opacity: 0.05 !important; }";
     style.type = "text/css";
     if (style.styleSheet)
         style.styleSheet.cssText = css;
