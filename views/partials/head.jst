@@ -193,7 +193,6 @@
             document.write(s);
             document.close();
             lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
-            lord.createStylesheetLink("3rdparty/jquery-ui/" + settings.style.name + "/jquery-ui.min.css", true);
             {{? it.isBoardPage}}
                 var style = lord.node("style");
                 style.id = "postBodySize";

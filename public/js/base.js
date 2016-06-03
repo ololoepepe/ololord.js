@@ -2323,8 +2323,6 @@ lord.initializeOnLoadBase = function() {
 lord.changeStyle = function(style) {
     var	link = lord.queryOne("link[href$='" + lord.settings().style.name + ".css']");
     link.href = link.href.replace(link.href.split("/").pop(), style + ".css");
-    link = lord.queryOne("link[href$='" + lord.settings().style.name + "/jquery-ui.min.css']");
-    link.href = link.href.replace(link.href.split("/")[link.href.split("/").length - 2], style);
     lord.setLocalObject("style", style);
     lord.adjustContentPadding();
     for (var i = 0.5; i <= 4; i *= 2) {
