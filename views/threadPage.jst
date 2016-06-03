@@ -8,28 +8,11 @@
       {{? it.thread.postLimitReached}}data-post-limit-reached="true"{{?}}
       {{? it.thread.bumpLimitReached}}data-bump-limit-reached="true"{{?}}>
 <script id="model-postformRules" type="application/json">{{ out += JSON.stringify(it.postformRules); }}</script>
-{{? it.site.vkontakte.integrationEnabled }}
-    <script type="text/javascript">
-        VK.init({ apiId: {{=it.site.vkontakte.appId}} });
-    </script>
-{{?}}
-<div id="hiddenPostForm" style="display: none;"></div>
-{{? it.board.captchaEnabled}}
-    <div id="hiddenCaptcha" style="display: none;"></div>
-{{?}}
 {{#def.sidebar}}
 {{#def.content}}
-{{~["top", "bottom"] :target}}
-    {{#def.navigationButton}}
-{{~}}
-{{~["previous", "next"] :target}}
-    {{#def.leafButton}}
-{{~}}
 <a id="top"></a>
 {{#def.toolbar}}
-{{#def.player}}
 {{#def.customHeader}}
-{{#def.searchAction}}
 {{#def.banner}}
 <div class="theTitle">
     <h1>{{!it.title}}</h1>
@@ -97,6 +80,23 @@
 <hr />
 <a id="bottom"></a>
 {{#def.customFooter}}
+{{#def.searchAction}}
+{{#def.player}}
+{{~["top", "bottom"] :target}}
+    {{#def.navigationButton}}
+{{~}}
+{{~["previous", "next"] :target}}
+    {{#def.leafButton}}
+{{~}}
+<div id="hiddenPostForm" style="display: none;"></div>
+{{? it.board.captchaEnabled}}
+    <div id="hiddenCaptcha" style="display: none;"></div>
+{{?}}
+{{? it.site.vkontakte.integrationEnabled }}
+    <script type="text/javascript">
+        VK.init({ apiId: {{=it.site.vkontakte.appId}} });
+    </script>
+{{?}}
 </div>
 </body>
 </html>
