@@ -1435,24 +1435,38 @@ lord.showNewPosts = function() {
                 var a = lord.queryOne("a", item);
                 if (!a)
                     return;
-                var newPostCount = getNewPostCount(lord.data("boardName", a));
+                var boardName = lord.data("boardName", a);
+                if (!boardName)
+                    return;
+                var newPostCount = getNewPostCount(boardName);
                 if (!newPostCount)
                     return;
-                var span = lord.node("span");
-                $(span).addClass("newPostCount");
-                span.appendChild(lord.node("text", "+" + newPostCount));
                 var parent = a.parentNode;
+                var span = lord.queryOne(".newPostCount", parent);
+                if (span)
+                    $(span).remove();
+                span = lord.node("span");
+                $(span).addClass("newPostCount");
+                span.appendChild(lord.node("text", "+" + newPostCount + " "));
                 parent.insertBefore(span, a);
-                parent.insertBefore(lord.node("text", " "), a);
             });
         });
         if (lord.deviceType("mobile")) {
             lord.queryAll(".boardSelect").forEach(function(sel) {
                 lord.queryAll("option", sel).forEach(function(opt) {
-                    var newPostCount = getNewPostCount(lord.data("boardName", opt));
+                    var boardName = lord.data("boardName", opt);
+                    if (!boardName)
+                        return;
+                    var newPostCount = getNewPostCount(boardName);
                     if (!newPostCount)
                         return;
-                    opt.insertBefore(lord.node("text", "+" + newPostCount + " "), opt.childNodes[0]);
+                    var span = lord.queryOne(".newPostCount", opt);
+                    if (span)
+                        $(span).remove();
+                    span = lord.node("span");
+                    $(span).addClass("newPostCount");
+                    span.appendChild(lord.node("text", "+" + newPostCount + " "));
+                    opt.insertBefore(span, opt.childNodes[0]);
                 });
             });
         } else {
@@ -1466,7 +1480,11 @@ lord.showNewPosts = function() {
         if (typeof result[currentBoardName] == "number")
             lastPostNumbers[currentBoardName] = result[currentBoardName];
         lord.setLocalObject("lastPostNumbers", lastPostNumbers);
-    }).catch(lord.handleError);
+        setTimeout(lord.showNewPosts.bind(lord), 15 * lord.Second);
+    }).catch(function(err) {
+        lord.handleError(err);
+        setTimeout(lord.showNewPosts.bind(lord), 30 * lord.Second);
+    });
 };
 
 lord.editHotkeys = function() {
