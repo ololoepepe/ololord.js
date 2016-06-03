@@ -1769,6 +1769,9 @@ if (lord.getLocalObject("useWebSockets", true)) {
                 return;
         }
         list.push(message);
+        list.sort(function(m1, m2) {
+            return m1.localeCompare(m2);
+        });
         lord.setLocalObject("chats", chats);
         lord.updateChat([key]);
     };
@@ -1801,6 +1804,9 @@ lord.checkChats = function() {
                 }
                 list.push(message);
                 any = true;
+            });
+            list.sort(function(m1, m2) {
+                return m1.localeCompare(m2);
             });
             if (any)
                 keys.push(key);
