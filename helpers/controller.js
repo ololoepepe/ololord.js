@@ -76,11 +76,15 @@ var controller = function(templateName, modelData) {
     if (!template)
         return Promise.reject(Tools.translate("Invalid template"));
     modelData = merge.recursive(baseModelData, modelData);
+    var extraScriptsGlobal = config("site.extraScripts._global");
     var extraScripts = config(`site.extraScripts.${templateName}`);
-    if (extraScripts) {
+    if (extraScripts || extraScriptsGlobal) {
         if (!modelData.extraScripts)
             modelData.extraScripts = [];
-        modelData.extraScripts = modelData.extraScripts.concat(extraScripts);
+        if (extraScriptsGlobal)
+            modelData.extraScripts = modelData.extraScripts.concat(extraScriptsGlobal);
+        if (extraScripts)
+            modelData.extraScripts = modelData.extraScripts.concat(extraScripts);
     }
     return Promise.resolve(template(modelData));
 };
