@@ -47,6 +47,7 @@ lord._defineHotkey("markupCode", "Alt+C");
 
 lord.chatDialog = null;
 lord.lastChatCheckDate = lord.getLocalObject("lastChatCheckDate", null);
+lord.lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
 lord.notificationQueue = [];
 lord.pageProcessors = [];
 lord.postProcessors = [];
@@ -1410,13 +1411,12 @@ lord.checkFavoriteThreads = function() {
 };
 
 lord.showNewPosts = function() {
-    var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
     var currentBoardName = lord.data("boardName");
     lord.api("lastPostNumbers").then(function(result) {
         var getNewPostCount = function(boardName) {
             if (!boardName || currentBoardName == boardName || !result[boardName])
                 return 0;
-            var lastPostNumber = lastPostNumbers[boardName];
+            var lastPostNumber = lord.lastPostNumbers[boardName];
             if (!lastPostNumber)
                 return 0;
             var newPostCount = result[boardName] - lastPostNumber;
@@ -1473,13 +1473,13 @@ lord.showNewPosts = function() {
             lord.adjustContentPadding();
         }
         lord.each(result, function(lastPostNumber, boardName) {
-            if (lastPostNumbers[boardName])
+            if (lord.lastPostNumbers[boardName])
                 return;
-            lastPostNumbers[boardName] = lastPostNumber;
+            lord.lastPostNumbers[boardName] = lastPostNumber;
         });
         if (typeof result[currentBoardName] == "number")
-            lastPostNumbers[currentBoardName] = result[currentBoardName];
-        lord.setLocalObject("lastPostNumbers", lastPostNumbers);
+            lord.lastPostNumbers[currentBoardName] = result[currentBoardName];
+        lord.setLocalObject("lastPostNumbers", lord.lastPostNumbers);
         setTimeout(lord.showNewPosts.bind(lord), 15 * lord.Second);
     }).catch(function(err) {
         lord.handleError(err);
