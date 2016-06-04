@@ -233,7 +233,7 @@ lord.initFileTree = function() {
     }).on("filetreeclicked", function(e, data) {
         $(".fileActions > button").button("enable");
         lord.currentFile = data.rel;
-        var TEXT_FORMATS = ["txt", "js", "json", "jst", "html", "xml", "md", "example", "gitignore"];
+        var TEXT_FORMATS = ["txt", "js", "json", "jst", "html", "xml", "css", "md", "example", "gitignore"];
         if (TEXT_FORMATS.indexOf(lord.currentFile.split(".").pop()) < 0)
             $("#editFile").button("disable");
         var lbl = lord.id("currentFileLabel");
