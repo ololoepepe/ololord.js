@@ -176,7 +176,7 @@ lord.styleSelectors = {
             }
         ]
     },
-    ".post:target, .opPost:target, .postFile:target > .postFileName, .postFile:target > .postFileSize, .postFile:target > .postFileSearch, .postFile:target > .postFileFile": {
+    ".post:target, .opPost:target": {
         "background-color": {
             enabledSelector: "#postTargetedBackgroundColorEnabled",
             selector: "#postTargetedBackgroundColor",
