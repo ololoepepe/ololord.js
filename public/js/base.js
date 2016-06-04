@@ -1479,7 +1479,12 @@ lord.showNewPosts = function() {
         });
         if (typeof result[currentBoardName] == "number")
             lord.lastPostNumbers[currentBoardName] = result[currentBoardName];
-        lord.setLocalObject("lastPostNumbers", lord.lastPostNumbers);
+        var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
+        lord.each(lord.lastPostNumbers, function(n, boardName) {
+            if (!lastPostNumbers[boardName] || lastPostNumbers[boardName] < n)
+                lastPostNumbers[boardName] = n;
+        });
+        lord.setLocalObject("lastPostNumbers", lastPostNumbers);
         setTimeout(lord.showNewPosts.bind(lord), 15 * lord.Second);
     }).catch(function(err) {
         lord.handleError(err);
