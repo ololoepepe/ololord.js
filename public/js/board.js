@@ -3392,8 +3392,12 @@ lord.scrollHandler = function() {
     var k = 1300;
     var top = ((window.innerHeight + window.scrollY + k) >= lord.id("content").scrollHeight);
     var bottom = (window.scrollY <= k);
-    lord.queryOne(".navigationButtonTop").style.display = bottom ? "none" : "";
-    lord.queryOne(".navigationButtonBottom").style.display = top ? "none" : "";
+    var nbTop = lord.queryOne(".navigationButtonTop");
+    if (nbTop)
+        nbTop.style.display = bottom ? "none" : "";
+    var nbBottom = lord.queryOne(".navigationButtonBottom");
+    if (nbBottom)
+        nbBottom.style.display = top ? "none" : "";
 };
 
 lord.addVisibilityChangeListener = function(callback) {
