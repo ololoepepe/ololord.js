@@ -48,7 +48,7 @@ var controller = function(templateName, modelData) {
         if (!noEmbed && config("system.embedScripts", true)) {
             try {
                 var data = FSSync.readFileSync(__dirname + "/../public/js/" + name, "utf8");
-                return `<script type="text/javascript">${data}</script>`;
+                return `<script type="text/javascript">${data.split("</script>").join("</scr'+'ipt>")}</script>`;
             } catch (err) {
                 console.error(err);
                 return "";
@@ -76,11 +76,15 @@ var controller = function(templateName, modelData) {
     if (!template)
         return Promise.reject(Tools.translate("Invalid template"));
     modelData = merge.recursive(baseModelData, modelData);
+    var extraScriptsGlobal = config("site.extraScripts._global");
     var extraScripts = config(`site.extraScripts.${templateName}`);
-    if (extraScripts) {
+    if (extraScripts || extraScriptsGlobal) {
         if (!modelData.extraScripts)
             modelData.extraScripts = [];
-        modelData.extraScripts = modelData.extraScripts.concat(extraScripts);
+        if (extraScriptsGlobal)
+            modelData.extraScripts = modelData.extraScripts.concat(extraScriptsGlobal);
+        if (extraScripts)
+            modelData.extraScripts = modelData.extraScripts.concat(extraScripts);
     }
     return Promise.resolve(template(modelData));
 };
@@ -128,9 +132,6 @@ controller.checkBan = function(req, res, boardNames, write) {
 
 controller.baseModel = function() {
     return {
-        server: {
-            uptime: process.uptime()
-        },
         site: {
             protocol: config("site.protocol", "http"),
             domain: config("site.domain", "localhost:8080"),
@@ -144,6 +145,9 @@ controller.baseModel = function() {
             },
             twitter: {
                 integrationEnabled: !!config("site.twitter.integrationEnabled", true)
+            },
+            ws: {
+                transports: config("site.ws.transports", "")
             }
         },
         styles: Tools.styles(),
@@ -496,12 +500,13 @@ controller.generateStatistics = function() {
         o.total.postingSpeed = controller.postingSpeedString(brd, o.total.postCount);
         return Global.IPC.send("getConnectionIPs");
     }).then(function(data) {
-        o.online = Object.keys(data.reduce(function(acc, ips) {
+        o.online = data.reduce(function(acc, ips) {
             Tools.forIn(ips, function(_, ip) {
-                acc[ip] = 1;
+                acc.add(ip);
             });
             return acc;
-        }, {})).length;
+        }, new Set()).size;
+        o.uptime = process.uptime();
     }).catch(function(err) {
         Global.error(err);
         return Promise.resolve();

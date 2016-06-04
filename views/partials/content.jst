@@ -1,0 +1,11 @@
+<script type="text/javascript">
+    (function() {
+        var s = '<div id="content"';
+        if (!lord.deviceType("mobile") && lord.getLocalObject("sidebarVisible", true))
+            s += ' style="left: 208px; width: calc(100% - 216px);"';
+        s += '>';
+        document.open();
+        document.write(s);
+        document.close();
+    })();
+</script>

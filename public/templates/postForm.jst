@@ -1,6 +1,19 @@
 <form id="postForm" method="post" accept-charset="utf-8" enctype="multipart/form-data"
       action="/{{=it.site.pathPrefix}}action/{{? it.thread}}createPost{{??}}createThread{{?}}"
       onsubmit="lord.submitted(event, this); return false;">
+    {{? "mobile" != it.deviceType}}
+        <div class="postFormHeader" ondragstart="lord.makeFormFloat(event);" draggable="true">
+            <span class="postFormHeaderLabel">{{=it.tr.postFormHeaderLabelText}}</span>
+            <div class="postFormHeaderButtons">
+                <a name="fixPostFormButton" href="javascript:void(0);" title="{{=it.tr.postFormFixedButtonText}}"
+                   onclick="lord.setPostFormFixed(); return false;">
+                    <img src="/{{=it.site.pathPrefix}}img/fixed.png" class="buttonImage" /></a>
+                <a name="closePostFormButton" href="javascript:void(0);" title="{{=it.tr.closePostFormButtonText}}"
+                   onclick="lord.closePostForm(); return false;">
+                    <img src="/{{=it.site.pathPrefix}}img/clear.png" class="buttonImage" /></a>
+            </div>
+        </div>
+    {{?}}
     <input type="hidden" name="boardName" value="{{=it.board.name}}" />
     {{? it.thread}}
         <input type="hidden" name="threadNumber" value="{{=it.thread.number}}" />

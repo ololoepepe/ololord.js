@@ -20,6 +20,7 @@
     {{ out += it.script("3rdparty/doT.min.js"); }}
     {{ out += it.script("3rdparty/underscore-min.js"); }}
     {{ out += it.script("api.js"); }}
+    {{ out += it.script("3rdparty/xregexp-all.min.js"); }}
     {{ out += it.script("3rdparty/merge.min.js"); }}
     {{ out += it.script("3rdparty/uuid.js"); }}
     {{ out += it.script("3rdparty/moment-with-locales.min.js"); }}
@@ -27,7 +28,8 @@
     {{ out += it.script("3rdparty/jszip-utils.min.js"); }}
     {{ out += it.script("3rdparty/FileSaver.min.js"); }}
     {{ out += it.script("3rdparty/mobile-detect.min.js"); }}
-    <script id="model-base" type="application/json"></script>
+    {{ out += it.script("3rdparty/sockjs-1.1.0.min.js"); }}
+    <script id="model-base" type="application/json">{{=it.models.base}}</script>
     <script id="model-boards" type="application/json">{{=it.models.boards}}</script>
     <script id="model-tr" type="application/json">{{=it.models.tr}}</script>
     <script id="model-partials" type="application/json">{{=it.models.partials}}</script>
@@ -44,12 +46,23 @@
         lord.templates = {};
 
         (function() {
-            var baseModelHtml = lord.get("/{{=it.site.pathPrefix}}misc/base.json") || "";
             ["base", "boards", "tr", "partials", "templates"].forEach(function(modelName) {
-                var isBase = ("base" == modelName);
-                var html = isBase ? baseModelHtml : lord.id("model-" + modelName).innerHTML;
+                var html = lord.id("model-" + modelName).innerHTML;
                 lord.models[modelName] = JSON.parse(html);
-                if (isBase) {
+                if ("base" == modelName) {
+                    var levels = {};
+                    try {
+                        levels = JSON.parse(lord.getCookie("tmp_levels"));
+                    } catch (ex) {
+                        levels = {};
+                    }
+                    var hashpass = lord.getCookie("hashpass");
+                    lord.models[modelName].user = {
+                        ip: lord.getCookie("tmp_ip"),
+                        levels: levels,
+                        hashpass: hashpass,
+                        loggedIn: !!hashpass
+                    };
                     var deviceTypes = {
                         desktop: {},
                         mobile: {}
@@ -154,7 +167,8 @@
             s += '</style>';
             if (lord.getLocalObject("mumWatching", false)) {
                 document.write('<style id="mumWatchingStylesheet" type="text/css">'
-                    + '.postFileFile > a > img:not(:hover), .banner > a > img:not(:hover) { opacity: 0.05 !important; }'
+                    + '.postFileFile > a > img:not(:hover), .banner > a > img:not(:hover), '
+                    + '.hideIfMumWatching:not(:hover) { opacity: 0.05 !important; }'
                     + '</style>');
             }
             var appendScript = function(path) {
@@ -180,7 +194,38 @@
             document.write(s);
             document.close();
             lord.createStylesheetLink("3rdparty/highlight.js/" + settings.codeStyle.name + ".css", true);
-            lord.createStylesheetLink("3rdparty/jquery-ui/" + settings.style.name + "/jquery-ui.min.css", true);
+            {{? it.isBoardPage}}
+                var style = lord.node("style");
+                style.id = "postBodySize";
+                style.type = "text/css";
+                var m = lord.deviceType("mobile") ? 0 : 270;
+                var k = lord.deviceType("mobile") ? 0 : 30;
+                var z = (!lord.deviceType("mobile") && lord.getLocalObject("sidebarVisible", true)) ? 178 : 0;
+                var css = ".postBody { max-width: " + ($(window).width() - (30 + z)) + "px; }";
+                css += ".postFile ~ .postText > blockquote, .blockLatex, .codeBlock { max-width: " + ($(window).width() - (30 + k + m + z)) + "px; }";
+                if (style.styleSheet)
+                    style.styleSheet.cssText = css;
+                else
+                    style.appendChild(lord.node("text", css));
+                document.head.appendChild(style);
+                css = "";
+                lord.each(lord.getLocalObject("hiddenPosts", {}), function(val, key) {
+                    if (key.split("/").shift() != "{{=it.board.name}}" || !val)
+                        return;
+                    var pn = key.split("/").pop();
+                    css += '[data-number="' + pn + '"] > .postBody { display: none; }\n';
+                    css += '#thread' + pn + ' > .omittedPosts { display: none; }\n';
+                    css += '#thread' + pn + ' > .threadPosts { display: none; }\n';
+                });
+                style = lord.node("style");
+                style.id = "tmpHiddenPosts";
+                style.type = "text/css";
+                if (style.styleSheet)
+                    style.styleSheet.cssText = css;
+                else
+                    style.appendChild(lord.node("text", css));
+                lord.queryOne("head").appendChild(style);
+            {{?}}
             if (settings.userCssEnabled) {
                 var css = lord.getLocalObject("userCss", "");
                 var style = lord.node("style");

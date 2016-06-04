@@ -4,6 +4,7 @@ var express = require("express");
 
 var config = require("../helpers/config");
 var Global = require("../helpers/global");
+var OnlineCounter = require("../helpers/online-counter");
 var Tools = require("../helpers/tools");
 
 var excludePaths = {};
@@ -75,6 +76,10 @@ if (config("system.log.middleware.before", "all") == "all")
     module.exports.push(log);
 
 module.exports.push(require("./ip-fix"));
+module.exports.push(function(req, res, next) {
+    OnlineCounter.alive(req.ip);
+    next();
+});
 
 var setupDdos = function() {
     if (config("system.log.middleware.before", "all") == "ddos")
@@ -151,9 +156,14 @@ if (config("system.log.middleware.before", "all") == "middleware")
 
 module.exports = module.exports.concat([
     cookieParser(),
-    require("./cookies"),
+    function(req, res, next) {
+        req.hashpass = Tools.hashpass(req);
+        next();
+    },
     require("./registered-user")
 ]);
 
 if (config("system.log.middleware.before", "all") == "request")
     module.exports.push(log);
+
+module.exports.push(require("./cookies"));

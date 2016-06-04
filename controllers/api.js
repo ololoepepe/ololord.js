@@ -116,9 +116,7 @@ router.get("/api/lastPostNumbers.json", function(req, res, next) {
         boardNames = [boardNames];
     if (!boardNames)
         boardNames = Board.boardNames();
-    controller.checkBan(req, res, boardNames).then(function() {
-        return boardModel.getLastPostNumbers(boardNames);
-    }).then(function(lastPostNumbers) {
+    boardModel.getLastPostNumbers(boardNames).then(function(lastPostNumbers) {
         var r = {};
         lastPostNumbers.forEach(function(lastPostNumber, i) {
             r[boardNames[i]] = lastPostNumber;
@@ -132,9 +130,7 @@ router.get("/api/lastPostNumbers.json", function(req, res, next) {
 router.get("/api/lastPostNumber.json", function(req, res, next) {
     if (!req.query.boardName)
         return next(Tools.translate("Invalid board"));
-    controller.checkBan(req, res, req.query.boardName).then(function() {
-        return boardModel.getLastPostNumbers([req.query.boardName]);
-    }).then(function(lastPostNumbers) {
+    boardModel.getLastPostNumbers([req.query.boardName]).then(function(lastPostNumbers) {
         res.json({ lastPostNumber: lastPostNumbers[0] });
     }).catch(function(err) {
         next(err);
@@ -309,7 +305,10 @@ router.get("/api/fileHeaders.json", function(req, res, next) {
 });
 
 router.get("/api/chatMessages.json", function(req, res, next) {
-    Chat.getMessages(req, req.query.lastRequestDate).then(function(result) {
+    Chat.getMessages({
+        ip: req.ip,
+        hashpass: req.hashpass
+    }, req.query.lastRequestDate).then(function(result) {
         res.json(result);
     }).catch(function(err) {
         next(err);
@@ -360,7 +359,9 @@ router.get("/api/fileTree.json", function(req, res, next) {
 router.get("/api/fileContent.json", function(req, res, next) {
     if (!req.isSuperuser())
         return next(Tools.translate("Not enough rights"));
-    return FS.read(__dirname + "/../" + req.query.fileName).then(function(content) {
+    const TEXT_FORMATS = ["txt", "js", "json", "jst", "html", "xml", "css", "md", "example", "gitignore"];
+    var encoding = (TEXT_FORMATS.indexOf((req.query.fileName || "").split(".").pop()) < 0) ? "b" : undefined;
+    return FS.read(__dirname + "/../" + req.query.fileName, encoding).then(function(content) {
         res.json({ content: content });
     }).catch(function(err) {
         if ("ENOENT" == err.code)

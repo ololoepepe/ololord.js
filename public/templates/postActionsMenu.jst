@@ -42,6 +42,14 @@
             <img src="/{{=it.site.pathPrefix}}img/{{? it.post.hidden}}show{{??}}hide{{?}}.png" class="signImage" />
             {{? it.post.hidden}}{{=it.tr.showPostText}}{{??}}{{=it.tr.hidePostText}}{{?}}{{? it.hideActionShortcut}} ({{=it.hideActionShortcut}}){{?}}</a>
     </li>
+    {{? !it.post.hidden && it.post.rawText}}
+        <li>
+            <a name="hideSimilarPostsButton" href="javascript:void(0);"
+               onclick="lord.hideSimilarPosts(this); return false;">
+                <img src="/{{=it.site.pathPrefix}}img/similar.png" class="signImage" />
+                {{=it.tr.hideSimilarPostsText}}</a>
+        </li>
+    {{?}}
     {{? it.customPostMenuAction && it.customPostMenuAction[50]}}
         {{ out += it.customPostMenuAction[50](it, it.thread, it.post); }}
     {{?}}

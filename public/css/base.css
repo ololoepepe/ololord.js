@@ -10,6 +10,10 @@
     width: 8px !important;
 }
 
+body {
+    margin: 0px;
+}
+
 header {
     padding-top: 2px;
     padding-bottom: 8px;
@@ -20,12 +24,20 @@ footer {
     padding-bottom: 2px;
 }
 
-.spoiler > span[data-video-id] > img {
-    visibility: hidden;
+.spoiler * {
+    opacity: 0;
 }
 
-.spoiler:hover > span[data-video-id] > img {
-    visibility: visible;
+.spoiler:hover * {
+    opacity: 1;
+}
+
+.spoiler:hover .spoiler {
+    opacity: 0;
+}
+
+.spoiler:hover .spoiler:hover {
+    opacity: 1;
 }
 
 a.expandCollapse {
@@ -173,10 +185,16 @@ blockquote.expand {
 
 .spoilerMarkupButton {
     border: none;
-    height: 20px;
+    display: inline-block;
+    height: 22px;
     vertical-align: middle;
     padding-left: 0px;
     padding-right: 0px;
+    opacity: 0.65;
+}
+
+.spoilerMarkupButton:hover {
+    opacity: 1;
 }
 
 span.tooltip {
@@ -225,6 +243,10 @@ span.newPostCount {
 
 .cspoilerTitle {
     cursor: pointer;
+}
+
+.cspoilerBody {
+    padding: 4px;
 }
 
 .catalogContainer {
@@ -410,10 +432,6 @@ span.newPostCount {
     display: none;
 }
 
-.opPost.hidden ~ .post {
-    display: none;
-}
-
 .post.temporary {
     display: block;
     box-sizing: border-box;
@@ -534,9 +552,6 @@ span.newPostCount {
 .leafButton {
     position: fixed;
     height: 32px;
-    top: -moz-calc(50% - 16px);
-    top: -webkit-calc(50% - 16px);
-    top: -o-calc(50% - 16px);
     top: calc(50% - 16px);
     z-index: 9910;
     opacity: 0.5;
@@ -625,14 +640,17 @@ ul.tabWidget > li > a {
 
 .searchAction {
     display: block;
-    margin-left: auto;
-    margin-right: auto;
+    position: fixed;
+    right: 0px;
+    width: 100%;
     text-align: right;
 }
 
 .searchAction > form {
     display: inline-block;
     position: relative;
+    padding-top: 4px;
+    padding-right: 4px;
 }
 
 .searchActionInputContainer {
@@ -640,7 +658,7 @@ ul.tabWidget > li > a {
 }
 
 .searchActionOptionsContainer {
-    margin-top: 4px;
+    margin-top: 0px;
     margin-left: 8px;
     padding: 4px;
     text-align: left;
@@ -654,15 +672,15 @@ ul.tabWidget > li > a {
     overflow-x: auto;
     font-size: 1.2em;
     position: relative;
-    top: -8px;
+    top: 0px;
+    left: 0px;
     z-index: 1;
 }
 
 .toolbar.sticky {
     position: fixed;
-    top: 0px;
-    width: 99%;
-    padding-bottom: 0px;
+    width: 100%;
+    padding-bottom: 2px;
 }
 
 .navbarBoardGroup {
@@ -732,6 +750,7 @@ blockquote.blockquoteThread.expand {
 
 .vote {
     display: table;
+    padding: 4px;
 }
 
 #recaptcha_image_cell {
@@ -859,11 +878,11 @@ input.buttonImage {
 
 .chatContact {
     cursor: pointer;
+    padding: 2px 4px 2px 4px;
 }
 
 .chatContact > input[type="image"] {
     float: right;
-    margin-top: 2px;
 }
 
 .chatContact ~ .chatContact {
@@ -904,17 +923,11 @@ input.buttonImage {
 
 .chatInput {
     box-sizing: border-box;
-    width: -moz-calc(100% - 4px);
-    width: -webkit-calc(100% - 4px);
-    width: -o-calc(100% - 4px);
     width: calc(100% - 4px);
 }
 
 .chatSendButton {
     box-sizing: border-box;
-    width: -moz-calc(100% - 4px);
-    width: -webkit-calc(100% - 4px);
-    width: -o-calc(100% - 4px);
     width: calc(100% - 4px);
 }
 
@@ -1292,7 +1305,6 @@ div.ui-widget-content.ui-dialog-content.checkerboardBackground {
     margin-bottom: 0px;
     padding-top: 8px;
     padding-bottom: 0px;
-    max-width: 100%;
     overflow-x: auto;
 }
 
@@ -1328,4 +1340,103 @@ input.buttonImage {
 
 .archiveThreads {
     text-align: center;
+}
+
+.toolbar > [name="sidebarButton"] {
+    position: absolute;
+    left: 4px;
+    top: 3px;
+}
+
+#sidebarButtonPlaceholder {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 4px;
+    margin-top: 3px;
+    width: 20px;
+    height: 20px;
+    visibility: none;
+}
+
+#sidebar {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 200px;
+    height: 100%;
+}
+
+#sidebar > [name="sidebarButton"] {
+    position: absolute;
+    left: 4px;
+    top: 3px;
+}
+
+#sidebarButtons {
+    position: absolute;
+    right: 4px;
+    top: 0px;
+    font-size: 1.2em;
+}
+
+#sidebarContent {
+    position: absolute;
+    left: 0px;
+    width: calc(100% - 8px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 8px;
+    padding-left: 4px;
+    padding-right: 4px;
+    top: 25px;
+    height: (100% - 67px);
+}
+
+#sidebarContent hr {
+    margin-left: 2px;
+    width: 180px;
+}
+
+#sidebarFooter {
+    position: absolute;
+    left: 4px;
+    bottom: 4px;
+    width: calc(100% - 8px);
+}
+
+#sidebarFooter > select {
+    width: calc(100%);
+}
+
+#content {
+    position: absolute;
+    top: 0px;
+    left: 8px;
+    height: 100%;
+    width: calc(100% - 16px);
+}
+
+.bannedUserHeader {
+    font-weight: bold;
+}
+
+.registeredUserHeader {
+    font-weight: bold;
+}
+
+.delallHeader {
+    font-weight: bold;
+}
+
+.sidebarGroup ~ .sidebarGroup {
+    margin-top: 4px;
+}
+
+.sidebarGroupBody {
+    padding: 4px;
+}
+
+.sidebarGroupTitle {
+    font-weight: bold;
+    padding: 2px 4px 2px 4px;
 }

@@ -1304,6 +1304,7 @@ lord.settings = function() {
         style: { name: lord.getLocalObject("style", "photon") },
         codeStyle: { name: lord.getLocalObject("codeStyle", "default") },
         shrinkPosts: lord.getLocalObject("shrinkPosts", true),
+        useWebSockets: lord.getLocalObject("useWebSockets", true),
         markupMode: lord.getLocalObject("markupMode", "EXTENDED_WAKABA_MARK,BB_CODE"),
         stickyToolbar: lord.getLocalObject("stickyToolbar", true),
         maxAllowedRating: lord.getLocalObject("maxAllowedRating", "R-18G"),
@@ -1487,14 +1488,6 @@ lord.series = function(arr, f, container) {
     });
 };
 
-lord.inIframe = function() {
-    try {
-        return window.self !== window.top;
-    } catch (e) {
-        return true;
-    }
-};
-
 lord.prompt = function(options) {
     var div = lord.node("div");
     if (options && options.label) {
@@ -1543,4 +1536,66 @@ lord.prompt = function(options) {
             value: inp.value
         });
     });
+};
+
+lord.detectSwipe = function(el, callback) {
+    if (typeof callback != "function")
+        return;
+    (function() {
+        var touches = {};
+        if (typeof el == "string")
+            el = lord.queryOne(el);
+        else if (el.selector)
+            el = el[0];
+        else if (typeof el != "object")
+            return;
+        el.addEventListener("touchstart", function(e) {
+            lord.toArray(e.changedTouches).forEach(function(t) {
+                if (!touches[t.identifier]) {
+                    touches[t.identifier] = {
+                        touchstartX: t.pageX,
+                        touchstartY: t.pageY,
+                        touchendX: t.pageX,
+                        touchendY: t.pageY
+                    };
+                }
+            });
+        }, false);
+        el.addEventListener("touchend", function(e) {
+            lord.toArray(e.changedTouches).forEach(function(t) {
+                if (!touches[t.identifier])
+                    return;
+                var tt = touches[t.identifier];
+                tt.touchendX = t.pageX;
+                tt.touchendY = t.pageY;
+                var types = [];
+                if (tt.touchendX < tt.touchstartX)
+                    types.push("swipeleft");
+                if (tt.touchendX > tt.touchstartX)
+                    types.push("swiperight");
+                if (tt.touchendY > tt.touchstartY)
+                    types.push("swipedown");
+                if (tt.touchendY < tt.touchstartY)
+                    types.push("swipeup");
+                if (tt.touchendX == tt.touchstartX && tt.touchendY == tt.touchstartY)
+                    types.push("tap");
+                callback({
+                    startX: tt.touchstartX,
+                    startY: tt.touchstartY,
+                    endX: tt.touchendX,
+                    endY: tt.touchendY,
+                    distanceX: tt.touchendX - tt.touchstartX,
+                    distanceY: tt.touchendY - tt.touchstartY,
+                    types: types
+                });
+                delete touches[t.identifier];
+            });
+        }, false);
+    })();
+};
+
+lord.getWords = function(text) {
+    if (typeof text != "string")
+        return [];
+    return text.replace(/\s+/g, " ").replace(new XRegExp("[^\\p{L} ]", "gi"), "").trim().substring(0, 800).split(" ");
 };

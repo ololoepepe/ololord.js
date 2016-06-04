@@ -95,6 +95,12 @@
                 </tr>
                 <tr>
                     <td colspan="2">
+                        <input type="checkbox" name="useWebSockets" value="true"
+                               {{? it.settings.useWebSockets}}checked="true"{{?}} /><label>{{=it.tr.useWebSocketsLabelText}}</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
                         <input type="checkbox" name="shrinkPosts" value="true"
                                {{? it.settings.shrinkPosts}}checked="true"{{?}} /><label>{{=it.tr.postShrinkingLabelText}}</label>
                         <input type="checkbox" name="stickyToolbar" value="true"

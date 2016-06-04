@@ -2,14 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
 <body {{#def.baseData}} data-sort-mode="{{=it.sortMode}}">
-{{~["top", "bottom"] :target}}
-    {{#def.navigationButton}}
-{{~}}
+{{#def.sidebar}}
+{{#def.content}}
 <a id="top"></a>
 {{#def.toolbar}}
-{{#def.player}}
 {{#def.customHeader}}
-{{#def.searchAction}}
 {{#def.banner}}
 <div class="theTitle">
     <h1>
@@ -68,5 +65,11 @@
 {{#def.postingSpeed}}
 <a id="bottom"></a>
 {{#def.customFooter}}
+{{#def.searchAction}}
+{{#def.player}}
+{{~["top", "bottom"] :target}}
+    {{#def.navigationButton}}
+{{~}}
+</div>
 </body>
 </html>

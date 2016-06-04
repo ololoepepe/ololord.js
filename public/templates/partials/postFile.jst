@@ -6,6 +6,7 @@
     data-size-text="{{=fileInfo.sizeText}}"
     data-width="{{ out += fileInfo.dimensions ? fileInfo.dimensions.width : 0; }}"
     data-height="{{ out += fileInfo.dimensions ? fileInfo.dimensions.height : 0; }}"
+    data-rating="{{=fileInfo.rating}}"
     {{? fileInfo.ihash}}data-ihash="{{=fileInfo.ihash}}"{{?}}
     {{? ("application/ogg" == fileInfo.mimeType || fileInfo.mimeType.substr(0, 6) == "audio/") && fileInfo.extraData}}
         {{? fileInfo.extraData.duration}}data-duration="{{=fileInfo.extraData.duration}}"{{?}}
@@ -25,9 +26,11 @@
         ({{=fileInfo.sizeText}})
     </div>
     <div class="postFileSearch">
-        <a href="javascript:void(0);" name="deleteFileButton" target="_blank"
-           onclick="lord.deleteFile(this); return false;">
+        <a href="javascript:void(0);" name="deleteFileButton" onclick="lord.deleteFile(this); return false;">
            <img src="/{{=it.site.pathPrefix}}img/delete.png" title="{{=it.tr.deleteFileText}}"
+                class="buttonImage" /></a>
+        <a href="javascript:void(0);" name="editFileRatingButton" onclick="lord.editFileRating(this); return false;">
+           <img src="/{{=it.site.pathPrefix}}img/shield.png" title="{{=it.tr.editFileRatingText}}"
                 class="buttonImage" /></a>
         {{? fileInfo.mimeType.substr(0, 6) == "image/"}}
             <input type="image" src="/{{=it.site.pathPrefix}}img/hide.png" class="buttonImage"
@@ -38,7 +41,7 @@
                     <a href="javascript:void(0);"
                        onclick="lord.hideByImage(this, false);">{{=it.tr.hideByImageSizeText}}</a>
                 </li>
-                {{? fileInfo.ihash && "0" != fileInfo.ihash && "image/gif" != fileInfo.mimeType}}
+                {{? fileInfo.ihash && "0" != fileInfo.ihash}}
                     <li class="nowrap">
                         <a href="javascript:void(0);"
                            onclick="lord.hideByImage(this, true);">{{=it.tr.hideByImageHashText}}</a>

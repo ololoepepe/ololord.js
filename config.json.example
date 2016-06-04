@@ -108,7 +108,11 @@ Example:
                 }
             ],
             "static": false,
-            "weight": 1
+            "weight": 1,
+            "ws": {
+                "connectionLimit": 20,
+                "maxMessageLength": 20480
+            }
         },
         "port": 8080,
         "rss": {
@@ -139,6 +143,9 @@ Example:
             "integrationEnabled": false,
             "appId": "Your VK app ID",
             "accessToken": "Your VK access token"
+        },
+        "ws": {
+            "transports": "websocket"
         }
     },
     "system": {
@@ -147,6 +154,7 @@ Example:
         },
         "embedScripts": true,
         "embedStylesheets": true,
+        "fastIPRetrieving": false,
         "fileDownloadProxy": "",
         "fileDownloadProxyAuth": "",
         "log": {
@@ -167,6 +175,10 @@ Example:
                 "console",
                 "file"
             ]
+        },
+        "onlineCounter": {
+            "interval": 60000,
+            "quota": 300000
         },
         "phash": {
             "enabled": true

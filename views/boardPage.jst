@@ -3,26 +3,11 @@
 {{#def.head}}
 <body {{#def.baseData}} data-current-page="{{=it.currentPage}}" data-page-count="{{=it.pageCount}}">
 <script id="model-postformRules" type="application/json">{{ out += JSON.stringify(it.postformRules); }}</script>
-{{? it.site.vkontakte.integrationEnabled }}
-    <script type="text/javascript">
-        VK.init({ apiId: {{=it.site.vkontakte.appId}} });
-    </script>
-{{?}}
-<div id="hiddenPostForm" style="display: none;"></div>
-{{? it.board.captchaEnabled}}
-    <div id="hiddenCaptcha" style="display: none;"></div>
-{{?}}
-{{~["top", "bottom"] :target}}
-    {{#def.navigationButton}}
-{{~}}
-{{~["previous", "next"] :target}}
-    {{#def.leafButton}}
-{{~}}
+{{#def.sidebar}}
+{{#def.content}}
 <a id="top"></a>
 {{#def.toolbar}}
-{{#def.player}}
 {{#def.customHeader}}
-{{#def.searchAction}}
 {{#def.banner}}
 <div class="theTitle">
     <h1>
@@ -56,7 +41,7 @@
             {{~}}
             {{? thread.omittedPosts > 0}}
                 <div class="omittedPosts">
-                    {{=it.tr.omittedPostsText}} {{=thread.omittedPosts}}   
+                    {{=it.tr.omittedPostsText}} {{=thread.omittedPosts}}
                 </div>
             {{?}}
             <div class="threadPosts">
@@ -145,5 +130,23 @@
 {{#def.postingSpeed}}
 <a id="bottom"></a>
 {{#def.customFooter}}
+{{#def.searchAction}}
+{{#def.player}}
+{{~["top", "bottom"] :target}}
+    {{#def.navigationButton}}
+{{~}}
+{{~["previous", "next"] :target}}
+    {{#def.leafButton}}
+{{~}}
+<div id="hiddenPostForm" style="display: none;"></div>
+{{? it.board.captchaEnabled}}
+    <div id="hiddenCaptcha" style="display: none;"></div>
+{{?}}
+{{? it.site.vkontakte.integrationEnabled }}
+    <script type="text/javascript">
+        VK.init({ apiId: {{=it.site.vkontakte.appId}} });
+    </script>
+{{?}}
+</div>
 </body>
 </html>

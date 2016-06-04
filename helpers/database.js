@@ -1,6 +1,7 @@
 var Address4 = require("ip-address").Address4;
 var Address6 = require("ip-address").Address6;
 var bigInt = require("big-integer");
+var cluster = require("cluster");
 var Crypto = require("crypto");
 var Elasticsearch = require("elasticsearch");
 var FS = require("q-io/fs");
@@ -28,18 +29,62 @@ var Ratings = {};
 var RegisteredUserLevels = {};
 var BanLevels = {};
 
-var db = new Redis({
-    port: config("system.redis.port", 6379),
-    host: config("system.redis.host", "127.0.0.1"),
-    family: config("system.redis.family", 4),
-    password: config("system.redis.password", ""),
-    db: config("system.redis.db", 0)
-});
+var createRedisClient = function() {
+    var redisNodes = config("system.redis.nodes");
+    if (Util.isArray(redisNodes) && redisNodes.length > 0) {
+        return new Redis.Cluster(redisNodes, {
+            clusterRetryStrategy: config("system.redis.clusterRetryStrategy", function(times) {
+                return Math.min(100 + times * 2, 2000);
+            }),
+            enableReadyCheck: config("system.redis.enableReadyCheck", false),
+            scaleReads: config("system.redis.scaleReads", "master"),
+            maxRedirections: config("system.redis.maxRedirections", 16),
+            retryDelayOnFailover: config("system.redis.retryDelayOnFailover", 100),
+            retryDelayOnClusterDown: config("system.redis.retryDelayOnClusterDown", 100),
+            retryDelayOnTryAgain: config("system.redis.retryDelayOnTryAgain", 100),
+            redisOptions: {
+                host: config("system.redis.host", "127.0.0.1"),
+                port: config("system.redis.port", 6379),
+                family: config("system.redis.family", 4),
+                password: config("system.redis.password", ""),
+                db: config("system.redis.db", 0)
+            }
+        });
+    } else {
+        return new Redis({
+            port: config("system.redis.port", 6379),
+            host: config("system.redis.host", "127.0.0.1"),
+            family: config("system.redis.family", 4),
+            password: config("system.redis.password", ""),
+            db: config("system.redis.db", 0)
+        });
+    }
+};
+
+var db = createRedisClient();
 var dbGeo = new SQLite3.Database(__dirname + "/../geolocation/ip2location.sqlite");
 var es = new Elasticsearch.Client({ host: config("system.elasticsearch.host", "localhost:9200") });
 
 module.exports.db = db;
 module.exports.es = es;
+
+var hasNewPosts = new Set();
+
+if (!cluster.isMaster) {
+    setInterval(function() {
+        var o = {};
+        for (var key of hasNewPosts)
+            o[key] = 1;
+        hasNewPosts.clear();
+        if (!Tools.hasOwnProperties(o))
+            return;
+        return Global.IPC.send("notifyAboutNewPosts", o).then(function() {
+            //Do nothing
+        }).catch(function(err) {
+            Global.error(err.stack || err);
+        });
+    }, Tools.Second);
+}
 
 db.tmp_hmget = db.hmget;
 db.hmget = function(key, hashes) {
@@ -1088,6 +1133,7 @@ module.exports.createPost = function(req, fields, files, transaction) {
         c.post = post;
         return Global.generate(post.boardName, post.threadNumber, post.number, "create");
     }).then(function() {
+        hasNewPosts.add(c.post.boardName + "/" + c.post.threadNumber);
         return Promise.resolve(c.post);
     });
 };
@@ -1171,13 +1217,13 @@ var removePost = function(boardName, postNumber, options) {
             return Promise.resolve();
         return rerenderReferringPosts(c.post, { removingThread: options && options.removingThread });
     }).catch(function(err) {
-        Global.error(err);
+        Global.error(err.stack || err);
     }).then(function() {
         if (options && options.leaveReferences)
             return Promise.resolve();
         return removeReferencedPosts(c.post);
     }).catch(function(err) {
-        Global.error(err);
+        Global.error(err.stack || err);
     }).then(function() {
         return db.srem("userPostNumbers:" + c.post.user.ip + ":" + board.name, postNumber);
     }).then(function() {
@@ -1336,7 +1382,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
                 }).then(function() {
                     return Cache.removeFile(`${board.name}/res/${oldThreadNumber}.html`);
                 }).catch(function(err) {
-                    Global.error(err);
+                    Global.error(err.stack || err);
                 });
                 return Promise.resolve();
             });
@@ -1440,19 +1486,30 @@ var Transaction = function() {
 };
 
 Transaction.prototype.rollback = function() {
-    this.filePaths.forEach(function(path) {
-        FS.exists(path).then(function(exists) {
+    var _this = this;
+    Tools.series(_this.filePaths, function(path) {
+        return FS.exists(path).then(function(exists) {
             if (!exists)
-                return;
-            FS.remove(path).catch(function(err) {
+                return Promise.resolve();
+            return FS.remove(path).catch(function(err) {
                 Global.error(err.stack || err);
             });
         });
+    }).then(function() {
+        if (_this.threadNumber <= 0)
+            return Promise.resolve();
+        return removeThread(_this.board.name, _this.threadNumber).catch(function(err) {
+            Global.error(err.stack || err);
+        });
+    }).then(function() {
+        if (_this.postNumber <= 0)
+            return Promise.resolve();
+        return removePost(_this.board.name, _this.postNumber).catch(function(err) {
+            Global.error(err.stack || err);
+        });
+    }).catch(function(err) {
+        Global.error(err.stack || err);
     });
-    if (this.threadNumber > 0)
-        removeThread(this.board.name, this.threadNumber);
-    if (this.postNumber > 0)
-        removePost(this.board.name, this.postNumber);
 };
 
 module.exports.Transaction = Transaction;
@@ -2207,7 +2264,7 @@ module.exports.deleteFile = function(req, res, fields) {
         paths.push(__dirname + "/../public/" + c.post.boardName + "/thumb/" + c.fileInfo.thumb.name);
         paths.forEach(function(path) {
             FS.remove(path).catch(function(err) {
-                Global.error(err);
+                Global.error(err.stack || err);
             });
         });
         Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
@@ -2215,6 +2272,38 @@ module.exports.deleteFile = function(req, res, fields) {
             boardName: c.post.boardName,
             postNumber: c.post.number,
             threadNumber: c.post.threadNumber
+        };
+    });
+};
+
+module.exports.editFileRating = function(req, res, fields) {
+    var c = {};
+    var password = Tools.sha1(fields.password);
+    return getFileInfo({ fileName: fields.fileName }).then(function(fileInfo) {
+        c.fileInfo = fileInfo;
+        return controller.checkBan(req, res, c.fileInfo.boardName, true);
+    }).then(function() {
+        return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
+    }).then(function(post) {
+        if (!post)
+            return Promise.reject(Tools.translate("Invalid post"));
+        c.post = post;
+        if ((!password || password != post.user.password)
+            && (!req.hashpass || req.hashpass != post.user.hashpass)
+            && !req.isSuperuser()
+            && (compareRegisteredUserLevels(req.level(c.fileInfo.boardName), post.user.level) <= 0)) {
+            return Promise.reject(Tools.translate("Not enough rights"));
+        }
+        c.fileInfo.rating = "SFW";
+        if (["R-15", "R-18", "R-18G"].indexOf(fields.rating) >= 0)
+            c.fileInfo.rating = fields.rating;
+        return db.hset("fileInfos", c.fileInfo.name, JSON.stringify(c.fileInfo));
+    }).then(function() {
+        Global.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
+        return {
+            boardName: c.post.boardName,
+            threadNumber: c.post.threadNumber,
+            postNumber: c.post.number
         };
     });
 };
@@ -2499,13 +2588,7 @@ module.exports.delall = function(req, ip, boardNames) {
 module.exports.initialize = function() {
     //NOTE: Enabling "key expired" notifications
     var CHANNEL = `__keyevent@${config("system.redis.db", 0)}__:expired`;
-    var dbs = new Redis({
-        port: config("system.redis.port", 6379),
-        host: config("system.redis.host", "127.0.0.1"),
-        family: config("system.redis.family", 4),
-        password: config("system.redis.password", ""),
-        db: config("system.redis.db", 0)
-    });
+    var dbs = createRedisClient();
     var initialized = false;
     var query = [];
     var updateBanOnMessage = function(message) {
@@ -2534,7 +2617,7 @@ module.exports.initialize = function() {
     });
     return db.config("SET", "notify-keyspace-events", "Ex").then(function() {
         dbs.subscribe(CHANNEL).catch(function(err) {
-            Global.error(err);
+            Global.error(err.stack || err);
         });
         return Promise.resolve(function() {
             initialized = true;

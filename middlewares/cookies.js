@@ -1,8 +1,5 @@
-var Captcha = require("../captchas");
-var markup = require("../helpers/markup");
-var Tools = require("../helpers/tools");
-
 module.exports = function(req, res, next) {
-    req.hashpass = Tools.hashpass(req);
+    res.cookie("tmp_ip", req.ip, { expires: null });
+    res.cookie("tmp_levels", JSON.stringify(req.levels || {}), { expires: null });
     next();
 };

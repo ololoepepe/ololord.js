@@ -44,7 +44,6 @@
 !file.png
 !fill_form.png
 !fixed.png
-!frame.png
 !gear.png
 !gif_file.png
 !go.png
@@ -67,11 +66,8 @@
 !move.png
 !mp3_file.png
 !mp4_file.png
-!mum_not_watching.png
-!mum_watching.png
 !neutron_line.png
 !node-captcha-fail.png
-!noframe.png
 !ogg_file.png
 !open.png
 !open_voting.png
@@ -90,11 +86,14 @@
 !search.png
 !search_hide.png
 !settings.png
+!shield.png
 !show.png
+!similar.png
 !source_text.png
 !storage.png
 !thread_back.png
 !thread_update.png
+!ui-icons_000000_256x240.png
 !unfix.png
 !unvote.png
 !up.png
@@ -102,6 +101,7 @@
 !video_ogg_logo.png
 !video_webm_logo.png
 !vote.png
+!wand.png
 !wav_file.png
 !webm_file.png
 !yandex-hernya.png

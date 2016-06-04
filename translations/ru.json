@@ -37,10 +37,10 @@
             "value": "Внутренняя ошибка"
         },
         "_default": {
-            "value": "Internal error"
+            "value": "Внутренняя ошибка"
         },
         "internalErrorText": {
-            "value": "Internal error"
+            "value": "Внутренняя ошибка"
         }
     },
     "Anonymous": {
@@ -685,6 +685,9 @@
     "Download file": {
         "downloadPlaylistFileText": {
             "value": "Скачать файл"
+        },
+        "downloadFileButtonText": {
+            "value": "Скачать файл"
         }
     },
     "Search": {
@@ -826,6 +829,9 @@
             "value": "Закрыть"
         },
         "closeThreadText": {
+            "value": "Закрыть"
+        },
+        "closePostFormButtonText": {
             "value": "Закрыть"
         }
     },
@@ -1256,6 +1262,9 @@
     "Fixed": {
         "fixedText": {
             "value": "Закрепленный"
+        },
+        "postFormFixedButtonText": {
+            "value": "Закреплена"
         }
     },
     "Fix": {
@@ -1288,7 +1297,7 @@
             "value": "В этом треде постинг запрещен"
         },
         "_default": {
-            "value": "Posting is disabled in this thread"
+            "value": "В этом треде постинг запрещен"
         }
     },
     "This thread is archived. Posting is disabled": {
@@ -1301,7 +1310,7 @@
             "value": "Достигнут лимит постов"
         },
         "_default": {
-            "value": "Post limit reached"
+            "value": "Достигнут лимит постов"
         }
     },
     "This user is registered": {
@@ -1355,7 +1364,7 @@
             "value": "Отмотать наверх"
         }
     },
-    "Answer": {
+    "Reply": {
         "toThread": {
             "value": "Ответ"
         }
@@ -1385,7 +1394,7 @@
             "value": "Байт(а)"
         }
     },
-    "Answers:": {
+    "Replies:": {
         "referencedByText": {
             "value": "Ответы:"
         }
@@ -2361,12 +2370,6 @@
             "value": "Не удалось вызвать метод"
         }
     },
-    "Invalid captcha type": {
-        "_default": {
-            "value": "Недействительный тип капчи"
-        },
-        "_obsolete": true
-    },
     "Invalid URL": {
         "_default": {
             "value": "Недействительный URL"
@@ -2416,12 +2419,6 @@
         "_default": {
             "value": "Поисковый запрос слишком длинный"
         }
-    },
-    "404 (not found)": {
-        "errorMessage": {
-            "value": "404 (не найдено)"
-        },
-        "_obsolete": true
     },
     "Invalid page number": {
         "_default": {
@@ -2772,12 +2769,6 @@
         "_default": {
             "value": "Введите пароль: "
         }
-    },
-    "That is a hashpass, isn't it? [Yes/no]: ": {
-        "_default": {
-            "value": "Это хешпасс, верно? [Yes/no]: "
-        },
-        "_obsolete": true
     },
     "Dimensions:": {
         "canvasDimensionsLabelText": {
@@ -3210,6 +3201,41 @@
     "Hide search field": {
         "hideSearchActionText": {
             "value": "Скрыть поиск"
+        }
+    },
+    "Show sidebar": {
+        "showSidebarButtonText": {
+            "value": "Показать боковую панель"
+        }
+    },
+    "Hide sidebar": {
+        "hideSidebarButtonText": {
+            "value": "Скрыть боковую панель"
+        }
+    },
+    "Edit file rating": {
+        "editFileRatingText": {
+            "value": "Редактировать рейтинг файла"
+        }
+    },
+    "Start dragging to make post form float": {
+        "postFormHeaderLabelText": {
+            "value": "Потяните, чтобы сделать форму плавающей"
+        }
+    },
+    "Not fixed": {
+        "postFormUnfixedButtonText": {
+            "value": "Не закреплена"
+        }
+    },
+    "Hide similar": {
+        "hideSimilarPostsText": {
+            "value": "Скрыть похожие"
+        }
+    },
+    "Use WebSockets": {
+        "useWebSocketsLabelText": {
+            "value": "Использовать WebSockets"
         }
     }
 }

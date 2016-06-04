@@ -237,7 +237,8 @@ var getThread = function(board, number, archived) {
             postCount: postCount,
             postingEnabled: (board.postingEnabled && !c.thread.closed),
             opPost: c.opPost,
-            lastPosts: c.posts
+            lastPosts: c.posts,
+            archived: !!archived
         };
         c.model.thread = threadModel;
         return Database.lastPostNumber(board.name);
@@ -743,7 +744,7 @@ module.exports.do_generateThread = function(key, data) {
     }
     case "delete": {
         return Database.db.sadd("deletedThreads", data.boardName + ":" + data.threadNumber).then(function() {
-            return Cache.removeFile(threadId);
+            return Cache.removeFile(`${boardName}/res/${threadNumber}.json`);
         }).then(function() {
             return Cache.removeFile(`${boardName}/res/${threadNumber}.html`);
         });

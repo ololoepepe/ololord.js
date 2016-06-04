@@ -2,22 +2,26 @@
 
 var cluster = require("cluster");
 var expressCluster = require("express-cluster");
+var HTTP = require("http");
 var Log4JS = require("log4js");
 var OS = require("os");
 var Util = require("util");
 
 var Global = require("./helpers/global");
 Global.Program = require("commander");
-Global.Program.version("1.1.0")
+Global.Program.version("1.1.1-beta")
     .option("-c, --config-file <file>", "Path to the config.json file")
     .option("-r, --regenerate", "Regenerate the cache on startup")
+    .option("-a, --archive", "Regenerate archived threads, too")
     .parse(process.argv);
 
 var config = require("./helpers/config");
 var controller = require("./helpers/controller");
 var BoardModel = require("./models/board");
 var Database = require("./helpers/database");
+var OnlineCounter = require("./helpers/online-counter");
 var Tools = require("./helpers/tools");
+var WebSocket = require("./helpers/websocket");
 
 Global.IPC = require("./helpers/ipc")(cluster);
 
@@ -53,11 +57,17 @@ var spawnCluster = function() {
 
         var express = require("express");
 
+        var Chat = require("./helpers/chat");
         var controller = require("./helpers/controller");
 
         var app = express();
 
         app.use(require("./middlewares"));
+        app.use("/redirect", function(req, res, next) {
+            if (!req.query.source)
+                return next();
+            res.redirect(307, "/" + config("site.pathPrefix", "") + req.query.source.replace(/^\//, ""));
+        });
         app.use(require("./controllers"));
         app.use("*", function(req, res, next) {
             var err = new Error();
@@ -101,7 +111,52 @@ var spawnCluster = function() {
         }).then(function() {
             var sockets = {};
             var nextSocketId = 0;
-            var server = app.listen(config("server.port", 8080), function() {
+            var server = HTTP.createServer(app);
+            var ws = new WebSocket(server);
+            ws.installHandler("sendChatMessage", function(msg, conn) {
+                var data = msg.data || {};
+                return Chat.sendMessage({
+                    ip: conn.ip,
+                    hashpass: conn.hashpass
+                }, data.boardName, data.postNumber, data.text, ws).then(function(result) {
+                    var message = result.message;
+                    if (result.senderHash != result.receiverHash) {
+                        message.type = "in";
+                        var receiver = result.receiver;
+                        var ip = receiver.hashpass ? null : receiver.ip;
+                        ws.sendMessage("newChatMessage", {
+                            message: message,
+                            boardName: data.boardName,
+                            postNumber: data.postNumber
+                        }, ip, receiver.hashpass);
+                    }
+                    message.type = "out";
+                    return Promise.resolve(message);
+                });
+            });
+            var subscriptions = new Map();
+            ws.installHandler("subscribeToThreadUpdates", function(msg, conn) {
+                var data = msg.data || {};
+                var key = data.boardName + "/" + data.threadNumber;
+                if (subscriptions.has(key)) {
+                    subscriptions.get(key).add(conn);
+                } else {
+                    var s = new Set();
+                    s.add(conn);
+                    subscriptions.set(key, s);
+                }
+            });
+            ws.installHandler("unsubscribeFromThreadUpdates", function(msg, conn) {
+                var data = msg.data || {};
+                var key = data.boardName + "/" + data.threadNumber;
+                var s = subscriptions.get(key);
+                if (!s)
+                    return;
+                s.delete(conn);
+                if (s.size < 1)
+                    subscriptions.delete(key);
+            });
+            server.listen(config("server.port", 8080), function() {
                 console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080) + "...");
                 Global.IPC.installHandler("exit", function(status) {
                     process.exit(status);
@@ -109,12 +164,13 @@ var spawnCluster = function() {
                 Global.IPC.installHandler("stop", function() {
                     return new Promise(function(resolve, reject) {
                         server.close(function() {
+                            Tools.forIn(sockets, function(socket, socketId) {
+                                delete sockets[socketId];
+                                socket.destroy();
+                            });
+                            OnlineCounter.clear();
                             console.log("[" + process.pid + "] Closed");
                             resolve();
-                        });
-                        Tools.forIn(sockets, function(socket, socketId) {
-                            delete sockets[socketId];
-                            socket.destroy();
                         });
                     });
                 });
@@ -144,15 +200,19 @@ var spawnCluster = function() {
                         config.reload();
                     return Promise.resolve();
                 });
+                Global.IPC.installHandler("notifyAboutNewPosts", function(data) {
+                    Tools.forIn(data, function(_, key) {
+                        var s = subscriptions.get(key);
+                        if (!s)
+                            return;
+                        s.forEach(function(conn) {
+                            conn.sendMessage("newPost");
+                        });
+                    });
+                    return Promise.resolve();
+                });
                 Global.IPC.installHandler("getConnectionIPs", function() {
-                    return Promise.resolve(Tools.mapIn(sockets, function(socket) {
-                        return socket.ip;
-                    }).filter(function(ip) {
-                        return ip;
-                    }).reduce(function(acc, ip) {
-                        acc[ip] = 1;
-                        return acc;
-                    }, {}));
+                    return Promise.resolve(OnlineCounter.unique());
                 });
                 Global.IPC.send("ready").catch(function(err) {
                     Global.error(err);
@@ -193,23 +253,14 @@ if (cluster.isMaster) {
         initCallback = cb;
         return controller.initialize();
     }).then(function() {
-        if (config("server.statistics.enabled", true)) {
-            setInterval(function() {
-                controller.generateStatistics().catch(function(err) {
-                    Global.error(err.stack || err);
-                });
-            }, config("server.statistics.ttl", 60) * Tools.Minute);
+        if (Global.Program.regenerate || config("system.regenerateCacheOnStartup", true)) {
+            return controller.regenerate(Global.Program.archive || config("system.regenerateArchive", false));
+        } else {
+            console.log("Generating statistics, please, wait...");
+            return controller.generateStatistics().catch(function(err) {
+                Global.error(err.stack || err);
+            });
         }
-        if (config("server.rss.enabled", true)) {
-            setInterval(function() {
-                BoardModel.generateRSS().catch(function(err) {
-                    Global.error(err.stack || err);
-                });
-            }, config("server.rss.ttl", 60) * Tools.Minute);
-        }
-        if (Global.Program.regenerate || config("system.regenerateCacheOnStartup", true))
-            return controller.regenerate(config("system.regenerateArchive", false));
-        return Promise.resolve();
     }).then(function() {
         console.log("Spawning workers, please, wait...");
         spawnCluster();
@@ -218,6 +269,20 @@ if (cluster.isMaster) {
             ++ready;
             if (ready == count) {
                 initCallback();
+                if (config("server.statistics.enabled", true)) {
+                    setInterval(function() {
+                        controller.generateStatistics().catch(function(err) {
+                            Global.error(err.stack || err);
+                        });
+                    }, config("server.statistics.ttl", 60) * Tools.Minute);
+                }
+                if (config("server.rss.enabled", true)) {
+                    setInterval(function() {
+                        BoardModel.generateRSS().catch(function(err) {
+                            Global.error(err.stack || err);
+                        });
+                    }, config("server.rss.ttl", 60) * Tools.Minute);
+                }
                 require("./helpers/commands")();
             }
         });
@@ -258,6 +323,9 @@ if (cluster.isMaster) {
         Global.IPC.installHandler("reloadConfig", function() {
             config.reload();
             return Global.IPC.send("reloadConfig");
+        });
+        Global.IPC.installHandler("notifyAboutNewPosts", function(data) {
+            return Global.IPC.send("notifyAboutNewPosts", data);
         });
         Global.IPC.installHandler("regenerateCache", function(regenerateArchive) {
             return controller.regenerate(regenerateArchive);

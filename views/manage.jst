@@ -2,10 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{#def.head}}
 <body {{#def.baseData}}>
+{{#def.sidebar}}
+{{#def.content}}
 {{#def.toolbar}}
-{{#def.player}}
 {{#def.customHeader}}
-{{#def.searchAction}}
 <div class="theTitle">
     <h1>
         {{=it.title}}
@@ -36,7 +36,7 @@
             <img src="/{{=it.site.pathPrefix}}img/loading_big.gif">
             <h1 style="display: inline;">{{=it.tr.loadingUsersMessage}}</h1>
         </div>
-        <div id="content" data-index="2" style="display: none;">
+        <div id="contentData" data-index="2" style="display: none;">
             <div class="contentFileTreeColumn"><div id="contentFileTree"></div></div>
             <div class="contentFileActionColumn">
                 <div>
@@ -55,6 +55,8 @@
                         {{=it.tr.currentFileLabelText}}
                     </h3>
                     <div class="fileActions">
+                        <button id="downloadFile"
+                                onclick="lord.downloadFile();">{{=it.tr.downloadFileButtonText}}</button>
                         <button id="editFile" onclick="lord.editFile();">{{=it.tr.editFileButtonText}}</button>
                         <button id="renameFile" onclick="lord.renameFile();">{{=it.tr.renameFileButtonText}}</button>
                         <button id="deleteFile" onclick="lord.deleteFile();">{{=it.tr.deleteFileButtonText}}</button>
@@ -87,5 +89,8 @@
     </div>
 </div> 
 {{#def.customFooter}}
+{{#def.searchAction}}
+{{#def.player}}
+</div>
 </body>
 </html>

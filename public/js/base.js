@@ -51,6 +51,8 @@ lord.notificationQueue = [];
 lord.pageProcessors = [];
 lord.postProcessors = [];
 lord.currentTracks = {};
+lord.wsMessages = {};
+lord.wsHandlers = {};
 lord.lastWindowSize = {
     width: $(window).width(),
     height: $(window).height()
@@ -190,8 +192,8 @@ if (typeof lord.getLocalObject("password") != "string") {
             max: 1,
             step: 0.01,
             value: volume,
-            slide: function() {
-                var volume = +$(this).slider("value");
+            slide: function(e, ui) {
+                var volume = ui.value;
                 _this.content.volume = volume;
                 _this.updateButtons();
             }
@@ -496,6 +498,27 @@ if (typeof lord.getLocalObject("password") != "string") {
     lord.pageProcessors.push(lord.processFomattedDate);
 })();
 
+lord.sendWSMessage = function(type, data) {
+    if (!lord.getLocalObject("useWebSockets", true))
+        return Promise.reject("WebSockets are disabled");
+    return (lord.wsOpen || Promise.resolve()).then(function() {
+        return new Promise(function(resolve, reject) {
+            var id = uuid.v1();
+            lord.wsMessages[id] = {
+                resolve: resolve,
+                reject: reject
+            };
+            if (lord.wsClosed)
+                return reject("Socket closed");
+            lord.ws.send(JSON.stringify({
+                id: id,
+                type: type,
+                data: data
+            }));
+        });
+    });
+};
+
 lord.logoutImplementation = function(form, vk) {
     lord.setCookie("hashpass", "", {
         expires: lord.Billion,
@@ -508,7 +531,7 @@ lord.logoutImplementation = function(form, vk) {
             path: "/"
         });
     }
-    lord.reloadPage();
+    window.location = "/" + lord.data("sitePathPrefix") + "redirect?source=" + window.location.pathname;
 };
 
 lord.doLogout = function(event, form) {
@@ -563,6 +586,7 @@ lord.localData = function(includeSettings, includeCustom, includePassword) {
     f("spells", "");
     f("hotkeys", {});
     f("hiddenPosts", {});
+    f("similarText", {});
     f("lastCodeLang", "");
     f("chats");
     f("drafts");
@@ -613,6 +637,7 @@ lord.setLocalData = function(o, includeSettings, includeCustom, includePassword)
     f("spells");
     f("hotkeys");
     f("hiddenPosts");
+    f("similarText");
     f("lastCodeLang");
     f("chats", function(src, key, value) {
         if (!src.hasOwnProperty(key))
@@ -705,7 +730,6 @@ lord.synchronize = function() {
                 lord.setLocalData(result, settings, cssJs, pwd);
             var formData = new FormData();
             formData.append("key", password);
-            console.log(settings, cssJs, pwd);
             formData.append("data", JSON.stringify(lord.localData(settings, cssJs, pwd)));
             return lord.post("/" + lord.data("sitePathPrefix") + "action/synchronize", formData);
         }).then(function() {
@@ -1386,13 +1410,13 @@ lord.checkFavoriteThreads = function() {
 };
 
 lord.showNewPosts = function() {
-    var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
     var currentBoardName = lord.data("boardName");
+    newLastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
     lord.api("lastPostNumbers").then(function(result) {
         var getNewPostCount = function(boardName) {
             if (!boardName || currentBoardName == boardName || !result[boardName])
                 return 0;
-            var lastPostNumber = lastPostNumbers[boardName];
+            var lastPostNumber = newLastPostNumbers[boardName];
             if (!lastPostNumber)
                 return 0;
             var newPostCount = result[boardName] - lastPostNumber;
@@ -1406,44 +1430,66 @@ lord.showNewPosts = function() {
                 return acc;
             }, {}));
         }
+        lord.queryAll(".navbar, .toolbar").forEach(function(navbar) {
+            lord.queryAll(".navbarItem", navbar).forEach(function(item) {
+                var a = lord.queryOne("a", item);
+                if (!a)
+                    return;
+                var boardName = lord.data("boardName", a);
+                if (!boardName)
+                    return;
+                var parent = a.parentNode;
+                var span = lord.queryOne(".newPostCount", parent);
+                if (span)
+                    $(span).remove();
+                var newPostCount = getNewPostCount(boardName);
+                if (!newPostCount)
+                    return;
+                span = lord.node("span");
+                $(span).addClass("newPostCount");
+                span.appendChild(lord.node("text", "+" + newPostCount + " "));
+                parent.insertBefore(span, a);
+            });
+        });
         if (lord.deviceType("mobile")) {
             lord.queryAll(".boardSelect").forEach(function(sel) {
                 lord.queryAll("option", sel).forEach(function(opt) {
-                    var newPostCount = getNewPostCount(lord.data("boardName", opt));
+                    var boardName = lord.data("boardName", opt);
+                    if (!boardName)
+                        return;
+                    var newPostCount = getNewPostCount(boardName);
+                    var span = lord.queryOne(".newPostCount", opt);
+                    if (span)
+                        $(span).remove();
                     if (!newPostCount)
                         return;
-                    opt.insertBefore(lord.node("text", "+" + newPostCount + " "), opt.childNodes[0]);
+                    span = lord.node("span");
+                    $(span).addClass("newPostCount");
+                    span.appendChild(lord.node("text", "+" + newPostCount + " "));
+                    opt.insertBefore(span, opt.childNodes[0]);
                 });
             });
         } else {
-            lord.queryAll(".navbar, .toolbar").forEach(function(navbar) {
-                lord.queryAll(".navbarItem", navbar).forEach(function(item) {
-                    var a = lord.queryOne("a", item);
-                    if (!a)
-                        return;
-                    var newPostCount = getNewPostCount(lord.data("boardName", a));
-                    if (!newPostCount)
-                        return;
-                    var span = lord.node("span");
-                    $(span).addClass("newPostCount");
-                    span.appendChild(lord.node("text", "+" + newPostCount));
-                    var parent = a.parentNode;
-                    parent.insertBefore(span, a);
-                    parent.insertBefore(lord.node("text", " "), a);
-                });
-            });
-            if (lord.getLocalObject("stickyToolbar", true))
-                $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
+            lord.adjustContentPadding();
         }
         lord.each(result, function(lastPostNumber, boardName) {
-            if (lastPostNumbers[boardName])
+            if (newLastPostNumbers[boardName])
                 return;
-            lastPostNumbers[boardName] = lastPostNumber;
+            newLastPostNumbers[boardName] = lastPostNumber;
         });
         if (typeof result[currentBoardName] == "number")
-            lastPostNumbers[currentBoardName] = result[currentBoardName];
+            newLastPostNumbers[currentBoardName] = result[currentBoardName];
+        var lastPostNumbers = lord.getLocalObject("lastPostNumbers", {});
+        lord.each(newLastPostNumbers, function(n, boardName) {
+            if (!lastPostNumbers[boardName] || lastPostNumbers[boardName] < n)
+                lastPostNumbers[boardName] = n;
+        });
         lord.setLocalObject("lastPostNumbers", lastPostNumbers);
-    }).catch(lord.handleError);
+        setTimeout(lord.showNewPosts.bind(lord), 15 * lord.Second);
+    }).catch(function(err) {
+        lord.handleError(err);
+        setTimeout(lord.showNewPosts.bind(lord), 30 * lord.Second);
+    });
 };
 
 lord.editHotkeys = function() {
@@ -1495,19 +1541,19 @@ lord.assignHotkey = function(e, inp) {
     return false;
 };
 
-lord.editSpells = function() {
+lord.editSpells = function(apply) {
     var ta = lord.node("textarea");
     ta.rows = 10;
     ta.cols = 43;
     ta.value = lord.getLocalObject("spells", lord.DefaultSpells);
-    lord.showDialog(ta).then(function(result) {
+    lord.showDialog(ta, { title: "editSpellsText" }).then(function(result) {
         if (!result)
             return Promise.resolve();
         var spells = ta.value;
         lord.setLocalObject("spells", spells);
-        if (!lord.doWork || !lord.getLocalObject("spellsEnabled", true))
-            return;
-        return lord.doWork("parseSpells", spells);
+        if (!apply || !lord.applySpells || !lord.getLocalObject("spellsEnabled", true))
+            return Promise.resolve();
+        return lord.applySpells(lord.queryAll(".post, .opPost"), true);
     }).catch(lord.handleError);
 };
 
@@ -1527,14 +1573,29 @@ lord.removeHidden = function(el) {
     var div = el.parentNode;
     div.parentNode.removeChild(div);
     var list = lord.getLocalObject("hiddenPosts", {});
-    var key = lord.data("boardName", div) + "/" + lord.data("postNumber", div);
+    var boardName = lord.data("boardName", div);
+    var postNumber = lord.data("postNumber", div);
+    var key = boardName + "/" + postNumber;
     if (!list.hasOwnProperty(key))
         return;
+    var post = lord.id(postNumber);
+    if (post && lord.data("boardName", post) == boardName && $(post).hasClass("hidden")) {
+        var thread = lord.id("thread" + postNumber);
+        $(post).removeClass("hidden");
+        $(lord.queryOne(".hideReason", post)).empty();
+        if (thread)
+            $(thread).removeClass("hidden");
+    }
     if (list[key].reason)
         list[key] = false;
     else
         delete list[key];
     lord.setLocalObject("hiddenPosts", list);
+    var similarText = lord.getLocalObject("similarText", {});
+    if (similarText.hasOwnProperty(key)) {
+        delete similarText[key];
+        lord.setLocalObject("similarText", similarText);
+    }
 };
 
 lord.createCodemirrorEditor = function(parent, mode, value) {
@@ -1698,9 +1759,34 @@ lord.updateChat = function(keys) {
     }
 };
 
+if (lord.getLocalObject("useWebSockets", true)) {
+    lord.wsHandlers["newChatMessage"] = function(msg) {
+        var chats = lord.getLocalObject("chats", {});
+        var data = msg.data;
+        var key = data.boardName + ":" + data.postNumber;
+        if (!chats[key])
+            chats[key] = [];
+        var list = chats[key];
+        var message = data.message;
+        for (var i = 0; i < list.length; ++i) {
+            var m = list[i];
+            if (message.type == m.type && message.date == m.date && message.text == m.text)
+                return;
+        }
+        list.push(message);
+        list.sort(function(m1, m2) {
+            return m1.date.localeCompare(m2.date);
+        });
+        lord.setLocalObject("chats", chats);
+        lord.updateChat([key]);
+    };
+}
+
 lord.checkChats = function() {
-    if (lord.checkChats.timer)
-        clearTimeout(lord.checkChats.timer);
+    if (!lord.getLocalObject("useWebSockets", true)) {
+        if (lord.checkChats.timer)
+            clearTimeout(lord.checkChats.timer);
+    }
     lord.api("chatMessages", { lastRequestDate: lord.lastChatCheckDate || "" }).then(function(model) {
         if (!model)
             return Promise.resolve();
@@ -1712,8 +1798,9 @@ lord.checkChats = function() {
             if (!chats[key])
                 chats[key] = [];
             var list = chats[key];
-            if (messages.length > 0)
-                keys.push(key);
+            if (messages.length < 1)
+                return;
+            var any = false;
             messages.forEach(function(message) {
                 for (var i = 0; i < list.length; ++i) {
                     var msg = list[i];
@@ -1721,16 +1808,25 @@ lord.checkChats = function() {
                         return;
                 }
                 list.push(message);
+                any = true;
             });
+            list.sort(function(m1, m2) {
+                return m1.date.localeCompare(m2.date);
+            });
+            if (any)
+                keys.push(key);
         });
         lord.setLocalObject("chats", chats);
         if (keys.length > 0)
             lord.updateChat(keys);
-        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord),
-            lord.chatDialog ? (5 * lord.Second) : lord.Minute);
+        if (!lord.getLocalObject("useWebSockets", true)) {
+            lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord),
+                lord.chatDialog ? (5 * lord.Second) : lord.Minute);
+        }
     }).catch(function(err) {
         lord.handleError(err);
-        lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), lord.Minute);
+        if (!lord.getLocalObject("useWebSockets", true))
+            lord.checkChats.timer = setTimeout(lord.checkChats.bind(lord), lord.Minute);
     });
 };
 
@@ -1816,16 +1912,35 @@ lord.sendChatMessage = function() {
     if (!contact)
         return;
     var message = lord.nameOne("message", lord.chatDialog);
-    var formData = new FormData();
     var key = $(contact).attr("name");
-    formData.append("text", message.value);
-    formData.append("boardName", key.split(":").shift());
-    formData.append("postNumber", +key.split(":").pop());
-    return lord.post("/" + lord.data("sitePathPrefix") + "action/sendChatMessage", formData).then(function(result) {
-        message.value = "";
-        $(message).focus();
-        lord.checkChats();
-    }).catch(lord.handleError);
+    if (lord.getLocalObject("useWebSockets", true)) {
+        lord.sendWSMessage("sendChatMessage", {
+            boardName: key.split(":").shift(),
+            postNumber: +key.split(":").pop(),
+            text: message.value
+        }).then(function(msg) {
+            message.value = "";
+            $(message).focus();
+            var chats = lord.getLocalObject("chats", {});
+            if (!chats[key])
+                chats[key] = [msg];
+            else
+                chats[key].push(msg);
+            lord.setLocalObject("chats", chats);
+            lord.updateChat([key]);
+        }).catch(lord.handleError);
+    } else {
+        var formData = new FormData();
+        formData.append("text", message.value);
+        formData.append("boardName", key.split(":").shift());
+        formData.append("postNumber", +key.split(":").pop());
+        var path = "/" + lord.data("sitePathPrefix") + "action/sendChatMessage";
+        return lord.post(path, formData).then(function(result) {
+            message.value = "";
+            $(message).focus();
+            lord.checkChats();
+        }).catch(lord.handleError);
+    }
 };
 
 lord.checkNotificationQueue = function() {
@@ -2020,7 +2135,8 @@ lord.setTooltips = function(parent) {
 lord.insertMumWatchingStylesheet = function() {
     var style = lord.node("style");
     style.id = "mumWatchingStylesheet";
-    var css = ".postFileFile > a > img:not(:hover), .banner > a > img:not(:hover) { opacity: 0.05 !important; }";
+    var css = ".postFileFile > a > img:not(:hover), .banner > a > img:not(:hover), .hideIfMumWatching:not(:hover) ";
+    css += "{ opacity: 0.05 !important; }";
     style.type = "text/css";
     if (style.styleSheet)
         style.styleSheet.cssText = css;
@@ -2029,8 +2145,101 @@ lord.insertMumWatchingStylesheet = function() {
     document.head.appendChild(style);
 };
 
+lord.adjustPostBodySize = function() {
+    var style = lord.id("postBodySize");
+    if (!style)
+        return;
+    var nstyle = lord.node("style");
+    nstyle.id = "postBodySize";
+    nstyle.type = "text/css";
+    var width = $("#content").width();
+    var m = lord.deviceType("mobile") ? 0 : 270;
+    var css = ".postBody { max-width: " + (width - 14) + "px; }\n";
+    css += ".postFile ~ .postText > blockquote, .blockLatex, .codeBlock { max-width: " + (width - m) + "px; }";
+    if (nstyle.styleSheet)
+        nstyle.styleSheet.cssText = css;
+    else
+        nstyle.appendChild(lord.node("text", css));
+    document.head.replaceChild(nstyle, style);
+};
+
+lord.adjustContentPadding = function() {
+    if (!lord.getLocalObject("stickyToolbar", true))
+        return;
+    var height = $(".toolbar.sticky").height();
+    $("#content").css("padding-top", (height + 6) + "px");
+    $("#sidebarContent").css({
+        top: (height + 2) + "px",
+        height: ($("#sidebarContent").parent().height() - (height + 44)) + "px"
+    });
+};
+
 lord.initializeOnLoadBase = function() {
     lord.hashChangeHandler(lord.hash());
+    if (lord.getLocalObject("useWebSockets", true)) {
+        var options = {};
+        var transports = lord.model("base").site.ws.transports;
+        if (transports)
+            options.transports = transports;
+        var retryCount = 0;
+        var f = function() {
+            lord.ws = new SockJS("/" + lord.model("base").site.pathPrefix + "ws", null, options);
+            lord.wsOpen = new Promise(function(resolve, reject) {
+                lord.ws.onopen = function() {
+                    retryCount = 0;
+                    lord.ws.send(JSON.stringify({
+                        type: "init",
+                        data: { hashpass: lord.getCookie("hashpass") }
+                    }));
+                };
+                lord.ws.onmessage = function(message) {
+                    try {
+                        message = JSON.parse(message.data);
+                    } catch (err) {
+                        lord.handleError(err);
+                        return;
+                    }
+                    if ("init" == message.type) {
+                        resolve();
+                        delete lord.wsOpen;
+                    } else {
+                        var msg = lord.wsMessages[message.id];
+                        if (!msg) {
+                            if ("_error" == message.id) {
+                                lord.handleError(message.error);
+                            } else {
+                                var handler = lord.wsHandlers[message.type];
+                                if (handler)
+                                    handler(message);
+                            }
+                            return;
+                        }
+                        delete lord.wsMessages[message.id];
+                        if (!message.error)
+                            msg.resolve(message.data);
+                        else
+                            msg.reject(message.error);
+                    }
+                };
+                lord.ws.onclose = function() {
+                    lord.wsClosed = true;
+                    if (!lord.wsOpen)
+                        return;
+                    reject("Socket closed");
+                    delete lord.wsOpen;
+                };
+            });
+            lord.wsOpen.catch(function(err) {
+                ++retryCount;
+                if (retryCount > 5)
+                    lord.handleError(err);
+                if (retryCount > 10)
+                    return;
+                setTimeout(f, retryCount * lord.Second);
+            });
+        };
+        f();
+    }
     lord.series(lord.pageProcessors, function(f) {
         return f();
     }).catch(lord.handleError);
@@ -2095,8 +2304,8 @@ lord.initializeOnLoadBase = function() {
         max: 1,
         step: 0.01,
         value: lord.getLocalObject("playerVolume", defVol),
-        slide: function() {
-            var volume = +$(this).slider("value");
+        slide: function(e, ui) {
+            var volume = ui.value;
             if (lord.playerElement)
                 lord.playerElement.volume = volume;
             else
@@ -2123,29 +2332,78 @@ lord.initializeOnLoadBase = function() {
         if (n.height != lord.lastWindowSize.height && !$("#player").hasClass("minimized"))
             lord.updatePlayerTracksHeight();
         if (n.width != lord.lastWindowSize.width) {
-            $(".postBody").css("maxWidth", (n.width - 30) + "px");
-            if (lord.getLocalObject("stickyToolbar", true))
-                $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
+            lord.adjustPostBodySize();
+            lord.adjustContentPadding();
         }
         lord.lastWindowSize = n;
     });
-    if (lord.getLocalObject("stickyToolbar", true))
-        $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
+    lord.adjustContentPadding();
+    if (lord.deviceType("mobile")) {
+        lord.detectSwipe(document.body, function(e) {
+            var sidebar = lord.id("sidebar");
+            var visible = !sidebar.style.display;
+            if (Math.abs(e.distanceY) >= 15 || Math.abs(e.distanceX) < 100)
+                return;
+            if ((e.types.indexOf("swiperight") >= 0 && !visible) || (e.types.indexOf("swipeleft") >= 0 && visible))
+                lord.showHideSidebar();
+        });
+    }
+};
+
+lord.changeStyle = function(style) {
+    var	link = lord.queryOne("link[href$='" + lord.settings().style.name + ".css']");
+    link.href = link.href.replace(link.href.split("/").pop(), style + ".css");
+    lord.setLocalObject("style", style);
+    lord.adjustContentPadding();
+    for (var i = 0.5; i <= 4; i *= 2) {
+        setTimeout(function() {
+            lord.adjustContentPadding();
+        }, i * lord.Second);
+    }
+};
+
+lord.showHideSidebar = function() {
+    var sidebar = lord.id("sidebar");
+    var visible = !sidebar.style.display;
+    sidebar.style.display = visible ? "none" : "";
+    lord.setLocalObject("sidebarVisible", !visible);
+    if (!lord.deviceType("mobile")) {
+        $("#content").css({
+            left: (visible ? 8 : 208) + "px",
+            width: "calc(100% - " + (visible ? 16 : 216) + "px)"
+        });
+        $(".toolbar.sticky").css({
+            left: (visible ? 0 : 201) + "px",
+            width: "calc(100% - " + (visible ? 0 : 201) + "px)"
+        });
+    }
+    $(".toolbar > [name='sidebarButton'], #sidebarButtonPlaceholder").css("display", visible ? "" : "none");
+    lord.adjustPostBodySize();
+    lord.adjustContentPadding();
 };
 
 lord.showHideSearchAction = function(a) {
     var sa = lord.queryOne(".searchAction");
-    var visible = !sa.style.display;
     var img = lord.queryOne("img", a);
+    var visible = /search_hide\.png$/.test(img.src);
+    lord.nameAll("searchButton").forEach(function(btn) {
+        var img = lord.queryOne("img", btn);
+        img.src = img.src.replace(/search(_hide)?\.png$/, "search.png");
+    });
     img.src = img.src.replace(/search(_hide)?\.png$/, visible ? "search.png" : "search_hide.png");
     a.title = lord.text(visible ? "showSearchActionText" : "hideSearchActionText");
+    $(sa).css("top", ($(".toolbar").height() + 4) + "px");
     sa.style.display = visible ? "none" : "";
     if (!visible) {
-        $(a).closest(".toolbar, .navbar").append(sa);
+        if (!lord.getLocalObject("stickyToolbar", true)) {
+            $(a).closest(".toolbar, .navbar").append(sa);
+            $(sa).css({
+                position: "static",
+                marginTop: "4px"
+            });
+        }
         $(sa).find(".searchActionInput").focus().select();
     }
-    if (lord.getLocalObject("stickyToolbar", true))
-        $(document.body).css("padding-top", $(".toolbar.sticky").height() + "px");
 };
 
 lord.processBoardGroups = function(model) {
@@ -2197,7 +2455,7 @@ lord.processBoardGroups = function(model) {
 
 window.addEventListener("load", function load() {
     window.removeEventListener("load", load, false);
-    if (/\/(frame|login).html$/.test(window.location.pathname))
+    if (/\/login.html$/.test(window.location.pathname))
         return;
     lord.initializeOnLoadBase();
     lord.checkFavoriteThreads();

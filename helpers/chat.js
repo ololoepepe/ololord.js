@@ -10,7 +10,7 @@ var createHash = function(user) {
     return sha256.digest("hex");
 };
 
-module.exports.sendMessage = function(req, boardName, postNumber, text) {
+module.exports.sendMessage = function(user, boardName, postNumber, text) {
     if (!text)
         return Promise.reject(Tools.translate("Message is empty"));
     if (!boardName)
@@ -20,18 +20,50 @@ module.exports.sendMessage = function(req, boardName, postNumber, text) {
         return Promise.reject(Tools.translate("Invalid post number"));
     var c = {};
     c.key = boardName + ":" + postNumber;
-    c.senderHash = createHash(req);
+    c.senderHash = createHash(user);
     c.date = Tools.now();
     c.ttl = config("server.chat.ttl", 10080) * 60; //NOTE: 7 days
     return Database.getPost(boardName, postNumber).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("No such post"));
         c.receiverHash = createHash(post.user);
+        c.receiver = post.user;
         return Database.db.zrange("chat:" + c.key, 0, 0);
     }).then(function(msg) {
         if (msg && msg.length > 0 && JSON.parse(msg[0]).senderHash != c.senderHash
             && JSON.parse(msg[0]).receiverHash != c.senderHash) {
             return Promise.reject(Tools.translate("Somebody is chatting here already"));
+        }
+        return Database.db.smembers("chatMembers:" + c.key);
+    }).then(function(members) {
+        if (!members || members.length < 2) {
+            c.members = [
+                JSON.stringify({
+                    hash: c.senderHash,
+                    ip: user.ip,
+                    hashpass: user.hashpass
+                }),
+                JSON.stringify({
+                    hash: c.receiverHash,
+                    ip: c.receiver.ip,
+                    hashpass: c.receiver.hashpass
+                })
+            ];
+            return Database.db.sadd("chatMembers:" + c.key, c.members);
+        }
+        c.members = members;
+        if (c.senderHash == c.receiverHash) {
+            c.members.some(function(member) {
+                member = JSON.parse(member);
+                if (member.hash == c.senderHash)
+                    return;
+                c.receiverHash = member.hash;
+                c.receiver = {
+                    ip: member.ip,
+                    hashpass: member.hashpass
+                };
+                return true;
+            });
         }
         return Database.db.sadd("chats:" + c.senderHash, c.key);
     }).then(function() {
@@ -50,15 +82,25 @@ module.exports.sendMessage = function(req, boardName, postNumber, text) {
     }).then(function() {
         return Database.db.expire("chat:" + c.key, c.ttl);
     }).then(function() {
-        return Promise.resolve({});
+        return Database.db.expire("chatMembers:" + c.key, c.ttl);
+    }).then(function() {
+        return Promise.resolve({
+            message: {
+                text: text,
+                date: c.date.toISOString()
+            },
+            senderHash: c.senderHash,
+            receiverHash: c.receiverHash,
+            receiver: c.receiver
+        });
     });
 };
 
-module.exports.getMessages = function(req, lastRequestDate) {
+module.exports.getMessages = function(user, lastRequestDate) {
     lastRequestDate = +(new Date(lastRequestDate)).valueOf();
     if (!lastRequestDate)
         lastRequestDate = 0;
-    var hash = createHash(req);
+    var hash = createHash(user);
     var chats = {};
     var date = Tools.now().toISOString();
     return Database.db.smembers("chats:" + hash).then(function(keys) {
@@ -85,13 +127,13 @@ module.exports.getMessages = function(req, lastRequestDate) {
     });
 };
 
-module.exports.deleteMessages = function(req, boardName, postNumber) {
+module.exports.deleteMessages = function(user, boardName, postNumber) {
     if (!boardName)
         return Promise.reject(Tools.translate("Invalid board"));
     postNumber = +postNumber;
     if (!boardName || !postNumber || postNumber < 0)
         return Promise.reject(Tools.translate("Invalid post number"));
-    var hash = createHash(req);
+    var hash = createHash(user);
     return Database.db.del("chats:" + hash).then(function() {
         return Promise.resolve({});
     });

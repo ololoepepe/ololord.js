@@ -1,6 +1,6 @@
 {
   "name": "ololord.js",
-  "version": "1.1.0",
+  "version": "1.1.1-beta",
   "description": "Imageboard engine in JavaScript to rule them all",
   "main": "app.js",
   "scripts": {
@@ -53,6 +53,7 @@
     "promisify-node": "^0.2.1",
     "q-io": "^1.13.1",
     "random-js": "^1.0.8",
+    "sockjs": "^0.3.17",
     "sqlite3": "^3.1.1",
     "uuid": "^2.0.1",
     "vorpal": "^1.10.8",

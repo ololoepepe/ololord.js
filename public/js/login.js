@@ -21,7 +21,8 @@ lord.loginImplementation = function(form, session) {
             path: "/"
         });
     }
-    window.location = URI(window.location.href).search(true).source;
+    window.location = "/" + lord.data("sitePathPrefix") + "redirect?source="
+        + URI(window.location.href).search(true).source;
 };
 
 lord.doLogin = function(event, form) {
