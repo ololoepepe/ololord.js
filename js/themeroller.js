@@ -176,7 +176,7 @@ lord.styleSelectors = {
             }
         ]
     },
-    ".post:target, .opPost:target": {
+    ".post:target, .opPost:target, .postFile:target > .postFileName, .postFile:target > .postFileSize, .postFile:target > .postFileSearch, .postFile:target > .postFileFile": {
         "background-color": {
             enabledSelector: "#postTargetedBackgroundColorEnabled",
             selector: "#postTargetedBackgroundColor",
@@ -502,7 +502,12 @@ lord.styleSelectors = {
                 selector: "#collapsibleBodyBorderColor",
                 type: "minicolors"
             }
-        ]
+        ],
+        "border-radius": {
+            enabledSelector: "#borderRadiusEnabled",
+            selector: "#borderRadius",
+            type: "number"
+        }
     },
     ".sectionBody, .error": {
         "background-color": {
