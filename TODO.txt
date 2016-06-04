@@ -2,10 +2,3 @@
 * Remove React dependency
 * Optimize HTML structure
 * Embed search results into page (no separate search page)
-[done] Implement better sidebar
-[done] Add ability to edit file ratings
-[done] Implement movable postform
-[done] Add ability to use Redis cluster
-[done] Implement hiding posts by similar text
-[done] Use SockJS (WebSocket wrapping/emulation lib)
-[done] Generate image hashes from previews, not the source image
