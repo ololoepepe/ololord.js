@@ -524,6 +524,7 @@ lord.logoutImplementation = function(form, vk) {
         expires: lord.Billion,
         path: "/"
     });
+    lord.removeLocalObject("levels");
     lord.removeLocalObject("lastChatCheckDate");
     if (vk) {
         lord.setCookie("vkAuth", "", {

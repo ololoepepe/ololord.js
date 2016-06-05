@@ -50,15 +50,21 @@
                 var html = lord.id("model-" + modelName).innerHTML;
                 lord.models[modelName] = JSON.parse(html);
                 if ("base" == modelName) {
-                    var levels = {};
-                    try {
-                        levels = JSON.parse(lord.getCookie("tmp_levels"));
-                    } catch (ex) {
-                        levels = {};
-                    }
                     var hashpass = lord.getCookie("hashpass");
+                    var levels = hashpass ? lord.getLocalObject("levels", {}) : {};
+                    var tmpLevels = lord.getCookie("tmp_levels");
+                    if (tmpLevels) {
+                        try {
+                            tmpLevels = JSON.parse(tmpLevels);
+                        } catch (ex) {
+                            //Do nothing
+                        }
+                    }
+                    if (tmpLevels) {
+                        levels = tmpLevels;
+                        lord.setLocalObject("levels", levels);
+                    }
                     lord.models[modelName].user = {
-                        ip: lord.getCookie("tmp_ip"),
                         levels: levels,
                         hashpass: hashpass,
                         loggedIn: !!hashpass

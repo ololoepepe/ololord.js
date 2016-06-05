@@ -2,3 +2,4 @@
 * Remove React dependency
 * Optimize HTML structure
 * Embed search results into page (no separate search page)
+* Use WebSockets for trakcing favorite threads
