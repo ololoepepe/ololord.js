@@ -204,11 +204,14 @@
                 var style = lord.node("style");
                 style.id = "postBodySize";
                 style.type = "text/css";
-                var m = lord.deviceType("mobile") ? 0 : 270;
+                var m = lord.deviceType("mobile") ? 0 : 60;
+                var mm = lord.deviceType("mobile") ? 0 : 270;
                 var k = lord.deviceType("mobile") ? 0 : 30;
                 var z = (!lord.deviceType("mobile") && lord.getLocalObject("sidebarVisible", true)) ? 178 : 0;
                 var css = ".postBody { max-width: " + ($(window).width() - (30 + z)) + "px; }";
-                css += ".postFile ~ .postText > blockquote, .blockLatex, .codeBlock { max-width: " + ($(window).width() - (30 + k + m + z)) + "px; }";
+                css += ".postText > blockquote { max-width: " + ($(window).width() - (30 + k + z + m)) + "px; }";
+                css += ".postFile ~ .postText > blockquote, .blockLatex, .codeBlock { max-width: " + ($(window).width() - (30 + k + mm + z)) + "px; }";
+                css += ".postFile ~ .postFile ~ .postText > blockquote, .blockLatex, .codeBlock { max-width: " + ($(window).width() - (30 + k + m + z)) + "px; }";
                 if (style.styleSheet)
                     style.styleSheet.cssText = css;
                 else
