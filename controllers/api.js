@@ -359,7 +359,7 @@ router.get("/api/fileTree.json", function(req, res, next) {
 router.get("/api/fileContent.json", function(req, res, next) {
     if (!req.isSuperuser())
         return next(Tools.translate("Not enough rights"));
-    const TEXT_FORMATS = ["txt", "js", "json", "jst", "html", "xml", "css", "md", "example", "gitignore"];
+    const TEXT_FORMATS = ["txt", "js", "json", "jst", "html", "xml", "css", "md", "example", "gitignore", "log"];
     var encoding = (TEXT_FORMATS.indexOf((req.query.fileName || "").split(".").pop()) < 0) ? "b" : undefined;
     return FS.read(__dirname + "/../" + req.query.fileName, encoding).then(function(content) {
         res.json({ content: content });

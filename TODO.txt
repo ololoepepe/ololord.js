@@ -3,3 +3,6 @@
 * Optimize HTML structure
 * Embed search results into page (no separate search page)
 * Use WebSockets for trakcing favorite threads
+* Add ability to reply to post previews (use floating post form)
+* Improve posting speed statistics
+* Add thread statistics
