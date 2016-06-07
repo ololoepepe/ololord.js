@@ -797,15 +797,33 @@ lord.chatWithUser = function(el) {
             return Promise.resolve();
         if (!ta.value)
             return Promise.resolve();
-        var formData = new FormData();
-        formData.append("boardName", lord.data("boardName"));
-        formData.append("postNumber", postNumber);
-        formData.append("text", ta.value);
-        return lord.post("/" + lord.data("sitePathPrefix") + "action/sendChatMessage", formData);
-    }).then(function(result) {
-        if (!result)
-            return Promise.resolve();
-        lord.checkChats();
+        if (lord.getLocalObject("useWebSockets", true)) {
+            return lord.sendWSMessage("sendChatMessage", {
+                boardName: boardName,
+                postNumber: postNumber,
+                text: ta.value
+            }).then(function(msg) {
+                var key = boardName + ":" + postNumber;
+                var chats = lord.getLocalObject("chats", {});
+                if (!chats[key])
+                    chats[key] = [msg];
+                else
+                    chats[key].push(msg);
+                lord.setLocalObject("chats", chats);
+                lord.updateChat([key]);
+            });
+        } else {
+            var formData = new FormData();
+            formData.append("boardName", boardName);
+            formData.append("postNumber", postNumber);
+            formData.append("text", ta.value);
+            var action = "/" + lord.data("sitePathPrefix") + "action/sendChatMessage";
+            return lord.post(action, formData).then(function(result) {
+                if (!result)
+                    return Promise.resolve();
+                lord.checkChats();
+            });
+        }
     }).catch(lord.handleError);
 };
 
