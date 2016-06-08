@@ -3287,7 +3287,7 @@ lord.initializeOnLoadBoard = function() {
             bumpLimitReached: lord.data("bumpLimitReached")
         };
     }
-    if (c.threadOrBoard && c.model.board.captchaEnabled) {
+    if (c.threadOrBoard) {
         c.model.customPostFormField = lord.customPostFormField;
         c.model.customPostFormOption = lord.customPostFormOption;
         c.model.postformRules = JSON.parse(lord.id("model-postformRules").innerHTML);
@@ -3316,39 +3316,41 @@ lord.initializeOnLoadBoard = function() {
                 $("#markup").width($(this).width() + 8);
             }).width(400).resize();
         }
-        var captcha = lord.selectCaptchaEngine();
-        var appendCaptchaWidgetToContainer = function(container) {
-            if (captcha && captcha.widgetHtml)
-                container.innerHTML = captcha.widgetHtml;
-            else if (captcha && captcha.widgetTemplate)
-                container.appendChild(lord.template(captcha.widgetTemplate, captcha));
-        };
-        lord.api("captchaQuota", { boardName: lord.data("boardName") }).then(function(result) {
-            var quota = result.quota;
-            if (quota > 0) {
-                appendCaptchaWidgetToContainer(lord.id("hiddenPostForm"));
-                var span = lord.node("span");
-                span.appendChild(lord.node("text", lord.text("noCaptchaText") + ". "
-                    + lord.text("captchaQuotaText") + " " + quota));
-                lord.id("captchaContainer").appendChild(span);
-            } else {
-                appendCaptchaWidgetToContainer(lord.id("captchaContainer"));
-            }
-            if (captcha && captcha.script) {
-                var script = lord.node("script");
-                script.type = "text/javascript";
-                script.innerHTML = captcha.script;
-                lord.queryOne("head").appendChild(script);
-            }
-            if (captcha && captcha.scriptSource) {
-                var script = lord.node("script");
-                script.type = "text/javascript";
-                script.src = captcha.scriptSource;
-                lord.queryOne("head").appendChild(script);
-            }
-            if (typeof lord.postFormLoaded == "function")
-                lord.postFormLoaded();
-        }).catch(lord.handleError);
+        if (c.model.board.captchaEnabled) {
+            var captcha = lord.selectCaptchaEngine();
+            var appendCaptchaWidgetToContainer = function(container) {
+                if (captcha && captcha.widgetHtml)
+                    container.innerHTML = captcha.widgetHtml;
+                else if (captcha && captcha.widgetTemplate)
+                    container.appendChild(lord.template(captcha.widgetTemplate, captcha));
+            };
+            lord.api("captchaQuota", { boardName: lord.data("boardName") }).then(function(result) {
+                var quota = result.quota;
+                if (quota > 0) {
+                    appendCaptchaWidgetToContainer(lord.id("hiddenPostForm"));
+                    var span = lord.node("span");
+                    span.appendChild(lord.node("text", lord.text("noCaptchaText") + ". "
+                        + lord.text("captchaQuotaText") + " " + quota));
+                    lord.id("captchaContainer").appendChild(span);
+                } else {
+                    appendCaptchaWidgetToContainer(lord.id("captchaContainer"));
+                }
+                if (captcha && captcha.script) {
+                    var script = lord.node("script");
+                    script.type = "text/javascript";
+                    script.innerHTML = captcha.script;
+                    lord.queryOne("head").appendChild(script);
+                }
+                if (captcha && captcha.scriptSource) {
+                    var script = lord.node("script");
+                    script.type = "text/javascript";
+                    script.src = captcha.scriptSource;
+                    lord.queryOne("head").appendChild(script);
+                }
+                if (typeof lord.postFormLoaded == "function")
+                    lord.postFormLoaded();
+            }).catch(lord.handleError);
+        }
     }
     if (lord.deviceType("mobile"))
         lord.setTooltips();

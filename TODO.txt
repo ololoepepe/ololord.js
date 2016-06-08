@@ -6,3 +6,14 @@
 * Add ability to reply to post previews (use floating post form)
 * Improve posting speed statistics
 * Add thread statistics
+* Remove "NO_ACCESS" ban level (retain "READ_ONLY")
+* Implement subnet support
+* Limit WebSocket request count per period of time
+* Implement limiting access by country
+* Improve DB structure
+* Incapsulate actions (reduce coherence)
+* Implement plugin support
+* Fix post previews
+* Rename "d" board to "withUserAgent"
+* Remove some boards and add them to the Wiki as an example of custom boards
+* Remove unneeded arguments from "custom*" funcion calls
