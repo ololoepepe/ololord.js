@@ -835,7 +835,7 @@ router.post("/action/superuserReload", function(req, res, next) {
                 return Global.IPC.send("reloadBoards");
             case "config":
                 return Global.IPC.send("reloadConfig");
-            case "controller":
+            case "templates":
                 return controller.initialize();
             default:
                 return Promise.resolve();
