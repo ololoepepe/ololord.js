@@ -27,3 +27,4 @@
 * Auto save post form
 * Do not show update and auto update buttons in archived threads
 * Add classes for custom post body/header parts
+* Serve local copies of YouTube, Coub and Vocaroo favicons
