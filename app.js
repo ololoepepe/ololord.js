@@ -9,7 +9,7 @@ var Util = require("util");
 
 var Global = require("./helpers/global");
 Global.Program = require("commander");
-Global.Program.version("1.1.1-beta")
+Global.Program.version("1.1.1")
     .option("-c, --config-file <file>", "Path to the config.json file")
     .option("-r, --regenerate", "Regenerate the cache on startup")
     .option("-a, --archive", "Regenerate archived threads, too")

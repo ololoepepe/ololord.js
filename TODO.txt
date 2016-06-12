@@ -21,3 +21,8 @@
 * Remove some boards and add them to the Wiki as an example of custom boards
 * Remove unneeded arguments from "custom*" funcion calls
 * Improve time correction
+* Improve hotkeys (add ability to disable a singel hotkey; fix Ctrl+Right, etc.)
+* Validate post form before submitting
+* Auto save post form
+* Do not show update and auto update buttons in archived threads
+* Add classes for custom post body/header parts
