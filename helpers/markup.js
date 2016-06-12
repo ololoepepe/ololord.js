@@ -137,6 +137,10 @@ var matchCoubLink = function(href) {
     return href.match(/^https?:\/\/coub\.com\/view\/[^\/\?]+.*$/);
 };
 
+var matchVocarooLink = function(href) {
+    return href.match(/^https?:\/\/vocaroo\.com\/i\/[a-zA-Z0-9]+$/);
+};
+
 var getTwitterEmbeddedHtml = function(href, defaultHtml) {
     return HTTP.request({
         method: "GET",
@@ -265,6 +269,17 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
     }).then(function(html) {
         return Promise.resolve(html);
     });
+};
+
+var getVocarooEmbeddedHtml = function(href, defaultHtml) {
+    var match = href.match(/^https?:\/\/vocaroo\.com\/i\/([a-zA-Z0-9]+)$/);
+    var audioId = match ? match[1] : null;
+    if (!audioId)
+        return Promise.resolve(defaultHtml);
+    var html = controller.sync("vocarooAudioLink", { info: { id: audioId } });
+    if (!html)
+        return Promise.reject(Tools.translate("Failed to create Vocaroo audio embedded container"));
+    return Promise.resolve(html);
 };
 
 var ProcessingInfo = function(text, boardName, referencedPosts, deletedPost, referencesToReplace) {
@@ -643,6 +658,8 @@ var convertExternalLink = function(info, text, matchs, _, options) {
         return getYoutubeEmbeddedHtml(href, def);
     if (matchCoubLink(href))
         return getCoubEmbeddedHtml(href, def);
+    if (matchVocarooLink(href))
+        return getVocarooEmbeddedHtml(href, def);
     return Promise.resolve(def);
 };
 
@@ -733,6 +750,8 @@ var convertUrl = function(info, text, matchs, matche, options) {
         return getYoutubeEmbeddedHtml(href, def);
     if (matchCoubLink(href))
         return getCoubEmbeddedHtml(href, def);
+    if (matchVocarooLink(href))
+        return getVocarooEmbeddedHtml(href, def);
     return Promise.resolve(def);
 };
 

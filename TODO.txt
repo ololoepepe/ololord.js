@@ -1,3 +1,4 @@
+[done] Add Vocaroo embedding support
 * Use Babel
 * Use LESS
 * Use Gulp
