@@ -10,57 +10,57 @@ importScripts("api.js");
 
 //TODO: Individual argument regexp
 lord.TokenTypes = [{
-    "name": "all"
+    name: "all"
 }, {
-    "name": "words",
-    "args": true
+    name: "words",
+    args: true
 }, {
-    "name": "op"
+    name: "op"
 }, {
-    "name": "wipe",
-    "args": true
+    name: "wipe",
+    args: true
 }, {
-    "name": "subj",
-    "args": "opt"
+    name: "subj",
+    args: "optrx"
 }, {
-    "name": "name",
-    "args": "opt"
+    name: "name",
+    args: "opt"
 }, {
-    "name": "trip",
-    "args": "opt"
+    name: "trip",
+    args: "opt"
 }, {
-    "name": "sage",
-    "args": false
+    name: "sage",
+    args: false
 }, {
-    "name": "tlen",
-    "args": "opt"
+    name: "tlen",
+    args: "opt"
 }, {
-    "name": "num",
-    "args": true
+    name: "num",
+    args: true
 }, {
-    "name": "img",
-    "args": "opt"
+    name: "img",
+    args: "opt"
 }, {
-    "name": "imgn",
-    "args": true
+    name: "imgn",
+    args: true
 }, {
-    "name": "ihash",
-    "args": true
+    name: "ihash",
+    args: true
 }, {
-    "name": "exp",
-    "args": true
+    name: "exp",
+    args: "rx"
 }, {
-    "name": "exph",
-    "args": true
+    name: "exph",
+    args: "rx"
 }, {
-    "name": "video",
-    "args": "opt"
+    name: "video",
+    args: "optrx"
 }, {
-    "name": "vauthor",
-    "args": true
+    name: "vauthor",
+    args: true
 }, {
-    "name": "rep",
-    "args": true
+    name: "rep",
+    args: "rx"
 }];
 
 /*Functions*/
@@ -86,6 +86,7 @@ lord.parseSpells = function(text) {
         pos += first;
         return text.slice(first);
     };
+    var inRegexp;
     var nextToken = function(text) {
         if (text.search(/[&\|\!\(\)]/) == 0) { //Special tokens
             pos += 1;
@@ -101,10 +102,22 @@ lord.parseSpells = function(text) {
         for (var i = 0; i < lord.TokenTypes.length; ++i) {
             var TokenType = lord.TokenTypes[i];
             var pattern = "^\\#" + TokenType.name + "(\\[(\\w+)(\\,(\\d+))?\\])?";
-            if ("opt" == TokenType.args)
+            switch (TokenType.args) {
+            case "opt":
                 pattern += "\\(((\\\\\\)|[^\\)])*?)\\)";
-            else if (TokenType.args)
+                break;
+            case "rx":
+                pattern += "\\((\/.*\/(i|igm?|img?|g|gmi?|gim?|m|mig?|mgi?)?)?\\)";
+                break;
+            case "optrx":
+                pattern += "\\(\/.*\/(i|igm?|img?|g|gmi?|gim?|m|mig?|mgi?)?\\)";
+                break;
+            case true:
                 pattern += "\\(((\\\\\\)|[^\\)])+?)\\)";
+                break;
+            default:
+                break;
+            }
             var rx = new RegExp(pattern);
             if (0 != text.search(rx))
                 continue;

@@ -524,6 +524,7 @@ lord.logoutImplementation = function(form, vk) {
         expires: lord.Billion,
         path: "/"
     });
+    lord.removeLocalObject("levels");
     lord.removeLocalObject("lastChatCheckDate");
     if (vk) {
         lord.setCookie("vkAuth", "", {
@@ -2153,9 +2154,13 @@ lord.adjustPostBodySize = function() {
     nstyle.id = "postBodySize";
     nstyle.type = "text/css";
     var width = $("#content").width();
-    var m = lord.deviceType("mobile") ? 0 : 270;
+    var m = lord.deviceType("mobile") ? 0 : 60;
+    var mm = lord.deviceType("mobile") ? 0 : 270;
+    var m = lord.deviceType("mobile") ? 0 : 60;
     var css = ".postBody { max-width: " + (width - 14) + "px; }\n";
-    css += ".postFile ~ .postText > blockquote, .blockLatex, .codeBlock { max-width: " + (width - m) + "px; }";
+    css += ".postText > blockquote { max-width: " + (width - m) + "px; }";
+    css += ".postFile ~ .postText > blockquote, .blockLatex, .codeBlock { max-width: " + (width - mm) + "px; }";
+    css += ".postFile ~ .postFile ~ .postText > blockquote, .blockLatex, .codeBlock { max-width: " + (width - m) + "px; }";
     if (nstyle.styleSheet)
         nstyle.styleSheet.cssText = css;
     else
@@ -2284,7 +2289,7 @@ lord.initializeOnLoadBase = function() {
                     var pos = bs.position();
                     $(this).css({
                         position: "absolute",
-                        left: Math.floor(pos.left + bs.width() / 2 - 100) + "px",
+                        left: Math.max(Math.floor(pos.left + bs.width() / 2 - 100), 8) + "px",
                         top: Math.floor(pos.top + bs.height() + 15) + "px",
                         width: "200px"
                     });
