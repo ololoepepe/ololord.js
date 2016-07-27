@@ -1933,7 +1933,7 @@ span.CodeMirror-selectedtext { background: none; }
 .favicon {
   width: 16px;
   height: 16px;
-  background-image: url('../img/sprite-favicons-16x16.png');
+  background-image: url('../img/sprites/favicons-16x16.png');
   display: inline-block;
 }
 .favicon-coub {
@@ -1963,7 +1963,7 @@ span.CodeMirror-selectedtext { background: none; }
 .flag {
   width: 16px;
   height: 11px;
-  background-image: url('../img/sprite-flags-16x11.png');
+  background-image: url('../img/sprits/flags-16x11.png');
   display: inline-block;
 }
 .flag-ad {
@@ -2737,7 +2737,7 @@ span.CodeMirror-selectedtext { background: none; }
 .icon-16 {
   display: inline-block;
   background-repeat: no-repeat;
-  background-image: url('../img/sprite-icons-16x16.svg');
+  background-image: url('../img/sprites/icons-16x16.svg');
 }
 .icon-music-plus {
   width: 16px;
@@ -3045,7 +3045,7 @@ span.CodeMirror-selectedtext { background: none; }
 .icon-20 {
   display: inline-block;
   background-repeat: no-repeat;
-  background-image: url('../img/sprite-icons-20x20.svg');
+  background-image: url('../img/sprites/icons-20x20.svg');
 }
 .icon-20.icon-latex {
   width: 20px;
@@ -3120,7 +3120,7 @@ span.CodeMirror-selectedtext { background: none; }
 .icon-24 {
   display: inline-block;
   background-repeat: no-repeat;
-  background-image: url('../img/sprite-icons-24x24.svg');
+  background-image: url('../img/sprites/icons-24x24.svg');
 }
 .icon-24.icon-archive {
   width: 27px;
@@ -3163,7 +3163,7 @@ span.CodeMirror-selectedtext { background: none; }
 .icon-32 {
   display: inline-block;
   background-repeat: no-repeat;
-  background-image: url('../img/sprite-icons-32x32.svg');
+  background-image: url('../img/sprites/icons-32x32.svg');
 }
 .icon-32.icon-file-open {
   width: 32px;
@@ -4078,7 +4078,7 @@ span.CodeMirror-selectedtext { background: none; }
 :root.rating-r-15 .post-file-link[data-rating='R-18G'],
 :root.rating-sfw .post-file-link[data-rating='R-18G'] {
   display: inline-block;
-  background: url('../img/r-18g.png') center center;
+  background: url('../img/rating/r-18g.png') center center;
 }
 :root.rating-r-18 .post-file-link[data-rating='R-18G'] img,
 :root.rating-r-15 .post-file-link[data-rating='R-18G'] img,
@@ -4088,7 +4088,7 @@ span.CodeMirror-selectedtext { background: none; }
 :root.rating-r-15 .post-file-link[data-rating='R-18'],
 :root.rating-sfw .post-file-link[data-rating='R-18'] {
   display: inline-block;
-  background: url('../img/r-18.png') center center;
+  background: url('../img/rating/r-18.png') center center;
 }
 :root.rating-r-15 .post-file-link[data-rating='R-18'] img,
 :root.rating-sfw .post-file-link[data-rating='R-18'] img {
@@ -4096,7 +4096,7 @@ span.CodeMirror-selectedtext { background: none; }
 }
 :root.rating-sfw .post-file-link[data-rating='R-15'] {
   display: inline-block;
-  background: url('../img/r-15.png') center center;
+  background: url('../img/rating/r-15.png') center center;
 }
 :root.rating-sfw .post-file-link[data-rating='R-15'] img {
   display: none;

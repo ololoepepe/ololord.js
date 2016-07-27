@@ -662,10 +662,8 @@ Board.initialize = function() {
 
         Board.addBoard(new Board("cg", Tools.translate.noop("Console games", "boardTitle")));
 
-        Board.addBoard(require("./templates/with-user-agents")("d",
-            Tools.translate.noop("Board /d/iscussion", "boardTitle")));
-        Board.addBoard(require("./templates/with-external-links")("echo",
-            Tools.translate.noop("Boardsphere echo", "boardTitle")));
+        Board.addBoard(new Board("d", Tools.translate.noop("Board /d/iscussion", "boardTitle")));
+        Board.addBoard(new Board("echo", Tools.translate.noop("Boardsphere echo", "boardTitle")));
 
         Board.addBoard(new Board("h", Tools.translate.noop("/h/entai", "boardTitle")));
 
@@ -685,9 +683,8 @@ Board.initialize = function() {
         Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"),
             { defaultUserName: Tools.translate.noop("Whiner", "defaultUserName") }));
 
-        Board.addBoard(require("./templates/with-votings")("rpg",
-            Tools.translate.noop("Role-playing games", "boardTitle")));
-        Board.addBoard(require("./templates/with-likes")("soc", Tools.translate.noop("Social life", "boardTitle"),
+        Board.addBoard(new Board("rpg", Tools.translate.noop("Role-playing games", "boardTitle")));
+        Board.addBoard(new Board("soc", Tools.translate.noop("Social life", "boardTitle"),
             { defaultUserName: Tools.translate.noop("Life of the party", "defaultUserName") }));
 
         Board.addBoard(new Board("vg", Tools.translate.noop("Video games", "boardTitle"),
