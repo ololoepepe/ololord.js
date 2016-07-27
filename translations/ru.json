@@ -824,6 +824,11 @@
             "value": "Убрать"
         }
     },
+    "Add": {
+        "addButtonText": {
+            "value": "Добавить"
+        }
+    },
     "Close": {
         "closeButtonText": {
             "value": "Закрыть"
@@ -1170,7 +1175,7 @@
         }
     },
     "SFW - safe for work (no socially condemned content)\nR-15 - restricted for 15 years (contains ecchi, idols, violence)\nR-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\nR-18G - restricted for 18 years, guidance advised (shemale, death, guro, scat, defecation, urination, etc.)": {
-        "ratingTooltip": {
+        "_default": {
             "value": "SFW - safe for work (отсутствует контент, осуждаемый обществом)\nR-15 - restricted for 15 years (содержит эччи, idols, сцены жестокости)\nR-18 - restricted for 18 years (гениталии, половой акт, оскорбительный материал религиозного/расового/национального характера)\nR-18G - restricted for 18 years, guidance adviced (транссексуалы, смерть, гуро, скат, дефекация, уринация, и т.д.)"
         }
     },
@@ -1273,7 +1278,7 @@
         }
     },
     "Hide post form": {
-        "hidePostFormText": {
+        "_default": {
             "value": "Скрыть форму постинга"
         }
     },
@@ -1399,9 +1404,9 @@
             "value": "Ответы:"
         }
     },
-    "Find source...": {
+    "Find source…": {
         "findSourceText": {
-            "value": "Найти соус..."
+            "value": "Найти соус…"
         }
     },
     "Download all files": {
@@ -1478,7 +1483,7 @@
         }
     },
     "This file exists on server. It will NOT be uploaded, but WILL be copied.": {
-        "fileExistsOnServerText": {
+        "_default": {
             "value": "Этот файл существует на сервере. Он НЕ будет загружен, но БУДЕТ скопирован."
         }
     },
@@ -1552,14 +1557,14 @@
             "value": "Синтаксис блока кода"
         }
     },
-    "Loading posts...": {
+    "Loading posts…": {
         "loadingPostsMessage": {
-            "value": "Загрузка постов..."
+            "value": "Загрузка постов…"
         }
     },
-    "Searching for posts...": {
+    "Searching for posts…": {
         "searchingMessage": {
-            "value": "Поиск постов..."
+            "value": "Поиск постов…"
         }
     },
     "Rating:": {
@@ -1568,17 +1573,17 @@
         }
     },
     "Specify file URL": {
-        "attachFileByLinkText": {
+        "_default": {
             "value": "Указать ссылку на файл"
         }
     },
     "Specify file by drawing or draw on attached image": {
-        "attachFileByDrawingText": {
+        "_default": {
             "value": "Указать файл, нарисовав картинку, либо рисовать на прикрепленной картинке"
         }
     },
     "Specify Vkontakte audio file": {
-        "attachFileByVkText": {
+        "_default": {
             "value": "Указать аудио-файл из Vkontakte"
         }
     },
@@ -1823,22 +1828,22 @@
         }
     },
     "Show post form": {
-        "showPostFormText": {
+        "_default": {
             "value": "Показать форму постинга"
         }
     },
     "Comment. Max length:": {
-        "postFormTextPlaceholder": {
+        "_default": {
             "value": "Комментарий. Макс. длина:"
         }
     },
     "The login systyem does NOT store any data on the server. It only stores a cookie on your PC to allow post deleting, etc. without entering password every time.<br />It is also used for moderator/administrator authentication.": {
-        "loginSystemDescriptionText": {
+        "_default": {
             "value": "Система логина НЕ СОХРАНЯЕТ никаких данных на сервере. Она только хранит cookie на вашем ПК, что позволяет удалять посты и т.д. без ввода пароля каждый раз.<br />Она также используется для аутентификации модераторов/администраторов."
         }
     },
     "When logging in with Vkontakte, you may omit the login, but to be logged in with the same login on each browser, you have to specify it.<br />When logged in with Vkontakte, you are able to attach your VK audio.<br />This does not affect your anonymity in any way (the files are downloaded by the server and no links to your VK page are shown).": {
-        "loginSystemVkontakteDescriptionText": {
+        "_default": {
             "value": "При входе в систему через Вкотнакте можно не указывать логин, но, чтобы быть залогиненым во всех браузерах под одним логином, его потребуется указать.<br />Когда вы залогинены через Вконтакте, вы можете прикреплять к посту свои аудиозаписи из ВК.<br />Это никак не влияет на вашу анонимность (файлы скачиваются сервером, и никакие ссылки на вашу страницу ВК не отображаются)."
         }
     },
@@ -1912,28 +1917,28 @@
             "value": "Не нравится"
         }
     },
-    "Loading threads...": {
+    "Loading threads…": {
         "loadingThreadsMessage": {
-            "value": "Загрузка тредов..."
+            "value": "Загрузка тредов…"
         }
     },
     "Tripcode activated for THIS THREAD only": {
-        "threadTripcodeActivatedText": {
+        "_default": {
             "value": "Трипкод активирован только в ЭТОМ ТРЕДЕ"
         }
     },
     "Tripcode deactivated for THIS THREAD only": {
-        "threadTripcodeDeactivatedText": {
+        "_default": {
             "value": "Трипкод деактивирован только в ЭТОМ ТРЕДЕ"
         }
     },
     "Global tripcode activated. Uncheck tripcode option OUTSIDE THREAD to disable it": {
-        "globalTripcodeActivatedText": {
+        "_default": {
             "value": "Трипкод активирован везде. Снимите отметку трипкода ВНЕ ТРЕДА, чтобы отключить его"
         }
     },
     "Global tripcode deactivated (except threads where it is activated explicitly)": {
-        "globalTripcodeDeactivatedText": {
+        "_default": {
             "value": "Глобальный трипкод деактивирован (кроме тредов, где он был активирован явно)"
         }
     },
@@ -1972,9 +1977,9 @@
             "value": "Свернуть"
         }
     },
-    "Redirecting to thread...": {
+    "Redirecting to thread…": {
         "redirectingToThreadText": {
-            "value": "Перенаправление в тред..."
+            "value": "Перенаправление в тред…"
         }
     },
     "YouTube and Coub video embedding": {
@@ -2237,7 +2242,7 @@
             "value": "Нет такого поста"
         },
         "noSuchPostErrorText": {
-            "value": "No such post"
+            "value": "Нет такого поста"
         }
     },
     "Failed to get file headers": {
@@ -2441,12 +2446,12 @@
         }
     },
     "Copy settings string and save it somewhere": {
-        "copySettingsHint": {
+        "_default": {
             "value": "Скопируйте строку с настройками и где-нибудь сохраните"
         }
     },
     "Paste settings string here": {
-        "pasteSettingsHint": {
+        "_default": {
             "value": "Вставьте сюда строку с настройками"
         }
     },
@@ -2526,17 +2531,17 @@
         }
     },
     "No password specified, and not logged in": {
-        "noPasswordNotLoggedInError": {
+        "_default": {
             "value": "Пароль не указан, и вы не залогинены"
         }
     },
     "Synchronization data will be available within 5 minutes": {
-        "synchronizationTimeoutText": {
+        "_default": {
             "value": "Данные синхронизации будут доступны в течение 5 минут"
         }
     },
     "Synchronization completed successfully": {
-        "synchronizationSuccessfulText": {
+        "_default": {
             "value": "Синхронизация успешно завершена"
         }
     },
@@ -2685,24 +2690,24 @@
             "value": "Контент"
         }
     },
-    "Loading bans...": {
+    "Loading bans…": {
         "loadingBansMessage": {
-            "value": "Загрузка банов..."
+            "value": "Загрузка банов…"
         }
     },
-    "Loading users...": {
+    "Loading users…": {
         "loadingUsersMessage": {
-            "value": "Загрузка пользователей..."
+            "value": "Загрузка пользователей…"
         }
     },
-    "New ban...": {
+    "New ban…": {
         "newBanText": {
-            "value": "Новый бан..."
+            "value": "Новый бан…"
         }
     },
-    "New user...": {
+    "New user…": {
         "newUserText": {
-            "value": "Новый пользователь..."
+            "value": "Новый пользователь…"
         }
     },
     "A user with this hashpass is already registered": {
@@ -3184,7 +3189,7 @@
         }
     },
     "Regenerate archived threads": {
-        "regenerateArchivedThreadsLabelText": {
+        "_default": {
             "value": "Сгенерировать заново архивные треды"
         }
     },
@@ -3219,7 +3224,7 @@
         }
     },
     "Start dragging to make post form float": {
-        "postFormHeaderLabelText": {
+        "_default": {
             "value": "Потяните, чтобы сделать форму плавающей"
         }
     },

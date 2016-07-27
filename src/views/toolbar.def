@@ -1,0 +1,8 @@
+<nav id='toolbar' class='toolbar navbar js-only js-navbar'>{{#def.innerToolbar}}</nav>
+<div class='toolbar toolbar-placeholder js-only'>{{#def.innerToolbar}}</div>
+<div id='toolbar-drop-area' class='toolbar-drop-area drop-area' style='display: none;'></div>
+<script type='text/javascript'>
+  (function() {
+    window.lord.require().initializeToolbar();
+  })();
+</script>

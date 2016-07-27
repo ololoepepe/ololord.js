@@ -1,0 +1,71 @@
+<input id='sidebar-switch' type='checkbox' class='sidebar-switch' checked='true' />
+<label for='sidebar-switch' title='{{!it.translate('Show/hide sidebar')}}'></label>
+<nav id='sidebar' class='sidebar'>
+  <div class='sidebar-buttons'>
+    <div class='sidebar-action-buttons-container'>
+      <div class='js-only sidebar-action-buttons js-action-buttons'>{{#def.actionButtons}}</div>
+      <div class='no-js-only sidebar-action-buttons'>{{!it.translate('JavaScript is disabled')}}</div>
+    </div>
+  </div>
+  <div class='navbar sidebar-content js-navbar'>
+      {{~it.boardGroups :group}}
+        <div name='{{!group.name || '_boards'}}' class='sidebar-group js-navbar-group'
+             data-bind='style: { "border-bottom-width": ((settings.hiddenBoardGroups().indexOf("{{!group.name || '_boards'}}") >= 0) ? "0px": "") }'>
+          <div class='sidebar-group-title js-navbar-group-title'
+               data-bind='style: { cursor: "pointer" },
+                          click: toggleBoardGroupVisibility'>{{!group.title || it.translate('Boards')}}</div>
+          <div class='sidebar-group-body js-navbar-group-body'
+               data-bind='visible: settings.hiddenBoardGroups().indexOf("{{!group.name || '_boards'}}") < 0'>
+            {{~group.boards.filter(function(board) { return !board.hidden; }) :board}}
+              <div class='navbar-item js-navbar-item-board'
+                   data-bind='visible: settings.hiddenBoards().indexOf("{{!board.name}}") < 0'>
+                <a href='/{{!it.site.pathPrefix}}{{!board.name}}'
+                   data-board-name='{{!board.name}}'>{{!board.title}}</a>
+              </div>
+            {{~}}
+          </div>
+        </div>
+      {{~}}
+      <div name='_general' class='sidebar-group js-navbar-group'
+           data-bind='style: { "border-bottom-width": ((settings.hiddenBoardGroups().indexOf("_general") >= 0) ? "0px": "") }'>
+        <div class='sidebar-group-title js-navbar-group-title'
+             data-bind='style: { cursor: "pointer" },
+                        click: toggleBoardGroupVisibility'>{{!it.translate('General')}}</div>
+        <div class='sidebar-group-body js-navbar-group-body'
+             data-bind='visible: settings.hiddenBoardGroups().indexOf("_general") < 0'>
+          <div class='navbar-item'>
+            <a href='/{{!it.site.pathPrefix}}' class='icon icon-home button-icon'></a>
+            <a href='/{{!it.site.pathPrefix}}'>{{!it.translate('Home', 'toHomePageText')}}</a>
+          </div>
+          <div class='navbar-item'>
+            <a href='/{{!it.site.pathPrefix}}markup.html' class='icon icon-code button-icon'></a>
+            <a href='/{{!it.site.pathPrefix}}markup.html'>{{!it.translate('Markup', 'toMarkupPageText')}}</a>
+          </div>
+          <div class='navbar-item'>
+            <a href='/{{!it.site.pathPrefix}}faq.html' class='icon icon-question button-icon'></a>
+            <a href='/{{!it.site.pathPrefix}}faq.html'>{{!it.translate('F.A.Q.', 'toFaqPageText')}}</a>
+          </div>
+          <div class='navbar-item user-level-moder-only'>
+            <a href='/{{!it.site.pathPrefix}}manage.html' class='icon icon-gear button-icon'></a>
+            <a href='/{{!it.site.pathPrefix}}manage.html'>{{!it.translate('Management', 'toManagePageText')}}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='js-only sidebar-footer js-sidebar-footer'>
+    <select class='select theme-select'
+            data-bind='value: settings.style'>
+      {{~it.styles :style}}
+        <option value='{{!style.name}}'>{{!style.title}}</option>
+      {{~}}
+    </select>
+  </div>
+</nav>
+<div class='sidebar-placeholder'></div>
+<div id='sidebar-drop-area' class='sidebar-drop-area drop-area' style='display: none;'></div>
+<script type='text/javascript'>
+  (function() {
+    window.lord.require().initializeSidebar();
+  })();
+</script>

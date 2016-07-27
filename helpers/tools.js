@@ -50,7 +50,7 @@ var ExternalLinkRegexpPattern = (function() {
         + "(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])";
     var hostname = "([\\w\\p{L}\\.\\-]+)\\.([\\p{L}]{2,17}\\.?)";
     var port = ":\\d+";
-    var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\\,\\(\\)\\[\\]«»]*)*\\/?";
+    var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\'\"\\,\\(\\)\\[\\]«»]*)*\\/?";
     return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
 })();
 
@@ -226,7 +226,7 @@ module.exports.styles = function() {
     var path = __dirname + "/../public/css";
     FSSync.readdirSync(path).forEach(function(fileName) {
         if (fileName.split(".").pop() != "css"
-            || ["base", "desktop", "mobile"].indexOf(fileName.split(".").shift()) >= 0) {
+            || ["base-desktop", "base-mobile"].indexOf(fileName.split(".").shift()) >= 0) {
             return;
         }
         var name = fileName.split(".").shift();
@@ -249,7 +249,7 @@ module.exports.codeStyles = function() {
     FSSync.readdirSync(path).forEach(function(fileName) {
         if (fileName.split(".").pop() != "css")
             return;
-        var name = fileName.split(".").shift();
+        var name = fileName.split(".").slice(0, -1).join('.');
         var str = FSSync.readFileSync(path + "/" + fileName, "utf8");
         var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(str);
         var title = match ? match[1] : name;
@@ -592,9 +592,9 @@ module.exports.markupLatex = function(text, inline) {
                 return reject(data.errors[0] || data.errors);
             var html = data.svg;
             if (inline)
-                html = `<span class="inlineLatex">${html}</span>`;
+                html = `<span class="latex-inline">${html}</span>`;
             else
-                html = `<div class="blockLatex">${html}</div>`;
+                html = `<div class="latex-block">${html}</div>`;
             resolve(html);
         });
     });
@@ -610,7 +610,7 @@ module.exports.generateRandomImage = function(hash, mimeType, thumbPath) {
     var canvas = new Canvas(200, 200);
     var ctx = canvas.getContext("2d");
     Jdenticon.drawIcon(ctx, hash, 200);
-    return FS.read(__dirname + "/../public/img/" + mimeType.replace("/", "_") + "_logo.png", "b").then(function(data) {
+    return FS.read(__dirname + "/../thumbs/" + mimeType + ".png", "b").then(function(data) {
         var img = new Image;
         img.src = data;
         ctx.drawImage(img, 0, 0, 200, 200);
@@ -642,4 +642,15 @@ module.exports.writeFile = function(filePath, data) {
     }).then(function() {
         return FS.rename(tmpFilePath, filePath);
     });
+};
+
+module.exports.escaped = function(string) {
+  return escapeHtml(string);
+}
+
+module.exports.escapedSelector = function(string) {
+  if (typeof string !== 'string') {
+    return string;
+  }
+  return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, '-');
 };

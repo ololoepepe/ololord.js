@@ -20,8 +20,4 @@ router.get("/misc/tr.json", function(req, res) {
     res.json(controller.translationsModel());
 });
 
-router.get("/misc/partials.json", function(req, res) {
-    res.json(controller.publicPartialNames());
-});
-
 module.exports = router;

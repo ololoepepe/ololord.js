@@ -1,0 +1,36 @@
+<div class='file-input js-only js-file-input' title='{{!it.translate('Select file', 'selectFileText')}}'
+     data-bind='click: browseFile,
+                event: {
+                  dragover: dragOver,
+                  dragLeave: dragLeave,
+                  drop: fileDrop
+                }'>
+  <div class='file-input-row'>
+    {{#def['custom/fileInputButton/0'] || ''}}
+    <span class='file-input-preview icon-32 icon-file-open js-file-input-preview'></span>
+    {{#def['custom/fileInputButton/10'] || ''}}
+    <span class='icon-32 icon-link button-icon' title='{{!it.translate('Specify file URL')}}'
+          data-bind='click: attachFileByLink'></span>
+    {{#def['custom/fileInputButton/20'] || ''}}
+    <span class='icon-32 icon-paint button-icon'
+          title='{{!it.translate('Specify file by drawing or draw on attached image')}}'
+          data-bind='click: attachFileByDrawing'></span>
+    {{#def['custom/fileInputButton/30'] || ''}}
+    <span class='icon-32 icon-vk button-icon user-vk-auth-only'
+          title='{{!it.translate('Specify Vkontakte audio file')}}'
+          data-bind='click: attachFileByVk'></span>
+    {{#def['custom/fileInputButton/40'] || ''}}
+    <span class='file-input-label'>
+      <span class='file-input-label-text js-file-input-label-text'></span>
+      <span class='icon icon-cross button-icon file-input-remove-button'
+            title='{{!it.translate('Remove this file', 'removeFileText')}}'
+            data-bind='click: removeFile'></span>
+      <span class='icon icon-database sign-icon js-sign-file-exists-on-server' style='display: none;'
+            title='{{!it.translate('This file exists on server. '
+              + 'It will NOT be uploaded, but WILL be copied.')}}'></span>
+    </span>
+  </div>
+  <div class='file-input-row'>
+    {{#def['postForm/ratingSelect']}}
+  </div>
+</div>

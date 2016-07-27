@@ -1,0 +1,15 @@
+<div class='auto-resizable-div'>
+  <div class='row'>{{!it.translate('If password is empty, current hashpass will be used', 'enterPasswordText')}}</div>
+  <div class='row'>
+    {{#def['postForm/ratingSelect']}}
+  </div>
+  <div class='row display-flex-row flex-justify-space-between'>
+    {{!it.translate('Password:')}}
+    <input type='password'
+           data-bind='attr: { type: (passwordVisible() ? "text" : "password") },
+                      textInput: password' />
+    <button data-bind='text: (passwordVisible() ? "{{!it.translate('Hide', 'hidePasswordButtonText')}}"
+                         : "{{!it.translate('Show', 'showPasswordButtonText')}}"),
+                       click: togglePasswordVisibility'></button>
+  </div>
+</div>

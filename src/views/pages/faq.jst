@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' {{#def.rootBindings}}>
+  {{#def.head}}
+  <body>
+    {{#def.sidebar}}
+    <main id='content'>
+      {{#def.toolbar}}
+      <header>{{#def['custom/header'] || ''}}</header>
+      <h1 class='page-title'>
+        {{!it.title}}
+      </h1>
+      {{#def['custom/faq'] || ''}}
+      <footer>{{#def['custom/footer'] || ''}}</footer>
+      {{#def.player}}
+    </main>
+    {{#def.jQueryUIpositionFix}}
+  </body>
+</html>

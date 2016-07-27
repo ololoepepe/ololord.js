@@ -66,6 +66,9 @@ var Board = function(name, title, options) {
     this.defineProperty("bannerFileNames", function() {
         return Board._banners[name];
     });
+    this.defineProperty("postFormRules", function() {
+        return Board._postFormRules[name];
+    });
     this.defineSetting("skippedGetOrder", 0);
     this.defineSetting("opModeration", false);
     this.defineSetting("captchaQuota", 0);
@@ -95,15 +98,7 @@ var Board = function(name, title, options) {
     ]);
     this.defineSetting("postingEnabled", true);
     this.defineSetting("showWhois", false);
-    this.defineProperty("supportedCaptchaEngines", function() {
-        var ids = config("board." + name + ".supportedCaptchaEngines",
-            config("board.supportedCaptchaEngines", Captcha.captchaIds()));
-        if (!Util.isArray(ids))
-            ids = [];
-        return ids.map(function(id) {
-            return Captcha.captcha(id).info();
-        });
-    });
+    this.defineSetting("supportedCaptchaEngines", Captcha.captchaIds());
     this.defineProperty("permissions", function() {
         var p = {};
         Tools.forIn(require("../helpers/permissions").Permissions, function(defLevel, key) {
@@ -187,6 +182,7 @@ Board.boards = {};
         bumpLimit: this.bumpLimit,
         postLimit: this.postLimit,
         bannerFileNames: this.bannerFileNames,
+        postFormRules: this.postFormRules,
         launchDate: this.launchDate.toISOString(),
         permissions: this.permissions,
         opModeration: this.opModeration
@@ -256,10 +252,6 @@ Board.boards = {};
     return Promise.resolve();
 };
 
-/*public*/ Board.prototype.addTranslations = function(translate) {
-    //
-};
-
 /*public*/ Board.prototype.customPostHeaderPart = function() {
     //
 };
@@ -308,71 +300,10 @@ var renderFileInfo = function(fi) {
     delete post.user.ip;
     delete post.user.hashpass;
     delete post.user.password;
-    if (!this.showWhois) {
-        if (post.geolocation)
-            delete post.geolocation;
-        return Promise.resolve(post);
+    if (!post.geolocation.countryName) {
+      post.geolocation.countryName = "Unknown country";
     }
-    return Tools.flagName(post.geolocation.countryCode).then(function(flagName) {
-        post.geolocation.flagName = flagName || "default.png";
-        if (!post.geolocation.countryName)
-            post.geolocation.countryName = "Unknown country";
-        return Promise.resolve(post);
-    });
-};
-
-var getRules = function(boardName) {
-    var fileName = __dirname + "/../misc/rules/rules" + (boardName ? ("." + boardName) : "") + ".txt";
-    return FS.exists(fileName).then(function(exists) {
-        if (!exists)
-            return Promise.resolve();
-        return FS.read(fileName);
-    }).then(function(data) {
-        if (!data)
-            return [];
-        return data.split(/\r*\n+/gi).filter(function(rule) {
-            return rule;
-        });
-    });
-};
-
-/*public*/ Board.prototype.postformRules = function() {
-    if (this._postformRules)
-        return Promise.resolve(this._postformRules);
-    var c = {};
-    var _this = this;
-    return getRules().then(function(rules) {
-        c.common = rules;
-        return getRules(_this.name);
-    }).then(function(rules) {
-        c.specific = rules;
-        for (var i = c.specific.length - 1; i >= 0; --i) {
-            var rule = c.specific[i];
-            var rxExcept = /^#include\s+except(\((\d+(\,\d+)*)\))$/;
-            var rxSeveral = /^#include\s+(\d+(\,\d+)*)$/;
-            if ("#include all" == rule) {
-                Array.prototype.splice.apply(c.specific, [i, 1].concat(c.common));
-            } else if (rxExcept.test(rule)) {
-                var excluded = rule.match(rxExcept)[2].split(",").map(function(n) {
-                    return +n;
-                });
-                Array.prototype.splice.apply(c.specific, [i, 1].concat(c.common.filter(function(_, i) {
-                    return excluded.indexOf(i) < 0;
-                })));
-            } else if (rxSeveral.test(rule)) {
-                var included = rule.match(rxSeveral)[1].split(",").map(function(n) {
-                    return +n;
-                }).filter(function(n) {
-                    return n >= 0 && n < c.common.length;
-                }).map(function(n) {
-                    return c.common[n];
-                });
-                Array.prototype.splice.apply(c.specific, [i, 1].concat(included));
-            }
-        };
-        _this._postformRules = (c.specific.length > 0) ? c.specific : c.common;
-        return Promise.resolve(_this._postformRules);
-    });
+    return Promise.resolve(post);
 };
 
 /*public*/ Board.prototype.generateFileName = function(file) {
@@ -682,6 +613,25 @@ Board.sortThreadsByPostCount = function(a, b) {
         return 0;
 };
 
+var getRules = function(boardName) {
+  var fileName = `${__dirname}/../misc/rules/rules${(boardName ? ('.' + boardName) : '')}.txt`;
+  try {
+    if (!FSSync.existsSync(fileName)) {
+      return [];
+    }
+    var data = FSSync.readFileSync(fileName, "utf8");
+    if (!data) {
+      return [];
+    }
+    return data.split(/\r*\n+/gi).filter(function(rule) {
+      return rule;
+    });
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+};
+
 Board.initialize = function() {
     var reinit = Tools.hasOwnProperties(Board.boards);
     Board.boards = {};
@@ -728,15 +678,6 @@ Board.initialize = function() {
             { defaultUserName: Tools.translate.noop("Armchair warrior", "defaultUserName") }));
 
         board = new Board("pr", Tools.translate.noop("/pr/ogramming", "boardTitle"));
-        board.defineProperty("supportedCaptchaEngines", function() {
-            var ids = config("board.pr.supportedCaptchaEngines",
-                config("board.supportedCaptchaEngines", ["codecha"]));
-            if (!Util.isArray(ids))
-                ids = [];
-            return ids.map(function(id) {
-                return Captcha.captcha(id).info();
-            });
-        });
         board.defineSetting("markupElements", board.markupElements.concat(Board.MarkupElements.CodeMarkupElement,
             Board.MarkupElements.LatexMarkupElement, Board.MarkupElements.InlineLatexMarkupElement));
         Board.addBoard(board);
@@ -764,6 +705,37 @@ Board.initialize = function() {
             Board._banners[boardName] = [];
         }
     });
+
+  Board._postFormRules = {};
+  Board.boardNames().forEach(function(boardName) {
+    var common = getRules();
+    var specific = getRules(boardName);
+    for (var i = specific.length - 1; i >= 0; --i) {
+      var rule = specific[i];
+      var rxExcept = /^#include\s+except(\((\d+(\,\d+)*)\))$/;
+      var rxSeveral = /^#include\s+(\d+(\,\d+)*)$/;
+      if ('#include all' === rule) {
+        Array.prototype.splice.apply(specific, [i, 1].concat(common));
+      } else if (rxExcept.test(rule)) {
+        var excluded = rule.match(rxExcept)[2].split(",").map(function(n) {
+          return +n;
+        });
+        Array.prototype.splice.apply(specific, [i, 1].concat(common.filter(function(_, i) {
+          return excluded.indexOf(i) < 0;
+        })));
+      } else if (rxSeveral.test(rule)) {
+        var included = rule.match(rxSeveral)[1].split(",").map(function(n) {
+          return +n;
+        }).filter(function(n) {
+          return n >= 0 && n < common.length;
+        }).map(function(n) {
+          return common[n];
+        });
+        Array.prototype.splice.apply(specific, [i, 1].concat(included));
+      }
+    };
+    Board._postFormRules[boardName] = (specific.length > 0) ? specific : common;
+  });
 };
 
 module.exports = Board;

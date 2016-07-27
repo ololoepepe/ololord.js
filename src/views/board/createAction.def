@@ -1,0 +1,19 @@
+<div id='create-action-container-{{!position}}'
+     class='create-action-container {{? 'bottom' === position}}js-only{{?}} js-create-action-container'>
+  <div class='js-only'>
+    [<a id='toggle-post-form-visibility-button-{{!position}}' href='javascript:void(0);'
+        class='js-toggle-post-form-visibility-button'
+        data-bind='text: (("{{!position}}" === visiblePostFormContainerPosition())
+                     ? "{{!it.translate('Hide post form')}}" : "{{!it.translate('Show post form')}}"),
+                   click: togglePostFormVisibility.bind($data, "{{!position}}")'>{{!it.translate('Show post form')}}</a>]
+  </div>
+  <div id='post-form-container-{{!position}}'
+       class='post-form-container {{? 'top' === position}}no-js-only{{?}} js-post-form-container'>{{? 'top' === position}}{{#def['postForm/postForm']}}{{?}}</div>
+</div>
+{{? 'bottom' === position}}
+  <script type='text/javascript'>
+    (function() {
+      window.lord.require('./core/post-form').initialize();
+    })();
+  </script>
+{{?}}

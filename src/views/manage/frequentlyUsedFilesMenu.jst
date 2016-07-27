@@ -1,0 +1,9 @@
+<ul id='menu-management-frequently-used-files' class='menu'>
+  {{~it.files :file}}
+    <li class='nowrap'>
+      <span data-bind='click: editFile.bind($data, "{{!file.id}}")'>
+        {{!file.id}}
+      </span>
+    </li>
+  {{~}}
+</ul>

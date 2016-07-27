@@ -1,0 +1,11 @@
+<span class='post-name js-post-name {{? post.user.level}}post-name-{{!post.user.level.toLowerCase()}}{{?}} {{? !post.name}}post-name-default js-post-name-default{{?}}'>
+  {{? !post.name}}
+    {{!it.board.defaultUserName}}
+  {{??}}
+    {{? it.compareRegisteredUserLevels(post.user.level, 'ADMIN') >= 0}}
+      {{=post.name}}
+    {{??}}
+      {{!post.name}}
+    {{?}}
+  {{?}}
+</span>

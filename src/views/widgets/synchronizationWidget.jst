@@ -1,0 +1,29 @@
+<div class='auto-resizable-div'>
+  <div>{{!it.translate('If password is empty, current hashpass will be used', 'enterPasswordText')}}</div>
+  <div>
+    <div class='row display-flex-row flex-justify-space-between'>
+      {{!it.translate('Password:')}}
+      <input type='password'
+             data-bind='attr: { type: (passwordVisible() ? "text" : "password") },
+                        textInput: password' />
+      <button data-bind='text: (passwordVisible() ? "{{!it.translate('Hide', 'hidePasswordButtonText')}}"
+                           : "{{!it.translate('Show', 'showPasswordButtonText')}}"),
+                         click: togglePasswordVisibility'></button>
+    </div>
+    <div class='row'>
+      <input type='checkbox'
+             data-bind='checked: synchronizeSettings' />
+      {{!it.translate('Synchronize settings', 'synchronizeSettingsLabelText')}}
+    </div>
+    <div class='row'>
+      <input type='checkbox'
+             data-bind='checked: synchronizeCSSAndJS' />
+      {{!it.translate('Synchronize CSS and JS', 'synchronizeCssAndJsLabelText')}}
+    </div>
+    <div class='row'>
+      <input type='checkbox'
+             data-bind='checked: synchronizePassword' />
+      {{!it.translate('Synchronize password', 'synchronizePasswordLabelText')}}
+    </div>
+  </div>
+</div>

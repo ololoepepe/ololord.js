@@ -1,0 +1,27 @@
+<div id='thread-{{!thread.opPost.number}}' class='js-thread'
+     data-board-name='{{!thread.opPost.boardName}}'
+     {{~['fixed', 'closed', 'unbumpable', 'archived', 'expanded'] :option}}
+       {{? thread[option]}}
+         data-{{!option}}='true'
+       {{?}}
+     {{~}}>
+  {{~[thread.opPost] :post}}
+    {{#def['post/post']}}
+  {{~}}
+  {{? thread.omittedPosts > 0}}
+    <div class='thread-info'>
+      <div class='omitted-posts'>{{!it.translate('Posts omitted:', 'omittedPostsText')}} {{!thread.omittedPosts}}</div>
+      {{? !it.isThreadPage}}
+        <div class='mobile-only js-reply-to-thread-button-container'>
+          <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/res/{{!post.number}}.html'
+             class='button reply-to-thread-button'>{{!it.translate('Reply', 'toThread')}}</a>
+        </div>
+      {{?}}
+    </div>
+  {{?}}
+  <div class='thread-posts js-thread-posts'>
+    {{~thread.lastPosts :post}}
+      {{#def['post/post']}}
+    {{~}}
+  </div>
+</div>

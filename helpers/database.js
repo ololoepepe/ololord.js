@@ -552,8 +552,9 @@ module.exports.registerUser = function(password, levels, ips, notHashpass) {
     if (!Tools.hasOwnProperties(levels))
         return Promise.reject(Tools.translate("Access level is not specified for any board"));
     var invalidBoard = Object.keys(levels).some(function(boardName) {
-        if (!Board.board(boardName))
+        if (!Board.board(boardName)) {
             return true;
+          }
     });
     if (invalidBoard)
         return Promise.reject(Tools.translate("Invalid board"));
@@ -1015,7 +1016,6 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
             bannedFor: false,
             boardName: board.name,
             createdAt: date.toISOString(),
-            email: fields.email || null,
             geolocation: c.geo,
             markup: markupModes,
             name: fields.name || null,
@@ -1072,7 +1072,7 @@ var createPost = function(req, fields, files, transaction, threadNumber, date) {
     }).then(function() {
         return db.sadd("threadPostNumbers:" + board.name + ":" + threadNumber, c.postNumber);
     }).then(function() {
-        if (c.postCount >= board.bumpLimit || (fields.email && fields.email.toLowerCase() == "sage"))
+        if (c.postCount >= board.bumpLimit)
             return Promise.resolve();
         if (c.unbumpable)
             return Promise.resolve();
@@ -1100,7 +1100,7 @@ var checkCaptcha = function(req, fields) {
         var ceid = fields.captchaEngine;
         var isSupported = function(id) {
             for (var i = 0; i < supportedCaptchaEngines.length; ++i) {
-                if (supportedCaptchaEngines[i].id == id)
+                if (id === supportedCaptchaEngines[i])
                     return true;
             }
             return false;
@@ -1109,7 +1109,7 @@ var checkCaptcha = function(req, fields) {
             if (isSupported("node-captcha"))
                 ceid = "node-captcha";
             else
-                ceid = supportedCaptchaEngines[0].id;
+                ceid = supportedCaptchaEngines[0];
         }
         var captcha = Captcha.captcha(ceid);
         if (!captcha)
@@ -1780,7 +1780,6 @@ module.exports.editPost = function(req, fields) {
     if (isNaN(postNumber) || postNumber <= 0)
         return Promise.reject(Tools.translate("Invalid post number"));
     var rawText = fields.text || null;
-    var email = fields.email || null;
     var name = fields.name || null;
     var subject = fields.subject || null;
     var markupModes = [];
@@ -1807,8 +1806,6 @@ module.exports.editPost = function(req, fields) {
             return Promise.reject(Tools.translate("Both file and comment are missing"));
         if (rawText && rawText.length > board.maxTextLength)
             return Promise.reject(Tools.translate("Text is too long"));
-        if (email && email.length > board.maxEmailLength)
-            return Promise.reject(Tools.translate("E-mail is too long"));
         if (name && name.length > board.maxNameLength)
             return Promise.reject(Tools.translate("Name is too long"));
         if (subject && subject.length > board.maxSubjectLength)
@@ -1824,7 +1821,6 @@ module.exports.editPost = function(req, fields) {
         return board.postExtraData(req, fields, null, c.post)
     }).then(function(extraData) {
         c.extraData = extraData;
-        c.post.email = email || null;
         c.post.markup = markupModes;
         c.post.name = name || null;
         c.post.plainText = c.plainText;

@@ -1,0 +1,59 @@
+<div data-bind='foreach: registeredUsers'>
+  <div class='registered-user-header js-registered-user-header'
+       data-bind='text: $data.title'></div>
+  <div class='registered-user'>
+    <div data-bind='visible: $data.inputHashpass'>
+      <input type='text' class='length-40' placeholder='{{!it.translate('Password/hashpass')}}'
+             data-bind='textInput: $data.hashpass' />
+    </div>
+    <div class='container-display-inline-block'>
+      <div>
+        <div class='display-table border-spacing-4'>
+          <div class='display-table-row-group'>
+            {{~it.boards :board}}
+              <div class='display-table-row'>
+                <div class='display-table-cell'>
+                  /{{!board.name}}/
+                </div>
+                <div class='display-table-cell'>
+                  <select class='select'
+                          data-bind='value: $data.levels["{{!board.name}}"]'>
+                    {{~it.accessLevels :level}}
+                      <option value='{{!level.level}}'>{{!level.description}}</option>
+                    {{~}}
+                  </select>
+                </div>
+              </div>
+            {{~}}
+            <div class='display-table-row'>
+              <div class='display-table-cell'>
+                {{!it.translate('All', 'selectAllText')}}
+              </div>
+              <div class='display-table-cell'>
+                <select class='select'
+                        data-bind='value: $data.level'>
+                  {{~it.accessLevels :level}}
+                    <option value='{{!level.level}}'>{{!level.description}}</option>
+                  {{~}}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='vertical-align-top'>
+        <div class='.header'>
+          <textarea class='length-40' rows='2' placeholder='IP: <192.168.0.1> [192.168.1.100 [...]]'
+                    data-bind='textInput: $data.ips'></textarea>
+        </div>
+      </div>
+    </div>
+    <div>
+      <button data-bind='click: $root.submit.bind($data, $index, !$data.inputHashpass)'>{{!it.translate('Confirm',
+        'confirmButtonText')}}</button>
+      <button data-bind='visible: !$data.inputHashpass,
+                         click: $root.removeRegisteredUser.bind($data, $index)'>{{!it.translate('Remove',
+        'removeButtonText')}}</button>
+    </div>
+  </div>
+</div>

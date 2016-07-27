@@ -41,14 +41,6 @@ nodeCaptcha.checkCaptcha = function(req, fields) {
     return Promise.resolve();
 };
 
-nodeCaptcha.scriptSource = function() {
-    return "/" + config("site.pathPrefix", "") + "js/node-captcha-script.js";
-};
-
-nodeCaptcha.widgetTemplate = function() {
-    return "nodeCaptchaWidget";
-};
-
 nodeCaptcha.apiRoutes = function() {
     return [{
         method: "get",

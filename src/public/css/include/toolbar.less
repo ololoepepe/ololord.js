@@ -1,0 +1,69 @@
+.toolbar {
+  left: 0px;
+  top: 0px;
+  width: ~'calc(100% - 16px)';
+  padding: 4px 8px 4px 8px;
+  text-align: center;
+}
+
+#sidebar-switch:checked:not(:disabled) ~ #content #toolbar {
+  width: ~'calc(100% - 208px)';
+  left: 200px;
+}
+
+.toolbar-placeholder {
+  visibility: hidden;
+  position: relative;
+}
+
+#toolbar {
+  position: fixed;
+  z-index: 1;
+}
+
+#toolbar.dragging {
+  z-index: 5;
+}
+
+.toolbar-buttons-container {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.toolbar-group {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.toolbar-group-title {
+  display: inline-block;
+}
+
+.toolbar-group-body {
+  display: inline-block;
+}
+
+.board-select-container {
+  display: inline-block;
+  vertical-align: top;
+  width: 16px;
+  overflow: hidden;
+}
+
+.board-select {
+  -moz-appearance: none; //NOTE: Autoprefixer does not handle these prefixes properly.
+  -webkit-appearance:none;
+  border: none;
+  background-color: transparent;
+  border-radius: 0; //NOTE: Safari fix.
+  cursor: pointer;
+}
+
+.toolbar-drop-area {
+  position: fixed;
+  left: 202px;
+  top: 0px;
+  width: 100%;
+  height: 60px;
+  z-index: 4;
+}

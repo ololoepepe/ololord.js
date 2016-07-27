@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' {{#def.rootBindings}}>
+  {{#def.head}}
+  <body>
+    {{#def.sidebar}}
+    <main id='content'>
+      {{#def.toolbar}}
+      <header>{{#def['custom/header'] || ''}}</header>
+      <h1 class='page-title'>{{!it.translate('Page or file not found', 'notFoundMessage')}}</h1>
+      <div class='not-found-image-container'>
+        {{? it.notFoundImageFileName}}
+          <img id='not-found-image' src='/{{!it.site.pathPrefix}}img/404/{{!it.notFoundImageFileName}}'
+               class='not-found-image' />
+          <script type='text/javascript'>
+            (function() {
+              window.lord.require().initializeNotFound();
+            })();
+          </script>
+        {{?}}
+      </div>
+      <footer>{{#def['custom/footer'] || ''}}</footer>
+      {{#def.player}}
+    </main>
+    {{#def.jQueryUIpositionFix}}
+  </body>
+</html>

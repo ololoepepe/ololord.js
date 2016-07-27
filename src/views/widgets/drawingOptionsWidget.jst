@@ -1,0 +1,29 @@
+<div>
+  <div class='row' {{? !it.drawingOnImage}}style='display: none;'{{?}}>
+    <input type='checkbox'
+           data-bind='checked: settings.drawingBackgroundDrawable' />
+    {{!it.translate('Backgdound drawable')}}
+  </div>
+  <div class='row'>
+    {{!it.translate('Background color:', 'canvasBackgroundColorLabelText')}}
+    <input type='text' class='input js-minicolors' value='{{!it.settings.drawingBackgroundColor}}' />
+    <button data-bind='click: resetBackgroundColor'>{{!it.translate('Default', 'dafaultCanvasBackgroundColorButtonText')}}</button>
+  </div>
+  <div class='row' {{? it.drawingOnImage}}style='display: none;'{{?}}>
+    {{!it.translate('Dimensions:', 'canvasDimensionsLabelText')}}
+    <input type='number' class='length-4' min='0' max='9999'
+           data-bind='textInput: settings.drawingBackgroundWidth' />
+    x
+    <input type='number' class='length-4' min='0' max='9999'
+           data-bind='textInput: settings.drawingBackgroundHeight' />
+    {{!it.translate('0 — determine automatically', 'canvasDimensionsDescriptionText')}}
+  </div>
+  <div class='row'  {{? it.drawingOnImage}}style='display: none;'{{?}}>
+    <button data-bind='click: setDrawingDimensions.bind($data, 0, 0)'>{{!it.translate('Auto', 'canvasBackgroundAutoSizeButtonText')}}</button>
+    {{~[{ w: 300, h: 300 }, { w: 400, h: 300}, { w: 640, h: 480}, { w: 800, h: 600}, { w: 1024, h: 768},
+      { w: 1600, h: 1200}] :item}}
+      <button data-bind='click: setDrawingDimensions.bind($data, {{!item.w.toString()}},
+                           {{!item.h.toString()}})'>{{!item.w.toString()}}x{{!item.h.toString()}}</button>
+    {{~}}
+  </div>
+</div>

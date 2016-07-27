@@ -229,10 +229,16 @@ router.post("/action/createPost", function(req, res, next) {
     }).then(function() {
         return Database.createPost(req, c.fields, c.files, transaction);
     }).then(function(post) {
+      if ('node-captcha-noscript' !== c.fields.captchaEngine) {
         res.send({
-            boardName: post.boardName,
-            postNumber: post.number
+          boardName: post.boardName,
+          postNumber: post.number
         });
+      } else {
+        let hash = `post-${post.number}`;
+        let path = `/${config('site.pathPrefix', '')}${post.boardName}/res/${post.threadNumber}.html#${hash}`;
+        res.redirect(303, path);
+      }
     }).catch(function(err) {
         transaction.rollback();
         next(err);
@@ -260,10 +266,14 @@ router.post("/action/createThread", function(req, res, next) {
     }).then(function() {
         return Database.createThread(req, c.fields, c.files, transaction);
     }).then(function(thread) {
+      if ('node-captcha-noscript' !== c.fields.captchaEngine) {
         res.send({
-            boardName: thread.boardName,
-            threadNumber: thread.number
+          boardName: thread.boardName,
+          threadNumber: thread.number
         });
+      } else {
+        res.redirect(303, `/${config('site.pathPrefix', '')}${thread.boardName}/res/${thread.number}.html`);
+      }
     }).catch(function(err) {
         transaction.rollback();
         next(err);
@@ -471,10 +481,9 @@ var getRegisteredUserData = function(fields) {
     Tools.forIn(fields, function(value, name) {
         if (!/^accessLevelBoard_\S+$/.test(name))
             return;
-        var level = fields["accessLevel_" + value];
-        if ("NONE" == level)
+        if ("NONE" == value)
             return;
-        levels[value] = level;
+        levels[name.match(/^accessLevelBoard_(\S+)$/)[1]] = value;
     });
     return Promise.resolve({
         password: password,
@@ -836,7 +845,7 @@ router.post("/action/superuserReload", function(req, res, next) {
             case "config":
                 return Global.IPC.send("reloadConfig");
             case "templates":
-                return controller.initialize();
+                return Global.IPC.send("reloadTemplates");
             default:
                 return Promise.resolve();
             }

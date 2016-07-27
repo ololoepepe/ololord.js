@@ -22,9 +22,7 @@ router.generateHTML = function() {
         { fileName: "3rdparty/jQueryFileTree/jQueryFileTree.min.css", noEmbed: true },
         { fileName: "3rdparty/codemirror.css" }
     ];
-    return controller("manage", model).then(function(data) {
-        return Promise.resolve({ "manage.html": data });
-    });
+    return Promise.resolve({ "manage.html": controller("pages/manage", model) });
 };
 
 module.exports = router;

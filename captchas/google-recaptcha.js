@@ -37,12 +37,4 @@ googleRecaptcha.checkCaptcha = function(req, fields) {
     });
 };
 
-googleRecaptcha.widgetTemplate = function() {
-    return "googleRecaptchaWidget";
-};
-
-googleRecaptcha.scriptSource = function() {
-    return "https://www.google.com/recaptcha/api.js";
-};
-
 module.exports = googleRecaptcha;

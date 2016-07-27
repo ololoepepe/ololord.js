@@ -1,3 +1,5 @@
+var _ = require('underscore');
+var browserify = require('browserify');
 var Crypto = require("crypto");
 var dot = require("dot");
 var FS = require("q-io/fs");
@@ -14,96 +16,49 @@ var Cache = require("./cache");
 var config = require("./config");
 var Global = require("./global");
 
-var partials = {};
 var templates = {};
-var publicPartials;
-var publicTemplates;
+var notFoundImageFileNames = [];
 var langNames = require("../misc/lang-names.json");
 var ipBans = {};
 
 var controller = function(templateName, modelData) {
-    var baseModelData = merge.recursive(controller.baseModel(), controller.translationsModel());
-    baseModelData = merge.recursive(baseModelData, controller.boardsModel());
+    var template = templates[templateName];
+    if (!template) {
+      console.error(Tools.translate('Invalid template') + ': ' + templateName);
+      return '';
+    }
+    var baseModelData = controller.baseModel();
+    baseModelData.templateName = templateName;
+    baseModelData.tr = controller.translationsModel().tr;
+    baseModelData.boards = controller.boardsModel().boards; //TODO: cache
+    baseModelData.boardGroups = controller.boardsModel().boardGroups; //TODO: cache
+    baseModelData._ = _;
     baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
-    baseModelData.publicPartials = publicPartials;
-    baseModelData.publicTemplates = publicTemplates;
-    baseModelData.models = {
-        base: JSON.stringify(controller.baseModel()),
-        boards: JSON.stringify(controller.boardsModel()),
-        tr: JSON.stringify(controller.translationsModel()),
-        partials: JSON.stringify(publicPartials.map(function(partial) {
-            return partial.name;
-        })),
-        templates: JSON.stringify(publicTemplates.map(function(partial) {
-            return partial.name;
-        }))
-    };
+    baseModelData.isImageType = Tools.isImageType;
+    baseModelData.isAudioType = Tools.isAudioType;
+    baseModelData.isVideoType = Tools.isVideoType;
+    baseModelData.escaped = Tools.escaped;
+    baseModelData.escapedSelector = Tools.escapedSelector;
+    baseModelData.banner = _(_(baseModelData.boards.filter(function(board) {
+      return board.bannerFileNames.length > 0;
+    }).map(function(board) {
+      return board.bannerFileNames.map(function(fileName) {
+        return {
+          boardName: board.name,
+          boardTitle: board.title,
+          fileName: fileName
+        }
+      });
+    })).flatten()).sample();
     var timeOffset = config("site.timeOffset", 0);
     var locale = config("site.locale", "en");
     var format = config("site.dateFormat", "MM/DD/YYYY HH:mm:ss");
     baseModelData.formattedDate = function(date) {
         return moment(date).utcOffset(timeOffset).locale(locale).format(format);
     };
-    baseModelData.script = function(name, noEmbed) {
-        if (!noEmbed && config("system.embedScripts", true)) {
-            try {
-                var data = FSSync.readFileSync(__dirname + "/../public/js/" + name, "utf8");
-                return `<script type="text/javascript">${data.split("</script>").join("</scr'+'ipt>")}</script>`;
-            } catch (err) {
-                console.error(err);
-                return "";
-            }
-        } else {
-            return `<script type="text/javascript" src="/${baseModelData.site.pathPrefix}js/${name}"></script>`;
-        }
-    };
-    baseModelData.stylesheet = function(name, noEmbed) {
-        if (!noEmbed && config("system.embedStylesheets", true)) {
-            try {
-                var data = FSSync.readFileSync(__dirname + "/../public/css/" + name, "utf8");
-                return `<style type="text/css">${data}</style>`;
-            } catch (err) {
-                console.error(err);
-                return "";
-            }
-        } else {
-            return `<link rel="stylesheet" type="text/css" href="/${baseModelData.site.pathPrefix}css/${name}">`;
-        }
-    };
+    baseModelData.translate = Tools.translate;
     if (!modelData)
         modelData = {};
-    var template = templates[templateName];
-    if (!template)
-        return Promise.reject(Tools.translate("Invalid template"));
-    modelData = merge.recursive(baseModelData, modelData);
-    var extraScriptsGlobal = config("site.extraScripts._global");
-    var extraScripts = config(`site.extraScripts.${templateName}`);
-    if (extraScripts || extraScriptsGlobal) {
-        if (!modelData.extraScripts)
-            modelData.extraScripts = [];
-        if (extraScriptsGlobal)
-            modelData.extraScripts = modelData.extraScripts.concat(extraScriptsGlobal);
-        if (extraScripts)
-            modelData.extraScripts = modelData.extraScripts.concat(extraScripts);
-    }
-    return Promise.resolve(template(modelData));
-};
-
-controller.publicPartialNames = function() {
-    return publicPartials.map(function(partial) {
-        return partial.name;
-    });
-};
-
-controller.sync = function(templateName, modelData) {
-    var baseModelData = merge.recursive(controller.baseModel(), controller.translationsModel());
-    baseModelData = merge.recursive(baseModelData, controller.boardsModel());
-    baseModelData.compareRegisteredUserLevels = Database.compareRegisteredUserLevels;
-    if (!modelData)
-        modelData = {};
-    var template = templates[templateName];
-    if (!template)
-        return null;
     modelData = merge.recursive(baseModelData, modelData);
     return template(modelData);
 };
@@ -174,20 +129,59 @@ controller.baseModel = function() {
                 title: Tools.translate("Extended WakabaMark and bbCode", "markupMode")
             },
         ],
-        supportedCaptchaEngines: Captcha.captchaIds().map(function(id) {
+        supportedCaptchaEngines: Captcha.captchaIds().filter((id) => {
+          return 'node-captcha-noscript' !== id;
+        }).map(function(id) {
             return Captcha.captcha(id).info();
         })
     };
 };
 
 controller.boardsModel = function() {
-    var boards = Board.boardNames().map(function(boardName) {
-        return Board.board(boardName).info();
+  let boards = Board.boardNames().map(boardName => Board.board(boardName).info());
+  let addDefault = false;
+  let boardGroups = _(config('boardGroups', {})).map((group, name) => {
+    group.name = name;
+    group.boards = boards.reduce((acc, board) => {
+      if (!board.groupName) {
+        addDefault = true;
+      } else if (name === board.groupName) {
+        acc.push(board);
+      }
+      return acc;
+    }, []);
+    return group;
+  });
+  if (addDefault || boardGroups.length < 1) {
+    let noGroups = (boardGroups.length < 1);
+    boardGroups.push({
+      name: '',
+      boards: boards.filter((board) => {
+        return noGroups || (!board.hidden && !board.groupName);
+      })
     });
-    return {
-        boards: boards,
-        boardGroups: config("boardGroups", {})
-    };
+  }
+  boardGroups = boardGroups.filter((group) => { return group.boards.length > 0; });
+  boardGroups.sort((g1, g2) => {
+    if (!g1.priority && !g2.priority) {
+      return (g1.name < g2.name) ? -1 : ((g1.name > g2.name) ? 1 : 0);
+    }
+    return ((g1.priority || 0) < (g2.priority || 0)) ? -1
+      : (((g1.priority || 0) > (g2.priority || 0)) ? 1 : 0);
+  });
+  boardGroups.forEach((group) => {
+    group.boards.sort((b1, b2) => {
+      if (!b1.priority && !b2.priority) {
+        return (b1.name < b2.name) ? -1 : ((b1.name > b2.name) ? 1 : 0);
+      }
+      return ((b1.priority || 0) < (b2.priority || 0)) ? -1
+        : (((b1.priority || 0) > (b2.priority || 0)) ? 1 : 0);
+    });
+  });
+  return {
+    boards: boards,
+    boardGroups: boardGroups
+  };
 };
 
 controller.boardModel = function(board) {
@@ -197,100 +191,92 @@ controller.boardModel = function(board) {
 };
 
 controller.translationsModel = function() {
-    var tr = require("./translations")();
-    var translate = function(sourceText, disambiguation) {
-        tr[disambiguation] = Tools.translate(sourceText, disambiguation);
-    };
-    Board.boardNames().forEach(function(boardName) {
-        Board.board(boardName).addTranslations(translate);
+    return { tr: Tools.translate.translations };
+};
+
+controller.notFoundImageFileNamesModel = function() {
+  return notFoundImageFileNames;
+};
+
+controller.compileTemplates = function() {
+  console.log('Compiling templates, please, wait...');
+  var sourcePath = `${__dirname}/../src/views`;
+  var destinationPath = `${__dirname}/../views`;
+  let settings = {
+      evaluate: /\{\{([\s\S]+?)\}\}/g,
+      interpolate: /\{\{=([\s\S]+?)\}\}/g,
+      encode: /\{\{!([\s\S]+?)\}\}/g,
+      use: /\{\{#([\s\S]+?)\}\}/g,
+      define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
+      conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
+      iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
+      varname: 'it',
+      strip: false,
+      append: true,
+      selfcontained: false
+  };
+	let includes = {};
+	let rx = /[^a-zA-Z\$_]/gi;
+  let fileNames;
+  const EXCLUDED_FILES = new Set(['index.js.template', '.gitignore']);
+  return FS.list(destinationPath).then((list) => {
+    return Tools.series(list.filter((entryName) => {
+      return !EXCLUDED_FILES.has(entryName);
+    }), (entryName) => {
+      return FS.removeTree(`${destinationPath}/${entryName}`);
     });
-    return { tr: tr };
+  }).then(() => {
+    return FS.listTree(sourcePath, (_, stat) => stat.isFile());
+  }).then((list) => {
+    fileNames = list.map(fileName => fileName.substr(sourcePath.length - 10));
+    return Tools.series(fileNames, (fileName) => {
+      if (!/\.def(\.dot|\.jst)?$/.test(fileName)) {
+        return;
+      }
+      return FS.read(`${sourcePath}/${fileName}`).then((s) => {
+        includes[fileName.split('.').slice(0, -1).join('.')] = s;
+      });
+    });
+  }).then(() => {
+    let encodeHTMLSource = dot.encodeHTMLSource.toString();
+    let doNotSkip = settings.doNotSkipEncoded || '';
+    return Tools.series(fileNames, (fileName) => {
+      if (!/\.jst(\.dot|\.def)?$/.test(fileName)) {
+        return;
+      }
+      let compiled = `(function(){`;
+      return FS.read(`${sourcePath}/${fileName}`).then((s) => {
+      	let moduleName = fileName.split('.').shift().replace(rx, '_');
+      	compiled += dot.template(s, settings, includes).toString().replace('anonymous', moduleName);
+        compiled += `var itself=${moduleName}, _encodeHTML=(${encodeHTMLSource}(${doNotSkip}));`;
+        compiled += 'module.exports=itself;})()';
+        return Tools.promiseIf(fileName.split('/').length > 1, () => {
+          return FS.makeTree(`${destinationPath}/${fileName.split('/').slice(0, -1).join('/')}`);
+        });
+      }).then(() => {
+        return FS.write(`${destinationPath}/${fileName.split('.').slice(0, -1).join('.')}.js`, compiled);
+      });
+    });
+  });
 };
 
 controller.initialize = function() {
-    partials = {};
-    templates = {};
-    var path1 = __dirname + "/../views/partials";
-    var path2 = __dirname + "/../public/templates/partials";
-    var c = {};
-    return FS.list(path1).then(function(fileNames) {
-        c.fileNames = fileNames.map(function(fileName) {
-            return path1 + "/" + fileName;
-        });
-        return FS.list(path2);
-    }).then(function(fileNames) {
-        publicPartials = fileNames.filter(function(fileName) {
-            return fileName.split(".").pop() == "jst";
-        }).map(function(fileName) {
-            return fileName.split(".").shift();
-        });
-        c.fileNames = c.fileNames.concat(fileNames.map(function(fileName) {
-            return path2 + "/" + fileName;
-        })).filter(function(fileName) {
-            return fileName.split(".").pop() == "jst";
-        });
-        var promises = c.fileNames.map(function(fileName) {
-            FS.read(fileName).then(function(data) {
-                var name = fileName.split("/").pop().split(".").shift();
-                var ind = publicPartials.indexOf(name);
-                if (ind >= 0) {
-                    publicPartials[ind] = {
-                        name: name,
-                        data: data
-                    };
-                }
-                partials[name] = data;
-                return Promise.resolve();
-            });
-        });
-        return Promise.all(promises);
-    }).then(function() {
-        path1 = __dirname + "/../views";
-        path2 = __dirname + "/../public/templates";
-        return FS.list(path1).then(function(fileNames) {
-            c.fileNames = fileNames.map(function(fileName) {
-                return path1 + "/" + fileName;
-            });
-            return FS.list(path2);
-        });
-    }).then(function(fileNames) {
-        publicTemplates = fileNames.filter(function(fileName) {
-            return fileName.split(".").pop() == "jst" && fileName.split("-").shift() != "custom";
-        }).map(function(fileName) {
-            return fileName.split(".").shift();
-        });
-        c.fileNames = c.fileNames.concat(fileNames.map(function(fileName) {
-            return path2 + "/" + fileName;
-        })).filter(function(fileName) {
-            return fileName.split(".").pop() == "jst";
-        });
-        return Tools.series(c.fileNames, function(fileName) {
-            return FS.read(fileName).then(function(data) {
-                var name = fileName.split("/").pop().split(".").shift();
-                var ind = publicTemplates.indexOf(name);
-                if (ind >= 0) {
-                    publicTemplates[ind] = {
-                        name: name,
-                        data: data
-                    };
-                }
-                templates[name] = dot.template(data, {
-                    evaluate: /\{\{([\s\S]+?)\}\}/g,
-                    interpolate: /\{\{=([\s\S]+?)\}\}/g,
-                    encode: /\{\{!([\s\S]+?)\}\}/g,
-                    use: /\{\{#([\s\S]+?)\}\}/g,
-                    define: /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
-                    conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
-                    iterate: /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
-                    varname: 'it',
-                    strip: false,
-                    append: true,
-                    selfcontained: false
-                }, partials);
-                return Promise.resolve();
-            });
-        });
+  let templatesPath = `${__dirname}/../views`;
+  return FS.list(`${__dirname}/../public/img/404`).then(function(fileNames) {
+    notFoundImageFileNames = fileNames.filter(function(fileName) {
+      return fileName != ".gitignore";
     });
+    return FS.listTree(templatesPath, (_, stat) => stat.isFile());
+  }).then(function(fileNames) {
+    templates = fileNames.filter(function(fileName) {
+      return fileName.split('.').pop() === 'js' && fileName.split('/').pop() !== 'index.js';
+    }).map(function(fileName) {
+      return fileName.substr(templatesPath.length - 10).split('.').slice(0, -1).join('.');
+    }).reduce(function(acc, templateName) {
+      acc[templateName] = require(`../views/${templateName}.js`);
+      return acc;
+    }, {});
+  });
 };
 
 controller.postingSpeedString = function(board, lastPostNumber) {
@@ -397,20 +383,105 @@ controller.regenerate = function(regenerateArchived) {
             });
         });
     }).then(function() {
-        if (!config("server.rss.enabled", true))
-            return Promise.resolve();
         console.log("Generating statistics, please, wait...");
         return controller.generateStatistics().catch(function(err) {
             Global.error(err.stack || err);
-        }).then(function() {
-            console.log("Generating RSS, please, wait...");
-            return BoardModel.generateRSS();
-        }).catch(function(err) {
-            Global.error(err.stack || err);
-        }).then(function() {
-            return Promise.resolve();
         });
+    }).then(function() {
+      if (!config("server.rss.enabled", true))
+          return Promise.resolve();
+      console.log("Generating RSS, please, wait...");
+      return BoardModel.generateRSS().catch(function(err) {
+          Global.error(err.stack || err);
+      }).then(function() {
+          return Promise.resolve();
+      });;
+    }).then(function() {
+      console.log('Generating templating JavaScript file, please, wait...');
+      return controller.generateTemplatingJavaScriptFile();
+    }).then(function() {
+      console.log('Checking custom JavaScript file existence, please, wait...');
+      return controller.checkCustomJavaScriptFileExistence();
+    }).then(function() {
+      console.log('Checking custom CSS files existence, please, wait...');
+      return controller.checkCustomCSSFilesExistence();
     });
+};
+
+controller.generateTemplatingJavaScriptFile = function() {
+  var models = JSON.stringify({
+      base: controller.baseModel(),
+      boards: controller.boardsModel(),
+      notFoundImageFileNames: controller.notFoundImageFileNamesModel(),
+      tr: controller.translationsModel()
+  });
+  var path = `${__dirname}/../views`;
+  var indexPath = `${path}/index.js`;
+  var templateNames;
+  return FS.listTree(path, (_, stat) => stat.isFile()).then(function(fileNames) {
+    templateNames = fileNames.filter(function(fileName) {
+      return fileName.split('.').pop() === 'js' && 'index.js' !== fileName;
+    }).map(fileName => fileName.substr(path.length - 10));
+    return FS.read(`${indexPath}.template`);
+  }).then(function(s) {
+    FS.write(indexPath, s.replace('{{models}}', models));
+  }).then(function() {
+    var string = '';
+    var stream = browserify({
+      entries: indexPath,
+      debug: false
+    });
+    templateNames.forEach((lib) => {
+      stream.require('./views/' + lib);
+    });
+    stream = stream.bundle();
+    stream.on('data', function(data) {
+      string += data;
+    });
+    return new Promise(function(resolve, reject) {
+      stream.on('end', function() {
+        resolve(string);
+      });
+      stream.on('error', reject);
+    });
+  }).then(function(string) {
+    return FS.write(`${__dirname}/../public/js/templating.js`,
+      string.split(path.split('/').slice(0, -3).join('/')).join('.'));
+  });
+};
+
+controller.checkCustomJavaScriptFileExistence = function() {
+  return FS.exists(`${__dirname}/../public/js/custom.js`).then(function(exists) {
+    if (exists) {
+      return Promise.resolve();
+    }
+    console.log('Custom JavaScript file does not exist, creating a dummy one, please, wait...');
+    return Cache.writeFile("js/custom.js", '');
+  });
+};
+
+controller.checkCustomCSSFilesExistence = function() {
+  return Tools.series(['combined', 'desktop', 'mobile'], function(type) {
+    return FS.exists(`${__dirname}/../public/css/custom-base-${type}.css`).then(function(exists) {
+      return {
+        type: type,
+        exists: exists
+      };
+    });
+  }, true).then(function(list) {
+    var types = list.filter(function(item) {
+      return !item.exists;
+    }).map(function(item) {
+      return item.type;
+    });
+    if (types.length < 1) {
+      return Promise.resolve();
+    }
+    console.log('Some of custom CSS files do not exist, creating dummy ones, please, wait...');
+    return Tools.series(types, function(type) {
+      return Cache.writeFile(`css/custom-base-${type}.css`, '');
+    });
+  });
 };
 
 controller.generateStatistics = function() {
@@ -508,7 +579,7 @@ controller.generateStatistics = function() {
         }, new Set()).size;
         o.uptime = process.uptime();
     }).catch(function(err) {
-        Global.error(err);
+        Global.error(err.stack || err);
         return Promise.resolve();
     }).then(function() {
         return Cache.writeFile("misc/statistics.json", JSON.stringify(o));

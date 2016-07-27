@@ -1,0 +1,50 @@
+<div class='chat-widget'>
+  <div class='chat-contact-list'
+       data-bind='foreach: chats'>
+    <div class='chat-contact'
+         data-bind='attr: { name: $data.key },
+                    css: { "chat-contact-selected": ($data.key === $root.selectedChatKey().key) },
+                    click: $root.selectChat'>
+      <span class='nowrap'>
+        <span class='chat-contact-new-messages'
+              data-bind='visible: $data.messages.some(function(msg) { return msg.unread; }),
+                         text: "+" + $data.messages.reduce(function(acc, msg) {
+                           return acc + (msg.unread ? 1 : 0);
+                         }, 0)'></span>
+        <span data-bind='text: "/" + $data.key.split(":").join("/")'></span>
+      </span>
+      <span class='icon icon-bin button-icon' title='{{!it.translate('Delete this chat')}}'
+            data-bind='click: $root.deleteChat'></span>
+    </div>
+  </div>
+  <div class='chat-messaging-area'>
+    <div class='chat-messages js-chat-messages'
+         data-bind='foreach: messages'>
+      <div class='chat-message'
+           data-bind='css: { "chat-message-unread": $data.unread },
+                      event: { mouseover: $root.markAsRead.bind($data, $index) }'>
+        <div class='chat-message-header'>
+          <span class='icon'
+                data-bind='css: {
+                             "icon-undo": ("out" === $data.type),
+                             "icon-redo": ("in" === $data.type)
+                           }'></span>
+          <span data-bind='text: $root.formattedDate($data.date)'></span>
+        </div>
+        <div class='chat-message-text'
+             data-bind='text: $data.text'></div>
+      </div>
+    </div>
+    <div class='chat-message-input-container'>
+      <input type='text' class='chat-input js-chat-input' placeholder='{{!it.translate('Enter your message here')}}'
+             data-bind='textInput: message,
+                        enable: selectedChatKey,
+                        event: { keypress: inputKeyPress }' />
+    </div>
+    <div class='chat-message-submit-container'>
+      <button class='chat-submit button'
+              data-bind='enable: selectedChatKey,
+                         click: sendMessage'>{{!it.translate('Send', 'sendChatMessageButtonText')}}</button>
+    </div>
+  </div>
+</div>

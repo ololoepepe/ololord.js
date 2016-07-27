@@ -1,0 +1,3 @@
+<a href='#{{!target}}'
+   class='navigation-button navigation-button-{{!target}} icon-32 icon-arrow-{{? target === 'top'}}up{{??}}down{{?}} button-icon'
+   title='{{? target === 'top'}}{{!it.translate('Scroll to the top', 'toTopText')}}{{??}}{{!it.translate('Scroll to the bottom', 'toBottomText')}}{{?}}'></a>

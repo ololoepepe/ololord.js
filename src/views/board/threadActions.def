@@ -1,0 +1,15 @@
+<div id='thread-actions-{{!position}}' class='thread-actions'>
+  [<a href='/{{!it.site.pathPrefix}}{{!it.board.name}}{{? it.thread.archived}}/archive.html{{?}}'
+      class='icon-24 icon-arrow-left button-icon' title='{{!it.translate('Back', 'backText')}}'></a>]
+  <span class='js-only'>[<span class='icon-24 icon-update button-icon' 
+         data-bind='attr: {
+                      title: "{{!it.translate('Update thread', 'updateThreadText')}}" + shortcutSuffix("updateThread")
+                    },
+                    click: toggleAutoUpdate'></span>]</span>
+  <span class='js-only'>[<input id='auto-update-thread-{{!position}}' type='text' />]</span>
+  <script type='text/javascript'>
+    (function() {
+      window.lord.require('./core/threads').initializeThreadActions('{{!position}}');
+    })();
+  </script>
+</div>

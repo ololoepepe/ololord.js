@@ -83,6 +83,27 @@ router.get("/api/threadInfo.json", function(req, res, next) {
     });
 });
 
+router.get("/api/threadInfos.json", function(req, res, next) {
+  var threads = req.query.threads;
+  if (Util.isString(threads))
+      threads = [threads];
+  var boardNames = (threads || []).map(function(thread) {
+      return thread.split(":").shift();
+  });
+  controller.checkBan(req, res, boardNames).then(function() {
+    return Tools.series(threads || [], function(thread) {
+      var boardName = thread.split(":").shift();
+      var threadNumber = +thread.split(":")[1];
+      var lastPostNumber = +thread.split(":")[2];
+      return boardModel.getThreadInfo(Board.board(boardName), req.hashpass, threadNumber, lastPostNumber);
+    }, true);
+  }).then(function(results) {
+    res.json(results);
+  }).catch(function(err) {
+    next(err);
+  });
+});
+
 router.get("/api/fileInfo.json", function(req, res, next) {
     boardModel.getFileInfos([{
         fileName: req.query.fileName,
@@ -329,24 +350,29 @@ router.get("/api/fileTree.json", function(req, res, next) {
     if (!req.isSuperuser())
         return next(Tools.translate("Not enough rights"));
     var dir = req.query.dir;
+    if (!dir || '#' === dir)
+      dir = './';
     if (dir.slice(-1)[0] != "/")
         dir += "/";
     var path = __dirname + "/../" + dir;
-    var c = { reply: "<ul class='jqueryFileTree'>" };
     FS.list(path).then(function(list) {
         return Tools.series(list, function(file) {
             return FS.stat(path + "/" + file).then(function(stat) {
-                var a = `<a rel="${Tools.toHtml(dir + file)}">${Tools.toHtml(file)}</a>`;
-                if (stat.isDirectory())
-                    c.reply += `<li class="directory collapsed">${a}</li>`;
-                else if (stat.isFile())
-                    c.reply += `<li class="file ext_${file.split(".").pop() || ""}">${a}</li>`;
-                return Promise.resolve();
+              var node = {
+                id: dir + file,
+                text: file
+              };
+              if (stat.isDirectory()) {
+                node.type = 'folder';
+                node.children = true;
+              } else if (stat.isFile()) {
+                node.type = 'file';
+              }
+              return Promise.resolve(node);
             });
-        });
-    }).then(function() {
-        c.reply += "</ul>";
-        res.json({ html: c.reply });
+        }, true);
+    }).then(function(list) {
+      res.json(list);
     }).catch(function(err) {
         if ("ENOENT" == err.code)
             err.status = 404;

@@ -1,0 +1,3 @@
+<div class='posting-speed-container'>
+  <span class='navbarItem'>[{{!it.translate('Posting speed:', 'postingSpeedText')}} {{!it.postingSpeed}}]</span>
+</div>

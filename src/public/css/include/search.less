@@ -1,0 +1,38 @@
+.search-area {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-query-container {
+  display: flex;
+  flex-direction: row;
+  padding: 4px;
+  .button-icon {
+    margin-top: 2px;
+  }
+}
+
+.search-query {
+  display: inline-block;
+  flex-grow: 1;
+  margin-right: 8px;
+}
+
+.search-options-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 4px;
+}
+
+.search-results {
+  overflow-y: auto;
+  max-height: ~'calc(100% - 50px)';
+}
+
+.search-result-link, .search-result-thread {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}

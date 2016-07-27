@@ -1,0 +1,71 @@
+<div class='auto-resizable-div search-area'>
+  <div class='search-query-container'>
+    <input type='text' class='input search-query js-search-query' maxlength='{{!it.maxSearchQueryLength}}'
+           plaveholder='{{!it.translate('Search: possible +required -excluded', 'searchInputPlaceholder')}}'
+           data-bind='event: { keypress: inputKeyPress },
+                      textInput: query' />
+    <span class='icon icon-search button-icon' title='{{!it.translate('Search', 'searchButtonText')}}'
+          data-bind='click: search'></span>
+  </div>
+  <div class='search-options-container'>
+    <select class='select'
+            data-bind='value: boardName'>
+      <option value='*'>[*] {{!it.translate('All boards', 'allBoardsText')}}</option>
+      {{~it.boards :board}}
+        <option value='{{!board.name}}'>[{{!board.name}}] {{!board.title}}</option>
+      {{~}}
+    </select>
+    <span data-bind='visible: total() && max() && Math.ceil(total() / max()) > 1'>
+      <span class='pagination'
+           data-bind='foreach: ((total() && max()) ? _.range(Math.ceil(total() / max())) : [])'>
+        <!-- ko if: $data === $root.page() -->
+          <span class='paginaton-page'>[<b data-bind='text: $data'></b>]</span>
+        <!-- /ko -->
+        <!-- ko if: $data !== $root.page() -->
+          <span class='paginaton-page'>
+            [<a href='javascript:void(0);'
+                data-bind='text: $data,
+                           click: $root.search.bind($data, $data)'></a>]
+          </span>
+        <!-- /ko -->
+      </span>
+    </span>
+  </div>
+  <div class='search-results'
+       data-bind='foreach: {
+                    data: results,
+                    afterRender: highlight
+                  }'>
+    <div class='post reply-post'>
+      <div class='post-internal-wrapper'>
+        <div class='search-result-link js-search-result-link'>
+          <span data-bind='text: ($root.page() * $root.max() + $index() + 1) + "."'></span>
+          <a target='_blank'
+             data-bind='attr: { href: "/{{!it.site.pathPrefix}}" + $data.boardName + "/"
+                          + ($data.archived ? "arch" : "res") + "/" + $data.threadNumber + ".html"
+                          + (($data.threadNumber === $data.postNumber) ? ("#post-" + $data.postNumber) : "") },
+                        text: $data.subject'></a>
+        </div>
+        <div class='search-result-thread'>
+          <span class='quotation'
+                data-bind='text: "/" + $data.boardName + "/" + ($data.archived ? "arch" : "res") + "/"
+                             + $data.threadNumber + ".html"
+                             + (($data.threadNumber === $data.postNumber) ? ("#post-" + $data.postNumber) : "")'></span>
+        </div>
+        <div class='post-body'
+             data-bind='visible: $data.text'>
+          <div class='post-files'>
+            <div class='post-text-wrapper'>
+              <blockquote class='post-text js-search-result-text'
+                          data-bind='text: $data.text'></blockquote>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='section-header'
+       data-bind='visible: !haveNotSearched() && results().length < 1'>
+    <h3>{{!it.translate('Nothing found', 'nothingFoundMessage')}}</h3>
+  </div>
+</div>

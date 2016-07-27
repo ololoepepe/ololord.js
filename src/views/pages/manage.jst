@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' {{#def.rootBindings}}>
+  {{#def.head}}
+  <body>
+    {{#def.sidebar}}
+    <main id='content'>
+      {{#def.toolbar}}
+      <header>{{#def['custom/header'] || ''}}</header>
+      <h1 class='page-title'>
+        {{!it.title}}
+      </h1>
+      <div id='management' class='js-only'>
+        <ul class='tab-widget-header js-tab-widget-header'>
+          <li data-index='0' class='activated'>
+            <span data-bind='click: activateTab.bind($data, 0, null)'>{{!it.translate('Bans', 'bansTabText')}}</span>
+          </li>
+          <li data-index='1' class='user-level-superuser-only'>
+            <span data-bind='click: activateTab.bind($data, 1, "users")'>{{!it.translate('Users',
+              'usersTabText')}}</span>
+          </li>
+          <li data-index='2' class='user-level-superuser-only'>
+            <span data-bind='click: activateTab.bind($data, 2, "content")'>{{!it.translate('Content',
+              'contentTabText')}}</span>
+          </li>
+        </ul>
+        <div class='js-tab-widget-body'>
+          <div id='bans' data-index='0' class='loading-message'>
+            <span class='icon-24 icon-spinner'></span>
+            <h1 class='loading-message-text'>{{!it.translate('Loading bans...', 'loadingBansMessage')}}</h1>
+          </div>
+          <div id='users' data-index='1' class='loading-message' style='display: none;'>
+            <span class='icon-24 icon-spinner'></span>
+            <h1 class='loading-message-text'>{{!it.translate('Loading users...', 'loadingUsersMessage')}}</h1>
+          </div>
+          <div id='contentData' class='display-flex-row' data-index='2' style='display: none;'>
+            <div class='display-flex-column flex-justify-start management-actions'>
+              <span class='icon icon-star-full button-icon' title='{{!it.translate('Frequently used files')}}'
+                    data-menu-selector='#menu-management-frequently-used-files'
+                    data-bind='click: showFrequentlyUsedFilesMenu'></span>
+              <span class='icon icon-gear button-icon' title='{{!it.translate('Server actions')}}'
+                    data-menu-selector='#menu-management-server-actions'
+                    data-bind='click: showServerActionsMenu'></span>
+              <ul id='menu-management-server-actions' class='menu' style='display: none;'>
+                <li class='nowrap'>
+                  <span data-bind='click: regenerateCache'>
+                    {{!it.translate('Regenerate cache')}}
+                  </span>
+                </li>
+                <li class='nowrap'>
+                  <span data-bind='click: regenerateCacheWithArchived'>
+                    {{!it.translate('Regenerate cache (including archived threads)')}}
+                  </span>
+                </li>
+                <li class='nowrap'>
+                  <span data-bind='click: rerenderPosts'>
+                    {{!it.translate('Rerender posts')}}
+                  </span>
+                </li>
+                <li class='nowrap'>
+                  <span data-bind='click: rebuildSearchIndex'>
+                    {{!it.translate('Rebuild post search index')}}
+                  </span>
+                </li>
+                <li class='nowrap'>
+                  <span data-bind='click: reloadBoards'>
+                    {{!it.translate('Reload boards')}}
+                  </span>
+                </li>
+                <li class='nowrap'>
+                  <span data-bind='click: reloadConfig'>
+                    {{!it.translate('Reload config')}}
+                  </span>
+                </li>
+                <li class='nowrap'>
+                  <span data-bind='click: reloadTemplates'>
+                    {{!it.translate('Reload templates')}}
+                  </span>
+                </li>
+                <li class='nowrap'>
+                  <span data-bind='click: reloadAll'>
+                    {{!it.translate('Reload everything')}}
+                  </span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <div id='content-file-tree' class='content-file-tree'></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='no-js-only align-center'>{{!it.translate('JavaScript is disabled')}}</div>
+      <footer>{{#def['custom/footer'] || ''}}</footer>
+      {{#def.player}}
+    </main>
+    {{#def.jQueryUIpositionFix}}
+  </body>
+</html>

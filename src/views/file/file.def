@@ -1,0 +1,63 @@
+<div id='file-{{=it.escapedSelector(fileInfo.name)}}' class='post-file js-post-file'
+     data-href='{{!it.site.protocol}}://{{!it.site.domain}}/{{!it.site.pathPrefix}}{{!post.boardName}}/src/{{!fileInfo.name}}'
+     data-file-name='{{!fileInfo.name}}'
+     data-mime-type='{{!fileInfo.mimeType}}'
+     data-size-k-b='{{!fileInfo.sizeKB}}'
+     data-size-text='{{!fileInfo.sizeText}}'
+     data-width='{{? fileInfo.dimensions}}{{!fileInfo.dimensions.width}}{{??}}0{{?}}'
+     data-height='{{? fileInfo.dimensions}}{{!fileInfo.dimensions.height}}{{??}}0{{?}}'
+     data-rating='{{!fileInfo.rating}}'
+     {{? fileInfo.ihash}}data-ihash='{{!fileInfo.ihash}}'{{?}}
+     {{? fileInfo.extraData}}data-extra-data='{{!JSON.stringify(fileInfo.extraData)}}'{{?}}>
+  <div class='post-file-name'>
+    <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/src/{{!fileInfo.name}}' target='_blank'>{{!fileInfo.name}}</a>
+  </div>
+  <div class='post-file-size js-with-tooltip' {{? fileInfo.sizeTooltip}}title='{{!fileInfo.sizeTooltip}}'{{?}}>
+    ({{!fileInfo.sizeText}})
+  </div>
+  <div class='js-only post-file-actions'>
+    <span class='icon icon-bin button-icon' title='{{!it.translate('Delete file', 'deleteFileText')}}'
+          data-bind='click: deleteFile.bind($data, "{{!fileInfo.name}}")'></span>
+    <span class='icon icon-shield button-icon' title='{{!it.translate('Edit file rating', 'editFileRatingText')}}'
+          data-bind='click: editFileRating.bind($data, "{{!fileInfo.name}}")'></span>
+    {{? it.isImageType(fileInfo.mimeType)}}
+      <span class='icon icon-eye-plus button-icon js-image-hiding-button'
+            title='{{!it.translate('Hide by image', 'hideByImageText')}}'
+            data-menu-selector='#menu-image-hide-{{=it.escapedSelector(fileInfo.name)}}'
+            data-bind='click: showImageHidingMenu'></span>
+      <ul id='menu-image-hide-{{=it.escapedSelector(fileInfo.name)}}' class='menu'>
+        <li class='nowrap'>
+          <span data-bind='click: hideByImage.bind($data, "{{!fileInfo.name}}")'>
+            {{!it.translate('Hide by image size', 'hideByImageSizeText')}}
+          </span>
+        </li>
+        {{? fileInfo.ihash && "0" != fileInfo.ihash}}
+          <li class='nowrap'>
+            <span data-bind='click: hideByImageHash.bind($data, "{{!fileInfo.name}}")'>
+              {{!it.translate('Hide by image hash', 'hideByImageHashText')}}
+            </span>
+          </li>
+        {{?}}
+      </ul>
+      <span class='icon icon-paint button-icon' title='{{!it.translate('Draw on this image', 'drawOnImageText')}}'
+            data-bind='click: drawOnImage.bind($data, "{{!fileInfo.name}}")'></span>
+      <span class='icon icon-search button-icon js-image-search-button'
+            title='{{!it.translate('Find source...', 'findSourceText')}}'
+            data-menu-selector='#menu-image-search-{{=it.escapedSelector(fileInfo.name)}}'
+            data-bind='click: showImageSearchMenu.bind($data, "{{!fileInfo.name}}")'></span>
+    {{?}}
+    {{? it.isAudioType(fileInfo.mimeType)}}
+      <span class='icon icon-tag button-icon' title='{{!it.translate('Edit audio file tags', 'editAudioTagsText')}}'
+            data-bind='click: editAudioTags.bind($data, "{{!fileInfo.name}}")'></span>
+    {{?}}
+    {{? it.isAudioType(fileInfo.mimeType) || it.isVideoType(fileInfo.mimeType)}}
+      <span class='icon icon-music-plus button-icon' title='{{!it.translate('Add to playlist', 'addToPlaylistText')}}'
+            data-bind='click: addToPlaylist.bind($data, "{{!fileInfo.name}}")'></span>
+    {{?}}
+  </div>
+  <div>
+    <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/src/{{!fileInfo.name}}' target='_blank' class='post-file-link'
+       data-rating='{{!fileInfo.rating}}'
+       data-bind='click: showImage.bind($data, "{{!fileInfo.name}}")'>{{#def['file/fileThumb']}}</a>
+  </div>
+</div>

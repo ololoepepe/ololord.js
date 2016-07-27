@@ -1,0 +1,3 @@
+<span class='post-subject js-post-subject{{? !post.subject}} js-post-subject-default{{?}}'>
+  {{? post.subject}}{{? post.subjectIsRaw}}{{=post.subject}}{{??}}{{!post.subject}}{{?}}{{?}}
+</span>

@@ -1,0 +1,14 @@
+<span>{{!it.translate('Rating:', 'ratingLabelText')}}</span>
+<select name='file_rating{{? typeof index !== 'undefined'}}_{{!(index + 1).toString()}}{{?}}' class='js-rating-select'
+        data-bind='click: function(_, e) { e.stopPropagation(); }{{? it.rating}}, value: rating{{?}}'>
+  {{~['SFW', 'R-15', 'R-18', 'R-18G'] :rating}}
+    <option value='{{!rating}}' {{? !it.rating && 'SFW' === rating}}selected='true'{{?}}
+            data-bind='click: function(_, e) { e.stopPropagation(); }'>{{!rating}}</option>
+  {{~}}
+</select>
+<span class='icon icon-question sign-icon'
+      title='{{!it.translate('SFW - safe for work (no socially condemned content)\n'
+        + 'R-15 - restricted for 15 years (contains ecchi, idols, violence)\n'
+        + 'R-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\n'
+        + 'R-18G - restricted for 18 years, guidance advised '
+        + '(shemale, death, guro, scat, defecation, urination, etc.)')}}'></span>

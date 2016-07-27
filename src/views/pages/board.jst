@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' {{#def.rootBindings}} data-page-count='{{!it.pageCount.toString()}}'>
+  {{#def.head}}
+  <body>
+    <a id='top'></a>
+    {{#def.sidebar}}
+    <main id='content'>
+      {{#def.toolbar}}
+      <header>{{#def['custom/header'] || ''}}</header>
+      {{#def.banner}}
+      <h1 class='page-title'>
+        {{!it.board.title}}
+        <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/catalog.html' class='icon-24 icon-table button-icon'
+           title='{{!it.translate('Threads catalog', 'boardCatalogLinkText')}}'></a>
+        <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/archive.html' class='icon-24 icon-archive button-icon'
+           title='{{!it.translate('Thread archive', 'boardArchiveLinkText')}}'></a>
+        <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/rss.xml' target='_blank'
+           class='icon-24 icon-rss button-icon' title='{{!it.translate('RSS feed', 'boardRssLinkText')}}'></a>
+      </h1>
+      {{? it.board.postingEnabled}}
+        <hr />
+        {{~['top'] :position}}
+          {{#def['board/createAction']}}
+        {{~}}
+      {{??}}
+        <h2 class='message-posting-disabled'>
+          {{!it.translate('Posting is disabled at this board', 'postingDisabledBoardText')}}
+        </h2>
+      {{?}}
+      <div id='threads'>
+        {{~it.threads :thread}}
+          <hr />
+          {{#def['board/thread']}}
+        {{~}}
+      </div>
+      {{? it.board.postingEnabled}}
+        <hr />
+        {{~['bottom'] :position}}
+          {{#def['board/createAction']}}
+        {{~}}
+        {{#def['board/draftsSection']}}
+      {{?}}
+      <div id='infinite-scroll-loading-message' class='loading-message' style='display: none;'>
+        <span class='icon-24 icon-spinner'></span>
+        <h1 class='loading-message-text'>{{!it.translate('Loading threads...', 'loadingThreadsMessage')}}</h1>
+      </div>
+      <hr />
+      <div id='pagination' class='pagination'>
+        {{? it.currentPage > 0}}
+          <span class='paginaton-page'>
+            [<a href='/{{!it.site.pathPrefix}}{{!it.board.name}}{{? it.currentPage > 1}}/{{!(it.currentPage - 1)}}{{?}}'>{{!it.translate('Previous page', 'toPreviousPageText')}}</a>]
+          </span>
+        {{?}}
+        {{~it._.range(it.pageCount) :pageNumber}}
+          {{? pageNumber !== it.currentPage}}
+            <span class='paginaton-page'>
+              [<a href='/{{!it.site.pathPrefix}}{{!it.board.name}}{{? pageNumber > 0}}/{{!pageNumber.toString()}}.html{{?}}'>{{!pageNumber.toString()}}</a>]
+            </span>
+          {{??}}
+            <span class='paginaton-page'>
+              [<b>{{!pageNumber.toString()}}</b>]
+            </span>
+          {{?}}
+        {{~}}
+        {{? it.currentPage < (it.pageCount - 1)}}
+          <span class='paginaton-page'>
+            [<a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/{{!(it.currentPage + 1)}}.html'>{{!it.translate('Next page', 'toNextPageText')}}</a>]
+          </span>
+        {{?}}
+      </div>
+      <hr />
+      {{#def['board/postingSpeed']}}
+      <a id='bottom'></a>
+      <footer>{{#def['custom/footer'] || ''}}</footer>
+      {{#def.player}}
+      {{~['top', 'bottom'] :target}}
+        {{#def['board/navigationButton']}}
+      {{~}}
+      {{~['previous', 'next'] :target}}
+        {{#def['board/leafButton']}}
+      {{~}}
+    </main>
+    {{#def.jQueryUIpositionFix}}
+  </body>
+</html>

@@ -13,9 +13,7 @@ router.generateHTML = function() {
         { fileName: "3rdparty/URI.min.js" },
         { fileName: "login.js" }
     ];
-    return controller("login", model).then(function(data) {
-        return Promise.resolve({ "login.html": data });
-    });
+    return Promise.resolve({ "login.html": controller("pages/login", model) });
 };
 
 module.exports = router;

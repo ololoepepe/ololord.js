@@ -1,0 +1,95 @@
+<div data-bind='foreach: bannedUsers'>
+  <div class='banned-user-header js-banned-user-header'
+       data-bind='text: $data.title'></div>
+  <div class='banned-user'>
+    <div data-bind='visible: $data.inputIP'>
+      <input type='text' class='length-40' placeholder='IP: <192.168.0.1>'
+             data-bind='textInput: $data.ip' />
+    </div>
+    <div class='container-display-inline-block'>
+      <div>
+        <div class='display-table border-spacing-4'>
+          <div class='display-table-row-group'>
+            {{~it.boards.filter(function(board) { return it.user.isModer(board.name); }) :board}}
+              <div class='display-table-row'>
+                <div class='display-table-cell'>
+                  /{{!board.name}}/
+                </div>
+                <form action='' class='display-table-cell nowrap'>
+                  {{~it.banLevels :level}}
+                    <input type='radio' name='banLevel_{{!board.name}}' class='switch switch-16'
+                           data-bind='checked: $data.bans["{{!board.name}}"].level'
+                           value='{{!level.level}}'><label title='{{!level.description}}'
+                                                           class='icon icon-{{!level.icon}} sign-icon'
+                                                           data-bind='click: $root.check.bind($data.bans["{{!board.name}}"])'></label>
+                  {{~}}
+                </form>
+                <div class='display-table-cell nowrap'>
+                  <input type='text' class='length-15 js-expires-at' readonly
+                         data-bind='boundData: $data.bans["{{!board.name}}"].expiresAt,
+                                    textInput: $data.bans["{{!board.name}}"].expiresAt' />
+                  <span class='icon icon-cross button-icon' title='{{!it.translate('Clear date field')}}'
+                        data-bind='click: $root.clearDate.bind($data.bans["{{!board.name}}"])'></span>
+                </div>
+                <div class='display-table-cell'>
+                  <input type='text' class='input-ban-reason' placeholder='{{!it.translate('Reason:')}} [...]'
+                         data-bind='textInput: $data.bans["{{!board.name}}"].reason' />
+                </div>
+              </div>
+            {{~}}
+            <div class='display-table-row'>
+              <div class='display-table-cell'>
+                {{!it.translate('All', 'selectAllText')}}
+              </div>
+              <form action='' class='display-table-cell nowrap'>
+                {{~it.banLevels :level}}
+                  <input type='radio' name='banLevel_{{!board.name}}' class='switch switch-16'
+                         data-bind='checked: $data.level'
+                         value='{{!level.level}}'><label title='{{!level.description}}'
+                                                         class='icon icon-{{!level.icon}} sign-icon'
+                                                         data-bind='click: $root.check.bind($data)'></label>
+                {{~}}
+              </form>
+              <div class='display-table-cell nowrap'>
+                <input type='text' class='length-15 js-expires-at' readonly
+                       data-bind='boundData: $data.expiresAt,
+                                  textInput: $data.expiresAt' />
+                <span class='icon icon-cross button-icon' title='{{!it.translate('Clear date field')}}'
+                      data-bind='click: $root.clearDate.bind($data)'></span>
+              </div>
+              <div class='display-table-cell'>
+                <input type='text' class='input-ban-reason' placeholder='{{!it.translate('Reason:')}} [...]'
+                       data-bind='textInput: $data.reason' />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='vertical-align-top'>
+        <div class='.header'>
+          <input type='checkbox'
+                 data-bind='checked: $data.delall' />
+          {{!it.translate('Delete all user posts on boards:')}}
+        </div>
+        <div>
+          {{~it.boards.filter(function(board) { return it.user.isModer(board.name); }) :board}}
+            <div>
+              <input type='checkbox' value='{{!board.name}}',
+                     data-bind='checked: $data.delallBoards'>[{{!board.name}}] {{!board.title}}</input>
+            </div>
+          {{~}}
+        </div>
+      </div>
+    </div>
+    <div>
+      <button data-bind='click: $root.submit.bind($data, $index, !$data.inputIP)'>{{!it.translate('Confirm',
+        'confirmButtonText')}}</button>
+      <button data-bind='visible: $root.showHideButton && !$data.inputIP
+                           && $root._.isEmpty($root._($data.bans).filter(function(ban) {
+                             return "NONE" !== ban.initialLevel;
+                           })),
+                         click: $root.removeBannedUser.bind($data, $index)'>{{!it.translate('Remove',
+        'removeButtonText')}}</button>
+    </div>
+  </div>
+</div>

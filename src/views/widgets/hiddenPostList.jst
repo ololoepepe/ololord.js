@@ -1,0 +1,27 @@
+<div data-bind='foreach: hiddenPosts'>
+  <div class='row display-flex-row flex-justify-space-between'>
+    <span>
+      <a target='_bank' class='hidden-post-link'
+         data-bind='css: { "hidden-post-link-not-hidden": !$data.hidden },
+                    attr: { href: "/{{!it.site.pathPrefix}}" + $data.boardName + "/res/" + $data.threadNumber + ".html"
+                      + (($data.postNumber !== $data.threadNumber) ? ("#post-" + $data.postNumber) : "") },
+                    text: ">>/" + $data.boardName + "/" + $data.postNumber
+                      + ($data.reason ? (" " + $data.reason) : "")'></a>
+    </span>
+    <span>
+      <span data-bind='if: !$data.hidden'>
+        <span class='icon icon-plus button-icon'
+              title='{{!it.translate('Hide', 'hidePostText')}}'
+              data-bind='click: $root.makeHidden.bind($data)'></span>
+      </span>
+      <span class='icon button-icon'
+            data-bind='css: {
+                         "icon-cross": $data.hidden,
+                         "icon-bin": !$data.hidden
+                       },
+                       attr: { title: ($data.auto ? "{{!it.translate('Show', 'showPostText')}}"
+                         : "{{!it.translate('Remove from hidden post/thread list')}}") },
+                       click: $root.removeHidden.bind($data)'></span>
+    </span>
+  </div>
+</div>

@@ -1,0 +1,2 @@
+data-bind='stopBindings: true,
+           css: classes'

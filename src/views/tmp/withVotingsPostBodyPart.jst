@@ -1,0 +1,43 @@
+<div class="vote">
+    <div name="voteText" class="voteText">
+        {{? it.disabled || it.archived}}
+            <img name="voteClosedImg" src="/{{=it.site.pathPrefix}}img/closed.png" class="signImage noInvert"
+                 title="{{=it.translate('', 'voteClosedText')}}">
+        {{?}}
+        {{=it.text}}</div>
+    {{? !it.disabled && !it.archived}}
+        <form method="post" accept-charset="utf-8" enctype="multipart/form-data" class="inlineForm"
+              action="/{{=it.site.pathPrefix}}action/vote"
+              onsubmit="lord.vote(event, this); return false;">
+    {{?}}
+    <div name="voteVariants">
+        {{ for (var i = 0; i < it.variants.length; ++i) { }}
+            {{ var variant = it.variants[i]; }}
+            {{? it.multiple}}
+                <input type="checkbox" name="voteVariant_{{=variant.id}}" value="{{=variant.id}}"
+            {{??}}
+                <input type="radio" name="voteGroup" value="{{=variant.id}}"
+            {{?}}
+            {{? it.disabled || it.archived}}
+                disabled="true"
+            {{?}}
+            />
+            {{=variant.text}}
+            <span class="voteCount">({{=it.translate('', 'voteCountText')}} {{=variant.voteCount}})</span></br />
+        {{ } }}
+    </div>
+    {{? !it.disabled && !it.archived}}
+        <input type="hidden" name="postNumber" value="{{=it.post.number}}" />
+        <input type="image" src="/{{=it.site.pathPrefix}}img/vote.png" name="buttonVote"
+               {{? it.disabled}}disabled="true"{{?}} title="{{=it.translate('', 'voteActionText')}}"
+               width="24" height="24" class="buttonImage noInvert" />
+        </form>
+    {{?}}
+    {{? !it.archived}}
+        <a href="javascript:void(0);"
+           title="{{? !it.disabled}}{{=it.translate('Close voting', 'closeVotingText')}}{{??}}{{=it.translate('Open voting', 'openVotingText')}}{{?}}"
+           onclick="lord.setVotingOpened(this, {{? !it.disabled}}false{{??}}true{{?}}); return false;"
+           target="_blank"><img src="/{{=it.site.pathPrefix}}img/{{? !it.disabled}}close{{??}}open{{?}}_voting.png"
+                                width="24" height="24" class="buttonImage noInvert"></a>
+    {{?}}
+</div>

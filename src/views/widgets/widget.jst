@@ -1,0 +1,15 @@
+<div class='widget'>
+  <div class='widget-wrapper-outer js-widget-wrapper-outer'>
+    <div class='widget-wrapper-inner js-widget-wrapper-inner'>
+      <div class='widget-header js-widget-header'>
+        <div>{{!(it.title || '')}}</div>
+        <div class='js-widget-header-buttons'>
+          <span class='icon icon-cross button-icon' title='{{!it.translate('Close', 'closeButtonText')}}'
+                data-bind='click: close'></span>
+        </div>
+      </div>
+      <div class='widget-content-wrapper js-widget-content-wrapper'></div>
+      <div class='widget-buttons js-widget-buttons'></div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+<div class='favorites'
+     data-bind='foreach: favoriteThreads'>
+  <div class='row favorite'>
+    <span>
+      <span class='favorite-new-post-count'
+            data-bind='visible: $data.newPostCount > 0,
+                       text: "+" + $data.newPostCount,
+                       click: $root.markAsVisited'></span>
+      <a target='_blank'
+         data-bind='attr: {
+                      href: "/{{!it.site.pathPrefix}}" + $data.boardName + "/res/" + $data.threadNumber + ".html",
+                      title: $data.subject
+                    },
+                    text: $root.truncatedText.bind($data)()'></a>
+    </span>
+    <span class='icon icon-cross button-icon' title='{{!it.translate('Remove thread from favorites')}}'
+          data-bind='click: $root.removeFromFavorites'></span>
+  </div>
+</div>

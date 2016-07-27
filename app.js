@@ -9,7 +9,7 @@ var Util = require("util");
 
 var Global = require("./helpers/global");
 Global.Program = require("commander");
-Global.Program.version("1.1.1")
+Global.Program.version("2.0.0-pa")
     .option("-c, --config-file <file>", "Path to the config.json file")
     .option("-r, --regenerate", "Regenerate the cache on startup")
     .option("-a, --archive", "Regenerate archived threads, too")
@@ -200,6 +200,9 @@ var spawnCluster = function() {
                         config.reload();
                     return Promise.resolve();
                 });
+                Global.IPC.installHandler("reloadTemplates", function() {
+                    return controller.initialize();
+                });
                 Global.IPC.installHandler("notifyAboutNewPosts", function(data) {
                     Tools.forIn(data, function(_, key) {
                         var s = subscriptions.get(key);
@@ -236,14 +239,16 @@ var spawnCluster = function() {
 
 if (cluster.isMaster) {
     var FS = require("q-io/fs");
-    var path = __dirname + "/public/node-captcha";
+    var paths = [__dirname + "/public/node-captcha", __dirname + "/tmp/node-captcha-noscript"];
     var initCallback;
-    FS.list(path).then(function(fileNames) {
-        return Tools.series(fileNames.filter(function(fileName) {
-            return fileName.split(".").pop() == "png" && /^[0-9]+$/.test(fileName.split(".").shift());
-        }), function(fileName) {
-            return FS.remove(path + "/" + fileName);
-        });
+    Tools.series(paths, function(path) {
+      return FS.list(path).then(function(fileNames) {
+          return Tools.series(fileNames.filter(function(fileName) {
+              return fileName.split(".").pop() == "png" && /^[0-9]+$/.test(fileName.split(".").shift());
+          }), function(fileName) {
+              return FS.remove(path + "/" + fileName);
+          });
+      });
     }).catch(function(err) {
         console.error(err);
         return Promise.resolve();
@@ -251,6 +256,8 @@ if (cluster.isMaster) {
         return Database.initialize();
     }).then(function(cb) {
         initCallback = cb;
+        return controller.compileTemplates();
+    }).then(function() {
         return controller.initialize();
     }).then(function() {
         if (Global.Program.regenerate || config("system.regenerateCacheOnStartup", true)) {
@@ -259,6 +266,15 @@ if (cluster.isMaster) {
             console.log("Generating statistics, please, wait...");
             return controller.generateStatistics().catch(function(err) {
                 Global.error(err.stack || err);
+            }).then(function() {
+              console.log('Generating templating JavaScript file, please, wait...');
+              return controller.generateTemplatingJavaScriptFile();
+            }).then(function() {
+              console.log('Checking custom JavaScript file existence, please, wait...');
+              return controller.checkCustomJavaScriptFileExistence();
+            }).then(function() {
+              console.log('Checking custom CSS files existence, please, wait...');
+              return controller.checkCustomCSSFilesExistence();
             });
         }
     }).then(function() {
@@ -323,6 +339,11 @@ if (cluster.isMaster) {
         Global.IPC.installHandler("reloadConfig", function() {
             config.reload();
             return Global.IPC.send("reloadConfig");
+        });
+        Global.IPC.installHandler("reloadTemplates", function() {
+            return controller.compileTemplates().then(function() {
+              return Global.IPC.send("reloadTemplates");
+            });
         });
         Global.IPC.installHandler("notifyAboutNewPosts", function(data) {
             return Global.IPC.send("notifyAboutNewPosts", data);

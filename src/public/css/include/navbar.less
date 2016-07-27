@@ -1,0 +1,88 @@
+.navbar {
+  font-size: 1.2em;
+}
+
+.navbar-item {
+    white-space: nowrap;
+}
+
+.notification-button {
+  position: relative;
+
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    font-size: 12px;
+    color: red;
+    animation: blinker 2s infinite;
+  }
+
+  &.notification-button-plus-1 {
+    &::before {
+      content: '+1';
+    }
+  }
+
+  &.notification-button-plus-2 {
+    &::before {
+      content: '+2';
+    }
+  }
+
+  &.notification-button-plus-3 {
+    &::before {
+      content: '+3';
+    }
+  }
+
+  &.notification-button-plus-4 {
+    &::before {
+      content: '+4';
+    }
+  }
+
+  &.notification-button-plus-5 {
+    &::before {
+      content: '+5';
+    }
+  }
+
+  &.notification-button-plus-6 {
+    &::before {
+      content: '+6';
+    }
+  }
+
+  &.notification-button-plus-7 {
+    &::before {
+      content: '+7';
+    }
+  }
+
+  &.notification-button-plus-8 {
+    &::before {
+      content: '+8';
+    }
+  }
+
+  &.notification-button-plus-9 {
+    &::before {
+      content: '+9';
+    }
+  }
+}
+
+.sidebar .notification-button {
+  &::before {
+    left: -20px;
+    top: 1px;
+  }
+}
+
+.toolbar .notification-button {
+  &::before {
+    top: 16px;
+    left: -1px;
+  }
+}

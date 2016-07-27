@@ -1,0 +1,62 @@
+<div class='js-only drafts-visibility-switch-container'>
+  [<a id='drafts-visibility-switch'
+      href='javascript:void(0);'
+      data-bind='text: (draftsVisible() ? "{{!it.translate('Hide drafts')}}" : "{{!it.translate('Show drafts')}}"),
+                 click: toggleDraftsVisibility'></a>]
+</div>
+<div id='drafts' style='display: none;'
+     data-bind='visible: draftsVisible'>
+  <hr />
+  <div class='drafts-header-container'><h2>{{!it.translate('Drafts', 'draftsText')}}</h2></div>
+  <div data-bind='foreach: drafts'>
+    <div class='post reply-post'>
+      <div class='post-header'>
+        <!-- ko if: $data.options.sage -->
+          <span class='icon icon-angry' title='{{!it.translate('SAGE')}}'></span>
+        <!-- /ko-->
+        <span class='post-subject'
+              data-bind='css: { "js-post-subject-default": !!$data.subject }'>
+          <!-- ko if: $data.subjectIsRaw -->
+            <span data-bind='html: $data.subject'></span>
+          <!-- /ko-->
+          <!-- ko if: !$data.subjectIsRaw -->
+            <span data-bind='text: $data.subject'></span>
+          <!-- /ko-->
+        </span>
+        <span data-bind='css: "post-name" + ($root.userLevel ? (" post-name-" + $root.userLevel.toLowerCase()) : "")
+                           + (!$data.name ? " post-name-default js-post-name-default" : "")'>
+          <!-- ko if: !$data.name -->
+            {{!it.board.defaultUserName}}
+          <!-- /ko-->
+          <!-- ko if: $data.name && ($root.compareRegisteredUserLevels($root.userLevel, 'ADMIN') >= 0) -->
+            <span data-bind='html: $data.name'></span>
+          <!-- /ko-->
+          <!-- ko if: $data.name && ($root.compareRegisteredUserLevels($root.userLevel, 'ADMIN') < 0) -->
+            <span data-bind='text: $data.name'></span>
+          <!-- /ko-->
+        </span>
+        <!-- ko if: $data.options.signAsOp -->
+          <span class='op-sign'></span>
+        <!-- /ko -->
+        <!-- ko if: $data.options.showTripcode && $data.tripcode -->
+          <span class='tripcode' data-bind='text: $data-tripcode'></span>
+        <!-- /ko -->
+        <time class='post-date-time nowrap js-date-time'
+              data-bind='attr: { "data-date-time": $data.createdAt },
+                         text: $root.formattedDate($data.createdAt)'></time>
+        <span class='icon icon-pencil button-icon' title='{{!it.translate('Fill form with this draft')}}'
+              data-bind='click: $root.fillFormWithDraft.bind($data)'></span>
+        <span class='icon icon-bin button-icon' title='{{!it.translate('Delete this draft')}}'
+              data-bind='click: $root.deleteDraft.bind($data)'></span>
+      </div>
+      <div class='post-body'>
+        <div class='post-files'>
+          <div class='post-text-wrapper js-post-text-wrapper'>
+            <blockquote class='post-text js-post-text'
+                        data-bind='html: $data.text'></blockquote>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

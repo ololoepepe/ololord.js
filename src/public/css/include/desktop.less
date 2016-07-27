@@ -1,0 +1,105 @@
+.mobile-only {
+  display: none !important;
+}
+
+:root {
+  &.rating-r-18,
+  &.rating-r-15,
+  &.rating-sfw {
+    .post-file-link[data-rating='R-18G'] {
+      width: 200px;
+      height: 200px;
+    }
+  }
+
+  &.rating-r-15,
+  &.rating-sfw {
+    .post-file-link[data-rating='R-18'] {
+      width: 200px;
+      height: 200px;
+    }
+  }
+
+  &.rating-sfw {
+    .post-file-link[data-rating='R-15'] {
+      width: 200px;
+      height: 200px;
+    }
+  }
+}
+
+.ui-widget {
+  font-size: 14.4px !important;
+}
+
+body {
+  font-size: 14.4px;
+}
+
+input, select {
+  font-size: 14.4px;
+}
+
+#sidebar {
+  z-index: 1;
+}
+
+#sidebar-switch:checked:not(:disabled) {
+  ~ .sidebar-placeholder {
+    display: block;
+  }
+
+  ~ #content {
+    max-width: ~'calc(100% - 216px)';
+  }
+}
+
+/* Post */
+
+.post-file-size {
+  font-size: 0.8em;
+}
+
+.post-text-wrapper {
+  flex-basis: ~'calc(100% - 250px)';
+}
+
+.post.temporary-post {
+  position: absolute;
+}
+
+/* Player */
+
+.player {
+  width: 400px;
+}
+
+.player-current-track-info,
+.player-current-track-tags {
+  font-size: 1.2em;
+}
+
+.player-slider-duration {
+  width: ~'calc(75% - 12px)';
+  margin-right: 6px;
+}
+
+.player-slider-volume {
+  display: inline-block;
+  width: ~'calc(25% - 12px)';
+}
+
+/* MovablePlayer */
+
+.movable-player-sliders {
+  width: ~'calc(100% - 44px)';
+}
+
+.movable-player-duration-slider {
+  width: ~'calc(75% - 12px)';
+}
+
+.movable-player-volume-slider {
+  display: inline-block;
+  width: ~'calc(25% - 12px)';
+}

@@ -273,7 +273,7 @@ module.exports.getThreadLastPostNumber = function(boardName, threadNumber) {
     });
 };
 
-module.exports.getThreadInfo = function(board, hashpass, number) {
+module.exports.getThreadInfo = function(board, hashpass, number, lastPostNumber) {
     if (!(board instanceof Board))
         return Promise.reject(Tools.translate("Invalid board"));
     number = +(number || 0);
@@ -284,7 +284,8 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
         limit: 1,
         filterFunction: function(thread) {
             return thread.number == number;
-        }
+        },
+        withPostNumbers: true
     }).then(function(threads) {
         if (threads.length == 1)
             return Promise.resolve(threads);
@@ -293,14 +294,16 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
             filterFunction: function(thread) {
                 return thread.number == number;
             },
-            archived: true
+            archived: true,
+            withPostNumbers: true
         });
     }).then(function(threads) {
         if (threads.length != 1)
             return Promise.reject(Tools.translate("No such thread"));
         c.thread = threads[0];
-        return Database.threadPostCount(board.name, c.thread.number);
-    }).then(function(postCount) {
+        var postCount = c.thread.postNumbers.sort((a, b) => { return a - b; }).length;
+        lastPostNumber = (+lastPostNumber > 0) ? +lastPostNumber : 0;
+        var newPostCount = c.thread.postNumbers.filter((pn) => { return pn > lastPostNumber }).length;
         var threadModel = {
             number: c.thread.number,
             bumpLimit: board.bumpLimit,
@@ -311,7 +314,9 @@ module.exports.getThreadInfo = function(board, hashpass, number) {
             fixed: c.thread.fixed,
             unbumpable: c.thread.unbumpable,
             postCount: postCount,
-            postingEnabled: (board.postingEnabled && !c.thread.closed)
+            postingEnabled: (board.postingEnabled && !c.thread.closed),
+            lastPostNumber: c.thread.postNumbers.pop(),
+            newPostCount: newPostCount
         };
         return Promise.resolve(threadModel);
     });
@@ -409,18 +414,13 @@ var generateThreadHTML = function(board, threadNumber, model, nowrite) {
     model.board = controller.boardModel(board).board;
     model.extraScripts = board.extraScripts();
     model.extraStylesheets = board.extraStylesheets();
-    model.tr = controller.translationsModel();
     model.threadNumber = model.thread.number;
-    return board.postformRules().then(function(rules) {
-        model.postformRules = rules;
-        model.customPostHeaderPart = board.customPostHeaderPart() || {};
-        model.customPostBodyPart = board.customPostBodyPart() || {};
-        return controller("threadPage", model);
-    }).then(function(data) {
-        if (nowrite)
-            return Promise.resolve(data);
-        return Cache.writeFile(`${board.name}/res/${threadNumber}.html`, data);
-    });
+    model.customPostHeaderPart = board.customPostHeaderPart() || {};
+    model.customPostBodyPart = board.customPostBodyPart() || {};
+    var data = controller("pages/thread", model);
+    if (nowrite)
+      return Promise.resolve(data);
+    return Cache.writeFile(`${board.name}/res/${threadNumber}.html`, data);
 };
 
 module.exports.generateThreadHTML = generateThreadHTML;
@@ -471,15 +471,10 @@ var generatePage = function(boardName, pageNumber) {
         c.model.board = controller.boardModel(board).board;
         c.model.extraScripts = board.extraScripts();
         c.model.extraStylesheets = board.extraStylesheets();
-        c.model.tr = controller.translationsModel();
-        return board.postformRules();
-    }).then(function(rules) {
-        c.model.postformRules = rules;
         c.model.customPostHeaderPart = board.customPostHeaderPart() || {};
         c.model.customPostBodyPart = board.customPostBodyPart() || {};
-        return controller("boardPage", c.model);
-    }).then(function(data) {
-        return Cache.writeFile(`${board.name}/${(pageNumber > 0) ? pageNumber : "index"}.html`, data);
+        return Cache.writeFile(`${board.name}/${(pageNumber > 0) ? pageNumber : "index"}.html`,
+          controller("pages/board", c.model));
     });
 };
 
@@ -516,10 +511,8 @@ var generateCatalog = function(boardName) {
             c.model.isBoardPage = true;
             c.model.board = controller.boardModel(board).board;
             c.model.sortMode = sortMode;
-            c.model.tr = controller.translationsModel();
-            return controller("catalogPage", c.model);
-        }).then(function(data) {
-            return Cache.writeFile(`${board.name}/catalog${("date" != sortMode) ? ("-" + sortMode) : ""}.html`, data);
+            return Cache.writeFile(`${board.name}/catalog${("date" != sortMode) ? ("-" + sortMode) : ""}.html`,
+              controller("pages/catalog", c.model));
         });
     });
 };
@@ -563,10 +556,7 @@ var generateArchive = function(boardName) {
     }).then(function() {
         model.title = board.title;
         model.board = controller.boardModel(board).board;
-        model.tr = controller.translationsModel();
-        return controller("archivePage", model);
-    }).then(function(data) {
-        return Cache.writeFile(`${board.name}/archive.html`, data);
+        return Cache.writeFile(`${board.name}/archive.html`, controller("pages/archive", model));
     });
 };
 

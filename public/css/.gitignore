@@ -1,11 +1,11 @@
 *
-!3rdparty
-!base.css
+!3rdparty/
+!base-combined.css
+!base-desktop.css
+!base-mobile.css
 !burichan.css
-!desktop.css
 !futaba.css
 !mint.css
-!mobile.css
 !neutron.css
 !photon.css
 !photon-classic.css

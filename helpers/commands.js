@@ -249,7 +249,7 @@ vorpal.installHandler("reload-config [fileName]", function(args) {
 
 vorpal.installHandler("reload-templates", function(args) {
     return Global.IPC.send("stop").then(function() {
-        return controller.initialize();
+        return Global.IPC.send("reloadTemplates");
     }).then(function() {
         return Global.IPC.send("start");
     }).then(function() {

@@ -212,7 +212,7 @@ var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
             info.id = videoId;
             info.href = href;
             info.start = youtubeVideoStartTime(href);
-            var html = controller.sync("youtubeVideoLink", { info: info });
+            var html = controller("markup/youtubeVideoLink", { info: info });
             if (!html)
                 return Promise.reject(Tools.translate("Failed to create YouTube video link"));
             return Promise.resolve(html);
@@ -256,7 +256,7 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
                 } : null,
                 id: videoId
             };
-            var html = controller.sync("coubVideoLink", { info: info });
+            var html = controller("markup/coubVideoLink", { info: info });
             if (!html)
                 return Promise.reject(Tools.translate("Failed to create Coub video link"));
             return Promise.resolve(html);
@@ -276,7 +276,7 @@ var getVocarooEmbeddedHtml = function(href, defaultHtml) {
     var audioId = match ? match[1] : null;
     if (!audioId)
         return Promise.resolve(defaultHtml);
-    var html = controller.sync("vocarooAudioLink", { info: { id: audioId } });
+    var html = controller("markup/vocarooAudioLink", { info: { id: audioId } });
     if (!html)
         return Promise.reject(Tools.translate("Failed to create Vocaroo audio embedded container"));
     return Promise.resolve(html);
@@ -632,7 +632,7 @@ var convertCode = function(_, text, matchs, _, options) {
     lang = result.language || lang;
     var langClass = lang ? (" " + lang) : "";
     var langName = langNames.hasOwnProperty(lang) ? langNames[lang] : lang;
-    options.op = `<div class="codeBlock${langClass} hljs" title="${langName || ''}">`;
+    options.op = `<div class="code-block${langClass} hljs js-with-tooltip" title="${langName || ''}">`;
     options.cl = "</div>";
     return Promise.resolve(Highlight.fixMarkup(text));
 };
@@ -671,7 +671,7 @@ var convertProtocol = function(_, _, matchs, _, options) {
 var convertTooltipShitty = function(_, _, matchs, _, options) {
     options.type = SkipTypes.NoSkip;
     var tooltip = matchs[2];
-    options.op = "<span class=\"tooltip\" title=\"" + tooltip + "\">";
+    options.op = "<span class=\"tooltip js-with-tooltip\" title=\"" + tooltip + "\">";
     options.cl = "</span>";
     return Promise.resolve(matchs[1]);
 };
@@ -679,7 +679,7 @@ var convertTooltipShitty = function(_, _, matchs, _, options) {
 var convertPostLink = function(info, _, matchs, _, options) {
     options.type = SkipTypes.HtmlSkip;
     var boardName = (matchs.length > 2) ? matchs[1] : info.boardName;
-    var postNumber = matchs[(matchs.length > 2) ? 2 : 1];
+    var postNumber = +matchs[(matchs.length > 2) ? 2 : 1];
     var escaped = matchs[0].split(">").join("&gt;");
     if (postNumber && (postNumber != info.deletedPost)) {
         return Database.db.hget("posts", boardName + ":" + postNumber).then(function(post) {
@@ -701,7 +701,11 @@ var convertPostLink = function(info, _, matchs, _, options) {
             if (postNumber != post.threadNumber)
                 href += "#" + postNumber;
             href += "\"";
-            var result = "<a " + href + " data-board-name=\"" + boardName + "\" data-post-number=\"" + postNumber
+            var result = "<a " + href;
+            if (postNumber === post.threadNumber) {
+              result += ' class="op-post-link"';
+            }
+            result += " data-board-name=\"" + boardName + "\" data-post-number=\"" + postNumber
                 + "\" data-thread-number=\"" + post.threadNumber + "\">" + escaped + "</a>";
             return result;
         });
@@ -760,9 +764,9 @@ var convertCSpoiler = function(_, text, matchs, _, options) {
     if (!title)
         title = "Spoiler";
     options.type = SkipTypes.NoSkip;
-    options.op = "<span class=\"cspoiler\"><span class=\"cspoilerTitle\" title=\"Spoiler\" "
+    options.op = "<span class=\"collapsible-spoiler\"><span class=\"collapsible-spoiler-title\" title=\"Spoiler\" "
         + "onclick=\"lord.expandCollapseSpoiler(this);\">" + title
-        + "</span><span class=\"cspoilerBody\" style=\"display: none;\">";
+        + "</span><span class=\"collapsible-spoiler-body\" style=\"display: none;\">";
     options.cl = "</span></span>";
     return Promise.resolve(text);
 };
@@ -770,7 +774,7 @@ var convertCSpoiler = function(_, text, matchs, _, options) {
 var convertTooltip = function(_, text, matchs, _, options) {
     var tooltip = matchs[1];
     options.type = SkipTypes.NoSkip;
-    options.op = "<span class=\"tooltip\" title=\"" + tooltip + "\">";
+    options.op = "<span class=\"tooltip js-with-tooltip\" title=\"" + tooltip + "\">";
     options.cl = "</span>";
     return Promise.resolve(text);
 };

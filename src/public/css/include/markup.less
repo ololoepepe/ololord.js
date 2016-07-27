@@ -1,0 +1,57 @@
+.spoiler * {
+  opacity: 0;
+}
+
+.spoiler:hover {
+  * {
+    opacity: 1;
+  }
+
+  .spoiler:not(:hover) {
+    opacity: 0;
+  }
+}
+
+.tooltip {
+  cursor: help;
+}
+
+.expandable {
+  cursor: pointer;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.collapsible-spoiler-title {
+  cursor: pointer;
+}
+
+.collapsible-spoiler-body {
+  display: block;
+  padding: 4px;
+}
+
+.code-block {
+  box-sizing: border-box;
+  max-width: 100%;
+  padding-left: 20px !important; //NOTE: Overwriting highlight.js value
+  overflow-x: auto;
+  white-space: pre;
+  word-break: normal;
+  word-wrap: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+  font-family: monospace;
+}
+
+.latex-block {
+  box-sizing: border-box;
+  max-width: 100%;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding-top: 8px;
+  padding-bottom: 0px;
+  overflow-x: auto;
+  text-align: center;
+}
