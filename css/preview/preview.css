@@ -8,11 +8,3 @@ a[data-rating="R-18"] {
 a[data-rating="R-18"] > img {
     display: none;
 }
-
-#player {
-    z-index: 2000000;
-}
-
-#postForm.floatingPostForm {
-    z-index: 3000000 !important;
-}

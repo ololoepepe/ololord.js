@@ -5,621 +5,495 @@
     <meta name="viewport" content="width=device-width">
     <title>ololord.js – Theme preview</title>
     <link rel="stylesheet" type="text/css" href="/ololord.js/css/3rdparty/highlight.js/darkula.css">
-    <link rel="stylesheet" type="text/css" href="/ololord.js/css/preview/base.css">
-    <link id="platformStylesheet" rel="stylesheet" type="text/css" href="/ololord.js/css/preview/desktop.css">
+    <link rel="stylesheet" type="text/css" href="/ololord.js/css/preview/base-combined.css">
     <link rel="stylesheet" type="text/css" href="/ololord.js/css/preview/preview.css">
-    <style id="themeStylesheet" type="text/css"></style>
+    <style id='themeStylesheet' type='text/less'></style>
     <script type ="text/javascript" src="/ololord.js/js/3rdparty/jquery-1.11.3.min.js"></script>
     <script type ="text/javascript" src="/ololord.js/js/3rdparty/jquery-ui.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/less.js/2.7.1/less.min.js"></script>
     <script type ="text/javascript" src="/ololord.js/js/preview.js"></script>
 </head>
 <body>
-<div>
-    <div class="toolbar sticky">
-        <input type="image" name="sidebarButton" title="Show sidebar" class="buttonImage"
-               src="/ololord.js/favicon.ico" width="20" height="20" onclick="return false;" />
-        <div id="sidebarButtonPlaceholder"></div>
-        [<input type="image" name="favoritesButton" title="Show favorites" class="buttonImage"
-                src="/ololord.js/img/favorite.png" onclick="return false;" />]
-        [<a name="switchMumWatchingButton"
-            title="Mum is watching me!"><img src="/ololord.js/img/show.png" class="buttonImage"></a>]
-        <span class="nowrap">
-            Thematics
-            <span class="navbarBoardGroup">
-                [
-                <span class="navbarItem navbarItemBoard"><span class="newPostCount">+3</span>
-                    <a href="javascript:void(0);" title="/a/nime">a</a></span>
-                /
-                <span class="navbarItem navbarItemBoard"><a href="javascript:void(0);"
-                          title="/h/entai">h</a></span>
-                ]
-            </span>
-        </span>
-        <span class="nowrap">
-            Other
-            <span class="navbarBoardGroup">
-                [
-                <span class="navbarItem navbarItemBoard"><a href="javascript:void(0);"
-                          title="/b/rotherhood">b</a></span>
-                /
-                <span class="navbarItem navbarItemBoard"><a href="javascript:void(0);"
-                          title="Board /d/iscussion">d</a></span>
-                ]
-            </span>
-        </span>
-        <span class="nowrap">
-            <span class="navbarItem">[<a href="javascript:void(0);"
-                                         title="Home"><img src="/ololord.js/img/homepage.png"
-                                                           class="buttonImage" width="16" height="16"></a>]</span>
-            <span class="navbarItem">[<a href="javascript:void(0);"
-                                         title="Markup"><img src="/ololord.js/img/markup.png" class="buttonImage"
-                                                             width="16" height="16"></a>]</span>
-            <span class="navbarItem">[<a href="javascript:void(0);"
-                                         title="F.A.Q."><img src="/ololord.js/img/question.png" class="buttonImage"
-                                                             width="16" height="16"></a>]</span>
-            <span class="navbarItem">[<a href="javascript:void(0);" name="searchButton"
-                                         title="Hide search"><img src="/ololord.js/img/search_hide.png" class="buttonImage"
-                                                                  width="16" height="16"></a>]</span>
-            <span class="navbarItem">[<a href="javascript:void(0);" name="chatButton"
-                                         title="Private chat"><img src="/ololord.js/img/chat.png" class="buttonImage"
-                                                                   width="16" height="16"></a>]</span>
-        </span>
-        <div class="searchAction" style="top: 30px;">
-            <form method="get" onsubmit="return false;">
-                <div class="searchActionInputContainer">
-                    <input type="text" class="input searchActionInput" name="query"
-                           placeholder="Search: possible +required -excluded" value="" />
-                    <input style="background: url(/ololord.js/img/search.png) center no-repeat; border: solid 0px; width: 16px; height: 16px;"
-                           type="submit" title="Search" class="buttonImage" value="" />
-                </div>
-                <div class="searchActionOptionsContainer">
-                    <select name="board" class="select searchActionSelect"
-                            onchange="$(this).closest('.searchAction').find('.searchActionInput').focus();">
-                        <option value="*" selected="true">[*] All boards</option>
-                        <option value="a">[a] /a/nime</option>
-                        <option value="b">[b] /b/rotherhood</option>
-                        <option value="d">[d] /d/iscussion</option>
-                        <option value="h">[h] /h/entai</option>
-                    </select>
-                </div>
-            </form>
-        </div>
+<input id="sidebar-switch" type="checkbox" class="sidebar-switch" checked="true">
+<label for="sidebar-switch" title="Скрыть боковую панель"></label>
+<nav id="sidebar" class="sidebar" draggable="true">
+  <div class="sidebar-buttons">
+    <div class="sidebar-action-buttons-container">
+      <div class="sidebar-action-buttons js-action-buttons"><span class="icon button-icon icon-exit" data-bind="css: (loggedIn ? &quot;icon-exit&quot; : &quot;icon-enter&quot;),
+                 attr: { title: loginButtonTitle() },
+                 click: loginOrLogout" title="Разлогиниться [залогинен в качестве суперпользователя]"></span>
+<span class="notification-button notification-button-plus-1" title="Приватный чат"><span class='icon icon-bubbles button-icon'></span></span>
+<span class="icon icon-list button-icon" title="Показать список скрытых постов" data-bind="click: showHiddenPostList"></span>
+<span class="icon icon-magic-wand button-icon" title="Редактировать спеллы" data-bind="click: editSpells"></span>
+<span class="icon icon-tools button-icon" data-bind="attr: {
+                   title: &quot;Настройки&quot; + shortcutSuffix(&quot;showSettings&quot;)
+                 },
+                 click: showSettings" title="Настройки (alt+t)"></span>
+<span class="icon icon-search button-icon" title="Search" data-bind="click: showSearch"></span>
+<span class="notification-button notification-button-plus-3" title="Избранное (alt+f)"><span class='icon icon-star-full button-icon'></span></span>
+<span class="icon button-icon icon-eye" title="Мамка в комнате!" data-bind="css: (settings.mumWatching() ? &quot;icon-eye-blocked&quot; : &quot;icon-eye&quot;),
+                 click: toggleMumWatching"></span>
+</div>
     </div>
-</div>
-<div id="player" class="minimized">
-    <div class="playerMinimized">
-        <div>
-            <span class="playerMinimizedActionsDesktop">
-                <a href="javascript:void(0);" onclick="lord.setPlayerVisible(event, true);"
-                   title="Maximize"><img src="/ololord.js/img/player/16/player.png"
-                                         class="buttonImage" width="16" height="16"></a>
-                <input type="image" onclick="return false;" name="playerPlayPauseButton" title="Play"
-                       src="/ololord.js/img/player/16/play.png" class="buttonImage" width="16" height="16"
-                       disabled="true" />
-                <input type="image" onclick="return false;" title="Previous track" class="buttonImage" width="16"
-                       height="16" src="/ololord.js/img/player/16/previous.png" name="playerPreviousTrackButton"
-                       disabled="true" />
-                <input type="image" onclick="return false;" name="playerNextTrackButton" title="Next track"
-                       class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/next.png"
-                       disabled="true" />
-            </span>
-            <span class="playerMinimizedActionsMobile" onclick="lord.setPlayerVisible(event, true);">
-                <input type="image" onclick="return false;" name="playerPlayPauseButton" title="Play"
-                       src="/ololord.js/img/player/16/play.png" class="buttonImage" width="16" height="16"
-                       disabled="true" />
-                Maximize
-            </span>
+  </div>
+  <div class="navbar sidebar-content js-navbar">
+      
+        <div name="_boards" class="sidebar-group js-navbar-group" data-bind="style: { &quot;border-bottom-width&quot;: ((settings.hiddenBoardGroups().indexOf(&quot;_boards&quot;) >= 0) ? &quot;0px&quot;: &quot;&quot;) }">
+          <div class="sidebar-group-title js-navbar-group-title" data-bind="style: { cursor: &quot;pointer&quot; },
+                          click: toggleBoardGroupVisibility" style="cursor: pointer;">Boards</div>
+          <div class="sidebar-group-body js-navbar-group-body" data-bind="visible: settings.hiddenBoardGroups().indexOf(&quot;_boards&quot;) < 0">
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;a&quot;) < 0">
+                <a href="/a" data-board-name="a">/a/ниме</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;cg&quot;) < 0">
+                <a href="/cg" data-board-name="cg">Консольные игры</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;d&quot;) < 0">
+                <a href="/d" data-board-name="d">/d/искуссии о борде</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;echo&quot;) < 0">
+                <a href="/echo" data-board-name="echo">Эхо бордосферы</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;int&quot;) < 0">
+                <a href="/int" data-board-name="int">/int/ernational</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;mlp&quot;) < 0">
+                <a href="/mlp" data-board-name="mlp">Мой маленький пони</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;ny&quot;) < 0">
+                <a href="/ny" data-board-name="ny">Новогодний розыгрыш</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;op&quot;) < 0">
+                <a href="/op" data-board-name="op">ОП-модерация</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;po&quot;) < 0">
+                <a href="/po" data-board-name="po">Политика</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;pr&quot;) < 0">
+                <span class='new-post-count'>+3</span>
+                <a href="/pr" data-board-name="pr">Программирование</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;rf&quot;) < 0">
+                <a href="/rf" data-board-name="rf">Убежище</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;rpg&quot;) < 0">
+                <a href="/rpg" data-board-name="rpg">Ролевые игры</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;s&quot;) < 0">
+                <a href="/s" data-board-name="s">Софт и железо</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;test&quot;) < 0">
+                <a href="/test" data-board-name="test">пиздест</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;vg&quot;) < 0">
+                <a href="/vg" data-board-name="vg">Видеоигры</a>
+              </div>
+            
+          </div>
         </div>
+      
+        <div name="adult" class="sidebar-group js-navbar-group" data-bind="style: { &quot;border-bottom-width&quot;: ((settings.hiddenBoardGroups().indexOf(&quot;adult&quot;) >= 0) ? &quot;0px&quot;: &quot;&quot;) }">
+          <div class="sidebar-group-title js-navbar-group-title" data-bind="style: { cursor: &quot;pointer&quot; },
+                          click: toggleBoardGroupVisibility" style="cursor: pointer;">For adults</div>
+          <div class="sidebar-group-body js-navbar-group-body" data-bind="visible: settings.hiddenBoardGroups().indexOf(&quot;adult&quot;) < 0">
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;3dpd&quot;) < 0">
+                <a href="/3dpd" data-board-name="3dpd">3D прон</a>
+              </div>
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;h&quot;) < 0">
+                <a href="/h" data-board-name="h">Хентай</a>
+              </div>
+            
+          </div>
+        </div>
+      
+        <div name="other" class="sidebar-group js-navbar-group" data-bind="style: { &quot;border-bottom-width&quot;: ((settings.hiddenBoardGroups().indexOf(&quot;other&quot;) >= 0) ? &quot;0px&quot;: &quot;&quot;) }">
+          <div class="sidebar-group-title js-navbar-group-title" data-bind="style: { cursor: &quot;pointer&quot; },
+                          click: toggleBoardGroupVisibility" style="cursor: pointer;">Other</div>
+          <div class="sidebar-group-body js-navbar-group-body" data-bind="visible: settings.hiddenBoardGroups().indexOf(&quot;other&quot;) < 0">
+            
+              <div class="navbar-item js-navbar-item-board" data-bind="visible: settings.hiddenBoards().indexOf(&quot;b&quot;) < 0">
+                <a href="/b" data-board-name="b">/b/ратство</a>
+              </div>
+            
+          </div>
+        </div>
+      
+      <div name="_general" class="sidebar-group js-navbar-group" data-bind="style: { &quot;border-bottom-width&quot;: ((settings.hiddenBoardGroups().indexOf(&quot;_general&quot;) >= 0) ? &quot;0px&quot;: &quot;&quot;) }">
+        <div class="sidebar-group-title js-navbar-group-title" data-bind="style: { cursor: &quot;pointer&quot; },
+                        click: toggleBoardGroupVisibility" style="cursor: pointer;">General</div>
+        <div class="sidebar-group-body js-navbar-group-body" data-bind="visible: settings.hiddenBoardGroups().indexOf(&quot;_general&quot;) < 0">
+          <div class="navbar-item">
+            <a href="/" class="icon icon-home button-icon"></a>
+            <a href="/">На главную</a>
+          </div>
+          <div class="navbar-item">
+            <a href="/markup.html" class="icon icon-code button-icon"></a>
+            <a href="/markup.html">Разметка</a>
+          </div>
+          <div class="navbar-item">
+            <a href="/faq.html" class="icon icon-question button-icon"></a>
+            <a href="/faq.html">F.A.Q.</a>
+          </div>
+          <div class="navbar-item user-level-moder-only">
+            <a href="/manage.html" class="icon icon-gear button-icon"></a>
+            <a href="/manage.html">Управление</a>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="playerMaximized">
-        <div class="playerHeader">
-            <input type="image" onclick="return false;" name="playerPlayPauseButton" title="Play"
-                   src="/ololord.js/img/player/32/play.png" class="buttonImage" width="32" height="32">
-            <input type="image" onclick="lreturn false;" name="playerPreviousTrackButton" title="Next track"
-                   class="buttonImage" width="32" height="32" src="/ololord.js/img/player/32/previous.png">
-            <input type="image" onclick="return false;" name="playerNextTrackButton" title="Previous track"
-                   class="buttonImage" width="32" height="32" src="/ololord.js/img/player/32/next.png">
-            <div id="playerTrackInfo">00:01:34</div>
-            <input type="image" onclick="lord.playerMute(event); return false;" name="playerMuteButton" title="Mute"
-                   src="/ololord.js/img/player/32/volume_on.png" class="buttonImage" width="32" height="32">
-        </div>
-        <div id="playerTrackTags"
-             class="playerHeader">DIAL M FOR MOGUAI — BEATBOX (Radio Box) [Dream Dance Vol. 10] </div>
-        <div class="playerHeader">
-            <div id="playerDurationSlider"
-                 class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 41.048%;"></span></div>
-            <div id="playerVolumeSlider"
-                 class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 73%;"></span></div>
-        </div>
-        <div id="playerTracks" style="max-height: 597px;"><div class="track" id="track/1429898536466.mp3">
-    <span class="trackInfo">
-            <br>
-            Megadeth — She-Wolf
+  
+  <div class="sidebar-footer js-sidebar-footer">
+    <select class="select theme-select" data-bind="value: settings.style">
+      
+        <option value="burichan">Burichan</option>
+      
+        <option value="futaba">Futaba</option>
+      
+        <option value="mint">Øchan Mint</option>
+      
+        <option value="neutron">Neutron</option>
+      
+        <option value="photon-classic">Photon Classic</option>
+      
+        <option value="photon">Photon</option>
+      
+    </select>
+  </div>
+</nav>
+<div class="sidebar-placeholder"></div>
+<div id="player" class="player player-minimized">
+  <div id="minimized-player" class="minimized-player" onclick='lord.togglePlayerVisibility();'>
+    <div class="minimized-player-actions-contaner-wrapper">
+    <span class="minimized-player-actions-contaner">
+      <span class="desktop-only icon icon-music button-icon" title="Развернуть плеер"
+            onclick='event.stopPropagation(); lord.togglePlayerVisibility();'></span>
+      <span class="icon button-icon icon-play" title="Воспроизвести" data-bind="attr: {
+                         title: playing() ? &quot;Приостановить&quot;
+                           : &quot;Воспроизвести&quot;
+                       },
+                       css: {
+                         &quot;icon-play&quot;: !playing(),
+                         &quot;icon-pause&quot;: playing(),
+                         &quot;button-icon-disabled&quot;: !currentTrack()
+                       },
+                       click: playPause"></span>
+      <span class="desktop-only icon icon-backward button-icon" title="Предыдущий трек" data-bind="css: {
+                         &quot;button-icon-disabled&quot;: !currentTrack() || (tracks().length < 2)
+                       },
+                       click: playPreviousTrack"></span>
+      <span class="desktop-only icon icon-forward button-icon" title="Следующий трек" data-bind="css: {
+                         &quot;button-icon-disabled&quot;: !currentTrack() || (tracks().length < 2)
+                       },
+                       click: playNextTrack"></span>
+      <span class="mobile-only maximize-player-text-container">
+        Развернуть плеер
+      </span>
     </span>
-    <span class="trackActions">
-            00:03:36 | 256kbps
-            <a title="Download file" href="javascript:void(0);" download="1429898536466.mp3">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/download.png"></a>
-            <a href="javascript:void(0);" title="Edit audio file tags">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/audio_edit_tags.png"></a>
-            <a href="javascript:void(0);" title="Remove from playlist">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/delete.png"></a>
-    </span>
-</div><div class="track" id="track/1429897519527.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1429897519527.mp3" draggable="true">
-    <span class="trackInfo">
-        
-            <br>
-            Noisia, Calyx &amp; Teebee
-            —
-            Hyenas
-            (2013)
-        
-    </span>
-    <span class="trackActions">
-            00:05:23 | 334kbps
-            <a title="Download file" href="javascript:void(0);" download="1429898536466.mp3">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/download.png"></a>
-            <a href="javascript:void(0);" title="Edit audio file tags">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/audio_edit_tags.png"></a>
-            <a href="javascript:void(0);" title="Remove from playlist">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/delete.png"></a>
-    </span>
-</div><div class="track" id="track/1429967253911.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1429967253911.mp3" draggable="true">
-    <span class="trackInfo">
-        
-            <br>
-            Phace
-            —
-            Cold Champagne
-            (2005)
-        
-    </span>
-    <span class="trackActions">
-            00:06:25 | 321kbps
-            <a title="Download file" href="javascript:void(0);" download="1429898536466.mp3">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/download.png"></a>
-            <a href="javascript:void(0);" title="Edit audio file tags">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/audio_edit_tags.png"></a>
-            <a href="javascript:void(0);" title="Remove from playlist">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/delete.png"></a>
-    </span>
-</div><div class="track" id="track/1429993286590.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1429993286590.mp3" draggable="true">
-    <span class="trackInfo">
-            <br>
-            MARIO DE BELLIS - CITY LIGHTS.mp3
-            
-            
-            (2001)
-        
-    </span>
-    <span class="trackActions">
-            00:03:37 | 320kbps
-            <a title="Download file" href="javascript:void(0);" download="1429898536466.mp3">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/download.png"></a>
-            <a href="javascript:void(0);" title="Edit audio file tags">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/audio_edit_tags.png"></a>
-            <a href="javascript:void(0);" title="Remove from playlist">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/delete.png"></a>
-    </span>
-</div><div class="track" id="track/1430586847226.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1430586847226.mp3" draggable="true">
-    <span class="trackInfo">
-        
-            <br>
-            Antiform
-            —
-            Rewinder
-            (2009)
-        
-    </span>
-    <span class="trackActions">
-            00:05:50 | 320kbps
-            <a title="Download file" href="javascript:void(0);" download="1429898536466.mp3">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/download.png"></a>
-            <a href="javascript:void(0);" title="Edit audio file tags">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/audio_edit_tags.png"></a>
-            <a href="javascript:void(0);" title="Remove from playlist">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/delete.png"></a>
-    </span>
-</div><div class="track" id="track/1431107156667.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1431107156667.mp3" draggable="true">
-    <span class="trackInfo">
-        
-            <br>
-            Chris.Su
-            —
-            Datahub (Mindscape Remix)
-            (2012)
-        
-    </span>
-    <span class="trackActions">
-            00:05:44 | 325kbps
-            <a title="Download file" href="javascript:void(0);" download="1429898536466.mp3">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/download.png"></a>
-            <a href="javascript:void(0);" title="Edit audio file tags">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/audio_edit_tags.png"></a>
-            <a href="javascript:void(0);" title="Remove from playlist">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/delete.png"></a>
-    </span>
-</div><div class="track" id="track/1433926648696.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1433926648696.mp3" draggable="true">
-    <span class="trackInfo">
-        
-            <br>
-            Black Sun Empire &amp; State of Mind ft. PNC
-            —
-            Until The World Ends
-            
-        
-    </span>
-    <span class="trackActions">
-            00:05:43 | 320kbps
-            <a title="Download file" href="javascript:void(0);" download="1429898536466.mp3">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/download.png"></a>
-            <a href="javascript:void(0);" title="Edit audio file tags">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/audio_edit_tags.png"></a>
-            <a href="javascript:void(0);" title="Remove from playlist">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/delete.png"></a>
-    </span>
-</div><div class="track" id="track/1434604884447.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1434604884447.mp3" draggable="true">
-    <span class="trackInfo">
-        
-            <br>
-            666
-            —
-            La Tierra Ya Destruida
-            (1998)
-        
-    </span>
-    <span class="trackActions">
-            00:06:19 | 270kbps
-            <a title="Download file" href="javascript:void(0);" download="1429898536466.mp3">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/download.png"></a>
-            <a href="javascript:void(0);" title="Edit audio file tags">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/audio_edit_tags.png"></a>
-            <a href="javascript:void(0);" title="Remove from playlist">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/delete.png"></a>
-    </span>
-</div><div class="track" id="track/1434777744851.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1434777744851.mp3" draggable="true">
-    <span class="trackInfo">
-        
-            <br>
-            Asumi Kana, Matsuki Miyu &amp; Ootsubo Yuka
-            —
-            Taiyou Iwaku Moeyo Chaos
-            (2012)
-        
-    </span>
-    <span class="trackActions">
-            00:03:53 | 321kbps
-            <a title="Download file" href="javascript:void(0);" download="1429898536466.mp3">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/download.png"></a>
-            <a href="javascript:void(0);" title="Edit audio file tags">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/audio_edit_tags.png"></a>
-            <a href="javascript:void(0);" title="Remove from playlist">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/delete.png"></a>
-    </span>
-</div><div class="track" id="track/1434777733464.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1434777733464.mp3" draggable="true">
-    <span class="trackInfo">
-        
-            <br>
-            Ushiro kara Haiyoritai G
-            —
-            Koi wa Konton no Reiya
-            (2013)
-        
-    </span>
-    <span class="trackActions">
-            00:04:02 | 324kbps
-            <a title="Download file" href="javascript:void(0);" download="1429898536466.mp3">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/download.png"></a>
-            <a href="javascript:void(0);" title="Edit audio file tags">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/audio_edit_tags.png"></a>
-            <a href="javascript:void(0);" title="Remove from playlist">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/delete.png"></a>
-    </span>
-</div><div class="track" id="track/1434862062697.mp3" onclick="lord.playTrack(this);" ondragstart="lord.trackDrag(event);" ondragover="lord.allowTrackDrop(event);" ondrop="lord.trackDrop(event);" data-board-name="b" data-file-name="1434862062697.mp3" draggable="true">
-    <span class="trackInfo">
-        
-            <br>
-            miko
-            —
-            チルノのパーフェクトさんすう教室
-            (2008.11.02)
-        
-    </span>
-    <span class="trackActions">
-            00:04:40 | 320kbps
-            <a title="Download file" href="javascript:void(0);" download="1429898536466.mp3">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/download.png"></a>
-            <a href="javascript:void(0);" title="Edit audio file tags">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/audio_edit_tags.png"></a>
-            <a href="javascript:void(0);" title="Remove from playlist">
-                <img class="buttonImage" width="16" height="16" src="/ololord.js/img/player/16/delete.png"></a>
-    </span>
-</div>
-</div>
-        <a id="playerAddRadioButton" href="javascript:void(0);" onclick="lord.playerAddRadio(); return false;" title="Добавить радио-поток"><img src="/ololord.js/img/player/32/radio_add.png" class="buttonImage" width="32" height="32"></a>
-        <a id="playerMinimizeButton" href="javascript:void(0);" onclick="lord.setPlayerVisible(event, false);" title="Свернуть плеер"><img src="/ololord.js/img/player/32/hide.png" class="buttonImage" width="32" height="32"></a>
     </div>
+  </div>
+  <div id="maximized-player" class="maximized-player">
+    <div class="player-header player-current-track-actions">
+      <span class="icon-32 button-icon icon-play" data-bind="attr: {
+                         title: playing() ? &quot;Приостановить&quot;
+                           : &quot;Воспроизвести&quot;
+                       },
+                       css: {
+                         &quot;icon-play&quot;: !playing(),
+                         &quot;icon-pause&quot;: playing(),
+                         &quot;button-icon-disabled&quot;: !currentTrack()
+                       },
+                       click: playPause" title="Воспроизвести"></span>
+      <span class="icon-32 icon-backward button-icon" title="Предыдущий трек" data-bind="css: {
+                         &quot;button-icon-disabled&quot;: !currentTrack() || (tracks().length < 2)
+                       },
+                       click: playPreviousTrack"></span>
+      <span class="icon-32 icon-forward button-icon" title="Следующий трек" data-bind="css: {
+                         &quot;button-icon-disabled&quot;: !currentTrack() || (tracks().length < 2)
+                       },
+                       click: playNextTrack"></span>
+      <div class="player-current-track-info-container">
+        <span class="player-current-track-info" data-bind="text: trackInfoText">00:00:00 / 00:03:39</span>
+      </div>
+      <span class="desktop-only icon-32 button-icon icon-volume" data-bind="attr: {
+                         title: ((volume() > 0) ? &quot;Выключить звук&quot;
+                           : &quot;Включить звук&quot;)
+                       },
+                       css: {
+                         &quot;icon-volume&quot;: volume() > 0,
+                         &quot;icon-volume-mute&quot;: volume() <= 0
+                       },
+                       click: toggleMute" title="Выключить звук"></span>
+    </div>
+    <div class="player-header player-current-track-tags" data-bind="style: { display: (trackTagsVisible() ? &quot;&quot; : &quot;none&quot;) },
+                    text: trackTagsText">先生 — 男女 [EXIT TRANCE PRESENTS ウマウマできるトランスを作ってみた](16/04/2008) </div>
+    <div class="player-header">
+      <div id="player-slider-duration" class="player-slider-duration ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all ui-state-disabled ui-slider-disabled"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0"></span></div>
+      <div id="player-slider-volume" class="desktop-only player-slider-volume ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 30%;"></span></div>
+    </div>
+    <div class="player-tracks" data-bind="foreach: tracks">
+      <div class="player-track" draggable="true" data-bind="attr: {
+                        id: $data.id,
+                        &quot;data-board-name&quot;: $data.boardName || &quot;&quot;,
+                        &quot;data-file-name&quot;: $data.fileName || &quot;&quot;,
+                        &quot;data-href&quot;: $data.href || &quot;&quot; },
+                      css: { selected: $data.isCurrent },
+                      click: $parent.playTrack,
+                      event: {
+                        dragstart: $parent.trackDrag,
+                        dragover: function() { /*NOTE: Just prevent default.*/ },
+                        drop: $parent.trackDrop
+                      }" id="track-1465385149076-mp3" data-board-name="b" data-file-name="1465385149076.mp3" data-href="">
+        <span class="player-track-info" data-bind="html: $parent.trackInfo($data)"><br>Bomfunk MC's — Rockin, Just Make Ya Move (Quincy Freak Mix)</span>
+        <span class="player-track-actions">
+          <span data-bind="if: $data.duration">
+            <span data-bind="text: $data.duration">00:04:30</span>
+            <span data-bind="if: $data.bitrate"><span data-bind="text: &quot; | &quot; + $data.bitrate + &quot;kbps&quot;"> | 312kbps</span></span>
+            <a class="icon icon-download button-icon" draggable="false" title="Скачать файл" onclick="event.stopPropagation();" download="fileName" data-bind="attr: { href: &quot;/&quot; + $data.boardName + &quot;/src/&quot; + $data.fileName }" href="/b/src/1465385149076.mp3"></a>
+            <span data-bind="if: " application="" ogg'="==" $data.mimetype="" ||="" audio\="" $="" .test($data.mimetype)'=""></span>
+          </span>
+          <span class="icon icon-minus button-icon" draggable="false" title="Удалить из плей-листа" data-bind="click: $parent.removeFromPlaylist"></span>
+        </span>
+      </div>
+    
+      <div class="player-track selected" draggable="true" data-bind="attr: {
+                        id: $data.id,
+                        &quot;data-board-name&quot;: $data.boardName || &quot;&quot;,
+                        &quot;data-file-name&quot;: $data.fileName || &quot;&quot;,
+                        &quot;data-href&quot;: $data.href || &quot;&quot; },
+                      css: { selected: $data.isCurrent },
+                      click: $parent.playTrack,
+                      event: {
+                        dragstart: $parent.trackDrag,
+                        dragover: function() { /*NOTE: Just prevent default.*/ },
+                        drop: $parent.trackDrop
+                      }" id="track-1465744721695-mp3" data-board-name="b" data-file-name="1465744721695.mp3" data-href="">
+        <span class="player-track-info" data-bind="html: $parent.trackInfo($data)"><br>先生 — 男女 (16/04/2008)</span>
+        <span class="player-track-actions">
+          <span data-bind="if: $data.duration">
+            <span data-bind="text: $data.duration">00:03:39</span>
+            <span data-bind="if: $data.bitrate"><span data-bind="text: &quot; | &quot; + $data.bitrate + &quot;kbps&quot;"> | 243kbps</span></span>
+            <a class="icon icon-download button-icon" draggable="false" title="Скачать файл" onclick="event.stopPropagation();" download="fileName" data-bind="attr: { href: &quot;/&quot; + $data.boardName + &quot;/src/&quot; + $data.fileName }" href="/b/src/1465744721695.mp3"></a>
+            <span data-bind="if: " application="" ogg'="==" $data.mimetype="" ||="" audio\="" $="" .test($data.mimetype)'=""></span>
+          </span>
+          <span class="icon icon-minus button-icon" draggable="false" title="Удалить из плей-листа" data-bind="click: $parent.removeFromPlaylist"></span>
+        </span>
+      </div>
+    
+      <div class="player-track" draggable="true" data-bind="attr: {
+                        id: $data.id,
+                        &quot;data-board-name&quot;: $data.boardName || &quot;&quot;,
+                        &quot;data-file-name&quot;: $data.fileName || &quot;&quot;,
+                        &quot;data-href&quot;: $data.href || &quot;&quot; },
+                      css: { selected: $data.isCurrent },
+                      click: $parent.playTrack,
+                      event: {
+                        dragstart: $parent.trackDrag,
+                        dragover: function() { /*NOTE: Just prevent default.*/ },
+                        drop: $parent.trackDrop
+                      }" id="track-1464970946147-mp3" data-board-name="b" data-file-name="1464970946147.mp3" data-href="">
+        <span class="player-track-info" data-bind="html: $parent.trackInfo($data)"><br>Noisia — Running Blind (Original Mix) (2014)</span>
+        <span class="player-track-actions">
+          <span data-bind="if: $data.duration">
+            <span data-bind="text: $data.duration">00:05:34</span>
+            <span data-bind="if: $data.bitrate"><span data-bind="text: &quot; | &quot; + $data.bitrate + &quot;kbps&quot;"> | 312kbps</span></span>
+            <a class="icon icon-download button-icon" draggable="false" title="Скачать файл" onclick="event.stopPropagation();" download="fileName" data-bind="attr: { href: &quot;/&quot; + $data.boardName + &quot;/src/&quot; + $data.fileName }" href="/b/src/1464970946147.mp3"></a>
+            <span data-bind="if: " application="" ogg'="==" $data.mimetype="" ||="" audio\="" $="" .test($data.mimetype)'=""></span>
+          </span>
+          <span class="icon icon-minus button-icon" draggable="false" title="Удалить из плей-листа" data-bind="click: $parent.removeFromPlaylist"></span>
+        </span>
+      </div>
+    
+      <div class="player-track" draggable="true" data-bind="attr: {
+                        id: $data.id,
+                        &quot;data-board-name&quot;: $data.boardName || &quot;&quot;,
+                        &quot;data-file-name&quot;: $data.fileName || &quot;&quot;,
+                        &quot;data-href&quot;: $data.href || &quot;&quot; },
+                      css: { selected: $data.isCurrent },
+                      click: $parent.playTrack,
+                      event: {
+                        dragstart: $parent.trackDrag,
+                        dragover: function() { /*NOTE: Just prevent default.*/ },
+                        drop: $parent.trackDrop
+                      }" id="track-1425651505718-webm" data-board-name="b" data-file-name="1425651505718.webm" data-href="">
+        <span class="player-track-info" data-bind="html: $parent.trackInfo($data)"><br>1425651505718.webm</span>
+        <span class="player-track-actions">
+          <span data-bind="if: $data.duration">
+            <span data-bind="text: $data.duration">00:01:29</span>
+            <span data-bind="if: $data.bitrate"><span data-bind="text: &quot; | &quot; + $data.bitrate + &quot;kbps&quot;"> | 472kbps</span></span>
+            <a class="icon icon-download button-icon" draggable="false" title="Скачать файл" onclick="event.stopPropagation();" download="fileName" data-bind="attr: { href: &quot;/&quot; + $data.boardName + &quot;/src/&quot; + $data.fileName }" href="/b/src/1425651505718.webm"></a>
+            <span data-bind="if: " application="" ogg'="==" $data.mimetype="" ||="" audio\="" $="" .test($data.mimetype)'=""></span>
+          </span>
+          <span class="icon icon-minus button-icon" draggable="false" title="Удалить из плей-листа" data-bind="click: $parent.removeFromPlaylist"></span>
+        </span>
+      </div>
+    
+      <div class="player-track" draggable="true" data-bind="attr: {
+                        id: $data.id,
+                        &quot;data-board-name&quot;: $data.boardName || &quot;&quot;,
+                        &quot;data-file-name&quot;: $data.fileName || &quot;&quot;,
+                        &quot;data-href&quot;: $data.href || &quot;&quot; },
+                      css: { selected: $data.isCurrent },
+                      click: $parent.playTrack,
+                      event: {
+                        dragstart: $parent.trackDrag,
+                        dragover: function() { /*NOTE: Just prevent default.*/ },
+                        drop: $parent.trackDrop
+                      }" id="track-3f6edf4a277788ea6d0e438dabba1e94168bb7ec" data-board-name="" data-file-name="" data-href="http://audio-mp3.ibiblio.org:8000/wcpe.mp3">
+        <span class="player-track-info" data-bind="html: $parent.trackInfo($data)"><br>111</span>
+        <span class="player-track-actions">
+          <span data-bind="if: $data.duration"></span>
+          <span class="icon icon-minus button-icon" draggable="false" title="Удалить из плей-листа" data-bind="click: $parent.removeFromPlaylist"></span>
+        </span>
+      </div>
+    </div>
+    <div class="player-tracks-empty-hint">
+      <div>
+        Add tracks by clicking the "Add to playlist" button
+        [<span class="icon icon-music"></span>]
+      </div>
+      <div>
+        <img src="/img/add_to_playlist.png">
+      </div>
+    </div>
+    <div class="player-actions">
+      <span class="player-button-add-stream icon-32 icon-broadcast button-icon" title="Add radio stream" data-bind="click: addRadioStream"></span>
+      <span class="player-button-minimize icon-32 icon-eye-blocked button-icon" title="Свернуть плеер"
+            onclick='lord.togglePlayerVisibility();'></span>
+    </div>
+  </div>
 </div>
+<main id='content'>
 <div class="banner">
     <a href="javascript:void(0);" title="/h/entai"><img src="/ololord.js/img/1.png"></a>
 </div>
-<div class="theTitle">
-    <h1>
+<h1 class="page-title">
         /b/rotherhood
-        <a href="javascript:void(0);"
-           title="Thread catalog"><img src="/ololord.js/img/catalog.png" class="buttonImage"
-                                       width="24" height="24"></a>
-        <a href="javascript:void(0);"
-           title="Thread archive"><img src="/ololord.js/img/archive.png" class="buttonImage"
-                                       width="24" height="24"></a>
-        <a href="javascript:void(0);"
-           title="RSS feed"><img src="/ololord.js/img/rss.png" class="buttonImage" width="24" height="24"></a>
-    </h1>
-</div>
+        <a href="javascript:void(0);" class="icon-24 icon-table button-icon" title="Threads catalog"></a>
+        <a href="javascript:void(0);" class="icon-24 icon-archive button-icon" title="Threads archive"></a>
+        <a href="javascript:void(0);" class="icon-24 icon-rss button-icon" title="RSS feed"></a>
+      </h1>
 <div>
     <hr />
-    <div id="createActionContainerTop" class="createAction">
-        <div id="postFormContainerTop">
-            <div>[<a id="showHidePostFormButtonTop" href="javascript:void(0);">Show post form</a>]</div>
-        </div>
-    </div>
-    <div class="postingDisabledMessage">
+    <div id="create-action-container-top" class="create-action-container  js-create-action-container">
+  <div>
+    [<a id="toggle-post-form-visibility-button-top" href="javascript:void(0);" class="js-toggle-post-form-visibility-button"
+                   click: togglePostFormVisibility.bind($data, &quot;top&quot;)">Show post form</a>]
+  </div>
+</div>
+    <div class="message-posting-disabled">
         <h2>This is an archived thread. Posting is disabled.</h2>
     </div>
-    <div class="postingDisabledMessage">
+    <div class="message-posting-disabled">
         <h2>Posting is disabled on this board</h2>
     </div>
-    <div class="theMessage">
-        <h2 class="postLimitReached">Post limit reached.</h2>
-    </div>
-    <div class="theMessage" name="bumpLimitReached">
-        <h3 class="bumpLimitReached">Bump limit reached.</h3>
-    </div>
+    <h2  class="message-post-limit-reached">
+        Post limit reached.
+    </h2>
+    <h3 class="message-bump-limit-reached">
+        Bump limit reached.
+    </h3>
 </div>
 <div id="threads">
     <hr />
     <div id="thread1" class="thread">
-        <div id="1" class="opPost">
-            <div class="postHeader">
+        <div id="1" class="post op-post">
+          <div class='post-internal-wrapper'>
+            <div class="post-header">
                 <span class="nowrap"> </span>
-                <span class="postSubject">
+                <span class="post-subject">
                     Post subject of an OP-post
                 </span>
-                <span class="someName">
-                    <span class="userName defaultUserName">Anonymous</span>
-                </span>
-                <span class="nowrap postDateTime" name="dateTime">22/05/2016 Sun 10:35:52</span>
+                <span class="post-name js-post-name  post-name-default js-post-name-default">
+            Anonymous
+        </span>
+                <time class="post-date-time nowrap js-date-time js-processed-date-time">22/05/2016 Sun 10:35:52</time>
                 <span class="nowrap">
-                    <span class="postNumber">
-                        #<a href="javascript:void(0);" name="number">1</a>
-                    </span>
-                    <span class="postSequenceNumber">1</span>
-                    <span class="hideReason"></span>
-                    <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
-                                                         title="Быстрый ответ"><img src="/ololord.js/img/reply.png"
-                                                                                    class="buttonImage"></a>]</span>
-                    <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
-                                                              class="buttonImage" name="postActions"
-                                                              title="Post actions" onclick="return false;">]</span>
-                    <span name="toThread" class="postToThread postToThreadDesktop">
-                        [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
-                    </span>
-                </span>
+        <a class="post-number  " href="/b/res/39011.html#post-6" data-board-name="b" data-post-number="6" data-thread-number="39011" data-bind="click: insertPostNumber.bind($data, 6)">#1</a>
+        
+        <span class="post-sequence-number">1</span>
+        
+        <span class="hiding-reason js-hiding-reason"></span>
+        
+        
+          <span class="js-quick-reply-container">
+            <span class="icon icon-undo button-icon" data-bind="attr: { title: &quot;Быстрый ответ&quot;
+                               + shortcutSuffix(&quot;quickReply&quot;) },
+                             click: quickReply.bind($data, 6, 39011)" title="Быстрый ответ (r)"></span>
+          </span>
+        
+        
+        <span class="js-post-actions-button-container">
+          <span class="icon icon-menu button-icon js-post-actions-button" title="Действия над постом" data-menu-selector="#menu-post-6" data-bind="click: showPostActionsMenu.bind($data, 6)"></span>
+        </span>
+        <span class="desktop-only js-reply-to-thread-button-container">
+            [<a href="/b/res/39011.html" data-bind="attr: {
+                             title: shortcutSuffix(&quot;goToThread&quot;, true)
+                           }" title="(v)">Ответ</a>]
+          </span>
+        
+        
+      </span>
             </div>
-            <div class="postBody">
-                <div class="postFiles">
-                    <div class="postFilesInner">
-                        <div class="postFilesInnerRow">
-                            <div id="file1463902552939.jpg" class="postFile">
-                                <div class="postFileName">
-                                    <a href="javascript:void(0);">1463902552939.jpg</a>
-                                </div>
-                                <div class="postFileSize" >
-                                    (25.01KB, 500x332)
-                                </div>
-                                <div class="postFileSearch">
-                                    <a href="javascript:void(0);" name="deleteFileButton">
-                                        <img src="/ololord.js/img/delete.png" title="Delete file"
-                                             class="buttonImage" /></a>
-                                    <a href="javascript:void(0);" name="editFileRatingButton">
-                                        <img src="/ololord.js/img/shield.png" title="Edit file rating"
-                                             class="buttonImage" /></a>
-                                    <input type="image" src="/ololord.js/img/hide.png" class="buttonImage"
-                                           title="Hide by image" onclick="return false;" />
-                                    <ul id="image1463902552939-pngHideMenu" name="hideByImageButton" class="menu">
-                                        <li class="nowrap">
-                                            <a href="javascript:void(0);">Hide by image size</a>
-                                        </li>
-                                    </ul>
-                                    <a name="drawOnImageButton" onclick="return false;">
-                                        <img src="/ololord.js/img/draw.png" title="Draw on this image"
-                                             class="buttonImage" /></a>
-                                    <input type="image" src="/ololord.js/img/search.png" class="buttonImage"
-                                           title="Find sauce..." onclick="return false;" />
-                                </div>
-                                <div class="postFileFile">
-                                    <a href="javascript:void(0);" data-rating="SFW">
-                                        <img src="/ololord.js/img/1463902552939s.jpg" class="postFileThumbImage">
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="postText">
-                                <blockquote id="post1Text">
-                                    Normal text
-                                    <br />
-                                    <strong>BOLD</strong>
-                                    <br />
-                                    <em>italics</em>
-                                    <br />
-                                    <s>striked out</s>
-                                    <br />
-                                    <u>Underlined</u>
-                                    <br />
-                                    <span class="spoiler">Spoiler</span>
-                                    <br />
-                                    <font face="monospace">monospace</font>
-                                    <br />
-                                    <span class="tooltip" title="Some extra information">Tooltip</span>
-                                    <br />
-                                    <a href="javascript:void(0);">https://site.com/link.html</a>
-                                    <br />
-                                    <a href="javascript:void(0);">&gt;&gt;/d/100</a>
-                                    <br />
-                                    <span class="cspoiler"><span class="cspoilerTitle" onclick="lord.expandCollapseSpoiler(this);">collapsible spoiler</span><span class="cspoilerBody" style="display: none;">some text</span></span>
-                                    <br />
-                                    <span class="quotation">&gt;quotation</span>
-                                    <br />
-                                    <div class="codeBlock cpp hljs" title="C++"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>;</div>
-                                </blockquote>
-                            </div>
+            <div class="post-body">
+                <div class="post-files">
+                            <div id="file1463902552939.jpg" class="post-file">
+                        <div class="post-file-name">
+                            <a href="javascript:void(0);">1463902552939.jpg</a>
+                        </div>
+                        <div class="post-file-size" >
+                            (25.01KB, 500x332)
+                        </div>
+                        <div class=" post-file-actions">
+    <span class="icon icon-bin button-icon" title="Удалить файл" data-bind="click: deleteFile.bind($data, &quot;1465581762187.jpg&quot;)"></span>
+    <span class="icon icon-shield button-icon" title="Редактировать рейтинг файла" data-bind="click: editFileRating.bind($data, &quot;1465581762187.jpg&quot;)"></span>
+    
+      <span class="icon icon-eye-plus button-icon js-image-hiding-button" title="Скрывать по картинке" data-menu-selector="#menu-image-hide-1465581762187-jpg" data-bind="click: showImageHidingMenu"></span>
+      <ul id="menu-image-hide-1465581762187-jpg" class="menu">
+        <li class="nowrap">
+          <span data-bind="click: hideByImage.bind($data, &quot;1465581762187.jpg&quot;)">
+            Скрывать по размеру картинки
+          </span>
+        </li>
+        
+          <li class="nowrap">
+            <span data-bind="click: hideByImageHash.bind($data, &quot;1465581762187.jpg&quot;)">
+              Скрывать по хешу картинки
+            </span>
+          </li>
+        
+      </ul>
+      <span class="icon icon-paint button-icon" title="Рисовать на этой картинке" data-bind="click: drawOnImage.bind($data, &quot;1465581762187.jpg&quot;)"></span>
+      <span class="icon icon-search button-icon js-image-search-button" title="Find source..." data-menu-selector="#menu-image-search-1465581762187-jpg" data-bind="click: showImageSearchMenu.bind($data, &quot;1465581762187.jpg&quot;)"></span>
+    
+    
+    
+  </div>
+                        <div>
+                            <a href="javascript:void(0);" data-rating="SFW">
+                                <img src="/ololord.js/img/1463902552939s.jpg" class="post-file-link-image hide-if-mum-watching">
+                            </a>
                         </div>
                     </div>
-                </div>
-                <div>
-                    <span class="bannedFor">User was banned for this post</span>
-                </div>
-                <div name="referencedByContainer">
-                    <span name="referencedBy" class="referencedBy">
-                        Replies:
-                        <a href="javascript:void(0);">&gt;&gt;5</a>
-                    </span>
-                </div>
-            </div>
-            <ul id="post1ActionsMenu" class="menu ui-menu ui-widget ui-widget-content" role="menu" tabindex="0"
-                style="display: block; top: 485px; left: 504px;" aria-activedescendant="ui-id-1">
-                <li class="ui-widget-header">Post</li>
-                <li class="ui-menu-item" id="ui-id-1" tabindex="-1" role="menuitem">
-                    <a name="sourceTextButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/source_text.png" class="signImage"> Source text</a>
-                </li>    
-                <li class="ui-menu-item" id="ui-id-2" tabindex="-1" role="menuitem">
-                    <a name="editButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/edit.png" class="signImage"> Edit [HOVER]</a>
-                </li>
-                <li class="ui-menu-item" id="ui-id-3" tabindex="-1" role="menuitem">
-                    <a name="hideButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/hide.png" class="signImage"> Hide (H)</a>
-                </li>
-                <li class="ui-menu-item" id="ui-id-4" tabindex="-1" role="menuitem">
-                    <a name="hideSimilarPostsButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/similar.png" class="signImage"> Hide similar</a>
-                </li>
-                <li class="ui-menu-item" id="ui-id-5" tabindex="-1" role="menuitem">
-                    <a name="deleteButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/delete.png" class="signImage"> Delete</a>
-                </li>
-                <li class="ui-widget-header">Thread</li>        
-                <li class="ui-menu-item" id="ui-id-6" tabindex="-1" role="menuitem">
-                    <a name="addToFavoritesButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/favorite.png" class="signImage"> <span>Add to favorites</span></a>
-                </li>
-                <li class="ui-menu-item" id="ui-id-7" tabindex="-1" role="menuitem">
-                    <a name="downloadFilesButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/download.png" class="signImage"> Download all files</a>
-                </li>
-                <li class="ui-menu-item ui-state-active" id="ui-id-8" tabindex="-1" role="menuitem">
-                    <a name="fixButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/fixed.png" class="signImage"> Fix [ACTIVE]</a>
-                </li>
-                <li class="ui-menu-item" id="ui-id-9" tabindex="-1" role="menuitem">
-                    <a name="closeButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/closed.png" class="signImage"> Close</a>
-                </li>
-                <li class="ui-menu-item" id="ui-id-10" tabindex="-1" role="menuitem">
-                    <a name="setUnbumpableButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/anchor.png" class="signImage"> Disallow bumping</a>
-                </li>
-                <li class="ui-menu-item" id="ui-id-11" tabindex="-1" role="menuitem">
-                    <a name="moveButton" target="_blank" href="javascript:void(0);">
-                        <img src="/ololord.js/img/move.png" class="signImage"> Move</a>
-                </li>
-                <li class="ui-widget-header">User</li>
-                <li class="ui-menu-item" id="ui-id-12" tabindex="-1" role="menuitem">
-                    <a name="chatButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/chat.png" class="signImage"> Private chat</a>
-                </li>
-                <li class="ui-menu-item" id="ui-id-13" tabindex="-1" role="menuitem">
-                    <a name="ipButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/ip.png" class="signImage"> Show IP-address</a>
-                </li>
-                <li class="ui-menu-item" id="ui-id-14" tabindex="-1" role="menuitem">
-                    <a name="banButton" href="javascript:void(0);">
-                        <img src="/ololord.js/img/ban.png" class="signImage"> Ban</a>
-                </li>
-            </ul>
-        </div>
-        <div class="omittedPosts">
-            Posts omitted: 4
-        </div>
-        <div class="threadPosts">
-            <div id="6" class="post">
-                <div class="postHeader">
-                    <span class="nowrap"> </span>
-                    <span class="postSubject">
-                        Some subject
-                    </span>
-                    <span class="someName">
-                        <span class="moderName">Moderator</span>
-                    </span>
-                    <span class="opSign">[OP]</span>
-                    <span class="nowrap postDateTime" name="dateTime">22/05/2016 Sun 10:35:52</span>
-                    <span class="nowrap">
-                        <span class="postNumber">
-                            #<a href="javascript:void(0);" name="number">6</a>
-                        </span>
-                        <span class="postSequenceNumber">6</span>
-                        <span class="hideReason"></span>
-                        <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
-                                                             title="Быстрый ответ"><img src="/ololord.js/img/reply.png"
-                                                                                        class="buttonImage"></a>]</span>
-                        <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
-                                                                  class="buttonImage" name="postActions"
-                                                                  title="Post actions" onclick="return false;">]</span>
-                        <span name="toThread" class="postToThread postToThreadDesktop">
-                            [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
-                        </span>
-                    </span>
-                </div>
-                <div class="postBody">
-                    <div class="postFiles">
-                        <div class="postFilesInner">
-                            <div class="postFilesInnerRow">
-                                <div id="file1463902552939.jpg" class="postFile">
-                                    <div class="postFileName">
-                                        <a href="javascript:void(0);">1463902552939.jpg</a>
-                                    </div>
-                                    <div class="postFileSize" >
-                                        (25.01KB, 500x332)
-                                    </div>
-                                    <div class="postFileSearch">
-                                        <a href="javascript:void(0);" name="deleteFileButton">
-                                            <img src="/ololord.js/img/delete.png" title="Delete file"
-                                                 class="buttonImage" /></a>
-                                        <a href="javascript:void(0);" name="editFileRatingButton">
-                                            <img src="/ololord.js/img/shield.png" title="Edit file rating"
-                                                 class="buttonImage" /></a>
-                                        <input type="image" src="/ololord.js/img/hide.png" class="buttonImage"
-                                               title="Hide by image" onclick="return false;" />
-                                        <ul id="image1463902552939-pngHideMenu" name="hideByImageButton" class="menu">
-                                            <li class="nowrap">
-                                                <a href="javascript:void(0);">Hide by image size</a>
-                                            </li>
-                                        </ul>
-                                        <a name="drawOnImageButton" onclick="return false;">
-                                            <img src="/ololord.js/img/draw.png" title="Draw on this image"
-                                                 class="buttonImage" /></a>
-                                        <input type="image" src="/ololord.js/img/search.png" class="buttonImage"
-                                               title="Find sauce..." onclick="return false;" />
-                                    </div>
-                                    <div class="postFileFile">
-                                        <a href="javascript:void(0);" data-rating="SFW">
-                                            <img src="/ololord.js/img/1463902552939s.jpg" class="postFileThumbImage">
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="postText">
-                                    <blockquote id="post6Text">
-                                        Normal text
+                            <div class="post-text-wrapper js-post-text-wrapper">
+          <blockquote id="post-6-text" class="post-text js-post-text">
+            Normal text
                                         <br />
                                         <strong>BOLD</strong>
                                         <br />
@@ -639,483 +513,831 @@
                                         <br />
                                         <a href="javascript:void(0);">&gt;&gt;/d/100</a>
                                         <br />
-                                        <span class="cspoiler"><span class="cspoilerTitle" onclick="lord.expandCollapseSpoiler(this);">collapsible spoiler</span><span class="cspoilerBody" style="display: none;">some text</span></span>
+                                        <span class="collapsible-spoiler"><span class="collapsible-spoiler-title" onclick="lord.expandCollapseSpoiler(this);">collapsible spoiler</span><span class="collapsible-spoiler-body" style="display: none;">some text</span></span>
                                         <br />
                                         <span class="quotation">&gt;quotation</span>
                                         <br />
-                                        <div class="codeBlock cpp hljs" title="C++"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>;</div>
-                                    </blockquote>
-                                </div>
-                            </div>
-                        </div>
+                                        <div class="code-block cpp hljs" title="C++"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>;</div>
+          </blockquote>
                     </div>
-                    <div name="referencedByContainer">
-                        <span name="referencedBy" class="referencedBy">
-                            Replies:
-                            <a href="javascript:void(0);">&gt;&gt;7</a>
-                        </span>
-                    </div>
+                </div>
+                <div class='banned-for'>
+                    User was banned for this post
+                </div>
+                <div class='referring-posts'>
+                        Replies:
+                        <a href="javascript:void(0);">&gt;&gt;5</a>
                 </div>
             </div>
-            <div id="7" class="post">
-                <div class="postHeader">
+            <ul id="menu-post-39011" class="menu ui-menu ui-widget ui-widget-content" role="menu" tabindex="0" data-vivaldi-spatnav-clickable="1" aria-activedescendant="ui-id-9"
+                style="display: block; top: 660px; left: 500px;">
+  
+  <li class="ui-widget-header">Пост</li>
+  
+  
+    <li data-bind="click: showPostSourceText" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-1" tabindex="-1" role="menuitem">
+      <span class="icon icon-file-text sign-icon"></span>
+      Исходный текст
+    </li>
+  
+  
+  
+    <li data-bind="click: editPost" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-2" tabindex="-1" role="menuitem">
+      <span class="icon icon-pencil sign-icon"></span>
+      Редактировать
+    </li>
+  
+  
+  
+  
+  <li data-bind="click: setPostHidden" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-3" tabindex="-1" role="menuitem">
+    <span data-bind="css: &quot;icon sign-icon icon-eye-&quot; + &quot;plus&quot;" class="icon sign-icon icon-eye-plus"></span>
+    <span data-bind="text: &quot;Скрыть&quot; + shortcutSuffix(&quot;hidePost&quot;)">Скрыть (h)</span>
+  </li>
+  
+  
+    <li data-bind="click: hideSimilarPosts" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-4" tabindex="-1" role="menuitem">
+      <span class="icon icon-copy sign-icon"></span>
+      Скрыть похожие
+    </li>
+  
+  
+  
+    <li data-bind="click: deletePost" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-5" tabindex="-1" role="menuitem">
+      <span class="icon icon-bin sign-icon"></span>
+      Удалить
+    </li>
+  
+  
+  
+    <li class="ui-widget-header">Тред</li>
+    
+    <li data-bind="click: addToOrRemoveFromFavorites" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-6" tabindex="-1" role="menuitem">
+      <span data-bind="css: &quot;icon sign-icon icon-star-&quot; + &quot;empty&quot;" class="icon sign-icon icon-star-empty"></span>
+      <span data-bind="text: &quot;Add to favorites&quot;">Add to favorites</span>
+    </li>
+    
+      <li data-bind="click: downloadThreadFiles" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-7" tabindex="-1" role="menuitem">
+        <span class="icon icon-download sign-icon"></span>
+        Скачать все файлы
+      </li>
+    
+    
+      <li data-bind="click: expandCollapseThread" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-8" tabindex="-1" role="menuitem">
+        <span data-bind="css: &quot;icon sign-icon icon-&quot; + &quot;enlarge&quot;" class="icon sign-icon icon-enlarge"></span>
+        <span data-bind="text: &quot;Развернуть&quot;">Развернуть</span>
+      </li>
+    
+    
+    
+      <li data-bind="click: setThreadFixed.bind($data, true)" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-9" tabindex="-1" role="menuitem">
+        <span data-bind="css: &quot;icon sign-icon icon-&quot; + &quot;unpin&quot;" class="icon sign-icon icon-unpin"></span>
+        <span data-bind="text: &quot;Закрепить&quot;">Закрепить</span>
+      </li>
+      
+      <li data-bind="click: setThreadClosed.bind($data, true)" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-10" tabindex="-1" role="menuitem">
+        <span data-bind="css: &quot;icon sign-icon icon-&quot; + &quot;unlocked&quot;" class="icon sign-icon icon-unlocked"></span>
+        <span data-bind="text: &quot;Закрыть&quot;">Закрыть</span>
+      </li>
+      
+      <li data-bind="click: setThreadUnbumpable" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-11" tabindex="-1" role="menuitem">
+        <span data-bind="css: &quot;icon sign-icon icon-magnet&quot; + &quot;&quot;" class="icon sign-icon icon-magnet"></span>
+        <span data-bind="text: &quot;Запретить бампать&quot;">Запретить бампать</span>
+      </li>
+      
+      <li data-bind="click: moveThread" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-12" tabindex="-1" role="menuitem">
+        <span class="icon icon-move sign-icon"></span>
+        Перенести
+      </li>
+      
+    
+  
+  
+  <li class="ui-widget-header">Пользователь</li>
+  
+  <li data-bind="click: chatWithUser" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-13" tabindex="-1" role="menuitem">
+    <span class="icon icon-bubble sign-icon"></span>
+    Приватный чат
+  </li>
+  
+  
+    <li data-bind="click: showUserInfo" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-14" tabindex="-1" role="menuitem">
+      <span class="icon icon-info sign-icon"></span>
+      User info
+    </li>
+    
+    <li data-bind="click: banUser" data-vivaldi-spatnav-clickable="1" class="ui-menu-item" id="ui-id-15" tabindex="-1" role="menuitem">
+      <span class="icon icon-hammer sign-icon"></span>
+      Забанить
+    </li>
+    
+  
+</ul>
+</div>
+        </div>
+        <div class="omittedPosts">
+            Posts omitted: 4
+        </div>
+        <div class="threadPosts">
+            <div id="post-6" class="post reply-post js-post" data-board-name="b" data-number="6" data-thread-number="39011" data-file-count="" data-plain-text="писюнчик писюнчик">
+  <div class="post-internal-wrapper">
+    <div class="post-header">
+      <span class="nowrap">
+        
+        
+        
+        
+      </span>
+      
+      <span class="post-subject js-post-subject">
+  Some subject
+</span>
+
+      
+      
+      
+      <span class="post-name post-name-moder js-post-name">
+  
+    Moderator
+  
+</span>
+
+      <span class="op-sign"></span>
+      
+      
+      
+      
+      
+      
+      <time class="post-date-time nowrap js-date-time js-processed-date-time">22/05/2016 Sun 10:35:52</time>
+      
+      <span class="nowrap">
+        <a class="post-number  " href="/b/res/39011.html#post-6" data-board-name="b" data-post-number="6" data-thread-number="39011" data-bind="click: insertPostNumber.bind($data, 6)">#6</a>
+        
+        <span class="post-sequence-number">6</span>
+        
+        <span class="hiding-reason js-hiding-reason"></span>
+        
+        
+          <span class="js-quick-reply-container">
+            <span class="icon icon-undo button-icon" data-bind="attr: { title: &quot;Быстрый ответ&quot;
+                               + shortcutSuffix(&quot;quickReply&quot;) },
+                             click: quickReply.bind($data, 6, 39011)" title="Быстрый ответ (r)"></span>
+          </span>
+        
+        
+        <span class="js-post-actions-button-container">
+          <span class="icon icon-menu button-icon js-post-actions-button" title="Действия над постом" data-menu-selector="#menu-post-6" data-bind="click: showPostActionsMenu.bind($data, 6)"></span>
+        </span>
+        
+        
+        
+      </span>
+    </div>
+    <div class="post-body">
+      
+      <div class="post-files">
+        
+        
+        <div class="post-text-wrapper js-post-text-wrapper">
+          <blockquote id="post-6-text" class="post-text js-post-text">
+            Normal text
+                                        <br />
+                                        <strong>BOLD</strong>
+                                        <br />
+                                        <em>italics</em>
+                                        <br />
+                                        <s>striked out</s>
+                                        <br />
+                                        <u>Underlined</u>
+                                        <br />
+                                        <span class="spoiler">Spoiler</span>
+                                        <br />
+                                        <font face="monospace">monospace</font>
+                                        <br />
+                                        <span class="tooltip" title="Some extra information">Tooltip</span>
+                                        <br />
+                                        <a href="javascript:void(0);">https://site.com/link.html</a>
+                                        <br />
+                                        <a href="javascript:void(0);">&gt;&gt;/d/100</a>
+                                        <br />
+                                        <span class="collapsible-spoiler"><span class="collapsible-spoiler-title" onclick="lord.expandCollapseSpoiler(this);">collapsible spoiler</span><span class="collapsible-spoiler-body" style="display: none;">some text</span></span>
+                                        <br />
+                                        <span class="quotation">&gt;quotation</span>
+                                        <br />
+                                        <div class="code-block cpp hljs" title="C++"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>;</div>
+          </blockquote>
+        </div>
+      </div>
+      
+      
+      
+      
+      
+      <div class="referring-posts">
+  
+  
+</div>
+
+      
+    </div>
+  </div>
+</div>
+            <div id="7" class="post reply-post">
+            <div class="post-internal-wrapper">
+                <div class="post-header">
                     <span class="nowrap"> </span>
-                    <span class="postSubject">
+                    <span class="post-subject">
                     </span>
-                    <img src="/ololord.js/img/registered.png" class="signImage" title="This user is registered">
-                    <span class="someName">
-                        <a class="mailtoName" href="mailto:sage">Anonymous</a>
-                    </span>
+                    <span class='icon icon-angry js-sage' title='SAGE'></span>
+                    <span class='icon icon-checkmark' title='This user is registered'></span>
                     <span class="tripcode">!iqJ4ggOa3l</span>
-                    <span class="nowrap postDateTime" name="dateTime">22/05/2016 Sun 10:35:52</span>
+                    <time class="post-date-time nowrap js-date-time js-processed-date-time">22/05/2016 Sun 10:35:52</time>
                     <span class="nowrap">
-                        <span class="postNumber">
-                            #<a href="javascript:void(0);" name="number">7</a>
-                        </span>
-                        <span class="postSequenceNumber">7</span>
-                        <span class="hideReason"></span>
-                        <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
-                                                             title="Быстрый ответ"><img src="/ololord.js/img/reply.png"
-                                                                                        class="buttonImage"></a>]</span>
-                        <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
-                                                                  class="buttonImage" name="postActions"
-                                                                  title="Post actions" onclick="return false;">]</span>
-                        <span name="toThread" class="postToThread postToThreadDesktop">
-                            [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
-                        </span>
-                    </span>
+        <a class="post-number  " href="/b/res/39011.html#post-6" data-board-name="b" data-post-number="6" data-thread-number="39011" data-bind="click: insertPostNumber.bind($data, 6)">#7</a>
+        
+        <span class="post-sequence-number">7</span>
+        
+        <span class="hiding-reason js-hiding-reason"></span>
+        
+        
+          <span class="js-quick-reply-container">
+            <span class="icon icon-undo button-icon" data-bind="attr: { title: &quot;Быстрый ответ&quot;
+                               + shortcutSuffix(&quot;quickReply&quot;) },
+                             click: quickReply.bind($data, 6, 39011)" title="Быстрый ответ (r)"></span>
+          </span>
+        
+        
+        <span class="js-post-actions-button-container">
+          <span class="icon icon-menu button-icon js-post-actions-button" title="Действия над постом" data-menu-selector="#menu-post-6" data-bind="click: showPostActionsMenu.bind($data, 6)"></span>
+        </span>
+        <span class="desktop-only js-reply-to-thread-button-container">
+            [<a href="/b/res/39011.html" data-bind="attr: {
+                             title: shortcutSuffix(&quot;goToThread&quot;, true)
+                           }" title="(v)">Ответ</a>]
+          </span>
+        
+        
+      </span>
                 </div>
-                <div class="postBody">
-                    <div class="postFiles">
-                        <div class="postFilesInner">
-                            <div class="postFilesInnerRow">
-                                <div class="postText">
-                                    <blockquote id="post7Text">
+                <div class="post-body">
+                    <div class="post-files">
+                        <div class="post-text-wrapper js-post-text-wrapper">
+          <blockquote id="post-7-text" class="post-text js-post-text">
                                         <strong>THIS</strong>, <em>is</em>, <s>a targeted</s>, <u>post</u>.
                                         <br />
                                         <span class="quotation">&gt;quotation: <strong>BOLD</strong>, <em>italics</em>, <s>striked out</s>, <u>Underlined</u>, <font face="monospace">monospace</font>, <a href="javascript:void(0);">&gt;&gt;5</a></span>
                                         <br />
                                         <span class="quotation">&gt;quotation: <span class="spoiler">Spoiler</span></span>, <span class="tooltip" title="Some extra information">tooltip</span>
                                         <br />
-                                        <span class="cspoiler"><span class="cspoilerTitle" onclick="lord.expandCollapseSpoiler(this);">collapsible spoiler</span><span class="cspoilerBody" style="display: none;"><div class="codeBlock cpp hljs" title="C++"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>;</div></span></span>
+                                        <span class="collapsible-spoiler"><span class="collapsible-spoiler-title" onclick="lord.expandCollapseSpoiler(this);">collapsible spoiler</span><span class="collapsible-spoiler-body" style="display: none;"><div class="code-block cpp hljs" title="C++"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>;</div></span></span>
                                     </blockquote>
                                 </div>
-                            </div>
-                        </div>
                     </div>
                     <div>
-                        <span class="modificationDateTime">
+                        <span class="modification-date-time">
                             Last modified:
                             <span class="processedFormattedDate" name="formattedDate">23/05/2016 Mon 13:20:15</span>
                         </span>
                     </div>
                 </div>
+              </div>
             </div>
-            <div id="8" class="post newPost">
-                <div class="postHeader">
-                    <span class="nowrap"> </span>
-                    <span class="postSubject">
-                    </span>
-                    <span class="someName">
-                        <font color="red">Admin</font>
-                    </span>
-                    <span class="nowrap postDateTime" name="dateTime">22/05/2016 Sun 10:35:52</span>
+            <div id="8" class="post new-post">
+            <div class="post-internal-wrapper">
+    <div class="post-header">
+                    
                     <span class="nowrap">
-                        <span class="postNumber">
-                            #<a href="javascript:void(0);" name="number">8</a>
-                        </span>
-                        <span class="postSequenceNumber">8</span>
-                        <span class="hideReason"></span>
-                        <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
-                                                             title="Быстрый ответ"><img src="/ololord.js/img/reply.png"
-                                                                                        class="buttonImage"></a>]</span>
-                        <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
-                                                                  class="buttonImage" name="postActions"
-                                                                  title="Post actions" onclick="return false;">]</span>
-                        <span name="toThread" class="postToThread postToThreadDesktop">
-                            [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
-                        </span>
-                    </span>
+        
+        
+        
+        
+      </span>
+      
+      <span class="post-subject js-post-subject">
+</span>
+
+      
+      
+      
+      <span class="post-name post-name-admin js-post-name">
+  
+    <font color='red'>Admin</font>
+  
+</span>
+      
+      
+      
+      
+      
+      
+      <time class="post-date-time nowrap js-date-time js-processed-date-time">22/05/2016 Sun 10:35:52</time>
+      
+      <span class="nowrap">
+        <a class="post-number  " href="/b/res/39011.html#post-6" data-board-name="b" data-post-number="6" data-thread-number="39011" data-bind="click: insertPostNumber.bind($data, 6)">#8</a>
+        
+        <span class="post-sequence-number">8</span>
+        
+        <span class="hiding-reason js-hiding-reason"></span>
+        
+        
+          <span class="js-quick-reply-container">
+            <span class="icon icon-undo button-icon" data-bind="attr: { title: &quot;Быстрый ответ&quot;
+                               + shortcutSuffix(&quot;quickReply&quot;) },
+                             click: quickReply.bind($data, 6, 39011)" title="Быстрый ответ (r)"></span>
+          </span>
+        
+        
+        <span class="js-post-actions-button-container">
+          <span class="icon icon-menu button-icon js-post-actions-button" title="Действия над постом" data-menu-selector="#menu-post-6" data-bind="click: showPostActionsMenu.bind($data, 6)"></span>
+        </span>
+        
+        
+        
+      </span>
+                    
+                    
+                    
                 </div>
-                <div class="postBody">
-                    <div class="postFiles">
-                        <div class="postFilesInner">
-                            <div class="postFilesInnerRow">
-                                <div class="postText">
-                                    <blockquote id="post8Text">
-                                        Voting. [A new post.]
-                                    </blockquote>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="vote">
-                        <div name="voteText" class="voteText">
-                            <img name="voteClosedImg" src="/ololord.js/img/closed.png" class="signImage noInvert"
-                                 title="Voting is closed">
-                            Wanna make some cool stylesheet?
-                        </div>
-                        <div name="voteVariants">
-                            <input type="radio" name="voteGroup" value="yep" />
-                            Yep!
-                            <span class="voteCount">(vote count: 156)</span>
-                            </br />
-                            <input type="radio" name="voteGroup" value="nope" disabled="true" />
-                            Nope!
-                            <span class="voteCount">(vote count: 23)</span>
-                        </div>
-                        <input type="image" src="/ololord.js/img/vote.png" name="buttonVote" disabled="true"
-                               title="Vote" width="24" height="24" class="buttonImage noInvert" />
-                        <a href="javascript:void(0);"
-                           title="Open voting"><img src="/ololord.js/img/open_voting.png"
-                                                    width="24" height="24" class="buttonImage noInvert"></a>
-                    </div>
-                </div>
+                <div class="post-body">
+      
+      <div class="post-files">
+        
+        
+        <div class="post-text-wrapper js-post-text-wrapper">
+          <blockquote id="post-8-text" class="post-text js-post-text">
+            A new post.
+          </blockquote>
+        </div>
+      </div>
+      
+      
+      
+      
+      
+      <div class="referring-posts">
+  
+  </div>
+</div>
+
+      
+    </div>
             </div>
-            <div id="9" class="post hidden">
-                <div class="postHeader">
+            <div id="9" class="post reply-post">
+              <div class='post-internal-wrapper'>
+                <div class="post-header">
                     <span class="nowrap"> </span>
-                    <span class="postSubject">
-                    </span>
-                    <span class="someName">
-                        <span class="userName defaultUserName">Anonymous</span>
-                    </span>
-                    <span class="nowrap postDateTime" name="dateTime">22/05/2016 Sun 10:35:52</span>
+                <span class="post-subject"></span>
+                <span class="post-name js-post-name  post-name-default js-post-name-default">
+            Anonymous
+        </span>
+                <time class="post-date-time nowrap js-date-time js-processed-date-time">22/05/2016 Sun 10:35:52</time>
                     <span class="nowrap">
-                        <span class="postNumber">
-                            #<a href="javascript:void(0);" name="number">8</a>
-                        </span>
-                        <span class="postSequenceNumber">8</span>
-                        <span class="hideReason">#wipe(longwords)</span>
-                        <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
-                                                             title="Быстрый ответ"><img src="/ololord.js/img/reply.png"
-                                                                                        class="buttonImage"></a>]</span>
-                        <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
-                                                                  class="buttonImage" name="postActions"
-                                                                  title="Post actions" onclick="return false;">]</span>
-                        <span name="toThread" class="postToThread postToThreadDesktop">
-                            [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
-                        </span>
-                    </span>
+        <a class="post-number  " href="/b/res/39011.html#post-6" data-board-name="b" data-post-number="6" data-thread-number="39011" data-bind="click: insertPostNumber.bind($data, 6)">#8</a>
+        
+        <span class="post-sequence-number">8</span>
+        
+        <span class="hiding-reason js-hiding-reason">#wipe(longwords)</span>
+        
+        
+          <span class="js-quick-reply-container">
+            <span class="icon icon-undo button-icon" data-bind="attr: { title: &quot;Быстрый ответ&quot;
+                               + shortcutSuffix(&quot;quickReply&quot;) },
+                             click: quickReply.bind($data, 6, 39011)" title="Быстрый ответ (r)"></span>
+          </span>
+        
+        
+        <span class="js-post-actions-button-container">
+          <span class="icon icon-menu button-icon js-post-actions-button" title="Действия над постом" data-menu-selector="#menu-post-6" data-bind="click: showPostActionsMenu.bind($data, 6)"></span>
+        </span>
+        
+        
+      </span>
                 </div>
-                <div class="postBody">
+                <div class="post-body" style='display: none;'>
+            </div>
             </div>
         </div>
     </div>
 </div>
 <div>
     <hr />
-    <div id="createActionContainerBottom" class="createAction">
-        <div id="postFormContainerBottom">
-            <div>[<a id="showHidePostFormButtonBottom" href="javascript:void(0);">Hide post form</a>]</div>
-            <form id="postForm" onsubmit="return false;">
-                <div class="postFormHeader" ondragstart="lord.makeFormFloat(event);" draggable="true">
-                    <span class="postFormHeaderLabel">Start dragging to make post form float</span>
-                    <div class="postFormHeaderButtons">
-                        <a name="fixPostFormButton" href="javascript:void(0);" title="Fixed">
-                            <img src="/ololord.js/img/fixed.png" class="buttonImage" /></a>
-                        <a name="closePostFormButton" href="javascript:void(0);" title="Close"
-                           onclick="lord.closePostForm(); return false;">
-                            <img src="/ololord.js/img/clear.png" class="buttonImage" /></a>
-                    </div>
-                </div>
-                <table class="postFormTable">
-                    <tbody>
-                        <tr>
-                            <td class="postformLabel">
-                                <b>E-mail:</b>
-                            </td>
-                            <td class="postformField">
-                                <input type="text" name="email" class="postFormInput" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="postformLabel">
-                                <b>Name:</b>
-                            </td>
-                            <td class="postformField">
-                                <input type="text" name="name" class="postFormInput" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="postformLabel">
-                                <b>Subject:</b>
-                            </td>
-                            <td class="postformField">
-                                <input type="text" name="subject" class="postFormInput" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="postformLabel">
-                                <b>Text:</b>
-                            </td>
-                            <td class="postformField">
-                                <div class="symbolCounterContainer postFormInput">
-                                    <textarea name="text" rows="10" cols="41" class="postFormTextarea"
-                                              placeholder="Comment. Max length: 1500" style="min-width: 400px;"
-                                              oninput="lord.countSymbols(this);"></textarea>
-                                    <span class="symbolCounter"><span name="used">0</span>/15000</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="postformLabel">
-                                <a href="javascript:void(0);"
-                                   class="hidePostformMarkupButton">Hide post form markup</a>
-                                <a href="javascript:void(0);"
-                                   class="hidePostformRulesButton">Hide post form rules</a>
-                            </td>
-                            <td class="postformField submitContainer">
-                                <input type="submit" name="submit" class="button" value="Submit (Alt+Enter)" />
-                            </td>
-                        </tr>
-                        <tr name="postformMarkup">
-                            <td class="postformLabel">
-                            </td>
-                            <td class="postformMarkup">
-                                <span id="markup">
-                                    <input type="image" src="/ololord.js/img/markup/bold.png" name="markupBold"
-                                           title=Bold" class="buttonImage bordered" width="20" height="20" />
-                                    <input type="image" src="/ololord.js/img/markup/italics.png" name="markupItalics"
-                                           title="Italics" class="buttonImage bordered" width="20" height="20" />
-                                    <input type="image" src="/ololord.js/img/markup/strikedout.png"
-                                           name="markupStrikedOut" title="Striked out" class="buttonImage bordered"
-                                           width="20" height="20" />
-                                    <input type="image" src="/ololord.js/img/markup/underlined.png"
-                                           name="markupUnderlined" title="Underlined" class="buttonImage bordered"
-                                           width="20" height="20" />
-                                    <button name="markupSpoiler" class="spoilerMarkupButton bordered"
-                                            title="Spoiler"><span class="spoiler">ab</span></button>
-                                    <input type="image" src="/ololord.js/img/markup/quotation.png"
-                                           name="markupQuotation" title="Quotation" class="buttonImage bordered"
-                                           width="20" height="20" />
-                                    <input type="image" src="/ololord.js/img/markup/ul.png"
-                                           class="buttonImage bordered" title="Unordered list" />
-                                    <input type="image" src="/ololord.js/img/markup/ol.png"
-                                           class="buttonImage bordered" title="Ordered list" />
-                                    <input type="image" src="/ololord.js/img/markup/li.png" name="markupListItem"
-                                           title="List item" class="buttonImage bordered" width="24" height="20" />
-                                    <input type="image" src="/ololord.js/img/markup/subscript.png"
-                                           name="markupSubscript" title="Subscript"
-                                           class="buttonImage bordered" width="36" height="20" />
-                                    <input type="image" src="/ololord.js/img/markup/superscript.png"
-                                           name="markupSuperscript" title="Superscript"
-                                           class="buttonImage bordered" width="20" height="20" />
-                                    <input type="image" src="/ololord.js/img/markup/url.png" name="markupUrl"
-                                           title="URL" class="buttonImage bordered" width="40" height="20" />
-                                    <input type="image" src="/ololord.js/img/markup/latex.png" name="markupLatex"
-                                           title="LaTeX" class="buttonImage bordered" width="51" height="20" />
-                                    <input type="image" src="/ololord.js/img/markup/inline_latex.png"
-                                           name="markupInlineLatex" title="Inline LaTeX"
-                                           class="buttonImage bordered" width="99" height="20" />
-                                    <span class="nowrap">
-                                        <select name="codeLang" class="select" title="Code">
-                                            <option value="-" selected="true">-----</option>
-                                            <option value="bash">bash</option>
-                                            <option value="cpp">C++</option>
-                                            <option value="javascript">JavaScript</option>
-                                        </select>
-                                        <input type="image" src="/ololord.js/img/markup/code.png" name="markupCode"
-                                               title="Code" class="buttonImage bordered" width="40"
-                                               height="20" />
-                                    </span>
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="postformLabel">
-                                <b>Markup mode:</b>
-                            </td>
-                            <td class="postformField">
-                                <select name="markupMode" class="select">
-                                    <option selected="true" value="Extanded WakabaMark and bbCode">Extanded WakabaMark and bbCode</option>
-                                    <option value="Extended WakabaMark only">Extended WakabaMark only</option>
-                                    <option value="bbCode only">bbCode only</option>
-                                    <option value="No markup">No markup</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="postformLabel">
-                                <b>Options:</b>
-                            </td>
-                            <td class="postformField">
-                                <span id="options">
-                                    <input id="checkboxOp" type="checkbox" name="signAsOp"
-                                           value="true" /><label for="checkboxOp">OP</label>
-                                    <input id="checkboxTripcode" type="checkbox" name="tripcode" 
-                                           value="true" /><label for="checkboxTripcode">Tripcode</label>
-                                </span>
-                                <a href="javascript:void(0);"
-                                   style="display: inline-block; vertical-align: top;" title='"Raw" HTML'
-                                   name="markupHtml"><img src="/ololord.js/img/html.png" class="signImage"></a>
-                                <a href="javascript:void(0);" name="optionDraft"
-                                   style="display: inline-block; vertical-align: top;"
-                                   title="To drafts"><img src="/ololord.js/img/draft.png" class="signImage"></a>
-                            </td>
-                        </tr>
-                            <tr>
-                                <td class="postformLabel">
-                                    <b>File(s):</b>
-                                </td>
-                                <td class="postformField">
-                                    <div class="postformFile" ondragover="return lord.fileDragOver(event, this);"
-                                         ondragleave="return lord.fileDragLeave(event, this);" title="Select file">
-                                        <img class="postformFilePreview signImage" src="/ololord.js/img/addfile.png">
-                                        <a class="fileByLinkButton" onclick="return lord.preventOnclick(event);"
-                                           title="Attach file by link"><img class="buttonImage" width="32" height="32"
-                                                                            src="/ololord.js/img/addfile_link.png"></a>
-                                        <a onclick="return lord.preventOnclick(event);" class="fileByLinkButton"
-                                           title="Attach file by drawing"><img class="buttonImage" width="32"
-                                                                               height="32"
-                                                                               src="/ololord.js/img/draw_big.png"></a>
-                                        <span class="postformFileText"></span>
-                                    <div name="ratingSelectContainer">
-                                        <span>Rating:</span>
-                                        <select name="file_rating">
-                                            <option value="SFW" selected="true"
-                                                    onclick="return lord.preventOnclick(event);">SFW</option>
-                                            <option value="R-15"
-                                                    onclick="return lord.preventOnclick(event);">R-15</option>
-                                            <option value="R-18"
-                                                    onclick="return lord.preventOnclick(event);">R-18</option>
-                                            <option value="R-18G"
-                                                    onclick="return lord.preventOnclick(event);">R-18G</option>
-                                        </select>
-                                        <img src="/ololord.js/img/question.png" class="signImage"
-                                             title="SFW - safe for work (no socially condemned content)\nR-15 - restricted for 15 years (contains ecchi, idols, violence)\nR-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\nR-18G - restricted for 18 years, guidance advised (shemale, death, guro, scat, defecation, urination, etc.)">
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="postformLabel">
-                                <b>Password:</b>
-                            </td>
-                            <td class="postformField">
-                                <input type="password" name="password"
-                                       value="12345678" class="postFormInput" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="postformLabel">
-                                <b>Captcha:</b>
-                            </td>
-                            <td id="captchaContainer" class="postformField">
-                                <span class="noCaptchaText">You don't have to enter captcha</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="postformRules">
-                                <ul>
-                                    <li>Never speak about /b/.</li>
-                                    <li><b>NEVER</b> speak about /b/!</li>
-                                </ul>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </form>
-        </div>
-    </div>
+    <div id="create-action-container-bottom" class="create-action-container js-create-action-container">
+  <div class="">
+    [<a id="toggle-post-form-visibility-button-bottom" href="javascript:void(0);" class="js-toggle-post-form-visibility-button" data-bind="text: ((&quot;bottom&quot; === visiblePostFormContainerPosition())
+                     ? &quot;Скрыть форму постинга&quot; : &quot;Показать форму постинга&quot;),
+                   click: togglePostFormVisibility.bind($data, &quot;bottom&quot;)">Скрыть форму постинга</a>]
+  </div>
+  <div id="post-form-container-bottom" class="post-form-container  js-post-form-container" style=""><form id="post-form" class="post-form" method="post" accept-charset="utf-8" enctype="multipart/form-data" action="/action/createThread" data-bind="event: { submit: submit }">
+  <div class="desktop-only post-form-header" draggable="true" data-bind="event: { dragstart: makeFormFloat }" style="">
+    <div>Потяните, чтобы сделать форму плавающей</div>
     <div>
-        <center>[<a id="draftsVisibilitySwitch" href="javascript:void(0);">Hide drafts</a>]</center>
+      <span class="icon icon-cross button-icon" title="Закрыть" data-bind="click: close"></span>
     </div>
-    <div id="drafts">
-        <hr />
-        <center><h2>Drafts</h2></center>
+  </div>
+  <div class="post-form-body">
+    <div class="js-post-form-hidden-section" style="display: none;">
+      <input name="boardName" type="hidden" value="b">
+      
+      <input name="captchaEngine" type="hidden" value="node-captcha">
+      <input name="fileHashes" type="hidden" class="js-file-hashes" value="">
+      <input name="markupMode" type="hidden" data-bind="value: settings.markupMode" value="EXTENDED_WAKABA_MARK,BB_CODE">
     </div>
+    <div class="post-form-row"></div>
+    <div class="post-form-row">
+      <input name="name" type="text" class="post-form-input" maxlength="50" placeholder="Имя">
+    </div>
+    <div class="post-form-row"></div>
+    <div class="post-form-row">
+      <input name="subject" type="text" class="post-form-input" maxlength="150" placeholder="Тема">
+    </div>
+    <div class="post-form-row"></div>
+    <div class="post-form-row post-form-textarea-container">
+      <textarea name="text" class="post-form-input post-form-textarea" rows="10" cols="41" placeholder="Комментарий. Макс. длина: 15000" data-bind="event: { input: countSymbols }"></textarea>
+    </div>
+    <div class="post-form-row symbol-counter-container">
+      <a href="javascript:void(0);" class="toggle-post-form-markup-visibility-button" data-bind="text: (settings.hidePostFormMarkup() ? &quot;Показать разметку&quot;
+                    : &quot;Скрыть разметку&quot;),
+                    click: toggleMarkupVisibility">Скрыть разметку</a>
+      <span class="symbol-counter"><span class="js-symbols-used">0</span>/15000</span>
+    </div>
+    <div class="post-form-row"></div>
+    <div class="post-form-row" data-bind="visible: !settings.hidePostFormMarkup()"><div id="markup" class="post-form-input">
+  
+    <span class="icon-20 icon-bold button-icon" data-bind="attr: { title: &quot;Жирный текст&quot; + shortcutSuffix(&quot;markupBold&quot;) },
+                     click: markup.bind($data, &quot;b&quot;)" title="Жирный текст (alt+b)"></span>
+  
+  
+    <span class="icon-20 icon-italic button-icon" data-bind="attr: { title: &quot;Курсив&quot; + shortcutSuffix(&quot;markupItalics&quot;) },
+                     click: markup.bind($data, &quot;i&quot;)" title="Курсив (alt+i)"></span>
+  
+  
+    <span class="icon-20 icon-strikethrough button-icon" data-bind="attr: { title: &quot;Зачеркнутый текст&quot;
+                       + shortcutSuffix(&quot;markupStrikedOut&quot;) },
+                     click: markup.bind($data, &quot;s&quot;)" title="Зачеркнутый текст (alt+s)"></span>
+  
+  
+    <span class="icon-20 icon-underline button-icon" data-bind="attr: { title: &quot;Подчеркнутый текст&quot;
+                       + shortcutSuffix(&quot;markupUnderlined&quot;) },
+                     click: markup.bind($data, &quot;u&quot;)" title="Подчеркнутый текст (alt+u)"></span>
+  
+  
+    <span class="icon-20 icon-eye-blocked button-icon" data-bind="attr: {
+                       title: &quot;Спойлер&quot; + shortcutSuffix(&quot;markupSpoiler&quot;)
+                     },
+                     click: markup.bind($data, &quot;spoiler&quot;)" title="Спойлер (alt+p)"></span>
+  
+  
+    <span class="icon-20 icon-quotes-left button-icon" data-bind="attr: { title: &quot;Цитировать выделенный текст&quot;
+                       + shortcutSuffix(&quot;markupQuotation&quot;) },
+                     click: markup.bind($data, &quot;>&quot;)" title="Цитировать выделенный текст (alt+q)"></span>
+  
+  
+    <span class="icon-20 icon-list button-icon" title="Маркированный список" data-menu-selector="#menu-markup-unordered-list" data-bind="click: showMenuMarkupUnorderedList"></span>
+    <ul id="menu-markup-unordered-list" class="menu">
+      <li type="disc">
+        <span data-bind="click: markup.bind($data, &quot;uld&quot;)">Маркированный список</span>
+      </li>
+      <li type="circle">
+        <span data-bind="click: markup.bind($data, &quot;ulc&quot;)">Маркированный список</span>
+      </li>
+      <li type="square">
+        <span data-bind="click: markup.bind($data, &quot;uls&quot;)">Маркированный список</span>
+      </li>
+    </ul>
+  
+  
+    <span class="icon-20 icon-list-numbered button-icon" title="Нумерованный список" data-menu-selector="#menu-markup-ordered-list" data-bind="click: showMenuMarkupOrderedList"></span>
+    <ol id="menu-markup-ordered-list" class="menu">
+      
+        <li type="1" value="1">
+          <span data-bind="click: markup.bind($data, &quot;ol1&quot;)">Нумерованный список</span>
+        </li>
+      
+        <li type="I" value="I">
+          <span data-bind="click: markup.bind($data, &quot;olI&quot;)">Нумерованный список</span>
+        </li>
+      
+        <li type="i" value="i">
+          <span data-bind="click: markup.bind($data, &quot;oli&quot;)">Нумерованный список</span>
+        </li>
+      
+        <li type="A" value="A">
+          <span data-bind="click: markup.bind($data, &quot;olA&quot;)">Нумерованный список</span>
+        </li>
+      
+        <li type="a" value="a">
+          <span data-bind="click: markup.bind($data, &quot;ola&quot;)">Нумерованный список</span>
+        </li>
+      
+    </ol>
+  
+  
+    <span class="icon-20 icon-list-item button-icon" title="Элемент списка" data-bind="click: markup.bind($data, &quot;li&quot;)"></span>
+  
+  
+    <span class="icon-20 icon-subscript button-icon" title="Индекс" data-bind="click: markup.bind($data, &quot;sub&quot;)"></span>
+  
+  
+    <span class="icon-20 icon-superscript button-icon" title="Верхний индекс" data-bind="click: markup.bind($data, &quot;sup&quot;)"></span>
+  
+  
+    <span class="icon-20 icon-share button-icon" title="URL (внешняя ссылка)" data-bind="click: markup.bind($data, &quot;url&quot;)"></span>
+  
+  
+  
+  
+  
+  <span class="user-permission-use-raw-html-markup-only icon-20 icon-code button-icon" title="&quot;Сырой&quot; HTML" data-bind="click: markup.bind($data, &quot;raw-html&quot;)"></span>
 </div>
-<div class="pages">
-    <span class="pagesItem metaPage">
-        [<a href="javascript:void(0);">Previous page</a>]
-    </span>
-    <span class="pagesItem">
-        [<a href="javascript:void(0);">0</a>]
-    </span>
-    <span class="pagesItem currentPage">
-        [<b>1</b>]
-    </span>
-    <span class="pagesItem">
-        [<a href="javascript:void(0);">2</a>]
-    </span>
-    <span class="pagesItem metaPage">
-        [<a href="javascript:void(0);">Nex tage</a>]
-    </span>
 </div>
+    <div class="post-form-row"></div>
+    <div class="post-form-row">
+      <input name="submit" type="submit" class="post-form-submit-button post-form-input button" value="Отправить" data-bind="attr: { title: shortcutSuffix(&quot;submitReply&quot;, true) }" title="(alt+enter)">
+    </div>
+    <div class="post-form-row"></div>
+    <div class="post-form-row">
+      <div class="post-form-input">
+        <span class="post-form-option"></span>
+        <span class="post-form-option">
+          <input id="post-form-option-sage" name="sage" type="checkbox" value="true" data-bind="checked: sageEnabled,
+                            click: toggleSageEnabled">
+          <label for="post-form-option-sage">SAGE</label>
+        </span>
+        <span class="post-form-option"></span>
+        <span class="post-form-option">
+          <input id="post-form-option-op" name="signAsOp" type="checkbox" value="true" style="display: none;">
+          <label for="post-form-option-op" style="display: none;">ОП</label>
+        </span>
+        <span class="post-form-option"></span>
+        <span class="post-form-option">
+          <input id="post-form-option-tripcode" name="tripcode" type="checkbox" value="true">
+          <label for="post-form-option-tripcode">Трипкод</label>
+        </span>
+        <span class="post-form-option"></span>
+        <span class="post-form-option">
+          <a href="javascript:void(0);" data-bind="click: addToDrafts">В черновики</a>
+        </span>
+        <span class="post-form-option"></span>
+      </div>
+    </div>
+    <div class="post-form-row"></div>
+    <div class="post-form-row js-file-inputs"><div class="file-input js-file-input" title="Выбрать файл" data-bind="click: browseFile,
+                event: {
+                  dragover: dragOver,
+                  dragLeave: dragLeave,
+                  drop: fileDrop
+                }">
+  <div class="file-input-row">
+    
+    <span class="file-input-preview icon-32 icon-file-open js-file-input-preview"></span>
+    
+    <span class="icon-32 icon-link button-icon" title="Указать ссылку на файл" data-bind="click: attachFileByLink"></span>
+    
+    <span class="icon-32 icon-paint button-icon" title="Указать файл, нарисовав картинку, либо рисовать на прикрепленной картинке" data-bind="click: attachFileByDrawing"></span>
+    <span onclick="event.stopPropagation(); alert(&quot;test&quot;); return false;">test</span>
+<!--var a = lord.node("a");
+        a.href = "javascript:void(0);";
+        $(a).addClass("fileByLinkButton");
+        a.title = "Сделать демотиватор или макрос";
+        a.onclick = function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            lord.attachFileByCreatingDemotivator(a);
+            return false;
+        };
+        var img = lord.node("img");
+        $(img).addClass("buttonImage");
+        img.src = "/" + lord.data("sitePathPrefix") + "img/custom/demotivator_32.png";
+        img.width = 32;
+        img.height = 32;
+        a.appendChild(img);
+        span.parentNode.insertBefore(a, span);-->
+
+    <span class="icon-32 icon-vk button-icon user-vk-auth-only" title="Указать аудио-файл из Vkontakte" data-bind="click: attachFileByVk"></span>
+    
+    <span class="file-input-label">
+      <span class="file-input-label-text js-file-input-label-text"></span>
+      <span class="icon icon-cross button-icon file-input-remove-button" title="Убрать этот файл" data-bind="click: removeFile"></span>
+      <span class="icon icon-database sign-icon js-sign-file-exists-on-server" style="display: none;" title="Этот файл существует на сервере. Он НЕ будет загружен, но БУДЕТ скопирован."></span>
+    </span>
+  </div>
+  <div class="file-input-row">
+    <span>Рейтинг:</span>
+<select name="file_rating" class="js-rating-select" data-bind="click: function(_, e) { e.stopPropagation(); }">
+  
+    <option value="SFW" selected="true" data-bind="click: function(_, e) { e.stopPropagation(); }">SFW</option>
+  
+    <option value="R-15" data-bind="click: function(_, e) { e.stopPropagation(); }">R-15</option>
+  
+    <option value="R-18" data-bind="click: function(_, e) { e.stopPropagation(); }">R-18</option>
+  
+    <option value="R-18G" data-bind="click: function(_, e) { e.stopPropagation(); }">R-18G</option>
+  
+</select>
+<span class="icon icon-question sign-icon" title="SFW - safe for work (отсутствует контент, осуждаемый обществом)
+R-15 - restricted for 15 years (содержит эччи, idols, сцены жестокости)
+R-18 - restricted for 18 years (гениталии, половой акт, оскорбительный материал религиозного/расового/национального характера)
+R-18G - restricted for 18 years, guidance adviced (транссексуалы, смерть, гуро, скат, дефекация, уринация, и т.д.)"></span>
+
+  </div>
+</div></div>
+    <div class="post-form-row"></div>
+    <div class="post-form-row">
+      <input name="password" type="password" class="post-form-input" maxlength="50" placeholder="Пароль" data-bind="textInput: password">
+    </div>
+    <div class="post-form-row"></div>
+    <div class="post-form-row">
+      <div>
+        <span class="post-form-captcha-label">Капча:</span>
+        
+        <span id="no-captcha" style="">
+          <span class="nowrap">Вам не нужно вводить капчу.</span>
+          <span class="nowrap">
+            Осталось постов:
+            <span id="captcha-quota">7</span>
+          </span>
+        </span>
+      </div>
+      
+        <div id="captcha-container" style="display: none;"><div id="captcha">
+    <input type="hidden" name="nodeCaptchaChallenge" value="ba09df4f-89e4-4e57-9808-b6f012037cdd">
+    <input type="text" name="nodeCaptchaResponse" style="width: undefinedpx;">
+    <span name="countdown">00:00:14</span>
+</div></div>
+      
+    </div>
+    <div class="post-form-row"></div>
+    <div class="post-form-row">
+      <div class="">
+        <a href="javascript:void(0);" class="toggle-post-form-rules-visibility-button" data-bind="text: (settings.hidePostFormRules() ? &quot;Показать правила&quot;
+                        : &quot;Скрыть правила&quot;),
+                      click: toggleRulesVisibility">Скрыть правила</a>
+      </div>
+      <ul class="post-form-rules" data-bind="visible: !settings.hidePostFormRules()">
+        
+          <li>Для создания треда необходимо прикрепить файл. Текст не обязателен, но желателен.</li>
+        
+          <li>Для ответа в тред достаточно либо прикрепить файл, либо ввести текст.</li>
+        
+          <li>Соблюдайте <a href="/">общие правила</a> и правила доски. Разметка описана <a href="/markup.html">здесь</a>.</li>
+        
+          <li>Поддерживаемые типы файлов: JPEG, PNG, GIF, WEBM, MP4, OGV, OGG, MP3, WAV, PDF.</li>
+        
+          <li>Максимальный размер файла: 15 МБ.</li>
+        
+          <li>Введя капчу один раз, можно написать 10 постов.</li>
+        
+          <li>Политику следует обсуждать в <a href="/po">/po/</a>.</li>
+        
+      </ul>
+    </div>
+    <div class="post-form-row"></div>
+  </div>
+</form></div>
+</div>
+    <div class=" drafts-visibility-switch-container">
+      [<a id="drafts-visibility-switch" href="javascript:void(0);">Hide drafts</a>]
+    </div>
+    <div class="drafts-header-container"><h2>Drafts</h2></div>
+</div>
+<div id="pagination" class="pagination">
+        
+        
+          
+            <span class="paginaton-page">
+              [<b>0</b>]
+            </span>
+          
+        
+          
+            <span class="paginaton-page">
+              [<a href="/b/1.html">1</a>]
+            </span>
+          
+        
+          
+            <span class="paginaton-page">
+              [<a href="/b/2.html">2</a>]
+            </span>
+          
+        
+          
+            <span class="paginaton-page">
+              [<a href="/b/3.html">3</a>]
+            </span>
+          
+        
+          
+            <span class="paginaton-page">
+              [<a href="/b/4.html">4</a>]
+            </span>
+          
+        
+          
+            <span class="paginaton-page">
+              [<a href="/b/5.html">5</a>]
+            </span>
+          
+        
+          
+            <span class="paginaton-page">
+              [<a href="/b/6.html">6</a>]
+            </span>
+          
+        
+          
+            <span class="paginaton-page">
+              [<a href="/b/7.html">7</a>]
+            </span>
+          
+        
+          
+            <span class="paginaton-page">
+              [<a href="/b/8.html">8</a>]
+            </span>
+          
+        
+          
+            <span class="paginaton-page">
+              [<a href="/b/9.html">9</a>]
+            </span>
+          
+        
+        
+          <span class="paginaton-page">
+            [<a href="/b/1.html">Следующая страница</a>]
+          </span>
+        
+      </div>
 <hr />
-<div class="postingSpeedBar">
-    <span class="navbarItem">[Posting speed: 3.6 post(s)/hour.]</span>
+<div class="posting-speed-container">
+  <span class="navbarItem">[Скорость постинга: 3.1 п./час.]</span>
 </div>
-<div id="5" class="post temporary" style="width: auto; position: absolute; max-width: 500px; left: 450px; top: 1183px; z-index: 9001;">
-    <div class="postHeader">
+<div id="5" class="post reply-post temporary-post" style="width: auto; position: absolute; max-width: 500px; left: 700px; top: 1000px;">
+  <div class="post-internal-wrapper">
+    <div class="post-header">
         <span class="nowrap"> </span>
-        <span class="postSubject">
+        <span class="post-subject">
             Some subject
         </span>
-        <span class="someName">
-            <span class="userName defaultUserName">Anonymous</span>
+        <span class="post-name js-post-name  post-name-default js-post-name-default">
+            Anonymous
         </span>
-        <span class="nowrap postDateTime" name="dateTime">22/05/2016 Sun 10:35:52</span>
+        <time class="post-date-time nowrap js-date-time js-processed-date-time">22/05/2016 Sun 10:35:52</time>
         <span class="nowrap">
-            <span class="postNumber">
-                #<a href="javascript:void(0);" name="number">5</a>
-            </span>
-            <span class="postSequenceNumber">5</span>
-            <span class="hideReason"></span>
-            <span name="quickReplyContainer">[<a href="javascript:void(0);" name="quickReply"
-                                                 title="Быстрый ответ"><img src="/ololord.js/img/reply.png"
-                                                                            class="buttonImage"></a>]</span>
-            <span name="postActionsContainer">[<input type="image" src="/ololord.js/img/post_actions.png"
-                                                      class="buttonImage" name="postActions"
-                                                      title="Post actions" onclick="return false;">]</span>
-            <span name="toThread" class="postToThread postToThreadDesktop">
-                [<a href="javascript:void(0);" name="toThreadLink">Reply</a>]
-            </span>
-        </span>
+        <a class="post-number  " href="/b/res/39011.html#post-6" data-board-name="b" data-post-number="6" data-thread-number="39011" data-bind="click: insertPostNumber.bind($data, 6)">#5</a>
+        
+        <span class="post-sequence-number">5</span>
+        
+        <span class="hiding-reason js-hiding-reason"></span>
+      </span>
     </div>
-    <div class="postBody">
-        <div class="postFiles">
-            <div class="postFilesInner">
-                <div class="postFilesInnerRow">
-                    <div id="file1463902552939.jpg" class="postFile">
-                        <div class="postFileName">
+    <div class="post-body">
+        <div class="post-files">
+                    <div id="file1463902552939.jpg" class="post-file">
+                        <div class="post-file-name">
                             <a href="javascript:void(0);">1463902552939.jpg</a>
                         </div>
-                        <div class="postFileSize" >
+                        <div class="post-file-size" >
                             (25.01KB, 500x332)
                         </div>
-                        <div class="postFileSearch">
-                            <a href="javascript:void(0);" name="deleteFileButton">
-                                <img src="/ololord.js/img/delete.png" title="Delete file" class="buttonImage" /></a>
-                            <a href="javascript:void(0);" name="editFileRatingButton">
-                                <img src="/ololord.js/img/shield.png" title="Edit file rating" class="buttonImage" /></a>
-                            <input type="image" src="/ololord.js/img/hide.png" class="buttonImage"
-                                   title="Hide by image" onclick="return false;" />
-                            <ul id="image1463902552939-pngHideMenu" name="hideByImageButton" class="menu">
-                                <li class="nowrap">
-                                    <a href="javascript:void(0);">Hide by image size</a>
-                                </li>
-                            </ul>
-                            <a name="drawOnImageButton" onclick="return false;">
-                                <img src="/ololord.js/img/draw.png" title="Draw on this image"
-                                     class="buttonImage" /></a>
-                            <input type="image" src="/ololord.js/img/search.png" class="buttonImage"
-                                   title="Find sauce..." onclick="return false;" />
-                        </div>
-                        <div class="postFileFile">
+                        <div class=" post-file-actions">
+    <span class="icon icon-bin button-icon" title="Удалить файл" data-bind="click: deleteFile.bind($data, &quot;1465581762187.jpg&quot;)"></span>
+    <span class="icon icon-shield button-icon" title="Редактировать рейтинг файла" data-bind="click: editFileRating.bind($data, &quot;1465581762187.jpg&quot;)"></span>
+    
+      <span class="icon icon-eye-plus button-icon js-image-hiding-button" title="Скрывать по картинке" data-menu-selector="#menu-image-hide-1465581762187-jpg" data-bind="click: showImageHidingMenu"></span>
+      <ul id="menu-image-hide-1465581762187-jpg" class="menu">
+        <li class="nowrap">
+          <span data-bind="click: hideByImage.bind($data, &quot;1465581762187.jpg&quot;)">
+            Скрывать по размеру картинки
+          </span>
+        </li>
+        
+          <li class="nowrap">
+            <span data-bind="click: hideByImageHash.bind($data, &quot;1465581762187.jpg&quot;)">
+              Скрывать по хешу картинки
+            </span>
+          </li>
+        
+      </ul>
+      <span class="icon icon-paint button-icon" title="Рисовать на этой картинке" data-bind="click: drawOnImage.bind($data, &quot;1465581762187.jpg&quot;)"></span>
+      <span class="icon icon-search button-icon js-image-search-button" title="Find source..." data-menu-selector="#menu-image-search-1465581762187-jpg" data-bind="click: showImageSearchMenu.bind($data, &quot;1465581762187.jpg&quot;)"></span>
+    
+    
+    
+  </div>
+                        <div>
                             <a href="javascript:void(0);" data-rating="R-18">
-                                <img src="/ololord.js/img/1463902552939s.jpg" class="postFileThumbImage">
+                                <img src="/ololord.js/img/1463902552939s.jpg" class="post-file-link-image hide-if-mum-watching">
                             </a>
                         </div>
                     </div>
-                    <div class="postText">
-                        <blockquote id="post6Text">
+                    <div class="post-text-wrapper">
+                        <blockquote id="post-5-text" class='post-text'>
                             This is a post preview.
                         </blockquote>
                     </div>
-                </div>
-            </div>
         </div>
         <div name="referencedByContainer">
             <span name="referencedBy" class="referencedBy">
@@ -1124,6 +1346,7 @@
             </span>
         </div>
     </div>
+  </div>
 </div>
 <div class="popup">Popup message</div>
 <div class="popup warning" style="top: 78px;">Popup warning</div>
@@ -1134,126 +1357,179 @@
         Some useful tooltip
     </div>
 </div>
-<div class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-front ui-dialog-buttons ui-draggable ui-resizable"
-     tabindex="-1" role="dialog" aria-describedby="ui-id-27" aria-labelledby="ui-id-28"
-     style="position: absolute; height: auto; width: auto; top: 285px; left: 750px; display: block; z-index: 101;">
-    <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix ui-draggable-handle">
-        <span id="ui-id-28" class="ui-dialog-title">Dialog</span>
-        <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only ui-dialog-titlebar-close"
-                type="button" role="button" title="Закрыть">
-            <span class="ui-button-icon-primary ui-icon ui-icon-closethick"></span>
-            <span class="ui-button-text">Close</span>
-        </button>
-    </div>
-    <div class="settingsDialog ui-dialog-content ui-widget-content" id="ui-id-27"
-         style="display: block; width: auto; min-height: 33px; max-height: 834px; height: auto;">
-        <ul class="tabWidget nowrap">
-            <li data-index="0" class="activated"><a href="javascript:void(0);">Activated tab</a></li>
-            <li data-index="1"><a href="javascript:void(0);">Normal tab</a></li>
-            <li data-index="2"><a href="javascript:void(0);">Another tab</a></li>
-        </ul>
-        <div>
-            <div data-index="0">
-                Tab content:
-                <br />
-                <input type="text" value="Normal input" />
-                <input type="text" value="Input class='.input'" class="input" />
-                <br />
-                <button type="text">Normal button</button>
-                <button type="text" class="button">Button class="button"</button>
-                <br />
-                <select>
-                    <option>Normal select</option>
-                    <option>Another option</option>
-                </select>
-                <select class="select">
-                    <option>Select class="select"</option>
-                    <option>Another option</option>
-                </select>
-                <br />
-                <table>
-                    <tbody>
-                        <tr>
-                            <td style="vertical-align: top;">
-                                <div class="chatContactList" style="min-width: 90px; width: 100px;">
-                                    <div name="b:5343" class="chatContact">
-                                        <span class="chatContactNewMessages"></span>
-                                        /b/5343
-                                        <input type="image" src="/ololord.js/img/delete.png" onclick="return false;"
-                                               class="buttonImage" title="Delete this chat">
-                                    </div>
-                                    <div name="b:36733" class="chatContact selected">
-                                        <span class="chatContactNewMessages"></span>
-                                        /b/36733
-                                        <input type="image" src="/ololord.js/img/delete.png" onclick="return false;"
-                                               class="buttonImage" title="Delete this chat">
-                                    </div>
-                                    <div name="b:28561" class="chatContact">
-                                        <span class="chatContactNewMessages"></span>
-                                        /b/28561
-                                        <input type="image" src="/ololord.js/img/delete.png" onclick="return false;"
-                                               class="buttonImage" title="Delete this chat">
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="chatHistory" name="history" style="min-height: 120px; height: 120px; min-width: 200px; width: 200px;">
-                                    <div class="chatMessage">
-                                        <div class="chatMessageDate">
-                                            <img src="/ololord.js/img/message_in.png" class="signImage" width="16"
-                                                  height="16">
-                                            22/12/2015 Tue 21:19:43
-                                        </div>
-                                        <div class="chatMessageText">Hi!</div>
-                                    </div>
-                                    <div class="chatMessage">
-                                        <div class="chatMessageDate">
-                                            <img src="/ololord.js/img/message_out.png" class="signImage" width="16"
-                                                 height="16">
-                                            22/12/2015 вт 21:25:51
-                                        </div>
-                                        <div class="chatMessageText">Hello!</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <input type="text" class="chatInput" name="message"
-                                           placeholder="Enter your message here" />
-                                </div>
-                                <div>
-                                    <button name="sendMessageButton" class="button chatSendButton">Send</button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+<div class="widget ui-draggable" data-vivaldi-spatnav-clickable="1" style="position: absolute; height: auto; width: auto; top: 440px; left: 600px; display: block; z-index: 101;">
+  <div class="widget-wrapper-outer js-widget-wrapper-outer ui-resizable" data-vivaldi-spatnav-clickable="1" style="width: 550px; height: 400px;">
+    <div class="widget-wrapper-inner js-widget-wrapper-inner">
+      <div class="widget-header js-widget-header ui-draggable-handle">
+        <div>Chat</div>
+        <div class="js-widget-header-buttons">
+          <span class="icon icon-cross button-icon" title="Закрыть" data-bind="click: close" data-vivaldi-spatnav-clickable="1"></span>
         </div>
+      </div>
+      <div class="widget-content-wrapper js-widget-content-wrapper"><div class="chat-widget">
+  <div class="chat-contact-list" data-bind="foreach: chats">
+    <div class="chat-contact" data-bind="attr: { name: $data.key },
+                    css: { &quot;chat-contact-selected&quot;: ($data.key === $root.selectedChatKey()) },
+                    click: $root.selectChat" name="b:29311" data-vivaldi-spatnav-clickable="1">
+      <span class="nowrap">
+        <span class="chat-contact-new-messages" data-bind="visible: $data.messages.some(function(msg) { return msg.unread; }),
+                         text: &quot;+&quot; + $data.messages.reduce(function(acc, msg) {
+                           return acc + (msg.unread ? 1 : 0);
+                         }, 0)" style="display: none;">+0</span>
+        <span data-bind="text: &quot;/&quot; + $data.key.split(&quot;:&quot;).join(&quot;/&quot;)">/b/29311</span>
+      </span>
+      <span class="icon icon-bin button-icon" title="Delete this chat" data-bind="click: $root.deleteChat" data-vivaldi-spatnav-clickable="1"></span>
     </div>
-    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
-        <div class="ui-dialog-buttonset">
-            <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
-                    role="button">
-                <span class="ui-button-text">Cancel</span>
-            </button>
-            <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
-                    role="button">
-                <span class="ui-button-text">Accept</span>
-            </button>
+  
+    <div class="chat-contact" data-bind="attr: { name: $data.key },
+                    css: { &quot;chat-contact-selected&quot;: ($data.key === $root.selectedChatKey()) },
+                    click: $root.selectChat" name="b:2300" data-vivaldi-spatnav-clickable="1">
+      <span class="nowrap">
+        <span class="chat-contact-new-messages" data-bind="visible: $data.messages.some(function(msg) { return msg.unread; }),
+                         text: &quot;+&quot; + $data.messages.reduce(function(acc, msg) {
+                           return acc + (msg.unread ? 1 : 0);
+                         }, 0)" style="display: none;">+0</span>
+        <span data-bind="text: &quot;/&quot; + $data.key.split(&quot;:&quot;).join(&quot;/&quot;)">/b/2300</span>
+      </span>
+      <span class="icon icon-bin button-icon" title="Delete this chat" data-bind="click: $root.deleteChat" data-vivaldi-spatnav-clickable="1"></span>
+    </div>
+  
+    <div class="chat-contact" data-bind="attr: { name: $data.key },
+                    css: { &quot;chat-contact-selected&quot;: ($data.key === $root.selectedChatKey()) },
+                    click: $root.selectChat" name="b:39452" data-vivaldi-spatnav-clickable="1">
+      <span class="nowrap">
+        <span class="chat-contact-new-messages" data-bind="visible: $data.messages.some(function(msg) { return msg.unread; }),
+                         text: &quot;+&quot; + $data.messages.reduce(function(acc, msg) {
+                           return acc + (msg.unread ? 1 : 0);
+                         }, 0)" style="display: none;">+0</span>
+        <span data-bind="text: &quot;/&quot; + $data.key.split(&quot;:&quot;).join(&quot;/&quot;)">/b/39452</span>
+      </span>
+      <span class="icon icon-bin button-icon" title="Delete this chat" data-bind="click: $root.deleteChat" data-vivaldi-spatnav-clickable="1"></span>
+    </div>
+  
+    <div class="chat-contact" data-bind="attr: { name: $data.key },
+                    css: { &quot;chat-contact-selected&quot;: ($data.key === $root.selectedChatKey()) },
+                    click: $root.selectChat" name="b:39449" data-vivaldi-spatnav-clickable="1">
+      <span class="nowrap">
+        <span class="chat-contact-new-messages" data-bind="visible: $data.messages.some(function(msg) { return msg.unread; }),
+                         text: &quot;+&quot; + $data.messages.reduce(function(acc, msg) {
+                           return acc + (msg.unread ? 1 : 0);
+                         }, 0)" style="display: none;">+0</span>
+        <span data-bind="text: &quot;/&quot; + $data.key.split(&quot;:&quot;).join(&quot;/&quot;)">/b/39449</span>
+      </span>
+      <span class="icon icon-bin button-icon" title="Delete this chat" data-bind="click: $root.deleteChat" data-vivaldi-spatnav-clickable="1"></span>
+    </div>
+  
+    <div class="chat-contact" data-bind="attr: { name: $data.key },
+                    css: { &quot;chat-contact-selected&quot;: ($data.key === $root.selectedChatKey()) },
+                    click: $root.selectChat" name="b:39451" data-vivaldi-spatnav-clickable="1">
+      <span class="nowrap">
+        <span class="chat-contact-new-messages" data-bind="visible: $data.messages.some(function(msg) { return msg.unread; }),
+                         text: &quot;+&quot; + $data.messages.reduce(function(acc, msg) {
+                           return acc + (msg.unread ? 1 : 0);
+                         }, 0)" style="display: none;">+0</span>
+        <span data-bind="text: &quot;/&quot; + $data.key.split(&quot;:&quot;).join(&quot;/&quot;)">/b/39451</span>
+      </span>
+      <span class="icon icon-bin button-icon" title="Delete this chat" data-bind="click: $root.deleteChat" data-vivaldi-spatnav-clickable="1"></span>
+    </div>
+  
+    <div class="chat-contact" data-bind="attr: { name: $data.key },
+                    css: { &quot;chat-contact-selected&quot;: ($data.key === $root.selectedChatKey()) },
+                    click: $root.selectChat" name="b:39453" data-vivaldi-spatnav-clickable="1">
+      <span class="nowrap">
+        <span class="chat-contact-new-messages" data-bind="visible: $data.messages.some(function(msg) { return msg.unread; }),
+                         text: &quot;+&quot; + $data.messages.reduce(function(acc, msg) {
+                           return acc + (msg.unread ? 1 : 0);
+                         }, 0)" style="display: none;">+0</span>
+        <span data-bind="text: &quot;/&quot; + $data.key.split(&quot;:&quot;).join(&quot;/&quot;)">/b/39453</span>
+      </span>
+      <span class="icon icon-bin button-icon" title="Delete this chat" data-bind="click: $root.deleteChat" data-vivaldi-spatnav-clickable="1"></span>
+    </div>
+  
+    <div class="chat-contact chat-contact-selected" data-bind="attr: { name: $data.key },
+                    css: { &quot;chat-contact-selected&quot;: ($data.key === $root.selectedChatKey()) },
+                    click: $root.selectChat" name="b:39499" data-vivaldi-spatnav-clickable="1">
+      <span class="nowrap">
+        <span class="chat-contact-new-messages" data-bind="visible: $data.messages.some(function(msg) { return msg.unread; }),
+                         text: &quot;+&quot; + $data.messages.reduce(function(acc, msg) {
+                           return acc + (msg.unread ? 1 : 0);
+                         }, 0)" style="display: none;">+0</span>
+        <span data-bind="text: &quot;/&quot; + $data.key.split(&quot;:&quot;).join(&quot;/&quot;)">/b/39499</span>
+      </span>
+      <span class="icon icon-bin button-icon" title="Delete this chat" data-bind="click: $root.deleteChat" data-vivaldi-spatnav-clickable="1"></span>
+    </div>
+  </div>
+  <div class="chat-messaging-area">
+    <div class="chat-messages js-chat-messages" data-bind="foreach: messages">
+      <div class="chat-message" data-bind="css: { &quot;chat-message-unread&quot;: $data.unread },
+                      event: { mouseover: $root.markAsRead.bind($data, $index) }">
+        <div class="chat-message-header">
+          <span class="icon icon-redo sign-icon" data-bind="css: {
+                             &quot;icon-undo&quot;: (&quot;out&quot; === $data.type),
+                             &quot;icon-redo&quot;: (&quot;in&quot; === $data.type)
+                           }"></span>
+          <span data-bind="text: $root.formattedDate($data.date)">23/07/2016 сб 17:11:47</span>
         </div>
+        <div class="chat-message-text" data-bind="text: $data.text">n fngf</div>
+      </div>
+    
+      <div class="chat-message" data-bind="css: { &quot;chat-message-unread&quot;: $data.unread },
+                      event: { mouseover: $root.markAsRead.bind($data, $index) }">
+        <div class="chat-message-header">
+          <span class="icon icon-redo sign-icon" data-bind="css: {
+                             &quot;icon-undo&quot;: (&quot;out&quot; === $data.type),
+                             &quot;icon-redo&quot;: (&quot;in&quot; === $data.type)
+                           }"></span>
+          <span data-bind="text: $root.formattedDate($data.date)">30/07/2016 сб 08:29:18</span>
+        </div>
+        <div class="chat-message-text" data-bind="text: $data.text">vsvb</div>
+      </div>
+    
+      <div class="chat-message" data-bind="css: { &quot;chat-message-unread&quot;: $data.unread },
+                      event: { mouseover: $root.markAsRead.bind($data, $index) }">
+        <div class="chat-message-header">
+          <span class="icon icon-redo sign-icon" data-bind="css: {
+                             &quot;icon-undo&quot;: (&quot;out&quot; === $data.type),
+                             &quot;icon-redo&quot;: (&quot;in&quot; === $data.type)
+                           }"></span>
+          <span data-bind="text: $root.formattedDate($data.date)">30/07/2016 сб 08:29:19</span>
+        </div>
+        <div class="chat-message-text" data-bind="text: $data.text">sdvsdv</div>
+      </div>
+    
+      <div class="chat-message" data-bind="css: { &quot;chat-message-unread&quot;: $data.unread },
+                      event: { mouseover: $root.markAsRead.bind($data, $index) }">
+        <div class="chat-message-header">
+          <span class="icon icon-redo sign-icon" data-bind="css: {
+                             &quot;icon-undo&quot;: (&quot;out&quot; === $data.type),
+                             &quot;icon-redo&quot;: (&quot;in&quot; === $data.type)
+                           }"></span>
+          <span data-bind="text: $root.formattedDate($data.date)">30/07/2016 сб 08:29:20</span>
+        </div>
+        <div class="chat-message-text" data-bind="text: $data.text">dvsd</div>
+      </div>
     </div>
-    <div class="ui-resizable-handle ui-resizable-n" style="z-index: 90;"></div>
-    <div class="ui-resizable-handle ui-resizable-e" style="z-index: 90;"></div>
-    <div class="ui-resizable-handle ui-resizable-s" style="z-index: 90;"></div>
-    <div class="ui-resizable-handle ui-resizable-w" style="z-index: 90;"></div>
-    <div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se" style="z-index: 90;"></div>
-    <div class="ui-resizable-handle ui-resizable-sw" style="z-index: 90;"></div>
-    <div class="ui-resizable-handle ui-resizable-ne" style="z-index: 90;"></div>
-    <div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90;"></div>
+    <div class="chat-message-input-container">
+      <input type="text" class="chat-input js-chat-input" placeholder="Enter your message here" data-bind="textInput: message,
+                        enable: selectedChatKey,
+                        event: { keypress: inputKeyPress }">
+    </div>
+    <div class="chat-message-submit-container">
+      <button class="chat-submit button" data-bind="enable: selectedChatKey,
+                         click: sendMessage" data-vivaldi-spatnav-clickable="1">Отправить</button>
+    </div>
+  </div>
+</div></div>
+      <div class="widget-buttons js-widget-buttons"><button class="widget-button" data-vivaldi-spatnav-clickable="1">Закрыть</button></div>
+    </div>
+  <div class="ui-resizable-handle ui-resizable-e" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-s" style="z-index: 90;"></div><div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se" style="z-index: 90;"></div></div>
 </div>
-<div class="sectionBody" style="position: absolute; top: 600px; left: 650px; text-align: center; width: 300px; height: 450px;">
-    <div style="position: absolute; top: 200px; left: 20px;">
-        Some <span class="searchResultHighlighted">highlighted</span> text.
+<div class="section-body" style="position: absolute; top: 800px; left: 650px; text-align: center; width: 300px; height: 200px;">
+    <div style="position: absolute; top: 100px; left: 20px;">
+        Some <span class="search-result-highlighted">highlighted</span> text.
     </div>
 </div>
+</main>
+<div id="jQueryUIpositionFix" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; opacity: 0; z-index: -1;"></div>
 </body>
 </html>
