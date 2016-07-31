@@ -32,7 +32,7 @@
           {{#def['custom-postHeaderPart30'] || ''}}
         {{?}}
         {{? post.sage}}
-          <span class='icon icon-angry js-sage' title='{{!it.translate('SAGE')}}'></span>
+          <span class='icon icon-angry sign-image js-sage' title='{{!it.translate('SAGE')}}'></span>
         {{?}}
         {{#def['custom-postHeaderPart40'] || ''}}
       </span>

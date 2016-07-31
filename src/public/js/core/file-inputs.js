@@ -123,7 +123,7 @@ async function previewImage(div) {
   }
   try {
     let url = await Tools.readAs(div.file, 'DataURL');
-    let img = $(`<img src='${url}' class='no-invert' />`);
+    let img = $(`<img src='${url}' class='invert' />`); //NOTE: Double inversion --> not inverted
     $(div).find('.js-file-input-preview').removeClass('icon-32').removeClassWild('icon-file-*').append(img);
   } catch (err) {
     DOM.handleError(err);

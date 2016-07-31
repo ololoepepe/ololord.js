@@ -8,7 +8,7 @@
   -webkit-filter: invert(0);
 }
 body {
-  font-family: 'Verdana, sans-serif';
+  font-family: Verdana, sans-serif;
   font-weight: normal;
   color: #000000;
   background-color: #EEEEEE;
@@ -54,8 +54,8 @@ hr {
   border-radius: 0px;
 }
 .warning {
-  color: #808000;
-  border: 1px dotted #808000;
+  color: #E08000;
+  border: 1px dotted #E08000;
 }
 .critical {
   color: #FF0000;
@@ -226,10 +226,13 @@ select {
   color: #FF0000;
 }
 .message-post-limit-reached {
-  color: #808000;
+  color: #E08000;
 }
 .post-subject {
   font-weight: bold;
+}
+.user-name {
+  font-weight: normal;
 }
 .hiding-reason {
   font-weight: bold;
@@ -327,7 +330,7 @@ a:hover {
 .ui-widget select,
 .ui-widget textarea,
 .ui-widget button {
-  font-family: 'Verdana, sans-serif';
+  font-family: Verdana, sans-serif;
 }
 .ui-widget-content {
   border: 1px solid #CCCCCC;
