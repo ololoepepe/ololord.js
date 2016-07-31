@@ -72,7 +72,8 @@
                  value='true'
                  data-bind='checked: showTripcode,
                             click: toggleShowTripcode' />
-          <label for='post-form-option-tripcode'>{{!it.translate('Tripcode', 'postFormLabelTripcode')}}</label>
+          <label for='post-form-option-tripcode'
+                 class='user-logged-in-only'>{{!it.translate('Tripcode', 'postFormLabelTripcode')}}</label>
         </span>
         <span class='post-form-option'>{{#def['custom/postFormOption/30'] || ''}}</span>
         <span class='post-form-option js-only'>

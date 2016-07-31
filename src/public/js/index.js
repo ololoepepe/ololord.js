@@ -2,7 +2,6 @@ import 'babel-polyfill';
 import _ from 'underscore';
 import $ from 'jquery';
 import KO from 'knockout';
-import MobileDetect from 'mobile-detect';
 import Mousetrap from 'mousetrap';
 
 import * as Constants from './helpers/constants';

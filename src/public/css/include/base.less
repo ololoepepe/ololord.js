@@ -23,14 +23,6 @@
 @import './toolbar';
 @import './widget';
 
-.ui-menu .ui-menu-item {
-  list-style-image: none !important;
-}
-
-.ui-slider-handle {
-    width: 8px !important;
-}
-
 body {
   margin: 0px;
   display: flex;
@@ -267,17 +259,6 @@ header:empty, footer:empty {
   padding: 4px 5px 4px 5px;
 }
 
-.ui-tooltip-content::after {
-  content: '';
-  position: absolute;
-  border-style: solid;
-  display: block;
-  width: 0;
-  top: -10px;
-  left: 85px;
-  border-width: 0 10px 10px;
-}
-
 .background-checkerboard {
   background-image:
     -moz-linear-gradient(45deg, #666666 25%, transparent 25%), 
@@ -488,4 +469,23 @@ header:empty, footer:empty {
   position: fixed;
   z-index: 25;
   border: 5px solid #777777;
+}
+
+.ui-menu .ui-menu-item {
+  list-style-image: none !important;
+}
+
+.ui-slider-handle {
+  width: 8px !important;
+}
+
+.ui-tooltip-content::after {
+  content: '';
+  position: absolute;
+  border-style: solid;
+  display: block;
+  width: 0;
+  top: -10px;
+  left: 85px;
+  border-width: 0 10px 10px;
 }

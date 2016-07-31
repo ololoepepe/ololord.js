@@ -83,7 +83,7 @@ function getLocalObject(key, value) {
   }
 }
 
-export let isAudioType = function(type) {
+export function isAudioType(type) {
   return AUDIO.has(type);
 }
 
@@ -91,7 +91,7 @@ export function isImageType(type) {
   return IMAGE.has(type);
 }
 
-export let isVideoType = function(type) {
+export function isVideoType(type) {
   return VIDEO.has(type);
 }
 

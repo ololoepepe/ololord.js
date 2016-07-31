@@ -219,6 +219,10 @@ module.exports.toHtml = function(text, replaceSpaces) {
     return text;
 };
 
+let NON_THEME_STYLESHEETS = new Set(['', 'custom-'].reduce((acc, prefix) => {
+  return acc.concat(['combined', 'desktop', 'mobile'].map(suffix => `${prefix}base-${suffix}`));
+}, []));
+
 module.exports.styles = function() {
     if (styles)
         return styles;
@@ -226,7 +230,7 @@ module.exports.styles = function() {
     var path = __dirname + "/../public/css";
     FSSync.readdirSync(path).forEach(function(fileName) {
         if (fileName.split(".").pop() != "css"
-            || ["base-desktop", "base-mobile"].indexOf(fileName.split(".").shift()) >= 0) {
+            || NON_THEME_STYLESHEETS.has(fileName.split(".").shift())) {
             return;
         }
         var name = fileName.split(".").shift();

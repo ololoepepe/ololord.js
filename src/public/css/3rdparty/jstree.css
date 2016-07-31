@@ -508,7 +508,7 @@
   /*background: url("throbber.gif") center center no-repeat;*/
   width: 16px;
   height: 16px;
-  background-image: url('../img/sprite-icons-16x16.svg');
+  background-image: url('../img/sprites/icons-16x16.svg');
   background-position: 0 -64px;
   animation-name: spinner;
   animation-duration: 0.5s;

@@ -64,7 +64,7 @@
   hyphens: auto;
 }
 
-.op-sign {
+.op-sign::after {
   content: '[OP]';
 }
 
@@ -86,6 +86,10 @@
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
+}
+
+.post-file + .post-file {
+  padding-left: 20px;
 }
 
 .post-file + .post-file + .post-text-wrapper {

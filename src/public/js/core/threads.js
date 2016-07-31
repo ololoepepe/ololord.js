@@ -35,7 +35,6 @@ const FAVORITES_MIN_HEIGHT = 400;
 let pageVisible = true;
 let blinkTimer = null;
 let autoUpdateTimer = null;
-let loadingImage = null;
 
 class AutoUpdateViewModel {
   constructor() {
@@ -44,6 +43,10 @@ class AutoUpdateViewModel {
 
   toggleAutoUpdate() {
     setAutoUpdateEnabled(!Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber()));
+  }
+
+  updateThread() {
+    updateThread();
   }
 }
 
@@ -80,13 +83,8 @@ class BlinkTimer {
 }
 
 function showLoadingPostsPopup(text) {
-  let span = DOM.node('span');
-  if (!loadingImage) {
-    loadingImage = $(`<img src='/${Tools.sitePathPrefix()}img/loading.gif' />`)[0];
-  }
-  span.appendChild(loadingImage.cloneNode(true));
-  span.appendChild(DOM.node('text', ` ${text || Tools.translate('Loading posts…', 'loadingPostsMessage')}`));
-  return PopupMessage.showPopup(span, {
+  text = text || Tools.translate('Loading posts…', 'loadingPostsMessage');
+  return PopupMessage.showPopup($(`<span><span class='icon-24 icon-spinner'></span><span>${text}</span></span>`)[0], {
     type: 'node',
     timeout: Constants.BILLION
   });
@@ -95,7 +93,7 @@ function showLoadingPostsPopup(text) {
 export let updateThread = async function(silent) {
   let boardName = Tools.boardName();
   let threadNumber = Tools.threadNumber();
-  let posts = DOM.queryAll('.opPost:not(.temporary), .post:not(.temporary)');
+  let posts = DOM.queryAll('.js-post:not(.temporary)');
   if (posts.length < 1) {
     return;
   }
@@ -190,7 +188,7 @@ export async function downloadThreadFiles(boardName, threadNumber, archived) {
   let suffix = archived ? 'arch' : 'res';
   try {
     if (Tools.isThreadPage()) {
-      var fileNames = DOM.queryAll('.postFile[data-file-name]').map(div => DOM.data('fileName', div));
+      var fileNames = DOM.queryAll('.js-post-file[data-file-name]').map(div => DOM.data('fileName', div));
       var title = window.document.title;
     } else {
       let thread = await AJAX.api(threadNumber, {}, { prefix: `${boardName}/${suffix}` });
@@ -375,7 +373,7 @@ export async function showNewPosts() {
     let getNewPostCount = createGetNewPostCountFunction(result, newLastPostNumbers);
     let selector = '.js-navbar .js-navbar-item a';
     if (Tools.deviceType('mobile')) {
-      selector += ', .boardSelect option';
+      selector += ', .board-select option';
     }
     DOM.queryAll(selector).forEach((a) => {
       let boardName = DOM.data('boardName', a);
@@ -383,13 +381,13 @@ export async function showNewPosts() {
         return;
       }
       let isSelect = 'OPTION' === a.tagName;
-      let span = isSelect ? $(a).find('.newPostCount') : $(a).parent().find('.newPostCount');
+      let span = isSelect ? $(a).find('.new-post-count') : $(a).parent().find('.new-post-count');
       span.remove();
       let newPostCount = getNewPostCount(boardName);
       if (!newPostCount) {
         return;
       }
-      $(`<span class='newPostCount'>+${newPostCount} </span>`).insertBefore(isSelect ? $(a).children().first() : a);
+      $(`<span class='new-post-count'>+${newPostCount} </span>`).insertBefore(isSelect ? $(a).children().first() : a);
     });
     _(result).each((lastPostNumber, boardName) => {
       if (!newLastPostNumbers.hasOwnProperty(boardName)) {
@@ -578,7 +576,15 @@ export function addToOrRemoveFromFavorites(boardName, threadNumber) {
   }
 }
 
-async function setAutoUpdateEnabled(enabled) {
+Settings.useWebSockets.subscribe(async function() {
+  if (!autoUpdateTimer) {
+    return;
+  }
+  await setAutoUpdateEnabled(false);
+  await setAutoUpdateEnabled(true);
+});
+
+export async function setAutoUpdateEnabled(enabled) {
   Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber(), enabled);
   if (Settings.useWebSockets()) {
     try {
@@ -629,6 +635,7 @@ export async function updateLastPostNumbers() {
 export async function showFavorites() {
   let options = {
     id: 'favoritesWidget',
+    type: 'favoritesWidget',
     title: Tools.translate('Favorite threads'),
     rememberGeometry: true
   };
@@ -648,9 +655,8 @@ export async function showFavorites() {
 }
 
 export function initializeThreadActions(position) {
-  $(`#thread-actions-${position}`).find('[name="updateThreadButton"]').click(updateThread.bind(null));
   //TODO: magic numbers
-  let autoUpdateButton = $(`#auto-update-thread-${position}`);
+  let autoUpdateButton = $(`#thread-actions-${position} .js-auto-update-thread`);
   autoUpdateButton.knob({
     readOnly: true,
     thickness: 0.5,
@@ -658,7 +664,7 @@ export function initializeThreadActions(position) {
     max: 1,
     height: 22,
     width: 22,
-    fgColor: '#2F2F2F'
+    fgColor: AutoUpdateTimer.COLOR_1
   });
   autoUpdateButton.val(1).trigger('change'); //TODO: magic numbers
   let parent = autoUpdateButton.parent();

@@ -6,6 +6,8 @@ import * as Tools from './tools';
 
 export const DEFAULT_DRAWING_BACKGROUND_COLOR = 'rgba(255, 255, 255, 1)';
 
+let prevent = false;
+
 export const DEFAULT = {
   deviceType: 'auto',
   time: 'server',
@@ -85,6 +87,9 @@ _(DEFAULT).each((_, key) => {
   let value = settings[key];
   let o = KO.observable((typeof value !== 'undefined') ? value : DEFAULT[key]);
   o.subscribe((value) => {
+    if (prevent) {
+      return;
+    }
     let settings = Storage.getLocalObject('settings', {});
     settings[key] = value;
     Storage.setLocalObject('settings', settings);
@@ -212,3 +217,11 @@ export function setLocalData(o, { includeSettings, includeCustom, includePasswor
     f(key, options.set);
   });
 }
+
+Storage.on('settings', (settings) => {
+  prevent = true;
+  _(DEFAULT).each((_, key) => {
+    module.exports[key](settings[key]);
+  });
+  prevent = false;
+});

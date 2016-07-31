@@ -37,6 +37,41 @@ export const DEFAULT_HOTKEYS = _({
   };
 });
 
+let storageHandlers = new Map();
+
+export function storageHandler(e) {
+  let handler = storageHandlers.get(e.key);
+  if (typeof handler !== 'object') {
+    return;
+  }
+  try {
+    var newValue = (null !== e.newValue) ? JSON.parse(e.newValue) : Tools.cloned(handler.defValue);
+    var oldValue = (null !== e.oldValue) ? JSON.parse(e.oldValue) : Tools.cloned(handler.defValue);
+  } catch (err) {
+    console.log(err);
+    var newValue = Tools.cloned(handler.defValue);
+    var oldValue = Tools.cloned(handler.defValue);
+  }
+  handler.handler(newValue, oldValue);
+}
+
+export function on(key, handler, defValue) {
+  if (typeof key !== 'string' || !key || typeof handler !== 'function') {
+    return;
+  }
+  storageHandlers.set(key, {
+    handler: handler,
+    defValue: defValue
+  });
+}
+
+export function off(key, handler) {
+  if (typeof key !== 'string' || !key || typeof handler !== 'function' || !storageHandlers.has(key)) {
+    return;
+  }
+  storageHandlers.delete(key);
+}
+
 export let getCookie = function(name, defValue) {
   var pattern = '(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)';
   var matches = window.document.cookie.match(new RegExp(pattern));
@@ -153,8 +188,17 @@ function createDataFunction(key, def, { readonly, convertSet, convertGet, storag
 
 function createObservable(storageKey, defValue) {
   let o = KO.observable(getLocalObject(storageKey, defValue));
+  let prevent = false;
   o.subscribe((value) => {
+    if (prevent) {
+      return;
+    }
     setLocalObject(storageKey, value);
+  });
+  on(storageKey, (newValue) => {
+    prevent = true;
+    o(newValue);
+    prevent = false;
   });
   return o;
 }
@@ -297,39 +341,4 @@ export function vkAuth(expires) {
   } else {
     return getCookie('vkAuth', 'false');
   }
-}
-
-let storageHandlers = new Map();
-
-export function storageHandler(e) {
-  let handler = storageHandlers.get(e.key);
-  if (typeof handler !== 'object') {
-    return;
-  }
-  try {
-    var newValue = (null !== e.newValue) ? JSON.parse(e.newValue) : Tools.cloned(handler.defValue);
-    var oldValue = (null !== e.oldValue) ? JSON.parse(e.oldValue) : Tools.cloned(handler.defValue);
-  } catch (err) {
-    console.log(err);
-    var newValue = Tools.cloned(handler.defValue);
-    var oldValue = Tools.cloned(handler.defValue);
-  }
-  handler.handler(newValue, oldValue);
-}
-
-export function on(key, handler, defValue) {
-  if (typeof key !== 'string' || !key || typeof handler !== 'function') {
-    return;
-  }
-  storageHandlers.set(key, {
-    handler: handler,
-    defValue: defValue
-  });
-}
-
-export function off(key, handler) {
-  if (typeof key !== 'string' || !key || typeof handler !== 'function' || !storageHandlers.has(key)) {
-    return;
-  }
-  storageHandlers.delete(key);
 }

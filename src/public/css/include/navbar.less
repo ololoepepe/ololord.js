@@ -3,86 +3,91 @@
 }
 
 .navbar-item {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 .notification-button {
   position: relative;
 
-  &::before {
+  &::after {
     content: '';
     display: block;
     position: absolute;
-    font-size: 12px;
-    color: red;
+    font-size: 12px; //NOTE: Yep, the font size is bound to icon size.
     animation: blinker 2s infinite;
+    filter: invert(0);
+    -webkit-filter: invert(0);
   }
 
   &.notification-button-plus-1 {
-    &::before {
+    &::after {
       content: '+1';
     }
   }
 
   &.notification-button-plus-2 {
-    &::before {
+    &::after {
       content: '+2';
     }
   }
 
   &.notification-button-plus-3 {
-    &::before {
+    &::after {
       content: '+3';
     }
   }
 
   &.notification-button-plus-4 {
-    &::before {
+    &::after {
       content: '+4';
     }
   }
 
   &.notification-button-plus-5 {
-    &::before {
+    &::after {
       content: '+5';
     }
   }
 
   &.notification-button-plus-6 {
-    &::before {
+    &::after {
       content: '+6';
     }
   }
 
   &.notification-button-plus-7 {
-    &::before {
+    &::after {
       content: '+7';
     }
   }
 
   &.notification-button-plus-8 {
-    &::before {
+    &::after {
       content: '+8';
     }
   }
 
   &.notification-button-plus-9 {
-    &::before {
+    &::after {
       content: '+9';
     }
   }
 }
 
 .sidebar .notification-button {
-  &::before {
-    left: -20px;
+  &::after {
+    left: 18px;
     top: 1px;
   }
 }
 
 .toolbar .notification-button {
-  &::before {
+  &::after {
     top: 16px;
     left: -1px;
   }
+}
+
+.drop-area {
+  box-sizing: border-box;
 }

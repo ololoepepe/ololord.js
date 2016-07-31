@@ -32,6 +32,7 @@ class TracksViewModel {
     this.currentTime = KO.observable(0);
     this.volume = KO.observable(1);
     this.playing = KO.observable(false);
+    this.isAudioType = Tools.isAudioType;
     this.trackTagsText = KO.computed(function() {
       let track = this.currentTrack();
       if (!track) {
@@ -202,7 +203,7 @@ class TracksViewModel {
       if (!result) {
         return;
       }
-      let post = $(`#${track.id}`).closest('.post, .opPost');
+      let post = $(`#file-${Tools.escapedSelector(track.fileName)}`).closest('.js-post');
       if (post[0]) {
         await Posts.updatePost(+DOM.data('number', post[0]));
       }

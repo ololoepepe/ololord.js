@@ -5,8 +5,9 @@
          data-bind='attr: {
                       title: "{{!it.translate('Update thread', 'updateThreadText')}}" + shortcutSuffix("updateThread")
                     },
-                    click: toggleAutoUpdate'></span>]</span>
-  <span class='js-only'>[<input id='auto-update-thread-{{!position}}' type='text' />]</span>
+                    click: updateThread'></span>]</span>
+  <span class='js-only'
+        data-bind='click: toggleAutoUpdate'>[<input class='js-auto-update-thread' type='text' />]</span>
   <script type='text/javascript'>
     (function() {
       window.lord.require('./core/threads').initializeThreadActions('{{!position}}');

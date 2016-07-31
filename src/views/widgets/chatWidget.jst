@@ -3,7 +3,7 @@
        data-bind='foreach: chats'>
     <div class='chat-contact'
          data-bind='attr: { name: $data.key },
-                    css: { "chat-contact-selected": ($data.key === $root.selectedChatKey().key) },
+                    css: { "chat-contact-selected": ($data.key === $root.selectedChatKey()) },
                     click: $root.selectChat'>
       <span class='nowrap'>
         <span class='chat-contact-new-messages'
@@ -24,7 +24,7 @@
            data-bind='css: { "chat-message-unread": $data.unread },
                       event: { mouseover: $root.markAsRead.bind($data, $index) }'>
         <div class='chat-message-header'>
-          <span class='icon'
+          <span class='icon sign-icon'
                 data-bind='css: {
                              "icon-undo": ("out" === $data.type),
                              "icon-redo": ("in" === $data.type)

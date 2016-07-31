@@ -126,7 +126,7 @@ registerHandler('load', () => {
       let html = `<hr /><div class='infinite-scroll-page-separator'>${Tools.translate('Page', 'pageText')} `;
       html += `${infiniteScrollPage}</div>${threadsHTML}`;
       $('#infinite-scroll-loading-message').hide();
-      $('#threads').html($('#threads').html() + html);
+      $('#threads').append(html);
       await Tools.series(threads.map((thread) => {
         return DOM.id(`thread-${thread.opPost.number}`);
       }), async function(thread) {

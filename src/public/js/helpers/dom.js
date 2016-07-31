@@ -183,7 +183,7 @@ export function createStylesheetLink(href, { prefix, id, replace } = {}) {
   return link[0];
 }
 
-export function createStylesheet(css, { id, replace } = {}) {
+export function createStylesheet(css, { id, replace, type } = {}) {
   let style = node('style');
   if (replace && !id) {
     id = $(replace).attr('id');
@@ -191,7 +191,7 @@ export function createStylesheet(css, { id, replace } = {}) {
   if (id) {
     style.id = id;
   }
-  style.type = 'text/css';
+  style.type = type || 'text/css';
   if (style.styleSheet) {
     style.styleSheet.cssText = css;
   } else {
@@ -499,8 +499,8 @@ export function activateTab(parent, index) {
   let header = parent.find('.js-tab-widget-header');
   let body = parent.find('.js-tab-widget-body');
   body.children().hide();
-  header.children().removeClass('activated');
-  header.find(`[data-index='${index}']`).addClass('activated');
+  header.children().removeClass('tab-widget-header-activated');
+  header.find(`[data-index='${index}']`).addClass('tab-widget-header-activated');
   body.find(`[data-index='${index}']`).show();
 }
 

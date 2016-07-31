@@ -88,13 +88,13 @@
                         "data-file-name": $data.fileName || "",
                         "data-href": $data.href || "" },
                       css: { selected: $data.isCurrent },
-                      click: $parent.playTrack,
+                      click: $root.playTrack,
                       event: {
-                        dragstart: $parent.trackDrag,
+                        dragstart: $root.trackDrag,
                         dragover: function() { /*NOTE: Just prevent default.*/ },
-                        drop: $parent.trackDrop
+                        drop: $root.trackDrop
                       }'>
-        <span class='player-track-info' data-bind='html: $parent.trackInfo($data)'></span>
+        <span class='player-track-info' data-bind='html: $root.trackInfo($data)'></span>
         <span class='player-track-actions'>
           <span data-bind='if: $data.duration'>
             <span data-bind='text: $data.duration'></span>
@@ -103,15 +103,15 @@
                title='{{!it.translate('Download file', 'downloadPlaylistFileText')}}'
                onclick='event.stopPropagation();' download='fileName'
                data-bind='attr: { href: "/{{!it.site.pathPrefix}}" + $data.boardName + "/src/" + $data.fileName }'></a>
-            <span data-bind='if: 'application/ogg' === $data.mimeType || /audio\/$/.test($data.mimeType)'>
+            <span data-bind='if: $root.isAudioType($data.mimeType)'>
               <span class='icon icon-tag button-icon' draggable='false'
                  title='{{!it.translate('Edit audio file tags', 'editAudioTagsText')}}'
-                 data-bind='click: $parent.editAudioTags'></span>
+                 data-bind='click: $root.editAudioTags'></span>
             </span>
           </span>
           <span class='icon icon-minus button-icon' draggable='false'
              title='{{!it.translate('Remove from playlist', 'removeFromPlaylistText')}}'
-             data-bind='click: $parent.removeFromPlaylist'></span>
+             data-bind='click: $root.removeFromPlaylist'></span>
         </span>
       </div>
     </div>

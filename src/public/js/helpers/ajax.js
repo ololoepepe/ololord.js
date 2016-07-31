@@ -48,7 +48,7 @@ export async function api(entity, parameters, { prefix, indicator } = {}) {
   let params = {
     url: `/${Tools.sitePathPrefix()}${prefix}/${entity}.json${query}`,
     dataType: 'json',
-    cache: Storage.getLocalObject('apiRequestCachingEnabled', false)
+    cache: false
   };
   if (typeof indicator === 'object') {
     params.xhr = createXHRFactory(indicator);

@@ -74,11 +74,12 @@
   width: 144px;
   text-align: center;
 
-  .button-icon + .button-icon {
+  > * + * {
     margin-left: 20px;
-  }
-  .button-icon + .button-icon:nth-child(5) {
-    margin-left: 0px;
+
+    &:nth-child(5) {
+      margin-left: 0px;
+    }
   }
 }
 

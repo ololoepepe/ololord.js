@@ -2,7 +2,7 @@
       data-bind='css: (loggedIn ? "icon-exit" : "icon-enter"),
                  attr: { title: loginButtonTitle() },
                  click: loginOrLogout'></span>
-<span class='icon icon-bubbles button-icon notification-button' title='{{!it.translate('Private chat', 'chatText')}}'
+<span class='notification-button' title='{{!it.translate('Private chat', 'chatText')}}'
       data-bind='css: {
                    "notification-button-plus-1": (unreadChatMessageCount() === 1),
                    "notification-button-plus-2": (unreadChatMessageCount() === 2),
@@ -13,8 +13,7 @@
                    "notification-button-plus-7": (unreadChatMessageCount() === 7),
                    "notification-button-plus-8": (unreadChatMessageCount() === 8),
                    "notification-button-plus-9": (unreadChatMessageCount() >= 9)
-                 },
-                 click: showChat'></span>
+                 }'><span class='icon icon-bubbles button-icon' data-bind='click: showChat'></span></span>
 <span class='icon icon-list button-icon' title='{{!it.translate('Show hidden post list', 'showHiddenPostListText')}}'
       data-bind='click: showHiddenPostList'></span>
 <span class='icon icon-magic-wand button-icon' title='{{!it.translate('Edit spells', 'editSpellsText')}}'
@@ -26,7 +25,7 @@
                  click: showSettings'></span>
 <span class='icon icon-search button-icon' title='{{!it.translate('Search', 'showSearchActionText')}}'
       data-bind='click: showSearch'></span>
-<span class='icon icon-star-full button-icon notification-button'
+<span class='notification-button'
       data-bind='attr: {
                    title: "{{!it.translate('Favorites', 'showFavoritesText')}}" + shortcutSuffix("showFavorites")
                  },
@@ -40,8 +39,7 @@
                    "notification-button-plus-7": (favoriteThreadNewPostCount() === 7),
                    "notification-button-plus-8": (favoriteThreadNewPostCount() === 8),
                    "notification-button-plus-9": (favoriteThreadNewPostCount() >= 9)
-                 },
-                 click: showFavorites'></span>
+                 }'><span class='icon icon-star-full button-icon' data-bind='click: showFavorites'></span></span>
 <span class='icon button-icon' title='{{!it.translate('Mum is watching me!', 'mumWatchingText')}}'
       data-bind='css: (settings.mumWatching() ? "icon-eye-blocked" : "icon-eye"),
                  click: toggleMumWatching'></span>
