@@ -55,6 +55,8 @@ lord.options = [{
   checked: true
 },
 lord.color('color-primary', '#000000'),
+lord.color('color-secondary', '#444444'),
+lord.color('color-title', '#FF6600'),
 lord.color('color-link', '#FF6600'),
 lord.color('color-link-hover', '#0066FF'),
 lord.color('color-link-button', '#E08060'),
@@ -93,8 +95,8 @@ lord.fontWeight('font-weight-primary'),
 },
 lord.color('color-post-subject', '#000000', true),
 lord.fontWeight('font-weight-post-subject', 'bold'),
-lord.color('color-user-name', '#000000', true),
-lord.fontWeight('font-weight-user-name'),
+lord.color('color-post-name', '#000000', true),
+lord.fontWeight('font-weight-post-name'),
 lord.color('color-hiding-reason', '#000000', true),
 lord.fontWeight('font-weight-hiding-reason', 'bold'),
 lord.color('color-post-name-moder', '#0000FF', true, true),
@@ -297,7 +299,9 @@ lord.styleChanged = function() {
     if (value.checked) {
       less = less.split('{{' + name + '}}').join(value.value);
     } else {
-      less = less.replace(new RegExp('.*' + name.split('-').join('\\-') + '.*', 'g'), '');
+      var rx1 = new RegExp('.*\\{\\{' + name.split('-').join('\\-') + '\\}\\}.*', 'g');
+      var rx2 = new RegExp('.*@' + name.split('-').join('\\-') + '.*', 'g');
+      less = less.replace(rx1, '').replace(rx2, '');
     }
   });
   lord.cssView.setValue(less);
@@ -370,7 +374,7 @@ lord.roll = function() {
     return alert("No title specified");
   }
   var blob = new Blob([lord.cssView.getValue()], {type: "text/plain;charset=utf-8"});
-  saveAs(blob, name + ".css");
+  saveAs(blob, name + ".less");
 };
 
 window.addEventListener("load", function load() {

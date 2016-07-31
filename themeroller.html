@@ -14,6 +14,8 @@
 <script id="styleTemplate" type="text/css">/*{{style-title}}*/
 
 @color-primary: {{color-primary}};
+@color-secondary: {{color-secondary}};
+@color-title: {{color-title}};
 @color-link: {{color-link}};
 @color-link-hover: {{color-link-hover}};
 @color-link-button: {{color-link-button}};
@@ -70,7 +72,7 @@ hr {
 }
 
 .page-title {
-  color: @color-link;
+  color: @color-title;
 }
 
 .widget {
@@ -170,8 +172,15 @@ button, input:not([type='image']), select {
 
 .sidebar,
 .toolbar {
-  border-right: @border-primary;
   background-color: @background-color-primary;
+}
+
+.sidebar {
+  border-right: @border-primary;
+}
+
+.toolbar {
+  border-bottom: @border-primary;
 }
 
 .sidebar-content {
@@ -192,7 +201,7 @@ button, input:not([type='image']), select {
 
 .toolbar-group-title {
   font-weight: bold;
-  border-bottom: 1px dashed @border-color-secondary;
+  border-bottom: 1px dashed @color-primary;
 }
 
 .drop-area {
@@ -325,7 +334,7 @@ button, input:not([type='image']), select {
 }
 
 .post-file-size {
-  color: lighten(@color-primary, 20);
+  color: @color-secondary;
 }
 
 .message-bump-limit-reached {
@@ -341,19 +350,19 @@ button, input:not([type='image']), select {
   font-weight: {{font-weight-post-subject}};
 }
 
-.user-name {
-  color: {{color-user-name}};
-  font-weight: {{font-weight-user-name}};
+.post-name {
+  color: {{color-post-name}};
+  font-weight: {{font-weight-post-name}};
+
+  &.post-name-moder {
+    color: {{color-post-name-moder}};
+    font-weight: {{font-weight-post-name-moder}};
+  }
 }
 
 .hiding-reason {
   color: {{color-hiding-reason}};
   font-weight: {{font-weight-hiding-reason}};
-}
-
-.post-name-moder {
-  color: {{color-post-name-moder}};
-  font-weight: {{font-weight-post-name-moder}};
 }
 
 .op-sign,
@@ -368,7 +377,7 @@ button, input:not([type='image']), select {
 }
 
 .referring-posts {
-  color: lighten(@color-primary, 20);
+  color: @color-secondary;
   font-style: {{font-style-referring-posts}};
 }
 
