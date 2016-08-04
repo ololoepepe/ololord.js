@@ -1,20 +1,22 @@
+"use strict";
+
 var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
 
 var captchas = {};
 
-var defineSetting = function(o, name, def) {
+var defineSetting = function defineSetting(o, name, def) {
     Object.defineProperty(o, name, {
-        get: (function(o, name, def) {
+        get: function (o, name, def) {
             return config("captcha." + o.id + "." + name, def);
-        }).bind(o, o, name, def)
+        }.bind(o, o, name, def)
     });
 };
 
-var Captcha = function(id, title, options) {
+var Captcha = function Captcha(id, title, options) {
     Object.defineProperty(this, "id", { value: id });
     Object.defineProperty(this, "title", {
-        get: function() {
+        get: function get() {
             return Tools.translate(title);
         }
     });
@@ -22,46 +24,41 @@ var Captcha = function(id, title, options) {
     defineSetting(this, "publicKey");
 };
 
-/*public*/ Captcha.prototype.info = function() {
+/*public*/Captcha.prototype.info = function () {
     var info = {
         id: this.id,
         title: this.title,
         publicKey: this.publicKey
     };
-    if (this.script)
-        info.script = this.script();
-    if (this.scriptSource)
-        info.scriptSource = this.scriptSource();
-    if (this.widgetHtml)
-        info.widgetHtml = this.widgetHtml();
-    if (this.widgetTemplate)
-        info.widgetTemplate = this.widgetTemplate();
+    if (this.script) info.script = this.script();
+    if (this.scriptSource) info.scriptSource = this.scriptSource();
+    if (this.widgetHtml) info.widgetHtml = this.widgetHtml();
+    if (this.widgetTemplate) info.widgetTemplate = this.widgetTemplate();
     return info;
 };
 
-/*public*/ Captcha.prototype.apiRoutes = function() {
+/*public*/Captcha.prototype.apiRoutes = function () {
     return []; //[ { method, path, handler }, ... ]
 };
 
-/*public*/ Captcha.prototype.actionRoutes = function() {
+/*public*/Captcha.prototype.actionRoutes = function () {
     return []; //[ { method, path, handler }, ... ]
 };
 
-Captcha.captcha = function(id) {
+Captcha.captcha = function (id) {
     return captchas[id];
 };
 
-Captcha.addCaptcha = function(captcha) {
-    if (!Captcha.prototype.isPrototypeOf(captcha))
-        return;
+Captcha.addCaptcha = function (captcha) {
+    if (!Captcha.prototype.isPrototypeOf(captcha)) return;
     captchas[captcha.id] = captcha;
 };
 
-Captcha.captchaIds = function() {
+Captcha.captchaIds = function () {
     var list = [];
-    Tools.toArray(captchas).sort(function(c1, c2) {
-        return (c1.id < c2.id) ? -1 : 1;
-    }).forEach(function(captcha) {
+    Tools.toArray(captchas).sort(function (c1, c2) {
+        return c1.id < c2.id ? -1 : 1;
+    }).forEach(function (captcha) {
         list.push(captcha.id);
     });
     return list;
@@ -77,3 +74,4 @@ Captcha.captchaIds = function() {
 //scriptSource() -> string
 
 module.exports = Captcha;
+//# sourceMappingURL=captcha.js.map

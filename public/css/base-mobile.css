@@ -4866,6 +4866,9 @@ body .ui-tooltip {
   overflow-x: auto;
   text-align: center;
 }
+[id^='vk_post_'] {
+  padding: 4px 5px 4px 5px;
+}
 .movable-player {
   position: fixed;
   z-index: 20;
@@ -5855,9 +5858,6 @@ footer:empty {
 }
 .vertical-align-top {
   vertical-align: top;
-}
-[id^='vk_post_'] {
-  padding: 4px 5px 4px 5px;
 }
 .background-checkerboard {
   background-image: -moz-linear-gradient(45deg, #666666 25%, transparent 25%), -moz-linear-gradient(-45deg, #666666 25%, transparent 25%), -moz-linear-gradient(45deg, transparent 75%, #666666 75%), -moz-linear-gradient(-45deg, #999999 75%, #666666 75%);

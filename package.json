@@ -6,6 +6,7 @@
   "scripts": {
     "build-all": "gulp build-all",
     "build": "gulp build",
+    "build-server": "gulp build-server",
     "build-css": "gulp build-css",
     "build-js": "gulp build-js",
     "build-custom": "gulp build-custom",
@@ -13,13 +14,15 @@
     "build-custom-js": "gulp build-custom-js",
     "build-all-debug": "gulp build-all-debug",
     "build-debug": "gulp build-debug",
+    "build-server-debug": "gulp build-server-debug",
     "build-css-debug": "gulp build-css-debug",
     "build-js-debug": "gulp build-js-debug",
     "build-custom-debug": "gulp build-custom-debug",
     "build-custom-css-debug": "gulp build-custom-css-debug",
     "build-custom-js-debug": "gulp build-custom-js-debug",
     "prepublish": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "/usr/bin/env node server.js"
   },
   "repository": {
     "type": "git",
@@ -57,6 +60,7 @@
     "fast-csv": "^0.6.0",
     "fluent-ffmpeg": "^2.0.1",
     "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
     "gulp-less": "^3.1.0",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^1.6.0",
@@ -101,6 +105,7 @@
     "react-dom": "^0.14.8",
     "sockjs": "^0.3.17",
     "sockjs-client": "^1.1.1",
+    "source-map-support": "^0.4.2",
     "sqlite3": "^3.1.1",
     "underscore": "^1.8.3",
     "urijs": "^1.18.1",

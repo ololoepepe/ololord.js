@@ -108,8 +108,13 @@ select {
 /* Navbar */
 .sidebar,
 .toolbar {
-  border-right: 1px solid #CCCCCC;
   background-color: #EEEEEE;
+}
+.sidebar {
+  border-right: 1px solid #CCCCCC;
+}
+.toolbar {
+  border-bottom: 1px solid #CCCCCC;
 }
 .sidebar-content {
   border-top: 1px solid #CCCCCC;
@@ -126,7 +131,7 @@ select {
 }
 .toolbar-group-title {
   font-weight: bold;
-  border-bottom: 1px dashed #BBBBBB;
+  border-bottom: 1px dashed #000000;
 }
 .drop-area {
   border: 1px solid #000000;

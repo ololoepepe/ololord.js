@@ -121,9 +121,11 @@ hr {
 .select {
   border: @border-primary;
   border-radius: @border-radius;
+  color: @color-primary;
   background-color: @background-color-primary;
 
   > option {
+    color: @color-primary;
     background-color: @background-color-primary;
     .no-invert;
   }
@@ -136,27 +138,21 @@ button, input:not([type='image']), select {
 .input,
 input:not([type=image]),
 textarea {
-    color: #a7a7a7;
-    background-color: #2A3037;
-    border: 1px solid rgba(255, 255, 255, .18);
-    -webkit-transition-property: background-color, border-color, box-shadow;
-    -webkit-transition-duration: .4s;
-    transition-property: background-color, border-color, box-shadow;
-    -o-transition-duration: .4s;
-    -o-transition-property: background-color, border-color, box-shadow;
-    -moz-transition-duration: .4s;
-    -moz-transition-property: background-color, border-color, box-shadow;
-    transition-duration: .4s
+  color: #a7a7a7;
+  background-color: #2A3037;
+  border: 1px solid rgba(255, 255, 255, .18);
+  transition-property: background-color, border-color, box-shadow;
+  transition-duration: .4s
 }
 
 .input:focus,
 input:not([type=image]):focus,
 textarea:focus {
-    border: 1px solid rgba(55, 201, 153, .62);
-    color: #D8D8D8;
-    outline: 0;
-    box-shadow: inset 0 0 40px rgba(55, 201, 153, .32);
-    background-color: #1D2228
+  border: 1px solid rgba(55, 201, 153, .62);
+  color: #D8D8D8;
+  outline: 0;
+  box-shadow: inset 0 0 40px rgba(55, 201, 153, .32);
+  background-color: #1D2228
 }
 
 input:not([type=image]):hover,
@@ -206,8 +202,15 @@ textarea:hover {
 
 .sidebar,
 .toolbar {
-  border-right: @border-primary;
   background-color: @background-color-primary;
+}
+
+.sidebar {
+  border-right: @border-primary;
+}
+
+.toolbar {
+  border-bottom: @border-primary;
 }
 
 .sidebar-content {
@@ -228,7 +231,7 @@ textarea:hover {
 
 .toolbar-group-title {
   font-weight: bold;
-  border-bottom: 1px dashed @border-color-secondary;
+  border-bottom: 1px dashed @color-primary;
 }
 
 .drop-area {

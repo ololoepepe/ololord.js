@@ -74,9 +74,11 @@ hr {
 .select {
   border: 1px solid #1F252C;
   border-radius: 0px;
+  color: #C7C7C7;
   background-color: #2C333D;
 }
 .select > option {
+  color: #C7C7C7;
   background-color: #2C333D;
   filter: invert(0);
   -webkit-filter: invert(0);
@@ -93,12 +95,7 @@ textarea {
   background-color: #2A3037;
   border: 1px solid rgba(255, 255, 255, 0.18);
   -webkit-transition-property: background-color, border-color, box-shadow;
-  -webkit-transition-duration: .4s;
   transition-property: background-color, border-color, box-shadow;
-  -o-transition-duration: .4s;
-  -o-transition-property: background-color, border-color, box-shadow;
-  -moz-transition-duration: .4s;
-  -moz-transition-property: background-color, border-color, box-shadow;
   -webkit-transition-duration: 0.4s;
           transition-duration: 0.4s;
 }
@@ -147,8 +144,13 @@ textarea:hover {
 }
 .sidebar,
 .toolbar {
-  border-right: 1px solid #1F252C;
   background-color: #2C333D;
+}
+.sidebar {
+  border-right: 1px solid #1F252C;
+}
+.toolbar {
+  border-bottom: 1px solid #1F252C;
 }
 .sidebar-content {
   border-top: 1px solid #1F252C;
@@ -165,7 +167,7 @@ textarea:hover {
 }
 .toolbar-group-title {
   font-weight: bold;
-  border-bottom: 1px dashed #0F151C;
+  border-bottom: 1px dashed #C7C7C7;
 }
 .drop-area {
   border: 1px solid #000000;

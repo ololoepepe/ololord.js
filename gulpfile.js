@@ -1,3 +1,4 @@
+var babel = require('gulp-babel');
 var babelify = require('babelify');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
@@ -35,6 +36,16 @@ function stringStream(string) {
   s.push(string);
   s.push(null);
   return s;
+}
+
+function buildServer(debug) {
+  var stream = gulp.src('./src/server/**/*.js');
+  if (debug) {
+    stream = stream.pipe(sourcemaps.init());
+  }
+  return stream.pipe(babel({ presets: ['es2015', 'stage-2'] }))
+  .pipe(sourcemaps.write('./'))
+  .pipe(gulp.dest('./'));
 }
 
 function buildCSS(custom, debug) {
@@ -96,17 +107,19 @@ function buildJS(custom, debug) {
 }
 
 gulp.task('build-all', ['build', 'build-custom']);
-gulp.task('build', ['build-css', 'build-js']);
+gulp.task('build', ['build-server', 'build-css', 'build-js']);
 gulp.task('build-custom', ['build-custom-css', 'build-custom-js']);
 
 gulp.task('build-all-debug', ['build-debug', 'build-custom-debug']);
-gulp.task('build-debug', ['build-css-debug', 'build-js-debug']);
+gulp.task('build-debug', ['build-server-debug', 'build-css-debug', 'build-js-debug']);
 gulp.task('build-custom-debug', ['build-custom-css-debug', 'build-custom-js-debug']);
 
+gulp.task('build-server', buildServer.bind(null, false));
 gulp.task('build-css', buildCSS.bind(null, false, false));
 gulp.task('build-js', buildJS.bind(null, false, false));
 gulp.task('build-custom-css', buildCSS.bind(null, true, false));
 gulp.task('build-custom-js', buildJS.bind(null, true, false));
+gulp.task('build-server-debug', buildServer.bind(null, true));
 gulp.task('build-css-debug', buildCSS.bind(null, false, true));
 gulp.task('build-js-debug', buildJS.bind(null, false, true));
 gulp.task('build-custom-css-debug', buildCSS.bind(null, true, true));

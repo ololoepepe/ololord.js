@@ -182,8 +182,15 @@ input:not([type='image']) {
 
 .sidebar,
 .toolbar {
-  border-right: @border-primary;
   background-color: @background-color-primary;
+}
+
+.sidebar {
+  border-right: @border-primary;
+}
+
+.toolbar {
+  border-bottom: @border-primary;
 }
 
 .sidebar-content {
@@ -204,7 +211,7 @@ input:not([type='image']) {
 
 .toolbar-group-title {
   font-weight: bold;
-  border-bottom: 1px dashed @border-color-secondary;
+  border-bottom: 1px dashed @color-primary;
 }
 
 .drop-area {

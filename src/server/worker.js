@@ -1,51 +1,21 @@
 #!/usr/bin/env node
 
-var cluster = require("cluster");
-var expressCluster = require("express-cluster");
-var HTTP = require("http");
-var Log4JS = require("log4js");
-var OS = require("os");
-var Util = require("util");
+import _ from 'underscore';
+import Cluster from 'cluster';
+import expressCluster from 'express-cluster';
+import FS from 'q-io/fs';
+import HTTP from 'http';
+import OS from 'os';
 
-var Global = require("./helpers/global");
-Global.Program = require("commander");
-Global.Program.version("1.1.1")
-    .option("-c, --config-file <file>", "Path to the config.json file")
-    .option("-r, --regenerate", "Regenerate the cache on startup")
-    .option("-a, --archive", "Regenerate archived threads, too")
-    .parse(process.argv);
-
+var Board = require("./boards/board");
 var config = require("./helpers/config");
 var controller = require("./helpers/controller");
+var Global = require("./helpers/global");
 var BoardModel = require("./models/board");
 var Database = require("./helpers/database");
 var OnlineCounter = require("./helpers/online-counter");
 var Tools = require("./helpers/tools");
 var WebSocket = require("./helpers/websocket");
-
-Global.IPC = require("./helpers/ipc")(cluster);
-
-var appenders = [];
-var logTargets = config("system.log.targets", ["console", "file"]);
-if (logTargets.indexOf("console") >= 0)
-    appenders.push({ type: "console" });
-if (logTargets.indexOf("console") >= 0) {
-    appenders.push({
-        type: "file",
-        filename: __dirname + "/logs/ololord.log",
-        maxLogSize: config("system.log.maxSize", 1048576),
-        backups: config("system.log.backups", 100)
-    });
-}
-Log4JS.configure({ appenders: appenders });
-Global.logger = Log4JS.getLogger();
-["trace", "debug", "info", "warn", "error", "fatal"].forEach(function(name) {
-    Global[name] = function() {
-        return Global.logger[name].apply(Global.logger, arguments);
-    };
-});
-
-config.installSetHook("site.locale", Tools.setLocale);
 
 var count = config("system.workerCount", OS.cpus().length);
 if (count <= 0)
@@ -89,7 +59,7 @@ var spawnCluster = function() {
                     model.ban = err.ban;
                 } else {
                     model.title = Tools.translate("Error", "pageTitle");
-                    if (Util.isError(err)) {
+                    if (_(err).isError()) {
                         model.errorMessage = Tools.translate("Internal error", "errorMessage");
                         model.errorDescription = err.message;
                     } else if (err.error) {
@@ -98,7 +68,7 @@ var spawnCluster = function() {
                         model.errorDescription = err.description || err.error;
                     } else {
                         model.errorMessage = Tools.translate("Error", "errorMessage");
-                        model.errorDescription = Util.isString(err) ? err : "";
+                        model.errorDescription = (typeof err === 'string') ? err : "";
                     }
                 }
                 res.json(model);
@@ -200,6 +170,9 @@ var spawnCluster = function() {
                         config.reload();
                     return Promise.resolve();
                 });
+                Global.IPC.installHandler("reloadTemplates", function() {
+                    return controller.initialize();
+                });
                 Global.IPC.installHandler("notifyAboutNewPosts", function(data) {
                     Tools.forIn(data, function(_, key) {
                         var s = subscriptions.get(key);
@@ -234,121 +207,22 @@ var spawnCluster = function() {
     });
 };
 
-if (cluster.isMaster) {
-    var FS = require("q-io/fs");
-    var path = __dirname + "/public/node-captcha";
-    var initCallback;
-    FS.list(path).then(function(fileNames) {
-        return Tools.series(fileNames.filter(function(fileName) {
-            return fileName.split(".").pop() == "png" && /^[0-9]+$/.test(fileName.split(".").shift());
-        }), function(fileName) {
-            return FS.remove(path + "/" + fileName);
-        });
-    }).catch(function(err) {
-        console.error(err);
-        return Promise.resolve();
-    }).then(function() {
-        return Database.initialize();
-    }).then(function(cb) {
-        initCallback = cb;
-        return controller.initialize();
-    }).then(function() {
-        if (Global.Program.regenerate || config("system.regenerateCacheOnStartup", true)) {
-            return controller.regenerate(Global.Program.archive || config("system.regenerateArchive", false));
-        } else {
-            console.log("Generating statistics, please, wait...");
-            return controller.generateStatistics().catch(function(err) {
-                Global.error(err.stack || err);
-            });
-        }
-    }).then(function() {
-        console.log("Spawning workers, please, wait...");
-        spawnCluster();
-        var ready = 0;
-        Global.IPC.installHandler("ready", function() {
-            ++ready;
-            if (ready == count) {
-                initCallback();
-                if (config("server.statistics.enabled", true)) {
-                    setInterval(function() {
-                        controller.generateStatistics().catch(function(err) {
-                            Global.error(err.stack || err);
-                        });
-                    }, config("server.statistics.ttl", 60) * Tools.Minute);
-                }
-                if (config("server.rss.enabled", true)) {
-                    setInterval(function() {
-                        BoardModel.generateRSS().catch(function(err) {
-                            Global.error(err.stack || err);
-                        });
-                    }, config("server.rss.ttl", 60) * Tools.Minute);
-                }
-                require("./helpers/commands")();
-            }
-        });
-        var lastFileName;
-        var fileName = function() {
-            var fn = "" + Tools.now().valueOf();
-            if (fn != lastFileName) {
-                lastFileName = fn;
-                return Promise.resolve(fn);
-            }
-            return new Promise(function(resolve, reject) {
-                setTimeout(function() {
-                    fileName().then(function(fn) {
-                        resolve(fn);
-                    });
-                }, 1);
-            });
-        };
-        Global.IPC.installHandler("fileName", function() {
-            return fileName();
-        });
-        Global.IPC.installHandler("generate", function(data) {
-            return BoardModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);
-        });
-        Global.IPC.installHandler("generateArchive", function(data) {
-            return BoardModel.scheduleGenerateArchive(data);
-        });
-        Global.IPC.installHandler("stop", function() {
-            return Global.IPC.send("stop");
-        });
-        Global.IPC.installHandler("start", function() {
-            return Global.IPC.send("start");
-        });
-        Global.IPC.installHandler("reloadBoards", function() {
-            require("./boards/board").initialize();
-            return Global.IPC.send("reloadBoards");
-        });
-        Global.IPC.installHandler("reloadConfig", function() {
-            config.reload();
-            return Global.IPC.send("reloadConfig");
-        });
-        Global.IPC.installHandler("notifyAboutNewPosts", function(data) {
-            return Global.IPC.send("notifyAboutNewPosts", data);
-        });
-        Global.IPC.installHandler("regenerateCache", function(regenerateArchive) {
-            return controller.regenerate(regenerateArchive);
-        });
-    }).catch(function(err) {
-        Global.error(err.stack || err);
-        process.exit(1);
-    });
-} else {
-    Global.generate = function(boardName, threadNumber, postNumber, action) {
-        return Global.IPC.send("generate", {
-            boardName: boardName,
-            threadNumber: threadNumber,
-            postNumber: postNumber,
-            action: action
-        }).catch(function(err) {
-            Global.error(err.stack || err);
-        });
-    };
-    Global.generateArchive = function(boardName) {
-        return Global.IPC.send("generateArchive", boardName).catch(function(err) {
-            Global.error(err.stack || err);
-        });
-    };
-    spawnCluster();
+export default async function initializeWorker() {
+  Board.initialize();
+  Global.generate = function(boardName, threadNumber, postNumber, action) {
+      return Global.IPC.send("generate", {
+          boardName: boardName,
+          threadNumber: threadNumber,
+          postNumber: postNumber,
+          action: action
+      }).catch(function(err) {
+          Global.error(err.stack || err);
+      });
+  };
+  Global.generateArchive = function(boardName) {
+      return Global.IPC.send("generateArchive", boardName).catch(function(err) {
+          Global.error(err.stack || err);
+      });
+  };
+  spawnCluster();
 }

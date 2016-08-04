@@ -1,3 +1,5 @@
+"use strict";
+
 var Address6 = require("ip-address").Address6;
 var Crypto = require("crypto");
 var ffmpeg = require("fluent-ffmpeg");
@@ -16,57 +18,45 @@ var Tools = require("../helpers/tools");
 var ImageMagick = promisify("imagemagick");
 var musicMetadata = promisify("musicmetadata");
 
-var durationToString = function(duration) {
+var durationToString = function durationToString(duration) {
     duration = Math.floor(+duration);
     var hours = "" + Math.floor(duration / 3600);
-    if (hours.length < 2)
-        hours = "0" + hours;
+    if (hours.length < 2) hours = "0" + hours;
     duration %= 3600;
     var minutes = "" + Math.floor(duration / 60);
-    if (minutes.length < 2)
-        minutes = "0" + minutes;
-    var seconds = "" + (duration % 60);
-    if (seconds.length < 2)
-        seconds = "0" + seconds;
+    if (minutes.length < 2) minutes = "0" + minutes;
+    var seconds = "" + duration % 60;
+    if (seconds.length < 2) seconds = "0" + seconds;
     return hours + ":" + minutes + ":" + seconds;
 };
 
-var Board = function(name, title, options) {
+var Board = function Board(name, title, options) {
     this.defineProperty("name", name);
-    this.defineSetting("title", function() {
+    this.defineSetting("title", function () {
         return Tools.translate(title);
     });
-    this.defineProperty("priority", function() {
+    this.defineProperty("priority", function () {
         var def;
-        if (options && !isNaN(+options.priority) && +options.priority)
-            def = +options.priority;
-        else
-            def = 0;
+        if (options && !isNaN(+options.priority) && +options.priority) def = +options.priority;else def = 0;
         return config("board." + name + ".priority", config("board.priority", def));
     });
-    this.defineProperty("defaultUserName", function() {
+    this.defineProperty("defaultUserName", function () {
         var def;
-        if (options && options.defaultUserName)
-            def = Tools.translate(options.defaultUserName);
-        else
-            def = Tools.translate("Anonymous", "defaultUserName");
+        if (options && options.defaultUserName) def = Tools.translate(options.defaultUserName);else def = Tools.translate("Anonymous", "defaultUserName");
         return config("board." + name + ".defaultUserName", config("board.defaultUserName", def));
     });
-    this.defineProperty("groupName", function() {
+    this.defineProperty("groupName", function () {
         var def;
-        if (options && options.groupName)
-            def = options.groupName;
-        else
-            def = "";
+        if (options && options.groupName) def = options.groupName;else def = "";
         return config("board." + name + ".groupName", config("board.groupName", def));
     });
-    this.defineProperty("captchaEnabled", function() {
+    this.defineProperty("captchaEnabled", function () {
         return config("board.captchaEnabled", true) && config("board." + name + ".captchaEnabled", true);
     });
-    this.defineProperty("bannerFileNames", function() {
+    this.defineProperty("bannerFileNames", function () {
         return Board._banners[name];
     });
-    this.defineProperty("postFormRules", function() {
+    this.defineProperty("postFormRules", function () {
         return Board._postFormRules[name];
     });
     this.defineSetting("skippedGetOrder", 0);
@@ -82,67 +72,41 @@ var Board = function(name, title, options) {
     this.defineSetting("maxFileCount", 1);
     this.defineSetting("maxFileSize", 10 * 1024 * 1024);
     this.defineSetting("maxLastPosts", 3);
-    this.defineSetting("markupElements", [
-        Board.MarkupElements.BoldMarkupElement,
-        Board.MarkupElements.ItalicsMarkupElement,
-        Board.MarkupElements.StrikedOutMarkupElement,
-        Board.MarkupElements.UnderlinedMarkupElement,
-        Board.MarkupElements.SpoilerMarkupElement,
-        Board.MarkupElements.QuotationMarkupElement,
-        Board.MarkupElements.UnorderedList,
-        Board.MarkupElements.OrderedList,
-        Board.MarkupElements.ListItem,
-        Board.MarkupElements.SubscriptMarkupElement,
-        Board.MarkupElements.SuperscriptMarkupElement,
-        Board.MarkupElements.UrlMarkupElement
-    ]);
+    this.defineSetting("markupElements", [Board.MarkupElements.BoldMarkupElement, Board.MarkupElements.ItalicsMarkupElement, Board.MarkupElements.StrikedOutMarkupElement, Board.MarkupElements.UnderlinedMarkupElement, Board.MarkupElements.SpoilerMarkupElement, Board.MarkupElements.QuotationMarkupElement, Board.MarkupElements.UnorderedList, Board.MarkupElements.OrderedList, Board.MarkupElements.ListItem, Board.MarkupElements.SubscriptMarkupElement, Board.MarkupElements.SuperscriptMarkupElement, Board.MarkupElements.UrlMarkupElement]);
     this.defineSetting("postingEnabled", true);
     this.defineSetting("showWhois", false);
     this.defineSetting("supportedCaptchaEngines", Captcha.captchaIds());
-    this.defineProperty("permissions", function() {
+    this.defineProperty("permissions", function () {
         var p = {};
-        Tools.forIn(require("../helpers/permissions").Permissions, function(defLevel, key) {
+        Tools.forIn(require("../helpers/permissions").Permissions, function (defLevel, key) {
             p[key] = config("board." + name + ".permissions." + key, config("permissions." + key, defLevel));
         });
         return p;
     });
-    this.defineSetting("supportedFileTypes", [
-        "application/ogg",
-        "application/pdf",
-        "audio/mpeg",
-        "audio/ogg",
-        "audio/wav",
-        "image/gif",
-        "image/jpeg",
-        "image/png",
-        "video/mp4",
-        "video/ogg",
-        "video/webm"
-    ]);
+    this.defineSetting("supportedFileTypes", ["application/ogg", "application/pdf", "audio/mpeg", "audio/ogg", "audio/wav", "image/gif", "image/jpeg", "image/png", "video/mp4", "video/ogg", "video/webm"]);
     this.defineSetting("bumpLimit", 500);
     this.defineSetting("postLimit", 1000);
     this.defineSetting("threadLimit", 200);
     this.defineSetting("archiveLimit", 0);
     this.defineSetting("threadsPerPage", 20);
-    this.defineProperty("launchDate", function() {
+    this.defineProperty("launchDate", function () {
         return new Date(config("board." + name + ".launchDate", config("board.launchDate", new Date())));
     });
 };
 
 Board.boards = {};
 
-/*public*/ Board.prototype.defineSetting = function(name, def) {
+/*public*/Board.prototype.defineSetting = function (name, def) {
     var _this = this;
     Object.defineProperty(this, name, {
-        get: function() {
-            return config("board." + _this.name + "." + name,
-                config("board." + name, (typeof def == "function") ? def() : def));
+        get: function get() {
+            return config("board." + _this.name + "." + name, config("board." + name, typeof def == "function" ? def() : def));
         },
         configurable: true
     });
 };
 
-/*public*/ Board.prototype.defineProperty = function(name, value) {
+/*public*/Board.prototype.defineProperty = function (name, value) {
     var _this = this;
     if (typeof value == "function") {
         Object.defineProperty(this, name, {
@@ -157,7 +121,7 @@ Board.boards = {};
     }
 };
 
-/*public*/ Board.prototype.info = function() {
+/*public*/Board.prototype.info = function () {
     var _this = this;
     var model = {
         name: this.name,
@@ -187,143 +151,127 @@ Board.boards = {};
         permissions: this.permissions,
         opModeration: this.opModeration
     };
-    this.customBoardInfoFields().forEach(function(field) {
+    this.customBoardInfoFields().forEach(function (field) {
         model[field] = _this[field];
     });
     return model;
 };
 
-/*public*/ Board.prototype.customBoardInfoFields = function() {
+/*public*/Board.prototype.customBoardInfoFields = function () {
     return [];
 };
 
-/*public*/ Board.prototype.isCaptchaEngineSupported = function(engineName) {
-    if (typeof engineName != "string")
-        return;
+/*public*/Board.prototype.isCaptchaEngineSupported = function (engineName) {
+    if (typeof engineName != "string") return;
     return Tools.contains(this.supportedCaptchaEngines, engineName);
 };
 
-/*public*/ Board.prototype.isFileTypeSupported = function(fileType) {
-    if (typeof fileType != "string")
-        return;
+/*public*/Board.prototype.isFileTypeSupported = function (fileType) {
+    if (typeof fileType != "string") return;
     return Tools.contains(this.supportedFileTypes, fileType);
 };
 
-/*public*/ Board.prototype.postExtraData = function(req, fields, files, oldPost) {
+/*public*/Board.prototype.postExtraData = function (req, fields, files, oldPost) {
     return Promise.resolve(oldPost ? oldPost.extraData : null);
 };
 
-/*public*/ Board.prototype.storeExtraData = function(postNumber, extraData) {
-    if (Util.isNullOrUndefined(extraData))
-        return Promise.resolve();
-    return Database.db.hset("postExtraData", this.name + ":" + postNumber, JSON.stringify(extraData));
+/*public*/Board.prototype.storeExtraData = function (postNumber, extraData) {
+    if (Util.isNullOrUndefined(extraData)) return Promise.resolve();
+    return Promise.resolve();
+    //return Database.db.hset("postExtraData", this.name + ":" + postNumber, JSON.stringify(extraData));
 };
 
-/*public*/ Board.prototype.loadExtraData = function(postNumber) {
+/*public*/Board.prototype.loadExtraData = function (postNumber) {
     var _this = this;
-    return Database.db.hget("postExtraData", this.name + ":" + postNumber).then(function(extraData) {
+    return Promise.resolve();
+    /*return Database.db.hget("postExtraData", this.name + ":" + postNumber).then(function(extraData) {
         if (Util.isNullOrUndefined(extraData))
             return Promise.resolve(null);
         return JSON.parse(extraData);
-    });
+    });*/
 };
 
-/*public*/ Board.prototype.removeExtraData = function(postNumber) {
-    return Database.db.hdel("postExtraData", this.name + ":" + postNumber);
+/*public*/Board.prototype.removeExtraData = function (postNumber) {
+    return Promise.resolve();
+    //return Database.db.hdel("postExtraData", this.name + ":" + postNumber);
 };
 
-/*public*/ Board.prototype.apiRoutes = function() {
+/*public*/Board.prototype.apiRoutes = function () {
     return []; //[ { method, path, handler }, ... ]
 };
 
-/*public*/ Board.prototype.actionRoutes = function() {
+/*public*/Board.prototype.actionRoutes = function () {
     return []; //[ { method, path, handler }, ... ]
 };
 
-/*public*/ Board.prototype.extraScripts = function() {
+/*public*/Board.prototype.extraScripts = function () {
     return [];
 };
 
-/*public*/ Board.prototype.extraStylesheets = function() {
+/*public*/Board.prototype.extraStylesheets = function () {
     return [];
 };
 
-/*public*/ Board.prototype.testParameters = function(req, fields, files, creatingThread) {
+/*public*/Board.prototype.testParameters = function (req, fields, files, creatingThread) {
     return Promise.resolve();
 };
 
-/*public*/ Board.prototype.customPostHeaderPart = function() {
-    //
-};
-
-/*public*/ Board.prototype.customPostBodyPart = function() {
-    //
-};
-
-var renderFileInfo = function(fi) {
+var renderFileInfo = function renderFileInfo(fi) {
     fi.sizeKB = fi.size / 1024;
     fi.sizeText = fi.sizeKB.toFixed(2) + "KB";
     if (Tools.isImageType(fi.mimeType) || Tools.isVideoType(fi.mimeType)) {
-        if (fi.dimensions)
-            fi.sizeText += ", " + fi.dimensions.width + "x" + fi.dimensions.height;
+        if (fi.dimensions) fi.sizeText += ", " + fi.dimensions.width + "x" + fi.dimensions.height;
     }
     if (Tools.isAudioType(fi.mimeType) || Tools.isVideoType(fi.mimeType)) {
         var ed = fi.extraData;
-        if (ed.duration)
-            fi.sizeText += ", " + ed.duration;
+        if (ed.duration) fi.sizeText += ", " + ed.duration;
         if (Tools.isAudioType(fi.mimeType)) {
-            if (ed.bitrate)
-                fi.sizeText += ", " + ed.bitrate + Tools.translate("kbps", "kbps");
+            if (ed.bitrate) fi.sizeText += ", " + ed.bitrate + Tools.translate("kbps", "kbps");
             fi.sizeTooltip = ed.artist ? ed.artist : Tools.translate("Unknown artist", "unknownArtist");
             fi.sizeTooltip += " - ";
             fi.sizeTooltip += ed.title ? ed.title : Tools.translate("Unknown title", "unknownTitle");
             fi.sizeTooltip += " [";
             fi.sizeTooltip += ed.album ? ed.album : Tools.translate("Unknown album", "unknownAlbum");
             fi.sizeTooltip += "]";
-            if (ed.year)
-                fi.sizeTooltip += " (" + ed.year + ")";
+            if (ed.year) fi.sizeTooltip += " (" + ed.year + ")";
         } else if (Tools.isVideoType(fi.mimeType) && ed.bitrate) {
             fi.sizeTooltip = ed.bitrate + Tools.translate("kbps", "kbps");
         }
     }
 };
 
-/*public*/ Board.prototype.renderPost = function(post, req, opPost) {
-    (post.fileInfos || []).forEach(function(fileInfo) {
+/*public*/Board.prototype.renderPost = function (post) {
+    (post.fileInfos || []).forEach(function (fileInfo) {
         renderFileInfo(fileInfo);
     });
     post.rawSubject = post.subject;
-    post.isOp = (post.number == post.threadNumber);
-    post.opIp = (opPost && post.user.ip == opPost.user.ip);
-    if (post.options.showTripcode)
-        post.tripcode = Tools.generateTripcode(post.user.hashpass);
+    post.isOp = post.number == post.threadNumber;
+    if (post.options.showTripcode) post.tripcode = Tools.generateTripcode(post.user.hashpass);
     delete post.user.ip;
     delete post.user.hashpass;
     delete post.user.password;
     if (!post.geolocation.countryName) {
-      post.geolocation.countryName = "Unknown country";
+        post.geolocation.countryName = "Unknown country";
     }
     return Promise.resolve(post);
 };
 
-/*public*/ Board.prototype.generateFileName = function(file) {
-    return Global.IPC.send("fileName").then(function(base) {
+/*public*/Board.prototype.generateFileName = function (file) {
+    return Global.IPC.send("fileName").then(function (base) {
         var ext = Path.extname(file.name);
-        if (Util.isString(ext))
-            ext = ext.substr(1);
-        if (!ext || Board.MimeTypesForExtensions[ext.toLowerCase()] != file.mimeType)
-            ext = Board.DefaultExtensions[file.mimeType];
+        if (Util.isString(ext)) ext = ext.substr(1);
+        if (!ext || Board.MimeTypesForExtensions[ext.toLowerCase()] != file.mimeType) ext = Board.DefaultExtensions[file.mimeType];
         return Promise.resolve({
-            name: (base + "." + ext),
-            thumbName: (base + "s." + (Board.ThumbExtensionsForMimeType[file.mimeType] || ext))
+            name: base + "." + ext,
+            thumbName: base + "s." + (Board.ThumbExtensionsForMimeType[file.mimeType] || ext)
         });
     });
 };
 
-/*public*/ Board.prototype.processFile = function(file) {
+/*public*/Board.prototype.processFile = function (file) {
     var p;
     if (!file.hash) {
-        p = FS.read(file.path, "b").then(function(data) {
+        p = FS.read(file.path, "b").then(function (data) {
             file.hash = Tools.sha1(data);
             return Promise.resolve();
         });
@@ -332,52 +280,42 @@ var renderFileInfo = function(fi) {
     }
     var thumbPath = Path.dirname(file.path) + "/" + UUID.v1();
     file.thumbPath = thumbPath;
-    return p.then(function() {
+    return p.then(function () {
         if (Tools.isAudioType(file.mimeType)) {
             file.dimensions = null;
             file.extraData = {};
-            return new Promise(function(resolve, reject) {
-                ffmpeg.ffprobe(file.path, function(err, metadata) {
-                    if (err)
-                        return reject(err);
+            return new Promise(function (resolve, reject) {
+                ffmpeg.ffprobe(file.path, function (err, metadata) {
+                    if (err) return reject(err);
                     resolve(metadata);
                 });
-            }).then(function(metadata) {
+            }).then(function (metadata) {
                 file.extraData.duration = durationToString(metadata.format.duration);
                 file.extraData.bitrate = Math.floor(+metadata.format.bit_rate / 1024);
                 return musicMetadata(FSSync.createReadStream(file.path));
-            }).then(function(metadata) {
+            }).then(function (metadata) {
                 file.extraData.album = metadata.album || "";
-                file.extraData.artist = (metadata.artist && metadata.artist.length > 0) ? metadata.artist[0] : "";
+                file.extraData.artist = metadata.artist && metadata.artist.length > 0 ? metadata.artist[0] : "";
                 file.extraData.title = metadata.title || "";
                 file.extraData.year = metadata.year || "";
                 return Promise.resolve(metadata);
-            }).catch(function(err) {
+            }).catch(function (err) {
                 Global.error(err.stack || err);
                 file.extraData.album = "";
                 file.extraData.artist = "";
                 file.extraData.title = "";
                 file.extraData.year = "";
                 return Promise.resolve();
-            }).then(function(metadata) {
-                if (metadata && metadata.picture && metadata.picture.length > 0)
-                    return FS.write(thumbPath, metadata.picture[0].data);
-                else
-                    return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
-            }).then(function() {
+            }).then(function (metadata) {
+                if (metadata && metadata.picture && metadata.picture.length > 0) return FS.write(thumbPath, metadata.picture[0].data);else return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
+            }).then(function () {
                 return ImageMagick.identify(thumbPath);
-            }).then(function(info) {
-                if (info.width <= 200 && info.height <= 200)
-                    return Promise.resolve();
-                return ImageMagick.convert([
-                    thumbPath,
-                    "-resize",
-                    "200x200",
-                    thumbPath
-                ]);
-            }).then(function() {
+            }).then(function (info) {
+                if (info.width <= 200 && info.height <= 200) return Promise.resolve();
+                return ImageMagick.convert([thumbPath, "-resize", "200x200", thumbPath]);
+            }).then(function () {
                 return ImageMagick.identify(file.thumbPath);
-            }).then(function(info) {
+            }).then(function (info) {
                 file.thumbDimensions = {
                     width: info.width,
                     height: info.height
@@ -386,51 +324,43 @@ var renderFileInfo = function(fi) {
         } else if (Tools.isVideoType(file.mimeType)) {
             file.extraData = {};
             var defaultThumb = false;
-            return (new Promise(function(resolve, reject) {
-                ffmpeg.ffprobe(file.path, function(err, metadata) {
-                    if (err)
-                        return reject(err);
+            return new Promise(function (resolve, reject) {
+                ffmpeg.ffprobe(file.path, function (err, metadata) {
+                    if (err) return reject(err);
                     resolve(metadata);
                 });
-            })).then(function(metadata) {
+            }).then(function (metadata) {
                 if (!isNaN(+metadata.streams[0].width) && !isNaN(+metadata.streams[0].height)) {
                     file.dimensions = {
                         width: metadata.streams[0].width,
                         height: metadata.streams[0].height
                     };
                 }
-                file.extraData.duration = +metadata.format.duration ? durationToString(metadata.format.duration)
-                    : metadata.format.duration;
+                file.extraData.duration = +metadata.format.duration ? durationToString(metadata.format.duration) : metadata.format.duration;
                 file.extraData.bitrate = +metadata.format.bit_rate ? Math.floor(+metadata.format.bit_rate / 1024) : 0;
                 file.thumbPath += ".png";
-                return new Promise(function(resolve, reject) {
+                return new Promise(function (resolve, reject) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
                 });
-            }).catch(function(err) {
+            }).catch(function (err) {
                 Global.error(err.stack || err);
                 file.thumbPath = thumbPath;
                 defaultThumb = true;
                 return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
-            }).then(function() {
+            }).then(function () {
                 return ImageMagick.identify(file.thumbPath);
-            }).then(function(info) {
+            }).then(function (info) {
                 if (!file.dimensions && !defaultThumb) {
                     file.dimensions = {
                         width: info.width,
                         height: info.height
                     };
                 }
-                if (info.width <= 200 && info.height <= 200)
-                    return Promise.resolve();
-                return ImageMagick.convert([
-                    file.thumbPath,
-                    "-resize",
-                    "200x200",
-                    file.thumbPath
-                ]);
-            }).then(function() {
+                if (info.width <= 200 && info.height <= 200) return Promise.resolve();
+                return ImageMagick.convert([file.thumbPath, "-resize", "200x200", file.thumbPath]);
+            }).then(function () {
                 return ImageMagick.identify(file.thumbPath);
-            }).then(function(info) {
+            }).then(function (info) {
                 file.thumbDimensions = {
                     width: info.width,
                     height: info.height
@@ -438,28 +368,28 @@ var renderFileInfo = function(fi) {
             });
         } else if (Tools.isImageType(file.mimeType)) {
             file.extraData = null;
-            var suffix = ("image/gif" == file.mimeType) ? "[0]" : "";
-            return ImageMagick.identify(file.path + suffix).then(function(info) {
+            var suffix = "image/gif" == file.mimeType ? "[0]" : "";
+            return ImageMagick.identify(file.path + suffix).then(function (info) {
                 file.dimensions = {
                     width: info.width,
                     height: info.height
                 };
-                var args = [ file.path + suffix ];
+                var args = [file.path + suffix];
                 if (info.width > 200 || info.height > 200) {
                     args.push("-resize");
                     args.push("200x200");
                 }
-                args.push((("image/gif" == file.mimeType) ? "png:" : "") + thumbPath);
+                args.push(("image/gif" == file.mimeType ? "png:" : "") + thumbPath);
                 return ImageMagick.convert(args);
-            }).then(function() {
+            }).then(function () {
                 return ImageMagick.identify(thumbPath);
-            }).then(function(info) {
+            }).then(function (info) {
                 file.thumbDimensions = {
                     width: info.width,
                     height: info.height
                 };
                 if (config("system.phash.enabled", true)) {
-                    return Tools.generateImageHash(thumbPath).then(function(hash) {
+                    return Tools.generateImageHash(thumbPath).then(function (hash) {
                         file.ihash = hash;
                     });
                 }
@@ -467,19 +397,9 @@ var renderFileInfo = function(fi) {
         } else if (Tools.isPdfType(file.mimeType)) {
             file.dimensions = null;
             file.extraData = null;
-            return ImageMagick.convert([
-                "-density",
-                "300",
-                file.path + "[0]",
-                "-quality",
-                "100",
-                "+adjoin",
-                "-resize",
-                "200x200",
-                "png:" + thumbPath
-            ]).then(function() {
+            return ImageMagick.convert(["-density", "300", file.path + "[0]", "-quality", "100", "+adjoin", "-resize", "200x200", "png:" + thumbPath]).then(function () {
                 return ImageMagick.identify(thumbPath);
-            }).then(function(info) {
+            }).then(function (info) {
                 file.thumbDimensions = {
                     width: info.width,
                     height: info.height
@@ -512,9 +432,9 @@ Board.MarkupElements = {
 Board.MimeTypesForExtensions = {};
 Board.DefaultExtensions = {};
 
-var defineMimeTypeExtensions = function(mimeType) {
+var defineMimeTypeExtensions = function defineMimeTypeExtensions(mimeType) {
     var extensions = Array.prototype.slice.call(arguments, 1);
-    extensions.forEach(function(extension) {
+    extensions.forEach(function (extension) {
         Board.MimeTypesForExtensions[extension] = mimeType;
     });
     Board.DefaultExtensions[mimeType] = extensions[0];
@@ -541,24 +461,22 @@ Board.ThumbExtensionsForMimeType = {
     "video/webm": "png"
 };
 
-Board.board = function(name) {
+Board.board = function (name) {
     return Board.boards[name];
 };
 
-Board.addBoard = function(board) {
-    if (!Board.prototype.isPrototypeOf(board))
-        return;
+Board.addBoard = function (board) {
+    if (!Board.prototype.isPrototypeOf(board)) return;
     Board.boards[board.name] = board;
 };
 
-Board.boardInfos = function(includeHidden) {
-    includeHidden = (includeHidden || (typeof includeHidden == "undefined"));
+Board.boardInfos = function (includeHidden) {
+    includeHidden = includeHidden || typeof includeHidden == "undefined";
     var list = [];
-    Tools.toArray(Board.boards).sort(function(b1, b2) {
-        return (b1.name < b2.name) ? -1 : 1;
-    }).forEach(function(board) {
-        if (!board.enabled || (!includeHidden && board.hidden))
-            return;
+    Tools.toArray(Board.boards).sort(function (b1, b2) {
+        return b1.name < b2.name ? -1 : 1;
+    }).forEach(function (board) {
+        if (!board.enabled || !includeHidden && board.hidden) return;
         list.push({
             name: board.name,
             title: board.title
@@ -567,27 +485,21 @@ Board.boardInfos = function(includeHidden) {
     return list;
 };
 
-Board.boardNames = function(includeHidden) {
-    includeHidden = (includeHidden || (typeof includeHidden == "undefined"));
+Board.boardNames = function (includeHidden) {
+    includeHidden = includeHidden || typeof includeHidden == "undefined";
     var list = [];
-    Tools.toArray(Board.boards).sort(function(b1, b2) {
-        return (b1.name < b2.name) ? -1 : 1;
-    }).forEach(function(board) {
-        if (!board.enabled || (!includeHidden && board.hidden))
-            return;
+    Tools.toArray(Board.boards).sort(function (b1, b2) {
+        return b1.name < b2.name ? -1 : 1;
+    }).forEach(function (board) {
+        if (!board.enabled || !includeHidden && board.hidden) return;
         list.push(board.name);
     });
     return list;
 };
 
-Board.sortThreadsByDate = function(a, b) {
+Board.sortThreadsByDate = function (a, b) {
     if (a.fixed == b.fixed) {
-        if (a.updatedAt < b.updatedAt)
-            return 1;
-        else if (a.updatedAt > b.updatedAt)
-            return -1;
-        else
-            return 0;
+        if (a.updatedAt < b.updatedAt) return 1;else if (a.updatedAt > b.updatedAt) return -1;else return 0;
     } else if (a.fixed) {
         return -1;
     } else {
@@ -595,56 +507,44 @@ Board.sortThreadsByDate = function(a, b) {
     }
 };
 
-Board.sortThreadsByCreationDate = function(a, b) {
-    if (a.createdAt > b.createdAt)
-        return -1;
-    else if (a.createdAt < b.createdAt)
-        return 1;
-    else
-        return 0;
+Board.sortThreadsByCreationDate = function (a, b) {
+    if (a.createdAt > b.createdAt) return -1;else if (a.createdAt < b.createdAt) return 1;else return 0;
 };
 
-Board.sortThreadsByPostCount = function(a, b) {
-    if (a.postCount > b.postCount)
-        return -1;
-    else if (a.postCount < b.postCount)
-        return 1;
-    else
-        return 0;
+Board.sortThreadsByPostCount = function (a, b) {
+    if (a.postCount > b.postCount) return -1;else if (a.postCount < b.postCount) return 1;else return 0;
 };
 
-var getRules = function(boardName) {
-  var fileName = `${__dirname}/../misc/rules/rules${(boardName ? ('.' + boardName) : '')}.txt`;
-  try {
-    if (!FSSync.existsSync(fileName)) {
-      return [];
+var getRules = function getRules(boardName) {
+    var fileName = __dirname + "/../misc/rules/rules" + (boardName ? '.' + boardName : '') + ".txt";
+    try {
+        if (!FSSync.existsSync(fileName)) {
+            return [];
+        }
+        var data = FSSync.readFileSync(fileName, "utf8");
+        if (!data) {
+            return [];
+        }
+        return data.split(/\r*\n+/gi).filter(function (rule) {
+            return rule;
+        });
+    } catch (err) {
+        console.error(err);
+        return [];
     }
-    var data = FSSync.readFileSync(fileName, "utf8");
-    if (!data) {
-      return [];
-    }
-    return data.split(/\r*\n+/gi).filter(function(rule) {
-      return rule;
-    });
-  } catch (err) {
-    console.error(err);
-    return [];
-  }
 };
 
-Board.initialize = function() {
+Board.initialize = function () {
     var reinit = Tools.hasOwnProperties(Board.boards);
     Board.boards = {};
 
-    FSSync.readdirSync(__dirname).forEach(function(file) {
-        if ("index.js" == file || "board.js" == file || "js" != file.split(".").pop())
-            return;
+    FSSync.readdirSync(__dirname).forEach(function (file) {
+        if ("index.js" == file || "board.js" == file || "js" != file.split(".").pop()) return;
         var id = "./" + file.split(".").shift();
-        if (reinit)
-            delete require.cache[require.resolve(id)];
+        if (reinit) delete require.cache[require.resolve(id)];
         var board = require(id);
         if (Util.isArray(board)) {
-            board.forEach(function(board) {
+            board.forEach(function (board) {
                 Board.addBoard(board);
             });
         } else {
@@ -655,8 +555,7 @@ Board.initialize = function() {
     if (config("board.useDefaultBoards", true)) {
         Board.addBoard(new Board("3dpd", Tools.translate.noop("3D pron", "boardTitle")));
 
-        Board.addBoard(new Board("a", Tools.translate.noop("/a/nime", "boardTitle"),
-            { defaultUserName: Tools.translate.noop("Kamina", "defaultUserName") }));
+        Board.addBoard(new Board("a", Tools.translate.noop("/a/nime", "boardTitle"), { defaultUserName: Tools.translate.noop("Kamina", "defaultUserName") }));
 
         Board.addBoard(new Board("b", Tools.translate.noop("/b/rotherhood", "boardTitle")));
 
@@ -667,35 +566,29 @@ Board.initialize = function() {
 
         Board.addBoard(new Board("h", Tools.translate.noop("/h/entai", "boardTitle")));
 
-        Board.addBoard(new Board("int", "/int/ernational",
-            { defaultUserName: Tools.translate.noop("Vladimir Putin", "defaultUserName") }));
+        Board.addBoard(new Board("int", "/int/ernational", { defaultUserName: Tools.translate.noop("Vladimir Putin", "defaultUserName") }));
 
         Board.addBoard(new Board("mlp", Tools.translate.noop("My Little Pony", "boardTitle")));
 
-        Board.addBoard(new Board("po", Tools.translate.noop("/po/litics", "boardTitle"),
-            { defaultUserName: Tools.translate.noop("Armchair warrior", "defaultUserName") }));
+        Board.addBoard(new Board("po", Tools.translate.noop("/po/litics", "boardTitle"), { defaultUserName: Tools.translate.noop("Armchair warrior", "defaultUserName") }));
 
-        board = new Board("pr", Tools.translate.noop("/pr/ogramming", "boardTitle"));
-        board.defineSetting("markupElements", board.markupElements.concat(Board.MarkupElements.CodeMarkupElement,
-            Board.MarkupElements.LatexMarkupElement, Board.MarkupElements.InlineLatexMarkupElement));
+        var board = new Board("pr", Tools.translate.noop("/pr/ogramming", "boardTitle"));
+        board.defineSetting("markupElements", board.markupElements.concat(Board.MarkupElements.CodeMarkupElement, Board.MarkupElements.LatexMarkupElement, Board.MarkupElements.InlineLatexMarkupElement));
         Board.addBoard(board);
 
-        Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"),
-            { defaultUserName: Tools.translate.noop("Whiner", "defaultUserName") }));
+        Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"), { defaultUserName: Tools.translate.noop("Whiner", "defaultUserName") }));
 
         Board.addBoard(new Board("rpg", Tools.translate.noop("Role-playing games", "boardTitle")));
-        Board.addBoard(new Board("soc", Tools.translate.noop("Social life", "boardTitle"),
-            { defaultUserName: Tools.translate.noop("Life of the party", "defaultUserName") }));
+        Board.addBoard(new Board("soc", Tools.translate.noop("Social life", "boardTitle"), { defaultUserName: Tools.translate.noop("Life of the party", "defaultUserName") }));
 
-        Board.addBoard(new Board("vg", Tools.translate.noop("Video games", "boardTitle"),
-            { defaultUserName: Tools.translate.noop("PC Nobleman", "defaultUserName") }));
+        Board.addBoard(new Board("vg", Tools.translate.noop("Video games", "boardTitle"), { defaultUserName: Tools.translate.noop("PC Nobleman", "defaultUserName") }));
     }
 
     Board._banners = {};
-    Board.boardNames().forEach(function(boardName) {
+    Board.boardNames().forEach(function (boardName) {
         var path = __dirname + "/../public/img/banners/" + boardName;
         if (FSSync.existsSync(path)) {
-            Board._banners[boardName] = FSSync.readdirSync(path).filter(function(fileName) {
+            Board._banners[boardName] = FSSync.readdirSync(path).filter(function (fileName) {
                 return ".gitignore" != fileName;
             });
         } else {
@@ -703,38 +596,39 @@ Board.initialize = function() {
         }
     });
 
-  Board._postFormRules = {};
-  Board.boardNames().forEach(function(boardName) {
-    var common = getRules();
-    var specific = getRules(boardName);
-    for (var i = specific.length - 1; i >= 0; --i) {
-      var rule = specific[i];
-      var rxExcept = /^#include\s+except(\((\d+(\,\d+)*)\))$/;
-      var rxSeveral = /^#include\s+(\d+(\,\d+)*)$/;
-      if ('#include all' === rule) {
-        Array.prototype.splice.apply(specific, [i, 1].concat(common));
-      } else if (rxExcept.test(rule)) {
-        var excluded = rule.match(rxExcept)[2].split(",").map(function(n) {
-          return +n;
-        });
-        Array.prototype.splice.apply(specific, [i, 1].concat(common.filter(function(_, i) {
-          return excluded.indexOf(i) < 0;
-        })));
-      } else if (rxSeveral.test(rule)) {
-        var included = rule.match(rxSeveral)[1].split(",").map(function(n) {
-          return +n;
-        }).filter(function(n) {
-          return n >= 0 && n < common.length;
-        }).map(function(n) {
-          return common[n];
-        });
-        Array.prototype.splice.apply(specific, [i, 1].concat(included));
-      }
-    };
-    Board._postFormRules[boardName] = (specific.length > 0) ? specific : common;
-  });
+    Board._postFormRules = {};
+    Board.boardNames().forEach(function (boardName) {
+        var common = getRules();
+        var specific = getRules(boardName);
+        for (var i = specific.length - 1; i >= 0; --i) {
+            var rule = specific[i];
+            var rxExcept = /^#include\s+except(\((\d+(\,\d+)*)\))$/;
+            var rxSeveral = /^#include\s+(\d+(\,\d+)*)$/;
+            if ('#include all' === rule) {
+                Array.prototype.splice.apply(specific, [i, 1].concat(common));
+            } else if (rxExcept.test(rule)) {
+                var excluded = rule.match(rxExcept)[2].split(",").map(function (n) {
+                    return +n;
+                });
+                Array.prototype.splice.apply(specific, [i, 1].concat(common.filter(function (_, i) {
+                    return excluded.indexOf(i) < 0;
+                })));
+            } else if (rxSeveral.test(rule)) {
+                var included = rule.match(rxSeveral)[1].split(",").map(function (n) {
+                    return +n;
+                }).filter(function (n) {
+                    return n >= 0 && n < common.length;
+                }).map(function (n) {
+                    return common[n];
+                });
+                Array.prototype.splice.apply(specific, [i, 1].concat(included));
+            }
+        };
+        Board._postFormRules[boardName] = specific.length > 0 ? specific : common;
+    });
 };
 
 module.exports = Board;
 
-var Database = require("../helpers/database");
+//var Database = require("../helpers/database");
+//# sourceMappingURL=board.js.map

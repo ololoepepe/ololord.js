@@ -1,10 +1,11 @@
+"use strict";
+
 var captcha = require("node-captcha");
 var FS = require("q-io/fs");
 var UUID = require("uuid");
 
 var Captcha = require("./captcha");
 var config = require("../helpers/config");
-var controller = require("../helpers/controller");
 var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
@@ -12,7 +13,7 @@ var nodeCaptcha = new Captcha("node-captcha-noscript", Tools.translate.noop("Nod
 
 nodeCaptcha.challenges = {};
 
-nodeCaptcha.checkCaptcha = function(req, fields) {
+nodeCaptcha.checkCaptcha = function (req, fields) {
   var challenge = nodeCaptcha.challenges[req.ip];
   if (!challenge) {
     return Promise.reject(Tools.translate("No captcha for this IP"));
@@ -22,7 +23,7 @@ nodeCaptcha.checkCaptcha = function(req, fields) {
     return Promise.reject(Tools.translate("Captcha is empty"));
   }
   clearTimeout(challenge.timer);
-  FS.remove(__dirname + "/../tmp/node-captcha-noscript/" + challenge.fileName).catch(function(err) {
+  FS.remove(__dirname + "/../tmp/node-captcha-noscript/" + challenge.fileName).catch(function (err) {
     Global.error(err);
   });
   delete nodeCaptcha.challenges[req.ip];
@@ -32,12 +33,12 @@ nodeCaptcha.checkCaptcha = function(req, fields) {
   return Promise.resolve();
 };
 
-nodeCaptcha.apiRoutes = function() {
+nodeCaptcha.apiRoutes = function () {
   return [{
     method: "get",
     path: "/nodeCaptchaImage.png",
-    handler: function(req, res) {
-      let challenge = nodeCaptcha.challenges[req.ip];
+    handler: function handler(req, res) {
+      var challenge = nodeCaptcha.challenges[req.ip];
       if (challenge) {
         res.sendFile(challenge.fileName, { root: __dirname + "/../tmp/node-captcha-noscript" });
       } else {
@@ -48,7 +49,7 @@ nodeCaptcha.apiRoutes = function() {
           fileMode: 2,
           size: size,
           height: height,
-          width: config("captcha.node-captcha.width", Math.round((height * size) / 1.8)),
+          width: config("captcha.node-captcha.width", Math.round(height * size / 1.8)),
           color: color,
           background: config("captcha.node-captcha.background", "rgb(255,255,255)"),
           lineWidth: config("captcha.node-captcha.lineWidth", 4),
@@ -56,15 +57,15 @@ nodeCaptcha.apiRoutes = function() {
           noiseColor: config("captcha.node-captcha.noiseColor", color),
           complexity: config("captcha.node-captcha.complexity", 1),
           spacing: config("captcha.node-captcha.spacing", 4)
-        }, function(response, data) {
-          let fileName = `${+Tools.now()}.png`;
-          FS.write(__dirname + "/../tmp/node-captcha-noscript/" + fileName, data).then(function() {
+        }, function (response, data) {
+          var fileName = +Tools.now() + ".png";
+          FS.write(__dirname + "/../tmp/node-captcha-noscript/" + fileName, data).then(function () {
             nodeCaptcha.challenges[req.ip] = {
               challenge: challenge,
               fileName: fileName,
               response: response,
-              timer: setTimeout(function() {
-                FS.remove(__dirname + "/../tmp/node-captcha-noscript/" + fileName).catch(function(err) {
+              timer: setTimeout(function () {
+                FS.remove(__dirname + "/../tmp/node-captcha-noscript/" + fileName).catch(function (err) {
                   Global.error(err);
                 });
                 delete nodeCaptcha.challenges[challenge];
@@ -79,3 +80,4 @@ nodeCaptcha.apiRoutes = function() {
 };
 
 module.exports = nodeCaptcha;
+//# sourceMappingURL=node-captcha-noscript.js.map

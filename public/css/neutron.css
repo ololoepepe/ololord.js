@@ -124,8 +124,13 @@ input:not([type='image']) {
 }
 .sidebar,
 .toolbar {
-  border-right: 1px solid #575757;
   background-color: #2C2C2C;
+}
+.sidebar {
+  border-right: 1px solid #575757;
+}
+.toolbar {
+  border-bottom: 1px solid #575757;
 }
 .sidebar-content {
   border-top: 1px solid #575757;
@@ -142,7 +147,7 @@ input:not([type='image']) {
 }
 .toolbar-group-title {
   font-weight: bold;
-  border-bottom: 1px dashed #464646;
+  border-bottom: 1px dashed #698CC0;
 }
 .drop-area {
   border: 1px solid #000000;

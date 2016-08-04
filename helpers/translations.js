@@ -1,8 +1,10 @@
+"use strict";
+
 var Tools = require("./tools");
 
-module.exports = function(tr) {
+module.exports = function (tr) {
     tr = tr || {};
-    var translate = function(sourceText, disambiguation) {
+    var translate = function translate(sourceText, disambiguation) {
         tr[disambiguation] = Tools.translate(sourceText, disambiguation);
     };
     translate("Markup", "toMarkupPageText");
@@ -218,20 +220,9 @@ module.exports = function(tr) {
     translate("Posts left:", "captchaQuotaText");
     translate("Show rules", "showPostformRulesText");
     translate("Hide rules", "hidePostformRulesText");
-    translate("The login systyem does NOT store any data on the server. "
-        + "It only stores a cookie on your PC to allow post deleting, etc. without "
-        + "entering password every time.<br />"
-        + "It is also used for moderator/administrator authentication.", "loginSystemDescriptionText");
-    translate("When logging in with Vkontakte, you may omit the login, "
-        + "but to be logged in with the same login on each browser, you have to specify it.<br />"
-        + "When logged in with Vkontakte, you are able to attach your VK audio.<br />"
-        + "This does not affect your anonymity in any way (the files are downloaded by the server "
-        + "and no links to your VK page are shown).", "loginSystemVkontakteDescriptionText");
-    translate("SFW - safe for work (no socially condemned content)\n"
-        + "R-15 - restricted for 15 years (contains ecchi, idols, violence)\n"
-        + "R-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\n"
-        + "R-18G - restricted for 18 years, guidance advised "
-        + "(shemale, death, guro, scat, defecation, urination, etc.)", "ratingTooltip");
+    translate("The login systyem does NOT store any data on the server. " + "It only stores a cookie on your PC to allow post deleting, etc. without " + "entering password every time.<br />" + "It is also used for moderator/administrator authentication.", "loginSystemDescriptionText");
+    translate("When logging in with Vkontakte, you may omit the login, " + "but to be logged in with the same login on each browser, you have to specify it.<br />" + "When logged in with Vkontakte, you are able to attach your VK audio.<br />" + "This does not affect your anonymity in any way (the files are downloaded by the server " + "and no links to your VK page are shown).", "loginSystemVkontakteDescriptionText");
+    translate("SFW - safe for work (no socially condemned content)\n" + "R-15 - restricted for 15 years (contains ecchi, idols, violence)\n" + "R-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\n" + "R-18G - restricted for 18 years, guidance advised " + "(shemale, death, guro, scat, defecation, urination, etc.)", "ratingTooltip");
     translate("Welcome. Again.", "welcomeMessage");
     translate("Our friends", "friendsHeader");
     translate("News", "newsHeader");
@@ -316,10 +307,8 @@ module.exports = function(tr) {
     translate("Open voting", "openVotingText");
     translate("Tripcode activated for THIS THREAD only", "threadTripcodeActivatedText");
     translate("Tripcode deactivated for THIS THREAD only", "threadTripcodeDeactivatedText");
-    translate("Global tripcode activated. Uncheck tripcode option OUTSIDE THREAD to disable it",
-        "globalTripcodeActivatedText");
-    translate("Global tripcode deactivated (except threads where it is activated explicitly)",
-        "globalTripcodeDeactivatedText");
+    translate("Global tripcode activated. Uncheck tripcode option OUTSIDE THREAD to disable it", "globalTripcodeActivatedText");
+    translate("Global tripcode deactivated (except threads where it is activated explicitly)", "globalTripcodeDeactivatedText");
     translate("Close files only by clicking on them", "closeFilesByClickingOnlyLabelText");
     translate("Drafts", "draftsText");
     translate("Fill form with this draft", "fillFormWithDraftText");
@@ -412,8 +401,7 @@ module.exports = function(tr) {
     translate("Background color:", "canvasBackgroundColorLabelText");
     translate("Drawing options", "drawingOptionsDialogTitle");
     translate("Auto", "canvasBackgroundAutoSizeButtonText");
-    translate("Drawing is disabled. Enable it in the \"Other\" tab of the settings dialog "
-        + "(the \"Enable drawing tools\" checkbox).", "drawingDisabledWarningText");
+    translate("Drawing is disabled. Enable it in the \"Other\" tab of the settings dialog " + "(the \"Enable drawing tools\" checkbox).", "drawingDisabledWarningText");
     translate("Reset image scale on every opening", "resetFileScaleOnOpeningLabelText");
     translate("Default", "dafaultCanvasBackgroundColorButtonText");
     translate("Show full text", "expandPostTextText");
@@ -439,8 +427,7 @@ module.exports = function(tr) {
     translate("File:", "fileLabelText");
     translate("Directory name:", "directoryNameLabelText");
     translate("Server actions", "serverActionLabelText");
-    translate("Connection with the server will be lost, and the server will become unavailable for some time. "
-        + "You will have to reload the page manually.", "reloadWarningText");
+    translate("Connection with the server will be lost, and the server will become unavailable for some time. " + "You will have to reload the page manually.", "reloadWarningText");
     translate("Regenerate cache", "regenerateCacheButtonText");
     translate("Rerender posts", "rerenderPostsButtonText");
     translate("Rebuild post search index", "rebuildSearchIndexButtonText");
@@ -462,3 +449,4 @@ module.exports = function(tr) {
     translate("Close", "closePostFormButtonText");
     return tr;
 };
+//# sourceMappingURL=translations.js.map

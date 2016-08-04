@@ -1,3 +1,5 @@
+"use strict";
+
 var UUID = require("uuid");
 
 var Tools = require("./tools");
@@ -5,20 +7,16 @@ var Tools = require("./tools");
 var tasks = {};
 var handlers = {};
 
-var handleMessage = function(cluster, message, pid) {
+var handleMessage = function handleMessage(cluster, message, pid) {
     var task = tasks[message.id];
     if (task) {
         delete tasks[message.id];
-        if (!message.error)
-            task.resolve(message.data);
-        else
-            task.reject(message.error);
+        if (!message.error) task.resolve(message.data);else task.reject(message.error);
     } else {
         var handler = handlers[message.type];
         var proc = pid ? cluster.workers[pid] : process;
         if (!handler) {
-            if (!proc)
-                return;
+            if (!proc) return;
             proc.send({
                 id: message.id,
                 type: message.type,
@@ -26,19 +24,16 @@ var handleMessage = function(cluster, message, pid) {
             });
         }
         var p = handler(message.data);
-        if (!p || !p.then)
-            p = Promise.resolve(p);
-        p.then(function(data) {
-            if (!proc)
-                return;
+        if (!p || !p.then) p = Promise.resolve(p);
+        p.then(function (data) {
+            if (!proc) return;
             proc.send({
                 id: message.id,
                 type: message.type,
                 data: data || null
             });
-        }).catch(function(err) {
-            if (!proc)
-                return;
+        }).catch(function (err) {
+            if (!proc) return;
             proc.send({
                 id: message.id,
                 type: message.type,
@@ -48,8 +43,8 @@ var handleMessage = function(cluster, message, pid) {
     }
 };
 
-var sendMessage = function(proc, type, data, nowait) {
-    return new Promise(function(resolve, reject) {
+var sendMessage = function sendMessage(proc, type, data, nowait) {
+    return new Promise(function (resolve, reject) {
         var id = UUID.v1();
         tasks[id] = {
             resolve: resolve,
@@ -59,7 +54,7 @@ var sendMessage = function(proc, type, data, nowait) {
             id: id,
             type: type,
             data: data || null
-        }, function(err) {
+        }, function (err) {
             if (err) {
                 delete tasks[id];
                 reject(err);
@@ -72,28 +67,27 @@ var sendMessage = function(proc, type, data, nowait) {
     });
 };
 
-module.exports = function(cluster) {
+module.exports = function (cluster) {
     var ipc = {};
     if (cluster.isMaster) {
-        cluster.on("online", function(worker) {
-            worker.process.on("message", function(message) {
+        cluster.on("online", function (worker) {
+            worker.process.on("message", function (message) {
                 handleMessage(cluster, message, worker.id);
             });
         });
     } else {
-        process.on("message", function(message) {
+        process.on("message", function (message) {
             handleMessage(cluster, message);
         });
     }
-    ipc.send = function(type, data, nowait, workerId) {
+    ipc.send = function (type, data, nowait, workerId) {
         if (cluster.isMaster) {
             if (workerId) {
                 var worker = cluster.workers[workerId];
-                if (!worker)
-                    return Promise.reject(Tools.translate("Invalid worker ID"));
+                if (!worker) return Promise.reject(Tools.translate("Invalid worker ID"));
                 return sendMessage(worker.process, type, data, nowait);
             } else {
-                var promises = Tools.mapIn(cluster.workers, function(worker) {
+                var promises = Tools.mapIn(cluster.workers, function (worker) {
                     return sendMessage(worker.process, type, data, nowait);
                 });
                 return Promise.all(promises);
@@ -102,8 +96,9 @@ module.exports = function(cluster) {
             return sendMessage(process, type, data, nowait);
         }
     };
-    ipc.installHandler = function(type, handler) {
+    ipc.installHandler = function (type, handler) {
         handlers[type] = handler;
     };
     return ipc;
 };
+//# sourceMappingURL=ipc.js.map
