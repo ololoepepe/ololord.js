@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import FS from 'q-io/fs';
 
 import * as PostsModel from './posts';
 import client from '../storage/client-factory';
@@ -30,6 +31,23 @@ let UserPostNumbers = new Key(client(), 'userPostNumbers', {
   parse: number => +number,
   stringify: number => number.toString()
 });
+
+function transformIPBans(bans) {
+  return _(bans).reduce((acc, ban, ip) => {
+    ip = Tools.correctAddress(ip);
+    if (ip) {
+      acc[ip] = ban;
+    }
+    return acc;
+  }, {});
+}
+
+let ipBans = Tools.createWatchedResource(`${__dirname}/../misc/bans.json`, (path) => {
+  return transformIPBans(require(path));
+}, async function(path) {
+  let data = await FS.read(path);
+  ipBans = transformIPBans(JSON.parse(data));
+}) || {};
 
 export async function getUserCaptchaQuota(boardName, userIp) {
   let board = Board.board(boardName);
@@ -97,4 +115,17 @@ export async function getUserPostNumbers(ip, boardName) {
   ip = Tools.correctAddress(ip) || '*';
   boardName = boardName || '*';
   return await UserPostNumbers.find(`${ip}:${boardName}`);
+}
+
+export async function checkUserBan(ip, boardNames, { write } = {}) {
+  ip = Tools.correctAddress(ip);
+  let ban = ipBans[ip];
+  if (ban && (write || 'NO_ACCESS' === ban.level)) {
+    return Promise.reject({ ban: ban });
+  }
+  let bans = await getBannedUserBans(ip, boardNames);
+  ban = _(bans).find((ban) => { return ban && (write || 'NO_ACCESS' === ban.level); });
+  if (ban) {
+    return Promise.reject({ ban: ban });
+  }
 }

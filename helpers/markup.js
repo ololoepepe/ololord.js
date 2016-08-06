@@ -1,5 +1,21 @@
 "use strict";
 
+var _renderer = require("../core/renderer");
+
+var Renderer = _interopRequireWildcard(_renderer);
+
+var _misc = require("../models/misc");
+
+var MiscModel = _interopRequireWildcard(_misc);
+
+var _logger = require("../helpers/logger");
+
+var _logger2 = _interopRequireDefault(_logger);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 var Highlight = require("highlight.js");
 var HTTP = require("q-io/http");
 var URL = require("url");
@@ -7,13 +23,9 @@ var XRegExp = require("xregexp");
 
 var Board = require("../boards/board");
 var config = require("./config");
-var controller = require("./controller");
 var Database = require("./database");
-var Global = require("./global");
 var Permissions = require("./permissions");
 var Tools = require("./tools");
-
-var langNames = require("../misc/lang-names.json");
 
 var SkipTypes = {
     NoSkip: "NO_SKIP",
@@ -155,7 +167,7 @@ var getTwitterEmbeddedHtml = function getTwitterEmbeddedHtml(href, defaultHtml) 
             return Promise.reject(err);
         }
     }).catch(function (err) {
-        Global.error(err.stack || err);
+        _logger2.default.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function (html) {
         return Promise.resolve(html);
@@ -200,14 +212,14 @@ var getYoutubeEmbeddedHtml = function getYoutubeEmbeddedHtml(href, defaultHtml) 
             info.id = videoId;
             info.href = href;
             info.start = youtubeVideoStartTime(href);
-            var html = controller("markup/youtubeVideoLink", { info: info });
+            var html = Renderer.render('markup/youtubeVideoLink', { info: info });
             if (!html) return Promise.reject(Tools.translate("Failed to create YouTube video link"));
             return Promise.resolve(html);
         } catch (err) {
             return Promise.reject(err);
         }
     }).catch(function (err) {
-        Global.error(err.stack || err);
+        _logger2.default.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function (html) {
         return Promise.resolve(html);
@@ -240,14 +252,14 @@ var getCoubEmbeddedHtml = function getCoubEmbeddedHtml(href, defaultHtml) {
                 } : null,
                 id: videoId
             };
-            var html = controller("markup/coubVideoLink", { info: info });
+            var html = Renderer.render('markup/coubVideoLink', { info: info });
             if (!html) return Promise.reject(Tools.translate("Failed to create Coub video link"));
             return Promise.resolve(html);
         } catch (err) {
             return Promise.reject(err);
         }
     }).catch(function (err) {
-        Global.error(err.stack || err);
+        _logger2.default.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function (html) {
         return Promise.resolve(html);
@@ -258,7 +270,7 @@ var getVocarooEmbeddedHtml = function getVocarooEmbeddedHtml(href, defaultHtml) 
     var match = href.match(/^https?:\/\/vocaroo\.com\/i\/([a-zA-Z0-9]+)$/);
     var audioId = match ? match[1] : null;
     if (!audioId) return Promise.resolve(defaultHtml);
-    var html = controller("markup/vocarooAudioLink", { info: { id: audioId } });
+    var html = Renderer.render('markup/vocarooAudioLink', { info: { id: audioId } });
     if (!html) return Promise.reject(Tools.translate("Failed to create Vocaroo audio embedded container"));
     return Promise.resolve(html);
 };
@@ -568,22 +580,33 @@ var convertPre = function convertPre(_, text, __, ___, options) {
     return Promise.resolve(text);
 };
 
-var convertCode = function convertCode(_, text, matchs, __, options) {
-    options.type = SkipTypes.CodeSkip;
-    var lang = matchs[1];
-    if (lang) lang = lang.replace("++", "pp").replace("#", "s");
+function markupCode(text, lang) {
+    if (lang) {
+        lang = lang.replace('++', 'pp').replace('#', 's'); //TODO: You know, this is not OK.
+    }
     Highlight.configure({
-        tabReplace: "    ",
+        tabReplace: '    ',
         useBR: true
     });
     var result = lang ? Highlight.highlight(lang, text, true) : Highlight.highlightAuto(text);
     text = result.value;
     lang = result.language || lang;
-    var langClass = lang ? " " + lang : "";
+    var langClass = lang ? " " + lang : '';
+    var langNames = MiscModel.codeLangNames();
     var langName = langNames.hasOwnProperty(lang) ? langNames[lang] : lang;
-    options.op = "<div class=\"code-block" + langClass + " hljs js-with-tooltip\" title=\"" + (langName || '') + "\">";
-    options.cl = "</div>";
-    return Promise.resolve(Highlight.fixMarkup(text));
+    return {
+        op: "<div class=\"code-block" + langClass + " hljs js-with-tooltip\" title=\"" + (langName || '') + "\">",
+        cl: '</div>',
+        text: Highlight.fixMarkup(text)
+    };
+}
+
+var convertCode = function convertCode(_, text, matchs, __, options) {
+    options.type = SkipTypes.CodeSkip;
+    var result = markupCode(text, matchs[1]);
+    options.op = result.op;
+    options.cl = result.cl;
+    return Promise.resolve(result.text);
 };
 
 var convertVkontaktePost = function convertVkontaktePost(_, __, matchs, ___, options) {
@@ -1001,6 +1024,7 @@ var processPostText = function processPostText(boardName, text, options) {
 };
 
 Object.defineProperty(processPostText, "MarkupModes", { value: MarkupModes });
+Object.defineProperty(processPostText, "markupCode", { value: markupCode });
 
 module.exports = processPostText;
 //# sourceMappingURL=markup.js.map

@@ -1,27 +1,29 @@
-"use strict";
+'use strict';
 
-var express = require("express");
-var moment = require("moment");
+var _express = require('express');
 
-var config = require("../helpers/config");
-var controller = require("../helpers/controller");
-var Database = require("../helpers/database");
-var Tools = require("../helpers/tools");
+var _express2 = _interopRequireDefault(_express);
 
-var router = express.Router();
+var _renderer = require('../core/renderer');
 
-router.generateHTML = function () {
-    var model = {};
-    model.title = Tools.translate("Management", "pageTitle");
-    model.extraScripts = [{ fileName: "manage.js" }];
-    model.extraScripts.push({ fileName: "3rdparty/jQueryFileTree.js" });
-    model.extraScripts.push({ fileName: "3rdparty/codemirror/codemirror.min.js" });
-    model.extraScripts.push({ fileName: "3rdparty/codemirror/javascript.min.js" });
-    model.extraScripts.push({ fileName: "3rdparty/codemirror/css.min.js" });
-    model.extraScripts.push({ fileName: "3rdparty/codemirror/xml.min.js" });
-    model.extraScripts.push({ fileName: "3rdparty/codemirror/htmlmixed.min.js" });
-    model.extraStylesheets = [{ fileName: "3rdparty/jQueryFileTree/jQueryFileTree.min.css", noEmbed: true }, { fileName: "3rdparty/codemirror.css" }];
-    return Promise.resolve({ "manage.html": controller("pages/manage", model) });
+var Renderer = _interopRequireWildcard(_renderer);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var router = _express2.default.Router();
+
+router.paths = function () {
+  return ['/manage.html'];
+};
+
+router.render = function () {
+  return { 'manage.html': Renderer.render('pages/manage', { title: Tools.translate('Management', 'pageTitle') }) };
 };
 
 module.exports = router;

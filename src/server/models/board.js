@@ -1,6 +1,6 @@
 import _ from 'underscore';
+import Cluster from 'cluster';
 
-var cluster = require("cluster");
 var FS = require("q-io/fs");
 var merge = require("merge");
 var mkpath = require("mkpath");
@@ -12,13 +12,15 @@ var XML2JS = require("xml2js");
 var Board = require("../boards/board");
 var Cache = require("../helpers/cache");
 var config = require("../helpers/config");
-var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
-var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
+import * as MiscModel from './misc';
+import * as Renderer from '../core/renderer';
 import client from '../storage/client-factory';
 import Hash from '../storage/hash';
+import * as IPC from '../helpers/ipc';
+import Logger from '../helpers/logger';
 
 var scheduledGeneratePages = {};
 var scheduledGenerateThread = {};
@@ -421,11 +423,11 @@ var generateThreadHTML = function(board, threadNumber, model, nowrite) {
     model.title = model.thread.title || (board.title + " — " + model.thread.number);
     model.isBoardPage = true;
     model.isThreadPage = true;
-    model.board = controller.boardModel(board).board;
+    model.board = MiscModel.board(board).board;
     model.extraScripts = board.extraScripts();
     model.extraStylesheets = board.extraStylesheets();
     model.threadNumber = model.thread.number;
-    var data = controller("pages/thread", model);
+    var data = Renderer.render('pages/thread', model);
     if (nowrite)
       return Promise.resolve(data);
     return Cache.writeFile(`${board.name}/res/${threadNumber}.html`, data);
@@ -471,16 +473,16 @@ var generatePage = function(boardName, pageNumber) {
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
         c.model.lastPostNumber = lastPostNumber;
-        c.model.postingSpeed = controller.postingSpeedString(board.launchDate, lastPostNumber);
+        c.model.postingSpeed = Tools.postingSpeedString(board.launchDate, lastPostNumber);
         return Cache.writeFile(`${board.name}/${pageNumber}.json`, JSON.stringify(c.model));
     }).then(function() {
         c.model.title = board.title;
         c.model.isBoardPage = true;
-        c.model.board = controller.boardModel(board).board;
+        c.model.board = MiscModel.board(board).board;
         c.model.extraScripts = board.extraScripts();
         c.model.extraStylesheets = board.extraStylesheets();
         return Cache.writeFile(`${board.name}/${(pageNumber > 0) ? pageNumber : "index"}.html`,
-          controller("pages/board", c.model));
+          Renderer.render('pages/board', c.model));
     });
 };
 
@@ -509,16 +511,16 @@ var generateCatalog = function(boardName) {
             return Database.lastPostNumber(board.name);
         }).then(function(lastPostNumber) {
             c.model.lastPostNumber = lastPostNumber;
-            c.model.postingSpeed = controller.postingSpeedString(board.launchDate, lastPostNumber);
+            c.model.postingSpeed = Tools.postingSpeedString(board.launchDate, lastPostNumber);
             return Cache.writeFile(`${board.name}/catalog${("date" != sortMode) ? ("-" + sortMode) : ""}.json`,
                 JSON.stringify(c.model));
         }).then(function() {
             c.model.title = board.title;
             c.model.isBoardPage = true;
-            c.model.board = controller.boardModel(board).board;
+            c.model.board = MiscModel.board(board).board;
             c.model.sortMode = sortMode;
             return Cache.writeFile(`${board.name}/catalog${("date" != sortMode) ? ("-" + sortMode) : ""}.html`,
-              controller("pages/catalog", c.model));
+              Renderer.render('pages/catalog', c.model));
         });
     });
 };
@@ -557,12 +559,12 @@ var generateArchive = function(boardName) {
         return Database.lastPostNumber(board.name);
     }).then(function(lastPostNumber) {
         model.lastPostNumber = lastPostNumber;
-        model.postingSpeed = controller.postingSpeedString(board.launchDate, lastPostNumber);
+        model.postingSpeed = Tools.postingSpeedString(board.launchDate, lastPostNumber);
         return Cache.writeFile(`${board.name}/archive.json`, JSON.stringify(model));
     }).then(function() {
         model.title = board.title;
-        model.board = controller.boardModel(board).board;
-        return Cache.writeFile(`${board.name}/archive.html`, controller("pages/archive", model));
+        model.board = MiscModel.board(board).board;
+        return Cache.writeFile(`${board.name}/archive.html`, Renderer.render('pages/archive', model));
     });
 };
 
@@ -577,7 +579,7 @@ var generateBoard = function(boardName) {
 };
 
 var performTask = function(funcName, key, data) {
-    var workerId = Object.keys(cluster.workers).map(function(id) {
+    var workerId = Object.keys(Cluster.workers).map(function(id) {
         return {
             id: id,
             load: workerLoads[id] || 0
@@ -594,7 +596,7 @@ var performTask = function(funcName, key, data) {
         workerLoads[workerId] = 1;
     else
         ++workerLoads[workerId];
-    return Global.IPC.send("doGenerate", {
+    return IPC.send('doGenerate', {
         funcName: funcName,
         key: key,
         data: data
@@ -621,7 +623,7 @@ var addTask = function(map, key, funcName, data) {
     } else {
         map[key] = {};
         return performTask(funcName, key, data).catch(function(err) {
-            Global.error(err.stack || err);
+            Logger.error(err.stack || err);
         }).then(function() {
             var g = function() {
                 var scheduled = map[key];
@@ -635,7 +637,7 @@ var addTask = function(map, key, funcName, data) {
                     return n.data;
                 });
                 performTask(funcName, key, data).catch(function(err) {
-                    Global.error(err.stack || err);
+                    Logger.error(err.stack || err);
                 }).then(function() {
                     g();
                     next.forEach(function(n) {
@@ -763,92 +765,80 @@ module.exports.do_generateArchive = function(boardName) {
     return generateArchive(boardName);
 };
 
-module.exports.scheduleGenerateThread = function(boardName, threadNumber, postNumber, action) {
-    return Database.db.sismember("deletedThreads", boardName + ":" + threadNumber).then(function(result) {
-        if (result)
-            return Promise.resolve();
-        if (threadNumber == postNumber) {
-            if ("edit" == action)
-                action = "create";
-        } else {
-            action = "edit";
-        }
-        return addTask(scheduledGenerateThread, boardName + ":" + threadNumber, "generateThread", {
-            boardName: boardName,
-            threadNumber: threadNumber,
-            action: action
-        });
-    });
-};
-
-module.exports.scheduleGeneratePages = function(boardName) {
-    return addTask(scheduledGeneratePages, boardName, "generatePages");
-};
-
-module.exports.scheduleGenerateCatalog = function(boardName) {
-    return addTask(scheduledGenerateCatalog, boardName, "generateCatalog");
-};
-
-module.exports.scheduleGenerateArchive = function(boardName) {
-    return addTask(scheduledGenerateArchive, boardName, "generateArchive");
-};
-
-module.exports.scheduleGenerate = function(boardName, threadNumber, postNumber, action) {
-    var p = Promise.resolve();
-    switch (action) {
-    case "create":
-        p = p.then(function() {
-            return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
-        }).then(function() {
-            module.exports.scheduleGeneratePages(boardName).then(function() {
-                module.exports.scheduleGenerateCatalog(boardName);
-            }).then(function() {
-                module.exports.scheduleGenerateArchive(boardName);
-            });
-            return Promise.resolve();
-        });
-        break;
-    case "edit":
-    case "delete":
-        if (threadNumber == postNumber) {
-            p = p.then(function() {
-                return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
-            }).then(function() {
-                return module.exports.scheduleGeneratePages(boardName);
-            }).then(function() {
-                module.exports.scheduleGenerateCatalog(boardName).then(function() {
-                    module.exports.scheduleGenerateArchive(boardName);
-                });
-                return Promise.resolve();
-            });
-        } else {
-            p = p.then(function() {
-                module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action).then(function() {
-                    return module.exports.scheduleGeneratePages(boardName);
-                }).then(function() {
-                    module.exports.scheduleGenerateCatalog(boardName).then(function() {
-                        module.exports.scheduleGenerateArchive(boardName);
-                    });
-                });
-                return Promise.resolve();
-            });
-        }
-        break;
-    default:
-        p = p.then(function() {
-            module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action).then(function() {
-                return module.exports.scheduleGeneratePages(boardName);
-            }).then(function() {
-                module.exports.scheduleGenerateCatalog(boardName).then(function() {
-                    module.exports.scheduleGenerateArchive(boardName);
-                });
-            });
-            return Promise.resolve();
-        });
-        break;
+export async function scheduleGenerateThread(boardName, threadNumber, postNumber, action) {
+  let key = `${boardName}:${threadNumber}`;
+  let result = await Database.db.sismember('deletedThreads', key);
+  if (result) {
+    return;
+  }
+  if (threadNumber === postNumber) {
+    if ('edit' === action) {
+      action = 'create';
     }
-    return p;
-};
+  } else {
+    action = 'edit';
+  }
+  return await addTask(scheduledGenerateThread, key, 'generateThread', {
+    boardName: boardName,
+    threadNumber: threadNumber,
+    action: action
+  });
+}
+
+export async function scheduleGeneratePages(boardName) {
+  return await addTask(scheduledGeneratePages, boardName, 'generatePages');
+}
+
+export async function scheduleGenerateCatalog(boardName) {
+  return await addTask(scheduledGenerateCatalog, boardName, 'generateCatalog');
+}
+
+export async function scheduleGenerateArchive(boardName) {
+  return await addTask(scheduledGenerateArchive, boardName, 'generateArchive');
+}
+
+export async function scheduleGenerate(boardName, threadNumber, postNumber, action) {
+  switch (action) {
+  case 'create':
+    await scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+    (async function() {
+      await scheduleGeneratePages(boardName);
+      await scheduleGenerateCatalog(boardName);
+      await scheduleGenerateArchive(boardName);
+    })();
+    break;
+  case 'edit':
+  case 'delete':
+    if (threadNumber === postNumber) {
+      await scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+      await scheduleGeneratePages(boardName);
+      (async function() {
+        await scheduleGenerateCatalog(boardName);
+        await scheduleGenerateArchive(boardName);
+      })();
+    } else {
+      (async function() {
+        await scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+        await scheduleGeneratePages(boardName);
+        (async function() {
+          await scheduleGenerateCatalog(boardName);
+          await scheduleGenerateArchive(boardName);
+        })();
+      })();
+    }
+    break;
+  default:
+    (async function() {
+      await scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+      await scheduleGeneratePages(boardName);
+      (async function() {
+        await scheduleGenerateCatalog(boardName);
+        await scheduleGenerateArchive(boardName);
+      })();
+    });
+    break;
+  }
+}
 
 module.exports.initialize = function() {
     return Tools.series(Board.boardNames(), function(boardName) {
@@ -993,4 +983,33 @@ export async function getLastPostNumbers(boardNames) {
     return Promise.reject(Tools.translate('Invalid boardName'));
   }
   return await PostCounters.getSome(boardNames);
+}
+
+export async function generate(boardName, threadNumber, postNumber, action) {
+  try {
+    if (Cluster.isMaster) {
+      await scheduleGenerate(boardName, threadNumber, postNumber, action);
+    } else {
+      await IPC.send('generate', {
+        boardName: boardName,
+        threadNumber: threadNumber,
+        postNumber: postNumber,
+        action: action
+      });
+    }
+  } catch (err) {
+    Logger.error(err.stack || err);
+  }
+}
+
+export async function generateArchive(boardName) {
+  try {
+    if (Cluster.isMaster) {
+      return scheduleGenerateArchive(boardName);
+    } else {
+      await IPC.send('generateArchive', boardName);
+    }
+  } catch (err) {
+    Logger.error(err.stack || err);
+  }
 }

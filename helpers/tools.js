@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.ExternalLinkRegexpPattern = exports.Hour = exports.Minute = exports.Second = exports.Billion = undefined;
+exports.ARCHIVE_PATHS_REGEXP = exports.ExternalLinkRegexpPattern = exports.Hour = exports.Minute = exports.Second = exports.Billion = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -24,6 +24,10 @@ var _underscore2 = _interopRequireDefault(_underscore);
 var _fsWatcher = require("./fs-watcher");
 
 var _fsWatcher2 = _interopRequireDefault(_fsWatcher);
+
+var _logger = require("./logger");
+
+var _logger2 = _interopRequireDefault(_logger);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -54,7 +58,6 @@ var UUID = require("uuid");
 var XRegExp = require("xregexp");
 
 var config = require("./config");
-var Global = require("./global");
 
 var translate = require("cute-localize")({
     locale: config("site.locale", "en"),
@@ -87,6 +90,7 @@ var ExternalLinkRegexpPattern = exports.ExternalLinkRegexpPattern = function () 
     var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\'\"\\,\\(\\)\\[\\]«»]*)*\\/?";
     return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
 }();
+var ARCHIVE_PATHS_REGEXP = exports.ARCHIVE_PATHS_REGEXP = /^\/[^\/]+\/(archive|arch\/\d+)\.(html|json)$/;
 
 var forIn = function forIn(obj, f) {
     if (!obj || typeof f != "function") return;
@@ -406,7 +410,7 @@ module.exports.proxy = function () {
 };
 
 var correctAddress = function correctAddress(ip) {
-    if (!ip) return null;
+    if (!ip || typeof ip !== 'string') return null;
     if ("::1" == ip) ip = "127.0.0.1";
     var match = ip.match(/^\:\:ffff\:(\d+\.\d+\.\d+\.\d+)$/);
     if (match) ip = match[1];
@@ -760,7 +764,7 @@ function createWatchedResource(path, synchronous, asynchronous) {
                             _context.prev = 9;
                             _context.t0 = _context["catch"](0);
 
-                            Global.error(_context.t0.stack || _context.t0);
+                            _logger2.default.error(_context.t0.stack || _context.t0);
 
                         case 12:
                         case "end":

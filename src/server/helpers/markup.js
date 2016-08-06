@@ -5,13 +5,13 @@ var XRegExp = require("xregexp");
 
 var Board = require("../boards/board");
 var config = require("./config");
-var controller = require("./controller");
 var Database = require("./database");
-var Global = require("./global");
 var Permissions = require("./permissions");
 var Tools = require("./tools");
 
-var langNames = require("../misc/lang-names.json");
+import * as Renderer from '../core/renderer';
+import * as MiscModel from '../models/misc';
+import Logger from '../helpers/logger';
 
 var SkipTypes = {
     NoSkip: "NO_SKIP",
@@ -157,7 +157,7 @@ var getTwitterEmbeddedHtml = function(href, defaultHtml) {
             return Promise.reject(err);
         }
     }).catch(function(err) {
-        Global.error(err.stack || err);
+        Logger.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function(html) {
         return Promise.resolve(html);
@@ -212,7 +212,7 @@ var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
             info.id = videoId;
             info.href = href;
             info.start = youtubeVideoStartTime(href);
-            var html = controller("markup/youtubeVideoLink", { info: info });
+            let html = Renderer.render('markup/youtubeVideoLink', { info: info });
             if (!html)
                 return Promise.reject(Tools.translate("Failed to create YouTube video link"));
             return Promise.resolve(html);
@@ -220,7 +220,7 @@ var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
             return Promise.reject(err);
         }
     }).catch(function(err) {
-        Global.error(err.stack || err);
+        Logger.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function(html) {
         return Promise.resolve(html);
@@ -256,7 +256,7 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
                 } : null,
                 id: videoId
             };
-            var html = controller("markup/coubVideoLink", { info: info });
+            let html = Renderer.render('markup/coubVideoLink', { info: info });
             if (!html)
                 return Promise.reject(Tools.translate("Failed to create Coub video link"));
             return Promise.resolve(html);
@@ -264,7 +264,7 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
             return Promise.reject(err);
         }
     }).catch(function(err) {
-        Global.error(err.stack || err);
+        Logger.error(err.stack || err);
         return Promise.resolve(defaultHtml);
     }).then(function(html) {
         return Promise.resolve(html);
@@ -276,7 +276,7 @@ var getVocarooEmbeddedHtml = function(href, defaultHtml) {
     var audioId = match ? match[1] : null;
     if (!audioId)
         return Promise.resolve(defaultHtml);
-    var html = controller("markup/vocarooAudioLink", { info: { id: audioId } });
+    let html = Renderer.render('markup/vocarooAudioLink', { info: { id: audioId } });
     if (!html)
         return Promise.reject(Tools.translate("Failed to create Vocaroo audio embedded container"));
     return Promise.resolve(html);
@@ -618,23 +618,33 @@ var convertPre = function(_, text, __, ___, options) {
     return Promise.resolve(text);
 };
 
+function markupCode(text, lang) {
+  if (lang) {
+    lang = lang.replace('++', 'pp').replace('#', 's'); //TODO: You know, this is not OK.
+  }
+  Highlight.configure({
+    tabReplace: '    ',
+    useBR: true
+  });
+  let result = lang ? Highlight.highlight(lang, text, true) : Highlight.highlightAuto(text);
+  text = result.value;
+  lang = result.language || lang;
+  let langClass = lang ? ` ${lang}` : '';
+  let langNames = MiscModel.codeLangNames();
+  let langName = langNames.hasOwnProperty(lang) ? langNames[lang] : lang;
+  return {
+    op: `<div class="code-block${langClass} hljs js-with-tooltip" title="${langName || ''}">`,
+    cl: '</div>',
+    text: Highlight.fixMarkup(text)
+  };
+}
+
 var convertCode = function(_, text, matchs, __, options) {
-    options.type = SkipTypes.CodeSkip;
-    var lang = matchs[1];
-    if (lang)
-        lang = lang.replace("++", "pp").replace("#", "s");
-    Highlight.configure({
-        tabReplace: "    ",
-        useBR: true
-    });
-    var result = lang ? Highlight.highlight(lang, text, true) : Highlight.highlightAuto(text);
-    text = result.value;
-    lang = result.language || lang;
-    var langClass = lang ? (" " + lang) : "";
-    var langName = langNames.hasOwnProperty(lang) ? langNames[lang] : lang;
-    options.op = `<div class="code-block${langClass} hljs js-with-tooltip" title="${langName || ''}">`;
-    options.cl = "</div>";
-    return Promise.resolve(Highlight.fixMarkup(text));
+  options.type = SkipTypes.CodeSkip;
+  let result = markupCode(text, matchs[1]);
+  options.op = result.op;
+  options.cl = result.cl;
+  return Promise.resolve(result.text);
 };
 
 var convertVkontaktePost = function(_, __, matchs, ___, options) {
@@ -1090,5 +1100,6 @@ var processPostText = function(boardName, text, options) {
 };
 
 Object.defineProperty(processPostText, "MarkupModes", { value: MarkupModes });
+Object.defineProperty(processPostText, "markupCode", { value: markupCode });
 
 module.exports = processPostText;

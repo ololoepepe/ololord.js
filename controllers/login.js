@@ -1,17 +1,29 @@
-"use strict";
+'use strict';
 
-var express = require("express");
+var _express = require('express');
 
-var controller = require("../helpers/controller");
-var Tools = require("../helpers/tools");
+var _express2 = _interopRequireDefault(_express);
 
-var router = express.Router();
+var _renderer = require('../core/renderer');
 
-router.generateHTML = function () {
-    var model = {};
-    model.title = Tools.translate("Login", "loginButtonText");
-    model.extraScripts = [{ fileName: "3rdparty/sha1.min.js" }, { fileName: "3rdparty/URI.min.js" }, { fileName: "login.js" }];
-    return Promise.resolve({ "login.html": controller("pages/login", model) });
+var Renderer = _interopRequireWildcard(_renderer);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var router = _express2.default.Router();
+
+router.paths = function () {
+  return ['/login.html'];
+};
+
+router.render = function () {
+  return { 'login.html': Renderer.render('pages/login', { title: Tools.translate('Login', 'pageTitle') }) };
 };
 
 module.exports = router;

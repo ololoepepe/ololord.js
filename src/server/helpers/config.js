@@ -3,9 +3,15 @@ var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Path = require("path");
 
-var Global = require("./global");
+import OS from 'os';
+
+import Program from './program';
 
 const DEFAULT_VALUES = new Map([
+  ['server.ddosProtection.enabled', true],
+  ['server.ddosProtection.ws.connectionLimit', 10],
+  ['server.ddosProtection.ws.maxMessageLength', 20480],
+  ['server.ddosProtection.ws.maxMessageRate', 6],
   ['site.protocol', 'http'],
   ['site.domain', 'localhost:8080'],
   ['site.pathPrefix', ''],
@@ -17,6 +23,11 @@ const DEFAULT_VALUES = new Map([
   ['site.twitter.integrationEnabled', true],
   ['site.ws.transports', ''],
   ['site.maxSearchQueryLength', 50],
+  ['system.detectRealIp', true],
+  ['system.useXRealIp', false],
+  ['system.log.backups', 100],
+  ['system.log.maxSize', 1048576],
+  ['system.log.targets', ['console', 'file']],
   ['system.redis.host', '127.0.0.1'],
   ['system.redis.port', 6379],
   ['system.redis.family', 4],
@@ -29,7 +40,8 @@ const DEFAULT_VALUES = new Map([
   ['system.redis.retryDelayOnClusterDown', 100],
   ['system.redis.retryDelayOnTryAgain', 100],
   ['system.regenerateCacheOnStartup', true],
-  ['system.regenerateArchive', false]
+  ['system.regenerateArchive', false],
+  ['system.workerCount', OS.cpus().length]
 ]);
 
 var contains = function(s, subs) {
@@ -44,7 +56,7 @@ var contains = function(s, subs) {
     return false;
 };
 
-var configFileName = Global.Program && Global.Program.configFile;
+var configFileName = Program.configFile;
 if (!configFileName)
     configFileName = __dirname + "/../config.json";
 configFileName = Path.resolve(__dirname + "/..", configFileName);
@@ -138,7 +150,7 @@ c.reload = function() {
 };
 
 c.setConfigFile = function(fileName) {
-    fileName = fileName || (Global.Program && Global.Program.configFile);
+    fileName = fileName || Program.configFile;
     if (!fileName)
         fileName = __dirname + "/../config.json";
     configFileName = Path.resolve(__dirname + "/..", fileName);

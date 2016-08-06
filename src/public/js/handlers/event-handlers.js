@@ -82,7 +82,7 @@ registerHandler('load', () => {
   }
 }, {
   priority: 0,
-  test: () => { return !/\/login.html$/.test(window.location.pathname); }
+  test: () => { return !/^\/login.html$/.test(Tools.locationPathname()); }
 });
 
 Settings.deviceType.subscribe(() => {
@@ -146,7 +146,7 @@ registerHandler('load', () => {
   priority: 10,
   test: () => {
     return Tools.isBoardPage() && !Tools.isThreadPage()
-      && !/(archive|catalog(\-(recent|bumps))?)\.html$/.test(window.location.pathname);
+      && !/^(archive|catalog(\-(recent|bumps))?)\.html$/.test(Tools.locationPathname());
   }
 });
 
@@ -185,12 +185,12 @@ registerHandler('load', () => {
   vkButton.style.width = '';
 }, {
   priority: 0,
-  test: () => { return /\/login.html$/.test(window.location.pathname); }
+  test: /^\/login.html$/
 });
 
 registerHandler('load', Management.initializeManagement, {
   priority: 10,
-  test: () => { return /\/manage.html$/.test(window.location.pathname); }
+  test: /^\/manage.html$/
 });
 
 registerHandler('beforeunload', DOM.setUnloading);

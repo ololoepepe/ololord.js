@@ -49,6 +49,7 @@
     "commander": "^2.9.0",
     "cookie-parser": "^1.4.0",
     "cute-localize": "^0.1.14",
+    "dddos": "^0.1.1",
     "ddos-express": "^0.1.1",
     "deep-equal": "^1.0.1",
     "dot": "^1.0.3",

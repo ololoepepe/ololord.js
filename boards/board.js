@@ -1,5 +1,17 @@
 "use strict";
 
+var _ipc = require("../helpers/ipc");
+
+var IPC = _interopRequireWildcard(_ipc);
+
+var _logger = require("../helpers/logger");
+
+var _logger2 = _interopRequireDefault(_logger);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 var Address6 = require("ip-address").Address6;
 var Crypto = require("crypto");
 var ffmpeg = require("fluent-ffmpeg");
@@ -12,7 +24,6 @@ var UUID = require("uuid");
 
 var Captcha = require("../captchas");
 var config = require("../helpers/config");
-var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
 var ImageMagick = promisify("imagemagick");
@@ -257,7 +268,7 @@ var renderFileInfo = function renderFileInfo(fi) {
 };
 
 /*public*/Board.prototype.generateFileName = function (file) {
-    return Global.IPC.send("fileName").then(function (base) {
+    return IPC.send('fileName').then(function (base) {
         var ext = Path.extname(file.name);
         if (Util.isString(ext)) ext = ext.substr(1);
         if (!ext || Board.MimeTypesForExtensions[ext.toLowerCase()] != file.mimeType) ext = Board.DefaultExtensions[file.mimeType];
@@ -278,7 +289,7 @@ var renderFileInfo = function renderFileInfo(fi) {
     } else {
         p = Promise.resolve();
     }
-    var thumbPath = Path.dirname(file.path) + "/" + UUID.v1();
+    var thumbPath = Path.dirname(file.path) + "/" + UUID.v4();
     file.thumbPath = thumbPath;
     return p.then(function () {
         if (Tools.isAudioType(file.mimeType)) {
@@ -300,7 +311,7 @@ var renderFileInfo = function renderFileInfo(fi) {
                 file.extraData.year = metadata.year || "";
                 return Promise.resolve(metadata);
             }).catch(function (err) {
-                Global.error(err.stack || err);
+                _logger2.default.error(err.stack || err);
                 file.extraData.album = "";
                 file.extraData.artist = "";
                 file.extraData.title = "";
@@ -343,7 +354,7 @@ var renderFileInfo = function renderFileInfo(fi) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
                 });
             }).catch(function (err) {
-                Global.error(err.stack || err);
+                _logger2.default.error(err.stack || err);
                 file.thumbPath = thumbPath;
                 defaultThumb = true;
                 return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);

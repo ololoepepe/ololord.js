@@ -2,14 +2,22 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
+var _os = require("os");
+
+var _os2 = _interopRequireDefault(_os);
+
+var _program = require("./program");
+
+var _program2 = _interopRequireDefault(_program);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var equal = require("deep-equal");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
 var Path = require("path");
 
-var Global = require("./global");
-
-var DEFAULT_VALUES = new Map([['site.protocol', 'http'], ['site.domain', 'localhost:8080'], ['site.pathPrefix', ''], ['site.locale', 'en'], ['site.dateFormat', 'MM/DD/YYYY hh:mm:ss'], ['site.timeOffset', 0], ['site.vkontakte.integrationEnabled', false], ['site.vkontakte.appId', ''], ['site.twitter.integrationEnabled', true], ['site.ws.transports', ''], ['site.maxSearchQueryLength', 50], ['system.redis.host', '127.0.0.1'], ['system.redis.port', 6379], ['system.redis.family', 4], ['system.redis.password', ''], ['system.redis.db', 0], ['system.redis.enableReadyCheck', false], ['system.redis.maxRedirections', 16], ['system.redis.scaleReads', 'master'], ['system.redis.retryDelayOnFailover', 100], ['system.redis.retryDelayOnClusterDown', 100], ['system.redis.retryDelayOnTryAgain', 100], ['system.regenerateCacheOnStartup', true], ['system.regenerateArchive', false]]);
+var DEFAULT_VALUES = new Map([['server.ddosProtection.enabled', true], ['server.ddosProtection.ws.connectionLimit', 10], ['server.ddosProtection.ws.maxMessageLength', 20480], ['server.ddosProtection.ws.maxMessageRate', 6], ['site.protocol', 'http'], ['site.domain', 'localhost:8080'], ['site.pathPrefix', ''], ['site.locale', 'en'], ['site.dateFormat', 'MM/DD/YYYY hh:mm:ss'], ['site.timeOffset', 0], ['site.vkontakte.integrationEnabled', false], ['site.vkontakte.appId', ''], ['site.twitter.integrationEnabled', true], ['site.ws.transports', ''], ['site.maxSearchQueryLength', 50], ['system.detectRealIp', true], ['system.useXRealIp', false], ['system.log.backups', 100], ['system.log.maxSize', 1048576], ['system.log.targets', ['console', 'file']], ['system.redis.host', '127.0.0.1'], ['system.redis.port', 6379], ['system.redis.family', 4], ['system.redis.password', ''], ['system.redis.db', 0], ['system.redis.enableReadyCheck', false], ['system.redis.maxRedirections', 16], ['system.redis.scaleReads', 'master'], ['system.redis.retryDelayOnFailover', 100], ['system.redis.retryDelayOnClusterDown', 100], ['system.redis.retryDelayOnTryAgain', 100], ['system.regenerateCacheOnStartup', true], ['system.regenerateArchive', false], ['system.workerCount', _os2.default.cpus().length]]);
 
 var contains = function contains(s, subs) {
     if (typeof s == "string" && typeof subs == "string") return s.replace(subs, "") != s;
@@ -20,7 +28,7 @@ var contains = function contains(s, subs) {
     return false;
 };
 
-var configFileName = Global.Program && Global.Program.configFile;
+var configFileName = _program2.default.configFile;
 if (!configFileName) configFileName = __dirname + "/../config.json";
 configFileName = Path.resolve(__dirname + "/..", configFileName);
 var config = {};
@@ -103,7 +111,7 @@ c.reload = function () {
 };
 
 c.setConfigFile = function (fileName) {
-    fileName = fileName || Global.Program && Global.Program.configFile;
+    fileName = fileName || _program2.default.configFile;
     if (!fileName) fileName = __dirname + "/../config.json";
     configFileName = Path.resolve(__dirname + "/..", fileName);
     c.reload();

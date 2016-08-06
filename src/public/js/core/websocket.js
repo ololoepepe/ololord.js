@@ -162,7 +162,7 @@ export async function sendMessage(type, data) {
     return Promise.reject(Tools.translate('WebSocket communication is disabled'));
   }
   let promise = new Promise((resolve, reject) => {
-    let id = UUID.v1();
+    let id = UUID.v4();
     queue.push({
       id: id,
       type: type,

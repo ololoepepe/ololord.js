@@ -12,7 +12,6 @@ import * as ThreadsModel from '../models/threads';
 import * as UsersModel from '../models/users';
 import Board from '../boards/board';
 import Captcha from '../captchas';
-var controller = require("../helpers/controller"); //TODO
 import * as Tools from '../helpers/tools';
 
 const TEXT_FORMATS = new Set(['txt', 'js', 'json', 'jst', 'html', 'xml', 'css', 'md', 'example', 'gitignore', 'log']);
@@ -24,7 +23,7 @@ router.get('/api/post.json', async function(req, res, next) {
     return next(Tools.translate('Invalid board'));
   }
   try {
-    await controller.checkBan(req.ip, req.query.boardName);
+    await UsersModel.checkUserBan(req.ip, req.query.boardName);
     let post = await PostsModel.getPost(req.query.boardName, +req.query.postNumber, {
       withFileInfos: true,
       withReferences: true,
@@ -46,7 +45,7 @@ router.get('/api/threadInfo.json', async function(req, res, next) {
     return next(Tools.translate('Invalid board'));
   }
   try {
-    await controller.checkBan(req.ip, req.query.boardName);
+    await UsersModel.checkUserBan(req.ip, req.query.boardName);
     let threadInfo = await ThreadsModel.getThreadInfo(req.query.boardName, +req.query.threadNumber,
       { lastPostNumber: +req.query.lastPostNumber });
     res.json(threadInfo);
@@ -62,7 +61,7 @@ router.get('/api/threadInfos.json', async function(req, res, next) {
   }
   try {
     let boardNames = (threads || []).map(thread => thread.split(':').shift());
-    await controller.checkBan(req.ip, boardNames);
+    await UsersModel.checkUserBan(req.ip, boardNames);
     let threadInfos = await Tools.series(threads || [], async function(thread) {
       let [boardName, threadNumber, lastPostNumber] = thread.split(':');
       return await ThreadsModel.getThreadInfo(boardName, +threadNumber, { lastPostNumber: +lastPostNumber });
@@ -79,7 +78,7 @@ router.get('/api/threadLastPostNumber.json', async function(req, res, next) {
     return next(Tools.translate('Invalid board'));
   }
   try {
-    await controller.checkBan(req.ip, boardName);
+    await UsersModel.checkUserBan(req.ip, boardName);
     let threadLastPostNumber = await ThreadsModel.getThreadLastPostNumber(boardName, +req.query.threadNumber);
     res.json({ lastPostNumber: threadLastPostNumber });
   } catch (err) {
@@ -94,7 +93,7 @@ router.get('/api/threadLastPostNumbers.json', async function(req, res, next) {
   }
   try {
     let boardNames = (threads || []).map(thread => thread.split(':').shift());
-    await controller.checkBan(req.ip, boardNames);
+    await UsersModel.checkUserBan(req.ip, boardNames);
     let threadLastPostNumbers = await Tools.series(threads || [], async function(thread) {
       let [boardName, threadNumber] = thread.split(':');
       return await ThreadsModel.getThreadLastPostNumber(boardName, +threadNumber);
@@ -193,7 +192,7 @@ router.get('/api/captchaQuota.json', async function(req, res, next) {
     return next(Tools.translate('Invalid board'));
   }
   try {
-    await controller.checkBan(req.ip, req.query.boardName);
+    await UsersModel.checkUserBan(req.ip, req.query.boardName);
     let quota = UsersModel.getUserCaptchaQuota(req.query.boardName, req.ip);
     res.json({ quota: quota });
   } catch (err) {
@@ -206,7 +205,7 @@ router.get('/api/userIp.json', async function(req, res, next) {
     return next(Tools.translate('Invalid board'));
   }
   try {
-    await controller.checkBan(req.ip, req.query.boardName);
+    await UsersModel.checkUserBan(req.ip, req.query.boardName);
     if (!req.isModer()) {
       return next(Tools.translate('Not enough rights'));
     }

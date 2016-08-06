@@ -1,11 +1,22 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _logger = require("../helpers/logger");
+
+var _logger2 = _interopRequireDefault(_logger);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var cookieParser = require("cookie-parser");
-var ddos = require("ddos-express");
+var DDDoS = require("dddos");
 var express = require("express");
 
 var config = require("../helpers/config");
-var Global = require("../helpers/global");
 var OnlineCounter = require("../helpers/online-counter");
 var Tools = require("../helpers/tools");
 
@@ -40,10 +51,10 @@ var log = function log(req, res, next) {
             req.formFields = result.fields;
             req.formFiles = result.files;
             args.push(result.fields);
-            Global.info.apply(Global.logger, args);
+            _logger2.default.info.apply(_logger2.default, _toConsumableArray(args));
             return Promise.resolve();
         }).catch(function (err) {
-            Global.error(err);
+            _logger2.default.error(err);
             return Promise.resolve();
         }).then(next);
     }
@@ -61,25 +72,25 @@ var log = function log(req, res, next) {
         default:
             break;
     }
-    if (args) Global.info.apply(Global.logger, args);
+    if (args) _logger2.default.info.apply(_logger2.default, _toConsumableArray(args));
     next();
 };
 
-module.exports = [];
+var middlewares = [];
 
-if (config("system.log.middleware.before", "all") == "all") module.exports.push(log);
+if (config("system.log.middleware.before", "all") == "all") middlewares.push(log);
 
-module.exports.push(require("./ip-fix"));
-module.exports.push(function (req, res, next) {
+middlewares.push(require("./ip-fix"));
+middlewares.push(function (req, res, next) {
     OnlineCounter.alive(req.ip);
     next();
 });
 
 var setupDdos = function setupDdos() {
-    if (config("system.log.middleware.before", "all") == "ddos") module.exports.push(log);
+    if (config("system.log.middleware.before", "all") == "ddos") middlewares.push(log);
 
     if (config("server.ddosProtection.enabled", true)) {
-        module.exports.push(ddos({
+        middlewares.push(new DDDoS({
             errorData: config("server.ddosProtection.errorData", "Not so fast!"),
             errorCode: config("server.ddosProtection.errorCode", 429),
             weight: config("server.ddosProtection.weight", 1),
@@ -116,14 +127,14 @@ var setupDdos = function setupDdos() {
                 regexp: ".*",
                 maxWeight: 10
             }]),
-            logFunction: Global.error.bind(null, "DDoS detected:")
-        }));
+            logFunction: _logger2.default.error.bind(_logger2.default, "DDoS detected:")
+        }).express());
     }
 };
 
 var setupStatic = function setupStatic() {
-    if (config("system.log.middleware.before", "all") == "static") module.exports.push(log);
-    module.exports.push(express.static(__dirname + "/../public"));
+    if (config("system.log.middleware.before", "all") == "static") middlewares.push(log);
+    middlewares.push(express.static(__dirname + "/../public"));
 };
 
 if (config("server.ddosProtection.static", false)) {
@@ -134,14 +145,16 @@ if (config("server.ddosProtection.static", false)) {
     setupDdos();
 }
 
-if (config("system.log.middleware.before", "all") == "middleware") module.exports.push(log);
+if (config("system.log.middleware.before", "all") == "middleware") middlewares.push(log);
 
-module.exports = module.exports.concat([cookieParser(), function (req, res, next) {
+middlewares = middlewares.concat([cookieParser(), function (req, res, next) {
     req.hashpass = Tools.hashpass(req);
     next();
 }, require("./registered-user")]);
 
-if (config("system.log.middleware.before", "all") == "request") module.exports.push(log);
+if (config("system.log.middleware.before", "all") == "request") middlewares.push(log);
 
-module.exports.push(require("./cookies"));
+middlewares.push(require("./cookies"));
+
+exports.default = middlewares;
 //# sourceMappingURL=index.js.map

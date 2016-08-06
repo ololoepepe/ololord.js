@@ -8,6 +8,7 @@ exports.boards = boards;
 exports.board = board;
 exports.translations = translations;
 exports.notFoundImageFileNames = notFoundImageFileNames;
+exports.codeLangNames = codeLangNames;
 
 var _underscore = require('underscore');
 
@@ -216,7 +217,7 @@ function board(brd) {
   if (typeof brd === 'string') {
     brd = Board.board(brd);
   }
-  return board ? { board: board.info() } : null;
+  return brd ? { board: brd.info() } : null;
 }
 
 function translations() {
@@ -225,5 +226,9 @@ function translations() {
 
 function notFoundImageFileNames() {
   return notFoundImageFileNames;
+}
+
+function codeLangNames() {
+  return langNames;
 }
 //# sourceMappingURL=misc.js.map

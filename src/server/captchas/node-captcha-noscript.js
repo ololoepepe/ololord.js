@@ -4,8 +4,9 @@ var UUID = require("uuid");
 
 var Captcha = require("./captcha");
 var config = require("../helpers/config");
-var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
+
+import Logger from '../helpers/logger';
 
 var nodeCaptcha = new Captcha("node-captcha-noscript", Tools.translate.noop("Node captcha (no script)"));
 
@@ -22,7 +23,7 @@ nodeCaptcha.checkCaptcha = function(req, fields) {
   }
   clearTimeout(challenge.timer);
   FS.remove(__dirname + "/../tmp/node-captcha-noscript/" + challenge.fileName).catch(function(err) {
-    Global.error(err);
+    Logger.error(err);
   });
   delete nodeCaptcha.challenges[req.ip];
   if (response !== challenge.response) {
@@ -64,7 +65,7 @@ nodeCaptcha.apiRoutes = function() {
               response: response,
               timer: setTimeout(function() {
                 FS.remove(__dirname + "/../tmp/node-captcha-noscript/" + fileName).catch(function(err) {
-                  Global.error(err);
+                  Logger.error(err);
                 });
                 delete nodeCaptcha.challenges[challenge];
               }, config("captcha.node-captcha.ttl", 5 * Tools.Minute))
@@ -76,5 +77,20 @@ nodeCaptcha.apiRoutes = function() {
     }
   }];
 };
+
+nodeCaptcha.removeOldCaptchImages = async function() {
+  try {
+    const PATH = `${__dirname}/../tmp/node-captcha-noscript`;
+    let fileNames = await FS.list(PATH);
+    await Tools.series(fileNames.filter((fileName) => {
+      let [name, suffix] = fileName.split('.');
+      return 'png' === suffix && /^[0-9]+$/.test(name);
+    }), async function(fileName) {
+      return await FS.remove(`${path}/${fileName}`);
+    });
+  } catch (err) {
+    Logger.error(err.stack || err);
+  }
+}
 
 module.exports = nodeCaptcha;

@@ -6,7 +6,8 @@ import * as BoardsModel from './board'; //TODO: board -> boards
 import * as UsersModel from './users';
 import Board from '../boards/board';
 import * as Cache from '../helpers/cache';
-var Global = require("../helpers/global");
+import * as IPC from '../helpers/ipc';
+import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 
 async function gatherBoardStatistics(board) {
@@ -17,14 +18,14 @@ async function gatherBoardStatistics(board) {
     statistics.postCount = lastPostNumber;
     statistics.postingSpeed = Tools.postingSpeedString(board.launchDate, lastPostNumber);
   } catch (err) {
-    Global.error(err.stack || err);
+    Logger.error(err.stack || err);
   }
   try {
     let fileNames = await FS.list(`${BOARD_PUBLIC_PATH}/src`);
     statistics.fileCount = fileNames.length;
   } catch (err) {
     if ('ENOENT' !== err.code) {
-      Global.error(err.stack || err);
+      Logger.error(err.stack || err);
     }
   }
   await Tools.series(['src', 'thumb', 'arch'], async function(subpath) {
@@ -33,7 +34,7 @@ async function gatherBoardStatistics(board) {
       statistics.diskUsage += size;
     } catch (err) {
       if ('ENOENT' !== err.code) {
-        Global.error(err.stack || err);
+        Logger.error(err.stack || err);
       }
     }
   });
@@ -43,7 +44,7 @@ async function gatherBoardStatistics(board) {
 //Must be called from the master process only.
 export async function generateStatistics() {
   if (!Cluster.isMaster) {
-    Global.error(Tools.translate('Error: generateStatistics() called from worker process.'));
+    Logger.error(Tools.translate('Error: generateStatistics() called from worker process.'));
     return;
   }
   console.log(Tools.translate('Generating statistics...'));
@@ -92,7 +93,7 @@ export async function generateStatistics() {
       statistics.boards.push(boardStatistics);
     });
     statistics.total.postingSpeed = Tools.postingSpeedString(launchDate, statistics.total.postCount);
-    let data = await Global.IPC.send('getConnectionIPs');
+    let data = await IPC.send('getConnectionIPs');
     statistics.online = data.reduce((acc, ips) => {
       _(ips).each((_1, ip) => { acc.add(ip); });
       return acc;
@@ -100,6 +101,6 @@ export async function generateStatistics() {
     statistics.uptime = process.uptime();
     await Cache.writeFile('misc/statistics.json', JSON.stringify(statistics));
   } catch (err) {
-    Global.error(err.stack || err);
+    Logger.error(err.stack || err);
   }
 }

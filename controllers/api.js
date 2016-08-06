@@ -64,9 +64,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var controller = require("../helpers/controller"); //TODO
-
-
 var TEXT_FORMATS = new Set(['txt', 'js', 'json', 'jst', 'html', 'xml', 'css', 'md', 'example', 'gitignore', 'log']);
 
 var router = _express2.default.Router();
@@ -88,7 +85,7 @@ router.get('/api/post.json', function () {
           case 2:
             _context.prev = 2;
             _context.next = 5;
-            return controller.checkBan(req.ip, req.query.boardName);
+            return UsersModel.checkUserBan(req.ip, req.query.boardName);
 
           case 5:
             _context.next = 7;
@@ -156,7 +153,7 @@ router.get('/api/threadInfo.json', function () {
           case 2:
             _context2.prev = 2;
             _context2.next = 5;
-            return controller.checkBan(req.ip, req.query.boardName);
+            return UsersModel.checkUserBan(req.ip, req.query.boardName);
 
           case 5:
             _context2.next = 7;
@@ -205,7 +202,7 @@ router.get('/api/threadInfos.json', function () {
               return thread.split(':').shift();
             });
             _context4.next = 6;
-            return controller.checkBan(req.ip, boardNames);
+            return UsersModel.checkUserBan(req.ip, boardNames);
 
           case 6:
             _context4.next = 8;
@@ -286,7 +283,7 @@ router.get('/api/threadLastPostNumber.json', function () {
           case 3:
             _context5.prev = 3;
             _context5.next = 6;
-            return controller.checkBan(req.ip, boardName);
+            return UsersModel.checkUserBan(req.ip, boardName);
 
           case 6:
             _context5.next = 8;
@@ -335,7 +332,7 @@ router.get('/api/threadLastPostNumbers.json', function () {
               return thread.split(':').shift();
             });
             _context7.next = 6;
-            return controller.checkBan(req.ip, boardNames);
+            return UsersModel.checkUserBan(req.ip, boardNames);
 
           case 6:
             _context7.next = 8;
@@ -715,7 +712,7 @@ router.get('/api/captchaQuota.json', function () {
           case 2:
             _context14.prev = 2;
             _context14.next = 5;
-            return controller.checkBan(req.ip, req.query.boardName);
+            return UsersModel.checkUserBan(req.ip, req.query.boardName);
 
           case 5:
             quota = UsersModel.getUserCaptchaQuota(req.query.boardName, req.ip);
@@ -760,7 +757,7 @@ router.get('/api/userIp.json', function () {
           case 2:
             _context15.prev = 2;
             _context15.next = 5;
-            return controller.checkBan(req.ip, req.query.boardName);
+            return UsersModel.checkUserBan(req.ip, req.query.boardName);
 
           case 5:
             if (req.isModer()) {

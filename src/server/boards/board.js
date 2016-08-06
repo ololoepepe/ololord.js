@@ -10,8 +10,10 @@ var UUID = require("uuid");
 
 var Captcha = require("../captchas");
 var config = require("../helpers/config");
-var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
+
+import * as IPC from '../helpers/ipc';
+import Logger from '../helpers/logger';
 
 var ImageMagick = promisify("imagemagick");
 var musicMetadata = promisify("musicmetadata");
@@ -301,7 +303,7 @@ var renderFileInfo = function(fi) {
 };
 
 /*public*/ Board.prototype.generateFileName = function(file) {
-    return Global.IPC.send("fileName").then(function(base) {
+    return IPC.send('fileName').then(function(base) {
         var ext = Path.extname(file.name);
         if (Util.isString(ext))
             ext = ext.substr(1);
@@ -324,7 +326,7 @@ var renderFileInfo = function(fi) {
     } else {
         p = Promise.resolve();
     }
-    var thumbPath = Path.dirname(file.path) + "/" + UUID.v1();
+    var thumbPath = Path.dirname(file.path) + "/" + UUID.v4();
     file.thumbPath = thumbPath;
     return p.then(function() {
         if (Tools.isAudioType(file.mimeType)) {
@@ -347,7 +349,7 @@ var renderFileInfo = function(fi) {
                 file.extraData.year = metadata.year || "";
                 return Promise.resolve(metadata);
             }).catch(function(err) {
-                Global.error(err.stack || err);
+                Logger.error(err.stack || err);
                 file.extraData.album = "";
                 file.extraData.artist = "";
                 file.extraData.title = "";
@@ -401,7 +403,7 @@ var renderFileInfo = function(fi) {
                     ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
                 });
             }).catch(function(err) {
-                Global.error(err.stack || err);
+                Logger.error(err.stack || err);
                 file.thumbPath = thumbPath;
                 defaultThumb = true;
                 return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);

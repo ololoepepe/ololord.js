@@ -6,9 +6,7 @@ let processors = [];
 export let registerProcessor = Tools.createRegisterFunction(processors);
 
 registerProcessor(Threads.updateLastPostNumbers, {
-  test: () => {
-    return Tools.isBoardPage() && !Tools.isThreadPage();
-  }
+  test: () => { return Tools.isBoardPage() && !Tools.isThreadPage(); }
 });
 
 export function executeProcessors() {

@@ -68,7 +68,7 @@ export function doWork(type, data, transferable) {
     return Promise.reject(Tools.translate('WebWorker is not initialzed'));
   }
   return new Promise((resolve, reject) => {
-    const ID = UUID.v1();
+    const ID = UUID.v4();
     workerTasks[ID] = {
       resolve: resolve,
       reject: reject

@@ -1,42 +1,38 @@
-var express = require("express");
+import express from 'express';
+import Highlight from 'highlight.js';
 
-var config = require("../helpers/config");
-var controller = require("../helpers/controller");
-var Highlight = require("highlight.js");
-var Tools = require("../helpers/tools");
+import * as Renderer from '../core/renderer';
+import markup from '../helpers/markup';
+import * as Tools from '../helpers/tools';
 
-var langNames = require("../misc/lang-names.json");
+let router = express.Router();
 
-var router = express.Router();
+const CODE_TO_MARKUP = 'static const int x = 0;';
+const LATEX_TO_MARKUP = 'v=v_0+\\frac{at^2}{2}';
+const INLINE_LATEX_TO_MARKUP = 'E=mc^2';
 
-router.generateHTML = function() {
-    var model = {};
-    model.title = Tools.translate("Markup", "pageTitle");
-    model.codeToMarkup = "static const int x = 0;";
-    Highlight.configure({
-        tabReplace: "    ",
-        useBR: true
-    });
-    var result = Highlight.highlight("cpp", model.codeToMarkup, true);
-    model.markedUpCode = "<div class=\"code-block cpp hljs\" title=\"C++\">" + Highlight.fixMarkup(result.value)
-        + "</div>";
-    model.langs = Highlight.listLanguages().map(function(lang) {
-        return {
-            id: lang,
-            name: langNames[lang] || lang
-        };
-    });
-    if (config("site.twitter.integrationEnabled", true))
-        model.extraScripts = [ { fileName: "3rdparty/twitter.js" } ];
-    model.latexToMarkup = "v=v_0+\\frac{at^2}{2}";
-    model.inlineLatexToMarkup = "E=mc^2";
-    return Tools.markupLatex(model.latexToMarkup).then(function(html) {
-        model.markedUpLatex = html;
-        return Tools.markupLatex(model.inlineLatexToMarkup, true);
-    }).then(function(html) {
-        model.markedUpInlineLatex = html;
-        return Promise.resolve({ "markup.html": controller("pages/markup", model) });
-    });
+router.paths = () => {
+  return ['/markup.html'];
+};
+
+router.render = async function() {
+  Highlight.configure({
+    tabReplace: '    ',
+    useBR: true
+  });
+  let result = markup.markpCode(CODE_TO_MARKUP, 'cpp');
+  let markedUpLatex = await Tools.markupLatex(LATEX_TO_MARKUP);
+  let markedUpInlineLatex = await Tools.markupLatex(INLINE_LATEX_TO_MARKUP, true);
+  let model = {
+    title: Tools.translate('Markup', 'pageTitle'),
+    codeToMarkup: CODE_TO_MARKUP,
+    markedUpCode: result.op + result.text + result.cl,
+    latexToMarkup: LATEX_TO_MARKUP,
+    markedUpLatex: markedUpLatex,
+    inlineLatexToMarkup: INLINE_LATEX_TO_MARKUP,
+    inlineLatexToMarkup: inlineLatexToMarkup
+  };
+  return { 'markup.html': Renderer.render('pages/markup', model) };
 };
 
 module.exports = router;

@@ -437,11 +437,11 @@ export function testFilter(item, data) {
   } else if (!test) {
     return true;
   } else if (_(test).isRegExp()) {
-    return test.test(window.location.pathname);
+    return test.test(locationPathname());
   } else if (typeof test === 'function') {
     return test(data);
   } else {
-    return test == window.location.pathname;
+    return test === locationPathname();
   }
 }
 
@@ -491,27 +491,58 @@ export function createRegisterFunction(processors, processorPropertyName, type, 
   return map ? f : f.bind(null, undefined);
 }
 
+export function locationPathname() {
+  return window.location.pathname.substr(_requireModel ? _requireModel('base').site.pathPrefix.length : 0);
+}
+
 export function isThreadPage() {
-  return /\/(res|arch)\/\d+\.html$/.test(window.location.pathname);
+  let match = locationPathname().match(/^\/([^\/]+)\/(res|arch)\/\d+\.html$/);
+  if (!match) {
+    return false;
+  }
+  if (!_requireModel) {
+    return true;
+  }
+  return _requireModel('boards').boards.some((board) => { return match[1] === board.name; });
 }
 
 export function isArchivedThreadPage() {
-  return /\/arch\/\d+\.html$/.test(window.location.pathname);
+  let match = locationPathname().match(/^\/([^\/]+)\/arch\/\d+\.html$/);
+  if (!match) {
+    return false;
+  }
+  if (!_requireModel) {
+    return true;
+  }
+  return _requireModel('boards').boards.some((board) => { return match[1] === board.name; });
 }
 
 export function isBoardPage() {
-  let pathname = window.location.pathname;
-  return isThreadPage() || /\/[^\/]+\/\d+\.html$/.test(pathname) || /\/[^\/\.]+\/?$/.test(pathname);
+  if (isThreadPage()) {
+    return true;
+  }
+  let pathname = locationPathname();
+  let match = pathname.match(/^\/([^\/]+)\/\d+\.html$/) || pathname.match(/^\/([^\/\.]+)\/?$/);
+  if (!match) {
+    return false;
+  }
+  if (!_requireModel) {
+    return true;
+  }
+  return _requireModel('boards').boards.some((board) => { return match[1] === board.name; });
 }
 
 export function pageNumber() {
   if (!isBoardPage() || isThreadPage()) {
     return;
   }
-  let pathname = window.location.pathname;
-  let match = pathname.match(/\/[^\/]+\/(\d+)\.html$/);
+  let pathname = locationPathname();
+  let match = pathname.match(/^\/([^\/]+)\/(\d+)\.html$/);
   if (match) {
-    return +match[1];
+    if (_requireModel && !_requireModel('boards').boards.some((board) => { return match[1] === board.name; })) {
+      return 0;
+    }
+    return +match[2];
   }
   return 0;
 }
@@ -521,15 +552,27 @@ export function pageCount() {
 }
 
 export function threadNumber() {
-  let match = window.location.pathname.match(/\/(res|arch)\/(\d+)\.html$/);
-  return (match && +match[2]) || 0;
+  let match = locationPathname().match(/^\/([^\/])\/(res|arch)\/(\d+)\.html$/);
+  if (match) {
+    if (_requireModel && !_requireModel('boards').boards.some((board) => { return match[1] === board.name; })) {
+      return 0;
+    }
+    return +match[3];
+  }
+  return 0;
 }
 
 export function boardName() {
-  let pathname = window.location.pathname;
-  let match = pathname.match(/\/([^\/]+)\/(res|arch)\/\d+\.html$/) || pathname.match(/\/([^\/]+)\/\d+\.html$/)
-    || pathname.match(/\/([^\/\.]+)\/?$/);
-  return (match && match[1]) || "";
+  let pathname = locationPathname();
+  let match = pathname.match(/^\/([^\/]+)\/(res|arch)\/\d+\.html$/) || pathname.match(/^\/([^\/]+)\/\d+\.html$/)
+    || pathname.match(/^\/([^\/\.]+)\/?$/);
+  if (match) {
+    if (_requireModel && !_requireModel('boards').boards.some((board) => { return match[1] === board.name; })) {
+      return '';
+    }
+    return match[1];
+  }
+  return '';
 }
 
 export function capitalizeFirstLetter(string) {

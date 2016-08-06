@@ -114,7 +114,7 @@ export function board(brd) {
   if (typeof brd === 'string') {
     brd = Board.board(brd);
   }
-  return board ? { board: board.info() } : null;
+  return brd ? { board: brd.info() } : null;
 }
 
 export function translations() {
@@ -123,4 +123,8 @@ export function translations() {
 
 export function notFoundImageFileNames() {
   return notFoundImageFileNames;
+}
+
+export function codeLangNames() {
+  return langNames;
 }

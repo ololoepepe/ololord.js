@@ -1,11 +1,12 @@
 var cookieParser = require("cookie-parser");
-var ddos = require("ddos-express");
+var DDDoS = require("dddos");
 var express = require("express");
 
 var config = require("../helpers/config");
-var Global = require("../helpers/global");
 var OnlineCounter = require("../helpers/online-counter");
 var Tools = require("../helpers/tools");
+
+import Logger from '../helpers/logger';
 
 var excludePaths = {};
 var excludeRules = [];
@@ -44,10 +45,10 @@ var log = function(req, res, next) {
             req.formFields = result.fields;
             req.formFiles = result.files;
             args.push(result.fields);
-            Global.info.apply(Global.logger, args);
+            Logger.info(...args);
             return Promise.resolve();
         }).catch(function(err) {
-            Global.error(err);
+            Logger.error(err);
             return Promise.resolve();
         }).then(next);
     }
@@ -66,27 +67,27 @@ var log = function(req, res, next) {
         break;
     }
     if (args)
-        Global.info.apply(Global.logger, args);
+        Logger.info(...args);
     next();
 };
 
-module.exports = [];
+let middlewares = [];
 
 if (config("system.log.middleware.before", "all") == "all")
-    module.exports.push(log);
+    middlewares.push(log);
 
-module.exports.push(require("./ip-fix"));
-module.exports.push(function(req, res, next) {
+middlewares.push(require("./ip-fix"));
+middlewares.push(function(req, res, next) {
     OnlineCounter.alive(req.ip);
     next();
 });
 
 var setupDdos = function() {
     if (config("system.log.middleware.before", "all") == "ddos")
-        module.exports.push(log);
+        middlewares.push(log);
 
     if (config("server.ddosProtection.enabled", true)) {
-        module.exports.push(ddos({
+        middlewares.push(new DDDoS({
             errorData: config("server.ddosProtection.errorData", "Not so fast!"),
             errorCode: config("server.ddosProtection.errorCode", 429),
             weight: config("server.ddosProtection.weight", 1),
@@ -132,15 +133,15 @@ var setupDdos = function() {
                     maxWeight: 10
                 }
             ]),
-            logFunction: Global.error.bind(null, "DDoS detected:")
-        }));
+            logFunction: Logger.error.bind(Logger, "DDoS detected:")
+        }).express());
     }
 };
 
 var setupStatic = function() {
     if (config("system.log.middleware.before", "all") == "static")
-        module.exports.push(log);
-    module.exports.push(express.static(__dirname + "/../public"));
+        middlewares.push(log);
+    middlewares.push(express.static(__dirname + "/../public"));
 };
 
 if (config("server.ddosProtection.static", false)) {
@@ -152,9 +153,9 @@ if (config("server.ddosProtection.static", false)) {
 }
 
 if (config("system.log.middleware.before", "all") == "middleware")
-    module.exports.push(log);
+    middlewares.push(log);
 
-module.exports = module.exports.concat([
+middlewares = middlewares.concat([
     cookieParser(),
     function(req, res, next) {
         req.hashpass = Tools.hashpass(req);
@@ -164,6 +165,8 @@ module.exports = module.exports.concat([
 ]);
 
 if (config("system.log.middleware.before", "all") == "request")
-    module.exports.push(log);
+    middlewares.push(log);
 
-module.exports.push(require("./cookies"));
+middlewares.push(require("./cookies"));
+
+export default middlewares;

@@ -1,7 +1,12 @@
 "use strict";
 
+var _logger = require("../helpers/logger");
+
+var _logger2 = _interopRequireDefault(_logger);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var Database = require("../helpers/database");
-var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
 module.exports = function (req, res, next) {
@@ -31,7 +36,7 @@ module.exports = function (req, res, next) {
         });
         next();
     }).catch(function (err) {
-        Global.error(err.stack || err);
+        _logger2.default.error(err.stack || err);
         next();
     });
 };

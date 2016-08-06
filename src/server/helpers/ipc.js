@@ -1,109 +1,106 @@
-var UUID = require("uuid");
+import _ from 'underscore';
+import Cluster from 'cluster';
+import UUID from 'uuid';
 
-var Tools = require("./tools");
+import * as Logger from './logger';
+import * as Tools from './tools';
 
-var tasks = {};
-var handlers = {};
+let handlers = {};
+let tasks = {};
 
-var handleMessage = function(cluster, message, pid) {
-    var task = tasks[message.id];
-    if (task) {
-        delete tasks[message.id];
-        if (!message.error)
-            task.resolve(message.data);
-        else
-            task.reject(message.error);
+async function handleMessage(message, workerID) {
+  let task = tasks[message.id];
+  if (task) {
+    delete tasks[message.id];
+    if (!message.error) {
+      task.resolve(message.data);
     } else {
-        var handler = handlers[message.type];
-        var proc = pid ? cluster.workers[pid] : process;
-        if (!handler) {
-            if (!proc)
-                return;
-            proc.send({
-                id: message.id,
-                type: message.type,
-                error: "Method not found: " + message.type
-            });
-        }
-        var p = handler(message.data);
-        if (!p || !p.then)
-            p = Promise.resolve(p);
-        p.then(function(data) {
-            if (!proc)
-                return;
-            proc.send({
-                id: message.id,
-                type: message.type,
-                data: data || null
-            });
-        }).catch(function(err) {
-            if (!proc)
-                return;
-            proc.send({
-                id: message.id,
-                type: message.type,
-                error: err
-            });
-        });
+      task.reject(message.error);
     }
-};
+  } else {
+    let handler = handlers[message.type];
+    let proc = workerID ? Cluster.workers[workerID] : process;
+    if (typeof handler !== 'function') {
+      proc.send({
+        id: message.id,
+        type: message.type,
+        error: Tools.translate('Method not found: $[1]', '', message.type)
+      });
+    }
+    try {
+      let data = await handler(message.data);
+      proc.send({
+        id: message.id,
+        type: message.type,
+        data: data || null
+      });
+    } catch (err) {
+      proc.send({
+        id: message.id,
+        type: message.type,
+        error: err
+      });
+    }
+  }
+}
 
-var sendMessage = function(proc, type, data, nowait) {
-    return new Promise(function(resolve, reject) {
-        var id = UUID.v1();
-        tasks[id] = {
-            resolve: resolve,
-            reject: reject
-        };
-        proc.send({
-            id: id,
-            type: type,
-            data: data || null
-        }, function(err) {
-            if (err) {
-                delete tasks[id];
-                reject(err);
-            }
-            if (nowait) {
-                delete tasks[id];
-                resolve();
-            }
-        });
+function sendMessage(proc, type, data, nowait) {
+  return new Promise((resolve, reject) => {
+    let id = UUID.v4();
+    tasks[id] = {
+      resolve: resolve,
+      reject: reject
+    };
+    proc.send({
+      id: id,
+      type: type,
+      data: data || null
+    }, (err) => {
+      if (err) {
+        delete tasks[id];
+        reject(err);
+        return;
+      }
+      if (nowait) {
+        delete tasks[id];
+        resolve();
+      }
     });
-};
+  });
+}
 
-module.exports = function(cluster) {
-    var ipc = {};
-    if (cluster.isMaster) {
-        cluster.on("online", function(worker) {
-            worker.process.on("message", function(message) {
-                handleMessage(cluster, message, worker.id);
-            });
-        });
+if (Cluster.isMaster) {
+  Cluster.on('online', (worker) => {
+    worker.process.on('message', (message) => {
+      handleMessage(message, worker.id);
+    });
+  });
+} else {
+  process.on('message', (message) => {
+    handleMessage(message);
+  });
+}
+
+export function send(type, data, nowait, workerID) {
+  if (Cluster.isMaster) {
+    if (workerID) {
+      let worker = Cluster.workers[workerID];
+      if (!worker) {
+        return Promise.reject(Tools.translate('Invalid worker ID'));
+      }
+      return sendMessage(worker.process, type, data, nowait);
     } else {
-        process.on("message", function(message) {
-            handleMessage(cluster, message);
-        });
+      let promises = _(Cluster.workers).map((worker) => {
+        return sendMessage(worker.process, type, data, nowait);
+      });
+      return Promise.all(promises);
     }
-    ipc.send = function(type, data, nowait, workerId) {
-        if (cluster.isMaster) {
-            if (workerId) {
-                var worker = cluster.workers[workerId];
-                if (!worker)
-                    return Promise.reject(Tools.translate("Invalid worker ID"));
-                return sendMessage(worker.process, type, data, nowait);
-            } else {
-                var promises = Tools.mapIn(cluster.workers, function(worker) {
-                    return sendMessage(worker.process, type, data, nowait);
-                });
-                return Promise.all(promises);
-            }
-        } else {
-            return sendMessage(process, type, data, nowait);
-        }
-    };
-    ipc.installHandler = function(type, handler) {
-        handlers[type] = handler;
-    };
-    return ipc;
-};
+  } else {
+    return sendMessage(process, type, data, nowait);
+  }
+}
+
+export function on(type, handler) {
+  handlers[type] = handler;
+  return module.exports;
+}

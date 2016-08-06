@@ -2,7 +2,6 @@ var Address4 = require("ip-address").Address4;
 var Address6 = require("ip-address").Address6;
 
 var config = require("../helpers/config");
-var controller = require("../helpers/controller");
 var Tools = require("../helpers/tools");
 
 var fast = config("system.fastIPRetrieving", false);

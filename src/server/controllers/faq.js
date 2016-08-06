@@ -1,14 +1,16 @@
-var express = require("express");
+import express from 'express';
 
-var controller = require("../helpers/controller");
-var Tools = require("../helpers/tools");
+import * as Renderer from '../core/renderer';
+import * as Tools from '../helpers/tools';
 
-var router = express.Router();
+let router = express.Router();
 
-router.generateHTML = function() {
-    var model = {};
-    model.title = Tools.translate("F.A.Q.", "pageTitle");
-    return Promise.resolve({ "faq.html": controller("pages/faq", model) });
+router.paths = () => {
+  return ['/faq.html'];
+};
+
+router.render = (paths) => {
+  return { 'faq.html': Renderer.render('pages/faq', { title: Tools.translate('F.A.Q.', 'pageTitle') }) };
 };
 
 module.exports = router;

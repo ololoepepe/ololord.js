@@ -1,23 +1,23 @@
-var express = require("express");
+import express from 'express';
 
-var controller = require("../helpers/controller");
+import * as MiscModel from '../models/misc';
 
-var router = express.Router();
+let router = express.Router();
 
-router.get("/misc/base.json", function(req, res) {
-    res.json(controller.baseModel());
+router.get('/misc/base.json', (req, res) => {
+  res.json(MiscModel.base());
 });
 
-router.get("/misc/boards.json", function(req, res) {
-    res.json(controller.boardsModel());
+router.get('/misc/boards.json', (req, res) => {
+  res.json(MiscModel.boards());
 });
 
-router.get("/misc/board/:board.json", function(req, res) {
-    res.json(controller.boardModel(req.params.board));
+router.get('/misc/board/:board.json', (req, res) => {
+  res.json(MiscModel.board(req.params.board));
 });
 
-router.get("/misc/tr.json", function(req, res) {
-    res.json(controller.translationsModel());
+router.get('/misc/tr.json', (req, res) => {
+  res.json(MiscModel.translations());
 });
 
 module.exports = router;

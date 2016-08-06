@@ -1,48 +1,352 @@
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.getLastPostNumbers = exports.getLastPostNumber = undefined;
+exports.generateArchive = exports.generate = exports.getLastPostNumbers = exports.getLastPostNumber = exports.scheduleGenerate = exports.scheduleGenerateArchive = exports.scheduleGenerateCatalog = exports.scheduleGeneratePages = exports.scheduleGenerateThread = undefined;
 
-var getLastPostNumber = exports.getLastPostNumber = function () {
-    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName) {
+var scheduleGenerateThread = exports.scheduleGenerateThread = function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, threadNumber, postNumber, action) {
+        var key, result;
         return regeneratorRuntime.wrap(function _callee$(_context) {
             while (1) {
                 switch (_context.prev = _context.next) {
                     case 0:
-                        if (Board.board(boardName)) {
-                            _context.next = 2;
+                        key = boardName + ':' + threadNumber;
+                        _context.next = 3;
+                        return Database.db.sismember('deletedThreads', key);
+
+                    case 3:
+                        result = _context.sent;
+
+                        if (!result) {
+                            _context.next = 6;
                             break;
                         }
 
-                        return _context.abrupt("return", Promise.reject(Tools.translate('Invalid boardName')));
+                        return _context.abrupt('return');
 
-                    case 2:
-                        _context.next = 4;
-                        return PostCounters.getOne(boardName);
+                    case 6:
+                        if (threadNumber === postNumber) {
+                            if ('edit' === action) {
+                                action = 'create';
+                            }
+                        } else {
+                            action = 'edit';
+                        }
+                        _context.next = 9;
+                        return addTask(scheduledGenerateThread, key, 'generateThread', {
+                            boardName: boardName,
+                            threadNumber: threadNumber,
+                            action: action
+                        });
 
-                    case 4:
-                        return _context.abrupt("return", _context.sent);
+                    case 9:
+                        return _context.abrupt('return', _context.sent);
 
-                    case 5:
-                    case "end":
+                    case 10:
+                    case 'end':
                         return _context.stop();
                 }
             }
         }, _callee, this);
     }));
 
-    return function getLastPostNumber(_x) {
+    return function scheduleGenerateThread(_x, _x2, _x3, _x4) {
+        return ref.apply(this, arguments);
+    };
+}();
+
+var scheduleGeneratePages = exports.scheduleGeneratePages = function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(boardName) {
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+            while (1) {
+                switch (_context2.prev = _context2.next) {
+                    case 0:
+                        _context2.next = 2;
+                        return addTask(scheduledGeneratePages, boardName, 'generatePages');
+
+                    case 2:
+                        return _context2.abrupt('return', _context2.sent);
+
+                    case 3:
+                    case 'end':
+                        return _context2.stop();
+                }
+            }
+        }, _callee2, this);
+    }));
+
+    return function scheduleGeneratePages(_x5) {
+        return ref.apply(this, arguments);
+    };
+}();
+
+var scheduleGenerateCatalog = exports.scheduleGenerateCatalog = function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+            while (1) {
+                switch (_context3.prev = _context3.next) {
+                    case 0:
+                        _context3.next = 2;
+                        return addTask(scheduledGenerateCatalog, boardName, 'generateCatalog');
+
+                    case 2:
+                        return _context3.abrupt('return', _context3.sent);
+
+                    case 3:
+                    case 'end':
+                        return _context3.stop();
+                }
+            }
+        }, _callee3, this);
+    }));
+
+    return function scheduleGenerateCatalog(_x6) {
+        return ref.apply(this, arguments);
+    };
+}();
+
+var scheduleGenerateArchive = exports.scheduleGenerateArchive = function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName) {
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+            while (1) {
+                switch (_context4.prev = _context4.next) {
+                    case 0:
+                        _context4.next = 2;
+                        return addTask(scheduledGenerateArchive, boardName, 'generateArchive');
+
+                    case 2:
+                        return _context4.abrupt('return', _context4.sent);
+
+                    case 3:
+                    case 'end':
+                        return _context4.stop();
+                }
+            }
+        }, _callee4, this);
+    }));
+
+    return function scheduleGenerateArchive(_x7) {
+        return ref.apply(this, arguments);
+    };
+}();
+
+var scheduleGenerate = exports.scheduleGenerate = function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName, threadNumber, postNumber, action) {
+        return regeneratorRuntime.wrap(function _callee11$(_context11) {
+            while (1) {
+                switch (_context11.prev = _context11.next) {
+                    case 0:
+                        _context11.t0 = action;
+                        _context11.next = _context11.t0 === 'create' ? 3 : _context11.t0 === 'edit' ? 7 : _context11.t0 === 'delete' ? 7 : 17;
+                        break;
+
+                    case 3:
+                        _context11.next = 5;
+                        return scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+
+                    case 5:
+                        _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
+                            return regeneratorRuntime.wrap(function _callee5$(_context5) {
+                                while (1) {
+                                    switch (_context5.prev = _context5.next) {
+                                        case 0:
+                                            _context5.next = 2;
+                                            return scheduleGeneratePages(boardName);
+
+                                        case 2:
+                                            _context5.next = 4;
+                                            return scheduleGenerateCatalog(boardName);
+
+                                        case 4:
+                                            _context5.next = 6;
+                                            return scheduleGenerateArchive(boardName);
+
+                                        case 6:
+                                        case 'end':
+                                            return _context5.stop();
+                                    }
+                                }
+                            }, _callee5, this);
+                        }))();
+                        return _context11.abrupt('break', 19);
+
+                    case 7:
+                        if (!(threadNumber === postNumber)) {
+                            _context11.next = 15;
+                            break;
+                        }
+
+                        _context11.next = 10;
+                        return scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+
+                    case 10:
+                        _context11.next = 12;
+                        return scheduleGeneratePages(boardName);
+
+                    case 12:
+                        _asyncToGenerator(regeneratorRuntime.mark(function _callee6() {
+                            return regeneratorRuntime.wrap(function _callee6$(_context6) {
+                                while (1) {
+                                    switch (_context6.prev = _context6.next) {
+                                        case 0:
+                                            _context6.next = 2;
+                                            return scheduleGenerateCatalog(boardName);
+
+                                        case 2:
+                                            _context6.next = 4;
+                                            return scheduleGenerateArchive(boardName);
+
+                                        case 4:
+                                        case 'end':
+                                            return _context6.stop();
+                                    }
+                                }
+                            }, _callee6, this);
+                        }))();
+                        _context11.next = 16;
+                        break;
+
+                    case 15:
+                        _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
+                            return regeneratorRuntime.wrap(function _callee8$(_context8) {
+                                while (1) {
+                                    switch (_context8.prev = _context8.next) {
+                                        case 0:
+                                            _context8.next = 2;
+                                            return scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+
+                                        case 2:
+                                            _context8.next = 4;
+                                            return scheduleGeneratePages(boardName);
+
+                                        case 4:
+                                            _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
+                                                return regeneratorRuntime.wrap(function _callee7$(_context7) {
+                                                    while (1) {
+                                                        switch (_context7.prev = _context7.next) {
+                                                            case 0:
+                                                                _context7.next = 2;
+                                                                return scheduleGenerateCatalog(boardName);
+
+                                                            case 2:
+                                                                _context7.next = 4;
+                                                                return scheduleGenerateArchive(boardName);
+
+                                                            case 4:
+                                                            case 'end':
+                                                                return _context7.stop();
+                                                        }
+                                                    }
+                                                }, _callee7, this);
+                                            }))();
+
+                                        case 5:
+                                        case 'end':
+                                            return _context8.stop();
+                                    }
+                                }
+                            }, _callee8, this);
+                        }))();
+
+                    case 16:
+                        return _context11.abrupt('break', 19);
+
+                    case 17:
+                        _asyncToGenerator(regeneratorRuntime.mark(function _callee10() {
+                            return regeneratorRuntime.wrap(function _callee10$(_context10) {
+                                while (1) {
+                                    switch (_context10.prev = _context10.next) {
+                                        case 0:
+                                            _context10.next = 2;
+                                            return scheduleGenerateThread(boardName, threadNumber, postNumber, action);
+
+                                        case 2:
+                                            _context10.next = 4;
+                                            return scheduleGeneratePages(boardName);
+
+                                        case 4:
+                                            _asyncToGenerator(regeneratorRuntime.mark(function _callee9() {
+                                                return regeneratorRuntime.wrap(function _callee9$(_context9) {
+                                                    while (1) {
+                                                        switch (_context9.prev = _context9.next) {
+                                                            case 0:
+                                                                _context9.next = 2;
+                                                                return scheduleGenerateCatalog(boardName);
+
+                                                            case 2:
+                                                                _context9.next = 4;
+                                                                return scheduleGenerateArchive(boardName);
+
+                                                            case 4:
+                                                            case 'end':
+                                                                return _context9.stop();
+                                                        }
+                                                    }
+                                                }, _callee9, this);
+                                            }))();
+
+                                        case 5:
+                                        case 'end':
+                                            return _context10.stop();
+                                    }
+                                }
+                            }, _callee10, this);
+                        }));
+                        return _context11.abrupt('break', 19);
+
+                    case 19:
+                    case 'end':
+                        return _context11.stop();
+                }
+            }
+        }, _callee11, this);
+    }));
+
+    return function scheduleGenerate(_x8, _x9, _x10, _x11) {
+        return ref.apply(this, arguments);
+    };
+}();
+
+var getLastPostNumber = exports.getLastPostNumber = function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName) {
+        return regeneratorRuntime.wrap(function _callee12$(_context12) {
+            while (1) {
+                switch (_context12.prev = _context12.next) {
+                    case 0:
+                        if (Board.board(boardName)) {
+                            _context12.next = 2;
+                            break;
+                        }
+
+                        return _context12.abrupt('return', Promise.reject(Tools.translate('Invalid boardName')));
+
+                    case 2:
+                        _context12.next = 4;
+                        return PostCounters.getOne(boardName);
+
+                    case 4:
+                        return _context12.abrupt('return', _context12.sent);
+
+                    case 5:
+                    case 'end':
+                        return _context12.stop();
+                }
+            }
+        }, _callee12, this);
+    }));
+
+    return function getLastPostNumber(_x12) {
         return ref.apply(this, arguments);
     };
 }();
 
 var getLastPostNumbers = exports.getLastPostNumbers = function () {
-    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(boardNames) {
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(boardNames) {
+        return regeneratorRuntime.wrap(function _callee13$(_context13) {
             while (1) {
-                switch (_context2.prev = _context2.next) {
+                switch (_context13.prev = _context13.next) {
                     case 0:
                         if (!(0, _underscore2.default)(boardNames), isArray()) {
                             boardNames = [boardNames];
@@ -51,49 +355,164 @@ var getLastPostNumbers = exports.getLastPostNumbers = function () {
                         if (!boardNames.some(function (boardName) {
                             return !Board.board(boardName);
                         })) {
-                            _context2.next = 3;
+                            _context13.next = 3;
                             break;
                         }
 
-                        return _context2.abrupt("return", Promise.reject(Tools.translate('Invalid boardName')));
+                        return _context13.abrupt('return', Promise.reject(Tools.translate('Invalid boardName')));
 
                     case 3:
-                        _context2.next = 5;
+                        _context13.next = 5;
                         return PostCounters.getSome(boardNames);
 
                     case 5:
-                        return _context2.abrupt("return", _context2.sent);
+                        return _context13.abrupt('return', _context13.sent);
 
                     case 6:
-                    case "end":
-                        return _context2.stop();
+                    case 'end':
+                        return _context13.stop();
                 }
             }
-        }, _callee2, this);
+        }, _callee13, this);
     }));
 
-    return function getLastPostNumbers(_x2) {
+    return function getLastPostNumbers(_x13) {
         return ref.apply(this, arguments);
     };
 }();
 
-var _underscore = require("underscore");
+var generate = exports.generate = function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(boardName, threadNumber, postNumber, action) {
+        return regeneratorRuntime.wrap(function _callee14$(_context14) {
+            while (1) {
+                switch (_context14.prev = _context14.next) {
+                    case 0:
+                        _context14.prev = 0;
+
+                        if (!_cluster2.default.isMaster) {
+                            _context14.next = 6;
+                            break;
+                        }
+
+                        _context14.next = 4;
+                        return scheduleGenerate(boardName, threadNumber, postNumber, action);
+
+                    case 4:
+                        _context14.next = 8;
+                        break;
+
+                    case 6:
+                        _context14.next = 8;
+                        return IPC.send('generate', {
+                            boardName: boardName,
+                            threadNumber: threadNumber,
+                            postNumber: postNumber,
+                            action: action
+                        });
+
+                    case 8:
+                        _context14.next = 13;
+                        break;
+
+                    case 10:
+                        _context14.prev = 10;
+                        _context14.t0 = _context14['catch'](0);
+
+                        _logger2.default.error(_context14.t0.stack || _context14.t0);
+
+                    case 13:
+                    case 'end':
+                        return _context14.stop();
+                }
+            }
+        }, _callee14, this, [[0, 10]]);
+    }));
+
+    return function generate(_x14, _x15, _x16, _x17) {
+        return ref.apply(this, arguments);
+    };
+}();
+
+var generateArchive = exports.generateArchive = function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(boardName) {
+        return regeneratorRuntime.wrap(function _callee15$(_context15) {
+            while (1) {
+                switch (_context15.prev = _context15.next) {
+                    case 0:
+                        _context15.prev = 0;
+
+                        if (!_cluster2.default.isMaster) {
+                            _context15.next = 5;
+                            break;
+                        }
+
+                        return _context15.abrupt('return', scheduleGenerateArchive(boardName));
+
+                    case 5:
+                        _context15.next = 7;
+                        return IPC.send('generateArchive', boardName);
+
+                    case 7:
+                        _context15.next = 12;
+                        break;
+
+                    case 9:
+                        _context15.prev = 9;
+                        _context15.t0 = _context15['catch'](0);
+
+                        _logger2.default.error(_context15.t0.stack || _context15.t0);
+
+                    case 12:
+                    case 'end':
+                        return _context15.stop();
+                }
+            }
+        }, _callee15, this, [[0, 9]]);
+    }));
+
+    return function generateArchive(_x18) {
+        return ref.apply(this, arguments);
+    };
+}();
+
+var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _clientFactory = require("../storage/client-factory");
+var _cluster = require('cluster');
+
+var _cluster2 = _interopRequireDefault(_cluster);
+
+var _misc = require('./misc');
+
+var MiscModel = _interopRequireWildcard(_misc);
+
+var _renderer = require('../core/renderer');
+
+var Renderer = _interopRequireWildcard(_renderer);
+
+var _clientFactory = require('../storage/client-factory');
 
 var _clientFactory2 = _interopRequireDefault(_clientFactory);
 
-var _hash = require("../storage/hash");
+var _hash = require('../storage/hash');
 
 var _hash2 = _interopRequireDefault(_hash);
+
+var _ipc = require('../helpers/ipc');
+
+var IPC = _interopRequireWildcard(_ipc);
+
+var _logger = require('../helpers/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var cluster = require("cluster");
 var FS = require("q-io/fs");
 var merge = require("merge");
 var mkpath = require("mkpath");
@@ -105,9 +524,7 @@ var XML2JS = require("xml2js");
 var Board = require("../boards/board");
 var Cache = require("../helpers/cache");
 var config = require("../helpers/config");
-var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
-var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
 
 var scheduledGeneratePages = {};
@@ -486,13 +903,13 @@ var generateThreadHTML = function generateThreadHTML(board, threadNumber, model,
     model.title = model.thread.title || board.title + " — " + model.thread.number;
     model.isBoardPage = true;
     model.isThreadPage = true;
-    model.board = controller.boardModel(board).board;
+    model.board = MiscModel.board(board).board;
     model.extraScripts = board.extraScripts();
     model.extraStylesheets = board.extraStylesheets();
     model.threadNumber = model.thread.number;
-    var data = controller("pages/thread", model);
+    var data = Renderer.render('pages/thread', model);
     if (nowrite) return Promise.resolve(data);
-    return Cache.writeFile(board.name + "/res/" + threadNumber + ".html", data);
+    return Cache.writeFile(board.name + '/res/' + threadNumber + '.html', data);
 };
 
 module.exports.generateThreadHTML = generateThreadHTML;
@@ -505,7 +922,7 @@ var generateThread = function generateThread(boardName, threadNumber) {
         c.model = model;
         return renderThread(board, c.model.thread);
     }).then(function () {
-        return Cache.writeFile(board.name + "/res/" + threadNumber + ".json", JSON.stringify(c.model));
+        return Cache.writeFile(board.name + '/res/' + threadNumber + '.json', JSON.stringify(c.model));
     }).then(function () {
         return generateThreadHTML(board, threadNumber, c.model);
     });
@@ -533,15 +950,15 @@ var generatePage = function generatePage(boardName, pageNumber) {
         return Database.lastPostNumber(board.name);
     }).then(function (lastPostNumber) {
         c.model.lastPostNumber = lastPostNumber;
-        c.model.postingSpeed = controller.postingSpeedString(board.launchDate, lastPostNumber);
-        return Cache.writeFile(board.name + "/" + pageNumber + ".json", JSON.stringify(c.model));
+        c.model.postingSpeed = Tools.postingSpeedString(board.launchDate, lastPostNumber);
+        return Cache.writeFile(board.name + '/' + pageNumber + '.json', JSON.stringify(c.model));
     }).then(function () {
         c.model.title = board.title;
         c.model.isBoardPage = true;
-        c.model.board = controller.boardModel(board).board;
+        c.model.board = MiscModel.board(board).board;
         c.model.extraScripts = board.extraScripts();
         c.model.extraStylesheets = board.extraStylesheets();
-        return Cache.writeFile(board.name + "/" + (pageNumber > 0 ? pageNumber : "index") + ".html", controller("pages/board", c.model));
+        return Cache.writeFile(board.name + '/' + (pageNumber > 0 ? pageNumber : "index") + '.html', Renderer.render('pages/board', c.model));
     });
 };
 
@@ -570,14 +987,14 @@ var generateCatalog = function generateCatalog(boardName) {
             return Database.lastPostNumber(board.name);
         }).then(function (lastPostNumber) {
             c.model.lastPostNumber = lastPostNumber;
-            c.model.postingSpeed = controller.postingSpeedString(board.launchDate, lastPostNumber);
-            return Cache.writeFile(board.name + "/catalog" + ("date" != sortMode ? "-" + sortMode : "") + ".json", JSON.stringify(c.model));
+            c.model.postingSpeed = Tools.postingSpeedString(board.launchDate, lastPostNumber);
+            return Cache.writeFile(board.name + '/catalog' + ("date" != sortMode ? "-" + sortMode : "") + '.json', JSON.stringify(c.model));
         }).then(function () {
             c.model.title = board.title;
             c.model.isBoardPage = true;
-            c.model.board = controller.boardModel(board).board;
+            c.model.board = MiscModel.board(board).board;
             c.model.sortMode = sortMode;
-            return Cache.writeFile(board.name + "/catalog" + ("date" != sortMode ? "-" + sortMode : "") + ".html", controller("pages/catalog", c.model));
+            return Cache.writeFile(board.name + '/catalog' + ("date" != sortMode ? "-" + sortMode : "") + '.html', Renderer.render('pages/catalog', c.model));
         });
     });
 };
@@ -585,7 +1002,7 @@ var generateCatalog = function generateCatalog(boardName) {
 var generateArchive = function generateArchive(boardName) {
     var board = Board.board(boardName);
     var model = {};
-    var path = __dirname + "/../public/" + board.name + "/arch";
+    var path = __dirname + '/../public/' + board.name + '/arch';
     return FS.exists(path).then(function (exists) {
         if (!exists) return Promise.resolve([]);
         return FS.list(path);
@@ -610,12 +1027,12 @@ var generateArchive = function generateArchive(boardName) {
         return Database.lastPostNumber(board.name);
     }).then(function (lastPostNumber) {
         model.lastPostNumber = lastPostNumber;
-        model.postingSpeed = controller.postingSpeedString(board.launchDate, lastPostNumber);
-        return Cache.writeFile(board.name + "/archive.json", JSON.stringify(model));
+        model.postingSpeed = Tools.postingSpeedString(board.launchDate, lastPostNumber);
+        return Cache.writeFile(board.name + '/archive.json', JSON.stringify(model));
     }).then(function () {
         model.title = board.title;
-        model.board = controller.boardModel(board).board;
-        return Cache.writeFile(board.name + "/archive.html", controller("pages/archive", model));
+        model.board = MiscModel.board(board).board;
+        return Cache.writeFile(board.name + '/archive.html', Renderer.render('pages/archive', model));
     });
 };
 
@@ -630,7 +1047,7 @@ var generateBoard = function generateBoard(boardName) {
 };
 
 var performTask = function performTask(funcName, key, data) {
-    var workerId = Object.keys(cluster.workers).map(function (id) {
+    var workerId = Object.keys(_cluster2.default.workers).map(function (id) {
         return {
             id: id,
             load: workerLoads[id] || 0
@@ -639,7 +1056,7 @@ var performTask = function performTask(funcName, key, data) {
         if (w1.load < w2.load) return -1;else if (w1.load > w2.load) return 1;else return 0;
     }).shift().id;
     if (!workerLoads.hasOwnProperty(workerId)) workerLoads[workerId] = 1;else ++workerLoads[workerId];
-    return Global.IPC.send("doGenerate", {
+    return IPC.send('doGenerate', {
         funcName: funcName,
         key: key,
         data: data
@@ -665,7 +1082,7 @@ var addTask = function addTask(map, key, funcName, data) {
     } else {
         map[key] = {};
         return performTask(funcName, key, data).catch(function (err) {
-            Global.error(err.stack || err);
+            _logger2.default.error(err.stack || err);
         }).then(function () {
             var g = function g() {
                 var scheduled = map[key];
@@ -679,7 +1096,7 @@ var addTask = function addTask(map, key, funcName, data) {
                     return n.data;
                 });
                 performTask(funcName, key, data).catch(function (err) {
-                    Global.error(err.stack || err);
+                    _logger2.default.error(err.stack || err);
                 }).then(function () {
                     g();
                     next.forEach(function (n) {
@@ -717,7 +1134,7 @@ module.exports.do_generateThread = function (key, data) {
         case "edit":
             {
                 var c = {};
-                var threadId = boardName + "/res/" + threadNumber + ".json";
+                var threadId = boardName + '/res/' + threadNumber + '.json';
                 var board = Board.board(boardName);
                 if (!board) return Promise.reject(Tools.translate("Invalid board"));
                 return Cache.readFile(threadId).then(function (data) {
@@ -778,9 +1195,9 @@ module.exports.do_generateThread = function (key, data) {
         case "delete":
             {
                 return Database.db.sadd("deletedThreads", data.boardName + ":" + data.threadNumber).then(function () {
-                    return Cache.removeFile(boardName + "/res/" + threadNumber + ".json");
+                    return Cache.removeFile(boardName + '/res/' + threadNumber + '.json');
                 }).then(function () {
-                    return Cache.removeFile(boardName + "/res/" + threadNumber + ".html");
+                    return Cache.removeFile(boardName + '/res/' + threadNumber + '.html');
                 });
             }
         default:
@@ -799,91 +1216,6 @@ module.exports.do_generateCatalog = function (boardName) {
 
 module.exports.do_generateArchive = function (boardName) {
     return generateArchive(boardName);
-};
-
-module.exports.scheduleGenerateThread = function (boardName, threadNumber, postNumber, action) {
-    return Database.db.sismember("deletedThreads", boardName + ":" + threadNumber).then(function (result) {
-        if (result) return Promise.resolve();
-        if (threadNumber == postNumber) {
-            if ("edit" == action) action = "create";
-        } else {
-            action = "edit";
-        }
-        return addTask(scheduledGenerateThread, boardName + ":" + threadNumber, "generateThread", {
-            boardName: boardName,
-            threadNumber: threadNumber,
-            action: action
-        });
-    });
-};
-
-module.exports.scheduleGeneratePages = function (boardName) {
-    return addTask(scheduledGeneratePages, boardName, "generatePages");
-};
-
-module.exports.scheduleGenerateCatalog = function (boardName) {
-    return addTask(scheduledGenerateCatalog, boardName, "generateCatalog");
-};
-
-module.exports.scheduleGenerateArchive = function (boardName) {
-    return addTask(scheduledGenerateArchive, boardName, "generateArchive");
-};
-
-module.exports.scheduleGenerate = function (boardName, threadNumber, postNumber, action) {
-    var p = Promise.resolve();
-    switch (action) {
-        case "create":
-            p = p.then(function () {
-                return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
-            }).then(function () {
-                module.exports.scheduleGeneratePages(boardName).then(function () {
-                    module.exports.scheduleGenerateCatalog(boardName);
-                }).then(function () {
-                    module.exports.scheduleGenerateArchive(boardName);
-                });
-                return Promise.resolve();
-            });
-            break;
-        case "edit":
-        case "delete":
-            if (threadNumber == postNumber) {
-                p = p.then(function () {
-                    return module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action);
-                }).then(function () {
-                    return module.exports.scheduleGeneratePages(boardName);
-                }).then(function () {
-                    module.exports.scheduleGenerateCatalog(boardName).then(function () {
-                        module.exports.scheduleGenerateArchive(boardName);
-                    });
-                    return Promise.resolve();
-                });
-            } else {
-                p = p.then(function () {
-                    module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action).then(function () {
-                        return module.exports.scheduleGeneratePages(boardName);
-                    }).then(function () {
-                        module.exports.scheduleGenerateCatalog(boardName).then(function () {
-                            module.exports.scheduleGenerateArchive(boardName);
-                        });
-                    });
-                    return Promise.resolve();
-                });
-            }
-            break;
-        default:
-            p = p.then(function () {
-                module.exports.scheduleGenerateThread(boardName, threadNumber, postNumber, action).then(function () {
-                    return module.exports.scheduleGeneratePages(boardName);
-                }).then(function () {
-                    module.exports.scheduleGenerateCatalog(boardName).then(function () {
-                        module.exports.scheduleGenerateArchive(boardName);
-                    });
-                });
-                return Promise.resolve();
-            });
-            break;
-    }
-    return p;
 };
 
 module.exports.initialize = function () {
@@ -994,7 +1326,7 @@ module.exports.generateRSS = function (currentProcess) {
                     allowSurrogateChars: true,
                     cdata: true
                 });
-                return Cache.writeFile(board.name + "/rss.xml", builder.buildObject(doc));
+                return Cache.writeFile(board.name + '/rss.xml', builder.buildObject(doc));
             });
         });
     });

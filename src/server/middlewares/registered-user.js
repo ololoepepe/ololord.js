@@ -1,6 +1,7 @@
 var Database = require("../helpers/database");
-var Global = require("../helpers/global");
 var Tools = require("../helpers/tools");
+
+import Logger from '../helpers/logger';
 
 module.exports = function(req, res, next) {
     Database.registeredUserLevels(req).then(function(levels) {
@@ -33,7 +34,7 @@ module.exports = function(req, res, next) {
         });
         next();
     }).catch(function(err) {
-        Global.error(err.stack || err);
+        Logger.error(err.stack || err);
         next();
     });
 };

@@ -1,5 +1,21 @@
 "use strict";
 
+var _users = require("../models/users");
+
+var UsersModel = _interopRequireWildcard(_users);
+
+var _ipc = require("../helpers/ipc");
+
+var IPC = _interopRequireWildcard(_ipc);
+
+var _logger = require("../helpers/logger");
+
+var _logger2 = _interopRequireDefault(_logger);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 var express = require("express");
 var FS = require("q-io/fs");
 var FSSync = require("fs");
@@ -11,9 +27,7 @@ var Board = require("../boards/board");
 var Captcha = require("../captchas");
 var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
-var controller = require("../helpers/controller");
 var Database = require("../helpers/database");
-var Global = require("../helpers/global");
 var markup = require("../helpers/markup");
 var Tools = require("../helpers/tools");
 var vk = require("../helpers/vk")(config("site.vkontakte.accessToken", ""));
@@ -29,7 +43,7 @@ var getFiles = function getFiles(fields, files, transaction) {
     var tmpFiles = Tools.filterIn(files, function (file) {
         if (file.size < 1) {
             FS.remove(file.path).catch(function (err) {
-                Global.error(req, err.stack || err);
+                _logger2.default.error(req, err.stack || err);
             });
             return false;
         }
@@ -54,7 +68,7 @@ var getFiles = function getFiles(fields, files, transaction) {
             });
         });
         promises = urls.map(function (url) {
-            var path = __dirname + "/../tmp/upload_" + UUID.v1();
+            var path = __dirname + "/../tmp/upload_" + UUID.v4();
             transaction.filePaths.push(path);
             var c = {};
             var proxy = Tools.proxy();
@@ -160,7 +174,7 @@ router.post("/action/markupText", function (req, res, next) {
         c.fields = result.fields;
         c.board = Board.board(c.fields.boardName);
         if (!c.board) return Promise.reject(Tools.translate("Invalid board"));
-        return controller.checkBan(req.ip, c.board.name, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.board.name, { write: true });
     }).then(function () {
         if (c.fields.text.length > c.board.maxTextFieldLength) return Promise.reject(Tools.translate("Comment is too long"));
         var markupModes = [];
@@ -199,7 +213,7 @@ router.post("/action/createPost", function (req, res, next) {
         c.board = Board.board(c.fields.boardName);
         if (!c.board) return Promise.reject(Tools.translate("Invalid board"));
         transaction.board = c.board;
-        return controller.checkBan(req.ip, c.board.name, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.board.name, { write: true });
     }).then(function () {
         return getFiles(c.fields, c.files, transaction);
     }).then(function (files) {
@@ -235,7 +249,7 @@ router.post("/action/createThread", function (req, res, next) {
         c.board = Board.board(c.fields.boardName);
         if (!c.board) return Promise.reject(Tools.translate("Invalid board"));
         transaction.board = c.board;
-        return controller.checkBan(req.ip, c.board.name, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.board.name, { write: true });
     }).then(function () {
         return getFiles(c.fields, c.files, transaction);
     }).then(function (files) {
@@ -266,7 +280,7 @@ router.post("/action/editPost", function (req, res, next) {
         c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.postNumber = +result.fields.postNumber;
-        return controller.checkBan(req.ip, c.boardName, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.boardName, { write: true });
     }).then(function () {
         return Database.editPost(req, c.fields);
     }).then(function (result) {
@@ -288,7 +302,7 @@ router.post("/action/addFiles", function (req, res, next) {
         c.board = Board.board(c.fields.boardName);
         if (!board) return Promise.reject(Tools.translate("Invalid board"));
         transaction.board = board;
-        return controller.checkBan(req.ip, c.board.name, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.board.name, { write: true });
     }).then(function () {
         return getFiles(c.fields, c.files, transaction);
     }).then(function (files) {
@@ -324,7 +338,7 @@ router.post("/action/deletePost", function (req, res, next) {
     var c = {};
     Tools.parseForm(req).then(function (result) {
         c.fields = result.fields;
-        return controller.checkBan(req.ip, c.fields.boardName, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.fields.boardName, { write: true });
     }).then(function () {
         return Database.deletePost(req, res, c.fields);
     }).then(function (result) {
@@ -358,9 +372,9 @@ router.post("/action/moveThread", function (req, res, next) {
     var c = {};
     Tools.parseForm(req).then(function (result) {
         c.fields = result.fields;
-        return controller.checkBan(req.ip, c.fields.boardName, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.fields.boardName, { write: true });
     }).then(function () {
-        return controller.checkBan(req.ip, c.fields.targetBoardName, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.fields.targetBoardName, { write: true });
     }).then(function () {
         return Database.moveThread(req, c.fields);
     }).then(function (result) {
@@ -429,7 +443,7 @@ router.post("/action/delall", function (req, res, next) {
             );
         }));
         if (c.boardNames.length < 1) return Promise.reject(Tools.translate("No board specified"));
-        return controller.checkBan(req.ip, c.boardNames, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.boardNames, { write: true });
     }).then(function () {
         return Database.delall(req, c.fields.userIp, c.boardNames);
     }).then(function (result) {
@@ -500,7 +514,7 @@ router.post("/action/setThreadFixed", function (req, res, next) {
         c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.threadNumber = +result.fields.threadNumber;
-        return controller.checkBan(req.ip, c.boardName, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.boardName, { write: true });
     }).then(function () {
         return Database.setThreadFixed(req, c.fields);
     }).then(function (result) {
@@ -516,7 +530,7 @@ router.post("/action/setThreadClosed", function (req, res, next) {
         c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.threadNumber = +result.fields.threadNumber;
-        return controller.checkBan(req.ip, c.boardName, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.boardName, { write: true });
     }).then(function () {
         return Database.setThreadClosed(req, c.fields);
     }).then(function (result) {
@@ -532,7 +546,7 @@ router.post("/action/setThreadUnbumpable", function (req, res, next) {
         c.fields = result.fields;
         c.boardName = result.fields.boardName;
         c.threadNumber = +result.fields.threadNumber;
-        return controller.checkBan(req.ip, c.boardName, { write: true });
+        return UsersModel.checkUserBan(req.ip, c.boardName, { write: true });
     }).then(function () {
         return Database.setThreadUnbumpable(req, c.fields);
     }).then(function (result) {
@@ -703,11 +717,11 @@ router.post("/action/superuserRegenerateCache", function (req, res, next) {
     var c = {};
     Tools.parseForm(req).then(function (result) {
         c.regenerateArchive = "true" == result.fields.regenerateArchive;
-        return Global.IPC.send("stop");
+        return IPC.send('stop');
     }).then(function () {
-        return Global.IPC.send("regenerateCache", c.regenerateArchive);
+        return IPC.send('regenerateCache', c.regenerateArchive);
     }).then(function () {
-        return Global.IPC.send("start");
+        return IPC.send('start');
     }).then(function () {
         res.json({});
     }).catch(function (err) {
@@ -724,11 +738,11 @@ router.post("/action/superuserRerenderPosts", function (req, res, next) {
             c.boardNames.push(value);
         });
         if (c.boardNames.length < 1) c.boardNames = Board.boardNames();
-        return Global.IPC.send("stop");
+        return IPC.send('stop');
     }).then(function () {
         return Database.rerenderPosts(c.boardNames);
     }).then(function () {
-        return Global.IPC.send("start");
+        return IPC.send('start');
     }).then(function () {
         res.json({});
     }).catch(function (err) {
@@ -738,10 +752,10 @@ router.post("/action/superuserRerenderPosts", function (req, res, next) {
 
 router.post("/action/superuserRebuildSearchIndex", function (req, res, next) {
     if (!req.isSuperuser()) return next(Tools.translate("Not enough rights"));
-    Global.IPC.send("stop").then(function () {
+    IPC.send('stop').then(function () {
         return Database.rebuildSearchIndex();
     }).then(function () {
-        return Global.IPC.send("start");
+        return IPC.send('start');
     }).then(function () {
         res.json({});
     }).catch(function (err) {
@@ -757,23 +771,23 @@ router.post("/action/superuserReload", function (req, res, next) {
         if ("true" == result.fields.config) c.list.push("config");
         if ("true" == result.fields.templates) c.list.push("templates");
         if (c.list.length < 1) return Promise.resolve();
-        return Global.IPC.send("stop");
+        return IPC.send('stop');
     }).then(function () {
         return Tools.series(c.list, function (action) {
             switch (action) {
                 case "boards":
-                    return Global.IPC.send("reloadBoards");
+                    return IPC.send('reloadBoards');
                 case "config":
-                    return Global.IPC.send("reloadConfig");
+                    return IPC.send('reloadConfig');
                 case "templates":
-                    return Global.IPC.send("reloadTemplates");
+                    return IPC.send('reloadTemplates');
                 default:
                     return Promise.resolve();
             }
         });
     }).then(function () {
         if (c.list.length < 1) return Promise.resolve();
-        return Global.IPC.send("start");
+        return IPC.send('start');
     }).then(function () {
         res.json({});
     }).catch(function (err) {

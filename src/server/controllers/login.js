@@ -1,19 +1,16 @@
-var express = require("express");
+import express from 'express';
 
-var controller = require("../helpers/controller");
-var Tools = require("../helpers/tools");
+import * as Renderer from '../core/renderer';
+import * as Tools from '../helpers/tools';
 
-var router = express.Router();
+let router = express.Router();
 
-router.generateHTML = function() {
-    var model = {};
-    model.title = Tools.translate("Login", "loginButtonText");
-    model.extraScripts = [
-        { fileName: "3rdparty/sha1.min.js" },
-        { fileName: "3rdparty/URI.min.js" },
-        { fileName: "login.js" }
-    ];
-    return Promise.resolve({ "login.html": controller("pages/login", model) });
+router.paths = () => {
+  return ['/login.html'];
+};
+
+router.render = () => {
+  return { 'login.html': Renderer.render('pages/login', { title: Tools.translate('Login', 'pageTitle') }) };
 };
 
 module.exports = router;

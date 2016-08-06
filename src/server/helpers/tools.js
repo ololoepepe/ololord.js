@@ -24,9 +24,9 @@ var UUID = require("uuid");
 var XRegExp = require("xregexp");
 
 import FSWatcher from './fs-watcher';
+import Logger from './logger';
 
 var config = require("./config");
-var Global = require("./global");
 
 var translate = require("cute-localize")({
     locale: config("site.locale", "en"),
@@ -60,6 +60,7 @@ export const ExternalLinkRegexpPattern = (function() {
     var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\'\"\\,\\(\\)\\[\\]«»]*)*\\/?";
     return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
 })();
+export const ARCHIVE_PATHS_REGEXP = /^\/[^\/]+\/(archive|arch\/\d+)\.(html|json)$/;
 
 var forIn = function(obj, f) {
     if (!obj || typeof f != "function")
@@ -418,7 +419,7 @@ module.exports.proxy = function() {
 };
 
 var correctAddress = function(ip) {
-    if (!ip)
+    if (!ip || typeof ip !== 'string')
         return null;
     if ("::1" == ip)
         ip = "127.0.0.1";
@@ -772,7 +773,7 @@ export function createWatchedResource(path, synchronous, asynchronous) {
           await asynchronous(path);
         }
       } catch (err) {
-        Global.error(err.stack || err);
+        Logger.error(err.stack || err);
       }
     });
   }

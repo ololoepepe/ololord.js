@@ -30,7 +30,7 @@ var gatherBoardStatistics = function () {
             _context2.prev = 10;
             _context2.t0 = _context2['catch'](2);
 
-            Global.error(_context2.t0.stack || _context2.t0);
+            _logger2.default.error(_context2.t0.stack || _context2.t0);
 
           case 13:
             _context2.prev = 13;
@@ -49,7 +49,7 @@ var gatherBoardStatistics = function () {
             _context2.t1 = _context2['catch'](13);
 
             if ('ENOENT' !== _context2.t1.code) {
-              Global.error(_context2.t1.stack || _context2.t1);
+              _logger2.default.error(_context2.t1.stack || _context2.t1);
             }
 
           case 23:
@@ -77,7 +77,7 @@ var gatherBoardStatistics = function () {
                         _context.t0 = _context['catch'](0);
 
                         if ('ENOENT' !== _context.t0.code) {
-                          Global.error(_context.t0.stack || _context.t0);
+                          _logger2.default.error(_context.t0.stack || _context.t0);
                         }
 
                       case 10:
@@ -126,7 +126,7 @@ var generateStatistics = exports.generateStatistics = function () {
               break;
             }
 
-            Global.error(Tools.translate('Error: generateStatistics() called from worker process.'));
+            _logger2.default.error(Tools.translate('Error: generateStatistics() called from worker process.'));
             return _context5.abrupt('return');
 
           case 3:
@@ -223,7 +223,7 @@ var generateStatistics = exports.generateStatistics = function () {
                     case 7:
                       statistics.total.postingSpeed = Tools.postingSpeedString(launchDate, statistics.total.postCount);
                       _context4.next = 10;
-                      return Global.IPC.send('getConnectionIPs');
+                      return IPC.send('getConnectionIPs');
 
                     case 10:
                       data = _context4.sent;
@@ -254,7 +254,7 @@ var generateStatistics = exports.generateStatistics = function () {
             _context5.prev = 10;
             _context5.t1 = _context5['catch'](6);
 
-            Global.error(_context5.t1.stack || _context5.t1);
+            _logger2.default.error(_context5.t1.stack || _context5.t1);
 
           case 13:
           case 'end':
@@ -297,6 +297,14 @@ var _cache = require('../helpers/cache');
 
 var Cache = _interopRequireWildcard(_cache);
 
+var _ipc = require('../helpers/ipc');
+
+var IPC = _interopRequireWildcard(_ipc);
+
+var _logger = require('../helpers/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
@@ -306,7 +314,4 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; } //TODO: board -> boards
-
-
-var Global = require("../helpers/global");
 //# sourceMappingURL=statistics.js.map

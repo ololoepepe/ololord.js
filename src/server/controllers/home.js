@@ -1,25 +1,24 @@
-var express = require("express");
-var FS = require("q-io/fs");
+import _ from 'underscore';
+import express from 'express';
 
-var controller = require("../helpers/controller");
-var Tools = require("../helpers/tools");
+import * as Renderer from '../core/renderer';
+import * as MiscModel from '../models/misc';
+import * as Tools from '../helpers/tools';
 
-var router = express.Router();
+let router = express.Router();
 
-router.generateHTML = function() {
-    var result = {};
-    var model = {};
-    model.title = Tools.translate("ololord.js", "pageTitle");
-    result["index.html"] = controller("pages/home", model);
-    model = {};
-    model.title = Tools.translate("Error 404", "pageTitle");
-    model.notFoundMessage = Tools.translate("Page or file not found", "notFoundMessage");
-    let fileNames = controller.notFoundImageFileNamesModel();
-    if (fileNames.length > 0) {
-      model.notFoundImageFileName = fileNames[Math.floor(Math.random() * fileNames.length)];
-    }
-    result["notFound.html"] = controller("pages/notFound", model);
-    return Promise.resolve(result);
+router.paths = () => {
+  return ['/'];
+};
+
+router.render = () => {
+  return {
+    'index.html': Renderer.render('pages/home', { title: Tools.translate('ololord.js', 'pageTitle') }),
+    'notFound.html': Renderer.render('pages/notFound', {
+      title: Tools.translate('Error 404', 'pageTitle'),
+      notFoundImageFileName: _(MiscModel.notFoundImageFileNames()).sample()
+    })
+  };
 };
 
 module.exports = router;

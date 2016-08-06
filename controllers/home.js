@@ -1,27 +1,43 @@
-"use strict";
+'use strict';
 
-var express = require("express");
-var FS = require("q-io/fs");
+var _underscore = require('underscore');
 
-var controller = require("../helpers/controller");
-var Tools = require("../helpers/tools");
+var _underscore2 = _interopRequireDefault(_underscore);
 
-var router = express.Router();
+var _express = require('express');
 
-router.generateHTML = function () {
-    var result = {};
-    var model = {};
-    model.title = Tools.translate("ololord.js", "pageTitle");
-    result["index.html"] = controller("pages/home", model);
-    model = {};
-    model.title = Tools.translate("Error 404", "pageTitle");
-    model.notFoundMessage = Tools.translate("Page or file not found", "notFoundMessage");
-    var fileNames = controller.notFoundImageFileNamesModel();
-    if (fileNames.length > 0) {
-        model.notFoundImageFileName = fileNames[Math.floor(Math.random() * fileNames.length)];
-    }
-    result["notFound.html"] = controller("pages/notFound", model);
-    return Promise.resolve(result);
+var _express2 = _interopRequireDefault(_express);
+
+var _renderer = require('../core/renderer');
+
+var Renderer = _interopRequireWildcard(_renderer);
+
+var _misc = require('../models/misc');
+
+var MiscModel = _interopRequireWildcard(_misc);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var router = _express2.default.Router();
+
+router.paths = function () {
+  return ['/'];
+};
+
+router.render = function () {
+  return {
+    'index.html': Renderer.render('pages/home', { title: Tools.translate('ololord.js', 'pageTitle') }),
+    'notFound.html': Renderer.render('pages/notFound', {
+      title: Tools.translate('Error 404', 'pageTitle'),
+      notFoundImageFileName: (0, _underscore2.default)(MiscModel.notFoundImageFileNames()).sample()
+    })
+  };
 };
 
 module.exports = router;

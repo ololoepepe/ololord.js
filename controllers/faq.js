@@ -1,16 +1,29 @@
-"use strict";
+'use strict';
 
-var express = require("express");
+var _express = require('express');
 
-var controller = require("../helpers/controller");
-var Tools = require("../helpers/tools");
+var _express2 = _interopRequireDefault(_express);
 
-var router = express.Router();
+var _renderer = require('../core/renderer');
 
-router.generateHTML = function () {
-    var model = {};
-    model.title = Tools.translate("F.A.Q.", "pageTitle");
-    return Promise.resolve({ "faq.html": controller("pages/faq", model) });
+var Renderer = _interopRequireWildcard(_renderer);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var router = _express2.default.Router();
+
+router.paths = function () {
+  return ['/faq.html'];
+};
+
+router.render = function (paths) {
+  return { 'faq.html': Renderer.render('pages/faq', { title: Tools.translate('F.A.Q.', 'pageTitle') }) };
 };
 
 module.exports = router;

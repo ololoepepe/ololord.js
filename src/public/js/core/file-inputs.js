@@ -184,7 +184,7 @@ export async function fileAddedCommon(div) {
   } catch (err) {
     DOM.handleError(err);
   }
-  let uuid = UUID.v1();
+  let uuid = UUID.v4();
   setFileName(div, uuid);
   removeFileHash(div);
   if (div.file && Settings.checkFileExistence()) {
