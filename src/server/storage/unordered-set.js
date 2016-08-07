@@ -24,6 +24,11 @@ export default class UnorderedSet {
     return data.map(this.parse);
   }
 
+  async contains(data, subkey) {
+    let contains = await this.client.sismember(this.fullKey(subkey), this.stringify(data));
+    return !!contains;
+  }
+
   async exists(subkey) {
     let exists = await this.client.exists(this.fullKey(subkey));
     return !!exists;
@@ -40,11 +45,11 @@ export default class UnorderedSet {
     return await this.client.sadd.call(this.client, this.fullKey(subkey), ...list.map(this.stringify));
   }
 
-  async removeOne(data, subkey) {
+  async deleteOne(data, subkey) {
     return await this.client.srem(this.fullKey(subkey), this.stringify(data));
   }
 
-  async removeSome(list, subkey) {
+  async deleteSome(list, subkey) {
     if (!list || !_(list).isArray() || list.length <= 0) {
       return 0;
     }
@@ -58,5 +63,9 @@ export default class UnorderedSet {
   async find(query, subkey) {
     query = (typeof query !== 'undefined') ? `:${query}` : ':*';
     return await this.client.keys(this.fullKey(subkey) + query);
+  }
+
+  async delete(subkey) {
+    return await this.client.del(this.fullKey(subkey));
   }
 }

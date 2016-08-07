@@ -33,6 +33,10 @@ var _middlewares = require('./middlewares');
 
 var _middlewares2 = _interopRequireDefault(_middlewares);
 
+var _commands = require('./core/commands');
+
+var _commands2 = _interopRequireDefault(_commands);
+
 var _renderer = require('./core/renderer');
 
 var Renderer = _interopRequireWildcard(_renderer);
@@ -78,6 +82,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 var Board = require("./boards/board"); //TODO
 var NodeCaptcha = require('./captchas/node-captcha');
 var NodeCaptchaNoscript = require('./captchas/node-captcha-noscript');
+var BoardController = require("./controllers/board");
 
 var BoardsModel = require("./models/board");
 
@@ -183,10 +188,10 @@ function spawnCluster() {
                                         });
                                     });
                                 });
-                                IPC.on('doGenerate', function (data) {
-                                    var f = BoardsModel['do_' + data.funcName];
+                                IPC.on('render', function (data) {
+                                    var f = BoardController['' + data.type];
                                     if (typeof f != "function") return Promise.reject("Invalid generator function");
-                                    return f.call(BoardsModel, data.key, data.data);
+                                    return f.call(BoardController, data.key, data.data);
                                 });
                                 IPC.on('reloadBoards', function () {
                                     require("./boards/board").initialize();
@@ -250,51 +255,63 @@ function spawnCluster() {
     });
 }
 
+function generateFileName() {
+    var fileName = _underscore2.default.now().toString();
+    if (fileName != generateFileName.lastFileName) {
+        generateFileName.lastFileName = fileName;
+        return fileName;
+    }
+    return new Promise(function (resolve) {
+        setTimeout(_asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+            var fileName;
+            return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                while (1) {
+                    switch (_context2.prev = _context2.next) {
+                        case 0:
+                            _context2.next = 2;
+                            return fileName();
+
+                        case 2:
+                            fileName = _context2.sent;
+
+                            resolve(fileName);
+
+                        case 4:
+                        case 'end':
+                            return _context2.stop();
+                    }
+                }
+            }, _callee2, this);
+        })), 1);
+    });
+}
+
+function onReady(initCallback) {
+    if (!onReady.ready) {
+        onReady.ready = 0;
+    }
+    ++onReady.ready;
+    if ((0, _config2.default)('system.workerCount') === onReady.ready) {
+        initCallback();
+        if ((0, _config2.default)('server.statistics.enabled')) {
+            setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), (0, _config2.default)('server.statistics.ttl') * Tools.Minute);
+        }
+        if ((0, _config2.default)('server.rss.enabled')) {
+            setInterval(BoardsModel.generateRSS.bind(BoardsModel), (0, _config2.default)('server.rss.ttl') * Tools.Minute);
+        }
+        (0, _commands2.default)();
+    }
+}
+
 function spawnWorkers(initCallback) {
-    console.log("Spawning workers, please, wait...");
+    console.log(Tools.translate('Spawning workers, please, wait...'));
     spawnCluster();
-    var ready = 0;
-    IPC.on('ready', function () {
-        ++ready;
-        if ((0, _config2.default)('system.workerCount') === ready) {
-            initCallback();
-            if ((0, _config2.default)("server.statistics.enabled", true)) {
-                setInterval(function () {
-                    StatisticsModel.generateStatistics();
-                }, (0, _config2.default)("server.statistics.ttl", 60) * Tools.Minute);
-            }
-            if ((0, _config2.default)("server.rss.enabled", true)) {
-                setInterval(function () {
-                    BoardsModel.generateRSS().catch(function (err) {
-                        _logger2.default.error(err.stack || err);
-                    });
-                }, (0, _config2.default)("server.rss.ttl", 60) * Tools.Minute);
-            }
-            require("./helpers/commands")();
-        }
-    });
-    var lastFileName;
-    var fileName = function fileName() {
-        var fn = "" + Tools.now().valueOf();
-        if (fn != lastFileName) {
-            lastFileName = fn;
-            return Promise.resolve(fn);
-        }
-        return new Promise(function (resolve, reject) {
-            setTimeout(function () {
-                fileName().then(function (fn) {
-                    resolve(fn);
-                });
-            }, 1);
-        });
-    };
-    IPC.on('fileName', function () {
-        return fileName();
-    });
-    IPC.on('generate', function (data) {
+    IPC.on('ready', onReady.bind(null, initCallback));
+    IPC.on('fileName', generateFileName);
+    IPC.on('render', function (data) {
         return BoardsModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);
     });
-    IPC.on('generateArchive', function (data) {
+    IPC.on('renderArchive', function (data) {
         return BoardsModel.scheduleGenerateArchive(data);
     });
     IPC.on('stop', function () {
@@ -304,116 +321,129 @@ function spawnWorkers(initCallback) {
         return IPC.send('start');
     });
     IPC.on('reloadBoards', function () {
-        require("./boards/board").initialize();
+        Board.initialize();
         return IPC.send('reloadBoards');
     });
-    IPC.on('reloadConfig', function () {
-        _config2.default.reload();
-        return IPC.send('reloadConfig');
-    });
-    IPC.on('reloadTemplates', function () {
-        return Renderer.compileTemplates().then(function () {
-            return IPC.send('reloadTemplates');
-        });
-    });
+    IPC.on('reloadTemplates', _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+            while (1) {
+                switch (_context3.prev = _context3.next) {
+                    case 0:
+                        _context3.next = 2;
+                        return Renderer.compileTemplates();
+
+                    case 2:
+                        _context3.next = 4;
+                        return Renderer.reloadTemplates();
+
+                    case 4:
+                        return _context3.abrupt('return', IPC.send('reloadTemplates'));
+
+                    case 5:
+                    case 'end':
+                        return _context3.stop();
+                }
+            }
+        }, _callee3, this);
+    })));
     IPC.on('notifyAboutNewPosts', function (data) {
         return IPC.send('notifyAboutNewPosts', data);
     });
-    IPC.on('regenerateCache', function (regenerateArchive) {
-        if (regenerateArchive) {
-            return Renderer.regenerate();
+    IPC.on('rerenderCache', function (rerenderArchive) {
+        if (rerenderArchive) {
+            return Renderer.rerender();
         } else {
-            return Renderer.regenerate(Tools.ARCHIVE_PATHS_REGEXP, true);
+            return Renderer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
         }
     });
 }
 
 if (_cluster2.default.isMaster) {
-    _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+    _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
         var initCallback;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
             while (1) {
-                switch (_context2.prev = _context2.next) {
+                switch (_context4.prev = _context4.next) {
                     case 0:
-                        _context2.prev = 0;
+                        _context4.prev = 0;
 
                         Board.initialize();
-                        _context2.next = 4;
+                        _context4.next = 4;
                         return NodeCaptcha.removeOldCaptchImages();
 
                     case 4:
-                        _context2.next = 6;
+                        _context4.next = 6;
                         return NodeCaptchaNoscript.removeOldCaptchImages();
 
                     case 6:
-                        _context2.next = 8;
+                        _context4.next = 8;
                         return Database.initialize();
 
                     case 8:
-                        initCallback = _context2.sent;
-                        _context2.next = 11;
+                        initCallback = _context4.sent;
+                        _context4.next = 11;
                         return Renderer.compileTemplates();
 
                     case 11:
-                        _context2.next = 13;
+                        _context4.next = 13;
                         return Renderer.reloadTemplates();
 
                     case 13:
-                        if (!(_program2.default.regenerate || (0, _config2.default)('system.regenerateCacheOnStartup'))) {
-                            _context2.next = 21;
+                        if (!(_program2.default.rerender || (0, _config2.default)('system.rerenderCacheOnStartup'))) {
+                            _context4.next = 21;
                             break;
                         }
 
-                        if (!(_program2.default.archive || (0, _config2.default)('system.regenerateArchive'))) {
-                            _context2.next = 19;
+                        if (!(_program2.default.archive || (0, _config2.default)('system.rerenderArchive'))) {
+                            _context4.next = 19;
                             break;
                         }
 
-                        _context2.next = 17;
-                        return Rengerer.rerender();
+                        _context4.next = 17;
+                        return Renderer.rerender();
 
                     case 17:
-                        _context2.next = 21;
+                        _context4.next = 21;
                         break;
 
                     case 19:
-                        _context2.next = 21;
-                        return Rengerer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
+                        _context4.next = 21;
+                        return Renderer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
 
                     case 21:
-                        _context2.next = 23;
+                        _context4.next = 23;
                         return StatisticsModel.generateStatistics();
 
                     case 23:
-                        _context2.next = 25;
+                        _context4.next = 25;
                         return Renderer.generateTemplatingJavaScriptFile();
 
                     case 25:
-                        _context2.next = 27;
+                        _context4.next = 27;
                         return Renderer.generateCustomJavaScriptFile();
 
                     case 27:
-                        _context2.next = 29;
+                        _context4.next = 29;
                         return Renderer.generateCustomCSSFiles();
 
                     case 29:
                         spawnWorkers(initCallback);
-                        _context2.next = 36;
+                        _context4.next = 36;
                         break;
 
                     case 32:
-                        _context2.prev = 32;
-                        _context2.t0 = _context2['catch'](0);
+                        _context4.prev = 32;
+                        _context4.t0 = _context4['catch'](0);
 
-                        _logger2.default.error(_context2.t0.stack || _context2.t0);
+                        _logger2.default.error(_context4.t0.stack || _context4.t0);
                         process.exit(1);
 
                     case 36:
                     case 'end':
-                        return _context2.stop();
+                        return _context4.stop();
                 }
             }
-        }, _callee2, this, [[0, 32]]);
+        }, _callee4, this, [[0, 32]]);
     }))();
 } else {
     Board.initialize();

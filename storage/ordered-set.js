@@ -330,6 +330,34 @@ var OrderedSet = function () {
 
       return find;
     }()
+  }, {
+    key: 'delete',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(subkey) {
+        return regeneratorRuntime.wrap(function _callee10$(_context10) {
+          while (1) {
+            switch (_context10.prev = _context10.next) {
+              case 0:
+                _context10.next = 2;
+                return this.client.del(this.fullKey(subkey));
+
+              case 2:
+                return _context10.abrupt('return', _context10.sent);
+
+              case 3:
+              case 'end':
+                return _context10.stop();
+            }
+          }
+        }, _callee10, this);
+      }));
+
+      function _delete(_x21) {
+        return ref.apply(this, arguments);
+      }
+
+      return _delete;
+    }()
   }]);
 
   return OrderedSet;

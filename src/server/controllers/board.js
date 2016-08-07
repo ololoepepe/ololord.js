@@ -1,62 +1,221 @@
-var express = require("express");
+import _ from 'underscore';
+import express from 'express';
 
 var Board = require('../boards/board');
-var BoardModel = require("../models/board");
-
+import * as BoardsModel from '../models/board';
+import * as MiscModel from '../models/misc';
+import * as ThreadsModel from '../models/threads';
+import * as Renderer from '../core/renderer';
+import * as Cache from '../helpers/cache';
 import * as Tools from '../helpers/tools';
 
-var router = express.Router();
+let router = express.Router();
 
-router.generateJSON = function() {
-    return BoardModel.generateJSON();
-};
+function pickPostsToRerender(oldPosts, posts) {
+  return _(posts).pick((post, postNumber) => {
+    let oldPost = oldPosts[postNumber];
+    if (!oldPost || oldPost.updatedAt < post.updatedAt || oldPost.bannedFor !== post.bannedFor
+      || oldPost.text === post.text) {
+      return true;
+    }
+    let oldRefs = oldPost.referringPosts.reduce((acc, ref) => {
+      return `${acc};${ref.boardName}:${ref.postNumber}`;
+    }, '');
+    let newRefs = post.referringPosts.reduce((acc, ref) => {
+      return `${acc};${ref.boardName}:${ref.postNumber}`;
+    }, '');
+    if (oldRefs !== newRefs) {
+      return true;
+    }
+    let oldFileInfos = oldPost.fileInfos.reduce((acc, fileInfo) => {
+      return `${acc};${fileInfo.fileName}:${JSON.stringify(fileInfo.extraData)}`;
+    }, '');
+    let newFileInfos = post.fileInfos.reduce((acc, fileInfo) => {
+      return `${acc};${fileInfo.fileName}:${JSON.stringify(fileInfo.extraData)}`;
+    }, '');
+    if (oldFileInfos !== newFileInfos) {
+      return true;
+    }
+  });
+}
+
+async function renderThreadHTML(thread) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(Tools.translate('Invalid board'));
+  }
+  thread.title = thread.title || (`${board.title} — ${thread.number}`);
+  let model = { thread: thread };
+  model.isBoardPage = true;
+  model.isThreadPage = true;
+  model.board = MiscModel.board(board).board;
+  model.threadNumber = thread.number;
+  let data = Renderer.render('pages/thread', model);
+  await Cache.writeFile(`${thread.boardName}/res/${thread.number}.html`, data);
+}
+
+async function renderThread(boardName, threadNumber) {
+  let thread = await BoardsModel.getThread(boardName, threadNumber);
+  await Renderer.renderThread(thread);
+  await Cache.writeFile(`${boardName}/res/${threadNumber}.json`, JSON.stringify({ thread: thread }));
+  await renderThreadHTML(thread);
+}
+
+async function renderPage(boardName, pageNumber) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(Tools.translate('Invalid board'));
+  }
+  let page = await BoardsModel.getPage(boardName, pageNumber);
+  await Tools.series(page.threads, async function(thread) {
+    return await Renderer.renderThread(thread);
+  });
+  await Cache.writeFile(`${boardName}/${pageNumber}.json`, JSON.stringify(page));
+  page.title = board.title;
+  page.board = MiscModel.board(board).board;
+  let pageID = (pageNumber > 0) ? pageNumber : 'index';
+  await Cache.writeFile(`${boardName}/${pageID}.html`, Renderer.render('pages/board', page));
+}
 
 router.paths = async function() {
-  //TODO
+  let arrays = await Tools.series(Board.boardNames(), async function(boardName) {
+    let threadNumbers = await ThreadsModel.getThreadNumbers(boardName);
+    let archivedThreadNumbers = await ThreadsModel.getThreadNumbers(boardName, { archived: true });
+    let paths = [`/${boardName}`, `/${boardName}/archive`, `/${boardName}/catalog`];
+    return paths.concat(threadNumbers.map(threadNumber => `/${boardName}/res/${threadNumber}`));
+  }, true);
+  return _(arrays).flatten();
+};
+
+router.renderThread = async function(key, data) {
+  if (!_(data).isArray()) {
+    data = [data];
+  }
+  let mustCreate = data.some((d) => { return 'create' === d.action; });
+  let mustDelete = data.some((d) => { return 'delete' === d.action; });
+  if (mustCreate && mustDelete) {
+    return; //NOTE: This should actually never happen
+  }
+  data = data.reduce((acc, d) => {
+    if (!acc) {
+      return d;
+    }
+    if (d.action < acc.action) {
+      return d;
+    }
+    return acc;
+  });
+  let board = Board.board(data.boardName);
+  if (!board) {
+    return Promise.reject(Tools.translate('Invalid board'));
+  }
+  switch (data.action) {
+  case 'create': {
+    await renderThread(data.boardName, data.threadNumber);
+    break;
+  }
+  case 'edit': {
+    let threadID = `${data.boardName}/res/${data.threadNumber}.json`;
+    let threadData = await Cache.readFile(threadID);
+    let model = JSON.parse(threadData);
+    let thread = model.thread;
+    let lastPosts = thread.lastPosts.reduce((acc, post) => {
+      acc[post.number] = post;
+      return acc;
+    }, {});
+    let posts = await ThreadsModel.getThreadPosts(data.boardName, data.threadNumber, {
+      withExtraData: true,
+      withFileInfos: true,
+      withReferences: true
+    });
+    let opPost = posts.splice(0, 1)[0];
+    posts = posts.reduce((acc, post) => {
+      acc[post.number] = post;
+      return acc;
+    }, {});
+    let postsToRerender = pickPostsToRerender(lastPosts, posts);
+    await Tools.series(postsToRerender, async function(post, postNumber) {
+      let renderedPost = await board.renderPost(post);
+      lastPosts[postNumber] = renderedPost;
+    });
+    thread.lastPosts = _(lastPosts).toArray();
+    await Cache.writeFile(threadID, JSON.stringify(model));
+    await renderThreadHTML(thread);
+    break;
+  }
+  case 'delete': {
+    await ThreadsModel.setThreadDeleted(`${data.boardName}:${data.threadNumber}`);
+    await Cache.removeFile(`${data.boardName}/res/${data.threadNumber}.json`);
+    await Cache.removeFile(`${data.boardName}/res/${data.threadNumber}.html`);
+    break;
+  }
+  default: {
+    return Promise.reject(Tools.translate('Invalid action'));
+  }
+  }
+}
+
+router.renderPages = async function(boardName) {
+  let pageCount = await BoardsModel.getPageCount(boardName);
+  return await Tools.series(_.range(pageCount), async function(pageNumber) {
+    return await renderPage(boardName, pageNumber);
+  });
+};
+
+router.renderCatalog = async function(boardName) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(Tools.translate('Invalid board'));
+  }
+  await Tools.series(['date', 'recent', 'bumps'], async function(sortMode) {
+    let catalog = await BoardsModel.getCatalog(boardName, sortMode);
+    await Tools.series(catalog.threads, async function(thread) {
+      return await Renderer.renderThread(thread);
+    });
+    let suffix = ('date' !== sortMode) ? `-${sortMode}` : '';
+    await Cache.writeFile(`${boardName}/catalog${suffix}.json`, JSON.stringify(catalog));
+    catalog.title = board.title;
+    catalog.board = MiscModel.board(board).board;
+    catalog.sortMode = sortMode;
+    return Cache.writeFile(`${boardName}/catalog${suffix}.html`, Renderer.render('pages/catalog', catalog));
+  });
+};
+
+router.renderArchive = async function(boardName) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(Tools.translate('Invalid board'));
+  }
+  let archive = await BoardsModel.getArchive(boardName);
+  await Cache.writeFile(`${boardName}/archive.json`, JSON.stringify(archive));
+  archive.title = board.title;
+  archive.board = MiscModel.board(board).board;
+  await Cache.writeFile(`${boardName}/archive.html`, Renderer.render('pages/archive', archive));
 };
 
 router.render = async function(paths) {
-  //TODO
   return await Tools.series(paths, async function(path) {
-    //= /^\/[^\/]+\/(archive|arch\/\d+)\.(html|json)$/
-    if (ARCHIVE_PATHS_REGEXP.test(path)) {
-      //
-    } else {
-      //
+    let match = path.match(/^\/([^\/]+)$/);
+    if (match) {
+      console.log(Tools.translate('Rendering board pages: /$[1]', '', match[1]));
+      return await router.renderPages(match[1]);
+    }
+    match = path.match(/^\/([^\/]+)\/archive$/);
+    if (match) {
+      console.log(Tools.translate('Rendering board archive: /$[1]/archive', '', match[1]));
+      return await router.renderArchive(match[1]);
+    }
+    match = path.match(/^\/([^\/]+)\/catalog$/);
+    if (match) {
+      console.log(Tools.translate('Rendering board catalog: /$[1]/catalog', '', match[1]));
+      return await router.renderCatalog(match[1]);
+    }
+    match = path.match(/^\/([^\/]+)\/res\/(\d+)$/);
+    if (match) {
+      console.log(Tools.translate('Rendering thread: /$[1]/$[2]', '', match[1], match[2]));
+      return await renderThread(match[1], +match[2]);
     }
   });
-  /*return Tools.series(Board.boardNames(), function(boardName) {
-      var archPath = `${__dirname}/../public/${boardName}/arch`;
-      return FS.exists(archPath).then(function(exists) {
-          return Tools.promiseIf(exists, function() {
-              var board = Board.board(boardName);
-              return FS.list(archPath).then(function(fileNames) {
-                  return Tools.series(fileNames.filter(function(fileName) {
-                      return fileName.split(".").pop() == "json";
-                  }), function(fileName) {
-                      var threadNumber = +fileName.split(".").shift();
-                      var c = {};
-                      return BoardModel.getThread(board, threadNumber, true).then(function(model) {
-                          c.model = model;
-                          return FS.write(`${archPath}/${threadNumber}.json`, JSON.stringify(c.model));
-                      }).then(function() {
-                          return BoardModel.generateThreadHTML(board, threadNumber, c.model, true);
-                      }).then(function(data) {
-                          return FS.write(`${archPath}/${threadNumber}.html`, data);
-                      }).catch(function(err) {
-                          Logger.error(err.stack || err);
-                      }).then(function() {
-                          return Promise.resolve();
-                      });
-                  });
-              });
-          });
-      }).catch(function(err) {
-          Logger.error(err.stack || err);
-      }).then(function() {
-          return Promise.resolve();
-      });
-  });*/
 };
 
 module.exports = router;

@@ -20,7 +20,7 @@ router.render = async function() {
     tabReplace: '    ',
     useBR: true
   });
-  let result = markup.markpCode(CODE_TO_MARKUP, 'cpp');
+  let result = markup.markupCode(CODE_TO_MARKUP, 'cpp');
   let markedUpLatex = await Tools.markupLatex(LATEX_TO_MARKUP);
   let markedUpInlineLatex = await Tools.markupLatex(INLINE_LATEX_TO_MARKUP, true);
   let model = {
@@ -30,7 +30,7 @@ router.render = async function() {
     latexToMarkup: LATEX_TO_MARKUP,
     markedUpLatex: markedUpLatex,
     inlineLatexToMarkup: INLINE_LATEX_TO_MARKUP,
-    inlineLatexToMarkup: inlineLatexToMarkup
+    markedUpInlineLatex: markedUpInlineLatex
   };
   return { 'markup.html': Renderer.render('pages/markup', model) };
 };

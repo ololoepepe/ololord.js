@@ -8,6 +8,10 @@ import Board from '../boards/board';
 import * as Tools from '../helpers/tools';
 
 let ArchivedThreads = new Hash(client(), 'archivedThreads');
+let DeletedThreads = new UnorderedSet(client(), 'deletedThreads', {
+  parse: false,
+  stringify: false
+});
 let ThreadPostNumbers = new UnorderedSet(client(), 'threadPostNumbers', {
   parse: number => +number,
   stringify: number => number.toString()
@@ -23,7 +27,7 @@ export async function getThreadPostNumbers(boardName, threadNumber) {
   return postNumbers.sort((a, b) => { return a - b; });
 }
 
-async function addDataToThread(thread, { withPostNumbers }) {
+async function addDataToThread(thread, { withPostNumbers } = {}) {
   thread.updatedAt = await ThreadUpdateDateTimes.getOne(thread.number, thread.boardName);
   if (withPostNumbers) {
     thread.postNumbers = await getThreadPostNumbers(thread.boardName, thread.number);
@@ -55,6 +59,11 @@ export async function getThreadPosts(boardName, threadNumber,
   return await PostsModel.getPosts(boardName, postNumbers, { withExtraData, withFileInfos, withReferences });
 }
 
+export async function getThreadNumbers(boardName, { archived } = {}) {
+  let source = archived ? ArchivedThreads : Threads;
+  return await source.keys(boardName);
+}
+
 export async function getThread(boardName, threadNumber, options) {
   let board = Board.board(boardName);
   if (!board) {
@@ -73,6 +82,49 @@ export async function getThread(boardName, threadNumber, options) {
   }
   await addDataToThread(thread, options);
   return thread;
+}
+
+export async function getThreads(boardName, threadNumbers, options) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(Tools.translate('Invalid board'));
+  }
+  if (!_(threadNumbers).isArray()) {
+    threadNumbers = [threadNumbers];
+  }
+  threadNumbers = threadNumbers.map((threadNumber) => {
+    return Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+  });
+  if (threadNumbers.some(threadNumber => !threadNumber)) {
+    return Promise.reject(Tools.translate('Invalid thread number'));
+  }
+  let threads = await Threads.getSome(threadNumbers, boardName);
+  threads = _(threads).toArray();
+  let mayBeArchivedThreadNumbers = threads.map((thread, index) => {
+    return {
+      thread: thread,
+      index: index
+    };
+  }).filter((thread) => !thread.thread).map((thread) => {
+    return {
+      index: thread.index,
+      threadNumber: threadNumbers[thread.index]
+    };
+  });
+  if (mayBeArchivedThreadNumbers.length > 0) {
+    let numbers = mayBeArchivedThreadNumbers.map(thread => thread.threadNumber);
+    let archivedThreads = await ArchivedThreads.getSome(numbers, boardName);
+    archivedThreads.forEach((thread, index) => {
+      threads[mayBeArchivedThreadNumbers[index].index] = thread;
+    });
+  }
+  if (threads.length <= 0) {
+    return [];
+  }
+  await Tools.series(threads, async function(thread) {
+    await addDataToThread(thread, options);
+  });
+  return threads;
 }
 
 export async function getThreadInfo(boardName, threadNumber, { lastPostNumber }) {
@@ -105,7 +157,7 @@ export async function getThreadInfo(boardName, threadNumber, { lastPostNumber })
     lastPostNumber: thread.postNumbers.pop(),
     newPostCount: newPostCount
   };
-};
+}
 
 export async function getThreadLastPostNumber(boardName, threadNumber) {
   if (!Board.board(boardName)) {
@@ -117,4 +169,16 @@ export async function getThreadLastPostNumber(boardName, threadNumber) {
   }
   let threadPostNumbers = await getThreadPostNumbers(boardName, threadNumber);
   return (threadPostNumbers.length > 0) ? _(threadPostNumbers).last() : 0;
+}
+
+export async function isThreadDeleted(boardName, threadNumber) {
+  return DeletedThreads.contains(`${boardName}:${threadNumber}`);
+}
+
+export async function setThreadDeleted(boardName, threadNumber) {
+  return DeletedThreads.addOne(`${boardName}:${threadNumber}`);
+}
+
+export async function clearDeletedThreads() {
+  return DeletedThreads.delete();
 }

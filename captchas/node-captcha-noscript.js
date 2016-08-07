@@ -88,70 +88,85 @@ nodeCaptcha.apiRoutes = function () {
   }];
 };
 
-nodeCaptcha.removeOldCaptchImages = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
-  var PATH, fileNames;
-  return regeneratorRuntime.wrap(function _callee2$(_context2) {
+nodeCaptcha.removeOldCaptchImages = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+  var _this = this;
+
+  return regeneratorRuntime.wrap(function _callee3$(_context3) {
     while (1) {
-      switch (_context2.prev = _context2.next) {
+      switch (_context3.prev = _context3.next) {
         case 0:
-          _context2.prev = 0;
-          PATH = __dirname + "/../tmp/node-captcha-noscript";
-          _context2.next = 4;
-          return FS.list(PATH);
+          _context3.prev = 0;
+          return _context3.delegateYield(regeneratorRuntime.mark(function _callee2() {
+            var PATH, fileNames;
+            return regeneratorRuntime.wrap(function _callee2$(_context2) {
+              while (1) {
+                switch (_context2.prev = _context2.next) {
+                  case 0:
+                    PATH = __dirname + "/../tmp/node-captcha-noscript";
+                    _context2.next = 3;
+                    return FS.list(PATH);
 
-        case 4:
-          fileNames = _context2.sent;
-          _context2.next = 7;
-          return Tools.series(fileNames.filter(function (fileName) {
-            var _fileName$split = fileName.split('.');
+                  case 3:
+                    fileNames = _context2.sent;
+                    _context2.next = 6;
+                    return Tools.series(fileNames.filter(function (fileName) {
+                      var _fileName$split = fileName.split('.');
 
-            var _fileName$split2 = _slicedToArray(_fileName$split, 2);
+                      var _fileName$split2 = _slicedToArray(_fileName$split, 2);
 
-            var name = _fileName$split2[0];
-            var suffix = _fileName$split2[1];
+                      var name = _fileName$split2[0];
+                      var suffix = _fileName$split2[1];
 
-            return 'png' === suffix && /^[0-9]+$/.test(name);
-          }), function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(fileName) {
-              return regeneratorRuntime.wrap(function _callee$(_context) {
-                while (1) {
-                  switch (_context.prev = _context.next) {
-                    case 0:
-                      _context.next = 2;
-                      return FS.remove(path + "/" + fileName);
+                      return 'png' === suffix && /^[0-9]+$/.test(name);
+                    }), function () {
+                      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(fileName) {
+                        return regeneratorRuntime.wrap(function _callee$(_context) {
+                          while (1) {
+                            switch (_context.prev = _context.next) {
+                              case 0:
+                                _context.next = 2;
+                                return FS.remove(PATH + "/" + fileName);
 
-                    case 2:
-                      return _context.abrupt("return", _context.sent);
+                              case 2:
+                                return _context.abrupt("return", _context.sent);
 
-                    case 3:
-                    case "end":
-                      return _context.stop();
-                  }
+                              case 3:
+                              case "end":
+                                return _context.stop();
+                            }
+                          }
+                        }, _callee, this);
+                      }));
+
+                      return function (_x) {
+                        return ref.apply(this, arguments);
+                      };
+                    }());
+
+                  case 6:
+                  case "end":
+                    return _context2.stop();
                 }
-              }, _callee, this);
-            }));
+              }
+            }, _callee2, _this);
+          })(), "t0", 2);
 
-            return function (_x) {
-              return ref.apply(this, arguments);
-            };
-          }());
-
-        case 7:
-          _context2.next = 12;
+        case 2:
+          _context3.next = 7;
           break;
 
-        case 9:
-          _context2.prev = 9;
-          _context2.t0 = _context2["catch"](0);
+        case 4:
+          _context3.prev = 4;
+          _context3.t1 = _context3["catch"](0);
 
-          _logger2.default.error(_context2.t0.stack || _context2.t0);
+          _logger2.default.error(_context3.t1.stack || _context3.t1);
 
-        case 12:
+        case 7:
         case "end":
-          return _context2.stop();
+          return _context3.stop();
       }
     }
-  }, _callee2, this, [[0, 9]]);
+  }, _callee3, this, [[0, 4]]);
 }));
 
 module.exports = nodeCaptcha;

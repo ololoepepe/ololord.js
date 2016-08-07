@@ -15,7 +15,6 @@ var Util = require("util");
 var mkpath = promisify("mkpath");
 
 var Board = require("../boards/board");
-var BoardModel = require("../models/board");
 var Cache = require("./cache");
 var Captcha = require("../captchas");
 var config = require("./config");
@@ -23,6 +22,8 @@ var markup = require("./markup");
 var Permissions = require("./permissions");
 var Tools = require("./tools");
 
+import * as BoardsModel from '../models/board';
+import * as PostsModel from '../models/posts';
 import * as UsersModel from '../models/users';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
@@ -396,67 +397,6 @@ var threadPosts = function(boardName, threadNumber, options) {
 };
 
 module.exports.threadPosts = threadPosts;
-
-var getPost = function(boardName, postNumber, options) {
-    var board = Board.board(boardName);
-    if (!board)
-        return Promise.reject(Tools.translate("Invalid board"));
-    if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject(Tools.translate("Invalid post number"));
-    var opts = (typeof options == "object");
-    var c = {};
-    var key = boardName + ":" + postNumber;
-    var p = db.hget("posts", key).then(function(post) {
-        if (!post)
-            return Promise.reject(Tools.translate("No such post"));
-        c.post = JSON.parse(post);
-        return bannedFor(boardName, c.post.number, c.post.user.ip);
-    }).then(function(banned) {
-        c.post.bannedFor = banned;
-        return Promise.resolve(c.post);
-    });
-    if (!opts || (!options.withFileInfos && !options.withReferences && !options.withExtraData))
-        return p;
-    return p.then(function() {
-        return threadPostNumbers(c.post.boardName, c.post.threadNumber);
-    }).then(function(postNumbers) {
-        c.post.sequenceNumber = postNumbers.indexOf(c.post.number) + 1;
-        var promises = [];
-        if (options.withFileInfos) {
-            promises.push(postFileInfoNames(boardName, postNumber).then(function(names) {
-                c.names = names;
-                return Promise.all(names.map(function(name) {
-                    return db.hget("fileInfos", name);
-                }));
-            }).then(function(fileInfos) {
-                return Promise.resolve(c.post.fileInfos = fileInfos ? fileInfos.map(function(fileInfo) {
-                    return JSON.parse(fileInfo);
-                }) : []);
-            }));
-        }
-        if (options.withReferences) {
-            promises.push(db.hgetall("referencedPosts:" + key).then(function(referencedPosts) {
-                c.post.referencedPosts = sortedReferensces(referencedPosts);
-                return db.hgetall("referringPosts:" + key);
-            }).then(function(referringPosts) {
-                c.post.referringPosts = sortedReferensces(referringPosts);
-                return Promise.resolve();
-            }));
-        }
-        if (options.withExtraData) {
-            promises.push(board.loadExtraData(postNumber).then(function(extraData) {
-                if (!Util.isNullOrUndefined(extraData))
-                    c.post.extraData = extraData;
-                return Promise.resolve();
-            }));
-        }
-        return Promise.all(promises);
-    }).then(function() {
-        return c.post;
-    });
-};
-
-module.exports.getPost = getPost;
 
 var getFileInfo = function(file) {
     var p;
@@ -1133,7 +1073,7 @@ module.exports.createPost = function(req, fields, files, transaction) {
         return createPost(req, fields, files, transaction);
     }).then(function(post) {
         c.post = post;
-        return BoardsModel.generate(post.boardName, post.threadNumber, post.number, "create");
+        return IPC.render(post.boardName, post.threadNumber, post.number, 'create');
     }).then(function() {
         hasNewPosts.add(c.post.boardName + "/" + c.post.threadNumber);
         return Promise.resolve(c.post);
@@ -1169,7 +1109,7 @@ var removeReferencedPosts = function(post, nogenerate) {
         if (!nogenerate) {
             Tools.forIn(c.referencedPosts, function(ref, refKey) {
                 if (ref.boardName != post.boardName || ref.threadNumber != post.threadNumber)
-                    BoardsModel.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
+                    IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
             });
         }
         return db.del("referencedPosts:" + key);
@@ -1186,7 +1126,7 @@ var addReferencedPosts = function(post, referencedPosts, nogenerate) {
         if (!nogenerate) {
             Tools.forIn(referencedPosts, function(ref, refKey) {
                 if (ref.boardName != post.boardName || ref.threadNumber != post.threadNumber)
-                    BoardsModel.generate(ref.boardName, ref.threadNumber, ref.postNumber, "edit");
+                    IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
             });
         }
         var promises = [];
@@ -1208,7 +1148,7 @@ var removePost = function(boardName, postNumber, options) {
         return Promise.reject(Tools.translate("Invalid board"));
     var c = {};
     return db.sadd("postsPlannedForDeletion", boardName + ":" + postNumber).then(function() {
-        return getPost(boardName, postNumber, { withReferences: true });
+        return PostsModel.getPost(boardName, postNumber, { withReferences: true });
     }).then(function(post) {
         c.post = post;
         return db.srem("threadPostNumbers:" + boardName + ":" + post.threadNumber, postNumber);
@@ -1416,7 +1356,7 @@ module.exports.createThread = function(req, fields, files, transaction) {
         c.files = files;
         return createPost(req, fields, files, transaction, c.threadNumber, date);
     }).then(function(post) {
-        return BoardsModel.generate(post.boardName, post.threadNumber, post.number, "create");
+        return IPC.render(post.boardName, post.threadNumber, post.number, 'create');
     }).then(function() {
         return c.thread;
     });
@@ -1613,7 +1553,7 @@ var rerenderPost = function(boardName, postNumber, silent) {
     if (!silent)
         console.log(`Rendering post: [${boardName}] ${postNumber}`);
     var referencedPosts = {};
-    return getPost(boardName, postNumber).then(function(post) {
+    return PostsModel.getPost(boardName, postNumber).then(function(post) {
         c.post = post;
         return markup(c.post.boardName, c.post.rawText, {
             markupModes: c.post.markup,
@@ -1629,7 +1569,7 @@ var rerenderPost = function(boardName, postNumber, silent) {
         return addReferencedPosts(c.post, referencedPosts, !silent);
     }).then(function() {
         if (silent)
-            BoardsModel.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
+            IPC.render(c.post.boardName, c.post.threadNumber, c.post.number, 'edit');
         return Promise.resolve();
     });
 };
@@ -1647,7 +1587,7 @@ var rebuildPostSearchIndex = function(boardName, postNumber, threads) {
     console.log(`Rebuilding post search index: >>/${boardName}/${postNumber}`);
     threads = threads || {};
     var c = {};
-    return getPost(boardName, postNumber).then(function(post) {
+    return PostsModel.getPost(boardName, postNumber).then(function(post) {
         c.post = post;
         return Tools.promiseIf(threads.hasOwnProperty(c.post.threadNumber), function() {
             return Promise.resolve(threads[c.post.threadNumber]);
@@ -1744,7 +1684,7 @@ module.exports.addFiles = function(req, fields, files, transaction) {
     var postNumber = +fields.postNumber;
     if (isNaN(postNumber) || postNumber <= 0)
         return Promise.reject(Tools.translate("Invalid post number"));
-    return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
+    return PostsModel.getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
         c.post = post;
         return checkPermissions(req, board, post, "addFilesToPost");
     }).then(function(result) {
@@ -1767,7 +1707,7 @@ module.exports.addFiles = function(req, fields, files, transaction) {
     }).then(function() {
         return addFileHashes(c.files);
     }).then(function() {
-        BoardsModel.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
+        IPC.render(c.post.boardName, c.post.threadNumber, c.post.number, 'edit');
         return Promise.resolve(c.post);
     });
 };
@@ -1790,7 +1730,7 @@ module.exports.editPost = function(req, fields) {
         if (fields.markupMode && fields.markupMode.indexOf(val) >= 0)
             markupModes.push(val);
     });
-    return getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
+    return PostsModel.getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("Invalid post"));
         c.post = post;
@@ -1853,7 +1793,7 @@ module.exports.editPost = function(req, fields) {
             }
         });
     }).then(function() {
-        BoardsModel.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
+        IPC.render(c.post.boardName, c.post.threadNumber, c.post.number, 'edit');
         return Promise.resolve();
     });
 };
@@ -1879,7 +1819,7 @@ module.exports.setThreadFixed = function(req, fields) {
         thread.fixed = fixed;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
-        return BoardsModel.generate(board.name, threadNumber, threadNumber, "edit");
+        return IPC.render(board.name, threadNumber, threadNumber, 'edit');
     }).then(function() {
         return Promise.resolve({
             boardName: board.name,
@@ -1909,7 +1849,7 @@ module.exports.setThreadClosed = function(req, fields) {
         thread.closed = closed;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
-        return BoardsModel.generate(board.name, threadNumber, threadNumber, "edit");
+        return IPC.render(board.name, threadNumber, threadNumber, 'edit');
     }).then(function() {
         return Promise.resolve({
             boardName: board.name,
@@ -1939,7 +1879,7 @@ module.exports.setThreadUnbumpable = function(req, fields) {
         thread.unbumpable = unbumpable;
         db.hset("threads:" + board.name, threadNumber, JSON.stringify(thread));
     }).then(function() {
-        return BoardsModel.generate(board.name, threadNumber, threadNumber, "edit");
+        return IPC.render(board.name, threadNumber, threadNumber, 'edit');
     }).then(function() {
         return Promise.resolve({
             boardName: board.name,
@@ -1957,7 +1897,7 @@ module.exports.deletePost = function(req, res, fields) {
         return Promise.reject(Tools.translate("Invalid post number"));
     var c = {};
     return UsersModel.checkUserBan(req.ip, board.name, { write: true }).then(function() {
-        return getPost(board.name, postNumber);
+        return PostsModel.getPost(board.name, postNumber);
     }).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("Invalid post"));
@@ -1979,11 +1919,11 @@ module.exports.deletePost = function(req, res, fields) {
             p = FS.remove(path + "json").then(function() {
                 return FS.remove(path + "html");
             }).then(function() {
-                return BoardsModel.generateArchive(board.name);
+                return IPC.renderArchive(board.name);
             });
         } else if (!c.archived) {
-            p = c.isThread ? BoardsModel.generate(c.post.boardName, c.post.threadNumber, c.post.number, "delete")
-                : BoardsModel.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
+            p = c.isThread ? IPC.render(c.post.boardName, c.post.threadNumber, c.post.number, 'delete')
+                : IPC.render(c.post.boardName, c.post.threadNumber, c.post.number, 'edit');
         }
         return p;
     }).then(function() {
@@ -2031,7 +1971,7 @@ module.exports.moveThread = function(req, fields) {
         c.postNumbers = c.thread.postNumbers;
         delete c.thread.postNumbers;
         var promises = c.postNumbers.map(function(postNumber) {
-            return getPost(sourceBoard.name, postNumber, {
+            return PostsModel.getPost(sourceBoard.name, postNumber, {
                 withFileInfos: true,
                 withReferences: true,
                 withExtraData: true
@@ -2185,7 +2125,7 @@ module.exports.moveThread = function(req, fields) {
         });
     }).then(function() {
         return Tools.series(c.toRerender, function(o) {
-            return getPost(o.boardName, o.postNumber).then(function(p) {
+            return PostsModel.getPost(o.boardName, o.postNumber).then(function(p) {
                 if (!p.rawText)
                     return Promise.resolve();
                 Tools.forIn(c.postNumberMap, function(newPostNumber, previousPostNumber) {
@@ -2208,7 +2148,7 @@ module.exports.moveThread = function(req, fields) {
         });
     }).then(function() {
         return Tools.series(c.toUpdate, function(o) {
-            return BoardsModel.generate(o.boardName, o.threadNumber, o.threadNumber, "create");
+            return IPC.render(o.boardName, o.threadNumber, o.threadNumber, 'create');
         });
     }).then(function() {
         return removeThread(sourceBoard.name, threadNumber, {
@@ -2216,8 +2156,8 @@ module.exports.moveThread = function(req, fields) {
             leaveReferences: true
         });
     }).then(function() {
-        BoardsModel.generate(sourceBoard.name, threadNumber, threadNumber, "delete")
-        return BoardsModel.generate(targetBoard.name, c.thread.number, c.thread.number, "create");
+        IPC.render(sourceBoard.name, threadNumber, threadNumber, 'delete')
+        return IPC.render(targetBoard.name, c.thread.number, c.thread.number, 'create');
     }).then(function() {
         return {
             boardName: targetBoard.name,
@@ -2235,7 +2175,7 @@ module.exports.deleteFile = function(req, res, fields) {
         if (!fileInfo)
             return Promise.reject(Tools.translate("No such file"));
         c.fileInfo = JSON.parse(fileInfo);
-        return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
+        return PostsModel.getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
     }).then(function(post) {
         c.post = post;
         var board = Board.board(c.fileInfo.boardName);
@@ -2265,7 +2205,7 @@ module.exports.deleteFile = function(req, res, fields) {
                 Logger.error(err.stack || err);
             });
         });
-        BoardsModel.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
+        IPC.render(c.post.boardName, c.post.threadNumber, c.post.number, 'edit');
         return {
             boardName: c.post.boardName,
             postNumber: c.post.number,
@@ -2281,7 +2221,7 @@ module.exports.editFileRating = function(req, res, fields) {
         c.fileInfo = fileInfo;
         return UsersModel.checkUserBan(req.ip, c.fileInfo.boardName, { write: true });
     }).then(function() {
-        return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
+        return PostsModel.getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
     }).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("Invalid post"));
@@ -2297,7 +2237,7 @@ module.exports.editFileRating = function(req, res, fields) {
             c.fileInfo.rating = fields.rating;
         return db.hset("fileInfos", c.fileInfo.name, JSON.stringify(c.fileInfo));
     }).then(function() {
-        BoardsModel.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
+        IPC.render(c.post.boardName, c.post.threadNumber, c.post.number, 'edit');
         return {
             boardName: c.post.boardName,
             threadNumber: c.post.threadNumber,
@@ -2315,7 +2255,7 @@ module.exports.editAudioTags = function(req, res, fields) {
         c.fileInfo = fileInfo;
         return UsersModel.checkUserBan(req.ip, c.fileInfo.boardName, { write: true });
     }).then(function() {
-        return getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
+        return PostsModel.getPost(c.fileInfo.boardName, c.fileInfo.postNumber);
     }).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("Invalid post"));
@@ -2335,7 +2275,7 @@ module.exports.editAudioTags = function(req, res, fields) {
         });
         return db.hset("fileInfos", c.fileInfo.name, JSON.stringify(c.fileInfo));
     }).then(function() {
-        BoardsModel.generate(c.post.boardName, c.post.threadNumber, c.post.number, "edit");
+        IPC.render(c.post.boardName, c.post.threadNumber, c.post.number, 'edit');
         return {
             boardName: c.post.boardName,
             threadNumber: c.post.threadNumber,
@@ -2381,7 +2321,7 @@ var updatePostBanInfo = function(boardName, postNumber) {
     return db.hget("posts", boardName + ":" + postNumber).then(function(post) {
         if (!post)
             return Promise.resolve();
-        return BoardsModel.generate(boardName, JSON.parse(post).threadNumber, postNumber, "edit");
+        return IPC.render(boardName, JSON.parse(post).threadNumber, postNumber, 'edit');
     });
 };
 
@@ -2532,7 +2472,7 @@ module.exports.delall = function(req, ip, boardNames) {
         return Tools.series(boardNames, function(boardName) {
             return db.smembers(`userPostNumbers:${ip}:${boardName}`).then(function(postNumbers) {
                 return Tools.series(postNumbers, function(postNumber) {
-                    return getPost(boardName, postNumber);
+                    return PostsModel.getPost(boardName, postNumber);
                 }, true).then(function(posts) {
                     posts.forEach(function(post) {
                         if (post.threadNumber == post.number) {
@@ -2569,11 +2509,11 @@ module.exports.delall = function(req, ip, boardNames) {
         });
     }).then(function() {
         return Tools.series(updatedThreads, function(thread) {
-            return BoardsModel.generate(thread.boardName, thread.number, thread.postNumber, "edit");
+            return IPC.render(thread.boardName, thread.number, thread.postNumber, 'edit');
         });
     }).then(function() {
         return Tools.series(deletedThreads, function(thread) {
-            return BoardsModel.generate(thread.boardName, thread.number, thread.number, "delete");
+            return IPC.render(thread.boardName, thread.number, thread.number, 'delete');
         });
     }).then(function() {
         return Promise.resolve();

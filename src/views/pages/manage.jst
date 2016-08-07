@@ -42,13 +42,13 @@
                     data-bind='click: showServerActionsMenu'></span>
               <ul id='menu-management-server-actions' class='menu' style='display: none;'>
                 <li class='nowrap'>
-                  <span data-bind='click: regenerateCache'>
-                    {{!it.translate('Regenerate cache')}}
+                  <span data-bind='click: rerenderCache'>
+                    {{!it.translate('Rerender cache')}}
                   </span>
                 </li>
                 <li class='nowrap'>
-                  <span data-bind='click: regenerateCacheWithArchived'>
-                    {{!it.translate('Regenerate cache (including archived threads)')}}
+                  <span data-bind='click: rerenderCacheWithArchived'>
+                    {{!it.translate('Rerender cache (including archived threads)')}}
                   </span>
                 </li>
                 <li class='nowrap'>

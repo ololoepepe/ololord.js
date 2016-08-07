@@ -3,9 +3,9 @@ var Util = require("util");
 var vorpal = require("vorpal")();
 
 var Board = require("../boards/board");
-var config = require("./config");
-var Database = require("./database");
-var Tools = require("./tools");
+var config = require("../helpers/config");
+var Database = require("../helpers/database");
+var Tools = require("../helpers/tools");
 
 import * as Renderer from '../core/renderer';
 import * as IPC from '../helpers/ipc';
@@ -204,9 +204,12 @@ vorpal.installHandler("start", function() {
     });
 }, { description: Tools.translate("Opens workers for connections if closed.") });
 
-vorpal.installHandler("regenerate", function(args) {
+vorpal.installHandler("rerender [what]", function(args) {
     return IPC.send('stop').then(function() {
-      if (args.options && args.options.archive) {
+      if (args.what) {
+        let what = (args.options && args.options.regexp) ? new RegExp(args.what) : args.what;
+        return Renderer.rerender(what, args.options && args.options.not);
+      } else if (args.options && args.options.archive) {
         return Renderer.rerender();
       } else {
         return Renderer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
@@ -217,11 +220,19 @@ vorpal.installHandler("regenerate", function(args) {
         return Promise.resolve("OK");
     });
 }, {
-    description: Tools.translate("Regenerates the cache (workers are closed and then opened again)."),
+    description: Tools.translate("Rerenders the cache (workers are closed and then opened again)."),
     options: [
         {
             value: "-a, --archive",
-            description: Tools.translate("Regenerate archived threads, too.")
+            description: Tools.translate("Rerender archived threads, too.")
+        },
+        {
+            value: "-r, --regexp",
+            description: Tools.translate("Treat [what] as a regular expression.")
+        },
+        {
+            value: "-n, --not",
+            description: Tools.translate("Inverse matching (if [what] specified only).")
         }
     ]
 });
@@ -291,8 +302,8 @@ vorpal.installHandler("uptime", function() {
     return Promise.resolve(format(process.uptime()));
 }, { description: Tools.translate("Shows server uptime.") });
 
-module.exports = function() {
+export default function commands() {
     console.log(Tools.translate("Type 'help' for commands"));
     vorpal.delimiter("ololord.js>").show();
     return vorpal;
-};
+}

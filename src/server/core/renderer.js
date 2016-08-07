@@ -5,6 +5,7 @@ import FS from 'q-io/fs';
 import merge from 'merge';
 import moment from 'moment';
 
+var Board = require('../boards/board');
 import controllers from '../controllers';
 import * as MiscModel from '../models/misc';
 import * as Cache from '../helpers/cache';
@@ -107,6 +108,20 @@ export async function rerender(what, not) {
     return await Tools.series(result, async function(data, id) {
       return await Cache.writeFile(id, data);
     });
+  });
+}
+
+export async function renderThread(thread) {
+  let board = Board.board(thread.boardName);
+  if (!board) {
+    return Promise.reject(Tools.translate('Invalid board'));
+  }
+  await board.renderPost(thread.opPost);
+  if (!thread.lastPosts) {
+    return;
+  }
+  await Tools.series(thread.lastPosts, async function(post) {
+    return await board.renderPost(post);
   });
 }
 

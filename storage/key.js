@@ -101,20 +101,21 @@ var Key = function () {
       return set;
     }()
   }, {
-    key: 'delete',
+    key: 'find',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(query, subkey) {
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                _context3.next = 2;
-                return this.client.del(this.fullKey(subkey));
-
-              case 2:
-                return _context3.abrupt('return', _context3.sent);
+                query = typeof query !== 'undefined' ? ':' + query : ':*';
+                _context3.next = 3;
+                return this.client.keys(this.fullKey(subkey) + query);
 
               case 3:
+                return _context3.abrupt('return', _context3.sent);
+
+              case 4:
               case 'end':
                 return _context3.stop();
             }
@@ -122,28 +123,27 @@ var Key = function () {
         }, _callee3, this);
       }));
 
-      function _delete() {
+      function find(_x5, _x6) {
         return ref.apply(this, arguments);
       }
 
-      return _delete;
+      return find;
     }()
   }, {
-    key: 'find',
+    key: 'delete',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(query, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(subkey) {
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                query = typeof query !== 'undefined' ? ':' + query : ':*';
-                _context4.next = 3;
-                return this.client.keys(this.fullKey(subkey) + query);
+                _context4.next = 2;
+                return this.client.del(this.fullKey(subkey));
 
-              case 3:
+              case 2:
                 return _context4.abrupt('return', _context4.sent);
 
-              case 4:
+              case 3:
               case 'end':
                 return _context4.stop();
             }
@@ -151,11 +151,11 @@ var Key = function () {
         }, _callee4, this);
       }));
 
-      function find(_x5, _x6) {
+      function _delete(_x7) {
         return ref.apply(this, arguments);
       }
 
-      return find;
+      return _delete;
     }()
   }]);
 

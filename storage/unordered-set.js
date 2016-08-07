@@ -105,20 +105,20 @@ var UnorderedSet = function () {
       return getAll;
     }()
   }, {
-    key: 'exists',
+    key: 'contains',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(subkey) {
-        var exists;
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(data, subkey) {
+        var contains;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
                 _context3.next = 2;
-                return this.client.exists(this.fullKey(subkey));
+                return this.client.sismember(this.fullKey(subkey), this.stringify(data));
 
               case 2:
-                exists = _context3.sent;
-                return _context3.abrupt('return', !!exists);
+                contains = _context3.sent;
+                return _context3.abrupt('return', !!contains);
 
               case 4:
               case 'end':
@@ -128,7 +128,37 @@ var UnorderedSet = function () {
         }, _callee3, this);
       }));
 
-      function exists(_x4) {
+      function contains(_x4, _x5) {
+        return ref.apply(this, arguments);
+      }
+
+      return contains;
+    }()
+  }, {
+    key: 'exists',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(subkey) {
+        var exists;
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                _context4.next = 2;
+                return this.client.exists(this.fullKey(subkey));
+
+              case 2:
+                exists = _context4.sent;
+                return _context4.abrupt('return', !!exists);
+
+              case 4:
+              case 'end':
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function exists(_x6) {
         return ref.apply(this, arguments);
       }
 
@@ -137,26 +167,26 @@ var UnorderedSet = function () {
   }, {
     key: 'addOne',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(data, subkey) {
-        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(data, subkey) {
+        return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
-                _context4.next = 2;
+                _context5.next = 2;
                 return this.client.sadd(this.fullKey(subkey), this.stringify(data));
 
               case 2:
-                return _context4.abrupt('return', _context4.sent);
+                return _context5.abrupt('return', _context5.sent);
 
               case 3:
               case 'end':
-                return _context4.stop();
+                return _context5.stop();
             }
           }
-        }, _callee4, this);
+        }, _callee5, this);
       }));
 
-      function addOne(_x5, _x6) {
+      function addOne(_x7, _x8) {
         return ref.apply(this, arguments);
       }
 
@@ -165,56 +195,28 @@ var UnorderedSet = function () {
   }, {
     key: 'addSome',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(list, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(list, subkey) {
         var _client$sadd;
 
-        return regeneratorRuntime.wrap(function _callee5$(_context5) {
-          while (1) {
-            switch (_context5.prev = _context5.next) {
-              case 0:
-                if (!(!list || !(0, _underscore2.default)(list).isArray() || list.length <= 0)) {
-                  _context5.next = 2;
-                  break;
-                }
-
-                return _context5.abrupt('return', 0);
-
-              case 2:
-                _context5.next = 4;
-                return (_client$sadd = this.client.sadd).call.apply(_client$sadd, [this.client, this.fullKey(subkey)].concat(_toConsumableArray(list.map(this.stringify))));
-
-              case 4:
-                return _context5.abrupt('return', _context5.sent);
-
-              case 5:
-              case 'end':
-                return _context5.stop();
-            }
-          }
-        }, _callee5, this);
-      }));
-
-      function addSome(_x7, _x8) {
-        return ref.apply(this, arguments);
-      }
-
-      return addSome;
-    }()
-  }, {
-    key: 'removeOne',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(data, subkey) {
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
-                _context6.next = 2;
-                return this.client.srem(this.fullKey(subkey), this.stringify(data));
+                if (!(!list || !(0, _underscore2.default)(list).isArray() || list.length <= 0)) {
+                  _context6.next = 2;
+                  break;
+                }
+
+                return _context6.abrupt('return', 0);
 
               case 2:
+                _context6.next = 4;
+                return (_client$sadd = this.client.sadd).call.apply(_client$sadd, [this.client, this.fullKey(subkey)].concat(_toConsumableArray(list.map(this.stringify))));
+
+              case 4:
                 return _context6.abrupt('return', _context6.sent);
 
-              case 3:
+              case 5:
               case 'end':
                 return _context6.stop();
             }
@@ -222,37 +224,27 @@ var UnorderedSet = function () {
         }, _callee6, this);
       }));
 
-      function removeOne(_x9, _x10) {
+      function addSome(_x9, _x10) {
         return ref.apply(this, arguments);
       }
 
-      return removeOne;
+      return addSome;
     }()
   }, {
-    key: 'removeSome',
+    key: 'deleteOne',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(list, subkey) {
-        var _client$srem;
-
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(data, subkey) {
         return regeneratorRuntime.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
-                if (!(!list || !(0, _underscore2.default)(list).isArray() || list.length <= 0)) {
-                  _context7.next = 2;
-                  break;
-                }
-
-                return _context7.abrupt('return', 0);
+                _context7.next = 2;
+                return this.client.srem(this.fullKey(subkey), this.stringify(data));
 
               case 2:
-                _context7.next = 4;
-                return (_client$srem = this.client.srem).call.apply(_client$srem, [this.client, this.fullKey(subkey)].concat(_toConsumableArray(list.map(this.stringify))));
-
-              case 4:
                 return _context7.abrupt('return', _context7.sent);
 
-              case 5:
+              case 3:
               case 'end':
                 return _context7.stop();
             }
@@ -260,27 +252,37 @@ var UnorderedSet = function () {
         }, _callee7, this);
       }));
 
-      function removeSome(_x11, _x12) {
+      function deleteOne(_x11, _x12) {
         return ref.apply(this, arguments);
       }
 
-      return removeSome;
+      return deleteOne;
     }()
   }, {
-    key: 'count',
+    key: 'deleteSome',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(list, subkey) {
+        var _client$srem;
+
         return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
-                _context8.next = 2;
-                return this.client.scard(this.fullKey(subkey));
+                if (!(!list || !(0, _underscore2.default)(list).isArray() || list.length <= 0)) {
+                  _context8.next = 2;
+                  break;
+                }
+
+                return _context8.abrupt('return', 0);
 
               case 2:
+                _context8.next = 4;
+                return (_client$srem = this.client.srem).call.apply(_client$srem, [this.client, this.fullKey(subkey)].concat(_toConsumableArray(list.map(this.stringify))));
+
+              case 4:
                 return _context8.abrupt('return', _context8.sent);
 
-              case 3:
+              case 5:
               case 'end':
                 return _context8.stop();
             }
@@ -288,7 +290,35 @@ var UnorderedSet = function () {
         }, _callee8, this);
       }));
 
-      function count(_x13) {
+      function deleteSome(_x13, _x14) {
+        return ref.apply(this, arguments);
+      }
+
+      return deleteSome;
+    }()
+  }, {
+    key: 'count',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(subkey) {
+        return regeneratorRuntime.wrap(function _callee9$(_context9) {
+          while (1) {
+            switch (_context9.prev = _context9.next) {
+              case 0:
+                _context9.next = 2;
+                return this.client.scard(this.fullKey(subkey));
+
+              case 2:
+                return _context9.abrupt('return', _context9.sent);
+
+              case 3:
+              case 'end':
+                return _context9.stop();
+            }
+          }
+        }, _callee9, this);
+      }));
+
+      function count(_x15) {
         return ref.apply(this, arguments);
       }
 
@@ -297,31 +327,59 @@ var UnorderedSet = function () {
   }, {
     key: 'find',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(query, subkey) {
-        return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(query, subkey) {
+        return regeneratorRuntime.wrap(function _callee10$(_context10) {
           while (1) {
-            switch (_context9.prev = _context9.next) {
+            switch (_context10.prev = _context10.next) {
               case 0:
                 query = typeof query !== 'undefined' ? ':' + query : ':*';
-                _context9.next = 3;
+                _context10.next = 3;
                 return this.client.keys(this.fullKey(subkey) + query);
 
               case 3:
-                return _context9.abrupt('return', _context9.sent);
+                return _context10.abrupt('return', _context10.sent);
 
               case 4:
               case 'end':
-                return _context9.stop();
+                return _context10.stop();
             }
           }
-        }, _callee9, this);
+        }, _callee10, this);
       }));
 
-      function find(_x14, _x15) {
+      function find(_x16, _x17) {
         return ref.apply(this, arguments);
       }
 
       return find;
+    }()
+  }, {
+    key: 'delete',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(subkey) {
+        return regeneratorRuntime.wrap(function _callee11$(_context11) {
+          while (1) {
+            switch (_context11.prev = _context11.next) {
+              case 0:
+                _context11.next = 2;
+                return this.client.del(this.fullKey(subkey));
+
+              case 2:
+                return _context11.abrupt('return', _context11.sent);
+
+              case 3:
+              case 'end':
+                return _context11.stop();
+            }
+          }
+        }, _callee11, this);
+      }));
+
+      function _delete(_x18) {
+        return ref.apply(this, arguments);
+      }
+
+      return _delete;
     }()
   }]);
 

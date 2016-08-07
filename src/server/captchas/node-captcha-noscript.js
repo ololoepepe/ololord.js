@@ -86,7 +86,7 @@ nodeCaptcha.removeOldCaptchImages = async function() {
       let [name, suffix] = fileName.split('.');
       return 'png' === suffix && /^[0-9]+$/.test(name);
     }), async function(fileName) {
-      return await FS.remove(`${path}/${fileName}`);
+      return await FS.remove(`${PATH}/${fileName}`);
     });
   } catch (err) {
     Logger.error(err.stack || err);

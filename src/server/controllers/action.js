@@ -769,15 +769,15 @@ router.post("/action/superuserDeleteFile", function(req, res, next) {
     });
 });
 
-router.post("/action/superuserRegenerateCache", function(req, res, next) {
+router.post("/action/superuserRerenderCache", function(req, res, next) {
     if (!req.isSuperuser())
         return next(Tools.translate("Not enough rights"));
     var c = {};
     Tools.parseForm(req).then(function(result) {
-        c.regenerateArchive = ("true" == result.fields.regenerateArchive);
+        c.rerenderArchive = ("true" == result.fields.rerenderArchive);
         return IPC.send('stop');
     }).then(function() {
-        return IPC.send('regenerateCache', c.regenerateArchive);
+        return IPC.send('rerenderCache', c.rerenderArchive);
     }).then(function() {
         return IPC.send('start');
     }).then(function() {

@@ -263,7 +263,7 @@ var Hash = function () {
   }, {
     key: 'keys',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(subkey) {
         return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
@@ -282,28 +282,27 @@ var Hash = function () {
         }, _callee8, this);
       }));
 
-      function keys() {
+      function keys(_x14) {
         return ref.apply(this, arguments);
       }
 
       return keys;
     }()
   }, {
-    key: 'find',
+    key: 'count',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(query, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(subkey) {
         return regeneratorRuntime.wrap(function _callee9$(_context9) {
           while (1) {
             switch (_context9.prev = _context9.next) {
               case 0:
-                query = typeof query !== 'undefined' ? ':' + query : ':*';
-                _context9.next = 3;
-                return this.client.keys(this.fullKey(subkey) + query);
+                _context9.next = 2;
+                return this.client.hlen(this.fullKey(subkey));
 
-              case 3:
+              case 2:
                 return _context9.abrupt('return', _context9.sent);
 
-              case 4:
+              case 3:
               case 'end':
                 return _context9.stop();
             }
@@ -311,11 +310,68 @@ var Hash = function () {
         }, _callee9, this);
       }));
 
-      function find(_x14, _x15) {
+      function count(_x15) {
+        return ref.apply(this, arguments);
+      }
+
+      return count;
+    }()
+  }, {
+    key: 'find',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(query, subkey) {
+        return regeneratorRuntime.wrap(function _callee10$(_context10) {
+          while (1) {
+            switch (_context10.prev = _context10.next) {
+              case 0:
+                query = typeof query !== 'undefined' ? ':' + query : ':*';
+                _context10.next = 3;
+                return this.client.keys(this.fullKey(subkey) + query);
+
+              case 3:
+                return _context10.abrupt('return', _context10.sent);
+
+              case 4:
+              case 'end':
+                return _context10.stop();
+            }
+          }
+        }, _callee10, this);
+      }));
+
+      function find(_x16, _x17) {
         return ref.apply(this, arguments);
       }
 
       return find;
+    }()
+  }, {
+    key: 'delete',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(subkey) {
+        return regeneratorRuntime.wrap(function _callee11$(_context11) {
+          while (1) {
+            switch (_context11.prev = _context11.next) {
+              case 0:
+                _context11.next = 2;
+                return this.client.del(this.fullKey(subkey));
+
+              case 2:
+                return _context11.abrupt('return', _context11.sent);
+
+              case 3:
+              case 'end':
+                return _context11.stop();
+            }
+          }
+        }, _callee11, this);
+      }));
+
+      function _delete(_x18) {
+        return ref.apply(this, arguments);
+      }
+
+      return _delete;
     }()
   }]);
 

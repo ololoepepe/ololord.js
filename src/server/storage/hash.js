@@ -50,12 +50,20 @@ export default class Hash {
     return await this.client.hdel(this.fullKey(subkey), id);
   }
 
-  async keys() {
+  async keys(subkey) {
     return await this.client.hkeys(this.fullKey(subkey));
+  }
+
+  async count(subkey) {
+    return await this.client.hlen(this.fullKey(subkey));
   }
 
   async find(query, subkey) {
     query = (typeof query !== 'undefined') ? `:${query}` : ':*';
     return await this.client.keys(this.fullKey(subkey) + query);
+  }
+
+  async delete(subkey) {
+    return await this.client.del(this.fullKey(subkey));
   }
 }

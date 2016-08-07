@@ -11,8 +11,10 @@ import HTTP from 'http';
 var Board = require("./boards/board"); //TODO
 var NodeCaptcha = require('./captchas/node-captcha');
 var NodeCaptchaNoscript = require('./captchas/node-captcha-noscript');
+var BoardController = require("./controllers/board");
 import controllers from './controllers';
 import middlewares from './middlewares';
+import commands from './core/commands';
 import * as Renderer from './core/renderer';
 import WebSocketServer from './core/websocket-server';
 var BoardsModel = require("./models/board");
@@ -111,11 +113,11 @@ function spawnCluster() {
                   });
               });
           });
-          IPC.on('doGenerate', function(data) {
-              var f = BoardsModel[`do_${data.funcName}`];
+          IPC.on('render', function(data) {
+              var f = BoardController[`${data.type}`];
               if (typeof f != "function")
                   return Promise.reject("Invalid generator function");
-              return f.call(BoardsModel, data.key, data.data);
+              return f.call(BoardController, data.key, data.data);
           });
           IPC.on('reloadBoards', function() {
               require("./boards/board").initialize();
@@ -166,80 +168,72 @@ function spawnCluster() {
   });
 }
 
+function generateFileName() {
+  let fileName = _.now().toString();
+  if (fileName != generateFileName.lastFileName) {
+    generateFileName.lastFileName = fileName;
+    return fileName;
+  }
+  return new Promise((resolve) => {
+    setTimeout(async function() {
+      let fileName = await fileName();
+      resolve(fileName);
+    }, 1);
+  });
+}
+
+function onReady(initCallback) {
+  if (!onReady.ready) {
+    onReady.ready = 0;
+  }
+  ++onReady.ready;
+  if (config('system.workerCount') === onReady.ready) {
+    initCallback();
+    if (config('server.statistics.enabled')) {
+      setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel),
+        config('server.statistics.ttl') * Tools.Minute);
+    }
+    if (config('server.rss.enabled')) {
+      setInterval(BoardsModel.generateRSS.bind(BoardsModel), config('server.rss.ttl') * Tools.Minute);
+    }
+    commands();
+  }
+}
+
 function spawnWorkers(initCallback) {
-  console.log("Spawning workers, please, wait...");
+  console.log(Tools.translate('Spawning workers, please, wait...'));
   spawnCluster();
-  var ready = 0;
-  IPC.on('ready', function() {
-      ++ready;
-      if (config('system.workerCount') === ready) {
-          initCallback();
-          if (config("server.statistics.enabled", true)) {
-              setInterval(function() {
-                StatisticsModel.generateStatistics();
-              }, config("server.statistics.ttl", 60) * Tools.Minute);
-          }
-          if (config("server.rss.enabled", true)) {
-              setInterval(function() {
-                  BoardsModel.generateRSS().catch(function(err) {
-                      Logger.error(err.stack || err);
-                  });
-              }, config("server.rss.ttl", 60) * Tools.Minute);
-          }
-          require("./helpers/commands")();
-      }
+  IPC.on('ready', onReady.bind(null, initCallback));
+  IPC.on('fileName', generateFileName);
+  IPC.on('render', (data) => {
+    return BoardsModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);
   });
-  var lastFileName;
-  var fileName = function() {
-      var fn = "" + Tools.now().valueOf();
-      if (fn != lastFileName) {
-          lastFileName = fn;
-          return Promise.resolve(fn);
-      }
-      return new Promise(function(resolve, reject) {
-          setTimeout(function() {
-              fileName().then(function(fn) {
-                  resolve(fn);
-              });
-          }, 1);
-      });
-  };
-  IPC.on('fileName', function() {
-      return fileName();
+  IPC.on('renderArchive', (data) => {
+    return BoardsModel.scheduleGenerateArchive(data);
   });
-  IPC.on('generate', function(data) {
-      return BoardsModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);
+  IPC.on('stop', () => {
+    return IPC.send('stop');
   });
-  IPC.on('generateArchive', function(data) {
-      return BoardsModel.scheduleGenerateArchive(data);
+  IPC.on('start', () => {
+    return IPC.send('start');
   });
-  IPC.on('stop', function() {
-      return IPC.send('stop');
+  IPC.on('reloadBoards', () => {
+    Board.initialize();
+    return IPC.send('reloadBoards');
   });
-  IPC.on('start', function() {
-      return IPC.send('start');
+  IPC.on('reloadTemplates', async function() {
+    await Renderer.compileTemplates();
+    await Renderer.reloadTemplates();
+    return IPC.send('reloadTemplates');
   });
-  IPC.on('reloadBoards', function() {
-      require("./boards/board").initialize();
-      return IPC.send('reloadBoards');
+  IPC.on('notifyAboutNewPosts', (data) => {
+    return IPC.send('notifyAboutNewPosts', data);
   });
-  IPC.on('reloadConfig', function() {
-      config.reload();
-      return IPC.send('reloadConfig');
-  });
-  IPC.on('reloadTemplates', function() {
-      return Renderer.compileTemplates().then(function() {
-        return IPC.send('reloadTemplates');
-      });
-  });
-  IPC.on('notifyAboutNewPosts', function(data) {
-      return IPC.send('notifyAboutNewPosts', data);
-  });
-  IPC.on('regenerateCache', function(regenerateArchive) {
-    if (regenerateArchive) {
-      return Renderer.regenerate();
+  IPC.on('rerenderCache', (rerenderArchive) => {
+    if (rerenderArchive) {
+      return Renderer.rerender();
     } else {
-      return Renderer.regenerate(Tools.ARCHIVE_PATHS_REGEXP, true);
+      return Renderer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
     }
   });
 }
@@ -253,11 +247,11 @@ if (Cluster.isMaster) {
       let initCallback = await Database.initialize();
       await Renderer.compileTemplates();
       await Renderer.reloadTemplates();
-      if (Program.regenerate || config('system.regenerateCacheOnStartup')) {
-        if (Program.archive || config('system.regenerateArchive')) {
-          await Rengerer.rerender();
+      if (Program.rerender || config('system.rerenderCacheOnStartup')) {
+        if (Program.archive || config('system.rerenderArchive')) {
+          await Renderer.rerender();
         } else {
-          await Rengerer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
+          await Renderer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
         }
       }
       await StatisticsModel.generateStatistics();

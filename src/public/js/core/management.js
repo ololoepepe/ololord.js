@@ -305,20 +305,20 @@ async function addFile(sourceId, isDir) {
   }
 }
 
-async function regenerateCache(archived) {
+async function rerenderCache(archived) {
   let txt = Tools.translate('Connection with the server will be lost, '
     + 'and the server will become unavailable for some time.'
     + ' You will have to reload the page manually.');
   try {
     let accepted = await Widgets.confirm({
-      id: `regenerate`,
-      title: Tools.translate('Regenerating'),
+      id: `rerender`,
+      title: Tools.translate('Rerendering'),
       label: txt
     });
     if (!accepted) {
       return;
     }
-    await AJAX.post(`/${Tools.sitePathPrefix()}action/superuserRegenerateCache`, Tools.createFormData({
+    await AJAX.post(`/${Tools.sitePathPrefix()}action/superuserRerenderCache`, Tools.createFormData({
       archived: (archived ? 'true' : '')
     }), new OverlayProgressBar());
   } catch (err) {
@@ -727,8 +727,8 @@ export async function initializeManagement() {
     showServerActionsMenu: (_, e) => {
       return Widgets.showMenu(e);
     },
-    regenerateCache: regenerateCache,
-    regenerateCacheWithArchived: regenerateCache.bind(null, true),
+    rerenderCache: rerenderCache,
+    rerenderCacheWithArchived: rerenderCache.bind(null, true),
     rerenderPosts: rerenderPosts,
     rebuildSearchIndex: rebuildSearchIndex,
     reloadBoards: reload.bind(null, 'boards'),

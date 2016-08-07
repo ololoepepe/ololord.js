@@ -90,7 +90,7 @@ var ExternalLinkRegexpPattern = exports.ExternalLinkRegexpPattern = function () 
     var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\'\"\\,\\(\\)\\[\\]«»]*)*\\/?";
     return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
 }();
-var ARCHIVE_PATHS_REGEXP = exports.ARCHIVE_PATHS_REGEXP = /^\/[^\/]+\/(archive|arch\/\d+)\.(html|json)$/;
+var ARCHIVE_PATHS_REGEXP = exports.ARCHIVE_PATHS_REGEXP = /^\/[^\/]+\/(archive|arch\/\d+)$/;
 
 var forIn = function forIn(obj, f) {
     if (!obj || typeof f != "function") return;

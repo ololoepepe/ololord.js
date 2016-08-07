@@ -23,12 +23,12 @@ export default class Key {
     return await this.client.set(this.fullKey(subkey), this.stringify(data));
   }
 
-  async delete() {
-    return await this.client.del(this.fullKey(subkey));
-  }
-
   async find(query, subkey) {
     query = (typeof query !== 'undefined') ? `:${query}` : ':*';
     return await this.client.keys(this.fullKey(subkey) + query);
+  }
+
+  async delete(subkey) {
+    return await this.client.del(this.fullKey(subkey));
   }
 }

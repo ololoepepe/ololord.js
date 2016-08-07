@@ -4,6 +4,8 @@ var Database = require("./database");
 var config = require("./config");
 var Tools = require("./tools");
 
+import * as PostsModel from '../models/posts';
+
 var createHash = function(user) {
     var sha256 = Crypto.createHash("sha256");
     sha256.update(user.hashpass || user.ip);
@@ -23,7 +25,7 @@ module.exports.sendMessage = function(user, boardName, postNumber, text) {
     c.senderHash = createHash(user);
     c.date = Tools.now();
     c.ttl = config("server.chat.ttl", 10080) * 60; //NOTE: 7 days
-    return Database.getPost(boardName, postNumber).then(function(post) {
+    return PostsModel.getPost(boardName, postNumber).then(function(post) {
         if (!post)
             return Promise.reject(Tools.translate("No such post"));
         c.receiverHash = createHash(post.user);

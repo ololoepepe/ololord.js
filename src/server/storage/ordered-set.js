@@ -60,4 +60,8 @@ export default class OrderedSet {
     query = (typeof query !== 'undefined') ? `:${query}` : ':*';
     return await this.client.keys(this.fullKey(subkey) + query);
   }
+
+  async delete(subkey) {
+    return await this.client.del(this.fullKey(subkey));
+  }
 }

@@ -12,6 +12,10 @@ const DEFAULT_VALUES = new Map([
   ['server.ddosProtection.ws.connectionLimit', 10],
   ['server.ddosProtection.ws.maxMessageLength', 20480],
   ['server.ddosProtection.ws.maxMessageRate', 6],
+  ['server.rss.enabled', true],
+  ['server.rss.ttl', 60],
+  ['server.statistics.enabled', true],
+  ['server.statistics.ttl', 60],
   ['site.protocol', 'http'],
   ['site.domain', 'localhost:8080'],
   ['site.pathPrefix', ''],
@@ -39,8 +43,8 @@ const DEFAULT_VALUES = new Map([
   ['system.redis.retryDelayOnFailover', 100],
   ['system.redis.retryDelayOnClusterDown', 100],
   ['system.redis.retryDelayOnTryAgain', 100],
-  ['system.regenerateCacheOnStartup', true],
-  ['system.regenerateArchive', false],
+  ['system.rerenderCacheOnStartup', true],
+  ['system.rerenderArchive', false],
   ['system.workerCount', OS.cpus().length]
 ]);
 

@@ -1,5 +1,11 @@
 "use strict";
 
+var _posts = require("../models/posts");
+
+var PostsModel = _interopRequireWildcard(_posts);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 var Crypto = require("crypto");
 
 var Database = require("./database");
@@ -22,7 +28,7 @@ module.exports.sendMessage = function (user, boardName, postNumber, text) {
     c.senderHash = createHash(user);
     c.date = Tools.now();
     c.ttl = config("server.chat.ttl", 10080) * 60; //NOTE: 7 days
-    return Database.getPost(boardName, postNumber).then(function (post) {
+    return PostsModel.getPost(boardName, postNumber).then(function (post) {
         if (!post) return Promise.reject(Tools.translate("No such post"));
         c.receiverHash = createHash(post.user);
         c.receiver = post.user;
