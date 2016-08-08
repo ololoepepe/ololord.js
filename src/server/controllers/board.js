@@ -40,13 +40,12 @@ function pickPostsToRerender(oldPosts, posts) {
 }
 
 async function renderThreadHTML(thread) {
-  let board = Board.board(boardName);
+  let board = Board.board(thread.boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   thread.title = thread.title || (`${board.title} — ${thread.number}`);
   let model = { thread: thread };
-  model.isBoardPage = true;
   model.isThreadPage = true;
   model.board = MiscModel.board(board).board;
   model.threadNumber = thread.number;
@@ -64,7 +63,7 @@ async function renderThread(boardName, threadNumber) {
 async function renderPage(boardName, pageNumber) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   let page = await BoardsModel.getPage(boardName, pageNumber);
   await Tools.series(page.threads, async function(thread) {
@@ -107,7 +106,7 @@ router.renderThread = async function(key, data) {
   });
   let board = Board.board(data.boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   switch (data.action) {
   case 'create': {
@@ -150,7 +149,7 @@ router.renderThread = async function(key, data) {
     break;
   }
   default: {
-    return Promise.reject(Tools.translate('Invalid action'));
+    return Promise.reject(new Error(Tools.translate('Invalid action')));
   }
   }
 }
@@ -165,7 +164,7 @@ router.renderPages = async function(boardName) {
 router.renderCatalog = async function(boardName) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   await Tools.series(['date', 'recent', 'bumps'], async function(sortMode) {
     let catalog = await BoardsModel.getCatalog(boardName, sortMode);
@@ -184,7 +183,7 @@ router.renderCatalog = async function(boardName) {
 router.renderArchive = async function(boardName) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   let archive = await BoardsModel.getArchive(boardName);
   await Cache.writeFile(`${boardName}/archive.json`, JSON.stringify(archive));
@@ -193,29 +192,23 @@ router.renderArchive = async function(boardName) {
   await Cache.writeFile(`${boardName}/archive.html`, Renderer.render('pages/archive', archive));
 };
 
-router.render = async function(paths) {
-  return await Tools.series(paths, async function(path) {
-    let match = path.match(/^\/([^\/]+)$/);
-    if (match) {
-      console.log(Tools.translate('Rendering board pages: /$[1]', '', match[1]));
-      return await router.renderPages(match[1]);
-    }
-    match = path.match(/^\/([^\/]+)\/archive$/);
-    if (match) {
-      console.log(Tools.translate('Rendering board archive: /$[1]/archive', '', match[1]));
-      return await router.renderArchive(match[1]);
-    }
-    match = path.match(/^\/([^\/]+)\/catalog$/);
-    if (match) {
-      console.log(Tools.translate('Rendering board catalog: /$[1]/catalog', '', match[1]));
-      return await router.renderCatalog(match[1]);
-    }
-    match = path.match(/^\/([^\/]+)\/res\/(\d+)$/);
-    if (match) {
-      console.log(Tools.translate('Rendering thread: /$[1]/$[2]', '', match[1], match[2]));
-      return await renderThread(match[1], +match[2]);
-    }
-  });
+router.render = async function(path) {
+  let match = path.match(/^\/([^\/]+)$/);
+  if (match) {
+    return await router.renderPages(match[1]);
+  }
+  match = path.match(/^\/([^\/]+)\/archive$/);
+  if (match) {
+    return await router.renderArchive(match[1]);
+  }
+  match = path.match(/^\/([^\/]+)\/catalog$/);
+  if (match) {
+    return await router.renderCatalog(match[1]);
+  }
+  match = path.match(/^\/([^\/]+)\/res\/(\d+)$/);
+  if (match) {
+    return await renderThread(match[1], +match[2]);
+  }
 };
 
 module.exports = router;

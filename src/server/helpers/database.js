@@ -27,44 +27,13 @@ import * as PostsModel from '../models/posts';
 import * as UsersModel from '../models/users';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
+import client from '../storage/client-factory';
 
 var Ratings = {};
 var RegisteredUserLevels = {};
 var BanLevels = {};
 
-var createRedisClient = function() {
-    var redisNodes = config("system.redis.nodes");
-    if (Util.isArray(redisNodes) && redisNodes.length > 0) {
-        return new Redis.Cluster(redisNodes, {
-            clusterRetryStrategy: config("system.redis.clusterRetryStrategy", function(times) {
-                return Math.min(100 + times * 2, 2000);
-            }),
-            enableReadyCheck: config("system.redis.enableReadyCheck", false),
-            scaleReads: config("system.redis.scaleReads", "master"),
-            maxRedirections: config("system.redis.maxRedirections", 16),
-            retryDelayOnFailover: config("system.redis.retryDelayOnFailover", 100),
-            retryDelayOnClusterDown: config("system.redis.retryDelayOnClusterDown", 100),
-            retryDelayOnTryAgain: config("system.redis.retryDelayOnTryAgain", 100),
-            redisOptions: {
-                host: config("system.redis.host", "127.0.0.1"),
-                port: config("system.redis.port", 6379),
-                family: config("system.redis.family", 4),
-                password: config("system.redis.password", ""),
-                db: config("system.redis.db", 0)
-            }
-        });
-    } else {
-        return new Redis({
-            port: config("system.redis.port", 6379),
-            host: config("system.redis.host", "127.0.0.1"),
-            family: config("system.redis.family", 4),
-            password: config("system.redis.password", ""),
-            db: config("system.redis.db", 0)
-        });
-    }
-};
-
-var db = createRedisClient();
+var db = client();
 var dbGeo = new SQLite3.Database(__dirname + "/../geolocation/ip2location.sqlite");
 var es = new Elasticsearch.Client({ host: config("system.elasticsearch.host", "localhost:9200") });
 
@@ -297,107 +266,6 @@ var bannedFor = function(boardName, postNumber, userIp) {
     });
 };
 
-var threadPosts = function(boardName, threadNumber, options) {
-    var board = Board.board(boardName);
-    if (!board)
-        return Promise.reject(Tools.translate("Invalid board"));
-    if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject(Tools.translate("Invalid thread"));
-    var opts = (typeof options == "object");
-    var filter = opts && (typeof options.filterFunction == "function");
-    var limit = (opts && !isNaN(options.limit) && options.limit > 0) ? options.limit : 0; //NOTE: 0 means no limit
-    var reverse = opts && options.reverse;
-    var c = { posts: [] };
-    var p = threadPostNumbers(boardName, threadNumber).then(function(result) {
-        var i = reverse ? (result.length - 1) : 0;
-        var bound = reverse ? -1 : result.length;
-        var step = limit ? limit : result.length;
-        var pred = function() {
-            return reverse ? (i > bound) : (i < bound);
-        };
-        var getKeys = function() {
-            var keys = [];
-            var x = 0;
-            for (; pred() && x < step; i += (reverse ? -1 : 1), ++x)
-                keys.push(boardName + ":" + result[i]);
-            return keys;
-        };
-        var getNext = function() {
-            var keys = getKeys();
-            return db.hmget("posts", keys).then(function(posts) {
-                posts = posts.filter(function(post) {
-                    return post;
-                }).map(function(post) {
-                    post = JSON.parse(post);
-                    post.sequenceNumber = result.indexOf(post.number) + 1;
-                    return post;
-                });
-                c.posts = c.posts.concat(filter? posts.filter(options.filterFunction) : posts);
-                if (!pred() || (limit && c.posts.length >= limit)) {
-                    if (limit && c.posts.length >= limit)
-                        c.posts = c.posts.slice(0, limit);
-                    return;
-                }
-                return getNext();
-            });
-        };
-        return getNext();
-    }).then(function() {
-        var promises = c.posts.map(function(post) {
-            return bannedFor(boardName, post.number, post.user.ip).then(function(banned) {
-                post.bannedFor = banned;
-                return Promise.resolve();
-            });
-        });
-        return Promise.all(promises);
-    });
-    if (!opts || (!options.withFileInfos && !options.withReferences && !options.withExtraData))
-        return p;
-    return p.then(function() {
-        var promises = [];
-        if (options.withFileInfos) {
-            promises = c.posts.map(function(post) {
-                return postFileInfoNames(boardName, post.number).then(function(names) {
-                    return Promise.all(names.map(function(name) {
-                        return db.hget("fileInfos", name);
-                    }));
-                }).then(function(fileInfos) {
-                    post.fileInfos = fileInfos ? fileInfos.map(function(fileInfo) {
-                        return JSON.parse(fileInfo);
-                    }) : [];
-                    if (post.fileInfos.indexOf(null) >= 0)
-                    return Promise.resolve();
-                });
-            });
-        }
-        if (options.withReferences) {
-            promises = promises.concat(c.posts.map(function(post) {
-                return db.hgetall("referencedPosts:" + boardName + ":" + post.number).then(function(referencedPosts) {
-                    post.referencedPosts = sortedReferensces(referencedPosts);
-                    return db.hgetall("referringPosts:" + boardName + ":" + post.number);
-                }).then(function(referringPosts) {
-                    post.referringPosts = sortedReferensces(referringPosts);
-                    return Promise.resolve();
-                });
-            }));
-        }
-        if (options.withExtraData) {
-            promises = promises.concat(c.posts.map(function(post) {
-                return board.loadExtraData(post.number).then(function(extraData) {
-                    if (!Util.isNullOrUndefined(extraData))
-                        post.extraData = extraData;
-                    return Promise.resolve();
-                })
-            }));
-        }
-        return Promise.all(promises);
-    }).then(function() {
-        return c.posts;
-    });
-};
-
-module.exports.threadPosts = threadPosts;
-
 var getFileInfo = function(file) {
     var p;
     if (file.fileName) {
@@ -419,14 +287,6 @@ var getFileInfo = function(file) {
 };
 
 module.exports.getFileInfo = getFileInfo;
-
-module.exports.threadPostCount = function(boardName, threadNumber) {
-    if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject(Tools.translate("Invalid board"));
-    if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject(Tools.translate("Invalid thread"));
-    return db.scard("threadPostNumbers:" + boardName + ":" + threadNumber);
-};
 
 var toHashpass = function(password, notHashpass) {
     if (notHashpass || !Tools.mayBeHashpass(password))
@@ -617,31 +477,6 @@ module.exports.updateRegisteredUser = function(hashpass, levels, ips, notHashpas
     });
 };
 
-var registeredUser = function(hashpass) {
-    var user = { hashpass: hashpass };
-    return db.hgetall("registeredUserLevels:" + hashpass).then(function(levels) {
-        if (!levels || !Tools.hasOwnProperties(levels))
-            return Promise.reject(Tools.translate("No user with this hashpass"));
-        user.levels = levels;
-        return db.smembers("registeredUserIps:" + hashpass);
-    }).then(function(ips) {
-        user.ips = ips || [];
-        return Promise.resolve(user);
-    });
-};
-
-module.exports.registeredUser = registeredUser;
-
-module.exports.registeredUsers = function() {
-    return db.keys("registeredUserLevels:*").then(function(keys) {
-        return Tools.series(keys.map(function(key) {
-            return key.split(":")[1];
-        }), function(hashpass) {
-            return registeredUser(hashpass);
-        }, true);
-    });
-};
-
 var registeredUserLevel = function(password, boardName, notHashpass) {
     if (!password)
         return Promise.reject(Tools.translate("Invalid password"));
@@ -704,28 +539,6 @@ var registeredUserLevelsByIp = function(ip) {
 };
 
 module.exports.registeredUserLevelsByIp = registeredUserLevelsByIp;
-
-module.exports.registeredUserIps = function(reqOrHashpass) {
-    if (reqOrHashpass && typeof reqOrHashpass == "object" && reqOrHashpass.cookies)
-        reqOrHashpass = Tools.hashpass(reqOrHashpass);
-    if (!reqOrHashpass)
-        return Promise.resolve(null);
-    return db.smembers("registeredUserIps:" + reqOrHashpass).then(function(ips) {
-        return Promise.resolve(ips || []);
-    });
-};
-
-var lastPostNumber = function(boardName) {
-    if (!Tools.contains(Board.boardNames(), boardName))
-        return Promise.reject(Tools.translate("Invalid board"));
-    return db.hget("postCounters", boardName).then(function(number) {
-        if (!number)
-            return 0;
-        return +number;
-    });
-};
-
-module.exports.lastPostNumber = lastPostNumber;
 
 var nextPostNumber = function(boardName, incrby) {
     var board = Board.board(boardName);
@@ -1033,7 +846,7 @@ var checkCaptcha = function(req, fields) {
     if (!board.captchaEnabled)
         return Promise.resolve();
     var ip = req.ip;
-    return getUserCaptchaQuota(board.name, ip).then(function(quota) {
+    return UsersModel.getUserCaptchaQuota(board.name, ip).then(function(quota) {
         if (board.captchaQuota > 0 && +quota > 0)
             return captchaUsed(board.name, ip);
         var supportedCaptchaEngines = board.supportedCaptchaEngines;
@@ -1508,17 +1321,6 @@ module.exports.findPosts = function(query, boardName, page) {
         };
     });
 };
-
-var getUserCaptchaQuota = function(boardName, userIp) {
-    var board = Board.board(boardName);
-    if (!board)
-        return Promise.reject(Tools.translate("Invalid board"));
-    return db.hget("captchaQuotas", boardName + ":" + userIp).then(function(quota) {
-        return Promise.resolve((+quota > 0) ? +quota : 0);
-    });
-};
-
-module.exports.getUserCaptchaQuota = getUserCaptchaQuota;
 
 var captchaSolved = function(boardName, userIp) {
     var board = Board.board(boardName);
@@ -2284,34 +2086,6 @@ module.exports.editAudioTags = function(req, res, fields) {
     });
 };
 
-var userBans = function(ip, boardNames) {
-    if (!ip) {
-        return db.smembers("bannedUserIps").then(function(ips) {
-            return Tools.series(ips, function(ip) {
-                return userBans(ip, boardNames);
-            }, {});
-        });
-    }
-    ip = Tools.correctAddress(ip);
-    if (!boardNames)
-        boardNames = Board.boardNames();
-    else if (!Util.isArray(boardNames))
-        boardNames = [boardNames];
-    return Tools.series(boardNames, function(boardName) {
-        return db.get(`userBans:${ip}:${boardName}`).then(function(ban) {
-            if (!ban)
-                return Promise.resolve();
-            return Promise.resolve(JSON.parse(ban));
-        });
-    }, {}).then(function(bans) {
-        return Tools.filterIn(bans, function(ban) {
-            return ban;
-        });
-    });
-};
-
-module.exports.userBans = userBans;
-
 var updatePostBanInfo = function(boardName, postNumber) {
     if (!Board.board(boardName))
         return Promise.reject(Tools.translate("Invalid board"));
@@ -2372,7 +2146,7 @@ module.exports.banUser = function(req, ip, bans) {
     var modified = [];
     var newBans;
     var c = {};
-    return userBans(ip).then(function(oldBans) {
+    return UsersModel.getBannedUserBans(ip).then(function(oldBans) {
         c.oldBans = oldBans;
         var date = Tools.now();
         newBans = Board.boardNames().reduce(function(acc, boardName) {
@@ -2523,7 +2297,7 @@ module.exports.delall = function(req, ip, boardNames) {
 module.exports.initialize = function() {
     //NOTE: Enabling "key expired" notifications
     var CHANNEL = `__keyevent@${config("system.redis.db", 0)}__:expired`;
-    var dbs = createRedisClient();
+    var dbs = client(true);
     var initialized = false;
     var query = [];
     var updateBanOnMessage = function(message) {

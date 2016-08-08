@@ -52,7 +52,7 @@ let ipBans = Tools.createWatchedResource(`${__dirname}/../misc/bans.json`, (path
 export async function getUserCaptchaQuota(boardName, userIp) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   let quota = UserCaptchaQuotas.getOne(`${boardName}:${userIp}`);
   return Tools.option(quota, 'number', 0, { test: (q) => { return q >= 0; } });
@@ -61,7 +61,7 @@ export async function getUserCaptchaQuota(boardName, userIp) {
 export async function getUserIP(boardName, postNumber) {
   let post = await PostsModel.getPost(boardName, postNumber);
   if (!post) {
-    return Promise.reject(Tools.translate('No such post'));
+    return Promise.reject(new Error(Tools.translate('No such post')));
   }
   return post.user.ip;
 }
@@ -90,7 +90,7 @@ export async function getRegisteredUser(hashpass) {
   let user = { hashpass: hashpass };
   let levels = await RegisteredUserLevels.getAll(hashpass);
   if (_(levels).isEmpty()) {
-    return Promise.reject(Tools.translate('No user with this hashpass'));
+    return Promise.reject(new Error(Tools.translate('No user with this hashpass')));
   }
   user.levels = levels;
   let ips = await RegisteredUserIPs.getAll(hashpass);

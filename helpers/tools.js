@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.ARCHIVE_PATHS_REGEXP = exports.ExternalLinkRegexpPattern = exports.Hour = exports.Minute = exports.Second = exports.Billion = undefined;
+exports.ExternalLinkRegexpPattern = exports.Hour = exports.Minute = exports.Second = exports.Billion = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -90,7 +90,6 @@ var ExternalLinkRegexpPattern = exports.ExternalLinkRegexpPattern = function () 
     var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\'\"\\,\\(\\)\\[\\]«»]*)*\\/?";
     return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
 }();
-var ARCHIVE_PATHS_REGEXP = exports.ARCHIVE_PATHS_REGEXP = /^\/[^\/]+\/(archive|arch\/\d+)$/;
 
 var forIn = function forIn(obj, f) {
     if (!obj || typeof f != "function") return;

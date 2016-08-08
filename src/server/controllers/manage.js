@@ -9,8 +9,10 @@ router.paths = () => {
   return ['/manage.html'];
 };
 
-router.render = () => {
-  return { 'manage.html': Renderer.render('pages/manage', { title: Tools.translate('Management', 'pageTitle') }) };
+router.render = (path) => {
+  if ('/manage.html' === path) {
+    return { 'manage.html': Renderer.render('pages/manage', { title: Tools.translate('Management', 'pageTitle') }) };
+  }
 };
 
 module.exports = router;

@@ -148,7 +148,7 @@ var getTwitterEmbeddedHtml = function(href, defaultHtml) {
         timeout: Tools.Minute
     }).then(function(response) {
         if (response.status != 200)
-            return Promise.reject(Tools.translate("Failed to get Twitter embedded HTML"));
+            return Promise.reject(new Error(Tools.translate("Failed to get Twitter embedded HTML")));
         return response.body.read();
     }).then(function(data) {
         try {
@@ -201,20 +201,20 @@ var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
         timeout: Tools.Minute
     }).then(function(response) {
         if (response.status != 200)
-            return Promise.reject(Tools.translate("Failed to get YouTube embedded HTML"));
+            return Promise.reject(new Error(Tools.translate("Failed to get YouTube embedded HTML")));
         return response.body.read();
     }).then(function(data) {
         try {
             var response = JSON.parse(data.toString());
             if (!response.items || response.items.length < 1)
-                return Promise.reject(Tools.translate("Failed to get YouTube video info"));
+                return Promise.reject(new Error(Tools.translate("Failed to get YouTube video info")));
             var info = response.items[0].snippet;
             info.id = videoId;
             info.href = href;
             info.start = youtubeVideoStartTime(href);
             let html = Renderer.render('markup/youtubeVideoLink', { info: info });
             if (!html)
-                return Promise.reject(Tools.translate("Failed to create YouTube video link"));
+                return Promise.reject(new Error(Tools.translate("Failed to create YouTube video link")));
             return Promise.resolve(html);
         } catch (err) {
             return Promise.reject(err);
@@ -238,13 +238,13 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
         timeout: Tools.Minute
     }).then(function(response) {
         if (response.status != 200)
-            return Promise.reject(Tools.translate("Failed to get Coub embedded HTML"));
+            return Promise.reject(new Error(Tools.translate("Failed to get Coub embedded HTML")));
         return response.body.read();
     }).then(function(data) {
         try {
             var response = JSON.parse(data.toString());
             if (!response)
-                return Promise.reject(Tools.translate("Failed to get Coub video info"));
+                return Promise.reject(new Error(Tools.translate("Failed to get Coub video info")));
             var info = {
                 href: href,
                 videoTitle: response.title,
@@ -258,7 +258,7 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
             };
             let html = Renderer.render('markup/coubVideoLink', { info: info });
             if (!html)
-                return Promise.reject(Tools.translate("Failed to create Coub video link"));
+                return Promise.reject(new Error(Tools.translate("Failed to create Coub video link")));
             return Promise.resolve(html);
         } catch (err) {
             return Promise.reject(err);
@@ -278,7 +278,7 @@ var getVocarooEmbeddedHtml = function(href, defaultHtml) {
         return Promise.resolve(defaultHtml);
     let html = Renderer.render('markup/vocarooAudioLink', { info: { id: audioId } });
     if (!html)
-        return Promise.reject(Tools.translate("Failed to create Vocaroo audio embedded container"));
+        return Promise.reject(new Error(Tools.translate("Failed to create Vocaroo audio embedded container")));
     return Promise.resolve(html);
 };
 

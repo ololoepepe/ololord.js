@@ -22,8 +22,10 @@ router.paths = function () {
   return ['/login.html'];
 };
 
-router.render = function () {
-  return { 'login.html': Renderer.render('pages/login', { title: Tools.translate('Login', 'pageTitle') }) };
+router.render = function (path) {
+  if ('/login.html' === path) {
+    return { 'login.html': Renderer.render('pages/login', { title: Tools.translate('Login', 'pageTitle') }) };
+  }
 };
 
 module.exports = router;

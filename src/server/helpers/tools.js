@@ -60,7 +60,6 @@ export const ExternalLinkRegexpPattern = (function() {
     var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\'\"\\,\\(\\)\\[\\]«»]*)*\\/?";
     return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
 })();
-export const ARCHIVE_PATHS_REGEXP = /^\/[^\/]+\/(archive|arch\/\d+)$/;
 
 var forIn = function(obj, f) {
     if (!obj || typeof f != "function")

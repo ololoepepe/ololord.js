@@ -16,11 +16,11 @@ async function getFileInfo(name, hash) {
     }
   }
   if (!name) {
-    return Promise.reject(Tools.translate('No such file'));
+    return Promise.reject(new Error(Tools.translate('No such file')));
   }
   let fileInfo = FileInfos.getOne(name);
   if (!fileInfo) {
-    return Promise.reject(Tools.translate('No such file'));
+    return Promise.reject(new Error(Tools.translate('No such file')));
   }
   return fileInfo;
 }

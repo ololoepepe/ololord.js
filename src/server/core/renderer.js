@@ -3,6 +3,7 @@ import browserify from 'browserify';
 import DOT from 'dot';
 import FS from 'q-io/fs';
 import merge from 'merge';
+import micromatch from 'micromatch';
 import moment from 'moment';
 
 var Board = require('../boards/board');
@@ -80,21 +81,13 @@ export function render(templateName, model) {
   }
 }
 
-export async function rerender(what, not) {
+export async function rerender(what) {
   let routers = await Tools.series(controllers.routers, async function(router) {
     if (typeof router.paths !== 'function' || typeof router.render !== 'function') {
       return;
     }
     let paths = await router.paths();
-    paths = paths.filter((path) => {
-      if (!what) {
-        return !not;
-      } else if (typeof what === 'string') {
-        return not ? (path !== what) : (path === what);
-      } else if (what instanceof RegExp) {
-        return not ? !what.test(path) : what.test(path);
-      }
-    });
+    paths = micromatch(paths, what || '**');
     if (paths.length <= 0) {
       return;
     }
@@ -104,9 +97,12 @@ export async function rerender(what, not) {
     };
   }, true);
   return await Tools.series(routers.filter(router => !!router), async function(router) {
-    let result = await router.router.render(router.paths);
-    return await Tools.series(result, async function(data, id) {
-      return await Cache.writeFile(id, data);
+    await Tools.series(router.paths, async function(path) {
+      console.log(Tools.translate('Rendering $[1]...', '', path));
+      let result = await router.router.render(path);
+      return await Tools.series(result, async function(data, id) {
+        return await Cache.writeFile(id, data);
+      });
     });
   });
 }
@@ -114,7 +110,7 @@ export async function rerender(what, not) {
 export async function renderThread(thread) {
   let board = Board.board(thread.boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   await board.renderPost(thread.opPost);
   if (!thread.lastPosts) {

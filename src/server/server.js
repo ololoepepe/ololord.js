@@ -206,10 +206,10 @@ function spawnWorkers(initCallback) {
   IPC.on('ready', onReady.bind(null, initCallback));
   IPC.on('fileName', generateFileName);
   IPC.on('render', (data) => {
-    return BoardsModel.scheduleGenerate(data.boardName, data.threadNumber, data.postNumber, data.action);
+    return IPC.render(data.boardName, data.threadNumber, data.postNumber, data.action);
   });
   IPC.on('renderArchive', (data) => {
-    return BoardsModel.scheduleGenerateArchive(data);
+    return IPC.renderArchive(data);
   });
   IPC.on('stop', () => {
     return IPC.send('stop');
@@ -251,7 +251,7 @@ if (Cluster.isMaster) {
         if (Program.archive || config('system.rerenderArchive')) {
           await Renderer.rerender();
         } else {
-          await Renderer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
+          await Renderer.rerender(['**', '!/*/archive', '!/*/arch/*']);
         }
       }
       await StatisticsModel.generateStatistics();

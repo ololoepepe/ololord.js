@@ -36,45 +36,59 @@ router.paths = function () {
   return ['/markup.html'];
 };
 
-router.render = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
-  var result, markedUpLatex, markedUpInlineLatex, model;
-  return regeneratorRuntime.wrap(function _callee$(_context) {
-    while (1) {
-      switch (_context.prev = _context.next) {
-        case 0:
-          _highlight2.default.configure({
-            tabReplace: '    ',
-            useBR: true
-          });
-          result = _markup2.default.markupCode(CODE_TO_MARKUP, 'cpp');
-          _context.next = 4;
-          return Tools.markupLatex(LATEX_TO_MARKUP);
+router.render = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(path) {
+    var result, markedUpLatex, markedUpInlineLatex, model;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            if (!('/markup.html' !== path)) {
+              _context.next = 2;
+              break;
+            }
 
-        case 4:
-          markedUpLatex = _context.sent;
-          _context.next = 7;
-          return Tools.markupLatex(INLINE_LATEX_TO_MARKUP, true);
+            return _context.abrupt('return');
 
-        case 7:
-          markedUpInlineLatex = _context.sent;
-          model = {
-            title: Tools.translate('Markup', 'pageTitle'),
-            codeToMarkup: CODE_TO_MARKUP,
-            markedUpCode: result.op + result.text + result.cl,
-            latexToMarkup: LATEX_TO_MARKUP,
-            markedUpLatex: markedUpLatex,
-            inlineLatexToMarkup: INLINE_LATEX_TO_MARKUP,
-            markedUpInlineLatex: markedUpInlineLatex
-          };
-          return _context.abrupt('return', { 'markup.html': Renderer.render('pages/markup', model) });
+          case 2:
+            _highlight2.default.configure({
+              tabReplace: '    ',
+              useBR: true
+            });
+            result = _markup2.default.markupCode(CODE_TO_MARKUP, 'cpp');
+            _context.next = 6;
+            return Tools.markupLatex(LATEX_TO_MARKUP);
 
-        case 10:
-        case 'end':
-          return _context.stop();
+          case 6:
+            markedUpLatex = _context.sent;
+            _context.next = 9;
+            return Tools.markupLatex(INLINE_LATEX_TO_MARKUP, true);
+
+          case 9:
+            markedUpInlineLatex = _context.sent;
+            model = {
+              title: Tools.translate('Markup', 'pageTitle'),
+              codeToMarkup: CODE_TO_MARKUP,
+              markedUpCode: result.op + result.text + result.cl,
+              latexToMarkup: LATEX_TO_MARKUP,
+              markedUpLatex: markedUpLatex,
+              inlineLatexToMarkup: INLINE_LATEX_TO_MARKUP,
+              markedUpInlineLatex: markedUpInlineLatex
+            };
+            return _context.abrupt('return', { 'markup.html': Renderer.render('pages/markup', model) });
+
+          case 12:
+          case 'end':
+            return _context.stop();
+        }
       }
-    }
-  }, _callee, this);
-}));
+    }, _callee, this);
+  }));
+
+  return function (_x) {
+    return ref.apply(this, arguments);
+  };
+}();
 
 module.exports = router;
 //# sourceMappingURL=markup.js.map

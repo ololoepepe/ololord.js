@@ -61,7 +61,7 @@ var handleMessage = function () {
             proc.send({
               id: message.id,
               type: message.type,
-              error: _context.t0
+              error: _context.t0.stack || _context.t0.toString()
             });
 
           case 19:
@@ -99,7 +99,7 @@ var performTask = function () {
               workerLoads.set(workerID, 1);
             }
             _context2.prev = 2;
-            result = IPC.send('render', {
+            result = send('render', {
               type: type,
               key: key,
               data: data
@@ -138,38 +138,44 @@ var nextTask = function () {
             scheduled = map.get(key);
             next = scheduled.next;
 
-            if (!next || next.length <= 0) {
-              map.delete(key);
+            if (!(!next || next.length <= 0)) {
+              _context3.next = 5;
+              break;
             }
+
+            map.delete(key);
+            return _context3.abrupt('return');
+
+          case 5:
             delete scheduled.next;
-            _context3.prev = 4;
-            _context3.next = 7;
+            _context3.prev = 6;
+            _context3.next = 9;
             return performTask(type, key, next.map(function (n) {
               return n.data;
             }));
 
-          case 7:
-            _context3.next = 12;
+          case 9:
+            _context3.next = 14;
             break;
 
-          case 9:
-            _context3.prev = 9;
-            _context3.t0 = _context3['catch'](4);
+          case 11:
+            _context3.prev = 11;
+            _context3.t0 = _context3['catch'](6);
 
-            Logger.error(_context3.t0.stack || _context3.t0);
+            _logger2.default.error(_context3.t0.stack || _context3.t0);
 
-          case 12:
+          case 14:
             nextTask();
             next.forEach(function (n) {
               n.resolve();
             });
 
-          case 14:
+          case 16:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[4, 9]]);
+    }, _callee3, this, [[6, 11]]);
   }));
 
   return function nextTask(_x6, _x7, _x8) {
@@ -216,7 +222,7 @@ var addTask = function () {
             _context4.prev = 12;
             _context4.t0 = _context4['catch'](7);
 
-            Logger.error(_context4.t0.stack || _context4.t0);
+            _logger2.default.error(_context4.t0.stack || _context4.t0);
 
           case 15:
             nextTask(type, key, map);
@@ -366,7 +372,7 @@ var renderArchive = exports.renderArchive = function () {
             _context8.prev = 11;
             _context8.t0 = _context8['catch'](0);
 
-            Logger.error(_context8.t0.stack || _context8.t0);
+            _logger2.default.error(_context8.t0.stack || _context8.t0);
 
           case 14:
           case 'end':
@@ -573,7 +579,7 @@ var render = exports.render = function () {
             _context15.prev = 27;
             _context15.t1 = _context15['catch'](0);
 
-            Logger.error(_context15.t1.stack || _context15.t1);
+            _logger2.default.error(_context15.t1.stack || _context15.t1);
 
           case 30:
           case 'end':
@@ -609,7 +615,7 @@ var ThreadsModel = _interopRequireWildcard(_threads);
 
 var _logger = require('./logger');
 
-var Logger = _interopRequireWildcard(_logger);
+var _logger2 = _interopRequireDefault(_logger);
 
 var _tools = require('./tools');
 
@@ -672,7 +678,7 @@ function send(type, data, nowait, workerID) {
     if (workerID) {
       var worker = _cluster2.default.workers[workerID];
       if (!worker) {
-        return Promise.reject(Tools.translate('Invalid worker ID'));
+        return Promise.reject(new Error(Tools.translate('Invalid worker ID')));
       }
       return sendMessage(worker.process, type, data, nowait);
     } else {

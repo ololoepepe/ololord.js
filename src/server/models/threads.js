@@ -38,11 +38,11 @@ export async function getThreadPosts(boardName, threadNumber,
   { reverse, limit, notOP, withExtraData, withFileInfos, withReferences } = {}) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!threadNumber) {
-    return Promise.reject(Tools.translate('Invalid thread number'));
+    return Promise.reject(new Error(Tools.translate('Invalid thread number')));
   }
   let threadPostNumbers = await getThreadPostNumbers(boardName, threadNumber);
   let postNumbers = Tools.cloned(threadPostNumbers);
@@ -67,18 +67,18 @@ export async function getThreadNumbers(boardName, { archived } = {}) {
 export async function getThread(boardName, threadNumber, options) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!threadNumber) {
-    return Promise.reject(Tools.translate('Invalid thread number'));
+    return Promise.reject(new Error(Tools.translate('Invalid thread number')));
   }
   let thread = await Threads.getOne(threadNumber, boardName);
   if (!thread) {
     thread = await ArchivedThreads.getOne(threadNumber, boardName);
   }
   if (!thread) {
-    return Promise.reject(Tools.translate('No such thread'));
+    return Promise.reject(new Error(Tools.translate('No such thread')));
   }
   await addDataToThread(thread, options);
   return thread;
@@ -87,7 +87,7 @@ export async function getThread(boardName, threadNumber, options) {
 export async function getThreads(boardName, threadNumbers, options) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   if (!_(threadNumbers).isArray()) {
     threadNumbers = [threadNumbers];
@@ -96,7 +96,7 @@ export async function getThreads(boardName, threadNumbers, options) {
     return Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
   });
   if (threadNumbers.some(threadNumber => !threadNumber)) {
-    return Promise.reject(Tools.translate('Invalid thread number'));
+    return Promise.reject(new Error(Tools.translate('Invalid thread number')));
   }
   let threads = await Threads.getSome(threadNumbers, boardName);
   threads = _(threads).toArray();
@@ -130,11 +130,11 @@ export async function getThreads(boardName, threadNumbers, options) {
 export async function getThreadInfo(boardName, threadNumber, { lastPostNumber }) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!threadNumber) {
-    return Promise.reject(Tools.translate('Invalid thread number'));
+    return Promise.reject(new Error(Tools.translate('Invalid thread number')));
   }
   let thread = await getThread(boardName, threadNumber, { withPostNumbers: true });
   if (!thread) {
@@ -161,11 +161,11 @@ export async function getThreadInfo(boardName, threadNumber, { lastPostNumber })
 
 export async function getThreadLastPostNumber(boardName, threadNumber) {
   if (!Board.board(boardName)) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!threadNumber) {
-    return Promise.reject(Tools.translate('Invalid thread number'));
+    return Promise.reject(new Error(Tools.translate('Invalid thread number')));
   }
   let threadPostNumbers = await getThreadPostNumbers(boardName, threadNumber);
   return (threadPostNumbers.length > 0) ? _(threadPostNumbers).last() : 0;

@@ -19,7 +19,7 @@ var getThread = exports.getThread = function () {
               break;
             }
 
-            return _context.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             _context.next = 5;
@@ -72,7 +72,7 @@ var getPage = exports.getPage = function () {
               break;
             }
 
-            return _context3.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context3.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             pageNumber = Tools.option(pageNumber, 'number', -1, { test: function test(n) {
@@ -85,7 +85,7 @@ var getPage = exports.getPage = function () {
               break;
             }
 
-            return _context3.abrupt('return', Promise.reject(Tools.translate('Invalid page number')));
+            return _context3.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid page number'))));
 
           case 7:
             _context3.next = 9;
@@ -183,7 +183,7 @@ var getPage = exports.getPage = function () {
 
 var getCatalog = exports.getCatalog = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName, sortMode) {
-    var board, threadNumbers, threads, sortFunction, lastPostNumber, catalog;
+    var board, threadNumbers, threads, sortFunction, lastPostNumber;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
@@ -195,7 +195,7 @@ var getCatalog = exports.getCatalog = function () {
               break;
             }
 
-            return _context5.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context5.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             _context5.next = 5;
@@ -216,7 +216,7 @@ var getCatalog = exports.getCatalog = function () {
                     switch (_context4.prev = _context4.next) {
                       case 0:
                         _context4.next = 2;
-                        return PostsModel.getPosts(boardName, thread.number, {
+                        return PostsModel.getPost(boardName, thread.number, {
                           withFileInfos: true,
                           withReferences: true
                         });
@@ -264,11 +264,11 @@ var getCatalog = exports.getCatalog = function () {
 
           case 22:
             lastPostNumber = _context5.sent;
-            catalog = {
+            return _context5.abrupt('return', {
               threads: threads.sort(sortFunction),
               lastPostNumber: lastPostNumber,
               postingSpeed: Tools.postingSpeedString(board.launchDate, lastPostNumber)
-            };
+            });
 
           case 24:
           case 'end':
@@ -297,7 +297,7 @@ var getArchive = exports.getArchive = function () {
               break;
             }
 
-            return _context7.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context7.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             path = __dirname + '/../public/' + boardName + '/arch';
@@ -398,7 +398,7 @@ var getLastPostNumber = exports.getLastPostNumber = function () {
               break;
             }
 
-            return _context8.abrupt('return', Promise.reject(Tools.translate('Invalid boardName')));
+            return _context8.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid boardName'))));
 
           case 2:
             _context8.next = 4;
@@ -437,7 +437,7 @@ var getLastPostNumbers = exports.getLastPostNumbers = function () {
               break;
             }
 
-            return _context9.abrupt('return', Promise.reject(Tools.translate('Invalid boardName')));
+            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid boardName'))));
 
           case 3:
             _context9.next = 5;
@@ -473,7 +473,7 @@ var getPageCount = exports.getPageCount = function () {
               break;
             }
 
-            return _context10.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context10.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             _context10.next = 5;

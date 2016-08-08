@@ -158,7 +158,7 @@ var getTwitterEmbeddedHtml = function getTwitterEmbeddedHtml(href, defaultHtml) 
         url: "https://api.twitter.com/1/statuses/oembed.json?url=" + href,
         timeout: Tools.Minute
     }).then(function (response) {
-        if (response.status != 200) return Promise.reject(Tools.translate("Failed to get Twitter embedded HTML"));
+        if (response.status != 200) return Promise.reject(new Error(Tools.translate("Failed to get Twitter embedded HTML")));
         return response.body.read();
     }).then(function (data) {
         try {
@@ -202,18 +202,18 @@ var getYoutubeEmbeddedHtml = function getYoutubeEmbeddedHtml(href, defaultHtml) 
         url: "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key=" + apiKey + "&part=snippet",
         timeout: Tools.Minute
     }).then(function (response) {
-        if (response.status != 200) return Promise.reject(Tools.translate("Failed to get YouTube embedded HTML"));
+        if (response.status != 200) return Promise.reject(new Error(Tools.translate("Failed to get YouTube embedded HTML")));
         return response.body.read();
     }).then(function (data) {
         try {
             var response = JSON.parse(data.toString());
-            if (!response.items || response.items.length < 1) return Promise.reject(Tools.translate("Failed to get YouTube video info"));
+            if (!response.items || response.items.length < 1) return Promise.reject(new Error(Tools.translate("Failed to get YouTube video info")));
             var info = response.items[0].snippet;
             info.id = videoId;
             info.href = href;
             info.start = youtubeVideoStartTime(href);
             var html = Renderer.render('markup/youtubeVideoLink', { info: info });
-            if (!html) return Promise.reject(Tools.translate("Failed to create YouTube video link"));
+            if (!html) return Promise.reject(new Error(Tools.translate("Failed to create YouTube video link")));
             return Promise.resolve(html);
         } catch (err) {
             return Promise.reject(err);
@@ -235,12 +235,12 @@ var getCoubEmbeddedHtml = function getCoubEmbeddedHtml(href, defaultHtml) {
         url: "https://coub.com/api/oembed.json?url=http://coub.com/view/" + videoId,
         timeout: Tools.Minute
     }).then(function (response) {
-        if (response.status != 200) return Promise.reject(Tools.translate("Failed to get Coub embedded HTML"));
+        if (response.status != 200) return Promise.reject(new Error(Tools.translate("Failed to get Coub embedded HTML")));
         return response.body.read();
     }).then(function (data) {
         try {
             var response = JSON.parse(data.toString());
-            if (!response) return Promise.reject(Tools.translate("Failed to get Coub video info"));
+            if (!response) return Promise.reject(new Error(Tools.translate("Failed to get Coub video info")));
             var info = {
                 href: href,
                 videoTitle: response.title,
@@ -253,7 +253,7 @@ var getCoubEmbeddedHtml = function getCoubEmbeddedHtml(href, defaultHtml) {
                 id: videoId
             };
             var html = Renderer.render('markup/coubVideoLink', { info: info });
-            if (!html) return Promise.reject(Tools.translate("Failed to create Coub video link"));
+            if (!html) return Promise.reject(new Error(Tools.translate("Failed to create Coub video link")));
             return Promise.resolve(html);
         } catch (err) {
             return Promise.reject(err);
@@ -271,7 +271,7 @@ var getVocarooEmbeddedHtml = function getVocarooEmbeddedHtml(href, defaultHtml) 
     var audioId = match ? match[1] : null;
     if (!audioId) return Promise.resolve(defaultHtml);
     var html = Renderer.render('markup/vocarooAudioLink', { info: { id: audioId } });
-    if (!html) return Promise.reject(Tools.translate("Failed to create Vocaroo audio embedded container"));
+    if (!html) return Promise.reject(new Error(Tools.translate("Failed to create Vocaroo audio embedded container")));
     return Promise.resolve(html);
 };
 

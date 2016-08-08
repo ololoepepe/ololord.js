@@ -193,7 +193,7 @@ router.get('/api/captchaQuota.json', async function(req, res, next) {
   }
   try {
     await UsersModel.checkUserBan(req.ip, req.query.boardName);
-    let quota = UsersModel.getUserCaptchaQuota(req.query.boardName, req.ip);
+    let quota = await UsersModel.getUserCaptchaQuota(req.query.boardName, req.ip);
     res.json({ quota: quota });
   } catch (err) {
     next(err);

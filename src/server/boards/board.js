@@ -482,7 +482,7 @@ var renderFileInfo = function(fi) {
                 };
             });
         } else {
-            return Promise.reject(Tools.translate("Unsupported file type"));
+            return Promise.reject(new Error(Tools.translate("Unsupported file type")));
         }
     });
 };

@@ -3,7 +3,7 @@ import Cluster from 'cluster';
 import UUID from 'uuid';
 
 import * as ThreadsModel from '../models/threads';
-import * as Logger from './logger';
+import Logger from './logger';
 import * as Tools from './tools';
 
 let handlers = new Map();
@@ -50,7 +50,7 @@ async function handleMessage(message, workerID) {
       proc.send({
         id: message.id,
         type: message.type,
-        error: err
+        error: err.stack || err.toString()
       });
     }
   }
@@ -98,7 +98,7 @@ export function send(type, data, nowait, workerID) {
     if (workerID) {
       let worker = Cluster.workers[workerID];
       if (!worker) {
-        return Promise.reject(Tools.translate('Invalid worker ID'));
+        return Promise.reject(new Error(Tools.translate('Invalid worker ID')));
       }
       return sendMessage(worker.process, type, data, nowait);
     } else {
@@ -130,7 +130,7 @@ async function performTask(type, key, data) {
     workerLoads.set(workerID, 1);
   }
   try {
-    let result = IPC.send('render', {
+    let result = send('render', {
       type: type,
       key: key,
       data: data
@@ -148,6 +148,7 @@ async function nextTask(type, key, map) {
   let next = scheduled.next;
   if (!next || next.length <= 0) {
     map.delete(key);
+    return;
   }
   delete scheduled.next;
   try {

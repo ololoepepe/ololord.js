@@ -204,15 +204,14 @@ vorpal.installHandler("start", function () {
     });
 }, { description: Tools.translate("Opens workers for connections if closed.") });
 
-vorpal.installHandler("rerender [what]", function (args) {
+vorpal.installHandler("rerender [what...]", function (args) {
     return IPC.send('stop').then(function () {
         if (args.what) {
-            var what = args.options && args.options.regexp ? new RegExp(args.what) : args.what;
-            return Renderer.rerender(what, args.options && args.options.not);
+            return Renderer.rerender(args.what);
         } else if (args.options && args.options.archive) {
             return Renderer.rerender();
         } else {
-            return Renderer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
+            return Renderer.rerender(['**', '!/*/archive', '!/*/arch/*']);
         }
     }).then(function () {
         return IPC.send('start');
@@ -223,13 +222,7 @@ vorpal.installHandler("rerender [what]", function (args) {
     description: Tools.translate("Rerenders the cache (workers are closed and then opened again)."),
     options: [{
         value: "-a, --archive",
-        description: Tools.translate("Rerender archived threads, too.")
-    }, {
-        value: "-r, --regexp",
-        description: Tools.translate("Treat [what] as a regular expression.")
-    }, {
-        value: "-n, --not",
-        description: Tools.translate("Inverse matching (if [what] specified only).")
+        description: Tools.translate("Rerender archived threads (if no pattern is specified).")
     }]
 });
 

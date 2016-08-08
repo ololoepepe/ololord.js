@@ -8,17 +8,20 @@ import * as Tools from '../helpers/tools';
 let router = express.Router();
 
 router.paths = () => {
-  return ['/'];
+  return ['/', '/notFound.html'];
 };
 
-router.render = () => {
-  return {
-    'index.html': Renderer.render('pages/home', { title: Tools.translate('ololord.js', 'pageTitle') }),
-    'notFound.html': Renderer.render('pages/notFound', {
-      title: Tools.translate('Error 404', 'pageTitle'),
-      notFoundImageFileName: _(MiscModel.notFoundImageFileNames()).sample()
-    })
-  };
+router.render = (path) => {
+  if ('/' === path) {
+    return { 'index.html': Renderer.render('pages/home', { title: Tools.translate('ololord.js', 'pageTitle') }) };
+  } else if ('/notFound.html' === path) {
+    return {
+      'notFound.html': Renderer.render('pages/notFound', {
+        title: Tools.translate('Error 404', 'pageTitle'),
+        notFoundImageFileName: _(MiscModel.notFoundImageFileNames()).sample()
+      })
+    };
+  }
 };
 
 module.exports = router;

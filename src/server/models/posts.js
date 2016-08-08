@@ -52,11 +52,11 @@ async function addDataToPost(board, post, { withExtraData, withFileInfos, withRe
 export async function getPost(boardName, postNumber, options) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!postNumber) {
-    return Promise.reject(Tools.translate('Invalid post number'));
+    return Promise.reject(new Error(Tools.translate('Invalid post number')));
   }
   let key = `${boardName}:${postNumber}`;
   let post = await Posts.getOne(key);
@@ -72,7 +72,7 @@ export async function getPost(boardName, postNumber, options) {
 export async function getPosts(boardName, postNumbers, options) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   if (!_(postNumbers).isArray()) {
     postNumbers = [postNumbers];
@@ -81,7 +81,7 @@ export async function getPosts(boardName, postNumbers, options) {
     return Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
   });
   if (postNumbers.some(postNumber => !postNumber)) {
-    return Promise.reject(Tools.translate('Invalid post number'));
+    return Promise.reject(new Error(Tools.translate('Invalid post number')));
   }
   let posts = await Posts.getSome(postNumbers.map(postNumber => `${boardName}:${postNumber}`));
   posts = _(posts).toArray();

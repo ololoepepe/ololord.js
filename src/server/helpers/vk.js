@@ -7,7 +7,7 @@ var Tools = require("../helpers/tools");
 module.exports = function(accessToken) {
     return function(method, params) {
         if (!method)
-            return Promise.reject(Tools.translate("Invalid method"));
+            return Promise.reject(new Error(Tools.translate("Invalid method")));
         var extra = "";
         if (params) {
             Tools.forIn(params, function(value, key) {
@@ -23,7 +23,7 @@ module.exports = function(accessToken) {
             timeout: Tools.Minute
         }).then(function(response) {
             if (response.status != 200)
-                return Promise.reject(Tools.translate("Failed to call method"));
+                return Promise.reject(new Error(Tools.translate("Failed to call method")));
             return response.body.read();
         }).then(function(data) {
             try {

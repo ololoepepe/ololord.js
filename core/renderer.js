@@ -6,13 +6,13 @@ Object.defineProperty(exports, "__esModule", {
 exports.reloadTemplates = exports.compileTemplates = exports.generateCustomCSSFiles = exports.generateCustomJavaScriptFile = exports.generateTemplatingJavaScriptFile = exports.renderThread = exports.rerender = undefined;
 
 var rerender = exports.rerender = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(what, not) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(what) {
     var routers;
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
-        switch (_context4.prev = _context4.next) {
+        switch (_context5.prev = _context5.next) {
           case 0:
-            _context4.next = 2;
+            _context5.next = 2;
             return Tools.series(_controllers2.default.routers, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(router) {
                 var paths;
@@ -34,15 +34,7 @@ var rerender = exports.rerender = function () {
                       case 4:
                         paths = _context.sent;
 
-                        paths = paths.filter(function (path) {
-                          if (!what) {
-                            return !not;
-                          } else if (typeof what === 'string') {
-                            return not ? path !== what : path === what;
-                          } else if (what instanceof RegExp) {
-                            return not ? !what.test(path) : what.test(path);
-                          }
-                        });
+                        paths = (0, _micromatch2.default)(paths, what || '**');
 
                         if (!(paths.length <= 0)) {
                           _context.next = 8;
@@ -65,134 +57,155 @@ var rerender = exports.rerender = function () {
                 }, _callee, this);
               }));
 
-              return function (_x3) {
+              return function (_x2) {
                 return ref.apply(this, arguments);
               };
             }(), true);
 
           case 2:
-            routers = _context4.sent;
-            _context4.next = 5;
+            routers = _context5.sent;
+            _context5.next = 5;
             return Tools.series(routers.filter(function (router) {
               return !!router;
             }), function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(router) {
-                var result;
-                return regeneratorRuntime.wrap(function _callee3$(_context3) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(router) {
+                return regeneratorRuntime.wrap(function _callee4$(_context4) {
                   while (1) {
-                    switch (_context3.prev = _context3.next) {
+                    switch (_context4.prev = _context4.next) {
                       case 0:
-                        _context3.next = 2;
-                        return router.router.render(router.paths);
-
-                      case 2:
-                        result = _context3.sent;
-                        _context3.next = 5;
-                        return Tools.series(result, function () {
-                          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(data, id) {
-                            return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                        _context4.next = 2;
+                        return Tools.series(router.paths, function () {
+                          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(path) {
+                            var result;
+                            return regeneratorRuntime.wrap(function _callee3$(_context3) {
                               while (1) {
-                                switch (_context2.prev = _context2.next) {
+                                switch (_context3.prev = _context3.next) {
                                   case 0:
-                                    _context2.next = 2;
-                                    return Cache.writeFile(id, data);
-
-                                  case 2:
-                                    return _context2.abrupt('return', _context2.sent);
+                                    console.log(Tools.translate('Rendering $[1]...', '', path));
+                                    _context3.next = 3;
+                                    return router.router.render(path);
 
                                   case 3:
+                                    result = _context3.sent;
+                                    _context3.next = 6;
+                                    return Tools.series(result, function () {
+                                      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(data, id) {
+                                        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                                          while (1) {
+                                            switch (_context2.prev = _context2.next) {
+                                              case 0:
+                                                _context2.next = 2;
+                                                return Cache.writeFile(id, data);
+
+                                              case 2:
+                                                return _context2.abrupt('return', _context2.sent);
+
+                                              case 3:
+                                              case 'end':
+                                                return _context2.stop();
+                                            }
+                                          }
+                                        }, _callee2, this);
+                                      }));
+
+                                      return function (_x5, _x6) {
+                                        return ref.apply(this, arguments);
+                                      };
+                                    }());
+
+                                  case 6:
+                                    return _context3.abrupt('return', _context3.sent);
+
+                                  case 7:
                                   case 'end':
-                                    return _context2.stop();
+                                    return _context3.stop();
                                 }
                               }
-                            }, _callee2, this);
+                            }, _callee3, this);
                           }));
 
-                          return function (_x5, _x6) {
+                          return function (_x4) {
                             return ref.apply(this, arguments);
                           };
                         }());
 
-                      case 5:
-                        return _context3.abrupt('return', _context3.sent);
-
-                      case 6:
+                      case 2:
                       case 'end':
-                        return _context3.stop();
+                        return _context4.stop();
                     }
                   }
-                }, _callee3, this);
+                }, _callee4, this);
               }));
 
-              return function (_x4) {
+              return function (_x3) {
                 return ref.apply(this, arguments);
               };
             }());
 
           case 5:
-            return _context4.abrupt('return', _context4.sent);
+            return _context5.abrupt('return', _context5.sent);
 
           case 6:
           case 'end':
-            return _context4.stop();
+            return _context5.stop();
         }
       }
-    }, _callee4, this);
+    }, _callee5, this);
   }));
 
-  return function rerender(_x, _x2) {
+  return function rerender(_x) {
     return ref.apply(this, arguments);
   };
 }();
 
 var renderThread = exports.renderThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(thread) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(thread) {
     var board;
-    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
-        switch (_context6.prev = _context6.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
             board = Board.board(thread.boardName);
 
             if (board) {
-              _context6.next = 3;
+              _context7.next = 3;
               break;
             }
 
-            return _context6.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context7.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
-            _context6.next = 5;
+            _context7.next = 5;
             return board.renderPost(thread.opPost);
 
           case 5:
             if (thread.lastPosts) {
-              _context6.next = 7;
+              _context7.next = 7;
               break;
             }
 
-            return _context6.abrupt('return');
+            return _context7.abrupt('return');
 
           case 7:
-            _context6.next = 9;
+            _context7.next = 9;
             return Tools.series(thread.lastPosts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(post) {
-                return regeneratorRuntime.wrap(function _callee5$(_context5) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(post) {
+                return regeneratorRuntime.wrap(function _callee6$(_context6) {
                   while (1) {
-                    switch (_context5.prev = _context5.next) {
+                    switch (_context6.prev = _context6.next) {
                       case 0:
-                        _context5.next = 2;
+                        _context6.next = 2;
                         return board.renderPost(post);
 
                       case 2:
-                        return _context5.abrupt('return', _context5.sent);
+                        return _context6.abrupt('return', _context6.sent);
 
                       case 3:
                       case 'end':
-                        return _context5.stop();
+                        return _context6.stop();
                     }
                   }
-                }, _callee5, this);
+                }, _callee6, this);
               }));
 
               return function (_x8) {
@@ -202,10 +215,10 @@ var renderThread = exports.renderThread = function () {
 
           case 9:
           case 'end':
-            return _context6.stop();
+            return _context7.stop();
         }
       }
-    }, _callee6, this);
+    }, _callee7, this);
   }));
 
   return function renderThread(_x7) {
@@ -214,11 +227,11 @@ var renderThread = exports.renderThread = function () {
 }();
 
 var generateTemplatingJavaScriptFile = exports.generateTemplatingJavaScriptFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
     var models, fileNames, templateNames, template, string, stream;
-    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context7.prev = _context7.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
             console.log('Generating templating JavaScript file...');
             models = JSON.stringify({
@@ -227,24 +240,24 @@ var generateTemplatingJavaScriptFile = exports.generateTemplatingJavaScriptFile 
               notFoundImageFileNames: MiscModel.notFoundImageFileNames(),
               tr: MiscModel.translations()
             });
-            _context7.next = 4;
+            _context8.next = 4;
             return _fs2.default.listTree(TEMPLATES_PATH, function (_, stat) {
               return stat.isFile();
             });
 
           case 4:
-            fileNames = _context7.sent;
+            fileNames = _context8.sent;
             templateNames = fileNames.filter(function (fileName) {
               return fileName.split('.').pop() === 'js' && 'index.js' !== fileName;
             }).map(function (fileName) {
               return fileName.substr(__dirname.length + 1);
             });
-            _context7.next = 8;
+            _context8.next = 8;
             return _fs2.default.read(TEMPLATES_INDEX_PATH + '.template');
 
           case 8:
-            template = _context7.sent;
-            _context7.next = 11;
+            template = _context8.sent;
+            _context8.next = 11;
             return _fs2.default.write(TEMPLATES_INDEX_PATH, template.replace('{{models}}', models));
 
           case 11:
@@ -261,7 +274,7 @@ var generateTemplatingJavaScriptFile = exports.generateTemplatingJavaScriptFile 
             stream.on('data', function (data) {
               string += data;
             });
-            _context7.next = 18;
+            _context8.next = 18;
             return new Promise(function (resolve, reject) {
               stream.on('end', resolve);
               stream.on('error', reject);
@@ -269,15 +282,15 @@ var generateTemplatingJavaScriptFile = exports.generateTemplatingJavaScriptFile 
 
           case 18:
             string = string.split(APP_PATH).join('.');
-            _context7.next = 21;
+            _context8.next = 21;
             return _fs2.default.write(__dirname + '/../public/js/templating.js', string);
 
           case 21:
           case 'end':
-            return _context7.stop();
+            return _context8.stop();
         }
       }
-    }, _callee7, this);
+    }, _callee8, this);
   }));
 
   return function generateTemplatingJavaScriptFile() {
@@ -286,37 +299,37 @@ var generateTemplatingJavaScriptFile = exports.generateTemplatingJavaScriptFile 
 }();
 
 var generateCustomJavaScriptFile = exports.generateCustomJavaScriptFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9() {
     var exists;
-    return regeneratorRuntime.wrap(function _callee8$(_context8) {
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
-        switch (_context8.prev = _context8.next) {
+        switch (_context9.prev = _context9.next) {
           case 0:
             console.log('Checking custom JavaScript file existence...');
-            _context8.next = 3;
+            _context9.next = 3;
             return _fs2.default.exists(__dirname + '/../public/js/custom.js');
 
           case 3:
-            exists = _context8.sent;
+            exists = _context9.sent;
 
             if (exists) {
-              _context8.next = 9;
+              _context9.next = 9;
               break;
             }
 
             console.log('Creating dummy custom JavaScript file...');
-            _context8.next = 8;
+            _context9.next = 8;
             return Cache.writeFile('js/custom.js', '');
 
           case 8:
-            return _context8.abrupt('return', _context8.sent);
+            return _context9.abrupt('return', _context9.sent);
 
           case 9:
           case 'end':
-            return _context8.stop();
+            return _context9.stop();
         }
       }
-    }, _callee8, this);
+    }, _callee9, this);
   }));
 
   return function generateCustomJavaScriptFile() {
@@ -325,37 +338,37 @@ var generateCustomJavaScriptFile = exports.generateCustomJavaScriptFile = functi
 }();
 
 var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11() {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12() {
     var list, types;
-    return regeneratorRuntime.wrap(function _callee11$(_context11) {
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
-        switch (_context11.prev = _context11.next) {
+        switch (_context12.prev = _context12.next) {
           case 0:
             console.log('Checking custom CSS files existence...');
-            _context11.next = 3;
+            _context12.next = 3;
             return Tools.series(['combined', 'desktop', 'mobile'], function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(type) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(type) {
                 var exists;
-                return regeneratorRuntime.wrap(function _callee9$(_context9) {
+                return regeneratorRuntime.wrap(function _callee10$(_context10) {
                   while (1) {
-                    switch (_context9.prev = _context9.next) {
+                    switch (_context10.prev = _context10.next) {
                       case 0:
-                        _context9.next = 2;
+                        _context10.next = 2;
                         return _fs2.default.exists(__dirname + '/../public/css/custom-base-' + type + '.css');
 
                       case 2:
-                        exists = _context9.sent;
-                        return _context9.abrupt('return', {
+                        exists = _context10.sent;
+                        return _context10.abrupt('return', {
                           type: type,
                           exists: exists
                         });
 
                       case 4:
                       case 'end':
-                        return _context9.stop();
+                        return _context10.stop();
                     }
                   }
-                }, _callee9, this);
+                }, _callee10, this);
               }));
 
               return function (_x9) {
@@ -364,7 +377,7 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
             }(), true);
 
           case 3:
-            list = _context11.sent;
+            list = _context12.sent;
             types = list.filter(function (item) {
               return !item.exists;
             }).map(function (item) {
@@ -372,27 +385,27 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
             });
 
             if (!(types.length > 0)) {
-              _context11.next = 9;
+              _context12.next = 9;
               break;
             }
 
             console.log('Creating dummy custom CSS file(s)...');
-            _context11.next = 9;
+            _context12.next = 9;
             return Tools.series(types, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(type) {
-                return regeneratorRuntime.wrap(function _callee10$(_context10) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(type) {
+                return regeneratorRuntime.wrap(function _callee11$(_context11) {
                   while (1) {
-                    switch (_context10.prev = _context10.next) {
+                    switch (_context11.prev = _context11.next) {
                       case 0:
-                        _context10.next = 2;
+                        _context11.next = 2;
                         return Cache.writeFile('css/custom-base-' + type + '.css', '');
 
                       case 2:
                       case 'end':
-                        return _context10.stop();
+                        return _context11.stop();
                     }
                   }
-                }, _callee10, this);
+                }, _callee11, this);
               }));
 
               return function (_x10) {
@@ -402,10 +415,10 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
 
           case 9:
           case 'end':
-            return _context11.stop();
+            return _context12.stop();
         }
       }
-    }, _callee11, this);
+    }, _callee12, this);
   }));
 
   return function generateCustomCSSFiles() {
@@ -414,39 +427,39 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
 }();
 
 var compileTemplates = exports.compileTemplates = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15() {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16() {
     var list, fileNames, includes;
-    return regeneratorRuntime.wrap(function _callee15$(_context15) {
+    return regeneratorRuntime.wrap(function _callee16$(_context16) {
       while (1) {
-        switch (_context15.prev = _context15.next) {
+        switch (_context16.prev = _context16.next) {
           case 0:
             console.log('Compiling templates...');
-            _context15.next = 3;
+            _context16.next = 3;
             return _fs2.default.list(TEMPLATES_PATH);
 
           case 3:
-            list = _context15.sent;
-            _context15.next = 6;
+            list = _context16.sent;
+            _context16.next = 6;
             return Tools.series(list.filter(function (entry) {
               return !EXCLUDED_SOURCE_TEMPLATE_FILES.has(entry);
             }), function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(entry) {
-                return regeneratorRuntime.wrap(function _callee12$(_context12) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(entry) {
+                return regeneratorRuntime.wrap(function _callee13$(_context13) {
                   while (1) {
-                    switch (_context12.prev = _context12.next) {
+                    switch (_context13.prev = _context13.next) {
                       case 0:
-                        _context12.next = 2;
+                        _context13.next = 2;
                         return _fs2.default.removeTree(TEMPLATES_PATH + '/' + entry);
 
                       case 2:
-                        return _context12.abrupt('return', _context12.sent);
+                        return _context13.abrupt('return', _context13.sent);
 
                       case 3:
                       case 'end':
-                        return _context12.stop();
+                        return _context13.stop();
                     }
                   }
-                }, _callee12, this);
+                }, _callee13, this);
               }));
 
               return function (_x11) {
@@ -455,49 +468,49 @@ var compileTemplates = exports.compileTemplates = function () {
             }());
 
           case 6:
-            _context15.next = 8;
+            _context16.next = 8;
             return _fs2.default.listTree(TEMPLATES_SOURCE_PATH, function (_, stat) {
               return stat.isFile();
             });
 
           case 8:
-            fileNames = _context15.sent;
+            fileNames = _context16.sent;
 
             fileNames = fileNames.map(function (fileName) {
               return fileName.substr(__dirname.length + 6);
             });
-            _context15.next = 12;
+            _context16.next = 12;
             return Tools.series(fileNames, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(fileName) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(fileName) {
                 var content;
-                return regeneratorRuntime.wrap(function _callee13$(_context13) {
+                return regeneratorRuntime.wrap(function _callee14$(_context14) {
                   while (1) {
-                    switch (_context13.prev = _context13.next) {
+                    switch (_context14.prev = _context14.next) {
                       case 0:
                         if (/\.def(\.dot|\.jst)?$/.test(fileName)) {
-                          _context13.next = 2;
+                          _context14.next = 2;
                           break;
                         }
 
-                        return _context13.abrupt('return');
+                        return _context14.abrupt('return');
 
                       case 2:
-                        _context13.next = 4;
+                        _context14.next = 4;
                         return _fs2.default.read(TEMPLATES_SOURCE_PATH + '/' + fileName);
 
                       case 4:
-                        content = _context13.sent;
-                        return _context13.abrupt('return', {
+                        content = _context14.sent;
+                        return _context14.abrupt('return', {
                           name: fileName.split('.').slice(0, -1).join('.'),
                           content: content
                         });
 
                       case 6:
                       case 'end':
-                        return _context13.stop();
+                        return _context14.stop();
                     }
                   }
-                }, _callee13, this);
+                }, _callee14, this);
               }));
 
               return function (_x12) {
@@ -506,7 +519,7 @@ var compileTemplates = exports.compileTemplates = function () {
             }(), true);
 
           case 12:
-            includes = _context15.sent;
+            includes = _context16.sent;
 
             includes = includes.filter(function (item) {
               return !!item;
@@ -514,28 +527,28 @@ var compileTemplates = exports.compileTemplates = function () {
               acc[item.name] = item.content;
               return acc;
             }, {});
-            _context15.next = 16;
+            _context16.next = 16;
             return Tools.series(fileNames, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(fileName) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(fileName) {
                 var compiled, string, moduleName;
-                return regeneratorRuntime.wrap(function _callee14$(_context14) {
+                return regeneratorRuntime.wrap(function _callee15$(_context15) {
                   while (1) {
-                    switch (_context14.prev = _context14.next) {
+                    switch (_context15.prev = _context15.next) {
                       case 0:
                         if (/\.jst(\.dot|\.def)?$/.test(fileName)) {
-                          _context14.next = 2;
+                          _context15.next = 2;
                           break;
                         }
 
-                        return _context14.abrupt('return');
+                        return _context15.abrupt('return');
 
                       case 2:
                         compiled = '(function(){';
-                        _context14.next = 5;
+                        _context15.next = 5;
                         return _fs2.default.read(TEMPLATES_SOURCE_PATH + '/' + fileName);
 
                       case 5:
-                        string = _context14.sent;
+                        string = _context15.sent;
                         moduleName = fileName.split('.').shift().replace(ILLEGAL_CHARACTERS_REGEXP, '_');
 
                         compiled += _dot2.default.template(string, DOT_SETTINGS, includes).toString().replace('anonymous', moduleName);
@@ -543,23 +556,23 @@ var compileTemplates = exports.compileTemplates = function () {
                         compiled += 'module.exports=itself;})()';
 
                         if (!(fileName.split('/').length > 1)) {
-                          _context14.next = 13;
+                          _context15.next = 13;
                           break;
                         }
 
-                        _context14.next = 13;
+                        _context15.next = 13;
                         return _fs2.default.makeTree(TEMPLATES_PATH + '/' + fileName.split('/').slice(0, -1).join('/'));
 
                       case 13:
-                        _context14.next = 15;
+                        _context15.next = 15;
                         return _fs2.default.write(TEMPLATES_PATH + '/' + fileName.split('.').slice(0, -1).join('.') + '.js', compiled);
 
                       case 15:
                       case 'end':
-                        return _context14.stop();
+                        return _context15.stop();
                     }
                   }
-                }, _callee14, this);
+                }, _callee15, this);
               }));
 
               return function (_x13) {
@@ -569,10 +582,10 @@ var compileTemplates = exports.compileTemplates = function () {
 
           case 16:
           case 'end':
-            return _context15.stop();
+            return _context16.stop();
         }
       }
-    }, _callee15, this);
+    }, _callee16, this);
   }));
 
   return function compileTemplates() {
@@ -581,20 +594,20 @@ var compileTemplates = exports.compileTemplates = function () {
 }();
 
 var reloadTemplates = exports.reloadTemplates = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16() {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17() {
     var fileNames;
-    return regeneratorRuntime.wrap(function _callee16$(_context16) {
+    return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
-        switch (_context16.prev = _context16.next) {
+        switch (_context17.prev = _context17.next) {
           case 0:
-            _context16.prev = 0;
-            _context16.next = 3;
+            _context17.prev = 0;
+            _context17.next = 3;
             return _fs2.default.listTree(TEMPLATES_PATH, function (_1, stat) {
               return stat.isFile();
             });
 
           case 3:
-            fileNames = _context16.sent;
+            fileNames = _context17.sent;
 
             templates = fileNames.filter(function (fileName) {
               return fileName.split('.').pop() === 'js' && fileName.split('/').pop() !== 'index.js';
@@ -608,21 +621,21 @@ var reloadTemplates = exports.reloadTemplates = function () {
               acc[templateName] = require(id);
               return acc;
             }, {});
-            _context16.next = 10;
+            _context17.next = 10;
             break;
 
           case 7:
-            _context16.prev = 7;
-            _context16.t0 = _context16['catch'](0);
+            _context17.prev = 7;
+            _context17.t0 = _context17['catch'](0);
 
-            _logger2.default.error(_context16.t0.stack || _context16.t0);
+            _logger2.default.error(_context17.t0.stack || _context17.t0);
 
           case 10:
           case 'end':
-            return _context16.stop();
+            return _context17.stop();
         }
       }
-    }, _callee16, this, [[0, 7]]);
+    }, _callee17, this, [[0, 7]]);
   }));
 
   return function reloadTemplates() {
@@ -651,6 +664,10 @@ var _fs2 = _interopRequireDefault(_fs);
 var _merge = require('merge');
 
 var _merge2 = _interopRequireDefault(_merge);
+
+var _micromatch = require('micromatch');
+
+var _micromatch2 = _interopRequireDefault(_micromatch);
 
 var _moment = require('moment');
 

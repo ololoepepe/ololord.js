@@ -105,7 +105,7 @@ var getPost = exports.getPost = function () {
               break;
             }
 
-            return _context2.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context2.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
@@ -115,7 +115,7 @@ var getPost = exports.getPost = function () {
               break;
             }
 
-            return _context2.abrupt('return', Promise.reject(Tools.translate('Invalid post number')));
+            return _context2.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post number'))));
 
           case 6:
             key = boardName + ':' + postNumber;
@@ -173,7 +173,7 @@ var getPosts = exports.getPosts = function () {
               break;
             }
 
-            return _context4.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context4.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             if (!(0, _underscore2.default)(postNumbers).isArray()) {
@@ -190,7 +190,7 @@ var getPosts = exports.getPosts = function () {
               break;
             }
 
-            return _context4.abrupt('return', Promise.reject(Tools.translate('Invalid post number')));
+            return _context4.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post number'))));
 
           case 7:
             _context4.next = 9;

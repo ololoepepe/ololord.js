@@ -27,17 +27,20 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var router = _express2.default.Router();
 
 router.paths = function () {
-  return ['/'];
+  return ['/', '/notFound.html'];
 };
 
-router.render = function () {
-  return {
-    'index.html': Renderer.render('pages/home', { title: Tools.translate('ololord.js', 'pageTitle') }),
-    'notFound.html': Renderer.render('pages/notFound', {
-      title: Tools.translate('Error 404', 'pageTitle'),
-      notFoundImageFileName: (0, _underscore2.default)(MiscModel.notFoundImageFileNames()).sample()
-    })
-  };
+router.render = function (path) {
+  if ('/' === path) {
+    return { 'index.html': Renderer.render('pages/home', { title: Tools.translate('ololord.js', 'pageTitle') }) };
+  } else if ('/notFound.html' === path) {
+    return {
+      'notFound.html': Renderer.render('pages/notFound', {
+        title: Tools.translate('Error 404', 'pageTitle'),
+        notFoundImageFileName: (0, _underscore2.default)(MiscModel.notFoundImageFileNames()).sample()
+      })
+    };
+  }
 };
 
 module.exports = router;

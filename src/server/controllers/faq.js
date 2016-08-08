@@ -9,8 +9,10 @@ router.paths = () => {
   return ['/faq.html'];
 };
 
-router.render = (paths) => {
-  return { 'faq.html': Renderer.render('pages/faq', { title: Tools.translate('F.A.Q.', 'pageTitle') }) };
+router.render = (path) => {
+  if ('/faq.html' === path) {
+    return { 'faq.html': Renderer.render('pages/faq', { title: Tools.translate('F.A.Q.', 'pageTitle') }) };
+  }
 };
 
 module.exports = router;

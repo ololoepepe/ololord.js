@@ -173,7 +173,7 @@ function addDataToThread(thread, board) {
 export async function getThread(boardName, threadNumber, archived) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   let thread = await ThreadsModel.getThread(boardName, threadNumber);
   let posts = await ThreadsModel.getThreadPosts(boardName, threadNumber, {
@@ -193,14 +193,15 @@ export async function getThread(boardName, threadNumber, archived) {
 export async function getPage(boardName, pageNumber) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   pageNumber = Tools.option(pageNumber, 'number', -1, { test: (n) => { return n >= 0; } });
   let pageCount = pageCounts.get(boardName);
   if (pageNumber < 0 || pageNumber >= pageCount) {
-    return Promise.reject(Tools.translate('Invalid page number'));
+    return Promise.reject(new Error(Tools.translate('Invalid page number')));
   }
   let threadNumbers = await ThreadsModel.getThreadNumbers(boardName);
+  //TODO: get threads, sort them, then slice
   let start = pageNumber * board.threadsPerPage;
   threadNumbers = threadNumbers.slice(start, start + board.threadsPerPage);
   let threads = await ThreadsModel.getThreads(boardName, threadNumbers, { withPostNumbers: true });
@@ -241,12 +242,12 @@ export async function getPage(boardName, pageNumber) {
 export async function getCatalog(boardName, sortMode) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   let threadNumbers = await ThreadsModel.getThreadNumbers(boardName);
   let threads = await ThreadsModel.getThreads(boardName, threadNumbers, { withPostNumbers: true });
   await Tools.series(threads, async function(thread) {
-    thread.opPost = await PostsModel.getPosts(boardName, thread.number, {
+    thread.opPost = await PostsModel.getPost(boardName, thread.number, {
       withFileInfos: true,
       withReferences: true
     });
@@ -266,7 +267,7 @@ export async function getCatalog(boardName, sortMode) {
     break;
   }
   let lastPostNumber = await getLastPostNumber(boardName);
-  let catalog = {
+  return {
     threads: threads.sort(sortFunction),
     lastPostNumber: lastPostNumber,
     postingSpeed: Tools.postingSpeedString(board.launchDate, lastPostNumber)
@@ -276,7 +277,7 @@ export async function getCatalog(boardName, sortMode) {
 export async function getArchive(boardName) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   let path = `${__dirname}/../public/${boardName}/arch`;
   let exists = await FS.exists(path);
@@ -304,7 +305,7 @@ export async function getArchive(boardName) {
 
 export async function getLastPostNumber(boardName) {
   if (!Board.board(boardName)) {
-    return Promise.reject(Tools.translate('Invalid boardName'));
+    return Promise.reject(new Error(Tools.translate('Invalid boardName')));
   }
   return await PostCounters.getOne(boardName);
 }
@@ -314,7 +315,7 @@ export async function getLastPostNumbers(boardNames) {
     boardNames = [boardNames];
   }
   if (boardNames.some(boardName => !Board.board(boardName))) {
-    return Promise.reject(Tools.translate('Invalid boardName'));
+    return Promise.reject(new Error(Tools.translate('Invalid boardName')));
   }
   return await PostCounters.getSome(boardNames);
 }
@@ -322,7 +323,7 @@ export async function getLastPostNumbers(boardNames) {
 export async function getPageCount(boardName) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(Tools.translate('Invalid board'));
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
   let threadCount = await Threads.count(boardName);
   let pageCount = Math.ceil(threadCount / board.threadsPerPage) || 1;

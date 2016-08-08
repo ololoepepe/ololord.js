@@ -19,7 +19,7 @@ var getUserCaptchaQuota = exports.getUserCaptchaQuota = function () {
               break;
             }
 
-            return _context2.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context2.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             quota = UserCaptchaQuotas.getOne(boardName + ':' + userIp);
@@ -58,7 +58,7 @@ var getUserIP = exports.getUserIP = function () {
               break;
             }
 
-            return _context3.abrupt('return', Promise.reject(Tools.translate('No such post')));
+            return _context3.abrupt('return', Promise.reject(new Error(Tools.translate('No such post'))));
 
           case 5:
             return _context3.abrupt('return', post.user.ip);
@@ -207,7 +207,7 @@ var getRegisteredUser = exports.getRegisteredUser = function () {
               break;
             }
 
-            return _context8.abrupt('return', Promise.reject(Tools.translate('No user with this hashpass')));
+            return _context8.abrupt('return', Promise.reject(new Error(Tools.translate('No user with this hashpass'))));
 
           case 6:
             user.levels = levels;

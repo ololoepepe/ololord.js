@@ -7,28 +7,27 @@ var renderThreadHTML = function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            board = Board.board(boardName);
+            board = Board.board(thread.boardName);
 
             if (board) {
               _context.next = 3;
               break;
             }
 
-            return _context.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             thread.title = thread.title || board.title + ' — ' + thread.number;
             model = { thread: thread };
 
-            model.isBoardPage = true;
             model.isThreadPage = true;
             model.board = MiscModel.board(board).board;
             model.threadNumber = thread.number;
             data = Renderer.render('pages/thread', model);
-            _context.next = 12;
+            _context.next = 11;
             return Cache.writeFile(thread.boardName + '/res/' + thread.number + '.html', data);
 
-          case 12:
+          case 11:
           case 'end':
             return _context.stop();
         }
@@ -91,7 +90,7 @@ var renderPage = function () {
               break;
             }
 
-            return _context4.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context4.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             _context4.next = 5;
@@ -319,7 +318,7 @@ router.renderThread = function () {
               break;
             }
 
-            return _context9.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 9:
             _context9.t0 = data.action;
@@ -443,7 +442,7 @@ router.renderThread = function () {
             return _context9.abrupt('break', 27);
 
           case 26:
-            return _context9.abrupt('return', Promise.reject(Tools.translate('Invalid action')));
+            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid action'))));
 
           case 27:
           case 'end':
@@ -526,7 +525,7 @@ router.renderCatalog = function () {
               break;
             }
 
-            return _context14.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context14.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             _context14.next = 5;
@@ -619,7 +618,7 @@ router.renderArchive = function () {
               break;
             }
 
-            return _context15.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context15.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             _context15.next = 5;
@@ -650,100 +649,73 @@ router.renderArchive = function () {
 }();
 
 router.render = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(paths) {
-    return regeneratorRuntime.wrap(function _callee17$(_context17) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(path) {
+    var match;
+    return regeneratorRuntime.wrap(function _callee16$(_context16) {
       while (1) {
-        switch (_context17.prev = _context17.next) {
+        switch (_context16.prev = _context16.next) {
           case 0:
-            _context17.next = 2;
-            return Tools.series(paths, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(path) {
-                var match;
-                return regeneratorRuntime.wrap(function _callee16$(_context16) {
-                  while (1) {
-                    switch (_context16.prev = _context16.next) {
-                      case 0:
-                        match = path.match(/^\/([^\/]+)$/);
+            match = path.match(/^\/([^\/]+)$/);
 
-                        if (!match) {
-                          _context16.next = 6;
-                          break;
-                        }
+            if (!match) {
+              _context16.next = 5;
+              break;
+            }
 
-                        console.log(Tools.translate('Rendering board pages: /$[1]', '', match[1]));
-                        _context16.next = 5;
-                        return router.renderPages(match[1]);
+            _context16.next = 4;
+            return router.renderPages(match[1]);
 
-                      case 5:
-                        return _context16.abrupt('return', _context16.sent);
+          case 4:
+            return _context16.abrupt('return', _context16.sent);
 
-                      case 6:
-                        match = path.match(/^\/([^\/]+)\/archive$/);
+          case 5:
+            match = path.match(/^\/([^\/]+)\/archive$/);
 
-                        if (!match) {
-                          _context16.next = 12;
-                          break;
-                        }
+            if (!match) {
+              _context16.next = 10;
+              break;
+            }
 
-                        console.log(Tools.translate('Rendering board archive: /$[1]/archive', '', match[1]));
-                        _context16.next = 11;
-                        return router.renderArchive(match[1]);
+            _context16.next = 9;
+            return router.renderArchive(match[1]);
 
-                      case 11:
-                        return _context16.abrupt('return', _context16.sent);
+          case 9:
+            return _context16.abrupt('return', _context16.sent);
 
-                      case 12:
-                        match = path.match(/^\/([^\/]+)\/catalog$/);
+          case 10:
+            match = path.match(/^\/([^\/]+)\/catalog$/);
 
-                        if (!match) {
-                          _context16.next = 18;
-                          break;
-                        }
+            if (!match) {
+              _context16.next = 15;
+              break;
+            }
 
-                        console.log(Tools.translate('Rendering board catalog: /$[1]/catalog', '', match[1]));
-                        _context16.next = 17;
-                        return router.renderCatalog(match[1]);
+            _context16.next = 14;
+            return router.renderCatalog(match[1]);
 
-                      case 17:
-                        return _context16.abrupt('return', _context16.sent);
+          case 14:
+            return _context16.abrupt('return', _context16.sent);
 
-                      case 18:
-                        match = path.match(/^\/([^\/]+)\/res\/(\d+)$/);
+          case 15:
+            match = path.match(/^\/([^\/]+)\/res\/(\d+)$/);
 
-                        if (!match) {
-                          _context16.next = 24;
-                          break;
-                        }
+            if (!match) {
+              _context16.next = 20;
+              break;
+            }
 
-                        console.log(Tools.translate('Rendering thread: /$[1]/$[2]', '', match[1], match[2]));
-                        _context16.next = 23;
-                        return renderThread(match[1], +match[2]);
+            _context16.next = 19;
+            return renderThread(match[1], +match[2]);
 
-                      case 23:
-                        return _context16.abrupt('return', _context16.sent);
+          case 19:
+            return _context16.abrupt('return', _context16.sent);
 
-                      case 24:
-                      case 'end':
-                        return _context16.stop();
-                    }
-                  }
-                }, _callee16, this);
-              }));
-
-              return function (_x19) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 2:
-            return _context17.abrupt('return', _context17.sent);
-
-          case 3:
+          case 20:
           case 'end':
-            return _context17.stop();
+            return _context16.stop();
         }
       }
-    }, _callee17, this);
+    }, _callee16, this);
   }));
 
   return function (_x18) {

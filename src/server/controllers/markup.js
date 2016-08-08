@@ -15,7 +15,10 @@ router.paths = () => {
   return ['/markup.html'];
 };
 
-router.render = async function() {
+router.render = async function(path) {
+  if ('/markup.html' !== path) {
+    return;
+  }
   Highlight.configure({
     tabReplace: '    ',
     useBR: true

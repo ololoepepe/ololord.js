@@ -715,24 +715,28 @@ router.get('/api/captchaQuota.json', function () {
             return UsersModel.checkUserBan(req.ip, req.query.boardName);
 
           case 5:
-            quota = UsersModel.getUserCaptchaQuota(req.query.boardName, req.ip);
+            _context14.next = 7;
+            return UsersModel.getUserCaptchaQuota(req.query.boardName, req.ip);
+
+          case 7:
+            quota = _context14.sent;
 
             res.json({ quota: quota });
-            _context14.next = 12;
+            _context14.next = 14;
             break;
 
-          case 9:
-            _context14.prev = 9;
+          case 11:
+            _context14.prev = 11;
             _context14.t0 = _context14['catch'](2);
 
             next(_context14.t0);
 
-          case 12:
+          case 14:
           case 'end':
             return _context14.stop();
         }
       }
-    }, _callee14, this, [[2, 9]]);
+    }, _callee14, this, [[2, 11]]);
   }));
 
   return function (_x36, _x37, _x38) {

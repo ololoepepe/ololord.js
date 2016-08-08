@@ -33,7 +33,7 @@ var getFileInfo = function () {
               break;
             }
 
-            return _context.abrupt('return', Promise.reject(Tools.translate('No such file')));
+            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('No such file'))));
 
           case 7:
             fileInfo = FileInfos.getOne(name);
@@ -43,7 +43,7 @@ var getFileInfo = function () {
               break;
             }
 
-            return _context.abrupt('return', Promise.reject(Tools.translate('No such file')));
+            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('No such file'))));
 
           case 10:
             return _context.abrupt('return', fileInfo);

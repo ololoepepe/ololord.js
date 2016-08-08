@@ -22,8 +22,10 @@ router.paths = function () {
   return ['/faq.html'];
 };
 
-router.render = function (paths) {
-  return { 'faq.html': Renderer.render('pages/faq', { title: Tools.translate('F.A.Q.', 'pageTitle') }) };
+router.render = function (path) {
+  if ('/faq.html' === path) {
+    return { 'faq.html': Renderer.render('pages/faq', { title: Tools.translate('F.A.Q.', 'pageTitle') }) };
+  }
 };
 
 module.exports = router;

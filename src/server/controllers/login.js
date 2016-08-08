@@ -9,8 +9,10 @@ router.paths = () => {
   return ['/login.html'];
 };
 
-router.render = () => {
-  return { 'login.html': Renderer.render('pages/login', { title: Tools.translate('Login', 'pageTitle') }) };
+router.render = (path) => {
+  if ('/login.html' === path) {
+    return { 'login.html': Renderer.render('pages/login', { title: Tools.translate('Login', 'pageTitle') }) };
+  }
 };
 
 module.exports = router;

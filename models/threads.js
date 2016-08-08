@@ -95,7 +95,7 @@ var getThreadPosts = exports.getThreadPosts = function () {
               break;
             }
 
-            return _context3.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context3.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
@@ -105,7 +105,7 @@ var getThreadPosts = exports.getThreadPosts = function () {
               break;
             }
 
-            return _context3.abrupt('return', Promise.reject(Tools.translate('Invalid thread number')));
+            return _context3.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid thread number'))));
 
           case 6:
             _context3.next = 8;
@@ -190,7 +190,7 @@ var getThread = exports.getThread = function () {
               break;
             }
 
-            return _context5.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context5.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
@@ -200,7 +200,7 @@ var getThread = exports.getThread = function () {
               break;
             }
 
-            return _context5.abrupt('return', Promise.reject(Tools.translate('Invalid thread number')));
+            return _context5.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid thread number'))));
 
           case 6:
             _context5.next = 8;
@@ -226,7 +226,7 @@ var getThread = exports.getThread = function () {
               break;
             }
 
-            return _context5.abrupt('return', Promise.reject(Tools.translate('No such thread')));
+            return _context5.abrupt('return', Promise.reject(new Error(Tools.translate('No such thread'))));
 
           case 15:
             _context5.next = 17;
@@ -262,7 +262,7 @@ var getThreads = exports.getThreads = function () {
               break;
             }
 
-            return _context7.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context7.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             if (!(0, _underscore2.default)(threadNumbers).isArray()) {
@@ -279,7 +279,7 @@ var getThreads = exports.getThreads = function () {
               break;
             }
 
-            return _context7.abrupt('return', Promise.reject(Tools.translate('Invalid thread number')));
+            return _context7.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid thread number'))));
 
           case 7:
             _context7.next = 9;
@@ -384,7 +384,7 @@ var getThreadInfo = exports.getThreadInfo = function () {
               break;
             }
 
-            return _context8.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context8.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
@@ -394,7 +394,7 @@ var getThreadInfo = exports.getThreadInfo = function () {
               break;
             }
 
-            return _context8.abrupt('return', Promise.reject(Tools.translate('Invalid thread number')));
+            return _context8.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid thread number'))));
 
           case 6:
             _context8.next = 8;
@@ -457,7 +457,7 @@ var getThreadLastPostNumber = exports.getThreadLastPostNumber = function () {
               break;
             }
 
-            return _context9.abrupt('return', Promise.reject(Tools.translate('Invalid board')));
+            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 2:
             threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
@@ -467,7 +467,7 @@ var getThreadLastPostNumber = exports.getThreadLastPostNumber = function () {
               break;
             }
 
-            return _context9.abrupt('return', Promise.reject(Tools.translate('Invalid thread number')));
+            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid thread number'))));
 
           case 5:
             _context9.next = 7;

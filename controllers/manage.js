@@ -22,8 +22,10 @@ router.paths = function () {
   return ['/manage.html'];
 };
 
-router.render = function () {
-  return { 'manage.html': Renderer.render('pages/manage', { title: Tools.translate('Management', 'pageTitle') }) };
+router.render = function (path) {
+  if ('/manage.html' === path) {
+    return { 'manage.html': Renderer.render('pages/manage', { title: Tools.translate('Management', 'pageTitle') }) };
+  }
 };
 
 module.exports = router;
