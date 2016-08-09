@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.clearDeletedThreads = exports.setThreadDeleted = exports.isThreadDeleted = exports.getThreadLastPostNumber = exports.getThreadInfo = exports.getThreads = exports.getThread = exports.getThreadNumbers = exports.getThreadPosts = exports.getThreadPostNumbers = undefined;
+exports.clearDeletedThreads = exports.setThreadDeleted = exports.isThreadDeleted = exports.getThreadsUpdateTimes = exports.getThreadUpdateTime = exports.getThreadLastPostNumber = exports.getThreadInfo = exports.getThreads = exports.getThread = exports.getThreadNumbers = exports.getThreadPosts = exports.getThreadPostNumbers = undefined;
 
 var getThreadPostNumbers = exports.getThreadPostNumbers = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, threadNumber) {
@@ -44,7 +44,7 @@ var addDataToThread = function () {
         switch (_context2.prev = _context2.next) {
           case 0:
             _context2.next = 2;
-            return ThreadUpdateDateTimes.getOne(thread.number, thread.boardName);
+            return ThreadUpdateTimes.getOne(thread.number, thread.boardName);
 
           case 2:
             thread.updatedAt = _context2.sent;
@@ -490,15 +490,19 @@ var getThreadLastPostNumber = exports.getThreadLastPostNumber = function () {
   };
 }();
 
-var isThreadDeleted = exports.isThreadDeleted = function () {
+var getThreadUpdateTime = exports.getThreadUpdateTime = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(boardName, threadNumber) {
     return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
         switch (_context10.prev = _context10.next) {
           case 0:
-            return _context10.abrupt('return', DeletedThreads.contains(boardName + ':' + threadNumber));
+            _context10.next = 2;
+            return ThreadUpdateTimes.getOne(threadNumber, boardName);
 
-          case 1:
+          case 2:
+            return _context10.abrupt('return', _context10.sent);
+
+          case 3:
           case 'end':
             return _context10.stop();
         }
@@ -506,20 +510,24 @@ var isThreadDeleted = exports.isThreadDeleted = function () {
     }, _callee10, this);
   }));
 
-  return function isThreadDeleted(_x25, _x26) {
+  return function getThreadUpdateTime(_x25, _x26) {
     return ref.apply(this, arguments);
   };
 }();
 
-var setThreadDeleted = exports.setThreadDeleted = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName, threadNumber) {
+var getThreadsUpdateTimes = exports.getThreadsUpdateTimes = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName, threadNumbers) {
     return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
         switch (_context11.prev = _context11.next) {
           case 0:
-            return _context11.abrupt('return', DeletedThreads.addOne(boardName + ':' + threadNumber));
+            _context11.next = 2;
+            return ThreadUpdateTimes.getSome(threadNumbers, boardName);
 
-          case 1:
+          case 2:
+            return _context11.abrupt('return', _context11.sent);
+
+          case 3:
           case 'end':
             return _context11.stop();
         }
@@ -527,18 +535,18 @@ var setThreadDeleted = exports.setThreadDeleted = function () {
     }, _callee11, this);
   }));
 
-  return function setThreadDeleted(_x27, _x28) {
+  return function getThreadsUpdateTimes(_x27, _x28) {
     return ref.apply(this, arguments);
   };
 }();
 
-var clearDeletedThreads = exports.clearDeletedThreads = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12() {
+var isThreadDeleted = exports.isThreadDeleted = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, threadNumber) {
     return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
         switch (_context12.prev = _context12.next) {
           case 0:
-            return _context12.abrupt('return', DeletedThreads.delete());
+            return _context12.abrupt('return', DeletedThreads.contains(boardName + ':' + threadNumber));
 
           case 1:
           case 'end':
@@ -546,6 +554,48 @@ var clearDeletedThreads = exports.clearDeletedThreads = function () {
         }
       }
     }, _callee12, this);
+  }));
+
+  return function isThreadDeleted(_x29, _x30) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var setThreadDeleted = exports.setThreadDeleted = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(boardName, threadNumber) {
+    return regeneratorRuntime.wrap(function _callee13$(_context13) {
+      while (1) {
+        switch (_context13.prev = _context13.next) {
+          case 0:
+            return _context13.abrupt('return', DeletedThreads.addOne(boardName + ':' + threadNumber));
+
+          case 1:
+          case 'end':
+            return _context13.stop();
+        }
+      }
+    }, _callee13, this);
+  }));
+
+  return function setThreadDeleted(_x31, _x32) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var clearDeletedThreads = exports.clearDeletedThreads = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
+    return regeneratorRuntime.wrap(function _callee14$(_context14) {
+      while (1) {
+        switch (_context14.prev = _context14.next) {
+          case 0:
+            return _context14.abrupt('return', DeletedThreads.delete());
+
+          case 1:
+          case 'end':
+            return _context14.stop();
+        }
+      }
+    }, _callee14, this);
   }));
 
   return function clearDeletedThreads() {
@@ -601,7 +651,7 @@ var ThreadPostNumbers = new _unorderedSet2.default((0, _clientFactory2.default)(
   }
 });
 var Threads = new _hash2.default((0, _clientFactory2.default)(), 'threads');
-var ThreadUpdateDateTimes = new _hash2.default((0, _clientFactory2.default)(), 'threadUpdateDateTimes', {
+var ThreadUpdateTimes = new _hash2.default((0, _clientFactory2.default)(), 'threadUpdateTimes', {
   parse: false,
   stringify: false
 });

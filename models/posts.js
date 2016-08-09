@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getPosts = exports.getPost = undefined;
+exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
 
 var addDataToPost = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(board, post) {
@@ -218,16 +218,24 @@ var getPosts = exports.getPosts = function () {
             threadPostNumbers = _context4.sent;
             _context4.next = 18;
             return Tools.series(posts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(post) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(post, index) {
                 return regeneratorRuntime.wrap(function _callee3$(_context3) {
                   while (1) {
                     switch (_context3.prev = _context3.next) {
                       case 0:
+                        if (post) {
+                          _context3.next = 2;
+                          break;
+                        }
+
+                        return _context3.abrupt('return');
+
+                      case 2:
                         post.sequenceNumber = threadPostNumbers.indexOf(post.number) + 1;
-                        _context3.next = 3;
+                        _context3.next = 5;
                         return addDataToPost(board, post, options);
 
-                      case 3:
+                      case 5:
                       case 'end':
                         return _context3.stop();
                     }
@@ -235,7 +243,7 @@ var getPosts = exports.getPosts = function () {
                 }, _callee3, this);
               }));
 
-              return function (_x11) {
+              return function (_x11, _x12) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -252,6 +260,31 @@ var getPosts = exports.getPosts = function () {
   }));
 
   return function getPosts(_x8, _x9, _x10) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var getPostKeys = exports.getPostKeys = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            _context5.next = 2;
+            return Posts.keys();
+
+          case 2:
+            return _context5.abrupt('return', _context5.sent);
+
+          case 3:
+          case 'end':
+            return _context5.stop();
+        }
+      }
+    }, _callee5, this);
+  }));
+
+  return function getPostKeys() {
     return ref.apply(this, arguments);
   };
 }();

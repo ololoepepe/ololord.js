@@ -60,7 +60,7 @@ var getThread = exports.getThread = function () {
 
 var getPage = exports.getPage = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, pageNumber) {
-    var board, pageCount, threadNumbers, start, threads, lastPostNumber;
+    var board, pageCount, threadNumbers, threads, start, lastPostNumber;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -93,15 +93,17 @@ var getPage = exports.getPage = function () {
 
           case 9:
             threadNumbers = _context3.sent;
-            start = pageNumber * board.threadsPerPage;
-
-            threadNumbers = threadNumbers.slice(start, start + board.threadsPerPage);
-            _context3.next = 14;
+            _context3.next = 12;
             return ThreadsModel.getThreads(boardName, threadNumbers, { withPostNumbers: true });
 
-          case 14:
+          case 12:
             threads = _context3.sent;
-            _context3.next = 17;
+
+            threads.sort(Board.sortThreadsByDate);
+            start = pageNumber * board.threadsPerPage;
+
+            threads = threads.slice(start, start + board.threadsPerPage);
+            _context3.next = 18;
             return Tools.series(threads, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(thread) {
                 var lastPosts;
@@ -154,21 +156,21 @@ var getPage = exports.getPage = function () {
               };
             }());
 
-          case 17:
-            _context3.next = 19;
+          case 18:
+            _context3.next = 20;
             return getLastPostNumber(boardName);
 
-          case 19:
+          case 20:
             lastPostNumber = _context3.sent;
             return _context3.abrupt('return', {
-              threads: threads.sort(Board.sortThreadsByDate),
+              threads: threads,
               pageCount: pageCount,
               currentPage: pageNumber,
               lastPostNumber: lastPostNumber,
               postingSpeed: Tools.postingSpeedString(board.launchDate, lastPostNumber)
             });
 
-          case 21:
+          case 22:
           case 'end':
             return _context3.stop();
         }
@@ -545,6 +547,8 @@ var initialize = exports.initialize = function () {
   };
 }();
 
+exports.postSubject = postSubject;
+
 var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
@@ -617,6 +621,14 @@ var Threads = new _hash2.default((0, _clientFactory2.default)(), 'threads');
 
 var pageCounts = new Map();
 
+function addDataToThread(thread, board) {
+  thread.bumpLimit = board.bumpLimit;
+  thread.postLimit = board.postLimit;
+  thread.bumpLimitReached = thread.postCount >= board.bumpLimit;
+  thread.postLimitReached = thread.postCount >= board.postLimit;
+  thread.postingEnabled = board.postingEnabled && !thread.closed;
+}
+
 function postSubject(post, maxLength) {
   var subject = '';
   if (post.subject) {
@@ -632,114 +644,5 @@ function postSubject(post, maxLength) {
     subject = subject.substr(0, maxLength - 1) + '…';
   }
   return subject;
-}
-
-//TODO: Use DoT.js
-module.exports.generateRSS = function (currentProcess) {
-  var site = {
-    protocol: config("site.protocol", "http"),
-    domain: config("site.domain", "localhost:8080"),
-    pathPrefix: config("site.pathPrefix", ""),
-    locale: config("site.locale", "en")
-  };
-  var rssPostCount = config("server.rss.postCount", 500);
-  var postNumbers = {};
-  Board.boardNames().forEach(function (boardName) {
-    postNumbers[boardName] = [];
-  });
-  var feedTranslated = Tools.translate("Feed", "channelTitle");
-  return Database.db.hkeys("posts").then(function (keys) {
-    keys.forEach(function (key) {
-      var list = postNumbers[key.split(":").shift()];
-      if (!list) return;
-      list.push(+key.split(":").pop());
-    });
-    return Tools.series(Board.boardNames(), function (boardName) {
-      var board = Board.board(boardName);
-      var title = feedTranslated + " " + site.domain + "/" + site.pathPrefix + boardName;
-      var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName;
-      var description = Tools.translate("Last posts from board", "channelDescription") + " /" + boardName + "/";
-      var atomLink = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/rss.xml";
-      var doc = {
-        $: {
-          version: "2.0",
-          "xmlns:dc": "http://purl.org/dc/elements/1.1/",
-          "xmlns:atom": "http://www.w3.org/2005/Atom"
-        },
-        channel: {
-          title: title,
-          link: link,
-          description: description,
-          language: site.locale,
-          pubDate: moment(Tools.now()).utc().locale("en").format("ddd, DD MMM YYYY HH:mm:ss +0000"),
-          ttl: "" + config("server.rss.ttl", 60),
-          "atom:link": {
-            $: {
-              href: atomLink,
-              rel: "self",
-              type: "application/rss+xml"
-            }
-          }
-        }
-      };
-      var posts = [];
-      return Tools.series(postNumbers[boardName].sort(function (pn1, pn2) {
-        if (pn1 < pn2) return 1;else if (pn1 > pn2) return -1;else return 0;
-      }).slice(0, rssPostCount).reverse(), function (postNumber) {
-        return PostsModel.getPost(boardName, postNumber, { withFileInfos: true }).then(function (post) {
-          posts.push(post);
-          return Promise.resolve();
-        });
-      }).then(function () {
-        doc.channel.item = posts.map(function (post) {
-          var title;
-          var isOp = post.number == post.threadNumber;
-          if (isOp) title = "[" + Tools.translate("New thread", "itemTitle") + "]";else title = Tools.translate("Reply to thread", "itemTitle");
-          title += " ";
-          if (!isOp) title += "\"";
-          title += postSubject(post, 150) || post.number;
-          if (!isOp) title += "\"";
-          var link = site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/res/" + post.threadNumber + ".html";
-          var description = "\n" + post.fileInfos.map(function (fileInfo) {
-            if (!fileInfo) return ""; //NOTE: Normally that should not happen
-            return "<img src=\"" + site.protocol + "://" + site.domain + "/" + site.pathPrefix + boardName + "/thumb/" + fileInfo.thumb.name + "\"><br />";
-          }).join("\n") + (post.text || "") + "\n";
-          return {
-            title: title,
-            link: link,
-            description: description,
-            pubDate: moment(post.createdAt).utc().locale("en").format("ddd, DD MMM YYYY HH:mm:ss +0000"),
-            guid: {
-              _: link + "#" + post.number,
-              $: { isPermalink: true }
-            },
-            "dc:creator": post.name || board.defaultUserName
-          };
-        });
-      }).then(function () {
-        var builder = new XML2JS.Builder({
-          rootName: "rss",
-          renderOpts: {
-            pretty: true,
-            indent: "    ",
-            newline: "\n"
-          },
-          allowSurrogateChars: true,
-          cdata: true
-        });
-        return Cache.writeFile(board.name + '/rss.xml', builder.buildObject(doc));
-      });
-    });
-  }).catch(function (err) {
-    _logger2.default.error(err.stack || err);
-  });
-};
-
-function addDataToThread(thread, board) {
-  thread.bumpLimit = board.bumpLimit;
-  thread.postLimit = board.postLimit;
-  thread.bumpLimitReached = thread.postCount >= board.bumpLimit;
-  thread.postLimitReached = thread.postCount >= board.postLimit;
-  thread.postingEnabled = board.postingEnabled && !thread.closed;
 }
 //# sourceMappingURL=board.js.map

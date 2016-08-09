@@ -297,7 +297,7 @@ function onReady(initCallback) {
             setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), (0, _config2.default)('server.statistics.ttl') * Tools.Minute);
         }
         if ((0, _config2.default)('server.rss.enabled')) {
-            setInterval(BoardsModel.generateRSS.bind(BoardsModel), (0, _config2.default)('server.rss.ttl') * Tools.Minute);
+            setInterval(BoardController.renderRSS.bind(BoardController), (0, _config2.default)('server.rss.ttl') * Tools.Minute);
         }
         (0, _commands2.default)();
     }

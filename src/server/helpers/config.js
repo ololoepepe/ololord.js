@@ -13,6 +13,7 @@ const DEFAULT_VALUES = new Map([
   ['server.ddosProtection.ws.maxMessageLength', 20480],
   ['server.ddosProtection.ws.maxMessageRate', 6],
   ['server.rss.enabled', true],
+  ['server.rss.postCount', 500],
   ['server.rss.ttl', 60],
   ['server.statistics.enabled', true],
   ['server.statistics.ttl', 60],

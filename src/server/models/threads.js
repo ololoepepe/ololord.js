@@ -17,7 +17,7 @@ let ThreadPostNumbers = new UnorderedSet(client(), 'threadPostNumbers', {
   stringify: number => number.toString()
 });
 let Threads = new Hash(client(), 'threads');
-let ThreadUpdateDateTimes = new Hash(client(), 'threadUpdateDateTimes', {
+let ThreadUpdateTimes = new Hash(client(), 'threadUpdateTimes', {
   parse: false,
   stringify: false
 });
@@ -28,7 +28,7 @@ export async function getThreadPostNumbers(boardName, threadNumber) {
 }
 
 async function addDataToThread(thread, { withPostNumbers } = {}) {
-  thread.updatedAt = await ThreadUpdateDateTimes.getOne(thread.number, thread.boardName);
+  thread.updatedAt = await ThreadUpdateTimes.getOne(thread.number, thread.boardName);
   if (withPostNumbers) {
     thread.postNumbers = await getThreadPostNumbers(thread.boardName, thread.number);
   }
@@ -169,6 +169,14 @@ export async function getThreadLastPostNumber(boardName, threadNumber) {
   }
   let threadPostNumbers = await getThreadPostNumbers(boardName, threadNumber);
   return (threadPostNumbers.length > 0) ? _(threadPostNumbers).last() : 0;
+}
+
+export async function getThreadUpdateTime(boardName, threadNumber) {
+  return await ThreadUpdateTimes.getOne(threadNumber, boardName);
+}
+
+export async function getThreadsUpdateTimes(boardName, threadNumbers) {
+  return await ThreadUpdateTimes.getSome(threadNumbers, boardName);
 }
 
 export async function isThreadDeleted(boardName, threadNumber) {

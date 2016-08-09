@@ -89,9 +89,16 @@ export async function getPosts(boardName, postNumbers, options) {
     return [];
   }
   let threadPostNumbers = await ThreadsModel.getThreadPostNumbers(boardName, posts[0].threadNumber);
-  await Tools.series(posts, async function(post) {
+  await Tools.series(posts, async function(post, index) {
+    if (!post) {
+      return;
+    }
     post.sequenceNumber = threadPostNumbers.indexOf(post.number) + 1;
     await addDataToPost(board, post, options);
   });
   return posts;
+}
+
+export async function getPostKeys() {
+  return await Posts.keys();
 }

@@ -194,7 +194,7 @@ function onReady(initCallback) {
         config('server.statistics.ttl') * Tools.Minute);
     }
     if (config('server.rss.enabled')) {
-      setInterval(BoardsModel.generateRSS.bind(BoardsModel), config('server.rss.ttl') * Tools.Minute);
+      setInterval(BoardController.renderRSS.bind(BoardController), config('server.rss.ttl') * Tools.Minute);
     }
     commands();
   }

@@ -1,5 +1,7 @@
 'use strict';
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var renderThreadHTML = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(thread) {
     var board, model, data;
@@ -156,6 +158,10 @@ var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
 
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
 var _board = require('../models/board');
 
 var BoardsModel = _interopRequireWildcard(_board);
@@ -163,6 +169,10 @@ var BoardsModel = _interopRequireWildcard(_board);
 var _misc = require('../models/misc');
 
 var MiscModel = _interopRequireWildcard(_misc);
+
+var _posts = require('../models/posts');
+
+var PostsModel = _interopRequireWildcard(_posts);
 
 var _threads = require('../models/threads');
 
@@ -176,6 +186,14 @@ var _cache = require('../helpers/cache');
 
 var Cache = _interopRequireWildcard(_cache);
 
+var _config = require('../helpers/config');
+
+var _config2 = _interopRequireDefault(_config);
+
+var _logger = require('../helpers/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
@@ -188,6 +206,8 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 var Board = require('../boards/board');
 
+
+var RSS_DATE_TIME_FORMAT = 'ddd, DD MMM YYYY HH:mm:ss +0000';
 
 var router = _express2.default.Router();
 
@@ -262,7 +282,7 @@ router.paths = _asyncToGenerator(regeneratorRuntime.mark(function _callee6() {
 
         case 2:
           arrays = _context6.sent;
-          return _context6.abrupt('return', (0, _underscore2.default)(arrays).flatten());
+          return _context6.abrupt('return', (0, _underscore2.default)(arrays).flatten().concat('/rss'));
 
         case 4:
         case 'end':
@@ -648,77 +668,223 @@ router.renderArchive = function () {
   };
 }();
 
+router.renderRSS = _asyncToGenerator(regeneratorRuntime.mark(function _callee18() {
+  var _this2 = this;
+
+  return regeneratorRuntime.wrap(function _callee18$(_context18) {
+    while (1) {
+      switch (_context18.prev = _context18.next) {
+        case 0:
+          _context18.prev = 0;
+          return _context18.delegateYield(regeneratorRuntime.mark(function _callee17() {
+            var rssPostCount, keys, postNumbers;
+            return regeneratorRuntime.wrap(function _callee17$(_context17) {
+              while (1) {
+                switch (_context17.prev = _context17.next) {
+                  case 0:
+                    rssPostCount = (0, _config2.default)('server.rss.postCount');
+                    _context17.next = 3;
+                    return PostsModel.getPostKeys();
+
+                  case 3:
+                    keys = _context17.sent;
+                    postNumbers = keys.reduce(function (acc, key) {
+                      var _key$split = key.split(':');
+
+                      var _key$split2 = _slicedToArray(_key$split, 2);
+
+                      var boardName = _key$split2[0];
+                      var postNumber = _key$split2[1];
+
+                      postNumber = +postNumber;
+                      if (!postNumber) {
+                        return acc;
+                      }
+                      if (!acc.hasOwnProperty(boardName)) {
+                        acc[boardName] = [];
+                      }
+                      acc[boardName].push(postNumber);
+                      return acc;
+                    }, {});
+                    _context17.next = 7;
+                    return Tools.series(Board.boardNames(), function () {
+                      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(boardName) {
+                        var numbers, board, posts, rss;
+                        return regeneratorRuntime.wrap(function _callee16$(_context16) {
+                          while (1) {
+                            switch (_context16.prev = _context16.next) {
+                              case 0:
+                                numbers = postNumbers[boardName];
+
+                                if (!(!numbers || numbers.length <= 0)) {
+                                  _context16.next = 3;
+                                  break;
+                                }
+
+                                return _context16.abrupt('return');
+
+                              case 3:
+                                board = Board.board(boardName);
+
+                                if (board) {
+                                  _context16.next = 6;
+                                  break;
+                                }
+
+                                return _context16.abrupt('return');
+
+                              case 6:
+                                numbers = numbers.sort(function (pn1, pn2) {
+                                  return pn2 - pn1;
+                                }).slice(0, rssPostCount).reverse();
+                                _context16.next = 9;
+                                return PostsModel.getPosts(boardName, numbers, { withFileInfos: true });
+
+                              case 9:
+                                posts = _context16.sent;
+
+                                posts.forEach(function (post) {
+                                  post.subject = BoardsModel.postSubject(post, 150) || post.number;
+                                });
+                                rss = {
+                                  date: Tools.now(),
+                                  ttl: (0, _config2.default)('server.rss.ttl'),
+                                  board: MiscModel.board(board).board,
+                                  posts: posts,
+                                  formattedDate: function formattedDate(date) {
+                                    return (0, _moment2.default)().utc().locale('en').format(RSS_DATE_TIME_FORMAT);
+                                  }
+                                };
+                                _context16.next = 14;
+                                return Cache.writeFile(boardName + '/rss.xml', Renderer.render('pages/rss', rss));
+
+                              case 14:
+                                return _context16.abrupt('return', _context16.sent);
+
+                              case 15:
+                              case 'end':
+                                return _context16.stop();
+                            }
+                          }
+                        }, _callee16, this);
+                      }));
+
+                      return function (_x18) {
+                        return ref.apply(this, arguments);
+                      };
+                    }());
+
+                  case 7:
+                  case 'end':
+                    return _context17.stop();
+                }
+              }
+            }, _callee17, _this2);
+          })(), 't0', 2);
+
+        case 2:
+          _context18.next = 7;
+          break;
+
+        case 4:
+          _context18.prev = 4;
+          _context18.t1 = _context18['catch'](0);
+
+          _logger2.default.error(_context18.t1.stack || _context18.t1);
+
+        case 7:
+        case 'end':
+          return _context18.stop();
+      }
+    }
+  }, _callee18, this, [[0, 4]]);
+}));
+
 router.render = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(path) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(path) {
     var match;
-    return regeneratorRuntime.wrap(function _callee16$(_context16) {
+    return regeneratorRuntime.wrap(function _callee19$(_context19) {
       while (1) {
-        switch (_context16.prev = _context16.next) {
+        switch (_context19.prev = _context19.next) {
           case 0:
+            match = path.match(/^\/rss$/);
+
+            if (!match) {
+              _context19.next = 5;
+              break;
+            }
+
+            _context19.next = 4;
+            return router.renderRSS();
+
+          case 4:
+            return _context19.abrupt('return', _context19.sent);
+
+          case 5:
             match = path.match(/^\/([^\/]+)$/);
 
             if (!match) {
-              _context16.next = 5;
+              _context19.next = 10;
               break;
             }
 
-            _context16.next = 4;
+            _context19.next = 9;
             return router.renderPages(match[1]);
 
-          case 4:
-            return _context16.abrupt('return', _context16.sent);
+          case 9:
+            return _context19.abrupt('return', _context19.sent);
 
-          case 5:
+          case 10:
             match = path.match(/^\/([^\/]+)\/archive$/);
 
             if (!match) {
-              _context16.next = 10;
+              _context19.next = 15;
               break;
             }
 
-            _context16.next = 9;
+            _context19.next = 14;
             return router.renderArchive(match[1]);
 
-          case 9:
-            return _context16.abrupt('return', _context16.sent);
+          case 14:
+            return _context19.abrupt('return', _context19.sent);
 
-          case 10:
+          case 15:
             match = path.match(/^\/([^\/]+)\/catalog$/);
 
             if (!match) {
-              _context16.next = 15;
+              _context19.next = 20;
               break;
             }
 
-            _context16.next = 14;
+            _context19.next = 19;
             return router.renderCatalog(match[1]);
 
-          case 14:
-            return _context16.abrupt('return', _context16.sent);
+          case 19:
+            return _context19.abrupt('return', _context19.sent);
 
-          case 15:
+          case 20:
             match = path.match(/^\/([^\/]+)\/res\/(\d+)$/);
 
             if (!match) {
-              _context16.next = 20;
+              _context19.next = 25;
               break;
             }
 
-            _context16.next = 19;
+            _context19.next = 24;
             return renderThread(match[1], +match[2]);
 
-          case 19:
-            return _context16.abrupt('return', _context16.sent);
+          case 24:
+            return _context19.abrupt('return', _context19.sent);
 
-          case 20:
+          case 25:
           case 'end':
-            return _context16.stop();
+            return _context19.stop();
         }
       }
-    }, _callee16, this);
+    }, _callee19, this);
   }));
 
-  return function (_x18) {
+  return function (_x19) {
     return ref.apply(this, arguments);
   };
 }();

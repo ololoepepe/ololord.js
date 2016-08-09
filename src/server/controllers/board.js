@@ -1,13 +1,19 @@
 import _ from 'underscore';
 import express from 'express';
+import moment from 'moment';
 
 var Board = require('../boards/board');
 import * as BoardsModel from '../models/board';
 import * as MiscModel from '../models/misc';
+import * as PostsModel from '../models/posts';
 import * as ThreadsModel from '../models/threads';
 import * as Renderer from '../core/renderer';
 import * as Cache from '../helpers/cache';
+import config from '../helpers/config';
+import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
+
+const RSS_DATE_TIME_FORMAT = 'ddd, DD MMM YYYY HH:mm:ss +0000';
 
 let router = express.Router();
 
@@ -83,7 +89,7 @@ router.paths = async function() {
     let paths = [`/${boardName}`, `/${boardName}/archive`, `/${boardName}/catalog`];
     return paths.concat(threadNumbers.map(threadNumber => `/${boardName}/res/${threadNumber}`));
   }, true);
-  return _(arrays).flatten();
+  return _(arrays).flatten().concat('/rss');
 };
 
 router.renderThread = async function(key, data) {
@@ -192,8 +198,58 @@ router.renderArchive = async function(boardName) {
   await Cache.writeFile(`${boardName}/archive.html`, Renderer.render('pages/archive', archive));
 };
 
+router.renderRSS = async function() {
+  try {
+    let rssPostCount = config('server.rss.postCount');
+    let keys = await PostsModel.getPostKeys();
+    let postNumbers = keys.reduce((acc, key) => {
+      let [boardName, postNumber] = key.split(':');
+      postNumber = +postNumber;
+      if (!postNumber) {
+        return acc;
+      }
+      if (!acc.hasOwnProperty(boardName)) {
+        acc[boardName] = [];
+      }
+      acc[boardName].push(postNumber);
+      return acc;
+    }, {});
+    await Tools.series(Board.boardNames(), async function(boardName) {
+      let numbers = postNumbers[boardName];
+      if (!numbers || numbers.length <= 0) {
+        return;
+      }
+      let board = Board.board(boardName);
+      if (!board) {
+        return;
+      }
+      numbers = numbers.sort((pn1, pn2) => { return pn2 - pn1; }).slice(0, rssPostCount).reverse();
+      let posts = await PostsModel.getPosts(boardName, numbers, { withFileInfos: true });
+      posts.forEach((post) => {
+        post.subject = BoardsModel.postSubject(post, 150) || post.number;
+      });
+      let rss = {
+        date: Tools.now(),
+        ttl: config('server.rss.ttl'),
+        board: MiscModel.board(board).board,
+        posts: posts,
+        formattedDate: (date) => {
+          return moment().utc().locale('en').format(RSS_DATE_TIME_FORMAT);
+        }
+      };
+      return await Cache.writeFile(`${boardName}/rss.xml`, Renderer.render('pages/rss', rss));
+    });
+  } catch (err) {
+    Logger.error(err.stack || err);
+  }
+};
+
 router.render = async function(path) {
-  let match = path.match(/^\/([^\/]+)$/);
+  let match = path.match(/^\/rss$/);
+  if (match) {
+    return await router.renderRSS();
+  }
+  match = path.match(/^\/([^\/]+)$/);
   if (match) {
     return await router.renderPages(match[1]);
   }
