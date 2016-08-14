@@ -233,15 +233,15 @@ var Hash = function () {
       return setOne;
     }()
   }, {
-    key: 'deleteOne',
+    key: 'incrementBy',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(id) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(id, n, subkey) {
         return regeneratorRuntime.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
                 _context7.next = 2;
-                return this.client.hdel(this.fullKey(subkey), id);
+                return this.client.hincrby(this.fullKey(subkey), key, n);
 
               case 2:
                 return _context7.abrupt('return', _context7.sent);
@@ -254,22 +254,22 @@ var Hash = function () {
         }, _callee7, this);
       }));
 
-      function deleteOne(_x13) {
+      function incrementBy(_x13, _x14, _x15) {
         return ref.apply(this, arguments);
       }
 
-      return deleteOne;
+      return incrementBy;
     }()
   }, {
-    key: 'keys',
+    key: 'deleteOne',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(id) {
         return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
                 _context8.next = 2;
-                return this.client.hkeys(this.fullKey(subkey));
+                return this.client.hdel(this.fullKey(subkey), id);
 
               case 2:
                 return _context8.abrupt('return', _context8.sent);
@@ -282,14 +282,14 @@ var Hash = function () {
         }, _callee8, this);
       }));
 
-      function keys(_x14) {
+      function deleteOne(_x16) {
         return ref.apply(this, arguments);
       }
 
-      return keys;
+      return deleteOne;
     }()
   }, {
-    key: 'count',
+    key: 'keys',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(subkey) {
         return regeneratorRuntime.wrap(function _callee9$(_context9) {
@@ -297,7 +297,7 @@ var Hash = function () {
             switch (_context9.prev = _context9.next) {
               case 0:
                 _context9.next = 2;
-                return this.client.hlen(this.fullKey(subkey));
+                return this.client.hkeys(this.fullKey(subkey));
 
               case 2:
                 return _context9.abrupt('return', _context9.sent);
@@ -310,7 +310,35 @@ var Hash = function () {
         }, _callee9, this);
       }));
 
-      function count(_x15) {
+      function keys(_x17) {
+        return ref.apply(this, arguments);
+      }
+
+      return keys;
+    }()
+  }, {
+    key: 'count',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(subkey) {
+        return regeneratorRuntime.wrap(function _callee10$(_context10) {
+          while (1) {
+            switch (_context10.prev = _context10.next) {
+              case 0:
+                _context10.next = 2;
+                return this.client.hlen(this.fullKey(subkey));
+
+              case 2:
+                return _context10.abrupt('return', _context10.sent);
+
+              case 3:
+              case 'end':
+                return _context10.stop();
+            }
+          }
+        }, _callee10, this);
+      }));
+
+      function count(_x18) {
         return ref.apply(this, arguments);
       }
 
@@ -319,27 +347,27 @@ var Hash = function () {
   }, {
     key: 'find',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(query, subkey) {
-        return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(query, subkey) {
+        return regeneratorRuntime.wrap(function _callee11$(_context11) {
           while (1) {
-            switch (_context10.prev = _context10.next) {
+            switch (_context11.prev = _context11.next) {
               case 0:
                 query = typeof query !== 'undefined' ? ':' + query : ':*';
-                _context10.next = 3;
+                _context11.next = 3;
                 return this.client.keys(this.fullKey(subkey) + query);
 
               case 3:
-                return _context10.abrupt('return', _context10.sent);
+                return _context11.abrupt('return', _context11.sent);
 
               case 4:
               case 'end':
-                return _context10.stop();
+                return _context11.stop();
             }
           }
-        }, _callee10, this);
+        }, _callee11, this);
       }));
 
-      function find(_x16, _x17) {
+      function find(_x19, _x20) {
         return ref.apply(this, arguments);
       }
 
@@ -348,26 +376,26 @@ var Hash = function () {
   }, {
     key: 'delete',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(subkey) {
-        return regeneratorRuntime.wrap(function _callee11$(_context11) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(subkey) {
+        return regeneratorRuntime.wrap(function _callee12$(_context12) {
           while (1) {
-            switch (_context11.prev = _context11.next) {
+            switch (_context12.prev = _context12.next) {
               case 0:
-                _context11.next = 2;
+                _context12.next = 2;
                 return this.client.del(this.fullKey(subkey));
 
               case 2:
-                return _context11.abrupt('return', _context11.sent);
+                return _context12.abrupt('return', _context12.sent);
 
               case 3:
               case 'end':
-                return _context11.stop();
+                return _context12.stop();
             }
           }
-        }, _callee11, this);
+        }, _callee12, this);
       }));
 
-      function _delete(_x18) {
+      function _delete(_x21) {
         return ref.apply(this, arguments);
       }
 

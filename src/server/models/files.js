@@ -40,3 +40,41 @@ export async function fileInfoExistsByName(name) {
 export async function fileInfoExistsByHash(hash) {
   return await FileHashes.exists(hash);
 }
+
+export async function getFileInfosByHashes(hashes) {
+  if (!hashes) {
+    return [];
+  }
+  if (!_(hashes).isArray()) {
+    hashes = [hashes];
+  }
+  return await Tools.series(hashes, async function(hash) {
+    let fileInfo = await FileHashes.getOne(hash);
+    fileInfo.hash = hash;
+    return fileInfo;
+  }, true);
+}
+
+export async function addFileInfo(fileInfo) {
+  await FileInfos.setOne(fileInfo.name, fileInfo);
+}
+
+export function createFileHash(fileInfo) {
+  return {
+    name: fileInfo.name,
+    thumb: { name: fileInfo.thumb.name },
+    size: fileInfo.size,
+    boardName: fileInfo.boardName,
+    mimeType: fileInfo.mimeType,
+    rating: fileInfo.rating
+  };
+}
+
+export async function addFileHashes(fileInfos) {
+  if (!_(fileInfos).isArray()) {
+    fileInfos = [fileInfos];
+  }
+  await Tools.series(fileInfos.filter(fileInfo => !!fileInfo), async function(fileInfo) {
+    return await FileHashes.addOne(createFileHash(fileInfo), fileInfo.hash);
+  });
+}

@@ -18,7 +18,7 @@ var Board = require("../boards/board");
 var Cache = require("./cache");
 var Captcha = require("../captchas");
 var config = require("./config");
-var markup = require("./markup");
+//var markup = require("./markup");
 var Permissions = require("./permissions");
 var Tools = require("./tools");
 
@@ -875,24 +875,6 @@ var checkCaptcha = function(req, fields) {
     });
 };
 
-module.exports.createPost = function(req, fields, files, transaction) {
-    var threadNumber = +fields.threadNumber;
-    var c = {};
-    if (isNaN(threadNumber) || threadNumber <= 0)
-        return Promise.reject(Tools.translate("Invalid thread"));
-    return checkCaptcha(req, fields).then(function() {
-        return processFiles(req, fields, files, transaction);
-    }).then(function(files) {
-        return createPost(req, fields, files, transaction);
-    }).then(function(post) {
-        c.post = post;
-        return IPC.render(post.boardName, post.threadNumber, post.number, 'create');
-    }).then(function() {
-        hasNewPosts.add(c.post.boardName + "/" + c.post.threadNumber);
-        return Promise.resolve(c.post);
-    });
-};
-
 var rerenderReferringPosts = function(post, options) {
     return db.hgetall("referringPosts:" + post.boardName + ":" + post.number).then(function(referringPosts) {
         return Tools.series(referringPosts, function(ref) {
@@ -1346,8 +1328,6 @@ var captchaUsed = function(boardName, userIp) {
         return (quota < 0) ? 0 : quota;
     });
 };
-
-module.exports.captchaUsed = captchaUsed;
 
 var rerenderPost = function(boardName, postNumber, silent) {
     var key = boardName + ":" + postNumber;

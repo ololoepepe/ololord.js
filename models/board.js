@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.initialize = exports.getPageCount = exports.getLastPostNumbers = exports.getLastPostNumber = exports.getArchive = exports.getCatalog = exports.getPage = exports.getThread = undefined;
+exports.initialize = exports.nextPostNumber = exports.getPageCount = exports.getLastPostNumbers = exports.getLastPostNumber = exports.getArchive = exports.getCatalog = exports.getPage = exports.getThread = undefined;
 
 var getThread = exports.getThread = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, threadNumber, archived) {
@@ -501,45 +501,106 @@ var getPageCount = exports.getPageCount = function () {
   };
 }();
 
-var initialize = exports.initialize = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12() {
-    return regeneratorRuntime.wrap(function _callee12$(_context12) {
+var nextPostNumber = exports.nextPostNumber = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName, incrementBy) {
+    var board, postNumber;
+    return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
-        switch (_context12.prev = _context12.next) {
+        switch (_context11.prev = _context11.next) {
           case 0:
-            _context12.next = 2;
+            board = Board.board(boardName);
+
+            if (board) {
+              _context11.next = 3;
+              break;
+            }
+
+            return _context11.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+
+          case 3:
+            incrementBy = Tools.option(incrementBy, 'number', 1, { test: function test(i) {
+                i >= 1;
+              } });
+            _context11.next = 6;
+            return PostCounters.incrementBy(boardName, incrementBy);
+
+          case 6:
+            postNumber = _context11.sent;
+
+            if (number) {
+              _context11.next = 9;
+              break;
+            }
+
+            return _context11.abrupt('return', 0);
+
+          case 9:
+            if (!(1 === incrementBy && board.skippedGetOrder > 0 && !(number % Math.pow(10, board.skippedGetOrder)))) {
+              _context11.next = 13;
+              break;
+            }
+
+            _context11.next = 12;
+            return nextPostNumber(boardName, incrementBy);
+
+          case 12:
+            return _context11.abrupt('return', _context11.sent);
+
+          case 13:
+            return _context11.abrupt('return', number);
+
+          case 14:
+          case 'end':
+            return _context11.stop();
+        }
+      }
+    }, _callee11, this);
+  }));
+
+  return function nextPostNumber(_x15, _x16) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var initialize = exports.initialize = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13() {
+    return regeneratorRuntime.wrap(function _callee13$(_context13) {
+      while (1) {
+        switch (_context13.prev = _context13.next) {
+          case 0:
+            _context13.next = 2;
             return Tools.series(Board.boardNames(), function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName) {
-                return regeneratorRuntime.wrap(function _callee11$(_context11) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName) {
+                return regeneratorRuntime.wrap(function _callee12$(_context12) {
                   while (1) {
-                    switch (_context11.prev = _context11.next) {
+                    switch (_context12.prev = _context12.next) {
                       case 0:
-                        _context11.next = 2;
+                        _context12.next = 2;
                         return getPageCount(boardName);
 
                       case 2:
                       case 'end':
-                        return _context11.stop();
+                        return _context12.stop();
                     }
                   }
-                }, _callee11, this);
+                }, _callee12, this);
               }));
 
-              return function (_x15) {
+              return function (_x17) {
                 return ref.apply(this, arguments);
               };
             }());
 
           case 2:
-            _context12.next = 4;
+            _context13.next = 4;
             return ThreadsModel.clearDeletedThreads();
 
           case 4:
           case 'end':
-            return _context12.stop();
+            return _context13.stop();
         }
       }
-    }, _callee12, this);
+    }, _callee13, this);
   }));
 
   return function initialize() {

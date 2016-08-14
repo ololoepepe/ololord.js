@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import express from 'express';
+import FS from 'q-io/fs';
 import FSSync from 'fs';
 
 import config from '../helpers/config';
@@ -40,6 +41,16 @@ router.use('*', (req, res, next) => {
 });
 
 router.use((err, req, res, next) => {
+  Tools.series(req.formFiles, async function(file) {
+    try {
+      let exists = FS.exists(file.path);
+      if (exists) {
+        await FS.remove(file.path);
+      }
+    } catch (err) {
+      Logger.error(err.stack || err);
+    }
+  });
   switch (err.status) {
   case 404: {
     Logger.error(Tools.preferIPv4(req.ip), err.path, 404);

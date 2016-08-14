@@ -216,6 +216,23 @@ export async function getPageCount(boardName) {
   return pageCount;
 }
 
+export async function nextPostNumber(boardName, incrementBy) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  incrementBy = Tools.option(incrementBy, 'number', 1, { test: (i) => { i >= 1; } });
+  let postNumber = await PostCounters.incrementBy(boardName, incrementBy);
+  if (!number) {
+    return 0;
+  }
+  //TODO: improve get skipping
+  if (1 === incrementBy && board.skippedGetOrder > 0 && !(number % Math.pow(10, board.skippedGetOrder))) {
+    return await nextPostNumber(boardName, incrementBy);
+  }
+  return number;
+}
+
 export async function initialize() {
   await Tools.series(Board.boardNames(), async function(boardName) {
     await getPageCount(boardName);

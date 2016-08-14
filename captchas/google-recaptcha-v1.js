@@ -8,12 +8,12 @@ var Tools = require("../helpers/tools");
 
 var googleRecaptcha = new Captcha("google-recaptcha-v1", Tools.translate.noop("Google reCAPTCHA v1"));
 
-googleRecaptcha.checkCaptcha = function (req, fields) {
+googleRecaptcha.checkCaptcha = function (ip, fields) {
     var challenge = fields.recaptcha_challenge_field;
     var response = fields.recaptcha_response_field;
     if (!challenge) return Promise.reject(Tools.translate("Captcha challenge is empty"));
     if (!response) return Promise.reject(Tools.translate("Captcha is empty"));
-    var query = "privatekey=" + this.privateKey + "&remoteip=" + req.ip + "&challenge=" + encodeURIComponent(challenge) + ("&response=" + encodeURIComponent(response));
+    var query = "privatekey=" + this.privateKey + "&remoteip=" + ip + "&challenge=" + encodeURIComponent(challenge) + ("&response=" + encodeURIComponent(response));
     var url = "https://www.google.com/recaptcha/api/verify?" + query;
     return HTTP.request({
         url: url,

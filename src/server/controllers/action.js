@@ -1,9 +1,10 @@
-var express = require("express");
-var FS = require("q-io/fs");
-var FSSync = require("fs");
-var HTTP = require("q-io/http");
+import _ from 'underscore';
+import express from 'express';
+import FS from 'q-io/fs';
+import HTTP from 'q-io/http';
+import merge from 'merge';
 var moment = require("moment");
-var UUID = require("uuid");
+import UUID from 'uuid';
 
 var Board = require("../boards/board");
 var Captcha = require("../captchas");
@@ -11,275 +12,170 @@ var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");
 var markup = require("../helpers/markup");
-var Tools = require("../helpers/tools");
-var vk = require("../helpers/vk")(config("site.vkontakte.accessToken", ""));
 
+import * as PostsModel from '../models/posts';
 import * as UsersModel from '../models/users';
+import PostCreationTransaction from '../storage/post-creation-transaction';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
+import * as Tools from '../helpers/tools';
+import * as Files from '../storage/files';
+import geolocation from '../storage/geolocation';
 
-var router = express.Router();
+let router = express.Router();
 
-var getFiles = function(fields, files, transaction) {
-    var setFileRating = function(file, id) {
-        file.rating = "SFW";
-        var r = fields["file_" + id + "_rating"];
-        if (["R-15", "R-18", "R-18G"].indexOf(r) >= 0)
-            file.rating = r;
-    };
-    var tmpFiles = Tools.filterIn(files, function(file) {
-        if (file.size < 1) {
-            FS.remove(file.path).catch(function(err) {
-                Logger.error(req, err.stack || err);
-            });
-            return false;
-        }
-        return true;
-    });
-    var promises = Tools.mapIn(tmpFiles, function(file, fieldName) {
-        setFileRating(file, file.fieldName.substr(5));
-        transaction.filePaths.push(file.path);
-        return Tools.mimeType(file.path).then(function(mimeType) {
-            file.mimeType = mimeType;
-            return Promise.resolve(file);
-        });
-    });
-    return Promise.all(promises).then(function(files) {
-        tmpFiles = files;
-        var urls = [];
-        Tools.forIn(fields, function(url, key) {
-            if (!/^file_url_\S+$/.test(key))
-                return;
-            urls.push({
-                url: url,
-                formFieldName: key
-            });
-        });
-        promises = urls.map(function(url) {
-            var path = __dirname + "/../tmp/upload_" + UUID.v4();
-            transaction.filePaths.push(path);
-            var c = {};
-            var proxy = Tools.proxy();
-            var p;
-            if (url.url.replace("vk://", "") != url.url) {
-                p = vk("audio.getById", {audios: url.url.split("/")[2]}).then(function(result) {
-                    return HTTP.request({
-                        url: result.response[0].url,
-                        timeout: Tools.Minute
-                    });
-                });
-            } else if (proxy) {
-                p = HTTP.request({
-                    host: proxy.host,
-                    port: proxy.port,
-                    headers: { "Proxy-Authorization": proxy.auth },
-                    path: url.url,
-                    timeout: Tools.Minute
-                });
-            } else {
-                p = HTTP.request({
-                    url: url.url,
-                    timeout: Tools.Minute
-                });
-            }
-            return p.then(function(response) {
-                if (response.status != 200)
-                    return Promise.reject(Tools.translate("Failed to download file"));
-                return response.body.read();
-            }).then(function(data) {
-                c.size = data.length;
-                if (c.size < 1)
-                    return Promise.reject(Tools.translate("File is empty"));
-                return Tools.writeFile(path, data);
-            }).then(function() {
-                c.file = {
-                    name: url.url.split("/").pop(),
-                    size: c.size,
-                    path: path
-                };
-                setFileRating(c.file, url.formFieldName.substr(9));
-                return Tools.mimeType(path);
-            }).then(function(mimeType) {
-                c.file.mimeType = mimeType;
-                return Promise.resolve(c.file);
-            });
-        });
-        return Promise.all(promises);
-    }).then(function(downloadedFiles) {
-        tmpFiles = tmpFiles.concat(downloadedFiles);
-        var hashes = fields.fileHashes ? fields.fileHashes.split(",") : [];
-        return Database.getFileInfosByHashes(hashes);
-    }).then(function(fileInfos) {
-        return tmpFiles.concat(fileInfos.map(function(fileInfo, i) {
-            var fi = {
-                name: fileInfo.name,
-                thumbName: fileInfo.thumb.name,
-                size: fileInfo.size,
-                boardName: fileInfo.boardName,
-                mimeType: fileInfo.mimeType,
-                rating: fileInfo.rating,
-                copy: true
-            };
-            setFileRating(fi, fields.fileHashes.split(",")[i]);
-            return fi;
-        }));
-    });
-};
+function transformGeoBans(bans) {
+  return _(bans).reduce((acc, value, key) => {
+    acc.set(key.toUpperCase(), !!value);
+    return acc;
+  }, new Map());
+}
 
-var testParameters = function(fields, files, creatingThread) {
-    var board = Board.board(fields.boardName);
-    if (!board)
-        return Promise.reject(404);
-    var email = fields.email || "";
-    var name = fields.name || "";
-    var subject = fields.subject || "";
-    var text = fields.text || "";
-    var password = fields.password || "";
-    var fileCount = files.length;
-    var maxFileSize = board.maxFileSize;
-    var maxFileCount = board.maxFileCount;
-    if (email.length > board.maxEmailLength)
-        return Promise.reject(Tools.translate("E-mail is too long"));
-    if (name.length > board.maxNameLength)
-        return Promise.reject(Tools.translate("Name is too long"));
-    if (subject.length > board.maxSubjectLength)
-        return Promise.reject(Tools.translate("Subject is too long"));
-    if (text.length > board.maxTextFieldLength)
-        return Promise.reject(Tools.translate("Comment is too long"));
-    if (password.length > board.maxPasswordLength)
-        return Promise.reject(Tools.translate("Password is too long"));
-    if (creatingThread && maxFileCount && !fileCount)
-        return Promise.reject(Tools.translate("Attempt to create a thread without attaching a file"));
-    if (text.length < 1 && !fileCount)
-        return Promise.reject(Tools.translate("Both file and comment are missing"));
-    if (fileCount > maxFileCount) {
-        return Promise.reject(Tools.translate("Too many files"));
-    } else {
-        var err = files.reduce(function(err, file) {
-            if (err)
-                return err;
-            if (file.size > maxFileSize)
-                return Tools.translate("File is too big");
-            if (board.supportedFileTypes.indexOf(file.mimeType) < 0)
-                return Tools.translate("File type is not supported");
-        }, "");
-        if (err)
-            return Promise.reject(err);
+let geoBans = Tools.createWatchedResource(`${__dirname}/../misc/geo-bans.json`, (path) => {
+  return transformGeoBans(require(path));
+}, async function(path) {
+  let data = await FS.read(path);
+  geoBans = transformGeoBans(JSON.parse(data));
+}) || {};
+
+function checkGeoBan(geolocationInfo) {
+  let def = geoBans.get('*');
+  if (def) {
+    geolocationInfo = geolocationInfo || {};
+  } else if (!geolocationInfo || !geolocationInfo.countryCode) {
+    return;
+  }
+  let countryCode = geolocationInfo.countryCode;
+  if (typeof countryCode !== 'string') {
+    countryCode = '';
+  }
+  let user = geoBans.get(countryCode.toUpperCase());
+  if (def) {
+    var banned = !user && (typeof user === 'boolean');
+  } else {
+    var banned = user;
+  }
+  if (banned) {
+    return Promise.reject(new Error(Tools.translate('Posting is disabled for this country')));
+  }
+}
+
+router.post('/action/markupText', async function(req, res, next) {
+  try {
+    let { fields: { boardName, text, markupMode, signAsOp, tripcode } } = await Tools.parseForm(req);
+    let board = Board.board(boardName);
+    if (!board) {
+      throw new Error(Tools.translate('Invalid board'));
     }
-    return Promise.resolve();
-};
-
-router.post("/action/markupText", function(req, res, next) {
-    var c = {};
-    var date = Tools.now();
-    Tools.parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        c.board = Board.board(c.fields.boardName);
-        if (!c.board)
-            return Promise.reject(Tools.translate("Invalid board"));
-        return UsersModel.checkUserBan(req.ip, c.board.name, { write: true });
-    }).then(function() {
-        if (c.fields.text.length > c.board.maxTextFieldLength)
-            return Promise.reject(Tools.translate("Comment is too long"));
-        var markupModes = [];
-        Tools.forIn(markup.MarkupModes, function(val) {
-            if (c.fields.markupMode && c.fields.markupMode.indexOf(val) >= 0)
-                markupModes.push(val);
-        });
-        return markup(c.board.name, c.fields.text, {
-            markupModes: markupModes,
-            referencedPosts: {},
-            accessLevel: req.level(c.board.name)
-        });
-    }).then(function(text) {
-        var data = {
-            boardName: c.board.name,
-            text: text || null,
-            rawText: c.fields.text || null,
-            options: {
-                signAsOp: ("true" == c.fields.signAsOp),
-                showTripcode: !!req.hashpass && ("true" == c.fields.tripcode)
-            },
-            createdAt: date.toISOString()
-        };
-        if (req.hashpass && c.fields.tripcode)
-            data.tripcode = Tools.generateTripcode(req.hashpass);
-        res.send(data);
-    }).catch(function(err) {
-        next(err);
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true }); //TODO: Should it really be "write"?
+    let rawText = text || '';
+    if (text.length > board.maxTextFieldLength) {
+      throw new Error(Tools.translate('Comment is too long'));
+    }
+    markupMode = markupMode || '';
+    let markupModes = Tools.markupModes(markupMode);
+    text = await markup(boardName, text, {
+      markupModes: markupModes,
+      accessLevel: req.level(boardName)
     });
+    let data = {
+      boardName: boardName,
+      text: text || null,
+      rawText: rawText || null,
+      options: {
+        signAsOp: ('true' === signAsOp),
+        showTripcode: !!(req.hashpass && ('true' === tripcode))
+      },
+      createdAt: Tools.now().toISOString()
+    };
+    if (req.hashpass && tripcode) {
+      data.tripcode = Tools.generateTripcode(req.hashpass);
+    }
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.post("/action/createPost", function(req, res, next) {
-    var c = {};
-    var transaction = new Database.Transaction();
-    Tools.parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        c.files = result.files;
-        c.board = Board.board(c.fields.boardName);
-        if (!c.board)
-            return Promise.reject(Tools.translate("Invalid board"));
-        transaction.board = c.board;
-        return UsersModel.checkUserBan(req.ip, c.board.name, { write: true });
-    }).then(function() {
-        return getFiles(c.fields, c.files, transaction);
-    }).then(function(files) {
-        c.files = files;
-        return testParameters(c.fields, c.files);
-    }).then(function() {
-        return c.board.testParameters(req, c.fields, c.files);
-    }).then(function() {
-        return Database.createPost(req, c.fields, c.files, transaction);
-    }).then(function(post) {
-      if ('node-captcha-noscript' !== c.fields.captchaEngine) {
-        res.send({
-          boardName: post.boardName,
-          postNumber: post.number
-        });
-      } else {
-        let hash = `post-${post.number}`;
-        let path = `/${config('site.pathPrefix', '')}${post.boardName}/res/${post.threadNumber}.html#${hash}`;
-        res.redirect(303, path);
-      }
-    }).catch(function(err) {
-        transaction.rollback();
-        next(err);
-    });
+router.post('/action/createPost', async function(req, res, next) {
+  let transaction;
+  try {
+    let { fields, files } = await Tools.parseForm(req);
+    let { boardName, threadNumber } = fields;
+    let board = Board.board(boardName);
+    if (!board) {
+      throw new Error(Tools.translate('Invalid board'));
+    }
+    threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+    if (!threadNumber) {
+      throw new Error(Tools.translate('Invalid thread'));
+    }
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
+    req.geolocation = await geolocation(req.ip);
+    await checkGeoBan(req.geolocation);
+    await Captch.checkCaptcha(req.ip, fields);
+    transaction = new PostCreationTransaction(boardName);
+    files = await Files.getFiles(fields, files);
+    await board.testParameters(req, fields, files);
+    files = await Files.processFiles(boardName, files, transaction);
+    let post = await PostsModel.createPost(req, fields, files, transaction);
+    await IPC.render(post.boardName, post.threadNumber, post.number, 'create');
+    //hasNewPosts.add(c.post.boardName + "/" + c.post.threadNumber); //TODO: pass to main process immediately
+    if ('node-captcha-noscript' !== fields.captchaEngine) {
+      res.send({
+        boardName: post.boardName,
+        postNumber: post.number
+      });
+    } else {
+      let hash = `post-${post.number}`;
+      let path = `/${config('site.pathPrefix')}${post.boardName}/res/${post.threadNumber}.html#${hash}`;
+      res.redirect(303, path);
+    }
+  } catch (err) {
+    if (transaction) {
+      transaction.rollback();
+    }
+    next(err);
+  }
 });
 
-router.post("/action/createThread", function(req, res, next) {
-    var c = {};
-    var transaction = new Database.Transaction();
-    Tools.parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        c.files = result.files;
-        c.board = Board.board(c.fields.boardName);
-        if (!c.board)
-            return Promise.reject(Tools.translate("Invalid board"));
-        transaction.board = c.board;
-        return UsersModel.checkUserBan(req.ip, c.board.name, { write: true });
-    }).then(function() {
-        return getFiles(c.fields, c.files, transaction);
-    }).then(function(files) {
-        c.files = files;
-        return testParameters(c.fields, c.files, true);
-    }).then(function() {
-        return c.board.testParameters(req, c.fields, c.files, true);
-    }).then(function() {
-        return Database.createThread(req, c.fields, c.files, transaction);
-    }).then(function(thread) {
-      if ('node-captcha-noscript' !== c.fields.captchaEngine) {
-        res.send({
-          boardName: thread.boardName,
-          threadNumber: thread.number
-        });
-      } else {
-        res.redirect(303, `/${config('site.pathPrefix', '')}${thread.boardName}/res/${thread.number}.html`);
-      }
-    }).catch(function(err) {
-        transaction.rollback();
-        next(err);
+router.post('/action/createThread', async function(req, res, next) {
+  let transaction;
+  try {
+    let { fields, files } = await Tools.parseForm(req);
+    let { boardName } = fields;
+    let board = Board.board(boardName);
+    if (!board) {
+      throw new Error(Tools.translate('Invalid board'));
+    }
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
+    req.geolocation = await geolocation(req.ip);
+    await checkGeoBan(req.geolocation);
+    await Captch.checkCaptcha(req.ip, fields);
+    transaction = new PostCreationTransaction(boardName);
+    files = await Files.getFiles(fields, files);
+    await board.testParameters(req, fields, files, true);
+    let thread = await ThreadsModel.createThread(req, fields, transaction);
+    files = await Files.processFiles(boardName, files, transaction);
+    await PostsModel.createPost(req, fields, files, transaction, {
+      postNumber: thread.number,
+      date: new Date(thread.createdAt)
     });
+    //return IPC.render(post.boardName, post.threadNumber, post.number, 'create'); //TODO
+    if ('node-captcha-noscript' !== c.fields.captchaEngine) {
+      res.send({
+        boardName: thread.boardName,
+        threadNumber: thread.number
+      });
+    } else {
+      res.redirect(303, `/${config('site.pathPrefix', '')}${thread.boardName}/res/${thread.number}.html`);
+    }
+  } catch (err) {
+    if (transaction) {
+      transaction.rollback();
+    }
+    next(err);
+  }
 });
 
 router.post("/action/editPost", function(req, res, next) {

@@ -27,6 +27,7 @@ import FSWatcher from './fs-watcher';
 import Logger from './logger';
 
 var config = require("./config");
+var markup = require("./markup");
 
 var translate = require("cute-localize")({
     locale: config("site.locale", "en"),
@@ -515,9 +516,9 @@ module.exports.series = function(arr, f, container) {
     var isObject = (typeof container == "object");
     var p = Promise.resolve();
     if (Util.isArray(arr)) {
-        arr.forEach(function(el) {
+        arr.forEach(function(el, index) {
             p = p.then(function() {
-                return f(el);
+                return f(el, index);
             }).then(function(result) {
                 if (isArray)
                     container.push(result);
@@ -837,4 +838,40 @@ export function postingSpeedString(launchDate, lastPostNumber) {
             }
         }
     }
+}
+
+export function requireWrapper(m) {
+  return (m && m.default) || m;
+}
+
+export function loadPlugins(path, filter) {
+  if (typeof filter !== 'function') {
+    if (typeof filter === 'undefined' || filter) {
+      filter = (fileName) => { return 'index.js' !== fileName; };
+    } else {
+      filter = () => true;
+    }
+  }
+  let list = FSSync.readdirSync(path).filter((fileName) => {
+    return fileName.split('.').pop() === 'js';
+  }).filter(filter).map((fileName) => {
+    let id = require.resolve(`${path}/${fileName}`);
+    if (require.cache.hasOwnProperty(id)) {
+      delete require.cache[id];
+    }
+    let plugins = require(id);
+    plugins = plugins.default || plugins;
+    if (!_(plugins).isArray()) {
+      plugins = [plugins];
+    }
+    return plugins;
+  });
+  return _(list).flatten();
+}
+
+export function markupModes(string) {
+  if (typeof string !== 'string') {
+    string = '';
+  }
+  return _(markup.MarkupModes).filter((mode) => { return string.indexOf(mode) >= 0; });
 }

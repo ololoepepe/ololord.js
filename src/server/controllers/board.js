@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import express from 'express';
+import FS from 'q-io/fs';
 import moment from 'moment';
 
 var Board = require('../boards/board');
@@ -45,7 +46,7 @@ function pickPostsToRerender(oldPosts, posts) {
   });
 }
 
-async function renderThreadHTML(thread) {
+async function renderThreadHTML(thread, { targetPath, archived } = {}) {
   let board = Board.board(thread.boardName);
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
@@ -55,8 +56,15 @@ async function renderThreadHTML(thread) {
   model.isThreadPage = true;
   model.board = MiscModel.board(board).board;
   model.threadNumber = thread.number;
+  if (archived) {
+    model.archived = true;
+  }
   let data = Renderer.render('pages/thread', model);
-  await Cache.writeFile(`${thread.boardName}/res/${thread.number}.html`, data);
+  if (targetPath) {
+    await FS.write(targetPath, data);
+  } else {
+    await Cache.writeFile(`${thread.boardName}/res/${thread.number}.html`, data);
+  }
 }
 
 async function renderThread(boardName, threadNumber) {
@@ -266,5 +274,7 @@ router.render = async function(path) {
     return await renderThread(match[1], +match[2]);
   }
 };
+
+router.renderThreadHTML = renderThreadHTML;
 
 module.exports = router;

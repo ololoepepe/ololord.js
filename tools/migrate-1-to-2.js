@@ -14,11 +14,14 @@ db.hkeys('posts').then(function(keys) {
       post = JSON.parse(post);
       c.post = post;
       console.log(`Processing post ${key}`);
+      if (!post.options) {
+        post.options = {};
+      }
       if (post.hasOwnProperty('email')) {
-        post.sage = /^sage$/i.test(post.email);
+        post.options.sage = /^sage$/i.test(post.email);
         delete post.email;
       } else {
-        post.sage = false;
+        post.options.sage = false;
       }
       return db.hget('posts', `${post.boardName}:${post.threadNumber}`);
     }).then(function(opPost) {

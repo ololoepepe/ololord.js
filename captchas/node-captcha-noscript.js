@@ -22,8 +22,8 @@ var nodeCaptcha = new Captcha("node-captcha-noscript", Tools.translate.noop("Nod
 
 nodeCaptcha.challenges = {};
 
-nodeCaptcha.checkCaptcha = function (req, fields) {
-  var challenge = nodeCaptcha.challenges[req.ip];
+nodeCaptcha.checkCaptcha = function (ip, fields) {
+  var challenge = nodeCaptcha.challenges[ip];
   if (!challenge) {
     return Promise.reject(Tools.translate("No captcha for this IP"));
   }
@@ -35,7 +35,7 @@ nodeCaptcha.checkCaptcha = function (req, fields) {
   FS.remove(__dirname + "/../tmp/node-captcha-noscript/" + challenge.fileName).catch(function (err) {
     _logger2.default.error(err);
   });
-  delete nodeCaptcha.challenges[req.ip];
+  delete nodeCaptcha.challenges[ip];
   if (response !== challenge.response) {
     return Promise.reject(Tools.translate("Captcha is solved incorrectly"));
   }

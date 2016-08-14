@@ -1,5 +1,10 @@
-var config = require("../helpers/config");
-var Tools = require("../helpers/tools");
+import _ from 'underscore';
+
+import NodeCaptcha from '../captchas/node-captcha';
+import Board from '../boards/board';
+import config from '../helpers/config';
+import * as Tools from '../helpers/tools';
+import * as UsersModel from '../models/users';
 
 var captchas = {};
 
@@ -67,8 +72,41 @@ Captcha.captchaIds = function() {
     return list;
 };
 
+Captcha.checkCaptcha = async function(ip, fields = {}) {
+  let { boardName } = fields;
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  if (!board.captchaEnabled) {
+    return;
+  }
+  let quota = await UsersModel.getUserCaptchaQuota(boardName, ip);
+  if (board.captchaQuota > 0 && +quota > 0) {
+    return await UsersModel.useCaptcha(boardName, ip);
+  }
+  let supportedCaptchaEngines = board.supportedCaptchaEngines;
+  if (supportedCaptchaEngines.length < 1) {
+    return Promise.reject(new Error(Tools.translate('Internal error: no captcha engine')));
+  }
+  let ceid = captchaEngine || null;
+  if (!ceid || !_(supportedCaptchaEngines).contains(ceid)) {
+    if (_(supportedCaptchaEngines).contains(NodeCaptcha.id)) {
+      ceid = NodeCaptcha.id;
+    } else {
+      ceid = supportedCaptchaEngines[0].id;
+    }
+  }
+  let captcha = Captcha.captcha(ceid);
+  if (!captcha) {
+    return Promise.reject(new Error(Tools.translate('Invalid captcha engine')));
+  }
+  await captcha.checkCaptcha(ip, fields);
+  return await UsersModel.setUserCaptchaQuota(boardName, ip, board.captchaQuota);
+};
+
 //NOTE: Must implement the following methods:
-//checkCaptcha(req, fields) -> Promise.resolve() / Promise.reject(err)
+//checkCaptcha(ip, fields) -> Promise.resolve() / Promise.reject(err)
 //widgetHtml() -> string
 //or
 //widgetTemplate() -> string

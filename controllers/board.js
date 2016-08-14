@@ -4,6 +4,10 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 var renderThreadHTML = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(thread) {
+    var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var targetPath = _ref.targetPath;
+    var archived = _ref.archived;
     var board, model, data;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -25,11 +29,28 @@ var renderThreadHTML = function () {
             model.isThreadPage = true;
             model.board = MiscModel.board(board).board;
             model.threadNumber = thread.number;
+            if (archived) {
+              model.archived = true;
+            }
             data = Renderer.render('pages/thread', model);
-            _context.next = 11;
+
+            if (!targetPath) {
+              _context.next = 15;
+              break;
+            }
+
+            _context.next = 13;
+            return _fs2.default.write(targetPath, data);
+
+          case 13:
+            _context.next = 17;
+            break;
+
+          case 15:
+            _context.next = 17;
             return Cache.writeFile(thread.boardName + '/res/' + thread.number + '.html', data);
 
-          case 11:
+          case 17:
           case 'end':
             return _context.stop();
         }
@@ -37,7 +58,7 @@ var renderThreadHTML = function () {
     }, _callee, this);
   }));
 
-  return function renderThreadHTML(_x) {
+  return function renderThreadHTML(_x, _x2) {
     return ref.apply(this, arguments);
   };
 }();
@@ -73,7 +94,7 @@ var renderThread = function () {
     }, _callee2, this);
   }));
 
-  return function renderThread(_x2, _x3) {
+  return function renderThread(_x4, _x5) {
     return ref.apply(this, arguments);
   };
 }();
@@ -121,7 +142,7 @@ var renderPage = function () {
                 }, _callee3, this);
               }));
 
-              return function (_x6) {
+              return function (_x8) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -145,7 +166,7 @@ var renderPage = function () {
     }, _callee4, this);
   }));
 
-  return function renderPage(_x4, _x5) {
+  return function renderPage(_x6, _x7) {
     return ref.apply(this, arguments);
   };
 }();
@@ -157,6 +178,10 @@ var _underscore2 = _interopRequireDefault(_underscore);
 var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
+
+var _fs = require('q-io/fs');
+
+var _fs2 = _interopRequireDefault(_fs);
 
 var _moment = require('moment');
 
@@ -275,7 +300,7 @@ router.paths = _asyncToGenerator(regeneratorRuntime.mark(function _callee6() {
               }, _callee5, this);
             }));
 
-            return function (_x7) {
+            return function (_x9) {
               return ref.apply(this, arguments);
             };
           }(), true);
@@ -411,7 +436,7 @@ router.renderThread = function () {
                           }, _callee7, this);
                         }));
 
-                        return function (_x10, _x11) {
+                        return function (_x12, _x13) {
                           return ref.apply(this, arguments);
                         };
                       }());
@@ -472,7 +497,7 @@ router.renderThread = function () {
     }, _callee9, this);
   }));
 
-  return function (_x8, _x9) {
+  return function (_x10, _x11) {
     return ref.apply(this, arguments);
   };
 }();
@@ -510,7 +535,7 @@ router.renderPages = function () {
                 }, _callee10, this);
               }));
 
-              return function (_x13) {
+              return function (_x15) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -526,7 +551,7 @@ router.renderPages = function () {
     }, _callee11, this);
   }));
 
-  return function (_x12) {
+  return function (_x14) {
     return ref.apply(this, arguments);
   };
 }();
@@ -582,7 +607,7 @@ router.renderCatalog = function () {
                             }, _callee12, this);
                           }));
 
-                          return function (_x16) {
+                          return function (_x18) {
                             return ref.apply(this, arguments);
                           };
                         }());
@@ -606,7 +631,7 @@ router.renderCatalog = function () {
                 }, _callee13, this);
               }));
 
-              return function (_x15) {
+              return function (_x17) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -619,7 +644,7 @@ router.renderCatalog = function () {
     }, _callee14, this);
   }));
 
-  return function (_x14) {
+  return function (_x16) {
     return ref.apply(this, arguments);
   };
 }();
@@ -663,7 +688,7 @@ router.renderArchive = function () {
     }, _callee15, this);
   }));
 
-  return function (_x17) {
+  return function (_x19) {
     return ref.apply(this, arguments);
   };
 }();
@@ -769,7 +794,7 @@ router.renderRSS = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(
                         }, _callee16, this);
                       }));
 
-                      return function (_x18) {
+                      return function (_x20) {
                         return ref.apply(this, arguments);
                       };
                     }());
@@ -884,10 +909,12 @@ router.render = function () {
     }, _callee19, this);
   }));
 
-  return function (_x19) {
+  return function (_x21) {
     return ref.apply(this, arguments);
   };
 }();
+
+router.renderThreadHTML = renderThreadHTML;
 
 module.exports = router;
 //# sourceMappingURL=board.js.map

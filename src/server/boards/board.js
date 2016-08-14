@@ -254,7 +254,42 @@ Board.boards = {};
 };
 
 /*public*/ Board.prototype.testParameters = function(req, fields, files, creatingThread) {
-    return Promise.resolve();
+  var email = fields.email || "";
+  var name = fields.name || "";
+  var subject = fields.subject || "";
+  var text = fields.text || "";
+  var password = fields.password || "";
+  var fileCount = files.length;
+  var maxFileSize = this.maxFileSize;
+  var maxFileCount = this.maxFileCount;
+  if (email.length > this.maxEmailLength)
+      return Promise.reject(Tools.translate("E-mail is too long"));
+  if (name.length > this.maxNameLength)
+      return Promise.reject(Tools.translate("Name is too long"));
+  if (subject.length > this.maxSubjectLength)
+      return Promise.reject(Tools.translate("Subject is too long"));
+  if (text.length > this.maxTextFieldLength)
+      return Promise.reject(Tools.translate("Comment is too long"));
+  if (password.length > this.maxPasswordLength)
+      return Promise.reject(Tools.translate("Password is too long"));
+  if (creatingThread && maxFileCount && !fileCount)
+      return Promise.reject(Tools.translate("Attempt to create a thread without attaching a file"));
+  if (text.length < 1 && !fileCount)
+      return Promise.reject(Tools.translate("Both file and comment are missing"));
+  if (fileCount > maxFileCount) {
+      return Promise.reject(Tools.translate("Too many files"));
+  } else {
+      var err = files.reduce((err, file) => {
+          if (err)
+              return err;
+          if (file.size > maxFileSize)
+              return Tools.translate("File is too big");
+          if (this.supportedFileTypes.indexOf(file.mimeType) < 0)
+              return Tools.translate("File type is not supported");
+      }, "");
+      if (err)
+          return Promise.reject(err);
+  }
 };
 
 var renderFileInfo = function(fi) {
@@ -300,191 +335,6 @@ var renderFileInfo = function(fi) {
       post.geolocation.countryName = "Unknown country";
     }
     return Promise.resolve(post);
-};
-
-/*public*/ Board.prototype.generateFileName = function(file) {
-    return IPC.send('fileName').then(function(base) {
-        var ext = Path.extname(file.name);
-        if (Util.isString(ext))
-            ext = ext.substr(1);
-        if (!ext || Board.MimeTypesForExtensions[ext.toLowerCase()] != file.mimeType)
-            ext = Board.DefaultExtensions[file.mimeType];
-        return Promise.resolve({
-            name: (base + "." + ext),
-            thumbName: (base + "s." + (Board.ThumbExtensionsForMimeType[file.mimeType] || ext))
-        });
-    });
-};
-
-/*public*/ Board.prototype.processFile = function(file) {
-    var p;
-    if (!file.hash) {
-        p = FS.read(file.path, "b").then(function(data) {
-            file.hash = Tools.sha1(data);
-            return Promise.resolve();
-        });
-    } else {
-        p = Promise.resolve();
-    }
-    var thumbPath = Path.dirname(file.path) + "/" + UUID.v4();
-    file.thumbPath = thumbPath;
-    return p.then(function() {
-        if (Tools.isAudioType(file.mimeType)) {
-            file.dimensions = null;
-            file.extraData = {};
-            return new Promise(function(resolve, reject) {
-                ffmpeg.ffprobe(file.path, function(err, metadata) {
-                    if (err)
-                        return reject(err);
-                    resolve(metadata);
-                });
-            }).then(function(metadata) {
-                file.extraData.duration = durationToString(metadata.format.duration);
-                file.extraData.bitrate = Math.floor(+metadata.format.bit_rate / 1024);
-                return musicMetadata(FSSync.createReadStream(file.path));
-            }).then(function(metadata) {
-                file.extraData.album = metadata.album || "";
-                file.extraData.artist = (metadata.artist && metadata.artist.length > 0) ? metadata.artist[0] : "";
-                file.extraData.title = metadata.title || "";
-                file.extraData.year = metadata.year || "";
-                return Promise.resolve(metadata);
-            }).catch(function(err) {
-                Logger.error(err.stack || err);
-                file.extraData.album = "";
-                file.extraData.artist = "";
-                file.extraData.title = "";
-                file.extraData.year = "";
-                return Promise.resolve();
-            }).then(function(metadata) {
-                if (metadata && metadata.picture && metadata.picture.length > 0)
-                    return FS.write(thumbPath, metadata.picture[0].data);
-                else
-                    return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
-            }).then(function() {
-                return ImageMagick.identify(thumbPath);
-            }).then(function(info) {
-                if (info.width <= 200 && info.height <= 200)
-                    return Promise.resolve();
-                return ImageMagick.convert([
-                    thumbPath,
-                    "-resize",
-                    "200x200",
-                    thumbPath
-                ]);
-            }).then(function() {
-                return ImageMagick.identify(file.thumbPath);
-            }).then(function(info) {
-                file.thumbDimensions = {
-                    width: info.width,
-                    height: info.height
-                };
-            });
-        } else if (Tools.isVideoType(file.mimeType)) {
-            file.extraData = {};
-            var defaultThumb = false;
-            return (new Promise(function(resolve, reject) {
-                ffmpeg.ffprobe(file.path, function(err, metadata) {
-                    if (err)
-                        return reject(err);
-                    resolve(metadata);
-                });
-            })).then(function(metadata) {
-                if (!isNaN(+metadata.streams[0].width) && !isNaN(+metadata.streams[0].height)) {
-                    file.dimensions = {
-                        width: metadata.streams[0].width,
-                        height: metadata.streams[0].height
-                    };
-                }
-                file.extraData.duration = +metadata.format.duration ? durationToString(metadata.format.duration)
-                    : metadata.format.duration;
-                file.extraData.bitrate = +metadata.format.bit_rate ? Math.floor(+metadata.format.bit_rate / 1024) : 0;
-                file.thumbPath += ".png";
-                return new Promise(function(resolve, reject) {
-                    ffmpeg(file.path).frames(1).on("error", reject).on("end", resolve).save(file.thumbPath);
-                });
-            }).catch(function(err) {
-                Logger.error(err.stack || err);
-                file.thumbPath = thumbPath;
-                defaultThumb = true;
-                return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
-            }).then(function() {
-                return ImageMagick.identify(file.thumbPath);
-            }).then(function(info) {
-                if (!file.dimensions && !defaultThumb) {
-                    file.dimensions = {
-                        width: info.width,
-                        height: info.height
-                    };
-                }
-                if (info.width <= 200 && info.height <= 200)
-                    return Promise.resolve();
-                return ImageMagick.convert([
-                    file.thumbPath,
-                    "-resize",
-                    "200x200",
-                    file.thumbPath
-                ]);
-            }).then(function() {
-                return ImageMagick.identify(file.thumbPath);
-            }).then(function(info) {
-                file.thumbDimensions = {
-                    width: info.width,
-                    height: info.height
-                };
-            });
-        } else if (Tools.isImageType(file.mimeType)) {
-            file.extraData = null;
-            var suffix = ("image/gif" == file.mimeType) ? "[0]" : "";
-            return ImageMagick.identify(file.path + suffix).then(function(info) {
-                file.dimensions = {
-                    width: info.width,
-                    height: info.height
-                };
-                var args = [ file.path + suffix ];
-                if (info.width > 200 || info.height > 200) {
-                    args.push("-resize");
-                    args.push("200x200");
-                }
-                args.push((("image/gif" == file.mimeType) ? "png:" : "") + thumbPath);
-                return ImageMagick.convert(args);
-            }).then(function() {
-                return ImageMagick.identify(thumbPath);
-            }).then(function(info) {
-                file.thumbDimensions = {
-                    width: info.width,
-                    height: info.height
-                };
-                if (config("system.phash.enabled", true)) {
-                    return Tools.generateImageHash(thumbPath).then(function(hash) {
-                        file.ihash = hash;
-                    });
-                }
-            });
-        } else if (Tools.isPdfType(file.mimeType)) {
-            file.dimensions = null;
-            file.extraData = null;
-            return ImageMagick.convert([
-                "-density",
-                "300",
-                file.path + "[0]",
-                "-quality",
-                "100",
-                "+adjoin",
-                "-resize",
-                "200x200",
-                "png:" + thumbPath
-            ]).then(function() {
-                return ImageMagick.identify(thumbPath);
-            }).then(function(info) {
-                file.thumbDimensions = {
-                    width: info.width,
-                    height: info.height
-                };
-            });
-        } else {
-            return Promise.reject(new Error(Tools.translate("Unsupported file type")));
-        }
-    });
 };
 
 Board.MarkupElements = {

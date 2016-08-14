@@ -31,7 +31,7 @@ nodeCaptcha.info = function () {
     return inf;
 };
 
-nodeCaptcha.checkCaptcha = function (req, fields) {
+nodeCaptcha.checkCaptcha = function (_1, fields) {
     var challenge = fields.nodeCaptchaChallenge;
     var response = fields.nodeCaptchaResponse;
     if (!challenge) return Promise.reject(Tools.translate("Captcha challenge is empty"));
@@ -51,7 +51,7 @@ nodeCaptcha.apiRoutes = function () {
     return [{
         method: "get",
         path: "/nodeCaptchaImage.json",
-        handler: function handler(req, res) {
+        handler: function handler(_1, res) {
             var size = config("captcha.node-captcha.size", 6);
             var height = config("captcha.node-captcha.height", 60);
             var color = config("captcha.node-captcha.color", "rgb(0,0,0)");

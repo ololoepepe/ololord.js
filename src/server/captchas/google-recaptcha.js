@@ -5,11 +5,11 @@ var Tools = require("../helpers/tools");
 
 var googleRecaptcha = new Captcha("google-recaptcha", Tools.translate.noop("Google reCAPTCHA"));
 
-googleRecaptcha.checkCaptcha = function(req, fields) {
+googleRecaptcha.checkCaptcha = function(ip, fields) {
     var captcha = fields["g-recaptcha-response"];
     if (!captcha)
         return Promise.reject(Tools.translate("Captcha is empty"));
-    var query = `secret=${this.privateKey}&response=${captcha}&remoteip=${req.ip}`;
+    var query = `secret=${this.privateKey}&response=${captcha}&remoteip=${ip}`;
     var url = "https://www.google.com/recaptcha/api/siteverify?" + query;
     return HTTP.request({
         url: url,

@@ -16,6 +16,9 @@ exports.addIPv4 = addIPv4;
 exports.createWatchedResource = createWatchedResource;
 exports.compareRegisteredUserLevels = compareRegisteredUserLevels;
 exports.postingSpeedString = postingSpeedString;
+exports.requireWrapper = requireWrapper;
+exports.loadPlugins = loadPlugins;
+exports.markupModes = markupModes;
 
 var _underscore = require("underscore");
 
@@ -58,6 +61,7 @@ var UUID = require("uuid");
 var XRegExp = require("xregexp");
 
 var config = require("./config");
+var markup = require("./markup");
 
 var translate = require("cute-localize")({
     locale: config("site.locale", "en"),
@@ -490,9 +494,9 @@ module.exports.series = function (arr, f, container) {
     var isObject = (typeof container === "undefined" ? "undefined" : _typeof(container)) == "object";
     var p = Promise.resolve();
     if (Util.isArray(arr)) {
-        arr.forEach(function (el) {
+        arr.forEach(function (el, index) {
             p = p.then(function () {
-                return f(el);
+                return f(el, index);
             }).then(function (result) {
                 if (isArray) container.push(result);else if (isObject) container[el] = result;
             });
@@ -825,5 +829,47 @@ function postingSpeedString(launchDate, lastPostNumber) {
             }
         }
     }
+}
+
+function requireWrapper(m) {
+    return m && m.default || m;
+}
+
+function loadPlugins(path, filter) {
+    if (typeof filter !== 'function') {
+        if (typeof filter === 'undefined' || filter) {
+            filter = function filter(fileName) {
+                return 'index.js' !== fileName;
+            };
+        } else {
+            filter = function filter() {
+                return true;
+            };
+        }
+    }
+    var list = FSSync.readdirSync(path).filter(function (fileName) {
+        return fileName.split('.').pop() === 'js';
+    }).filter(filter).map(function (fileName) {
+        var id = require.resolve(path + "/" + fileName);
+        if (require.cache.hasOwnProperty(id)) {
+            delete require.cache[id];
+        }
+        var plugins = require(id);
+        plugins = plugins.default || plugins;
+        if (!(0, _underscore2.default)(plugins).isArray()) {
+            plugins = [plugins];
+        }
+        return plugins;
+    });
+    return (0, _underscore2.default)(list).flatten();
+}
+
+function markupModes(string) {
+    if (typeof string !== 'string') {
+        string = '';
+    }
+    return (0, _underscore2.default)(markup.MarkupModes).filter(function (mode) {
+        return string.indexOf(mode) >= 0;
+    });
 }
 //# sourceMappingURL=tools.js.map

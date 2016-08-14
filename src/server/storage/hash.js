@@ -46,6 +46,10 @@ export default class Hash {
     return await this.client.hset(this.fullKey(subkey), id, this.stringify(data));
   }
 
+  async incrementBy(id, n, subkey) {
+    return await this.client.hincrby(this.fullKey(subkey), key, n);
+  }
+
   async deleteOne(id) {
     return await this.client.hdel(this.fullKey(subkey), id);
   }

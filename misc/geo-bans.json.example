@@ -1,0 +1,11 @@
+Actual name must be geo-bans.json.
+
+Example:
+
+{
+  '*': true,
+  'RU': false,
+  'UA': false,
+  'BY': false,
+  'KZ': false
+}

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
+exports.removePost = exports.createPost = exports.addReferencedPosts = exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
 
 var addDataToPost = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(board, post) {
@@ -289,13 +289,435 @@ var getPostKeys = exports.getPostKeys = function () {
   };
 }();
 
+var addReferencedPosts = exports.addReferencedPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(post, referencedPosts) {
+    var _ref2 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var nogenerate = _ref2.nogenerate;
+    var key;
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+      while (1) {
+        switch (_context7.prev = _context7.next) {
+          case 0:
+            key = post.boardName + ':' + post.number;
+            //TODO: Optimise (hmset)
+
+            _context7.next = 3;
+            return Tools.series(referencedPosts, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(ref, refKey) {
+                return regeneratorRuntime.wrap(function _callee6$(_context6) {
+                  while (1) {
+                    switch (_context6.prev = _context6.next) {
+                      case 0:
+                        _context6.next = 2;
+                        return ReferencedPosts.setOne(refKey, ref, key);
+
+                      case 2:
+                        _context6.next = 4;
+                        return ReferringPosts.setOne(key, {
+                          boardName: post.boardName,
+                          postNumber: post.number,
+                          threadNumber: post.threadNumber,
+                          createdAt: refKey.createdAt
+                        }, refKey);
+
+                      case 4:
+                      case 'end':
+                        return _context6.stop();
+                    }
+                  }
+                }, _callee6, this);
+              }));
+
+              return function (_x17, _x18) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 3:
+            if (!nogenerate) {
+              (0, _underscore2.default)(referencedPosts).each(function (ref, refKey) {
+                if (ref.boardName !== post.boardName || ref.threadNumber !== post.threadNumber) {
+                  IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
+                }
+              });
+            }
+
+          case 4:
+          case 'end':
+            return _context7.stop();
+        }
+      }
+    }, _callee7, this);
+  }));
+
+  return function addReferencedPosts(_x13, _x14, _x15) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var createPost = exports.createPost = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(req, fields, files, transaction) {
+    var _ref3 = arguments.length <= 4 || arguments[4] === undefined ? {} : arguments[4];
+
+    var postNumber = _ref3.postNumber;
+    var date = _ref3.date;
+    var boardName, threadNumber, text, markupMode, name, subject, sage, signAsOp, tripcode, password, board, rawText, markupModes, referencedPosts, thread, unbumpable, accessLevel, postCount, extraData, post;
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            boardName = fields.boardName;
+            threadNumber = fields.threadNumber;
+            text = fields.text;
+            markupMode = fields.markupMode;
+            name = fields.name;
+            subject = fields.subject;
+            sage = fields.sage;
+            signAsOp = fields.signAsOp;
+            tripcode = fields.tripcode;
+            password = fields.password;
+
+            threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+            postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context9.next = 15;
+              break;
+            }
+
+            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+
+          case 15:
+            if (board.postingEnabled) {
+              _context9.next = 17;
+              break;
+            }
+
+            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Posting is disabled at this board'))));
+
+          case 17:
+            date = date || Tools.now();
+            if (postNumber) {
+              threadNumber = postNumber;
+            }
+            rawText = text || null;
+            markupModes = Tools.markupModes(markupMode);
+            referencedPosts = {};
+
+            sage = 'true' === sage;
+            tripcode = 'true' === tripcode;
+            signAsOp = 'true' === signAsOp;
+            password = Tools.sha1(password);
+            hashpass = req.hashpass || null;
+            _context9.next = 29;
+            return ThreadsModel.getThread(boardName, threadNumber);
+
+          case 29:
+            thread = _context9.sent;
+
+            if (thread) {
+              _context9.next = 32;
+              break;
+            }
+
+            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('No such thread'))));
+
+          case 32:
+            if (!thread.closed) {
+              _context9.next = 34;
+              break;
+            }
+
+            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Posting is disabled in this thread'))));
+
+          case 34:
+            unbumpable = !!thread.unbumpable;
+            accessLevel = req.level(boardName) || null;
+            _context9.next = 38;
+            return ThreadsModel.getThreadPostCount(boardName, threadNumber);
+
+          case 38:
+            postCount = _context9.sent;
+
+            if (!(postCount >= board.postLimit)) {
+              _context9.next = 41;
+              break;
+            }
+
+            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Post limit reached'))));
+
+          case 41:
+            _context9.next = 43;
+            return (0, _markup2.default)(boardName, rawText, {
+              markupModes: markupModes,
+              referencedPosts: referencedPosts,
+              accessLevel: accessLevel
+            });
+
+          case 43:
+            text = _context9.sent;
+            _context9.next = 46;
+            return board.postExtraData(req, fields, files);
+
+          case 46:
+            extraData = _context9.sent;
+
+            if (typeof extraData === 'undefined') {
+              extraData = null;
+            }
+
+            if (postNumber) {
+              _context9.next = 52;
+              break;
+            }
+
+            _context9.next = 51;
+            return BoardsModel.nextPostNumber(boardName);
+
+          case 51:
+            postNumber = _context9.sent;
+
+          case 52:
+            post = {
+              bannedFor: false,
+              boardName: boardName,
+              createdAt: date.toISOString(),
+              geolocation: req.geolocation,
+              markup: markupModes,
+              name: name || null,
+              number: postNumber,
+              options: {
+                sage: sage,
+                showTripcode: !!req.hashpass && tripcode,
+                signAsOp: signAsOp
+              },
+              rawText: rawText,
+              subject: subject || null,
+              text: text || null,
+              plainText: text ? Tools.plainText(text, { brToNewline: true }) : null,
+              threadNumber: threadNumber,
+              updatedAt: null,
+              user: {
+                hashpass: hashpass,
+                ip: req.ip,
+                level: accessLevel,
+                password: password
+              }
+            };
+
+            transaction.setPostNumber(postNumber);
+            _context9.next = 56;
+            return Posts.setOne(boardName + ':' + postNumber, post);
+
+          case 56:
+            _context9.next = 58;
+            return board.storeExtraData(postNumber, extraData);
+
+          case 58:
+            _context9.next = 60;
+            return addReferencedPosts(post, referencedPosts);
+
+          case 60:
+            _context9.next = 62;
+            return UsersModel.addUserPostNumber(req.ip, boardName, postNumber);
+
+          case 62:
+            _context9.next = 64;
+            return Tools.series(files, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(fileInfo) {
+                return regeneratorRuntime.wrap(function _callee8$(_context8) {
+                  while (1) {
+                    switch (_context8.prev = _context8.next) {
+                      case 0:
+                        file.boardName = boardName;
+                        file.postNumber = postNumber;
+                        _context8.next = 4;
+                        return FilesModel.addFileInfo(fileInfo);
+
+                      case 4:
+                        _context8.next = 6;
+                        return PostFileInfoNames.addOne(fileInfo.name, boardName + ':' + postNumber);
+
+                      case 6:
+                      case 'end':
+                        return _context8.stop();
+                    }
+                  }
+                }, _callee8, this);
+              }));
+
+              return function (_x25) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 64:
+            _context9.next = 66;
+            return FilesModel.addFileHashes(files);
+
+          case 66:
+            _context9.next = 68;
+            return Search.indexPost({
+              boardName: boardName,
+              postNumber: postNumber,
+              threadNumber: threadNumber,
+              plainText: plainText,
+              subject: subject
+            });
+
+          case 68:
+            _context9.next = 70;
+            return ThreadsModel.addThreadPostNumber(boardName, threadNumber, postNumber);
+
+          case 70:
+            if (!(!sage && postCount < board.bumpLimit && !unbumpable)) {
+              _context9.next = 73;
+              break;
+            }
+
+            _context9.next = 73;
+            return ThreadsModel.setThreadUpdateTime(boardName, threadNumber, date.toISOString());
+
+          case 73:
+            post.referencedPosts = referencedPosts;
+            post.fileInfos = files;
+            return _context9.abrupt('return', post);
+
+          case 76:
+          case 'end':
+            return _context9.stop();
+        }
+      }
+    }, _callee9, this);
+  }));
+
+  return function createPost(_x19, _x20, _x21, _x22, _x23) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var removePost = exports.removePost = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(boardName, postNumber) {
+    var _ref4 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var removingThread = _ref4.removingThread;
+    var leaveReferences = _ref4.leaveReferences;
+    var leaveFileInfos = _ref4.leaveFileInfos;
+    var board, c;
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context10.next = 3;
+              break;
+            }
+
+            return _context10.abrupt('return', Promise.reject(Tools.translate("Invalid board")));
+
+          case 3:
+            c = {};
+            return _context10.abrupt('return', db.sadd("postsPlannedForDeletion", boardName + ":" + postNumber).then(function () {
+              return PostsModel.getPost(boardName, postNumber, { withReferences: true });
+            }).then(function (post) {
+              c.post = post;
+              return db.srem("threadPostNumbers:" + boardName + ":" + post.threadNumber, postNumber);
+            }).then(function () {
+              return db.hdel("posts", boardName + ":" + postNumber);
+            }).then(function () {
+              if (options && options.leaveReferences) return Promise.resolve();
+              return rerenderReferringPosts(c.post, { removingThread: options && options.removingThread });
+            }).catch(function (err) {
+              Logger.error(err.stack || err);
+            }).then(function () {
+              if (options && options.leaveReferences) return Promise.resolve();
+              return removeReferencedPosts(c.post);
+            }).catch(function (err) {
+              Logger.error(err.stack || err);
+            }).then(function () {
+              return db.srem("userPostNumbers:" + c.post.user.ip + ":" + board.name, postNumber);
+            }).then(function () {
+              return postFileInfoNames(boardName, postNumber);
+            }).then(function (names) {
+              c.fileInfoNames = names;
+              return Promise.all(names.map(function (name) {
+                return db.hget("fileInfos", name);
+              }));
+            }).then(function (fileInfos) {
+              if (options && options.leaveFileInfos) return Promise.resolve();
+              c.fileInfos = [];
+              c.paths = [];
+              fileInfos.forEach(function (fileInfo) {
+                if (!fileInfo) return;
+                fileInfo = JSON.parse(fileInfo);
+                c.fileInfos.push(fileInfo);
+                c.paths.push(__dirname + "/../public/" + boardName + "/src/" + fileInfo.name);
+                c.paths.push(__dirname + "/../public/" + boardName + "/thumb/" + fileInfo.thumb.name);
+              });
+              return db.del("postFileInfoNames:" + boardName + ":" + postNumber);
+            }).then(function () {
+              if (options && options.leaveFileInfos) return Promise.resolve();
+              return Promise.all(c.fileInfoNames.map(function (name) {
+                return db.hdel("fileInfos", name);
+              }));
+            }).then(function () {
+              if (options && options.leaveFileInfos) return Promise.resolve();
+              return removeFileHashes(c.fileInfos);
+            }).then(function () {
+              return board.removeExtraData(postNumber);
+            }).then(function () {
+              return es.delete({
+                index: "ololord.js",
+                type: "posts",
+                id: boardName + ":" + postNumber
+              });
+            }).then(function () {
+              if (!options || !options.leaveFileInfos) {
+                c.paths.forEach(function (path) {
+                  return FS.remove(path).catch(function (err) {
+                    Logger.error(err.stack || err);
+                  });
+                });
+              }
+              return db.srem("postsPlannedForDeletion", boardName + ":" + postNumber);
+            }));
+
+          case 5:
+          case 'end':
+            return _context10.stop();
+        }
+      }
+    }, _callee10, this);
+  }));
+
+  return function removePost(_x26, _x27, _x28) {
+    return ref.apply(this, arguments);
+  };
+}();
+
 var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
+var _boards = require('./boards');
+
+var BoardsModel = _interopRequireWildcard(_boards);
+
+var _files = require('./files');
+
+var FilesModel = _interopRequireWildcard(_files);
+
 var _threads = require('./threads');
 
 var ThreadsModel = _interopRequireWildcard(_threads);
+
+var _users = require('./users');
+
+var UsersModel = _interopRequireWildcard(_users);
 
 var _clientFactory = require('../storage/client-factory');
 
@@ -309,6 +731,10 @@ var _key = require('../storage/key');
 
 var _key2 = _interopRequireDefault(_key);
 
+var _search = require('../storage/search');
+
+var Search = _interopRequireWildcard(_search);
+
 var _unorderedSet = require('../storage/unordered-set');
 
 var _unorderedSet2 = _interopRequireDefault(_unorderedSet);
@@ -316,6 +742,14 @@ var _unorderedSet2 = _interopRequireDefault(_unorderedSet);
 var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
+
+var _markup = require('../core/markup');
+
+var _markup2 = _interopRequireDefault(_markup);
+
+var _ipc = require('../helpers/ipc');
+
+var IPC = _interopRequireWildcard(_ipc);
 
 var _tools = require('../helpers/tools');
 

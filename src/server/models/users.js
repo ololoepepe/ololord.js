@@ -27,7 +27,7 @@ let UserCaptchaQuotas = new Hash(client(), 'captchaQuotas', {
   parse: quota => +quota,
   stringify: quota => quota.toString()
 });
-let UserPostNumbers = new Key(client(), 'userPostNumbers', {
+let UserPostNumbers = new UnorderedSet(client(), 'userPostNumbers', {
   parse: number => +number,
   stringify: number => number.toString()
 });
@@ -42,7 +42,7 @@ function transformIPBans(bans) {
   }, {});
 }
 
-let ipBans = Tools.createWatchedResource(`${__dirname}/../misc/bans.json`, (path) => {
+let ipBans = Tools.createWatchedResource(`${__dirname}/../misc/user-bans.json`, (path) => {
   return transformIPBans(require(path));
 }, async function(path) {
   let data = await FS.read(path);
@@ -54,7 +54,28 @@ export async function getUserCaptchaQuota(boardName, userIp) {
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
-  let quota = UserCaptchaQuotas.getOne(`${boardName}:${userIp}`);
+  let quota = await UserCaptchaQuotas.getOne(`${boardName}:${userIp}`);
+  return Tools.option(quota, 'number', 0, { test: (q) => { return q >= 0; } });
+}
+
+export async function setUserCaptchaQuota(boardName, userIp, quota) {
+  quota = Tools.option(quota, 'number', 0, { test: (q) => { return q >= 0; } });
+  return await UserCaptchaQuotas.setOne(`${boardName}:${userIp}`, quota);
+}
+
+export async function useCaptcha(boardName, userIp) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  if (board.captchaQuota < 1) {
+    return 0;
+  }
+  let key = `${boardName}:${userIp}`;
+  let quota = await UserCaptchaQuotas.incrementBy(key, -1);
+  if (+quota < 0) {
+    return await UserCaptchaQuotas.setOne(key, 0);
+  }
   return Tools.option(quota, 'number', 0, { test: (q) => { return q >= 0; } });
 }
 
@@ -115,6 +136,11 @@ export async function getUserPostNumbers(ip, boardName) {
   ip = Tools.correctAddress(ip) || '*';
   boardName = boardName || '*';
   return await UserPostNumbers.find(`${ip}:${boardName}`);
+}
+
+export async function addUserPostNumber(ip, boardName, postNumber) {
+  ip = Tools.correctAddress(ip);
+  await UserPostNumbers.addOne(postNumber, `${ip}:${boardName}`);
 }
 
 export async function checkUserBan(ip, boardNames, { write } = {}) {

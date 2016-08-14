@@ -12,9 +12,13 @@ var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
 
-var _fs = require('fs');
+var _fs = require('q-io/fs');
 
 var _fs2 = _interopRequireDefault(_fs);
+
+var _fs3 = require('fs');
+
+var _fs4 = _interopRequireDefault(_fs3);
 
 var _config = require('../helpers/config');
 
@@ -32,6 +36,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
 var EXCLUDED_ROUTERS = new Set(['index.js', 'home.js', 'board.js']);
 
 var router = _express2.default.Router();
@@ -44,7 +50,7 @@ router.use('/redirect', function (req, res, next) {
   res.redirect(307, '/' + (0, _config2.default)('site.pathPrefix') + req.query.source.replace(/^\//, ''));
 });
 
-_fs2.default.readdirSync(__dirname).filter(function (fileName) {
+_fs4.default.readdirSync(__dirname).filter(function (fileName) {
   return !EXCLUDED_ROUTERS.has(fileName) && 'js' === fileName.split('.').pop();
 }).forEach(function (fileName) {
   var r = require('./' + fileName.split('.').slice(0, -1).join('.'));
@@ -66,6 +72,46 @@ router.use('*', function (req, res, next) {
 });
 
 router.use(function (err, req, res, next) {
+  Tools.series(req.formFiles, function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file) {
+      var exists;
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.prev = 0;
+              exists = _fs2.default.exists(file.path);
+
+              if (!exists) {
+                _context.next = 5;
+                break;
+              }
+
+              _context.next = 5;
+              return _fs2.default.remove(file.path);
+
+            case 5:
+              _context.next = 10;
+              break;
+
+            case 7:
+              _context.prev = 7;
+              _context.t0 = _context['catch'](0);
+
+              _logger2.default.error(_context.t0.stack || _context.t0);
+
+            case 10:
+            case 'end':
+              return _context.stop();
+          }
+        }
+      }, _callee, this, [[0, 7]]);
+    }));
+
+    return function (_x) {
+      return ref.apply(this, arguments);
+    };
+  }());
   switch (err.status) {
     case 404:
       {
