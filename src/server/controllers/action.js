@@ -101,7 +101,7 @@ router.post('/action/createPost', async function(req, res, next) {
   let transaction;
   try {
     let { fields, files } = await Tools.parseForm(req);
-    let { boardName, threadNumber } = fields;
+    let { boardName, threadNumber, captchaEngine } = fields;
     let board = Board.board(boardName);
     if (!board) {
       throw new Error(Tools.translate('Invalid board'));
@@ -121,7 +121,7 @@ router.post('/action/createPost', async function(req, res, next) {
     let post = await PostsModel.createPost(req, fields, files, transaction);
     await IPC.render(post.boardName, post.threadNumber, post.number, 'create');
     //hasNewPosts.add(c.post.boardName + "/" + c.post.threadNumber); //TODO: pass to main process immediately
-    if ('node-captcha-noscript' !== fields.captchaEngine) {
+    if ('node-captcha-noscript' !== captchaEngine) {
       res.send({
         boardName: post.boardName,
         postNumber: post.number
@@ -143,7 +143,7 @@ router.post('/action/createThread', async function(req, res, next) {
   let transaction;
   try {
     let { fields, files } = await Tools.parseForm(req);
-    let { boardName } = fields;
+    let { boardName, captchaEngine } = fields;
     let board = Board.board(boardName);
     if (!board) {
       throw new Error(Tools.translate('Invalid board'));
@@ -157,18 +157,18 @@ router.post('/action/createThread', async function(req, res, next) {
     await board.testParameters(req, fields, files, true);
     let thread = await ThreadsModel.createThread(req, fields, transaction);
     files = await Files.processFiles(boardName, files, transaction);
-    await PostsModel.createPost(req, fields, files, transaction, {
+    let post = await PostsModel.createPost(req, fields, files, transaction, {
       postNumber: thread.number,
       date: new Date(thread.createdAt)
     });
-    //return IPC.render(post.boardName, post.threadNumber, post.number, 'create'); //TODO
-    if ('node-captcha-noscript' !== c.fields.captchaEngine) {
+    await IPC.render(post.boardName, post.threadNumber, post.number, 'create');
+    if ('node-captcha-noscript' !== captchaEngine) {
       res.send({
         boardName: thread.boardName,
         threadNumber: thread.number
       });
     } else {
-      res.redirect(303, `/${config('site.pathPrefix', '')}${thread.boardName}/res/${thread.number}.html`);
+      res.redirect(303, `/${config('site.pathPrefix')}${thread.boardName}/res/${thread.number}.html`);
     }
   } catch (err) {
     if (transaction) {

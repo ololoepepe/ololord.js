@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.checkUserBan = exports.addUserPostNumber = exports.getUserPostNumbers = exports.getSynchronizationData = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
+exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.getSynchronizationData = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
 
 var getUserCaptchaQuota = exports.getUserCaptchaQuota = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(boardName, userIp) {
@@ -457,45 +457,17 @@ var addUserPostNumber = exports.addUserPostNumber = function () {
   };
 }();
 
-var checkUserBan = exports.checkUserBan = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(ip, boardNames) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var write = _ref.write;
-    var ban, bans;
+var removeUserPostNumber = exports.removeUserPostNumber = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(ip, boardName, postNumber) {
     return regeneratorRuntime.wrap(function _callee16$(_context16) {
       while (1) {
         switch (_context16.prev = _context16.next) {
           case 0:
             ip = Tools.correctAddress(ip);
-            ban = ipBans[ip];
+            _context16.next = 3;
+            return UserPostNumbers.deleteOne(postNumber, ip + ':' + boardName);
 
-            if (!(ban && (write || 'NO_ACCESS' === ban.level))) {
-              _context16.next = 4;
-              break;
-            }
-
-            return _context16.abrupt('return', Promise.reject({ ban: ban }));
-
-          case 4:
-            _context16.next = 6;
-            return getBannedUserBans(ip, boardNames);
-
-          case 6:
-            bans = _context16.sent;
-
-            ban = (0, _underscore2.default)(bans).find(function (ban) {
-              return ban && (write || 'NO_ACCESS' === ban.level);
-            });
-
-            if (!ban) {
-              _context16.next = 10;
-              break;
-            }
-
-            return _context16.abrupt('return', Promise.reject({ ban: ban }));
-
-          case 10:
+          case 3:
           case 'end':
             return _context16.stop();
         }
@@ -503,7 +475,58 @@ var checkUserBan = exports.checkUserBan = function () {
     }, _callee16, this);
   }));
 
-  return function checkUserBan(_x24, _x25, _x26) {
+  return function removeUserPostNumber(_x24, _x25, _x26) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var checkUserBan = exports.checkUserBan = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(ip, boardNames) {
+    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var write = _ref.write;
+    var ban, bans;
+    return regeneratorRuntime.wrap(function _callee17$(_context17) {
+      while (1) {
+        switch (_context17.prev = _context17.next) {
+          case 0:
+            ip = Tools.correctAddress(ip);
+            ban = ipBans[ip];
+
+            if (!(ban && (write || 'NO_ACCESS' === ban.level))) {
+              _context17.next = 4;
+              break;
+            }
+
+            return _context17.abrupt('return', Promise.reject({ ban: ban }));
+
+          case 4:
+            _context17.next = 6;
+            return getBannedUserBans(ip, boardNames);
+
+          case 6:
+            bans = _context17.sent;
+
+            ban = (0, _underscore2.default)(bans).find(function (ban) {
+              return ban && (write || 'NO_ACCESS' === ban.level);
+            });
+
+            if (!ban) {
+              _context17.next = 10;
+              break;
+            }
+
+            return _context17.abrupt('return', Promise.reject({ ban: ban }));
+
+          case 10:
+          case 'end':
+            return _context17.stop();
+        }
+      }
+    }, _callee17, this);
+  }));
+
+  return function checkUserBan(_x27, _x28, _x29) {
     return ref.apply(this, arguments);
   };
 }();

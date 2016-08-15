@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updatePostIndex = exports.getPostIndex = exports.indexPost = undefined;
+exports.removePostIndex = exports.updatePostIndex = exports.getPostIndex = exports.indexPost = undefined;
 
 var indexPost = exports.indexPost = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(_ref) {
@@ -145,6 +145,32 @@ var updatePostIndex = exports.updatePostIndex = function () {
   }));
 
   return function updatePostIndex(_x4, _x5, _x6) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var removePostIndex = exports.removePostIndex = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, postNumber) {
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            _context4.next = 2;
+            return es.delete({
+              index: INDEX_NAME,
+              type: 'posts',
+              id: boardName + ':' + postNumber
+            });
+
+          case 2:
+          case 'end':
+            return _context4.stop();
+        }
+      }
+    }, _callee4, this);
+  }));
+
+  return function removePostIndex(_x7, _x8) {
     return ref.apply(this, arguments);
   };
 }();

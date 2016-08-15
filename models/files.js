@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.addFileHashes = exports.addFileInfo = exports.getFileInfosByHashes = exports.fileInfoExistsByHash = exports.fileInfoExistsByName = exports.getFileInfoByHash = exports.getFileInfoByName = undefined;
+exports.removeFileInfos = exports.removeFileHashes = exports.addFileHashes = exports.addFileInfo = exports.getFileInfosByHashes = exports.fileInfoExistsByHash = exports.fileInfoExistsByName = exports.getFileInfoByHash = exports.getFileInfoByName = undefined;
 
 var getFileInfo = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(name, hash) {
@@ -292,6 +292,110 @@ var addFileHashes = exports.addFileHashes = function () {
   }));
 
   return function addFileHashes(_x10) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var removeFileHashes = exports.removeFileHashes = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(fileInfos) {
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
+      while (1) {
+        switch (_context12.prev = _context12.next) {
+          case 0:
+            if (!(0, _underscore2.default)(fileInfos).isArray()) {
+              fileInfos = [fileInfos];
+            }
+
+            if (!(fileInfos.length <= 0)) {
+              _context12.next = 3;
+              break;
+            }
+
+            return _context12.abrupt('return');
+
+          case 3:
+            _context12.next = 5;
+            return Tools.series(fileInfos, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(fileInfo) {
+                var size;
+                return regeneratorRuntime.wrap(function _callee11$(_context11) {
+                  while (1) {
+                    switch (_context11.prev = _context11.next) {
+                      case 0:
+                        _context11.next = 2;
+                        return FileHashes.deleteOne(createFileHash(fileInfo), fileInfo.hash);
+
+                      case 2:
+                        _context11.next = 4;
+                        return FileHashes.count(fileInfo.hash);
+
+                      case 4:
+                        size = _context11.sent;
+
+                        if (!(size <= 0)) {
+                          _context11.next = 8;
+                          break;
+                        }
+
+                        _context11.next = 8;
+                        return FileHashes.delete(fileInfo.hash);
+
+                      case 8:
+                      case 'end':
+                        return _context11.stop();
+                    }
+                  }
+                }, _callee11, this);
+              }));
+
+              return function (_x13) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 5:
+          case 'end':
+            return _context12.stop();
+        }
+      }
+    }, _callee12, this);
+  }));
+
+  return function removeFileHashes(_x12) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var removeFileInfos = exports.removeFileInfos = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(fileInfoNames) {
+    return regeneratorRuntime.wrap(function _callee13$(_context13) {
+      while (1) {
+        switch (_context13.prev = _context13.next) {
+          case 0:
+            if (!(0, _underscore2.default)(fileInfoNames).isArray()) {
+              fileInfos = [fileInfos];
+            }
+
+            if (!(ids.length <= 0)) {
+              _context13.next = 3;
+              break;
+            }
+
+            return _context13.abrupt('return', 0);
+
+          case 3:
+            _context13.next = 5;
+            return FileInfos.deleteSome(fileInfoNames);
+
+          case 5:
+          case 'end':
+            return _context13.stop();
+        }
+      }
+    }, _callee13, this);
+  }));
+
+  return function removeFileInfos(_x14) {
     return ref.apply(this, arguments);
   };
 }();

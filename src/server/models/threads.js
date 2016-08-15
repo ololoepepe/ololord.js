@@ -45,6 +45,10 @@ export async function addThreadPostNumber(boardName, threadNumber, postNumber) {
   await ThreadPostNumbers.addOne(postNumber, `${boardName}:${threadNumber}`);
 }
 
+export async function removeThreadPostNumber(boardName, threadNumber, postNumber) {
+  await ThreadPostNumbers.deleteOne(postNumber, `${boardName}:${threadNumber}`);
+}
+
 async function addDataToThread(thread, { withPostNumbers } = {}) {
   thread.updatedAt = await ThreadUpdateTimes.getOne(thread.number, thread.boardName);
   if (withPostNumbers) {

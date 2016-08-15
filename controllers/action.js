@@ -227,7 +227,7 @@ router.post('/action/markupText', function () {
 
 router.post('/action/createPost', function () {
     var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, res, next) {
-        var transaction, _ref2, fields, files, boardName, threadNumber, _board2, post, hash, path;
+        var transaction, _ref2, fields, files, boardName, threadNumber, captchaEngine, _board2, post, hash, path;
 
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
             while (1) {
@@ -244,69 +244,70 @@ router.post('/action/createPost', function () {
                         files = _ref2.files;
                         boardName = fields.boardName;
                         threadNumber = fields.threadNumber;
+                        captchaEngine = fields.captchaEngine;
                         _board2 = Board.board(boardName);
 
                         if (_board2) {
-                            _context3.next = 12;
+                            _context3.next = 13;
                             break;
                         }
 
                         throw new Error(Tools.translate('Invalid board'));
 
-                    case 12:
+                    case 13:
                         threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
 
                         if (threadNumber) {
-                            _context3.next = 15;
+                            _context3.next = 16;
                             break;
                         }
 
                         throw new Error(Tools.translate('Invalid thread'));
 
-                    case 15:
-                        _context3.next = 17;
+                    case 16:
+                        _context3.next = 18;
                         return UsersModel.checkUserBan(req.ip, boardName, { write: true });
 
-                    case 17:
-                        _context3.next = 19;
+                    case 18:
+                        _context3.next = 20;
                         return (0, _geolocation2.default)(req.ip);
 
-                    case 19:
+                    case 20:
                         req.geolocation = _context3.sent;
-                        _context3.next = 22;
+                        _context3.next = 23;
                         return checkGeoBan(req.geolocation);
 
-                    case 22:
-                        _context3.next = 24;
+                    case 23:
+                        _context3.next = 25;
                         return Captch.checkCaptcha(req.ip, fields);
 
-                    case 24:
+                    case 25:
                         transaction = new _postCreationTransaction2.default(boardName);
-                        _context3.next = 27;
+                        _context3.next = 28;
                         return Files.getFiles(fields, files);
 
-                    case 27:
+                    case 28:
                         files = _context3.sent;
-                        _context3.next = 30;
+                        _context3.next = 31;
                         return _board2.testParameters(req, fields, files);
 
-                    case 30:
-                        _context3.next = 32;
+                    case 31:
+                        _context3.next = 33;
                         return Files.processFiles(boardName, files, transaction);
 
-                    case 32:
+                    case 33:
                         files = _context3.sent;
-                        _context3.next = 35;
+                        _context3.next = 36;
                         return PostsModel.createPost(req, fields, files, transaction);
 
-                    case 35:
+                    case 36:
                         post = _context3.sent;
-                        _context3.next = 38;
+                        _context3.next = 39;
                         return IPC.render(post.boardName, post.threadNumber, post.number, 'create');
 
-                    case 38:
+                    case 39:
                         //hasNewPosts.add(c.post.boardName + "/" + c.post.threadNumber); //TODO: pass to main process immediately
-                        if ('node-captcha-noscript' !== fields.captchaEngine) {
+                        if ('node-captcha-noscript' !== captchaEngine) {
                             res.send({
                                 boardName: post.boardName,
                                 postNumber: post.number
@@ -317,11 +318,11 @@ router.post('/action/createPost', function () {
 
                             res.redirect(303, path);
                         }
-                        _context3.next = 45;
+                        _context3.next = 46;
                         break;
 
-                    case 41:
-                        _context3.prev = 41;
+                    case 42:
+                        _context3.prev = 42;
                         _context3.t0 = _context3['catch'](1);
 
                         if (transaction) {
@@ -329,12 +330,12 @@ router.post('/action/createPost', function () {
                         }
                         next(_context3.t0);
 
-                    case 45:
+                    case 46:
                     case 'end':
                         return _context3.stop();
                 }
             }
-        }, _callee3, this, [[1, 41]]);
+        }, _callee3, this, [[1, 42]]);
     }));
 
     return function (_x5, _x6, _x7) {
@@ -344,7 +345,7 @@ router.post('/action/createPost', function () {
 
 router.post('/action/createThread', function () {
     var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(req, res, next) {
-        var transaction, _ref3, fields, files, boardName, _board3, thread;
+        var transaction, _ref3, fields, files, boardName, captchaEngine, _board3, thread, post;
 
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
             while (1) {
@@ -360,74 +361,79 @@ router.post('/action/createThread', function () {
                         fields = _ref3.fields;
                         files = _ref3.files;
                         boardName = fields.boardName;
+                        captchaEngine = fields.captchaEngine;
                         _board3 = Board.board(boardName);
 
                         if (_board3) {
-                            _context4.next = 11;
+                            _context4.next = 12;
                             break;
                         }
 
                         throw new Error(Tools.translate('Invalid board'));
 
-                    case 11:
-                        _context4.next = 13;
+                    case 12:
+                        _context4.next = 14;
                         return UsersModel.checkUserBan(req.ip, boardName, { write: true });
 
-                    case 13:
-                        _context4.next = 15;
+                    case 14:
+                        _context4.next = 16;
                         return (0, _geolocation2.default)(req.ip);
 
-                    case 15:
+                    case 16:
                         req.geolocation = _context4.sent;
-                        _context4.next = 18;
+                        _context4.next = 19;
                         return checkGeoBan(req.geolocation);
 
-                    case 18:
-                        _context4.next = 20;
+                    case 19:
+                        _context4.next = 21;
                         return Captch.checkCaptcha(req.ip, fields);
 
-                    case 20:
+                    case 21:
                         transaction = new _postCreationTransaction2.default(boardName);
-                        _context4.next = 23;
+                        _context4.next = 24;
                         return Files.getFiles(fields, files);
 
-                    case 23:
+                    case 24:
                         files = _context4.sent;
-                        _context4.next = 26;
+                        _context4.next = 27;
                         return _board3.testParameters(req, fields, files, true);
 
-                    case 26:
-                        _context4.next = 28;
+                    case 27:
+                        _context4.next = 29;
                         return ThreadsModel.createThread(req, fields, transaction);
 
-                    case 28:
+                    case 29:
                         thread = _context4.sent;
-                        _context4.next = 31;
+                        _context4.next = 32;
                         return Files.processFiles(boardName, files, transaction);
 
-                    case 31:
+                    case 32:
                         files = _context4.sent;
-                        _context4.next = 34;
+                        _context4.next = 35;
                         return PostsModel.createPost(req, fields, files, transaction, {
                             postNumber: thread.number,
                             date: new Date(thread.createdAt)
                         });
 
-                    case 34:
-                        //return IPC.render(post.boardName, post.threadNumber, post.number, 'create'); //TODO
-                        if ('node-captcha-noscript' !== c.fields.captchaEngine) {
+                    case 35:
+                        post = _context4.sent;
+                        _context4.next = 38;
+                        return IPC.render(post.boardName, post.threadNumber, post.number, 'create');
+
+                    case 38:
+                        if ('node-captcha-noscript' !== captchaEngine) {
                             res.send({
                                 boardName: thread.boardName,
                                 threadNumber: thread.number
                             });
                         } else {
-                            res.redirect(303, '/' + config('site.pathPrefix', '') + thread.boardName + '/res/' + thread.number + '.html');
+                            res.redirect(303, '/' + config('site.pathPrefix') + thread.boardName + '/res/' + thread.number + '.html');
                         }
-                        _context4.next = 41;
+                        _context4.next = 45;
                         break;
 
-                    case 37:
-                        _context4.prev = 37;
+                    case 41:
+                        _context4.prev = 41;
                         _context4.t0 = _context4['catch'](1);
 
                         if (transaction) {
@@ -435,12 +441,12 @@ router.post('/action/createThread', function () {
                         }
                         next(_context4.t0);
 
-                    case 41:
+                    case 45:
                     case 'end':
                         return _context4.stop();
                 }
             }
-        }, _callee4, this, [[1, 37]]);
+        }, _callee4, this, [[1, 41]]);
     }));
 
     return function (_x8, _x9, _x10) {

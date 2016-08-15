@@ -60,3 +60,12 @@ export async function updatePostIndex(boardName, postNumber, transformer) {
     Logger.error(err.stack || err);
   }
 }
+
+
+export async function removePostIndex(boardName, postNumber) {
+  await es.delete({
+    index: INDEX_NAME,
+    type: 'posts',
+    id: `${boardName}:${postNumber}`
+  });
+}

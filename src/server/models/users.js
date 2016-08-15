@@ -143,6 +143,11 @@ export async function addUserPostNumber(ip, boardName, postNumber) {
   await UserPostNumbers.addOne(postNumber, `${ip}:${boardName}`);
 }
 
+export async function removeUserPostNumber(ip, boardName, postNumber) {
+  ip = Tools.correctAddress(ip);
+  await UserPostNumbers.deleteOne(postNumber, `${ip}:${boardName}`);
+}
+
 export async function checkUserBan(ip, boardNames, { write } = {}) {
   ip = Tools.correctAddress(ip);
   let ban = ipBans[ip];

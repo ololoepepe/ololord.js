@@ -78,3 +78,29 @@ export async function addFileHashes(fileInfos) {
     return await FileHashes.addOne(createFileHash(fileInfo), fileInfo.hash);
   });
 }
+
+export async function removeFileHashes(fileInfos) {
+  if (!_(fileInfos).isArray()) {
+    fileInfos = [fileInfos];
+  }
+  if (fileInfos.length <= 0) {
+    return;
+  }
+  await Tools.series(fileInfos, async function(fileInfo) {
+    await FileHashes.deleteOne(createFileHash(fileInfo), fileInfo.hash);
+    let size = await FileHashes.count(fileInfo.hash);
+    if (size <= 0) {
+      await FileHashes.delete(fileInfo.hash);
+    }
+  });
+}
+
+export async function removeFileInfos(fileInfoNames) {
+  if (!_(fileInfoNames).isArray()) {
+    fileInfos = [fileInfos];
+  }
+  if (ids.length <= 0) {
+    return 0;
+  }
+  await FileInfos.deleteSome(fileInfoNames);
+}

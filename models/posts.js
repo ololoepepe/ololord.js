@@ -598,103 +598,384 @@ var createPost = exports.createPost = function () {
   };
 }();
 
-var removePost = exports.removePost = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(boardName, postNumber) {
-    var _ref4 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+var removeReferencedPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(_ref4) {
+    var boardName = _ref4.boardName;
+    var number = _ref4.number;
+    var threadNumber = _ref4.threadNumber;
 
-    var removingThread = _ref4.removingThread;
-    var leaveReferences = _ref4.leaveReferences;
-    var leaveFileInfos = _ref4.leaveFileInfos;
-    var board, c;
-    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+    var _ref5 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var nogenerate = _ref5.nogenerate;
+    var key, referencedPosts;
+    return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
-        switch (_context10.prev = _context10.next) {
+        switch (_context11.prev = _context11.next) {
+          case 0:
+            key = boardName + ':' + number;
+            _context11.next = 3;
+            return ReferencedPosts.getAll(key);
+
+          case 3:
+            referencedPosts = _context11.sent;
+            _context11.next = 6;
+            return Tools.series(referencedPosts, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(ref, refKey) {
+                return regeneratorRuntime.wrap(function _callee10$(_context10) {
+                  while (1) {
+                    switch (_context10.prev = _context10.next) {
+                      case 0:
+                        _context10.next = 2;
+                        return ReferringPosts.deleteOne(key, refKey);
+
+                      case 2:
+                        return _context10.abrupt('return', _context10.sent);
+
+                      case 3:
+                      case 'end':
+                        return _context10.stop();
+                    }
+                  }
+                }, _callee10, this);
+              }));
+
+              return function (_x29, _x30) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 6:
+            if (!nogenerate) {
+              (0, _underscore2.default)(referencedPosts).filter(function (ref) {
+                return ref.boardName !== boardName || ref.threadNumber !== threadNumber;
+              }).forEach(function (ref) {
+                IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
+              });
+            }
+            ReferencedPosts.delete(key);
+
+          case 8:
+          case 'end':
+            return _context11.stop();
+        }
+      }
+    }, _callee11, this);
+  }));
+
+  return function removeReferencedPosts(_x26, _x27) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var rerenderPost = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, postNumber) {
+    var _ref6 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var silent = _ref6.silent;
+    var key, post, referencedPosts, text;
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
+      while (1) {
+        switch (_context12.prev = _context12.next) {
+          case 0:
+            key = boardName + ':' + postNumber;
+
+            if (!silent) {
+              console.log(Tools.translate('Rendering post: [$[1]] $[2]', '', boardName, postNumber));
+            }
+            _context12.next = 4;
+            return getPost(boardName, postNumber);
+
+          case 4:
+            post = _context12.sent;
+            referencedPosts = {};
+            _context12.next = 8;
+            return (0, _markup2.default)(boardName, post.rawText, {
+              markupModes: post.markup,
+              referencedPosts: referencedPosts,
+              accessLevel: post.user.level
+            });
+
+          case 8:
+            text = _context12.sent;
+
+            post.text = text;
+            _context12.next = 12;
+            return Posts.setOne(post, key);
+
+          case 12:
+            _context12.next = 14;
+            return removeReferencedPosts(post, { nogenerate: !silent });
+
+          case 14:
+            _context12.next = 16;
+            return addReferencedPosts(post, referencedPosts, { nogenerate: !silent });
+
+          case 16:
+            if (silent) {
+              IPC.render(boardName, post.threadNumber, postNumber, 'edit');
+            }
+
+          case 17:
+          case 'end':
+            return _context12.stop();
+        }
+      }
+    }, _callee12, this);
+  }));
+
+  return function rerenderPost(_x31, _x32, _x33) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var rerenderReferringPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(_ref7) {
+    var boardName = _ref7.boardName;
+    var number = _ref7.number;
+    var threadNumber = _ref7.threadNumber;
+
+    var _ref8 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var removingThread = _ref8.removingThread;
+    var referringPosts;
+    return regeneratorRuntime.wrap(function _callee14$(_context14) {
+      while (1) {
+        switch (_context14.prev = _context14.next) {
+          case 0:
+            referringPosts = ReferringPosts.getAll(boardName + ':' + number);
+
+            referringPosts = (0, _underscore2.default)(referringPosts).filter(function (ref) {
+              return !removingThread || ref.boardName !== boardName || ref.threadNumber !== threadNumber;
+            });
+            _context14.next = 4;
+            return Tools.series(referringPosts, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(ref) {
+                return regeneratorRuntime.wrap(function _callee13$(_context13) {
+                  while (1) {
+                    switch (_context13.prev = _context13.next) {
+                      case 0:
+                        _context13.next = 2;
+                        return rerenderPost(ref.boardName, ref.postNumber, true);
+
+                      case 2:
+                        return _context13.abrupt('return', _context13.sent);
+
+                      case 3:
+                      case 'end':
+                        return _context13.stop();
+                    }
+                  }
+                }, _callee13, this);
+              }));
+
+              return function (_x38) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 4:
+          case 'end':
+            return _context14.stop();
+        }
+      }
+    }, _callee14, this);
+  }));
+
+  return function rerenderReferringPosts(_x35, _x36) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var removePost = exports.removePost = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(boardName, postNumber) {
+    var _ref9 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var removingThread = _ref9.removingThread;
+    var leaveReferences = _ref9.leaveReferences;
+    var leaveFileInfos = _ref9.leaveFileInfos;
+    var board, key, post, fileNames, fileInfos, paths;
+    return regeneratorRuntime.wrap(function _callee17$(_context17) {
+      while (1) {
+        switch (_context17.prev = _context17.next) {
           case 0:
             board = _board2.default.board(boardName);
 
             if (board) {
-              _context10.next = 3;
+              _context17.next = 3;
               break;
             }
 
-            return _context10.abrupt('return', Promise.reject(Tools.translate("Invalid board")));
+            return _context17.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
-            c = {};
-            return _context10.abrupt('return', db.sadd("postsPlannedForDeletion", boardName + ":" + postNumber).then(function () {
-              return PostsModel.getPost(boardName, postNumber, { withReferences: true });
-            }).then(function (post) {
-              c.post = post;
-              return db.srem("threadPostNumbers:" + boardName + ":" + post.threadNumber, postNumber);
-            }).then(function () {
-              return db.hdel("posts", boardName + ":" + postNumber);
-            }).then(function () {
-              if (options && options.leaveReferences) return Promise.resolve();
-              return rerenderReferringPosts(c.post, { removingThread: options && options.removingThread });
-            }).catch(function (err) {
-              Logger.error(err.stack || err);
-            }).then(function () {
-              if (options && options.leaveReferences) return Promise.resolve();
-              return removeReferencedPosts(c.post);
-            }).catch(function (err) {
-              Logger.error(err.stack || err);
-            }).then(function () {
-              return db.srem("userPostNumbers:" + c.post.user.ip + ":" + board.name, postNumber);
-            }).then(function () {
-              return postFileInfoNames(boardName, postNumber);
-            }).then(function (names) {
-              c.fileInfoNames = names;
-              return Promise.all(names.map(function (name) {
-                return db.hget("fileInfos", name);
-              }));
-            }).then(function (fileInfos) {
-              if (options && options.leaveFileInfos) return Promise.resolve();
-              c.fileInfos = [];
-              c.paths = [];
-              fileInfos.forEach(function (fileInfo) {
-                if (!fileInfo) return;
-                fileInfo = JSON.parse(fileInfo);
-                c.fileInfos.push(fileInfo);
-                c.paths.push(__dirname + "/../public/" + boardName + "/src/" + fileInfo.name);
-                c.paths.push(__dirname + "/../public/" + boardName + "/thumb/" + fileInfo.thumb.name);
-              });
-              return db.del("postFileInfoNames:" + boardName + ":" + postNumber);
-            }).then(function () {
-              if (options && options.leaveFileInfos) return Promise.resolve();
-              return Promise.all(c.fileInfoNames.map(function (name) {
-                return db.hdel("fileInfos", name);
-              }));
-            }).then(function () {
-              if (options && options.leaveFileInfos) return Promise.resolve();
-              return removeFileHashes(c.fileInfos);
-            }).then(function () {
-              return board.removeExtraData(postNumber);
-            }).then(function () {
-              return es.delete({
-                index: "ololord.js",
-                type: "posts",
-                id: boardName + ":" + postNumber
-              });
-            }).then(function () {
-              if (!options || !options.leaveFileInfos) {
-                c.paths.forEach(function (path) {
-                  return FS.remove(path).catch(function (err) {
-                    Logger.error(err.stack || err);
-                  });
-                });
-              }
-              return db.srem("postsPlannedForDeletion", boardName + ":" + postNumber);
-            }));
+            key = boardName + ':' + postNumber;
+            _context17.next = 6;
+            return PostsPlannedForDeletion.addOne(key);
 
-          case 5:
+          case 6:
+            _context17.next = 8;
+            return getPost(boardName, postNumber, { withReferences: true });
+
+          case 8:
+            post = _context17.sent;
+            _context17.next = 11;
+            return ThreadsModel.removeThreadPostNumber(boardName, post.threadNumber, postNumber);
+
+          case 11:
+            _context17.next = 13;
+            return Posts.deleteOne(key);
+
+          case 13:
+            if (leaveReferences) {
+              _context17.next = 30;
+              break;
+            }
+
+            _context17.prev = 14;
+            _context17.next = 17;
+            return rerenderReferringPosts(post, { removingThread: removingThread });
+
+          case 17:
+            _context17.next = 22;
+            break;
+
+          case 19:
+            _context17.prev = 19;
+            _context17.t0 = _context17['catch'](14);
+
+            Logger.error(_context17.t0.stack || _context17.t0);
+
+          case 22:
+            _context17.prev = 22;
+            _context17.next = 25;
+            return removeReferencedPosts(post);
+
+          case 25:
+            _context17.next = 30;
+            break;
+
+          case 27:
+            _context17.prev = 27;
+            _context17.t1 = _context17['catch'](22);
+
+            Logger.error(_context17.t1.stack || _context17.t1);
+
+          case 30:
+            _context17.next = 32;
+            return UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber);
+
+          case 32:
+            if (leaveFileInfos) {
+              _context17.next = 48;
+              break;
+            }
+
+            _context17.next = 35;
+            return PostFileInfoNames.getAll(key);
+
+          case 35:
+            fileNames = _context17.sent;
+            _context17.next = 38;
+            return Tools.series(fileNames, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(fileName) {
+                return regeneratorRuntime.wrap(function _callee15$(_context15) {
+                  while (1) {
+                    switch (_context15.prev = _context15.next) {
+                      case 0:
+                        _context15.next = 2;
+                        return FilesModel.getFileInfoByName(fileName);
+
+                      case 2:
+                        return _context15.abrupt('return', _context15.sent);
+
+                      case 3:
+                      case 'end':
+                        return _context15.stop();
+                    }
+                  }
+                }, _callee15, this);
+              }));
+
+              return function (_x43) {
+                return ref.apply(this, arguments);
+              };
+            }(), true);
+
+          case 38:
+            fileInfos = _context17.sent;
+
+            fileInfos = fileInfos.filter(function (fileInfo) {
+              return !!fileInfo;
+            });
+            paths = fileInfos.map(function (fileInfo) {
+              return [__dirname + '/../public/' + boardName + '/src/' + fileInfo.name, __dirname + '/../public/' + boardName + '/thumb/' + fileInfo.thumb.name];
+            });
+            _context17.next = 43;
+            return PostFileInfoNames.delete(key);
+
+          case 43:
+            _context17.next = 45;
+            return FilesModel.removeFileInfos(fileNames);
+
+          case 45:
+            _context17.next = 47;
+            return FilesModel.removeFileHashes(fileInfos);
+
+          case 47:
+            Tools.series((0, _underscore2.default)(paths).flatten(), function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(path) {
+                return regeneratorRuntime.wrap(function _callee16$(_context16) {
+                  while (1) {
+                    switch (_context16.prev = _context16.next) {
+                      case 0:
+                        _context16.prev = 0;
+                        _context16.next = 3;
+                        return FS.remove(path);
+
+                      case 3:
+                        _context16.next = 8;
+                        break;
+
+                      case 5:
+                        _context16.prev = 5;
+                        _context16.t0 = _context16['catch'](0);
+
+                        Logger.error(_context16.t0.stack || _context16.t0);
+
+                      case 8:
+                      case 'end':
+                        return _context16.stop();
+                    }
+                  }
+                }, _callee16, this, [[0, 5]]);
+              }));
+
+              return function (_x44) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 48:
+            _context17.next = 50;
+            return board.removeExtraData(postNumber);
+
+          case 50:
+            _context17.next = 52;
+            return Search.removePostIndex(boardName, postNumber);
+
+          case 52:
+            _context17.next = 54;
+            return PostsPlannedForDeletion.deleteOne(key);
+
+          case 54:
           case 'end':
-            return _context10.stop();
+            return _context17.stop();
         }
       }
-    }, _callee10, this);
+    }, _callee17, this, [[14, 19], [22, 27]]);
   }));
 
-  return function removePost(_x26, _x27, _x28) {
+  return function removePost(_x39, _x40, _x41) {
     return ref.apply(this, arguments);
   };
 }();
@@ -767,6 +1048,10 @@ var PostFileInfoNames = new _unorderedSet2.default((0, _clientFactory2.default)(
   stringify: false
 });
 var Posts = new _hash2.default((0, _clientFactory2.default)(), 'posts');
+var PostsPlannedForDeletion = new _unorderedSet2.default((0, _clientFactory2.default)(), 'postsPlannedForDeletion', {
+  parse: false,
+  stringify: false
+});
 var ReferringPosts = new _hash2.default((0, _clientFactory2.default)(), 'referringPosts');
 var ReferencedPosts = new _hash2.default((0, _clientFactory2.default)(), 'referencedPosts');
 var UserBans = new _key2.default((0, _clientFactory2.default)(), 'userBans');

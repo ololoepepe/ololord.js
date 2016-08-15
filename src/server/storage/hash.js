@@ -20,7 +20,7 @@ export default class Hash {
   }
 
   async getSome(ids, subkey) {
-    if (!ids || !_(ids).isArray() || ids.length <= 0) {
+    if (!_(ids).isArray() || ids.length <= 0) {
       return [];
     }
     let data = await this.client.hmget.call(this.client, this.fullKey(subkey), ...ids);
@@ -50,8 +50,18 @@ export default class Hash {
     return await this.client.hincrby(this.fullKey(subkey), key, n);
   }
 
-  async deleteOne(id) {
+  async deleteOne(id, subkey) {
     return await this.client.hdel(this.fullKey(subkey), id);
+  }
+
+  async deleteSome(ids, subkey) {
+    if (!_(ids).isArray()) {
+      ids = [ids];
+    }
+    if (ids.length <= 0) {
+      return 0;
+    }
+    return await this.client.hdel(this.fullKey(subkey), ...ids);
   }
 
   async keys(subkey) {

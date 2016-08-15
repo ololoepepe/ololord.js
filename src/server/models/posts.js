@@ -20,6 +20,10 @@ let PostFileInfoNames = new UnorderedSet(client(), 'postFileInfoNames', {
   stringify: false
 });
 let Posts = new Hash(client(), 'posts');
+let PostsPlannedForDeletion = new UnorderedSet(client(), 'postsPlannedForDeletion', {
+  parse: false,
+  stringify: false
+});
 let ReferringPosts = new Hash(client(), 'referringPosts');
 let ReferencedPosts = new Hash(client(), 'referencedPosts');
 let UserBans = new Key(client(), 'userBans');
@@ -232,79 +236,100 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
   return post;
 }
 
-export async function removePost(boardName, postNumber, { removingThread, leaveReferences, leaveFileInfos } = {}) {
-  var board = Board.board(boardName);
-  if (!board)
-      return Promise.reject(Tools.translate("Invalid board"));
-  var c = {};
-  return db.sadd("postsPlannedForDeletion", boardName + ":" + postNumber).then(function() {
-      return PostsModel.getPost(boardName, postNumber, { withReferences: true });
-  }).then(function(post) {
-      c.post = post;
-      return db.srem("threadPostNumbers:" + boardName + ":" + post.threadNumber, postNumber);
-  }).then(function() {
-      return db.hdel("posts", boardName + ":" + postNumber);
-  }).then(function() {
-      if (options && options.leaveReferences)
-          return Promise.resolve();
-      return rerenderReferringPosts(c.post, { removingThread: options && options.removingThread });
-  }).catch(function(err) {
-      Logger.error(err.stack || err);
-  }).then(function() {
-      if (options && options.leaveReferences)
-          return Promise.resolve();
-      return removeReferencedPosts(c.post);
-  }).catch(function(err) {
-      Logger.error(err.stack || err);
-  }).then(function() {
-      return db.srem("userPostNumbers:" + c.post.user.ip + ":" + board.name, postNumber);
-  }).then(function() {
-      return postFileInfoNames(boardName, postNumber);
-  }).then(function(names) {
-      c.fileInfoNames = names;
-      return Promise.all(names.map(function(name) {
-          return db.hget("fileInfos", name);
-      }));
-  }).then(function(fileInfos) {
-      if (options && options.leaveFileInfos)
-          return Promise.resolve();
-      c.fileInfos = [];
-      c.paths = [];
-      fileInfos.forEach(function(fileInfo) {
-          if (!fileInfo)
-              return;
-          fileInfo = JSON.parse(fileInfo);
-          c.fileInfos.push(fileInfo);
-          c.paths.push(__dirname + "/../public/" + boardName + "/src/" + fileInfo.name);
-          c.paths.push(__dirname + "/../public/" + boardName + "/thumb/" + fileInfo.thumb.name);
-      });
-      return db.del("postFileInfoNames:" + boardName + ":" + postNumber);
-  }).then(function() {
-      if (options && options.leaveFileInfos)
-          return Promise.resolve();
-      return Promise.all(c.fileInfoNames.map(function(name) {
-          return db.hdel("fileInfos", name);
-      }));
-  }).then(function() {
-      if (options && options.leaveFileInfos)
-          return Promise.resolve();
-      return removeFileHashes(c.fileInfos);
-  }).then(function() {
-      return board.removeExtraData(postNumber);
-  }).then(function() {
-      return es.delete({
-          index: "ololord.js",
-          type: "posts",
-          id: boardName + ":" + postNumber
-      });
-  }).then(function() {
-      if (!options || !options.leaveFileInfos) {
-          c.paths.forEach(function(path) {
-              return FS.remove(path).catch(function(err) {
-                  Logger.error(err.stack || err);
-              });
-          });
-      }
-      return db.srem("postsPlannedForDeletion", boardName + ":" + postNumber);
+async function removeReferencedPosts({ boardName, number, threadNumber }, { nogenerate } = {}) {
+  let key = `${boardName}:${number}`;
+  let referencedPosts = await ReferencedPosts.getAll(key);
+  await Tools.series(referencedPosts, async function(ref, refKey) {
+    return await ReferringPosts.deleteOne(key, refKey);
   });
+  if (!nogenerate) {
+    _(referencedPosts).filter((ref) => {
+      return (ref.boardName !== boardName) || (ref.threadNumber !== threadNumber);
+    }).forEach((ref) => {
+      IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
+    });
+  }
+  ReferencedPosts.delete(key);
+}
+
+async function rerenderPost(boardName, postNumber, { silent } = {}) {
+  let key = `${boardName}:${postNumber}`;
+  if (!silent) {
+    console.log(Tools.translate('Rendering post: [$[1]] $[2]', '', boardName, postNumber));
+  }
+  let post = await getPost(boardName, postNumber);
+  let referencedPosts = {};
+  let text = await markup(boardName, post.rawText, {
+    markupModes: post.markup,
+    referencedPosts: referencedPosts,
+    accessLevel: post.user.level
+  });
+  post.text = text;
+  await Posts.setOne(post, key);
+  await removeReferencedPosts(post, { nogenerate: !silent });
+  await addReferencedPosts(post, referencedPosts, { nogenerate: !silent });
+  if (silent) {
+    IPC.render(boardName, post.threadNumber, postNumber, 'edit');
+  }
+}
+
+async function rerenderReferringPosts({ boardName, number, threadNumber }, { removingThread } = {}) {
+  let referringPosts = ReferringPosts.getAll(`${boardName}:${number}`);
+  referringPosts = _(referringPosts).filter((ref) => {
+    return !removingThread || ref.boardName !== boardName || ref.threadNumber !== threadNumber;
+  });
+  await Tools.series(referringPosts, async function(ref) {
+    return await rerenderPost(ref.boardName, ref.postNumber, true);
+  });
+}
+
+export async function removePost(boardName, postNumber, { removingThread, leaveReferences, leaveFileInfos } = {}) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  let key = `${boardName}:${postNumber}`
+  await PostsPlannedForDeletion.addOne(key);
+  let post = await getPost(boardName, postNumber, { withReferences: true });
+  await ThreadsModel.removeThreadPostNumber(boardName, post.threadNumber, postNumber);
+  await Posts.deleteOne(key);
+  if (!leaveReferences) {
+    try {
+      await rerenderReferringPosts(post, { removingThread: removingThread });
+    } catch (err) {
+      Logger.error(err.stack || err);
+    }
+    try {
+      await removeReferencedPosts(post);
+    } catch (err) {
+      Logger.error(err.stack || err);
+    }
+  }
+  await UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber);
+  if (!leaveFileInfos) {
+    let fileNames = await PostFileInfoNames.getAll(key);
+    let fileInfos = await Tools.series(fileNames, async function(fileName) {
+      return await FilesModel.getFileInfoByName(fileName);
+    }, true);
+    fileInfos = fileInfos.filter(fileInfo => !!fileInfo);
+    let paths = fileInfos.map((fileInfo) => {
+      return [
+        `${__dirname}/../public/${boardName}/src/${fileInfo.name}`,
+        `${__dirname}/../public/${boardName}/thumb/${fileInfo.thumb.name}`
+      ];
+    });
+    await PostFileInfoNames.delete(key);
+    await FilesModel.removeFileInfos(fileNames);
+    await FilesModel.removeFileHashes(fileInfos);
+    Tools.series(_(paths).flatten(), async function(path) {
+      try {
+        await FS.remove(path);
+      } catch (err) {
+        Logger.error(err.stack || err);
+      }
+    });
+  }
+  await board.removeExtraData(postNumber);
+  await Search.removePostIndex(boardName, postNumber);
+  await PostsPlannedForDeletion.deleteOne(key);
 }
