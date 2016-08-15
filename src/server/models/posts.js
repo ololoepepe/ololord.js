@@ -333,3 +333,105 @@ export async function removePost(boardName, postNumber, { removingThread, leaveR
   await Search.removePostIndex(boardName, postNumber);
   await PostsPlannedForDeletion.deleteOne(key);
 }
+
+export async function editPost(req, fields) {
+  let { boardName, postNumber, text, name, subject, sage, markupMode } = fields;
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+  if (!postNumber) {
+    return Promise.reject(new Error(Tools.translate('Invalid post number')));
+  }
+  let date = Tools.now();
+  let rawText = text || null;
+  let markupModes = Tools.markupModes(markupMode);
+  let referencedPosts = {};
+  sage = ('true' === sage);
+  let post = await getPost(boardName, postNumber, { withExtraData: true });
+  if (!post) {
+    return Promise.reject(new Error(Tools.translate('Invalid post')));
+  }
+  /*
+  return db.hget("threads:" + board.name, c.post.threadNumber);
+  if (!thread)
+      return Promise.reject(Tools.translate("No such thread"));
+  */
+  let result = await UsersModel.checkUserPermissions(req, board, post, 'editPost');
+  if (!result) {
+    return Promise.reject(new Error(Tools.translate('Not enough rights')));
+  }
+  let key = `${boardName}:${postNumbers}`;
+  let count = await PostFileInfoNames.count(key);
+  if (!rawText && count <= 0) {
+    return Promise.reject(new Error(Tools.translate('Both file and comment are missing')));
+  }
+  text = await markup(board.name, rawText, {
+    markupModes: markupModes,
+    referencedPosts: referencedPosts,
+    accessLevel: req.level(board.name)
+  });
+  let plainText = text ? Tools.plainText(text, { brToNewline: true }) : null;
+  let extraData = await board.postExtraData(req, fields, null, post);
+  post.markup = markupModes;
+  post.name = name || null;
+  post.plainText = plainText;
+  post.rawText = rawText;
+  post.subject = subject || null;
+  post.text = text || null;
+  post.updatedAt = date.toISOString();
+  //delete post.bannedFor; //TODO: WTF?
+  await Posts.setOne(key, post);
+  await board.removeExtraData(postNumber);
+  await board.storeExtraData(postNumber, extraData);
+  await removeReferencedPosts(post);
+  await addReferencedPosts(post, referencedPosts);
+  await Search.updatePostIndex(boardName, postNumber, (body) => {
+    body.plainText = plainText;
+    body.subject = subject;
+    return body;
+  });
+  return post;
+}
+
+export async function deletePost(req, { boardName, postNumber, archived, password }) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+  if (!postNumber) {
+    return Promise.reject(new Error(Tools.translate('Invalid post number')));
+  }
+  let post = await PostsModel.getPost(boardName, postNumber);
+  if (!post) {
+    return Promise.reject(new Error(Tools.translate('No such post')));
+  }
+  let isThread = post.threadNumber === post.number;
+  archived = ('true' === archived);
+  if (archived && !isThread) {
+    return Promise.reject(new Error(Tools.translate('Deleting posts from archived threads is not allowed')));
+  }
+  let result = await UsersModel.checkUserPermissions(req, board, post, 'deletePost', Tools.sha1(password));
+  if (!result) {
+    return Promise.reject(new Error(Tools.translate('Not enough rights')));
+  }
+  if (isThread) {
+    await removeThread(boardName, postNumber, { archived: archived });
+  } else {
+    await removePost(boardName, postNumber);
+  }
+  if (isThread && archived) {
+    await Tools.series(['json', 'html'], async function(suffix) {
+      return await FS.remove(`${__dirname}/../public/${boardName}/arch/${postNumber}.${suffix}`);
+    });
+    await IPC.renderArchive(boardName);
+  } else if (!archived) {
+    await IPC.render(boardName, post.threadNumber, postNumber, isThread ? 'delete' : 'edit');
+  }
+  return {
+    boardName: boardName,
+    threadNumber: (isThread ? 0 : post.threadNumber)
+  };
+}

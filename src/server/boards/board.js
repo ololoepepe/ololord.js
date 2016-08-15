@@ -253,42 +253,48 @@ Board.boards = {};
     return [];
 };
 
-/*public*/ Board.prototype.testParameters = function(req, fields, files, creatingThread) {
-  var email = fields.email || "";
-  var name = fields.name || "";
-  var subject = fields.subject || "";
-  var text = fields.text || "";
-  var password = fields.password || "";
-  var fileCount = files.length;
-  var maxFileSize = this.maxFileSize;
-  var maxFileCount = this.maxFileCount;
-  if (email.length > this.maxEmailLength)
-      return Promise.reject(Tools.translate("E-mail is too long"));
-  if (name.length > this.maxNameLength)
-      return Promise.reject(Tools.translate("Name is too long"));
-  if (subject.length > this.maxSubjectLength)
-      return Promise.reject(Tools.translate("Subject is too long"));
-  if (text.length > this.maxTextFieldLength)
-      return Promise.reject(Tools.translate("Comment is too long"));
-  if (password.length > this.maxPasswordLength)
-      return Promise.reject(Tools.translate("Password is too long"));
-  if (creatingThread && maxFileCount && !fileCount)
-      return Promise.reject(Tools.translate("Attempt to create a thread without attaching a file"));
-  if (text.length < 1 && !fileCount)
-      return Promise.reject(Tools.translate("Both file and comment are missing"));
-  if (fileCount > maxFileCount) {
-      return Promise.reject(Tools.translate("Too many files"));
-  } else {
-      var err = files.reduce((err, file) => {
-          if (err)
-              return err;
-          if (file.size > maxFileSize)
-              return Tools.translate("File is too big");
-          if (this.supportedFileTypes.indexOf(file.mimeType) < 0)
-              return Tools.translate("File type is not supported");
-      }, "");
-      if (err)
-          return Promise.reject(err);
+/*public*/ Board.prototype.testParameters = function(mode, req, { name, subject, text, password }, files) {
+  name = name || '';
+  subject = subject || '';
+  text = text || '';
+  password = password || '';
+  if (name.length > this.maxNameLength) {
+    return Promise.reject(new Error(Tools.translate('Name is too long')));
+  }
+  if (subject.length > this.maxSubjectLength) {
+    return Promise.reject(new Error(Tools.translate('Subject is too long')));
+  }
+  if (text.length > this.maxTextFieldLength) {
+    return Promise.reject(new Error(Tools.translate('Comment is too long')));
+  }
+  if (password.length > this.maxPasswordLength) {
+    return Promise.reject(new Error(Tools.translate('Password is too long')));
+  }
+  if ('markupText' === mode || 'editPost' === mode) {
+    return;
+  }
+  if ('createThread' === mode && this.maxFileCount && files.length <= 0) {
+    return Promise.reject(new Error(Tools.translate('Attempt to create a thread without attaching a file')));
+  }
+  if (text.length <= 0 && files.length <= 0) {
+    return Promise.reject(new Error(Tools.translate('Both file and comment are missing')));
+  }
+  if (files.length > this.maxFileCount) {
+    return Promise.reject(new Error(Tools.translate('Too many files')));
+  }
+  let err = files.reduce((err, file) => {
+    if (err) {
+      return err;
+    }
+    if (file.size > this.maxFileSize) {
+      return Tools.translate('File is too big');
+    }
+    if (this.supportedFileTypes.indexOf(file.mimeType) < 0) {
+      return Tools.translate('File type is not supported');
+    }
+  }, '');
+  if (err) {
+    return Promise.reject(err);
   }
 };
 

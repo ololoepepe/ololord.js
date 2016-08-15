@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.removePost = exports.createPost = exports.addReferencedPosts = exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
+exports.deletePost = exports.editPost = exports.removePost = exports.createPost = exports.addReferencedPosts = exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
 
 var addDataToPost = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(board, post) {
@@ -976,6 +976,311 @@ var removePost = exports.removePost = function () {
   }));
 
   return function removePost(_x39, _x40, _x41) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var editPost = exports.editPost = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(req, fields) {
+    var boardName, postNumber, text, name, subject, sage, markupMode, board, date, rawText, markupModes, referencedPosts, post, result, key, count, plainText, extraData;
+    return regeneratorRuntime.wrap(function _callee18$(_context18) {
+      while (1) {
+        switch (_context18.prev = _context18.next) {
+          case 0:
+            boardName = fields.boardName;
+            postNumber = fields.postNumber;
+            text = fields.text;
+            name = fields.name;
+            subject = fields.subject;
+            sage = fields.sage;
+            markupMode = fields.markupMode;
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context18.next = 10;
+              break;
+            }
+
+            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+
+          case 10:
+            postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+
+            if (postNumber) {
+              _context18.next = 13;
+              break;
+            }
+
+            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post number'))));
+
+          case 13:
+            date = Tools.now();
+            rawText = text || null;
+            markupModes = Tools.markupModes(markupMode);
+            referencedPosts = {};
+
+            sage = 'true' === sage;
+            _context18.next = 20;
+            return getPost(boardName, postNumber, { withExtraData: true });
+
+          case 20:
+            post = _context18.sent;
+
+            if (post) {
+              _context18.next = 23;
+              break;
+            }
+
+            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post'))));
+
+          case 23:
+            _context18.next = 25;
+            return UsersModel.checkUserPermissions(req, board, post, 'editPost');
+
+          case 25:
+            result = _context18.sent;
+
+            if (result) {
+              _context18.next = 28;
+              break;
+            }
+
+            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
+
+          case 28:
+            key = boardName + ':' + postNumbers;
+            _context18.next = 31;
+            return PostFileInfoNames.count(key);
+
+          case 31:
+            count = _context18.sent;
+
+            if (!(!rawText && count <= 0)) {
+              _context18.next = 34;
+              break;
+            }
+
+            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Both file and comment are missing'))));
+
+          case 34:
+            _context18.next = 36;
+            return (0, _markup2.default)(board.name, rawText, {
+              markupModes: markupModes,
+              referencedPosts: referencedPosts,
+              accessLevel: req.level(board.name)
+            });
+
+          case 36:
+            text = _context18.sent;
+            plainText = text ? Tools.plainText(text, { brToNewline: true }) : null;
+            _context18.next = 40;
+            return board.postExtraData(req, fields, null, post);
+
+          case 40:
+            extraData = _context18.sent;
+
+            post.markup = markupModes;
+            post.name = name || null;
+            post.plainText = plainText;
+            post.rawText = rawText;
+            post.subject = subject || null;
+            post.text = text || null;
+            post.updatedAt = date.toISOString();
+            //delete post.bannedFor; //TODO: WTF?
+            _context18.next = 50;
+            return Posts.setOne(key, post);
+
+          case 50:
+            _context18.next = 52;
+            return board.removeExtraData(postNumber);
+
+          case 52:
+            _context18.next = 54;
+            return board.storeExtraData(postNumber, extraData);
+
+          case 54:
+            _context18.next = 56;
+            return removeReferencedPosts(post);
+
+          case 56:
+            _context18.next = 58;
+            return addReferencedPosts(post, referencedPosts);
+
+          case 58:
+            _context18.next = 60;
+            return Search.updatePostIndex(boardName, postNumber, function (body) {
+              body.plainText = plainText;
+              body.subject = subject;
+              return body;
+            });
+
+          case 60:
+            return _context18.abrupt('return', post);
+
+          case 61:
+          case 'end':
+            return _context18.stop();
+        }
+      }
+    }, _callee18, this);
+  }));
+
+  return function editPost(_x45, _x46) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var deletePost = exports.deletePost = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(req, _ref10) {
+    var boardName = _ref10.boardName;
+    var postNumber = _ref10.postNumber;
+    var archived = _ref10.archived;
+    var password = _ref10.password;
+    var board, post, isThread, result;
+    return regeneratorRuntime.wrap(function _callee20$(_context20) {
+      while (1) {
+        switch (_context20.prev = _context20.next) {
+          case 0:
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context20.next = 3;
+              break;
+            }
+
+            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+
+          case 3:
+            postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+
+            if (postNumber) {
+              _context20.next = 6;
+              break;
+            }
+
+            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post number'))));
+
+          case 6:
+            _context20.next = 8;
+            return PostsModel.getPost(boardName, postNumber);
+
+          case 8:
+            post = _context20.sent;
+
+            if (post) {
+              _context20.next = 11;
+              break;
+            }
+
+            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('No such post'))));
+
+          case 11:
+            isThread = post.threadNumber === post.number;
+
+            archived = 'true' === archived;
+
+            if (!(archived && !isThread)) {
+              _context20.next = 15;
+              break;
+            }
+
+            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('Deleting posts from archived threads is not allowed'))));
+
+          case 15:
+            _context20.next = 17;
+            return UsersModel.checkUserPermissions(req, board, post, 'deletePost', Tools.sha1(password));
+
+          case 17:
+            result = _context20.sent;
+
+            if (result) {
+              _context20.next = 20;
+              break;
+            }
+
+            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
+
+          case 20:
+            if (!isThread) {
+              _context20.next = 25;
+              break;
+            }
+
+            _context20.next = 23;
+            return removeThread(boardName, postNumber, { archived: archived });
+
+          case 23:
+            _context20.next = 27;
+            break;
+
+          case 25:
+            _context20.next = 27;
+            return removePost(boardName, postNumber);
+
+          case 27:
+            if (!(isThread && archived)) {
+              _context20.next = 34;
+              break;
+            }
+
+            _context20.next = 30;
+            return Tools.series(['json', 'html'], function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(suffix) {
+                return regeneratorRuntime.wrap(function _callee19$(_context19) {
+                  while (1) {
+                    switch (_context19.prev = _context19.next) {
+                      case 0:
+                        _context19.next = 2;
+                        return FS.remove(__dirname + '/../public/' + boardName + '/arch/' + postNumber + '.' + suffix);
+
+                      case 2:
+                        return _context19.abrupt('return', _context19.sent);
+
+                      case 3:
+                      case 'end':
+                        return _context19.stop();
+                    }
+                  }
+                }, _callee19, this);
+              }));
+
+              return function (_x49) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 30:
+            _context20.next = 32;
+            return IPC.renderArchive(boardName);
+
+          case 32:
+            _context20.next = 37;
+            break;
+
+          case 34:
+            if (archived) {
+              _context20.next = 37;
+              break;
+            }
+
+            _context20.next = 37;
+            return IPC.render(boardName, post.threadNumber, postNumber, isThread ? 'delete' : 'edit');
+
+          case 37:
+            return _context20.abrupt('return', {
+              boardName: boardName,
+              threadNumber: isThread ? 0 : post.threadNumber
+            });
+
+          case 38:
+          case 'end':
+            return _context20.stop();
+        }
+      }
+    }, _callee20, this);
+  }));
+
+  return function deletePost(_x47, _x48) {
     return ref.apply(this, arguments);
   };
 }();

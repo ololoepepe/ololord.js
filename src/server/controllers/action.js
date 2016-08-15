@@ -69,9 +69,7 @@ router.post('/action/markupText', async function(req, res, next) {
     }
     await UsersModel.checkUserBan(req.ip, boardName, { write: true }); //TODO: Should it really be "write"?
     let rawText = text || '';
-    if (text.length > board.maxTextFieldLength) {
-      throw new Error(Tools.translate('Comment is too long'));
-    }
+    await board.testParameters('markupText', req, fields);
     markupMode = markupMode || '';
     let markupModes = Tools.markupModes(markupMode);
     text = await markup(boardName, text, {
@@ -116,7 +114,7 @@ router.post('/action/createPost', async function(req, res, next) {
     await Captch.checkCaptcha(req.ip, fields);
     transaction = new PostCreationTransaction(boardName);
     files = await Files.getFiles(fields, files);
-    await board.testParameters(req, fields, files);
+    await board.testParameters('createPost', req, fields, files);
     files = await Files.processFiles(boardName, files, transaction);
     let post = await PostsModel.createPost(req, fields, files, transaction);
     await IPC.render(post.boardName, post.threadNumber, post.number, 'create');
@@ -154,7 +152,7 @@ router.post('/action/createThread', async function(req, res, next) {
     await Captch.checkCaptcha(req.ip, fields);
     transaction = new PostCreationTransaction(boardName);
     files = await Files.getFiles(fields, files);
-    await board.testParameters(req, fields, files, true);
+    await board.testParameters('createThread', req, fields, files);
     let thread = await ThreadsModel.createThread(req, fields, transaction);
     files = await Files.processFiles(boardName, files, transaction);
     let post = await PostsModel.createPost(req, fields, files, transaction, {
@@ -178,23 +176,23 @@ router.post('/action/createThread', async function(req, res, next) {
   }
 });
 
-router.post("/action/editPost", function(req, res, next) {
-    var c = {};
-    Tools.parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        c.boardName = result.fields.boardName;
-        c.postNumber = +result.fields.postNumber;
-        return UsersModel.checkUserBan(req.ip, c.boardName, { write: true });
-    }).then(function() {
-        return Database.editPost(req, c.fields);
-    }).then(function(result) {
-        res.send({
-            boardName: c.boardName,
-            postNumber: c.postNumber
-        });
-    }).catch(function(err) {
-        next(err);
+router.post('/action/editPost', async function(req, res, next) {
+  try {
+    let { fields } = await Tools.parseForm(req);
+    let { boardName, postNumber } = fields;
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
+    req.geolocation = await geolocation(req.ip);
+    await checkGeoBan(req.geolocation);
+    await board.testParameters('editPost', req, fields);
+    let post = await PostsModel.editPost(req, fields);
+    IPC.render(boardName, post.threadNumber, postNumber, 'edit');
+    res.send({
+      boardName: post.boardName,
+      postNumber: post.number
     });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post("/action/addFiles", function(req, res, next) {
@@ -244,18 +242,17 @@ router.post("/action/addFiles", function(req, res, next) {
     });
 });
 
-router.post("/action/deletePost", function(req, res, next) {
-    var c = {};
-    Tools.parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        return UsersModel.checkUserBan(req.ip, c.fields.boardName, { write: true });
-    }).then(function() {
-        return Database.deletePost(req, res, c.fields);
-    }).then(function(result) {
-        res.send(result);
-    }).catch(function(err) {
-        next(err);
-    });
+router.post('/action/deletePost', async function(req, res, next) {
+  try {
+    let { fields } = await Tools.parseForm(req);
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
+    req.geolocation = await geolocation(req.ip);
+    await checkGeoBan(req.geolocation);
+    let result = await PostsModel.deletePost(req, fields);
+    res.send(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post("/action/deleteFile", function(req, res, next) {

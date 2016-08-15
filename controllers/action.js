@@ -135,7 +135,7 @@ function checkGeoBan(geolocationInfo) {
 
 router.post('/action/markupText', function () {
     var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, res, next) {
-        var _ref, _ref$fields, boardName, text, markupMode, signAsOp, tripcode, _board, rawText, markupModes, data;
+        var _ref, _ref$fields, _boardName, text, markupMode, signAsOp, tripcode, _board, rawText, markupModes, data;
 
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
             while (1) {
@@ -148,12 +148,12 @@ router.post('/action/markupText', function () {
                     case 3:
                         _ref = _context2.sent;
                         _ref$fields = _ref.fields;
-                        boardName = _ref$fields.boardName;
+                        _boardName = _ref$fields.boardName;
                         text = _ref$fields.text;
                         markupMode = _ref$fields.markupMode;
                         signAsOp = _ref$fields.signAsOp;
                         tripcode = _ref$fields.tripcode;
-                        _board = Board.board(boardName);
+                        _board = Board.board(_boardName);
 
                         if (_board) {
                             _context2.next = 13;
@@ -164,32 +164,27 @@ router.post('/action/markupText', function () {
 
                     case 13:
                         _context2.next = 15;
-                        return UsersModel.checkUserBan(req.ip, boardName, { write: true });
+                        return UsersModel.checkUserBan(req.ip, _boardName, { write: true });
 
                     case 15:
                         //TODO: Should it really be "write"?
                         rawText = text || '';
-
-                        if (!(text.length > _board.maxTextFieldLength)) {
-                            _context2.next = 18;
-                            break;
-                        }
-
-                        throw new Error(Tools.translate('Comment is too long'));
+                        _context2.next = 18;
+                        return _board.testParameters('markupText', req, fields);
 
                     case 18:
                         markupMode = markupMode || '';
                         markupModes = Tools.markupModes(markupMode);
                         _context2.next = 22;
-                        return markup(boardName, text, {
+                        return markup(_boardName, text, {
                             markupModes: markupModes,
-                            accessLevel: req.level(boardName)
+                            accessLevel: req.level(_boardName)
                         });
 
                     case 22:
                         text = _context2.sent;
                         data = {
-                            boardName: boardName,
+                            boardName: _boardName,
                             text: text || null,
                             rawText: rawText || null,
                             options: {
@@ -227,7 +222,7 @@ router.post('/action/markupText', function () {
 
 router.post('/action/createPost', function () {
     var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, res, next) {
-        var transaction, _ref2, fields, files, boardName, threadNumber, captchaEngine, _board2, post, hash, path;
+        var transaction, _ref2, _fields, files, _boardName2, threadNumber, captchaEngine, _board2, post, hash, path;
 
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
             while (1) {
@@ -240,12 +235,12 @@ router.post('/action/createPost', function () {
 
                     case 4:
                         _ref2 = _context3.sent;
-                        fields = _ref2.fields;
+                        _fields = _ref2.fields;
                         files = _ref2.files;
-                        boardName = fields.boardName;
-                        threadNumber = fields.threadNumber;
-                        captchaEngine = fields.captchaEngine;
-                        _board2 = Board.board(boardName);
+                        _boardName2 = _fields.boardName;
+                        threadNumber = _fields.threadNumber;
+                        captchaEngine = _fields.captchaEngine;
+                        _board2 = Board.board(_boardName2);
 
                         if (_board2) {
                             _context3.next = 13;
@@ -266,7 +261,7 @@ router.post('/action/createPost', function () {
 
                     case 16:
                         _context3.next = 18;
-                        return UsersModel.checkUserBan(req.ip, boardName, { write: true });
+                        return UsersModel.checkUserBan(req.ip, _boardName2, { write: true });
 
                     case 18:
                         _context3.next = 20;
@@ -279,26 +274,26 @@ router.post('/action/createPost', function () {
 
                     case 23:
                         _context3.next = 25;
-                        return Captch.checkCaptcha(req.ip, fields);
+                        return Captch.checkCaptcha(req.ip, _fields);
 
                     case 25:
-                        transaction = new _postCreationTransaction2.default(boardName);
+                        transaction = new _postCreationTransaction2.default(_boardName2);
                         _context3.next = 28;
-                        return Files.getFiles(fields, files);
+                        return Files.getFiles(_fields, files);
 
                     case 28:
                         files = _context3.sent;
                         _context3.next = 31;
-                        return _board2.testParameters(req, fields, files);
+                        return _board2.testParameters('createPost', req, _fields, files);
 
                     case 31:
                         _context3.next = 33;
-                        return Files.processFiles(boardName, files, transaction);
+                        return Files.processFiles(_boardName2, files, transaction);
 
                     case 33:
                         files = _context3.sent;
                         _context3.next = 36;
-                        return PostsModel.createPost(req, fields, files, transaction);
+                        return PostsModel.createPost(req, _fields, files, transaction);
 
                     case 36:
                         post = _context3.sent;
@@ -345,7 +340,7 @@ router.post('/action/createPost', function () {
 
 router.post('/action/createThread', function () {
     var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(req, res, next) {
-        var transaction, _ref3, fields, files, boardName, captchaEngine, _board3, thread, post;
+        var transaction, _ref3, _fields2, files, _boardName3, captchaEngine, _board3, thread, post;
 
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
             while (1) {
@@ -358,11 +353,11 @@ router.post('/action/createThread', function () {
 
                     case 4:
                         _ref3 = _context4.sent;
-                        fields = _ref3.fields;
+                        _fields2 = _ref3.fields;
                         files = _ref3.files;
-                        boardName = fields.boardName;
-                        captchaEngine = fields.captchaEngine;
-                        _board3 = Board.board(boardName);
+                        _boardName3 = _fields2.boardName;
+                        captchaEngine = _fields2.captchaEngine;
+                        _board3 = Board.board(_boardName3);
 
                         if (_board3) {
                             _context4.next = 12;
@@ -373,7 +368,7 @@ router.post('/action/createThread', function () {
 
                     case 12:
                         _context4.next = 14;
-                        return UsersModel.checkUserBan(req.ip, boardName, { write: true });
+                        return UsersModel.checkUserBan(req.ip, _boardName3, { write: true });
 
                     case 14:
                         _context4.next = 16;
@@ -386,31 +381,31 @@ router.post('/action/createThread', function () {
 
                     case 19:
                         _context4.next = 21;
-                        return Captch.checkCaptcha(req.ip, fields);
+                        return Captch.checkCaptcha(req.ip, _fields2);
 
                     case 21:
-                        transaction = new _postCreationTransaction2.default(boardName);
+                        transaction = new _postCreationTransaction2.default(_boardName3);
                         _context4.next = 24;
-                        return Files.getFiles(fields, files);
+                        return Files.getFiles(_fields2, files);
 
                     case 24:
                         files = _context4.sent;
                         _context4.next = 27;
-                        return _board3.testParameters(req, fields, files, true);
+                        return _board3.testParameters('createThread', req, _fields2, files);
 
                     case 27:
                         _context4.next = 29;
-                        return ThreadsModel.createThread(req, fields, transaction);
+                        return ThreadsModel.createThread(req, _fields2, transaction);
 
                     case 29:
                         thread = _context4.sent;
                         _context4.next = 32;
-                        return Files.processFiles(boardName, files, transaction);
+                        return Files.processFiles(_boardName3, files, transaction);
 
                     case 32:
                         files = _context4.sent;
                         _context4.next = 35;
-                        return PostsModel.createPost(req, fields, files, transaction, {
+                        return PostsModel.createPost(req, _fields2, files, transaction, {
                             postNumber: thread.number,
                             date: new Date(thread.createdAt)
                         });
@@ -454,24 +449,72 @@ router.post('/action/createThread', function () {
     };
 }());
 
-router.post("/action/editPost", function (req, res, next) {
-    var c = {};
-    Tools.parseForm(req).then(function (result) {
-        c.fields = result.fields;
-        c.boardName = result.fields.boardName;
-        c.postNumber = +result.fields.postNumber;
-        return UsersModel.checkUserBan(req.ip, c.boardName, { write: true });
-    }).then(function () {
-        return Database.editPost(req, c.fields);
-    }).then(function (result) {
-        res.send({
-            boardName: c.boardName,
-            postNumber: c.postNumber
-        });
-    }).catch(function (err) {
-        next(err);
-    });
-});
+router.post('/action/editPost', function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(req, res, next) {
+        var _ref4, _fields3, _boardName4, postNumber, post;
+
+        return regeneratorRuntime.wrap(function _callee5$(_context5) {
+            while (1) {
+                switch (_context5.prev = _context5.next) {
+                    case 0:
+                        _context5.prev = 0;
+                        _context5.next = 3;
+                        return Tools.parseForm(req);
+
+                    case 3:
+                        _ref4 = _context5.sent;
+                        _fields3 = _ref4.fields;
+                        _boardName4 = _fields3.boardName;
+                        postNumber = _fields3.postNumber;
+                        _context5.next = 9;
+                        return UsersModel.checkUserBan(req.ip, _boardName4, { write: true });
+
+                    case 9:
+                        _context5.next = 11;
+                        return (0, _geolocation2.default)(req.ip);
+
+                    case 11:
+                        req.geolocation = _context5.sent;
+                        _context5.next = 14;
+                        return checkGeoBan(req.geolocation);
+
+                    case 14:
+                        _context5.next = 16;
+                        return board.testParameters('editPost', req, _fields3);
+
+                    case 16:
+                        _context5.next = 18;
+                        return PostsModel.editPost(req, _fields3);
+
+                    case 18:
+                        post = _context5.sent;
+
+                        IPC.render(_boardName4, post.threadNumber, postNumber, 'edit');
+                        res.send({
+                            boardName: post.boardName,
+                            postNumber: post.number
+                        });
+                        _context5.next = 26;
+                        break;
+
+                    case 23:
+                        _context5.prev = 23;
+                        _context5.t0 = _context5['catch'](0);
+
+                        next(_context5.t0);
+
+                    case 26:
+                    case 'end':
+                        return _context5.stop();
+                }
+            }
+        }, _callee5, this, [[0, 23]]);
+    }));
+
+    return function (_x11, _x12, _x13) {
+        return ref.apply(this, arguments);
+    };
+}());
 
 router.post("/action/addFiles", function (req, res, next) {
     var c = {};
@@ -514,19 +557,62 @@ router.post("/action/addFiles", function (req, res, next) {
     });
 });
 
-router.post("/action/deletePost", function (req, res, next) {
-    var c = {};
-    Tools.parseForm(req).then(function (result) {
-        c.fields = result.fields;
-        return UsersModel.checkUserBan(req.ip, c.fields.boardName, { write: true });
-    }).then(function () {
-        return Database.deletePost(req, res, c.fields);
-    }).then(function (result) {
-        res.send(result);
-    }).catch(function (err) {
-        next(err);
-    });
-});
+router.post('/action/deletePost', function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(req, res, next) {
+        var _ref5, _fields4, result;
+
+        return regeneratorRuntime.wrap(function _callee6$(_context6) {
+            while (1) {
+                switch (_context6.prev = _context6.next) {
+                    case 0:
+                        _context6.prev = 0;
+                        _context6.next = 3;
+                        return Tools.parseForm(req);
+
+                    case 3:
+                        _ref5 = _context6.sent;
+                        _fields4 = _ref5.fields;
+                        _context6.next = 7;
+                        return UsersModel.checkUserBan(req.ip, boardName, { write: true });
+
+                    case 7:
+                        _context6.next = 9;
+                        return (0, _geolocation2.default)(req.ip);
+
+                    case 9:
+                        req.geolocation = _context6.sent;
+                        _context6.next = 12;
+                        return checkGeoBan(req.geolocation);
+
+                    case 12:
+                        _context6.next = 14;
+                        return PostsModel.deletePost(req, _fields4);
+
+                    case 14:
+                        result = _context6.sent;
+
+                        res.send(result);
+                        _context6.next = 21;
+                        break;
+
+                    case 18:
+                        _context6.prev = 18;
+                        _context6.t0 = _context6['catch'](0);
+
+                        next(_context6.t0);
+
+                    case 21:
+                    case 'end':
+                        return _context6.stop();
+                }
+            }
+        }, _callee6, this, [[0, 18]]);
+    }));
+
+    return function (_x14, _x15, _x16) {
+        return ref.apply(this, arguments);
+    };
+}());
 
 router.post("/action/deleteFile", function (req, res, next) {
     Tools.parseForm(req).then(function (result) {

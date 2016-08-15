@@ -7,6 +7,7 @@ import Hash from '../storage/hash';
 import Key from '../storage/key';
 import UnorderedSet from '../storage/unordered-set';
 import Board from '../boards/board';
+import * as Permissions from '../helpers/permissions';
 import * as Tools from '../helpers/tools';
 
 let BannedUserIPs = new UnorderedSet(client(), 'bannedUserIps', {
@@ -22,6 +23,7 @@ let RegisteredUserLevels = new Hash(client(), 'registeredUserLevels', {
   stringify: false
 });
 let SynchronizationData = new Key(client(), 'synchronizationData');
+let Threads = new Hash(client(), 'threads');
 let UserBans = new Key(client(), 'userBans');
 let UserCaptchaQuotas = new Hash(client(), 'captchaQuotas', {
   parse: quota => +quota,
@@ -159,4 +161,41 @@ export async function checkUserBan(ip, boardNames, { write } = {}) {
   if (ban) {
     return Promise.reject({ ban: ban });
   }
+}
+
+export async function checkUserPermissions(req, board, { user, threadNumber }, permission, password) {
+  if (req.isSuperuser()) {
+    return true;
+  }
+  if (typeof board === 'string') {
+    board = Board.board(board);
+  }
+  if (Tools.compareRegisteredUserLevels(req.level(board.name), Permissions[permission]()) > 0) {
+    if (Tools.compareRegisteredUserLevels(req.level(board.name), user.level) > 0) {
+      return true;
+    }
+    if (req.hashpass && req.hashpass === user.hashpass) {
+      return true;
+    }
+    if (password && password === user.password) {
+      return true;
+    }
+  }
+  if (!board.opModeration) {
+    return false;
+  }
+  let thread = await Threads.getOne(threadNumber, board.name);
+  if (thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass)) {
+    return false;
+  }
+  if (Tools.compareRegisteredUserLevels(req.level(board.name), user.level) >= 0) {
+    return true;
+  }
+  if (req.hashpass && req.hashpass === user.hashpass) {
+    return true;
+  }
+  if (password && password === user.password) {
+    return true;
+  }
+  return false;
 }

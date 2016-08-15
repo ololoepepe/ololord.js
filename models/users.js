@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.getSynchronizationData = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
+exports.checkUserPermissions = exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.getSynchronizationData = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
 
 var getUserCaptchaQuota = exports.getUserCaptchaQuota = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(boardName, userIp) {
@@ -531,6 +531,117 @@ var checkUserBan = exports.checkUserBan = function () {
   };
 }();
 
+var checkUserPermissions = exports.checkUserPermissions = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(req, board, _ref2, permission, password) {
+    var user = _ref2.user;
+    var threadNumber = _ref2.threadNumber;
+    var thread;
+    return regeneratorRuntime.wrap(function _callee18$(_context18) {
+      while (1) {
+        switch (_context18.prev = _context18.next) {
+          case 0:
+            if (!req.isSuperuser()) {
+              _context18.next = 2;
+              break;
+            }
+
+            return _context18.abrupt('return', true);
+
+          case 2:
+            if (typeof board === 'string') {
+              board = _board2.default.board(board);
+            }
+
+            if (!(Tools.compareRegisteredUserLevels(req.level(board.name), Permissions[permission]()) > 0)) {
+              _context18.next = 10;
+              break;
+            }
+
+            if (!(Tools.compareRegisteredUserLevels(req.level(board.name), user.level) > 0)) {
+              _context18.next = 6;
+              break;
+            }
+
+            return _context18.abrupt('return', true);
+
+          case 6:
+            if (!(req.hashpass && req.hashpass === user.hashpass)) {
+              _context18.next = 8;
+              break;
+            }
+
+            return _context18.abrupt('return', true);
+
+          case 8:
+            if (!(password && password === user.password)) {
+              _context18.next = 10;
+              break;
+            }
+
+            return _context18.abrupt('return', true);
+
+          case 10:
+            if (board.opModeration) {
+              _context18.next = 12;
+              break;
+            }
+
+            return _context18.abrupt('return', false);
+
+          case 12:
+            _context18.next = 14;
+            return Threads.getOne(threadNumber, board.name);
+
+          case 14:
+            thread = _context18.sent;
+
+            if (!(thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass))) {
+              _context18.next = 17;
+              break;
+            }
+
+            return _context18.abrupt('return', false);
+
+          case 17:
+            if (!(Tools.compareRegisteredUserLevels(req.level(board.name), user.level) >= 0)) {
+              _context18.next = 19;
+              break;
+            }
+
+            return _context18.abrupt('return', true);
+
+          case 19:
+            if (!(req.hashpass && req.hashpass === user.hashpass)) {
+              _context18.next = 21;
+              break;
+            }
+
+            return _context18.abrupt('return', true);
+
+          case 21:
+            if (!(password && password === user.password)) {
+              _context18.next = 23;
+              break;
+            }
+
+            return _context18.abrupt('return', true);
+
+          case 23:
+            return _context18.abrupt('return', false);
+
+          case 24:
+          case 'end':
+            return _context18.stop();
+        }
+      }
+    }, _callee18, this);
+  }));
+
+  return function checkUserPermissions(_x31, _x32, _x33, _x34, _x35) {
+    return ref.apply(this, arguments);
+  };
+}();
+
 var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
@@ -563,6 +674,10 @@ var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
+var _permissions = require('../helpers/permissions');
+
+var Permissions = _interopRequireWildcard(_permissions);
+
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
@@ -586,6 +701,7 @@ var RegisteredUserLevels = new _hash2.default((0, _clientFactory2.default)(), 'r
   stringify: false
 });
 var SynchronizationData = new _key2.default((0, _clientFactory2.default)(), 'synchronizationData');
+var Threads = new _hash2.default((0, _clientFactory2.default)(), 'threads');
 var UserBans = new _key2.default((0, _clientFactory2.default)(), 'userBans');
 var UserCaptchaQuotas = new _hash2.default((0, _clientFactory2.default)(), 'captchaQuotas', {
   parse: function parse(quota) {
