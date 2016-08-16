@@ -1,3 +1,4 @@
+import _ from 'underscore';
 var Address6 = require("ip-address").Address6;
 var Crypto = require("crypto");
 var ffmpeg = require("fluent-ffmpeg");
@@ -12,6 +13,7 @@ var Captcha = require("../captchas");
 var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
 
+import * as PostsModel from '../models/posts';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 
@@ -253,7 +255,8 @@ Board.boards = {};
     return [];
 };
 
-/*public*/ Board.prototype.testParameters = function(mode, req, { name, subject, text, password }, files) {
+/*public*/ Board.prototype.testParameters = function(mode, fields, files, existingFileCount) {
+  let { name, subject, text, password } = fields;
   name = name || '';
   subject = subject || '';
   text = text || '';
@@ -276,10 +279,10 @@ Board.boards = {};
   if ('createThread' === mode && this.maxFileCount && files.length <= 0) {
     return Promise.reject(new Error(Tools.translate('Attempt to create a thread without attaching a file')));
   }
-  if (text.length <= 0 && files.length <= 0) {
+  if (text.length <= 0 && (files.length + existingFileCount) <= 0) {
     return Promise.reject(new Error(Tools.translate('Both file and comment are missing')));
   }
-  if (files.length > this.maxFileCount) {
+  if ((files.length + existingFileCount) > this.maxFileCount) {
     return Promise.reject(new Error(Tools.translate('Too many files')));
   }
   let err = files.reduce((err, file) => {
@@ -463,6 +466,29 @@ Board.sortThreadsByPostCount = function(a, b) {
         return 1;
     else
         return 0;
+};
+
+Board.testParameters = async function(boardName, mode, { fields, files, postNumber } = {}) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  if (!fields) {
+    fields = {};
+  }
+  if (!_(files).isArray()) {
+    files = [];
+  }
+  let fileCount = 0;
+  postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+  if (postNumber) {
+    fileCount = await PostsModel.getPostFileCount(boardName, postNumber);
+    if (typeof fields.text === 'undefined') {
+      let post = await PostsModel.getPost(boardName, postNumber);
+      fields.text = post.rawText;
+    }
+  }
+  await board.testParameters(mode, fields, files, fileCount);
 };
 
 var getRules = function(boardName) {

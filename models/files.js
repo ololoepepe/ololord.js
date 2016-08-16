@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.removeFileInfos = exports.removeFileHashes = exports.addFileHashes = exports.addFileInfo = exports.getFileInfosByHashes = exports.fileInfoExistsByHash = exports.fileInfoExistsByName = exports.getFileInfoByHash = exports.getFileInfoByName = undefined;
+exports.addFilesToPost = exports.removeFileInfos = exports.removeFileHashes = exports.addFileHashes = exports.addFileInfo = exports.getFileInfosByHashes = exports.fileInfoExistsByHash = exports.fileInfoExistsByName = exports.getFileInfoByHash = exports.getFileInfoByName = undefined;
 
 var getFileInfo = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(name, hash) {
@@ -400,6 +400,58 @@ var removeFileInfos = exports.removeFileInfos = function () {
   };
 }();
 
+var addFilesToPost = exports.addFilesToPost = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(boardName, postNumber, files, transaction) {
+    return regeneratorRuntime.wrap(function _callee15$(_context15) {
+      while (1) {
+        switch (_context15.prev = _context15.next) {
+          case 0:
+            _context15.next = 2;
+            return Tools.series(files, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(file) {
+                return regeneratorRuntime.wrap(function _callee14$(_context14) {
+                  while (1) {
+                    switch (_context14.prev = _context14.next) {
+                      case 0:
+                        file.boardName = boardName;
+                        file.postNumber = postNumber;
+                        _context14.next = 4;
+                        return addFileInfo(file);
+
+                      case 4:
+                        _context14.next = 6;
+                        return PostFileInfoNames.addOne(file.name, boardName + ':' + postNumber);
+
+                      case 6:
+                      case 'end':
+                        return _context14.stop();
+                    }
+                  }
+                }, _callee14, this);
+              }));
+
+              return function (_x19) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 2:
+            _context15.next = 4;
+            return addFileHashes(files);
+
+          case 4:
+          case 'end':
+            return _context15.stop();
+        }
+      }
+    }, _callee15, this);
+  }));
+
+  return function addFilesToPost(_x15, _x16, _x17, _x18) {
+    return ref.apply(this, arguments);
+  };
+}();
+
 exports.createFileHash = createFileHash;
 
 var _underscore = require('underscore');
@@ -430,6 +482,10 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 var FileHashes = new _unorderedSet2.default((0, _clientFactory2.default)(), 'fileHashes');
 var FileInfos = new _hash2.default((0, _clientFactory2.default)(), 'fileInfos');
+var PostFileInfoNames = new _unorderedSet2.default((0, _clientFactory2.default)(), 'postFileInfoNames', {
+  parse: false,
+  stringify: false
+});
 
 function createFileHash(fileInfo) {
   return {

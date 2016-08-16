@@ -213,11 +213,11 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
   await board.storeExtraData(postNumber, extraData);
   await addReferencedPosts(post, referencedPosts);
   await UsersModel.addUserPostNumber(req.ip, boardName, postNumber);
-  await Tools.series(files, async function(fileInfo) {
+  await Tools.series(files, async function(file) {
     file.boardName = boardName;
     file.postNumber = postNumber;
-    await FilesModel.addFileInfo(fileInfo);
-    await PostFileInfoNames.addOne(fileInfo.name, `${boardName}:${postNumber}`);
+    await FilesModel.addFileInfo(file);
+    await PostFileInfoNames.addOne(file.name, `${boardName}:${postNumber}`);
   });
   await FilesModel.addFileHashes(files);
   await Search.indexPost({
@@ -358,15 +358,7 @@ export async function editPost(req, fields) {
   if (!thread)
       return Promise.reject(Tools.translate("No such thread"));
   */
-  let result = await UsersModel.checkUserPermissions(req, board, post, 'editPost');
-  if (!result) {
-    return Promise.reject(new Error(Tools.translate('Not enough rights')));
-  }
   let key = `${boardName}:${postNumbers}`;
-  let count = await PostFileInfoNames.count(key);
-  if (!rawText && count <= 0) {
-    return Promise.reject(new Error(Tools.translate('Both file and comment are missing')));
-  }
   text = await markup(board.name, rawText, {
     markupModes: markupModes,
     referencedPosts: referencedPosts,
@@ -395,7 +387,7 @@ export async function editPost(req, fields) {
   return post;
 }
 
-export async function deletePost(req, { boardName, postNumber, archived, password }) {
+export async function deletePost(req, { boardName, postNumber, archived }) {
   let board = Board.board(boardName);
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
@@ -412,10 +404,6 @@ export async function deletePost(req, { boardName, postNumber, archived, passwor
   archived = ('true' === archived);
   if (archived && !isThread) {
     return Promise.reject(new Error(Tools.translate('Deleting posts from archived threads is not allowed')));
-  }
-  let result = await UsersModel.checkUserPermissions(req, board, post, 'deletePost', Tools.sha1(password));
-  if (!result) {
-    return Promise.reject(new Error(Tools.translate('Not enough rights')));
   }
   if (isThread) {
     await removeThread(boardName, postNumber, { archived: archived });
@@ -434,4 +422,8 @@ export async function deletePost(req, { boardName, postNumber, archived, passwor
     boardName: boardName,
     threadNumber: (isThread ? 0 : post.threadNumber)
   };
+}
+
+export async function getPostFileCount(boardName, postNumber) {
+  return await PostFileInfoNames.count(`${boardName}:${postNumber}`);
 }

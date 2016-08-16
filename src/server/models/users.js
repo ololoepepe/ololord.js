@@ -163,39 +163,41 @@ export async function checkUserBan(ip, boardNames, { write } = {}) {
   }
 }
 
-export async function checkUserPermissions(req, board, { user, threadNumber }, permission, password) {
+export async function checkUserPermissions(req, boardName, postNumber, permission, password) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  let { user, threadNumber } = await PostsModel.getPost(boardName, postNumber);
   if (req.isSuperuser()) {
-    return true;
+    return;
   }
-  if (typeof board === 'string') {
-    board = Board.board(board);
-  }
-  if (Tools.compareRegisteredUserLevels(req.level(board.name), Permissions[permission]()) > 0) {
-    if (Tools.compareRegisteredUserLevels(req.level(board.name), user.level) > 0) {
-      return true;
+  if (Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) > 0) {
+    if (Tools.compareRegisteredUserLevels(req.level(boardName), user.level) > 0) {
+      return;
     }
     if (req.hashpass && req.hashpass === user.hashpass) {
-      return true;
+      return;
     }
     if (password && password === user.password) {
-      return true;
+      return;
     }
   }
   if (!board.opModeration) {
-    return false;
+    return Promise.reject(Tools.translate('Not enough rights'));
   }
-  let thread = await Threads.getOne(threadNumber, board.name);
+  let thread = await Threads.getOne(threadNumber, boardName);
   if (thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass)) {
-    return false;
+    return Promise.reject(Tools.translate('Not enough rights'));
   }
-  if (Tools.compareRegisteredUserLevels(req.level(board.name), user.level) >= 0) {
-    return true;
+  if (Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0) {
+    return;
   }
   if (req.hashpass && req.hashpass === user.hashpass) {
-    return true;
+    return;
   }
   if (password && password === user.password) {
-    return true;
+    return;
   }
-  return false;
+  return Promise.reject(Tools.translate('Not enough rights'));
 }

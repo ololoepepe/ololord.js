@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.deletePost = exports.editPost = exports.removePost = exports.createPost = exports.addReferencedPosts = exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
+exports.getPostFileCount = exports.deletePost = exports.editPost = exports.removePost = exports.createPost = exports.addReferencedPosts = exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
 
 var addDataToPost = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(board, post) {
@@ -526,7 +526,7 @@ var createPost = exports.createPost = function () {
           case 62:
             _context9.next = 64;
             return Tools.series(files, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(fileInfo) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(file) {
                 return regeneratorRuntime.wrap(function _callee8$(_context8) {
                   while (1) {
                     switch (_context8.prev = _context8.next) {
@@ -534,11 +534,11 @@ var createPost = exports.createPost = function () {
                         file.boardName = boardName;
                         file.postNumber = postNumber;
                         _context8.next = 4;
-                        return FilesModel.addFileInfo(fileInfo);
+                        return FilesModel.addFileInfo(file);
 
                       case 4:
                         _context8.next = 6;
-                        return PostFileInfoNames.addOne(fileInfo.name, boardName + ':' + postNumber);
+                        return PostFileInfoNames.addOne(file.name, boardName + ':' + postNumber);
 
                       case 6:
                       case 'end':
@@ -982,7 +982,7 @@ var removePost = exports.removePost = function () {
 
 var editPost = exports.editPost = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(req, fields) {
-    var boardName, postNumber, text, name, subject, sage, markupMode, board, date, rawText, markupModes, referencedPosts, post, result, key, count, plainText, extraData;
+    var boardName, postNumber, text, name, subject, sage, markupMode, board, date, rawText, markupModes, referencedPosts, post, key, plainText, extraData;
     return regeneratorRuntime.wrap(function _callee18$(_context18) {
       while (1) {
         switch (_context18.prev = _context18.next) {
@@ -1034,49 +1034,26 @@ var editPost = exports.editPost = function () {
             return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post'))));
 
           case 23:
-            _context18.next = 25;
-            return UsersModel.checkUserPermissions(req, board, post, 'editPost');
-
-          case 25:
-            result = _context18.sent;
-
-            if (result) {
-              _context18.next = 28;
-              break;
-            }
-
-            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
-
-          case 28:
+            /*
+            return db.hget("threads:" + board.name, c.post.threadNumber);
+            if (!thread)
+                return Promise.reject(Tools.translate("No such thread"));
+            */
             key = boardName + ':' + postNumbers;
-            _context18.next = 31;
-            return PostFileInfoNames.count(key);
-
-          case 31:
-            count = _context18.sent;
-
-            if (!(!rawText && count <= 0)) {
-              _context18.next = 34;
-              break;
-            }
-
-            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Both file and comment are missing'))));
-
-          case 34:
-            _context18.next = 36;
+            _context18.next = 26;
             return (0, _markup2.default)(board.name, rawText, {
               markupModes: markupModes,
               referencedPosts: referencedPosts,
               accessLevel: req.level(board.name)
             });
 
-          case 36:
+          case 26:
             text = _context18.sent;
             plainText = text ? Tools.plainText(text, { brToNewline: true }) : null;
-            _context18.next = 40;
+            _context18.next = 30;
             return board.postExtraData(req, fields, null, post);
 
-          case 40:
+          case 30:
             extraData = _context18.sent;
 
             post.markup = markupModes;
@@ -1087,37 +1064,37 @@ var editPost = exports.editPost = function () {
             post.text = text || null;
             post.updatedAt = date.toISOString();
             //delete post.bannedFor; //TODO: WTF?
-            _context18.next = 50;
+            _context18.next = 40;
             return Posts.setOne(key, post);
 
-          case 50:
-            _context18.next = 52;
+          case 40:
+            _context18.next = 42;
             return board.removeExtraData(postNumber);
 
-          case 52:
-            _context18.next = 54;
+          case 42:
+            _context18.next = 44;
             return board.storeExtraData(postNumber, extraData);
 
-          case 54:
-            _context18.next = 56;
+          case 44:
+            _context18.next = 46;
             return removeReferencedPosts(post);
 
-          case 56:
-            _context18.next = 58;
+          case 46:
+            _context18.next = 48;
             return addReferencedPosts(post, referencedPosts);
 
-          case 58:
-            _context18.next = 60;
+          case 48:
+            _context18.next = 50;
             return Search.updatePostIndex(boardName, postNumber, function (body) {
               body.plainText = plainText;
               body.subject = subject;
               return body;
             });
 
-          case 60:
+          case 50:
             return _context18.abrupt('return', post);
 
-          case 61:
+          case 51:
           case 'end':
             return _context18.stop();
         }
@@ -1135,8 +1112,7 @@ var deletePost = exports.deletePost = function () {
     var boardName = _ref10.boardName;
     var postNumber = _ref10.postNumber;
     var archived = _ref10.archived;
-    var password = _ref10.password;
-    var board, post, isThread, result;
+    var board, post, isThread;
     return regeneratorRuntime.wrap(function _callee20$(_context20) {
       while (1) {
         switch (_context20.prev = _context20.next) {
@@ -1187,43 +1163,29 @@ var deletePost = exports.deletePost = function () {
             return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('Deleting posts from archived threads is not allowed'))));
 
           case 15:
-            _context20.next = 17;
-            return UsersModel.checkUserPermissions(req, board, post, 'deletePost', Tools.sha1(password));
-
-          case 17:
-            result = _context20.sent;
-
-            if (result) {
+            if (!isThread) {
               _context20.next = 20;
               break;
             }
 
-            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
-
-          case 20:
-            if (!isThread) {
-              _context20.next = 25;
-              break;
-            }
-
-            _context20.next = 23;
+            _context20.next = 18;
             return removeThread(boardName, postNumber, { archived: archived });
 
-          case 23:
-            _context20.next = 27;
+          case 18:
+            _context20.next = 22;
             break;
 
-          case 25:
-            _context20.next = 27;
+          case 20:
+            _context20.next = 22;
             return removePost(boardName, postNumber);
 
-          case 27:
+          case 22:
             if (!(isThread && archived)) {
-              _context20.next = 34;
+              _context20.next = 29;
               break;
             }
 
-            _context20.next = 30;
+            _context20.next = 25;
             return Tools.series(['json', 'html'], function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(suffix) {
                 return regeneratorRuntime.wrap(function _callee19$(_context19) {
@@ -1249,30 +1211,30 @@ var deletePost = exports.deletePost = function () {
               };
             }());
 
-          case 30:
-            _context20.next = 32;
+          case 25:
+            _context20.next = 27;
             return IPC.renderArchive(boardName);
 
-          case 32:
-            _context20.next = 37;
+          case 27:
+            _context20.next = 32;
             break;
 
-          case 34:
+          case 29:
             if (archived) {
-              _context20.next = 37;
+              _context20.next = 32;
               break;
             }
 
-            _context20.next = 37;
+            _context20.next = 32;
             return IPC.render(boardName, post.threadNumber, postNumber, isThread ? 'delete' : 'edit');
 
-          case 37:
+          case 32:
             return _context20.abrupt('return', {
               boardName: boardName,
               threadNumber: isThread ? 0 : post.threadNumber
             });
 
-          case 38:
+          case 33:
           case 'end':
             return _context20.stop();
         }
@@ -1281,6 +1243,31 @@ var deletePost = exports.deletePost = function () {
   }));
 
   return function deletePost(_x47, _x48) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var getPostFileCount = exports.getPostFileCount = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(boardName, postNumber) {
+    return regeneratorRuntime.wrap(function _callee21$(_context21) {
+      while (1) {
+        switch (_context21.prev = _context21.next) {
+          case 0:
+            _context21.next = 2;
+            return PostFileInfoNames.count(boardName + ':' + postNumber);
+
+          case 2:
+            return _context21.abrupt('return', _context21.sent);
+
+          case 3:
+          case 'end':
+            return _context21.stop();
+        }
+      }
+    }, _callee21, this);
+  }));
+
+  return function getPostFileCount(_x50, _x51) {
     return ref.apply(this, arguments);
   };
 }();

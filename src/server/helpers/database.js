@@ -1169,42 +1169,6 @@ module.exports.rebuildSearchIndex = function() {
     });
 };
 
-module.exports.addFiles = function(req, fields, files, transaction) {
-    var board = Board.board(fields.boardName);
-    if (!board)
-        return Promise.reject(Tools.translate("Invalid board"));
-    var c = {};
-    var postNumber = +fields.postNumber;
-    if (isNaN(postNumber) || postNumber <= 0)
-        return Promise.reject(Tools.translate("Invalid post number"));
-    return PostsModel.getPost(board.name, postNumber, { withExtraData: true }).then(function(post) {
-        c.post = post;
-        return checkPermissions(req, board, post, "addFilesToPost");
-    }).then(function(result) {
-        if (!result)
-            return Promise.reject(Tools.translate("Not enough rights"));
-        return postFileInfoNames(board.name, c.post.number);
-    }).then(function(names) {
-        if (names.length + files.length > board.maxFileCount)
-            return Promise.reject(Tools.translate("Too many files"));
-        return processFiles(req, fields, files, transaction);
-    }).then(function(files) {
-        c.files = files;
-        return Tools.series(c.files, function(fileInfo) {
-            fileInfo.boardName = board.name;
-            fileInfo.postNumber = c.post.number;
-            return db.hset("fileInfos", fileInfo.name, JSON.stringify(fileInfo)).then(function() {
-                return db.sadd("postFileInfoNames:" + board.name + ":" + c.post.number, fileInfo.name);
-            });
-        });
-    }).then(function() {
-        return addFileHashes(c.files);
-    }).then(function() {
-        IPC.render(c.post.boardName, c.post.threadNumber, c.post.number, 'edit');
-        return Promise.resolve(c.post);
-    });
-};
-
 module.exports.setThreadFixed = function(req, fields) {
     var board = Board.board(fields.boardName);
     if (!board)

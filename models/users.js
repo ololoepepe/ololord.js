@@ -532,104 +532,117 @@ var checkUserBan = exports.checkUserBan = function () {
 }();
 
 var checkUserPermissions = exports.checkUserPermissions = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(req, board, _ref2, permission, password) {
-    var user = _ref2.user;
-    var threadNumber = _ref2.threadNumber;
-    var thread;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(req, boardName, postNumber, permission, password) {
+    var board, _ref2, user, threadNumber, thread;
+
     return regeneratorRuntime.wrap(function _callee18$(_context18) {
       while (1) {
         switch (_context18.prev = _context18.next) {
           case 0:
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context18.next = 3;
+              break;
+            }
+
+            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+
+          case 3:
+            _context18.next = 5;
+            return PostsModel.getPost(boardName, postNumber);
+
+          case 5:
+            _ref2 = _context18.sent;
+            user = _ref2.user;
+            threadNumber = _ref2.threadNumber;
+
             if (!req.isSuperuser()) {
-              _context18.next = 2;
-              break;
-            }
-
-            return _context18.abrupt('return', true);
-
-          case 2:
-            if (typeof board === 'string') {
-              board = _board2.default.board(board);
-            }
-
-            if (!(Tools.compareRegisteredUserLevels(req.level(board.name), Permissions[permission]()) > 0)) {
               _context18.next = 10;
               break;
             }
 
-            if (!(Tools.compareRegisteredUserLevels(req.level(board.name), user.level) > 0)) {
-              _context18.next = 6;
-              break;
-            }
-
-            return _context18.abrupt('return', true);
-
-          case 6:
-            if (!(req.hashpass && req.hashpass === user.hashpass)) {
-              _context18.next = 8;
-              break;
-            }
-
-            return _context18.abrupt('return', true);
-
-          case 8:
-            if (!(password && password === user.password)) {
-              _context18.next = 10;
-              break;
-            }
-
-            return _context18.abrupt('return', true);
+            return _context18.abrupt('return');
 
           case 10:
-            if (board.opModeration) {
-              _context18.next = 12;
-              break;
-            }
-
-            return _context18.abrupt('return', false);
-
-          case 12:
-            _context18.next = 14;
-            return Threads.getOne(threadNumber, board.name);
-
-          case 14:
-            thread = _context18.sent;
-
-            if (!(thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass))) {
+            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) > 0)) {
               _context18.next = 17;
               break;
             }
 
-            return _context18.abrupt('return', false);
+            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), user.level) > 0)) {
+              _context18.next = 13;
+              break;
+            }
+
+            return _context18.abrupt('return');
+
+          case 13:
+            if (!(req.hashpass && req.hashpass === user.hashpass)) {
+              _context18.next = 15;
+              break;
+            }
+
+            return _context18.abrupt('return');
+
+          case 15:
+            if (!(password && password === user.password)) {
+              _context18.next = 17;
+              break;
+            }
+
+            return _context18.abrupt('return');
 
           case 17:
-            if (!(Tools.compareRegisteredUserLevels(req.level(board.name), user.level) >= 0)) {
+            if (board.opModeration) {
               _context18.next = 19;
               break;
             }
 
-            return _context18.abrupt('return', true);
+            return _context18.abrupt('return', Promise.reject(Tools.translate('Not enough rights')));
 
           case 19:
-            if (!(req.hashpass && req.hashpass === user.hashpass)) {
-              _context18.next = 21;
-              break;
-            }
-
-            return _context18.abrupt('return', true);
+            _context18.next = 21;
+            return Threads.getOne(threadNumber, boardName);
 
           case 21:
-            if (!(password && password === user.password)) {
-              _context18.next = 23;
+            thread = _context18.sent;
+
+            if (!(thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass))) {
+              _context18.next = 24;
               break;
             }
 
-            return _context18.abrupt('return', true);
-
-          case 23:
-            return _context18.abrupt('return', false);
+            return _context18.abrupt('return', Promise.reject(Tools.translate('Not enough rights')));
 
           case 24:
+            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0)) {
+              _context18.next = 26;
+              break;
+            }
+
+            return _context18.abrupt('return');
+
+          case 26:
+            if (!(req.hashpass && req.hashpass === user.hashpass)) {
+              _context18.next = 28;
+              break;
+            }
+
+            return _context18.abrupt('return');
+
+          case 28:
+            if (!(password && password === user.password)) {
+              _context18.next = 30;
+              break;
+            }
+
+            return _context18.abrupt('return');
+
+          case 30:
+            return _context18.abrupt('return', Promise.reject(Tools.translate('Not enough rights')));
+
+          case 31:
           case 'end':
             return _context18.stop();
         }

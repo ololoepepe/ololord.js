@@ -7,6 +7,10 @@ import * as Tools from '../helpers/tools';
 
 let FileHashes = new UnorderedSet(client(), 'fileHashes');
 let FileInfos = new Hash(client(), 'fileInfos');
+let PostFileInfoNames = new UnorderedSet(client(), 'postFileInfoNames', {
+  parse: false,
+  stringify: false
+});
 
 async function getFileInfo(name, hash) {
   if (!name && hash) {
@@ -103,4 +107,14 @@ export async function removeFileInfos(fileInfoNames) {
     return 0;
   }
   await FileInfos.deleteSome(fileInfoNames);
+}
+
+export async function addFilesToPost(boardName, postNumber, files, transaction) {
+  await Tools.series(files, async function(file) {
+    file.boardName = boardName;
+    file.postNumber = postNumber;
+    await addFileInfo(file);
+    await PostFileInfoNames.addOne(file.name, `${boardName}:${postNumber}`);
+  });
+  await addFileHashes(files);
 }

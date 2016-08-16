@@ -13,6 +13,7 @@ var config = require("../helpers/config");
 var Database = require("../helpers/database");
 var markup = require("../helpers/markup");
 
+import * as FilesModel from '../models/files';
 import * as PostsModel from '../models/posts';
 import * as UsersModel from '../models/users';
 import PostCreationTransaction from '../storage/post-creation-transaction';
@@ -69,7 +70,7 @@ router.post('/action/markupText', async function(req, res, next) {
     }
     await UsersModel.checkUserBan(req.ip, boardName, { write: true }); //TODO: Should it really be "write"?
     let rawText = text || '';
-    await board.testParameters('markupText', req, fields);
+    await Board.testParameters(boardName, 'markupText', { fields: fields });
     markupMode = markupMode || '';
     let markupModes = Tools.markupModes(markupMode);
     text = await markup(boardName, text, {
@@ -112,9 +113,12 @@ router.post('/action/createPost', async function(req, res, next) {
     req.geolocation = await geolocation(req.ip);
     await checkGeoBan(req.geolocation);
     await Captch.checkCaptcha(req.ip, fields);
-    transaction = new PostCreationTransaction(boardName);
     files = await Files.getFiles(fields, files);
-    await board.testParameters('createPost', req, fields, files);
+    await Board.testParameters(boardName, 'createPost', {
+      fields: fields,
+      files: files
+    });
+    transaction = new PostCreationTransaction(boardName);
     files = await Files.processFiles(boardName, files, transaction);
     let post = await PostsModel.createPost(req, fields, files, transaction);
     await IPC.render(post.boardName, post.threadNumber, post.number, 'create');
@@ -150,9 +154,12 @@ router.post('/action/createThread', async function(req, res, next) {
     req.geolocation = await geolocation(req.ip);
     await checkGeoBan(req.geolocation);
     await Captch.checkCaptcha(req.ip, fields);
-    transaction = new PostCreationTransaction(boardName);
     files = await Files.getFiles(fields, files);
-    await board.testParameters('createThread', req, fields, files);
+    await Board.testParameters(boardName, 'createThread', {
+      fields: fields,
+      files: files
+    });
+    transaction = new PostCreationTransaction(boardName);
     let thread = await ThreadsModel.createThread(req, fields, transaction);
     files = await Files.processFiles(boardName, files, transaction);
     let post = await PostsModel.createPost(req, fields, files, transaction, {
@@ -180,10 +187,18 @@ router.post('/action/editPost', async function(req, res, next) {
   try {
     let { fields } = await Tools.parseForm(req);
     let { boardName, postNumber } = fields;
+    postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+    if (!postNumber) {
+      throw new Error(Tools.translate('Invalid post number'));
+    }
     await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     req.geolocation = await geolocation(req.ip);
     await checkGeoBan(req.geolocation);
-    await board.testParameters('editPost', req, fields);
+    await UsersModel.checkUserPermissions(req, boardName, postNumber, 'editPost');
+    await Board.testParameters(boardName, 'editPost', {
+      fields: fields,
+      postNumber: postNumber
+    });
     let post = await PostsModel.editPost(req, fields);
     IPC.render(boardName, post.threadNumber, postNumber, 'edit');
     res.send({
@@ -195,60 +210,66 @@ router.post('/action/editPost', async function(req, res, next) {
   }
 });
 
-router.post("/action/addFiles", function(req, res, next) {
-    var c = {};
-    var transaction = new Database.Transaction();
-    Tools.parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        c.files = result.files;
-        c.board = Board.board(c.fields.boardName);
-        if (!board)
-            return Promise.reject(Tools.translate("Invalid board"));
-        transaction.board = board;
-        return UsersModel.checkUserBan(req.ip, c.board.name, { write: true });
-    }).then(function() {
-        return getFiles(c.fields, c.files, transaction);
-    }).then(function(files) {
-        c.files = files;
-        var fileCount = c.files.length;
-        if (fileCount < 1)
-            return Promise.reject(Tools.translate("No file specified"));
-        var maxFileSize = c.board.maxFileSize;
-        var maxFileCount = c.board.maxFileCount;
-        if (fileCount > maxFileCount) {
-            return Promise.reject(Tools.translate("Too many files"));
-        } else {
-            var err = c.files.reduce(function(err, file) {
-                if (err)
-                    return err;
-                if (file.size > maxFileSize)
-                    return Tools.translate("File is too big");
-                if (c.board.supportedFileTypes.indexOf(file.mimeType) < 0)
-                    return Tools.translate("File type is not supported");
-            }, "");
-            if (err)
-                return Promise.reject(err);
-        }
-        return Database.addFiles(req, c.fields, c.files, transaction);
-    }).then(function(result) {
-        res.send({
-            boardName: result.boardName,
-            postNumber: result.postNumber,
-            threadNumber: result.threadNumber
-        });
-    }).catch(function(err) {
-        transaction.rollback();
-        next(err);
+router.post('/action/addFiles', async function(req, res, next) {
+  let transaction;
+  try {
+    let { fields, files } = await Tools.parseForm(req);
+    let { boardName, postNumber } = fields;
+    let board = Board.board(boardName);
+    if (!board) {
+      throw new Error(Tools.translate('Invalid board'));
+    }
+    postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+    if (!postNumber) {
+      throw new Error(Tools.translate('Invalid post number'));
+    }
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
+    req.geolocation = await geolocation(req.ip);
+    await checkGeoBan(req.geolocation);
+    await UsersModel.checkPermissions(req, boardName, postNumber, 'addFilesToPost');
+    let post = await PostsModel.getPost(boardName, postNumber);
+    if (!post) {
+      return Promise.reject(Tools.translate('No such post'));
+    }
+    files = await Files.getFiles(fields, files);
+    if (files.length <= 0) {
+      throw new Error(Tools.translate('No file specified'));
+    }
+    await Board.testParameters(boardName, 'addFiles', {
+      fields: fields,
+      files: files,
+      postNumber: postNumber
     });
+    transaction = new PostCreationTransaction(boardName);
+    files = await Files.processFiles(boardName, files, transaction);
+    await FilesModel.addFiles(boardName, postNumber, files, transaction);
+    IPC.render(boardName, post.threadNumber, postNumber, 'edit');
+    res.send({});
+  } catch (err) {
+    if (transaction) {
+      transaction.rollback();
+    }
+    next(err);
+  }
 });
 
 router.post('/action/deletePost', async function(req, res, next) {
   try {
     let { fields } = await Tools.parseForm(req);
+    let { boardName, postNumber, password } = fields;
+    let board = Board.board(boardName);
+    if (!board) {
+      throw new Error(Tools.translate('Invalid board'));
+    }
+    postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+    if (!postNumber) {
+      throw new Error(Tools.translate('Invalid post number'));
+    }
     await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     req.geolocation = await geolocation(req.ip);
     await checkGeoBan(req.geolocation);
-    let result = await PostsModel.deletePost(req, fields);
+    await UsersModel.checkUserPermissions(req, boardName, postNumber, 'deletePost', Tools.sha1(password));
+    result = await PostsModel.deletePost(req, fields);
     res.send(result);
   } catch (err) {
     next(err);
