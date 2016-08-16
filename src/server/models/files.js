@@ -1,9 +1,10 @@
 import _ from 'underscore';
 
+import * as Tools from '../helpers/tools';
 import client from '../storage/client-factory';
 import Hash from '../storage/hash';
 import UnorderedSet from '../storage/unordered-set';
-import * as Tools from '../helpers/tools';
+import { AUDIO_TAGS } from '../thumbnailing/audio';
 
 let FileHashes = new UnorderedSet(client(), 'fileHashes');
 let FileInfos = new Hash(client(), 'fileInfos');
@@ -117,4 +118,42 @@ export async function addFilesToPost(boardName, postNumber, files, transaction) 
     await PostFileInfoNames.addOne(file.name, `${boardName}:${postNumber}`);
   });
   await addFileHashes(files);
+}
+
+export async function deleteFile(fileName) {
+  let fileInfo = await getFileInfoByName(fileName);
+  let { boardName, postNumber } = fileInfo;
+  await PostFileInfoNames.deleteOne(fileName, `${boardName}:${postNumber}`);
+  await FileInfos.deleteOne(fileName);
+  await removeFileHashes(fileInfo);
+  let path = `${__dirname}/../public/${boardName}`;
+  Tools.series([`${path}/src/${fileInfo.name}`, `${path}/thumb/${fileInfo.thumb.name}`], async function() {
+    try {
+      await FS.remove(path);
+    } catch (err) {
+      Logger.error(err.stack || err);
+    }
+  });
+}
+
+export async function editFileRating(fileName, rating) {
+  let fileInfo = await getFileInfoByName(fileName);
+  if (Tools.FILE_RATINGS.indexOf(rating) < 0) {
+    rating = Tools.FILE_RATINGS[0];
+  }
+  fileInfo.rating = rating;
+  await FileInfos.setOne(fileName, fileInfo);
+}
+
+export async function editAudioTags(fileName, fields) {
+  let fileInfo = await getFileInfoByName(fileName);
+  AUDIO_TAGS.forEach((tag) => {
+    let value = fields[tag];
+    if (value && typeof value === 'string') {
+      fileInfo.extraData[tag] = value;
+    } else if (fileInfo.extraData.hasOwnProperty(tag)) {
+      delete fileInfo.extraData[tag];
+    }
+  });
+  await FileInfos.setOne(fileName, fileInfo);
 }

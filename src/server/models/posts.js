@@ -418,10 +418,6 @@ export async function deletePost(req, { boardName, postNumber, archived }) {
   } else if (!archived) {
     await IPC.render(boardName, post.threadNumber, postNumber, isThread ? 'delete' : 'edit');
   }
-  return {
-    boardName: boardName,
-    threadNumber: (isThread ? 0 : post.threadNumber)
-  };
 }
 
 export async function getPostFileCount(boardName, postNumber) {

@@ -6,6 +6,8 @@ var p = {
     addFilesToPost: "MODER",
     deleteFile: null,
     deletePost: null,
+    editAudioTags: null,
+    editFileRating: null,
     editPost: "MODER",
     useRawHTMLMarkup: "MODER"
 };

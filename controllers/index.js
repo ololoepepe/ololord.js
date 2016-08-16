@@ -53,13 +53,13 @@ router.use('/redirect', function (req, res, next) {
 _fs4.default.readdirSync(__dirname).filter(function (fileName) {
   return !EXCLUDED_ROUTERS.has(fileName) && 'js' === fileName.split('.').pop();
 }).forEach(function (fileName) {
-  var r = require('./' + fileName.split('.').slice(0, -1).join('.'));
+  var r = Tools.requireWrapper(require('./' + fileName.split('.').slice(0, -1).join('.')));
   router.use('/', r);
   routers.push(r);
 });
 
 ['./board', './home'].forEach(function (id) {
-  var r = require(id);
+  var r = Tools.requireWrapper(require(id));
   router.use('/', r);
   routers.push(r);
 });

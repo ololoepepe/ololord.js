@@ -51,6 +51,20 @@ let ipBans = Tools.createWatchedResource(`${__dirname}/../misc/user-bans.json`, 
   ipBans = transformIPBans(JSON.parse(data));
 }) || {};
 
+function transformGeoBans(bans) {
+  return _(bans).reduce((acc, value, key) => {
+    acc.set(key.toUpperCase(), !!value);
+    return acc;
+  }, new Map());
+}
+
+let geoBans = Tools.createWatchedResource(`${__dirname}/../misc/geo-bans.json`, (path) => {
+  return transformGeoBans(require(path));
+}, async function(path) {
+  let data = await FS.read(path);
+  geoBans = transformGeoBans(JSON.parse(data));
+}) || {};
+
 export async function getUserCaptchaQuota(boardName, userIp) {
   let board = Board.board(boardName);
   if (!board) {
@@ -173,7 +187,8 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
     return;
   }
   if (Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) > 0) {
-    if (Tools.compareRegisteredUserLevels(req.level(boardName), user.level) > 0) {
+    if (Tools.compareRegisteredUserLevels(req.level(boardName), 'USER') > 0
+      && Tools.compareRegisteredUserLevels(req.level(boardName), user.level) > 0) {
       return;
     }
     if (req.hashpass && req.hashpass === user.hashpass) {
@@ -200,4 +215,26 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
     return;
   }
   return Promise.reject(Tools.translate('Not enough rights'));
+}
+
+export function checkGeoBan(geolocationInfo) {
+  let def = geoBans.get('*');
+  if (def) {
+    geolocationInfo = geolocationInfo || {};
+  } else if (!geolocationInfo || !geolocationInfo.countryCode) {
+    return;
+  }
+  let countryCode = geolocationInfo.countryCode;
+  if (typeof countryCode !== 'string') {
+    countryCode = '';
+  }
+  let user = geoBans.get(countryCode.toUpperCase());
+  if (def) {
+    var banned = !user && (typeof user === 'boolean');
+  } else {
+    var banned = user;
+  }
+  if (banned) {
+    return Promise.reject(new Error(Tools.translate('Posting is disabled for this country')));
+  }
 }

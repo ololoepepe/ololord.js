@@ -27,6 +27,8 @@ defineMimeTypeSuffixes('audio/mpeg', ['mpeg', 'mp1', 'm1a', 'mp3', 'm2a', 'mpa',
 defineMimeTypeSuffixes('audio/ogg', 'ogg', 'png');
 defineMimeTypeSuffixes('audio/wav', 'wav', 'png');
 
+export const AUDIO_TAGS = ['album', 'artist', 'title', 'year'];
+
 export function match(mimeType) {
   return Tools.isAudioType(mimeType);
 }

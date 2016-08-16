@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.addFilesToPost = exports.removeFileInfos = exports.removeFileHashes = exports.addFileHashes = exports.addFileInfo = exports.getFileInfosByHashes = exports.fileInfoExistsByHash = exports.fileInfoExistsByName = exports.getFileInfoByHash = exports.getFileInfoByName = undefined;
+exports.editAudioTags = exports.editFileRating = exports.deleteFile = exports.addFilesToPost = exports.removeFileInfos = exports.removeFileHashes = exports.addFileHashes = exports.addFileInfo = exports.getFileInfosByHashes = exports.fileInfoExistsByHash = exports.fileInfoExistsByName = exports.getFileInfoByHash = exports.getFileInfoByName = undefined;
 
 var getFileInfo = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(name, hash) {
@@ -452,11 +452,153 @@ var addFilesToPost = exports.addFilesToPost = function () {
   };
 }();
 
+var deleteFile = exports.deleteFile = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(fileName) {
+    var fileInfo, boardName, postNumber, path;
+    return regeneratorRuntime.wrap(function _callee17$(_context17) {
+      while (1) {
+        switch (_context17.prev = _context17.next) {
+          case 0:
+            _context17.next = 2;
+            return getFileInfoByName(fileName);
+
+          case 2:
+            fileInfo = _context17.sent;
+            boardName = fileInfo.boardName;
+            postNumber = fileInfo.postNumber;
+            _context17.next = 7;
+            return PostFileInfoNames.deleteOne(fileName, boardName + ':' + postNumber);
+
+          case 7:
+            _context17.next = 9;
+            return FileInfos.deleteOne(fileName);
+
+          case 9:
+            _context17.next = 11;
+            return removeFileHashes(fileInfo);
+
+          case 11:
+            path = __dirname + '/../public/' + boardName;
+
+            Tools.series([path + '/src/' + fileInfo.name, path + '/thumb/' + fileInfo.thumb.name], _asyncToGenerator(regeneratorRuntime.mark(function _callee16() {
+              return regeneratorRuntime.wrap(function _callee16$(_context16) {
+                while (1) {
+                  switch (_context16.prev = _context16.next) {
+                    case 0:
+                      _context16.prev = 0;
+                      _context16.next = 3;
+                      return FS.remove(path);
+
+                    case 3:
+                      _context16.next = 8;
+                      break;
+
+                    case 5:
+                      _context16.prev = 5;
+                      _context16.t0 = _context16['catch'](0);
+
+                      Logger.error(_context16.t0.stack || _context16.t0);
+
+                    case 8:
+                    case 'end':
+                      return _context16.stop();
+                  }
+                }
+              }, _callee16, this, [[0, 5]]);
+            })));
+
+          case 13:
+          case 'end':
+            return _context17.stop();
+        }
+      }
+    }, _callee17, this);
+  }));
+
+  return function deleteFile(_x20) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var editFileRating = exports.editFileRating = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(fileName, rating) {
+    var fileInfo;
+    return regeneratorRuntime.wrap(function _callee18$(_context18) {
+      while (1) {
+        switch (_context18.prev = _context18.next) {
+          case 0:
+            _context18.next = 2;
+            return getFileInfoByName(fileName);
+
+          case 2:
+            fileInfo = _context18.sent;
+
+            if (Tools.FILE_RATINGS.indexOf(rating) < 0) {
+              rating = Tools.FILE_RATINGS[0];
+            }
+            fileInfo.rating = rating;
+            _context18.next = 7;
+            return FileInfos.setOne(fileName, fileInfo);
+
+          case 7:
+          case 'end':
+            return _context18.stop();
+        }
+      }
+    }, _callee18, this);
+  }));
+
+  return function editFileRating(_x21, _x22) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var editAudioTags = exports.editAudioTags = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(fileName, fields) {
+    var fileInfo;
+    return regeneratorRuntime.wrap(function _callee19$(_context19) {
+      while (1) {
+        switch (_context19.prev = _context19.next) {
+          case 0:
+            _context19.next = 2;
+            return getFileInfoByName(fileName);
+
+          case 2:
+            fileInfo = _context19.sent;
+
+            _audio.AUDIO_TAGS.forEach(function (tag) {
+              var value = fields[tag];
+              if (value && typeof value === 'string') {
+                fileInfo.extraData[tag] = value;
+              } else if (fileInfo.extraData.hasOwnProperty(tag)) {
+                delete fileInfo.extraData[tag];
+              }
+            });
+            _context19.next = 6;
+            return FileInfos.setOne(fileName, fileInfo);
+
+          case 6:
+          case 'end':
+            return _context19.stop();
+        }
+      }
+    }, _callee19, this);
+  }));
+
+  return function editAudioTags(_x23, _x24) {
+    return ref.apply(this, arguments);
+  };
+}();
+
 exports.createFileHash = createFileHash;
 
 var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
 
 var _clientFactory = require('../storage/client-factory');
 
@@ -470,9 +612,7 @@ var _unorderedSet = require('../storage/unordered-set');
 
 var _unorderedSet2 = _interopRequireDefault(_unorderedSet);
 
-var _tools = require('../helpers/tools');
-
-var Tools = _interopRequireWildcard(_tools);
+var _audio = require('../thumbnailing/audio');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 

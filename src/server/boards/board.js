@@ -481,14 +481,16 @@ Board.testParameters = async function(boardName, mode, { fields, files, postNumb
   }
   let fileCount = 0;
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+  let post;
   if (postNumber) {
     fileCount = await PostsModel.getPostFileCount(boardName, postNumber);
     if (typeof fields.text === 'undefined') {
-      let post = await PostsModel.getPost(boardName, postNumber);
+      post = await PostsModel.getPost(boardName, postNumber);
       fields.text = post.rawText;
     }
   }
   await board.testParameters(mode, fields, files, fileCount);
+  return post;
 };
 
 var getRules = function(boardName) {

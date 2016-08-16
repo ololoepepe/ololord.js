@@ -460,36 +460,40 @@ Board.testParameters = function () {
                         fileCount = 0;
 
                         postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+                        post = void 0;
 
                         if (!postNumber) {
-                            _context.next = 16;
+                            _context.next = 17;
                             break;
                         }
 
-                        _context.next = 10;
+                        _context.next = 11;
                         return PostsModel.getPostFileCount(boardName, postNumber);
 
-                    case 10:
+                    case 11:
                         fileCount = _context.sent;
 
                         if (!(typeof fields.text === 'undefined')) {
-                            _context.next = 16;
+                            _context.next = 17;
                             break;
                         }
 
-                        _context.next = 14;
+                        _context.next = 15;
                         return PostsModel.getPost(boardName, postNumber);
 
-                    case 14:
+                    case 15:
                         post = _context.sent;
 
                         fields.text = post.rawText;
 
-                    case 16:
-                        _context.next = 18;
+                    case 17:
+                        _context.next = 19;
                         return board.testParameters(mode, fields, files, fileCount);
 
-                    case 18:
+                    case 19:
+                        return _context.abrupt("return", post);
+
+                    case 20:
                     case "end":
                         return _context.stop();
                 }

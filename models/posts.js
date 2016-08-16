@@ -1229,12 +1229,6 @@ var deletePost = exports.deletePost = function () {
             return IPC.render(boardName, post.threadNumber, postNumber, isThread ? 'delete' : 'edit');
 
           case 32:
-            return _context20.abrupt('return', {
-              boardName: boardName,
-              threadNumber: isThread ? 0 : post.threadNumber
-            });
-
-          case 33:
           case 'end':
             return _context20.stop();
         }

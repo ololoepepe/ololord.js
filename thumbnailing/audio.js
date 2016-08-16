@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createThumbnail = undefined;
+exports.createThumbnail = exports.AUDIO_TAGS = undefined;
 
 var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file, thumbPath, path) {
@@ -166,6 +166,8 @@ defineMimeTypeSuffixes('application/ogg', 'ogg', 'png');
 defineMimeTypeSuffixes('audio/mpeg', ['mpeg', 'mp1', 'm1a', 'mp3', 'm2a', 'mpa', 'mpg'], 'png');
 defineMimeTypeSuffixes('audio/ogg', 'ogg', 'png');
 defineMimeTypeSuffixes('audio/wav', 'wav', 'png');
+
+var AUDIO_TAGS = exports.AUDIO_TAGS = ['album', 'artist', 'title', 'year'];
 
 function match(mimeType) {
   return Tools.isAudioType(mimeType);

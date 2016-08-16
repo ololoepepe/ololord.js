@@ -61,6 +61,7 @@ export const ExternalLinkRegexpPattern = (function() {
     var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\'\"\\,\\(\\)\\[\\]«»]*)*\\/?";
     return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
 })();
+export const FILE_RATINGS = ['SFW', 'R-15', 'R-18', 'R-18G'];
 
 var forIn = function(obj, f) {
     if (!obj || typeof f != "function")

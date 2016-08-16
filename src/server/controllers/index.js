@@ -22,13 +22,13 @@ router.use('/redirect', (req, res, next) => {
 FSSync.readdirSync(__dirname).filter((fileName) => {
   return !EXCLUDED_ROUTERS.has(fileName) && 'js' === fileName.split('.').pop();
 }).forEach((fileName) => {
-  let r = require(`./${fileName.split('.').slice(0, -1).join('.')}`);
+  let r = Tools.requireWrapper(require(`./${fileName.split('.').slice(0, -1).join('.')}`));
   router.use('/', r);
   routers.push(r);
 });
 
 ['./board', './home'].forEach((id) => {
-  let r = require(id);
+  let r = Tools.requireWrapper(require(id));
   router.use('/', r);
   routers.push(r);
 });
