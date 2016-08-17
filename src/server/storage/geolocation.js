@@ -5,13 +5,7 @@ import SQLite3 from 'sqlite3';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 
-try {
-  var db = new SQLite3.Database(`${__dirname}/../geolocation/ip2location.sqlite`);
-} catch (err) {
-  Logger.error(err.stack || err);
-  Logger.error(new Error(Tools.translate('No geolocation database found. Geolocation will be disabled.')));
-  var db = null;
-}
+let db = null;
 
 export default async function geolocation(ip) {
   let info = {
@@ -19,7 +13,11 @@ export default async function geolocation(ip) {
     countryCode: null,
     countryName: null
   };
-  if (!db || !ip) {
+  if (!db) {
+    Logger.error(new Error(Tools.translate('No geolocation database found. Geolocation is disabled.')));
+    return info;
+  }
+  if (!ip) {
     return info;
   }
   let address = Tools.correctAddress(ip);
@@ -55,3 +53,16 @@ export default async function geolocation(ip) {
   info.countryName = result.countryName;
   return info;
 }
+
+geolocation.initialize = async function() {
+  await new Promise((resolve) => {
+    db = new SQLite3.Database(`${__dirname}/../sqlite/ip2location.sqlite`, SQLite3.OPEN_READONLY, (err) => {
+      if (err) {
+        db = null;
+        Logger.error(err.stack || err);
+        Logger.error(new Error(Tools.translate('No geolocation database found. Geolocation will be disabled.')));
+      }
+      resolve();
+    });
+  });
+};

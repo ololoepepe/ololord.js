@@ -27,6 +27,8 @@ import Logger from './helpers/logger';
 import * as OnlineCounter from './helpers/online-counter';
 import Program from './helpers/program';
 import * as Tools from './helpers/tools';
+import geolocation from './storage/geolocation';
+import sqlClient from './storage/sql-client-factory';
 
 config.installSetHook("site.locale", Tools.setLocale);
 
@@ -37,6 +39,8 @@ function spawnCluster() {
     app.use(middlewares);
     app.use(controllers);
     try {
+      await geolocation.initialize();
+      await sqlClient.initialize();
       await BoardsModel.initialize();
       await Renderer.reloadTemplates();
       var sockets = {};
@@ -238,10 +242,11 @@ function spawnWorkers(initCallback) {
   });
 }
 
+Board.initialize();
+
 if (Cluster.isMaster) {
   (async function() {
     try {
-      Board.initialize();
       await NodeCaptcha.removeOldCaptchImages();
       await NodeCaptchaNoscript.removeOldCaptchImages();
       let initCallback = await Database.initialize();
@@ -265,6 +270,5 @@ if (Cluster.isMaster) {
     }
   })();
 } else {
-  Board.initialize();
   spawnCluster();
 }

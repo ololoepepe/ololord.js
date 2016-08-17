@@ -14,11 +14,19 @@ let BannedUserIPs = new UnorderedSet(client(), 'bannedUserIps', {
   parse: false,
   stringify: false
 });
+let RegisteredUserHashes = new Hash(client(), 'registeredUserHashes', {
+  parse: false,
+  stringify: false
+});
 let RegisteredUserIPs = new UnorderedSet(client(), 'registeredUserIps', {
   parse: false,
   stringify: false
 });
 let RegisteredUserLevels = new Hash(client(), 'registeredUserLevels', {
+  parse: false,
+  stringify: false
+});
+let SuperuserHashes = new UnorderedSet(client(), 'superuserHashes', {
   parse: false,
   stringify: false
 });
@@ -123,6 +131,65 @@ export async function getBannedUsers(boardNames) {
   }, {});
 }
 
+export async function getRegisteredUserLevel(hashpass, boardName) {
+  if (!hashpass || !Tools.mayBeHashpass(hashpass)) {
+    return Promise.reject(new Error(Tools.translate('Invalid hashpass')));
+  }
+  if (!Board.board(boardName)) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  let exists = await SuperuserHashes.contains(hashpass);
+  if (exists) {
+    return 'SUPERUSER';
+  }
+  let level = await RegisteredUserLevels.getOne(boardName, hashpass);
+  return level || null;
+}
+
+export async function getRegisteredUserLevelByIp(ip, boardName) {
+  ip = Tools.correctAddress(ip);
+  if (!ip) {
+    return Promise.reject(new Error(Tools.translate('Invalid IP address')));
+  }
+  let hashpass = await RegisteredUserHashes.getOne(ip);
+  if (!hashpass) {
+    return null;
+  }
+  return await getRegisteredUserLevel(hashpass, boardName);
+}
+
+export async function getRegisteredUserLevels(hashpass) {
+  if (!hashpass || !Tools.mayBeHashpass(hashpass)) {
+    return {};
+  }
+  let exists = await SuperuserHashes.contains(hashpass);
+  if (exists) {
+    return Board.boardNames().reduce((acc, boardName) => {
+      acc[boardName] = 'SUPERUSER';
+      return acc;
+    }, {});
+  }
+  let levels = await RegisteredUserLevels.getAll(hashpass);
+  return levels || {};
+}
+
+export async function getRegisteredUserLevelsByIp(ip) {
+  ip = Tools.correctAddress(ip);
+  if (!ip) {
+    return {};
+  }
+  let hashpass = await RegisteredUserHashes.getOne(ip);
+  if (!hashpass) {
+    return {};
+  }
+  return await getRegisteredUserLevels(hashpass);
+    return db.hget("registeredUserHashes", ip).then(function(hashpass) {
+        if (!hashpass)
+            return Promise.resolve({});
+        return registeredUserLevels(hashpass);
+    });
+}
+
 export async function getRegisteredUser(hashpass) {
   let user = { hashpass: hashpass };
   let levels = await RegisteredUserLevels.getAll(hashpass);
@@ -142,6 +209,82 @@ export async function getRegisteredUsers() {
   }), async function(hashpass) {
     return await getRegisteredUser(hashpass);
   }, true);
+}
+
+async function processRegisteredUserData(levels, ips) {
+  if (!Tools.hasOwnProperties(levels)) {
+    return Promise.reject(new Error(Tools.translate('Access level is not specified for any board')));
+  }
+  if (Object.keys(levels).some(boardName => !Board.board(boardName))) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  let invalidLevel = _(levels).some((level) => {
+    return (Tools.compareRegisteredUserLevels(level, 'USER') < 0)
+      || (Tools.compareRegisteredUserLevels(level, 'SUPERUSER') >= 0);
+  });
+  if (invalidLevel) {
+    return Promise.reject(new Error(Tools.translate('Invalid access level')));
+  }
+  if (_(ips).isArray()) {
+    ips = ips.map(ip => Tools.correctAddress(ip));
+    if (ips.some(ip => !ip)) {
+      return Promise.reject(new Error(Tools.translate('Invalid IP address')));
+    }
+  }
+  return ips;
+}
+
+export async function registerUser(hashpass, levels, ips) {
+  let ips = await processRegisteredUserData(levels, ips);
+  let existingUserLevel = await RegisteredUserLevels.exists(hashpass);
+  if (existingUserLevel) {
+    return Promise.reject(new Error(Tools.translate('A user with this hashpass is already registered')));
+  }
+  let existingSuperuserHash = await SuperuserHashes.contains(hashpass);
+  if (existingSuperuserHash) {
+    return Promise.reject(new Error(Tools.translate('A user with this hashpass is already registered as superuser')));
+  }
+  await RegisteredUserLevels.setSome(levels, hashpass);
+  if (_(ips).isArray()) {
+    //TODO: May be optimised (hmset)
+    await Tools.series(ips, async function(ip) {
+      await RegisteredUserHashes.setOne(ip, hashpass);
+      await RegisteredUserIPs.addOne(ip, hashpass);
+    });
+  }
+}
+
+export async function updateRegisteredUser(hashpass, levels, ips) {
+  let ips = await processRegisteredUserData(levels, ips);
+  let existingUserLevel = await RegisteredUserLevels.exists(hashpass);
+  if (!existingUserLevel) {
+    return Promise.reject(new Error(Tools.translate('No user with this hashpass')));
+  }
+  await RegisteredUserLevels.setSome(levels, hashpass);
+  let existingIPs = await RegisteredUserIPs.getAll(hashpass);
+  if (existingIPs && existingIPs.length > 0) {
+    await RegisteredUserHashes.deleteSome(ips);
+  }
+  await RegisteredUserIPs.delete(hashpass);
+  if (_(ips).isArray()) {
+    //TODO: May be optimised (hmset)
+    await Tools.series(ips, async function(ip) {
+      await RegisteredUserHashes.setOne(ip, hashpass);
+      await RegisteredUserIPs.addOne(ip, hashpass);
+    });
+  }
+}
+
+export async function unregisterUser(hashpass) {
+  let count = await RegisteredUserLevels.delete(hashpass);
+  if (count <= 0) {
+    return Promise.reject(new Error(Tools.translate('No user with this hashpass')));
+  }
+  let ips = await RegisteredUserIPs.getAll(hashpass);
+  if (ips && ips.length > 0) {
+    await RegisteredUserHashes.deleteSome(ips);
+  }
+  await RegisteredUserIPs.delete(hashpass);
 }
 
 export async function getSynchronizationData(key) {
@@ -199,11 +342,11 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
     }
   }
   if (!board.opModeration) {
-    return Promise.reject(Tools.translate('Not enough rights'));
+    return Promise.reject(new Error(Tools.translate('Not enough rights'));
   }
   let thread = await Threads.getOne(threadNumber, boardName);
   if (thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass)) {
-    return Promise.reject(Tools.translate('Not enough rights'));
+    return Promise.reject(new Error(Tools.translate('Not enough rights')));
   }
   if (Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0) {
     return;
@@ -214,7 +357,7 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
   if (password && password === user.password) {
     return;
   }
-  return Promise.reject(Tools.translate('Not enough rights'));
+  return Promise.reject(new Error(Tools.translate('Not enough rights')));
 }
 
 export function checkGeoBan(geolocationInfo) {

@@ -25,65 +25,75 @@ import geolocation from '../storage/geolocation';
 
 let router = express.Router();
 
-var getRegisteredUserData = function(fields) {
-    var levels = {};
-    var password = fields.password;
-    var ips = Tools.ipList(fields.ips);
-    if (typeof ips == "string")
-        return Promise.reject(ips);
-    Tools.forIn(fields, function(value, name) {
-        if (!/^accessLevelBoard_\S+$/.test(name))
-            return;
-        if ("NONE" == value)
-            return;
-        levels[name.match(/^accessLevelBoard_(\S+)$/)[1]] = value;
-    });
-    return Promise.resolve({
-        password: password,
-        levels: levels,
-        ips: ips
-    });
-};
+function getRegisteredUserData(fields) {
+  let ips = Tools.ipList(fields.ips);
+  if (typeof ips === 'string') {
+    return Promise.reject(new Error(ips));
+  }
+  let levels = _(fields).reduce((acc, value, name) => {
+    let match = name.match(/^accessLevelBoard_(\S+)$/);
+    if (match && 'NONE' !== value) {
+      acc[match[1]] = value;
+    }
+    return acc;
+  });
+  return {
+    levels:
+    ips: ips
+  };
+}
 
-router.post("/action/registerUser", function(req, res, next) {
-    if (!req.isSuperuser())
-        return next(Tools.translate("Not enough rights"));
-    Tools.parseForm(req).then(function(result) {
-        return getRegisteredUserData(result.fields);
-    }).then(function(result) {
-        return Database.registerUser(result.password, result.levels, result.ips);
-    }).then(function(hashpass) {
-        res.json({ hashpass: hashpass });
-    }).catch(function(err) {
-        next(err);
-    });
+router.post('/action/registerUser', async function(req, res, next) {
+  try {
+    if (!req.isSuperuser()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields } = await Tools.parseForm(req);
+    let { password } = fields;
+    if (!password) {
+      throw new Error(Tools.translate('Invalid password'));
+    }
+    let { levels, ips } = getRegisteredUserData(fields);
+    let hashpass = Tools.mayBeHashpass(password) ? password : Tools.toHashpass(password);
+    await UsersModel.registerUser(hashpass, levels, ips);
+    res.json({ hashpass: hashpass });
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.post("/action/unregisterUser", function(req, res, next) {
-    if (!req.isSuperuser())
-        return next(Tools.translate("Not enough rights"));
-    var c = {};
-    Tools.parseForm(req).then(function(result) {
-        return Database.unregisterUser(result.fields.hashpass);
-    }).then(function(result) {
-        res.send({});
-    }).catch(function(err) {
-        next(err);
-    });
+router.post('/action/updateRegisteredUser', async function(req, res, next) {
+  try {
+    if (!req.isSuperuser()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields } = await Tools.parseForm(req);
+    let { hashpass } = fields;
+    if (!hashpass || !Tools.mayBeHashpass(hashpass)) {
+      throw new Error(Tools.translate('Invalid hashpass'));
+    }
+    let { levels, ips } = getRegisteredUserData(fields);
+    await UsersModel.updateRegisterUser(hashpass, levels, ips);
+    res.json({});
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.post("/action/updateRegisteredUser", function(req, res, next) {
-    if (!req.isSuperuser())
-        return next(Tools.translate("Not enough rights"));
-    Tools.parseForm(req).then(function(result) {
-        return getRegisteredUserData(result.fields);
-    }).then(function(result) {
-        return Database.updateRegisteredUser(result.password, result.levels, result.ips);
-    }).then(function() {
-        res.json({});
-    }).catch(function(err) {
-        next(err);
-    });
+router.post('/action/unregisterUser', async function(req, res, next) {
+  try {
+    if (!req.isSuperuser()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields: { hashpass } } = await Tools.parseForm(req);
+    if (!hashpass || !Tools.mayBeHashpass(hashpass)) {
+      throw new Error(Tools.translate('Invalid hashpass'));
+    }
+    await UsersModel.unregisterUser(hashpass);
+    res.json({});
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post("/action/superuserAddFile", function(req, res, next) {
@@ -254,16 +264,4 @@ router.post("/action/superuserReload", function(req, res, next) {
     });
 });
 
-Captcha.captchaIds().forEach(function(id) {
-    Captcha.captcha(id).actionRoutes().forEach(function(route) {
-        router[route.method]("/action" + route.path, route.handler);
-    });
-});
-
-Board.boardNames().forEach(function(name) {
-    Board.board(name).actionRoutes().forEach(function(route) {
-        router[route.method]("/action" + route.path, route.handler);
-    });
-});
-
-module.exports = router;
+export default router;

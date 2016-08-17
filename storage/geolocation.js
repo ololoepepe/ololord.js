@@ -30,13 +30,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-try {
-  var db = new _sqlite2.default.Database(__dirname + '/../geolocation/ip2location.sqlite');
-} catch (err) {
-  _logger2.default.error(err.stack || err);
-  _logger2.default.error(new Error(Tools.translate('No geolocation database found. Geolocation will be disabled.')));
-  var db = null;
-}
+var db = null;
 
 exports.default = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(ip) {
@@ -51,17 +45,16 @@ exports.default = function () {
               countryName: null
             };
 
-            if (!(!db || !ip)) {
-              _context.next = 3;
+            if (db) {
+              _context.next = 4;
               break;
             }
 
+            _logger2.default.error(new Error(Tools.translate('No geolocation database found. Geolocation is disabled.')));
             return _context.abrupt('return', info);
 
-          case 3:
-            address = Tools.correctAddress(ip);
-
-            if (address) {
+          case 4:
+            if (ip) {
               _context.next = 6;
               break;
             }
@@ -69,6 +62,16 @@ exports.default = function () {
             return _context.abrupt('return', info);
 
           case 6:
+            address = Tools.correctAddress(ip);
+
+            if (address) {
+              _context.next = 9;
+              break;
+            }
+
+            return _context.abrupt('return', info);
+
+          case 9:
             ipv4 = Tools.preferIPv4(ip);
             query = 'SELECT ipFrom, countryCode, countryName, cityName FROM ip2location WHERE ipTo >= ? LIMIT 1';
             statement = db.prepare(query);
@@ -79,56 +82,56 @@ exports.default = function () {
             } else {
               address = bigInt(new _ipAddress2.default.Address6(address).bigInteger().toString());
             }
-            _context.next = 13;
+            _context.next = 16;
             return statement.pget(address.toString());
 
-          case 13:
+          case 16:
             result = _context.sent;
 
             statement.finalize();
 
             if (result) {
-              _context.next = 17;
+              _context.next = 20;
               break;
             }
 
             return _context.abrupt('return', info);
 
-          case 17:
+          case 20:
             ipFrom = void 0;
-            _context.prev = 18;
+            _context.prev = 21;
 
             ipFrom = bigInt(result.ipFrom);
-            _context.next = 26;
+            _context.next = 29;
             break;
 
-          case 22:
-            _context.prev = 22;
-            _context.t0 = _context['catch'](18);
+          case 25:
+            _context.prev = 25;
+            _context.t0 = _context['catch'](21);
 
             _logger2.default.error(_context.t0.stack || _context.t0);
             return _context.abrupt('return', info);
 
-          case 26:
+          case 29:
             if (!ipFrom.greater(address)) {
-              _context.next = 28;
+              _context.next = 31;
               break;
             }
 
             return _context.abrupt('return', info);
 
-          case 28:
+          case 31:
             info.cityName = result.cityName;
             info.countryCode = result.countryCode;
             info.countryName = result.countryName;
             return _context.abrupt('return', info);
 
-          case 32:
+          case 35:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, this, [[18, 22]]);
+    }, _callee, this, [[21, 25]]);
   }));
 
   function geolocation(_x) {
@@ -137,4 +140,29 @@ exports.default = function () {
 
   return geolocation;
 }();
+
+geolocation.initialize = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+  return regeneratorRuntime.wrap(function _callee2$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.next = 2;
+          return new Promise(function (resolve) {
+            db = new _sqlite2.default.Database(__dirname + '/../sqlite/ip2location.sqlite', _sqlite2.default.OPEN_READONLY, function (err) {
+              if (err) {
+                db = null;
+                _logger2.default.error(err.stack || err);
+                _logger2.default.error(new Error(Tools.translate('No geolocation database found. Geolocation will be disabled.')));
+              }
+              resolve();
+            });
+          });
+
+        case 2:
+        case 'end':
+          return _context2.stop();
+      }
+    }
+  }, _callee2, this);
+}));
 //# sourceMappingURL=geolocation.js.map

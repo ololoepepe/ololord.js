@@ -46,6 +46,20 @@ export default class Hash {
     return await this.client.hset(this.fullKey(subkey), id, this.stringify(data));
   }
 
+  async setSome(items, subkey) {
+    if (typeof items !== 'object') {
+      return 0;
+    }
+    if (!_(items).isArray()) {
+      items = _(items).map((value, key) => { return [key, value]; });
+      items = _(items).flatten();
+    }
+    if (items.length <= 0) {
+      return 0;
+    }
+    return await this.client.hmset.call(this.client, this.fullKey(subkey), ...items);
+  }
+
   async incrementBy(id, n, subkey) {
     return await this.client.hincrby(this.fullKey(subkey), key, n);
   }

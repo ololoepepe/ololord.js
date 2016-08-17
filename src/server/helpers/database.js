@@ -127,8 +127,8 @@ var sortedReferensces = function(references) {
 var checkPermissions = function(req, board, post, permission, password) {
     if (req.isSuperuser())
         return Promise.resolve(true);
-    if (compareRegisteredUserLevels(req.level(board.name), Permissions[permission]()) >= 0) {
-        if (compareRegisteredUserLevels(req.level(board.name), post.user.level) > 0)
+    if (Tools.compareRegisteredUserLevels(req.level(board.name), Permissions[permission]()) >= 0) {
+        if (Tools.compareRegisteredUserLevels(req.level(board.name), post.user.level) > 0)
             return Promise.resolve(true);
         if (req.hashpass && req.hashpass == post.user.hashpass)
             return Promise.resolve(true);
@@ -141,7 +141,7 @@ var checkPermissions = function(req, board, post, permission, password) {
         thread = JSON.parse(thread);
         if (thread.user.ip != req.ip && (!req.hashpass || req.hashpass != thread.user.hashpass))
             return Promise.resolve(false);
-        if (compareRegisteredUserLevels(req.level(board.name), post.user.level) >= 0)
+        if (Tools.compareRegisteredUserLevels(req.level(board.name), post.user.level) >= 0)
             return Promise.resolve(true);
         if (req.hashpass && req.hashpass == post.user.hashpass)
             return Promise.resolve(true);
@@ -346,199 +346,6 @@ module.exports.removeSuperuser = function(password, notHashpass) {
         return Promise.resolve();
     });
 };
-
-module.exports.registerUser = function(password, levels, ips, notHashpass) {
-    if (!password)
-        return Promise.reject(Tools.translate("Invalid password"));
-    var hashpass = toHashpass(password, notHashpass);
-    if (!Tools.hasOwnProperties(levels))
-        return Promise.reject(Tools.translate("Access level is not specified for any board"));
-    var invalidBoard = Object.keys(levels).some(function(boardName) {
-        if (!Board.board(boardName)) {
-            return true;
-          }
-    });
-    if (invalidBoard)
-        return Promise.reject(Tools.translate("Invalid board"));
-    var invalidLevel = Tools.toArray(levels).some(function(level) {
-        if (compareRegisteredUserLevels(level, RegisteredUserLevels.User) < 0
-            || compareRegisteredUserLevels(level, RegisteredUserLevels.Superuser) >= 0) {
-            return true;
-        }
-    });
-    if (invalidLevel)
-        return Promise.reject(Tools.translate("Invalid access level"));
-    var invalidIp;
-    if (Util.isArray(ips)) {
-        invalidIp = ips.some(function(ip, i) {
-            ip = Tools.correctAddress(ip);
-            if (!ip)
-                return true;
-            ips[i] = ip;
-        });
-    }
-    if (invalidIp)
-        return Promise.reject(Tools.translate("Invalid IP address"));
-    return db.exists("registeredUserLevels:" + hashpass).then(function(result) {
-        if (result)
-            return Promise.reject(Tools.translate("A user with this hashpass is already registered"));
-        return db.sismember("superuserHashes", hashpass);
-    }).then(function(result) {
-        if (result)
-            return Promise.reject(Tools.translate("A user with this hashpass is already registered as superuser"));
-        return db.hmset("registeredUserLevels:" + hashpass, levels);
-    }).then(function() {
-        if (!Util.isArray(ips))
-            return Promise.resolve();
-        return Tools.series(ips, function(ip) {
-            return db.hset("registeredUserHashes", ip, hashpass).then(function() {
-                return db.sadd("registeredUserIps:" + hashpass, ip);
-            });
-        });
-    }).then(function() {
-        return Promise.resolve(hashpass);
-    });
-};
-
-module.exports.unregisterUser = function(hashpass) {
-    if (!hashpass || !Tools.mayBeHashpass(hashpass))
-        return Promise.reject(Tools.translate("Invalid hashpass"));
-    return db.del("registeredUserLevels:" + hashpass).then(function(result) {
-        if (!result)
-            return Promise.reject(Tools.translate("No user with this hashpass"));
-        return db.smembers("registeredUserIps:" + hashpass);
-    }).then(function(ips) {
-        if (!ips)
-            return Promise.resolve();
-        return Tools.series(ips, function(ip) {
-            return db.hdel("registeredUserHashes", ip);
-        });
-    }).then(function() {
-        return db.del("registeredUserIps:" + hashpass);
-    }).then(function() {
-        return Promise.resolve();
-    });
-};
-
-module.exports.updateRegisteredUser = function(hashpass, levels, ips, notHashpass) {
-    if (!hashpass || !Tools.mayBeHashpass(hashpass))
-        return Promise.reject(Tools.translate("Invalid hashpass"));
-    if (!Tools.hasOwnProperties(levels))
-        return Promise.reject(Tools.translate("Access level is not specified for any board"));
-    var invalidBoard = Object.keys(levels).some(function(boardName) {
-        if (!Board.board(boardName))
-            return true;
-    });
-    if (invalidBoard)
-        return Promise.reject(Tools.translate("Invalid board"));
-    var invalidLevel = Tools.toArray(levels).some(function(level) {
-        if (compareRegisteredUserLevels(level, RegisteredUserLevels.User) < 0
-            || compareRegisteredUserLevels(level, RegisteredUserLevels.Superuser) >= 0) {
-            return true;
-        }
-    });
-    if (invalidLevel)
-        return Promise.reject(Tools.translate("Invalid access level"));
-    var invalidIp;
-    if (Util.isArray(ips)) {
-        invalidIp = ips.some(function(ip, i) {
-            ip = Tools.correctAddress(ip);
-            if (!ip)
-                return true;
-            ips[i] = ip;
-        });
-    }
-    if (invalidIp)
-        return Promise.reject(Tools.translate("Invalid IP address"));
-    return db.del("registeredUserLevels:" + hashpass).then(function(result) {
-        if (!result)
-            return Promise.reject(Tools.translate("No user with this hashpass"));
-        return db.hmset("registeredUserLevels:" + hashpass, levels);
-    }).then(function() {
-        return db.smembers("registeredUserIps:" + hashpass);
-    }).then(function(ips) {
-        if (!ips)
-            return Promise.resolve();
-        return Tools.series(ips, function(ip) {
-            return db.hdel("registeredUserHashes", ip);
-        });
-    }).then(function() {
-        return db.del("registeredUserIps:" + hashpass);
-    }).then(function() {
-        if (!Util.isArray(ips))
-            return Promise.resolve();
-        return Tools.series(ips, function(ip) {
-            return db.hset("registeredUserHashes", ip, hashpass).then(function() {
-                return db.sadd("registeredUserIps:" + hashpass, ip);
-            });
-        });
-    }).then(function() {
-        return Promise.resolve();
-    });
-};
-
-var registeredUserLevel = function(password, boardName, notHashpass) {
-    if (!password)
-        return Promise.reject(Tools.translate("Invalid password"));
-    if (!Board.board(boardName))
-        return Promise.reject(Tools.translate("Invalid board"));
-    var hashpass = toHashpass(password, notHashpass);
-    return db.sismember("superuserHashes", hashpass).then(function(result) {
-        if (!result)
-            return db.hgetall("registeredUserLevels:" + hashpass);
-        return Promise.resolve({ boardName: RegisteredUserLevels.Superuser });
-    }).then(function(levels) {
-        levels = levels || {};
-        return Promise.resolve(levels[boardName] || null);
-    });
-};
-
-module.exports.registeredUserLevel = registeredUserLevel;
-
-var registeredUserLevelByIp = function(ip, boardName) {
-    ip = Tools.correctAddress(ip);
-    if (!ip)
-        return Promise.reject(Tools.translate("Invalid IP address"));
-    return db.hget("registeredUserHashes", ip).then(function(hashpass) {
-        if (!hashpass)
-            return Promise.resolve(null);
-        return registeredUserLevel(hashpass, boardName);
-    });
-};
-
-module.exports.registeredUserLevelByIp = registeredUserLevelByIp;
-
-var registeredUserLevels = function(reqOrHashpass) {
-    if (reqOrHashpass && typeof reqOrHashpass == "object" && reqOrHashpass.cookies)
-        reqOrHashpass = Tools.hashpass(reqOrHashpass);
-    if (!reqOrHashpass)
-        return Promise.resolve(null);
-    return db.sismember("superuserHashes", reqOrHashpass).then(function(result) {
-        if (!result)
-            return db.hgetall("registeredUserLevels:" + reqOrHashpass);
-        return Promise.resolve(Board.boardNames().reduce(function(acc, boardName) {
-            acc[boardName] = RegisteredUserLevels.Superuser;
-            return acc;
-        }, {}));
-    }).then(function(levels) {
-        return Promise.resolve(levels || {});
-    });
-};
-
-module.exports.registeredUserLevels = registeredUserLevels;
-
-var registeredUserLevelsByIp = function(ip) {
-    ip = Tools.correctAddress(ip);
-    if (!ip)
-        return Promise.reject(Tools.translate("Invalid IP address"));
-    return db.hget("registeredUserHashes", ip).then(function(hashpass) {
-        if (!hashpass)
-            return Promise.resolve({});
-        return registeredUserLevels(hashpass);
-    });
-};
-
-module.exports.registeredUserLevelsByIp = registeredUserLevelsByIp;
 
 var nextPostNumber = function(boardName, incrby) {
     var board = Board.board(boardName);
@@ -874,19 +681,6 @@ var userLevels = [
     "ADMIN",
     "SUPERUSER"
 ];
-
-var compareRegisteredUserLevels = function(l1, l2) {
-    l1 = userLevels.indexOf(l1);
-    l2 = userLevels.indexOf(l2);
-    if (l1 < l2)
-        return -1;
-    else if (l1 > l2)
-        return 1;
-    else
-        return 0;
-};
-
-module.exports.compareRegisteredUserLevels = compareRegisteredUserLevels;
 
 var getGeolocationInfo = function(ip) {
     var info = {
@@ -1289,7 +1083,7 @@ module.exports.moveThread = function(req, fields) {
         if ((!password || password != c.thread.user.password)
             && (!req.hashpass || req.hashpass != c.thread.user.hashpass)
             && !req.isSuperuser()
-            && (compareRegisteredUserLevels(req.level(sourceBoard.name), c.thread.user.level) <= 0)) {
+            && (Tools.compareRegisteredUserLevels(req.level(sourceBoard.name), c.thread.user.level) <= 0)) {
             return Promise.reject(Tools.translate("Not enough rights"));
         }
         delete c.thread.updatedAt;
@@ -1570,11 +1364,11 @@ module.exports.banUser = function(req, ip, bans) {
             }
             return acc;
         }, {});
-        return registeredUserLevelsByIp(ip);
+        return UsersModel.getRegisteredUserLevelsByIp(ip);
     }).then(function(levels) {
         modified.some(function(boardName) {
             var level = req.level(boardName);
-            if (!req.isSuperuser(boardName) && compareRegisteredUserLevels(level, levels[boardName]) <= 0) {
+            if (!req.isSuperuser(boardName) && Tools.compareRegisteredUserLevels(level, levels[boardName]) <= 0) {
                 err = Promise.reject(Tools.translate("Not enough rights"));
                 return true;
             }
@@ -1640,10 +1434,10 @@ module.exports.delall = function(req, ip, boardNames) {
     var deletedThreads = {};
     var updatedThreads = {};
     var deletedPosts = {};
-    return registeredUserLevelsByIp(ip).then(function(levels) {
+    return UsersModel.getRegisteredUserLevelsByIp(ip).then(function(levels) {
         err = boardNames.some(function(boardName) {
             var level = req.level(boardName);
-            if (!req.isSuperuser(boardName) && compareRegisteredUserLevels(level, levels[boardName]) <= 0)
+            if (!req.isSuperuser(boardName) && Tools.compareRegisteredUserLevels(level, levels[boardName]) <= 0)
                 return true;
         });
         if (err)

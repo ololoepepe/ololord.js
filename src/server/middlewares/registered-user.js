@@ -2,9 +2,10 @@ var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
 
 import Logger from '../helpers/logger';
+import * as UsersModel from '../models/users';
 
 module.exports = function(req, res, next) {
-    Database.registeredUserLevels(req).then(function(levels) {
+    UsersModel.getRegisteredUserLevels(req.hashpass).then(function(levels) {
         levels = levels || {};
         var maxLevel = Tools.toArray(levels).sort(function() {
             return -1 * Database.compareRegisteredUserLevels(arguments);

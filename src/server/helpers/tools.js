@@ -177,7 +177,7 @@ module.exports.toUTC = function(date) {
 
 module.exports.hashpass = function(req) {
     var s = req.cookies.hashpass;
-    if (!module.exports.mayBeHashpass(s))
+    if (!mayBeHashpass(s))
         return;
     return s;
 };
@@ -369,9 +369,9 @@ module.exports.splitCommand = function(cmd) {
     };
 };
 
-module.exports.mayBeHashpass = function(password) {
-    return (typeof password == "string") && password.match(/^([0-9a-fA-F]){40}$/);
-};
+export function mayBeHashpass(password) {
+  return (typeof password === 'string') && password.match(/^([0-9a-fA-F]){40}$/);
+}
 
 module.exports.parseForm = function(req) {
     if (req.formFields) {
@@ -467,13 +467,14 @@ module.exports.preferIPv4 = function(ip) {
     return ip;
 };
 
-module.exports.sha1 = function(data) {
-    if (!data || (!Util.isString(data) && !Util.isBuffer(data)))
-        return null;
-    var sha1 = Crypto.createHash("sha1");
-    sha1.update(data);
-    return sha1.digest("hex");
-};
+export function sha1(data) {
+  if (!data || (typeof data !== 'string' && !_(data).isBuffer())) {
+    return null;
+  }
+  let hash = Crypto.createHash('sha1');
+  hash.update(data);
+  return hash.digest('hex');
+}
 
 module.exports.sha256 = function(data) {
     if (!data)
@@ -781,7 +782,7 @@ export function createWatchedResource(path, synchronous, asynchronous) {
   return synchronous(path);
 }
 
-const USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];
+export const USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];
 
 export function compareRegisteredUserLevels(l1, l2) {
   return USER_LEVELS.indexOf(l1) - USER_LEVELS.indexOf(l2);
@@ -875,4 +876,11 @@ export function markupModes(string) {
     string = '';
   }
   return _(markup.MarkupModes).filter((mode) => { return string.indexOf(mode) >= 0; });
+}
+
+export function toHashpass(password, notHashpass) {
+  if (notHashpass || !mayBeHashpass(password)) {
+    password = sha1(password);
+  }
+  return password;
 }
