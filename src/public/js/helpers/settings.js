@@ -69,7 +69,8 @@ export const DEFAULT = {
   captchaEngine: 'node-captcha',
   style: 'photon',
   codeStyle: 'default',
-  mumWatching: false
+  mumWatching: false,
+  ajaxNavigation: false
 };
 
 export function initialize() {

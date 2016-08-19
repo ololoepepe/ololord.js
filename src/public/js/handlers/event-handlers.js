@@ -153,7 +153,7 @@ registerHandler('load', () => {
 registerHandler('load', async function() {
   try {
     Drafts.initializeDrafts();
-    let posts = DOM.queryAll('#content .post, #content .opPost');
+    let posts = DOM.queryAll('#content .js-post');
     await PostProcessors.applyPreprocessors(posts);
     await PostProcessors.applyPostprocessors(posts);
     Files.initializeFiles();
@@ -208,14 +208,50 @@ registerHandler('resize', () => {
   let height = w.height();
   ResizeHandlers.applyHandlers(width != lastWindowSize.width, height != lastWindowSize.height, width, height);
   lastWindowSize = {
-      width: width,
-      height: height
+    width: width,
+    height: height
   };
 });
 
 registerHandler('scroll', DOM.scrollHandler);
 
-registerHandler('click', Posts.globalClickHandler);
+registerHandler('click', Posts.globalClickHandler, { priority: 0 });
+
+registerHandler('click', async function(e) {
+  if (!Settings.ajaxNavigation()) {
+    return;
+  }
+  if (e.button) {
+    return;
+  }
+  let t = e.target;
+  if (!t || 'A' !== t.tagName || !t.href) {
+    return;
+  }
+  let href = t.href;
+  let sameDomain = `${window.location.protocol}//${window.location.hostname}`;
+  if (!/^\//.test(href) && href.substr(0, sameDomain.length) !== sameDomain) {
+    return;
+  }
+  try {
+    e.preventDefault();
+    let html = await $.ajax({
+      url: href,
+      type: 'GET',
+      dataType: 'html'
+    });
+    let start = html.indexOf("<main id='content'>");
+    let end = html.lastIndexOf('</main>');
+    html = html.substring(start, end + 7);
+    let content = _($.parseHTML(html, window.document, true)).find((n) => {
+      return window.Node.ELEMENT_NODE === n.nodeType;
+    });
+    Templating.scriptWorkaround(content);
+    $('#content').replaceWith(content);
+  } catch (err) {
+    DOM.handleError(err);
+  }
+}, { priority: 10 });
 
 registerHandler('mouseover', Posts.globalMouseoverHandler);
 

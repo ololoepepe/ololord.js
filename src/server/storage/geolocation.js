@@ -1,5 +1,5 @@
 import IPAddress from 'ip-address';
-import promisify from 'promisify';
+import promisify from 'promisify-node';
 import SQLite3 from 'sqlite3';
 
 import Logger from '../helpers/logger';
@@ -7,7 +7,7 @@ import * as Tools from '../helpers/tools';
 
 let db = null;
 
-export default async function geolocation(ip) {
+async function geolocation(ip) {
   let info = {
     cityName: null,
     countryCode: null,
@@ -66,3 +66,5 @@ geolocation.initialize = async function() {
     });
   });
 };
+
+export default geolocation;

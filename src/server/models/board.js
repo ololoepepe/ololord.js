@@ -9,7 +9,7 @@ var promisify = require("promisify-node");
 var Util = require("util");
 var XML2JS = require("xml2js");
 
-var Board = require("../boards/board");
+import Board from '../boards/board';
 var Cache = require("../helpers/cache");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");

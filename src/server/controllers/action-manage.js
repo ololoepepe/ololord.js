@@ -6,12 +6,12 @@ import merge from 'merge';
 var moment = require("moment");
 import UUID from 'uuid';
 
-var Board = require("../boards/board");
+import Board from '../boards/board';
 var Captcha = require("../captchas");
 var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");
-var markup = require("../helpers/markup");
+var markup = require("../core/markup");
 
 import * as FilesModel from '../models/files';
 import * as PostsModel from '../models/posts';
@@ -38,7 +38,7 @@ function getRegisteredUserData(fields) {
     return acc;
   });
   return {
-    levels:
+    levels: levels,
     ips: ips
   };
 }
@@ -96,78 +96,74 @@ router.post('/action/unregisterUser', async function(req, res, next) {
   }
 });
 
-router.post("/action/superuserAddFile", function(req, res, next) {
-    if (!req.isSuperuser())
-        return next(Tools.translate("Not enough rights"));
-    Tools.parseForm(req).then(function(result) {
-        var dir = result.fields.dir;
-        if (dir.slice(-1)[0] != "/")
-            dir += "/";
-        var path = __dirname + "/../" + dir + result.fields.fileName;
-        var files = Tools.toArray(result.files);
-        if ("true" == result.fields.isDir)
-            return FS.makeDirectory(path);
-        else if (files.length < 1)
-            return Tools.writeFile(path, "");
-        else
-            return FS.move(files[0].path, path);
-    }).then(function() {
-        res.json({});
-    }).catch(function(err) {
-        if ("ENOENT" == err.code)
-            err.status = 404;
-        else if ("ENOTDIR" == err.code)
-            err = Tools.translate("Not a directory");
-        next(err);
+router.post('/action/superuserAddFile', async function(req, res, next) {
+  try {
+    if (!req.isSuperuser()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields: { dir, fileName, isDir }, files } = await Tools.parseForm(req);
+    if (!dir || typeof dir !== 'string') {
+      throw new Error(Tools.translate('Invalid dir'));
+    }
+    if (!fileName || typeof fileName !== 'string') {
+      throw new Error(Tools.translate('Invalid file name'));
+    }
+    await Files.createFile(dir, fileName, {
+      isDir: ('true' === isDir),
+      file: _(files).toArray()[0]
     });
+    res.json({});
+  } catch (err) {
+    next(Tools.processError(err, true));
+  }
 });
 
-router.post("/action/superuserEditFile", function(req, res, next) {
-    if (!req.isSuperuser())
-        return next(Tools.translate("Not enough rights"));
-    Tools.parseForm(req).then(function(result) {
-        var path = __dirname + "/../" + result.fields.fileName;
-        return Tools.writeFile(path, result.fields.content);
-    }).then(function() {
-        res.json({});
-    }).catch(function(err) {
-        if ("ENOENT" == err.code)
-            err.status = 404;
-        else if ("EISDIR" == err.code)
-            err = Tools.translate("Not a file");
-        next(err);
-    });
+router.post('/action/superuserEditFile', async function(req, res, next) {
+  try {
+    if (!req.isSuperuser()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields: { fileName, content } } = await Tools.parseForm(req);
+    if (!fileName || typeof fileName !== 'string') {
+      throw new Error(Tools.translate('Invalid file name'));
+    }
+    await Files.editFile(fileName, content);
+    res.json({});
+  } catch (err) {
+    next(Tools.processError(err, false));
+  }
 });
 
-router.post("/action/superuserRenameFile", function(req, res, next) {
-    if (!req.isSuperuser())
-        return next(Tools.translate("Not enough rights"));
-    Tools.parseForm(req).then(function(result) {
-        var oldPath = __dirname + "/../" + result.fields.oldFileName;
-        var newPath = oldPath.split("/").slice(0, -1).join("/") + "/" + result.fields.fileName;
-        return FS.rename(oldPath, newPath);
-    }).then(function() {
-        res.json({});
-    }).catch(function(err) {
-        if ("ENOENT" == err.code)
-            err.status = 404;
-        next(err);
-    });
+router.post("/action/superuserRenameFile", async function(req, res, next) {
+  try {
+    if (!req.isSuperuser()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields: { oldFileName, fileName } } = await Tools.parseForm(req);
+    if (!oldFileName || typeof oldFileName !== 'string' || !fileName || typeof fileName !== 'string') {
+      throw new Error(Tools.translate('Invalid file name'));
+    }
+    await Files.renameFile(oldFileName, fileName);
+    res.json({});
+  } catch (err) {
+    next(Tools.processError(err));
+  }
 });
 
-router.post("/action/superuserDeleteFile", function(req, res, next) {
-    if (!req.isSuperuser())
-        return next(Tools.translate("Not enough rights"));
-    Tools.parseForm(req).then(function(result) {
-        var path = __dirname + "/../" + result.fields.fileName;
-        return FS.removeTree(path);
-    }).then(function() {
-        res.json({});
-    }).catch(function(err) {
-        if ("ENOENT" == err.code)
-            err.status = 404;
-        next(err);
-    });
+router.post('/action/superuserDeleteFile', async function(req, res, next) {
+  try {
+    if (!req.isSuperuser()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields: { fileName } } = await Tools.parseForm(req);
+    if (!fileName || typeof fileName !== 'string') {
+      throw new Error(Tools.translate('Invalid file name'));
+    }
+    await Files.deleteFile(fileName);
+    res.json({});
+  } catch (err) {
+    next(Tools.processError(err));
+  }
 });
 
 router.post("/action/superuserRerenderCache", function(req, res, next) {

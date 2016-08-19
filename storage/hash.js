@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _underscore = require('underscore');
@@ -233,20 +235,45 @@ var Hash = function () {
       return setOne;
     }()
   }, {
-    key: 'incrementBy',
+    key: 'setSome',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(id, n, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(items, subkey) {
+        var _client$hmset;
+
         return regeneratorRuntime.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
-                _context7.next = 2;
-                return this.client.hincrby(this.fullKey(subkey), key, n);
+                if (!((typeof items === 'undefined' ? 'undefined' : _typeof(items)) !== 'object')) {
+                  _context7.next = 2;
+                  break;
+                }
+
+                return _context7.abrupt('return', 0);
 
               case 2:
+                if (!(0, _underscore2.default)(items).isArray()) {
+                  items = (0, _underscore2.default)(items).map(function (value, key) {
+                    return [key, value];
+                  });
+                  items = (0, _underscore2.default)(items).flatten();
+                }
+
+                if (!(items.length <= 0)) {
+                  _context7.next = 5;
+                  break;
+                }
+
+                return _context7.abrupt('return', 0);
+
+              case 5:
+                _context7.next = 7;
+                return (_client$hmset = this.client.hmset).call.apply(_client$hmset, [this.client, this.fullKey(subkey)].concat(_toConsumableArray(items)));
+
+              case 7:
                 return _context7.abrupt('return', _context7.sent);
 
-              case 3:
+              case 8:
               case 'end':
                 return _context7.stop();
             }
@@ -254,22 +281,22 @@ var Hash = function () {
         }, _callee7, this);
       }));
 
-      function incrementBy(_x13, _x14, _x15) {
+      function setSome(_x13, _x14) {
         return ref.apply(this, arguments);
       }
 
-      return incrementBy;
+      return setSome;
     }()
   }, {
-    key: 'deleteOne',
+    key: 'incrementBy',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(id, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(id, n, subkey) {
         return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
                 _context8.next = 2;
-                return this.client.hdel(this.fullKey(subkey), id);
+                return this.client.hincrby(this.fullKey(subkey), key, n);
 
               case 2:
                 return _context8.abrupt('return', _context8.sent);
@@ -282,7 +309,35 @@ var Hash = function () {
         }, _callee8, this);
       }));
 
-      function deleteOne(_x16, _x17) {
+      function incrementBy(_x15, _x16, _x17) {
+        return ref.apply(this, arguments);
+      }
+
+      return incrementBy;
+    }()
+  }, {
+    key: 'deleteOne',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(id, subkey) {
+        return regeneratorRuntime.wrap(function _callee9$(_context9) {
+          while (1) {
+            switch (_context9.prev = _context9.next) {
+              case 0:
+                _context9.next = 2;
+                return this.client.hdel(this.fullKey(subkey), id);
+
+              case 2:
+                return _context9.abrupt('return', _context9.sent);
+
+              case 3:
+              case 'end':
+                return _context9.stop();
+            }
+          }
+        }, _callee9, this);
+      }));
+
+      function deleteOne(_x18, _x19) {
         return ref.apply(this, arguments);
       }
 
@@ -291,40 +346,40 @@ var Hash = function () {
   }, {
     key: 'deleteSome',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(ids, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(ids, subkey) {
         var _client;
 
-        return regeneratorRuntime.wrap(function _callee9$(_context9) {
+        return regeneratorRuntime.wrap(function _callee10$(_context10) {
           while (1) {
-            switch (_context9.prev = _context9.next) {
+            switch (_context10.prev = _context10.next) {
               case 0:
                 if (!(0, _underscore2.default)(ids).isArray()) {
                   ids = [ids];
                 }
 
                 if (!(ids.length <= 0)) {
-                  _context9.next = 3;
+                  _context10.next = 3;
                   break;
                 }
 
-                return _context9.abrupt('return', 0);
+                return _context10.abrupt('return', 0);
 
               case 3:
-                _context9.next = 5;
+                _context10.next = 5;
                 return (_client = this.client).hdel.apply(_client, [this.fullKey(subkey)].concat(_toConsumableArray(ids)));
 
               case 5:
-                return _context9.abrupt('return', _context9.sent);
+                return _context10.abrupt('return', _context10.sent);
 
               case 6:
               case 'end':
-                return _context9.stop();
+                return _context10.stop();
             }
           }
-        }, _callee9, this);
+        }, _callee10, this);
       }));
 
-      function deleteSome(_x18, _x19) {
+      function deleteSome(_x20, _x21) {
         return ref.apply(this, arguments);
       }
 
@@ -333,41 +388,13 @@ var Hash = function () {
   }, {
     key: 'keys',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(subkey) {
-        return regeneratorRuntime.wrap(function _callee10$(_context10) {
-          while (1) {
-            switch (_context10.prev = _context10.next) {
-              case 0:
-                _context10.next = 2;
-                return this.client.hkeys(this.fullKey(subkey));
-
-              case 2:
-                return _context10.abrupt('return', _context10.sent);
-
-              case 3:
-              case 'end':
-                return _context10.stop();
-            }
-          }
-        }, _callee10, this);
-      }));
-
-      function keys(_x20) {
-        return ref.apply(this, arguments);
-      }
-
-      return keys;
-    }()
-  }, {
-    key: 'count',
-    value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(subkey) {
         return regeneratorRuntime.wrap(function _callee11$(_context11) {
           while (1) {
             switch (_context11.prev = _context11.next) {
               case 0:
                 _context11.next = 2;
-                return this.client.hlen(this.fullKey(subkey));
+                return this.client.hkeys(this.fullKey(subkey));
 
               case 2:
                 return _context11.abrupt('return', _context11.sent);
@@ -380,7 +407,35 @@ var Hash = function () {
         }, _callee11, this);
       }));
 
-      function count(_x21) {
+      function keys(_x22) {
+        return ref.apply(this, arguments);
+      }
+
+      return keys;
+    }()
+  }, {
+    key: 'count',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(subkey) {
+        return regeneratorRuntime.wrap(function _callee12$(_context12) {
+          while (1) {
+            switch (_context12.prev = _context12.next) {
+              case 0:
+                _context12.next = 2;
+                return this.client.hlen(this.fullKey(subkey));
+
+              case 2:
+                return _context12.abrupt('return', _context12.sent);
+
+              case 3:
+              case 'end':
+                return _context12.stop();
+            }
+          }
+        }, _callee12, this);
+      }));
+
+      function count(_x23) {
         return ref.apply(this, arguments);
       }
 
@@ -389,27 +444,27 @@ var Hash = function () {
   }, {
     key: 'find',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(query, subkey) {
-        return regeneratorRuntime.wrap(function _callee12$(_context12) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(query, subkey) {
+        return regeneratorRuntime.wrap(function _callee13$(_context13) {
           while (1) {
-            switch (_context12.prev = _context12.next) {
+            switch (_context13.prev = _context13.next) {
               case 0:
                 query = typeof query !== 'undefined' ? ':' + query : ':*';
-                _context12.next = 3;
+                _context13.next = 3;
                 return this.client.keys(this.fullKey(subkey) + query);
 
               case 3:
-                return _context12.abrupt('return', _context12.sent);
+                return _context13.abrupt('return', _context13.sent);
 
               case 4:
               case 'end':
-                return _context12.stop();
+                return _context13.stop();
             }
           }
-        }, _callee12, this);
+        }, _callee13, this);
       }));
 
-      function find(_x22, _x23) {
+      function find(_x24, _x25) {
         return ref.apply(this, arguments);
       }
 
@@ -418,26 +473,26 @@ var Hash = function () {
   }, {
     key: 'delete',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(subkey) {
-        return regeneratorRuntime.wrap(function _callee13$(_context13) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(subkey) {
+        return regeneratorRuntime.wrap(function _callee14$(_context14) {
           while (1) {
-            switch (_context13.prev = _context13.next) {
+            switch (_context14.prev = _context14.next) {
               case 0:
-                _context13.next = 2;
+                _context14.next = 2;
                 return this.client.del(this.fullKey(subkey));
 
               case 2:
-                return _context13.abrupt('return', _context13.sent);
+                return _context14.abrupt('return', _context14.sent);
 
               case 3:
               case 'end':
-                return _context13.stop();
+                return _context14.stop();
             }
           }
-        }, _callee13, this);
+        }, _callee14, this);
       }));
 
-      function _delete(_x24) {
+      function _delete(_x26) {
         return ref.apply(this, arguments);
       }
 

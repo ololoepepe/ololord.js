@@ -6,12 +6,12 @@ import merge from 'merge';
 var moment = require("moment");
 import UUID from 'uuid';
 
-var Board = require("../boards/board");
+import Board from '../boards/board';
 var Captcha = require("../captchas");
 var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");
-var markup = require("../helpers/markup");
+var markup = require("../core/markup");
 
 import * as FilesModel from '../models/files';
 import * as PostsModel from '../models/posts';

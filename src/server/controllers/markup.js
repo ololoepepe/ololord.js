@@ -2,7 +2,7 @@ import express from 'express';
 import Highlight from 'highlight.js';
 
 import * as Renderer from '../core/renderer';
-import markup from '../helpers/markup';
+import markup from '../core/markup';
 import * as Tools from '../helpers/tools';
 
 let router = express.Router();

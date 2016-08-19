@@ -4,10 +4,6 @@ var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _nodeCaptcha = require('../captchas/node-captcha');
-
-var _nodeCaptcha2 = _interopRequireDefault(_nodeCaptcha);
-
 var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
@@ -149,8 +145,8 @@ Captcha.checkCaptcha = function () {
                         ceid = captchaEngine || null;
 
                         if (!ceid || !(0, _underscore2.default)(supportedCaptchaEngines).contains(ceid)) {
-                            if ((0, _underscore2.default)(supportedCaptchaEngines).contains(_nodeCaptcha2.default.id)) {
-                                ceid = _nodeCaptcha2.default.id;
+                            if ((0, _underscore2.default)(supportedCaptchaEngines).contains(Tools.NODE_CAPTCHA_ID)) {
+                                ceid = Tools.NODE_CAPTCHA_ID;
                             } else {
                                 ceid = supportedCaptchaEngines[0].id;
                             }

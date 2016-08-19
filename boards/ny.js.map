@@ -1,0 +1,1 @@
+{"version":3,"sources":["boards/ny.js"],"names":[],"mappings":";;AAAA;;;;;;AAEA,OAAO,OAAP,GAAiB,oBAAU,IAAV,EAAgB,qBAAhB,CAAjB","file":"boards/ny.js","sourcesContent":["import Board from './board';\n\nmodule.exports = new Board(\"ny\", \"Новогодний розыгрыш\");\n"],"sourceRoot":"/source/"}

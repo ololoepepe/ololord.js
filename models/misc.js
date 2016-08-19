@@ -26,9 +26,17 @@ var _highlight = require('highlight.js');
 
 var _highlight2 = _interopRequireDefault(_highlight);
 
+var _board = require('../boards/board');
+
+var _board2 = _interopRequireDefault(_board);
+
 var _captchas = require('../captchas');
 
 var _captchas2 = _interopRequireDefault(_captchas);
+
+var _markup = require('../core/markup');
+
+var _markup2 = _interopRequireDefault(_markup);
 
 var _config = require('../helpers/config');
 
@@ -38,10 +46,6 @@ var _fsWatcher = require('../helpers/fs-watcher');
 
 var _fsWatcher2 = _interopRequireDefault(_fsWatcher);
 
-var _markup = require('../helpers/markup');
-
-var _markup2 = _interopRequireDefault(_markup);
-
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
@@ -50,10 +54,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
-
-var Board = require("../boards/board"); //TODO
-//TODO
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; } //TODO
 
 
 var langNames = Tools.createWatchedResource(__dirname + '/misc/lang-names.json', function (path) {
@@ -135,8 +136,8 @@ function base() {
       },
       ws: { transports: (0, _config2.default)('site.ws.transports') }
     },
-    styles: Tools.styles(),
-    codeStyles: Tools.codeStyles(),
+    styles: Tools.STYLES,
+    codeStyles: Tools.CODE_STYLES,
     availableCodeLangs: _highlight2.default.listLanguages().map(function (lang) {
       return {
         id: lang,
@@ -173,8 +174,8 @@ function sort(x1, x2) {
 }
 
 function boards() {
-  var boards = Board.boardNames().map(function (boardName) {
-    return Board.board(boardName).info();
+  var boards = _board2.default.boardNames().map(function (boardName) {
+    return _board2.default.board(boardName).info();
   });
   var addDefault = false;
   var boardGroups = (0, _underscore2.default)((0, _config2.default)('boardGroups', {})).map(function (group, name) {
@@ -215,7 +216,7 @@ function boards() {
 
 function board(brd) {
   if (typeof brd === 'string') {
-    brd = Board.board(brd);
+    brd = _board2.default.board(brd);
   }
   return brd ? { board: brd.info() } : null;
 }

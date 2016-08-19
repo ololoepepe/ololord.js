@@ -3,7 +3,7 @@ import express from 'express';
 import FS from 'q-io/fs';
 import moment from 'moment';
 
-var Board = require('../boards/board');
+import Board from '../boards/board';
 import * as BoardsModel from '../models/board';
 import * as MiscModel from '../models/misc';
 import * as PostsModel from '../models/posts';
@@ -90,7 +90,25 @@ async function renderPage(boardName, pageNumber) {
   await Cache.writeFile(`${boardName}/${pageID}.html`, Renderer.render('pages/board', page));
 }
 
-router.paths = async function() {
+router.paths = async function(description) {
+  if (description) {
+    return [{
+      path: '/<board name>',
+      description: Tools.translate('Board pages (from 0 to N)')
+    }, {
+      path: '/<board name>/archive',
+      description: Tools.translate('Board archive page (WITHOUT the archived threads)')
+    }, {
+      path: '/<board name>/catalog',
+      description: Tools.translate('Board catalog page')
+    }, {
+      path: '/<board name>/res/<thread number>',
+      description: Tools.translate('A thread')
+    }, {
+      path: '/rss',
+      description: Tools.translate('RSS feed (for all boards)')
+    }];
+  }
   let arrays = await Tools.series(Board.boardNames(), async function(boardName) {
     let threadNumbers = await ThreadsModel.getThreadNumbers(boardName);
     let archivedThreadNumbers = await ThreadsModel.getThreadNumbers(boardName, { archived: true });

@@ -1,0 +1,1 @@
+{"version":3,"sources":["boards/op.js"],"names":[],"mappings":";;AAAA;;;;;;AAEA,OAAO,OAAP,GAAiB,oBAAU,IAAV,EAAgB,cAAhB,EAAgC,EAAE,iBAAiB,OAAnB,EAAhC,CAAjB","file":"boards/op.js","sourcesContent":["import Board from './board';\r\n\r\nmodule.exports = new Board(\"op\", \"ОП-модерация\", { defaultUserName: \"Царёк\" });\r\n"],"sourceRoot":"/source/"}

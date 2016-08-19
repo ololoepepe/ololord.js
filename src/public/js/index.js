@@ -132,6 +132,47 @@ $.fn.removeClassWild = function(mask) {
   });
 };
 
+//NOTE: Same as .load, but always keeps <script> tags
+$.fn.loadWithScripts = function(url, params, callback) {
+  let selector;
+  let type;
+  let response;
+	let off = url.indexOf(' ');
+	if (off >= 0) {
+	  selector = $.trim(url.slice(off));
+		url = url.slice(0, off);
+	}
+	if (typeof params === 'function') {
+		callback = params;
+		params = undefined;
+	} else if (params && typeof params === 'object') {
+		type = 'POST';
+	}
+  if (this.length <= 0) {
+    return this;
+  }
+  $.ajax({
+    url: url,
+    type: type || 'GET',
+    dataType: 'html',
+    data: params
+  }).done((responseText) => {
+    response = arguments;
+    if (selector) {
+      let node = $('<div>').append($.parseHTML(responseText, window.document, true)).find(selector);
+      Templating.scriptWorkaround(node);
+      this.html(node);
+    } else {
+      this.html(responseText);
+    }
+  }).always(callback && (function(jqXHR, status) {
+    this.each(function() {
+      callback.apply(this, response || [jqXHR.responseText, status, jqXHR]);
+    });
+  }).bind(this));
+	return this;
+};
+
 window.lord = window.lord || {};
 
 window.lord.require = (moduleName) => {

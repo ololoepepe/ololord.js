@@ -3,10 +3,13 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.FILE_RATINGS = exports.ExternalLinkRegexpPattern = exports.Hour = exports.Minute = exports.Second = exports.Billion = undefined;
+exports.USER_LEVELS = exports.escapedSelector = exports.escaped = exports.writeFile = exports.generateRandomImage = exports.generateImageHash = exports.markupLatex = exports.ipList = exports.plainText = exports.generateTripcode = exports.series = exports.remove = exports.withoutDuplicates = exports.sha256 = exports.preferIPv4 = exports.correctAddress = exports.proxy = exports.parseForm = exports.splitCommand = exports.isImageType = exports.isPdfType = exports.isVideoType = exports.isAudioType = exports.mimeType = exports.CODE_STYLES = exports.STYLES = exports.toHtml = exports.externalLinkRootZoneExists = exports.forever = exports.now = exports.setLocale = exports.flagName = exports.hashpass = exports.toUTC = exports.replace = exports.hasOwnProperties = exports.contains = exports.arr = exports.extend = exports.promiseIf = exports.toArray = exports.filterIn = exports.mapIn = exports.forIn = exports.NODE_CAPTCHA_ID = exports.FILE_RATINGS = exports.ExternalLinkRegexpPattern = exports.Hour = exports.Minute = exports.Second = exports.Billion = exports.translate = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
+exports.mayBeHashpass = mayBeHashpass;
+exports.sha1 = sha1;
+exports.du = du;
 exports.option = option;
 exports.testPostNumber = testPostNumber;
 exports.selectParser = selectParser;
@@ -18,11 +21,16 @@ exports.compareRegisteredUserLevels = compareRegisteredUserLevels;
 exports.postingSpeedString = postingSpeedString;
 exports.requireWrapper = requireWrapper;
 exports.loadPlugins = loadPlugins;
-exports.markupModes = markupModes;
+exports.toHashpass = toHashpass;
+exports.processError = processError;
 
 var _underscore = require("underscore");
 
 var _underscore2 = _interopRequireDefault(_underscore);
+
+var _config = require("./config");
+
+var _config2 = _interopRequireDefault(_config);
 
 var _fsWatcher = require("./fs-watcher");
 
@@ -60,18 +68,16 @@ var Util = require("util");
 var UUID = require("uuid");
 var XRegExp = require("xregexp");
 
-var config = require("./config");
-var markup = require("./markup");
-
 var translate = require("cute-localize")({
-    locale: config("site.locale", "en"),
+    locale: (0, _config2.default)("site.locale", "en"),
     extraLocations: __dirname + "/../translations/custom",
     silent: true
 });
 
+exports.translate = translate;
+
+
 var flags = {};
-var styles = null;
-var codeStyles = null;
 var rootZones = require("../misc/root-zones.json").reduce(function (acc, zone) {
     acc[zone] = {};
     return acc;
@@ -80,7 +86,7 @@ var rootZones = require("../misc/root-zones.json").reduce(function (acc, zone) {
 MathJax.config({ MathJax: {} });
 MathJax.start();
 
-mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/form");
+mkpath.sync((0, _config2.default)("system.tmpPath", __dirname + "/../tmp") + "/form");
 
 var Billion = exports.Billion = 2 * 1000 * 1000 * 1000;
 var Second = exports.Second = 1000;
@@ -95,17 +101,16 @@ var ExternalLinkRegexpPattern = exports.ExternalLinkRegexpPattern = function () 
     return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
 }();
 var FILE_RATINGS = exports.FILE_RATINGS = ['SFW', 'R-15', 'R-18', 'R-18G'];
+var NODE_CAPTCHA_ID = exports.NODE_CAPTCHA_ID = 'node-captcha';
 
-var forIn = function forIn(obj, f) {
+var forIn = exports.forIn = function forIn(obj, f) {
     if (!obj || typeof f != "function") return;
     for (var x in obj) {
         if (obj.hasOwnProperty(x)) f(obj[x], x);
     }
 };
 
-module.exports.forIn = forIn;
-
-var mapIn = function mapIn(obj, f) {
+var mapIn = exports.mapIn = function mapIn(obj, f) {
     if (!obj || typeof f != "function") return;
     var arr = [];
     for (var x in obj) {
@@ -114,9 +119,7 @@ var mapIn = function mapIn(obj, f) {
     return arr;
 };
 
-module.exports.mapIn = mapIn;
-
-module.exports.filterIn = function (obj, f) {
+var filterIn = exports.filterIn = function filterIn(obj, f) {
     if (!obj || typeof f != "function") return;
     var nobj = {};
     for (var x in obj) {
@@ -128,7 +131,7 @@ module.exports.filterIn = function (obj, f) {
     return nobj;
 };
 
-var toArray = function toArray(obj) {
+var toArray = exports.toArray = function toArray(obj) {
     var arr = [];
     forIn(obj, function (val) {
         arr.push(val);
@@ -136,13 +139,11 @@ var toArray = function toArray(obj) {
     return arr;
 };
 
-module.exports.toArray = toArray;
-
-module.exports.promiseIf = function (condition, ifTrue, ifFalse) {
+var promiseIf = exports.promiseIf = function promiseIf(condition, ifTrue, ifFalse) {
     if (condition) return ifTrue();else if (typeof ifFalse == "function") return ifFalse();else return Promise.resolve();
 };
 
-module.exports.extend = function (Child, Parent) {
+var extend = exports.extend = function extend(Child, Parent) {
     var F = function F() {};
     F.prototype = Parent.prototype;
     Child.prototype = new F();
@@ -150,7 +151,7 @@ module.exports.extend = function (Child, Parent) {
     Child.superclass = Parent.prototype;
 };
 
-module.exports.arr = function (obj) {
+var arr = exports.arr = function arr(obj) {
     var arr = [];
     if (!obj || !obj.length) return arr;
     for (var i = 0; i < obj.length; ++i) {
@@ -158,7 +159,7 @@ module.exports.arr = function (obj) {
     }return arr;
 };
 
-module.exports.contains = function (s, subs) {
+var contains = exports.contains = function contains(s, subs) {
     if (typeof s == "string" && typeof subs == "string") return s.replace(subs, "") != s;
     if (!s || !s.length || s.length < 1) return false;
     for (var i = 0; i < s.length; ++i) {
@@ -167,7 +168,7 @@ module.exports.contains = function (s, subs) {
     return false;
 };
 
-var hasOwnProperties = function hasOwnProperties(obj) {
+var hasOwnProperties = exports.hasOwnProperties = function hasOwnProperties(obj) {
     if (!obj) return false;
     for (var x in obj) {
         if (obj.hasOwnProperty(x)) return true;
@@ -175,26 +176,24 @@ var hasOwnProperties = function hasOwnProperties(obj) {
     return false;
 };
 
-module.exports.hasOwnProperties = hasOwnProperties;
-
-module.exports.replace = function (where, what, withWhat) {
+var replace = exports.replace = function replace(where, what, withWhat) {
     if (typeof where != "string" || typeof what != "string" && !(what instanceof RegExp) || typeof withWhat != "string") return;
     var sl = where.split(what);
     return sl.length > 1 ? sl.join(withWhat) : sl.pop();
 };
 
-module.exports.toUTC = function (date) {
+var toUTC = exports.toUTC = function toUTC(date) {
     if (!(date instanceof Date)) return;
     return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getMilliseconds());
 };
 
-module.exports.hashpass = function (req) {
+var hashpass = exports.hashpass = function hashpass(req) {
     var s = req.cookies.hashpass;
-    if (!module.exports.mayBeHashpass(s)) return;
+    if (!mayBeHashpass(s)) return;
     return s;
 };
 
-module.exports.flagName = function (countryCode) {
+var flagName = exports.flagName = function flagName(countryCode) {
     if (!countryCode) return Promise.resolve("");
     var fn = countryCode.toUpperCase() + ".png";
     if (flags.hasOwnProperty(fn)) return Promise.resolve(fn);
@@ -204,27 +203,25 @@ module.exports.flagName = function (countryCode) {
     });
 };
 
-module.exports.translate = translate;
-
-module.exports.setLocale = function (locale) {
+var setLocale = exports.setLocale = function setLocale(locale) {
     translate.setLocale(locale);
 };
 
-module.exports.now = function () {
+var now = exports.now = function now() {
     return new Date();
 };
 
-module.exports.forever = function () {
+var forever = exports.forever = function forever() {
     var date = new Date();
-    date.setTime(date.getTime() + module.exports.Billion * 1000);
+    date.setTime(date.getTime() + Billion * 1000);
     return date;
 };
 
-module.exports.externalLinkRootZoneExists = function (zoneName) {
+var externalLinkRootZoneExists = exports.externalLinkRootZoneExists = function externalLinkRootZoneExists(zoneName) {
     return rootZones.hasOwnProperty(zoneName);
 };
 
-module.exports.toHtml = function (text, replaceSpaces) {
+var toHtml = exports.toHtml = function toHtml(text, replaceSpaces) {
     text = escapeHtml(text).split("\n").join("<br />");
     if (replaceSpaces) text = text.split(" ").join("&nbsp;");
     return text;
@@ -236,45 +233,33 @@ var NON_THEME_STYLESHEETS = new Set(['', 'custom-'].reduce(function (acc, prefix
     }));
 }, []));
 
-module.exports.styles = function () {
-    if (styles) return styles;
-    styles = [];
-    var path = __dirname + "/../public/css";
-    FSSync.readdirSync(path).forEach(function (fileName) {
-        if (fileName.split(".").pop() != "css" || NON_THEME_STYLESHEETS.has(fileName.split(".").shift())) {
-            return;
-        }
-        var name = fileName.split(".").shift();
-        var str = FSSync.readFileSync(path + "/" + fileName, "utf8");
-        var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(str);
-        var title = match ? match[1] : name;
-        styles.push({
-            name: name,
-            title: title
-        });
-    });
-    return styles;
-};
+var STYLES_PATH = __dirname + "/../public/css";
 
-module.exports.codeStyles = function () {
-    if (codeStyles) return codeStyles;
-    codeStyles = [];
-    var path = __dirname + "/../public/css/3rdparty/highlight.js";
-    FSSync.readdirSync(path).forEach(function (fileName) {
-        if (fileName.split(".").pop() != "css") return;
-        var name = fileName.split(".").slice(0, -1).join('.');
-        var str = FSSync.readFileSync(path + "/" + fileName, "utf8");
-        var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(str);
-        var title = match ? match[1] : name;
-        codeStyles.push({
-            name: name,
-            title: title
-        });
-    });
-    return codeStyles;
-};
+var STYLES = exports.STYLES = FSSync.readdirSync(STYLES_PATH).filter(function (fileName) {
+    return fileName.split('.').pop() === 'css' && !NON_THEME_STYLESHEETS.has(fileName.split('.').shift());
+}).map(function (fileName) {
+    var name = fileName.split('.').slice(0, -1).join('.');
+    var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(FSSync.readFileSync(STYLES_PATH + "/" + fileName, 'utf8'));
+    return {
+        name: name,
+        title: match ? match[1] : name
+    };
+});
 
-module.exports.mimeType = function (fileName) {
+var CODE_STYLES_PATH = __dirname + "/../public/css/3rdparty/highlight.js";
+
+var CODE_STYLES = exports.CODE_STYLES = FSSync.readdirSync(CODE_STYLES_PATH).filter(function (fileName) {
+    return fileName.split('.').pop() === 'css';
+}).map(function (fileName) {
+    var name = fileName.split('.').slice(0, -1).join('.');
+    var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(FSSync.readFileSync(CODE_STYLES_PATH + "/" + fileName, 'utf8'));
+    return {
+        name: name,
+        title: match ? match[1] : name
+    };
+});
+
+var mimeType = exports.mimeType = function mimeType(fileName) {
     if (!fileName || !Util.isString(fileName)) return Promise.resolve(null);
     try {
         return new Promise(function (resolve, reject) {
@@ -292,23 +277,23 @@ module.exports.mimeType = function (fileName) {
     }
 };
 
-module.exports.isAudioType = function (mimeType) {
+var isAudioType = exports.isAudioType = function isAudioType(mimeType) {
     return "application/ogg" == mimeType || mimeType.substr(0, 6) == "audio/";
 };
 
-module.exports.isVideoType = function (mimeType) {
+var isVideoType = exports.isVideoType = function isVideoType(mimeType) {
     return mimeType.substr(0, 6) == "video/";
 };
 
-module.exports.isPdfType = function (mimeType) {
+var isPdfType = exports.isPdfType = function isPdfType(mimeType) {
     return mimeType == "application/pdf";
 };
 
-module.exports.isImageType = function (mimeType) {
+var isImageType = exports.isImageType = function isImageType(mimeType) {
     return mimeType.substr(0, 6) == "image/";
 };
 
-module.exports.splitCommand = function (cmd) {
+var splitCommand = exports.splitCommand = function splitCommand(cmd) {
     var args = [];
     var arg = "";
     var quot = 0;
@@ -366,11 +351,11 @@ module.exports.splitCommand = function (cmd) {
     };
 };
 
-module.exports.mayBeHashpass = function (password) {
-    return typeof password == "string" && password.match(/^([0-9a-fA-F]){40}$/);
-};
+function mayBeHashpass(password) {
+    return typeof password === 'string' && password.match(/^([0-9a-fA-F]){40}$/);
+}
 
-module.exports.parseForm = function (req) {
+var parseForm = exports.parseForm = function parseForm(req) {
     if (req.formFields) {
         return Promise.resolve({
             fields: req.formFields,
@@ -378,7 +363,7 @@ module.exports.parseForm = function (req) {
         });
     }
     var form = new Multiparty.Form();
-    form.uploadDir = config("system.tmpPath", __dirname + "/../tmp") + "/form";
+    form.uploadDir = (0, _config2.default)("system.tmpPath", __dirname + "/../tmp") + "/form";
     form.autoFields = true;
     form.autoFiles = true;
     form.maxFieldsSize = 5 * 1024 * 1024;
@@ -401,11 +386,11 @@ module.exports.parseForm = function (req) {
     });
 };
 
-module.exports.proxy = function () {
-    var proxy = config("system.fileDownloadProxy");
+var proxy = exports.proxy = function proxy() {
+    var proxy = (0, _config2.default)("system.fileDownloadProxy");
     if (!proxy) return null;
     var parts = proxy.split(":");
-    var auth = config("system.fileDownloadProxyAuth");
+    var auth = (0, _config2.default)("system.fileDownloadProxyAuth");
     return {
         host: parts[0],
         port: parts[1] ? +parts[1] : null,
@@ -413,7 +398,7 @@ module.exports.proxy = function () {
     };
 };
 
-var correctAddress = function correctAddress(ip) {
+var correctAddress = exports.correctAddress = function correctAddress(ip) {
     if (!ip || typeof ip !== 'string') return null;
     if ("::1" == ip) ip = "127.0.0.1";
     var match = ip.match(/^\:\:ffff\:(\d+\.\d+\.\d+\.\d+)$/);
@@ -434,9 +419,7 @@ var correctAddress = function correctAddress(ip) {
     return null;
 };
 
-module.exports.correctAddress = correctAddress;
-
-module.exports.preferIPv4 = function (ip) {
+var preferIPv4 = exports.preferIPv4 = function preferIPv4(ip) {
     if (!ip) return null;
     try {
         var address = new Address6(ip);
@@ -453,30 +436,30 @@ module.exports.preferIPv4 = function (ip) {
     return ip;
 };
 
-module.exports.sha1 = function (data) {
-    if (!data || !Util.isString(data) && !Util.isBuffer(data)) return null;
-    var sha1 = Crypto.createHash("sha1");
-    sha1.update(data);
-    return sha1.digest("hex");
-};
+function sha1(data) {
+    if (!data || typeof data !== 'string' && !(0, _underscore2.default)(data).isBuffer()) {
+        return null;
+    }
+    var hash = Crypto.createHash('sha1');
+    hash.update(data);
+    return hash.digest('hex');
+}
 
-module.exports.sha256 = function (data) {
+var sha256 = exports.sha256 = function sha256(data) {
     if (!data) return null;
     var sha256 = Crypto.createHash("sha256");
     sha256.update(data);
     return sha256.digest("hex");
 };
 
-var withoutDuplicates = function withoutDuplicates(arr) {
+var withoutDuplicates = exports.withoutDuplicates = function withoutDuplicates(arr) {
     if (!arr || !Util.isArray(arr)) return arr;
     return arr.filter(function (item, i) {
         return arr.indexOf(item) == i;
     });
 };
 
-module.exports.withoutDuplicates = withoutDuplicates;
-
-module.exports.remove = function (arr, what, both) {
+var remove = exports.remove = function remove(arr, what, both) {
     if (!arr || !Util.isArray(arr)) return arr;
     if (Util.isUndefined(what)) return;
     if (!Util.isArray(what)) what = [what];
@@ -489,7 +472,7 @@ module.exports.remove = function (arr, what, both) {
     }
 };
 
-module.exports.series = function (arr, f, container) {
+var series = exports.series = function series(arr, f, container) {
     if (container && (typeof container === "undefined" ? "undefined" : _typeof(container)) != "object") container = [];
     var isArray = Util.isArray(container);
     var isObject = (typeof container === "undefined" ? "undefined" : _typeof(container)) == "object";
@@ -517,20 +500,20 @@ module.exports.series = function (arr, f, container) {
     });
 };
 
-module.exports.generateTripcode = function (source) {
+var generateTripcode = exports.generateTripcode = function generateTripcode(source) {
     var md5 = Crypto.createHash("md5");
-    md5.update(source + config("site.tripcodeSalt", ""));
+    md5.update(source + (0, _config2.default)("site.tripcodeSalt", ""));
     return "!" + md5.digest("base64").substr(0, 10);
 };
 
-module.exports.plainText = function (text, options) {
+var plainText = exports.plainText = function plainText(text, options) {
     if (!text) return "";
     text = "" + text;
     var uuid = UUID.v4();
     if (options && options.brToNewline) text = text.replace(/<br \/>/g, uuid);else text = text.replace(/<br \/>/g, " ");
     text = HTMLToText.fromString(text, {
         wordwrap: null,
-        linkHrefBaseUrl: config("site.protocol", "http") + "://" + config("site.domain", "localhost:8080"),
+        linkHrefBaseUrl: (0, _config2.default)("site.protocol", "http") + "://" + (0, _config2.default)("site.domain", "localhost:8080"),
         hideLinkHrefIfSameAsText: true,
         ignoreImages: true
     });
@@ -538,7 +521,7 @@ module.exports.plainText = function (text, options) {
     return text;
 };
 
-module.exports.ipList = function (s) {
+var ipList = exports.ipList = function ipList(s) {
     var ips = (s || "").split(/\s+/).filter(function (ip) {
         return ip;
     });
@@ -552,7 +535,7 @@ module.exports.ipList = function (s) {
     return withoutDuplicates(ips);
 };
 
-module.exports.markupLatex = function (text, inline) {
+var markupLatex = exports.markupLatex = function markupLatex(text, inline) {
     return new Promise(function (resolve, reject) {
         MathJax.typeset({
             math: text,
@@ -567,13 +550,13 @@ module.exports.markupLatex = function (text, inline) {
     });
 };
 
-module.exports.generateImageHash = function (fileName) {
+var generateImageHash = exports.generateImageHash = function generateImageHash(fileName) {
     return phash(fileName, true).then(function (hash) {
         return Promise.resolve(hash.toString());
     });
 };
 
-module.exports.generateRandomImage = function (hash, mimeType, thumbPath) {
+var generateRandomImage = exports.generateRandomImage = function generateRandomImage(hash, mimeType, thumbPath) {
     var canvas = new Canvas(200, 200);
     var ctx = canvas.getContext("2d");
     Jdenticon.drawIcon(ctx, hash, 200);
@@ -587,16 +570,16 @@ module.exports.generateRandomImage = function (hash, mimeType, thumbPath) {
     });
 };
 
-module.exports.du = function (path) {
+function du(path) {
     return new Promise(function (resolve, reject) {
         du(path, function (err, size) {
             if (err) return reject(err);
             resolve(size);
         });
     });
-};
+}
 
-module.exports.writeFile = function (filePath, data) {
+var writeFile = exports.writeFile = function writeFile(filePath, data) {
     var tmpFilePath = filePath + ".tmp";
     var path = filePath.split("/").slice(0, -1).join("/");
     return FS.exists(path).then(function (exists) {
@@ -609,11 +592,11 @@ module.exports.writeFile = function (filePath, data) {
     });
 };
 
-module.exports.escaped = function (string) {
+var escaped = exports.escaped = function escaped(string) {
     return escapeHtml(string);
 };
 
-module.exports.escapedSelector = function (string) {
+var escapedSelector = exports.escapedSelector = function escapedSelector(string) {
     if (typeof string !== 'string') {
         return string;
     }
@@ -727,7 +710,7 @@ function addIPv4(object, ip) {
     if (!ip) {
         return object;
     }
-    var ipv4 = module.exports.preferIPv4(ip);
+    var ipv4 = preferIPv4(ip);
     if (ipv4 && ipv4 !== ip) {
         object.ipv4 = ipv4;
     }
@@ -781,7 +764,7 @@ function createWatchedResource(path, synchronous, asynchronous) {
     return synchronous(path);
 }
 
-var USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];
+var USER_LEVELS = exports.USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];
 
 function compareRegisteredUserLevels(l1, l2) {
     return USER_LEVELS.indexOf(l1) - USER_LEVELS.indexOf(l2);
@@ -865,12 +848,23 @@ function loadPlugins(path, filter) {
     return (0, _underscore2.default)(list).flatten();
 }
 
-function markupModes(string) {
-    if (typeof string !== 'string') {
-        string = '';
+function toHashpass(password, notHashpass) {
+    if (notHashpass || !mayBeHashpass(password)) {
+        password = sha1(password);
     }
-    return (0, _underscore2.default)(markup.MarkupModes).filter(function (mode) {
-        return string.indexOf(mode) >= 0;
-    });
+    return password;
+}
+
+function processError(err, dir) {
+    if ('ENOENT' === err.code) {
+        err.status = 404;
+    } else if (typeof dir !== 'undefined') {
+        if (dir && 'ENOTDIR' === err.code) {
+            err = new Error(Tools.translate('Not a directory'));
+        } else if (!dir && 'EISDIR' === err.code) {
+            err = new Error(Tools.translate('Not a file'));
+        }
+    }
+    return err;
 }
 //# sourceMappingURL=tools.js.map

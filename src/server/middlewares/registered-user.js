@@ -8,7 +8,7 @@ module.exports = function(req, res, next) {
     UsersModel.getRegisteredUserLevels(req.hashpass).then(function(levels) {
         levels = levels || {};
         var maxLevel = Tools.toArray(levels).sort(function() {
-            return -1 * Database.compareRegisteredUserLevels(arguments);
+            return -1 * Tools.compareRegisteredUserLevels(arguments);
         });
         maxLevel = (maxLevel.length > 0) ? maxLevel[0] : null;
         req.level = function(boardName) {
@@ -26,9 +26,9 @@ module.exports = function(req, res, next) {
                 strict = boardName;
             }
             if (strict)
-                return !Database.compareRegisteredUserLevels(lvl, level);
+                return !Tools.compareRegisteredUserLevels(lvl, level);
             else
-                return Database.compareRegisteredUserLevels(lvl, level) >= 0;
+                return Tools.compareRegisteredUserLevels(lvl, level) >= 0;
         };
         Object.keys(Database.RegisteredUserLevels).forEach(function(lvl) {
             req[`is${lvl}`] = test.bind(req, Database.RegisteredUserLevels[lvl]);

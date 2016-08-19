@@ -1,15 +1,16 @@
+import _ from 'underscore';
 var Highlight = require("highlight.js");
 var HTTP = require("q-io/http");
 var URL = require("url");
 var XRegExp = require("xregexp");
 
-var Board = require("../boards/board");
-var config = require("./config");
-var Database = require("./database");
-var Permissions = require("./permissions");
-var Tools = require("./tools");
+import Board from '../boards/board';
+var config = require("../helpers/config");
+var Database = require("../helpers/database");
+var Permissions = require("../helpers/permissions");
+var Tools = require("../helpers/tools");
 
-import * as Renderer from '../core/renderer';
+import * as Renderer from './renderer';
 import * as MiscModel from '../models/misc';
 import Logger from '../helpers/logger';
 
@@ -884,7 +885,7 @@ var processPostText = function(boardName, text, options) {
         });
     }
     if (markupModes.indexOf(MarkupModes.BBCode) >= 0) {
-        if (Database.compareRegisteredUserLevels(accessLevel, Permissions.useRawHTMLMarkup()) >= 0) {
+        if (Tools.compareRegisteredUserLevels(accessLevel, Permissions.useRawHTMLMarkup()) >= 0) {
             p = p.then(function() {
                 return process(info, convertHtml, {
                     op: "[raw-html]",
@@ -1101,5 +1102,12 @@ var processPostText = function(boardName, text, options) {
 
 Object.defineProperty(processPostText, "MarkupModes", { value: MarkupModes });
 Object.defineProperty(processPostText, "markupCode", { value: markupCode });
+
+processPostText.markupModes = function(string) {
+  if (typeof string !== 'string') {
+    string = '';
+  }
+  return _(MarkupModes).filter((mode) => { return string.indexOf(mode) >= 0; });
+};
 
 module.exports = processPostText;

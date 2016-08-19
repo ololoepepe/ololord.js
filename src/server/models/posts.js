@@ -1,18 +1,18 @@
 import _ from 'underscore';
 
-import * as BoardsModel from './boards';
+import * as BoardsModel from './board';
 import * as FilesModel from './files';
 import * as ThreadsModel from './threads';
 import * as UsersModel from './users';
+import Board from '../boards/board';
+import markup from '../core/markup';
+import * as IPC from '../helpers/ipc';
+import * as Tools from '../helpers/tools';
 import client from '../storage/client-factory';
 import Hash from '../storage/hash';
 import Key from '../storage/key';
 import * as Search from '../storage/search';
 import UnorderedSet from '../storage/unordered-set';
-import Board from '../boards/board';
-import markup from '../core/markup';
-import * as IPC from '../helpers/ipc';
-import * as Tools from '../helpers/tools';
 
 let FileInfos = new Hash(client(), 'fileInfos');
 let PostFileInfoNames = new UnorderedSet(client(), 'postFileInfoNames', {
@@ -150,7 +150,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
     threadNumber = postNumber;
   }
   let rawText = text || null;
-  let markupModes = Tools.markupModes(markupMode);
+  let markupModes = markup.markupModes(markupMode);
   let referencedPosts = {};
   sage = ('true' === sage);
   tripcode = ('true' === tripcode);
@@ -346,7 +346,7 @@ export async function editPost(req, fields) {
   }
   let date = Tools.now();
   let rawText = text || null;
-  let markupModes = Tools.markupModes(markupMode);
+  let markupModes = markup.markupModes(markupMode);
   let referencedPosts = {};
   sage = ('true' === sage);
   let post = await getPost(boardName, postNumber, { withExtraData: true });

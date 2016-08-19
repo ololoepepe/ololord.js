@@ -1,6 +1,14 @@
 "use strict";
 
-var _renderer = require("../core/renderer");
+var _underscore = require("underscore");
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _board = require("../boards/board");
+
+var _board2 = _interopRequireDefault(_board);
+
+var _renderer = require("./renderer");
 
 var Renderer = _interopRequireWildcard(_renderer);
 
@@ -12,20 +20,19 @@ var _logger = require("../helpers/logger");
 
 var _logger2 = _interopRequireDefault(_logger);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Highlight = require("highlight.js");
 var HTTP = require("q-io/http");
 var URL = require("url");
 var XRegExp = require("xregexp");
 
-var Board = require("../boards/board");
-var config = require("./config");
-var Database = require("./database");
-var Permissions = require("./permissions");
-var Tools = require("./tools");
+var config = require("../helpers/config");
+var Database = require("../helpers/database");
+var Permissions = require("../helpers/permissions");
+var Tools = require("../helpers/tools");
 
 var SkipTypes = {
     NoSkip: "NO_SKIP",
@@ -809,7 +816,7 @@ var processPostText = function processPostText(boardName, text, options) {
         });
     }
     if (markupModes.indexOf(MarkupModes.BBCode) >= 0) {
-        if (Database.compareRegisteredUserLevels(accessLevel, Permissions.useRawHTMLMarkup()) >= 0) {
+        if (Tools.compareRegisteredUserLevels(accessLevel, Permissions.useRawHTMLMarkup()) >= 0) {
             p = p.then(function () {
                 return process(info, convertHtml, {
                     op: "[raw-html]",
@@ -896,7 +903,7 @@ var processPostText = function processPostText(boardName, text, options) {
                 cl: null
             });
         }).then(function () {
-            var boards = Board.boardNames().join("|");
+            var boards = _board2.default.boardNames().join("|");
             return process(info, convertPostLink, {
                 op: new RegExp(">>/(" + boards + ")/([1-9][0-9]*)", "gi"),
                 cl: null
@@ -1025,6 +1032,15 @@ var processPostText = function processPostText(boardName, text, options) {
 
 Object.defineProperty(processPostText, "MarkupModes", { value: MarkupModes });
 Object.defineProperty(processPostText, "markupCode", { value: markupCode });
+
+processPostText.markupModes = function (string) {
+    if (typeof string !== 'string') {
+        string = '';
+    }
+    return (0, _underscore2.default)(MarkupModes).filter(function (mode) {
+        return string.indexOf(mode) >= 0;
+    });
+};
 
 module.exports = processPostText;
 //# sourceMappingURL=markup.js.map

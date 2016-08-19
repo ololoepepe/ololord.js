@@ -1,26 +1,18 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _underscore = require("underscore");
 
 var _underscore2 = _interopRequireDefault(_underscore);
-
-var _posts = require("../models/posts");
-
-var PostsModel = _interopRequireWildcard(_posts);
-
-var _ipc = require("../helpers/ipc");
-
-var IPC = _interopRequireWildcard(_ipc);
 
 var _logger = require("../helpers/logger");
 
 var _logger2 = _interopRequireDefault(_logger);
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var Address6 = require("ip-address").Address6;
 var Crypto = require("crypto");
@@ -32,12 +24,8 @@ var promisify = require("promisify-node");
 var Util = require("util");
 var UUID = require("uuid");
 
-var Captcha = require("../captchas");
 var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
-
-var ImageMagick = promisify("imagemagick");
-var musicMetadata = promisify("musicmetadata");
 
 var durationToString = function durationToString(duration) {
     duration = Math.floor(+duration);
@@ -96,7 +84,7 @@ var Board = function Board(name, title, options) {
     this.defineSetting("markupElements", [Board.MarkupElements.BoldMarkupElement, Board.MarkupElements.ItalicsMarkupElement, Board.MarkupElements.StrikedOutMarkupElement, Board.MarkupElements.UnderlinedMarkupElement, Board.MarkupElements.SpoilerMarkupElement, Board.MarkupElements.QuotationMarkupElement, Board.MarkupElements.UnorderedList, Board.MarkupElements.OrderedList, Board.MarkupElements.ListItem, Board.MarkupElements.SubscriptMarkupElement, Board.MarkupElements.SuperscriptMarkupElement, Board.MarkupElements.UrlMarkupElement]);
     this.defineSetting("postingEnabled", true);
     this.defineSetting("showWhois", false);
-    this.defineSetting("supportedCaptchaEngines", Captcha.captchaIds());
+    this.defineSetting("supportedCaptchaEngines", Tools.requireWrapper(require('../captchas/captcha')).captchaIds());
     this.defineProperty("permissions", function () {
         var p = {};
         Tools.forIn(require("../helpers/permissions").Permissions, function (defLevel, key) {
@@ -429,83 +417,6 @@ Board.sortThreadsByPostCount = function (a, b) {
     if (a.postCount > b.postCount) return -1;else if (a.postCount < b.postCount) return 1;else return 0;
 };
 
-Board.testParameters = function () {
-    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, mode) {
-        var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-        var fields = _ref.fields;
-        var files = _ref.files;
-        var postNumber = _ref.postNumber;
-        var board, fileCount, post;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-            while (1) {
-                switch (_context.prev = _context.next) {
-                    case 0:
-                        board = Board.board(boardName);
-
-                        if (board) {
-                            _context.next = 3;
-                            break;
-                        }
-
-                        return _context.abrupt("return", Promise.reject(new Error(Tools.translate('Invalid board'))));
-
-                    case 3:
-                        if (!fields) {
-                            fields = {};
-                        }
-                        if (!(0, _underscore2.default)(files).isArray()) {
-                            files = [];
-                        }
-                        fileCount = 0;
-
-                        postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
-                        post = void 0;
-
-                        if (!postNumber) {
-                            _context.next = 17;
-                            break;
-                        }
-
-                        _context.next = 11;
-                        return PostsModel.getPostFileCount(boardName, postNumber);
-
-                    case 11:
-                        fileCount = _context.sent;
-
-                        if (!(typeof fields.text === 'undefined')) {
-                            _context.next = 17;
-                            break;
-                        }
-
-                        _context.next = 15;
-                        return PostsModel.getPost(boardName, postNumber);
-
-                    case 15:
-                        post = _context.sent;
-
-                        fields.text = post.rawText;
-
-                    case 17:
-                        _context.next = 19;
-                        return board.testParameters(mode, fields, files, fileCount);
-
-                    case 19:
-                        return _context.abrupt("return", post);
-
-                    case 20:
-                    case "end":
-                        return _context.stop();
-                }
-            }
-        }, _callee, this);
-    }));
-
-    return function (_x, _x2, _x3) {
-        return ref.apply(this, arguments);
-    };
-}();
-
 var getRules = function getRules(boardName) {
     var fileName = __dirname + "/../misc/rules/rules" + (boardName ? '.' + boardName : '') + ".txt";
     try {
@@ -619,7 +530,7 @@ Board.initialize = function () {
     });
 };
 
-module.exports = Board;
+exports.default = Board;
 
 //var Database = require("../helpers/database");
 //# sourceMappingURL=board.js.map

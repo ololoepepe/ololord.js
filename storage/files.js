@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.processFiles = undefined;
+exports.deleteFile = exports.renameFile = exports.editFile = exports.createFile = exports.processFiles = undefined;
 
 var downloadFile = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(url, formFieldName, fields, transaction) {
@@ -576,6 +576,128 @@ var processFiles = exports.processFiles = function () {
   }));
 
   return function processFiles(_x21, _x22, _x23) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var createFile = exports.createFile = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(dir, fileName) {
+    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var file = _ref.file;
+    var isDir = _ref.isDir;
+    var path;
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
+      while (1) {
+        switch (_context12.prev = _context12.next) {
+          case 0:
+            if (dir.slice(-1)[0] !== '/') {
+              dir += '/';
+            }
+            path = __dirname + '/../' + dir + fileName;
+
+            if (!isDir) {
+              _context12.next = 5;
+              break;
+            }
+
+            _context12.next = 5;
+            return _fs2.default.makeDirectory(path);
+
+          case 5:
+            if (!file) {
+              _context12.next = 10;
+              break;
+            }
+
+            _context12.next = 8;
+            return _fs2.default.move(file.path, path);
+
+          case 8:
+            _context12.next = 12;
+            break;
+
+          case 10:
+            _context12.next = 12;
+            return Tools.writeFile(path, '');
+
+          case 12:
+          case 'end':
+            return _context12.stop();
+        }
+      }
+    }, _callee12, this);
+  }));
+
+  return function createFile(_x25, _x26, _x27) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var editFile = exports.editFile = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(fileName, content) {
+    return regeneratorRuntime.wrap(function _callee13$(_context13) {
+      while (1) {
+        switch (_context13.prev = _context13.next) {
+          case 0:
+            _context13.next = 2;
+            return Tools.writeFile(__dirname + '/../' + fileName, content);
+
+          case 2:
+          case 'end':
+            return _context13.stop();
+        }
+      }
+    }, _callee13, this);
+  }));
+
+  return function editFile(_x29, _x30) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var renameFile = exports.renameFile = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(oldFileName, fileName) {
+    var oldPath;
+    return regeneratorRuntime.wrap(function _callee14$(_context14) {
+      while (1) {
+        switch (_context14.prev = _context14.next) {
+          case 0:
+            oldPath = __dirname + '/../' + oldFileName;
+            _context14.next = 3;
+            return _fs2.default.rename(oldPath, oldPath.split('/').slice(0, -1).join('/') + '/' + fileName);
+
+          case 3:
+          case 'end':
+            return _context14.stop();
+        }
+      }
+    }, _callee14, this);
+  }));
+
+  return function renameFile(_x31, _x32) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var deleteFile = exports.deleteFile = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(fileName) {
+    return regeneratorRuntime.wrap(function _callee15$(_context15) {
+      while (1) {
+        switch (_context15.prev = _context15.next) {
+          case 0:
+            _context15.next = 2;
+            return _fs2.default.removeTree(__dirname + '/../' + fileName);
+
+          case 2:
+          case 'end':
+            return _context15.stop();
+        }
+      }
+    }, _callee15, this);
+  }));
+
+  return function deleteFile(_x33) {
     return ref.apply(this, arguments);
   };
 }();

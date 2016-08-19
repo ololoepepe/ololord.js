@@ -8,9 +8,9 @@ import express from 'express';
 import expressCluster from 'express-cluster';
 import HTTP from 'http';
 
-var Board = require("./boards/board"); //TODO
-var NodeCaptcha = require('./captchas/node-captcha');
-var NodeCaptchaNoscript = require('./captchas/node-captcha-noscript');
+import Board from './boards/board';
+var NodeCaptcha = require('./captchas/node-captcha'); //TODO
+var NodeCaptchaNoscript = require('./captchas/node-captcha-noscript'); //TODO
 var BoardController = require("./controllers/board");
 import controllers from './controllers';
 import middlewares from './middlewares';
@@ -250,6 +250,7 @@ if (Cluster.isMaster) {
       await NodeCaptcha.removeOldCaptchImages();
       await NodeCaptchaNoscript.removeOldCaptchImages();
       let initCallback = await Database.initialize();
+      await sqlClient.initialize(true);
       await Renderer.compileTemplates();
       await Renderer.reloadTemplates();
       if (Program.rerender || config('system.rerenderCacheOnStartup')) {

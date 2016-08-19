@@ -3,11 +3,11 @@ import FS from 'q-io/fs';
 import FSSync from 'fs';
 import Highlight from 'highlight.js';
 
-var Board = require("../boards/board"); //TODO
+import Board from '../boards/board';
 import Captcha from '../captchas'; //TODO
+import markup from '../core/markup';
 import config from '../helpers/config';
 import FSWatcher from '../helpers/fs-watcher';
-import markup from '../helpers/markup';
 import * as Tools from '../helpers/tools';
 
 let langNames = Tools.createWatchedResource(`${__dirname}/misc/lang-names.json`, (path) => {
@@ -44,8 +44,8 @@ export function base() {
       },
       ws: { transports: config('site.ws.transports') }
     },
-    styles: Tools.styles(),
-    codeStyles: Tools.codeStyles(),
+    styles: Tools.STYLES,
+    codeStyles: Tools.CODE_STYLES,
     availableCodeLangs: Highlight.listLanguages().map((lang) => {
       return {
         id: lang,

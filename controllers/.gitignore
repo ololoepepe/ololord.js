@@ -1,5 +1,8 @@
 *
-!action.js
+!action-manage.js
+!action-moder.js
+!action-other.js
+!action-posts.js
 !api.js
 !board.js
 !faq.js

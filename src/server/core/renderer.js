@@ -6,7 +6,7 @@ import merge from 'merge';
 import micromatch from 'micromatch';
 import moment from 'moment';
 
-var Board = require('../boards/board');
+import Board from '../boards/board';
 import controllers from '../controllers';
 import * as MiscModel from '../models/misc';
 import * as Cache from '../helpers/cache';
@@ -79,6 +79,16 @@ export function render(templateName, model) {
     Logger.error(err.stack || err);
     return '';
   }
+}
+
+export async function getRouterPaths(description) {
+  let paths = await Tools.series(controllers.routers, async function(router) {
+    if (typeof router.paths !== 'function' || typeof router.render !== 'function') {
+      return [];
+    }
+    return await router.paths(description);
+  }, true);
+  return _(paths).flatten().filter(path => !!path);
 }
 
 export async function rerender(what) {

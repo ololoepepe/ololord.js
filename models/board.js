@@ -12,7 +12,7 @@ var getThread = exports.getThread = function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            board = Board.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context.next = 3;
@@ -65,7 +65,7 @@ var getPage = exports.getPage = function () {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            board = Board.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context3.next = 3;
@@ -99,7 +99,7 @@ var getPage = exports.getPage = function () {
           case 12:
             threads = _context3.sent;
 
-            threads.sort(Board.sortThreadsByDate);
+            threads.sort(_board2.default.sortThreadsByDate);
             start = pageNumber * board.threadsPerPage;
 
             threads = threads.slice(start, start + board.threadsPerPage);
@@ -190,7 +190,7 @@ var getCatalog = exports.getCatalog = function () {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            board = Board.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context5.next = 3;
@@ -244,17 +244,17 @@ var getCatalog = exports.getCatalog = function () {
             }());
 
           case 11:
-            sortFunction = Board.sortThreadsByCreationDate;
+            sortFunction = _board2.default.sortThreadsByCreationDate;
             _context5.t0 = (sortMode || 'date').toLowerCase();
             _context5.next = _context5.t0 === 'recent' ? 15 : _context5.t0 === 'bumps' ? 17 : 19;
             break;
 
           case 15:
-            sortFunction = Board.sortThreadsByDate;
+            sortFunction = _board2.default.sortThreadsByDate;
             return _context5.abrupt('break', 20);
 
           case 17:
-            sortFunction = Board.sortThreadsByPostCount;
+            sortFunction = _board2.default.sortThreadsByPostCount;
             return _context5.abrupt('break', 20);
 
           case 19:
@@ -292,7 +292,7 @@ var getArchive = exports.getArchive = function () {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            board = Board.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context7.next = 3;
@@ -395,7 +395,7 @@ var getLastPostNumber = exports.getLastPostNumber = function () {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
-            if (Board.board(boardName)) {
+            if (_board2.default.board(boardName)) {
               _context8.next = 2;
               break;
             }
@@ -433,7 +433,7 @@ var getLastPostNumbers = exports.getLastPostNumbers = function () {
             }
 
             if (!boardNames.some(function (boardName) {
-              return !Board.board(boardName);
+              return !_board2.default.board(boardName);
             })) {
               _context9.next = 3;
               break;
@@ -468,7 +468,7 @@ var getPageCount = exports.getPageCount = function () {
       while (1) {
         switch (_context10.prev = _context10.next) {
           case 0:
-            board = Board.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context10.next = 3;
@@ -508,7 +508,7 @@ var nextPostNumber = exports.nextPostNumber = function () {
       while (1) {
         switch (_context11.prev = _context11.next) {
           case 0:
-            board = Board.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context11.next = 3;
@@ -569,7 +569,7 @@ var initialize = exports.initialize = function () {
         switch (_context13.prev = _context13.next) {
           case 0:
             _context13.next = 2;
-            return Tools.series(Board.boardNames(), function () {
+            return Tools.series(_board2.default.boardNames(), function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName) {
                 return regeneratorRuntime.wrap(function _callee12$(_context12) {
                   while (1) {
@@ -618,6 +618,10 @@ var _cluster = require('cluster');
 
 var _cluster2 = _interopRequireDefault(_cluster);
 
+var _board = require('../boards/board');
+
+var _board2 = _interopRequireDefault(_board);
+
 var _misc = require('./misc');
 
 var MiscModel = _interopRequireWildcard(_misc);
@@ -664,7 +668,6 @@ var promisify = require("promisify-node");
 var Util = require("util");
 var XML2JS = require("xml2js");
 
-var Board = require("../boards/board");
 var Cache = require("../helpers/cache");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");

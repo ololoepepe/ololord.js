@@ -77,13 +77,18 @@
       </div>
       <div class='settings-widget-tab-row'>
         <input type='checkbox'
+               data-bind='checked: settings.ajaxNavigation' />
+        {{!it.translate('AJAX navigation')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
                data-bind='checked: settings.useWebSockets' />
-        {{!it.translate('Use WebSockets', 'useWebSocketsLabelText')}}
+        {{!it.translate('Use WebSockets')}}
       </div>
       <div class='settings-widget-tab-row'>
         <input type='checkbox'
                data-bind='checked: settings.shrinkPosts' />
-        {{!it.translate('Shrink posts', 'postShrinkingLabelText')}}
+        {{!it.translate('Shrink posts')}}
       </div>
       <div class='settings-widget-tab-row'>
         {{!it.translate('Password:', 'postFormLabelPassword')}}

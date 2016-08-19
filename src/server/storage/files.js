@@ -221,3 +221,31 @@ export async function processFiles(boardName, files, transaction) {
     return await processFile(boardName, file, transaction);
   }, true);
 }
+
+export async function createFile(dir, fileName, { file, isDir } = {}) {
+  if (dir.slice(-1)[0] !== '/') {
+    dir += '/';
+  }
+  let path = `${__dirname}/../${dir}${fileName}`;
+  if (isDir) {
+    await FS.makeDirectory(path);
+  }
+  if (file) {
+    await FS.move(file.path, path);
+  } else {
+    await Tools.writeFile(path, '');
+  }
+}
+
+export async function editFile(fileName, content) {
+  await Tools.writeFile(`${__dirname}/../${fileName}`, content);
+}
+
+export async function renameFile(oldFileName, fileName) {
+  let oldPath = `${__dirname}/../${oldFileName}`;
+  await FS.rename(oldPath, oldPath.split('/').slice(0, -1).join('/') + '/' + fileName);
+}
+
+export async function deleteFile(fileName) {
+  await FS.removeTree(`${__dirname}/../${fileName}`);
+}

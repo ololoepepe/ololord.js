@@ -6,11 +6,11 @@ import * as Tools from '../helpers/tools';
 
 let db = null;
 
-export default function getClient() {
+function getClient() {
   return db;
 }
 
-geolocation.initialize = async function() {
+getClient.initialize = async function(createFromSchema) {
   await new Promise((resolve, reject) => {
     db = new SQLite3.Database(`${__dirname}/../sqlite/main.sqlite`, (err) => {
       if (err) {
@@ -21,9 +21,12 @@ geolocation.initialize = async function() {
       resolve();
     });
   });
+  if (!createFromSchema) {
+    return;
+  }
   let schema = await FS.read(`${__dirname}/../sqlite/main.schema`);
   schema = schema.replace(/\/\*(.|\r?\n)*\*\//g, '');
-  sehema = schema.replace(/\-\-.*/g, '');
+  schema = schema.replace(/\-\-.*/g, '');
   schema = schema.replace(/\r?\n+/g, ' ');
   let statements = schema.split(';').filter((statement) => !/^\s+$/.test(statement));
   await Tools.series(statements, async function(statement) {
@@ -38,3 +41,5 @@ geolocation.initialize = async function() {
     });
   });
 };
+
+export default getClient;

@@ -1,4 +1,4 @@
-var Board = require("../boards/board");
+import Board from '../boards/board';
 var config = require("./config");
 var Tools = require("./tools");
 

@@ -4,35 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _ipAddress = require('ip-address');
-
-var _ipAddress2 = _interopRequireDefault(_ipAddress);
-
-var _promisify = require('promisify');
-
-var _promisify2 = _interopRequireDefault(_promisify);
-
-var _sqlite = require('sqlite3');
-
-var _sqlite2 = _interopRequireDefault(_sqlite);
-
-var _logger = require('../helpers/logger');
-
-var _logger2 = _interopRequireDefault(_logger);
-
-var _tools = require('../helpers/tools');
-
-var Tools = _interopRequireWildcard(_tools);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
-
-var db = null;
-
-exports.default = function () {
+var geolocation = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(ip) {
     var info, address, ipv4, query, statement, result, ipFrom;
     return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -76,7 +48,7 @@ exports.default = function () {
             query = 'SELECT ipFrom, countryCode, countryName, cityName FROM ip2location WHERE ipTo >= ? LIMIT 1';
             statement = db.prepare(query);
 
-            statement.pget = (0, _promisify2.default)(statement.get);
+            statement.pget = (0, _promisifyNode2.default)(statement.get);
             if (ipv4) {
               address = bigInt(new _ipAddress2.default.Address4(ipv4).bigInteger().toString());
             } else {
@@ -134,12 +106,38 @@ exports.default = function () {
     }, _callee, this, [[21, 25]]);
   }));
 
-  function geolocation(_x) {
+  return function geolocation(_x) {
     return ref.apply(this, arguments);
-  }
-
-  return geolocation;
+  };
 }();
+
+var _ipAddress = require('ip-address');
+
+var _ipAddress2 = _interopRequireDefault(_ipAddress);
+
+var _promisifyNode = require('promisify-node');
+
+var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
+
+var _sqlite = require('sqlite3');
+
+var _sqlite2 = _interopRequireDefault(_sqlite);
+
+var _logger = require('../helpers/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
+var db = null;
 
 geolocation.initialize = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
   return regeneratorRuntime.wrap(function _callee2$(_context2) {
@@ -165,4 +163,6 @@ geolocation.initialize = _asyncToGenerator(regeneratorRuntime.mark(function _cal
     }
   }, _callee2, this);
 }));
+
+exports.default = geolocation;
 //# sourceMappingURL=geolocation.js.map

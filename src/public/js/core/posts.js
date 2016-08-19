@@ -571,8 +571,8 @@ export function globalClickHandler(e) {
       let postNumber = Tools.option(+DOM.data('postNumber', t), 'number', 0, { test: Tools.testPostNumber });
       if (boardName && postNumber && POST_LINK_REGEXP.test(t.textContent)) {
         e.preventDefault();
+        e.stopImmediatePropagation();
         viewPost(t, boardName, postNumber);
-        return false;
       }
     }
     return;

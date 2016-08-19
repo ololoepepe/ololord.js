@@ -235,7 +235,7 @@ async function processRegisteredUserData(levels, ips) {
 }
 
 export async function registerUser(hashpass, levels, ips) {
-  let ips = await processRegisteredUserData(levels, ips);
+  ips = await processRegisteredUserData(levels, ips);
   let existingUserLevel = await RegisteredUserLevels.exists(hashpass);
   if (existingUserLevel) {
     return Promise.reject(new Error(Tools.translate('A user with this hashpass is already registered')));
@@ -255,7 +255,7 @@ export async function registerUser(hashpass, levels, ips) {
 }
 
 export async function updateRegisteredUser(hashpass, levels, ips) {
-  let ips = await processRegisteredUserData(levels, ips);
+  ips = await processRegisteredUserData(levels, ips);
   let existingUserLevel = await RegisteredUserLevels.exists(hashpass);
   if (!existingUserLevel) {
     return Promise.reject(new Error(Tools.translate('No user with this hashpass')));
@@ -342,7 +342,7 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
     }
   }
   if (!board.opModeration) {
-    return Promise.reject(new Error(Tools.translate('Not enough rights'));
+    return Promise.reject(new Error(Tools.translate('Not enough rights')));
   }
   let thread = await Threads.getOne(threadNumber, boardName);
   if (thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass)) {

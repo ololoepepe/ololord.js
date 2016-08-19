@@ -23,21 +23,19 @@ var Util = require("util");
 var UUID = require("uuid");
 var XRegExp = require("xregexp");
 
+import config from './config';
 import FSWatcher from './fs-watcher';
 import Logger from './logger';
 
-var config = require("./config");
-var markup = require("./markup");
-
-var translate = require("cute-localize")({
+let translate = require("cute-localize")({
     locale: config("site.locale", "en"),
     extraLocations: __dirname + "/../translations/custom",
     silent: true
 });
 
+export { translate as translate };
+
 var flags = {};
-var styles = null;
-var codeStyles = null;
 var rootZones = require("../misc/root-zones.json").reduce(function(acc, zone) {
     acc[zone] = {};
     return acc;
@@ -62,8 +60,9 @@ export const ExternalLinkRegexpPattern = (function() {
     return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
 })();
 export const FILE_RATINGS = ['SFW', 'R-15', 'R-18', 'R-18G'];
+export const NODE_CAPTCHA_ID = 'node-captcha';
 
-var forIn = function(obj, f) {
+export let forIn = function(obj, f) {
     if (!obj || typeof f != "function")
         return;
     for (var x in obj) {
@@ -72,9 +71,7 @@ var forIn = function(obj, f) {
     }
 };
 
-module.exports.forIn = forIn;
-
-var mapIn = function(obj, f) {
+export let mapIn = function(obj, f) {
     if (!obj || typeof f != "function")
         return;
     var arr = [];
@@ -85,9 +82,7 @@ var mapIn = function(obj, f) {
     return arr;
 };
 
-module.exports.mapIn = mapIn;
-
-module.exports.filterIn = function(obj, f) {
+export let filterIn = function(obj, f) {
     if (!obj || typeof f != "function")
         return;
     var nobj = {};
@@ -101,7 +96,7 @@ module.exports.filterIn = function(obj, f) {
     return nobj;
 };
 
-var toArray = function(obj) {
+export let toArray = function(obj) {
     var arr = [];
     forIn(obj, function(val) {
         arr.push(val);
@@ -109,9 +104,7 @@ var toArray = function(obj) {
     return arr;
 };
 
-module.exports.toArray = toArray;
-
-module.exports.promiseIf = function(condition, ifTrue, ifFalse) {
+export let promiseIf = function(condition, ifTrue, ifFalse) {
     if (condition)
         return ifTrue();
     else if (typeof ifFalse == "function")
@@ -120,7 +113,7 @@ module.exports.promiseIf = function(condition, ifTrue, ifFalse) {
         return Promise.resolve();
 };
 
-module.exports.extend = function(Child, Parent) {
+export let extend = function(Child, Parent) {
     var F = function() {};
     F.prototype = Parent.prototype;
     Child.prototype = new F();
@@ -128,7 +121,7 @@ module.exports.extend = function(Child, Parent) {
     Child.superclass = Parent.prototype;
 };
 
-module.exports.arr = function(obj) {
+export let arr = function(obj) {
     var arr = [];
     if (!obj || !obj.length)
         return arr;
@@ -137,7 +130,7 @@ module.exports.arr = function(obj) {
     return arr;
 };
 
-module.exports.contains = function(s, subs) {
+export let contains = function(s, subs) {
     if (typeof s == "string" && typeof subs == "string")
         return s.replace(subs, "") != s;
     if (!s || !s.length || s.length < 1)
@@ -149,7 +142,7 @@ module.exports.contains = function(s, subs) {
     return false;
 };
 
-var hasOwnProperties = function(obj) {
+export let hasOwnProperties = function(obj) {
     if (!obj)
         return false;
     for (var x in obj) {
@@ -159,30 +152,28 @@ var hasOwnProperties = function(obj) {
     return false;
 };
 
-module.exports.hasOwnProperties = hasOwnProperties;
-
-module.exports.replace = function(where, what, withWhat) {
+export let replace = function(where, what, withWhat) {
     if (typeof where != "string" || (typeof what != "string" && !(what instanceof RegExp)) || typeof withWhat != "string")
         return;
     var sl = where.split(what);
     return (sl.length > 1) ? sl.join(withWhat) : sl.pop();
 };
 
-module.exports.toUTC = function(date) {
+export let toUTC = function(date) {
     if (!(date instanceof Date))
         return;
     return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(),
         date.getUTCMinutes(), date.getUTCSeconds(), date.getMilliseconds());
 };
 
-module.exports.hashpass = function(req) {
+export let hashpass = function(req) {
     var s = req.cookies.hashpass;
     if (!mayBeHashpass(s))
         return;
     return s;
 };
 
-module.exports.flagName = function(countryCode) {
+export let flagName = function(countryCode) {
     if (!countryCode)
         return Promise.resolve("");
     var fn = countryCode.toUpperCase() + ".png";
@@ -195,27 +186,25 @@ module.exports.flagName = function(countryCode) {
     });
 };
 
-module.exports.translate = translate;
-
-module.exports.setLocale = function(locale) {
+export let setLocale = function(locale) {
     translate.setLocale(locale);
 };
 
-module.exports.now = function() {
+export let now = function() {
     return new Date();
 };
 
-module.exports.forever = function() {
+export let forever = function() {
     var date = new Date();
-    date.setTime(date.getTime() + module.exports.Billion * 1000);
+    date.setTime(date.getTime() + Billion * 1000);
     return date;
 };
 
-module.exports.externalLinkRootZoneExists = function(zoneName) {
+export let externalLinkRootZoneExists = function(zoneName) {
     return rootZones.hasOwnProperty(zoneName);
 };
 
-module.exports.toHtml = function(text, replaceSpaces) {
+export let toHtml = function(text, replaceSpaces) {
     text = escapeHtml(text).split("\n").join("<br />");
     if (replaceSpaces)
         text = text.split(" ").join("&nbsp;");
@@ -226,49 +215,33 @@ let NON_THEME_STYLESHEETS = new Set(['', 'custom-'].reduce((acc, prefix) => {
   return acc.concat(['combined', 'desktop', 'mobile'].map(suffix => `${prefix}base-${suffix}`));
 }, []));
 
-module.exports.styles = function() {
-    if (styles)
-        return styles;
-    styles = [];
-    var path = __dirname + "/../public/css";
-    FSSync.readdirSync(path).forEach(function(fileName) {
-        if (fileName.split(".").pop() != "css"
-            || NON_THEME_STYLESHEETS.has(fileName.split(".").shift())) {
-            return;
-        }
-        var name = fileName.split(".").shift();
-        var str = FSSync.readFileSync(path + "/" + fileName, "utf8");
-        var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(str);
-        var title = match ? match[1] : name;
-        styles.push({
-            name: name,
-            title: title
-        });
-    });
-    return styles;
-};
+const STYLES_PATH = `${__dirname}/../public/css`;
 
-module.exports.codeStyles = function() {
-    if (codeStyles)
-        return codeStyles;
-    codeStyles = [];
-    var path = __dirname + "/../public/css/3rdparty/highlight.js";
-    FSSync.readdirSync(path).forEach(function(fileName) {
-        if (fileName.split(".").pop() != "css")
-            return;
-        var name = fileName.split(".").slice(0, -1).join('.');
-        var str = FSSync.readFileSync(path + "/" + fileName, "utf8");
-        var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(str);
-        var title = match ? match[1] : name;
-        codeStyles.push({
-            name: name,
-            title: title
-        });
-    });
-    return codeStyles;
-};
+export const STYLES = FSSync.readdirSync(STYLES_PATH).filter((fileName) => {
+  return fileName.split('.').pop() === 'css' && !NON_THEME_STYLESHEETS.has(fileName.split('.').shift());
+}).map((fileName) => {
+  let name = fileName.split('.').slice(0, -1).join('.');
+  let match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(FSSync.readFileSync(`${STYLES_PATH}/${fileName}`, 'utf8'));
+  return {
+    name: name,
+    title: (match ? match[1] : name)
+  };
+});
 
-module.exports.mimeType = function(fileName) {
+const CODE_STYLES_PATH = `${__dirname}/../public/css/3rdparty/highlight.js`;
+
+export const CODE_STYLES = FSSync.readdirSync(CODE_STYLES_PATH).filter((fileName) => {
+  return fileName.split('.').pop() === 'css';
+}).map((fileName) => {
+  let name = fileName.split('.').slice(0, -1).join('.');
+  let match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(FSSync.readFileSync(`${CODE_STYLES_PATH}/${fileName}`, 'utf8'));
+  return {
+    name: name,
+    title: (match ? match[1] : name)
+  };
+});
+
+export let mimeType = function(fileName) {
     if (!fileName || !Util.isString(fileName))
         return Promise.resolve(null);
     try {
@@ -292,23 +265,23 @@ module.exports.mimeType = function(fileName) {
     }
 };
 
-module.exports.isAudioType = function(mimeType) {
+export let isAudioType = function(mimeType) {
     return "application/ogg" == mimeType || mimeType.substr(0, 6) == "audio/";
 };
 
-module.exports.isVideoType = function(mimeType) {
+export let isVideoType = function(mimeType) {
     return mimeType.substr(0, 6) == "video/";
 };
 
-module.exports.isPdfType = function(mimeType) {
+export let isPdfType = function(mimeType) {
     return mimeType == "application/pdf";
 };
 
-module.exports.isImageType = function(mimeType) {
+export let isImageType = function(mimeType) {
     return mimeType.substr(0, 6) == "image/";
 };
 
-module.exports.splitCommand = function(cmd) {
+export let splitCommand = function(cmd) {
     var args = [];
     var arg = "";
     var quot = 0;
@@ -373,7 +346,7 @@ export function mayBeHashpass(password) {
   return (typeof password === 'string') && password.match(/^([0-9a-fA-F]){40}$/);
 }
 
-module.exports.parseForm = function(req) {
+export let parseForm = function(req) {
     if (req.formFields) {
         return Promise.resolve({
             fields: req.formFields,
@@ -406,7 +379,7 @@ module.exports.parseForm = function(req) {
     });
 };
 
-module.exports.proxy = function() {
+export let proxy = function() {
     var proxy = config("system.fileDownloadProxy");
     if (!proxy)
         return null;
@@ -419,7 +392,7 @@ module.exports.proxy = function() {
     };
 };
 
-var correctAddress = function(ip) {
+export let correctAddress = function(ip) {
     if (!ip || typeof ip !== 'string')
         return null;
     if ("::1" == ip)
@@ -446,9 +419,7 @@ var correctAddress = function(ip) {
     return null;
 };
 
-module.exports.correctAddress = correctAddress;
-
-module.exports.preferIPv4 = function(ip) {
+export let preferIPv4 = function(ip) {
     if (!ip)
         return null;
     try {
@@ -476,7 +447,7 @@ export function sha1(data) {
   return hash.digest('hex');
 }
 
-module.exports.sha256 = function(data) {
+export let sha256 = function(data) {
     if (!data)
         return null;
     var sha256 = Crypto.createHash("sha256");
@@ -484,7 +455,7 @@ module.exports.sha256 = function(data) {
     return sha256.digest("hex");
 };
 
-var withoutDuplicates = function(arr) {
+export let withoutDuplicates = function(arr) {
     if (!arr || !Util.isArray(arr))
         return arr;
     return arr.filter(function(item, i) {
@@ -492,9 +463,7 @@ var withoutDuplicates = function(arr) {
     });
 };
 
-module.exports.withoutDuplicates = withoutDuplicates;
-
-module.exports.remove = function(arr, what, both) {
+export let remove = function(arr, what, both) {
     if (!arr || !Util.isArray(arr))
         return arr;
     if (Util.isUndefined(what))
@@ -511,7 +480,7 @@ module.exports.remove = function(arr, what, both) {
     }
 };
 
-module.exports.series = function(arr, f, container) {
+export let series = function(arr, f, container) {
     if (container && typeof container != "object")
         container = [];
     var isArray = Util.isArray(container);
@@ -547,13 +516,13 @@ module.exports.series = function(arr, f, container) {
     });
 };
 
-module.exports.generateTripcode = function(source) {
+export let generateTripcode = function(source) {
     var md5 = Crypto.createHash("md5");
     md5.update(source + config("site.tripcodeSalt", ""));
     return "!" + md5.digest("base64").substr(0, 10);
 };
 
-module.exports.plainText = function(text, options) {
+export let plainText = function(text, options) {
     if (!text)
         return "";
     text = "" + text;
@@ -573,7 +542,7 @@ module.exports.plainText = function(text, options) {
     return text;
 };
 
-module.exports.ipList = function(s) {
+export let ipList = function(s) {
     var ips = (s || "").split(/\s+/).filter(function(ip) {
         return ip;
     });
@@ -589,7 +558,7 @@ module.exports.ipList = function(s) {
     return withoutDuplicates(ips);
 };
 
-module.exports.markupLatex = function(text, inline) {
+export let markupLatex = function(text, inline) {
     return new Promise(function(resolve, reject) {
         MathJax.typeset({
             math: text,
@@ -608,13 +577,13 @@ module.exports.markupLatex = function(text, inline) {
     });
 };
 
-module.exports.generateImageHash = function(fileName) {
+export let generateImageHash = function(fileName) {
     return phash(fileName, true).then(function(hash) {
         return Promise.resolve(hash.toString());
     });
 };
 
-module.exports.generateRandomImage = function(hash, mimeType, thumbPath) {
+export let generateRandomImage = function(hash, mimeType, thumbPath) {
     var canvas = new Canvas(200, 200);
     var ctx = canvas.getContext("2d");
     Jdenticon.drawIcon(ctx, hash, 200);
@@ -628,7 +597,7 @@ module.exports.generateRandomImage = function(hash, mimeType, thumbPath) {
     });
 };
 
-module.exports.du = function(path) {
+export function du(path) {
     return new Promise(function(resolve, reject) {
         du(path, function(err, size) {
             if (err)
@@ -636,9 +605,9 @@ module.exports.du = function(path) {
             resolve(size);
         });
     });
-};
+}
 
-module.exports.writeFile = function(filePath, data) {
+export let writeFile = function(filePath, data) {
     var tmpFilePath = filePath + ".tmp";
     var path = filePath.split("/").slice(0, -1).join("/");
     return FS.exists(path).then(function(exists) {
@@ -652,11 +621,11 @@ module.exports.writeFile = function(filePath, data) {
     });
 };
 
-module.exports.escaped = function(string) {
+export let escaped = function(string) {
   return escapeHtml(string);
 }
 
-module.exports.escapedSelector = function(string) {
+export let escapedSelector = function(string) {
   if (typeof string !== 'string') {
     return string;
   }
@@ -756,7 +725,7 @@ export function addIPv4(object, ip) {
   if (!ip) {
     return object;
   }
-  let ipv4 = module.exports.preferIPv4(ip);
+  let ipv4 = preferIPv4(ip);
   if (ipv4 && ipv4 !== ip) {
     object.ipv4 = ipv4;
   }
@@ -871,16 +840,22 @@ export function loadPlugins(path, filter) {
   return _(list).flatten();
 }
 
-export function markupModes(string) {
-  if (typeof string !== 'string') {
-    string = '';
-  }
-  return _(markup.MarkupModes).filter((mode) => { return string.indexOf(mode) >= 0; });
-}
-
 export function toHashpass(password, notHashpass) {
   if (notHashpass || !mayBeHashpass(password)) {
     password = sha1(password);
   }
   return password;
+}
+
+export function processError(err, dir) {
+  if ('ENOENT' === err.code) {
+    err.status = 404;
+  } else if (typeof dir !== 'undefined') {
+    if (dir && 'ENOTDIR' === err.code) {
+      err = new Error(Tools.translate('Not a directory'));
+    } else if (!dir && 'EISDIR' === err.code) {
+      err = new Error(Tools.translate('Not a file'));
+    }
+  }
+  return err;
 }

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.checkUserPermissions = exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.getSynchronizationData = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
+exports.checkUserPermissions = exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.getSynchronizationData = exports.unregisterUser = exports.updateRegisteredUser = exports.registerUser = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getRegisteredUserLevelsByIp = exports.getRegisteredUserLevels = exports.getRegisteredUserLevelByIp = exports.getRegisteredUserLevel = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
 
 var getUserCaptchaQuota = exports.getUserCaptchaQuota = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, userIp) {
@@ -281,39 +281,51 @@ var getBannedUsers = exports.getBannedUsers = function () {
   };
 }();
 
-var getRegisteredUser = exports.getRegisteredUser = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(hashpass) {
-    var user, levels, ips;
+var getRegisteredUserLevel = exports.getRegisteredUserLevel = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(hashpass, boardName) {
+    var exists, level;
     return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
         switch (_context11.prev = _context11.next) {
           case 0:
-            user = { hashpass: hashpass };
-            _context11.next = 3;
-            return RegisteredUserLevels.getAll(hashpass);
-
-          case 3:
-            levels = _context11.sent;
-
-            if (!(0, _underscore2.default)(levels).isEmpty()) {
-              _context11.next = 6;
+            if (!(!hashpass || !Tools.mayBeHashpass(hashpass))) {
+              _context11.next = 2;
               break;
             }
 
-            return _context11.abrupt('return', Promise.reject(new Error(Tools.translate('No user with this hashpass'))));
+            return _context11.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid hashpass'))));
+
+          case 2:
+            if (_board2.default.board(boardName)) {
+              _context11.next = 4;
+              break;
+            }
+
+            return _context11.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+
+          case 4:
+            _context11.next = 6;
+            return SuperuserHashes.contains(hashpass);
 
           case 6:
-            user.levels = levels;
-            _context11.next = 9;
-            return RegisteredUserIPs.getAll(hashpass);
+            exists = _context11.sent;
+
+            if (!exists) {
+              _context11.next = 9;
+              break;
+            }
+
+            return _context11.abrupt('return', 'SUPERUSER');
 
           case 9:
-            ips = _context11.sent;
+            _context11.next = 11;
+            return RegisteredUserLevels.getOne(boardName, hashpass);
 
-            user.ips = ips || [];
-            return _context11.abrupt('return', user);
+          case 11:
+            level = _context11.sent;
+            return _context11.abrupt('return', level || null);
 
-          case 12:
+          case 13:
           case 'end':
             return _context11.stop();
         }
@@ -321,55 +333,101 @@ var getRegisteredUser = exports.getRegisteredUser = function () {
     }, _callee11, this);
   }));
 
-  return function getRegisteredUser(_x17) {
+  return function getRegisteredUserLevel(_x17, _x18) {
     return ref.apply(this, arguments);
   };
 }();
 
-var getRegisteredUsers = exports.getRegisteredUsers = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13() {
-    var keys;
+var getRegisteredUserLevelByIp = exports.getRegisteredUserLevelByIp = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(ip, boardName) {
+    var hashpass;
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
+      while (1) {
+        switch (_context12.prev = _context12.next) {
+          case 0:
+            ip = Tools.correctAddress(ip);
+
+            if (ip) {
+              _context12.next = 3;
+              break;
+            }
+
+            return _context12.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid IP address'))));
+
+          case 3:
+            _context12.next = 5;
+            return RegisteredUserHashes.getOne(ip);
+
+          case 5:
+            hashpass = _context12.sent;
+
+            if (hashpass) {
+              _context12.next = 8;
+              break;
+            }
+
+            return _context12.abrupt('return', null);
+
+          case 8:
+            _context12.next = 10;
+            return getRegisteredUserLevel(hashpass, boardName);
+
+          case 10:
+            return _context12.abrupt('return', _context12.sent);
+
+          case 11:
+          case 'end':
+            return _context12.stop();
+        }
+      }
+    }, _callee12, this);
+  }));
+
+  return function getRegisteredUserLevelByIp(_x19, _x20) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var getRegisteredUserLevels = exports.getRegisteredUserLevels = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(hashpass) {
+    var exists, levels;
     return regeneratorRuntime.wrap(function _callee13$(_context13) {
       while (1) {
         switch (_context13.prev = _context13.next) {
           case 0:
-            _context13.next = 2;
-            return RegisteredUserLevels.find();
+            if (!(!hashpass || !Tools.mayBeHashpass(hashpass))) {
+              _context13.next = 2;
+              break;
+            }
+
+            return _context13.abrupt('return', {});
 
           case 2:
-            keys = _context13.sent;
-            _context13.next = 5;
-            return Tools.series(keys.map(function (key) {
-              return key.split(':')[1];
-            }), function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(hashpass) {
-                return regeneratorRuntime.wrap(function _callee12$(_context12) {
-                  while (1) {
-                    switch (_context12.prev = _context12.next) {
-                      case 0:
-                        _context12.next = 2;
-                        return getRegisteredUser(hashpass);
+            _context13.next = 4;
+            return SuperuserHashes.contains(hashpass);
 
-                      case 2:
-                        return _context12.abrupt('return', _context12.sent);
+          case 4:
+            exists = _context13.sent;
 
-                      case 3:
-                      case 'end':
-                        return _context12.stop();
-                    }
-                  }
-                }, _callee12, this);
-              }));
+            if (!exists) {
+              _context13.next = 7;
+              break;
+            }
 
-              return function (_x18) {
-                return ref.apply(this, arguments);
-              };
-            }(), true);
+            return _context13.abrupt('return', _board2.default.boardNames().reduce(function (acc, boardName) {
+              acc[boardName] = 'SUPERUSER';
+              return acc;
+            }, {}));
 
-          case 5:
-            return _context13.abrupt('return', _context13.sent);
+          case 7:
+            _context13.next = 9;
+            return RegisteredUserLevels.getAll(hashpass);
 
-          case 6:
+          case 9:
+            levels = _context13.sent;
+            return _context13.abrupt('return', levels || {});
+
+          case 11:
           case 'end':
             return _context13.stop();
         }
@@ -377,24 +435,49 @@ var getRegisteredUsers = exports.getRegisteredUsers = function () {
     }, _callee13, this);
   }));
 
-  return function getRegisteredUsers() {
+  return function getRegisteredUserLevels(_x21) {
     return ref.apply(this, arguments);
   };
 }();
 
-var getSynchronizationData = exports.getSynchronizationData = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(key) {
+var getRegisteredUserLevelsByIp = exports.getRegisteredUserLevelsByIp = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(ip) {
+    var hashpass;
     return regeneratorRuntime.wrap(function _callee14$(_context14) {
       while (1) {
         switch (_context14.prev = _context14.next) {
           case 0:
-            _context14.next = 2;
-            return SynchronizationData.get(key);
+            ip = Tools.correctAddress(ip);
 
-          case 2:
-            return _context14.abrupt('return', _context14.sent);
+            if (ip) {
+              _context14.next = 3;
+              break;
+            }
+
+            return _context14.abrupt('return', {});
 
           case 3:
+            _context14.next = 5;
+            return RegisteredUserHashes.getOne(ip);
+
+          case 5:
+            hashpass = _context14.sent;
+
+            if (hashpass) {
+              _context14.next = 8;
+              break;
+            }
+
+            return _context14.abrupt('return', {});
+
+          case 8:
+            _context14.next = 10;
+            return getRegisteredUserLevels(hashpass);
+
+          case 10:
+            return _context14.abrupt('return', _context14.sent);
+
+          case 12:
           case 'end':
             return _context14.stop();
         }
@@ -402,26 +485,44 @@ var getSynchronizationData = exports.getSynchronizationData = function () {
     }, _callee14, this);
   }));
 
-  return function getSynchronizationData(_x19) {
+  return function getRegisteredUserLevelsByIp(_x22) {
     return ref.apply(this, arguments);
   };
 }();
 
-var getUserPostNumbers = exports.getUserPostNumbers = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(ip, boardName) {
+var getRegisteredUser = exports.getRegisteredUser = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(hashpass) {
+    var user, levels, ips;
     return regeneratorRuntime.wrap(function _callee15$(_context15) {
       while (1) {
         switch (_context15.prev = _context15.next) {
           case 0:
-            ip = Tools.correctAddress(ip) || '*';
-            boardName = boardName || '*';
-            _context15.next = 4;
-            return UserPostNumbers.find(ip + ':' + boardName);
+            user = { hashpass: hashpass };
+            _context15.next = 3;
+            return RegisteredUserLevels.getAll(hashpass);
 
-          case 4:
-            return _context15.abrupt('return', _context15.sent);
+          case 3:
+            levels = _context15.sent;
 
-          case 5:
+            if (!(0, _underscore2.default)(levels).isEmpty()) {
+              _context15.next = 6;
+              break;
+            }
+
+            return _context15.abrupt('return', Promise.reject(new Error(Tools.translate('No user with this hashpass'))));
+
+          case 6:
+            user.levels = levels;
+            _context15.next = 9;
+            return RegisteredUserIPs.getAll(hashpass);
+
+          case 9:
+            ips = _context15.sent;
+
+            user.ips = ips || [];
+            return _context15.abrupt('return', user);
+
+          case 12:
           case 'end':
             return _context15.stop();
         }
@@ -429,45 +530,55 @@ var getUserPostNumbers = exports.getUserPostNumbers = function () {
     }, _callee15, this);
   }));
 
-  return function getUserPostNumbers(_x20, _x21) {
+  return function getRegisteredUser(_x23) {
     return ref.apply(this, arguments);
   };
 }();
 
-var addUserPostNumber = exports.addUserPostNumber = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(ip, boardName, postNumber) {
-    return regeneratorRuntime.wrap(function _callee16$(_context16) {
-      while (1) {
-        switch (_context16.prev = _context16.next) {
-          case 0:
-            ip = Tools.correctAddress(ip);
-            _context16.next = 3;
-            return UserPostNumbers.addOne(postNumber, ip + ':' + boardName);
-
-          case 3:
-          case 'end':
-            return _context16.stop();
-        }
-      }
-    }, _callee16, this);
-  }));
-
-  return function addUserPostNumber(_x22, _x23, _x24) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var removeUserPostNumber = exports.removeUserPostNumber = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(ip, boardName, postNumber) {
+var getRegisteredUsers = exports.getRegisteredUsers = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17() {
+    var keys;
     return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
         switch (_context17.prev = _context17.next) {
           case 0:
-            ip = Tools.correctAddress(ip);
-            _context17.next = 3;
-            return UserPostNumbers.deleteOne(postNumber, ip + ':' + boardName);
+            _context17.next = 2;
+            return RegisteredUserLevels.find();
 
-          case 3:
+          case 2:
+            keys = _context17.sent;
+            _context17.next = 5;
+            return Tools.series(keys.map(function (key) {
+              return key.split(':')[1];
+            }), function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(hashpass) {
+                return regeneratorRuntime.wrap(function _callee16$(_context16) {
+                  while (1) {
+                    switch (_context16.prev = _context16.next) {
+                      case 0:
+                        _context16.next = 2;
+                        return getRegisteredUser(hashpass);
+
+                      case 2:
+                        return _context16.abrupt('return', _context16.sent);
+
+                      case 3:
+                      case 'end':
+                        return _context16.stop();
+                    }
+                  }
+                }, _callee16, this);
+              }));
+
+              return function (_x24) {
+                return ref.apply(this, arguments);
+              };
+            }(), true);
+
+          case 5:
+            return _context17.abrupt('return', _context17.sent);
+
+          case 6:
           case 'end':
             return _context17.stop();
         }
@@ -475,50 +586,70 @@ var removeUserPostNumber = exports.removeUserPostNumber = function () {
     }, _callee17, this);
   }));
 
-  return function removeUserPostNumber(_x25, _x26, _x27) {
+  return function getRegisteredUsers() {
     return ref.apply(this, arguments);
   };
 }();
 
-var checkUserBan = exports.checkUserBan = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(ip, boardNames) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var write = _ref.write;
-    var ban, bans;
+var processRegisteredUserData = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(levels, ips) {
+    var invalidLevel;
     return regeneratorRuntime.wrap(function _callee18$(_context18) {
       while (1) {
         switch (_context18.prev = _context18.next) {
           case 0:
-            ip = Tools.correctAddress(ip);
-            ban = ipBans[ip];
+            if (Tools.hasOwnProperties(levels)) {
+              _context18.next = 2;
+              break;
+            }
 
-            if (!(ban && (write || 'NO_ACCESS' === ban.level))) {
+            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Access level is not specified for any board'))));
+
+          case 2:
+            if (!Object.keys(levels).some(function (boardName) {
+              return !_board2.default.board(boardName);
+            })) {
               _context18.next = 4;
               break;
             }
 
-            return _context18.abrupt('return', Promise.reject({ ban: ban }));
+            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 4:
-            _context18.next = 6;
-            return getBannedUserBans(ip, boardNames);
-
-          case 6:
-            bans = _context18.sent;
-
-            ban = (0, _underscore2.default)(bans).find(function (ban) {
-              return ban && (write || 'NO_ACCESS' === ban.level);
+            invalidLevel = (0, _underscore2.default)(levels).some(function (level) {
+              return Tools.compareRegisteredUserLevels(level, 'USER') < 0 || Tools.compareRegisteredUserLevels(level, 'SUPERUSER') >= 0;
             });
 
-            if (!ban) {
-              _context18.next = 10;
+            if (!invalidLevel) {
+              _context18.next = 7;
               break;
             }
 
-            return _context18.abrupt('return', Promise.reject({ ban: ban }));
+            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid access level'))));
 
-          case 10:
+          case 7:
+            if (!(0, _underscore2.default)(ips).isArray()) {
+              _context18.next = 11;
+              break;
+            }
+
+            ips = ips.map(function (ip) {
+              return Tools.correctAddress(ip);
+            });
+
+            if (!ips.some(function (ip) {
+              return !ip;
+            })) {
+              _context18.next = 11;
+              break;
+            }
+
+            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid IP address'))));
+
+          case 11:
+            return _context18.abrupt('return', ips);
+
+          case 12:
           case 'end':
             return _context18.stop();
         }
@@ -526,131 +657,515 @@ var checkUserBan = exports.checkUserBan = function () {
     }, _callee18, this);
   }));
 
-  return function checkUserBan(_x28, _x29, _x30) {
+  return function processRegisteredUserData(_x25, _x26) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var registerUser = exports.registerUser = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(hashpass, levels, ips) {
+    var existingUserLevel, existingSuperuserHash;
+    return regeneratorRuntime.wrap(function _callee20$(_context20) {
+      while (1) {
+        switch (_context20.prev = _context20.next) {
+          case 0:
+            _context20.next = 2;
+            return processRegisteredUserData(levels, ips);
+
+          case 2:
+            ips = _context20.sent;
+            _context20.next = 5;
+            return RegisteredUserLevels.exists(hashpass);
+
+          case 5:
+            existingUserLevel = _context20.sent;
+
+            if (!existingUserLevel) {
+              _context20.next = 8;
+              break;
+            }
+
+            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('A user with this hashpass is already registered'))));
+
+          case 8:
+            _context20.next = 10;
+            return SuperuserHashes.contains(hashpass);
+
+          case 10:
+            existingSuperuserHash = _context20.sent;
+
+            if (!existingSuperuserHash) {
+              _context20.next = 13;
+              break;
+            }
+
+            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('A user with this hashpass is already registered as superuser'))));
+
+          case 13:
+            _context20.next = 15;
+            return RegisteredUserLevels.setSome(levels, hashpass);
+
+          case 15:
+            if (!(0, _underscore2.default)(ips).isArray()) {
+              _context20.next = 18;
+              break;
+            }
+
+            _context20.next = 18;
+            return Tools.series(ips, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(ip) {
+                return regeneratorRuntime.wrap(function _callee19$(_context19) {
+                  while (1) {
+                    switch (_context19.prev = _context19.next) {
+                      case 0:
+                        _context19.next = 2;
+                        return RegisteredUserHashes.setOne(ip, hashpass);
+
+                      case 2:
+                        _context19.next = 4;
+                        return RegisteredUserIPs.addOne(ip, hashpass);
+
+                      case 4:
+                      case 'end':
+                        return _context19.stop();
+                    }
+                  }
+                }, _callee19, this);
+              }));
+
+              return function (_x30) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 18:
+          case 'end':
+            return _context20.stop();
+        }
+      }
+    }, _callee20, this);
+  }));
+
+  return function registerUser(_x27, _x28, _x29) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var updateRegisteredUser = exports.updateRegisteredUser = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(hashpass, levels, ips) {
+    var existingUserLevel, existingIPs;
+    return regeneratorRuntime.wrap(function _callee22$(_context22) {
+      while (1) {
+        switch (_context22.prev = _context22.next) {
+          case 0:
+            _context22.next = 2;
+            return processRegisteredUserData(levels, ips);
+
+          case 2:
+            ips = _context22.sent;
+            _context22.next = 5;
+            return RegisteredUserLevels.exists(hashpass);
+
+          case 5:
+            existingUserLevel = _context22.sent;
+
+            if (existingUserLevel) {
+              _context22.next = 8;
+              break;
+            }
+
+            return _context22.abrupt('return', Promise.reject(new Error(Tools.translate('No user with this hashpass'))));
+
+          case 8:
+            _context22.next = 10;
+            return RegisteredUserLevels.setSome(levels, hashpass);
+
+          case 10:
+            _context22.next = 12;
+            return RegisteredUserIPs.getAll(hashpass);
+
+          case 12:
+            existingIPs = _context22.sent;
+
+            if (!(existingIPs && existingIPs.length > 0)) {
+              _context22.next = 16;
+              break;
+            }
+
+            _context22.next = 16;
+            return RegisteredUserHashes.deleteSome(ips);
+
+          case 16:
+            _context22.next = 18;
+            return RegisteredUserIPs.delete(hashpass);
+
+          case 18:
+            if (!(0, _underscore2.default)(ips).isArray()) {
+              _context22.next = 21;
+              break;
+            }
+
+            _context22.next = 21;
+            return Tools.series(ips, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(ip) {
+                return regeneratorRuntime.wrap(function _callee21$(_context21) {
+                  while (1) {
+                    switch (_context21.prev = _context21.next) {
+                      case 0:
+                        _context21.next = 2;
+                        return RegisteredUserHashes.setOne(ip, hashpass);
+
+                      case 2:
+                        _context21.next = 4;
+                        return RegisteredUserIPs.addOne(ip, hashpass);
+
+                      case 4:
+                      case 'end':
+                        return _context21.stop();
+                    }
+                  }
+                }, _callee21, this);
+              }));
+
+              return function (_x34) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 21:
+          case 'end':
+            return _context22.stop();
+        }
+      }
+    }, _callee22, this);
+  }));
+
+  return function updateRegisteredUser(_x31, _x32, _x33) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var unregisterUser = exports.unregisterUser = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(hashpass) {
+    var count, ips;
+    return regeneratorRuntime.wrap(function _callee23$(_context23) {
+      while (1) {
+        switch (_context23.prev = _context23.next) {
+          case 0:
+            _context23.next = 2;
+            return RegisteredUserLevels.delete(hashpass);
+
+          case 2:
+            count = _context23.sent;
+
+            if (!(count <= 0)) {
+              _context23.next = 5;
+              break;
+            }
+
+            return _context23.abrupt('return', Promise.reject(new Error(Tools.translate('No user with this hashpass'))));
+
+          case 5:
+            _context23.next = 7;
+            return RegisteredUserIPs.getAll(hashpass);
+
+          case 7:
+            ips = _context23.sent;
+
+            if (!(ips && ips.length > 0)) {
+              _context23.next = 11;
+              break;
+            }
+
+            _context23.next = 11;
+            return RegisteredUserHashes.deleteSome(ips);
+
+          case 11:
+            _context23.next = 13;
+            return RegisteredUserIPs.delete(hashpass);
+
+          case 13:
+          case 'end':
+            return _context23.stop();
+        }
+      }
+    }, _callee23, this);
+  }));
+
+  return function unregisterUser(_x35) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var getSynchronizationData = exports.getSynchronizationData = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(key) {
+    return regeneratorRuntime.wrap(function _callee24$(_context24) {
+      while (1) {
+        switch (_context24.prev = _context24.next) {
+          case 0:
+            _context24.next = 2;
+            return SynchronizationData.get(key);
+
+          case 2:
+            return _context24.abrupt('return', _context24.sent);
+
+          case 3:
+          case 'end':
+            return _context24.stop();
+        }
+      }
+    }, _callee24, this);
+  }));
+
+  return function getSynchronizationData(_x36) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var getUserPostNumbers = exports.getUserPostNumbers = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(ip, boardName) {
+    return regeneratorRuntime.wrap(function _callee25$(_context25) {
+      while (1) {
+        switch (_context25.prev = _context25.next) {
+          case 0:
+            ip = Tools.correctAddress(ip) || '*';
+            boardName = boardName || '*';
+            _context25.next = 4;
+            return UserPostNumbers.find(ip + ':' + boardName);
+
+          case 4:
+            return _context25.abrupt('return', _context25.sent);
+
+          case 5:
+          case 'end':
+            return _context25.stop();
+        }
+      }
+    }, _callee25, this);
+  }));
+
+  return function getUserPostNumbers(_x37, _x38) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var addUserPostNumber = exports.addUserPostNumber = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(ip, boardName, postNumber) {
+    return regeneratorRuntime.wrap(function _callee26$(_context26) {
+      while (1) {
+        switch (_context26.prev = _context26.next) {
+          case 0:
+            ip = Tools.correctAddress(ip);
+            _context26.next = 3;
+            return UserPostNumbers.addOne(postNumber, ip + ':' + boardName);
+
+          case 3:
+          case 'end':
+            return _context26.stop();
+        }
+      }
+    }, _callee26, this);
+  }));
+
+  return function addUserPostNumber(_x39, _x40, _x41) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var removeUserPostNumber = exports.removeUserPostNumber = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(ip, boardName, postNumber) {
+    return regeneratorRuntime.wrap(function _callee27$(_context27) {
+      while (1) {
+        switch (_context27.prev = _context27.next) {
+          case 0:
+            ip = Tools.correctAddress(ip);
+            _context27.next = 3;
+            return UserPostNumbers.deleteOne(postNumber, ip + ':' + boardName);
+
+          case 3:
+          case 'end':
+            return _context27.stop();
+        }
+      }
+    }, _callee27, this);
+  }));
+
+  return function removeUserPostNumber(_x42, _x43, _x44) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var checkUserBan = exports.checkUserBan = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(ip, boardNames) {
+    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var write = _ref.write;
+    var ban, bans;
+    return regeneratorRuntime.wrap(function _callee28$(_context28) {
+      while (1) {
+        switch (_context28.prev = _context28.next) {
+          case 0:
+            ip = Tools.correctAddress(ip);
+            ban = ipBans[ip];
+
+            if (!(ban && (write || 'NO_ACCESS' === ban.level))) {
+              _context28.next = 4;
+              break;
+            }
+
+            return _context28.abrupt('return', Promise.reject({ ban: ban }));
+
+          case 4:
+            _context28.next = 6;
+            return getBannedUserBans(ip, boardNames);
+
+          case 6:
+            bans = _context28.sent;
+
+            ban = (0, _underscore2.default)(bans).find(function (ban) {
+              return ban && (write || 'NO_ACCESS' === ban.level);
+            });
+
+            if (!ban) {
+              _context28.next = 10;
+              break;
+            }
+
+            return _context28.abrupt('return', Promise.reject({ ban: ban }));
+
+          case 10:
+          case 'end':
+            return _context28.stop();
+        }
+      }
+    }, _callee28, this);
+  }));
+
+  return function checkUserBan(_x45, _x46, _x47) {
     return ref.apply(this, arguments);
   };
 }();
 
 var checkUserPermissions = exports.checkUserPermissions = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(req, boardName, postNumber, permission, password) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(req, boardName, postNumber, permission, password) {
     var board, _ref2, user, threadNumber, thread;
 
-    return regeneratorRuntime.wrap(function _callee19$(_context19) {
+    return regeneratorRuntime.wrap(function _callee29$(_context29) {
       while (1) {
-        switch (_context19.prev = _context19.next) {
+        switch (_context29.prev = _context29.next) {
           case 0:
             board = _board2.default.board(boardName);
 
             if (board) {
-              _context19.next = 3;
+              _context29.next = 3;
               break;
             }
 
-            return _context19.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            return _context29.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
-            _context19.next = 5;
+            _context29.next = 5;
             return PostsModel.getPost(boardName, postNumber);
 
           case 5:
-            _ref2 = _context19.sent;
+            _ref2 = _context29.sent;
             user = _ref2.user;
             threadNumber = _ref2.threadNumber;
 
             if (!req.isSuperuser()) {
-              _context19.next = 10;
+              _context29.next = 10;
               break;
             }
 
-            return _context19.abrupt('return');
+            return _context29.abrupt('return');
 
           case 10:
             if (!(Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) > 0)) {
-              _context19.next = 17;
+              _context29.next = 17;
               break;
             }
 
             if (!(Tools.compareRegisteredUserLevels(req.level(boardName), 'USER') > 0 && Tools.compareRegisteredUserLevels(req.level(boardName), user.level) > 0)) {
-              _context19.next = 13;
+              _context29.next = 13;
               break;
             }
 
-            return _context19.abrupt('return');
+            return _context29.abrupt('return');
 
           case 13:
             if (!(req.hashpass && req.hashpass === user.hashpass)) {
-              _context19.next = 15;
+              _context29.next = 15;
               break;
             }
 
-            return _context19.abrupt('return');
+            return _context29.abrupt('return');
 
           case 15:
             if (!(password && password === user.password)) {
-              _context19.next = 17;
+              _context29.next = 17;
               break;
             }
 
-            return _context19.abrupt('return');
+            return _context29.abrupt('return');
 
           case 17:
             if (board.opModeration) {
-              _context19.next = 19;
+              _context29.next = 19;
               break;
             }
 
-            return _context19.abrupt('return', Promise.reject(Tools.translate('Not enough rights')));
+            return _context29.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
 
           case 19:
-            _context19.next = 21;
+            _context29.next = 21;
             return Threads.getOne(threadNumber, boardName);
 
           case 21:
-            thread = _context19.sent;
+            thread = _context29.sent;
 
             if (!(thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass))) {
-              _context19.next = 24;
+              _context29.next = 24;
               break;
             }
 
-            return _context19.abrupt('return', Promise.reject(Tools.translate('Not enough rights')));
+            return _context29.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
 
           case 24:
             if (!(Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0)) {
-              _context19.next = 26;
+              _context29.next = 26;
               break;
             }
 
-            return _context19.abrupt('return');
+            return _context29.abrupt('return');
 
           case 26:
             if (!(req.hashpass && req.hashpass === user.hashpass)) {
-              _context19.next = 28;
+              _context29.next = 28;
               break;
             }
 
-            return _context19.abrupt('return');
+            return _context29.abrupt('return');
 
           case 28:
             if (!(password && password === user.password)) {
-              _context19.next = 30;
+              _context29.next = 30;
               break;
             }
 
-            return _context19.abrupt('return');
+            return _context29.abrupt('return');
 
           case 30:
-            return _context19.abrupt('return', Promise.reject(Tools.translate('Not enough rights')));
+            return _context29.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
 
           case 31:
           case 'end':
-            return _context19.stop();
+            return _context29.stop();
         }
       }
-    }, _callee19, this);
+    }, _callee29, this);
   }));
 
-  return function checkUserPermissions(_x32, _x33, _x34, _x35, _x36) {
+  return function checkUserPermissions(_x49, _x50, _x51, _x52, _x53) {
     return ref.apply(this, arguments);
   };
 }();
@@ -707,11 +1222,19 @@ var BannedUserIPs = new _unorderedSet2.default((0, _clientFactory2.default)(), '
   parse: false,
   stringify: false
 });
+var RegisteredUserHashes = new _hash2.default((0, _clientFactory2.default)(), 'registeredUserHashes', {
+  parse: false,
+  stringify: false
+});
 var RegisteredUserIPs = new _unorderedSet2.default((0, _clientFactory2.default)(), 'registeredUserIps', {
   parse: false,
   stringify: false
 });
 var RegisteredUserLevels = new _hash2.default((0, _clientFactory2.default)(), 'registeredUserLevels', {
+  parse: false,
+  stringify: false
+});
+var SuperuserHashes = new _unorderedSet2.default((0, _clientFactory2.default)(), 'superuserHashes', {
   parse: false,
   stringify: false
 });

@@ -98,7 +98,7 @@ var getPost = exports.getPost = function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            board = _board2.default.board(boardName);
+            board = _board3.default.board(boardName);
 
             if (board) {
               _context2.next = 3;
@@ -166,7 +166,7 @@ var getPosts = exports.getPosts = function () {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            board = _board2.default.board(boardName);
+            board = _board3.default.board(boardName);
 
             if (board) {
               _context4.next = 3;
@@ -380,7 +380,7 @@ var createPost = exports.createPost = function () {
 
             threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
-            board = _board2.default.board(boardName);
+            board = _board3.default.board(boardName);
 
             if (board) {
               _context9.next = 15;
@@ -403,7 +403,7 @@ var createPost = exports.createPost = function () {
               threadNumber = postNumber;
             }
             rawText = text || null;
-            markupModes = Tools.markupModes(markupMode);
+            markupModes = _markup2.default.markupModes(markupMode);
             referencedPosts = {};
 
             sage = 'true' === sage;
@@ -798,7 +798,7 @@ var removePost = exports.removePost = function () {
       while (1) {
         switch (_context17.prev = _context17.next) {
           case 0:
-            board = _board2.default.board(boardName);
+            board = _board3.default.board(boardName);
 
             if (board) {
               _context17.next = 3;
@@ -994,7 +994,7 @@ var editPost = exports.editPost = function () {
             subject = fields.subject;
             sage = fields.sage;
             markupMode = fields.markupMode;
-            board = _board2.default.board(boardName);
+            board = _board3.default.board(boardName);
 
             if (board) {
               _context18.next = 10;
@@ -1016,7 +1016,7 @@ var editPost = exports.editPost = function () {
           case 13:
             date = Tools.now();
             rawText = text || null;
-            markupModes = Tools.markupModes(markupMode);
+            markupModes = _markup2.default.markupModes(markupMode);
             referencedPosts = {};
 
             sage = 'true' === sage;
@@ -1117,7 +1117,7 @@ var deletePost = exports.deletePost = function () {
       while (1) {
         switch (_context20.prev = _context20.next) {
           case 0:
-            board = _board2.default.board(boardName);
+            board = _board3.default.board(boardName);
 
             if (board) {
               _context20.next = 3;
@@ -1270,9 +1270,9 @@ var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _boards = require('./boards');
+var _board = require('./board');
 
-var BoardsModel = _interopRequireWildcard(_boards);
+var BoardsModel = _interopRequireWildcard(_board);
 
 var _files = require('./files');
 
@@ -1285,6 +1285,22 @@ var ThreadsModel = _interopRequireWildcard(_threads);
 var _users = require('./users');
 
 var UsersModel = _interopRequireWildcard(_users);
+
+var _board2 = require('../boards/board');
+
+var _board3 = _interopRequireDefault(_board2);
+
+var _markup = require('../core/markup');
+
+var _markup2 = _interopRequireDefault(_markup);
+
+var _ipc = require('../helpers/ipc');
+
+var IPC = _interopRequireWildcard(_ipc);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
 
 var _clientFactory = require('../storage/client-factory');
 
@@ -1305,22 +1321,6 @@ var Search = _interopRequireWildcard(_search);
 var _unorderedSet = require('../storage/unordered-set');
 
 var _unorderedSet2 = _interopRequireDefault(_unorderedSet);
-
-var _board = require('../boards/board');
-
-var _board2 = _interopRequireDefault(_board);
-
-var _markup = require('../core/markup');
-
-var _markup2 = _interopRequireDefault(_markup);
-
-var _ipc = require('../helpers/ipc');
-
-var IPC = _interopRequireWildcard(_ipc);
-
-var _tools = require('../helpers/tools');
-
-var Tools = _interopRequireWildcard(_tools);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 

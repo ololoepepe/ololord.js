@@ -14,7 +14,7 @@ var Util = require("util");
 
 var mkpath = promisify("mkpath");
 
-var Board = require("../boards/board");
+import Board from '../boards/board';
 var Cache = require("./cache");
 var Captcha = require("../captchas");
 var config = require("./config");
@@ -34,7 +34,6 @@ var RegisteredUserLevels = {};
 var BanLevels = {};
 
 var db = client();
-var dbGeo = new SQLite3.Database(__dirname + "/../geolocation/ip2location.sqlite");
 var es = new Elasticsearch.Client({ host: config("system.elasticsearch.host", "localhost:9200") });
 
 module.exports.db = db;
@@ -681,44 +680,6 @@ var userLevels = [
     "ADMIN",
     "SUPERUSER"
 ];
-
-var getGeolocationInfo = function(ip) {
-    var info = {
-        cityName: null,
-        countryCode: null,
-        countryName: null
-    };
-    if (!ip)
-        return Promise.resolve(info);
-    var address = Tools.correctAddress(ip);
-    if (!address)
-        return Promise.resolve(info);
-    var ipv4 = Tools.preferIPv4(ip);
-    var q = "SELECT ipFrom, countryCode, countryName, cityName FROM ip2location WHERE ipTo >= ? LIMIT 1";
-    var stmt = dbGeo.prepare(q);
-    stmt.pget = promisify(stmt.get);
-    if (ipv4)
-        address = bigInt(new Address4(ipv4).bigInteger().toString());
-    else
-        address = bigInt(new Address6(address).bigInteger().toString());
-    return stmt.pget(address.toString()).then(function(result) {
-        stmt.finalize();
-        if (!result)
-            return info;
-        var ipFrom;
-        try {
-            ipFrom = bigInt(result.ipFrom);
-        } catch (err) {
-            return info;
-        }
-        if (ipFrom.greater(address))
-            return info;
-        info.cityName = result.cityName;
-        info.countryCode = result.countryCode;
-        info.countryName = result.countryName;
-        return info;
-    });
-};
 
 var Transaction = function() {
     this.filePaths = [];

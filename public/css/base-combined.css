@@ -5564,7 +5564,7 @@ body .ui-tooltip {
   padding: 4px 8px 4px 8px;
   text-align: center;
 }
-#sidebar-switch:checked:not(:disabled) ~ #content #toolbar {
+#sidebar-switch:checked:not(:disabled) ~ .content-wrapper #toolbar {
   width: calc(100% - 208px);
   left: 200px;
 }
@@ -5681,11 +5681,16 @@ body {
   width: 100%;
   height: 100%;
 }
-#content {
+.content-wrapper {
   width: calc(100% - 16px);
   height: calc(100% - 16px);
   padding: 8px;
 }
+/*#content {
+  width: ~'calc(100% - 16px)';
+  height: ~'calc(100% - 16px)';
+  padding: 8px;
+}*/
 header {
   padding-top: 2px;
   padding-bottom: 8px;
@@ -6074,7 +6079,7 @@ footer:empty {
   #sidebarSwitch:checked:not(:disabled) ~ .sidebarPlaceholder {
     display: none;
   }
-  #sidebarSwitch:checked:not(:disabled) ~ #content {
+  #sidebarSwitch:checked:not(:disabled) ~ .content-wrapper {
     max-width: 100%;
   }
   #sidebarFooter > select {
@@ -6175,7 +6180,7 @@ footer:empty {
   #sidebar-switch:checked:not(:disabled) ~ .sidebar-placeholder {
     display: block;
   }
-  #sidebar-switch:checked:not(:disabled) ~ #content {
+  #sidebar-switch:checked:not(:disabled) ~ .content-wrapper {
     max-width: calc(100% - 216px);
   }
   /* Post */

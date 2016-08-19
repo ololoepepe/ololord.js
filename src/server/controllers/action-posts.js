@@ -15,6 +15,31 @@ import geolocation from '../storage/geolocation';
 
 let router = express.Router();
 
+async function testParameters(boardName, mode, { fields, files, postNumber } = {}) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  if (!fields) {
+    fields = {};
+  }
+  if (!_(files).isArray()) {
+    files = [];
+  }
+  let fileCount = 0;
+  postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+  let post;
+  if (postNumber) {
+    fileCount = await PostsModel.getPostFileCount(boardName, postNumber);
+    if (typeof fields.text === 'undefined') {
+      post = await PostsModel.getPost(boardName, postNumber);
+      fields.text = post.rawText;
+    }
+  }
+  await board.testParameters(mode, fields, files, fileCount);
+  return post;
+}
+
 router.post('/action/markupText', async function(req, res, next) {
   try {
     let { fields: { boardName, text, markupMode, signAsOp, tripcode } } = await Tools.parseForm(req);
@@ -24,9 +49,9 @@ router.post('/action/markupText', async function(req, res, next) {
     }
     await UsersModel.checkUserBan(req.ip, boardName, { write: true }); //TODO: Should it really be "write"?
     let rawText = text || '';
-    await Board.testParameters(boardName, 'markupText', { fields: fields });
+    await testParameters(boardName, 'markupText', { fields: fields });
     markupMode = markupMode || '';
-    let markupModes = Tools.markupModes(markupMode);
+    let markupModes = markup.markupModes(markupMode);
     text = await markup(boardName, text, {
       markupModes: markupModes,
       accessLevel: req.level(boardName)
@@ -68,7 +93,7 @@ router.post('/action/createPost', async function(req, res, next) {
     await UsersModel.checkGeoBan(req.geolocation);
     await Captcha.checkCaptcha(req.ip, fields);
     files = await Files.getFiles(fields, files);
-    await Board.testParameters(boardName, 'createPost', {
+    await testParameters(boardName, 'createPost', {
       fields: fields,
       files: files
     });
@@ -109,7 +134,7 @@ router.post('/action/createThread', async function(req, res, next) {
     await UsersModel.checkGeoBan(req.geolocation);
     await Captcha.checkCaptcha(req.ip, fields);
     files = await Files.getFiles(fields, files);
-    await Board.testParameters(boardName, 'createThread', {
+    await testParameters(boardName, 'createThread', {
       fields: fields,
       files: files
     });
@@ -149,7 +174,7 @@ router.post('/action/editPost', async function(req, res, next) {
     req.geolocation = await geolocation(req.ip);
     await UsersModel.checkGeoBan(req.geolocation);
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'editPost');
-    await Board.testParameters(boardName, 'editPost', {
+    await testParameters(boardName, 'editPost', {
       fields: fields,
       postNumber: postNumber
     });
@@ -189,7 +214,7 @@ router.post('/action/addFiles', async function(req, res, next) {
     if (files.length <= 0) {
       throw new Error(Tools.translate('No file specified'));
     }
-    await Board.testParameters(boardName, 'addFiles', {
+    await testParameters(boardName, 'addFiles', {
       fields: fields,
       files: files,
       postNumber: postNumber
@@ -246,7 +271,7 @@ router.post('/action/deleteFile', async function(req, res, next) {
     req.geolocation = await geolocation(req.ip);
     await UsersModel.checkGeoBan(req.geolocation);
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'deleteFile', Tools.sha1(password));
-    let post = await Board.testParameters(boardName, 'deleteFile', { postNumber: postNumber });
+    let post = await testParameters(boardName, 'deleteFile', { postNumber: postNumber });
     await FilesModel.deleteFile(fileName);
     IPC.render(boardName, post.threadNumber, postNumber, 'edit');
     res.send({});

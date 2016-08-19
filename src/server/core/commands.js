@@ -2,7 +2,7 @@ var Crypto = require("crypto");
 var Util = require("util");
 var vorpal = require("vorpal")();
 
-var Board = require("../boards/board");
+import Board from '../boards/board';
 var config = require("../helpers/config");
 var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
@@ -205,6 +205,17 @@ vorpal.installHandler("start", function() {
 }, { description: Tools.translate("Opens workers for connections if closed.") });
 
 vorpal.installHandler("rerender [what...]", function(args) {
+    if (args.options && args.options.list) {
+      return Renderer.getRouterPaths(true).then((paths) => {
+        paths.forEach((path) => {
+          if (typeof path === 'object') {
+            console.log(path.path, path.description);
+          } else {
+            console.log(path);
+          }
+        });
+      });
+    }
     return IPC.send('stop').then(function() {
       if (args.what) {
         return Renderer.rerender(args.what);
@@ -224,6 +235,10 @@ vorpal.installHandler("rerender [what...]", function(args) {
         {
             value: "-a, --archive",
             description: Tools.translate("Rerender archived threads (if no pattern is specified).")
+        },
+        {
+            value: '-l, --list',
+            description: Tools.translate('Only list available router paths. No rerender.')
         }
     ]
 });

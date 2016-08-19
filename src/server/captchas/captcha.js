@@ -1,6 +1,5 @@
 import _ from 'underscore';
 
-import NodeCaptcha from '../captchas/node-captcha';
 import Board from '../boards/board';
 import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
@@ -91,8 +90,8 @@ Captcha.checkCaptcha = async function(ip, fields = {}) {
   }
   let ceid = captchaEngine || null;
   if (!ceid || !_(supportedCaptchaEngines).contains(ceid)) {
-    if (_(supportedCaptchaEngines).contains(NodeCaptcha.id)) {
-      ceid = NodeCaptcha.id;
+    if (_(supportedCaptchaEngines).contains(Tools.NODE_CAPTCHA_ID)) {
+      ceid = Tools.NODE_CAPTCHA_ID;
     } else {
       ceid = supportedCaptchaEngines[0].id;
     }

@@ -3,7 +3,14 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 exports.default = commands;
+
+var _board = require("../boards/board");
+
+var _board2 = _interopRequireDefault(_board);
 
 var _renderer = require("../core/renderer");
 
@@ -15,11 +22,12 @@ var IPC = _interopRequireWildcard(_ipc);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var Crypto = require("crypto");
 var Util = require("util");
 var vorpal = require("vorpal")();
 
-var Board = require("../boards/board");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
@@ -168,7 +176,7 @@ vorpal.installHandler("remove-superuser", function () {
 
 vorpal.installHandler("rerender-posts [board]", function (args) {
     args = args.board;
-    var boards = Board.boardNames();
+    var boards = _board2.default.boardNames();
     if (args) {
         if (boards.indexOf(args) < 0) return Promise.reject(Tools.translate("Invalid board"));
         boards = [args];
@@ -205,6 +213,17 @@ vorpal.installHandler("start", function () {
 }, { description: Tools.translate("Opens workers for connections if closed.") });
 
 vorpal.installHandler("rerender [what...]", function (args) {
+    if (args.options && args.options.list) {
+        return Renderer.getRouterPaths(true).then(function (paths) {
+            paths.forEach(function (path) {
+                if ((typeof path === "undefined" ? "undefined" : _typeof(path)) === 'object') {
+                    console.log(path.path, path.description);
+                } else {
+                    console.log(path);
+                }
+            });
+        });
+    }
     return IPC.send('stop').then(function () {
         if (args.what) {
             return Renderer.rerender(args.what);
@@ -223,12 +242,15 @@ vorpal.installHandler("rerender [what...]", function (args) {
     options: [{
         value: "-a, --archive",
         description: Tools.translate("Rerender archived threads (if no pattern is specified).")
+    }, {
+        value: '-l, --list',
+        description: Tools.translate('Only list available router paths. No rerender.')
     }]
 });
 
 vorpal.installHandler("reload-boards", function () {
     return IPC.send('stop').then(function () {
-        Board.initialize();
+        _board2.default.initialize();
         return IPC.send('reloadBoards');
     }).then(function () {
         return IPC.send('start');

@@ -12,7 +12,7 @@ var _renderer = require('../core/renderer');
 
 var Renderer = _interopRequireWildcard(_renderer);
 
-var _markup = require('../helpers/markup');
+var _markup = require('../core/markup');
 
 var _markup2 = _interopRequireDefault(_markup);
 

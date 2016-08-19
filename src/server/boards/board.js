@@ -9,16 +9,10 @@ var promisify = require("promisify-node");
 var Util = require("util");
 var UUID = require("uuid");
 
-var Captcha = require("../captchas");
 var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
 
-import * as PostsModel from '../models/posts';
-import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
-
-var ImageMagick = promisify("imagemagick");
-var musicMetadata = promisify("musicmetadata");
 
 var durationToString = function(duration) {
     duration = Math.floor(+duration);
@@ -102,7 +96,7 @@ var Board = function(name, title, options) {
     ]);
     this.defineSetting("postingEnabled", true);
     this.defineSetting("showWhois", false);
-    this.defineSetting("supportedCaptchaEngines", Captcha.captchaIds());
+    this.defineSetting("supportedCaptchaEngines", Tools.requireWrapper(require('../captchas/captcha')).captchaIds());
     this.defineProperty("permissions", function() {
         var p = {};
         Tools.forIn(require("../helpers/permissions").Permissions, function(defLevel, key) {
@@ -468,31 +462,6 @@ Board.sortThreadsByPostCount = function(a, b) {
         return 0;
 };
 
-Board.testParameters = async function(boardName, mode, { fields, files, postNumber } = {}) {
-  let board = Board.board(boardName);
-  if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
-  }
-  if (!fields) {
-    fields = {};
-  }
-  if (!_(files).isArray()) {
-    files = [];
-  }
-  let fileCount = 0;
-  postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
-  let post;
-  if (postNumber) {
-    fileCount = await PostsModel.getPostFileCount(boardName, postNumber);
-    if (typeof fields.text === 'undefined') {
-      post = await PostsModel.getPost(boardName, postNumber);
-      fields.text = post.rawText;
-    }
-  }
-  await board.testParameters(mode, fields, files, fileCount);
-  return post;
-};
-
 var getRules = function(boardName) {
   var fileName = `${__dirname}/../misc/rules/rules${(boardName ? ('.' + boardName) : '')}.txt`;
   try {
@@ -615,6 +584,6 @@ Board.initialize = function() {
   });
 };
 
-module.exports = Board;
+export default Board;
 
 //var Database = require("../helpers/database");
