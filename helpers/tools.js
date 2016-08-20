@@ -12,8 +12,6 @@ exports.sha1 = sha1;
 exports.du = du;
 exports.option = option;
 exports.testPostNumber = testPostNumber;
-exports.selectParser = selectParser;
-exports.selectStringifier = selectStringifier;
 exports.cloned = cloned;
 exports.addIPv4 = addIPv4;
 exports.createWatchedResource = createWatchedResource;
@@ -23,6 +21,8 @@ exports.requireWrapper = requireWrapper;
 exports.loadPlugins = loadPlugins;
 exports.toHashpass = toHashpass;
 exports.processError = processError;
+exports.mixin = mixin;
+exports.rerenderPostsTargetsFromString = rerenderPostsTargetsFromString;
 
 var _underscore = require("underscore");
 
@@ -41,6 +41,14 @@ var _logger = require("./logger");
 var _logger2 = _interopRequireDefault(_logger);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
@@ -437,7 +445,7 @@ var preferIPv4 = exports.preferIPv4 = function preferIPv4(ip) {
 };
 
 function sha1(data) {
-    if (!data || typeof data !== 'string' && !(0, _underscore2.default)(data).isBuffer()) {
+    if (!data || typeof data !== 'string' && !Util.isBuffer(data)) {
         return null;
     }
     var hash = Crypto.createHash('sha1');
@@ -656,43 +664,6 @@ function testPostNumber(postNumber) {
     return postNumber > 0;
 }
 
-function selectParser(parse) {
-    if (typeof parse === 'function') {
-        return function (data) {
-            if (typeof data === 'null' || typeof data === 'undefined') {
-                return data;
-            }
-            return parse(data);
-        };
-    } else if (parse || typeof parse === 'undefined') {
-        return function (data) {
-            if (typeof data !== 'string') {
-                return data;
-            }
-            return JSON.parse(data);
-        };
-    } else {
-        return function (data) {
-            return data;
-        };
-    }
-}
-
-function selectStringifier(stringify) {
-    if (typeof stringify === 'function') {
-        if (typeof data === 'null' || typeof data === 'undefined') {
-            return data;
-        }
-        return stringify(data);
-    } else if (stringify || typeof stringify === 'undefined') {
-        return JSON.stringify.bind(null);
-    } else {
-        return function (data) {
-            return data;
-        };
-    }
-}
-
 function cloned(value) {
     if ((0, _underscore2.default)(value).isArray()) {
         return value.slice(0).map(function (val) {
@@ -838,8 +809,7 @@ function loadPlugins(path, filter) {
         if (require.cache.hasOwnProperty(id)) {
             delete require.cache[id];
         }
-        var plugins = require(id);
-        plugins = plugins.default || plugins;
+        var plugins = requireWrapper(require(id));
         if (!(0, _underscore2.default)(plugins).isArray()) {
             plugins = [plugins];
         }
@@ -866,5 +836,66 @@ function processError(err, dir) {
         }
     }
     return err;
+}
+
+function mixin(Parent) {
+    if (typeof Parent !== 'function') {
+        Parent = function Parent() {
+            _classCallCheck(this, Parent);
+        };
+    }
+
+    var Mixed = function (_Parent) {
+        _inherits(Mixed, _Parent);
+
+        function Mixed() {
+            _classCallCheck(this, Mixed);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(Mixed).apply(this, arguments));
+        }
+
+        return Mixed;
+    }(Parent);
+
+    ;
+
+    for (var _len = arguments.length, mixins = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        mixins[_key - 1] = arguments[_key];
+    }
+
+    mixins.forEach(function (mixin) {
+        for (var prop in mixin) {
+            Mixed.prototype[prop] = mixin[prop];
+        }
+    });
+    return Mixed;
+}
+
+function rerenderPostsTargetsFromString(string) {
+    if (!string || typeof string !== 'string') {
+        return {};
+    }
+    return string.split(/\s+/).reduce(function (acc, part) {
+        var _part$split = part.split(':');
+
+        var _part$split2 = _toArray(_part$split);
+
+        var boardName = _part$split2[0];
+
+        var postNumbers = _part$split2.slice(1);
+
+        if (boardName) {
+            if (postNumbers.length > 0) {
+                acc[boardName] = postNumbers.map(function (postNumber) {
+                    return option(postNumber, 'number', 0, { test: testPostNumber });
+                }).filter(function (postNumber) {
+                    return !!postNumber;
+                });
+            } else {
+                acc[boardName] = '*';
+            }
+        }
+        return acc;
+    }, {});
 }
 //# sourceMappingURL=tools.js.map

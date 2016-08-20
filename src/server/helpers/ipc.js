@@ -211,7 +211,7 @@ export async function renderCatalog(boardName) {
   return await addTask('renderCatalog', boardName);
 }
 
-export async function renderArchive(boardName) {
+export async function renderArchive(boardName) { //TODO
   try {
     if (Cluster.isMaster) {
       return await addTask('renderArchive', boardName);

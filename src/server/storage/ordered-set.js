@@ -1,17 +1,10 @@
 import _ from 'underscore';
 
-import * as Tools from '../helpers/tools';
+import CommonKey from './common-key';
 
-export default class OrderedSet {
-  constructor(client, key, { parse, stringify } = {}) {
-    this.client = client;
-    this.key = key;
-    this.parse = Tools.selectParser(parse);
-    this.stringify = Tools.selectStringifier(stringify);
-  }
-
-  fullKey(subkey, separator) {
-    return this.key + (subkey ? `${separator || ':'}${subkey}` : '');
+export default class OrderedSet extends CommonKey {
+  constructor(...args) {
+    super(...args);
   }
 
   async getSome(lb, ub, subkey) {
@@ -54,14 +47,5 @@ export default class OrderedSet {
 
   async count(subkey) {
     return await this.client.zcard(this.fullKey(subkey));
-  }
-
-  async find(query, subkey) {
-    query = (typeof query !== 'undefined') ? `:${query}` : ':*';
-    return await this.client.keys(this.fullKey(subkey) + query);
-  }
-
-  async delete(subkey) {
-    return await this.client.del(this.fullKey(subkey));
   }
 }

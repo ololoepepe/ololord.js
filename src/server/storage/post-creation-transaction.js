@@ -23,11 +23,12 @@ export default class PostCreationTransaction {
 
   async rollback() {
     try {
+      await this._rollbackFiles();
       if (this.threadNumber > 0) {
-        await _rollbackThread();
+        await this._rollbackThread();
       }
       if (this.postNumber > 0) {
-        await _rollbackPost();
+        await this._rollbackPost();
       }
     } catch (err) {
       Logger.error(err.stack || err);

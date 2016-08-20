@@ -12,11 +12,9 @@ var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _tools = require('../helpers/tools');
+var _commonKey = require('./common-key');
 
-var Tools = _interopRequireWildcard(_tools);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _commonKey2 = _interopRequireDefault(_commonKey);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26,27 +24,26 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Hash = function () {
-  function Hash(client, key) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-    var parse = _ref.parse;
-    var stringify = _ref.stringify;
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Hash = function (_CommonKey) {
+  _inherits(Hash, _CommonKey);
+
+  function Hash() {
+    var _Object$getPrototypeO;
 
     _classCallCheck(this, Hash);
 
-    this.client = client;
-    this.key = key;
-    this.parse = Tools.selectParser(parse);
-    this.stringify = Tools.selectStringifier(stringify);
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Hash)).call.apply(_Object$getPrototypeO, [this].concat(args)));
   }
 
   _createClass(Hash, [{
-    key: 'fullKey',
-    value: function fullKey(subkey, separator) {
-      return this.key + (subkey ? '' + (separator || ':') + subkey : '');
-    }
-  }, {
     key: 'getOne',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(id, subkey) {
@@ -70,7 +67,7 @@ var Hash = function () {
         }, _callee, this);
       }));
 
-      function getOne(_x2, _x3) {
+      function getOne(_x, _x2) {
         return ref.apply(this, arguments);
       }
 
@@ -110,7 +107,7 @@ var Hash = function () {
         }, _callee2, this);
       }));
 
-      function getSome(_x4, _x5) {
+      function getSome(_x3, _x4) {
         return ref.apply(this, arguments);
       }
 
@@ -140,23 +137,23 @@ var Hash = function () {
         }, _callee3, this);
       }));
 
-      function getAll(_x6) {
+      function getAll(_x5) {
         return ref.apply(this, arguments);
       }
 
       return getAll;
     }()
   }, {
-    key: 'exists',
+    key: 'existsOne',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(id, subkey) {
         var exists;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
                 _context4.next = 2;
-                return this.client.exists(this.fullKey(subkey));
+                return this.client.hexists(this.fullKey(subkey), id);
 
               case 2:
                 exists = _context4.sent;
@@ -170,37 +167,7 @@ var Hash = function () {
         }, _callee4, this);
       }));
 
-      function exists(_x7) {
-        return ref.apply(this, arguments);
-      }
-
-      return exists;
-    }()
-  }, {
-    key: 'existsOne',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(id, subkey) {
-        var exists;
-        return regeneratorRuntime.wrap(function _callee5$(_context5) {
-          while (1) {
-            switch (_context5.prev = _context5.next) {
-              case 0:
-                _context5.next = 2;
-                return this.client.hexists(this.fullKey(subkey), id);
-
-              case 2:
-                exists = _context5.sent;
-                return _context5.abrupt('return', !!exists);
-
-              case 4:
-              case 'end':
-                return _context5.stop();
-            }
-          }
-        }, _callee5, this);
-      }));
-
-      function existsOne(_x8, _x9) {
+      function existsOne(_x6, _x7) {
         return ref.apply(this, arguments);
       }
 
@@ -209,26 +176,26 @@ var Hash = function () {
   }, {
     key: 'setOne',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(id, data, subkey) {
-        return regeneratorRuntime.wrap(function _callee6$(_context6) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(id, data, subkey) {
+        return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context6.prev = _context6.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
-                _context6.next = 2;
+                _context5.next = 2;
                 return this.client.hset(this.fullKey(subkey), id, this.stringify(data));
 
               case 2:
-                return _context6.abrupt('return', _context6.sent);
+                return _context5.abrupt('return', _context5.sent);
 
               case 3:
               case 'end':
-                return _context6.stop();
+                return _context5.stop();
             }
           }
-        }, _callee6, this);
+        }, _callee5, this);
       }));
 
-      function setOne(_x10, _x11, _x12) {
+      function setOne(_x8, _x9, _x10) {
         return ref.apply(this, arguments);
       }
 
@@ -237,19 +204,19 @@ var Hash = function () {
   }, {
     key: 'setSome',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(items, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(items, subkey) {
         var _client$hmset;
 
-        return regeneratorRuntime.wrap(function _callee7$(_context7) {
+        return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context7.prev = _context7.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
                 if (!((typeof items === 'undefined' ? 'undefined' : _typeof(items)) !== 'object')) {
-                  _context7.next = 2;
+                  _context6.next = 2;
                   break;
                 }
 
-                return _context7.abrupt('return', 0);
+                return _context6.abrupt('return', 0);
 
               case 2:
                 if (!(0, _underscore2.default)(items).isArray()) {
@@ -260,28 +227,28 @@ var Hash = function () {
                 }
 
                 if (!(items.length <= 0)) {
-                  _context7.next = 5;
+                  _context6.next = 5;
                   break;
                 }
 
-                return _context7.abrupt('return', 0);
+                return _context6.abrupt('return', 0);
 
               case 5:
-                _context7.next = 7;
+                _context6.next = 7;
                 return (_client$hmset = this.client.hmset).call.apply(_client$hmset, [this.client, this.fullKey(subkey)].concat(_toConsumableArray(items)));
 
               case 7:
-                return _context7.abrupt('return', _context7.sent);
+                return _context6.abrupt('return', _context6.sent);
 
               case 8:
               case 'end':
-                return _context7.stop();
+                return _context6.stop();
             }
           }
-        }, _callee7, this);
+        }, _callee6, this);
       }));
 
-      function setSome(_x13, _x14) {
+      function setSome(_x11, _x12) {
         return ref.apply(this, arguments);
       }
 
@@ -290,13 +257,41 @@ var Hash = function () {
   }, {
     key: 'incrementBy',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(id, n, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(id, n, subkey) {
+        return regeneratorRuntime.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                _context7.next = 2;
+                return this.client.hincrby(this.fullKey(subkey), id, n);
+
+              case 2:
+                return _context7.abrupt('return', _context7.sent);
+
+              case 3:
+              case 'end':
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this);
+      }));
+
+      function incrementBy(_x13, _x14, _x15) {
+        return ref.apply(this, arguments);
+      }
+
+      return incrementBy;
+    }()
+  }, {
+    key: 'deleteOne',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(id, subkey) {
         return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
                 _context8.next = 2;
-                return this.client.hincrby(this.fullKey(subkey), key, n);
+                return this.client.hdel(this.fullKey(subkey), id);
 
               case 2:
                 return _context8.abrupt('return', _context8.sent);
@@ -309,35 +304,7 @@ var Hash = function () {
         }, _callee8, this);
       }));
 
-      function incrementBy(_x15, _x16, _x17) {
-        return ref.apply(this, arguments);
-      }
-
-      return incrementBy;
-    }()
-  }, {
-    key: 'deleteOne',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(id, subkey) {
-        return regeneratorRuntime.wrap(function _callee9$(_context9) {
-          while (1) {
-            switch (_context9.prev = _context9.next) {
-              case 0:
-                _context9.next = 2;
-                return this.client.hdel(this.fullKey(subkey), id);
-
-              case 2:
-                return _context9.abrupt('return', _context9.sent);
-
-              case 3:
-              case 'end':
-                return _context9.stop();
-            }
-          }
-        }, _callee9, this);
-      }));
-
-      function deleteOne(_x18, _x19) {
+      function deleteOne(_x16, _x17) {
         return ref.apply(this, arguments);
       }
 
@@ -346,40 +313,40 @@ var Hash = function () {
   }, {
     key: 'deleteSome',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(ids, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(ids, subkey) {
         var _client;
 
-        return regeneratorRuntime.wrap(function _callee10$(_context10) {
+        return regeneratorRuntime.wrap(function _callee9$(_context9) {
           while (1) {
-            switch (_context10.prev = _context10.next) {
+            switch (_context9.prev = _context9.next) {
               case 0:
                 if (!(0, _underscore2.default)(ids).isArray()) {
                   ids = [ids];
                 }
 
                 if (!(ids.length <= 0)) {
-                  _context10.next = 3;
+                  _context9.next = 3;
                   break;
                 }
 
-                return _context10.abrupt('return', 0);
+                return _context9.abrupt('return', 0);
 
               case 3:
-                _context10.next = 5;
+                _context9.next = 5;
                 return (_client = this.client).hdel.apply(_client, [this.fullKey(subkey)].concat(_toConsumableArray(ids)));
 
               case 5:
-                return _context10.abrupt('return', _context10.sent);
+                return _context9.abrupt('return', _context9.sent);
 
               case 6:
               case 'end':
-                return _context10.stop();
+                return _context9.stop();
             }
           }
-        }, _callee10, this);
+        }, _callee9, this);
       }));
 
-      function deleteSome(_x20, _x21) {
+      function deleteSome(_x18, _x19) {
         return ref.apply(this, arguments);
       }
 
@@ -388,13 +355,41 @@ var Hash = function () {
   }, {
     key: 'keys',
     value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(subkey) {
+        return regeneratorRuntime.wrap(function _callee10$(_context10) {
+          while (1) {
+            switch (_context10.prev = _context10.next) {
+              case 0:
+                _context10.next = 2;
+                return this.client.hkeys(this.fullKey(subkey));
+
+              case 2:
+                return _context10.abrupt('return', _context10.sent);
+
+              case 3:
+              case 'end':
+                return _context10.stop();
+            }
+          }
+        }, _callee10, this);
+      }));
+
+      function keys(_x20) {
+        return ref.apply(this, arguments);
+      }
+
+      return keys;
+    }()
+  }, {
+    key: 'count',
+    value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(subkey) {
         return regeneratorRuntime.wrap(function _callee11$(_context11) {
           while (1) {
             switch (_context11.prev = _context11.next) {
               case 0:
                 _context11.next = 2;
-                return this.client.hkeys(this.fullKey(subkey));
+                return this.client.hlen(this.fullKey(subkey));
 
               case 2:
                 return _context11.abrupt('return', _context11.sent);
@@ -407,101 +402,16 @@ var Hash = function () {
         }, _callee11, this);
       }));
 
-      function keys(_x22) {
-        return ref.apply(this, arguments);
-      }
-
-      return keys;
-    }()
-  }, {
-    key: 'count',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(subkey) {
-        return regeneratorRuntime.wrap(function _callee12$(_context12) {
-          while (1) {
-            switch (_context12.prev = _context12.next) {
-              case 0:
-                _context12.next = 2;
-                return this.client.hlen(this.fullKey(subkey));
-
-              case 2:
-                return _context12.abrupt('return', _context12.sent);
-
-              case 3:
-              case 'end':
-                return _context12.stop();
-            }
-          }
-        }, _callee12, this);
-      }));
-
-      function count(_x23) {
+      function count(_x21) {
         return ref.apply(this, arguments);
       }
 
       return count;
     }()
-  }, {
-    key: 'find',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(query, subkey) {
-        return regeneratorRuntime.wrap(function _callee13$(_context13) {
-          while (1) {
-            switch (_context13.prev = _context13.next) {
-              case 0:
-                query = typeof query !== 'undefined' ? ':' + query : ':*';
-                _context13.next = 3;
-                return this.client.keys(this.fullKey(subkey) + query);
-
-              case 3:
-                return _context13.abrupt('return', _context13.sent);
-
-              case 4:
-              case 'end':
-                return _context13.stop();
-            }
-          }
-        }, _callee13, this);
-      }));
-
-      function find(_x24, _x25) {
-        return ref.apply(this, arguments);
-      }
-
-      return find;
-    }()
-  }, {
-    key: 'delete',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(subkey) {
-        return regeneratorRuntime.wrap(function _callee14$(_context14) {
-          while (1) {
-            switch (_context14.prev = _context14.next) {
-              case 0:
-                _context14.next = 2;
-                return this.client.del(this.fullKey(subkey));
-
-              case 2:
-                return _context14.abrupt('return', _context14.sent);
-
-              case 3:
-              case 'end':
-                return _context14.stop();
-            }
-          }
-        }, _callee14, this);
-      }));
-
-      function _delete(_x26) {
-        return ref.apply(this, arguments);
-      }
-
-      return _delete;
-    }()
   }]);
 
   return Hash;
-}();
+}(_commonKey2.default);
 
 exports.default = Hash;
 //# sourceMappingURL=hash.js.map

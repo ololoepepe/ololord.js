@@ -6,6 +6,7 @@ import merge from 'merge';
 import * as AJAX from '../helpers/ajax';
 import * as Constants from '../helpers/constants';
 import * as DOM from '../helpers/dom';
+import * as Navigation from '../helpers/navigation';
 import * as Settings from '../helpers/settings';
 import * as Storage from '../helpers/storage';
 import * as Templating from '../helpers/templating';
@@ -375,10 +376,11 @@ async function deletePost(boardName, postNumber, archived) {
     }
     if (DOM.data('isOp', post)) {
       if (Tools.isThreadPage()) {
-        window.location = `/${Tools.sitePathPrefix()}${boardName}${archived ? '/archive.html' : ''}`;
+        await Navigation.setPage(`/${Tools.sitePathPrefix()}${boardName}${archived ? '/archive.html' : ''}`);
       } else {
-        DOM.reloadPage();
+        Navigation.reloadPage();
       }
+      return;
     } else {
       $(post).remove();
     }

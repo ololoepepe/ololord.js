@@ -20,9 +20,15 @@ var _ipc = require("../helpers/ipc");
 
 var IPC = _interopRequireWildcard(_ipc);
 
+var _posts = require("../models/posts");
+
+var PostsModel = _interopRequireWildcard(_posts);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var Crypto = require("crypto");
 var Util = require("util");
@@ -174,31 +180,53 @@ vorpal.installHandler("remove-superuser", function () {
     });
 }, { description: Tools.translate("Unregisters a superuser.") });
 
-vorpal.installHandler("rerender-posts [board]", function (args) {
-    args = args.board;
-    var boards = _board2.default.boardNames();
-    if (args) {
-        if (boards.indexOf(args) < 0) return Promise.reject(Tools.translate("Invalid board"));
-        boards = [args];
-    }
-    return this.prompt({
-        type: "confirm",
-        name: "rerender",
-        default: true,
-        message: Tools.translate("Are you sure? ")
-    }).then(function (result) {
-        if (!result.rerender) return Promise.resolve();
-        return IPC.send('stop').then(function () {
-            return Database.rerenderPosts(boards);
-        }).then(function () {
-            return Renderer.rerender(/^\/[^\/]+(\/(catalog|res\/\d+)\.(html|json))?$/);
-        }).then(function () {
-            return IPC.send('start');
-        }).then(function () {
-            return Promise.resolve("OK");
-        });
-    });
-}, { description: Tools.translate("Rerenders all posts (workers are closed and then opened again).") });
+vorpal.installHandler("rerender-posts [targets...]", function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(args) {
+        var result, targets;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+            while (1) {
+                switch (_context.prev = _context.next) {
+                    case 0:
+                        _context.next = 2;
+                        return this.prompt({
+                            type: 'confirm',
+                            name: 'rerender',
+                            default: true,
+                            message: Tools.translate('Are you sure? ')
+                        });
+
+                    case 2:
+                        result = _context.sent;
+
+                        if (result.rerender) {
+                            _context.next = 5;
+                            break;
+                        }
+
+                        return _context.abrupt("return");
+
+                    case 5:
+                        targets = Tools.rerenderPostsTargetsFromString((args.targets || []).join(' '));
+                        _context.next = 8;
+                        return PostsModel.rerenderPosts(targets);
+
+                    case 8:
+                        return _context.abrupt("return", 'OK');
+
+                    case 9:
+                    case "end":
+                        return _context.stop();
+                }
+            }
+        }, _callee, this);
+    }));
+
+    return function (_x) {
+        return ref.apply(this, arguments);
+    };
+}(), {
+    description: Tools.translate('Rerenders posts specified as $[1].\n' + 'If $[1] is omitted, rerenders all posts on all boards.\n' + 'Each target is a string in the following form:\n' + '$[2]', '', '[targets...]', '<board name>[:<post number>[:...]]')
+});
 
 vorpal.installHandler("stop", function () {
     return IPC.send('stop').then(function () {

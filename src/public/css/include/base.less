@@ -194,7 +194,7 @@ header:empty, footer:empty {
   width: 100%;
   height: 100%;
   z-index: 200;
-  background-color: rgba(0, 0, 0, 0.3);       
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .progress-bar {
@@ -211,6 +211,30 @@ header:empty, footer:empty {
   text-align: center;
   font-weight: bold;
   text-shadow: 1px 1px 0 #fff;
+}
+
+.ajax-overlay-mask {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 300;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.ajax-overlay-spinner-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.ajax-overlay-spinner-text {
+  padding-left: 8px;
 }
 
 .length-3 {

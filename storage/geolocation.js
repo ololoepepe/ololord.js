@@ -50,9 +50,9 @@ var geolocation = function () {
 
             statement.pget = (0, _promisifyNode2.default)(statement.get);
             if (ipv4) {
-              address = bigInt(new _ipAddress2.default.Address4(ipv4).bigInteger().toString());
+              address = (0, _bigInteger2.default)(new _ipAddress2.default.Address4(ipv4).bigInteger().toString());
             } else {
-              address = bigInt(new _ipAddress2.default.Address6(address).bigInteger().toString());
+              address = (0, _bigInteger2.default)(new _ipAddress2.default.Address6(address).bigInteger().toString());
             }
             _context.next = 16;
             return statement.pget(address.toString());
@@ -73,7 +73,7 @@ var geolocation = function () {
             ipFrom = void 0;
             _context.prev = 21;
 
-            ipFrom = bigInt(result.ipFrom);
+            ipFrom = (0, _bigInteger2.default)(result.ipFrom);
             _context.next = 29;
             break;
 
@@ -110,6 +110,10 @@ var geolocation = function () {
     return ref.apply(this, arguments);
   };
 }();
+
+var _bigInteger = require('big-integer');
+
+var _bigInteger2 = _interopRequireDefault(_bigInteger);
 
 var _ipAddress = require('ip-address');
 

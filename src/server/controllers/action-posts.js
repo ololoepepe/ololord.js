@@ -1,3 +1,4 @@
+import _ from 'underscore';
 import express from 'express';
 
 import Board from '../boards/board';
@@ -221,7 +222,7 @@ router.post('/action/addFiles', async function(req, res, next) {
     });
     transaction = new PostCreationTransaction(boardName);
     files = await Files.processFiles(boardName, files, transaction);
-    await FilesModel.addFiles(boardName, postNumber, files, transaction);
+    await FilesModel.addFilesToPost(boardName, postNumber, files, transaction);
     IPC.render(boardName, post.threadNumber, postNumber, 'edit');
     res.send({});
   } catch (err) {

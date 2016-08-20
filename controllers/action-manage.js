@@ -428,7 +428,7 @@ router.post('/action/superuserEditFile', function () {
   };
 }());
 
-router.post("/action/superuserRenameFile", function () {
+router.post('/action/superuserRenameFile', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(req, res, next) {
     var _ref6, _ref6$fields, oldFileName, fileName;
 
@@ -557,28 +557,7 @@ router.post("/action/superuserRerenderCache", function (req, res, next) {
     c.rerenderArchive = "true" == result.fields.rerenderArchive;
     return IPC.send('stop');
   }).then(function () {
-    return IPC.send('rerenderCache', c.rerenderArchive);
-  }).then(function () {
-    return IPC.send('start');
-  }).then(function () {
-    res.json({});
-  }).catch(function (err) {
-    next(err);
-  });;
-});
-
-router.post("/action/superuserRerenderPosts", function (req, res, next) {
-  if (!req.isSuperuser()) return next(Tools.translate("Not enough rights"));
-  var c = { boardNames: [] };
-  Tools.parseForm(req).then(function (result) {
-    Tools.forIn(result.fields, function (value, name) {
-      if (!/^board_\S+$/.test(name)) return;
-      c.boardNames.push(value);
-    });
-    if (c.boardNames.length < 1) c.boardNames = _board2.default.boardNames();
-    return IPC.send('stop');
-  }).then(function () {
-    return Database.rerenderPosts(c.boardNames);
+    return IPC.send('rerenderCache', c.rerenderArchive); //TODO
   }).then(function () {
     return IPC.send('start');
   }).then(function () {
@@ -587,6 +566,67 @@ router.post("/action/superuserRerenderPosts", function (req, res, next) {
     next(err);
   });
 });
+
+router.post('/action/superuserRerenderPosts', function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(req, res, next) {
+    var _ref8, targets;
+
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
+      while (1) {
+        switch (_context8.prev = _context8.next) {
+          case 0:
+            _context8.prev = 0;
+
+            if (req.isSuperuser()) {
+              _context8.next = 3;
+              break;
+            }
+
+            throw new Error(Tools.translate('Not enough rights'));
+
+          case 3:
+            _context8.next = 5;
+            return Tools.parseForm(req);
+
+          case 5:
+            _ref8 = _context8.sent;
+            targets = _ref8.fields.targets;
+
+            if (!(typeof targets !== 'string')) {
+              _context8.next = 9;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid targets'));
+
+          case 9:
+            _context8.next = 11;
+            return PostsModel.rerenderPosts(Tools.rerenderPostsTargetsFromString(targets));
+
+          case 11:
+            //TODO: Rerender corresponding pages?
+            res.json({});
+            _context8.next = 17;
+            break;
+
+          case 14:
+            _context8.prev = 14;
+            _context8.t0 = _context8['catch'](0);
+
+            next(Tools.processError(_context8.t0));
+
+          case 17:
+          case 'end':
+            return _context8.stop();
+        }
+      }
+    }, _callee8, this, [[0, 14]]);
+  }));
+
+  return function (_x22, _x23, _x24) {
+    return ref.apply(this, arguments);
+  };
+}());
 
 router.post("/action/superuserRebuildSearchIndex", function (req, res, next) {
   if (!req.isSuperuser()) return next(Tools.translate("Not enough rights"));

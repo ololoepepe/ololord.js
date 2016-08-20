@@ -5,6 +5,7 @@ import Mousetrap from 'mousetrap';
 
 import * as Constants from '../helpers/constants';
 import * as DOM from '../helpers/dom';
+import * as Navigation from '../helpers/navigation';
 import * as Settings from '../helpers/settings';
 import * as Storage from '../helpers/storage';
 import * as Templating from '../helpers/templating';
@@ -58,7 +59,7 @@ function previousNextPageImage(next) {
   if (pageNumber > 0) {
     href += `/${pageNumber}.html`;
   }
-  window.location.href = href;
+  Navigation.setPage(href);
 }
 
 function previousNextThreadPost(next, post) {

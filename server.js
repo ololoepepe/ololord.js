@@ -331,6 +331,7 @@ function spawnWorkers(initCallback) {
         return IPC.render(data.boardName, data.threadNumber, data.postNumber, data.action);
     });
     IPC.on('renderArchive', function (data) {
+        //TODO
         return IPC.renderArchive(data);
     });
     IPC.on('stop', function () {
@@ -372,7 +373,7 @@ function spawnWorkers(initCallback) {
         if (rerenderArchive) {
             return Renderer.rerender();
         } else {
-            return Renderer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
+            //return Renderer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
         }
     });
 }

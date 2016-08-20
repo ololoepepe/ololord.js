@@ -8,6 +8,7 @@ import UUID from 'uuid';
 
 import Board from '../boards/board';
 import * as FilesModel from '../models/files';
+import * as IPC from '../helpers/ipc';
 import * as Tools from '../helpers/tools';
 import vk from '../helpers/vk';
 
@@ -64,7 +65,7 @@ async function downloadFile(url, formFieldName, fields, transaction) {
   return file;
 }
 
-async function getFiles(fields, files, transaction) {
+export async function getFiles(fields, files, transaction) {
   files = await Tools.series(_(files).pick((file) => {
     if (file.size < 1) {
       FS.remove(file.path).catch((err) => { Logger.error(req, err.stack || err); });
@@ -76,14 +77,14 @@ async function getFiles(fields, files, transaction) {
     let mimeType = await Tools.mimeType(file.path);
     file.mimeType = mimeType;
     return file;
-  }, {});
-  let downloadedFiles = Tools.series(_(fields).pick((_1, key) => {
+  }, true);
+  let downloadedFiles = await Tools.series(_(fields).pick((_1, key) => {
     return /^file_url_\S+$/.test(key);
   }), async function(url, formFieldName) {
     return await downloadFile(url, formFieldName, fields, transaction);
   }, true);
-  files.concat(downloadedFiles);
-  let hashes = (typeof fields.fileHashes === 'string') ? fields.fileHashes.split(',') : [];
+  files = files.concat(downloadedFiles);
+  let hashes = (typeof fields.fileHashes === 'string') ? fields.fileHashes.split(',').filter(hash => !!hash) : [];
   let fileInfos = await FilesModel.getFileInfosByHashes(hashes);
   let existingFiles = fileInfos.map((fileInfo, index) => {
     let fi = {
@@ -152,7 +153,7 @@ async function createFileThumb(file, plugin) {
 }
 
 async function processFile(boardName, file, transaction) {
-  let plugin = thumbCreationPlugins.find(plugin => plugin.match(file.mimeType));
+  let plugin = _(thumbCreationPlugins).find(plugin => plugin.match(file.mimeType));
   if (!plugin) {
     return Promise.reject(new Error(Tools.translate('Unsupported file type')));
   }

@@ -94,7 +94,7 @@ var getPostIndex = exports.getPostIndex = function () {
 
 var updatePostIndex = exports.updatePostIndex = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, postNumber, transformer) {
-    var data, body;
+    var body;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -112,9 +112,9 @@ var updatePostIndex = exports.updatePostIndex = function () {
             return getPostIndex(boardName, postNumber);
 
           case 5:
-            data = _context3.sent;
+            body = _context3.sent;
             _context3.next = 8;
-            return transformer(data._source);
+            return transformer(body);
 
           case 8:
             body = _context3.sent;

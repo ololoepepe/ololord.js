@@ -1048,8 +1048,7 @@ var checkUserBan = exports.checkUserBan = function () {
 
 var checkUserPermissions = exports.checkUserPermissions = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(req, boardName, postNumber, permission, password) {
-    var board, _ref2, user, threadNumber, thread;
-
+    var board, post, user, threadNumber, thread;
     return regeneratorRuntime.wrap(function _callee29$(_context29) {
       while (1) {
         switch (_context29.prev = _context29.next) {
@@ -1068,32 +1067,33 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
             return PostsModel.getPost(boardName, postNumber);
 
           case 5:
-            _ref2 = _context29.sent;
-            user = _ref2.user;
-            threadNumber = _ref2.threadNumber;
+            post = _context29.sent;
+
+            if (post) {
+              _context29.next = 8;
+              break;
+            }
+
+            return _context29.abrupt('return', Promise.reject(new Error(Tools.translate('Not such post: $[1]', '', '/' + boardName + '/' + postNumber))));
+
+          case 8:
+            user = post.user;
+            threadNumber = post.threadNumber;
 
             if (!req.isSuperuser()) {
-              _context29.next = 10;
+              _context29.next = 12;
               break;
             }
 
             return _context29.abrupt('return');
 
-          case 10:
+          case 12:
             if (!(Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) > 0)) {
-              _context29.next = 17;
+              _context29.next = 19;
               break;
             }
 
             if (!(Tools.compareRegisteredUserLevels(req.level(boardName), 'USER') > 0 && Tools.compareRegisteredUserLevels(req.level(boardName), user.level) > 0)) {
-              _context29.next = 13;
-              break;
-            }
-
-            return _context29.abrupt('return');
-
-          case 13:
-            if (!(req.hashpass && req.hashpass === user.hashpass)) {
               _context29.next = 15;
               break;
             }
@@ -1101,7 +1101,7 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
             return _context29.abrupt('return');
 
           case 15:
-            if (!(password && password === user.password)) {
+            if (!(req.hashpass && req.hashpass === user.hashpass)) {
               _context29.next = 17;
               break;
             }
@@ -1109,37 +1109,37 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
             return _context29.abrupt('return');
 
           case 17:
-            if (board.opModeration) {
+            if (!(password && password === user.password)) {
               _context29.next = 19;
-              break;
-            }
-
-            return _context29.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
-
-          case 19:
-            _context29.next = 21;
-            return Threads.getOne(threadNumber, boardName);
-
-          case 21:
-            thread = _context29.sent;
-
-            if (!(thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass))) {
-              _context29.next = 24;
-              break;
-            }
-
-            return _context29.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
-
-          case 24:
-            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0)) {
-              _context29.next = 26;
               break;
             }
 
             return _context29.abrupt('return');
 
+          case 19:
+            if (board.opModeration) {
+              _context29.next = 21;
+              break;
+            }
+
+            return _context29.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
+
+          case 21:
+            _context29.next = 23;
+            return Threads.getOne(threadNumber, boardName);
+
+          case 23:
+            thread = _context29.sent;
+
+            if (!(thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass))) {
+              _context29.next = 26;
+              break;
+            }
+
+            return _context29.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
+
           case 26:
-            if (!(req.hashpass && req.hashpass === user.hashpass)) {
+            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0)) {
               _context29.next = 28;
               break;
             }
@@ -1147,7 +1147,7 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
             return _context29.abrupt('return');
 
           case 28:
-            if (!(password && password === user.password)) {
+            if (!(req.hashpass && req.hashpass === user.hashpass)) {
               _context29.next = 30;
               break;
             }
@@ -1155,9 +1155,17 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
             return _context29.abrupt('return');
 
           case 30:
+            if (!(password && password === user.password)) {
+              _context29.next = 32;
+              break;
+            }
+
+            return _context29.abrupt('return');
+
+          case 32:
             return _context29.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
 
-          case 31:
+          case 33:
           case 'end':
             return _context29.stop();
         }
@@ -1333,7 +1341,7 @@ var geoBans = Tools.createWatchedResource(__dirname + '/../misc/geo-bans.json', 
   return function (_x2) {
     return ref.apply(this, arguments);
   };
-}()) || {};
+}()) || new Map();
 
 function checkGeoBan(geolocationInfo) {
   var def = geoBans.get('*');

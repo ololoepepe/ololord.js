@@ -29,7 +29,7 @@ var testParameters = function () {
             if (!fields) {
               fields = {};
             }
-            if (!_(files).isArray()) {
+            if (!(0, _underscore2.default)(files).isArray()) {
               files = [];
             }
             fileCount = 0;
@@ -80,6 +80,10 @@ var testParameters = function () {
     return ref.apply(this, arguments);
   };
 }();
+
+var _underscore = require('underscore');
+
+var _underscore2 = _interopRequireDefault(_underscore);
 
 var _express = require('express');
 
@@ -647,7 +651,7 @@ router.post('/action/addFiles', function () {
           case 39:
             files = _context6.sent;
             _context6.next = 42;
-            return FilesModel.addFiles(boardName, postNumber, files, transaction);
+            return FilesModel.addFilesToPost(boardName, postNumber, files, transaction);
 
           case 42:
             IPC.render(boardName, _post4.threadNumber, postNumber, 'edit');

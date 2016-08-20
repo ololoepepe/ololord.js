@@ -439,7 +439,7 @@ export let preferIPv4 = function(ip) {
 };
 
 export function sha1(data) {
-  if (!data || (typeof data !== 'string' && !_(data).isBuffer())) {
+  if (!data || (typeof data !== 'string' && !Util.isBuffer(data))) {
     return null;
   }
   let hash = Crypto.createHash('sha1');
@@ -677,39 +677,6 @@ export function testPostNumber(postNumber) {
   return postNumber > 0;
 }
 
-export function selectParser(parse) {
-  if (typeof parse === 'function') {
-    return (data) => {
-      if (typeof data === 'null' || typeof data === 'undefined') {
-        return data;
-      }
-      return parse(data);
-    };
-  } else if (parse || typeof parse === 'undefined') {
-    return (data) => {
-      if (typeof data !== 'string') {
-        return data;
-      }
-      return JSON.parse(data);
-    };
-  } else {
-    return data => data;
-  }
-}
-
-export function selectStringifier(stringify) {
-  if (typeof stringify === 'function') {
-    if (typeof data === 'null' || typeof data === 'undefined') {
-      return data;
-    }
-    return stringify(data);
-  } else if (stringify || typeof stringify === 'undefined') {
-    return JSON.stringify.bind(null);
-  } else {
-    return data => data;
-  }
-}
-
 export function cloned(value) {
   if (_(value).isArray()) {
     return value.slice(0).map(val => cloned(val));
@@ -830,8 +797,7 @@ export function loadPlugins(path, filter) {
     if (require.cache.hasOwnProperty(id)) {
       delete require.cache[id];
     }
-    let plugins = require(id);
-    plugins = plugins.default || plugins;
+    let plugins = requireWrapper(require(id));
     if (!_(plugins).isArray()) {
       plugins = [plugins];
     }
@@ -858,4 +824,36 @@ export function processError(err, dir) {
     }
   }
   return err;
+}
+
+export function mixin(Parent, ...mixins) {
+  if (typeof Parent !== 'function') {
+    Parent = class {};
+  }
+  class Mixed extends Parent {};
+  mixins.forEach((mixin) => {
+    for (let prop in mixin) {
+      Mixed.prototype[prop] = mixin[prop];
+    }
+  });
+  return Mixed;
+}
+
+export function rerenderPostsTargetsFromString(string) {
+  if (!string || typeof string !== 'string') {
+    return {};
+  }
+  return string.split(/\s+/).reduce((acc, part) => {
+    let [boardName, ...postNumbers] = part.split(':');
+    if (boardName) {
+      if (postNumbers.length > 0) {
+        acc[boardName] = postNumbers.map((postNumber) => {
+          return option(postNumber, 'number', 0, { test: testPostNumber })
+        }).filter(postNumber => !!postNumber);
+      } else {
+        acc[boardName] = '*';
+      }
+    }
+    return acc;
+  }, {});
 }

@@ -74,6 +74,10 @@ async function renderThread(boardName, threadNumber) {
   await renderThreadHTML(thread);
 }
 
+async function renderArchivedThread(boardName, threadNumber) {
+  //TODO: Implement!!!
+}
+
 async function renderPage(boardName, pageNumber) {
   let board = Board.board(boardName);
   if (!board) {
@@ -105,6 +109,9 @@ router.paths = async function(description) {
       path: '/<board name>/res/<thread number>',
       description: Tools.translate('A thread')
     }, {
+      path: '/<board name>/arch/<thread number>',
+      description: Tools.translate('An archived thread')
+    }, {
       path: '/rss',
       description: Tools.translate('RSS feed (for all boards)')
     }];
@@ -113,7 +120,8 @@ router.paths = async function(description) {
     let threadNumbers = await ThreadsModel.getThreadNumbers(boardName);
     let archivedThreadNumbers = await ThreadsModel.getThreadNumbers(boardName, { archived: true });
     let paths = [`/${boardName}`, `/${boardName}/archive`, `/${boardName}/catalog`];
-    return paths.concat(threadNumbers.map(threadNumber => `/${boardName}/res/${threadNumber}`));
+    paths = paths.concat(threadNumbers.map(threadNumber => `/${boardName}/res/${threadNumber}`));
+    paths = paths.concat(archivedThreadNumbers.map(threadNumber => `/${boardName}/arch/${threadNumber}`));
   }, true);
   return _(arrays).flatten().concat('/rss');
 };
@@ -290,6 +298,10 @@ router.render = async function(path) {
   match = path.match(/^\/([^\/]+)\/res\/(\d+)$/);
   if (match) {
     return await renderThread(match[1], +match[2]);
+  }
+  match = path.match(/^\/([^\/]+)\/arch\/(\d+)$/);
+  if (match) {
+    return await renderArchivedThread(match[1], +match[2]);
   }
 };
 

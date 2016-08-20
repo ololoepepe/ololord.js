@@ -527,7 +527,7 @@ var nextPostNumber = exports.nextPostNumber = function () {
           case 6:
             postNumber = _context11.sent;
 
-            if (number) {
+            if (postNumber) {
               _context11.next = 9;
               break;
             }
@@ -535,7 +535,7 @@ var nextPostNumber = exports.nextPostNumber = function () {
             return _context11.abrupt('return', 0);
 
           case 9:
-            if (!(1 === incrementBy && board.skippedGetOrder > 0 && !(number % Math.pow(10, board.skippedGetOrder)))) {
+            if (!(1 === incrementBy && board.skippedGetOrder > 0 && !(postNumber % Math.pow(10, board.skippedGetOrder)))) {
               _context11.next = 13;
               break;
             }
@@ -547,7 +547,7 @@ var nextPostNumber = exports.nextPostNumber = function () {
             return _context11.abrupt('return', _context11.sent);
 
           case 13:
-            return _context11.abrupt('return', number);
+            return _context11.abrupt('return', postNumber);
 
           case 14:
           case 'end':

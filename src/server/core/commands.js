@@ -9,6 +9,7 @@ var Tools = require("../helpers/tools");
 
 import * as Renderer from '../core/renderer';
 import * as IPC from '../helpers/ipc';
+import * as PostsModel from '../models/posts';
 
 var requestPassword = function(thisArg) {
     var c = {};
@@ -164,33 +165,26 @@ vorpal.installHandler("remove-superuser", function() {
     });
 }, { description: Tools.translate("Unregisters a superuser.") });
 
-vorpal.installHandler("rerender-posts [board]", function(args) {
-    args = args.board;
-    var boards = Board.boardNames();
-    if (args) {
-        if (boards.indexOf(args) < 0)
-            return Promise.reject(Tools.translate("Invalid board"));
-        boards = [args];
-    }
-    return this.prompt({
-        type: "confirm",
-        name: "rerender",
-        default: true,
-        message: Tools.translate("Are you sure? ")
-    }).then(function(result) {
-        if (!result.rerender)
-            return Promise.resolve();
-        return IPC.send('stop').then(function() {
-            return Database.rerenderPosts(boards);
-        }).then(function() {
-          return Renderer.rerender(/^\/[^\/]+(\/(catalog|res\/\d+)\.(html|json))?$/);
-        }).then(function() {
-            return IPC.send('start');
-        }).then(function() {
-            return Promise.resolve("OK");
-        });
-    });
-}, { description: Tools.translate("Rerenders all posts (workers are closed and then opened again).") });
+vorpal.installHandler("rerender-posts [targets...]", async function(args) {
+  let result = await this.prompt({
+    type: 'confirm',
+    name: 'rerender',
+    default: true,
+    message: Tools.translate('Are you sure? ')
+  });
+  if (!result.rerender) {
+    return;
+  }
+  let targets = Tools.rerenderPostsTargetsFromString((args.targets || []).join(' '));
+  await PostsModel.rerenderPosts(targets);
+  //TODO: Rerender corresponding pages?
+  return 'OK';
+}, {
+  description: Tools.translate('Rerenders posts specified as $[1].\n'
+    + 'If $[1] is omitted, rerenders all posts on all boards.\n'
+    + 'Each target is a string in the following form:\n'
+    + '$[2]', '', '[targets...]', '<board name>[:<post number>[:...]]')
+});
 
 vorpal.installHandler("stop", function() {
     return IPC.send('stop').then(function() {
@@ -222,7 +216,7 @@ vorpal.installHandler("rerender [what...]", function(args) {
       } else if (args.options && args.options.archive) {
         return Renderer.rerender();
       } else {
-        return Renderer.rerender(['**', '!/*/archive', '!/*/arch/*']);
+        return Renderer.rerender(['**', '!/*/arch/*']);
       }
     }).then(function() {
         return IPC.send('start');

@@ -55,7 +55,9 @@ export async function getFileInfosByHashes(hashes) {
   }
   return await Tools.series(hashes, async function(hash) {
     let fileInfo = await FileHashes.getOne(hash);
-    fileInfo.hash = hash;
+    if (fileInfo) {
+      fileInfo.hash = hash;
+    }
     return fileInfo;
   }, true);
 }
@@ -102,9 +104,9 @@ export async function removeFileHashes(fileInfos) {
 
 export async function removeFileInfos(fileInfoNames) {
   if (!_(fileInfoNames).isArray()) {
-    fileInfos = [fileInfos];
+    fileInfoNames = [fileInfoNames];
   }
-  if (ids.length <= 0) {
+  if (fileInfoNames.length <= 0) {
     return 0;
   }
   await FileInfos.deleteSome(fileInfoNames);

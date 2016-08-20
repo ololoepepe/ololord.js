@@ -12,11 +12,9 @@ var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _tools = require('../helpers/tools');
+var _commonKey = require('./common-key');
 
-var Tools = _interopRequireWildcard(_tools);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _commonKey2 = _interopRequireDefault(_commonKey);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26,27 +24,26 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var OrderedSet = function () {
-  function OrderedSet(client, key) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-    var parse = _ref.parse;
-    var stringify = _ref.stringify;
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var OrderedSet = function (_CommonKey) {
+  _inherits(OrderedSet, _CommonKey);
+
+  function OrderedSet() {
+    var _Object$getPrototypeO;
 
     _classCallCheck(this, OrderedSet);
 
-    this.client = client;
-    this.key = key;
-    this.parse = Tools.selectParser(parse);
-    this.stringify = Tools.selectStringifier(stringify);
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(OrderedSet)).call.apply(_Object$getPrototypeO, [this].concat(args)));
   }
 
   _createClass(OrderedSet, [{
-    key: 'fullKey',
-    value: function fullKey(subkey, separator) {
-      return this.key + (subkey ? '' + (separator || ':') + subkey : '');
-    }
-  }, {
     key: 'getSome',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(lb, ub, subkey) {
@@ -70,7 +67,7 @@ var OrderedSet = function () {
         }, _callee, this);
       }));
 
-      function getSome(_x2, _x3, _x4) {
+      function getSome(_x, _x2, _x3) {
         return ref.apply(this, arguments);
       }
 
@@ -100,7 +97,7 @@ var OrderedSet = function () {
         }, _callee2, this);
       }));
 
-      function getSomeByScore(_x5, _x6, _x7) {
+      function getSomeByScore(_x4, _x5, _x6) {
         return ref.apply(this, arguments);
       }
 
@@ -130,7 +127,7 @@ var OrderedSet = function () {
         }, _callee3, this);
       }));
 
-      function getAll(_x8) {
+      function getAll(_x7) {
         return ref.apply(this, arguments);
       }
 
@@ -158,7 +155,7 @@ var OrderedSet = function () {
         }, _callee4, this);
       }));
 
-      function addOne(_x9, _x10, _x11) {
+      function addOne(_x8, _x9, _x10) {
         return ref.apply(this, arguments);
       }
 
@@ -169,7 +166,7 @@ var OrderedSet = function () {
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(list, subkey) {
         var _client$zadd,
-            _this = this;
+            _this2 = this;
 
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
@@ -187,7 +184,7 @@ var OrderedSet = function () {
               case 2:
                 _context5.next = 4;
                 return (_client$zadd = this.client.zadd).call.apply(_client$zadd, [this.client, this.fullKey(subkey)].concat(_toConsumableArray((0, _underscore2.default)(list.map(function (item) {
-                  return [item.score, _this.stringify(item.data)];
+                  return [item.score, _this2.stringify(item.data)];
                 })).flatten())));
 
               case 4:
@@ -201,7 +198,7 @@ var OrderedSet = function () {
         }, _callee5, this);
       }));
 
-      function addSome(_x12, _x13) {
+      function addSome(_x11, _x12) {
         return ref.apply(this, arguments);
       }
 
@@ -229,7 +226,7 @@ var OrderedSet = function () {
         }, _callee6, this);
       }));
 
-      function removeOne(_x14, _x15) {
+      function removeOne(_x13, _x14) {
         return ref.apply(this, arguments);
       }
 
@@ -267,7 +264,7 @@ var OrderedSet = function () {
         }, _callee7, this);
       }));
 
-      function removeSome(_x16, _x17) {
+      function removeSome(_x15, _x16) {
         return ref.apply(this, arguments);
       }
 
@@ -295,73 +292,16 @@ var OrderedSet = function () {
         }, _callee8, this);
       }));
 
-      function count(_x18) {
+      function count(_x17) {
         return ref.apply(this, arguments);
       }
 
       return count;
     }()
-  }, {
-    key: 'find',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(query, subkey) {
-        return regeneratorRuntime.wrap(function _callee9$(_context9) {
-          while (1) {
-            switch (_context9.prev = _context9.next) {
-              case 0:
-                query = typeof query !== 'undefined' ? ':' + query : ':*';
-                _context9.next = 3;
-                return this.client.keys(this.fullKey(subkey) + query);
-
-              case 3:
-                return _context9.abrupt('return', _context9.sent);
-
-              case 4:
-              case 'end':
-                return _context9.stop();
-            }
-          }
-        }, _callee9, this);
-      }));
-
-      function find(_x19, _x20) {
-        return ref.apply(this, arguments);
-      }
-
-      return find;
-    }()
-  }, {
-    key: 'delete',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(subkey) {
-        return regeneratorRuntime.wrap(function _callee10$(_context10) {
-          while (1) {
-            switch (_context10.prev = _context10.next) {
-              case 0:
-                _context10.next = 2;
-                return this.client.del(this.fullKey(subkey));
-
-              case 2:
-                return _context10.abrupt('return', _context10.sent);
-
-              case 3:
-              case 'end':
-                return _context10.stop();
-            }
-          }
-        }, _callee10, this);
-      }));
-
-      function _delete(_x21) {
-        return ref.apply(this, arguments);
-      }
-
-      return _delete;
-    }()
   }]);
 
   return OrderedSet;
-}();
+}(_commonKey2.default);
 
 exports.default = OrderedSet;
 //# sourceMappingURL=ordered-set.js.map

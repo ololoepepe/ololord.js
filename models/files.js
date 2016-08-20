@@ -192,7 +192,9 @@ var getFileInfosByHashes = exports.getFileInfosByHashes = function () {
                       case 2:
                         fileInfo = _context6.sent;
 
-                        fileInfo.hash = hash;
+                        if (fileInfo) {
+                          fileInfo.hash = hash;
+                        }
                         return _context6.abrupt('return', fileInfo);
 
                       case 5:
@@ -373,10 +375,10 @@ var removeFileInfos = exports.removeFileInfos = function () {
         switch (_context13.prev = _context13.next) {
           case 0:
             if (!(0, _underscore2.default)(fileInfoNames).isArray()) {
-              fileInfos = [fileInfos];
+              fileInfoNames = [fileInfoNames];
             }
 
-            if (!(ids.length <= 0)) {
+            if (!(fileInfoNames.length <= 0)) {
               _context13.next = 3;
               break;
             }

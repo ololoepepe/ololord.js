@@ -6,6 +6,7 @@ import VK from 'vk-openapi';
 import * as AJAX from '../helpers/ajax';
 import * as Constants from '../helpers/constants';
 import * as DOM from '../helpers/dom';
+import * as Navigation from '../helpers/navigation';
 import * as Settings from '../helpers/settings';
 import * as Storage from '../helpers/storage';
 import * as Templating from '../helpers/templating';
@@ -228,30 +229,23 @@ registerHandler('click', async function(e) {
   if (!t || 'A' !== t.tagName || !t.href) {
     return;
   }
-  let href = t.href;
-  let sameDomain = `${window.location.protocol}//${window.location.hostname}`;
-  if (!/^\//.test(href) && href.substr(0, sameDomain.length) !== sameDomain) {
+  if (!Navigation.testSameDomain(t.href)) {
     return;
   }
-  try {
-    e.preventDefault();
-    let html = await $.ajax({
-      url: href,
-      type: 'GET',
-      dataType: 'html'
-    });
-    let start = html.indexOf("<main id='content'>");
-    let end = html.lastIndexOf('</main>');
-    html = html.substring(start, end + 7);
-    let content = _($.parseHTML(html, window.document, true)).find((n) => {
-      return window.Node.ELEMENT_NODE === n.nodeType;
-    });
-    Templating.scriptWorkaround(content);
-    $('#content').replaceWith(content);
-  } catch (err) {
-    DOM.handleError(err);
-  }
+  e.preventDefault();
+  await Navigation.setPage(t.href);
 }, { priority: 10 });
+
+registerHandler('popstate', async function(e) {
+  let state = e.state;
+  if (!state) {
+    return;
+  }
+  await Navigation.setPage(state.href, {
+    title: state.title,
+    fromHistory: true
+  });
+});
 
 registerHandler('mouseover', Posts.globalMouseoverHandler);
 

@@ -72,7 +72,7 @@ Captcha.captchaIds = function() {
 };
 
 Captcha.checkCaptcha = async function(ip, fields = {}) {
-  let { boardName } = fields;
+  let { boardName, captchaEngine } = fields;
   let board = Board.board(boardName);
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));

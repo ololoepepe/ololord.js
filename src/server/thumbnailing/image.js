@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import promisify from 'promisify-node';
 
+import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
 
 const ImageMagick = promisify('imagemagick');

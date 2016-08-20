@@ -223,14 +223,14 @@ export async function nextPostNumber(boardName, incrementBy) {
   }
   incrementBy = Tools.option(incrementBy, 'number', 1, { test: (i) => { i >= 1; } });
   let postNumber = await PostCounters.incrementBy(boardName, incrementBy);
-  if (!number) {
+  if (!postNumber) {
     return 0;
   }
   //TODO: improve get skipping
-  if (1 === incrementBy && board.skippedGetOrder > 0 && !(number % Math.pow(10, board.skippedGetOrder))) {
+  if (1 === incrementBy && board.skippedGetOrder > 0 && !(postNumber % Math.pow(10, board.skippedGetOrder))) {
     return await nextPostNumber(boardName, incrementBy);
   }
-  return number;
+  return postNumber;
 }
 
 export async function initialize() {

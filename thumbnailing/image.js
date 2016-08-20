@@ -45,7 +45,7 @@ var createThumbnail = exports.createThumbnail = function () {
               }, 'thumbInfo', info.height)
             };
 
-            if (!config('system.phash.enabled')) {
+            if (!(0, _config2.default)('system.phash.enabled')) {
               _context.next = 19;
               break;
             }
@@ -86,6 +86,10 @@ var _underscore2 = _interopRequireDefault(_underscore);
 var _promisifyNode = require('promisify-node');
 
 var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
+
+var _config = require('../helpers/config');
+
+var _config2 = _interopRequireDefault(_config);
 
 var _tools = require('../helpers/tools');
 

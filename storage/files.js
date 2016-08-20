@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.deleteFile = exports.renameFile = exports.editFile = exports.createFile = exports.processFiles = undefined;
+exports.deleteFile = exports.renameFile = exports.editFile = exports.createFile = exports.processFiles = exports.getFiles = undefined;
 
 var downloadFile = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(url, formFieldName, fields, transaction) {
@@ -107,7 +107,7 @@ var downloadFile = function () {
   };
 }();
 
-var getFiles = function () {
+var getFiles = exports.getFiles = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(fields, files, transaction) {
     var downloadedFiles, hashes, fileInfos, existingFiles;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
@@ -151,11 +151,12 @@ var getFiles = function () {
               return function (_x8, _x9) {
                 return ref.apply(this, arguments);
               };
-            }(), {});
+            }(), true);
 
           case 2:
             files = _context4.sent;
-            downloadedFiles = Tools.series((0, _underscore2.default)(fields).pick(function (_1, key) {
+            _context4.next = 5;
+            return Tools.series((0, _underscore2.default)(fields).pick(function (_1, key) {
               return (/^file_url_\S+$/.test(key)
               );
             }), function () {
@@ -183,12 +184,17 @@ var getFiles = function () {
               };
             }(), true);
 
-            files.concat(downloadedFiles);
-            hashes = typeof fields.fileHashes === 'string' ? fields.fileHashes.split(',') : [];
-            _context4.next = 8;
+          case 5:
+            downloadedFiles = _context4.sent;
+
+            files = files.concat(downloadedFiles);
+            hashes = typeof fields.fileHashes === 'string' ? fields.fileHashes.split(',').filter(function (hash) {
+              return !!hash;
+            }) : [];
+            _context4.next = 10;
             return FilesModel.getFileInfosByHashes(hashes);
 
-          case 8:
+          case 10:
             fileInfos = _context4.sent;
             existingFiles = fileInfos.map(function (fileInfo, index) {
               var fi = {
@@ -205,7 +211,7 @@ var getFiles = function () {
             });
             return _context4.abrupt('return', files.concat(existingFiles));
 
-          case 11:
+          case 13:
           case 'end':
             return _context4.stop();
         }
@@ -390,7 +396,7 @@ var processFile = function () {
       while (1) {
         switch (_context9.prev = _context9.next) {
           case 0:
-            plugin = thumbCreationPlugins.find(function (plugin) {
+            plugin = (0, _underscore2.default)(thumbCreationPlugins).find(function (plugin) {
               return plugin.match(file.mimeType);
             });
 
@@ -737,6 +743,10 @@ var _board2 = _interopRequireDefault(_board);
 var _files = require('../models/files');
 
 var FilesModel = _interopRequireWildcard(_files);
+
+var _ipc = require('../helpers/ipc');
+
+var IPC = _interopRequireWildcard(_ipc);
 
 var _tools = require('../helpers/tools');
 

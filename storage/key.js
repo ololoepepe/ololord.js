@@ -10,11 +10,9 @@ var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _tools = require('../helpers/tools');
+var _commonKey = require('./common-key');
 
-var Tools = _interopRequireWildcard(_tools);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _commonKey2 = _interopRequireDefault(_commonKey);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -22,27 +20,26 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Key = function () {
-  function Key(client, key) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-    var parse = _ref.parse;
-    var stringify = _ref.stringify;
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Key = function (_CommonKey) {
+  _inherits(Key, _CommonKey);
+
+  function Key() {
+    var _Object$getPrototypeO;
 
     _classCallCheck(this, Key);
 
-    this.client = client;
-    this.key = key;
-    this.parse = Tools.selectParser(parse);
-    this.stringify = Tools.selectStringifier(stringify);
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Key)).call.apply(_Object$getPrototypeO, [this].concat(args)));
   }
 
   _createClass(Key, [{
-    key: 'fullKey',
-    value: function fullKey(subkey, separator) {
-      return this.key + (subkey ? '' + (separator || ':') + subkey : '');
-    }
-  }, {
     key: 'get',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(subkey) {
@@ -66,7 +63,7 @@ var Key = function () {
         }, _callee, this);
       }));
 
-      function get(_x2) {
+      function get(_x) {
         return ref.apply(this, arguments);
       }
 
@@ -94,73 +91,16 @@ var Key = function () {
         }, _callee2, this);
       }));
 
-      function set(_x3, _x4) {
+      function set(_x2, _x3) {
         return ref.apply(this, arguments);
       }
 
       return set;
     }()
-  }, {
-    key: 'find',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(query, subkey) {
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                query = typeof query !== 'undefined' ? ':' + query : ':*';
-                _context3.next = 3;
-                return this.client.keys(this.fullKey(subkey) + query);
-
-              case 3:
-                return _context3.abrupt('return', _context3.sent);
-
-              case 4:
-              case 'end':
-                return _context3.stop();
-            }
-          }
-        }, _callee3, this);
-      }));
-
-      function find(_x5, _x6) {
-        return ref.apply(this, arguments);
-      }
-
-      return find;
-    }()
-  }, {
-    key: 'delete',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(subkey) {
-        return regeneratorRuntime.wrap(function _callee4$(_context4) {
-          while (1) {
-            switch (_context4.prev = _context4.next) {
-              case 0:
-                _context4.next = 2;
-                return this.client.del(this.fullKey(subkey));
-
-              case 2:
-                return _context4.abrupt('return', _context4.sent);
-
-              case 3:
-              case 'end':
-                return _context4.stop();
-            }
-          }
-        }, _callee4, this);
-      }));
-
-      function _delete(_x7) {
-        return ref.apply(this, arguments);
-      }
-
-      return _delete;
-    }()
   }]);
 
   return Key;
-}();
+}(_commonKey2.default);
 
 exports.default = Key;
 //# sourceMappingURL=key.js.map

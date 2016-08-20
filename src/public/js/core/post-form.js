@@ -4,6 +4,7 @@ import KO from 'knockout';
 
 import * as AJAX from '../helpers/ajax';
 import * as DOM from '../helpers/dom';
+import * as Navigation from '../helpers/navigation';
 import * as Settings from '../helpers/settings';
 import * as Storage from '../helpers/storage';
 import * as Templating from '../helpers/templating';
@@ -210,7 +211,8 @@ export async function submit() {
       } else {
         if ('goto_thread' === Settings.quickReplyAction()) {
           let hash = `#post-${result.number}`;
-          window.location = `/${Tools.sitePathPrefix()}${result.boardName}/res/${result.threadNumber}.html${hash}`;
+          let href = `/${Tools.sitePathPrefix()}${result.boardName}/res/${result.threadNumber}.html${hash}`;
+          await Navigation.setPage(href);
           return;
         } else if (threadNumber) {
           let threadPosts = $(`#thread-${threadNumber} .js-thread-posts`);
@@ -226,7 +228,7 @@ export async function submit() {
       }
     } else {
       btn.prop('disabled', false);
-      window.location = `/${Tools.sitePathPrefix()}${result.boardName}/res/${result.threadNumber}.html`;
+      await Navigation.setPage(`/${Tools.sitePathPrefix()}${result.boardName}/res/${result.threadNumber}.html`);
     }
   } catch (err) {
     btn.prop('disabled', false);

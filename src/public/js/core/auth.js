@@ -3,6 +3,7 @@ import VK from 'vk-openapi';
 
 import * as Constants from '../helpers/constants';
 import * as DOM from '../helpers/dom';
+import * as Navigation from '../helpers/navigation';
 import * as Storage from '../helpers/storage';
 import * as Tools from '../helpers/tools';
 
@@ -53,7 +54,8 @@ export async function login(hashpass, vk) {
     }
     Storage.removeLocalObject('levels');
     Storage.removeLocalObject('lastChatCheckDate');
-    window.location = `/${Tools.sitePathPrefix()}redirect?source=${URI(window.location.href).search(true).source}`;
+    let href = `/${Tools.sitePathPrefix()}redirect?source=${URI(window.location.href).search(true).source}`;
+    await Navigation.setPage(href, { ajax: false });
   } catch (err) {
     DOM.handleError(err);
   }
@@ -68,7 +70,7 @@ export async function logout() {
     Storage.hashpass('', -1);
     Storage.removeLocalObject('levels');
     Storage.removeLocalObject('lastChatCheckDate');
-    window.location = `/${Tools.sitePathPrefix()}redirect?source=${window.location.pathname}`;
+    await Navigation.setPage(`/${Tools.sitePathPrefix()}redirect?source=${window.location.pathname}`, { ajax: false });
   } catch (err) {
     DOM.handleError(err);
   }

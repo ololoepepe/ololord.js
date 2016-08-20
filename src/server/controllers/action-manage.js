@@ -1,27 +1,12 @@
 import _ from 'underscore';
 import express from 'express';
-import FS from 'q-io/fs';
-import HTTP from 'q-io/http';
-import merge from 'merge';
-var moment = require("moment");
-import UUID from 'uuid';
 
-import Board from '../boards/board';
-var Captcha = require("../captchas");
-var Chat = require("../helpers/chat");
-var config = require("../helpers/config");
-var Database = require("../helpers/database");
-var markup = require("../core/markup");
-
-import * as FilesModel from '../models/files';
+import * as Renderer from '../core/renderer';
 import * as PostsModel from '../models/posts';
 import * as UsersModel from '../models/users';
-import PostCreationTransaction from '../storage/post-creation-transaction';
 import * as IPC from '../helpers/ipc';
-import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 import * as Files from '../storage/files';
-import geolocation from '../storage/geolocation';
 
 let router = express.Router();
 
@@ -134,7 +119,7 @@ router.post('/action/superuserEditFile', async function(req, res, next) {
   }
 });
 
-router.post("/action/superuserRenameFile", async function(req, res, next) {
+router.post('/action/superuserRenameFile', async function(req, res, next) {
   try {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
@@ -166,98 +151,80 @@ router.post('/action/superuserDeleteFile', async function(req, res, next) {
   }
 });
 
-router.post("/action/superuserRerenderCache", function(req, res, next) {
-    if (!req.isSuperuser())
-        return next(Tools.translate("Not enough rights"));
-    var c = {};
-    Tools.parseForm(req).then(function(result) {
-        c.rerenderArchive = ("true" == result.fields.rerenderArchive);
-        return IPC.send('stop');
-    }).then(function() {
-        return IPC.send('rerenderCache', c.rerenderArchive);
-    }).then(function() {
-        return IPC.send('start');
-    }).then(function() {
-        res.json({});
-    }).catch(function(err) {
-        next(err);
-    });;
+router.post('/action/superuserRerender', async function(req, res, next) {
+  try {
+    if (!req.isSuperuser()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields: { targets, archive } } = await Tools.parseForm(req);
+    if (typeof targets !== 'string') {
+      throw new Error(Tools.translate('Invalid targets'));
+    }
+    if (targets) {
+      await Renderer.rerender(targets);
+    } else if ('true' === archive) {
+      await Renderer.rerender();
+    } else {
+      await Renderer.rerender(['**', '!/*/arch/*']);
+    }
+    res.json({});
+  } catch (err) {
+    next(Tools.processError(err));
+  }
 });
 
-router.post("/action/superuserRerenderPosts", function(req, res, next) {
-    if (!req.isSuperuser())
-        return next(Tools.translate("Not enough rights"));
-    var c = { boardNames: [] };
-    Tools.parseForm(req).then(function(result) {
-        Tools.forIn(result.fields, function(value, name) {
-            if (!/^board_\S+$/.test(name))
-                return;
-            c.boardNames.push(value);
-        });
-        if (c.boardNames.length < 1)
-            c.boardNames = Board.boardNames();
-        return IPC.send('stop');
-    }).then(function() {
-        return Database.rerenderPosts(c.boardNames);
-    }).then(function() {
-        return IPC.send('start');
-    }).then(function() {
-        res.json({});
-    }).catch(function(err) {
-        next(err);
-    });
+router.post('/action/superuserRerenderPosts', async function(req, res, next) {
+  try {
+    if (!req.isSuperuser()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields: { targets } } = await Tools.parseForm(req);
+    if (typeof targets !== 'string') {
+      throw new Error(Tools.translate('Invalid targets'));
+    }
+    await PostsModel.rerenderPosts(Tools.rerenderPostsTargetsFromString(targets));
+    //TODO: Rerender corresponding pages?
+    res.json({});
+  } catch (err) {
+    next(Tools.processError(err));
+  }
 });
 
-router.post("/action/superuserRebuildSearchIndex", function(req, res, next) {
-    if (!req.isSuperuser())
-        return next(Tools.translate("Not enough rights"));
-    IPC.send('stop').then(function() {
-        return Database.rebuildSearchIndex();
-    }).then(function() {
-        return IPC.send('start');
-    }).then(function() {
-        res.json({});
-    }).catch(function(err) {
-        next(err);
-    });
+router.post('/action/superuserRebuildSearchIndex', async function(req, res, next) {
+  try {
+    if (!req.isSuperuser()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields: { targets } } = await Tools.parseForm(req);
+    if (typeof targets !== 'string') {
+      throw new Error(Tools.translate('Invalid targets'));
+    }
+    await PostsModel.rebuildSearchIndex(Tools.rerenderPostsTargetsFromString(targets));
+    res.json({});
+  } catch (err) {
+    next(Tools.processError(err));
+  }
 });
 
-router.post("/action/superuserReload", function(req, res, next) {
-    if (!req.isSuperuser())
-        return next(Tools.translate("Not enough rights"));
-    var c = { list: [] };
-    Tools.parseForm(req).then(function(result) {
-        if ("true" == result.fields.boards)
-            c.list.push("boards");
-        if ("true" == result.fields.config)
-            c.list.push("config");
-        if ("true" == result.fields.templates)
-            c.list.push("templates");
-        if (c.list.length < 1)
-            return Promise.resolve();
-        return IPC.send('stop');
-    }).then(function() {
-        return Tools.series(c.list, function(action) {
-            switch (action) {
-            case "boards":
-                return IPC.send('reloadBoards');
-            case "config":
-                return IPC.send('reloadConfig');
-            case "templates":
-                return IPC.send('reloadTemplates');
-            default:
-                return Promise.resolve();
-            }
-        });
-    }).then(function() {
-        if (c.list.length < 1)
-            return Promise.resolve();
-        return IPC.send('start');
-    }).then(function() {
-        res.json({});
-    }).catch(function(err) {
-        next(err);
-    });
+router.post('/action/superuserReload', async function(req, res, next) {
+  try {
+    if (!req.isSuperuser()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields: { boards, templates } } = await Tools.parseForm(req);
+    if (typeof targets !== 'string') {
+      throw new Error(Tools.translate('Invalid targets'));
+    }
+    if ('true' === boards) {
+      await IPC.send('reloadBoards');
+    }
+    if ('true' === templates) {
+      await IPC.send('reloadTemplates');
+    }
+    res.json({});
+  } catch (err) {
+    next(Tools.processError(err));
+  }
 });
 
 export default router;

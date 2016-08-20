@@ -212,7 +212,7 @@ function spawnWorkers(initCallback) {
   IPC.on('render', (data) => {
     return IPC.render(data.boardName, data.threadNumber, data.postNumber, data.action);
   });
-  IPC.on('renderArchive', (data) => {
+  IPC.on('renderArchive', (data) => { //TODO
     return IPC.renderArchive(data);
   });
   IPC.on('stop', () => {
@@ -237,7 +237,7 @@ function spawnWorkers(initCallback) {
     if (rerenderArchive) {
       return Renderer.rerender();
     } else {
-      return Renderer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
+      //return Renderer.rerender(Tools.ARCHIVE_PATHS_REGEXP, true);
     }
   });
 }
@@ -254,10 +254,10 @@ if (Cluster.isMaster) {
       await Renderer.compileTemplates();
       await Renderer.reloadTemplates();
       if (Program.rerender || config('system.rerenderCacheOnStartup')) {
-        if (Program.archive || config('system.rerenderArchive')) {
+        if (Program.archive || config('system.rerenderArchive')) { //TODO
           await Renderer.rerender();
         } else {
-          await Renderer.rerender(['**', '!/*/archive', '!/*/arch/*']);
+          await Renderer.rerender(['**', '!/*/arch/*']);
         }
       }
       await StatisticsModel.generateStatistics();

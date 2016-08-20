@@ -227,10 +227,6 @@ export function createScript(src, { prefix, id, replace, onload }) {
   return script;
 }
 
-export function reloadPage() {
-  window.document.location.reload(true);
-}
-
 export let showNotification = function(title, body, icon) {
   if (!('Notification' in window)) {
     return;

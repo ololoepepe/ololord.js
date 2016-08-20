@@ -6,6 +6,7 @@ import Mousetrap from 'mousetrap';
 
 import * as Constants from './helpers/constants';
 import * as DOM from './helpers/dom';
+import * as Navigation from './helpers/navigation';
 import * as Settings from './helpers/settings';
 import * as Storage from './helpers/storage';
 import * as Templating from './helpers/templating';
@@ -221,7 +222,7 @@ function initializeNavbar(navbar) {
       if (user.loggedIn) {
         Auth.logout();
       } else {
-        window.location = `/${Tools.sitePathPrefix()}login.html?source=${window.location.pathname}`;
+        Navigation.setPage(`/${Tools.sitePathPrefix()}login.html?source=${window.location.pathname}`, false);
       }
     },
     unreadChatMessageCount: KO.computed(() => {
@@ -248,7 +249,7 @@ function initializeNavbar(navbar) {
     selectBoard: (_, e) => {
       let value = $(e.target).val();
       if (value) {
-        window.location = value;
+        Navigation.setPage(value);
       }
     },
     toggleBoardGroupVisibility: (_, e) => {
@@ -330,6 +331,7 @@ Storage.userCSS.subscribe(reloadUserCSS);
 
 export function initializeHead() {
   Settings.initialize();
+  Navigation.initialize();
   Hotkeys.initialize();
   KO.applyBindings({
     classes: KO.computed(() => {

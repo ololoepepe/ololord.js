@@ -8,6 +8,7 @@ import { saveAs } from 'node-safe-filesaver';
 import * as AJAX from '../helpers/ajax';
 import * as Constants from '../helpers/constants';
 import * as DOM from '../helpers/dom';
+import * as Navigation from '../helpers/navigation';
 import * as Settings from '../helpers/settings';
 import * as Storage from '../helpers/storage';
 import * as Templating from '../helpers/templating';
@@ -423,7 +424,7 @@ export async function setThreadFixed(boardName, threadNumber, fixed) {
       threadNumber: threadNumber,
       fixed: !!fixed
     }), new OverlayProgressBar());
-    DOM.reloadPage();
+    Navigation.reloadPage();
   } catch (err) {
     DOM.handleError(err);
   }
@@ -519,7 +520,7 @@ export async function moveThread(boardName, threadNumber) {
       targetBoardName: targetBoardName(),
       password: password()
     }), new OverlayProgressBar());
-    window.location = `/${Tools.sitePathPrefix()}${result.boardName}/res/${result.threadNumber}.html`;
+    await Navigation.setPage(`/${Tools.sitePathPrefix()}${result.boardName}/res/${result.threadNumber}.html`);
   } catch (err) {
     DOM.handleError(err);
   }

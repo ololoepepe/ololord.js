@@ -7,6 +7,7 @@ import * as UsersModel from './users';
 import Board from '../boards/board';
 import markup from '../core/markup';
 import * as IPC from '../helpers/ipc';
+import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 import client from '../storage/client-factory';
 import Hash from '../storage/hash';
@@ -156,7 +157,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
   tripcode = ('true' === tripcode);
   signAsOp = ('true' === signAsOp);
   password = Tools.sha1(password);
-  hashpass = (req.hashpass || null);
+  let hashpass = (req.hashpass || null);
   let thread = await ThreadsModel.getThread(boardName, threadNumber);
   if (!thread) {
     return Promise.reject(new Error(Tools.translate('No such thread')));
@@ -182,6 +183,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
   if (!postNumber) {
     postNumber = await BoardsModel.nextPostNumber(boardName);
   }
+  let plainText = text ? Tools.plainText(text, { brToNewline: true }) : null;
   let post = {
     bannedFor: false,
     boardName: boardName,
@@ -198,7 +200,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
     rawText: rawText,
     subject: subject || null,
     text: text || null,
-    plainText: (text ? Tools.plainText(text, { brToNewline: true }) : null),
+    plainText: plainText,
     threadNumber: threadNumber,
     updatedAt: null,
     user: {
@@ -252,12 +254,11 @@ async function removeReferencedPosts({ boardName, number, threadNumber }, { noge
   ReferencedPosts.delete(key);
 }
 
-async function rerenderPost(boardName, postNumber, { silent } = {}) {
-  let key = `${boardName}:${postNumber}`;
-  if (!silent) {
-    console.log(Tools.translate('Rendering post: [$[1]] $[2]', '', boardName, postNumber));
-  }
+async function rerenderPost(boardName, postNumber, { nogenerate } = {}) {
   let post = await getPost(boardName, postNumber);
+  if (!post) {
+    return Promise.reject(new Error(Tools.translate('No such post')));
+  }
   let referencedPosts = {};
   let text = await markup(boardName, post.rawText, {
     markupModes: post.markup,
@@ -265,10 +266,10 @@ async function rerenderPost(boardName, postNumber, { silent } = {}) {
     accessLevel: post.user.level
   });
   post.text = text;
-  await Posts.setOne(post, key);
-  await removeReferencedPosts(post, { nogenerate: !silent });
-  await addReferencedPosts(post, referencedPosts, { nogenerate: !silent });
-  if (silent) {
+  await Posts.setOne(`${boardName}:${postNumber}`, post);
+  await removeReferencedPosts(post, { nogenerate: nogenerate });
+  await addReferencedPosts(post, referencedPosts, { nogenerate: nogenerate });
+  if (!nogenerate) {
     IPC.render(boardName, post.threadNumber, postNumber, 'edit');
   }
 }
@@ -279,7 +280,7 @@ async function rerenderReferringPosts({ boardName, number, threadNumber }, { rem
     return !removingThread || ref.boardName !== boardName || ref.threadNumber !== threadNumber;
   });
   await Tools.series(referringPosts, async function(ref) {
-    return await rerenderPost(ref.boardName, ref.postNumber, true);
+    return await rerenderPost(ref.boardName, ref.postNumber);
   });
 }
 
@@ -358,15 +359,15 @@ export async function editPost(req, fields) {
   if (!thread)
       return Promise.reject(Tools.translate("No such thread"));
   */
-  let key = `${boardName}:${postNumbers}`;
+  let key = `${boardName}:${postNumber}`;
   text = await markup(board.name, rawText, {
-    markupModes: markupModes,
+    markupModes: /*markupModes*/post.markup, //TODO ???
     referencedPosts: referencedPosts,
     accessLevel: req.level(board.name)
   });
   let plainText = text ? Tools.plainText(text, { brToNewline: true }) : null;
   let extraData = await board.postExtraData(req, fields, null, post);
-  post.markup = markupModes;
+  //post.markup = markupModes; //TODO ???
   post.name = name || null;
   post.plainText = plainText;
   post.rawText = rawText;
@@ -396,7 +397,7 @@ export async function deletePost(req, { boardName, postNumber, archived }) {
   if (!postNumber) {
     return Promise.reject(new Error(Tools.translate('Invalid post number')));
   }
-  let post = await PostsModel.getPost(boardName, postNumber);
+  let post = await getPost(boardName, postNumber);
   if (!post) {
     return Promise.reject(new Error(Tools.translate('No such post')));
   }
@@ -422,4 +423,89 @@ export async function deletePost(req, { boardName, postNumber, archived }) {
 
 export async function getPostFileCount(boardName, postNumber) {
   return await PostFileInfoNames.count(`${boardName}:${postNumber}`);
+}
+
+async function forEachPost(targets, action) {
+  if (typeof targets !== 'object') {
+    return;
+  }
+  if (_(targets).toArray().length <= 0) {
+    targets = Board.boardNames();
+  }
+  if (_(targets).isArray()) {
+    targets = targets.reduce((acc, boardName) => {
+      acc[boardName] = '*';
+      return acc;
+    }, {});
+  }
+  let postKeys = await Posts.keys();
+  postKeys = postKeys.reduce((acc, key) => {
+    let [boardName, postNumber] = key.split(':');
+    let set = acc.get(boardName);
+    if (!set) {
+      set = new Set();
+      acc.set(boardName, set);
+    }
+    set.add(+postNumber);
+    return acc;
+  }, new Map());
+  await Tools.series(targets, async function(postNumbers, boardName) {
+    if (typeof postNumbers !== 'string' && !_(postNumbers).isArray()) {
+      return;
+    }
+    if (!Board.board(boardName)) {
+      Logger.error(new Error(Tools.translate('Invalid board name: $[1]', '', boardName)));
+      return;
+    }
+    let set = postKeys.get(boardName);
+    if ('*' === postNumbers) {
+      postNumbers = set ? Array.from(set) : [];
+    } else {
+      postNumbers = set ? postNumbers.filter(postNumber => set.has(postNumber)) : [];
+    }
+    return await Tools.series(postNumbers, async function(postNumber) {
+      try {
+        return await action(boardName, postNumber);
+      } catch (err) {
+        Logger.error(err.stack || err);
+      }
+    });
+  });
+}
+
+export async function rerenderPosts(targets) {
+  return await forEachPost(targets, async function(boardName, postNumber) {
+    console.log(Tools.translate('Rendering post: >>/$[1]/$[2]', '', boardName, postNumber));
+    return await rerenderPost(boardName, postNumber, { nogenerate: true });
+  });
+}
+
+async function rebuildPostSearchIndex(boardName, postNumber, threads) {
+  threads = threads || new Map();
+  let key = `${boardName}:${postNumber}`;
+  let post = await getPost(boardName, postNumber);
+  let threadNumber = post.threadNumber;
+  let threadKey = `${boardName}:${threadNumber}`;
+  let thread = threads.get(threadKey);
+  if (!thread) {
+    thread = await ThreadsModel.getThread(boardName, threadNumber);
+    if (!thread) {
+      return Promise.reject(new Error(Tools.translate('No such thread: >>/$[1]/$[2]', '', boardName, threadNumber)));
+    }
+    threads.set(threadKey, thread);
+  }
+  await Search.updatePostIndex(boardName, postNumber, (body) => {
+    body.plainText = post.plainText;
+    body.subject = post.subject;
+    body.archived = !!thread.archived;
+    return body;
+  });
+}
+
+export async function rebuildSearchIndex() {
+  let threads = new Map();
+  return await forEachPost(targets, async function(boardName, postNumber) {
+    console.log(Tools.translate('Rebuilding post search index: >>/$[1]/$[2]', '', boardName, postNumber));
+    return await rebuildPostSearchIndex(boardName, postNumber, threads);
+  });
 }

@@ -71,7 +71,7 @@ let geoBans = Tools.createWatchedResource(`${__dirname}/../misc/geo-bans.json`, 
 }, async function(path) {
   let data = await FS.read(path);
   geoBans = transformGeoBans(JSON.parse(data));
-}) || {};
+}) || new Map();
 
 export async function getUserCaptchaQuota(boardName, userIp) {
   let board = Board.board(boardName);
@@ -325,7 +325,11 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
-  let { user, threadNumber } = await PostsModel.getPost(boardName, postNumber);
+  let post = await PostsModel.getPost(boardName, postNumber);
+  if (!post) {
+    return Promise.reject(new Error(Tools.translate('Not such post: $[1]', '', `/${boardName}/${postNumber}`)));
+  }
+  let { user, threadNumber } = post;
   if (req.isSuperuser()) {
     return;
   }

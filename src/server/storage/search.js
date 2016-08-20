@@ -48,8 +48,8 @@ export async function updatePostIndex(boardName, postNumber, transformer) {
     return;
   }
   try {
-    let data = await getPostIndex(boardName, postNumber);
-    let body = await transformer(data._source);
+    let body = await getPostIndex(boardName, postNumber);
+    body = await transformer(body);
     await es.index({
       index: INDEX_NAME,
       type: 'posts',
