@@ -150,7 +150,7 @@ if (config("system.log.middleware.before", "all") == "middleware") middlewares.p
 middlewares = middlewares.concat([cookieParser(), function (req, res, next) {
     req.hashpass = Tools.hashpass(req);
     next();
-}, require("./registered-user")]);
+}, Tools.requireWrapper(require("./registered-user"))]);
 
 if (config("system.log.middleware.before", "all") == "request") middlewares.push(log);
 

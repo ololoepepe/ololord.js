@@ -12,29 +12,9 @@ var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
 
-var _fs = require('q-io/fs');
+var _renderer = require('../core/renderer');
 
-var _fs2 = _interopRequireDefault(_fs);
-
-var _http = require('q-io/http');
-
-var _http2 = _interopRequireDefault(_http);
-
-var _merge = require('merge');
-
-var _merge2 = _interopRequireDefault(_merge);
-
-var _uuid = require('uuid');
-
-var _uuid2 = _interopRequireDefault(_uuid);
-
-var _board = require('../boards/board');
-
-var _board2 = _interopRequireDefault(_board);
-
-var _files = require('../models/files');
-
-var FilesModel = _interopRequireWildcard(_files);
+var Renderer = _interopRequireWildcard(_renderer);
 
 var _posts = require('../models/posts');
 
@@ -44,43 +24,23 @@ var _users = require('../models/users');
 
 var UsersModel = _interopRequireWildcard(_users);
 
-var _postCreationTransaction = require('../storage/post-creation-transaction');
-
-var _postCreationTransaction2 = _interopRequireDefault(_postCreationTransaction);
-
 var _ipc = require('../helpers/ipc');
 
 var IPC = _interopRequireWildcard(_ipc);
-
-var _logger = require('../helpers/logger');
-
-var _logger2 = _interopRequireDefault(_logger);
 
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-var _files2 = require('../storage/files');
+var _files = require('../storage/files');
 
-var Files = _interopRequireWildcard(_files2);
-
-var _geolocation = require('../storage/geolocation');
-
-var _geolocation2 = _interopRequireDefault(_geolocation);
+var Files = _interopRequireWildcard(_files);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
-
-var moment = require("moment");
-
-var Captcha = require("../captchas");
-var Chat = require("../helpers/chat");
-var config = require("../helpers/config");
-var Database = require("../helpers/database");
-var markup = require("../core/markup");
 
 var router = _express2.default.Router();
 
@@ -550,26 +510,9 @@ router.post('/action/superuserDeleteFile', function () {
   };
 }());
 
-router.post("/action/superuserRerenderCache", function (req, res, next) {
-  if (!req.isSuperuser()) return next(Tools.translate("Not enough rights"));
-  var c = {};
-  Tools.parseForm(req).then(function (result) {
-    c.rerenderArchive = "true" == result.fields.rerenderArchive;
-    return IPC.send('stop');
-  }).then(function () {
-    return IPC.send('rerenderCache', c.rerenderArchive); //TODO
-  }).then(function () {
-    return IPC.send('start');
-  }).then(function () {
-    res.json({});
-  }).catch(function (err) {
-    next(err);
-  });
-});
-
-router.post('/action/superuserRerenderPosts', function () {
+router.post('/action/superuserRerender', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(req, res, next) {
-    var _ref8, targets;
+    var _ref8, _ref8$fields, _targets, archive;
 
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
@@ -590,37 +533,64 @@ router.post('/action/superuserRerenderPosts', function () {
 
           case 5:
             _ref8 = _context8.sent;
-            targets = _ref8.fields.targets;
+            _ref8$fields = _ref8.fields;
+            _targets = _ref8$fields.targets;
+            archive = _ref8$fields.archive;
 
-            if (!(typeof targets !== 'string')) {
-              _context8.next = 9;
+            if (!(typeof _targets !== 'string')) {
+              _context8.next = 11;
               break;
             }
 
             throw new Error(Tools.translate('Invalid targets'));
 
-          case 9:
-            _context8.next = 11;
-            return PostsModel.rerenderPosts(Tools.rerenderPostsTargetsFromString(targets));
-
           case 11:
-            //TODO: Rerender corresponding pages?
-            res.json({});
-            _context8.next = 17;
-            break;
+            if (!_targets) {
+              _context8.next = 16;
+              break;
+            }
+
+            _context8.next = 14;
+            return Renderer.rerender(_targets);
 
           case 14:
-            _context8.prev = 14;
+            _context8.next = 23;
+            break;
+
+          case 16:
+            if (!('true' === archive)) {
+              _context8.next = 21;
+              break;
+            }
+
+            _context8.next = 19;
+            return Renderer.rerender();
+
+          case 19:
+            _context8.next = 23;
+            break;
+
+          case 21:
+            _context8.next = 23;
+            return Renderer.rerender(['**', '!/*/arch/*']);
+
+          case 23:
+            res.json({});
+            _context8.next = 29;
+            break;
+
+          case 26:
+            _context8.prev = 26;
             _context8.t0 = _context8['catch'](0);
 
             next(Tools.processError(_context8.t0));
 
-          case 17:
+          case 29:
           case 'end':
             return _context8.stop();
         }
       }
-    }, _callee8, this, [[0, 14]]);
+    }, _callee8, this, [[0, 26]]);
   }));
 
   return function (_x22, _x23, _x24) {
@@ -628,50 +598,202 @@ router.post('/action/superuserRerenderPosts', function () {
   };
 }());
 
-router.post("/action/superuserRebuildSearchIndex", function (req, res, next) {
-  if (!req.isSuperuser()) return next(Tools.translate("Not enough rights"));
-  IPC.send('stop').then(function () {
-    return Database.rebuildSearchIndex();
-  }).then(function () {
-    return IPC.send('start');
-  }).then(function () {
-    res.json({});
-  }).catch(function (err) {
-    next(err);
-  });
-});
+router.post('/action/superuserRerenderPosts', function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(req, res, next) {
+    var _ref9, _targets2;
 
-router.post("/action/superuserReload", function (req, res, next) {
-  if (!req.isSuperuser()) return next(Tools.translate("Not enough rights"));
-  var c = { list: [] };
-  Tools.parseForm(req).then(function (result) {
-    if ("true" == result.fields.boards) c.list.push("boards");
-    if ("true" == result.fields.config) c.list.push("config");
-    if ("true" == result.fields.templates) c.list.push("templates");
-    if (c.list.length < 1) return Promise.resolve();
-    return IPC.send('stop');
-  }).then(function () {
-    return Tools.series(c.list, function (action) {
-      switch (action) {
-        case "boards":
-          return IPC.send('reloadBoards');
-        case "config":
-          return IPC.send('reloadConfig');
-        case "templates":
-          return IPC.send('reloadTemplates');
-        default:
-          return Promise.resolve();
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            _context9.prev = 0;
+
+            if (req.isSuperuser()) {
+              _context9.next = 3;
+              break;
+            }
+
+            throw new Error(Tools.translate('Not enough rights'));
+
+          case 3:
+            _context9.next = 5;
+            return Tools.parseForm(req);
+
+          case 5:
+            _ref9 = _context9.sent;
+            _targets2 = _ref9.fields.targets;
+
+            if (!(typeof _targets2 !== 'string')) {
+              _context9.next = 9;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid targets'));
+
+          case 9:
+            _context9.next = 11;
+            return PostsModel.rerenderPosts(Tools.rerenderPostsTargetsFromString(_targets2));
+
+          case 11:
+            //TODO: Rerender corresponding pages?
+            res.json({});
+            _context9.next = 17;
+            break;
+
+          case 14:
+            _context9.prev = 14;
+            _context9.t0 = _context9['catch'](0);
+
+            next(Tools.processError(_context9.t0));
+
+          case 17:
+          case 'end':
+            return _context9.stop();
+        }
       }
-    });
-  }).then(function () {
-    if (c.list.length < 1) return Promise.resolve();
-    return IPC.send('start');
-  }).then(function () {
-    res.json({});
-  }).catch(function (err) {
-    next(err);
-  });
-});
+    }, _callee9, this, [[0, 14]]);
+  }));
+
+  return function (_x25, _x26, _x27) {
+    return ref.apply(this, arguments);
+  };
+}());
+
+router.post('/action/superuserRebuildSearchIndex', function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(req, res, next) {
+    var _ref10, _targets3;
+
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            _context10.prev = 0;
+
+            if (req.isSuperuser()) {
+              _context10.next = 3;
+              break;
+            }
+
+            throw new Error(Tools.translate('Not enough rights'));
+
+          case 3:
+            _context10.next = 5;
+            return Tools.parseForm(req);
+
+          case 5:
+            _ref10 = _context10.sent;
+            _targets3 = _ref10.fields.targets;
+
+            if (!(typeof _targets3 !== 'string')) {
+              _context10.next = 9;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid targets'));
+
+          case 9:
+            _context10.next = 11;
+            return PostsModel.rebuildSearchIndex(Tools.rerenderPostsTargetsFromString(_targets3));
+
+          case 11:
+            res.json({});
+            _context10.next = 17;
+            break;
+
+          case 14:
+            _context10.prev = 14;
+            _context10.t0 = _context10['catch'](0);
+
+            next(Tools.processError(_context10.t0));
+
+          case 17:
+          case 'end':
+            return _context10.stop();
+        }
+      }
+    }, _callee10, this, [[0, 14]]);
+  }));
+
+  return function (_x28, _x29, _x30) {
+    return ref.apply(this, arguments);
+  };
+}());
+
+router.post('/action/superuserReload', function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(req, res, next) {
+    var _ref11, _ref11$fields, boards, templates;
+
+    return regeneratorRuntime.wrap(function _callee11$(_context11) {
+      while (1) {
+        switch (_context11.prev = _context11.next) {
+          case 0:
+            _context11.prev = 0;
+
+            if (req.isSuperuser()) {
+              _context11.next = 3;
+              break;
+            }
+
+            throw new Error(Tools.translate('Not enough rights'));
+
+          case 3:
+            _context11.next = 5;
+            return Tools.parseForm(req);
+
+          case 5:
+            _ref11 = _context11.sent;
+            _ref11$fields = _ref11.fields;
+            boards = _ref11$fields.boards;
+            templates = _ref11$fields.templates;
+
+            if (!(typeof targets !== 'string')) {
+              _context11.next = 11;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid targets'));
+
+          case 11:
+            if (!('true' === boards)) {
+              _context11.next = 14;
+              break;
+            }
+
+            _context11.next = 14;
+            return IPC.send('reloadBoards');
+
+          case 14:
+            if (!('true' === templates)) {
+              _context11.next = 17;
+              break;
+            }
+
+            _context11.next = 17;
+            return IPC.send('reloadTemplates');
+
+          case 17:
+            res.json({});
+            _context11.next = 23;
+            break;
+
+          case 20:
+            _context11.prev = 20;
+            _context11.t0 = _context11['catch'](0);
+
+            next(Tools.processError(_context11.t0));
+
+          case 23:
+          case 'end':
+            return _context11.stop();
+        }
+      }
+    }, _callee11, this, [[0, 20]]);
+  }));
+
+  return function (_x31, _x32, _x33) {
+    return ref.apply(this, arguments);
+  };
+}());
 
 exports.default = router;
 //# sourceMappingURL=action-manage.js.map

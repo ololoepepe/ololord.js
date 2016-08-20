@@ -7,21 +7,20 @@ var moment = require("moment");
 import UUID from 'uuid';
 
 import Board from '../boards/board';
-var Captcha = require("../captchas");
+import Captcha from '../captchas/captcha';
 var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
-var Database = require("../helpers/database");
 var markup = require("../core/markup");
 
 import * as FilesModel from '../models/files';
 import * as PostsModel from '../models/posts';
 import * as UsersModel from '../models/users';
-import PostCreationTransaction from '../storage/post-creation-transaction';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 import * as Files from '../storage/files';
 import geolocation from '../storage/geolocation';
+import PostCreationTransaction from '../storage/post-creation-transaction';
 
 let router = express.Router();
 

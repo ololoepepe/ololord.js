@@ -2,6 +2,14 @@
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+var _captcha = require("./captcha");
+
+var _captcha2 = _interopRequireDefault(_captcha);
+
+var _config = require("../helpers/config");
+
+var _config2 = _interopRequireDefault(_config);
+
 var _logger = require("../helpers/logger");
 
 var _logger2 = _interopRequireDefault(_logger);
@@ -20,19 +28,16 @@ var captcha = require("node-captcha");
 var FS = require("q-io/fs");
 var UUID = require("uuid");
 
-var Captcha = require("./captcha");
-var config = require("../helpers/config");
-
-var nodeCaptcha = new Captcha(Tools.NODE_CAPTCHA_ID, Tools.translate.noop("Node captcha"));
+var nodeCaptcha = new _captcha2.default(Tools.NODE_CAPTCHA_ID, Tools.translate.noop("Node captcha"));
 
 nodeCaptcha.challenges = {};
 
 nodeCaptcha.info = function () {
-    var inf = Captcha.prototype.info.call(this);
-    inf.size = config("captcha.node-captcha.size", 6);
-    inf.height = config("captcha.node-captcha.height", 60);
-    inf.width = config("captcha.node-captcha.width", Math.round(inf.size * inf.height / 1.8));
-    inf.ttl = config("captcha.node-captcha.ttl", 5 * Tools.Minute);
+    var inf = _captcha2.default.prototype.info.call(this);
+    inf.size = (0, _config2.default)("captcha.node-captcha.size", 6);
+    inf.height = (0, _config2.default)("captcha.node-captcha.height", 60);
+    inf.width = (0, _config2.default)("captcha.node-captcha.width", Math.round(inf.size * inf.height / 1.8));
+    inf.ttl = (0, _config2.default)("captcha.node-captcha.ttl", 5 * Tools.Minute);
     return inf;
 };
 
@@ -57,22 +62,22 @@ nodeCaptcha.apiRoutes = function () {
         method: "get",
         path: "/nodeCaptchaImage.json",
         handler: function handler(_1, res) {
-            var size = config("captcha.node-captcha.size", 6);
-            var height = config("captcha.node-captcha.height", 60);
-            var color = config("captcha.node-captcha.color", "rgb(0,0,0)");
+            var size = (0, _config2.default)("captcha.node-captcha.size", 6);
+            var height = (0, _config2.default)("captcha.node-captcha.height", 60);
+            var color = (0, _config2.default)("captcha.node-captcha.color", "rgb(0,0,0)");
             captcha({
                 fileMode: 1,
                 saveDir: __dirname + "/../public/node-captcha",
                 size: size,
                 height: height,
-                width: config("captcha.node-captcha.width", Math.round(height * size / 1.8)),
+                width: (0, _config2.default)("captcha.node-captcha.width", Math.round(height * size / 1.8)),
                 color: color,
-                background: config("captcha.node-captcha.background", "rgb(255,255,255)"),
-                lineWidth: config("captcha.node-captcha.lineWidth", 4),
-                noise: config("captcha.node-captcha.noise", true),
-                noiseColor: config("captcha.node-captcha.noiseColor", color),
-                complexity: config("captcha.node-captcha.complexity", 1),
-                spacing: config("captcha.node-captcha.spacing", 4)
+                background: (0, _config2.default)("captcha.node-captcha.background", "rgb(255,255,255)"),
+                lineWidth: (0, _config2.default)("captcha.node-captcha.lineWidth", 4),
+                noise: (0, _config2.default)("captcha.node-captcha.noise", true),
+                noiseColor: (0, _config2.default)("captcha.node-captcha.noiseColor", color),
+                complexity: (0, _config2.default)("captcha.node-captcha.complexity", 1),
+                spacing: (0, _config2.default)("captcha.node-captcha.spacing", 4)
             }, function (response, fileName) {
                 var challenge = UUID.v4();
                 nodeCaptcha.challenges[challenge] = {
@@ -84,12 +89,12 @@ nodeCaptcha.apiRoutes = function () {
                             _logger2.default.error(err);
                         });
                         delete nodeCaptcha.challenges[challenge];
-                    }, config("captcha.node-captcha.ttl", 5 * Tools.Minute))
+                    }, (0, _config2.default)("captcha.node-captcha.ttl", 5 * Tools.Minute))
                 };
                 res.send({
                     challenge: challenge,
                     fileName: fileName,
-                    ttl: config("captcha.node-captcha.ttl", 5 * Tools.Minute)
+                    ttl: (0, _config2.default)("captcha.node-captcha.ttl", 5 * Tools.Minute)
                 });
             });
         }

@@ -2,9 +2,8 @@ var captcha = require("node-captcha");
 var FS = require("q-io/fs");
 var UUID = require("uuid");
 
-var Captcha = require("./captcha");
-var config = require("../helpers/config");
-
+import Captcha from './captcha';
+import config from '../helpers/config';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 

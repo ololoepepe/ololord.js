@@ -2,16 +2,16 @@ import _ from 'underscore';
 import FS from 'q-io/fs';
 import mkpath from 'mkpath';
 
-import * as BoardsModel from './board';
+import * as BoardsModel from './boards';
 import * as PostsModel from './posts';
-var BoardController = require("../controllers/board");
+import Board from '../boards/board';
+import BoardController from '../controllers/board';
+import * as Cache from '../helpers/cache';
+import * as Tools from '../helpers/tools';
 import client from '../storage/client-factory';
 import Hash from '../storage/hash';
 import * as Search from '../storage/search';
 import UnorderedSet from '../storage/unordered-set';
-import Board from '../boards/board';
-import * as Cache from '../helpers/cache';
-import * as Tools from '../helpers/tools';
 
 let ArchivedThreads = new Hash(client(), 'archivedThreads');
 let DeletedThreads = new UnorderedSet(client(), 'deletedThreads', {

@@ -4,15 +4,15 @@ import FS from 'q-io/fs';
 import HTTP from 'q-io/http';
 import merge from 'merge';
 
-import * as BoardsModel from '../models/board';
+import Board from '../boards/board';
+import Captcha from '../captchas/captcha';
+import * as Tools from '../helpers/tools';
+import * as BoardsModel from '../models/boards';
 import * as ChatsModel from '../models/chats';
 import * as FilesModel from '../models/files';
 import * as PostsModel from '../models/posts';
 import * as ThreadsModel from '../models/threads';
 import * as UsersModel from '../models/users';
-import Board from '../boards/board';
-import Captcha from '../captchas';
-import * as Tools from '../helpers/tools';
 
 const TEXT_FORMATS = new Set(['txt', 'js', 'json', 'jst', 'html', 'xml', 'css', 'md', 'example', 'gitignore', 'log']);
 

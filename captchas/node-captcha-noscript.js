@@ -2,9 +2,23 @@
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+var _captcha = require("./captcha");
+
+var _captcha2 = _interopRequireDefault(_captcha);
+
+var _config = require("../helpers/config");
+
+var _config2 = _interopRequireDefault(_config);
+
 var _logger = require("../helpers/logger");
 
 var _logger2 = _interopRequireDefault(_logger);
+
+var _tools = require("../helpers/tools");
+
+var Tools = _interopRequireWildcard(_tools);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -14,11 +28,7 @@ var captcha = require("node-captcha");
 var FS = require("q-io/fs");
 var UUID = require("uuid");
 
-var Captcha = require("./captcha");
-var config = require("../helpers/config");
-var Tools = require("../helpers/tools");
-
-var nodeCaptcha = new Captcha("node-captcha-noscript", Tools.translate.noop("Node captcha (no script)"));
+var nodeCaptcha = new _captcha2.default("node-captcha-noscript", Tools.translate.noop("Node captcha (no script)"));
 
 nodeCaptcha.challenges = {};
 
@@ -51,21 +61,21 @@ nodeCaptcha.apiRoutes = function () {
       if (challenge) {
         res.sendFile(challenge.fileName, { root: __dirname + "/../tmp/node-captcha-noscript" });
       } else {
-        var size = config("captcha.node-captcha.size", 6);
-        var height = config("captcha.node-captcha.height", 60);
-        var color = config("captcha.node-captcha.color", "rgb(0,0,0)");
+        var size = (0, _config2.default)("captcha.node-captcha.size", 6);
+        var height = (0, _config2.default)("captcha.node-captcha.height", 60);
+        var color = (0, _config2.default)("captcha.node-captcha.color", "rgb(0,0,0)");
         captcha({
           fileMode: 2,
           size: size,
           height: height,
-          width: config("captcha.node-captcha.width", Math.round(height * size / 1.8)),
+          width: (0, _config2.default)("captcha.node-captcha.width", Math.round(height * size / 1.8)),
           color: color,
-          background: config("captcha.node-captcha.background", "rgb(255,255,255)"),
-          lineWidth: config("captcha.node-captcha.lineWidth", 4),
-          noise: config("captcha.node-captcha.noise", true),
-          noiseColor: config("captcha.node-captcha.noiseColor", color),
-          complexity: config("captcha.node-captcha.complexity", 1),
-          spacing: config("captcha.node-captcha.spacing", 4)
+          background: (0, _config2.default)("captcha.node-captcha.background", "rgb(255,255,255)"),
+          lineWidth: (0, _config2.default)("captcha.node-captcha.lineWidth", 4),
+          noise: (0, _config2.default)("captcha.node-captcha.noise", true),
+          noiseColor: (0, _config2.default)("captcha.node-captcha.noiseColor", color),
+          complexity: (0, _config2.default)("captcha.node-captcha.complexity", 1),
+          spacing: (0, _config2.default)("captcha.node-captcha.spacing", 4)
         }, function (response, data) {
           var fileName = +Tools.now() + ".png";
           FS.write(__dirname + "/../tmp/node-captcha-noscript/" + fileName, data).then(function () {
@@ -78,7 +88,7 @@ nodeCaptcha.apiRoutes = function () {
                   _logger2.default.error(err);
                 });
                 delete nodeCaptcha.challenges[challenge];
-              }, config("captcha.node-captcha.ttl", 5 * Tools.Minute))
+              }, (0, _config2.default)("captcha.node-captcha.ttl", 5 * Tools.Minute))
             };
             res.end(data);
           });

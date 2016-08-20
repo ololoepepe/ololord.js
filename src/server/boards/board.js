@@ -9,10 +9,9 @@ var promisify = require("promisify-node");
 var Util = require("util");
 var UUID = require("uuid");
 
-var config = require("../helpers/config");
-var Tools = require("../helpers/tools");
-
+import config from '../helpers/config';
 import Logger from '../helpers/logger';
+import * as Tools from '../helpers/tools';
 
 var durationToString = function(duration) {
     duration = Math.floor(+duration);
@@ -482,15 +481,14 @@ var getRules = function(boardName) {
 };
 
 Board.initialize = function() {
-    var reinit = Tools.hasOwnProperties(Board.boards);
     Board.boards = {};
 
     FSSync.readdirSync(__dirname).forEach(function(file) {
         if ("index.js" == file || "board.js" == file || "js" != file.split(".").pop())
             return;
-        var id = "./" + file.split(".").shift();
-        if (reinit)
-            delete require.cache[require.resolve(id)];
+        var id = require.resolve("./" + file.split(".").shift());
+        if (require.cache.hasOwnProperty(id))
+            delete require.cache[id];
         var board = require(id);
         if (Util.isArray(board)) {
             board.forEach(function(board) {

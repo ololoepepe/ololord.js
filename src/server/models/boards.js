@@ -12,7 +12,6 @@ var XML2JS = require("xml2js");
 import Board from '../boards/board';
 var Cache = require("../helpers/cache");
 var config = require("../helpers/config");
-var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
 
 import * as MiscModel from './misc';

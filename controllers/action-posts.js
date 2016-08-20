@@ -93,9 +93,9 @@ var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
-var _captchas = require('../captchas');
+var _captcha = require('../captchas/captcha');
 
-var _captchas2 = _interopRequireDefault(_captchas);
+var _captcha2 = _interopRequireDefault(_captcha);
 
 var _markup = require('../core/markup');
 
@@ -286,7 +286,7 @@ router.post('/action/createPost', function () {
 
           case 23:
             _context3.next = 25;
-            return _captchas2.default.checkCaptcha(req.ip, _fields);
+            return _captcha2.default.checkCaptcha(req.ip, _fields);
 
           case 25:
             _context3.next = 27;
@@ -396,7 +396,7 @@ router.post('/action/createThread', function () {
 
           case 19:
             _context4.next = 21;
-            return _captchas2.default.checkCaptcha(req.ip, _fields2);
+            return _captcha2.default.checkCaptcha(req.ip, _fields2);
 
           case 21:
             _context4.next = 23;

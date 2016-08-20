@@ -61,6 +61,7 @@ export const ExternalLinkRegexpPattern = (function() {
 })();
 export const FILE_RATINGS = ['SFW', 'R-15', 'R-18', 'R-18G'];
 export const NODE_CAPTCHA_ID = 'node-captcha';
+export const REGISTERED_USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];
 
 export let forIn = function(obj, f) {
     if (!obj || typeof f != "function")
@@ -718,10 +719,8 @@ export function createWatchedResource(path, synchronous, asynchronous) {
   return synchronous(path);
 }
 
-export const USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];
-
 export function compareRegisteredUserLevels(l1, l2) {
-  return USER_LEVELS.indexOf(l1) - USER_LEVELS.indexOf(l2);
+  return REGISTERED_USER_LEVELS.indexOf(l1) - REGISTERED_USER_LEVELS.indexOf(l2);
 }
 
 export function postingSpeedString(launchDate, lastPostNumber) {

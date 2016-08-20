@@ -30,10 +30,6 @@ var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
-var _captchas = require('../captchas');
-
-var _captchas2 = _interopRequireDefault(_captchas);
-
 var _markup = require('../core/markup');
 
 var _markup2 = _interopRequireDefault(_markup);
@@ -54,8 +50,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; } //TODO
-
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var langNames = Tools.createWatchedResource(__dirname + '/misc/lang-names.json', function (path) {
   return require(path);
@@ -121,6 +116,7 @@ var notFoundImageFileNames = Tools.createWatchedResource(__dirname + '/../public
 }()) || [];
 
 function base() {
+  var Captcha = Tools.requireWrapper(require('../captchas/captcha'));
   return {
     site: {
       protocol: (0, _config2.default)('site.protocol'),
@@ -158,10 +154,10 @@ function base() {
       name: _markup2.default.MarkupModes.ExtendedWakabaMark + ',' + _markup2.default.MarkupModes.BBCode,
       title: Tools.translate('Extended WakabaMark and bbCode', 'markupMode')
     }],
-    supportedCaptchaEngines: _captchas2.default.captchaIds().filter(function (id) {
+    supportedCaptchaEngines: Captcha.captchaIds().filter(function (id) {
       return 'node-captcha-noscript' !== id;
     }).map(function (id) {
-      return _captchas2.default.captcha(id).info();
+      return Captcha.captcha(id).info();
     })
   };
 }

@@ -10,6 +10,7 @@ var Tools = require("../helpers/tools");
 import * as Renderer from '../core/renderer';
 import * as IPC from '../helpers/ipc';
 import * as PostsModel from '../models/posts';
+import * as UsersModel from '../models/users';
 
 var requestPassword = function(thisArg) {
     var c = {};
@@ -140,32 +141,26 @@ vorpal.installHandler("remove <key>", function(args) {
     return Promise.resolve("OK");
 }, { description: Tools.translate("Removes the option (config.json) at the key specified.") });
 
-vorpal.installHandler("add-superuser", function() {
-    var c = {};
-    var _this = this;
-    return requestPassword(this).then(function(result) {
-        c.password = result.password;
-        c.notHashpass = result.notHashpass;
-        return _this.prompt(Tools.translate("Enter superuser IP list (separate by spaces): "));
-    }).then(function(result) {
-        var ips = Tools.ipList(result.input);
-        if (typeof ips == "string")
-            return Promise.reject(ips);
-        return Database.addSuperuser(c.password, ips, c.notHashpass);
-    }).then(function() {
-        return Promise.resolve("OK");
-    });
-}, { description: Tools.translate("Registers a superuser.") });
+vorpal.installHandler('add-superuser', async function() {
+  let { password, notHashpass } = await requestPassword(this);
+  let { input } = await this.prompt(Tools.translate('Enter superuser IP list (separate by spaces): '));
+  let ips = Tools.ipList(input);
+  if (typeof ips === 'string') {
+    return Promise.reject(new Error(ips));
+  }
+  let hashpass = Tools.toHashpass(password, notHashpass);
+  await UsersModel.addSuperuser(hashpass, ips);
+  return 'OK';
+}, { description: Tools.translate('Registers a superuser.') });
 
-vorpal.installHandler("remove-superuser", function() {
-    return requestPassword(this).then(function(result) {
-        return Database.removeSuperuser(result.password, result.notHashpass);
-    }).then(function() {
-        return Promise.resolve("OK");
-    });
-}, { description: Tools.translate("Unregisters a superuser.") });
+vorpal.installHandler('remove-superuser', async function() {
+  let { password, notHashpass } = await requestPassword(this);
+  let hashpass = Tools.toHashpass(password, notHashpass);
+  await UsersModel.removeSuperuser(hashpass);
+  return 'OK';
+}, { description: Tools.translate('Unregisters a superuser.') });
 
-vorpal.installHandler("rerender-posts [targets...]", async function(args) {
+vorpal.installHandler('rerender-posts [targets...]', async function(args) {
   let result = await this.prompt({
     type: 'confirm',
     name: 'rerender',

@@ -157,7 +157,7 @@ var getThreadPosts = exports.getThreadPosts = function () {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
-            board = _board3.default.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context6.next = 3;
@@ -252,7 +252,7 @@ var getThread = exports.getThread = function () {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
-            board = _board3.default.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context8.next = 3;
@@ -324,7 +324,7 @@ var getThreads = exports.getThreads = function () {
       while (1) {
         switch (_context10.prev = _context10.next) {
           case 0:
-            board = _board3.default.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context10.next = 3;
@@ -446,7 +446,7 @@ var getThreadInfo = exports.getThreadInfo = function () {
       while (1) {
         switch (_context11.prev = _context11.next) {
           case 0:
-            board = _board3.default.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context11.next = 3;
@@ -521,7 +521,7 @@ var getThreadLastPostNumber = exports.getThreadLastPostNumber = function () {
       while (1) {
         switch (_context12.prev = _context12.next) {
           case 0:
-            if (_board3.default.board(boardName)) {
+            if (_board2.default.board(boardName)) {
               _context12.next = 2;
               break;
             }
@@ -819,7 +819,7 @@ var pushOutOldThread = function () {
           case 5:
             threads = _context24.sent;
 
-            threads.sort(_board3.default.sortThreadsByDate);
+            threads.sort(_board2.default.sortThreadsByDate);
 
             if (!(threads.length < board.threadLimit)) {
               _context24.next = 9;
@@ -840,7 +840,7 @@ var pushOutOldThread = function () {
           case 14:
             archivedThreads = _context24.sent;
 
-            archivedThreads.sort(_board3.default.sortThreadsByDate);
+            archivedThreads.sort(_board2.default.sortThreadsByDate);
 
             if (!(archivedThreads.length > 0 && archivedThreads.length >= board.archiveLimit)) {
               _context24.next = 19;
@@ -934,7 +934,7 @@ var pushOutOldThread = function () {
 
                     case 13:
                       _context23.next = 15;
-                      return BoardController.renderThreadHTML(model.thread, {
+                      return _board4.default.renderThreadHTML(model.thread, {
                         targetPath: archivePath + '/' + oldThreadNumber + '.html',
                         archived: true
                       });
@@ -987,7 +987,7 @@ var createThread = exports.createThread = function () {
           case 0:
             boardName = fields.boardName;
             password = fields.password;
-            board = _board3.default.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context25.next = 5;
@@ -1061,13 +1061,29 @@ var _mkpath = require('mkpath');
 
 var _mkpath2 = _interopRequireDefault(_mkpath);
 
-var _board = require('./board');
+var _boards = require('./boards');
 
-var BoardsModel = _interopRequireWildcard(_board);
+var BoardsModel = _interopRequireWildcard(_boards);
 
 var _posts = require('./posts');
 
 var PostsModel = _interopRequireWildcard(_posts);
+
+var _board = require('../boards/board');
+
+var _board2 = _interopRequireDefault(_board);
+
+var _board3 = require('../controllers/board');
+
+var _board4 = _interopRequireDefault(_board3);
+
+var _cache = require('../helpers/cache');
+
+var Cache = _interopRequireWildcard(_cache);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
 
 var _clientFactory = require('../storage/client-factory');
 
@@ -1085,26 +1101,11 @@ var _unorderedSet = require('../storage/unordered-set');
 
 var _unorderedSet2 = _interopRequireDefault(_unorderedSet);
 
-var _board2 = require('../boards/board');
-
-var _board3 = _interopRequireDefault(_board2);
-
-var _cache = require('../helpers/cache');
-
-var Cache = _interopRequireWildcard(_cache);
-
-var _tools = require('../helpers/tools');
-
-var Tools = _interopRequireWildcard(_tools);
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
-
-var BoardController = require("../controllers/board");
-
 
 var ArchivedThreads = new _hash2.default((0, _clientFactory2.default)(), 'archivedThreads');
 var DeletedThreads = new _unorderedSet2.default((0, _clientFactory2.default)(), 'deletedThreads', {

@@ -2,7 +2,7 @@ import _ from 'underscore';
 import Cluster from 'cluster';
 import FS from 'q-io/fs';
 
-import * as BoardsModel from './board'; //TODO: board -> boards
+import * as BoardsModel from './boards';
 import * as UsersModel from './users';
 import Board from '../boards/board';
 import * as Cache from '../helpers/cache';

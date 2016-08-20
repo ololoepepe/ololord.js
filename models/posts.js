@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.rerenderPosts = exports.getPostFileCount = exports.deletePost = exports.editPost = exports.removePost = exports.createPost = exports.addReferencedPosts = exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
+exports.rebuildSearchIndex = exports.rerenderPosts = exports.getPostFileCount = exports.deletePost = exports.editPost = exports.removePost = exports.createPost = exports.addReferencedPosts = exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -102,7 +102,7 @@ var getPost = exports.getPost = function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            board = _board3.default.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context2.next = 3;
@@ -170,7 +170,7 @@ var getPosts = exports.getPosts = function () {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            board = _board3.default.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context4.next = 3;
@@ -384,7 +384,7 @@ var createPost = exports.createPost = function () {
 
             threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
-            board = _board3.default.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context9.next = 15;
@@ -807,7 +807,7 @@ var removePost = exports.removePost = function () {
       while (1) {
         switch (_context17.prev = _context17.next) {
           case 0:
-            board = _board3.default.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context17.next = 3;
@@ -1003,7 +1003,7 @@ var editPost = exports.editPost = function () {
             subject = fields.subject;
             sage = fields.sage;
             markupMode = fields.markupMode;
-            board = _board3.default.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context18.next = 10;
@@ -1126,7 +1126,7 @@ var deletePost = exports.deletePost = function () {
       while (1) {
         switch (_context20.prev = _context20.next) {
           case 0:
-            board = _board3.default.board(boardName);
+            board = _board2.default.board(boardName);
 
             if (board) {
               _context20.next = 3;
@@ -1275,8 +1275,8 @@ var getPostFileCount = exports.getPostFileCount = function () {
   };
 }();
 
-var rerenderPosts = exports.rerenderPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(targets) {
+var forEachPost = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(targets, action) {
     var postKeys;
     return regeneratorRuntime.wrap(function _callee24$(_context24) {
       while (1) {
@@ -1291,7 +1291,7 @@ var rerenderPosts = exports.rerenderPosts = function () {
 
           case 2:
             if ((0, _underscore2.default)(targets).toArray().length <= 0) {
-              targets = _board3.default.boardNames();
+              targets = _board2.default.boardNames();
             }
             if ((0, _underscore2.default)(targets).isArray()) {
               targets = targets.reduce(function (acc, boardName) {
@@ -1337,7 +1337,7 @@ var rerenderPosts = exports.rerenderPosts = function () {
                         return _context23.abrupt('return');
 
                       case 2:
-                        if (_board3.default.board(boardName)) {
+                        if (_board2.default.board(boardName)) {
                           _context23.next = 5;
                           break;
                         }
@@ -1363,14 +1363,11 @@ var rerenderPosts = exports.rerenderPosts = function () {
                                 switch (_context22.prev = _context22.next) {
                                   case 0:
                                     _context22.prev = 0;
+                                    _context22.next = 3;
+                                    return action(boardName, postNumber);
 
-                                    console.log(Tools.translate('Rendering post: /$[1]/$[2]', '', boardName, postNumber));
-                                    _context22.next = 4;
-                                    return rerenderPost(boardName, postNumber, { nogenerate: true });
-
-                                  case 4:
-                                    _context22.next = 9;
-                                    break;
+                                  case 3:
+                                    return _context22.abrupt('return', _context22.sent);
 
                                   case 6:
                                     _context22.prev = 6;
@@ -1386,7 +1383,7 @@ var rerenderPosts = exports.rerenderPosts = function () {
                             }, _callee22, this, [[0, 6]]);
                           }));
 
-                          return function (_x55) {
+                          return function (_x56) {
                             return ref.apply(this, arguments);
                           };
                         }());
@@ -1402,7 +1399,7 @@ var rerenderPosts = exports.rerenderPosts = function () {
                 }, _callee23, this);
               }));
 
-              return function (_x53, _x54) {
+              return function (_x54, _x55) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -1415,7 +1412,168 @@ var rerenderPosts = exports.rerenderPosts = function () {
     }, _callee24, this);
   }));
 
-  return function rerenderPosts(_x52) {
+  return function forEachPost(_x52, _x53) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var rerenderPosts = exports.rerenderPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(targets) {
+    return regeneratorRuntime.wrap(function _callee26$(_context26) {
+      while (1) {
+        switch (_context26.prev = _context26.next) {
+          case 0:
+            _context26.next = 2;
+            return forEachPost(targets, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(boardName, postNumber) {
+                return regeneratorRuntime.wrap(function _callee25$(_context25) {
+                  while (1) {
+                    switch (_context25.prev = _context25.next) {
+                      case 0:
+                        console.log(Tools.translate('Rendering post: >>/$[1]/$[2]', '', boardName, postNumber));
+                        _context25.next = 3;
+                        return rerenderPost(boardName, postNumber, { nogenerate: true });
+
+                      case 3:
+                        return _context25.abrupt('return', _context25.sent);
+
+                      case 4:
+                      case 'end':
+                        return _context25.stop();
+                    }
+                  }
+                }, _callee25, this);
+              }));
+
+              return function (_x58, _x59) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 2:
+            return _context26.abrupt('return', _context26.sent);
+
+          case 3:
+          case 'end':
+            return _context26.stop();
+        }
+      }
+    }, _callee26, this);
+  }));
+
+  return function rerenderPosts(_x57) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var rebuildPostSearchIndex = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(boardName, postNumber, threads) {
+    var key, post, threadNumber, threadKey, thread;
+    return regeneratorRuntime.wrap(function _callee27$(_context27) {
+      while (1) {
+        switch (_context27.prev = _context27.next) {
+          case 0:
+            threads = threads || new Map();
+            key = boardName + ':' + postNumber;
+            _context27.next = 4;
+            return getPost(boardName, postNumber);
+
+          case 4:
+            post = _context27.sent;
+            threadNumber = post.threadNumber;
+            threadKey = boardName + ':' + threadNumber;
+            thread = threads.get(threadKey);
+
+            if (thread) {
+              _context27.next = 15;
+              break;
+            }
+
+            _context27.next = 11;
+            return ThreadsModel.getThread(boardName, threadNumber);
+
+          case 11:
+            thread = _context27.sent;
+
+            if (thread) {
+              _context27.next = 14;
+              break;
+            }
+
+            return _context27.abrupt('return', Promise.reject(new Error(Tools.translate('No such thread: >>/$[1]/$[2]', '', boardName, threadNumber))));
+
+          case 14:
+            threads.set(threadKey, thread);
+
+          case 15:
+            _context27.next = 17;
+            return Search.updatePostIndex(boardName, postNumber, function (body) {
+              body.plainText = post.plainText;
+              body.subject = post.subject;
+              body.archived = !!thread.archived;
+              return body;
+            });
+
+          case 17:
+          case 'end':
+            return _context27.stop();
+        }
+      }
+    }, _callee27, this);
+  }));
+
+  return function rebuildPostSearchIndex(_x60, _x61, _x62) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var rebuildSearchIndex = exports.rebuildSearchIndex = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29() {
+    var threads;
+    return regeneratorRuntime.wrap(function _callee29$(_context29) {
+      while (1) {
+        switch (_context29.prev = _context29.next) {
+          case 0:
+            threads = new Map();
+            _context29.next = 3;
+            return forEachPost(targets, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(boardName, postNumber) {
+                return regeneratorRuntime.wrap(function _callee28$(_context28) {
+                  while (1) {
+                    switch (_context28.prev = _context28.next) {
+                      case 0:
+                        console.log(Tools.translate('Rebuilding post search index: >>/$[1]/$[2]', '', boardName, postNumber));
+                        _context28.next = 3;
+                        return rebuildPostSearchIndex(boardName, postNumber, threads);
+
+                      case 3:
+                        return _context28.abrupt('return', _context28.sent);
+
+                      case 4:
+                      case 'end':
+                        return _context28.stop();
+                    }
+                  }
+                }, _callee28, this);
+              }));
+
+              return function (_x63, _x64) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 3:
+            return _context29.abrupt('return', _context29.sent);
+
+          case 4:
+          case 'end':
+            return _context29.stop();
+        }
+      }
+    }, _callee29, this);
+  }));
+
+  return function rebuildSearchIndex() {
     return ref.apply(this, arguments);
   };
 }();
@@ -1424,9 +1582,9 @@ var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _board = require('./board');
+var _boards = require('./boards');
 
-var BoardsModel = _interopRequireWildcard(_board);
+var BoardsModel = _interopRequireWildcard(_boards);
 
 var _files = require('./files');
 
@@ -1440,9 +1598,9 @@ var _users = require('./users');
 
 var UsersModel = _interopRequireWildcard(_users);
 
-var _board2 = require('../boards/board');
+var _board = require('../boards/board');
 
-var _board3 = _interopRequireDefault(_board2);
+var _board2 = _interopRequireDefault(_board);
 
 var _markup = require('../core/markup');
 

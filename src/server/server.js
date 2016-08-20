@@ -9,15 +9,16 @@ import expressCluster from 'express-cluster';
 import HTTP from 'http';
 
 import Board from './boards/board';
+import Captcha from './captchas/captcha';
 var NodeCaptcha = require('./captchas/node-captcha'); //TODO
 var NodeCaptchaNoscript = require('./captchas/node-captcha-noscript'); //TODO
-var BoardController = require("./controllers/board");
+import BoardController from './controllers/board';
 import controllers from './controllers';
 import middlewares from './middlewares';
 import commands from './core/commands';
 import * as Renderer from './core/renderer';
 import WebSocketServer from './core/websocket-server';
-var BoardsModel = require("./models/board");
+import * as BoardsModel from './models/boards';
 import * as StatisticsModel from './models/statistics';
 var Chat = require("./helpers/chat");
 import config from './helpers/config';
@@ -124,7 +125,7 @@ function spawnCluster() {
               return f.call(BoardController, data.key, data.data);
           });
           IPC.on('reloadBoards', function() {
-              require("./boards/board").initialize();
+              Board.initialize();
               return Promise.resolve();
           });
           IPC.on('reloadConfig', function(data) {
@@ -243,6 +244,7 @@ function spawnWorkers(initCallback) {
 }
 
 Board.initialize();
+Captcha.initialize();
 
 if (Cluster.isMaster) {
   (async function() {

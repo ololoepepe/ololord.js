@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import FSSync from 'fs';
 
 import Board from '../boards/board';
 import config from '../helpers/config';
@@ -104,6 +105,24 @@ Captcha.checkCaptcha = async function(ip, fields = {}) {
   return await UsersModel.setUserCaptchaQuota(boardName, ip, board.captchaQuota);
 };
 
+Captcha.initialize = function() {
+  FSSync.readdirSync(__dirname).forEach(function(file) {
+      if ("index.js" == file || "js" != file.split(".").pop())
+          return;
+      let id = require.resolve("./" + file.split(".").shift());
+      if (require.cache.hasOwnProperty(id))
+          delete require.cache[id];
+      var captcha = require(id);
+      if (_(captcha).isArray()) {
+          captcha.forEach(function(captcha) {
+              Captcha.addCaptcha(captcha);
+          });
+      } else {
+          Captcha.addCaptcha(captcha);
+      }
+  });
+};
+
 //NOTE: Must implement the following methods:
 //checkCaptcha(ip, fields) -> Promise.resolve() / Promise.reject(err)
 //widgetHtml() -> string
@@ -113,4 +132,4 @@ Captcha.checkCaptcha = async function(ip, fields = {}) {
 //script() -> string
 //scriptSource() -> string
 
-module.exports = Captcha;
+export default Captcha;

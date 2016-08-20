@@ -2,7 +2,7 @@ import _ from 'underscore';
 import express from 'express';
 
 import Board from '../boards/board';
-import Captcha from '../captchas';
+import Captcha from '../captchas/captcha';
 import markup from '../core/markup';
 import * as FilesModel from '../models/files';
 import * as PostsModel from '../models/posts';

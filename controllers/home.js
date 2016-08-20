@@ -1,5 +1,9 @@
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
 var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
@@ -43,5 +47,5 @@ router.render = function (path) {
   }
 };
 
-module.exports = router;
+exports.default = router;
 //# sourceMappingURL=home.js.map

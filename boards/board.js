@@ -8,9 +8,19 @@ var _underscore = require("underscore");
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
+var _config = require("../helpers/config");
+
+var _config2 = _interopRequireDefault(_config);
+
 var _logger = require("../helpers/logger");
 
 var _logger2 = _interopRequireDefault(_logger);
+
+var _tools = require("../helpers/tools");
+
+var Tools = _interopRequireWildcard(_tools);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23,9 +33,6 @@ var Path = require("path");
 var promisify = require("promisify-node");
 var Util = require("util");
 var UUID = require("uuid");
-
-var config = require("../helpers/config");
-var Tools = require("../helpers/tools");
 
 var durationToString = function durationToString(duration) {
     duration = Math.floor(+duration);
@@ -47,20 +54,20 @@ var Board = function Board(name, title, options) {
     this.defineProperty("priority", function () {
         var def;
         if (options && !isNaN(+options.priority) && +options.priority) def = +options.priority;else def = 0;
-        return config("board." + name + ".priority", config("board.priority", def));
+        return (0, _config2.default)("board." + name + ".priority", (0, _config2.default)("board.priority", def));
     });
     this.defineProperty("defaultUserName", function () {
         var def;
         if (options && options.defaultUserName) def = Tools.translate(options.defaultUserName);else def = Tools.translate("Anonymous", "defaultUserName");
-        return config("board." + name + ".defaultUserName", config("board.defaultUserName", def));
+        return (0, _config2.default)("board." + name + ".defaultUserName", (0, _config2.default)("board.defaultUserName", def));
     });
     this.defineProperty("groupName", function () {
         var def;
         if (options && options.groupName) def = options.groupName;else def = "";
-        return config("board." + name + ".groupName", config("board.groupName", def));
+        return (0, _config2.default)("board." + name + ".groupName", (0, _config2.default)("board.groupName", def));
     });
     this.defineProperty("captchaEnabled", function () {
-        return config("board.captchaEnabled", true) && config("board." + name + ".captchaEnabled", true);
+        return (0, _config2.default)("board.captchaEnabled", true) && (0, _config2.default)("board." + name + ".captchaEnabled", true);
     });
     this.defineProperty("bannerFileNames", function () {
         return Board._banners[name];
@@ -88,7 +95,7 @@ var Board = function Board(name, title, options) {
     this.defineProperty("permissions", function () {
         var p = {};
         Tools.forIn(require("../helpers/permissions").Permissions, function (defLevel, key) {
-            p[key] = config("board." + name + ".permissions." + key, config("permissions." + key, defLevel));
+            p[key] = (0, _config2.default)("board." + name + ".permissions." + key, (0, _config2.default)("permissions." + key, defLevel));
         });
         return p;
     });
@@ -99,7 +106,7 @@ var Board = function Board(name, title, options) {
     this.defineSetting("archiveLimit", 0);
     this.defineSetting("threadsPerPage", 20);
     this.defineProperty("launchDate", function () {
-        return new Date(config("board." + name + ".launchDate", config("board.launchDate", new Date())));
+        return new Date((0, _config2.default)("board." + name + ".launchDate", (0, _config2.default)("board.launchDate", new Date())));
     });
 };
 
@@ -109,7 +116,7 @@ Board.boards = {};
     var _this = this;
     Object.defineProperty(this, name, {
         get: function get() {
-            return config("board." + _this.name + "." + name, config("board." + name, typeof def == "function" ? def() : def));
+            return (0, _config2.default)("board." + _this.name + "." + name, (0, _config2.default)("board." + name, typeof def == "function" ? def() : def));
         },
         configurable: true
     });
@@ -437,13 +444,12 @@ var getRules = function getRules(boardName) {
 };
 
 Board.initialize = function () {
-    var reinit = Tools.hasOwnProperties(Board.boards);
     Board.boards = {};
 
     FSSync.readdirSync(__dirname).forEach(function (file) {
         if ("index.js" == file || "board.js" == file || "js" != file.split(".").pop()) return;
-        var id = "./" + file.split(".").shift();
-        if (reinit) delete require.cache[require.resolve(id)];
+        var id = require.resolve("./" + file.split(".").shift());
+        if (require.cache.hasOwnProperty(id)) delete require.cache[id];
         var board = require(id);
         if (Util.isArray(board)) {
             board.forEach(function (board) {
@@ -454,7 +460,7 @@ Board.initialize = function () {
         }
     });
 
-    if (config("board.useDefaultBoards", true)) {
+    if ((0, _config2.default)("board.useDefaultBoards", true)) {
         Board.addBoard(new Board("3dpd", Tools.translate.noop("3D pron", "boardTitle")));
 
         Board.addBoard(new Board("a", Tools.translate.noop("/a/nime", "boardTitle"), { defaultUserName: Tools.translate.noop("Kamina", "defaultUserName") }));

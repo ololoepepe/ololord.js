@@ -211,6 +211,16 @@ export async function getRegisteredUsers() {
   }, true);
 }
 
+async function processUserIPs(ips) {
+  if (_(ips).isArray()) {
+    ips = ips.map(ip => Tools.correctAddress(ip));
+    if (ips.some(ip => !ip)) {
+      return Promise.reject(new Error(Tools.translate('Invalid IP address')));
+    }
+  }
+  return ips;
+}
+
 async function processRegisteredUserData(levels, ips) {
   if (!Tools.hasOwnProperties(levels)) {
     return Promise.reject(new Error(Tools.translate('Access level is not specified for any board')));
@@ -225,13 +235,23 @@ async function processRegisteredUserData(levels, ips) {
   if (invalidLevel) {
     return Promise.reject(new Error(Tools.translate('Invalid access level')));
   }
-  if (_(ips).isArray()) {
-    ips = ips.map(ip => Tools.correctAddress(ip));
-    if (ips.some(ip => !ip)) {
-      return Promise.reject(new Error(Tools.translate('Invalid IP address')));
-    }
+  return await processUserIPs(ips);
+}
+
+async function addUserIPs(hashpass, ips) {
+  //TODO: May be optimised (hmset)
+  await Tools.series(ips, async function(ip) {
+    await RegisteredUserHashes.setOne(ip, hashpass);
+    await RegisteredUserIPs.addOne(ip, hashpass);
+  });
+}
+
+async function removeUserIPs(hashpass) {
+  let ips = await RegisteredUserIPs.getAll(hashpass);
+  if (ips && ips.length > 0) {
+    await RegisteredUserHashes.deleteSome(ips);
   }
-  return ips;
+  await RegisteredUserIPs.delete(hashpass);
 }
 
 export async function registerUser(hashpass, levels, ips) {
@@ -246,11 +266,7 @@ export async function registerUser(hashpass, levels, ips) {
   }
   await RegisteredUserLevels.setSome(levels, hashpass);
   if (_(ips).isArray()) {
-    //TODO: May be optimised (hmset)
-    await Tools.series(ips, async function(ip) {
-      await RegisteredUserHashes.setOne(ip, hashpass);
-      await RegisteredUserIPs.addOne(ip, hashpass);
-    });
+    await addUserIPs(hashpass, ips);
   }
 }
 
@@ -261,17 +277,9 @@ export async function updateRegisteredUser(hashpass, levels, ips) {
     return Promise.reject(new Error(Tools.translate('No user with this hashpass')));
   }
   await RegisteredUserLevels.setSome(levels, hashpass);
-  let existingIPs = await RegisteredUserIPs.getAll(hashpass);
-  if (existingIPs && existingIPs.length > 0) {
-    await RegisteredUserHashes.deleteSome(ips);
-  }
-  await RegisteredUserIPs.delete(hashpass);
+  await removeUserIPs(hashpass);
   if (_(ips).isArray()) {
-    //TODO: May be optimised (hmset)
-    await Tools.series(ips, async function(ip) {
-      await RegisteredUserHashes.setOne(ip, hashpass);
-      await RegisteredUserIPs.addOne(ip, hashpass);
-    });
+    await addUserIPs(hashpass, ips);
   }
 }
 
@@ -280,11 +288,36 @@ export async function unregisterUser(hashpass) {
   if (count <= 0) {
     return Promise.reject(new Error(Tools.translate('No user with this hashpass')));
   }
-  let ips = await RegisteredUserIPs.getAll(hashpass);
-  if (ips && ips.length > 0) {
-    await RegisteredUserHashes.deleteSome(ips);
+  await removeUserIPs(hashpass);
+}
+
+export async function addSuperuser(hashpass, ips) {
+  if (!hashpass) {
+    return Promise.reject(new Error(Tools.translate('Invalid hashpass')));
   }
-  await RegisteredUserIPs.delete(hashpass);
+  ips = await processUserIPs(ips);
+  let existingUserLevel = await RegisteredUserLevels.exists(hashpass);
+  if (existingUserLevel) {
+    return Promise.reject(new Error(Tools.translate('A user with this hashpass is already registered')));
+  }
+  let count = await SuperuserHashes.addOne(hashpass);
+  if (count <= 0) {
+    return Promise.reject(new Error(Tools.translate('A user with this hashpass is already registered')));
+  }
+  if (_(ips).isArray()) {
+    await addUserIPs(hashpass, ips);
+  }
+}
+
+export async function removeSuperuser(password, notHashpass) {
+  if (!hashpass) {
+    return Promise.reject(new Error(Tools.translate('Invalid hashpass')));
+  }
+  let count = await SuperuserHashes.deleteOne(hashpass);
+  if (count <= 0) {
+    return Promise.reject(new Error(Tools.translate('No user with this hashpass')));
+  }
+  await removeUserIPs();
 }
 
 export async function getSynchronizationData(key) {

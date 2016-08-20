@@ -7,7 +7,7 @@ var moment = require("moment");
 import UUID from 'uuid';
 
 import Board from '../boards/board';
-var Captcha = require("../captchas");
+var Captcha = require("../captchas/captcha");
 var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
 var Database = require("../helpers/database");

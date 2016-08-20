@@ -1,8 +1,8 @@
 var HTTP = require("q-io/http");
 
-var Captcha = require("./captcha");
-var config = require("../helpers/config");
-var Tools = require("../helpers/tools");
+import Captcha from './captcha';
+import config from '../helpers/config';
+import * as Tools from '../helpers/tools';
 
 var googleRecaptcha = new Captcha("google-recaptcha-v1", Tools.translate.noop("Google reCAPTCHA v1"));
 

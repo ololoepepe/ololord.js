@@ -1,6 +1,6 @@
 import _ from 'underscore';
 
-import * as BoardsModel from './board';
+import * as BoardsModel from './boards';
 import * as FilesModel from './files';
 import * as ThreadsModel from './threads';
 import * as UsersModel from './users';

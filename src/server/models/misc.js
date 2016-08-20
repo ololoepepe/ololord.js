@@ -4,7 +4,6 @@ import FSSync from 'fs';
 import Highlight from 'highlight.js';
 
 import Board from '../boards/board';
-import Captcha from '../captchas'; //TODO
 import markup from '../core/markup';
 import config from '../helpers/config';
 import FSWatcher from '../helpers/fs-watcher';
@@ -29,6 +28,7 @@ let notFoundImageFileNames = Tools.createWatchedResource(`${__dirname}/../public
 }) || [];
 
 export function base() {
+  let Captcha = Tools.requireWrapper(require('../captchas/captcha'));
   return {
     site: {
       protocol: config('site.protocol'),

@@ -670,7 +670,6 @@ var XML2JS = require("xml2js");
 
 var Cache = require("../helpers/cache");
 var config = require("../helpers/config");
-var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
 
 var PostCounters = new _hash2.default((0, _clientFactory2.default)(), 'postCounters', {
@@ -709,4 +708,4 @@ function postSubject(post, maxLength) {
   }
   return subject;
 }
-//# sourceMappingURL=board.js.map
+//# sourceMappingURL=boards.js.map

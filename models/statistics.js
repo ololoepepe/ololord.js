@@ -152,7 +152,7 @@ var generateStatistics = exports.generateStatistics = function () {
 
                     case 2:
                       keys = _context4.sent;
-                      uniqueUsers = _board3.default.boardNames().reduce(function (acc, boardName) {
+                      uniqueUsers = _board2.default.boardNames().reduce(function (acc, boardName) {
                         acc[boardName] = 0;
                         return acc;
                       }, {});
@@ -170,14 +170,14 @@ var generateStatistics = exports.generateStatistics = function () {
                         return acc;
                       }, new Set()).size;
                       _context4.next = 7;
-                      return Tools.series(_board3.default.boardNames(), function () {
+                      return Tools.series(_board2.default.boardNames(), function () {
                         var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName) {
                           var board, boardLaunchDate, boardStatistics;
                           return regeneratorRuntime.wrap(function _callee3$(_context3) {
                             while (1) {
                               switch (_context3.prev = _context3.next) {
                                 case 0:
-                                  board = _board3.default.board(boardName);
+                                  board = _board2.default.board(boardName);
 
                                   if (board) {
                                     _context3.next = 3;
@@ -281,17 +281,17 @@ var _fs = require('q-io/fs');
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _board = require('./board');
+var _boards = require('./boards');
 
-var BoardsModel = _interopRequireWildcard(_board);
+var BoardsModel = _interopRequireWildcard(_boards);
 
 var _users = require('./users');
 
 var UsersModel = _interopRequireWildcard(_users);
 
-var _board2 = require('../boards/board');
+var _board = require('../boards/board');
 
-var _board3 = _interopRequireDefault(_board2);
+var _board2 = _interopRequireDefault(_board);
 
 var _cache = require('../helpers/cache');
 
@@ -313,5 +313,5 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; } //TODO: board -> boards
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 //# sourceMappingURL=statistics.js.map

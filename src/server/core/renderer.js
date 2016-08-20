@@ -7,7 +7,6 @@ import micromatch from 'micromatch';
 import moment from 'moment';
 
 import Board from '../boards/board';
-import controllers from '../controllers';
 import * as MiscModel from '../models/misc';
 import * as Cache from '../helpers/cache';
 import config from '../helpers/config';
@@ -82,6 +81,7 @@ export function render(templateName, model) {
 }
 
 export async function getRouterPaths(description) {
+  let controllers = Tools.requireWrapper(require('../controllers'));
   let paths = await Tools.series(controllers.routers, async function(router) {
     if (typeof router.paths !== 'function' || typeof router.render !== 'function') {
       return [];
@@ -92,6 +92,7 @@ export async function getRouterPaths(description) {
 }
 
 export async function rerender(what) {
+  let controllers = Tools.requireWrapper(require('../controllers'));
   let routers = await Tools.series(controllers.routers, async function(router) {
     if (typeof router.paths !== 'function' || typeof router.render !== 'function') {
       return;

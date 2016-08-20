@@ -28,6 +28,10 @@ var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
+var _captcha = require('../captchas/captcha');
+
+var _captcha2 = _interopRequireDefault(_captcha);
+
 var _files = require('../models/files');
 
 var FilesModel = _interopRequireWildcard(_files);
@@ -39,10 +43,6 @@ var PostsModel = _interopRequireWildcard(_posts);
 var _users = require('../models/users');
 
 var UsersModel = _interopRequireWildcard(_users);
-
-var _postCreationTransaction = require('../storage/post-creation-transaction');
-
-var _postCreationTransaction2 = _interopRequireDefault(_postCreationTransaction);
 
 var _ipc = require('../helpers/ipc');
 
@@ -64,16 +64,18 @@ var _geolocation = require('../storage/geolocation');
 
 var _geolocation2 = _interopRequireDefault(_geolocation);
 
+var _postCreationTransaction = require('../storage/post-creation-transaction');
+
+var _postCreationTransaction2 = _interopRequireDefault(_postCreationTransaction);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var moment = require("moment");
 
-var Captcha = require("../captchas");
 var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
-var Database = require("../helpers/database");
 var markup = require("../core/markup");
 
 var router = _express2.default.Router();
@@ -178,8 +180,8 @@ router.post("/action/search", function (req, res, next) {
     });
 });
 
-Captcha.captchaIds().forEach(function (id) {
-    Captcha.captcha(id).actionRoutes().forEach(function (route) {
+_captcha2.default.captchaIds().forEach(function (id) {
+    _captcha2.default.captcha(id).actionRoutes().forEach(function (route) {
         router[route.method]("/action" + route.path, route.handler);
     });
 });

@@ -4,7 +4,7 @@ import FS from 'q-io/fs';
 import moment from 'moment';
 
 import Board from '../boards/board';
-import * as BoardsModel from '../models/board';
+import * as BoardsModel from '../models/boards';
 import * as MiscModel from '../models/misc';
 import * as PostsModel from '../models/posts';
 import * as ThreadsModel from '../models/threads';
@@ -307,4 +307,4 @@ router.render = async function(path) {
 
 router.renderThreadHTML = renderThreadHTML;
 
-module.exports = router;
+export default router;

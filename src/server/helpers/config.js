@@ -49,6 +49,7 @@ const DEFAULT_VALUES = new Map([
   ['system.redis.retryDelayOnTryAgain', 100],
   ['system.rerenderCacheOnStartup', true],
   ['system.rerenderArchive', false],
+  ['system.searchLimit', 100],
   ['system.workerCount', OS.cpus().length]
 ]);
 

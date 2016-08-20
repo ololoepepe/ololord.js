@@ -161,7 +161,7 @@ middlewares = middlewares.concat([
         req.hashpass = Tools.hashpass(req);
         next();
     },
-    require("./registered-user")
+    Tools.requireWrapper(require("./registered-user"))
 ]);
 
 if (config("system.log.middleware.before", "all") == "request")

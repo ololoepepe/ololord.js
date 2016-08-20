@@ -22,9 +22,21 @@ var _merge = require('merge');
 
 var _merge2 = _interopRequireDefault(_merge);
 
-var _board = require('../models/board');
+var _board = require('../boards/board');
 
-var BoardsModel = _interopRequireWildcard(_board);
+var _board2 = _interopRequireDefault(_board);
+
+var _captcha = require('../captchas/captcha');
+
+var _captcha2 = _interopRequireDefault(_captcha);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+var _boards = require('../models/boards');
+
+var BoardsModel = _interopRequireWildcard(_boards);
 
 var _chats = require('../models/chats');
 
@@ -45,18 +57,6 @@ var ThreadsModel = _interopRequireWildcard(_threads);
 var _users = require('../models/users');
 
 var UsersModel = _interopRequireWildcard(_users);
-
-var _board2 = require('../boards/board');
-
-var _board3 = _interopRequireDefault(_board2);
-
-var _captchas = require('../captchas');
-
-var _captchas2 = _interopRequireDefault(_captchas);
-
-var _tools = require('../helpers/tools');
-
-var Tools = _interopRequireWildcard(_tools);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -106,7 +106,7 @@ router.get('/api/post.json', function () {
             return _context.abrupt('return', res.json(null));
 
           case 10:
-            board = _board3.default.board(post.boardName);
+            board = _board2.default.board(post.boardName);
             _context.next = 13;
             return board.renderPost(post);
 
@@ -576,7 +576,7 @@ router.get('/api/lastPostNumbers.json', function () {
             boardNames = req.query.boardNames;
 
             if (!boardNames) {
-              boardNames = _board3.default.boardNames();
+              boardNames = _board2.default.boardNames();
             } else if (!(0, _underscore2.default)(boardNames).isArray()) {
               boardNames = [boardNames];
             }
@@ -828,7 +828,7 @@ router.get('/api/bannedUser.json', function () {
           case 5:
             _context16.prev = 5;
             _context16.next = 8;
-            return UsersModel.getBannedUserBans(ip, _board3.default.boardNames().filter(function (boardName) {
+            return UsersModel.getBannedUserBans(ip, _board2.default.boardNames().filter(function (boardName) {
               return req.isModer(boardName);
             }));
 
@@ -878,7 +878,7 @@ router.get('/api/bannedUsers.json', function () {
           case 2:
             _context17.prev = 2;
             _context17.next = 5;
-            return UsersModel.getBannedUsers(_board3.default.boardNames().filter(function (boardName) {
+            return UsersModel.getBannedUsers(_board2.default.boardNames().filter(function (boardName) {
               return req.isModer(boardName);
             }));
 
@@ -1252,14 +1252,14 @@ router.get('/api/fileHeaders.json', function () {
   };
 }());
 
-_captchas2.default.captchaIds().forEach(function (id) {
-  _captchas2.default.captcha(id).apiRoutes().forEach(function (route) {
+_captcha2.default.captchaIds().forEach(function (id) {
+  _captcha2.default.captcha(id).apiRoutes().forEach(function (route) {
     router[route.method]('/api' + route.path, route.handler);
   });
 });
 
-_board3.default.boardNames().forEach(function (name) {
-  _board3.default.board(name).apiRoutes().forEach(function (route) {
+_board2.default.boardNames().forEach(function (name) {
+  _board2.default.board(name).apiRoutes().forEach(function (route) {
     router[route.method]('/api' + route.path, route.handler);
   });
 });

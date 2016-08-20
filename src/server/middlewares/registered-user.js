@@ -1,41 +1,44 @@
-var Database = require("../helpers/database");
-var Tools = require("../helpers/tools");
+import _ from 'underscore';
 
 import Logger from '../helpers/logger';
+import * as Tools from '../helpers/tools';
 import * as UsersModel from '../models/users';
 
-module.exports = function(req, res, next) {
-    UsersModel.getRegisteredUserLevels(req.hashpass).then(function(levels) {
-        levels = levels || {};
-        var maxLevel = Tools.toArray(levels).sort(function() {
-            return -1 * Tools.compareRegisteredUserLevels(arguments);
-        });
-        maxLevel = (maxLevel.length > 0) ? maxLevel[0] : null;
-        req.level = function(boardName) {
-            if (!boardName)
-                return maxLevel;
-            return levels[boardName] || null;
-        };
-        req.levels = levels;
-        var test = function(level, boardName, strict) {
-            var lvl;
-            if (boardName && typeof boardName != "boolean") {
-                lvl = req.levels[boardName];
-            } else {
-                lvl = maxLevel;
-                strict = boardName;
-            }
-            if (strict)
-                return !Tools.compareRegisteredUserLevels(lvl, level);
-            else
-                return Tools.compareRegisteredUserLevels(lvl, level) >= 0;
-        };
-        Object.keys(Database.RegisteredUserLevels).forEach(function(lvl) {
-            req[`is${lvl}`] = test.bind(req, Database.RegisteredUserLevels[lvl]);
-        });
-        next();
-    }).catch(function(err) {
-        Logger.error(err.stack || err);
-        next();
+export default async function(req, res, next) {
+  try {
+    let levels = await UsersModel.getRegisteredUserLevels(req.hashpass);
+    let maxLevelIndex = _(levels).toArray().map((level) => {
+      return Tools.REGISTERED_USER_LEVELS.indexOf(level);
+    }).sort((level1, level2) => { return level2 - level1; })[0];
+    let maxLevel = Tools.REGISTERED_USER_LEVELS[maxLevelIndex] || null;
+    req.level = (boardName) => {
+      if (!boardName || typeof boardName !== 'string') {
+        return maxLevel;
+      }
+      return levels[boardName] || null;
+    };
+    req.levels = levels;
+    let test = function(level, boardName, strict) {
+      let lvl;
+      if (boardName && typeof boardName !== 'boolean') {
+        lvl = req.levels[boardName];
+      } else {
+        lvl = maxLevel;
+        strict = boardName;
+      }
+      if (strict) {
+        return !Tools.compareRegisteredUserLevels(lvl, level);
+      } else {
+        return Tools.compareRegisteredUserLevels(lvl, level) >= 0;
+      }
+    };
+    Tools.REGISTERED_USER_LEVELS.forEach((lvl) => {
+      lvl = lvl.toLowerCase();
+      req[`is${lvl}`] = test.bind(req, lvl.charAt(0).toUpperCase() + lvl.slice(1));
     });
+    next();
+  } catch (err) {
+    Logger.error(err.stack || err);
+    next();
+  }
 };

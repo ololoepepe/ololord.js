@@ -29,6 +29,14 @@ var _board = require('./boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
+var _captcha = require('./captchas/captcha');
+
+var _captcha2 = _interopRequireDefault(_captcha);
+
+var _board3 = require('./controllers/board');
+
+var _board4 = _interopRequireDefault(_board3);
+
 var _controllers = require('./controllers');
 
 var _controllers2 = _interopRequireDefault(_controllers);
@@ -48,6 +56,10 @@ var Renderer = _interopRequireWildcard(_renderer);
 var _websocketServer = require('./core/websocket-server');
 
 var _websocketServer2 = _interopRequireDefault(_websocketServer);
+
+var _boards = require('./models/boards');
+
+var BoardsModel = _interopRequireWildcard(_boards);
 
 var _statistics = require('./models/statistics');
 
@@ -93,9 +105,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 var NodeCaptcha = require('./captchas/node-captcha'); //TODO
 var NodeCaptchaNoscript = require('./captchas/node-captcha-noscript'); //TODO
-var BoardController = require("./controllers/board");
-
-var BoardsModel = require("./models/board");
 
 var Chat = require("./helpers/chat");
 
@@ -113,27 +122,35 @@ function spawnCluster() {
                     switch (_context.prev = _context.next) {
                         case 0:
                             console.log('[' + process.pid + '] Initializing...');
+                            console.log(1);
                             app = (0, _express2.default)();
 
+                            console.log(2, _middlewares2.default);
                             app.use(_middlewares2.default);
+                            console.log(3);
                             app.use(_controllers2.default);
-                            _context.prev = 4;
-                            _context.next = 7;
+                            console.log(4);
+                            _context.prev = 8;
+                            _context.next = 11;
                             return _geolocation2.default.initialize();
 
-                        case 7:
-                            _context.next = 9;
+                        case 11:
+                            console.log(5);
+                            _context.next = 14;
                             return _sqlClientFactory2.default.initialize();
 
-                        case 9:
-                            _context.next = 11;
+                        case 14:
+                            console.log(6);
+                            _context.next = 17;
                             return BoardsModel.initialize();
 
-                        case 11:
-                            _context.next = 13;
+                        case 17:
+                            console.log(7);
+                            _context.next = 20;
                             return Renderer.reloadTemplates();
 
-                        case 13:
+                        case 20:
+                            console.log(8);
                             sockets = {};
                             nextSocketId = 0;
                             server = _http2.default.createServer(app);
@@ -208,12 +225,12 @@ function spawnCluster() {
                                     });
                                 });
                                 IPC.on('render', function (data) {
-                                    var f = BoardController['' + data.type];
+                                    var f = _board4.default['' + data.type];
                                     if (typeof f != "function") return Promise.reject("Invalid generator function");
-                                    return f.call(BoardController, data.key, data.data);
+                                    return f.call(_board4.default, data.key, data.data);
                                 });
                                 IPC.on('reloadBoards', function () {
-                                    require("./boards/board").initialize();
+                                    _board2.default.initialize();
                                     return Promise.resolve();
                                 });
                                 IPC.on('reloadConfig', function (data) {
@@ -247,22 +264,22 @@ function spawnCluster() {
                                     delete sockets[socketId];
                                 });
                             });
-                            _context.next = 29;
+                            _context.next = 37;
                             break;
 
-                        case 25:
-                            _context.prev = 25;
-                            _context.t0 = _context['catch'](4);
+                        case 33:
+                            _context.prev = 33;
+                            _context.t0 = _context['catch'](8);
 
                             console.log(_context.t0);
                             _logger2.default.error(_context.t0.stack || _context.t0);
 
-                        case 29:
+                        case 37:
                         case 'end':
                             return _context.stop();
                     }
                 }
-            }, _callee, this, [[4, 25]]);
+            }, _callee, this, [[8, 33]]);
         }));
 
         return function (_x) {
@@ -316,7 +333,7 @@ function onReady(initCallback) {
             setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), (0, _config2.default)('server.statistics.ttl') * Tools.Minute);
         }
         if ((0, _config2.default)('server.rss.enabled')) {
-            setInterval(BoardController.renderRSS.bind(BoardController), (0, _config2.default)('server.rss.ttl') * Tools.Minute);
+            setInterval(_board4.default.renderRSS.bind(_board4.default), (0, _config2.default)('server.rss.ttl') * Tools.Minute);
         }
         (0, _commands2.default)();
     }
@@ -379,6 +396,7 @@ function spawnWorkers(initCallback) {
 }
 
 _board2.default.initialize();
+_captcha2.default.initialize();
 
 if (_cluster2.default.isMaster) {
     _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
@@ -432,7 +450,7 @@ if (_cluster2.default.isMaster) {
 
                     case 20:
                         _context4.next = 22;
-                        return Renderer.rerender(['**', '!/*/archive', '!/*/arch/*']);
+                        return Renderer.rerender(['**', '!/*/arch/*']);
 
                     case 22:
                         _context4.next = 24;

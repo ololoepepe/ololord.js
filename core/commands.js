@@ -24,6 +24,10 @@ var _posts = require("../models/posts");
 
 var PostsModel = _interopRequireWildcard(_posts);
 
+var _users = require("../models/users");
+
+var UsersModel = _interopRequireWildcard(_users);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -156,38 +160,88 @@ vorpal.installHandler("remove <key>", function (args) {
     return Promise.resolve("OK");
 }, { description: Tools.translate("Removes the option (config.json) at the key specified.") });
 
-vorpal.installHandler("add-superuser", function () {
-    var c = {};
-    var _this = this;
-    return requestPassword(this).then(function (result) {
-        c.password = result.password;
-        c.notHashpass = result.notHashpass;
-        return _this.prompt(Tools.translate("Enter superuser IP list (separate by spaces): "));
-    }).then(function (result) {
-        var ips = Tools.ipList(result.input);
-        if (typeof ips == "string") return Promise.reject(ips);
-        return Database.addSuperuser(c.password, ips, c.notHashpass);
-    }).then(function () {
-        return Promise.resolve("OK");
-    });
-}, { description: Tools.translate("Registers a superuser.") });
+vorpal.installHandler('add-superuser', _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+    var _ref, password, notHashpass, _ref2, input, ips, hashpass;
 
-vorpal.installHandler("remove-superuser", function () {
-    return requestPassword(this).then(function (result) {
-        return Database.removeSuperuser(result.password, result.notHashpass);
-    }).then(function () {
-        return Promise.resolve("OK");
-    });
-}, { description: Tools.translate("Unregisters a superuser.") });
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+            switch (_context.prev = _context.next) {
+                case 0:
+                    _context.next = 2;
+                    return requestPassword(this);
 
-vorpal.installHandler("rerender-posts [targets...]", function () {
-    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(args) {
+                case 2:
+                    _ref = _context.sent;
+                    password = _ref.password;
+                    notHashpass = _ref.notHashpass;
+                    _context.next = 7;
+                    return this.prompt(Tools.translate('Enter superuser IP list (separate by spaces): '));
+
+                case 7:
+                    _ref2 = _context.sent;
+                    input = _ref2.input;
+                    ips = Tools.ipList(input);
+
+                    if (!(typeof ips === 'string')) {
+                        _context.next = 12;
+                        break;
+                    }
+
+                    return _context.abrupt("return", Promise.reject(new Error(ips)));
+
+                case 12:
+                    hashpass = Tools.toHashpass(password, notHashpass);
+                    _context.next = 15;
+                    return UsersModel.addSuperuser(hashpass, ips);
+
+                case 15:
+                    return _context.abrupt("return", 'OK');
+
+                case 16:
+                case "end":
+                    return _context.stop();
+            }
+        }
+    }, _callee, this);
+})), { description: Tools.translate('Registers a superuser.') });
+
+vorpal.installHandler('remove-superuser', _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+    var _ref3, password, notHashpass, hashpass;
+
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        while (1) {
+            switch (_context2.prev = _context2.next) {
+                case 0:
+                    _context2.next = 2;
+                    return requestPassword(this);
+
+                case 2:
+                    _ref3 = _context2.sent;
+                    password = _ref3.password;
+                    notHashpass = _ref3.notHashpass;
+                    hashpass = Tools.toHashpass(password, notHashpass);
+                    _context2.next = 8;
+                    return UsersModel.removeSuperuser(hashpass);
+
+                case 8:
+                    return _context2.abrupt("return", 'OK');
+
+                case 9:
+                case "end":
+                    return _context2.stop();
+            }
+        }
+    }, _callee2, this);
+})), { description: Tools.translate('Unregisters a superuser.') });
+
+vorpal.installHandler('rerender-posts [targets...]', function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(args) {
         var result, targets;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
             while (1) {
-                switch (_context.prev = _context.next) {
+                switch (_context3.prev = _context3.next) {
                     case 0:
-                        _context.next = 2;
+                        _context3.next = 2;
                         return this.prompt({
                             type: 'confirm',
                             name: 'rerender',
@@ -196,29 +250,29 @@ vorpal.installHandler("rerender-posts [targets...]", function () {
                         });
 
                     case 2:
-                        result = _context.sent;
+                        result = _context3.sent;
 
                         if (result.rerender) {
-                            _context.next = 5;
+                            _context3.next = 5;
                             break;
                         }
 
-                        return _context.abrupt("return");
+                        return _context3.abrupt("return");
 
                     case 5:
                         targets = Tools.rerenderPostsTargetsFromString((args.targets || []).join(' '));
-                        _context.next = 8;
+                        _context3.next = 8;
                         return PostsModel.rerenderPosts(targets);
 
                     case 8:
-                        return _context.abrupt("return", 'OK');
+                        return _context3.abrupt("return", 'OK');
 
                     case 9:
                     case "end":
-                        return _context.stop();
+                        return _context3.stop();
                 }
             }
-        }, _callee, this);
+        }, _callee3, this);
     }));
 
     return function (_x) {
@@ -258,7 +312,7 @@ vorpal.installHandler("rerender [what...]", function (args) {
         } else if (args.options && args.options.archive) {
             return Renderer.rerender();
         } else {
-            return Renderer.rerender(['**', '!/*/archive', '!/*/arch/*']);
+            return Renderer.rerender(['**', '!/*/arch/*']);
         }
     }).then(function () {
         return IPC.send('start');

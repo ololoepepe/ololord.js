@@ -1,8 +1,16 @@
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
+
+var _fs = require('fs');
+
+var _fs2 = _interopRequireDefault(_fs);
 
 var _board = require('../boards/board');
 
@@ -185,6 +193,22 @@ Captcha.checkCaptcha = function () {
     };
 }();
 
+Captcha.initialize = function () {
+    _fs2.default.readdirSync(__dirname).forEach(function (file) {
+        if ("index.js" == file || "js" != file.split(".").pop()) return;
+        var id = require.resolve("./" + file.split(".").shift());
+        if (require.cache.hasOwnProperty(id)) delete require.cache[id];
+        var captcha = require(id);
+        if ((0, _underscore2.default)(captcha).isArray()) {
+            captcha.forEach(function (captcha) {
+                Captcha.addCaptcha(captcha);
+            });
+        } else {
+            Captcha.addCaptcha(captcha);
+        }
+    });
+};
+
 //NOTE: Must implement the following methods:
 //checkCaptcha(ip, fields) -> Promise.resolve() / Promise.reject(err)
 //widgetHtml() -> string
@@ -194,5 +218,5 @@ Captcha.checkCaptcha = function () {
 //script() -> string
 //scriptSource() -> string
 
-module.exports = Captcha;
+exports.default = Captcha;
 //# sourceMappingURL=captcha.js.map

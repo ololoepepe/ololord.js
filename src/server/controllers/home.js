@@ -24,4 +24,4 @@ router.render = (path) => {
   }
 };
 
-module.exports = router;
+export default router;
