@@ -10,6 +10,7 @@ import Board from '../boards/board';
 import * as MiscModel from '../models/misc';
 import * as Cache from '../helpers/cache';
 import config from '../helpers/config';
+import * as Files from '../helpers/files';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 
@@ -123,12 +124,14 @@ export async function renderThread(thread) {
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
+  await Files.renderPostFileInfos(thread.opPost);
   await board.renderPost(thread.opPost);
   if (!thread.lastPosts) {
     return;
   }
   await Tools.series(thread.lastPosts, async function(post) {
-    return await board.renderPost(post);
+    await Files.renderPostFileInfos(post);
+    await board.renderPost(post);
   });
 }
 

@@ -99,7 +99,7 @@ var getPage = exports.getPage = function () {
           case 12:
             threads = _context3.sent;
 
-            threads.sort(_board2.default.sortThreadsByDate);
+            threads.sort(ThreadsModel.sortThreadsByDate);
             start = pageNumber * board.threadsPerPage;
 
             threads = threads.slice(start, start + board.threadsPerPage);
@@ -244,17 +244,17 @@ var getCatalog = exports.getCatalog = function () {
             }());
 
           case 11:
-            sortFunction = _board2.default.sortThreadsByCreationDate;
+            sortFunction = ThreadsModel.sortThreadsByCreationDate;
             _context5.t0 = (sortMode || 'date').toLowerCase();
             _context5.next = _context5.t0 === 'recent' ? 15 : _context5.t0 === 'bumps' ? 17 : 19;
             break;
 
           case 15:
-            sortFunction = _board2.default.sortThreadsByDate;
+            sortFunction = ThreadsModel.sortThreadsByDate;
             return _context5.abrupt('break', 20);
 
           case 17:
-            sortFunction = _board2.default.sortThreadsByPostCount;
+            sortFunction = ThreadsModel.sortThreadsByPostCount;
             return _context5.abrupt('break', 20);
 
           case 19:

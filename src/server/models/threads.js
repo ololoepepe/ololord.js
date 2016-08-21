@@ -32,6 +32,22 @@ let ThreadUpdateTimes = new Hash(client(), 'threadUpdateTimes', {
   stringify: false
 });
 
+export function sortThreadsByDate(t1, t2) {
+  if (!!t1.fixed === !!t2.fixed) {
+    return t2.updatedAt.localeCompare(t1.updatedAt);
+  } else {
+    return t1.fixed ? -1 : 1;
+  }
+}
+
+export function sortThreadsByCreationDate(t1, t2) {
+  return t2.createdAt.localeCompare(t1.createdAt);
+}
+
+export function sortThreadsByPostCount(t1, t2) {
+  return t2.postCount - t1.postCount;
+}
+
 export async function getThreadPostCount(boardName, threadNumber) {
   return await ThreadPostNumbers.count(`${boardName}:${threadNumber}`);
 }
@@ -244,13 +260,13 @@ async function removeThread(boardName, threadNumber, { archived, leaveFileInfos,
 async function pushOutOldThread(boardName) {
   let threadNumbers = await getThreadNumbers(boardName);
   let threads = await getThreads(boardName, threadNumbers);
-  threads.sort(Board.sortThreadsByDate);
+  threads.sort(sortThreadsByDate);
   if (threads.length < board.threadLimit) {
     return;
   }
   let archivedThreadNumbers = await getThreadNumbers(boardName, { archived: true });
   let archivedThreads = await getThreads(boardName, archivedThreadNumbers);
-  archivedThreads.sort(Board.sortThreadsByDate);
+  archivedThreads.sort(sortThreadsByDate);
   if (archivedThreads.length > 0 && archivedThreads.length >= board.archiveLimit) {
     await removeThread(boardName, archivedThreads.pop().number, { archived: true });
   }
@@ -323,4 +339,72 @@ export async function createThread(req, fields, files, transaction) {
   transaction.setThreadNumber(threadNumber);
   await Threads.setOne(threadNumber, thread, boardName);
   return thread;
+}
+
+export async function moveThread(sourceBoardName, threadNumber, targetBoardName) {
+  let targetBoard = Board.board(targetBoardName);
+  if (!targetBoard || !Board.board(sourceBoardName)) {
+    throw new Error(Tools.translate('Invalid board'));
+  }
+  threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+  if (!threadNumber) {
+    throw new Error(Tools.translate('Invalid thread number'));
+  }
+  let thread = await getThread(sourceBoardName, threadNumber, { withPostNumbers: true });
+  if (!thread) {
+    throw new Error(Tools.translate('No such thread'));
+  }
+  let sourcePath = `${__dirname}/../public/${sourceBoardName}/src`;
+  let sourceThumbPath = `${__dirname}/../public/${sourceBoardName}/thumb`;
+  let targetPath = `${__dirname}/../public/${targetBoardName}/src`;
+  let targetThumbPath = `${__dirname}/../public/${targetBoardName}/thumb`;
+  await mkpath(targetPath);
+  await mkpath(targetThumbPath);
+  delete thread.updatedAt;
+  let posts = await PostsModel.getPosts(sourceBoardName, thread.postNumbers, {
+    withFileInfos: true,
+    withReferences: true,
+    withExtraData: true
+  });
+  delete thread.postNumbers;
+  let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, posts.length);
+  lastPostNumber = lastPostNumber - posts.length + 1;
+  thread.number = lastPostNumber;
+  let postNumberMap = posts.reduce((acc, post) => {
+    acc.set(post.number, lastPostNumber++);
+    return acc;
+  }, new Map());
+  let { toRerender, toUpdate } = await PostsModel.processMovedThreadPosts({
+    posts: posts,
+    postNumberMap: postNumberMap,
+    threadNumber: thread.number,
+    targetBoard: targetBoard,
+    sourceBoardName: sourceBoardName,
+    sourcePath: sourcePath,
+    sourceThumbPath: sourceThumbPath,
+    targetPath: targetPath,
+    targetThumbPath: targetThumbPath
+  });
+  await Threads.setOne(thead.number, thread, targetBoardName);
+  let threadKey = `${targetBoardName}:${thread.number}`;
+  await ThreadUpdateTimes.setOne(threadKey, Tools.now().toISOString());
+  await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), threadKey);
+  await PostsModel.processMovedThreadRelatedPosts({
+    posts: toRerender,
+    sourceBoardName: sourceBoardName,
+    postNumberMap: postNumberMap
+  });
+  await Tools.series(toUpdate, async function(o) {
+    return await IPC.render(o.boardName, o.threadNumber, o.threadNumber, 'create');
+  });
+  await removeThread(sourceBoardName, threadNumber, {
+    leaveFileInfos: true,
+    leaveReferences: true
+  });
+  IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
+  await IPC.render(targetBoardName, thread.number, thread.number, 'create');
+  return {
+    boardName: targetBoardName,
+    threadNumber: thread.number
+  };
 }

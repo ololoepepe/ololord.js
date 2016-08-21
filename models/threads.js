@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createThread = exports.clearDeletedThreads = exports.setThreadDeleted = exports.isThreadDeleted = exports.setThreadUpdateTime = exports.getThreadsUpdateTimes = exports.getThreadUpdateTime = exports.getThreadLastPostNumber = exports.getThreadInfo = exports.getThreads = exports.getThread = exports.getThreadNumbers = exports.getThreadPosts = exports.removeThreadPostNumber = exports.addThreadPostNumber = exports.getThreadPostNumbers = exports.getThreadPostCount = undefined;
+exports.moveThread = exports.createThread = exports.clearDeletedThreads = exports.setThreadDeleted = exports.isThreadDeleted = exports.setThreadUpdateTime = exports.getThreadsUpdateTimes = exports.getThreadUpdateTime = exports.getThreadLastPostNumber = exports.getThreadInfo = exports.getThreads = exports.getThread = exports.getThreadNumbers = exports.getThreadPosts = exports.removeThreadPostNumber = exports.addThreadPostNumber = exports.getThreadPostNumbers = exports.getThreadPostCount = undefined;
 
 var getThreadPostCount = exports.getThreadPostCount = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, threadNumber) {
@@ -819,7 +819,7 @@ var pushOutOldThread = function () {
           case 5:
             threads = _context24.sent;
 
-            threads.sort(_board2.default.sortThreadsByDate);
+            threads.sort(sortThreadsByDate);
 
             if (!(threads.length < board.threadLimit)) {
               _context24.next = 9;
@@ -840,7 +840,7 @@ var pushOutOldThread = function () {
           case 14:
             archivedThreads = _context24.sent;
 
-            archivedThreads.sort(_board2.default.sortThreadsByDate);
+            archivedThreads.sort(sortThreadsByDate);
 
             if (!(archivedThreads.length > 0 && archivedThreads.length >= board.archiveLimit)) {
               _context24.next = 19;
@@ -1049,6 +1049,183 @@ var createThread = exports.createThread = function () {
   };
 }();
 
+var moveThread = exports.moveThread = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(sourceBoardName, threadNumber, targetBoardName) {
+    var targetBoard, thread, sourcePath, sourceThumbPath, targetPath, targetThumbPath, posts, lastPostNumber, postNumberMap, _ref6, toRerender, toUpdate, threadKey;
+
+    return regeneratorRuntime.wrap(function _callee27$(_context27) {
+      while (1) {
+        switch (_context27.prev = _context27.next) {
+          case 0:
+            targetBoard = _board2.default.board(targetBoardName);
+
+            if (!(!targetBoard || !_board2.default.board(sourceBoardName))) {
+              _context27.next = 3;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid board'));
+
+          case 3:
+            threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+
+            if (threadNumber) {
+              _context27.next = 6;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid thread number'));
+
+          case 6:
+            _context27.next = 8;
+            return getThread(sourceBoardName, threadNumber, { withPostNumbers: true });
+
+          case 8:
+            thread = _context27.sent;
+
+            if (thread) {
+              _context27.next = 11;
+              break;
+            }
+
+            throw new Error(Tools.translate('No such thread'));
+
+          case 11:
+            sourcePath = __dirname + '/../public/' + sourceBoardName + '/src';
+            sourceThumbPath = __dirname + '/../public/' + sourceBoardName + '/thumb';
+            targetPath = __dirname + '/../public/' + targetBoardName + '/src';
+            targetThumbPath = __dirname + '/../public/' + targetBoardName + '/thumb';
+            _context27.next = 17;
+            return (0, _mkpath2.default)(targetPath);
+
+          case 17:
+            _context27.next = 19;
+            return (0, _mkpath2.default)(targetThumbPath);
+
+          case 19:
+            delete thread.updatedAt;
+            _context27.next = 22;
+            return PostsModel.getPosts(sourceBoardName, thread.postNumbers, {
+              withFileInfos: true,
+              withReferences: true,
+              withExtraData: true
+            });
+
+          case 22:
+            posts = _context27.sent;
+
+            delete thread.postNumbers;
+            _context27.next = 26;
+            return BoardsModel.nextPostNumber(targetBoardName, posts.length);
+
+          case 26:
+            lastPostNumber = _context27.sent;
+
+            lastPostNumber = lastPostNumber - posts.length + 1;
+            thread.number = lastPostNumber;
+            postNumberMap = posts.reduce(function (acc, post) {
+              acc.set(post.number, lastPostNumber++);
+              return acc;
+            }, new Map());
+            _context27.next = 32;
+            return PostsModel.processMovedThreadPosts({
+              posts: posts,
+              postNumberMap: postNumberMap,
+              threadNumber: thread.number,
+              targetBoard: targetBoard,
+              sourceBoardName: sourceBoardName,
+              sourcePath: sourcePath,
+              sourceThumbPath: sourceThumbPath,
+              targetPath: targetPath,
+              targetThumbPath: targetThumbPath
+            });
+
+          case 32:
+            _ref6 = _context27.sent;
+            toRerender = _ref6.toRerender;
+            toUpdate = _ref6.toUpdate;
+            _context27.next = 37;
+            return Threads.setOne(thead.number, thread, targetBoardName);
+
+          case 37:
+            threadKey = targetBoardName + ':' + thread.number;
+            _context27.next = 40;
+            return ThreadUpdateTimes.setOne(threadKey, Tools.now().toISOString());
+
+          case 40:
+            _context27.next = 42;
+            return ThreadPostNumbers.addSome((0, _underscore2.default)(postNumberMap).toArray(), threadKey);
+
+          case 42:
+            _context27.next = 44;
+            return PostsModel.processMovedThreadRelatedPosts({
+              posts: toRerender,
+              sourceBoardName: sourceBoardName,
+              postNumberMap: postNumberMap
+            });
+
+          case 44:
+            _context27.next = 46;
+            return Tools.series(toUpdate, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(o) {
+                return regeneratorRuntime.wrap(function _callee26$(_context26) {
+                  while (1) {
+                    switch (_context26.prev = _context26.next) {
+                      case 0:
+                        _context26.next = 2;
+                        return IPC.render(o.boardName, o.threadNumber, o.threadNumber, 'create');
+
+                      case 2:
+                        return _context26.abrupt('return', _context26.sent);
+
+                      case 3:
+                      case 'end':
+                        return _context26.stop();
+                    }
+                  }
+                }, _callee26, this);
+              }));
+
+              return function (_x58) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 46:
+            _context27.next = 48;
+            return removeThread(sourceBoardName, threadNumber, {
+              leaveFileInfos: true,
+              leaveReferences: true
+            });
+
+          case 48:
+            IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
+            _context27.next = 51;
+            return IPC.render(targetBoardName, thread.number, thread.number, 'create');
+
+          case 51:
+            return _context27.abrupt('return', {
+              boardName: targetBoardName,
+              threadNumber: thread.number
+            });
+
+          case 52:
+          case 'end':
+            return _context27.stop();
+        }
+      }
+    }, _callee27, this);
+  }));
+
+  return function moveThread(_x55, _x56, _x57) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+exports.sortThreadsByDate = sortThreadsByDate;
+exports.sortThreadsByCreationDate = sortThreadsByCreationDate;
+exports.sortThreadsByPostCount = sortThreadsByPostCount;
+
 var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
@@ -1129,4 +1306,20 @@ var ThreadUpdateTimes = new _hash2.default((0, _clientFactory2.default)(), 'thre
   parse: false,
   stringify: false
 });
+
+function sortThreadsByDate(t1, t2) {
+  if (!!t1.fixed === !!t2.fixed) {
+    return t2.updatedAt.localeCompare(t1.updatedAt);
+  } else {
+    return t1.fixed ? -1 : 1;
+  }
+}
+
+function sortThreadsByCreationDate(t1, t2) {
+  return t2.createdAt.localeCompare(t1.createdAt);
+}
+
+function sortThreadsByPostCount(t1, t2) {
+  return t2.postCount - t1.postCount;
+}
 //# sourceMappingURL=threads.js.map

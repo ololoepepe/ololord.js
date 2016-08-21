@@ -238,18 +238,22 @@ var renderThread = exports.renderThread = function () {
 
           case 3:
             _context9.next = 5;
-            return board.renderPost(thread.opPost);
+            return Files.renderPostFileInfos(thread.opPost);
 
           case 5:
+            _context9.next = 7;
+            return board.renderPost(thread.opPost);
+
+          case 7:
             if (thread.lastPosts) {
-              _context9.next = 7;
+              _context9.next = 9;
               break;
             }
 
             return _context9.abrupt('return');
 
-          case 7:
-            _context9.next = 9;
+          case 9:
+            _context9.next = 11;
             return Tools.series(thread.lastPosts, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(post) {
                 return regeneratorRuntime.wrap(function _callee8$(_context8) {
@@ -257,12 +261,13 @@ var renderThread = exports.renderThread = function () {
                     switch (_context8.prev = _context8.next) {
                       case 0:
                         _context8.next = 2;
-                        return board.renderPost(post);
+                        return Files.renderPostFileInfos(post);
 
                       case 2:
-                        return _context8.abrupt('return', _context8.sent);
+                        _context8.next = 4;
+                        return board.renderPost(post);
 
-                      case 3:
+                      case 4:
                       case 'end':
                         return _context8.stop();
                     }
@@ -275,7 +280,7 @@ var renderThread = exports.renderThread = function () {
               };
             }());
 
-          case 9:
+          case 11:
           case 'end':
             return _context9.stop();
         }
@@ -750,6 +755,10 @@ var Cache = _interopRequireWildcard(_cache);
 var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
+
+var _files = require('../helpers/files');
+
+var Files = _interopRequireWildcard(_files);
 
 var _logger = require('../helpers/logger');
 

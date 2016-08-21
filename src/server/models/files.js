@@ -112,7 +112,7 @@ export async function removeFileInfos(fileInfoNames) {
   await FileInfos.deleteSome(fileInfoNames);
 }
 
-export async function addFilesToPost(boardName, postNumber, files, transaction) {
+export async function addFilesToPost(boardName, postNumber, files) {
   await Tools.series(files, async function(file) {
     file.boardName = boardName;
     file.postNumber = postNumber;

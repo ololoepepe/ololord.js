@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createThumbnail = undefined;
+exports.rerenderPostFileInfo = exports.createThumbnail = undefined;
 
 var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(file, thumbPath, path) {
@@ -148,6 +148,41 @@ var createThumbnail = exports.createThumbnail = function () {
   }));
 
   return function createThumbnail(_x, _x2, _x3) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var rerenderPostFileInfo = exports.rerenderPostFileInfo = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(fileInfo) {
+    var _ref, duration, bitrate;
+
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            if (fileInfo.dimensions) {
+              fileInfo.sizeText += ', ' + fileInfo.dimensions.width + 'x' + fileInfo.dimensions.height;
+            }
+            _ref = fileInfo.extraData || {};
+            duration = _ref.duration;
+            bitrate = _ref.bitrate;
+
+            if (duration) {
+              fileInfo.sizeText += ', ' + duration;
+            }
+            if (bitrate) {
+              fileInfo.sizeTooltip = bitrate + ' ' + Tools.translate('kbps');
+            }
+
+          case 6:
+          case 'end':
+            return _context3.stop();
+        }
+      }
+    }, _callee3, this);
+  }));
+
+  return function rerenderPostFileInfo(_x4) {
     return ref.apply(this, arguments);
   };
 }();

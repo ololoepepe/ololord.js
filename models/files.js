@@ -403,7 +403,7 @@ var removeFileInfos = exports.removeFileInfos = function () {
 }();
 
 var addFilesToPost = exports.addFilesToPost = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(boardName, postNumber, files, transaction) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(boardName, postNumber, files) {
     return regeneratorRuntime.wrap(function _callee15$(_context15) {
       while (1) {
         switch (_context15.prev = _context15.next) {
@@ -432,7 +432,7 @@ var addFilesToPost = exports.addFilesToPost = function () {
                 }, _callee14, this);
               }));
 
-              return function (_x19) {
+              return function (_x18) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -449,7 +449,7 @@ var addFilesToPost = exports.addFilesToPost = function () {
     }, _callee15, this);
   }));
 
-  return function addFilesToPost(_x15, _x16, _x17, _x18) {
+  return function addFilesToPost(_x15, _x16, _x17) {
     return ref.apply(this, arguments);
   };
 }();
@@ -517,7 +517,7 @@ var deleteFile = exports.deleteFile = function () {
     }, _callee17, this);
   }));
 
-  return function deleteFile(_x20) {
+  return function deleteFile(_x19) {
     return ref.apply(this, arguments);
   };
 }();
@@ -550,7 +550,7 @@ var editFileRating = exports.editFileRating = function () {
     }, _callee18, this);
   }));
 
-  return function editFileRating(_x21, _x22) {
+  return function editFileRating(_x20, _x21) {
     return ref.apply(this, arguments);
   };
 }();
@@ -587,7 +587,7 @@ var editAudioTags = exports.editAudioTags = function () {
     }, _callee19, this);
   }));
 
-  return function editAudioTags(_x23, _x24) {
+  return function editAudioTags(_x22, _x23) {
     return ref.apply(this, arguments);
   };
 }();

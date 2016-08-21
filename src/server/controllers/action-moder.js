@@ -20,91 +20,167 @@ import PostCreationTransaction from '../storage/post-creation-transaction';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
-import * as Files from '../storage/files';
 import geolocation from '../storage/geolocation';
 
 let router = express.Router();
 
-router.post("/action/moveThread", function(req, res, next) {
-    var c = {};
-    Tools.parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        return UsersModel.checkUserBan(req.ip, c.fields.boardName, { write: true });
-    }).then(function() {
-        return UsersModel.checkUserBan(req.ip, c.fields.targetBoardName, { write: true });
-    }).then(function() {
-        return Database.moveThread(req, c.fields);
-    }).then(function(result) {
-        res.send(result);
-    }).catch(function(err) {
-        next(err);
+function getBans(fields) {
+  let { timeOffset } = fields;
+  let bans = _(fields).pick((value, name) => {
+    return /^banBoard_\S+$/.test(name) && 'NONE' !== fields[`banLevel_${value}`];
+  });
+  timeOffset = Tools.option(timeOffset, 'number', config('site.timeOffset'), {
+    test: (o) => { return (o >= -720) && (o <= 840); } //TODO: magic numbers
+  });
+  bans = _(bans).reduce((acc, value, name) => {
+    let expiresAt = fields[`banExpires_${value}`];
+    if (expiresAt) {
+      let hours = Math.floor(timeOffset / 60);
+      let minutes = Math.abs(timeOffset) % 60;
+      let tz = ((timeOffset > 0) ? '+' : '') + ((Math.abs(hours) < 10) ? '0' : '') + hours + ':'
+        + ((minutes < 10) ? '0' : '') + minutes; //TODO: use pad function
+      expiresAt = +moment(`${expiresAt} ${tz}`, 'YYYY/MM/DD HH:mm ZZ'); //TODO: magic numbers
+      if (expiresAt < (_.now() + Tools.Second)) {
+        expiresAt = null;
+      }
+    } else {
+      expiresAt = null;
+    }
+    acc[boardName] = {
+      boardName: value,
+      expiresAt: expiresAt,
+      level: fields[`banLevel_${value}`],
+      reason: fields[`banReason_${value}`],
+      postNumber: Tools.option(fields[`banPostNumber_${value}`], 'number', null, { test: Tools.testPostNumber })
+    };
+    return acc;
+  }, {});
+}
+
+router.post('/action/banUser', async function(req, res, next) {
+  try {
+    if (!req.isModer()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields } = await Tools.parseForm(req);
+    let { userIp } = fields;
+    userIp = Tools.correctAddress(userIp);
+    if (!userIp) {
+      throw new Error(Tools.translate('Invalid IP address'));
+    }
+    if (userIp === req.ip) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let bans = getBans(fields);
+    let banLevels = Tools.BAN_LEVELS.slice(1);
+    bans.each((ban) => {
+      if (!Board.board(ban.boardName)) {
+        throw new Error(Tools.translate('Invalid board: $[1]', '', ban.boardName));
+      }
+      if (banLevels.indexOf(ban.level) < 0) {
+        throw new Error(Tools.translate('Invalid ban level: $[1]', '', ban.level));
+      }
     });
+    let oldBans = await UsersModel.getBannedUserBans(userIp);
+    let date = Tools.now();
+    let modifiedBanBoards = new Set();
+    let newBans = Board.boardNames().reduce((acc, boardName) => {
+      if (req.isModer(boardName)) {
+        if (bans.hasOwnProperty(boardName)) {
+          let ban = bans[boardName];
+          ban.createdAt = date;
+          acc[boardName] = ban;
+          modifiedBanBoards.add(boardName);
+        } else if (oldBans.hasOwnProperty(boardName)) {
+          modifiedBanBoards.add(boardName);
+        }
+      } else if (oldBans.hasOwnProperty(boardName)) {
+        acc[boardName] = oldBans[boardName];
+      }
+      return acc;
+    }, {});
+    let levels = UsersModel.getRegisteredUserLevelsByIp(userIp);
+    modifiedBanBoards.forEach((boardName) => {
+      let level = req.level(boardName);
+      if (!req.isSuperuser(boardName) && Tools.compareRegisteredUserLevels(level, levels[boardName]) <= 0) {
+        throw new Error(Tools.translate('Not enough rights'));
+      }
+    });
+    await UsersModel.banUser(userIp, newBans);
+    res.send({});
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.post("/action/banUser", function(req, res, next) {
-    if (!req.isModer())
-        return next(Tools.translate("Not enough rights"));
-    var c = {};
-    Tools.parseForm(req).then(function(result) {
-        c.bans = [];
-        c.fields = result.fields;
-        c.userIp = result.fields.userIp;
-        Tools.forIn(result.fields, function(value, name) {
-            if (!/^banBoard_\S+$/.test(name))
-                return;
-            var level = result.fields["banLevel_" + value];
-            if ("NONE" == level)
-                return;
-            var expiresAt = result.fields["banExpires_" + value];
-            if (expiresAt) {
-                var timeOffset = +c.fields.timeOffset;
-                if (isNaN(timeOffset) || timeOffset < -720 || timeOffset > 840)
-                    timeOffset = config("site.timeOffset", 0);
-                var hours = Math.floor(timeOffset / 60);
-                var minutes = Math.abs(timeOffset) % 60;
-                var tz = ((timeOffset > 0) ? "+" : "") + ((Math.abs(hours) < 10) ? "0" : "") + hours + ":"
-                    + ((minutes < 10) ? "0" : "") + minutes;
-                expiresAt = moment(expiresAt + " " + tz, "YYYY/MM/DD HH:mm ZZ");
-                if (+expiresAt < (+Tools.now() + Tools.Second))
-                    expiresAt = null;
-            } else {
-                expiresAt = null;
-            }
-            c.bans.push({
-                boardName: value,
-                expiresAt: +expiresAt ? expiresAt : null,
-                level: level,
-                reason: result.fields["banReason_" + value],
-                postNumber: +result.fields["banPostNumber_" + value] || null
-            });
-        });
-        return Database.banUser(req, c.fields.userIp, c.bans);
-    }).then(function(result) {
-        res.send({});
-    }).catch(function(err) {
-        next(err);
+router.post('/action/delall', async function(req, res, next) {
+  try {
+    if (!req.isModer()) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let { fields } = await Tools.parseForm(req);
+    let { userIp } = fields;
+    userIp = Tools.correctAddress(userIp);
+    if (!userIp) {
+      throw new Error(Tools.translate('Invalid IP address'));
+    }
+    if (userIp === req.ip) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let boardNames = _(fields).filter((boardName, key) => {
+      return /^board_\S+$/.test(key);
     });
+    if (boardNames.length <= 0) {
+      return throw new Error(Tools.translate('No board specified'));
+    }
+    boardNames.forEach((boardName) => {
+      if (!Board.board(boardName)) {
+        throw new Error(Tools.translate('Invalid board'));
+      }
+      if (!req.isModer(boardName)) {
+        throw new Error(Tools.translate('Not enough rights'));
+      }
+    });
+    let geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardNames, {
+      write: true,
+      geolocationInfo: geolocationInfo
+    });
+    await BoardsModel.delall(req, userIp, boardNames);
+    res.send({});
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.post("/action/delall", function(req, res, next) {
-    if (!req.isModer())
-        return next(Tools.translate("Not enough rights"));
-    var c = {};
-    Tools.parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        c.boardNames = Tools.toArray(Tools.filterIn(c.fields, function(boardName, key) {
-            return /^board_\S+$/.test(key);
-        }));
-        if (c.boardNames.length < 1)
-            return Promise.reject(Tools.translate("No board specified"));
-        return UsersModel.checkUserBan(req.ip, c.boardNames, { write: true });
-    }).then(function() {
-        return Database.delall(req, c.fields.userIp, c.boardNames);
-    }).then(function(result) {
-        res.send({});
-    }).catch(function(err) {
-        next(err);
+router.post('/action/moveThread', async function(req, res, next) {
+  try {
+    let { fields } = await Tools.parseForm(req);
+    let { boardName, threadNumber, targetBoardName, password } = fields;
+    if (!Board.board(boardName) || !Board.board(targetBoardName)) {
+      throw new Error(Tools.translate('Invalid board'));
+    }
+    if (sourceBoardName == targetBoardName) {
+      throw new Error(Tools.translate('Source and target boards are the same'));
+    }
+    threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+    if (!threadNumber) {
+      throw new Error(Tools.translate('Invalid thread number'));
+    }
+    if (!req.isModer(boardName) || !req.isModer(targetBoardName)) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, [boardName, targetBoardName], {
+      write: true,
+      geolocationInfo: geolocationInfo
     });
+    await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'moveThread', Tools.sha1(password));
+    let result = await ThreadsModel.moveThread(boardName, threadNumber, targetBoardName);
+    res.send(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post("/action/setThreadFixed", function(req, res, next) {
@@ -155,4 +231,4 @@ router.post("/action/setThreadUnbumpable", function(req, res, next) {
     });
 });
 
-module.exports = router;
+export default router;

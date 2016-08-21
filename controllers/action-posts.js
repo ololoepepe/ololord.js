@@ -11,21 +11,19 @@ var testParameters = function () {
     var fields = _ref.fields;
     var files = _ref.files;
     var postNumber = _ref.postNumber;
-    var board, fileCount, post;
+    var fileCount, post;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            board = _board2.default.board(boardName);
-
-            if (board) {
-              _context.next = 3;
+            if (_board2.default.board(boardName)) {
+              _context.next = 2;
               break;
             }
 
-            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            throw new Error(Tools.translate('Invalid board'));
 
-          case 3:
+          case 2:
             if (!fields) {
               fields = {};
             }
@@ -38,37 +36,37 @@ var testParameters = function () {
             post = void 0;
 
             if (!postNumber) {
-              _context.next = 17;
+              _context.next = 16;
               break;
             }
 
-            _context.next = 11;
+            _context.next = 10;
             return PostsModel.getPostFileCount(boardName, postNumber);
 
-          case 11:
+          case 10:
             fileCount = _context.sent;
 
             if (!(typeof fields.text === 'undefined')) {
-              _context.next = 17;
+              _context.next = 16;
               break;
             }
 
-            _context.next = 15;
+            _context.next = 14;
             return PostsModel.getPost(boardName, postNumber);
 
-          case 15:
+          case 14:
             post = _context.sent;
 
             fields.text = post.rawText;
 
-          case 17:
-            _context.next = 19;
+          case 16:
+            _context.next = 18;
             return board.testParameters(mode, fields, files, fileCount);
 
-          case 19:
+          case 18:
             return _context.abrupt('return', post);
 
-          case 20:
+          case 19:
           case 'end':
             return _context.stop();
         }
@@ -125,13 +123,13 @@ var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
 
+var _files2 = require('../helpers/files');
+
+var Files = _interopRequireWildcard(_files2);
+
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
-
-var _files2 = require('../storage/files');
-
-var Files = _interopRequireWildcard(_files2);
 
 var _geolocation = require('../storage/geolocation');
 
@@ -147,7 +145,7 @@ var router = _express2.default.Router();
 
 router.post('/action/markupText', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, res, next) {
-    var _ref2, _ref2$fields, boardName, text, markupMode, signAsOp, tripcode, board, rawText, markupModes, data;
+    var _ref2, _ref2$fields, boardName, text, markupMode, signAsOp, tripcode, rawText, markupModes, data;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -165,35 +163,34 @@ router.post('/action/markupText', function () {
             markupMode = _ref2$fields.markupMode;
             signAsOp = _ref2$fields.signAsOp;
             tripcode = _ref2$fields.tripcode;
-            board = _board2.default.board(boardName);
 
-            if (board) {
-              _context2.next = 13;
+            if (_board2.default.board(boardName)) {
+              _context2.next = 12;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
-          case 13:
-            _context2.next = 15;
+          case 12:
+            _context2.next = 14;
             return UsersModel.checkUserBan(req.ip, boardName, { write: true });
 
-          case 15:
+          case 14:
             //TODO: Should it really be "write"?
             rawText = text || '';
-            _context2.next = 18;
+            _context2.next = 17;
             return testParameters(boardName, 'markupText', { fields: fields });
 
-          case 18:
+          case 17:
             markupMode = markupMode || '';
             markupModes = _markup2.default.markupModes(markupMode);
-            _context2.next = 22;
+            _context2.next = 21;
             return (0, _markup2.default)(boardName, text, {
               markupModes: markupModes,
               accessLevel: req.level(boardName)
             });
 
-          case 22:
+          case 21:
             text = _context2.sent;
             data = {
               boardName: boardName,
@@ -210,21 +207,21 @@ router.post('/action/markupText', function () {
               data.tripcode = Tools.generateTripcode(req.hashpass);
             }
             res.json(data);
-            _context2.next = 31;
+            _context2.next = 30;
             break;
 
-          case 28:
-            _context2.prev = 28;
+          case 27:
+            _context2.prev = 27;
             _context2.t0 = _context2['catch'](0);
 
             next(_context2.t0);
 
-          case 31:
+          case 30:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, this, [[0, 28]]);
+    }, _callee2, this, [[0, 27]]);
   }));
 
   return function (_x5, _x6, _x7) {
@@ -234,7 +231,7 @@ router.post('/action/markupText', function () {
 
 router.post('/action/createPost', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, res, next) {
-    var transaction, _ref3, _fields, files, boardName, threadNumber, captchaEngine, board, _post, hash, path;
+    var transaction, _ref3, _fields, files, boardName, threadNumber, captchaEngine, _post, hash, path;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -252,70 +249,68 @@ router.post('/action/createPost', function () {
             boardName = _fields.boardName;
             threadNumber = _fields.threadNumber;
             captchaEngine = _fields.captchaEngine;
-            board = _board2.default.board(boardName);
 
-            if (board) {
-              _context3.next = 13;
+            if (_board2.default.board(boardName)) {
+              _context3.next = 12;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
-          case 13:
+          case 12:
             threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (threadNumber) {
-              _context3.next = 16;
+              _context3.next = 15;
               break;
             }
 
             throw new Error(Tools.translate('Invalid thread'));
 
-          case 16:
-            _context3.next = 18;
-            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
-
-          case 18:
-            _context3.next = 20;
+          case 15:
+            _context3.next = 17;
             return (0, _geolocation2.default)(req.ip);
 
-          case 20:
-            req.geolocation = _context3.sent;
-            _context3.next = 23;
-            return UsersModel.checkGeoBan(req.geolocation);
+          case 17:
+            req.geolocationInfo = _context3.sent;
+            _context3.next = 20;
+            return UsersModel.checkUserBan(req.ip, boardName, {
+              write: true,
+              geolocationInfo: req.geolocationInfo
+            });
 
-          case 23:
-            _context3.next = 25;
+          case 20:
+            _context3.next = 22;
             return _captcha2.default.checkCaptcha(req.ip, _fields);
 
-          case 25:
-            _context3.next = 27;
+          case 22:
+            _context3.next = 24;
             return Files.getFiles(_fields, files);
 
-          case 27:
+          case 24:
             files = _context3.sent;
-            _context3.next = 30;
+            _context3.next = 27;
             return testParameters(boardName, 'createPost', {
               fields: _fields,
               files: files
             });
 
-          case 30:
+          case 27:
             transaction = new _postCreationTransaction2.default(boardName);
-            _context3.next = 33;
+            _context3.next = 30;
             return Files.processFiles(boardName, files, transaction);
 
-          case 33:
+          case 30:
             files = _context3.sent;
-            _context3.next = 36;
+            _context3.next = 33;
             return PostsModel.createPost(req, _fields, files, transaction);
 
-          case 36:
+          case 33:
             _post = _context3.sent;
-            _context3.next = 39;
+            _context3.next = 36;
             return IPC.render(_post.boardName, _post.threadNumber, _post.number, 'create');
 
-          case 39:
+          case 36:
             //hasNewPosts.add(c.post.boardName + "/" + c.post.threadNumber); //TODO: pass to main process immediately
             if ('node-captcha-noscript' !== captchaEngine) {
               res.send({
@@ -328,11 +323,11 @@ router.post('/action/createPost', function () {
 
               res.redirect(303, path);
             }
-            _context3.next = 46;
+            _context3.next = 43;
             break;
 
-          case 42:
-            _context3.prev = 42;
+          case 39:
+            _context3.prev = 39;
             _context3.t0 = _context3['catch'](1);
 
             if (transaction) {
@@ -340,12 +335,12 @@ router.post('/action/createPost', function () {
             }
             next(_context3.t0);
 
-          case 46:
+          case 43:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[1, 42]]);
+    }, _callee3, this, [[1, 39]]);
   }));
 
   return function (_x8, _x9, _x10) {
@@ -355,7 +350,7 @@ router.post('/action/createPost', function () {
 
 router.post('/action/createThread', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(req, res, next) {
-    var transaction, _ref4, _fields2, files, boardName, captchaEngine, board, thread, _post2;
+    var transaction, _ref4, _fields2, files, boardName, captchaEngine, thread, _post2;
 
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -372,68 +367,66 @@ router.post('/action/createThread', function () {
             files = _ref4.files;
             boardName = _fields2.boardName;
             captchaEngine = _fields2.captchaEngine;
-            board = _board2.default.board(boardName);
 
-            if (board) {
-              _context4.next = 12;
+            if (_board2.default.board(boardName)) {
+              _context4.next = 11;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
-          case 12:
-            _context4.next = 14;
-            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
-
-          case 14:
-            _context4.next = 16;
+          case 11:
+            _context4.next = 13;
             return (0, _geolocation2.default)(req.ip);
 
-          case 16:
-            req.geolocation = _context4.sent;
-            _context4.next = 19;
-            return UsersModel.checkGeoBan(req.geolocation);
+          case 13:
+            req.geolocationInfo = _context4.sent;
+            _context4.next = 16;
+            return UsersModel.checkUserBan(req.ip, boardName, {
+              write: true,
+              geolocationInfo: req.geolocationInfo
+            });
 
-          case 19:
-            _context4.next = 21;
+          case 16:
+            _context4.next = 18;
             return _captcha2.default.checkCaptcha(req.ip, _fields2);
 
-          case 21:
-            _context4.next = 23;
+          case 18:
+            _context4.next = 20;
             return Files.getFiles(_fields2, files);
 
-          case 23:
+          case 20:
             files = _context4.sent;
-            _context4.next = 26;
+            _context4.next = 23;
             return testParameters(boardName, 'createThread', {
               fields: _fields2,
               files: files
             });
 
-          case 26:
+          case 23:
             transaction = new _postCreationTransaction2.default(boardName);
-            _context4.next = 29;
+            _context4.next = 26;
             return ThreadsModel.createThread(req, _fields2, transaction);
 
-          case 29:
+          case 26:
             thread = _context4.sent;
-            _context4.next = 32;
+            _context4.next = 29;
             return Files.processFiles(boardName, files, transaction);
 
-          case 32:
+          case 29:
             files = _context4.sent;
-            _context4.next = 35;
+            _context4.next = 32;
             return PostsModel.createPost(req, _fields2, files, transaction, {
               postNumber: thread.number,
               date: new Date(thread.createdAt)
             });
 
-          case 35:
+          case 32:
             _post2 = _context4.sent;
-            _context4.next = 38;
+            _context4.next = 35;
             return IPC.render(_post2.boardName, _post2.threadNumber, _post2.number, 'create');
 
-          case 38:
+          case 35:
             if ('node-captcha-noscript' !== captchaEngine) {
               res.send({
                 boardName: thread.boardName,
@@ -442,11 +435,11 @@ router.post('/action/createThread', function () {
             } else {
               res.redirect(303, '/' + (0, _config2.default)('site.pathPrefix') + thread.boardName + '/res/' + thread.number + '.html');
             }
-            _context4.next = 45;
+            _context4.next = 42;
             break;
 
-          case 41:
-            _context4.prev = 41;
+          case 38:
+            _context4.prev = 38;
             _context4.t0 = _context4['catch'](1);
 
             if (transaction) {
@@ -454,12 +447,12 @@ router.post('/action/createThread', function () {
             }
             next(_context4.t0);
 
-          case 45:
+          case 42:
           case 'end':
             return _context4.stop();
         }
       }
-    }, _callee4, this, [[1, 41]]);
+    }, _callee4, this, [[1, 38]]);
   }));
 
   return function (_x11, _x12, _x13) {
@@ -496,33 +489,32 @@ router.post('/action/editPost', function () {
 
           case 10:
             _context5.next = 12;
-            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
-
-          case 12:
-            _context5.next = 14;
             return (0, _geolocation2.default)(req.ip);
 
-          case 14:
-            req.geolocation = _context5.sent;
+          case 12:
+            req.geolocationInfo = _context5.sent;
+            _context5.next = 15;
+            return UsersModel.checkUserBan(req.ip, boardName, {
+              write: true,
+              geolocationInfo: req.geolocationInfo
+            });
+
+          case 15:
             _context5.next = 17;
-            return UsersModel.checkGeoBan(req.geolocation);
+            return UsersModel.checkUserPermissions(req, boardName, postNumber, 'editPost');
 
           case 17:
             _context5.next = 19;
-            return UsersModel.checkUserPermissions(req, boardName, postNumber, 'editPost');
-
-          case 19:
-            _context5.next = 21;
             return testParameters(boardName, 'editPost', {
               fields: _fields3,
               postNumber: postNumber
             });
 
-          case 21:
-            _context5.next = 23;
+          case 19:
+            _context5.next = 21;
             return PostsModel.editPost(req, _fields3);
 
-          case 23:
+          case 21:
             _post3 = _context5.sent;
 
             IPC.render(boardName, _post3.threadNumber, postNumber, 'edit');
@@ -530,21 +522,21 @@ router.post('/action/editPost', function () {
               boardName: _post3.boardName,
               postNumber: _post3.number
             });
-            _context5.next = 31;
+            _context5.next = 29;
             break;
 
-          case 28:
-            _context5.prev = 28;
+          case 26:
+            _context5.prev = 26;
             _context5.t0 = _context5['catch'](0);
 
             next(_context5.t0);
 
-          case 31:
+          case 29:
           case 'end':
             return _context5.stop();
         }
       }
-    }, _callee5, this, [[0, 28]]);
+    }, _callee5, this, [[0, 26]]);
   }));
 
   return function (_x14, _x15, _x16) {
@@ -554,7 +546,7 @@ router.post('/action/editPost', function () {
 
 router.post('/action/addFiles', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(req, res, next) {
-    var transaction, _ref6, _fields4, files, boardName, postNumber, board, _post4;
+    var transaction, _ref6, _fields4, files, boardName, postNumber, _post4;
 
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -571,96 +563,94 @@ router.post('/action/addFiles', function () {
             files = _ref6.files;
             boardName = _fields4.boardName;
             postNumber = _fields4.postNumber;
-            board = _board2.default.board(boardName);
 
-            if (board) {
-              _context6.next = 12;
+            if (_board2.default.board(boardName)) {
+              _context6.next = 11;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
-          case 12:
+          case 11:
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (postNumber) {
-              _context6.next = 15;
+              _context6.next = 14;
               break;
             }
 
             throw new Error(Tools.translate('Invalid post number'));
 
-          case 15:
-            _context6.next = 17;
-            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
-
-          case 17:
-            _context6.next = 19;
+          case 14:
+            _context6.next = 16;
             return (0, _geolocation2.default)(req.ip);
 
-          case 19:
-            req.geolocation = _context6.sent;
-            _context6.next = 22;
-            return UsersModel.checkGeoBan(req.geolocation);
+          case 16:
+            req.geolocationInfo = _context6.sent;
+            _context6.next = 19;
+            return UsersModel.checkUserBan(req.ip, boardName, {
+              write: true,
+              geolocationInfo: req.geolocationInfo
+            });
 
-          case 22:
-            _context6.next = 24;
+          case 19:
+            _context6.next = 21;
             return UsersModel.checkUserPermissions(req, boardName, postNumber, 'addFilesToPost');
 
-          case 24:
-            _context6.next = 26;
+          case 21:
+            _context6.next = 23;
             return PostsModel.getPost(boardName, postNumber);
 
-          case 26:
+          case 23:
             _post4 = _context6.sent;
 
             if (_post4) {
-              _context6.next = 29;
+              _context6.next = 26;
               break;
             }
 
             return _context6.abrupt('return', Promise.reject(Tools.translate('No such post')));
 
-          case 29:
-            _context6.next = 31;
+          case 26:
+            _context6.next = 28;
             return Files.getFiles(_fields4, files);
 
-          case 31:
+          case 28:
             files = _context6.sent;
 
             if (!(files.length <= 0)) {
-              _context6.next = 34;
+              _context6.next = 31;
               break;
             }
 
             throw new Error(Tools.translate('No file specified'));
 
-          case 34:
-            _context6.next = 36;
+          case 31:
+            _context6.next = 33;
             return testParameters(boardName, 'addFiles', {
               fields: _fields4,
               files: files,
               postNumber: postNumber
             });
 
-          case 36:
+          case 33:
             transaction = new _postCreationTransaction2.default(boardName);
-            _context6.next = 39;
+            _context6.next = 36;
             return Files.processFiles(boardName, files, transaction);
 
-          case 39:
+          case 36:
             files = _context6.sent;
-            _context6.next = 42;
+            _context6.next = 39;
             return FilesModel.addFilesToPost(boardName, postNumber, files, transaction);
 
-          case 42:
+          case 39:
             IPC.render(boardName, _post4.threadNumber, postNumber, 'edit');
             res.send({});
-            _context6.next = 50;
+            _context6.next = 47;
             break;
 
-          case 46:
-            _context6.prev = 46;
+          case 43:
+            _context6.prev = 43;
             _context6.t0 = _context6['catch'](1);
 
             if (transaction) {
@@ -668,12 +658,12 @@ router.post('/action/addFiles', function () {
             }
             next(_context6.t0);
 
-          case 50:
+          case 47:
           case 'end':
             return _context6.stop();
         }
       }
-    }, _callee6, this, [[1, 46]]);
+    }, _callee6, this, [[1, 43]]);
   }));
 
   return function (_x17, _x18, _x19) {
@@ -683,7 +673,7 @@ router.post('/action/addFiles', function () {
 
 router.post('/action/deletePost', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(req, res, next) {
-    var _ref7, _fields5, boardName, postNumber, password, board;
+    var _ref7, _fields5, boardName, postNumber, password;
 
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
@@ -699,63 +689,61 @@ router.post('/action/deletePost', function () {
             boardName = _fields5.boardName;
             postNumber = _fields5.postNumber;
             password = _fields5.password;
-            board = _board2.default.board(boardName);
 
-            if (board) {
-              _context7.next = 11;
+            if (_board2.default.board(boardName)) {
+              _context7.next = 10;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
-          case 11:
+          case 10:
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (postNumber) {
-              _context7.next = 14;
+              _context7.next = 13;
               break;
             }
 
             throw new Error(Tools.translate('Invalid post number'));
 
-          case 14:
-            _context7.next = 16;
-            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
-
-          case 16:
-            _context7.next = 18;
+          case 13:
+            _context7.next = 15;
             return (0, _geolocation2.default)(req.ip);
 
-          case 18:
-            req.geolocation = _context7.sent;
-            _context7.next = 21;
-            return UsersModel.checkGeoBan(req.geolocation);
+          case 15:
+            req.geolocationInfo = _context7.sent;
+            _context7.next = 18;
+            return UsersModel.checkUserBan(req.ip, boardName, {
+              write: true,
+              geolocationInfo: req.geolocationInfo
+            });
 
-          case 21:
-            _context7.next = 23;
+          case 18:
+            _context7.next = 20;
             return UsersModel.checkUserPermissions(req, boardName, postNumber, 'deletePost', Tools.sha1(password));
 
-          case 23:
-            _context7.next = 25;
+          case 20:
+            _context7.next = 22;
             return PostsModel.deletePost(req, _fields5);
 
-          case 25:
+          case 22:
             res.send({});
-            _context7.next = 31;
+            _context7.next = 28;
             break;
 
-          case 28:
-            _context7.prev = 28;
+          case 25:
+            _context7.prev = 25;
             _context7.t0 = _context7['catch'](0);
 
             next(_context7.t0);
 
-          case 31:
+          case 28:
           case 'end':
             return _context7.stop();
         }
       }
-    }, _callee7, this, [[0, 28]]);
+    }, _callee7, this, [[0, 25]]);
   }));
 
   return function (_x20, _x21, _x22) {
@@ -806,48 +794,47 @@ router.post('/action/deleteFile', function () {
             boardName = fileInfo.boardName;
             postNumber = fileInfo.postNumber;
             _context8.next = 18;
-            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
-
-          case 18:
-            _context8.next = 20;
             return (0, _geolocation2.default)(req.ip);
 
-          case 20:
-            req.geolocation = _context8.sent;
+          case 18:
+            req.geolocationInfo = _context8.sent;
+            _context8.next = 21;
+            return UsersModel.checkUserBan(req.ip, boardName, {
+              write: true,
+              geolocationInfo: req.geolocationInfo
+            });
+
+          case 21:
             _context8.next = 23;
-            return UsersModel.checkGeoBan(req.geolocation);
+            return UsersModel.checkUserPermissions(req, boardName, postNumber, 'deleteFile', Tools.sha1(password));
 
           case 23:
             _context8.next = 25;
-            return UsersModel.checkUserPermissions(req, boardName, postNumber, 'deleteFile', Tools.sha1(password));
-
-          case 25:
-            _context8.next = 27;
             return testParameters(boardName, 'deleteFile', { postNumber: postNumber });
 
-          case 27:
+          case 25:
             _post5 = _context8.sent;
-            _context8.next = 30;
+            _context8.next = 28;
             return FilesModel.deleteFile(fileName);
 
-          case 30:
+          case 28:
             IPC.render(boardName, _post5.threadNumber, postNumber, 'edit');
             res.send({});
-            _context8.next = 37;
+            _context8.next = 35;
             break;
 
-          case 34:
-            _context8.prev = 34;
+          case 32:
+            _context8.prev = 32;
             _context8.t0 = _context8['catch'](0);
 
             next(_context8.t0);
 
-          case 37:
+          case 35:
           case 'end':
             return _context8.stop();
         }
       }
-    }, _callee8, this, [[0, 34]]);
+    }, _callee8, this, [[0, 32]]);
   }));
 
   return function (_x23, _x24, _x25) {
@@ -899,43 +886,42 @@ router.post('/action/editFileRating', function () {
             boardName = fileInfo.boardName;
             postNumber = fileInfo.postNumber;
             _context9.next = 19;
-            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
-
-          case 19:
-            _context9.next = 21;
             return (0, _geolocation2.default)(req.ip);
 
-          case 21:
-            req.geolocation = _context9.sent;
+          case 19:
+            req.geolocationInfo = _context9.sent;
+            _context9.next = 22;
+            return UsersModel.checkUserBan(req.ip, boardName, {
+              write: true,
+              geolocationInfo: req.geolocationInfo
+            });
+
+          case 22:
             _context9.next = 24;
-            return UsersModel.checkGeoBan(req.geolocation);
+            return UsersModel.checkUserPermissions(req, boardName, postNumber, 'editFileRating', Tools.sha1(password));
 
           case 24:
             _context9.next = 26;
-            return UsersModel.checkUserPermissions(req, boardName, postNumber, 'editFileRating', Tools.sha1(password));
-
-          case 26:
-            _context9.next = 28;
             return FilesModel.editFileRating(fileName, rating);
 
-          case 28:
+          case 26:
             IPC.render(boardName, post.threadNumber, postNumber, 'edit');
             res.send({});
-            _context9.next = 35;
+            _context9.next = 33;
             break;
 
-          case 32:
-            _context9.prev = 32;
+          case 30:
+            _context9.prev = 30;
             _context9.t0 = _context9['catch'](0);
 
             next(_context9.t0);
 
-          case 35:
+          case 33:
           case 'end':
             return _context9.stop();
         }
       }
-    }, _callee9, this, [[0, 32]]);
+    }, _callee9, this, [[0, 30]]);
   }));
 
   return function (_x26, _x27, _x28) {
@@ -945,83 +931,91 @@ router.post('/action/editFileRating', function () {
 
 router.post('/action/editAudioTags', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(req, res, next) {
-    var _ref10, fields, fileName, password, fileInfo, boardName, postNumber;
+    var _ref10, _fields8, fileName, password, fileInfo, boardName, postNumber;
 
     return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
         switch (_context10.prev = _context10.next) {
           case 0:
-            _context10.next = 2;
+            _context10.prev = 0;
+            _context10.next = 3;
             return Tools.parseForm(req);
 
-          case 2:
+          case 3:
             _ref10 = _context10.sent;
-            fields = _ref10.fields;
-            fileName = fields.fileName;
-            password = fields.password;
+            _fields8 = _ref10.fields;
+            fileName = _fields8.fileName;
+            password = _fields8.password;
 
             if (!(!fileName || typeof fileName !== 'string')) {
-              _context10.next = 8;
+              _context10.next = 9;
               break;
             }
 
             throw new Error(Tools.translate('Invalid file name'));
 
-          case 8:
-            _context10.next = 10;
+          case 9:
+            _context10.next = 11;
             return FilesModel.getFileInfoByName(fileName);
 
-          case 10:
+          case 11:
             fileInfo = _context10.sent;
 
             if (fileInfo) {
-              _context10.next = 13;
+              _context10.next = 14;
               break;
             }
 
             throw new Error(Tools.translate('No such file'));
 
-          case 13:
+          case 14:
             if (Tools.isAudioType(fileInfo.mimeType)) {
-              _context10.next = 15;
+              _context10.next = 16;
               break;
             }
 
             throw new Error(Tools.translate('Not an audio file'));
 
-          case 15:
+          case 16:
             boardName = fileInfo.boardName;
             postNumber = fileInfo.postNumber;
-            _context10.next = 19;
-            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
-
-          case 19:
-            _context10.next = 21;
+            _context10.next = 20;
             return (0, _geolocation2.default)(req.ip);
 
-          case 21:
-            req.geolocation = _context10.sent;
-            _context10.next = 24;
-            return UsersModel.checkGeoBan(req.geolocation);
+          case 20:
+            req.geolocationInfo = _context10.sent;
+            _context10.next = 23;
+            return UsersModel.checkUserBan(req.ip, boardName, {
+              write: true,
+              geolocationInfo: req.geolocationInfo
+            });
 
-          case 24:
-            _context10.next = 26;
+          case 23:
+            _context10.next = 25;
             return UsersModel.checkUserPermissions(req, boardName, postNumber, 'editAudioTags', Tools.sha1(password));
 
-          case 26:
-            _context10.next = 28;
-            return FilesModel.editAudioTags(fileName, fields);
+          case 25:
+            _context10.next = 27;
+            return FilesModel.editAudioTags(fileName, _fields8);
 
-          case 28:
+          case 27:
             IPC.render(boardName, post.threadNumber, postNumber, 'edit');
             res.send({});
+            _context10.next = 34;
+            break;
 
-          case 30:
+          case 31:
+            _context10.prev = 31;
+            _context10.t0 = _context10['catch'](0);
+
+            next(_context10.t0);
+
+          case 34:
           case 'end':
             return _context10.stop();
         }
       }
-    }, _callee10, this);
+    }, _callee10, this, [[0, 31]]);
   }));
 
   return function (_x29, _x30, _x31) {

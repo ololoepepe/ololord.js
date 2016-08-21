@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.rebuildSearchIndex = exports.rerenderPosts = exports.getPostFileCount = exports.deletePost = exports.editPost = exports.removePost = exports.createPost = exports.addReferencedPosts = exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
+exports.processMovedThreadRelatedPosts = exports.processMovedThreadPosts = exports.rebuildSearchIndex = exports.rerenderPosts = exports.getPostFileCount = exports.deletePost = exports.editPost = exports.removePost = exports.createPost = exports.addReferencedPosts = exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -489,7 +489,7 @@ var createPost = exports.createPost = function () {
               bannedFor: false,
               boardName: boardName,
               createdAt: date.toISOString(),
-              geolocation: req.geolocation,
+              geolocation: req.geolocationInfo,
               markup: markupModes,
               name: name || null,
               number: postNumber,
@@ -1574,6 +1574,334 @@ var rebuildSearchIndex = exports.rebuildSearchIndex = function () {
   }));
 
   return function rebuildSearchIndex() {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var processMovedThreadPostReferences = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee31(_ref11) {
+    var references = _ref11.references;
+    var entity = _ref11.entity;
+    var sourceBoardName = _ref11.sourceBoardName;
+    var targetBoardName = _ref11.targetBoardName;
+    var threadNumber = _ref11.threadNumber;
+    var postNumberMap = _ref11.postNumberMap;
+    var toRerender = _ref11.toRerender;
+    var toUpdate = _ref11.toUpdate;
+    return regeneratorRuntime.wrap(function _callee31$(_context31) {
+      while (1) {
+        switch (_context31.prev = _context31.next) {
+          case 0:
+            _context31.next = 2;
+            return Tools.series(references, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee30(ref) {
+                var nref;
+                return regeneratorRuntime.wrap(function _callee30$(_context30) {
+                  while (1) {
+                    switch (_context30.prev = _context30.next) {
+                      case 0:
+                        nref = void 0;
+
+                        if (ref.boardName === sourceBoardName && ref.threadNumber === threadNumber) {
+                          nref = {
+                            boardName: targetBoardName,
+                            threadNumber: post.threadNumber,
+                            postNumber: postNumberMap[ref.postNumber]
+                          };
+                        } else {
+                          nref = ref;
+                          toUpdate[ref.boardName + ':' + ref.threadNumber] = {
+                            boardName: ref.boardName,
+                            threadNumber: ref.threadNumber
+                          };
+                          if (toRerender) {
+                            toRerender[ref.boardName + ':' + ref.postNumber] = {
+                              boardName: ref.boardName,
+                              postNumber: ref.postNumber
+                            };
+                          }
+                        }
+                        _context30.next = 4;
+                        return entity.deleteOne(ref.boardName + ':' + ref.postNumber, sourceBoardName + ':' + oldPostNumber);
+
+                      case 4:
+                        _context30.next = 6;
+                        return entity.setOne(nref.boardName + ':' + nref.postNumber, targetBoard.name + ':' + post.number, nref);
+
+                      case 6:
+                      case 'end':
+                        return _context30.stop();
+                    }
+                  }
+                }, _callee30, this);
+              }));
+
+              return function (_x66) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 2:
+          case 'end':
+            return _context31.stop();
+        }
+      }
+    }, _callee31, this);
+  }));
+
+  return function processMovedThreadPostReferences(_x65) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var processMovedThreadPosts = exports.processMovedThreadPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee34(_ref12) {
+    var posts = _ref12.posts;
+    var postNumberMap = _ref12.postNumberMap;
+    var threadNumber = _ref12.threadNumber;
+    var targetBoard = _ref12.targetBoard;
+    var sourceBoardName = _ref12.sourceBoardName;
+    var sourcePath = _ref12.sourcePath;
+    var sourceThumbPath = _ref12.sourceThumbPath;
+    var targetPath = _ref12.targetPath;
+    var targetThumbPath = _ref12.targetThumbPath;
+    var toRerender, toUpdate;
+    return regeneratorRuntime.wrap(function _callee34$(_context34) {
+      while (1) {
+        switch (_context34.prev = _context34.next) {
+          case 0:
+            toRerender = {};
+            toUpdate = {};
+            _context34.next = 4;
+            return Tools.series(posts, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee33(post) {
+                var oldPostNumber, referencedPosts, extraData, referringPosts, fileInfos;
+                return regeneratorRuntime.wrap(function _callee33$(_context33) {
+                  while (1) {
+                    switch (_context33.prev = _context33.next) {
+                      case 0:
+                        oldPostNumber = post.number;
+
+                        post.number = postNumberMap.get(post.number);
+                        post.threadNumber = threadNumber;
+                        post.boardName = targetBoard.name;
+                        referencedPosts = post.referencedPosts;
+
+                        delete post.referencedPosts;
+                        extraData = post.extraData;
+
+                        delete post.extraData;
+                        referringPosts = post.referringPosts;
+
+                        delete post.referringPosts;
+                        fileInfos = post.fileInfos;
+
+                        delete post.fileInfos;
+                        if (post.rawText) {
+                          (0, _underscore2.default)(postNumberMap).each(function (newPostNumber, previousPostNumber) {
+                            var rx = new RegExp('>>/' + sourceBoardName + '/' + previousPostNumber, 'g');
+                            post.rawText = post.rawText.replace(rx, '>>/' + targetBoard.name + '/' + newPostNumber);
+                            rx = new RegExp('>>' + previousPostNumber, 'g');
+                            post.rawText = post.rawText.replace(rx, '>>' + newPostNumber);
+                          });
+                          referencedPosts.filter(function (ref) {
+                            return ref.boardName === sourceBoardName;
+                          }).forEach(function (ref) {
+                            var rx = new RegExp('>>' + ref.postNumber, 'g');
+                            post.rawText = post.rawText.replace(rx, '>>/' + sourceBoardName + '/' + ref.postNumber);
+                          });
+                        }
+
+                        if (!post.rawText) {
+                          _context33.next = 17;
+                          break;
+                        }
+
+                        _context33.next = 16;
+                        return (0, _markup2.default)(targetBoard.name, post.rawText, {
+                          markupModes: post.markup,
+                          accessLevel: post.user.level
+                        });
+
+                      case 16:
+                        post.text = _context33.sent;
+
+                      case 17:
+                        _context33.next = 19;
+                        return Posts.setOne(targetBoard.name + ':' + post.number, post);
+
+                      case 19:
+                        _context33.next = 21;
+                        return targetBoard.storeExtraData(post.number, extraData);
+
+                      case 21:
+                        _context33.next = 23;
+                        return processMovedThreadPostReferences({
+                          references: referencedPosts,
+                          entity: ReferencedPosts,
+                          sourceBoardName: sourceBoardName,
+                          targetBoardName: targetBoard.name,
+                          threadNumber: threadNumber,
+                          postNumberMap: postNumberMap,
+                          toUpdate: toUpdate
+                        });
+
+                      case 23:
+                        _context33.next = 25;
+                        return processMovedThreadPostReferences({
+                          references: referringPosts,
+                          entity: ReferringPosts,
+                          sourceBoardName: sourceBoardName,
+                          targetBoardName: targetBoard.name,
+                          threadNumber: threadNumber,
+                          postNumberMap: postNumberMap,
+                          toRerender: toRerender,
+                          toUpdate: toUpdate
+                        });
+
+                      case 25:
+                        _context33.next = 27;
+                        return UsersModel.addUserPostNumber(post.user.ip, targetBoard.name, post.number);
+
+                      case 27:
+                        _context33.next = 29;
+                        return FilesModel.addFilesToPost(targetBoard.name, post.number, fileInfos);
+
+                      case 29:
+                        _context33.next = 31;
+                        return Tools.series(fileInfos, function () {
+                          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee32(fileInfo) {
+                            return regeneratorRuntime.wrap(function _callee32$(_context32) {
+                              while (1) {
+                                switch (_context32.prev = _context32.next) {
+                                  case 0:
+                                    _context32.next = 2;
+                                    return FS.move(sourcePath + '/' + fileInfo.name, targetPath + '/' + fileInfo.name);
+
+                                  case 2:
+                                    _context32.next = 4;
+                                    return FS.move(sourceThumbPath + '/' + fileInfo.thumb.name, targetThumbPath + '/' + fileInfo.thumb.name);
+
+                                  case 4:
+                                  case 'end':
+                                    return _context32.stop();
+                                }
+                              }
+                            }, _callee32, this);
+                          }));
+
+                          return function (_x69) {
+                            return ref.apply(this, arguments);
+                          };
+                        }());
+
+                      case 31:
+                        _context33.next = 33;
+                        return Search.indexPost(targetBoard.name, post.number, threadNumber, post.plainText, post.subject);
+
+                      case 33:
+                      case 'end':
+                        return _context33.stop();
+                    }
+                  }
+                }, _callee33, this);
+              }));
+
+              return function (_x68) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 4:
+            return _context34.abrupt('return', {
+              toRerender: toRerender,
+              toUpdate: toUpdate
+            });
+
+          case 5:
+          case 'end':
+            return _context34.stop();
+        }
+      }
+    }, _callee34, this);
+  }));
+
+  return function processMovedThreadPosts(_x67) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var processMovedThreadRelatedPosts = exports.processMovedThreadRelatedPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee36(_ref13) {
+    var posts = _ref13.posts;
+    var sourceBoardName = _ref13.sourceBoardName;
+    var postNumberMap = _ref13.postNumberMap;
+    return regeneratorRuntime.wrap(function _callee36$(_context36) {
+      while (1) {
+        switch (_context36.prev = _context36.next) {
+          case 0:
+            _context36.next = 2;
+            return Tools.series(posts, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee35(post) {
+                return regeneratorRuntime.wrap(function _callee35$(_context35) {
+                  while (1) {
+                    switch (_context35.prev = _context35.next) {
+                      case 0:
+                        _context35.next = 2;
+                        return PostsModel.getPost(post.boardName, post.postNumber);
+
+                      case 2:
+                        post = _context35.sent;
+
+                        if (post.rawText) {
+                          _context35.next = 5;
+                          break;
+                        }
+
+                        return _context35.abrupt('return');
+
+                      case 5:
+                        (0, _underscore2.default)(postNumberMap).each(function (newPostNumber, previousPostNumber) {
+                          var rx = new RegExp('>>/' + sourceBoardName + '/' + previousPostNumber, 'g');
+                          post.rawText = post.rawText.replace(rx, '>>/' + targetBoardName + '/' + newPostNumber);
+                          if (post.boardName === sourceBoardName) {
+                            rx = new RegExp('>>' + previousPostNumber, 'g');
+                            post.rawText = post.rawText.replace(rx, '>>/' + targetBoardName + '/' + newPostNumber);
+                          }
+                        });
+                        _context35.next = 8;
+                        return (0, _markup2.default)(post.boardName, post.rawText, {
+                          markupModes: post.markup,
+                          accessLevel: post.user.level
+                        });
+
+                      case 8:
+                        post.text = _context35.sent;
+                        _context35.next = 11;
+                        return Posts.setOne(post.boardName + ':' + post.number, post);
+
+                      case 11:
+                      case 'end':
+                        return _context35.stop();
+                    }
+                  }
+                }, _callee35, this);
+              }));
+
+              return function (_x71) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 2:
+          case 'end':
+            return _context36.stop();
+        }
+      }
+    }, _callee36, this);
+  }));
+
+  return function processMovedThreadRelatedPosts(_x70) {
     return ref.apply(this, arguments);
   };
 }();

@@ -66,3 +66,10 @@ export async function createThumbnail(file, thumbPath) {
   }
   return result;
 }
+
+export async function rerenderPostFileInfo(fileInfo) {
+  if (fileInfo.dimensions) {
+    fileInfo.sizeText += `, ${fileInfo.dimensions.width}x${fileInfo.dimensions.height}`;
+  }
+  return fileInfo;
+}

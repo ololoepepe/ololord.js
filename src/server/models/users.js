@@ -32,6 +32,10 @@ let SuperuserHashes = new UnorderedSet(client(), 'superuserHashes', {
 });
 let SynchronizationData = new Key(client(), 'synchronizationData');
 let Threads = new Hash(client(), 'threads');
+let UserBanPostNumbers = new Hash(client(), 'userBanPostNumbers', {
+  parse: number => +number,
+  stringify: number => number.toString()
+});
 let UserBans = new Key(client(), 'userBans');
 let UserCaptchaQuotas = new Hash(client(), 'captchaQuotas', {
   parse: quota => +quota,
@@ -61,7 +65,15 @@ let ipBans = Tools.createWatchedResource(`${__dirname}/../misc/user-bans.json`, 
 
 function transformGeoBans(bans) {
   return _(bans).reduce((acc, value, key) => {
-    acc.set(key.toUpperCase(), !!value);
+    if (typeof value === 'string') {
+      value = [value];
+    }
+    if (_(value).isArray()) {
+      value = new Set(value.map(ip => Tools.correctAddress(ip)).filter(ip => !!ip));
+    } else {
+      value = !!value;
+    }
+    acc.set(key.toUpperCase(), value);
     return acc;
   }, new Map());
 }
@@ -183,11 +195,6 @@ export async function getRegisteredUserLevelsByIp(ip) {
     return {};
   }
   return await getRegisteredUserLevels(hashpass);
-    return db.hget("registeredUserHashes", ip).then(function(hashpass) {
-        if (!hashpass)
-            return Promise.resolve({});
-        return registeredUserLevels(hashpass);
-    });
 }
 
 export async function getRegisteredUser(hashpass) {
@@ -340,7 +347,31 @@ export async function removeUserPostNumber(ip, boardName, postNumber) {
   await UserPostNumbers.deleteOne(postNumber, `${ip}:${boardName}`);
 }
 
-export async function checkUserBan(ip, boardNames, { write } = {}) {
+function checkGeoBan(geolocationInfo, ip) {
+  let def = geoBans.get('*');
+  if (def) {
+    geolocationInfo = geolocationInfo || {};
+  } else if (!geolocationInfo || !geolocationInfo.countryCode) {
+    return;
+  }
+  let countryCode = geolocationInfo.countryCode;
+  if (typeof countryCode !== 'string') {
+    countryCode = '';
+  }
+  let user = geoBans.get(countryCode.toUpperCase());
+  if (ip && ((typeof user === 'object' && user.has(ip)) || (typeof def === 'object' && def.has(ip)))) {
+    return;
+  }
+  if (typeof user === 'boolean' && !user) {
+    return;
+  }
+  if (!user && !def) {
+    return;
+  }
+  return Promise.reject(new Error(Tools.translate('Posting is disabled for this country')));
+}
+
+export async function checkUserBan(ip, boardNames, { write, geolocationInfo } = {}) {
   ip = Tools.correctAddress(ip);
   let ban = ipBans[ip];
   if (ban && (write || 'NO_ACCESS' === ban.level)) {
@@ -350,6 +381,9 @@ export async function checkUserBan(ip, boardNames, { write } = {}) {
   ban = _(bans).find((ban) => { return ban && (write || 'NO_ACCESS' === ban.level); });
   if (ban) {
     return Promise.reject({ ban: ban });
+  }
+  if (geolocationInfo) {
+    return checkGeoBan(geolocationInfo, ip);
   }
 }
 
@@ -397,24 +431,92 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
   return Promise.reject(new Error(Tools.translate('Not enough rights')));
 }
 
-export function checkGeoBan(geolocationInfo) {
-  let def = geoBans.get('*');
-  if (def) {
-    geolocationInfo = geolocationInfo || {};
-  } else if (!geolocationInfo || !geolocationInfo.countryCode) {
+export async function updatePostBanInfo(boardName, postNumber) {
+  if (!Board.board(boardName)) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+  if (!postNumber) {
     return;
   }
-  let countryCode = geolocationInfo.countryCode;
-  if (typeof countryCode !== 'string') {
-    countryCode = '';
+  let post = await PostsModel.getPost(boardName, postNumber);
+  if (!post) {
+    return;
   }
-  let user = geoBans.get(countryCode.toUpperCase());
-  if (def) {
-    var banned = !user && (typeof user === 'boolean');
-  } else {
-    var banned = user;
+  await IPC.render(boardName, post.threadNumber, postNumber, 'edit');
+}
+
+export async function banUser(ip, newBans) {
+  ip = Tools.correctAddress(ip);
+  if (!ip) {
+    return Promise.reject(new Error(Tools.translate('Invalid IP address')));
   }
-  if (banned) {
-    return Promise.reject(new Error(Tools.translate('Posting is disabled for this country')));
+  let oldBans = await UsersModel.getBannedUserBans(userIp);
+  await Tools.series(Board.boardNames(), async function(boardName) {
+    let key = `${ip}:${boardName}`;
+    let ban = newBans[boardName];
+    if (ban) {
+      await UserBans.set(ban, key);
+      if (ban.expiresAt) {
+        await UserBans.expire(Math.ceil((+ban.expiresAt - +Tools.now()) / 1000), key);
+      }
+      if (ban.postNumber) {
+        await UserBanPostNumbers.setOne(key, ban.postNumber);
+        await updatePostBanInfo(boardName, ban.postNumber);
+      }
+    } else {
+      ban = oldBans[boardName];
+      if (!ban) {
+        return;
+      }
+      await UserBans.delete(key);
+      if (ban.postNumber) {
+        UserBanPostNumbers.deleteOne(ban.postNumber, key);
+        await updatePostBanInfo(boardName, ban.postNumber);
+      }
+    }
+  });
+  await BannedUserIPs[_(newBans).isEmpty() ? 'deleteOne' : 'addOne'](ip);
+}
+
+async function updateBanOnMessage(message) {
+  try {
+    let ip = Tools.correctAddress(message.split(':').slice(1, -1).join(':'));
+    if (!ip) {
+      throw new Error(Tools.translate('Invalid IP address'));
+    }
+    let boardName = message.split(':').pop();
+    if (!Board.board(boardName)) {
+      throw new Error(Tools.translate('Invalid board'));
+    }
+    let postNumber = await UserBanPostNumbers.getOne(message);
+    postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+    if (!postNumber) {
+      throw new Error(Tools.translate('Invalid post number'));
+    }
+    await UserBanPostNumbers.deleteOne(message);
+    let keys = await UserBans.find(`${ip}:*`);
+    if (!keys || keys.length <= 0) {
+      await BannedUserIPs.deleteOne(ip);
+    }
+    await updatePostBanInfo(boardName, postNumber);
+  } catch (err) {
+    Logger.error(err.stack || err);
   }
+}
+
+export async function initializeUserBansMonitoring() {
+  //NOTE: Enabling "key expired" notifications
+  const CHANNEL = `__keyevent@${config('system.redis.db')}__:expired`;
+  const db = client(true);
+  db.on('message', (channel, message) => {
+    if (CHANNEL !== channel) {
+      return;
+    }
+    updateBanOnMessage(message);
+  });
+  await client().config('SET', 'notify-keyspace-events', 'Ex');
+  db.subscribe(CHANNEL).catch((err) => {
+    Logger.error(err.stack || err);
+  });
 }

@@ -24,6 +24,10 @@ var _users = require('../models/users');
 
 var UsersModel = _interopRequireWildcard(_users);
 
+var _files = require('../helpers/files');
+
+var Files = _interopRequireWildcard(_files);
+
 var _ipc = require('../helpers/ipc');
 
 var IPC = _interopRequireWildcard(_ipc);
@@ -31,10 +35,6 @@ var IPC = _interopRequireWildcard(_ipc);
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
-
-var _files = require('../storage/files');
-
-var Files = _interopRequireWildcard(_files);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 

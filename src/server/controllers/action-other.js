@@ -18,7 +18,6 @@ import * as UsersModel from '../models/users';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
-import * as Files from '../storage/files';
 import geolocation from '../storage/geolocation';
 import PostCreationTransaction from '../storage/post-creation-transaction';
 

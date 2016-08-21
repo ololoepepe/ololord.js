@@ -56,10 +56,6 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-var _files2 = require('../storage/files');
-
-var Files = _interopRequireWildcard(_files2);
-
 var _geolocation = require('../storage/geolocation');
 
 var _geolocation2 = _interopRequireDefault(_geolocation);

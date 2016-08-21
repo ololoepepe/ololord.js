@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createThumbnail = undefined;
+exports.rerenderPostFileInfo = exports.createThumbnail = undefined;
 
 var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file, thumbPath) {
@@ -70,6 +70,30 @@ var createThumbnail = exports.createThumbnail = function () {
   }));
 
   return function createThumbnail(_x, _x2) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var rerenderPostFileInfo = exports.rerenderPostFileInfo = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileInfo) {
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            if (fileInfo.dimensions) {
+              fileInfo.sizeText += ', ' + fileInfo.dimensions.width + 'x' + fileInfo.dimensions.height;
+            }
+            return _context2.abrupt('return', fileInfo);
+
+          case 2:
+          case 'end':
+            return _context2.stop();
+        }
+      }
+    }, _callee2, this);
+  }));
+
+  return function rerenderPostFileInfo(_x3) {
     return ref.apply(this, arguments);
   };
 }();

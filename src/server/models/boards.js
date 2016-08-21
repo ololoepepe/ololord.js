@@ -86,7 +86,7 @@ export async function getPage(boardName, pageNumber) {
   }
   let threadNumbers = await ThreadsModel.getThreadNumbers(boardName);
   let threads = await ThreadsModel.getThreads(boardName, threadNumbers, { withPostNumbers: true });
-  threads.sort(Board.sortThreadsByDate);
+  threads.sort(ThreadsModel.sortThreadsByDate);
   let start = pageNumber * board.threadsPerPage;
   threads = threads.slice(start, start + board.threadsPerPage);
   await Tools.series(threads, async function(thread) {
@@ -139,13 +139,13 @@ export async function getCatalog(boardName, sortMode) {
     delete thread.postNumbers;
     addDataToThread(thread, board);
   });
-  let sortFunction = Board.sortThreadsByCreationDate;
+  let sortFunction = ThreadsModel.sortThreadsByCreationDate;
   switch ((sortMode || 'date').toLowerCase()) {
   case 'recent':
-    sortFunction = Board.sortThreadsByDate;
+    sortFunction = ThreadsModel.sortThreadsByDate;
     break;
   case 'bumps':
-    sortFunction = Board.sortThreadsByPostCount;
+    sortFunction = ThreadsModel.sortThreadsByPostCount;
     break;
   default:
     break;
@@ -237,4 +237,48 @@ export async function initialize() {
     await getPageCount(boardName);
   });
   await ThreadsModel.clearDeletedThreads();
+}
+
+export async function delall(req, ip, boardNames) {
+  ip = Tools.correctAddress(ip);
+  if (!ip) {
+    throw new Error(Tools.translate('Invalid IP address'));
+  }
+  let deletedThreads = {};
+  let updatedThreads = {};
+  let deletedPosts = {};
+  await Tools.series(boardNames, async function(boardName) {
+    let postNumbers = await UsersModel.getUserPostNumbers(ip, boardName);
+    let posts = await PostsModel.getPosts(boardName, postNumbers);
+    posts.forEach((post) => {
+      if (post.threadNumber === post.number) {
+        deletedThreads[`${boardName}:${post.threadNumber}`] = {
+          boardName: boardName,
+          number: post.threadNumber
+        };
+      }
+    });
+    posts.filter(post => !deletedThreads.hasOwnProperty(`${boardName}:${post.threadNumber}`)).forEach((post) => {
+      updatedThreads[`${boardName}:${post.threadNumber}`] = {
+        boardName: boardName,
+        number: post.threadNumber
+      };
+      deletedPosts[`${boardName}:${post.number}`] = {
+        boardName: boardName,
+        number: post.number
+      };
+    });
+  });
+  await Tools.series(deletedPosts, async function(post) {
+    await PostsModel.removePost(post.boardName, post.number);
+  });
+  await Tools.series(deletedThreads, async function(thread) {
+    await ThreadsModel.removeThread(thread.boardName, thread.number);
+  });
+  await Tools.series(updatedThreads, async function(thread) {
+    await IPC.render(thread.boardName, thread.number, thread.number, 'edit');
+  });
+  await Tools.series(deletedThreads, async function(thread) {
+    await IPC.render(thread.boardName, thread.number, thread.number, 'delete');
+  });
 }

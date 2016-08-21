@@ -93,3 +93,22 @@ export async function createThumbnail(file, thumbPath, path) {
     }
   };
 }
+
+export async function rerenderPostFileInfo(fileInfo) {
+  let { duration, bitrate, album, artist, title, year } = fileInfo.extraData || {};
+  if (duration) {
+    fileInfo.sizeText += `, ${duration}`;
+  }
+  if (bitrate) {
+    fileInfo.sizeText += `, ${bitrate} ${Tools.translate('kbps')}`;
+  }
+  fileInfo.sizeTooltip = artist ? artist : Tools.translate('Unknown artist');
+  fileInfo.sizeTooltip += ' - ';
+  fileInfo.sizeTooltip += title ? title : Tools.translate('Unknown title');
+  fileInfo.sizeTooltip += ' [';
+  fileInfo.sizeTooltip += album ? album : Tools.translate('Unknown album');
+  fileInfo.sizeTooltip += ']';
+  if (year) {
+    fileInfo.sizeTooltip += ` (${year})`;
+  }
+}

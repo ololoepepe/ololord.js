@@ -243,6 +243,10 @@ var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
 
+var _files = require('../helpers/files');
+
+var Files = _interopRequireWildcard(_files);
+
 var _logger = require('../helpers/logger');
 
 var _logger2 = _interopRequireDefault(_logger);
@@ -482,14 +486,18 @@ router.renderThread = function () {
                               switch (_context8.prev = _context8.next) {
                                 case 0:
                                   _context8.next = 2;
-                                  return board.renderPost(post);
+                                  return Files.renderPostFileInfos(post);
 
                                 case 2:
+                                  _context8.next = 4;
+                                  return board.renderPost(post);
+
+                                case 4:
                                   renderedPost = _context8.sent;
 
                                   lastPosts[postNumber] = renderedPost;
 
-                                case 4:
+                                case 6:
                                 case 'end':
                                   return _context8.stop();
                               }

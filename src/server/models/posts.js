@@ -188,7 +188,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
     bannedFor: false,
     boardName: boardName,
     createdAt: date.toISOString(),
-    geolocation: req.geolocation,
+    geolocation: req.geolocationInfo,
     markup: markupModes,
     name: name || null,
     number: postNumber,
@@ -507,5 +507,125 @@ export async function rebuildSearchIndex() {
   return await forEachPost(targets, async function(boardName, postNumber) {
     console.log(Tools.translate('Rebuilding post search index: >>/$[1]/$[2]', '', boardName, postNumber));
     return await rebuildPostSearchIndex(boardName, postNumber, threads);
+  });
+}
+
+async function processMovedThreadPostReferences({ references, entity, sourceBoardName, targetBoardName, threadNumber,
+  postNumberMap, toRerender, toUpdate }) {
+  await Tools.series(references, async function(ref) {
+    let nref;
+    if (ref.boardName === sourceBoardName && ref.threadNumber === threadNumber) {
+        nref = {
+          boardName: targetBoardName,
+          threadNumber: post.threadNumber,
+          postNumber: postNumberMap[ref.postNumber]
+        };
+    } else {
+      nref = ref;
+      toUpdate[`${ref.boardName}:${ref.threadNumber}`] = {
+        boardName: ref.boardName,
+        threadNumber: ref.threadNumber
+      };
+      if (toRerender) {
+        toRerender[`${ref.boardName}:${ref.postNumber}`] = {
+          boardName: ref.boardName,
+          postNumber: ref.postNumber
+        };
+      }
+    }
+    await entity.deleteOne(`${ref.boardName}:${ref.postNumber}`, `${sourceBoardName}:${oldPostNumber}`);
+    await entity.setOne(`${nref.boardName}:${nref.postNumber}`, `${targetBoard.name}:${post.number}`, nref);
+  });
+}
+
+export async function processMovedThreadPosts({ posts, postNumberMap, threadNumber, targetBoard, sourceBoardName,
+  sourcePath, sourceThumbPath, targetPath, targetThumbPath }) {
+  let toRerender = {};
+  let toUpdate = {};
+  await Tools.series(posts, async function(post) {
+    let oldPostNumber = post.number;
+    post.number = postNumberMap.get(post.number);
+    post.threadNumber = threadNumber;
+    post.boardName = targetBoard.name;
+    let referencedPosts = post.referencedPosts;
+    delete post.referencedPosts;
+    let extraData = post.extraData;
+    delete post.extraData;
+    let referringPosts = post.referringPosts;
+    delete post.referringPosts;
+    let fileInfos = post.fileInfos;
+    delete post.fileInfos;
+    if (post.rawText) {
+      _(postNumberMap).each((newPostNumber, previousPostNumber) => {
+        let rx = new RegExp(`>>/${sourceBoardName}/${previousPostNumber}`, 'g');
+        post.rawText = post.rawText.replace(rx, `>>/${targetBoard.name}/${newPostNumber}`);
+        rx = new RegExp(`>>${previousPostNumber}`, 'g');
+        post.rawText = post.rawText.replace(rx, `>>${newPostNumber}`);
+      });
+      referencedPosts.filter((ref) => { return ref.boardName === sourceBoardName; }).forEach((ref) => {
+        let rx = new RegExp(`>>${ref.postNumber}`, 'g');
+        post.rawText = post.rawText.replace(rx, `>>/${sourceBoardName}/${ref.postNumber}`);
+      });
+    }
+    if (post.rawText) {
+      post.text = await markup(targetBoard.name, post.rawText, {
+        markupModes: post.markup,
+        accessLevel: post.user.level
+      });
+    }
+    await Posts.setOne(`${targetBoard.name}:${post.number}`, post);
+    await targetBoard.storeExtraData(post.number, extraData);
+    await processMovedThreadPostReferences({
+      references: referencedPosts,
+      entity: ReferencedPosts,
+      sourceBoardName: sourceBoardName,
+      targetBoardName: targetBoard.name,
+      threadNumber: threadNumber,
+      postNumberMap: postNumberMap,
+      toUpdate: toUpdate
+    });
+    await processMovedThreadPostReferences({
+      references: referringPosts,
+      entity: ReferringPosts,
+      sourceBoardName: sourceBoardName,
+      targetBoardName: targetBoard.name,
+      threadNumber: threadNumber,
+      postNumberMap: postNumberMap,
+      toRerender: toRerender,
+      toUpdate: toUpdate
+    });
+    await UsersModel.addUserPostNumber(post.user.ip, targetBoard.name, post.number);
+    await FilesModel.addFilesToPost(targetBoard.name, post.number, fileInfos);
+    await Tools.series(fileInfos, async function(fileInfo) {
+      await FS.move(`${sourcePath}/${fileInfo.name}`, `${targetPath}/${fileInfo.name}`);
+      await FS.move(`${sourceThumbPath}/${fileInfo.thumb.name}`, `${targetThumbPath}/${fileInfo.thumb.name}`);
+    });
+    await Search.indexPost(targetBoard.name, post.number, threadNumber, post.plainText, post.subject);
+  });
+  return {
+    toRerender: toRerender,
+    toUpdate: toUpdate
+  };
+}
+
+export async function processMovedThreadRelatedPosts({ posts, sourceBoardName, postNumberMap }) {
+  await Tools.series(posts, async function(post) {
+    post = await PostsModel.getPost(post.boardName, post.postNumber);
+    if (!post.rawText) {
+      return;
+    }
+    _(postNumberMap).each((newPostNumber, previousPostNumber) => {
+      let rx = new RegExp(`>>/${sourceBoardName}/${previousPostNumber}`, 'g');
+      post.rawText = post.rawText.replace(rx, `>>/${targetBoardName}/${newPostNumber}`);
+      if (post.boardName === sourceBoardName) {
+        rx = new RegExp(`>>${previousPostNumber}`, 'g');
+        post.rawText = post.rawText.replace(rx, `>>/${targetBoardName}/${newPostNumber}`);
+      }
+    });
+    post.text = await markup(post.boardName, post.rawText, {
+      markupModes: post.markup,
+      accessLevel: post.user.level
+    });
+    await Posts.setOne(`${post.boardName}:${post.number}`, post);
   });
 }

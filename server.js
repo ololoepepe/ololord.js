@@ -33,17 +33,21 @@ var _captcha = require('./captchas/captcha');
 
 var _captcha2 = _interopRequireDefault(_captcha);
 
-var _board3 = require('./controllers/board');
+var _nodeCaptcha = require('./captchas/node-captcha');
 
-var _board4 = _interopRequireDefault(_board3);
+var _nodeCaptcha2 = _interopRequireDefault(_nodeCaptcha);
+
+var _nodeCaptchaNoscript = require('./captchas/node-captcha-noscript');
+
+var _nodeCaptchaNoscript2 = _interopRequireDefault(_nodeCaptchaNoscript);
 
 var _controllers = require('./controllers');
 
 var _controllers2 = _interopRequireDefault(_controllers);
 
-var _middlewares = require('./middlewares');
+var _board3 = require('./controllers/board');
 
-var _middlewares2 = _interopRequireDefault(_middlewares);
+var _board4 = _interopRequireDefault(_board3);
 
 var _commands = require('./core/commands');
 
@@ -56,14 +60,6 @@ var Renderer = _interopRequireWildcard(_renderer);
 var _websocketServer = require('./core/websocket-server');
 
 var _websocketServer2 = _interopRequireDefault(_websocketServer);
-
-var _boards = require('./models/boards');
-
-var BoardsModel = _interopRequireWildcard(_boards);
-
-var _statistics = require('./models/statistics');
-
-var StatisticsModel = _interopRequireWildcard(_statistics);
 
 var _config = require('./helpers/config');
 
@@ -89,6 +85,26 @@ var _tools = require('./helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
+var _middlewares = require('./middlewares');
+
+var _middlewares2 = _interopRequireDefault(_middlewares);
+
+var _boards = require('./models/boards');
+
+var BoardsModel = _interopRequireWildcard(_boards);
+
+var _chats = require('./models/chats');
+
+var ChatsModel = _interopRequireWildcard(_chats);
+
+var _statistics = require('./models/statistics');
+
+var StatisticsModel = _interopRequireWildcard(_statistics);
+
+var _users = require('./models/users');
+
+var UsersModel = _interopRequireWildcard(_users);
+
 var _geolocation = require('./storage/geolocation');
 
 var _geolocation2 = _interopRequireDefault(_geolocation);
@@ -103,14 +119,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var NodeCaptcha = require('./captchas/node-captcha'); //TODO
-var NodeCaptchaNoscript = require('./captchas/node-captcha-noscript'); //TODO
-
-var Chat = require("./helpers/chat");
-
-var Database = require("./helpers/database");
-
-
 _config2.default.installSetHook("site.locale", Tools.setLocale);
 
 function spawnCluster() {
@@ -122,35 +130,27 @@ function spawnCluster() {
                     switch (_context.prev = _context.next) {
                         case 0:
                             console.log('[' + process.pid + '] Initializing...');
-                            console.log(1);
                             app = (0, _express2.default)();
 
-                            console.log(2, _middlewares2.default);
                             app.use(_middlewares2.default);
-                            console.log(3);
                             app.use(_controllers2.default);
-                            console.log(4);
-                            _context.prev = 8;
-                            _context.next = 11;
+                            _context.prev = 4;
+                            _context.next = 7;
                             return _geolocation2.default.initialize();
 
-                        case 11:
-                            console.log(5);
-                            _context.next = 14;
+                        case 7:
+                            _context.next = 9;
                             return _sqlClientFactory2.default.initialize();
 
-                        case 14:
-                            console.log(6);
-                            _context.next = 17;
+                        case 9:
+                            _context.next = 11;
                             return BoardsModel.initialize();
 
-                        case 17:
-                            console.log(7);
-                            _context.next = 20;
+                        case 11:
+                            _context.next = 13;
                             return Renderer.reloadTemplates();
 
-                        case 20:
-                            console.log(8);
+                        case 13:
                             sockets = {};
                             nextSocketId = 0;
                             server = _http2.default.createServer(app);
@@ -158,7 +158,7 @@ function spawnCluster() {
 
                             ws.on("sendChatMessage", function (msg, conn) {
                                 var data = msg.data || {};
-                                return Chat.sendMessage({
+                                return Chats.sendMessage({ //TODO
                                     ip: conn.ip,
                                     hashpass: conn.hashpass
                                 }, data.boardName, data.postNumber, data.text, ws).then(function (result) {
@@ -264,22 +264,22 @@ function spawnCluster() {
                                     delete sockets[socketId];
                                 });
                             });
-                            _context.next = 37;
+                            _context.next = 29;
                             break;
 
-                        case 33:
-                            _context.prev = 33;
-                            _context.t0 = _context['catch'](8);
+                        case 25:
+                            _context.prev = 25;
+                            _context.t0 = _context['catch'](4);
 
                             console.log(_context.t0);
                             _logger2.default.error(_context.t0.stack || _context.t0);
 
-                        case 37:
+                        case 29:
                         case 'end':
                             return _context.stop();
                     }
                 }
-            }, _callee, this, [[8, 33]]);
+            }, _callee, this, [[4, 25]]);
         }));
 
         return function (_x) {
@@ -328,7 +328,7 @@ function onReady(initCallback) {
     }
     ++onReady.ready;
     if ((0, _config2.default)('system.workerCount') === onReady.ready) {
-        initCallback();
+        UsersModel.initializeUserBansMonitoring();
         if ((0, _config2.default)('server.statistics.enabled')) {
             setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), (0, _config2.default)('server.statistics.ttl') * Tools.Minute);
         }
@@ -400,92 +400,86 @@ _captcha2.default.initialize();
 
 if (_cluster2.default.isMaster) {
     _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
-        var initCallback;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
             while (1) {
                 switch (_context4.prev = _context4.next) {
                     case 0:
                         _context4.prev = 0;
                         _context4.next = 3;
-                        return NodeCaptcha.removeOldCaptchImages();
+                        return _nodeCaptcha2.default.removeOldCaptchImages();
 
                     case 3:
                         _context4.next = 5;
-                        return NodeCaptchaNoscript.removeOldCaptchImages();
+                        return _nodeCaptchaNoscript2.default.removeOldCaptchImages();
 
                     case 5:
                         _context4.next = 7;
-                        return Database.initialize();
-
-                    case 7:
-                        initCallback = _context4.sent;
-                        _context4.next = 10;
                         return _sqlClientFactory2.default.initialize(true);
 
-                    case 10:
-                        _context4.next = 12;
+                    case 7:
+                        _context4.next = 9;
                         return Renderer.compileTemplates();
 
-                    case 12:
-                        _context4.next = 14;
+                    case 9:
+                        _context4.next = 11;
                         return Renderer.reloadTemplates();
 
-                    case 14:
+                    case 11:
                         if (!(_program2.default.rerender || (0, _config2.default)('system.rerenderCacheOnStartup'))) {
-                            _context4.next = 22;
+                            _context4.next = 19;
                             break;
                         }
 
                         if (!(_program2.default.archive || (0, _config2.default)('system.rerenderArchive'))) {
-                            _context4.next = 20;
+                            _context4.next = 17;
                             break;
                         }
 
-                        _context4.next = 18;
+                        _context4.next = 15;
                         return Renderer.rerender();
 
-                    case 18:
-                        _context4.next = 22;
+                    case 15:
+                        _context4.next = 19;
                         break;
 
-                    case 20:
-                        _context4.next = 22;
+                    case 17:
+                        _context4.next = 19;
                         return Renderer.rerender(['**', '!/*/arch/*']);
 
-                    case 22:
-                        _context4.next = 24;
+                    case 19:
+                        _context4.next = 21;
                         return StatisticsModel.generateStatistics();
 
-                    case 24:
-                        _context4.next = 26;
+                    case 21:
+                        _context4.next = 23;
                         return Renderer.generateTemplatingJavaScriptFile();
 
-                    case 26:
-                        _context4.next = 28;
+                    case 23:
+                        _context4.next = 25;
                         return Renderer.generateCustomJavaScriptFile();
 
-                    case 28:
-                        _context4.next = 30;
+                    case 25:
+                        _context4.next = 27;
                         return Renderer.generateCustomCSSFiles();
 
-                    case 30:
-                        spawnWorkers(initCallback);
-                        _context4.next = 37;
+                    case 27:
+                        spawnWorkers();
+                        _context4.next = 34;
                         break;
 
-                    case 33:
-                        _context4.prev = 33;
+                    case 30:
+                        _context4.prev = 30;
                         _context4.t0 = _context4['catch'](0);
 
                         _logger2.default.error(_context4.t0.stack || _context4.t0);
                         process.exit(1);
 
-                    case 37:
+                    case 34:
                     case 'end':
                         return _context4.stop();
                 }
             }
-        }, _callee4, this, [[0, 33]]);
+        }, _callee4, this, [[0, 30]]);
     }))();
 } else {
     spawnCluster();

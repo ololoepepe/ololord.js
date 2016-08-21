@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createThumbnail = exports.AUDIO_TAGS = undefined;
+exports.rerenderPostFileInfo = exports.createThumbnail = exports.AUDIO_TAGS = undefined;
 
 var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file, thumbPath, path) {
@@ -105,6 +105,51 @@ var createThumbnail = exports.createThumbnail = function () {
   }));
 
   return function createThumbnail(_x, _x2, _x3) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var rerenderPostFileInfo = exports.rerenderPostFileInfo = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileInfo) {
+    var _ref, duration, bitrate, album, artist, title, year;
+
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _ref = fileInfo.extraData || {};
+            duration = _ref.duration;
+            bitrate = _ref.bitrate;
+            album = _ref.album;
+            artist = _ref.artist;
+            title = _ref.title;
+            year = _ref.year;
+
+            if (duration) {
+              fileInfo.sizeText += ', ' + duration;
+            }
+            if (bitrate) {
+              fileInfo.sizeText += ', ' + bitrate + ' ' + Tools.translate('kbps');
+            }
+            fileInfo.sizeTooltip = artist ? artist : Tools.translate('Unknown artist');
+            fileInfo.sizeTooltip += ' - ';
+            fileInfo.sizeTooltip += title ? title : Tools.translate('Unknown title');
+            fileInfo.sizeTooltip += ' [';
+            fileInfo.sizeTooltip += album ? album : Tools.translate('Unknown album');
+            fileInfo.sizeTooltip += ']';
+            if (year) {
+              fileInfo.sizeTooltip += ' (' + year + ')';
+            }
+
+          case 16:
+          case 'end':
+            return _context2.stop();
+        }
+      }
+    }, _callee2, this);
+  }));
+
+  return function rerenderPostFileInfo(_x4) {
     return ref.apply(this, arguments);
   };
 }();

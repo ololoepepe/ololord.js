@@ -30,6 +30,10 @@ var _captcha = require('../captchas/captcha');
 
 var _captcha2 = _interopRequireDefault(_captcha);
 
+var _files = require('../helpers/files');
+
+var Files = _interopRequireWildcard(_files);
+
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
@@ -42,9 +46,9 @@ var _chats = require('../models/chats');
 
 var ChatsModel = _interopRequireWildcard(_chats);
 
-var _files = require('../models/files');
+var _files2 = require('../models/files');
 
-var FilesModel = _interopRequireWildcard(_files);
+var FilesModel = _interopRequireWildcard(_files2);
 
 var _posts = require('../models/posts');
 
@@ -108,27 +112,31 @@ router.get('/api/post.json', function () {
           case 10:
             board = _board2.default.board(post.boardName);
             _context.next = 13;
-            return board.renderPost(post);
+            return Files.renderPostFileInfos(post);
 
           case 13:
+            _context.next = 15;
+            return board.renderPost(post);
+
+          case 15:
             post = _context.sent;
 
             res.json(post || null);
-            _context.next = 20;
+            _context.next = 22;
             break;
 
-          case 17:
-            _context.prev = 17;
+          case 19:
+            _context.prev = 19;
             _context.t0 = _context['catch'](2);
 
             next(_context.t0);
 
-          case 20:
+          case 22:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, this, [[2, 17]]);
+    }, _callee, this, [[2, 19]]);
   }));
 
   return function (_x, _x2, _x3) {

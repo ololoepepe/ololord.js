@@ -102,3 +102,16 @@ export async function createThumbnail(file, thumbPath, path) {
   }
   return result;
 }
+
+export async function rerenderPostFileInfo(fileInfo) {
+  if (fileInfo.dimensions) {
+    fileInfo.sizeText += `, ${fileInfo.dimensions.width}x${fileInfo.dimensions.height}`;
+  }
+  let { duration, bitrate } = fileInfo.extraData || {};
+  if (duration) {
+    fileInfo.sizeText += `, ${duration}`;
+  }
+  if (bitrate) {
+    fileInfo.sizeTooltip = `${bitrate} ${Tools.translate('kbps')}`;
+  }
+}

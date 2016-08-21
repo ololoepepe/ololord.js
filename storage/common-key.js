@@ -156,6 +156,34 @@ var CommonKey = function () {
 
       return _delete;
     }()
+  }, {
+    key: 'expire',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(ttl, subkey) {
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                _context4.next = 2;
+                return this.client.expire(this.fullKey(subkey), ttl);
+
+              case 2:
+                return _context4.abrupt('return', _context4.sent);
+
+              case 3:
+              case 'end':
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function expire(_x6, _x7) {
+        return ref.apply(this, arguments);
+      }
+
+      return expire;
+    }()
   }]);
 
   return CommonKey;

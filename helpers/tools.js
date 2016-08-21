@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.escapedSelector = exports.escaped = exports.writeFile = exports.generateRandomImage = exports.generateImageHash = exports.markupLatex = exports.ipList = exports.plainText = exports.generateTripcode = exports.series = exports.remove = exports.withoutDuplicates = exports.sha256 = exports.preferIPv4 = exports.correctAddress = exports.proxy = exports.parseForm = exports.splitCommand = exports.isImageType = exports.isPdfType = exports.isVideoType = exports.isAudioType = exports.mimeType = exports.CODE_STYLES = exports.STYLES = exports.toHtml = exports.externalLinkRootZoneExists = exports.forever = exports.now = exports.setLocale = exports.flagName = exports.hashpass = exports.toUTC = exports.replace = exports.hasOwnProperties = exports.contains = exports.arr = exports.extend = exports.promiseIf = exports.toArray = exports.filterIn = exports.mapIn = exports.forIn = exports.REGISTERED_USER_LEVELS = exports.NODE_CAPTCHA_ID = exports.FILE_RATINGS = exports.ExternalLinkRegexpPattern = exports.Hour = exports.Minute = exports.Second = exports.Billion = exports.translate = undefined;
+exports.escapedSelector = exports.escaped = exports.writeFile = exports.generateRandomImage = exports.generateImageHash = exports.markupLatex = exports.ipList = exports.plainText = exports.generateTripcode = exports.series = exports.remove = exports.withoutDuplicates = exports.sha256 = exports.preferIPv4 = exports.correctAddress = exports.proxy = exports.parseForm = exports.splitCommand = exports.isImageType = exports.isPdfType = exports.isVideoType = exports.isAudioType = exports.mimeType = exports.CODE_STYLES = exports.STYLES = exports.toHtml = exports.externalLinkRootZoneExists = exports.forever = exports.now = exports.setLocale = exports.flagName = exports.hashpass = exports.toUTC = exports.replace = exports.hasOwnProperties = exports.contains = exports.arr = exports.extend = exports.promiseIf = exports.toArray = exports.filterIn = exports.mapIn = exports.forIn = exports.BAN_LEVELS = exports.REGISTERED_USER_LEVELS = exports.NODE_CAPTCHA_ID = exports.FILE_RATINGS = exports.ExternalLinkRegexpPattern = exports.Hour = exports.Minute = exports.Second = exports.Billion = exports.translate = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -111,6 +111,7 @@ var ExternalLinkRegexpPattern = exports.ExternalLinkRegexpPattern = function () 
 var FILE_RATINGS = exports.FILE_RATINGS = ['SFW', 'R-15', 'R-18', 'R-18G'];
 var NODE_CAPTCHA_ID = exports.NODE_CAPTCHA_ID = 'node-captcha';
 var REGISTERED_USER_LEVELS = exports.REGISTERED_USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];
+var BAN_LEVELS = exports.BAN_LEVELS = ['NONE', 'READ_ONLY', 'NO_ACCESS'];
 
 var forIn = exports.forIn = function forIn(obj, f) {
     if (!obj || typeof f != "function") return;

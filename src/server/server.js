@@ -10,24 +10,24 @@ import HTTP from 'http';
 
 import Board from './boards/board';
 import Captcha from './captchas/captcha';
-var NodeCaptcha = require('./captchas/node-captcha'); //TODO
-var NodeCaptchaNoscript = require('./captchas/node-captcha-noscript'); //TODO
-import BoardController from './controllers/board';
+import NodeCaptcha from './captchas/node-captcha';
+import NodeCaptchaNoscript from './captchas/node-captcha-noscript';
 import controllers from './controllers';
-import middlewares from './middlewares';
+import BoardController from './controllers/board';
 import commands from './core/commands';
 import * as Renderer from './core/renderer';
 import WebSocketServer from './core/websocket-server';
-import * as BoardsModel from './models/boards';
-import * as StatisticsModel from './models/statistics';
-var Chat = require("./helpers/chat");
 import config from './helpers/config';
-var Database = require("./helpers/database");
 import * as IPC from './helpers/ipc';
 import Logger from './helpers/logger';
 import * as OnlineCounter from './helpers/online-counter';
 import Program from './helpers/program';
 import * as Tools from './helpers/tools';
+import middlewares from './middlewares';
+import * as BoardsModel from './models/boards';
+import * as ChatsModel from './models/chats';
+import * as StatisticsModel from './models/statistics';
+import * as UsersModel from './models/users';
 import geolocation from './storage/geolocation';
 import sqlClient from './storage/sql-client-factory';
 
@@ -50,7 +50,7 @@ function spawnCluster() {
       var ws = new WebSocketServer(server);
       ws.on("sendChatMessage", function(msg, conn) {
           var data = msg.data || {};
-          return Chat.sendMessage({
+          return Chats.sendMessage({ //TODO
               ip: conn.ip,
               hashpass: conn.hashpass
           }, data.boardName, data.postNumber, data.text, ws).then(function(result) {
@@ -193,7 +193,7 @@ function onReady(initCallback) {
   }
   ++onReady.ready;
   if (config('system.workerCount') === onReady.ready) {
-    initCallback();
+    UsersModel.initializeUserBansMonitoring();
     if (config('server.statistics.enabled')) {
       setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel),
         config('server.statistics.ttl') * Tools.Minute);
@@ -251,7 +251,6 @@ if (Cluster.isMaster) {
     try {
       await NodeCaptcha.removeOldCaptchImages();
       await NodeCaptchaNoscript.removeOldCaptchImages();
-      let initCallback = await Database.initialize();
       await sqlClient.initialize(true);
       await Renderer.compileTemplates();
       await Renderer.reloadTemplates();
@@ -266,7 +265,7 @@ if (Cluster.isMaster) {
       await Renderer.generateTemplatingJavaScriptFile();
       await Renderer.generateCustomJavaScriptFile();
       await Renderer.generateCustomCSSFiles();
-      spawnWorkers(initCallback);
+      spawnWorkers();
     } catch (err) {
       Logger.error(err.stack || err);
       process.exit(1);

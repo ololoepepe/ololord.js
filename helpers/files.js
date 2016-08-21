@@ -826,15 +826,15 @@ var _files = require('../models/files');
 
 var FilesModel = _interopRequireWildcard(_files);
 
-var _ipc = require('../helpers/ipc');
+var _ipc = require('./ipc');
 
 var IPC = _interopRequireWildcard(_ipc);
 
-var _tools = require('../helpers/tools');
+var _tools = require('./tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-var _vk = require('../helpers/vk');
+var _vk = require('./vk');
 
 var _vk2 = _interopRequireDefault(_vk);
 

@@ -11,6 +11,7 @@ import * as ThreadsModel from '../models/threads';
 import * as Renderer from '../core/renderer';
 import * as Cache from '../helpers/cache';
 import config from '../helpers/config';
+import * as Files from '../helpers/files';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 
@@ -174,6 +175,7 @@ router.renderThread = async function(key, data) {
     }, {});
     let postsToRerender = pickPostsToRerender(lastPosts, posts);
     await Tools.series(postsToRerender, async function(post, postNumber) {
+      await Files.renderPostFileInfos(post);
       let renderedPost = await board.renderPost(post);
       lastPosts[postNumber] = renderedPost;
     });

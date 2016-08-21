@@ -10,16 +10,15 @@ import * as UsersModel from '../models/users';
 import PostCreationTransaction from '../storage/post-creation-transaction';
 import * as IPC from '../helpers/ipc';
 import config from '../helpers/config';
+import * as Files from '../helpers/files';
 import * as Tools from '../helpers/tools';
-import * as Files from '../storage/files';
 import geolocation from '../storage/geolocation';
 
 let router = express.Router();
 
 async function testParameters(boardName, mode, { fields, files, postNumber } = {}) {
-  let board = Board.board(boardName);
-  if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  if (!Board.board(boardName)) {
+    throw new Error(Tools.translate('Invalid board'));
   }
   if (!fields) {
     fields = {};
@@ -44,8 +43,7 @@ async function testParameters(boardName, mode, { fields, files, postNumber } = {
 router.post('/action/markupText', async function(req, res, next) {
   try {
     let { fields: { boardName, text, markupMode, signAsOp, tripcode } } = await Tools.parseForm(req);
-    let board = Board.board(boardName);
-    if (!board) {
+    if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
     await UsersModel.checkUserBan(req.ip, boardName, { write: true }); //TODO: Should it really be "write"?
@@ -81,17 +79,18 @@ router.post('/action/createPost', async function(req, res, next) {
   try {
     let { fields, files } = await Tools.parseForm(req);
     let { boardName, threadNumber, captchaEngine } = fields;
-    let board = Board.board(boardName);
-    if (!board) {
+    if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
     threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
     if (!threadNumber) {
       throw new Error(Tools.translate('Invalid thread'));
     }
-    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
-    req.geolocation = await geolocation(req.ip);
-    await UsersModel.checkGeoBan(req.geolocation);
+    req.geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: req.geolocationInfo
+    });
     await Captcha.checkCaptcha(req.ip, fields);
     files = await Files.getFiles(fields, files);
     await testParameters(boardName, 'createPost', {
@@ -126,13 +125,14 @@ router.post('/action/createThread', async function(req, res, next) {
   try {
     let { fields, files } = await Tools.parseForm(req);
     let { boardName, captchaEngine } = fields;
-    let board = Board.board(boardName);
-    if (!board) {
+    if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
-    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
-    req.geolocation = await geolocation(req.ip);
-    await UsersModel.checkGeoBan(req.geolocation);
+    req.geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: req.geolocationInfo
+    });
     await Captcha.checkCaptcha(req.ip, fields);
     files = await Files.getFiles(fields, files);
     await testParameters(boardName, 'createThread', {
@@ -171,9 +171,11 @@ router.post('/action/editPost', async function(req, res, next) {
     if (!postNumber) {
       throw new Error(Tools.translate('Invalid post number'));
     }
-    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
-    req.geolocation = await geolocation(req.ip);
-    await UsersModel.checkGeoBan(req.geolocation);
+    req.geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: req.geolocationInfo
+    });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'editPost');
     await testParameters(boardName, 'editPost', {
       fields: fields,
@@ -195,17 +197,18 @@ router.post('/action/addFiles', async function(req, res, next) {
   try {
     let { fields, files } = await Tools.parseForm(req);
     let { boardName, postNumber } = fields;
-    let board = Board.board(boardName);
-    if (!board) {
+    if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
     postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
     if (!postNumber) {
       throw new Error(Tools.translate('Invalid post number'));
     }
-    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
-    req.geolocation = await geolocation(req.ip);
-    await UsersModel.checkGeoBan(req.geolocation);
+    req.geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: req.geolocationInfo
+    });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'addFilesToPost');
     let post = await PostsModel.getPost(boardName, postNumber);
     if (!post) {
@@ -237,17 +240,18 @@ router.post('/action/deletePost', async function(req, res, next) {
   try {
     let { fields } = await Tools.parseForm(req);
     let { boardName, postNumber, password } = fields;
-    let board = Board.board(boardName);
-    if (!board) {
+    if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
     postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
     if (!postNumber) {
       throw new Error(Tools.translate('Invalid post number'));
     }
-    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
-    req.geolocation = await geolocation(req.ip);
-    await UsersModel.checkGeoBan(req.geolocation);
+    req.geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: req.geolocationInfo
+    });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'deletePost', Tools.sha1(password));
     await PostsModel.deletePost(req, fields);
     res.send({});
@@ -268,9 +272,11 @@ router.post('/action/deleteFile', async function(req, res, next) {
       throw new Error(Tools.translate('No such file'));
     }
     let { boardName, postNumber } = fileInfo;
-    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
-    req.geolocation = await geolocation(req.ip);
-    await UsersModel.checkGeoBan(req.geolocation);
+    req.geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: req.geolocationInfo
+    });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'deleteFile', Tools.sha1(password));
     let post = await testParameters(boardName, 'deleteFile', { postNumber: postNumber });
     await FilesModel.deleteFile(fileName);
@@ -293,9 +299,11 @@ router.post('/action/editFileRating', async function(req, res, next) {
       throw new Error(Tools.translate('No such file'));
     }
     let { boardName, postNumber } = fileInfo;
-    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
-    req.geolocation = await geolocation(req.ip);
-    await UsersModel.checkGeoBan(req.geolocation);
+    req.geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: req.geolocationInfo
+    });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'editFileRating', Tools.sha1(password));
     await FilesModel.editFileRating(fileName, rating);
     IPC.render(boardName, post.threadNumber, postNumber, 'edit');
@@ -306,26 +314,32 @@ router.post('/action/editFileRating', async function(req, res, next) {
 });
 
 router.post('/action/editAudioTags', async function(req, res, next) {
-  let { fields } = await Tools.parseForm(req);
-  let { fileName, password } = fields;
-  if (!fileName || typeof fileName !== 'string') {
-    throw new Error(Tools.translate('Invalid file name'));
+  try {
+    let { fields } = await Tools.parseForm(req);
+    let { fileName, password } = fields;
+    if (!fileName || typeof fileName !== 'string') {
+      throw new Error(Tools.translate('Invalid file name'));
+    }
+    let fileInfo = await FilesModel.getFileInfoByName(fileName);
+    if (!fileInfo) {
+      throw new Error(Tools.translate('No such file'));
+    }
+    if (!Tools.isAudioType(fileInfo.mimeType)) {
+      throw new Error(Tools.translate('Not an audio file'));
+    }
+    let { boardName, postNumber } = fileInfo;
+    req.geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: req.geolocationInfo
+    });
+    await UsersModel.checkUserPermissions(req, boardName, postNumber, 'editAudioTags', Tools.sha1(password));
+    await FilesModel.editAudioTags(fileName, fields);
+    IPC.render(boardName, post.threadNumber, postNumber, 'edit');
+    res.send({});
+  } catch (err) {
+    next(err);
   }
-  let fileInfo = await FilesModel.getFileInfoByName(fileName);
-  if (!fileInfo) {
-    throw new Error(Tools.translate('No such file'));
-  }
-  if (!Tools.isAudioType(fileInfo.mimeType)) {
-    throw new Error(Tools.translate('Not an audio file'));
-  }
-  let { boardName, postNumber } = fileInfo;
-  await UsersModel.checkUserBan(req.ip, boardName, { write: true });
-  req.geolocation = await geolocation(req.ip);
-  await UsersModel.checkGeoBan(req.geolocation);
-  await UsersModel.checkUserPermissions(req, boardName, postNumber, 'editAudioTags', Tools.sha1(password));
-  await FilesModel.editAudioTags(fileName, fields);
-  IPC.render(boardName, post.threadNumber, postNumber, 'edit');
-  res.send({});
 });
 
 export default router;

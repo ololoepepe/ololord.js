@@ -8,9 +8,9 @@ import UUID from 'uuid';
 
 import Board from '../boards/board';
 import * as FilesModel from '../models/files';
-import * as IPC from '../helpers/ipc';
-import * as Tools from '../helpers/tools';
-import vk from '../helpers/vk';
+import * as IPC from './ipc';
+import * as Tools from './tools';
+import vk from './vk';
 
 const mkpath = promisify('mkpath');
 
@@ -152,8 +152,36 @@ async function createFileThumb(file, plugin) {
   }
 }
 
+export function selectThumbnailingPlugin(mimeType) {
+  //TODO: Cache
+  return _(thumbCreationPlugins).find(plugin => plugin.match(mimeType));
+}
+
+export async function renderPostFileInfos(post) {
+  if (!post) {
+    return;
+  }
+  await Tools.series(post.fileInfos || [], async function(fileInfo) {
+    if (!fileInfo) {
+      return;
+    }
+    fileInfo.sizeKB = fileInfo.size / 1024;
+    fileInfo.sizeText = fileInfo.sizeKB.toFixed(2) + ' ' + Tools.translate('KB');
+    let plugin = selectThumbnailingPlugin(fileInfo.mimeType);
+    if (!plugin) {
+      let err = new Error(Tools.translate('Unsupported file type'));
+      Logger.error(err.stack || err);
+      return;
+    }
+    if (typeof plugin.renderPostFileInfo !== 'function') {
+      return;
+    }
+    await plugin.renderPostFileInfo(fileInfo);
+  });
+}
+
 async function processFile(boardName, file, transaction) {
-  let plugin = _(thumbCreationPlugins).find(plugin => plugin.match(file.mimeType));
+  let plugin = selectThumbnailingPlugin(file.mimeType);
   if (!plugin) {
     return Promise.reject(new Error(Tools.translate('Unsupported file type')));
   }

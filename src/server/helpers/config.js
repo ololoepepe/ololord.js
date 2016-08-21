@@ -8,6 +8,7 @@ import OS from 'os';
 import Program from './program';
 
 const DEFAULT_VALUES = new Map([
+  ['board.useDefaultBoards', true],
   ['server.ddosProtection.enabled', true],
   ['server.ddosProtection.ws.connectionLimit', 10],
   ['server.ddosProtection.ws.maxMessageLength', 20480],

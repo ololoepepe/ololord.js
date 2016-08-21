@@ -1,25 +1,26 @@
-import Board from '../boards/board';
-var config = require("./config");
-var Tools = require("./tools");
+import _ from 'underscore';
 
-var p = {
-    addFilesToPost: "MODER",
-    deleteFile: null,
-    deletePost: null,
-    editAudioTags: null,
-    editFileRating: null,
-    editPost: "MODER",
-    useRawHTMLMarkup: "MODER"
+import Board from '../boards/board';
+import config from './config';
+
+export const PERMISSIONS = {
+  addFilesToPost: 'MODER',
+  deleteFile: null,
+  deletePost: null,
+  editAudioTags: null,
+  editFileRating: null,
+  editPost: 'MODER',
+  useRawHTMLMarkup: 'MODER'
 };
 
-Tools.forIn(p, function(defLevel, key) {
-    module.exports[key] = function(board) {
-        if (typeof board == "string")
-            board = Board.board(board);
-        if (!board)
-            return config(`permissions.${key}`, defLevel);
-        return config(`board.${board.name}.permissions.${key}`, config(`permissions.${key}`, defLevel));
-    };
+_(PERMISSIONS).each((defaultLevel, key) => {
+  module.exports[key] = (board) => {
+    if (typeof board === 'string') {
+      board = Board.board(board);
+    }
+    if (!board) {
+      return config(`permissions.${key}`, defaultLevel);
+    }
+    return config(`board.${board.name}.permissions.${key}`, config(`permissions.${key}`, defaultLevel));
+  };
 });
-
-Object.defineProperty(module.exports, "Permissions", { value: p });

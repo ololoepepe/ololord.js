@@ -1,22 +1,34 @@
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
-var _underscore = require("underscore");
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _config = require("../helpers/config");
+var _fs = require('fs');
+
+var _fs2 = _interopRequireDefault(_fs);
+
+var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
 
-var _logger = require("../helpers/logger");
+var _logger = require('../helpers/logger');
 
 var _logger2 = _interopRequireDefault(_logger);
 
-var _tools = require("../helpers/tools");
+var _permissions = require('../helpers/permissions');
+
+var Permissions = _interopRequireWildcard(_permissions);
+
+var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
@@ -24,122 +36,260 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Address6 = require("ip-address").Address6;
-var Crypto = require("crypto");
-var ffmpeg = require("fluent-ffmpeg");
-var FS = require("q-io/fs");
-var FSSync = require("fs");
-var Path = require("path");
-var promisify = require("promisify-node");
-var Util = require("util");
-var UUID = require("uuid");
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var durationToString = function durationToString(duration) {
-    duration = Math.floor(+duration);
-    var hours = "" + Math.floor(duration / 3600);
-    if (hours.length < 2) hours = "0" + hours;
-    duration %= 3600;
-    var minutes = "" + Math.floor(duration / 60);
-    if (minutes.length < 2) minutes = "0" + minutes;
-    var seconds = "" + duration % 60;
-    if (seconds.length < 2) seconds = "0" + seconds;
-    return hours + ":" + minutes + ":" + seconds;
-};
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Board = function Board(name, title, options) {
-    this.defineProperty("name", name);
-    this.defineSetting("title", function () {
-        return Tools.translate(title);
+var RX_EXCEPT = /^#include\s+except(\((\d+(\,\d+)*)\))$/;
+var RX_SEVERAL = /^#include\s+(\d+(\,\d+)*)$/;
+var DEFAULT_SUPPORTED_FILE_TYPES = ['application/ogg', 'application/pdf', 'audio/mpeg', 'audio/ogg', 'audio/wav', 'image/gif', 'image/jpeg', 'image/png', 'video/mp4', 'video/ogg', 'video/webm'];
+var MARKUP_ELEMENTS = ['BOLD', 'ITALICS', 'STRIKED_OUT', 'UNDERLINED', 'SPOILER', 'QUOTATION', 'UNORDERED_LIST', 'ORDERED_LIST', 'LIST_ITEM', 'SUBSCRIPT', 'SUPERSCRIPT', 'URL', 'CODE', 'LATEX', 'INLINE_LATEX'];
+var DEFAULT_MARKUP_ELEMENTS = MARKUP_ELEMENTS.slice(0, -3);
+
+var boards = {};
+var banners = {};
+var postFormRules = {};
+
+function getRules(boardName) {
+  var fileName = __dirname + '/../misc/rules/rules' + (boardName ? '.' + boardName : '') + '.txt';
+  try {
+    if (!_fs2.default.existsSync(fileName)) {
+      return [];
+    }
+    var data = _fs2.default.readFileSync(fileName, 'utf8');
+    if (!data) {
+      return [];
+    }
+    return data.split(/\r*\n+/gi).filter(function (rule) {
+      return !!rule;
     });
-    this.defineProperty("priority", function () {
-        var def;
-        if (options && !isNaN(+options.priority) && +options.priority) def = +options.priority;else def = 0;
-        return (0, _config2.default)("board." + name + ".priority", (0, _config2.default)("board.priority", def));
-    });
-    this.defineProperty("defaultUserName", function () {
-        var def;
-        if (options && options.defaultUserName) def = Tools.translate(options.defaultUserName);else def = Tools.translate("Anonymous", "defaultUserName");
-        return (0, _config2.default)("board." + name + ".defaultUserName", (0, _config2.default)("board.defaultUserName", def));
-    });
-    this.defineProperty("groupName", function () {
-        var def;
-        if (options && options.groupName) def = options.groupName;else def = "";
-        return (0, _config2.default)("board." + name + ".groupName", (0, _config2.default)("board.groupName", def));
-    });
-    this.defineProperty("captchaEnabled", function () {
-        return (0, _config2.default)("board.captchaEnabled", true) && (0, _config2.default)("board." + name + ".captchaEnabled", true);
-    });
-    this.defineProperty("bannerFileNames", function () {
-        return Board._banners[name];
-    });
-    this.defineProperty("postFormRules", function () {
-        return Board._postFormRules[name];
-    });
-    this.defineSetting("skippedGetOrder", 0);
-    this.defineSetting("opModeration", false);
-    this.defineSetting("captchaQuota", 0);
-    this.defineSetting("enabled", true);
-    this.defineSetting("hidden", false);
-    this.defineSetting("maxEmailLength", 150);
-    this.defineSetting("maxNameLength", 50);
-    this.defineSetting("maxSubjectLength", 150);
-    this.defineSetting("maxTextLength", 15000);
-    this.defineSetting("maxPasswordLength", 50);
-    this.defineSetting("maxFileCount", 1);
-    this.defineSetting("maxFileSize", 10 * 1024 * 1024);
-    this.defineSetting("maxLastPosts", 3);
-    this.defineSetting("markupElements", [Board.MarkupElements.BoldMarkupElement, Board.MarkupElements.ItalicsMarkupElement, Board.MarkupElements.StrikedOutMarkupElement, Board.MarkupElements.UnderlinedMarkupElement, Board.MarkupElements.SpoilerMarkupElement, Board.MarkupElements.QuotationMarkupElement, Board.MarkupElements.UnorderedList, Board.MarkupElements.OrderedList, Board.MarkupElements.ListItem, Board.MarkupElements.SubscriptMarkupElement, Board.MarkupElements.SuperscriptMarkupElement, Board.MarkupElements.UrlMarkupElement]);
-    this.defineSetting("postingEnabled", true);
-    this.defineSetting("showWhois", false);
-    this.defineSetting("supportedCaptchaEngines", Tools.requireWrapper(require('../captchas/captcha')).captchaIds());
-    this.defineProperty("permissions", function () {
-        var p = {};
-        Tools.forIn(require("../helpers/permissions").Permissions, function (defLevel, key) {
-            p[key] = (0, _config2.default)("board." + name + ".permissions." + key, (0, _config2.default)("permissions." + key, defLevel));
+  } catch (err) {
+    _logger2.default.error(err.stack || err);
+    return [];
+  }
+}
+
+function getBoards(includeHidden) {
+  includeHidden = includeHidden || typeof includeHidden === 'undefined';
+  return (0, _underscore2.default)(boards).toArray().sort(function (b1, b2) {
+    return b1.name.localeCompare(b2);
+  }).filter(function (board) {
+    return board.enabled && (includeHidden || board.hidden);
+  });
+}
+
+function getDefaultBoards() {
+  var prBoard = new Board('pr', Tools.translate.noop('/pr/ogramming', 'boardTitle'));
+  prBoard.defineSetting('markupElements', MARKUP_ELEMENTS);
+  return [new Board('3dpd', Tools.translate.noop('3D pron', 'boardTitle')), new Board('a', Tools.translate.noop('/a/nime', 'boardTitle'), { defaultUserName: Tools.translate.noop('Kamina', 'defaultUserName') }), new Board('b', Tools.translate.noop('/b/rotherhood', 'boardTitle')), new Board('d', Tools.translate.noop('Board /d/iscussion', 'boardTitle')), new Board('h', Tools.translate.noop('/h/entai', 'boardTitle')), prBoard, new Board('rf', Tools.translate.noop('Refuge', 'boardTitle'), { defaultUserName: Tools.translate.noop('Whiner', 'defaultUserName') }), new Board('vg', Tools.translate.noop('Video games', 'boardTitle'), { defaultUserName: Tools.translate.noop('PC Nobleman', 'defaultUserName') })];
+}
+
+var Board = function () {
+  _createClass(Board, null, [{
+    key: 'board',
+    value: function board(name) {
+      return boards[name];
+    }
+  }, {
+    key: 'addBoard',
+    value: function addBoard(board) {
+      boards[board.name] = board;
+    }
+  }, {
+    key: 'boardInfos',
+    value: function boardInfos(includeHidden) {
+      return getBoards(includeHidden).map(function (board) {
+        return {
+          name: board.name,
+          title: board.title
+        };
+      });
+    }
+  }, {
+    key: 'boardNames',
+    value: function boardNames(includeHidden) {
+      return getBoards(includeHidden).map(function (board) {
+        return board.name;
+      });
+    }
+  }, {
+    key: 'reloadBanners',
+    value: function reloadBanners() {
+      banners = Board.boardNames().reduce(function (acc, boardName) {
+        var path = __dirname + '/../public/img/banners/' + boardName;
+        if (_fs2.default.existsSync(path)) {
+          acc[boardName] = _fs2.default.readdirSync(path).filter(function (fileName) {
+            return '.gitignore' !== fileName;
+          });
+        } else {
+          acc[boardName] = [];
+        }
+        return acc;
+      }, {});
+    }
+  }, {
+    key: 'reloadPostFormRules',
+    value: function reloadPostFormRules() {
+      var common = getRules();
+      postFormRules = Board.boardNames().reduce(function (acc, boardName) {
+        var specific = getRules(boardName).reverse();
+        specific = specific.map(function (rule, i) {
+          i = specific.length - i - 1;
+          if ('#include all' === rule) {
+            return common;
+          } else if (RX_EXCEPT.test(rule)) {
+            var _ret = function () {
+              var excluded = rule.match(RX_EXCEPT)[2].split(',').map(function (n) {
+                return +n;
+              });
+              return {
+                v: common.filter(function (_, i) {
+                  return excluded.indexOf(i) < 0;
+                })
+              };
+            }();
+
+            if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+          } else if (RX_SEVERAL.test(rule)) {
+            return rule.match(RX_SEVERAL)[1].split(',').map(function (n) {
+              return +n;
+            }).filter(function (n) {
+              return n >= 0 && n < common.length;
+            }).map(function (n) {
+              return common[n];
+            });
+          }
         });
-        return p;
-    });
-    this.defineSetting("supportedFileTypes", ["application/ogg", "application/pdf", "audio/mpeg", "audio/ogg", "audio/wav", "image/gif", "image/jpeg", "image/png", "video/mp4", "video/ogg", "video/webm"]);
-    this.defineSetting("bumpLimit", 500);
-    this.defineSetting("postLimit", 1000);
-    this.defineSetting("threadLimit", 200);
-    this.defineSetting("archiveLimit", 0);
-    this.defineSetting("threadsPerPage", 20);
-    this.defineProperty("launchDate", function () {
-        return new Date((0, _config2.default)("board." + name + ".launchDate", (0, _config2.default)("board.launchDate", new Date())));
-    });
-};
+        specific = (0, _underscore2.default)(specific).flatten();
+        acc[boardName] = specific.length > 0 ? specific : common;
+        return acc;
+      }, {});
+    }
+  }, {
+    key: 'initialize',
+    value: function initialize() {
+      boards = {};
+      _fs2.default.readdirSync(__dirname).filter(function (fileName) {
+        return 'board.js' !== fileName && fileName.split('.').pop() === 'js';
+      }).map(function (fileName) {
+        return require.resolve('./' + fileName.split('.').shift());
+      }).forEach(function (id) {
+        if (require.cache.hasOwnProperty(id)) {
+          delete require.cache[id];
+        }
+        var board = Tools.requireWrapper(require(id));
+        if ((0, _underscore2.default)(board).isArray()) {
+          board.forEach(function (board) {
+            Board.addBoard(board);
+          });
+        } else {
+          Board.addBoard(board);
+        }
+      });
+      if ((0, _config2.default)('board.useDefaultBoards')) {
+        getDefaultBoards().forEach(function (board) {
+          Board.addBoard(board);
+        });
+      }
+      Board.reloadBanners();
+      Board.reloadPostFormRules();
+    }
+  }]);
 
-Board.boards = {};
+  function Board(name, title) {
+    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-/*public*/Board.prototype.defineSetting = function (name, def) {
-    var _this = this;
-    Object.defineProperty(this, name, {
+    var defaultPriority = _ref.defaultPriority;
+    var defaultUserName = _ref.defaultUserName;
+    var defaultGroupName = _ref.defaultGroupName;
+
+    _classCallCheck(this, Board);
+
+    defaultPriority = Tools.option(defaultPriority, 'number', 0);
+    defaultUserName = defaultUserName ? Tools.translate(defaultUserName) : Tools.translate('Anonymous', 'defaultUserName');
+    defaultGroupName = defaultGroupName || '';
+    this.defineProperty('name', name);
+    this.defineSetting('title', function () {
+      return Tools.translate(title);
+    });
+    this.defineSetting('property', defaultPriority);
+    this.defineSetting('defaultUserName', defaultUserName);
+    this.defineSetting('groupName', defaultGroupName);
+    this.defineProperty('captchaEnabled', function () {
+      return (0, _config2.default)('board.captchaEnabled', true) && (0, _config2.default)('board.' + name + '.captchaEnabled', true);
+    });
+    this.defineProperty('bannerFileNames', function () {
+      return banners[name];
+    });
+    this.defineProperty('postFormRules', function () {
+      return postFormRules[name];
+    });
+    this.defineSetting('skippedGetOrder', 0);
+    this.defineSetting('opModeration', false);
+    this.defineSetting('captchaQuota', 0);
+    this.defineSetting('enabled', true);
+    this.defineSetting('hidden', false);
+    this.defineSetting('maxNameLength', 50);
+    this.defineSetting('maxSubjectLength', 150);
+    this.defineSetting('maxTextLength', 15000);
+    this.defineSetting('maxPasswordLength', 50);
+    this.defineSetting('maxFileCount', 1);
+    this.defineSetting('maxFileSize', 10 * 1024 * 1024);
+    this.defineSetting('maxLastPosts', 3);
+    this.defineSetting('markupElements', DEFAULT_MARKUP_ELEMENTS);
+    this.defineSetting('postingEnabled', true);
+    this.defineSetting('showWhois', false);
+    var Captcha = Tools.requireWrapper(require('../captchas/captcha'));
+    this.defineSetting('supportedCaptchaEngines', Captcha.captchaIds());
+    this.defineProperty('permissions', function () {
+      return (0, _underscore2.default)(Permissions.PERMISSIONS).mapObject(function (defaultLevel, key) {
+        return (0, _config2.default)('board.' + name + '.permissions.' + key, (0, _config2.default)('permissions.' + key, defaultLevel));
+      });
+    });
+    this.defineSetting('supportedFileTypes', DEFAULT_SUPPORTED_FILE_TYPES);
+    this.defineSetting('bumpLimit', 500);
+    this.defineSetting('postLimit', 1000);
+    this.defineSetting('threadLimit', 200);
+    this.defineSetting('archiveLimit', 0);
+    this.defineSetting('threadsPerPage', 20);
+    this.defineProperty('launchDate', function () {
+      return new Date((0, _config2.default)('board.' + name + '.launchDate', (0, _config2.default)('board.launchDate', new Date())));
+    });
+  }
+
+  _createClass(Board, [{
+    key: 'defineSetting',
+    value: function defineSetting(name, def) {
+      var _this = this;
+
+      Object.defineProperty(this, name, {
         get: function get() {
-            return (0, _config2.default)("board." + _this.name + "." + name, (0, _config2.default)("board." + name, typeof def == "function" ? def() : def));
+          return (0, _config2.default)('board.' + _this.name + '.' + name, (0, _config2.default)('board.' + name, typeof def === 'function' ? def() : def));
         },
         configurable: true
-    });
-};
-
-/*public*/Board.prototype.defineProperty = function (name, value) {
-    var _this = this;
-    if (typeof value == "function") {
-        Object.defineProperty(this, name, {
-            get: value,
-            configurable: true
-        });
-    } else {
-        Object.defineProperty(this, name, {
-            value: value,
-            configurable: true
-        });
+      });
     }
-};
+  }, {
+    key: 'defineProperty',
+    value: function defineProperty(name, value) {
+      if (typeof value === 'function') {
+        Object.defineProperty(this, name, {
+          get: value,
+          configurable: true
+        });
+      } else {
+        Object.defineProperty(this, name, {
+          value: value,
+          configurable: true
+        });
+      }
+    }
+  }, {
+    key: 'info',
+    value: function info() {
+      var _this2 = this;
 
-/*public*/Board.prototype.info = function () {
-    var _this = this;
-    var model = {
+      var model = {
         name: this.name,
         title: this.title,
         defaultUserName: this.defaultUserName,
@@ -166,377 +316,287 @@ Board.boards = {};
         launchDate: this.launchDate.toISOString(),
         permissions: this.permissions,
         opModeration: this.opModeration
-    };
-    this.customBoardInfoFields().forEach(function (field) {
-        model[field] = _this[field];
-    });
-    return model;
-};
-
-/*public*/Board.prototype.customBoardInfoFields = function () {
-    return [];
-};
-
-/*public*/Board.prototype.isCaptchaEngineSupported = function (engineName) {
-    if (typeof engineName != "string") return;
-    return Tools.contains(this.supportedCaptchaEngines, engineName);
-};
-
-/*public*/Board.prototype.isFileTypeSupported = function (fileType) {
-    if (typeof fileType != "string") return;
-    return Tools.contains(this.supportedFileTypes, fileType);
-};
-
-/*public*/Board.prototype.postExtraData = function (req, fields, files, oldPost) {
-    return Promise.resolve(oldPost ? oldPost.extraData : null);
-};
-
-/*public*/Board.prototype.storeExtraData = function (postNumber, extraData) {
-    if (Util.isNullOrUndefined(extraData)) return Promise.resolve();
-    return Promise.resolve();
-    //return Database.db.hset("postExtraData", this.name + ":" + postNumber, JSON.stringify(extraData));
-};
-
-/*public*/Board.prototype.loadExtraData = function (postNumber) {
-    var _this = this;
-    return Promise.resolve();
-    /*return Database.db.hget("postExtraData", this.name + ":" + postNumber).then(function(extraData) {
-        if (Util.isNullOrUndefined(extraData))
-            return Promise.resolve(null);
-        return JSON.parse(extraData);
-    });*/
-};
-
-/*public*/Board.prototype.removeExtraData = function (postNumber) {
-    return Promise.resolve();
-    //return Database.db.hdel("postExtraData", this.name + ":" + postNumber);
-};
-
-/*public*/Board.prototype.apiRoutes = function () {
-    return []; //[ { method, path, handler }, ... ]
-};
-
-/*public*/Board.prototype.actionRoutes = function () {
-    return []; //[ { method, path, handler }, ... ]
-};
-
-/*public*/Board.prototype.extraScripts = function () {
-    return [];
-};
-
-/*public*/Board.prototype.extraStylesheets = function () {
-    return [];
-};
-
-/*public*/Board.prototype.testParameters = function (mode, fields, files, existingFileCount) {
-    var _this2 = this;
-
-    var name = fields.name;
-    var subject = fields.subject;
-    var text = fields.text;
-    var password = fields.password;
-
-    name = name || '';
-    subject = subject || '';
-    text = text || '';
-    password = password || '';
-    if (name.length > this.maxNameLength) {
-        return Promise.reject(new Error(Tools.translate('Name is too long')));
+      };
+      this.customBoardInfoFields().forEach(function (field) {
+        model[field] = _this2[field];
+      });
+      return model;
     }
-    if (subject.length > this.maxSubjectLength) {
-        return Promise.reject(new Error(Tools.translate('Subject is too long')));
+  }, {
+    key: 'customBoardInfoFields',
+    value: function customBoardInfoFields() {
+      return [];
     }
-    if (text.length > this.maxTextFieldLength) {
-        return Promise.reject(new Error(Tools.translate('Comment is too long')));
+  }, {
+    key: 'isCaptchaEngineSupported',
+    value: function isCaptchaEngineSupported(engineName) {
+      return (0, _underscore2.default)(this.supportedCaptchaEngines).contains(engineName);
     }
-    if (password.length > this.maxPasswordLength) {
-        return Promise.reject(new Error(Tools.translate('Password is too long')));
+  }, {
+    key: 'isFileTypeSupported',
+    value: function isFileTypeSupported(fileType) {
+      return (0, _underscore2.default)(this.supportedFileTypes).contains(fileType);
     }
-    if ('markupText' === mode || 'editPost' === mode) {
-        return;
+  }, {
+    key: 'apiRoutes',
+    value: function apiRoutes() {
+      return [];
     }
-    if ('createThread' === mode && this.maxFileCount && files.length <= 0) {
-        return Promise.reject(new Error(Tools.translate('Attempt to create a thread without attaching a file')));
+  }, {
+    key: 'actionRoutes',
+    value: function actionRoutes() {
+      return [];
     }
-    if (text.length <= 0 && files.length + existingFileCount <= 0) {
-        return Promise.reject(new Error(Tools.translate('Both file and comment are missing')));
-    }
-    if (files.length + existingFileCount > this.maxFileCount) {
-        return Promise.reject(new Error(Tools.translate('Too many files')));
-    }
-    var err = files.reduce(function (err, file) {
-        if (err) {
-            return err;
-        }
-        if (file.size > _this2.maxFileSize) {
-            return Tools.translate('File is too big');
-        }
-        if (_this2.supportedFileTypes.indexOf(file.mimeType) < 0) {
-            return Tools.translate('File type is not supported');
-        }
-    }, '');
-    if (err) {
-        return Promise.reject(err);
-    }
-};
+  }, {
+    key: 'testParameters',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(mode, fields, files, existingFileCount) {
+        var _this3 = this;
 
-var renderFileInfo = function renderFileInfo(fi) {
-    fi.sizeKB = fi.size / 1024;
-    fi.sizeText = fi.sizeKB.toFixed(2) + "KB";
-    if (Tools.isImageType(fi.mimeType) || Tools.isVideoType(fi.mimeType)) {
-        if (fi.dimensions) fi.sizeText += ", " + fi.dimensions.width + "x" + fi.dimensions.height;
-    }
-    if (Tools.isAudioType(fi.mimeType) || Tools.isVideoType(fi.mimeType)) {
-        var ed = fi.extraData;
-        if (ed.duration) fi.sizeText += ", " + ed.duration;
-        if (Tools.isAudioType(fi.mimeType)) {
-            if (ed.bitrate) fi.sizeText += ", " + ed.bitrate + Tools.translate("kbps", "kbps");
-            fi.sizeTooltip = ed.artist ? ed.artist : Tools.translate("Unknown artist", "unknownArtist");
-            fi.sizeTooltip += " - ";
-            fi.sizeTooltip += ed.title ? ed.title : Tools.translate("Unknown title", "unknownTitle");
-            fi.sizeTooltip += " [";
-            fi.sizeTooltip += ed.album ? ed.album : Tools.translate("Unknown album", "unknownAlbum");
-            fi.sizeTooltip += "]";
-            if (ed.year) fi.sizeTooltip += " (" + ed.year + ")";
-        } else if (Tools.isVideoType(fi.mimeType) && ed.bitrate) {
-            fi.sizeTooltip = ed.bitrate + Tools.translate("kbps", "kbps");
-        }
-    }
-};
+        var name, subject, text, password, err;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                name = fields.name;
+                subject = fields.subject;
+                text = fields.text;
+                password = fields.password;
 
-/*public*/Board.prototype.renderPost = function (post) {
-    (post.fileInfos || []).forEach(function (fileInfo) {
-        renderFileInfo(fileInfo);
-    });
-    post.rawSubject = post.subject;
-    post.isOp = post.number == post.threadNumber;
-    if (post.options.showTripcode) post.tripcode = Tools.generateTripcode(post.user.hashpass);
-    delete post.user.ip;
-    delete post.user.hashpass;
-    delete post.user.password;
-    if (!post.geolocation.countryName) {
-        post.geolocation.countryName = "Unknown country";
-    }
-    return Promise.resolve(post);
-};
+                name = name || '';
+                subject = subject || '';
+                text = text || '';
+                password = password || '';
 
-Board.MarkupElements = {
-    BoldMarkupElement: "BOLD",
-    ItalicsMarkupElement: "ITALICS",
-    StrikedOutMarkupElement: "STRIKED_OUT",
-    UnderlinedMarkupElement: "UNDERLINED",
-    SpoilerMarkupElement: "SPOILER",
-    QuotationMarkupElement: "QUOTATION",
-    UnorderedList: "UNORDERED_LIST",
-    OrderedList: "ORDERED_LIST",
-    ListItem: "LIST_ITEM",
-    SubscriptMarkupElement: "SUBSCRIPT",
-    SuperscriptMarkupElement: "SUPERSCRIPT",
-    UrlMarkupElement: "URL",
-    CodeMarkupElement: "CODE",
-    LatexMarkupElement: "LATEX",
-    InlineLatexMarkupElement: "INLINE_LATEX"
-};
+                if (!(name.length > this.maxNameLength)) {
+                  _context.next = 10;
+                  break;
+                }
 
-Board.MimeTypesForExtensions = {};
-Board.DefaultExtensions = {};
+                return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Name is too long'))));
 
-var defineMimeTypeExtensions = function defineMimeTypeExtensions(mimeType) {
-    var extensions = Array.prototype.slice.call(arguments, 1);
-    extensions.forEach(function (extension) {
-        Board.MimeTypesForExtensions[extension] = mimeType;
-    });
-    Board.DefaultExtensions[mimeType] = extensions[0];
-};
+              case 10:
+                if (!(subject.length > this.maxSubjectLength)) {
+                  _context.next = 12;
+                  break;
+                }
 
-defineMimeTypeExtensions("application/ogg", "ogg");
-defineMimeTypeExtensions("application/pdf", "pdf");
-defineMimeTypeExtensions("audio/mpeg", "mpeg", "mp1", "m1a", "mp3", "m2a", "mpa", "mpg");
-defineMimeTypeExtensions("audio/ogg", "ogg");
-defineMimeTypeExtensions("audio/wav", "wav");
-defineMimeTypeExtensions("image/gif", "gif");
-defineMimeTypeExtensions("image/jpeg", "jpeg", "jpg");
-defineMimeTypeExtensions("image/png", "png");
-defineMimeTypeExtensions("video/mp4", "mp4");
-defineMimeTypeExtensions("video/webm", "webm");
+                return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Subject is too long'))));
 
-Board.ThumbExtensionsForMimeType = {
-    "application/ogg": "png",
-    "application/pdf": "png",
-    "audio/mpeg": "png",
-    "audio/ogg": "png",
-    "audio/wav": "png",
-    "video/mp4": "png",
-    "video/webm": "png"
-};
+              case 12:
+                if (!(text.length > this.maxTextFieldLength)) {
+                  _context.next = 14;
+                  break;
+                }
 
-Board.board = function (name) {
-    return Board.boards[name];
-};
+                return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Comment is too long'))));
 
-Board.addBoard = function (board) {
-    if (!Board.prototype.isPrototypeOf(board)) return;
-    Board.boards[board.name] = board;
-};
+              case 14:
+                if (!(password.length > this.maxPasswordLength)) {
+                  _context.next = 16;
+                  break;
+                }
 
-Board.boardInfos = function (includeHidden) {
-    includeHidden = includeHidden || typeof includeHidden == "undefined";
-    var list = [];
-    Tools.toArray(Board.boards).sort(function (b1, b2) {
-        return b1.name < b2.name ? -1 : 1;
-    }).forEach(function (board) {
-        if (!board.enabled || !includeHidden && board.hidden) return;
-        list.push({
-            name: board.name,
-            title: board.title
-        });
-    });
-    return list;
-};
+                return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Password is too long'))));
 
-Board.boardNames = function (includeHidden) {
-    includeHidden = includeHidden || typeof includeHidden == "undefined";
-    var list = [];
-    Tools.toArray(Board.boards).sort(function (b1, b2) {
-        return b1.name < b2.name ? -1 : 1;
-    }).forEach(function (board) {
-        if (!board.enabled || !includeHidden && board.hidden) return;
-        list.push(board.name);
-    });
-    return list;
-};
+              case 16:
+                if (!('markupText' === mode || 'editPost' === mode)) {
+                  _context.next = 18;
+                  break;
+                }
 
-Board.sortThreadsByDate = function (a, b) {
-    if (a.fixed == b.fixed) {
-        if (a.updatedAt < b.updatedAt) return 1;else if (a.updatedAt > b.updatedAt) return -1;else return 0;
-    } else if (a.fixed) {
-        return -1;
-    } else {
-        return 1;
-    }
-};
+                return _context.abrupt('return');
 
-Board.sortThreadsByCreationDate = function (a, b) {
-    if (a.createdAt > b.createdAt) return -1;else if (a.createdAt < b.createdAt) return 1;else return 0;
-};
+              case 18:
+                if (!('createThread' === mode && this.maxFileCount && files.length <= 0)) {
+                  _context.next = 20;
+                  break;
+                }
 
-Board.sortThreadsByPostCount = function (a, b) {
-    if (a.postCount > b.postCount) return -1;else if (a.postCount < b.postCount) return 1;else return 0;
-};
+                return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Attempt to create a thread without attaching a file'))));
 
-var getRules = function getRules(boardName) {
-    var fileName = __dirname + "/../misc/rules/rules" + (boardName ? '.' + boardName : '') + ".txt";
-    try {
-        if (!FSSync.existsSync(fileName)) {
-            return [];
-        }
-        var data = FSSync.readFileSync(fileName, "utf8");
-        if (!data) {
-            return [];
-        }
-        return data.split(/\r*\n+/gi).filter(function (rule) {
-            return rule;
-        });
-    } catch (err) {
-        console.error(err);
-        return [];
-    }
-};
+              case 20:
+                if (!(text.length <= 0 && files.length + existingFileCount <= 0)) {
+                  _context.next = 22;
+                  break;
+                }
 
-Board.initialize = function () {
-    Board.boards = {};
+                return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Both file and comment are missing'))));
 
-    FSSync.readdirSync(__dirname).forEach(function (file) {
-        if ("index.js" == file || "board.js" == file || "js" != file.split(".").pop()) return;
-        var id = require.resolve("./" + file.split(".").shift());
-        if (require.cache.hasOwnProperty(id)) delete require.cache[id];
-        var board = require(id);
-        if (Util.isArray(board)) {
-            board.forEach(function (board) {
-                Board.addBoard(board);
-            });
-        } else {
-            Board.addBoard(board);
-        }
-    });
+              case 22:
+                if (!(files.length + existingFileCount > this.maxFileCount)) {
+                  _context.next = 24;
+                  break;
+                }
 
-    if ((0, _config2.default)("board.useDefaultBoards", true)) {
-        Board.addBoard(new Board("3dpd", Tools.translate.noop("3D pron", "boardTitle")));
+                return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Too many files'))));
 
-        Board.addBoard(new Board("a", Tools.translate.noop("/a/nime", "boardTitle"), { defaultUserName: Tools.translate.noop("Kamina", "defaultUserName") }));
+              case 24:
+                err = files.reduce(function (err, file) {
+                  if (err) {
+                    return err;
+                  }
+                  if (file.size > _this3.maxFileSize) {
+                    return Tools.translate('File is too big');
+                  }
+                  if (_this3.supportedFileTypes.indexOf(file.mimeType) < 0) {
+                    return Tools.translate('File type is not supported');
+                  }
+                }, '');
 
-        Board.addBoard(new Board("b", Tools.translate.noop("/b/rotherhood", "boardTitle")));
+                if (!err) {
+                  _context.next = 27;
+                  break;
+                }
 
-        Board.addBoard(new Board("cg", Tools.translate.noop("Console games", "boardTitle")));
+                return _context.abrupt('return', Promise.reject(err));
 
-        Board.addBoard(new Board("d", Tools.translate.noop("Board /d/iscussion", "boardTitle")));
-        Board.addBoard(new Board("echo", Tools.translate.noop("Boardsphere echo", "boardTitle")));
-
-        Board.addBoard(new Board("h", Tools.translate.noop("/h/entai", "boardTitle")));
-
-        Board.addBoard(new Board("int", "/int/ernational", { defaultUserName: Tools.translate.noop("Vladimir Putin", "defaultUserName") }));
-
-        Board.addBoard(new Board("mlp", Tools.translate.noop("My Little Pony", "boardTitle")));
-
-        Board.addBoard(new Board("po", Tools.translate.noop("/po/litics", "boardTitle"), { defaultUserName: Tools.translate.noop("Armchair warrior", "defaultUserName") }));
-
-        var board = new Board("pr", Tools.translate.noop("/pr/ogramming", "boardTitle"));
-        board.defineSetting("markupElements", board.markupElements.concat(Board.MarkupElements.CodeMarkupElement, Board.MarkupElements.LatexMarkupElement, Board.MarkupElements.InlineLatexMarkupElement));
-        Board.addBoard(board);
-
-        Board.addBoard(new Board("rf", Tools.translate.noop("Refuge", "boardTitle"), { defaultUserName: Tools.translate.noop("Whiner", "defaultUserName") }));
-
-        Board.addBoard(new Board("rpg", Tools.translate.noop("Role-playing games", "boardTitle")));
-        Board.addBoard(new Board("soc", Tools.translate.noop("Social life", "boardTitle"), { defaultUserName: Tools.translate.noop("Life of the party", "defaultUserName") }));
-
-        Board.addBoard(new Board("vg", Tools.translate.noop("Video games", "boardTitle"), { defaultUserName: Tools.translate.noop("PC Nobleman", "defaultUserName") }));
-    }
-
-    Board._banners = {};
-    Board.boardNames().forEach(function (boardName) {
-        var path = __dirname + "/../public/img/banners/" + boardName;
-        if (FSSync.existsSync(path)) {
-            Board._banners[boardName] = FSSync.readdirSync(path).filter(function (fileName) {
-                return ".gitignore" != fileName;
-            });
-        } else {
-            Board._banners[boardName] = [];
-        }
-    });
-
-    Board._postFormRules = {};
-    Board.boardNames().forEach(function (boardName) {
-        var common = getRules();
-        var specific = getRules(boardName);
-        for (var i = specific.length - 1; i >= 0; --i) {
-            var rule = specific[i];
-            var rxExcept = /^#include\s+except(\((\d+(\,\d+)*)\))$/;
-            var rxSeveral = /^#include\s+(\d+(\,\d+)*)$/;
-            if ('#include all' === rule) {
-                Array.prototype.splice.apply(specific, [i, 1].concat(common));
-            } else if (rxExcept.test(rule)) {
-                var excluded = rule.match(rxExcept)[2].split(",").map(function (n) {
-                    return +n;
-                });
-                Array.prototype.splice.apply(specific, [i, 1].concat(common.filter(function (_, i) {
-                    return excluded.indexOf(i) < 0;
-                })));
-            } else if (rxSeveral.test(rule)) {
-                var included = rule.match(rxSeveral)[1].split(",").map(function (n) {
-                    return +n;
-                }).filter(function (n) {
-                    return n >= 0 && n < common.length;
-                }).map(function (n) {
-                    return common[n];
-                });
-                Array.prototype.splice.apply(specific, [i, 1].concat(included));
+              case 27:
+              case 'end':
+                return _context.stop();
             }
-        };
-        Board._postFormRules[boardName] = specific.length > 0 ? specific : common;
-    });
-};
+          }
+        }, _callee, this);
+      }));
+
+      function testParameters(_x2, _x3, _x4, _x5) {
+        return ref.apply(this, arguments);
+      }
+
+      return testParameters;
+    }()
+  }, {
+    key: 'postExtraData',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, fields, files, oldPost) {
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                return _context2.abrupt('return', oldPost ? oldPost.extraData : null);
+
+              case 1:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function postExtraData(_x6, _x7, _x8, _x9) {
+        return ref.apply(this, arguments);
+      }
+
+      return postExtraData;
+    }()
+  }, {
+    key: 'storeExtraData',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(postNumber, extraData) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+              case 'end':
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function storeExtraData(_x10, _x11) {
+        return ref.apply(this, arguments);
+      }
+
+      return storeExtraData;
+    }()
+  }, {
+    key: 'loadExtraData',
+
+    //NOTE: Do nothing by default.
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(postNumber) {
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+              case 'end':
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function loadExtraData(_x12) {
+        return ref.apply(this, arguments);
+      }
+
+      return loadExtraData;
+    }()
+  }, {
+    key: 'removeExtraData',
+
+    //NOTE: Do nothing by default.
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(postNumber) {
+        return regeneratorRuntime.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+              case 'end':
+                return _context5.stop();
+            }
+          }
+        }, _callee5, this);
+      }));
+
+      function removeExtraData(_x13) {
+        return ref.apply(this, arguments);
+      }
+
+      return removeExtraData;
+    }()
+  }, {
+    key: 'renderPost',
+
+    //NOTE: Do nothing by default.
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(post) {
+        return regeneratorRuntime.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                post.rawSubject = post.subject;
+                post.isOp = post.number === post.threadNumber;
+                if (post.options.showTripcode) {
+                  post.tripcode = Tools.generateTripcode(post.user.hashpass);
+                }
+                delete post.user.ip;
+                delete post.user.hashpass;
+                delete post.user.password;
+                if (!post.geolocation.countryName) {
+                  post.geolocation.countryName = 'Unknown country';
+                }
+                return _context6.abrupt('return', post);
+
+              case 8:
+              case 'end':
+                return _context6.stop();
+            }
+          }
+        }, _callee6, this);
+      }));
+
+      function renderPost(_x14) {
+        return ref.apply(this, arguments);
+      }
+
+      return renderPost;
+    }()
+  }]);
+
+  return Board;
+}();
 
 exports.default = Board;
-
-//var Database = require("../helpers/database");
 //# sourceMappingURL=board.js.map

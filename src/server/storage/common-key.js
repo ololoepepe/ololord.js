@@ -58,4 +58,8 @@ export default class CommonKey {
   async delete(subkey) {
     return await this.client.del(this.fullKey(subkey));
   }
+
+  async expire(ttl, subkey) {
+    return await this.client.expire(this.fullKey(subkey), ttl);
+  }
 }

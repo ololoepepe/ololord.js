@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.checkUserPermissions = exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.getSynchronizationData = exports.removeSuperuser = exports.addSuperuser = exports.unregisterUser = exports.updateRegisteredUser = exports.registerUser = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getRegisteredUserLevelsByIp = exports.getRegisteredUserLevels = exports.getRegisteredUserLevelByIp = exports.getRegisteredUserLevel = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
+exports.initializeUserBansMonitoring = exports.banUser = exports.updatePostBanInfo = exports.checkUserPermissions = exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.getSynchronizationData = exports.removeSuperuser = exports.addSuperuser = exports.unregisterUser = exports.updateRegisteredUser = exports.registerUser = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getRegisteredUserLevelsByIp = exports.getRegisteredUserLevels = exports.getRegisteredUserLevelByIp = exports.getRegisteredUserLevel = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
 
 var getUserCaptchaQuota = exports.getUserCaptchaQuota = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, userIp) {
@@ -477,7 +477,7 @@ var getRegisteredUserLevelsByIp = exports.getRegisteredUserLevelsByIp = function
           case 10:
             return _context14.abrupt('return', _context14.sent);
 
-          case 12:
+          case 11:
           case 'end':
             return _context14.stop();
         }
@@ -1145,6 +1145,7 @@ var checkUserBan = exports.checkUserBan = function () {
     var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
     var write = _ref.write;
+    var geolocationInfo = _ref.geolocationInfo;
     var ban, bans;
     return regeneratorRuntime.wrap(function _callee32$(_context32) {
       while (1) {
@@ -1179,6 +1180,14 @@ var checkUserBan = exports.checkUserBan = function () {
             return _context32.abrupt('return', Promise.reject({ ban: ban }));
 
           case 10:
+            if (!geolocationInfo) {
+              _context32.next = 12;
+              break;
+            }
+
+            return _context32.abrupt('return', checkGeoBan(geolocationInfo));
+
+          case 12:
           case 'end':
             return _context32.stop();
         }
@@ -1323,7 +1332,308 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
   };
 }();
 
-exports.checkGeoBan = checkGeoBan;
+var updatePostBanInfo = exports.updatePostBanInfo = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee34(boardName, postNumber) {
+    var post;
+    return regeneratorRuntime.wrap(function _callee34$(_context34) {
+      while (1) {
+        switch (_context34.prev = _context34.next) {
+          case 0:
+            if (_board2.default.board(boardName)) {
+              _context34.next = 2;
+              break;
+            }
+
+            return _context34.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+
+          case 2:
+            postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+
+            if (postNumber) {
+              _context34.next = 5;
+              break;
+            }
+
+            return _context34.abrupt('return');
+
+          case 5:
+            _context34.next = 7;
+            return PostsModel.getPost(boardName, postNumber);
+
+          case 7:
+            post = _context34.sent;
+
+            if (post) {
+              _context34.next = 10;
+              break;
+            }
+
+            return _context34.abrupt('return');
+
+          case 10:
+            _context34.next = 12;
+            return IPC.render(boardName, post.threadNumber, postNumber, 'edit');
+
+          case 12:
+          case 'end':
+            return _context34.stop();
+        }
+      }
+    }, _callee34, this);
+  }));
+
+  return function updatePostBanInfo(_x61, _x62) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var banUser = exports.banUser = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee36(ip, newBans) {
+    var oldBans;
+    return regeneratorRuntime.wrap(function _callee36$(_context36) {
+      while (1) {
+        switch (_context36.prev = _context36.next) {
+          case 0:
+            ip = Tools.correctAddress(ip);
+
+            if (ip) {
+              _context36.next = 3;
+              break;
+            }
+
+            return _context36.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid IP address'))));
+
+          case 3:
+            _context36.next = 5;
+            return UsersModel.getBannedUserBans(userIp);
+
+          case 5:
+            oldBans = _context36.sent;
+            _context36.next = 8;
+            return Tools.series(_board2.default.boardNames(), function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee35(boardName) {
+                var key, ban;
+                return regeneratorRuntime.wrap(function _callee35$(_context35) {
+                  while (1) {
+                    switch (_context35.prev = _context35.next) {
+                      case 0:
+                        key = ip + ':' + boardName;
+                        ban = newBans[boardName];
+
+                        if (!ban) {
+                          _context35.next = 15;
+                          break;
+                        }
+
+                        _context35.next = 5;
+                        return UserBans.set(ban, key);
+
+                      case 5:
+                        if (!ban.expiresAt) {
+                          _context35.next = 8;
+                          break;
+                        }
+
+                        _context35.next = 8;
+                        return UserBans.expire(Math.ceil((+ban.expiresAt - +Tools.now()) / 1000), key);
+
+                      case 8:
+                        if (!ban.postNumber) {
+                          _context35.next = 13;
+                          break;
+                        }
+
+                        _context35.next = 11;
+                        return UserBanPostNumbers.setOne(key, ban.postNumber);
+
+                      case 11:
+                        _context35.next = 13;
+                        return updatePostBanInfo(boardName, ban.postNumber);
+
+                      case 13:
+                        _context35.next = 24;
+                        break;
+
+                      case 15:
+                        ban = oldBans[boardName];
+
+                        if (ban) {
+                          _context35.next = 18;
+                          break;
+                        }
+
+                        return _context35.abrupt('return');
+
+                      case 18:
+                        _context35.next = 20;
+                        return UserBans.delete(key);
+
+                      case 20:
+                        if (!ban.postNumber) {
+                          _context35.next = 24;
+                          break;
+                        }
+
+                        UserBanPostNumbers.deleteOne(ban.postNumber, key);
+                        _context35.next = 24;
+                        return updatePostBanInfo(boardName, ban.postNumber);
+
+                      case 24:
+                      case 'end':
+                        return _context35.stop();
+                    }
+                  }
+                }, _callee35, this);
+              }));
+
+              return function (_x65) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 8:
+            _context36.next = 10;
+            return BannedUserIPs[(0, _underscore2.default)(newBans).isEmpty() ? 'deleteOne' : 'addOne'](ip);
+
+          case 10:
+          case 'end':
+            return _context36.stop();
+        }
+      }
+    }, _callee36, this);
+  }));
+
+  return function banUser(_x63, _x64) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var updateBanOnMessage = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee37(message) {
+    var ip, boardName, postNumber, keys;
+    return regeneratorRuntime.wrap(function _callee37$(_context37) {
+      while (1) {
+        switch (_context37.prev = _context37.next) {
+          case 0:
+            _context37.prev = 0;
+            ip = Tools.correctAddress(message.split(':').slice(1, -1).join(':'));
+
+            if (ip) {
+              _context37.next = 4;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid IP address'));
+
+          case 4:
+            boardName = message.split(':').pop();
+
+            if (_board2.default.board(boardName)) {
+              _context37.next = 7;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid board'));
+
+          case 7:
+            _context37.next = 9;
+            return UserBanPostNumbers.getOne(message);
+
+          case 9:
+            postNumber = _context37.sent;
+
+            postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+
+            if (postNumber) {
+              _context37.next = 13;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid post number'));
+
+          case 13:
+            _context37.next = 15;
+            return UserBanPostNumbers.deleteOne(message);
+
+          case 15:
+            _context37.next = 17;
+            return UserBans.find(ip + ':*');
+
+          case 17:
+            keys = _context37.sent;
+
+            if (!(!keys || keys.length <= 0)) {
+              _context37.next = 21;
+              break;
+            }
+
+            _context37.next = 21;
+            return BannedUserIPs.deleteOne(ip);
+
+          case 21:
+            _context37.next = 23;
+            return updatePostBanInfo(boardName, postNumber);
+
+          case 23:
+            _context37.next = 28;
+            break;
+
+          case 25:
+            _context37.prev = 25;
+            _context37.t0 = _context37['catch'](0);
+
+            Logger.error(_context37.t0.stack || _context37.t0);
+
+          case 28:
+          case 'end':
+            return _context37.stop();
+        }
+      }
+    }, _callee37, this, [[0, 25]]);
+  }));
+
+  return function updateBanOnMessage(_x66) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var initializeUserBansMonitoring = exports.initializeUserBansMonitoring = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee38() {
+    var CHANNEL, db;
+    return regeneratorRuntime.wrap(function _callee38$(_context38) {
+      while (1) {
+        switch (_context38.prev = _context38.next) {
+          case 0:
+            //NOTE: Enabling "key expired" notifications
+            CHANNEL = '__keyevent@' + config('system.redis.db') + '__:expired';
+            db = (0, _clientFactory2.default)(true);
+
+            db.on('message', function (channel, message) {
+              if (CHANNEL !== channel) {
+                return;
+              }
+              updateBanOnMessage(message);
+            });
+            _context38.next = 5;
+            return (0, _clientFactory2.default)().config('SET', 'notify-keyspace-events', 'Ex');
+
+          case 5:
+            db.subscribe(CHANNEL).catch(function (err) {
+              Logger.error(err.stack || err);
+            });
+
+          case 6:
+          case 'end':
+            return _context38.stop();
+        }
+      }
+    }, _callee38, this);
+  }));
+
+  return function initializeUserBansMonitoring() {
+    return ref.apply(this, arguments);
+  };
+}();
 
 var _underscore = require('underscore');
 
@@ -1393,6 +1703,14 @@ var SuperuserHashes = new _unorderedSet2.default((0, _clientFactory2.default)(),
 });
 var SynchronizationData = new _key2.default((0, _clientFactory2.default)(), 'synchronizationData');
 var Threads = new _hash2.default((0, _clientFactory2.default)(), 'threads');
+var UserBanPostNumbers = new _hash2.default((0, _clientFactory2.default)(), 'userBanPostNumbers', {
+  parse: function parse(number) {
+    return +number;
+  },
+  stringify: function stringify(number) {
+    return number.toString();
+  }
+});
 var UserBans = new _key2.default((0, _clientFactory2.default)(), 'userBans');
 var UserCaptchaQuotas = new _hash2.default((0, _clientFactory2.default)(), 'captchaQuotas', {
   parse: function parse(quota) {
@@ -1488,7 +1806,8 @@ var geoBans = Tools.createWatchedResource(__dirname + '/../misc/geo-bans.json', 
   };
 }()) || new Map();
 
-function checkGeoBan(geolocationInfo) {
+function checkGeoBan(geolocationInfo, ip) {
+  //TODO: consider ip
   var def = geoBans.get('*');
   if (def) {
     geolocationInfo = geolocationInfo || {};
@@ -1500,12 +1819,7 @@ function checkGeoBan(geolocationInfo) {
     countryCode = '';
   }
   var user = geoBans.get(countryCode.toUpperCase());
-  if (def) {
-    var banned = !user && typeof user === 'boolean';
-  } else {
-    var banned = user;
-  }
-  if (banned) {
+  if (def ? !user && typeof user === 'boolean' : !!user) {
     return Promise.reject(new Error(Tools.translate('Posting is disabled for this country')));
   }
 }
