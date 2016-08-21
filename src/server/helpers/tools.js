@@ -1,23 +1,16 @@
 import _ from 'underscore';
 var Address4 = require("ip-address").Address4;
 var Address6 = require("ip-address").Address6;
-var Canvas = require("canvas");
-var ChildProcess = require("child_process");
 var Crypto = require("crypto");
-var du = require("du");
 var equal = require("deep-equal");
-var escapeHtml = require("escape-html");
+import escapeHTML from 'escape-html';
 var FS = require("q-io/fs");
 var FSSync = require("fs");
 var HTMLToText = require("html-to-text");
-var Image = Canvas.Image;
-var Jdenticon = require("jdenticon");
-var MathJax = require("mathjax-node/lib/mj-single.js");
 var merge = require("merge");
 var mkpath = require("mkpath");
 var Multiparty = require("multiparty");
 var Path = require("path");
-var phash = require("phash-image");
 var promisify = require("promisify-node");
 var Util = require("util");
 var UUID = require("uuid");
@@ -41,16 +34,19 @@ var rootZones = require("../misc/root-zones.json").reduce(function(acc, zone) {
     return acc;
 }, {});
 
-MathJax.config({ MathJax: {} });
-MathJax.start();
-
 mkpath.sync(config("system.tmpPath", __dirname + "/../tmp") + "/form");
 
-export const Billion = 2 * 1000 * 1000 * 1000;
-export const Second = 1000;
-export const Minute = 60 * 1000;
-export const Hour = 60 * 60 * 1000;
-export const ExternalLinkRegexpPattern = (function() {
+const NON_THEME_STYLESHEETS = new Set(['', 'custom-'].reduce((acc, prefix) => {
+  return acc.concat(['combined', 'desktop', 'mobile'].map(suffix => `${prefix}base-${suffix}`));
+}, []));
+const STYLES_PATH = `${__dirname}/../public/css`;
+const CODE_STYLES_PATH = `${__dirname}/../public/css/3rdparty/highlight.js`;
+const JS_TYPES = new Set(['string', 'boolean', 'number', 'object']);
+
+export const SECOND = 1000;
+export const MINUTE = 60 * SECOND;
+export const HOUR = 60 * MINUTE;
+export const EXTERNAL_LINK_REGEXP_PATTERN = (function() {
     var schema = "https?:\\/\\/|ftp:\\/\\/";
     var ip = "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}"
         + "(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])";
@@ -63,162 +59,6 @@ export const FILE_RATINGS = ['SFW', 'R-15', 'R-18', 'R-18G'];
 export const NODE_CAPTCHA_ID = 'node-captcha';
 export const REGISTERED_USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];
 export const BAN_LEVELS = ['NONE', 'READ_ONLY', 'NO_ACCESS'];
-
-export let forIn = function(obj, f) {
-    if (!obj || typeof f != "function")
-        return;
-    for (var x in obj) {
-        if (obj.hasOwnProperty(x))
-            f(obj[x], x);
-    }
-};
-
-export let mapIn = function(obj, f) {
-    if (!obj || typeof f != "function")
-        return;
-    var arr = [];
-    for (var x in obj) {
-        if (obj.hasOwnProperty(x))
-            arr.push(f(obj[x], x));
-    }
-    return arr;
-};
-
-export let filterIn = function(obj, f) {
-    if (!obj || typeof f != "function")
-        return;
-    var nobj = {};
-    for (var x in obj) {
-        if (obj.hasOwnProperty(x)) {
-            var item = obj[x];
-            if (f(item, x))
-                nobj[x] = item;
-        }
-    }
-    return nobj;
-};
-
-export let toArray = function(obj) {
-    var arr = [];
-    forIn(obj, function(val) {
-        arr.push(val);
-    });
-    return arr;
-};
-
-export let promiseIf = function(condition, ifTrue, ifFalse) {
-    if (condition)
-        return ifTrue();
-    else if (typeof ifFalse == "function")
-        return ifFalse();
-    else
-        return Promise.resolve();
-};
-
-export let extend = function(Child, Parent) {
-    var F = function() {};
-    F.prototype = Parent.prototype;
-    Child.prototype = new F();
-    Child.prototype.constructor = Child;
-    Child.superclass = Parent.prototype;
-};
-
-export let arr = function(obj) {
-    var arr = [];
-    if (!obj || !obj.length)
-        return arr;
-    for (var i = 0; i < obj.length; ++i)
-        arr.push(obj[i]);
-    return arr;
-};
-
-export let contains = function(s, subs) {
-    if (typeof s == "string" && typeof subs == "string")
-        return s.replace(subs, "") != s;
-    if (!s || !s.length || s.length < 1)
-        return false;
-    for (var i = 0; i < s.length; ++i) {
-        if (equal(s[i], subs))
-            return true;
-    }
-    return false;
-};
-
-export let hasOwnProperties = function(obj) {
-    if (!obj)
-        return false;
-    for (var x in obj) {
-        if (obj.hasOwnProperty(x))
-            return true;
-    }
-    return false;
-};
-
-export let replace = function(where, what, withWhat) {
-    if (typeof where != "string" || (typeof what != "string" && !(what instanceof RegExp)) || typeof withWhat != "string")
-        return;
-    var sl = where.split(what);
-    return (sl.length > 1) ? sl.join(withWhat) : sl.pop();
-};
-
-export let toUTC = function(date) {
-    if (!(date instanceof Date))
-        return;
-    return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(),
-        date.getUTCMinutes(), date.getUTCSeconds(), date.getMilliseconds());
-};
-
-export let hashpass = function(req) {
-    var s = req.cookies.hashpass;
-    if (!mayBeHashpass(s))
-        return;
-    return s;
-};
-
-export let flagName = function(countryCode) {
-    if (!countryCode)
-        return Promise.resolve("");
-    var fn = countryCode.toUpperCase() + ".png";
-    if (flags.hasOwnProperty(fn))
-        return Promise.resolve(fn);
-    return FS.exists(__dirname + "/../public/img/flags/" + fn).then(function(exists) {
-        if (exists)
-            flags[fn] = true;
-        return Promise.resolve(exists ? fn : "");
-    });
-};
-
-export let setLocale = function(locale) {
-    translate.setLocale(locale);
-};
-
-export let now = function() {
-    return new Date();
-};
-
-export let forever = function() {
-    var date = new Date();
-    date.setTime(date.getTime() + Billion * 1000);
-    return date;
-};
-
-export let externalLinkRootZoneExists = function(zoneName) {
-    return rootZones.hasOwnProperty(zoneName);
-};
-
-export let toHtml = function(text, replaceSpaces) {
-    text = escapeHtml(text).split("\n").join("<br />");
-    if (replaceSpaces)
-        text = text.split(" ").join("&nbsp;");
-    return text;
-};
-
-let NON_THEME_STYLESHEETS = new Set(['', 'custom-'].reduce((acc, prefix) => {
-  return acc.concat(['combined', 'desktop', 'mobile'].map(suffix => `${prefix}base-${suffix}`));
-}, []));
-
-const STYLES_PATH = `${__dirname}/../public/css`;
-
 export const STYLES = FSSync.readdirSync(STYLES_PATH).filter((fileName) => {
   return fileName.split('.').pop() === 'css' && !NON_THEME_STYLESHEETS.has(fileName.split('.').shift());
 }).map((fileName) => {
@@ -229,8 +69,6 @@ export const STYLES = FSSync.readdirSync(STYLES_PATH).filter((fileName) => {
     title: (match ? match[1] : name)
   };
 });
-
-const CODE_STYLES_PATH = `${__dirname}/../public/css/3rdparty/highlight.js`;
 
 export const CODE_STYLES = FSSync.readdirSync(CODE_STYLES_PATH).filter((fileName) => {
   return fileName.split('.').pop() === 'css';
@@ -243,44 +81,30 @@ export const CODE_STYLES = FSSync.readdirSync(CODE_STYLES_PATH).filter((fileName
   };
 });
 
-export let mimeType = function(fileName) {
-    if (!fileName || !Util.isString(fileName))
-        return Promise.resolve(null);
-    try {
-        return new Promise(function(resolve, reject) {
-            ChildProcess.exec(`file --brief --mime-type ${fileName}`, {
-                timeout: 5000,
-                encoding: "utf8",
-                stdio: [
-                    0,
-                    "pipe",
-                    null
-                ]
-            }, function(err, out) {
-                if (err)
-                    reject(err);
-                resolve(out ? out.replace(/\r*\n+/g, "") : null);
-            });
-        });
-    } catch (err) {
-        return Promise.resolve(null);
-    }
+export let hashpass = function(req) {
+    var s = req.cookies.hashpass;
+    if (!mayBeHashpass(s))
+        return;
+    return s;
 };
 
-export let isAudioType = function(mimeType) {
-    return "application/ogg" == mimeType || mimeType.substr(0, 6) == "audio/";
+export let setLocale = function(locale) {
+    translate.setLocale(locale);
 };
 
-export let isVideoType = function(mimeType) {
-    return mimeType.substr(0, 6) == "video/";
+export let now = function() {
+    return new Date();
 };
 
-export let isPdfType = function(mimeType) {
-    return mimeType == "application/pdf";
+export let externalLinkRootZoneExists = function(zoneName) {
+    return rootZones.hasOwnProperty(zoneName);
 };
 
-export let isImageType = function(mimeType) {
-    return mimeType.substr(0, 6) == "image/";
+export let toHtml = function(text, replaceSpaces) {
+    text = escapeHTML(text).split("\n").join("<br />");
+    if (replaceSpaces)
+        text = text.split(" ").join("&nbsp;");
+    return text;
 };
 
 export let splitCommand = function(cmd) {
@@ -364,13 +188,13 @@ export let parseForm = function(req) {
         form.parse(req, function(err, fields, files) {
             if (err)
                 return reject(err);
-            forIn(fields, function(val, key) {
+            _(fields).each((val, key) => {
                 if (1 == val.length)
                     fields[key] = val[0];
             });
             resolve({
                 fields: fields,
-                files: toArray(files).reduce(function(acc, files) {
+                files: _(files).reduce((acc, files) => {
                     return acc.concat(files);
                 }, []).map(function(file) {
                     file.name = file.originalFilename;
@@ -465,23 +289,6 @@ export let withoutDuplicates = function(arr) {
     });
 };
 
-export let remove = function(arr, what, both) {
-    if (!arr || !Util.isArray(arr))
-        return arr;
-    if (Util.isUndefined(what))
-        return;
-    if (!Util.isArray(what))
-        what = [what];
-    for (var i = what.length - 1; i >= 0; --i) {
-        var ind = arr.indexOf(what[i]);
-        if (ind >= 0) {
-            arr.splice(ind, 1);
-            if (both)
-                what.splice(i, 1);
-        }
-    }
-};
-
 export let series = function(arr, f, container) {
     if (container && typeof container != "object")
         container = [];
@@ -500,7 +307,7 @@ export let series = function(arr, f, container) {
             });
         });
     } else if (Util.isObject(arr)) {
-        forIn(arr, function(el, key) {
+        _(arr).each((el, key) => {
             p = p.then(function() {
                 return f(el, key);
             }).then(function(result) {
@@ -559,82 +366,6 @@ export let ipList = function(s) {
         return translate("Invalid IP address");
     return withoutDuplicates(ips);
 };
-
-export let markupLatex = function(text, inline) {
-    return new Promise(function(resolve, reject) {
-        MathJax.typeset({
-            math: text,
-            format: inline ? "inline-TeX" : "TeX",
-            svg: true
-        }, function(data) {
-            if (data.errors)
-                return reject(data.errors[0] || data.errors);
-            var html = data.svg;
-            if (inline)
-                html = `<span class="latex-inline">${html}</span>`;
-            else
-                html = `<div class="latex-block">${html}</div>`;
-            resolve(html);
-        });
-    });
-};
-
-export let generateImageHash = function(fileName) {
-    return phash(fileName, true).then(function(hash) {
-        return Promise.resolve(hash.toString());
-    });
-};
-
-export let generateRandomImage = function(hash, mimeType, thumbPath) {
-    var canvas = new Canvas(200, 200);
-    var ctx = canvas.getContext("2d");
-    Jdenticon.drawIcon(ctx, hash, 200);
-    return FS.read(__dirname + "/../thumbs/" + mimeType + ".png", "b").then(function(data) {
-        var img = new Image;
-        img.src = data;
-        ctx.drawImage(img, 0, 0, 200, 200);
-        return new Promise(function(resolve, reject) {
-            canvas.pngStream().pipe(FSSync.createWriteStream(thumbPath).on("error", reject).on("finish", resolve));
-        });
-    });
-};
-
-export function du(path) {
-    return new Promise(function(resolve, reject) {
-        du(path, function(err, size) {
-            if (err)
-                return reject(err);
-            resolve(size);
-        });
-    });
-}
-
-export let writeFile = function(filePath, data) {
-    var tmpFilePath = filePath + ".tmp";
-    var path = filePath.split("/").slice(0, -1).join("/");
-    return FS.exists(path).then(function(exists) {
-        if (exists)
-            return Promise.resolve();
-        return FS.makeTree(path);
-    }).then(function() {
-        return FS.write(tmpFilePath, data);
-    }).then(function() {
-        return FS.rename(tmpFilePath, filePath);
-    });
-};
-
-export let escaped = function(string) {
-  return escapeHtml(string);
-}
-
-export let escapedSelector = function(string) {
-  if (typeof string !== 'string') {
-    return string;
-  }
-  return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, '-');
-};
-
-const JS_TYPES = new Set(['string', 'boolean', 'number', 'object']);
 
 export function option(source, acceptable, def, { strict, invert, test } = {}) {
   if (typeof source === 'undefined') {
@@ -740,7 +471,7 @@ export function postingSpeedString(launchDate, lastPostNumber) {
         return (ss.split(".").pop() != "0") ? ss : ss.split(".").shift();
     };
     var uptimeMsecs = _.now() - launchDate;
-    var duptime = uptimeMsecs / Hour;
+    var duptime = uptimeMsecs / HOUR;
     var uptime = Math.floor(duptime);
     var shour = translate("post(s) per hour.", "postingSpeed");
     if (!uptime) {
@@ -782,7 +513,7 @@ export function requireWrapper(m) {
   return (m && m.default) || m;
 }
 
-export function loadPlugins(path, filter) {
+export function loadPlugins(paths, filter) {
   if (typeof filter !== 'function') {
     if (typeof filter === 'undefined' || filter) {
       filter = (fileName) => { return 'index.js' !== fileName; };
@@ -790,18 +521,25 @@ export function loadPlugins(path, filter) {
       filter = () => true;
     }
   }
-  let list = FSSync.readdirSync(path).filter((fileName) => {
-    return fileName.split('.').pop() === 'js';
-  }).filter(filter).map((fileName) => {
-    let id = require.resolve(`${path}/${fileName}`);
-    if (require.cache.hasOwnProperty(id)) {
-      delete require.cache[id];
-    }
-    let plugins = requireWrapper(require(id));
-    if (!_(plugins).isArray()) {
-      plugins = [plugins];
-    }
-    return plugins;
+  if (!_(paths).isArray()) {
+    paths = [paths];
+  }
+  let list = paths.map((path, pathIndex) => {
+    return FSSync.readdirSync(path).filter((fileName) => {
+      return fileName.split('.').pop() === 'js';
+    }).filter((fileName, index, fileNames) => {
+      return filter(fileName, index, fileNames, path, pathIndex);
+    }).map((fileName) => {
+      let id = require.resolve(`${path}/${fileName}`);
+      if (require.cache.hasOwnProperty(id)) {
+        delete require.cache[id];
+      }
+      let plugins = requireWrapper(require(id));
+      if (!_(plugins).isArray()) {
+        plugins = [plugins];
+      }
+      return plugins;
+    });
   });
   return _(list).flatten();
 }
@@ -826,19 +564,6 @@ export function processError(err, dir) {
   return err;
 }
 
-export function mixin(Parent, ...mixins) {
-  if (typeof Parent !== 'function') {
-    Parent = class {};
-  }
-  class Mixed extends Parent {};
-  mixins.forEach((mixin) => {
-    for (let prop in mixin) {
-      Mixed.prototype[prop] = mixin[prop];
-    }
-  });
-  return Mixed;
-}
-
 export function rerenderPostsTargetsFromString(string) {
   if (!string || typeof string !== 'string') {
     return {};
@@ -856,4 +581,16 @@ export function rerenderPostsTargetsFromString(string) {
     }
     return acc;
   }, {});
+}
+
+export function pad(what, length, ch) {
+  what = '' + what;
+  length = option(length, 'number', 2, { test: (l) => { return l > 0; } });
+  if (!length) {
+    return what;
+  }
+  if (length - what.length <= 0) {
+    return what;
+  }
+  return Array(length - what.length).join((ch || '0').toString()[0]) + what;
 }

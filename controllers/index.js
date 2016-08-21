@@ -41,114 +41,113 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 var EXCLUDED_ROUTERS = new Set(['index.js', 'home.js', 'board.js']);
 
 var router = _express2.default.Router();
-var routers = [];
+router.routers = [];
 
-router.use('/redirect', function (req, res, next) {
-  if (!req.query.source) {
-    return next();
-  }
-  res.redirect(307, '/' + (0, _config2.default)('site.pathPrefix') + req.query.source.replace(/^\//, ''));
-});
+router.initialize = function () {
+  router.use('/redirect', function (req, res, next) {
+    if (!req.query.source) {
+      return next();
+    }
+    res.redirect(307, '/' + (0, _config2.default)('site.pathPrefix') + req.query.source.replace(/^\//, ''));
+  });
 
-_fs4.default.readdirSync(__dirname).filter(function (fileName) {
-  return !EXCLUDED_ROUTERS.has(fileName) && 'js' === fileName.split('.').pop();
-}).forEach(function (fileName) {
-  var r = Tools.requireWrapper(require('./' + fileName.split('.').slice(0, -1).join('.')));
-  router.use('/', r);
-  routers.push(r);
-});
+  Tools.loadPlugins([__dirname, __dirname + '/custom'], function (fileName, _1, _2, path) {
+    return !EXCLUDED_ROUTERS.has(fileName) || path.split('/') === 'custom';
+  }).forEach(function (plugin) {
+    router.use('/', plugin);
+    router.routers.push(plugin);
+  });
 
-['./board', './home'].forEach(function (id) {
-  var r = Tools.requireWrapper(require(id));
-  router.use('/', r);
-  routers.push(r);
-});
+  ['./board', './home'].forEach(function (id) {
+    var r = Tools.requireWrapper(require(id));
+    router.use('/', r);
+    router.routers.push(r);
+  });
 
-router.use('*', function (req, res, next) {
-  var err = new Error();
-  err.status = 404;
-  err.path = req.baseUrl;
-  next(err);
-});
+  router.use('*', function (req, res, next) {
+    var err = new Error();
+    err.status = 404;
+    err.path = req.baseUrl;
+    next(err);
+  });
 
-router.use(function (err, req, res, next) {
-  Tools.series(req.formFiles, function () {
-    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file) {
-      var exists;
-      return regeneratorRuntime.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _context.prev = 0;
-              exists = _fs2.default.exists(file.path);
+  router.use(function (err, req, res, next) {
+    Tools.series(req.formFiles, function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file) {
+        var exists;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                exists = _fs2.default.exists(file.path);
 
-              if (!exists) {
+                if (!exists) {
+                  _context.next = 5;
+                  break;
+                }
+
                 _context.next = 5;
+                return _fs2.default.remove(file.path);
+
+              case 5:
+                _context.next = 10;
                 break;
-              }
 
-              _context.next = 5;
-              return _fs2.default.remove(file.path);
+              case 7:
+                _context.prev = 7;
+                _context.t0 = _context['catch'](0);
 
-            case 5:
-              _context.next = 10;
-              break;
+                _logger2.default.error(_context.t0.stack || _context.t0);
 
-            case 7:
-              _context.prev = 7;
-              _context.t0 = _context['catch'](0);
-
-              _logger2.default.error(_context.t0.stack || _context.t0);
-
-            case 10:
-            case 'end':
-              return _context.stop();
+              case 10:
+              case 'end':
+                return _context.stop();
+            }
           }
-        }
-      }, _callee, this, [[0, 7]]);
-    }));
+        }, _callee, this, [[0, 7]]);
+      }));
 
-    return function (_x) {
-      return ref.apply(this, arguments);
-    };
-  }());
-  switch (err.status) {
-    case 404:
-      {
-        _logger2.default.error(Tools.preferIPv4(req.ip), err.path, 404);
-        res.status(404).sendFile('notFound.html', { root: __dirname + '/../public' });
-        break;
-      }
-    default:
-      {
-        _logger2.default.error(Tools.preferIPv4(req.ip), req.path, err.stack || err);
-        if (err.ban) {
-          var model = { ban: err.ban };
-        } else {
-          if ((0, _underscore2.default)(err).isError()) {
-            var model = {
-              errorMessage: Tools.translate('Internal error'),
-              errorDescription: err.message
-            };
-          } else if (err.error) {
-            var model = {
-              errorMessage: error.description ? err.error : Tools.translate('Error'),
-              errorDescription: err.description || err.error
-            };
+      return function (_x) {
+        return ref.apply(this, arguments);
+      };
+    }());
+    switch (err.status) {
+      case 404:
+        {
+          _logger2.default.error(Tools.preferIPv4(req.ip), err.path, 404);
+          res.status(404).sendFile('notFound.html', { root: __dirname + '/../public' });
+          break;
+        }
+      default:
+        {
+          _logger2.default.error(Tools.preferIPv4(req.ip), req.path, err.stack || err);
+          if (err.ban) {
+            var model = { ban: err.ban };
           } else {
-            var model = {
-              errorMessage: Tools.translate('Error'),
-              errorDescription: typeof err === 'string' ? err : ''
-            };
+            if ((0, _underscore2.default)(err).isError()) {
+              var model = {
+                errorMessage: Tools.translate('Internal error'),
+                errorDescription: err.message
+              };
+            } else if (err.error) {
+              var model = {
+                errorMessage: error.description ? err.error : Tools.translate('Error'),
+                errorDescription: err.description || err.error
+              };
+            } else {
+              var model = {
+                errorMessage: Tools.translate('Error'),
+                errorDescription: typeof err === 'string' ? err : ''
+              };
+            }
           }
+          res.json(model);
+          break;
         }
-        res.json(model);
-        break;
-      }
-  }
-});
-
-router.routers = routers;
+    }
+  });
+};
 
 exports.default = router;
 //# sourceMappingURL=index.js.map

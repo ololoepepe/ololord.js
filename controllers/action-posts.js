@@ -5,8 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var testParameters = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, mode) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(req, boardName, mode) {
+    var _ref = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
 
     var fields = _ref.fields;
     var files = _ref.files;
@@ -61,7 +61,13 @@ var testParameters = function () {
 
           case 16:
             _context.next = 18;
-            return board.testParameters(mode, fields, files, fileCount);
+            return board.testParameters({
+              req: req,
+              mode: mode,
+              fields: fields,
+              files: files,
+              existingFileCount: fileCount
+            });
 
           case 18:
             return _context.abrupt('return', post);
@@ -74,7 +80,7 @@ var testParameters = function () {
     }, _callee, this);
   }));
 
-  return function testParameters(_x, _x2, _x3) {
+  return function testParameters(_x, _x2, _x3, _x4) {
     return ref.apply(this, arguments);
   };
 }();
@@ -179,7 +185,7 @@ router.post('/action/markupText', function () {
             //TODO: Should it really be "write"?
             rawText = text || '';
             _context2.next = 17;
-            return testParameters(boardName, 'markupText', { fields: fields });
+            return testParameters(req, boardName, 'markupText', { fields: fields });
 
           case 17:
             markupMode = markupMode || '';
@@ -224,7 +230,7 @@ router.post('/action/markupText', function () {
     }, _callee2, this, [[0, 27]]);
   }));
 
-  return function (_x5, _x6, _x7) {
+  return function (_x6, _x7, _x8) {
     return ref.apply(this, arguments);
   };
 }());
@@ -290,7 +296,7 @@ router.post('/action/createPost', function () {
           case 24:
             files = _context3.sent;
             _context3.next = 27;
-            return testParameters(boardName, 'createPost', {
+            return testParameters(req, boardName, 'createPost', {
               fields: _fields,
               files: files
             });
@@ -343,7 +349,7 @@ router.post('/action/createPost', function () {
     }, _callee3, this, [[1, 39]]);
   }));
 
-  return function (_x8, _x9, _x10) {
+  return function (_x9, _x10, _x11) {
     return ref.apply(this, arguments);
   };
 }());
@@ -398,7 +404,7 @@ router.post('/action/createThread', function () {
           case 20:
             files = _context4.sent;
             _context4.next = 23;
-            return testParameters(boardName, 'createThread', {
+            return testParameters(req, boardName, 'createThread', {
               fields: _fields2,
               files: files
             });
@@ -455,7 +461,7 @@ router.post('/action/createThread', function () {
     }, _callee4, this, [[1, 38]]);
   }));
 
-  return function (_x11, _x12, _x13) {
+  return function (_x12, _x13, _x14) {
     return ref.apply(this, arguments);
   };
 }());
@@ -505,7 +511,7 @@ router.post('/action/editPost', function () {
 
           case 17:
             _context5.next = 19;
-            return testParameters(boardName, 'editPost', {
+            return testParameters(req, boardName, 'editPost', {
               fields: _fields3,
               postNumber: postNumber
             });
@@ -539,7 +545,7 @@ router.post('/action/editPost', function () {
     }, _callee5, this, [[0, 26]]);
   }));
 
-  return function (_x14, _x15, _x16) {
+  return function (_x15, _x16, _x17) {
     return ref.apply(this, arguments);
   };
 }());
@@ -627,7 +633,7 @@ router.post('/action/addFiles', function () {
 
           case 31:
             _context6.next = 33;
-            return testParameters(boardName, 'addFiles', {
+            return testParameters(req, boardName, 'addFiles', {
               fields: _fields4,
               files: files,
               postNumber: postNumber
@@ -666,7 +672,7 @@ router.post('/action/addFiles', function () {
     }, _callee6, this, [[1, 43]]);
   }));
 
-  return function (_x17, _x18, _x19) {
+  return function (_x18, _x19, _x20) {
     return ref.apply(this, arguments);
   };
 }());
@@ -746,7 +752,7 @@ router.post('/action/deletePost', function () {
     }, _callee7, this, [[0, 25]]);
   }));
 
-  return function (_x20, _x21, _x22) {
+  return function (_x21, _x22, _x23) {
     return ref.apply(this, arguments);
   };
 }());
@@ -810,7 +816,7 @@ router.post('/action/deleteFile', function () {
 
           case 23:
             _context8.next = 25;
-            return testParameters(boardName, 'deleteFile', { postNumber: postNumber });
+            return testParameters(req, boardName, 'deleteFile', { postNumber: postNumber });
 
           case 25:
             _post5 = _context8.sent;
@@ -837,7 +843,7 @@ router.post('/action/deleteFile', function () {
     }, _callee8, this, [[0, 32]]);
   }));
 
-  return function (_x23, _x24, _x25) {
+  return function (_x24, _x25, _x26) {
     return ref.apply(this, arguments);
   };
 }());
@@ -924,7 +930,7 @@ router.post('/action/editFileRating', function () {
     }, _callee9, this, [[0, 30]]);
   }));
 
-  return function (_x26, _x27, _x28) {
+  return function (_x27, _x28, _x29) {
     return ref.apply(this, arguments);
   };
 }());
@@ -969,7 +975,7 @@ router.post('/action/editAudioTags', function () {
             throw new Error(Tools.translate('No such file'));
 
           case 14:
-            if (Tools.isAudioType(fileInfo.mimeType)) {
+            if (Files.isAudioType(fileInfo.mimeType)) {
               _context10.next = 16;
               break;
             }
@@ -1018,7 +1024,7 @@ router.post('/action/editAudioTags', function () {
     }, _callee10, this, [[0, 31]]);
   }));
 
-  return function (_x29, _x30, _x31) {
+  return function (_x30, _x31, _x32) {
     return ref.apply(this, arguments);
   };
 }());

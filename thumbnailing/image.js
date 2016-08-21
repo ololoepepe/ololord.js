@@ -7,7 +7,7 @@ exports.rerenderPostFileInfo = exports.createThumbnail = undefined;
 
 var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file, thumbPath) {
-    var suffix, info, args, prefix, thumbInfo, result, phash;
+    var suffix, info, args, prefix, thumbInfo, result, hash;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -51,12 +51,12 @@ var createThumbnail = exports.createThumbnail = function () {
             }
 
             _context.next = 17;
-            return Tools.generateImageHash(thumbPath);
+            return (0, _phashImage2.default)(thumbPath, true);
 
           case 17:
-            phash = _context.sent;
+            hash = _context.sent;
 
-            result.ihash = phash;
+            result.ihash = hash.toString();
 
           case 19:
             return _context.abrupt('return', result);
@@ -107,6 +107,10 @@ var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
+var _phashImage = require('phash-image');
+
+var _phashImage2 = _interopRequireDefault(_phashImage);
+
 var _promisifyNode = require('promisify-node');
 
 var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
@@ -114,6 +118,10 @@ var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
 var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
+
+var _files = require('../helpers/files');
+
+var Files = _interopRequireWildcard(_files);
 
 var _tools = require('../helpers/tools');
 
@@ -149,7 +157,7 @@ defineMimeTypeSuffixes('image/jpeg', ['jpeg', 'jpg']);
 defineMimeTypeSuffixes('image/png', 'png');
 
 function match(mimeType) {
-  return Tools.isImageType(mimeType);
+  return Files.isImageType(mimeType);
 }
 
 function suffixMatchesMimeType(suffix, mimeType) {

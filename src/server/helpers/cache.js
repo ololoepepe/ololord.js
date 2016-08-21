@@ -1,6 +1,6 @@
 var FS = require("q-io/fs");
 
-var Tools = require("./tools");
+import * as Files from './files';
 
 var rootPath = __dirname + "/../public";
 
@@ -9,7 +9,7 @@ module.exports.readFile = function(fileName) {
 };
 
 module.exports.writeFile = function(fileName, data) {
-    return Tools.writeFile(rootPath + "/" + fileName, data);
+    return Files.writeFile(rootPath + "/" + fileName, data);
 };
 
 module.exports.removeFile = function(fileName) {

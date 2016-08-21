@@ -36,6 +36,7 @@ config.installSetHook("site.locale", Tools.setLocale);
 function spawnCluster() {
   expressCluster(async function(worker) {
     console.log(`[${process.pid}] Initializing...`);
+    controllers.initialize();
     let app = express();
     app.use(middlewares);
     app.use(controllers);
@@ -99,7 +100,7 @@ function spawnCluster() {
           IPC.on('stop', function() {
               return new Promise(function(resolve, reject) {
                   server.close(function() {
-                      Tools.forIn(sockets, function(socket, socketId) {
+                      _(sockets).each((socket, socketId) => {
                           delete sockets[socketId];
                           socket.destroy();
                       });
@@ -139,7 +140,7 @@ function spawnCluster() {
             return Renderer.reloadTemplates();
           });
           IPC.on('notifyAboutNewPosts', function(data) {
-              Tools.forIn(data, function(_, key) {
+              _(data).each((_, key) => {
                   var s = subscriptions.get(key);
                   if (!s)
                       return;
@@ -196,10 +197,10 @@ function onReady(initCallback) {
     UsersModel.initializeUserBansMonitoring();
     if (config('server.statistics.enabled')) {
       setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel),
-        config('server.statistics.ttl') * Tools.Minute);
+        config('server.statistics.ttl') * Tools.MINUTE);
     }
     if (config('server.rss.enabled')) {
-      setInterval(BoardController.renderRSS.bind(BoardController), config('server.rss.ttl') * Tools.Minute);
+      setInterval(BoardController.renderRSS.bind(BoardController), config('server.rss.ttl') * Tools.MINUTE);
     }
     commands();
   }

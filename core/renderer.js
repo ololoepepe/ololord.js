@@ -724,6 +724,10 @@ var _dot = require('dot');
 
 var _dot2 = _interopRequireDefault(_dot);
 
+var _escapeHtml = require('escape-html');
+
+var _escapeHtml2 = _interopRequireDefault(_escapeHtml);
+
 var _fs = require('q-io/fs');
 
 var _fs2 = _interopRequireDefault(_fs);
@@ -797,6 +801,13 @@ var ILLEGAL_CHARACTERS_REGEXP = /[^a-zA-Z\$_]/gi;
 
 var templates = {};
 
+function escapedSelector(string) {
+  if (typeof string !== 'string') {
+    return string;
+  }
+  return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, '-');
+}
+
 function render(templateName, model) {
   var template = templates[templateName];
   if (!template) {
@@ -821,11 +832,11 @@ function render(templateName, model) {
   })).flatten()).sample();
   baseModel._ = _underscore2.default;
   baseModel.compareRegisteredUserLevels = Tools.compareRegisteredUserLevels;
-  baseModel.isImageType = Tools.isImageType;
-  baseModel.isAudioType = Tools.isAudioType;
-  baseModel.isVideoType = Tools.isVideoType;
-  baseModel.escaped = Tools.escaped;
-  baseModel.escapedSelector = Tools.escapedSelector;
+  baseModel.isImageType = Files.isImageType;
+  baseModel.isAudioType = Files.isAudioType;
+  baseModel.isVideoType = Files.isVideoType;
+  baseModel.escaped = _escapeHtml2.default;
+  baseModel.escapedSelector = escapedSelector;
   baseModel.translate = Tools.translate;
   var timeOffset = (0, _config2.default)('site.timeOffset');
   var locale = (0, _config2.default)('site.locale');

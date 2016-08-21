@@ -1,7 +1,9 @@
 import _ from 'underscore';
+import phash from 'phash-image';
 import promisify from 'promisify-node';
 
 import config from '../helpers/config';
+import * as Files from '../helpers/files';
 import * as Tools from '../helpers/tools';
 
 const ImageMagick = promisify('imagemagick');
@@ -24,7 +26,7 @@ defineMimeTypeSuffixes('image/jpeg', ['jpeg', 'jpg']);
 defineMimeTypeSuffixes('image/png', 'png');
 
 export function match(mimeType) {
-  return Tools.isImageType(mimeType);
+  return Files.isImageType(mimeType);
 }
 
 export function suffixMatchesMimeType(suffix, mimeType) {
@@ -61,8 +63,8 @@ export async function createThumbnail(file, thumbPath) {
     }
   };
   if (config('system.phash.enabled')) {
-    let phash = await Tools.generateImageHash(thumbPath);
-    result.ihash = phash;
+    let hash = await phash(thumbPath, true);
+    result.ihash = hash.toString();
   }
   return result;
 }

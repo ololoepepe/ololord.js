@@ -1,1 +1,0 @@
-{"version":3,"sources":["boards/test.js"],"names":[],"mappings":";;AAAA;;;;;;AAEA,OAAO,OAAP,GAAiB,oBAAU,MAAV,EAAkB,SAAlB,CAAjB","file":"boards/test.js","sourcesContent":["import Board from './board';\r\n\r\nmodule.exports = new Board(\"test\", \"пиздест\");\r\n"],"sourceRoot":"/source/"}

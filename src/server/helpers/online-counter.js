@@ -2,8 +2,8 @@ var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
 
 var users = new Map();
-var quota = config("system.onlineCounter.quota", 5 * Tools.Minute);
-var interval = config("system.onlineCounter.interval", Tools.Minute);
+var quota = config("system.onlineCounter.quota", 5 * Tools.MINUTE); //TODO: magic numbers
+var interval = config("system.onlineCounter.interval", Tools.MINUTE); //TODO: magic numbers
 
 setInterval(function() {
     users.forEach(function(q, ip) {

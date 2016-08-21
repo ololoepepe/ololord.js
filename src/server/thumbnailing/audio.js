@@ -4,6 +4,7 @@ import FS from 'q-io/fs';
 import FSSync from 'fs';
 import promisify from 'promisify-node';
 
+import * as Files from '../helpers/files';
 import * as Tools from '../helpers/tools';
 
 const ImageMagick = promisify('imagemagick');
@@ -30,7 +31,7 @@ defineMimeTypeSuffixes('audio/wav', 'wav', 'png');
 export const AUDIO_TAGS = ['album', 'artist', 'title', 'year'];
 
 export function match(mimeType) {
-  return Tools.isAudioType(mimeType);
+  return Files.isAudioType(mimeType);
 }
 
 export function suffixMatchesMimeType(suffix, mimeType) {
@@ -73,7 +74,7 @@ export async function createThumbnail(file, thumbPath, path) {
   if (metadata.picture && metadata.picture.length > 0) {
     await FS.write(thumbPath, metadata.picture[0].data);
   } else {
-    await Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
+    await Files.generateRandomImage(file.hash, file.mimeType, thumbPath);
   }
   let thumbInfo = await ImageMagick.identify(thumbPath);
   if (thumbInfo.width > 200 && thumbInfo.height > 200) {

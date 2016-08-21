@@ -135,7 +135,7 @@ router.post("/action/search", function(req, res, next) {
     });
 });
 
-Captcha.captchaIds().forEach(function(id) {
+Captcha.captchaIDs().forEach(function(id) {
     Captcha.captcha(id).actionRoutes().forEach(function(route) {
         router[route.method]("/action" + route.path, route.handler);
     });

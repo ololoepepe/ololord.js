@@ -154,7 +154,7 @@ function base() {
       name: _markup2.default.MarkupModes.ExtendedWakabaMark + ',' + _markup2.default.MarkupModes.BBCode,
       title: Tools.translate('Extended WakabaMark and bbCode', 'markupMode')
     }],
-    supportedCaptchaEngines: Captcha.captchaIds().filter(function (id) {
+    supportedCaptchaEngines: Captcha.captchaIDs().filter(function (id) {
       return 'node-captcha-noscript' !== id;
     }).map(function (id) {
       return Captcha.captcha(id).info();

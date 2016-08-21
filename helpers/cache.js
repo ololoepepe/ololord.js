@@ -1,8 +1,12 @@
 "use strict";
 
-var FS = require("q-io/fs");
+var _files = require("./files");
 
-var Tools = require("./tools");
+var Files = _interopRequireWildcard(_files);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+var FS = require("q-io/fs");
 
 var rootPath = __dirname + "/../public";
 
@@ -11,7 +15,7 @@ module.exports.readFile = function (fileName) {
 };
 
 module.exports.writeFile = function (fileName, data) {
-    return Tools.writeFile(rootPath + "/" + fileName, data);
+    return Files.writeFile(rootPath + "/" + fileName, data);
 };
 
 module.exports.removeFile = function (fileName) {

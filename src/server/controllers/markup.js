@@ -24,8 +24,8 @@ router.render = async function(path) {
     useBR: true
   });
   let result = markup.markupCode(CODE_TO_MARKUP, 'cpp');
-  let markedUpLatex = await Tools.markupLatex(LATEX_TO_MARKUP);
-  let markedUpInlineLatex = await Tools.markupLatex(INLINE_LATEX_TO_MARKUP, true);
+  let markedUpLatex = await markup.latex(LATEX_TO_MARKUP);
+  let markedUpInlineLatex = await markup.latex(INLINE_LATEX_TO_MARKUP, true);
   let model = {
     title: Tools.translate('Markup', 'pageTitle'),
     codeToMarkup: CODE_TO_MARKUP,

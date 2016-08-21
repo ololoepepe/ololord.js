@@ -169,28 +169,18 @@ var Board = function () {
     key: 'initialize',
     value: function initialize() {
       boards = {};
-      _fs2.default.readdirSync(__dirname).filter(function (fileName) {
-        return 'board.js' !== fileName && fileName.split('.').pop() === 'js';
-      }).map(function (fileName) {
-        return require.resolve('./' + fileName.split('.').shift());
-      }).forEach(function (id) {
-        if (require.cache.hasOwnProperty(id)) {
-          delete require.cache[id];
-        }
-        var board = Tools.requireWrapper(require(id));
-        if ((0, _underscore2.default)(board).isArray()) {
-          board.forEach(function (board) {
-            Board.addBoard(board);
-          });
-        } else {
-          Board.addBoard(board);
-        }
-      });
       if ((0, _config2.default)('board.useDefaultBoards')) {
         getDefaultBoards().forEach(function (board) {
           Board.addBoard(board);
         });
       }
+      Tools.loadPlugins([__dirname, __dirname + '/custom'], function (fileName, _1, _2, path) {
+        return 'board.js' !== fileName || path.split('/') === 'custom';
+      }).map(function (plugin) {
+        return typeof plugin === 'function' ? new plugin() : plugin;
+      }).forEach(function (board) {
+        Board.addBoard(board);
+      });
       Board.reloadBanners();
       Board.reloadPostFormRules();
     }
@@ -240,7 +230,7 @@ var Board = function () {
     this.defineSetting('postingEnabled', true);
     this.defineSetting('showWhois', false);
     var Captcha = Tools.requireWrapper(require('../captchas/captcha'));
-    this.defineSetting('supportedCaptchaEngines', Captcha.captchaIds());
+    this.defineSetting('supportedCaptchaEngines', Captcha.captchaIDs());
     this.defineProperty('permissions', function () {
       return (0, _underscore2.default)(Permissions.PERMISSIONS).mapObject(function (defaultLevel, key) {
         return (0, _config2.default)('board.' + name + '.permissions.' + key, (0, _config2.default)('permissions.' + key, defaultLevel));
@@ -317,14 +307,14 @@ var Board = function () {
         permissions: this.permissions,
         opModeration: this.opModeration
       };
-      this.customBoardInfoFields().forEach(function (field) {
+      this.customInfoFields().forEach(function (field) {
         model[field] = _this2[field];
       });
       return model;
     }
   }, {
-    key: 'customBoardInfoFields',
-    value: function customBoardInfoFields() {
+    key: 'customInfoFields',
+    value: function customInfoFields() {
       return [];
     }
   }, {
@@ -350,9 +340,14 @@ var Board = function () {
   }, {
     key: 'testParameters',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(mode, fields, files, existingFileCount) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(_ref2) {
         var _this3 = this;
 
+        var req = _ref2.req;
+        var mode = _ref2.mode;
+        var fields = _ref2.fields;
+        var files = _ref2.files;
+        var existingFileCount = _ref2.existingFileCount;
         var name, subject, text, password, err;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -459,7 +454,7 @@ var Board = function () {
         }, _callee, this);
       }));
 
-      function testParameters(_x2, _x3, _x4, _x5) {
+      function testParameters(_x2) {
         return ref.apply(this, arguments);
       }
 
@@ -483,7 +478,7 @@ var Board = function () {
         }, _callee2, this);
       }));
 
-      function postExtraData(_x6, _x7, _x8, _x9) {
+      function postExtraData(_x3, _x4, _x5, _x6) {
         return ref.apply(this, arguments);
       }
 
@@ -504,7 +499,7 @@ var Board = function () {
         }, _callee3, this);
       }));
 
-      function storeExtraData(_x10, _x11) {
+      function storeExtraData(_x7, _x8) {
         return ref.apply(this, arguments);
       }
 
@@ -527,7 +522,7 @@ var Board = function () {
         }, _callee4, this);
       }));
 
-      function loadExtraData(_x12) {
+      function loadExtraData(_x9) {
         return ref.apply(this, arguments);
       }
 
@@ -550,7 +545,7 @@ var Board = function () {
         }, _callee5, this);
       }));
 
-      function removeExtraData(_x13) {
+      function removeExtraData(_x10) {
         return ref.apply(this, arguments);
       }
 
@@ -587,7 +582,7 @@ var Board = function () {
         }, _callee6, this);
       }));
 
-      function renderPost(_x14) {
+      function renderPost(_x11) {
         return ref.apply(this, arguments);
       }
 

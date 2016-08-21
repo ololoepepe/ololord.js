@@ -1,6 +1,7 @@
 import _ from 'underscore';
 var Highlight = require("highlight.js");
 var HTTP = require("q-io/http");
+var MathJax = require("mathjax-node/lib/mj-single.js");
 var URL = require("url");
 var XRegExp = require("xregexp");
 
@@ -13,6 +14,9 @@ var Tools = require("../helpers/tools");
 import * as Renderer from './renderer';
 import * as MiscModel from '../models/misc';
 import Logger from '../helpers/logger';
+
+MathJax.config({ MathJax: {} });
+MathJax.start();
 
 var SkipTypes = {
     NoSkip: "NO_SKIP",
@@ -98,6 +102,22 @@ var ListTypes = {
     s: "square"
 };
 
+async function markupLaTeX(text, inline) {
+  return await new Promise(function(resolve, reject) {
+    MathJax.typeset({
+      math: text,
+      format: inline ? 'inline-TeX' : 'TeX',
+      svg: true
+    }, (data) => {
+      if (data.errors) {
+        return reject(data.errors[0] || data.errors);
+      }
+      let tagName = inline ? 'span' : 'div';
+      resolve(`<${tagName} class='latex-${inline ? 'inline' : 'block'}'>${data.svg}</${tagName}>`);
+    });
+  });
+}
+
 var isEscaped = function(s, pos) {
     if (pos <= 0 || pos >= s.length)
         return false;
@@ -146,7 +166,7 @@ var getTwitterEmbeddedHtml = function(href, defaultHtml) {
     return HTTP.request({
         method: "GET",
         url: `https://api.twitter.com/1/statuses/oembed.json?url=${href}`,
-        timeout: Tools.Minute
+        timeout: Tools.MINUTE //TODO: magic numbers
     }).then(function(response) {
         if (response.status != 200)
             return Promise.reject(new Error(Tools.translate("Failed to get Twitter embedded HTML")));
@@ -199,7 +219,7 @@ var getYoutubeEmbeddedHtml = function(href, defaultHtml) {
     return HTTP.request({
         method: "GET",
         url: `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`,
-        timeout: Tools.Minute
+        timeout: Tools.MINUTE //TODO: magic numbers
     }).then(function(response) {
         if (response.status != 200)
             return Promise.reject(new Error(Tools.translate("Failed to get YouTube embedded HTML")));
@@ -236,7 +256,7 @@ var getCoubEmbeddedHtml = function(href, defaultHtml) {
     return HTTP.request({
         method: "GET",
         url: `https://coub.com/api/oembed.json?url=http://coub.com/view/${videoId}`,
-        timeout: Tools.Minute
+        timeout: Tools.MINUTE //TODO: magic numbers
     }).then(function(response) {
         if (response.status != 200)
             return Promise.reject(new Error(Tools.translate("Failed to get Coub embedded HTML")));
@@ -746,7 +766,7 @@ var convertMarkup = function(_, text, matchs, __, options) {
 
 var convertLatex = function(inline, _, text, matchs, __, options) {
     options.type = SkipTypes.HtmlSkip;
-    return Tools.markupLatex(text, inline);
+    return markupLaTeX(text, inline);
 };
 
 var convertUrl = function(info, text, matchs, matche, options) {
@@ -950,7 +970,7 @@ var processPostText = function(boardName, text, options) {
             });
         }).then(function() {
             return process(info, convertExternalLink, {
-                op: new XRegExp(Tools.ExternalLinkRegexpPattern, "gi"),
+                op: new XRegExp(Tools.EXTERNAL_LINK_REGEXP_PATTERN, "gi"),
                 cl: null
             }, { checkFunction: checkExternalLink });
         }).then(function() {
@@ -1109,5 +1129,7 @@ processPostText.markupModes = function(string) {
   }
   return _(MarkupModes).filter((mode) => { return string.indexOf(mode) >= 0; });
 };
+
+processPostText.latex = markupLaTeX;
 
 module.exports = processPostText;

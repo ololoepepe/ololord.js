@@ -1,6 +1,11 @@
 import _ from 'underscore';
+import Canvas from 'canvas';
+import ChildProcess from 'child_process';
+import du from 'du';
 import FS from 'q-io/fs';
+import FSSync from 'fs';
 import HTTP from 'q-io/http';
+import Jdenticon from 'jdenticon';
 import merge from 'merge';
 import Path from 'path';
 import promisify from 'promisify-node';
@@ -8,7 +13,9 @@ import UUID from 'uuid';
 
 import Board from '../boards/board';
 import * as FilesModel from '../models/files';
+import config from './config';
 import * as IPC from './ipc';
+import Logger from './logger';
 import * as Tools from './tools';
 import vk from './vk';
 
@@ -16,7 +23,7 @@ const mkpath = promisify('mkpath');
 
 const FILE_RATINGS = new Set(['SFW', 'R-15', 'R-18', 'R-18G']);
 
-let thumbCreationPlugins = Tools.loadPlugins(`${__dirname}/../thumbnailing`);
+let thumbCreationPlugins = Tools.loadPlugins([`${__dirname}/../thumbnailing`, `${__dirname}/../thumbnailing/custom`]);
 
 function setFileRating(file, id, fields) {
   let rating = fields[`file_${id}_rating`];
@@ -31,7 +38,7 @@ async function downloadFile(url, formFieldName, fields, transaction) {
   let path = `${__dirname}/../tmp/upload_${UUID.v4()}`;
   transaction.addFile(path);
   let proxy = Tools.proxy();
-  let options = { timeout: Tools.Minute }; //TODO: magic number
+  let options = { timeout: Tools.MINUTE }; //TODO: magic number
   if (/^vk\:\/\//.test(url)) {
     let result = await vk('audio.getById', { audios: url.split('/')[2] });
     options.url = result.response[0].url;
@@ -53,14 +60,14 @@ async function downloadFile(url, formFieldName, fields, transaction) {
   if (data.length < 1) {
     return Promise.reject(new Error(Tools.translate('File is empty')));
   }
-  await Tools.writeFile(path, data);
+  await writeFile(path, data);
   let file = {
     name: url.split('/').pop(),
     size: data.length,
     path: path
   };
   setFileRating(file, formFieldName.substr(9), fields);
-  let mimeType = await Tools.mimeType(path);
+  let mimeType = await getMimeType(path);
   file.mimeType = mimeType;
   return file;
 }
@@ -74,7 +81,7 @@ export async function getFiles(fields, files, transaction) {
     return true;
   }), async function(file, fileName) {
     setFileRating(file, file.fieldName.substr(5), fields);
-    let mimeType = await Tools.mimeType(file.path);
+    let mimeType = await getMimeType(file.path);
     file.mimeType = mimeType;
     return file;
   }, true);
@@ -251,6 +258,28 @@ export async function processFiles(boardName, files, transaction) {
   }, true);
 }
 
+export async function diskUsage(path) {
+  return await new Promise((resolve, reject) => {
+    du(path, (err, size) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(size);
+    });
+  });
+}
+
+export async function writeFile(filePath, data) {
+  let tmpFilePath = `${filePath}.tmp`;
+  let path = filePath.split('/').slice(0, -1).join('/');
+  let exists = await FS.exists(path);
+  if (!exists) {
+    await FS.makeTree(path);
+  }
+  await FS.write(tmpFilePath, data);
+  await FS.rename(tmpFilePath, filePath);
+}
+
 export async function createFile(dir, fileName, { file, isDir } = {}) {
   if (dir.slice(-1)[0] !== '/') {
     dir += '/';
@@ -262,12 +291,12 @@ export async function createFile(dir, fileName, { file, isDir } = {}) {
   if (file) {
     await FS.move(file.path, path);
   } else {
-    await Tools.writeFile(path, '');
+    await writeFile(path, '');
   }
 }
 
 export async function editFile(fileName, content) {
-  await Tools.writeFile(`${__dirname}/../${fileName}`, content);
+  await writeFile(`${__dirname}/../${fileName}`, content);
 }
 
 export async function renameFile(oldFileName, fileName) {
@@ -277,4 +306,56 @@ export async function renameFile(oldFileName, fileName) {
 
 export async function deleteFile(fileName) {
   await FS.removeTree(`${__dirname}/../${fileName}`);
+}
+
+export async function generateRandomImage(hash, mimeType, thumbPath) {
+  let canvas = new Canvas(200, 200);
+  let ctx = canvas.getContext('2d');
+  Jdenticon.drawIcon(ctx, hash, 200);
+  let data = await FS.read(`${__dirname}/../thumbs/${mimeType}.png`, 'b');
+  let img = new Canvas.Image();
+  img.src = data;
+  ctx.drawImage(img, 0, 0, 200, 200);
+  return await new Promise((resolve, reject) => {
+    canvas.pngStream().pipe(FSSync.createWriteStream(thumbPath).on('error', reject).on('finish', resolve));
+  });
+}
+
+export async function getMimeType(fileName) {
+  if (!fileName || typeof fileName !== 'string') {
+    return null;
+  }
+  try {
+    return await new Promise((resolve, reject) => {
+      ChildProcess.exec(`file --brief --mime-type ${fileName}`, {
+        timeout: config('system.mimeTypeRetrievingTimeout'),
+        encoding: 'utf8',
+        stdio: [0, 'pipe', null]
+      }, (err, out) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(out ? out.replace(/\r*\n+/g, '') : null);
+      });
+    });
+  } catch (err) {
+    Logger.error(err.stack || err);
+    return null;
+  }
+}
+
+export function isAudioType(mimeType) {
+  return 'application/ogg' === mimeType || /^audio\//.test(mimeType);
+}
+
+export function isVideoType(mimeType) {
+  return /^video\//.test(mimeType);
+}
+
+export function isPdfType(mimeType) {
+  return 'application/pdf' === mimeType;
+}
+
+export function isImageType(mimeType) {
+  return /^image\//.test(mimeType);
 }

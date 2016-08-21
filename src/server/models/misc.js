@@ -66,7 +66,7 @@ export function base() {
       name: (markup.MarkupModes.ExtendedWakabaMark + ',' + markup.MarkupModes.BBCode),
       title: Tools.translate('Extended WakabaMark and bbCode', 'markupMode')
     }],
-    supportedCaptchaEngines: Captcha.captchaIds().filter((id) => {
+    supportedCaptchaEngines: Captcha.captchaIDs().filter((id) => {
       return 'node-captcha-noscript' !== id;
     }).map(id => Captcha.captcha(id).info())
   };

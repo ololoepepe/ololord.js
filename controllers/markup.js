@@ -57,12 +57,12 @@ router.render = function () {
             });
             result = _markup2.default.markupCode(CODE_TO_MARKUP, 'cpp');
             _context.next = 6;
-            return Tools.markupLatex(LATEX_TO_MARKUP);
+            return _markup2.default.latex(LATEX_TO_MARKUP);
 
           case 6:
             markedUpLatex = _context.sent;
             _context.next = 9;
-            return Tools.markupLatex(INLINE_LATEX_TO_MARKUP, true);
+            return _markup2.default.latex(INLINE_LATEX_TO_MARKUP, true);
 
           case 9:
             markedUpInlineLatex = _context.sent;

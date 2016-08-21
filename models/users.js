@@ -5,6 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.initializeUserBansMonitoring = exports.banUser = exports.updatePostBanInfo = exports.checkUserPermissions = exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.getSynchronizationData = exports.removeSuperuser = exports.addSuperuser = exports.unregisterUser = exports.updateRegisteredUser = exports.registerUser = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getRegisteredUserLevelsByIp = exports.getRegisteredUserLevels = exports.getRegisteredUserLevelByIp = exports.getRegisteredUserLevel = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var getUserCaptchaQuota = exports.getUserCaptchaQuota = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, userIp) {
     var board, quota;
@@ -638,7 +640,7 @@ var processRegisteredUserData = function () {
       while (1) {
         switch (_context19.prev = _context19.next) {
           case 0:
-            if (Tools.hasOwnProperties(levels)) {
+            if (!(0, _underscore2.default)(levels).isEmpty()) {
               _context19.next = 2;
               break;
             }
@@ -1185,7 +1187,7 @@ var checkUserBan = exports.checkUserBan = function () {
               break;
             }
 
-            return _context32.abrupt('return', checkGeoBan(geolocationInfo));
+            return _context32.abrupt('return', checkGeoBan(geolocationInfo, ip));
 
           case 12:
           case 'end':
@@ -1771,7 +1773,19 @@ var ipBans = Tools.createWatchedResource(__dirname + '/../misc/user-bans.json', 
 
 function transformGeoBans(bans) {
   return (0, _underscore2.default)(bans).reduce(function (acc, value, key) {
-    acc.set(key.toUpperCase(), !!value);
+    if (typeof value === 'string') {
+      value = [value];
+    }
+    if ((0, _underscore2.default)(value).isArray()) {
+      value = new Set(value.map(function (ip) {
+        return Tools.correctAddress(ip);
+      }).filter(function (ip) {
+        return !!ip;
+      }));
+    } else {
+      value = !!value;
+    }
+    acc.set(key.toUpperCase(), value);
     return acc;
   }, new Map());
 }
@@ -1807,7 +1821,6 @@ var geoBans = Tools.createWatchedResource(__dirname + '/../misc/geo-bans.json', 
 }()) || new Map();
 
 function checkGeoBan(geolocationInfo, ip) {
-  //TODO: consider ip
   var def = geoBans.get('*');
   if (def) {
     geolocationInfo = geolocationInfo || {};
@@ -1819,8 +1832,15 @@ function checkGeoBan(geolocationInfo, ip) {
     countryCode = '';
   }
   var user = geoBans.get(countryCode.toUpperCase());
-  if (def ? !user && typeof user === 'boolean' : !!user) {
-    return Promise.reject(new Error(Tools.translate('Posting is disabled for this country')));
+  if (ip && ((typeof user === 'undefined' ? 'undefined' : _typeof(user)) === 'object' && user.has(ip) || (typeof def === 'undefined' ? 'undefined' : _typeof(def)) === 'object' && def.has(ip))) {
+    return;
   }
+  if (typeof user === 'boolean' && !user) {
+    return;
+  }
+  if (!user && !def) {
+    return;
+  }
+  return Promise.reject(new Error(Tools.translate('Posting is disabled for this country')));
 }
 //# sourceMappingURL=users.js.map

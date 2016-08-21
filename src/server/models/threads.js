@@ -408,3 +408,45 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
     threadNumber: thread.number
   };
 }
+
+export async function setThreadFixed(boardName, threadNumber, fixed) {
+  let thread = await getThread(boardName, threadNumber);
+  if (!thread) {
+    throw new Error(Tools.translate('No such thread'));
+  }
+  fixed = !!fixed;
+  if (fixed === !!thread.fixed) {
+    return;
+  }
+  thread.fixed = fixed;
+  await Threads.setOne(threadNumber, thread, boardName);
+  await IPC.render(boardName, threadNumber, threadNumber, 'edit');
+}
+
+export async function setThreadClosed(boardName, threadNumber, closed) {
+  let thread = await getThread(boardName, threadNumber);
+  if (!thread) {
+    throw new Error(Tools.translate('No such thread'));
+  }
+  closed = !!closed;
+  if (closed === !!thread.closed) {
+    return;
+  }
+  thread.closed = closed;
+  await Threads.setOne(threadNumber, thread, boardName);
+  await IPC.render(boardName, threadNumber, threadNumber, 'edit');
+}
+
+export async function setThreadUnbumpable(boardName, threadNumber, unbumpable) {
+  let thread = await getThread(boardName, threadNumber);
+  if (!thread) {
+    throw new Error(Tools.translate('No such thread'));
+  }
+  unbumpable = !!unbumpable;
+  if (unbumpable === !!thread.unbumpable) {
+    return;
+  }
+  thread.unbumpable = unbumpable;
+  await Threads.setOne(threadNumber, thread, boardName);
+  await IPC.render(boardName, threadNumber, threadNumber, 'edit');
+}

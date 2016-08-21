@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import browserify from 'browserify';
 import DOT from 'dot';
+import escapeHTML from 'escape-html';
 import FS from 'q-io/fs';
 import merge from 'merge';
 import micromatch from 'micromatch';
@@ -37,6 +38,13 @@ const ILLEGAL_CHARACTERS_REGEXP = /[^a-zA-Z\$_]/gi;
 
 let templates = {};
 
+function escapedSelector(string) {
+  if (typeof string !== 'string') {
+    return string;
+  }
+  return string.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, '-');
+}
+
 export function render(templateName, model) {
   let template = templates[templateName];
   if (!template) {
@@ -61,11 +69,11 @@ export function render(templateName, model) {
   })).flatten()).sample();
   baseModel._ = _;
   baseModel.compareRegisteredUserLevels = Tools.compareRegisteredUserLevels;
-  baseModel.isImageType = Tools.isImageType;
-  baseModel.isAudioType = Tools.isAudioType;
-  baseModel.isVideoType = Tools.isVideoType;
-  baseModel.escaped = Tools.escaped;
-  baseModel.escapedSelector = Tools.escapedSelector;
+  baseModel.isImageType = Files.isImageType;
+  baseModel.isAudioType = Files.isAudioType;
+  baseModel.isVideoType = Files.isVideoType;
+  baseModel.escaped = escapeHTML;
+  baseModel.escapedSelector = escapedSelector;
   baseModel.translate = Tools.translate;
   let timeOffset = config('site.timeOffset');
   let locale = config('site.locale');

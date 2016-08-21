@@ -176,7 +176,7 @@ router.post("/action/search", function (req, res, next) {
     });
 });
 
-_captcha2.default.captchaIds().forEach(function (id) {
+_captcha2.default.captchaIDs().forEach(function (id) {
     _captcha2.default.captcha(id).actionRoutes().forEach(function (route) {
         router[route.method]("/action" + route.path, route.handler);
     });

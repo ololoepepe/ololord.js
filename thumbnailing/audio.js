@@ -66,7 +66,7 @@ var createThumbnail = exports.createThumbnail = function () {
 
           case 25:
             _context.next = 27;
-            return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
+            return Files.generateRandomImage(file.hash, file.mimeType, thumbPath);
 
           case 27:
             _context.next = 29;
@@ -179,6 +179,10 @@ var _promisifyNode = require('promisify-node');
 
 var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
 
+var _files = require('../helpers/files');
+
+var Files = _interopRequireWildcard(_files);
+
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
@@ -215,7 +219,7 @@ defineMimeTypeSuffixes('audio/wav', 'wav', 'png');
 var AUDIO_TAGS = exports.AUDIO_TAGS = ['album', 'artist', 'title', 'year'];
 
 function match(mimeType) {
-  return Tools.isAudioType(mimeType);
+  return Files.isAudioType(mimeType);
 }
 
 function suffixMatchesMimeType(suffix, mimeType) {

@@ -1209,7 +1209,7 @@ router.get('/api/fileHeaders.json', function () {
             _context24.prev = 2;
             options = {
               method: 'HEAD',
-              timeout: Tools.Minute
+              timeout: Tools.MINUTE //TODO: magic numbers
             };
             proxy = Tools.proxy();
 
@@ -1260,7 +1260,7 @@ router.get('/api/fileHeaders.json', function () {
   };
 }());
 
-_captcha2.default.captchaIds().forEach(function (id) {
+_captcha2.default.captchaIDs().forEach(function (id) {
   _captcha2.default.captcha(id).apiRoutes().forEach(function (route) {
     router[route.method]('/api' + route.path, route.handler);
   });

@@ -6,6 +6,7 @@ import * as BoardsModel from './boards';
 import * as UsersModel from './users';
 import Board from '../boards/board';
 import * as Cache from '../helpers/cache';
+import * as Files from '../helpers/files';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
@@ -30,7 +31,7 @@ async function gatherBoardStatistics(board) {
   }
   await Tools.series(['src', 'thumb', 'arch'], async function(subpath) {
     try {
-      let size = await Tools.du(`${BOARD_PUBLIC_PATH}/${subpath}`);
+      let size = await Files.diskUsage(`${BOARD_PUBLIC_PATH}/${subpath}`);
       statistics.diskUsage += size;
     } catch (err) {
       if ('ENOENT' !== err.code) {

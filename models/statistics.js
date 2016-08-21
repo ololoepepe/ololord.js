@@ -63,7 +63,7 @@ var gatherBoardStatistics = function () {
                       case 0:
                         _context.prev = 0;
                         _context.next = 3;
-                        return Tools.du(BOARD_PUBLIC_PATH + '/' + subpath);
+                        return Files.diskUsage(BOARD_PUBLIC_PATH + '/' + subpath);
 
                       case 3:
                         size = _context.sent;
@@ -296,6 +296,10 @@ var _board2 = _interopRequireDefault(_board);
 var _cache = require('../helpers/cache');
 
 var Cache = _interopRequireWildcard(_cache);
+
+var _files = require('../helpers/files');
+
+var Files = _interopRequireWildcard(_files);
 
 var _ipc = require('../helpers/ipc');
 

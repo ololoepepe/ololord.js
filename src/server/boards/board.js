@@ -119,26 +119,18 @@ export default class Board {
 
   static initialize() {
     boards = {};
-    FSSync.readdirSync(__dirname).filter((fileName) => {
-      return ('board.js' !== fileName) && (fileName.split('.').pop() === 'js');
-    }).map((fileName) => {
-      return require.resolve('./' + fileName.split('.').shift());
-    }).forEach((id) => {
-      if (require.cache.hasOwnProperty(id)) {
-        delete require.cache[id];
-      }
-      let board = Tools.requireWrapper(require(id));
-      if (_(board).isArray()) {
-        board.forEach((board) => { Board.addBoard(board); });
-      } else {
-        Board.addBoard(board);
-      }
-    });
     if (config('board.useDefaultBoards')) {
       getDefaultBoards().forEach((board) => {
         Board.addBoard(board);
       });
     }
+    Tools.loadPlugins([__dirname, `${__dirname}/custom`], (fileName, _1, _2, path) => {
+      return ('board.js' !== fileName) || (path.split('/') === 'custom');
+    }).map((plugin) => {
+      return (typeof plugin === 'function') ? new plugin() : plugin;
+    }).forEach((board) => {
+      Board.addBoard(board);
+    });
     Board.reloadBanners();
     Board.reloadPostFormRules();
   }
@@ -174,7 +166,7 @@ export default class Board {
     this.defineSetting('postingEnabled', true);
     this.defineSetting('showWhois', false);
     const Captcha = Tools.requireWrapper(require('../captchas/captcha'));
-    this.defineSetting('supportedCaptchaEngines', Captcha.captchaIds());
+    this.defineSetting('supportedCaptchaEngines', Captcha.captchaIDs());
     this.defineProperty('permissions', () => {
       return _(Permissions.PERMISSIONS).mapObject((defaultLevel, key) => {
         return config(`board.${name}.permissions.${key}`, config(`permissions.${key}`, defaultLevel));
@@ -244,13 +236,13 @@ export default class Board {
       permissions: this.permissions,
       opModeration: this.opModeration
     };
-    this.customBoardInfoFields().forEach((field) => {
+    this.customInfoFields().forEach((field) => {
       model[field] = this[field];
     });
     return model;
   }
 
-  customBoardInfoFields() {
+  customInfoFields() {
     return [];
   }
 
@@ -270,7 +262,7 @@ export default class Board {
     return [];
   }
 
-  async testParameters(mode, fields, files, existingFileCount) {
+  async testParameters({ req, mode, fields, files, existingFileCount }) {
     let { name, subject, text, password } = fields;
     name = name || '';
     subject = subject || '';

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.initialize = exports.nextPostNumber = exports.getPageCount = exports.getLastPostNumbers = exports.getLastPostNumber = exports.getArchive = exports.getCatalog = exports.getPage = exports.getThread = undefined;
+exports.delall = exports.initialize = exports.nextPostNumber = exports.getPageCount = exports.getLastPostNumbers = exports.getLastPostNumber = exports.getArchive = exports.getCatalog = exports.getPage = exports.getThread = undefined;
 
 var getThread = exports.getThread = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, threadNumber, archived) {
@@ -604,6 +604,188 @@ var initialize = exports.initialize = function () {
   }));
 
   return function initialize() {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var delall = exports.delall = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(req, ip, boardNames) {
+    var deletedThreads, updatedThreads, deletedPosts;
+    return regeneratorRuntime.wrap(function _callee19$(_context19) {
+      while (1) {
+        switch (_context19.prev = _context19.next) {
+          case 0:
+            ip = Tools.correctAddress(ip);
+
+            if (ip) {
+              _context19.next = 3;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid IP address'));
+
+          case 3:
+            deletedThreads = {};
+            updatedThreads = {};
+            deletedPosts = {};
+            _context19.next = 8;
+            return Tools.series(boardNames, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(boardName) {
+                var postNumbers, posts;
+                return regeneratorRuntime.wrap(function _callee14$(_context14) {
+                  while (1) {
+                    switch (_context14.prev = _context14.next) {
+                      case 0:
+                        _context14.next = 2;
+                        return UsersModel.getUserPostNumbers(ip, boardName);
+
+                      case 2:
+                        postNumbers = _context14.sent;
+                        _context14.next = 5;
+                        return PostsModel.getPosts(boardName, postNumbers);
+
+                      case 5:
+                        posts = _context14.sent;
+
+                        posts.forEach(function (post) {
+                          if (post.threadNumber === post.number) {
+                            deletedThreads[boardName + ':' + post.threadNumber] = {
+                              boardName: boardName,
+                              number: post.threadNumber
+                            };
+                          }
+                        });
+                        posts.filter(function (post) {
+                          return !deletedThreads.hasOwnProperty(boardName + ':' + post.threadNumber);
+                        }).forEach(function (post) {
+                          updatedThreads[boardName + ':' + post.threadNumber] = {
+                            boardName: boardName,
+                            number: post.threadNumber
+                          };
+                          deletedPosts[boardName + ':' + post.number] = {
+                            boardName: boardName,
+                            number: post.number
+                          };
+                        });
+
+                      case 8:
+                      case 'end':
+                        return _context14.stop();
+                    }
+                  }
+                }, _callee14, this);
+              }));
+
+              return function (_x21) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 8:
+            _context19.next = 10;
+            return Tools.series(deletedPosts, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(post) {
+                return regeneratorRuntime.wrap(function _callee15$(_context15) {
+                  while (1) {
+                    switch (_context15.prev = _context15.next) {
+                      case 0:
+                        _context15.next = 2;
+                        return PostsModel.removePost(post.boardName, post.number);
+
+                      case 2:
+                      case 'end':
+                        return _context15.stop();
+                    }
+                  }
+                }, _callee15, this);
+              }));
+
+              return function (_x22) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 10:
+            _context19.next = 12;
+            return Tools.series(deletedThreads, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(thread) {
+                return regeneratorRuntime.wrap(function _callee16$(_context16) {
+                  while (1) {
+                    switch (_context16.prev = _context16.next) {
+                      case 0:
+                        _context16.next = 2;
+                        return ThreadsModel.removeThread(thread.boardName, thread.number);
+
+                      case 2:
+                      case 'end':
+                        return _context16.stop();
+                    }
+                  }
+                }, _callee16, this);
+              }));
+
+              return function (_x23) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 12:
+            _context19.next = 14;
+            return Tools.series(updatedThreads, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(thread) {
+                return regeneratorRuntime.wrap(function _callee17$(_context17) {
+                  while (1) {
+                    switch (_context17.prev = _context17.next) {
+                      case 0:
+                        _context17.next = 2;
+                        return IPC.render(thread.boardName, thread.number, thread.number, 'edit');
+
+                      case 2:
+                      case 'end':
+                        return _context17.stop();
+                    }
+                  }
+                }, _callee17, this);
+              }));
+
+              return function (_x24) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 14:
+            _context19.next = 16;
+            return Tools.series(deletedThreads, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(thread) {
+                return regeneratorRuntime.wrap(function _callee18$(_context18) {
+                  while (1) {
+                    switch (_context18.prev = _context18.next) {
+                      case 0:
+                        _context18.next = 2;
+                        return IPC.render(thread.boardName, thread.number, thread.number, 'delete');
+
+                      case 2:
+                      case 'end':
+                        return _context18.stop();
+                    }
+                  }
+                }, _callee18, this);
+              }));
+
+              return function (_x25) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 16:
+          case 'end':
+            return _context19.stop();
+        }
+      }
+    }, _callee19, this);
+  }));
+
+  return function delall(_x18, _x19, _x20) {
     return ref.apply(this, arguments);
   };
 }();

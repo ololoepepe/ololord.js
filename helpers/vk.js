@@ -51,7 +51,7 @@ exports.default = function () {
             return _http2.default.request({
               url: 'https://api.vk.com/method/' + method + '?' + params,
               method: 'POST',
-              timeout: Tools.Minute //TODO: magic number
+              timeout: Tools.MINUTE //TODO: magic number
             });
 
           case 7:

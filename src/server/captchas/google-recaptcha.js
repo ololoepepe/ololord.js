@@ -1,40 +1,44 @@
-var HTTP = require("q-io/http");
+import _ from 'underscore';
+import HTTP from 'q-io/http';
 
 import Captcha from './captcha';
 import * as Tools from '../helpers/tools';
 
-var googleRecaptcha = new Captcha("google-recaptcha", Tools.translate.noop("Google reCAPTCHA"));
-
-googleRecaptcha.checkCaptcha = function(ip, fields) {
-    var captcha = fields["g-recaptcha-response"];
-    if (!captcha)
-        return Promise.reject(Tools.translate("Captcha is empty"));
-    var query = `secret=${this.privateKey}&response=${captcha}&remoteip=${ip}`;
-    var url = "https://www.google.com/recaptcha/api/siteverify?" + query;
-    return HTTP.request({
-        url: url,
-        timeout: (15 * Tools.Second)
-    }).then(function(response) {
-        if (response.status != 200)
-            return Promise.reject(Tools.translate("Failed to check captcha"));
-        return response.body.read("utf8");
-    }).then(function(data) {
-        var reply = JSON.parse(data.toString());
-        if (!reply.success) {
-            if (reply["error-codes"].indexOf("missing-input-secret") >= 0)
-                return Promise.reject(Tools.translate("The secret captcha parameter is missing"));
-            else if (reply["error-codes"].indexOf("invalid-input-secret") >= 0)
-                return Promise.reject(Tools.translate("The secret captcha parameter is invalid or malformed"));
-            else if (reply["error-codes"].indexOf("missing-input-response") >= 0)
-                return Promise.reject(Tools.translate("The captcha response parameter is missing"));
-            else if (reply["error-codes"].indexOf("invalid-input-response") >= 0)
-                return Promise.reject(Tools.translate("The captcha response parameter is invalid or malformed"));
-            else
-                return Promise.reject(Tools.translate("Invalid captcha"));
-        } else {
-            return Promise.resolve();
-        }
-    });
+const ERROR_CODE_TRANSLATIONS = {
+  'missing-input-secret': Tools.translate.noop('The secret captcha parameter is missing'),
+  'invalid-input-secret': Tools.translate.noop('The secret captcha parameter is invalid or malformed'),
+  'missing-input-response': Tools.translate.noop('The captcha response parameter is missing'),
+  'invalid-input-response': Tools.translate.noop('The captcha response parameter is invalid or malformed')
 };
 
-module.exports = googleRecaptcha;
+export default class GoogleRecaptcha extends Captcha {
+  constructor() {
+    super('google-recaptcha', Tools.translate.noop('Google reCAPTCHA'));
+    this.defineSetting('timeout', 15 * Tools.SECOND);
+  }
+
+  async checkCaptcha(ip, fields) {
+    let captcha = fields['g-recaptcha-response'];
+    if (!captcha) {
+      throw new Error(Tools.translate('Captcha is empty'));
+    }
+    let query = `secret=${this.privateKey}&response=${captcha}&remoteip=${ip}`;
+    let reply = await HTTP.request({
+      url: `https://www.google.com/recaptcha/api/siteverify?${query}`,
+      timeout: this.timeout
+    });
+    if (200 !== reply.status) {
+      throw new Error(Tools.translate('Failed to check captcha'));
+    }
+    let data = await reply.body.read('utf8');
+    let result = JSON.parse(data.toString());
+    if (!result.success) {
+      _(ERROR_CODE_TRANSLATIONS).each((translation, errorCode) => {
+        if (errorCodes.indexOf(errorCode) >= 0) {
+          throw new Error(Tools.translate(translation));
+        }
+      });
+      throw new Error(Tools.translate('Invalid captcha'));
+    }
+  }
+}

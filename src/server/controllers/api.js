@@ -346,7 +346,7 @@ router.get('/api/fileHeaders.json', async function(req, res, next) {
   try {
     let options = {
       method: 'HEAD',
-      timeout: Tools.Minute
+      timeout: Tools.MINUTE //TODO: magic numbers
     };
     let proxy = Tools.proxy();
     if (proxy) {
@@ -369,7 +369,7 @@ router.get('/api/fileHeaders.json', async function(req, res, next) {
   }
 });
 
-Captcha.captchaIds().forEach((id) => {
+Captcha.captchaIDs().forEach((id) => {
   Captcha.captcha(id).apiRoutes().forEach((route) => {
     router[route.method](`/api${route.path}`, route.handler);
   });

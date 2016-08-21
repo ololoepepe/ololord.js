@@ -36,6 +36,7 @@ const DEFAULT_VALUES = new Map([
   ['system.log.backups', 100],
   ['system.log.maxSize', 1048576],
   ['system.log.targets', ['console', 'file']],
+  ['system.mimeTypeRetrievingTimeout', 5 * 1000],
   ['system.phash.enabled', true],
   ['system.redis.host', '127.0.0.1'],
   ['system.redis.port', 6379],

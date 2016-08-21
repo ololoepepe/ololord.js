@@ -2,6 +2,7 @@ import _ from 'underscore';
 import ffmpeg from 'fluent-ffmpeg';
 import promisify from 'promisify-node';
 
+import * as Files from '../helpers/files';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 
@@ -24,7 +25,7 @@ defineMimeTypeSuffixes('video/mp4', 'mp4', 'png');
 defineMimeTypeSuffixes('video/webm', 'webm', 'png');
 
 export function match(mimeType) {
-  return Tools.isVideoType(mimeType);
+  return Files.isVideoType(mimeType);
 }
 
 export function suffixMatchesMimeType(suffix, mimeType) {
@@ -73,7 +74,7 @@ export async function createThumbnail(file, thumbPath, path) {
     Logger.error(err.stack || err);
   }
   if (thumbPath === file.thumbPath) {
-    await Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
+    await Files.generateRandomImage(file.hash, file.mimeType, thumbPath);
     result.dimensions = result.dimensions || {
       width: 200,
       height: 200

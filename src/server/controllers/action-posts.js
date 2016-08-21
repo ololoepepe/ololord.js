@@ -16,7 +16,7 @@ import geolocation from '../storage/geolocation';
 
 let router = express.Router();
 
-async function testParameters(boardName, mode, { fields, files, postNumber } = {}) {
+async function testParameters(req, boardName, mode, { fields, files, postNumber } = {}) {
   if (!Board.board(boardName)) {
     throw new Error(Tools.translate('Invalid board'));
   }
@@ -36,7 +36,13 @@ async function testParameters(boardName, mode, { fields, files, postNumber } = {
       fields.text = post.rawText;
     }
   }
-  await board.testParameters(mode, fields, files, fileCount);
+  await board.testParameters({
+    req: req,
+    mode: mode,
+    fields: fields,
+    files: files,
+    existingFileCount: fileCount
+  });
   return post;
 }
 
@@ -48,7 +54,7 @@ router.post('/action/markupText', async function(req, res, next) {
     }
     await UsersModel.checkUserBan(req.ip, boardName, { write: true }); //TODO: Should it really be "write"?
     let rawText = text || '';
-    await testParameters(boardName, 'markupText', { fields: fields });
+    await testParameters(req, boardName, 'markupText', { fields: fields });
     markupMode = markupMode || '';
     let markupModes = markup.markupModes(markupMode);
     text = await markup(boardName, text, {
@@ -93,7 +99,7 @@ router.post('/action/createPost', async function(req, res, next) {
     });
     await Captcha.checkCaptcha(req.ip, fields);
     files = await Files.getFiles(fields, files);
-    await testParameters(boardName, 'createPost', {
+    await testParameters(req, boardName, 'createPost', {
       fields: fields,
       files: files
     });
@@ -135,7 +141,7 @@ router.post('/action/createThread', async function(req, res, next) {
     });
     await Captcha.checkCaptcha(req.ip, fields);
     files = await Files.getFiles(fields, files);
-    await testParameters(boardName, 'createThread', {
+    await testParameters(req, boardName, 'createThread', {
       fields: fields,
       files: files
     });
@@ -177,7 +183,7 @@ router.post('/action/editPost', async function(req, res, next) {
       geolocationInfo: req.geolocationInfo
     });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'editPost');
-    await testParameters(boardName, 'editPost', {
+    await testParameters(req, boardName, 'editPost', {
       fields: fields,
       postNumber: postNumber
     });
@@ -218,7 +224,7 @@ router.post('/action/addFiles', async function(req, res, next) {
     if (files.length <= 0) {
       throw new Error(Tools.translate('No file specified'));
     }
-    await testParameters(boardName, 'addFiles', {
+    await testParameters(req, boardName, 'addFiles', {
       fields: fields,
       files: files,
       postNumber: postNumber
@@ -278,7 +284,7 @@ router.post('/action/deleteFile', async function(req, res, next) {
       geolocationInfo: req.geolocationInfo
     });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'deleteFile', Tools.sha1(password));
-    let post = await testParameters(boardName, 'deleteFile', { postNumber: postNumber });
+    let post = await testParameters(req, boardName, 'deleteFile', { postNumber: postNumber });
     await FilesModel.deleteFile(fileName);
     IPC.render(boardName, post.threadNumber, postNumber, 'edit');
     res.send({});
@@ -324,7 +330,7 @@ router.post('/action/editAudioTags', async function(req, res, next) {
     if (!fileInfo) {
       throw new Error(Tools.translate('No such file'));
     }
-    if (!Tools.isAudioType(fileInfo.mimeType)) {
+    if (!Files.isAudioType(fileInfo.mimeType)) {
       throw new Error(Tools.translate('Not an audio file'));
     }
     let { boardName, postNumber } = fileInfo;

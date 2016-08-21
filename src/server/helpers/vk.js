@@ -19,7 +19,7 @@ export default async function(method, params) {
   let response = await HTTP.request({
     url: `https://api.vk.com/method/${method}?${params}`,
     method: 'POST',
-    timeout: Tools.Minute //TODO: magic number
+    timeout: Tools.MINUTE //TODO: magic number
   });
   if (200 !== response.status) {
     return Promise.reject(new Error(Tools.translate('Failed to call VK API method')));

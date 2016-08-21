@@ -50,6 +50,10 @@ var _promisifyNode = require('promisify-node');
 
 var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
 
+var _files = require('../helpers/files');
+
+var Files = _interopRequireWildcard(_files);
+
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
@@ -63,7 +67,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 var ImageMagick = (0, _promisifyNode2.default)('imagemagick');
 
 function match(mimeType) {
-  return Tools.isPdfType(mimeType);
+  return Files.isPdfType(mimeType);
 }
 
 function suffixMatchesMimeType(suffix, mimeType) {

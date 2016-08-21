@@ -1,5 +1,42 @@
 "use strict";
 
+var markupLaTeX = function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(text, inline) {
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+            while (1) {
+                switch (_context.prev = _context.next) {
+                    case 0:
+                        _context.next = 2;
+                        return new Promise(function (resolve, reject) {
+                            MathJax.typeset({
+                                math: text,
+                                format: inline ? 'inline-TeX' : 'TeX',
+                                svg: true
+                            }, function (data) {
+                                if (data.errors) {
+                                    return reject(data.errors[0] || data.errors);
+                                }
+                                var tagName = inline ? 'span' : 'div';
+                                resolve("<" + tagName + " class='latex-" + (inline ? 'inline' : 'block') + "'>" + data.svg + "</" + tagName + ">");
+                            });
+                        });
+
+                    case 2:
+                        return _context.abrupt("return", _context.sent);
+
+                    case 3:
+                    case "end":
+                        return _context.stop();
+                }
+            }
+        }, _callee, this);
+    }));
+
+    return function markupLaTeX(_x, _x2) {
+        return ref.apply(this, arguments);
+    };
+}();
+
 var _underscore = require("underscore");
 
 var _underscore2 = _interopRequireDefault(_underscore);
@@ -24,8 +61,11 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
 var Highlight = require("highlight.js");
 var HTTP = require("q-io/http");
+var MathJax = require("mathjax-node/lib/mj-single.js");
 var URL = require("url");
 var XRegExp = require("xregexp");
 
@@ -33,6 +73,9 @@ var config = require("../helpers/config");
 var Database = require("../helpers/database");
 var Permissions = require("../helpers/permissions");
 var Tools = require("../helpers/tools");
+
+MathJax.config({ MathJax: {} });
+MathJax.start();
 
 var SkipTypes = {
     NoSkip: "NO_SKIP",
@@ -163,7 +206,7 @@ var getTwitterEmbeddedHtml = function getTwitterEmbeddedHtml(href, defaultHtml) 
     return HTTP.request({
         method: "GET",
         url: "https://api.twitter.com/1/statuses/oembed.json?url=" + href,
-        timeout: Tools.Minute
+        timeout: Tools.MINUTE //TODO: magic numbers
     }).then(function (response) {
         if (response.status != 200) return Promise.reject(new Error(Tools.translate("Failed to get Twitter embedded HTML")));
         return response.body.read();
@@ -207,7 +250,7 @@ var getYoutubeEmbeddedHtml = function getYoutubeEmbeddedHtml(href, defaultHtml) 
     return HTTP.request({
         method: "GET",
         url: "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key=" + apiKey + "&part=snippet",
-        timeout: Tools.Minute
+        timeout: Tools.MINUTE //TODO: magic numbers
     }).then(function (response) {
         if (response.status != 200) return Promise.reject(new Error(Tools.translate("Failed to get YouTube embedded HTML")));
         return response.body.read();
@@ -240,7 +283,7 @@ var getCoubEmbeddedHtml = function getCoubEmbeddedHtml(href, defaultHtml) {
     return HTTP.request({
         method: "GET",
         url: "https://coub.com/api/oembed.json?url=http://coub.com/view/" + videoId,
-        timeout: Tools.Minute
+        timeout: Tools.MINUTE //TODO: magic numbers
     }).then(function (response) {
         if (response.status != 200) return Promise.reject(new Error(Tools.translate("Failed to get Coub embedded HTML")));
         return response.body.read();
@@ -700,7 +743,7 @@ var convertMarkup = function convertMarkup(_, text, matchs, __, options) {
 
 var convertLatex = function convertLatex(inline, _, text, matchs, __, options) {
     options.type = SkipTypes.HtmlSkip;
-    return Tools.markupLatex(text, inline);
+    return markupLaTeX(text, inline);
 };
 
 var convertUrl = function convertUrl(info, text, matchs, matche, options) {
@@ -880,7 +923,7 @@ var processPostText = function processPostText(boardName, text, options) {
             });
         }).then(function () {
             return process(info, convertExternalLink, {
-                op: new XRegExp(Tools.ExternalLinkRegexpPattern, "gi"),
+                op: new XRegExp(Tools.EXTERNAL_LINK_REGEXP_PATTERN, "gi"),
                 cl: null
             }, { checkFunction: checkExternalLink });
         }).then(function () {
@@ -1041,6 +1084,8 @@ processPostText.markupModes = function (string) {
         return string.indexOf(mode) >= 0;
     });
 };
+
+processPostText.latex = markupLaTeX;
 
 module.exports = processPostText;
 //# sourceMappingURL=markup.js.map

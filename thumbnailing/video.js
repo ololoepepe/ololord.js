@@ -88,7 +88,7 @@ var createThumbnail = exports.createThumbnail = function () {
             }
 
             _context2.next = 20;
-            return Tools.generateRandomImage(file.hash, file.mimeType, thumbPath);
+            return Files.generateRandomImage(file.hash, file.mimeType, thumbPath);
 
           case 20:
             result.dimensions = result.dimensions || {
@@ -204,6 +204,10 @@ var _promisifyNode = require('promisify-node');
 
 var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
 
+var _files = require('../helpers/files');
+
+var Files = _interopRequireWildcard(_files);
+
 var _logger = require('../helpers/logger');
 
 var _logger2 = _interopRequireDefault(_logger);
@@ -239,7 +243,7 @@ defineMimeTypeSuffixes('video/mp4', 'mp4', 'png');
 defineMimeTypeSuffixes('video/webm', 'webm', 'png');
 
 function match(mimeType) {
-  return Tools.isVideoType(mimeType);
+  return Files.isVideoType(mimeType);
 }
 
 function suffixMatchesMimeType(suffix, mimeType) {

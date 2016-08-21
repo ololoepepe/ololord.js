@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.moveThread = exports.createThread = exports.clearDeletedThreads = exports.setThreadDeleted = exports.isThreadDeleted = exports.setThreadUpdateTime = exports.getThreadsUpdateTimes = exports.getThreadUpdateTime = exports.getThreadLastPostNumber = exports.getThreadInfo = exports.getThreads = exports.getThread = exports.getThreadNumbers = exports.getThreadPosts = exports.removeThreadPostNumber = exports.addThreadPostNumber = exports.getThreadPostNumbers = exports.getThreadPostCount = undefined;
+exports.setThreadUnbumpable = exports.setThreadClosed = exports.setThreadFixed = exports.moveThread = exports.createThread = exports.clearDeletedThreads = exports.setThreadDeleted = exports.isThreadDeleted = exports.setThreadUpdateTime = exports.getThreadsUpdateTimes = exports.getThreadUpdateTime = exports.getThreadLastPostNumber = exports.getThreadInfo = exports.getThreads = exports.getThread = exports.getThreadNumbers = exports.getThreadPosts = exports.removeThreadPostNumber = exports.addThreadPostNumber = exports.getThreadPostNumbers = exports.getThreadPostCount = undefined;
 
 var getThreadPostCount = exports.getThreadPostCount = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, threadNumber) {
@@ -1218,6 +1218,162 @@ var moveThread = exports.moveThread = function () {
   }));
 
   return function moveThread(_x55, _x56, _x57) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var setThreadFixed = exports.setThreadFixed = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(boardName, threadNumber, fixed) {
+    var thread;
+    return regeneratorRuntime.wrap(function _callee28$(_context28) {
+      while (1) {
+        switch (_context28.prev = _context28.next) {
+          case 0:
+            _context28.next = 2;
+            return getThread(boardName, threadNumber);
+
+          case 2:
+            thread = _context28.sent;
+
+            if (thread) {
+              _context28.next = 5;
+              break;
+            }
+
+            throw new Error(Tools.translate('No such thread'));
+
+          case 5:
+            fixed = !!fixed;
+
+            if (!(fixed === !!thread.fixed)) {
+              _context28.next = 8;
+              break;
+            }
+
+            return _context28.abrupt('return');
+
+          case 8:
+            thread.fixed = fixed;
+            _context28.next = 11;
+            return Threads.setOne(threadNumber, thread, boardName);
+
+          case 11:
+            _context28.next = 13;
+            return IPC.render(boardName, threadNumber, threadNumber, 'edit');
+
+          case 13:
+          case 'end':
+            return _context28.stop();
+        }
+      }
+    }, _callee28, this);
+  }));
+
+  return function setThreadFixed(_x59, _x60, _x61) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var setThreadClosed = exports.setThreadClosed = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(boardName, threadNumber, closed) {
+    var thread;
+    return regeneratorRuntime.wrap(function _callee29$(_context29) {
+      while (1) {
+        switch (_context29.prev = _context29.next) {
+          case 0:
+            _context29.next = 2;
+            return getThread(boardName, threadNumber);
+
+          case 2:
+            thread = _context29.sent;
+
+            if (thread) {
+              _context29.next = 5;
+              break;
+            }
+
+            throw new Error(Tools.translate('No such thread'));
+
+          case 5:
+            closed = !!closed;
+
+            if (!(closed === !!thread.closed)) {
+              _context29.next = 8;
+              break;
+            }
+
+            return _context29.abrupt('return');
+
+          case 8:
+            thread.closed = closed;
+            _context29.next = 11;
+            return Threads.setOne(threadNumber, thread, boardName);
+
+          case 11:
+            _context29.next = 13;
+            return IPC.render(boardName, threadNumber, threadNumber, 'edit');
+
+          case 13:
+          case 'end':
+            return _context29.stop();
+        }
+      }
+    }, _callee29, this);
+  }));
+
+  return function setThreadClosed(_x62, _x63, _x64) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var setThreadUnbumpable = exports.setThreadUnbumpable = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee30(boardName, threadNumber, unbumpable) {
+    var thread;
+    return regeneratorRuntime.wrap(function _callee30$(_context30) {
+      while (1) {
+        switch (_context30.prev = _context30.next) {
+          case 0:
+            _context30.next = 2;
+            return getThread(boardName, threadNumber);
+
+          case 2:
+            thread = _context30.sent;
+
+            if (thread) {
+              _context30.next = 5;
+              break;
+            }
+
+            throw new Error(Tools.translate('No such thread'));
+
+          case 5:
+            unbumpable = !!unbumpable;
+
+            if (!(unbumpable === !!thread.unbumpable)) {
+              _context30.next = 8;
+              break;
+            }
+
+            return _context30.abrupt('return');
+
+          case 8:
+            thread.unbumpable = unbumpable;
+            _context30.next = 11;
+            return Threads.setOne(threadNumber, thread, boardName);
+
+          case 11:
+            _context30.next = 13;
+            return IPC.render(boardName, threadNumber, threadNumber, 'edit');
+
+          case 13:
+          case 'end':
+            return _context30.stop();
+        }
+      }
+    }, _callee30, this);
+  }));
+
+  return function setThreadUnbumpable(_x65, _x66, _x67) {
     return ref.apply(this, arguments);
   };
 }();

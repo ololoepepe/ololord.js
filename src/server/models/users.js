@@ -229,7 +229,7 @@ async function processUserIPs(ips) {
 }
 
 async function processRegisteredUserData(levels, ips) {
-  if (!Tools.hasOwnProperties(levels)) {
+  if (_(levels).isEmpty()) {
     return Promise.reject(new Error(Tools.translate('Access level is not specified for any board')));
   }
   if (Object.keys(levels).some(boardName => !Board.board(boardName))) {

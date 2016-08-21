@@ -1,11 +1,12 @@
 import promisify from 'promisify-node';
 
+import * as Files from '../helpers/files';
 import * as Tools from '../helpers/tools';
 
 const ImageMagick = promisify('imagemagick');
 
 export function match(mimeType) {
-  return Tools.isPdfType(mimeType);
+  return Files.isPdfType(mimeType);
 }
 
 export function suffixMatchesMimeType(suffix, mimeType) {

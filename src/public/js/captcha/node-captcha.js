@@ -11,7 +11,7 @@ const WIDGET_TEMPLATE = 'captcha/nodeCaptchaWidget';
 
 let countdownTimer = null;
 
-async function reload(data) {
+async function reload() {
   let captcha = DOM.id('captcha');
   if (!captcha) {
     return;

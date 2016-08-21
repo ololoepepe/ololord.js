@@ -130,27 +130,28 @@ function spawnCluster() {
                     switch (_context.prev = _context.next) {
                         case 0:
                             console.log('[' + process.pid + '] Initializing...');
+                            _controllers2.default.initialize();
                             app = (0, _express2.default)();
 
                             app.use(_middlewares2.default);
                             app.use(_controllers2.default);
-                            _context.prev = 4;
-                            _context.next = 7;
+                            _context.prev = 5;
+                            _context.next = 8;
                             return _geolocation2.default.initialize();
 
-                        case 7:
-                            _context.next = 9;
+                        case 8:
+                            _context.next = 10;
                             return _sqlClientFactory2.default.initialize();
 
-                        case 9:
-                            _context.next = 11;
+                        case 10:
+                            _context.next = 12;
                             return BoardsModel.initialize();
 
-                        case 11:
-                            _context.next = 13;
+                        case 12:
+                            _context.next = 14;
                             return Renderer.reloadTemplates();
 
-                        case 13:
+                        case 14:
                             sockets = {};
                             nextSocketId = 0;
                             server = _http2.default.createServer(app);
@@ -206,7 +207,7 @@ function spawnCluster() {
                                 IPC.on('stop', function () {
                                     return new Promise(function (resolve, reject) {
                                         server.close(function () {
-                                            Tools.forIn(sockets, function (socket, socketId) {
+                                            (0, _underscore2.default)(sockets).each(function (socket, socketId) {
                                                 delete sockets[socketId];
                                                 socket.destroy();
                                             });
@@ -241,7 +242,7 @@ function spawnCluster() {
                                     return Renderer.reloadTemplates();
                                 });
                                 IPC.on('notifyAboutNewPosts', function (data) {
-                                    Tools.forIn(data, function (_, key) {
+                                    (0, _underscore2.default)(data).each(function (_, key) {
                                         var s = subscriptions.get(key);
                                         if (!s) return;
                                         s.forEach(function (conn) {
@@ -264,22 +265,22 @@ function spawnCluster() {
                                     delete sockets[socketId];
                                 });
                             });
-                            _context.next = 29;
+                            _context.next = 30;
                             break;
 
-                        case 25:
-                            _context.prev = 25;
-                            _context.t0 = _context['catch'](4);
+                        case 26:
+                            _context.prev = 26;
+                            _context.t0 = _context['catch'](5);
 
                             console.log(_context.t0);
                             _logger2.default.error(_context.t0.stack || _context.t0);
 
-                        case 29:
+                        case 30:
                         case 'end':
                             return _context.stop();
                     }
                 }
-            }, _callee, this, [[4, 25]]);
+            }, _callee, this, [[5, 26]]);
         }));
 
         return function (_x) {
@@ -330,10 +331,10 @@ function onReady(initCallback) {
     if ((0, _config2.default)('system.workerCount') === onReady.ready) {
         UsersModel.initializeUserBansMonitoring();
         if ((0, _config2.default)('server.statistics.enabled')) {
-            setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), (0, _config2.default)('server.statistics.ttl') * Tools.Minute);
+            setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), (0, _config2.default)('server.statistics.ttl') * Tools.MINUTE);
         }
         if ((0, _config2.default)('server.rss.enabled')) {
-            setInterval(_board4.default.renderRSS.bind(_board4.default), (0, _config2.default)('server.rss.ttl') * Tools.Minute);
+            setInterval(_board4.default.renderRSS.bind(_board4.default), (0, _config2.default)('server.rss.ttl') * Tools.MINUTE);
         }
         (0, _commands2.default)();
     }

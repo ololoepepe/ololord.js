@@ -1,28 +1,20 @@
 import _ from 'underscore';
 import express from 'express';
-import FS from 'q-io/fs';
-import HTTP from 'q-io/http';
-import merge from 'merge';
-var moment = require("moment");
-import UUID from 'uuid';
+import moment from 'moment';
 
 import Board from '../boards/board';
-var Captcha = require("../captchas/captcha");
-var Chat = require("../helpers/chat");
-var config = require("../helpers/config");
-var Database = require("../helpers/database");
-var markup = require("../core/markup");
+import config from '../helpers/config';
 
-import * as FilesModel from '../models/files';
-import * as PostsModel from '../models/posts';
+import * as ThreadsModel from '../models/threads';
 import * as UsersModel from '../models/users';
-import PostCreationTransaction from '../storage/post-creation-transaction';
-import * as IPC from '../helpers/ipc';
-import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 import geolocation from '../storage/geolocation';
 
 let router = express.Router();
+
+const MIN_TIME_OFFSET = -720;
+const MAX_TIME_OFFSET = 840;
+const BAN_EXPIRES_FORMAT = 'YYYY/MM/DD HH:mm ZZ';
 
 function getBans(fields) {
   let { timeOffset } = fields;
@@ -30,17 +22,16 @@ function getBans(fields) {
     return /^banBoard_\S+$/.test(name) && 'NONE' !== fields[`banLevel_${value}`];
   });
   timeOffset = Tools.option(timeOffset, 'number', config('site.timeOffset'), {
-    test: (o) => { return (o >= -720) && (o <= 840); } //TODO: magic numbers
+    test: (o) => { return (o >= MIN_TIME_OFFSET) && (o <= MAX_TIME_OFFSET); }
   });
   bans = _(bans).reduce((acc, value, name) => {
     let expiresAt = fields[`banExpires_${value}`];
     if (expiresAt) {
-      let hours = Math.floor(timeOffset / 60);
+      let hours = Math.floor(Math.abs(timeOffset) / 60);
       let minutes = Math.abs(timeOffset) % 60;
-      let tz = ((timeOffset > 0) ? '+' : '') + ((Math.abs(hours) < 10) ? '0' : '') + hours + ':'
-        + ((minutes < 10) ? '0' : '') + minutes; //TODO: use pad function
-      expiresAt = +moment(`${expiresAt} ${tz}`, 'YYYY/MM/DD HH:mm ZZ'); //TODO: magic numbers
-      if (expiresAt < (_.now() + Tools.Second)) {
+      let tz = ((timeOffset > 0) ? '+' : '') + Tools.pad(hours, 2, '0') + ':' + Tools.pad(minutes, 2, '0');
+      expiresAt = +moment(`${expiresAt} ${tz}`, BAN_EXPIRES_FORMAT);
+      if (expiresAt < (_.now() + Tools.SECOND)) {
         expiresAt = null;
       }
     } else {
@@ -131,7 +122,7 @@ router.post('/action/delall', async function(req, res, next) {
       return /^board_\S+$/.test(key);
     });
     if (boardNames.length <= 0) {
-      return throw new Error(Tools.translate('No board specified'));
+      throw new Error(Tools.translate('No board specified'));
     }
     boardNames.forEach((boardName) => {
       if (!Board.board(boardName)) {
@@ -183,52 +174,85 @@ router.post('/action/moveThread', async function(req, res, next) {
   }
 });
 
-router.post("/action/setThreadFixed", function(req, res, next) {
-    var c = {};
-    Tools.parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        c.boardName = result.fields.boardName;
-        c.threadNumber = +result.fields.threadNumber;
-        return UsersModel.checkUserBan(req.ip, c.boardName, { write: true });
-    }).then(function() {
-        return Database.setThreadFixed(req, c.fields);
-    }).then(function(result) {
-        res.send(result);
-    }).catch(function(err) {
-        next(err);
+router.post('/action/setThreadFixed', async function(req, res, next) {
+  try {
+    let { fields } = await Tools.parseForm(req);
+    let { boardName, threadNumber, fixed, password } = fields;
+    if (!Board.board(boardName)) {
+      throw new Error(Tools.translate('Invalid board'));
+    }
+    threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+    if (!threadNumber) {
+      throw new Error(Tools.translate('Invalid thread number'));
+    }
+    if (!req.isModer(boardName)) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: geolocationInfo
     });
+    await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadFixed', Tools.sha1(password));
+    await ThreadsModel.setThreadFixed(boardName, threadNumber, 'true' === fixed);
+    res.send({});
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.post("/action/setThreadClosed", function(req, res, next) {
-    var c = {};
-    Tools.parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        c.boardName = result.fields.boardName;
-        c.threadNumber = +result.fields.threadNumber;
-        return UsersModel.checkUserBan(req.ip, c.boardName, { write: true });
-    }).then(function() {
-        return Database.setThreadClosed(req, c.fields);
-    }).then(function(result) {
-        res.send(result);
-    }).catch(function(err) {
-        next(err);
+router.post('/action/setThreadClosed', async function(req, res, next) {
+  try {
+    let { fields } = await Tools.parseForm(req);
+    let { boardName, threadNumber, closed, password } = fields;
+    if (!Board.board(boardName)) {
+      throw new Error(Tools.translate('Invalid board'));
+    }
+    threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+    if (!threadNumber) {
+      throw new Error(Tools.translate('Invalid thread number'));
+    }
+    if (!req.isModer(boardName)) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: geolocationInfo
     });
+    await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadClosed', Tools.sha1(password));
+    await ThreadsModel.setThreadClosed(boardName, threadNumber, 'true' === closed);
+    res.send({});
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.post("/action/setThreadUnbumpable", function(req, res, next) {
-    var c = {};
-    Tools.parseForm(req).then(function(result) {
-        c.fields = result.fields;
-        c.boardName = result.fields.boardName;
-        c.threadNumber = +result.fields.threadNumber;
-        return UsersModel.checkUserBan(req.ip, c.boardName, { write: true });
-    }).then(function() {
-        return Database.setThreadUnbumpable(req, c.fields);
-    }).then(function(result) {
-        res.send(result);
-    }).catch(function(err) {
-        next(err);
+router.post('/action/setThreadUnbumpable', async function(req, res, next) {
+  try {
+    let { fields } = await Tools.parseForm(req);
+    let { boardName, threadNumber, unbumpable, password } = fields;
+    if (!Board.board(boardName)) {
+      throw new Error(Tools.translate('Invalid board'));
+    }
+    threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+    if (!threadNumber) {
+      throw new Error(Tools.translate('Invalid thread number'));
+    }
+    if (!req.isModer(boardName)) {
+      throw new Error(Tools.translate('Not enough rights'));
+    }
+    let geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: geolocationInfo
     });
+    await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadUnbumpable', Tools.sha1(password));
+    await ThreadsModel.setThreadUnbumpable(boardName, threadNumber, 'true' === unbumpable);
+    res.send({});
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;
