@@ -42,7 +42,8 @@ function spawnCluster() {
     app.use(controllers);
     try {
       await geolocation.initialize();
-      await sqlClient.initialize();
+      let main = await sqlClient();
+      await main.initialize();
       await BoardsModel.initialize();
       await Renderer.reloadTemplates();
       var sockets = {};
@@ -252,7 +253,8 @@ if (Cluster.isMaster) {
     try {
       await NodeCaptcha.removeOldCaptchImages();
       await NodeCaptchaNoscript.removeOldCaptchImages();
-      await sqlClient.initialize(true);
+      let main = await sqlClient();
+      await main.initialize();
       await Renderer.compileTemplates();
       await Renderer.reloadTemplates();
       if (Program.rerender || config('system.rerenderCacheOnStartup')) {

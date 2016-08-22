@@ -3,7 +3,8 @@ import Redis from 'ioredis';
 
 import config from '../helpers/config';
 
-let client = null;
+let defaultClient = null;
+let clients = new Map();
 
 function createOptions() {
   return {
@@ -13,15 +14,12 @@ function createOptions() {
     password: config('system.redis.password'),
     db: config('system.redis.db')
   }
-  };
+};
 
-export default function(force) {
+function createClient() {
   let redisNodes = config('system.redis.nodes');
-  if (client && !force) {
-    return client;
-  }
   if (_.isArray(redisNodes) && redisNodes.length > 0) {
-    var c = new Redis.Cluster(redisNodes, {
+    return new Redis.Cluster(redisNodes, {
       clusterRetryStrategy: config('system.redis.clusterRetryStrategy', (times) => {
           return Math.min(100 + times * 2, 2000);
       }),
@@ -34,10 +32,24 @@ export default function(force) {
       redisOptions: createOptions()
     });
   } else {
-    var c = new Redis(createOptions());
+    return new Redis(createOptions());
   }
+}
+
+export default function(id) {
+  if (id && (typeof id === 'object' || typeof id === 'boolean')) {
+    return createClient();
+  }
+  if (!id) {
+    if (!defaultClient) {
+      defaultClient = createClient();
+    }
+    return defaultClient;
+  }
+  let client = clients.get(id);
   if (!client) {
-    client = c;
+    client = createClient();
+    clients.set(id, client);
   }
-  return c;
+  return client;
 }

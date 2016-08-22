@@ -4,6 +4,18 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+exports.default = function (name) {
+  if (!name) {
+    name = 'main';
+  }
+  var client = clients.get(name);
+  if (!client) {
+    client = createClient(name);
+    clients.set(name, client);
+  }
+  return client;
+};
+
 var _fs = require('q-io/fs');
 
 var _fs2 = _interopRequireDefault(_fs);
@@ -26,98 +38,82 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var db = null;
+var clients = new Map();
 
-function getClient() {
-  return db;
-}
-
-getClient.initialize = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(createFromSchema) {
-    var schema, statements;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            _context2.next = 2;
-            return new Promise(function (resolve, reject) {
-              db = new _sqlite2.default.Database(__dirname + '/../sqlite/main.sqlite', function (err) {
-                if (err) {
-                  db = null;
-                  reject(err);
-                  return;
-                }
-                resolve();
-              });
-            });
-
-          case 2:
-            if (createFromSchema) {
-              _context2.next = 4;
-              break;
-            }
-
-            return _context2.abrupt('return');
-
-          case 4:
-            _context2.next = 6;
-            return _fs2.default.read(__dirname + '/../sqlite/main.schema');
-
-          case 6:
-            schema = _context2.sent;
-
-            schema = schema.replace(/\/\*(.|\r?\n)*\*\//g, '');
-            schema = schema.replace(/\-\-.*/g, '');
-            schema = schema.replace(/\r?\n+/g, ' ');
-            statements = schema.split(';').filter(function (statement) {
-              return !/^\s+$/.test(statement);
-            });
-            _context2.next = 13;
-            return Tools.series(statements, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(statement) {
-                return regeneratorRuntime.wrap(function _callee$(_context) {
-                  while (1) {
-                    switch (_context.prev = _context.next) {
-                      case 0:
-                        _context.next = 2;
-                        return new Promise(function (resolve, reject) {
-                          db.run(statement, [], function (err) {
-                            if (err) {
-                              reject(err);
-                            } else {
-                              resolve();
-                            }
-                          });
-                        });
-
-                      case 2:
-                        return _context.abrupt('return', _context.sent);
-
-                      case 3:
-                      case 'end':
-                        return _context.stop();
-                    }
-                  }
-                }, _callee, this);
-              }));
-
-              return function (_x2) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 13:
-          case 'end':
-            return _context2.stop();
-        }
+function createClient(name) {
+  return new Promise(function (resolve, reject) {
+    var db = new _sqlite2.default.Database(__dirname + '/../sqlite/' + name + '.sqlite', function (err) {
+      if (err) {
+        reject(err);
+        return;
       }
-    }, _callee2, this);
-  }));
+      db.initialize = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+        var path, exists, schema, statements;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                path = __dirname + '/../sqlite/' + name + '.schema';
+                _context2.next = 3;
+                return _fs2.default.exists(path);
 
-  return function (_x) {
-    return ref.apply(this, arguments);
-  };
-}();
+              case 3:
+                exists = _context2.sent;
+                _context2.next = 6;
+                return _fs2.default.read(path);
 
-exports.default = getClient;
+              case 6:
+                schema = _context2.sent;
+
+                schema = schema.replace(/\/\*(.|\r?\n)*\*\//g, '');
+                schema = schema.replace(/\-\-.*/g, '');
+                schema = schema.replace(/\r?\n+/g, ' ');
+                statements = schema.split(';').filter(function (statement) {
+                  return !/^\s+$/.test(statement);
+                });
+                _context2.next = 13;
+                return Tools.series(statements, function () {
+                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(statement) {
+                    return regeneratorRuntime.wrap(function _callee$(_context) {
+                      while (1) {
+                        switch (_context.prev = _context.next) {
+                          case 0:
+                            _context.next = 2;
+                            return new Promise(function (resolve, reject) {
+                              db.run(statement, [], function (err) {
+                                if (err) {
+                                  reject(err);
+                                } else {
+                                  resolve();
+                                }
+                              });
+                            });
+
+                          case 2:
+                            return _context.abrupt('return', _context.sent);
+
+                          case 3:
+                          case 'end':
+                            return _context.stop();
+                        }
+                      }
+                    }, _callee, this);
+                  }));
+
+                  return function (_x) {
+                    return ref.apply(this, arguments);
+                  };
+                }());
+
+              case 13:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+      resolve(db);
+    });
+  });
+}
 //# sourceMappingURL=sql-client-factory.js.map

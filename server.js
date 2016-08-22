@@ -124,7 +124,7 @@ _config2.default.installSetHook("site.locale", Tools.setLocale);
 function spawnCluster() {
     (0, _expressCluster2.default)(function () {
         var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(worker) {
-            var app, sockets, nextSocketId, server, ws, subscriptions;
+            var app, main, sockets, nextSocketId, server, ws, subscriptions;
             return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
                     switch (_context.prev = _context.next) {
@@ -141,17 +141,22 @@ function spawnCluster() {
 
                         case 8:
                             _context.next = 10;
-                            return _sqlClientFactory2.default.initialize();
+                            return (0, _sqlClientFactory2.default)();
 
                         case 10:
-                            _context.next = 12;
+                            main = _context.sent;
+                            _context.next = 13;
+                            return main.initialize();
+
+                        case 13:
+                            _context.next = 15;
                             return BoardsModel.initialize();
 
-                        case 12:
-                            _context.next = 14;
+                        case 15:
+                            _context.next = 17;
                             return Renderer.reloadTemplates();
 
-                        case 14:
+                        case 17:
                             sockets = {};
                             nextSocketId = 0;
                             server = _http2.default.createServer(app);
@@ -265,22 +270,22 @@ function spawnCluster() {
                                     delete sockets[socketId];
                                 });
                             });
-                            _context.next = 30;
+                            _context.next = 33;
                             break;
 
-                        case 26:
-                            _context.prev = 26;
+                        case 29:
+                            _context.prev = 29;
                             _context.t0 = _context['catch'](5);
 
                             console.log(_context.t0);
                             _logger2.default.error(_context.t0.stack || _context.t0);
 
-                        case 30:
+                        case 33:
                         case 'end':
                             return _context.stop();
                     }
                 }
-            }, _callee, this, [[5, 26]]);
+            }, _callee, this, [[5, 29]]);
         }));
 
         return function (_x) {
@@ -401,6 +406,7 @@ _captcha2.default.initialize();
 
 if (_cluster2.default.isMaster) {
     _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+        var main;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
             while (1) {
                 switch (_context4.prev = _context4.next) {
@@ -415,72 +421,77 @@ if (_cluster2.default.isMaster) {
 
                     case 5:
                         _context4.next = 7;
-                        return _sqlClientFactory2.default.initialize(true);
+                        return (0, _sqlClientFactory2.default)();
 
                     case 7:
-                        _context4.next = 9;
+                        main = _context4.sent;
+                        _context4.next = 10;
+                        return main.initialize();
+
+                    case 10:
+                        _context4.next = 12;
                         return Renderer.compileTemplates();
 
-                    case 9:
-                        _context4.next = 11;
+                    case 12:
+                        _context4.next = 14;
                         return Renderer.reloadTemplates();
 
-                    case 11:
+                    case 14:
                         if (!(_program2.default.rerender || (0, _config2.default)('system.rerenderCacheOnStartup'))) {
-                            _context4.next = 19;
+                            _context4.next = 22;
                             break;
                         }
 
                         if (!(_program2.default.archive || (0, _config2.default)('system.rerenderArchive'))) {
-                            _context4.next = 17;
+                            _context4.next = 20;
                             break;
                         }
 
-                        _context4.next = 15;
+                        _context4.next = 18;
                         return Renderer.rerender();
 
-                    case 15:
-                        _context4.next = 19;
+                    case 18:
+                        _context4.next = 22;
                         break;
 
-                    case 17:
-                        _context4.next = 19;
+                    case 20:
+                        _context4.next = 22;
                         return Renderer.rerender(['**', '!/*/arch/*']);
 
-                    case 19:
-                        _context4.next = 21;
+                    case 22:
+                        _context4.next = 24;
                         return StatisticsModel.generateStatistics();
 
-                    case 21:
-                        _context4.next = 23;
+                    case 24:
+                        _context4.next = 26;
                         return Renderer.generateTemplatingJavaScriptFile();
 
-                    case 23:
-                        _context4.next = 25;
+                    case 26:
+                        _context4.next = 28;
                         return Renderer.generateCustomJavaScriptFile();
 
-                    case 25:
-                        _context4.next = 27;
+                    case 28:
+                        _context4.next = 30;
                         return Renderer.generateCustomCSSFiles();
 
-                    case 27:
+                    case 30:
                         spawnWorkers();
-                        _context4.next = 34;
+                        _context4.next = 37;
                         break;
 
-                    case 30:
-                        _context4.prev = 30;
+                    case 33:
+                        _context4.prev = 33;
                         _context4.t0 = _context4['catch'](0);
 
                         _logger2.default.error(_context4.t0.stack || _context4.t0);
                         process.exit(1);
 
-                    case 34:
+                    case 37:
                     case 'end':
                         return _context4.stop();
                 }
             }
-        }, _callee4, this, [[0, 30]]);
+        }, _callee4, this, [[0, 33]]);
     }))();
 } else {
     spawnCluster();

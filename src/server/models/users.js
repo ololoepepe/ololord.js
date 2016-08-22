@@ -2,14 +2,20 @@ import _ from 'underscore';
 import FS from 'q-io/fs';
 
 import * as PostsModel from './posts';
+import Board from '../boards/board';
+import config from '../helpers/config';
+import * as Permissions from '../helpers/permissions';
+import * as Tools from '../helpers/tools';
+import Channel from '../storage/channel';
 import redisClient from '../storage/redis-client-factory';
 import Hash from '../storage/hash';
 import Key from '../storage/key';
 import UnorderedSet from '../storage/unordered-set';
-import Board from '../boards/board';
-import * as Permissions from '../helpers/permissions';
-import * as Tools from '../helpers/tools';
 
+let BanExpiredChannel = new Channel(redisClient('BAN_EXPIRED'), `__keyevent@${config('system.redis.db')}__:expired`, {
+  parse: false,
+  stringify: false
+});
 let BannedUserIPs = new UnorderedSet(redisClient(), 'bannedUserIps', {
   parse: false,
   stringify: false
@@ -507,16 +513,6 @@ async function updateBanOnMessage(message) {
 
 export async function initializeUserBansMonitoring() {
   //NOTE: Enabling "key expired" notifications
-  const CHANNEL = `__keyevent@${config('system.redis.db')}__:expired`;
-  const db = redisClient(true);
-  db.on('message', (channel, message) => {
-    if (CHANNEL !== channel) {
-      return;
-    }
-    updateBanOnMessage(message);
-  });
   await redisClient().config('SET', 'notify-keyspace-events', 'Ex');
-  db.subscribe(CHANNEL).catch((err) => {
-    Logger.error(err.stack || err);
-  });
+  await BanExpiresChannel.subscribe(updateBanOnMessage);
 }

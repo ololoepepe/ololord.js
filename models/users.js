@@ -1601,30 +1601,18 @@ var updateBanOnMessage = function () {
 
 var initializeUserBansMonitoring = exports.initializeUserBansMonitoring = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee38() {
-    var CHANNEL, db;
     return regeneratorRuntime.wrap(function _callee38$(_context38) {
       while (1) {
         switch (_context38.prev = _context38.next) {
           case 0:
-            //NOTE: Enabling "key expired" notifications
-            CHANNEL = '__keyevent@' + config('system.redis.db') + '__:expired';
-            db = (0, _redisClientFactory2.default)(true);
-
-            db.on('message', function (channel, message) {
-              if (CHANNEL !== channel) {
-                return;
-              }
-              updateBanOnMessage(message);
-            });
-            _context38.next = 5;
+            _context38.next = 2;
             return (0, _redisClientFactory2.default)().config('SET', 'notify-keyspace-events', 'Ex');
 
-          case 5:
-            db.subscribe(CHANNEL).catch(function (err) {
-              Logger.error(err.stack || err);
-            });
+          case 2:
+            _context38.next = 4;
+            return BanExpiresChannel.subscribe(updateBanOnMessage);
 
-          case 6:
+          case 4:
           case 'end':
             return _context38.stop();
         }
@@ -1649,6 +1637,26 @@ var _posts = require('./posts');
 
 var PostsModel = _interopRequireWildcard(_posts);
 
+var _board = require('../boards/board');
+
+var _board2 = _interopRequireDefault(_board);
+
+var _config = require('../helpers/config');
+
+var _config2 = _interopRequireDefault(_config);
+
+var _permissions = require('../helpers/permissions');
+
+var Permissions = _interopRequireWildcard(_permissions);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+var _channel = require('../storage/channel');
+
+var _channel2 = _interopRequireDefault(_channel);
+
 var _redisClientFactory = require('../storage/redis-client-factory');
 
 var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
@@ -1665,24 +1673,16 @@ var _unorderedSet = require('../storage/unordered-set');
 
 var _unorderedSet2 = _interopRequireDefault(_unorderedSet);
 
-var _board = require('../boards/board');
-
-var _board2 = _interopRequireDefault(_board);
-
-var _permissions = require('../helpers/permissions');
-
-var Permissions = _interopRequireWildcard(_permissions);
-
-var _tools = require('../helpers/tools');
-
-var Tools = _interopRequireWildcard(_tools);
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
+var BanExpiredChannel = new _channel2.default((0, _redisClientFactory2.default)('BAN_EXPIRED'), '__keyevent@' + (0, _config2.default)('system.redis.db') + '__:expired', {
+  parse: false,
+  stringify: false
+});
 var BannedUserIPs = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'bannedUserIps', {
   parse: false,
   stringify: false

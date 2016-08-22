@@ -10,46 +10,50 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function selectParser(parse) {
-  if (typeof parse === 'function') {
-    return function (data) {
-      if (typeof data === 'null' || typeof data === 'undefined') {
-        return data;
-      }
-      return parse(data);
-    };
-  } else if (parse || typeof parse === 'undefined') {
-    return function (data) {
-      if (typeof data !== 'string') {
-        return data;
-      }
-      return JSON.parse(data);
-    };
-  } else {
-    return function (data) {
-      return data;
-    };
-  }
-}
-
-function selectStringifier(stringify) {
-  if (typeof stringify === 'function') {
-    return function (data) {
-      if (typeof data === 'null' || typeof data === 'undefined') {
-        return data;
-      }
-      return stringify(data);
-    };
-  } else if (stringify || typeof stringify === 'undefined') {
-    return JSON.stringify.bind(null);
-  } else {
-    return function (data) {
-      return data;
-    };
-  }
-}
-
 var CommonKey = function () {
+  _createClass(CommonKey, null, [{
+    key: 'selectParser',
+    value: function selectParser(parse) {
+      if (typeof parse === 'function') {
+        return function (data) {
+          if (typeof data === 'null' || typeof data === 'undefined') {
+            return data;
+          }
+          return parse(data);
+        };
+      } else if (parse || typeof parse === 'undefined') {
+        return function (data) {
+          if (typeof data !== 'string') {
+            return data;
+          }
+          return JSON.parse(data);
+        };
+      } else {
+        return function (data) {
+          return data;
+        };
+      }
+    }
+  }, {
+    key: 'selectStringifier',
+    value: function selectStringifier(stringify) {
+      if (typeof stringify === 'function') {
+        return function (data) {
+          if (typeof data === 'null' || typeof data === 'undefined') {
+            return data;
+          }
+          return stringify(data);
+        };
+      } else if (stringify || typeof stringify === 'undefined') {
+        return JSON.stringify.bind(null);
+      } else {
+        return function (data) {
+          return data;
+        };
+      }
+    }
+  }]);
+
   function CommonKey(client, key) {
     var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
@@ -60,8 +64,8 @@ var CommonKey = function () {
 
     this.client = client;
     this.key = key;
-    this.parse = selectParser(parse);
-    this.stringify = selectStringifier(stringify);
+    this.parse = CommonKey.selectParser(parse);
+    this.stringify = CommonKey.selectStringifier(stringify);
   }
 
   _createClass(CommonKey, [{
