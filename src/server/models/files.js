@@ -1,14 +1,14 @@
 import _ from 'underscore';
 
 import * as Tools from '../helpers/tools';
-import client from '../storage/client-factory';
+import redisClient from '../storage/redis-client-factory';
 import Hash from '../storage/hash';
 import UnorderedSet from '../storage/unordered-set';
-import { AUDIO_TAGS } from '../thumbnailing/audio';
+import { AUDIO_TAGS } from '../file-types/audio';
 
-let FileHashes = new UnorderedSet(client(), 'fileHashes');
-let FileInfos = new Hash(client(), 'fileInfos');
-let PostFileInfoNames = new UnorderedSet(client(), 'postFileInfoNames', {
+let FileHashes = new UnorderedSet(redisClient(), 'fileHashes');
+let FileInfos = new Hash(redisClient(), 'fileInfos');
+let PostFileInfoNames = new UnorderedSet(redisClient(), 'postFileInfoNames', {
   parse: false,
   stringify: false
 });

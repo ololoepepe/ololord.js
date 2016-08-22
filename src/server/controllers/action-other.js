@@ -8,9 +8,9 @@ import UUID from 'uuid';
 
 import Board from '../boards/board';
 import Captcha from '../captchas/captcha';
+import geolocation from '../core/geolocation';
 var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
-var markup = require("../core/markup");
 
 import * as FilesModel from '../models/files';
 import * as PostsModel from '../models/posts';
@@ -18,8 +18,6 @@ import * as UsersModel from '../models/users';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
-import geolocation from '../storage/geolocation';
-import PostCreationTransaction from '../storage/post-creation-transaction';
 
 let router = express.Router();
 
@@ -31,7 +29,7 @@ router.post("/action/sendChatMessage", function(req, res, next) {
             hashpass: req.hashpass
         }, fields.boardName, +fields.postNumber, fields.text);
     }).then(function(result) {
-        res.send({});
+        res.json({});
     }).catch(function(err) {
         next(err);
     });
@@ -45,7 +43,7 @@ router.post("/action/deleteChatMessages", function(req, res, next) {
             hashpass: req.hashpass
         }, fields.boardName, fields.postNumber);
     }).then(function(result) {
-        res.send(result);
+        res.json(result);
     }).catch(function(err) {
         next(err);
     });
@@ -67,7 +65,7 @@ router.post("/action/synchronize", function(req, res, next) {
     }).then(function() {
         return Database.db.expire("synchronizationData:" + c.key, 300); //NOTE: 5 minutes
     }).then(function() {
-        res.send({});
+        res.json({});
     }).catch(function(err) {
         next(err);
     });
@@ -129,7 +127,7 @@ router.post("/action/search", function(req, res, next) {
         });
         c.model.total = result.total;
         c.model.max = result.max;
-        res.send(c.model);
+        res.json(c.model);
     }).catch(function(err) {
         next(err);
     });

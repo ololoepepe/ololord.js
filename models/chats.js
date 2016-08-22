@@ -84,9 +84,9 @@ var _crypto = require('crypto');
 
 var _crypto2 = _interopRequireDefault(_crypto);
 
-var _clientFactory = require('../storage/client-factory');
+var _redisClientFactory = require('../storage/redis-client-factory');
 
-var _clientFactory2 = _interopRequireDefault(_clientFactory);
+var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
 
 var _orderedSet = require('../storage/ordered-set');
 
@@ -111,16 +111,16 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 //import Board from '../boards';
 
 
-//let FileInfos = new Hash(client(), 'fileInfos');
-var Chat = new _orderedSet2.default((0, _clientFactory2.default)(), 'chat');
-var Chats = new _unorderedSet2.default((0, _clientFactory2.default)(), 'chats', {
+//let FileInfos = new Hash(redisClient(), 'fileInfos');
+var Chat = new _orderedSet2.default((0, _redisClientFactory2.default)(), 'chat');
+var Chats = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'chats', {
   parse: false,
   stringify: false
 });
-/*let Posts = new Hash(client(), 'posts');
-let ReferringPosts = new Hash(client(), 'referringPosts');
-let ReferencedPosts = new Hash(client(), 'referencedPosts');
-let UserBans = new Key(client(), 'userBans');*/
+/*let Posts = new Hash(redisClient(), 'posts');
+let ReferringPosts = new Hash(redisClient(), 'referringPosts');
+let ReferencedPosts = new Hash(redisClient(), 'referencedPosts');
+let UserBans = new Key(redisClient(), 'userBans');*/
 
 function createUserHash(user) {
   var sha256 = _crypto2.default.createHash('sha256');

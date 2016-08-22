@@ -1,17 +1,17 @@
-var FS = require("q-io/fs");
+import FS from 'q-io/fs';
 
-import * as Files from './files';
+import * as Files from '../core/files';
 
-var rootPath = __dirname + "/../public";
+const ROOT_PATH = `${__dirname}/../public`;
 
-module.exports.readFile = function(fileName) {
-    return FS.read(rootPath + "/" + fileName);
-};
+export async function readFile(fileName) {
+  return await FS.read(`${ROOT_PATH}/${fileName}`);
+}
 
-module.exports.writeFile = function(fileName, data) {
-    return Files.writeFile(rootPath + "/" + fileName, data);
-};
+export async function writeFile(fileName, data) {
+  return await Files.writeFile(`${ROOT_PATH}/${fileName}`, data);
+}
 
-module.exports.removeFile = function(fileName) {
-    return FS.remove(rootPath + "/" + fileName);
-};
+export async function removeFile(fileName) {
+  return await FS.remove(`${ROOT_PATH}/${fileName}`);
+}

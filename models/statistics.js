@@ -293,13 +293,13 @@ var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
+var _files = require('../core/files');
+
+var Files = _interopRequireWildcard(_files);
+
 var _cache = require('../helpers/cache');
 
 var Cache = _interopRequireWildcard(_cache);
-
-var _files = require('../helpers/files');
-
-var Files = _interopRequireWildcard(_files);
 
 var _ipc = require('../helpers/ipc');
 

@@ -30,10 +30,6 @@ var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
-var _markup = require('../core/markup');
-
-var _markup2 = _interopRequireDefault(_markup);
-
 var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
@@ -45,6 +41,10 @@ var _fsWatcher2 = _interopRequireDefault(_fsWatcher);
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
+
+var _markup = require('../markup');
+
+var _markup2 = _interopRequireDefault(_markup);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 

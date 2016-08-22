@@ -19,7 +19,6 @@ import Board from '../boards/board';
 var Cache = require("./cache");
 var Captcha = require("../captchas/captcha");
 var config = require("./config");
-//var markup = require("./markup");
 var Permissions = require("./permissions");
 var Tools = require("./tools");
 
@@ -28,9 +27,6 @@ import * as PostsModel from '../models/posts';
 import * as UsersModel from '../models/users';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
-import client from '../storage/client-factory';
-
-var db = client();
 
 var hasNewPosts = new Set();
 

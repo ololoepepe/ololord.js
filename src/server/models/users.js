@@ -2,7 +2,7 @@ import _ from 'underscore';
 import FS from 'q-io/fs';
 
 import * as PostsModel from './posts';
-import client from '../storage/client-factory';
+import redisClient from '../storage/redis-client-factory';
 import Hash from '../storage/hash';
 import Key from '../storage/key';
 import UnorderedSet from '../storage/unordered-set';
@@ -10,38 +10,38 @@ import Board from '../boards/board';
 import * as Permissions from '../helpers/permissions';
 import * as Tools from '../helpers/tools';
 
-let BannedUserIPs = new UnorderedSet(client(), 'bannedUserIps', {
+let BannedUserIPs = new UnorderedSet(redisClient(), 'bannedUserIps', {
   parse: false,
   stringify: false
 });
-let RegisteredUserHashes = new Hash(client(), 'registeredUserHashes', {
+let RegisteredUserHashes = new Hash(redisClient(), 'registeredUserHashes', {
   parse: false,
   stringify: false
 });
-let RegisteredUserIPs = new UnorderedSet(client(), 'registeredUserIps', {
+let RegisteredUserIPs = new UnorderedSet(redisClient(), 'registeredUserIps', {
   parse: false,
   stringify: false
 });
-let RegisteredUserLevels = new Hash(client(), 'registeredUserLevels', {
+let RegisteredUserLevels = new Hash(redisClient(), 'registeredUserLevels', {
   parse: false,
   stringify: false
 });
-let SuperuserHashes = new UnorderedSet(client(), 'superuserHashes', {
+let SuperuserHashes = new UnorderedSet(redisClient(), 'superuserHashes', {
   parse: false,
   stringify: false
 });
-let SynchronizationData = new Key(client(), 'synchronizationData');
-let Threads = new Hash(client(), 'threads');
-let UserBanPostNumbers = new Hash(client(), 'userBanPostNumbers', {
+let SynchronizationData = new Key(redisClient(), 'synchronizationData');
+let Threads = new Hash(redisClient(), 'threads');
+let UserBanPostNumbers = new Hash(redisClient(), 'userBanPostNumbers', {
   parse: number => +number,
   stringify: number => number.toString()
 });
-let UserBans = new Key(client(), 'userBans');
-let UserCaptchaQuotas = new Hash(client(), 'captchaQuotas', {
+let UserBans = new Key(redisClient(), 'userBans');
+let UserCaptchaQuotas = new Hash(redisClient(), 'captchaQuotas', {
   parse: quota => +quota,
   stringify: quota => quota.toString()
 });
-let UserPostNumbers = new UnorderedSet(client(), 'userPostNumbers', {
+let UserPostNumbers = new UnorderedSet(redisClient(), 'userPostNumbers', {
   parse: number => +number,
   stringify: number => number.toString()
 });
@@ -508,14 +508,14 @@ async function updateBanOnMessage(message) {
 export async function initializeUserBansMonitoring() {
   //NOTE: Enabling "key expired" notifications
   const CHANNEL = `__keyevent@${config('system.redis.db')}__:expired`;
-  const db = client(true);
+  const db = redisClient(true);
   db.on('message', (channel, message) => {
     if (CHANNEL !== channel) {
       return;
     }
     updateBanOnMessage(message);
   });
-  await client().config('SET', 'notify-keyspace-events', 'Ex');
+  await redisClient().config('SET', 'notify-keyspace-events', 'Ex');
   db.subscribe(CHANNEL).catch((err) => {
     Logger.error(err.stack || err);
   });

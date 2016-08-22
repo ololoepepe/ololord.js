@@ -3,12 +3,11 @@ import express from 'express';
 import moment from 'moment';
 
 import Board from '../boards/board';
+import geolocation from '../core/geolocation';
 import config from '../helpers/config';
-
+import * as Tools from '../helpers/tools';
 import * as ThreadsModel from '../models/threads';
 import * as UsersModel from '../models/users';
-import * as Tools from '../helpers/tools';
-import geolocation from '../storage/geolocation';
 
 let router = express.Router();
 
@@ -98,7 +97,7 @@ router.post('/action/banUser', async function(req, res, next) {
       }
     });
     await UsersModel.banUser(userIp, newBans);
-    res.send({});
+    res.json({});
   } catch (err) {
     next(err);
   }
@@ -138,7 +137,7 @@ router.post('/action/delall', async function(req, res, next) {
       geolocationInfo: geolocationInfo
     });
     await BoardsModel.delall(req, userIp, boardNames);
-    res.send({});
+    res.json({});
   } catch (err) {
     next(err);
   }
@@ -168,7 +167,7 @@ router.post('/action/moveThread', async function(req, res, next) {
     });
     await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'moveThread', Tools.sha1(password));
     let result = await ThreadsModel.moveThread(boardName, threadNumber, targetBoardName);
-    res.send(result);
+    res.json(result);
   } catch (err) {
     next(err);
   }
@@ -195,7 +194,7 @@ router.post('/action/setThreadFixed', async function(req, res, next) {
     });
     await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadFixed', Tools.sha1(password));
     await ThreadsModel.setThreadFixed(boardName, threadNumber, 'true' === fixed);
-    res.send({});
+    res.json({});
   } catch (err) {
     next(err);
   }
@@ -222,7 +221,7 @@ router.post('/action/setThreadClosed', async function(req, res, next) {
     });
     await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadClosed', Tools.sha1(password));
     await ThreadsModel.setThreadClosed(boardName, threadNumber, 'true' === closed);
-    res.send({});
+    res.json({});
   } catch (err) {
     next(err);
   }
@@ -249,7 +248,7 @@ router.post('/action/setThreadUnbumpable', async function(req, res, next) {
     });
     await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadUnbumpable', Tools.sha1(password));
     await ThreadsModel.setThreadUnbumpable(boardName, threadNumber, 'true' === unbumpable);
-    res.send({});
+    res.json({});
   } catch (err) {
     next(err);
   }

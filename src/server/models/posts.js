@@ -5,29 +5,29 @@ import * as FilesModel from './files';
 import * as ThreadsModel from './threads';
 import * as UsersModel from './users';
 import Board from '../boards/board';
-import markup from '../core/markup';
+import * as Search from '../core/search';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
-import client from '../storage/client-factory';
+import markup from '../markup';
+import redisClient from '../storage/redis-client-factory';
 import Hash from '../storage/hash';
 import Key from '../storage/key';
-import * as Search from '../storage/search';
 import UnorderedSet from '../storage/unordered-set';
 
-let FileInfos = new Hash(client(), 'fileInfos');
-let PostFileInfoNames = new UnorderedSet(client(), 'postFileInfoNames', {
+let FileInfos = new Hash(redisClient(), 'fileInfos');
+let PostFileInfoNames = new UnorderedSet(redisClient(), 'postFileInfoNames', {
   parse: false,
   stringify: false
 });
-let Posts = new Hash(client(), 'posts');
-let PostsPlannedForDeletion = new UnorderedSet(client(), 'postsPlannedForDeletion', {
+let Posts = new Hash(redisClient(), 'posts');
+let PostsPlannedForDeletion = new UnorderedSet(redisClient(), 'postsPlannedForDeletion', {
   parse: false,
   stringify: false
 });
-let ReferringPosts = new Hash(client(), 'referringPosts');
-let ReferencedPosts = new Hash(client(), 'referencedPosts');
-let UserBans = new Key(client(), 'userBans');
+let ReferringPosts = new Hash(redisClient(), 'referringPosts');
+let ReferencedPosts = new Hash(redisClient(), 'referencedPosts');
+let UserBans = new Key(redisClient(), 'userBans');
 
 function sortedReferences(references) {
   return _(references).toArray().sort((a, b) => {

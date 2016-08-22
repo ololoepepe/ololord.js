@@ -15,6 +15,7 @@ import NodeCaptchaNoscript from './captchas/node-captcha-noscript';
 import controllers from './controllers';
 import BoardController from './controllers/board';
 import commands from './core/commands';
+import geolocation from './core/geolocation';
 import * as Renderer from './core/renderer';
 import WebSocketServer from './core/websocket-server';
 import config from './helpers/config';
@@ -28,7 +29,6 @@ import * as BoardsModel from './models/boards';
 import * as ChatsModel from './models/chats';
 import * as StatisticsModel from './models/statistics';
 import * as UsersModel from './models/users';
-import geolocation from './storage/geolocation';
 import sqlClient from './storage/sql-client-factory';
 
 config.installSetHook("site.locale", Tools.setLocale);

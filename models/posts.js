@@ -1930,9 +1930,9 @@ var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
-var _markup = require('../core/markup');
+var _search = require('../core/search');
 
-var _markup2 = _interopRequireDefault(_markup);
+var Search = _interopRequireWildcard(_search);
 
 var _ipc = require('../helpers/ipc');
 
@@ -1946,9 +1946,13 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-var _clientFactory = require('../storage/client-factory');
+var _markup = require('../markup');
 
-var _clientFactory2 = _interopRequireDefault(_clientFactory);
+var _markup2 = _interopRequireDefault(_markup);
+
+var _redisClientFactory = require('../storage/redis-client-factory');
+
+var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
 
 var _hash = require('../storage/hash');
 
@@ -1957,10 +1961,6 @@ var _hash2 = _interopRequireDefault(_hash);
 var _key = require('../storage/key');
 
 var _key2 = _interopRequireDefault(_key);
-
-var _search = require('../storage/search');
-
-var Search = _interopRequireWildcard(_search);
 
 var _unorderedSet = require('../storage/unordered-set');
 
@@ -1972,19 +1972,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var FileInfos = new _hash2.default((0, _clientFactory2.default)(), 'fileInfos');
-var PostFileInfoNames = new _unorderedSet2.default((0, _clientFactory2.default)(), 'postFileInfoNames', {
+var FileInfos = new _hash2.default((0, _redisClientFactory2.default)(), 'fileInfos');
+var PostFileInfoNames = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'postFileInfoNames', {
   parse: false,
   stringify: false
 });
-var Posts = new _hash2.default((0, _clientFactory2.default)(), 'posts');
-var PostsPlannedForDeletion = new _unorderedSet2.default((0, _clientFactory2.default)(), 'postsPlannedForDeletion', {
+var Posts = new _hash2.default((0, _redisClientFactory2.default)(), 'posts');
+var PostsPlannedForDeletion = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'postsPlannedForDeletion', {
   parse: false,
   stringify: false
 });
-var ReferringPosts = new _hash2.default((0, _clientFactory2.default)(), 'referringPosts');
-var ReferencedPosts = new _hash2.default((0, _clientFactory2.default)(), 'referencedPosts');
-var UserBans = new _key2.default((0, _clientFactory2.default)(), 'userBans');
+var ReferringPosts = new _hash2.default((0, _redisClientFactory2.default)(), 'referringPosts');
+var ReferencedPosts = new _hash2.default((0, _redisClientFactory2.default)(), 'referencedPosts');
+var UserBans = new _key2.default((0, _redisClientFactory2.default)(), 'userBans');
 
 function sortedReferences(references) {
   return (0, _underscore2.default)(references).toArray().sort(function (a, b) {

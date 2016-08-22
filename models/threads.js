@@ -1410,6 +1410,10 @@ var _board3 = require('../controllers/board');
 
 var _board4 = _interopRequireDefault(_board3);
 
+var _search = require('../core/search');
+
+var Search = _interopRequireWildcard(_search);
+
 var _cache = require('../helpers/cache');
 
 var Cache = _interopRequireWildcard(_cache);
@@ -1418,17 +1422,13 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-var _clientFactory = require('../storage/client-factory');
+var _redisClientFactory = require('../storage/redis-client-factory');
 
-var _clientFactory2 = _interopRequireDefault(_clientFactory);
+var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
 
 var _hash = require('../storage/hash');
 
 var _hash2 = _interopRequireDefault(_hash);
-
-var _search = require('../storage/search');
-
-var Search = _interopRequireWildcard(_search);
 
 var _unorderedSet = require('../storage/unordered-set');
 
@@ -1440,12 +1440,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var ArchivedThreads = new _hash2.default((0, _clientFactory2.default)(), 'archivedThreads');
-var DeletedThreads = new _unorderedSet2.default((0, _clientFactory2.default)(), 'deletedThreads', {
+var ArchivedThreads = new _hash2.default((0, _redisClientFactory2.default)(), 'archivedThreads');
+var DeletedThreads = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'deletedThreads', {
   parse: false,
   stringify: false
 });
-var ThreadPostNumbers = new _unorderedSet2.default((0, _clientFactory2.default)(), 'threadPostNumbers', {
+var ThreadPostNumbers = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'threadPostNumbers', {
   parse: function parse(number) {
     return +number;
   },
@@ -1453,12 +1453,12 @@ var ThreadPostNumbers = new _unorderedSet2.default((0, _clientFactory2.default)(
     return number.toString();
   }
 });
-var Threads = new _hash2.default((0, _clientFactory2.default)(), 'threads');
-var ThreadsPlannedForDeletion = new _unorderedSet2.default((0, _clientFactory2.default)(), 'threadsPlannedForDeletion', {
+var Threads = new _hash2.default((0, _redisClientFactory2.default)(), 'threads');
+var ThreadsPlannedForDeletion = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'threadsPlannedForDeletion', {
   parse: false,
   stringify: false
 });
-var ThreadUpdateTimes = new _hash2.default((0, _clientFactory2.default)(), 'threadUpdateTimes', {
+var ThreadUpdateTimes = new _hash2.default((0, _redisClientFactory2.default)(), 'threadUpdateTimes', {
   parse: false,
   stringify: false
 });

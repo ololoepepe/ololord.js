@@ -11,19 +11,21 @@ var testParameters = function () {
     var fields = _ref.fields;
     var files = _ref.files;
     var postNumber = _ref.postNumber;
-    var fileCount, post;
+    var board, fileCount, post;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            if (_board2.default.board(boardName)) {
-              _context.next = 2;
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context.next = 3;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
-          case 2:
+          case 3:
             if (!fields) {
               fields = {};
             }
@@ -36,31 +38,31 @@ var testParameters = function () {
             post = void 0;
 
             if (!postNumber) {
-              _context.next = 16;
+              _context.next = 17;
               break;
             }
 
-            _context.next = 10;
+            _context.next = 11;
             return PostsModel.getPostFileCount(boardName, postNumber);
 
-          case 10:
+          case 11:
             fileCount = _context.sent;
 
             if (!(typeof fields.text === 'undefined')) {
-              _context.next = 16;
+              _context.next = 17;
               break;
             }
 
-            _context.next = 14;
+            _context.next = 15;
             return PostsModel.getPost(boardName, postNumber);
 
-          case 14:
+          case 15:
             post = _context.sent;
 
             fields.text = post.rawText;
 
-          case 16:
-            _context.next = 18;
+          case 17:
+            _context.next = 19;
             return board.testParameters({
               req: req,
               mode: mode,
@@ -69,10 +71,10 @@ var testParameters = function () {
               existingFileCount: fileCount
             });
 
-          case 18:
+          case 19:
             return _context.abrupt('return', post);
 
-          case 19:
+          case 20:
           case 'end':
             return _context.stop();
         }
@@ -101,13 +103,37 @@ var _captcha = require('../captchas/captcha');
 
 var _captcha2 = _interopRequireDefault(_captcha);
 
-var _markup = require('../core/markup');
+var _files = require('../core/files');
+
+var Files = _interopRequireWildcard(_files);
+
+var _geolocation = require('../core/geolocation');
+
+var _geolocation2 = _interopRequireDefault(_geolocation);
+
+var _config = require('../helpers/config');
+
+var _config2 = _interopRequireDefault(_config);
+
+var _ipc = require('../helpers/ipc');
+
+var IPC = _interopRequireWildcard(_ipc);
+
+var _postCreationTransaction = require('../helpers/post-creation-transaction');
+
+var _postCreationTransaction2 = _interopRequireDefault(_postCreationTransaction);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+var _markup = require('../markup');
 
 var _markup2 = _interopRequireDefault(_markup);
 
-var _files = require('../models/files');
+var _files2 = require('../models/files');
 
-var FilesModel = _interopRequireWildcard(_files);
+var FilesModel = _interopRequireWildcard(_files2);
 
 var _posts = require('../models/posts');
 
@@ -116,30 +142,6 @@ var PostsModel = _interopRequireWildcard(_posts);
 var _users = require('../models/users');
 
 var UsersModel = _interopRequireWildcard(_users);
-
-var _postCreationTransaction = require('../storage/post-creation-transaction');
-
-var _postCreationTransaction2 = _interopRequireDefault(_postCreationTransaction);
-
-var _ipc = require('../helpers/ipc');
-
-var IPC = _interopRequireWildcard(_ipc);
-
-var _config = require('../helpers/config');
-
-var _config2 = _interopRequireDefault(_config);
-
-var _files2 = require('../helpers/files');
-
-var Files = _interopRequireWildcard(_files2);
-
-var _tools = require('../helpers/tools');
-
-var Tools = _interopRequireWildcard(_tools);
-
-var _geolocation = require('../storage/geolocation');
-
-var _geolocation2 = _interopRequireDefault(_geolocation);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -182,7 +184,6 @@ router.post('/action/markupText', function () {
             return UsersModel.checkUserBan(req.ip, boardName, { write: true });
 
           case 14:
-            //TODO: Should it really be "write"?
             rawText = text || '';
             _context2.next = 17;
             return testParameters(req, boardName, 'markupText', { fields: fields });
@@ -319,7 +320,7 @@ router.post('/action/createPost', function () {
           case 36:
             //hasNewPosts.add(c.post.boardName + "/" + c.post.threadNumber); //TODO: pass to main process immediately
             if ('node-captcha-noscript' !== captchaEngine) {
-              res.send({
+              res.json({
                 boardName: _post.boardName,
                 postNumber: _post.number
               });
@@ -434,7 +435,7 @@ router.post('/action/createThread', function () {
 
           case 35:
             if ('node-captcha-noscript' !== captchaEngine) {
-              res.send({
+              res.json({
                 boardName: thread.boardName,
                 threadNumber: thread.number
               });
@@ -524,7 +525,7 @@ router.post('/action/editPost', function () {
             _post3 = _context5.sent;
 
             IPC.render(boardName, _post3.threadNumber, postNumber, 'edit');
-            res.send({
+            res.json({
               boardName: _post3.boardName,
               postNumber: _post3.number
             });
@@ -651,7 +652,7 @@ router.post('/action/addFiles', function () {
 
           case 39:
             IPC.render(boardName, _post4.threadNumber, postNumber, 'edit');
-            res.send({});
+            res.json({});
             _context6.next = 47;
             break;
 
@@ -734,7 +735,7 @@ router.post('/action/deletePost', function () {
             return PostsModel.deletePost(req, _fields5);
 
           case 22:
-            res.send({});
+            res.json({});
             _context7.next = 28;
             break;
 
@@ -825,7 +826,7 @@ router.post('/action/deleteFile', function () {
 
           case 28:
             IPC.render(boardName, _post5.threadNumber, postNumber, 'edit');
-            res.send({});
+            res.json({});
             _context8.next = 35;
             break;
 
@@ -912,7 +913,7 @@ router.post('/action/editFileRating', function () {
 
           case 26:
             IPC.render(boardName, post.threadNumber, postNumber, 'edit');
-            res.send({});
+            res.json({});
             _context9.next = 33;
             break;
 
@@ -1006,7 +1007,7 @@ router.post('/action/editAudioTags', function () {
 
           case 27:
             IPC.render(boardName, post.threadNumber, postNumber, 'edit');
-            res.send({});
+            res.json({});
             _context10.next = 34;
             break;
 

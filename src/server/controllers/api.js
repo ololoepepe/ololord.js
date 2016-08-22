@@ -6,7 +6,7 @@ import merge from 'merge';
 
 import Board from '../boards/board';
 import Captcha from '../captchas/captcha';
-import * as Files from '../helpers/files';
+import * as Files from '../core/files';
 import * as Tools from '../helpers/tools';
 import * as BoardsModel from '../models/boards';
 import * as ChatsModel from '../models/chats';

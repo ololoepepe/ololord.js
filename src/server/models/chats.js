@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import Crypto from 'crypto';
 
-import client from '../storage/client-factory';
+import redisClient from '../storage/redis-client-factory';
 //import Hash from '../storage/hash';
 //import Key from '../storage/key';
 import OrderedSet from '../storage/ordered-set';
@@ -9,16 +9,16 @@ import UnorderedSet from '../storage/unordered-set';
 //import Board from '../boards';
 import * as Tools from '../helpers/tools';
 
-//let FileInfos = new Hash(client(), 'fileInfos');
-let Chat = new OrderedSet(client(), 'chat');
-let Chats = new UnorderedSet(client(), 'chats', {
+//let FileInfos = new Hash(redisClient(), 'fileInfos');
+let Chat = new OrderedSet(redisClient(), 'chat');
+let Chats = new UnorderedSet(redisClient(), 'chats', {
   parse: false,
   stringify: false
 });
-/*let Posts = new Hash(client(), 'posts');
-let ReferringPosts = new Hash(client(), 'referringPosts');
-let ReferencedPosts = new Hash(client(), 'referencedPosts');
-let UserBans = new Key(client(), 'userBans');*/
+/*let Posts = new Hash(redisClient(), 'posts');
+let ReferringPosts = new Hash(redisClient(), 'referringPosts');
+let ReferencedPosts = new Hash(redisClient(), 'referencedPosts');
+let UserBans = new Key(redisClient(), 'userBans');*/
 
 function createUserHash(user) {
   let sha256 = Crypto.createHash('sha256');

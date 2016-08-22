@@ -230,7 +230,9 @@ var Board = function () {
     this.defineSetting('postingEnabled', true);
     this.defineSetting('showWhois', false);
     var Captcha = Tools.requireWrapper(require('../captchas/captcha'));
-    this.defineSetting('supportedCaptchaEngines', Captcha.captchaIDs());
+    this.defineSetting('supportedCaptchaEngines', function () {
+      return Captcha.captchaIDs();
+    });
     this.defineProperty('permissions', function () {
       return (0, _underscore2.default)(Permissions.PERMISSIONS).mapObject(function (defaultLevel, key) {
         return (0, _config2.default)('board.' + name + '.permissions.' + key, (0, _config2.default)('permissions.' + key, defaultLevel));

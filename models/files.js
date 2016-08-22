@@ -602,9 +602,9 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-var _clientFactory = require('../storage/client-factory');
+var _redisClientFactory = require('../storage/redis-client-factory');
 
-var _clientFactory2 = _interopRequireDefault(_clientFactory);
+var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
 
 var _hash = require('../storage/hash');
 
@@ -614,7 +614,7 @@ var _unorderedSet = require('../storage/unordered-set');
 
 var _unorderedSet2 = _interopRequireDefault(_unorderedSet);
 
-var _audio = require('../thumbnailing/audio');
+var _audio = require('../file-types/audio');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -622,9 +622,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var FileHashes = new _unorderedSet2.default((0, _clientFactory2.default)(), 'fileHashes');
-var FileInfos = new _hash2.default((0, _clientFactory2.default)(), 'fileInfos');
-var PostFileInfoNames = new _unorderedSet2.default((0, _clientFactory2.default)(), 'postFileInfoNames', {
+var FileHashes = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'fileHashes');
+var FileInfos = new _hash2.default((0, _redisClientFactory2.default)(), 'fileInfos');
+var PostFileInfoNames = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'postFileInfoNames', {
   parse: false,
   stringify: false
 });

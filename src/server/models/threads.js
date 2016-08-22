@@ -6,28 +6,28 @@ import * as BoardsModel from './boards';
 import * as PostsModel from './posts';
 import Board from '../boards/board';
 import BoardController from '../controllers/board';
+import * as Search from '../core/search';
 import * as Cache from '../helpers/cache';
 import * as Tools from '../helpers/tools';
-import client from '../storage/client-factory';
+import redisClient from '../storage/redis-client-factory';
 import Hash from '../storage/hash';
-import * as Search from '../storage/search';
 import UnorderedSet from '../storage/unordered-set';
 
-let ArchivedThreads = new Hash(client(), 'archivedThreads');
-let DeletedThreads = new UnorderedSet(client(), 'deletedThreads', {
+let ArchivedThreads = new Hash(redisClient(), 'archivedThreads');
+let DeletedThreads = new UnorderedSet(redisClient(), 'deletedThreads', {
   parse: false,
   stringify: false
 });
-let ThreadPostNumbers = new UnorderedSet(client(), 'threadPostNumbers', {
+let ThreadPostNumbers = new UnorderedSet(redisClient(), 'threadPostNumbers', {
   parse: number => +number,
   stringify: number => number.toString()
 });
-let Threads = new Hash(client(), 'threads');
-let ThreadsPlannedForDeletion = new UnorderedSet(client(), 'threadsPlannedForDeletion', {
+let Threads = new Hash(redisClient(), 'threads');
+let ThreadsPlannedForDeletion = new UnorderedSet(redisClient(), 'threadsPlannedForDeletion', {
   parse: false,
   stringify: false
 });
-let ThreadUpdateTimes = new Hash(client(), 'threadUpdateTimes', {
+let ThreadUpdateTimes = new Hash(redisClient(), 'threadUpdateTimes', {
   parse: false,
   stringify: false
 });

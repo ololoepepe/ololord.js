@@ -4,10 +4,10 @@ import FSSync from 'fs';
 import Highlight from 'highlight.js';
 
 import Board from '../boards/board';
-import markup from '../core/markup';
 import config from '../helpers/config';
 import FSWatcher from '../helpers/fs-watcher';
 import * as Tools from '../helpers/tools';
+import markup from '../markup';
 
 let langNames = Tools.createWatchedResource(`${__dirname}/misc/lang-names.json`, (path) => {
   return require(path);

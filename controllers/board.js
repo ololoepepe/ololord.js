@@ -215,6 +215,30 @@ var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
+var _files = require('../core/files');
+
+var Files = _interopRequireWildcard(_files);
+
+var _renderer = require('../core/renderer');
+
+var Renderer = _interopRequireWildcard(_renderer);
+
+var _cache = require('../helpers/cache');
+
+var Cache = _interopRequireWildcard(_cache);
+
+var _config = require('../helpers/config');
+
+var _config2 = _interopRequireDefault(_config);
+
+var _logger = require('../helpers/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
 var _boards = require('../models/boards');
 
 var BoardsModel = _interopRequireWildcard(_boards);
@@ -230,30 +254,6 @@ var PostsModel = _interopRequireWildcard(_posts);
 var _threads = require('../models/threads');
 
 var ThreadsModel = _interopRequireWildcard(_threads);
-
-var _renderer = require('../core/renderer');
-
-var Renderer = _interopRequireWildcard(_renderer);
-
-var _cache = require('../helpers/cache');
-
-var Cache = _interopRequireWildcard(_cache);
-
-var _config = require('../helpers/config');
-
-var _config2 = _interopRequireDefault(_config);
-
-var _files = require('../helpers/files');
-
-var Files = _interopRequireWildcard(_files);
-
-var _logger = require('../helpers/logger');
-
-var _logger2 = _interopRequireDefault(_logger);
-
-var _tools = require('../helpers/tools');
-
-var Tools = _interopRequireWildcard(_tools);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 

@@ -30,7 +30,7 @@ var _captcha = require('../captchas/captcha');
 
 var _captcha2 = _interopRequireDefault(_captcha);
 
-var _files = require('../helpers/files');
+var _files = require('../core/files');
 
 var Files = _interopRequireWildcard(_files);
 

@@ -7,11 +7,11 @@ import merge from 'merge';
 import micromatch from 'micromatch';
 import moment from 'moment';
 
+import * as Files from './files';
 import Board from '../boards/board';
 import * as MiscModel from '../models/misc';
 import * as Cache from '../helpers/cache';
 import config from '../helpers/config';
-import * as Files from '../helpers/files';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 

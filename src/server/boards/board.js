@@ -166,7 +166,7 @@ export default class Board {
     this.defineSetting('postingEnabled', true);
     this.defineSetting('showWhois', false);
     const Captcha = Tools.requireWrapper(require('../captchas/captcha'));
-    this.defineSetting('supportedCaptchaEngines', Captcha.captchaIDs());
+    this.defineSetting('supportedCaptchaEngines', () => { return Captcha.captchaIDs(); });
     this.defineProperty('permissions', () => {
       return _(Permissions.PERMISSIONS).mapObject((defaultLevel, key) => {
         return config(`board.${name}.permissions.${key}`, config(`permissions.${key}`, defaultLevel));

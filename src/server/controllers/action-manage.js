@@ -1,12 +1,12 @@
 import _ from 'underscore';
 import express from 'express';
 
+import * as Files from '../core/files';
 import * as Renderer from '../core/renderer';
-import * as PostsModel from '../models/posts';
-import * as UsersModel from '../models/users';
-import * as Files from '../helpers/files';
 import * as IPC from '../helpers/ipc';
 import * as Tools from '../helpers/tools';
+import * as PostsModel from '../models/posts';
+import * as UsersModel from '../models/users';
 
 let router = express.Router();
 

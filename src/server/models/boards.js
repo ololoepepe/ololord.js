@@ -18,16 +18,16 @@ import * as MiscModel from './misc';
 import * as PostsModel from './posts';
 import * as ThreadsModel from './threads';
 import * as Renderer from '../core/renderer';
-import client from '../storage/client-factory';
+import redisClient from '../storage/redis-client-factory';
 import Hash from '../storage/hash';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 
-let PostCounters = new Hash(client(), 'postCounters', {
+let PostCounters = new Hash(redisClient(), 'postCounters', {
   parse: number => +number,
   stringify: number => number.toString()
 });
-let Threads = new Hash(client(), 'threads');
+let Threads = new Hash(redisClient(), 'threads');
 
 let pageCounts = new Map();
 

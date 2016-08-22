@@ -28,10 +28,6 @@ var _logger = require("../helpers/logger");
 
 var _logger2 = _interopRequireDefault(_logger);
 
-var _clientFactory = require("../storage/client-factory");
-
-var _clientFactory2 = _interopRequireDefault(_clientFactory);
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -55,11 +51,8 @@ var mkpath = promisify("mkpath");
 var Cache = require("./cache");
 var Captcha = require("../captchas/captcha");
 var config = require("./config");
-//var markup = require("./markup");
 var Permissions = require("./permissions");
 var Tools = require("./tools");
-
-var db = (0, _clientFactory2.default)();
 
 var hasNewPosts = new Set();
 

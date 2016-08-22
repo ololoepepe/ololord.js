@@ -20,9 +20,17 @@ var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
+var _geolocation = require('../core/geolocation');
+
+var _geolocation2 = _interopRequireDefault(_geolocation);
+
 var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
 
 var _threads = require('../models/threads');
 
@@ -31,14 +39,6 @@ var ThreadsModel = _interopRequireWildcard(_threads);
 var _users = require('../models/users');
 
 var UsersModel = _interopRequireWildcard(_users);
-
-var _tools = require('../helpers/tools');
-
-var Tools = _interopRequireWildcard(_tools);
-
-var _geolocation = require('../storage/geolocation');
-
-var _geolocation2 = _interopRequireDefault(_geolocation);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -183,7 +183,7 @@ router.post('/action/banUser', function () {
                       return UsersModel.banUser(userIp, newBans);
 
                     case 25:
-                      res.send({});
+                      res.json({});
 
                     case 26:
                     case 'end':
@@ -297,7 +297,7 @@ router.post('/action/delall', function () {
             return BoardsModel.delall(req, userIp, boardNames);
 
           case 24:
-            res.send({});
+            res.json({});
             _context3.next = 30;
             break;
 
@@ -396,7 +396,7 @@ router.post('/action/moveThread', function () {
           case 27:
             result = _context4.sent;
 
-            res.send(result);
+            res.json(result);
             _context4.next = 34;
             break;
 
@@ -485,7 +485,7 @@ router.post('/action/setThreadFixed', function () {
             return ThreadsModel.setThreadFixed(_boardName2, threadNumber, 'true' === fixed);
 
           case 25:
-            res.send({});
+            res.json({});
             _context5.next = 31;
             break;
 
@@ -574,7 +574,7 @@ router.post('/action/setThreadClosed', function () {
             return ThreadsModel.setThreadClosed(_boardName3, threadNumber, 'true' === closed);
 
           case 25:
-            res.send({});
+            res.json({});
             _context6.next = 31;
             break;
 
@@ -663,7 +663,7 @@ router.post('/action/setThreadUnbumpable', function () {
             return ThreadsModel.setThreadUnbumpable(_boardName4, threadNumber, 'true' === unbumpable);
 
           case 25:
-            res.send({});
+            res.json({});
             _context7.next = 31;
             break;
 

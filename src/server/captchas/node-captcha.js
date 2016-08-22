@@ -36,7 +36,7 @@ async function getNodeCaptchaImage(_1, res) {
         this.challenges.delete(challengeID);
       }, this.ttl)
     });
-    res.send({
+    res.json({
       challenge: challengeID,
       fileName: fileName,
       ttl: this.ttl

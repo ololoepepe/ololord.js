@@ -820,9 +820,9 @@ var _renderer = require('../core/renderer');
 
 var Renderer = _interopRequireWildcard(_renderer);
 
-var _clientFactory = require('../storage/client-factory');
+var _redisClientFactory = require('../storage/redis-client-factory');
 
-var _clientFactory2 = _interopRequireDefault(_clientFactory);
+var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
 
 var _hash = require('../storage/hash');
 
@@ -854,7 +854,7 @@ var Cache = require("../helpers/cache");
 var config = require("../helpers/config");
 var Tools = require("../helpers/tools");
 
-var PostCounters = new _hash2.default((0, _clientFactory2.default)(), 'postCounters', {
+var PostCounters = new _hash2.default((0, _redisClientFactory2.default)(), 'postCounters', {
   parse: function parse(number) {
     return +number;
   },
@@ -862,7 +862,7 @@ var PostCounters = new _hash2.default((0, _clientFactory2.default)(), 'postCount
     return number.toString();
   }
 });
-var Threads = new _hash2.default((0, _clientFactory2.default)(), 'threads');
+var Threads = new _hash2.default((0, _redisClientFactory2.default)(), 'threads');
 
 var pageCounts = new Map();
 

@@ -53,6 +53,10 @@ var _commands = require('./core/commands');
 
 var _commands2 = _interopRequireDefault(_commands);
 
+var _geolocation = require('./core/geolocation');
+
+var _geolocation2 = _interopRequireDefault(_geolocation);
+
 var _renderer = require('./core/renderer');
 
 var Renderer = _interopRequireWildcard(_renderer);
@@ -104,10 +108,6 @@ var StatisticsModel = _interopRequireWildcard(_statistics);
 var _users = require('./models/users');
 
 var UsersModel = _interopRequireWildcard(_users);
-
-var _geolocation = require('./storage/geolocation');
-
-var _geolocation2 = _interopRequireDefault(_geolocation);
 
 var _sqlClientFactory = require('./storage/sql-client-factory');
 

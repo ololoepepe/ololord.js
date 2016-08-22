@@ -42,7 +42,7 @@ var getNodeCaptchaImage = function () {
                   _this.challenges.delete(challengeID);
                 }, _this.ttl)
               });
-              res.send({
+              res.json({
                 challenge: challengeID,
                 fileName: fileName,
                 ttl: _this.ttl

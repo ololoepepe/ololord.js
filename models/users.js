@@ -1608,7 +1608,7 @@ var initializeUserBansMonitoring = exports.initializeUserBansMonitoring = functi
           case 0:
             //NOTE: Enabling "key expired" notifications
             CHANNEL = '__keyevent@' + config('system.redis.db') + '__:expired';
-            db = (0, _clientFactory2.default)(true);
+            db = (0, _redisClientFactory2.default)(true);
 
             db.on('message', function (channel, message) {
               if (CHANNEL !== channel) {
@@ -1617,7 +1617,7 @@ var initializeUserBansMonitoring = exports.initializeUserBansMonitoring = functi
               updateBanOnMessage(message);
             });
             _context38.next = 5;
-            return (0, _clientFactory2.default)().config('SET', 'notify-keyspace-events', 'Ex');
+            return (0, _redisClientFactory2.default)().config('SET', 'notify-keyspace-events', 'Ex');
 
           case 5:
             db.subscribe(CHANNEL).catch(function (err) {
@@ -1649,9 +1649,9 @@ var _posts = require('./posts');
 
 var PostsModel = _interopRequireWildcard(_posts);
 
-var _clientFactory = require('../storage/client-factory');
+var _redisClientFactory = require('../storage/redis-client-factory');
 
-var _clientFactory2 = _interopRequireDefault(_clientFactory);
+var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
 
 var _hash = require('../storage/hash');
 
@@ -1683,29 +1683,29 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var BannedUserIPs = new _unorderedSet2.default((0, _clientFactory2.default)(), 'bannedUserIps', {
+var BannedUserIPs = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'bannedUserIps', {
   parse: false,
   stringify: false
 });
-var RegisteredUserHashes = new _hash2.default((0, _clientFactory2.default)(), 'registeredUserHashes', {
+var RegisteredUserHashes = new _hash2.default((0, _redisClientFactory2.default)(), 'registeredUserHashes', {
   parse: false,
   stringify: false
 });
-var RegisteredUserIPs = new _unorderedSet2.default((0, _clientFactory2.default)(), 'registeredUserIps', {
+var RegisteredUserIPs = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'registeredUserIps', {
   parse: false,
   stringify: false
 });
-var RegisteredUserLevels = new _hash2.default((0, _clientFactory2.default)(), 'registeredUserLevels', {
+var RegisteredUserLevels = new _hash2.default((0, _redisClientFactory2.default)(), 'registeredUserLevels', {
   parse: false,
   stringify: false
 });
-var SuperuserHashes = new _unorderedSet2.default((0, _clientFactory2.default)(), 'superuserHashes', {
+var SuperuserHashes = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'superuserHashes', {
   parse: false,
   stringify: false
 });
-var SynchronizationData = new _key2.default((0, _clientFactory2.default)(), 'synchronizationData');
-var Threads = new _hash2.default((0, _clientFactory2.default)(), 'threads');
-var UserBanPostNumbers = new _hash2.default((0, _clientFactory2.default)(), 'userBanPostNumbers', {
+var SynchronizationData = new _key2.default((0, _redisClientFactory2.default)(), 'synchronizationData');
+var Threads = new _hash2.default((0, _redisClientFactory2.default)(), 'threads');
+var UserBanPostNumbers = new _hash2.default((0, _redisClientFactory2.default)(), 'userBanPostNumbers', {
   parse: function parse(number) {
     return +number;
   },
@@ -1713,8 +1713,8 @@ var UserBanPostNumbers = new _hash2.default((0, _clientFactory2.default)(), 'use
     return number.toString();
   }
 });
-var UserBans = new _key2.default((0, _clientFactory2.default)(), 'userBans');
-var UserCaptchaQuotas = new _hash2.default((0, _clientFactory2.default)(), 'captchaQuotas', {
+var UserBans = new _key2.default((0, _redisClientFactory2.default)(), 'userBans');
+var UserCaptchaQuotas = new _hash2.default((0, _redisClientFactory2.default)(), 'captchaQuotas', {
   parse: function parse(quota) {
     return +quota;
   },
@@ -1722,7 +1722,7 @@ var UserCaptchaQuotas = new _hash2.default((0, _clientFactory2.default)(), 'capt
     return quota.toString();
   }
 });
-var UserPostNumbers = new _unorderedSet2.default((0, _clientFactory2.default)(), 'userPostNumbers', {
+var UserPostNumbers = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'userPostNumbers', {
   parse: function parse(number) {
     return +number;
   },

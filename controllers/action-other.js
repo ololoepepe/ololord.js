@@ -32,6 +32,10 @@ var _captcha = require('../captchas/captcha');
 
 var _captcha2 = _interopRequireDefault(_captcha);
 
+var _geolocation = require('../core/geolocation');
+
+var _geolocation2 = _interopRequireDefault(_geolocation);
+
 var _files = require('../models/files');
 
 var FilesModel = _interopRequireWildcard(_files);
@@ -56,14 +60,6 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-var _geolocation = require('../storage/geolocation');
-
-var _geolocation2 = _interopRequireDefault(_geolocation);
-
-var _postCreationTransaction = require('../storage/post-creation-transaction');
-
-var _postCreationTransaction2 = _interopRequireDefault(_postCreationTransaction);
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -72,7 +68,6 @@ var moment = require("moment");
 
 var Chat = require("../helpers/chat");
 var config = require("../helpers/config");
-var markup = require("../core/markup");
 
 var router = _express2.default.Router();
 
@@ -84,7 +79,7 @@ router.post("/action/sendChatMessage", function (req, res, next) {
             hashpass: req.hashpass
         }, fields.boardName, +fields.postNumber, fields.text);
     }).then(function (result) {
-        res.send({});
+        res.json({});
     }).catch(function (err) {
         next(err);
     });
@@ -98,7 +93,7 @@ router.post("/action/deleteChatMessages", function (req, res, next) {
             hashpass: req.hashpass
         }, fields.boardName, fields.postNumber);
     }).then(function (result) {
-        res.send(result);
+        res.json(result);
     }).catch(function (err) {
         next(err);
     });
@@ -119,7 +114,7 @@ router.post("/action/synchronize", function (req, res, next) {
     }).then(function () {
         return Database.db.expire("synchronizationData:" + c.key, 300); //NOTE: 5 minutes
     }).then(function () {
-        res.send({});
+        res.json({});
     }).catch(function (err) {
         next(err);
     });
@@ -170,7 +165,7 @@ router.post("/action/search", function (req, res, next) {
         });
         c.model.total = result.total;
         c.model.max = result.max;
-        res.send(c.model);
+        res.json(c.model);
     }).catch(function (err) {
         next(err);
     });

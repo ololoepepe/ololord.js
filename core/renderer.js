@@ -744,6 +744,10 @@ var _moment = require('moment');
 
 var _moment2 = _interopRequireDefault(_moment);
 
+var _files = require('./files');
+
+var Files = _interopRequireWildcard(_files);
+
 var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
@@ -759,10 +763,6 @@ var Cache = _interopRequireWildcard(_cache);
 var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
-
-var _files = require('../helpers/files');
-
-var Files = _interopRequireWildcard(_files);
 
 var _logger = require('../helpers/logger');
 
