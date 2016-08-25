@@ -337,6 +337,11 @@ export async function getSynchronizationData(key) {
   return await SynchronizationData.get(key);
 }
 
+export async function setSynchronizationData(key, data) {
+  await SynchronizationData.set(data, key);
+  await SynchronizationData.expire(config('server.synchronizationData.ttl'), key);
+}
+
 export async function getUserPostNumbers(ip, boardName) {
   ip = Tools.correctAddress(ip) || '*';
   boardName = boardName || '*';
@@ -383,10 +388,12 @@ export async function checkUserBan(ip, boardNames, { write, geolocationInfo } = 
   if (ban && (write || 'NO_ACCESS' === ban.level)) {
     return Promise.reject({ ban: ban });
   }
-  let bans = await getBannedUserBans(ip, boardNames);
-  ban = _(bans).find((ban) => { return ban && (write || 'NO_ACCESS' === ban.level); });
-  if (ban) {
-    return Promise.reject({ ban: ban });
+  if (boardNames) {
+    let bans = await getBannedUserBans(ip, boardNames);
+    ban = _(bans).find((ban) => { return ban && (write || 'NO_ACCESS' === ban.level); });
+    if (ban) {
+      return Promise.reject({ ban: ban });
+    }
   }
   if (geolocationInfo) {
     return checkGeoBan(geolocationInfo, ip);

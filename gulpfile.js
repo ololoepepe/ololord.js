@@ -38,12 +38,10 @@ function stringStream(string) {
   return s;
 }
 
-function buildServer(debug) {
-  var stream = gulp.src('./src/server/**/*.js');
-  if (debug) {
-    stream = stream.pipe(sourcemaps.init());
-  }
-  return stream.pipe(babel({ presets: ['es2015', 'stage-2'] }))
+function buildServer(/*debug*/) {
+  return gulp.src('./src/server/**/*.js')
+  .pipe(sourcemaps.init())
+  .pipe(babel({ presets: ['es2015', 'stage-2'] }))
   .pipe(sourcemaps.write('./'))
   .pipe(gulp.dest('./'));
 }
@@ -57,18 +55,15 @@ function buildCSS(custom, debug) {
     return fileName.split('.').pop() === 'less' && 'base.less' != fileName;
   }).map(function(fileName) {
     return `${path}/${fileName}`;
-  }));
+  }))
+  .pipe(sourcemaps.init({ loadMaps: true }));
   var plugins = [autoprefix];
-  if (debug) {
-    stream = stream.pipe(sourcemaps.init({ loadMaps: true }));
-  } else {
+  if (!debug) {
     plugins.push(cleanCSS);
   }
-  stream = stream.pipe(less({ plugins: plugins }));
-  if (debug) {
-    stream = stream.pipe(sourcemaps.write('./'));
-  }
-  return stream.pipe(gulp.dest('./public/css'));
+  return stream.pipe(less({ plugins: plugins }))
+  .pipe(sourcemaps.write('./'))
+  .pipe(gulp.dest('./public/css'));
 }
 
 function buildJS(custom, debug) {
@@ -97,10 +92,9 @@ function buildJS(custom, debug) {
   if (custom) {
     stream = stream.pipe(rename('custom.js'));
   }
-  if (debug) {
-    stream = stream.pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(sourcemaps.write('./'));
-  } else {
+  stream.pipe(sourcemaps.init({ loadMaps: true }))
+  .pipe(sourcemaps.write('./'));
+  if (!debug) {
     stream = stream.pipe(uglify());
   }
   return stream.pipe(gulp.dest('./public/js'));

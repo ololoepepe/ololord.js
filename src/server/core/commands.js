@@ -4,7 +4,6 @@ var vorpal = require("vorpal")();
 
 import Board from '../boards/board';
 var config = require("../helpers/config");
-var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
 
 import * as Renderer from '../core/renderer';
@@ -268,7 +267,7 @@ vorpal.installHandler("reload-templates", function(args) {
     });
 }, { description: Tools.translate("Reloads the templates and the partials (including public ones).") });
 
-vorpal.installHandler("rebuild-search-index", function(args) {
+vorpal.installHandler("rebuild-search-index [targets...]", function(args) {
     return this.prompt({
         type: "confirm",
         name: "rebuild",
@@ -277,9 +276,8 @@ vorpal.installHandler("rebuild-search-index", function(args) {
     }).then(function(result) {
         if (!result.rebuild)
             return Promise.resolve();
-        return Database.rebuildSearchIndex().then(function() {
-            return Promise.resolve();
-        });
+        let targets = Tools.rerenderPostsTargetsFromString((args.targets || []).join(' '));
+        return PostsModel.rebuildSearchIndex(targets);
     });
 }, { description: Tools.translate("Rebuilds post search index.") });
 

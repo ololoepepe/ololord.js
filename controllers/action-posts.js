@@ -181,23 +181,31 @@ router.post('/action/markupText', function () {
 
           case 12:
             _context2.next = 14;
-            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
+            return (0, _geolocation2.default)(req.ip);
 
           case 14:
-            rawText = text || '';
+            req.geolocationInfo = _context2.sent;
             _context2.next = 17;
-            return testParameters(req, boardName, 'markupText', { fields: fields });
+            return UsersModel.checkUserBan(req.ip, boardName, {
+              write: true,
+              geolocationInfo: req.geolocationInfo
+            });
 
           case 17:
+            rawText = text || '';
+            _context2.next = 20;
+            return testParameters(req, boardName, 'markupText', { fields: fields });
+
+          case 20:
             markupMode = markupMode || '';
             markupModes = _markup2.default.markupModes(markupMode);
-            _context2.next = 21;
+            _context2.next = 24;
             return (0, _markup2.default)(boardName, text, {
               markupModes: markupModes,
               accessLevel: req.level(boardName)
             });
 
-          case 21:
+          case 24:
             text = _context2.sent;
             data = {
               boardName: boardName,
@@ -214,21 +222,21 @@ router.post('/action/markupText', function () {
               data.tripcode = Tools.generateTripcode(req.hashpass);
             }
             res.json(data);
-            _context2.next = 30;
+            _context2.next = 33;
             break;
 
-          case 27:
-            _context2.prev = 27;
+          case 30:
+            _context2.prev = 30;
             _context2.t0 = _context2['catch'](0);
 
             next(_context2.t0);
 
-          case 30:
+          case 33:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, this, [[0, 27]]);
+    }, _callee2, this, [[0, 30]]);
   }));
 
   return function (_x6, _x7, _x8) {
@@ -318,7 +326,7 @@ router.post('/action/createPost', function () {
             return IPC.render(_post.boardName, _post.threadNumber, _post.number, 'create');
 
           case 36:
-            //hasNewPosts.add(c.post.boardName + "/" + c.post.threadNumber); //TODO: pass to main process immediately
+            IPC.send('notifyAboutNewPosts', boardName + '/' + threadNumber);
             if ('node-captcha-noscript' !== captchaEngine) {
               res.json({
                 boardName: _post.boardName,
@@ -330,11 +338,11 @@ router.post('/action/createPost', function () {
 
               res.redirect(303, path);
             }
-            _context3.next = 43;
+            _context3.next = 44;
             break;
 
-          case 39:
-            _context3.prev = 39;
+          case 40:
+            _context3.prev = 40;
             _context3.t0 = _context3['catch'](1);
 
             if (transaction) {
@@ -342,12 +350,12 @@ router.post('/action/createPost', function () {
             }
             next(_context3.t0);
 
-          case 43:
+          case 44:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[1, 39]]);
+    }, _callee3, this, [[1, 40]]);
   }));
 
   return function (_x9, _x10, _x11) {

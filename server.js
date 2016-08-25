@@ -109,14 +109,6 @@ var _users = require('./models/users');
 
 var UsersModel = _interopRequireWildcard(_users);
 
-var _sqlClientFactory = require('./storage/sql-client-factory');
-
-var _sqlClientFactory2 = _interopRequireDefault(_sqlClientFactory);
-
-var _unorderedSet = require('./storage/unordered-set');
-
-var _unorderedSet2 = _interopRequireDefault(_unorderedSet);
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -241,15 +233,16 @@ function spawnCluster() {
                 IPC.on('reloadTemplates', function () {
                   return Renderer.reloadTemplates();
                 });
-                IPC.on('notifyAboutNewPosts', function (data) {
-                  (0, _underscore2.default)(data).each(function (_, key) {
+                IPC.on('notifyAboutNewPosts', function (keys) {
+                  (0, _underscore2.default)(keys).each(function (_1, key) {
                     var s = subscriptions.get(key);
-                    if (!s) return;
+                    if (!s) {
+                      return;
+                    }
                     s.forEach(function (conn) {
-                      conn.sendMessage("newPost");
+                      conn.sendMessage('newPost');
                     });
                   });
-                  return Promise.resolve();
                 });
                 IPC.on('getConnectionIPs', function () {
                   return Promise.resolve(OnlineCounter.unique());
@@ -385,8 +378,18 @@ function spawnWorkers(initCallback) {
       }
     }, _callee3, this);
   })));
-  IPC.on('notifyAboutNewPosts', function (data) {
-    return IPC.send('notifyAboutNewPosts', data);
+  var hasNewPosts = {};
+  setInterval(function () {
+    if ((0, _underscore2.default)(hasNewPosts).isEmpty()) {
+      return;
+    }
+    IPC.send('notifyAboutNewPosts', hasNewPosts).catch(function (err) {
+      _logger2.default.error(err.stack || err);
+    });
+    hasNewPosts = {};
+  }, Tools.SECOND);
+  IPC.on('notifyAboutNewPosts', function (key) {
+    hasNewPosts[key] = 1;
   });
   IPC.on('rerenderCache', function (rerenderArchive) {
     if (rerenderArchive) {
@@ -399,22 +402,6 @@ function spawnWorkers(initCallback) {
 
 _board2.default.initialize();
 _captcha2.default.initialize();
-
-var MyKey = new _unorderedSet2.default((0, _sqlClientFactory2.default)(), 'my_hash');
-
-MyKey.addOne(10).then(function () {
-  return MyKey.getOne();
-}).then(function (result) {
-  console.log(result);
-  return MyKey.addSome(['x', 'y']);
-}).then(function (result) {
-  console.log(result);
-  return MyKey.getAll();
-}).then(function (result) {
-  console.log(result);
-}).catch(function (err) {
-  console.log('err', err);
-});
 
 if (_cluster2.default.isMaster) {
   _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {

@@ -502,9 +502,9 @@ async function rebuildPostSearchIndex(boardName, postNumber, threads) {
   });
 }
 
-export async function rebuildSearchIndex() {
+export async function rebuildSearchIndex(targets) {
   let threads = new Map();
-  return await forEachPost(targets, async function(boardName, postNumber) {
+  return await forEachPost(targets || {}, async function(boardName, postNumber) {
     console.log(Tools.translate('Rebuilding post search index: >>/$[1]/$[2]', '', boardName, postNumber));
     return await rebuildPostSearchIndex(boardName, postNumber, threads);
   });

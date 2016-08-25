@@ -203,14 +203,14 @@ var findPosts = exports.findPosts = function () {
             page = Tools.option(page, 'number', 0, { test: function test(p) {
                 return p >= 0;
               } });
-            limit = (0, _config2.default)('system.searchLimit');
+            limit = (0, _config2.default)('system.search.maxResultCount');
             startFrom = page * limit;
             query = { bool: {} };
 
             if ((0, _underscore2.default)(requiredPhrases).isArray() && requiredPhrases.length > 0) {
               query.bool.must = requiredPhrases.map(mapPhrase);
             }
-            if (string && typeof boardName === 'string') {
+            if (boardName && typeof boardName === 'string') {
               query.bool.must = (query.bool.must || []).concat({ match_phrase: { boardName: boardName } });
             }
             if ((0, _underscore2.default)(excludedPhrases).isArray() && excludedPhrases.length > 0) {

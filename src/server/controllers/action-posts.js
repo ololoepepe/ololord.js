@@ -53,7 +53,11 @@ router.post('/action/markupText', async function(req, res, next) {
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
-    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
+    req.geolocationInfo = await geolocation(req.ip);
+    await UsersModel.checkUserBan(req.ip, boardName, {
+      write: true,
+      geolocationInfo: req.geolocationInfo
+    });
     let rawText = text || '';
     await testParameters(req, boardName, 'markupText', { fields: fields });
     markupMode = markupMode || '';
@@ -108,7 +112,7 @@ router.post('/action/createPost', async function(req, res, next) {
     files = await Files.processFiles(boardName, files, transaction);
     let post = await PostsModel.createPost(req, fields, files, transaction);
     await IPC.render(post.boardName, post.threadNumber, post.number, 'create');
-    //hasNewPosts.add(c.post.boardName + "/" + c.post.threadNumber); //TODO: pass to main process immediately
+    IPC.send('notifyAboutNewPosts', `${boardName}/${threadNumber}`);
     if ('node-captcha-noscript' !== captchaEngine) {
       res.json({
         boardName: post.boardName,

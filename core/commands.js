@@ -39,7 +39,6 @@ var Util = require("util");
 var vorpal = require("vorpal")();
 
 var config = require("../helpers/config");
-var Database = require("../helpers/database");
 var Tools = require("../helpers/tools");
 
 var requestPassword = function requestPassword(thisArg) {
@@ -363,7 +362,7 @@ vorpal.installHandler("reload-templates", function (args) {
     });
 }, { description: Tools.translate("Reloads the templates and the partials (including public ones).") });
 
-vorpal.installHandler("rebuild-search-index", function (args) {
+vorpal.installHandler("rebuild-search-index [targets...]", function (args) {
     return this.prompt({
         type: "confirm",
         name: "rebuild",
@@ -371,9 +370,8 @@ vorpal.installHandler("rebuild-search-index", function (args) {
         message: Tools.translate("Are you sure? ")
     }).then(function (result) {
         if (!result.rebuild) return Promise.resolve();
-        return Database.rebuildSearchIndex().then(function () {
-            return Promise.resolve();
-        });
+        var targets = Tools.rerenderPostsTargetsFromString((args.targets || []).join(' '));
+        return PostsModel.rebuildSearchIndex(targets);
     });
 }, { description: Tools.translate("Rebuilds post search index.") });
 

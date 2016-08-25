@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.ipList = exports.plainText = exports.generateTripcode = exports.series = exports.withoutDuplicates = exports.sha256 = exports.preferIPv4 = exports.correctAddress = exports.proxy = exports.parseForm = exports.splitCommand = exports.toHtml = exports.externalLinkRootZoneExists = exports.now = exports.setLocale = exports.hashpass = exports.CODE_STYLES = exports.STYLES = exports.BAN_LEVELS = exports.REGISTERED_USER_LEVELS = exports.NODE_CAPTCHA_ID = exports.FILE_RATINGS = exports.EXTERNAL_LINK_REGEXP_PATTERN = exports.HOUR = exports.MINUTE = exports.SECOND = exports.translate = undefined;
+exports.ipList = exports.plainText = exports.generateTripcode = exports.series = exports.withoutDuplicates = exports.sha256 = exports.preferIPv4 = exports.correctAddress = exports.proxy = exports.parseForm = exports.toHtml = exports.externalLinkRootZoneExists = exports.now = exports.setLocale = exports.hashpass = exports.CODE_STYLES = exports.STYLES = exports.BAN_LEVELS = exports.REGISTERED_USER_LEVELS = exports.NODE_CAPTCHA_ID = exports.FILE_RATINGS = exports.EXTERNAL_LINK_REGEXP_PATTERN = exports.DAY = exports.HOUR = exports.MINUTE = exports.SECOND = exports.translate = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -96,6 +96,7 @@ var JS_TYPES = new Set(['string', 'boolean', 'number', 'object']);
 var SECOND = exports.SECOND = 1000;
 var MINUTE = exports.MINUTE = 60 * SECOND;
 var HOUR = exports.HOUR = 60 * MINUTE;
+var DAY = exports.DAY = 24 * HOUR;
 var EXTERNAL_LINK_REGEXP_PATTERN = exports.EXTERNAL_LINK_REGEXP_PATTERN = function () {
     var schema = "https?:\\/\\/|ftp:\\/\\/";
     var ip = "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}" + "(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])";
@@ -152,64 +153,6 @@ var toHtml = exports.toHtml = function toHtml(text, replaceSpaces) {
     text = (0, _escapeHtml2.default)(text).split("\n").join("<br />");
     if (replaceSpaces) text = text.split(" ").join("&nbsp;");
     return text;
-};
-
-var splitCommand = exports.splitCommand = function splitCommand(cmd) {
-    var args = [];
-    var arg = "";
-    var quot = 0;
-    for (var i = 0; i < cmd.length; ++i) {
-        var c = cmd[i];
-        if (/\s/.test(c)) {
-            if (quot) {
-                arg += c;
-            } else if (arg.length > 0) {
-                args.push(arg);
-                arg = "";
-            }
-        } else {
-            if ("\"" == c && (i < 1 || "\\" != cmd[i - 1])) {
-                switch (quot) {
-                    case 1:
-                        quot = 0;
-                        break;
-                    case -1:
-                        arg += c;
-                        break;
-                    case 0:
-                    default:
-                        quot = 1;
-                        break;
-                }
-            } else if ("'" == c && (i < 1 || "\\" != cmd[i - 1])) {
-                switch (quot) {
-                    case 1:
-                        arg += c;
-                        break;
-                    case -1:
-                        quot = 0;
-                        break;
-                    case 0:
-                    default:
-                        quot = -1;
-                        break;
-                }
-            } else {
-                if (("\"" == c || "'" == c) && (i > 0 || "\\" == cmd[i - 1]) && arg.length > 0) arg = arg.substring(0, arg.length - 1);
-                arg += c;
-            }
-        }
-    }
-    if (arg.length > 0) {
-        if (quot) return null;
-        args.push(arg);
-    }
-    var command = null;
-    if (args.length > 0) command = args.shift();
-    return {
-        command: command,
-        arguments: args
-    };
 };
 
 function mayBeHashpass(password) {

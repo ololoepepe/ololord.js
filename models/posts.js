@@ -1528,7 +1528,7 @@ var rebuildPostSearchIndex = function () {
 }();
 
 var rebuildSearchIndex = exports.rebuildSearchIndex = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29() {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(targets) {
     var threads;
     return regeneratorRuntime.wrap(function _callee29$(_context29) {
       while (1) {
@@ -1536,7 +1536,7 @@ var rebuildSearchIndex = exports.rebuildSearchIndex = function () {
           case 0:
             threads = new Map();
             _context29.next = 3;
-            return forEachPost(targets, function () {
+            return forEachPost(targets || {}, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(boardName, postNumber) {
                 return regeneratorRuntime.wrap(function _callee28$(_context28) {
                   while (1) {
@@ -1557,7 +1557,7 @@ var rebuildSearchIndex = exports.rebuildSearchIndex = function () {
                 }, _callee28, this);
               }));
 
-              return function (_x63, _x64) {
+              return function (_x64, _x65) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -1573,7 +1573,7 @@ var rebuildSearchIndex = exports.rebuildSearchIndex = function () {
     }, _callee29, this);
   }));
 
-  return function rebuildSearchIndex() {
+  return function rebuildSearchIndex(_x63) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1636,7 +1636,7 @@ var processMovedThreadPostReferences = function () {
                 }, _callee30, this);
               }));
 
-              return function (_x66) {
+              return function (_x67) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -1649,7 +1649,7 @@ var processMovedThreadPostReferences = function () {
     }, _callee31, this);
   }));
 
-  return function processMovedThreadPostReferences(_x65) {
+  return function processMovedThreadPostReferences(_x66) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1790,7 +1790,7 @@ var processMovedThreadPosts = exports.processMovedThreadPosts = function () {
                             }, _callee32, this);
                           }));
 
-                          return function (_x69) {
+                          return function (_x70) {
                             return ref.apply(this, arguments);
                           };
                         }());
@@ -1807,7 +1807,7 @@ var processMovedThreadPosts = exports.processMovedThreadPosts = function () {
                 }, _callee33, this);
               }));
 
-              return function (_x68) {
+              return function (_x69) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -1826,7 +1826,7 @@ var processMovedThreadPosts = exports.processMovedThreadPosts = function () {
     }, _callee34, this);
   }));
 
-  return function processMovedThreadPosts(_x67) {
+  return function processMovedThreadPosts(_x68) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1888,7 +1888,7 @@ var processMovedThreadRelatedPosts = exports.processMovedThreadRelatedPosts = fu
                 }, _callee35, this);
               }));
 
-              return function (_x71) {
+              return function (_x72) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -1901,7 +1901,7 @@ var processMovedThreadRelatedPosts = exports.processMovedThreadRelatedPosts = fu
     }, _callee36, this);
   }));
 
-  return function processMovedThreadRelatedPosts(_x70) {
+  return function processMovedThreadRelatedPosts(_x71) {
     return ref.apply(this, arguments);
   };
 }();

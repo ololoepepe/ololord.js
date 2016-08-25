@@ -89,13 +89,13 @@ function mapPhrase(phrase) {
 
 export async function findPosts({ requiredPhrases, excludedPhrases, possiblePhrases }, { boardName, page }) {
   page = Tools.option(page, 'number', 0, { test: (p) => { return p >= 0; } });
-  let limit = config('system.searchLimit');
+  let limit = config('system.search.maxResultCount');
   let startFrom = page * limit;
   let query = { bool: {} };
   if (_(requiredPhrases).isArray() && requiredPhrases.length > 0) {
     query.bool.must = requiredPhrases.map(mapPhrase);
   }
-  if (string && typeof boardName === 'string') {
+  if (boardName && typeof boardName === 'string') {
     query.bool.must = (query.bool.must || []).concat({ match_phrase: { boardName: boardName } });
   }
   if (_(excludedPhrases).isArray() && excludedPhrases.length > 0) {

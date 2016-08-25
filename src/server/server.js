@@ -137,16 +137,16 @@ function spawnCluster() {
           IPC.on('reloadTemplates', function() {
             return Renderer.reloadTemplates();
           });
-          IPC.on('notifyAboutNewPosts', function(data) {
-              _(data).each((_, key) => {
-                  var s = subscriptions.get(key);
-                  if (!s)
-                      return;
-                  s.forEach(function(conn) {
-                      conn.sendMessage("newPost");
-                  });
+          IPC.on('notifyAboutNewPosts', (keys) => {
+            _(keys).each((_1, key) => {
+              let s = subscriptions.get(key);
+              if (!s) {
+                return;
+              }
+              s.forEach((conn) => {
+                conn.sendMessage('newPost');
               });
-              return Promise.resolve();
+            });
           });
           IPC.on('getConnectionIPs', function() {
               return Promise.resolve(OnlineCounter.unique());
@@ -231,8 +231,18 @@ function spawnWorkers(initCallback) {
     await Renderer.reloadTemplates();
     return IPC.send('reloadTemplates');
   });
-  IPC.on('notifyAboutNewPosts', (data) => {
-    return IPC.send('notifyAboutNewPosts', data);
+  let hasNewPosts = {};
+  setInterval(() => {
+    if (_(hasNewPosts).isEmpty()) {
+      return;
+    }
+    IPC.send('notifyAboutNewPosts', hasNewPosts).catch((err) => {
+      Logger.error(err.stack || err);
+    });
+    hasNewPosts = {};
+  }, Tools.SECOND);
+  IPC.on('notifyAboutNewPosts', (key) => {
+    hasNewPosts[key] = 1;
   });
   IPC.on('rerenderCache', (rerenderArchive) => {
     if (rerenderArchive) {

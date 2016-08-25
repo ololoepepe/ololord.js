@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.initializeUserBansMonitoring = exports.banUser = exports.updatePostBanInfo = exports.checkUserPermissions = exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.getSynchronizationData = exports.removeSuperuser = exports.addSuperuser = exports.unregisterUser = exports.updateRegisteredUser = exports.registerUser = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getRegisteredUserLevelsByIp = exports.getRegisteredUserLevels = exports.getRegisteredUserLevelByIp = exports.getRegisteredUserLevel = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
+exports.initializeUserBansMonitoring = exports.banUser = exports.updatePostBanInfo = exports.checkUserPermissions = exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.setSynchronizationData = exports.getSynchronizationData = exports.removeSuperuser = exports.addSuperuser = exports.unregisterUser = exports.updateRegisteredUser = exports.registerUser = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getRegisteredUserLevelsByIp = exports.getRegisteredUserLevels = exports.getRegisteredUserLevelByIp = exports.getRegisteredUserLevel = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -1069,21 +1069,20 @@ var getSynchronizationData = exports.getSynchronizationData = function () {
   };
 }();
 
-var getUserPostNumbers = exports.getUserPostNumbers = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(ip, boardName) {
+var setSynchronizationData = exports.setSynchronizationData = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(key, data) {
     return regeneratorRuntime.wrap(function _callee29$(_context29) {
       while (1) {
         switch (_context29.prev = _context29.next) {
           case 0:
-            ip = Tools.correctAddress(ip) || '*';
-            boardName = boardName || '*';
+            _context29.next = 2;
+            return SynchronizationData.set(data, key);
+
+          case 2:
             _context29.next = 4;
-            return UserPostNumbers.find(ip + ':' + boardName);
+            return SynchronizationData.expire((0, _config2.default)('server.synchronizationData.ttl'), key);
 
           case 4:
-            return _context29.abrupt('return', _context29.sent);
-
-          case 5:
           case 'end':
             return _context29.stop();
         }
@@ -1091,22 +1090,26 @@ var getUserPostNumbers = exports.getUserPostNumbers = function () {
     }, _callee29, this);
   }));
 
-  return function getUserPostNumbers(_x44, _x45) {
+  return function setSynchronizationData(_x44, _x45) {
     return ref.apply(this, arguments);
   };
 }();
 
-var addUserPostNumber = exports.addUserPostNumber = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee30(ip, boardName, postNumber) {
+var getUserPostNumbers = exports.getUserPostNumbers = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee30(ip, boardName) {
     return regeneratorRuntime.wrap(function _callee30$(_context30) {
       while (1) {
         switch (_context30.prev = _context30.next) {
           case 0:
-            ip = Tools.correctAddress(ip);
-            _context30.next = 3;
-            return UserPostNumbers.addOne(postNumber, ip + ':' + boardName);
+            ip = Tools.correctAddress(ip) || '*';
+            boardName = boardName || '*';
+            _context30.next = 4;
+            return UserPostNumbers.find(ip + ':' + boardName);
 
-          case 3:
+          case 4:
+            return _context30.abrupt('return', _context30.sent);
+
+          case 5:
           case 'end':
             return _context30.stop();
         }
@@ -1114,12 +1117,12 @@ var addUserPostNumber = exports.addUserPostNumber = function () {
     }, _callee30, this);
   }));
 
-  return function addUserPostNumber(_x46, _x47, _x48) {
+  return function getUserPostNumbers(_x46, _x47) {
     return ref.apply(this, arguments);
   };
 }();
 
-var removeUserPostNumber = exports.removeUserPostNumber = function () {
+var addUserPostNumber = exports.addUserPostNumber = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee31(ip, boardName, postNumber) {
     return regeneratorRuntime.wrap(function _callee31$(_context31) {
       while (1) {
@@ -1127,7 +1130,7 @@ var removeUserPostNumber = exports.removeUserPostNumber = function () {
           case 0:
             ip = Tools.correctAddress(ip);
             _context31.next = 3;
-            return UserPostNumbers.deleteOne(postNumber, ip + ':' + boardName);
+            return UserPostNumbers.addOne(postNumber, ip + ':' + boardName);
 
           case 3:
           case 'end':
@@ -1137,59 +1140,22 @@ var removeUserPostNumber = exports.removeUserPostNumber = function () {
     }, _callee31, this);
   }));
 
-  return function removeUserPostNumber(_x49, _x50, _x51) {
+  return function addUserPostNumber(_x48, _x49, _x50) {
     return ref.apply(this, arguments);
   };
 }();
 
-var checkUserBan = exports.checkUserBan = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee32(ip, boardNames) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var write = _ref.write;
-    var geolocationInfo = _ref.geolocationInfo;
-    var ban, bans;
+var removeUserPostNumber = exports.removeUserPostNumber = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee32(ip, boardName, postNumber) {
     return regeneratorRuntime.wrap(function _callee32$(_context32) {
       while (1) {
         switch (_context32.prev = _context32.next) {
           case 0:
             ip = Tools.correctAddress(ip);
-            ban = ipBans[ip];
+            _context32.next = 3;
+            return UserPostNumbers.deleteOne(postNumber, ip + ':' + boardName);
 
-            if (!(ban && (write || 'NO_ACCESS' === ban.level))) {
-              _context32.next = 4;
-              break;
-            }
-
-            return _context32.abrupt('return', Promise.reject({ ban: ban }));
-
-          case 4:
-            _context32.next = 6;
-            return getBannedUserBans(ip, boardNames);
-
-          case 6:
-            bans = _context32.sent;
-
-            ban = (0, _underscore2.default)(bans).find(function (ban) {
-              return ban && (write || 'NO_ACCESS' === ban.level);
-            });
-
-            if (!ban) {
-              _context32.next = 10;
-              break;
-            }
-
-            return _context32.abrupt('return', Promise.reject({ ban: ban }));
-
-          case 10:
-            if (!geolocationInfo) {
-              _context32.next = 12;
-              break;
-            }
-
-            return _context32.abrupt('return', checkGeoBan(geolocationInfo, ip));
-
-          case 12:
+          case 3:
           case 'end':
             return _context32.stop();
         }
@@ -1197,131 +1163,64 @@ var checkUserBan = exports.checkUserBan = function () {
     }, _callee32, this);
   }));
 
-  return function checkUserBan(_x52, _x53, _x54) {
+  return function removeUserPostNumber(_x51, _x52, _x53) {
     return ref.apply(this, arguments);
   };
 }();
 
-var checkUserPermissions = exports.checkUserPermissions = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee33(req, boardName, postNumber, permission, password) {
-    var board, post, user, threadNumber, thread;
+var checkUserBan = exports.checkUserBan = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee33(ip, boardNames) {
+    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var write = _ref.write;
+    var geolocationInfo = _ref.geolocationInfo;
+    var ban, bans;
     return regeneratorRuntime.wrap(function _callee33$(_context33) {
       while (1) {
         switch (_context33.prev = _context33.next) {
           case 0:
-            board = _board2.default.board(boardName);
+            ip = Tools.correctAddress(ip);
+            ban = ipBans[ip];
 
-            if (board) {
-              _context33.next = 3;
+            if (!(ban && (write || 'NO_ACCESS' === ban.level))) {
+              _context33.next = 4;
               break;
             }
 
-            return _context33.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            return _context33.abrupt('return', Promise.reject({ ban: ban }));
 
-          case 3:
-            _context33.next = 5;
-            return PostsModel.getPost(boardName, postNumber);
-
-          case 5:
-            post = _context33.sent;
-
-            if (post) {
-              _context33.next = 8;
+          case 4:
+            if (!boardNames) {
+              _context33.next = 11;
               break;
             }
 
-            return _context33.abrupt('return', Promise.reject(new Error(Tools.translate('Not such post: $[1]', '', '/' + boardName + '/' + postNumber))));
+            _context33.next = 7;
+            return getBannedUserBans(ip, boardNames);
 
-          case 8:
-            user = post.user;
-            threadNumber = post.threadNumber;
+          case 7:
+            bans = _context33.sent;
 
-            if (!req.isSuperuser()) {
-              _context33.next = 12;
+            ban = (0, _underscore2.default)(bans).find(function (ban) {
+              return ban && (write || 'NO_ACCESS' === ban.level);
+            });
+
+            if (!ban) {
+              _context33.next = 11;
               break;
             }
 
-            return _context33.abrupt('return');
+            return _context33.abrupt('return', Promise.reject({ ban: ban }));
 
-          case 12:
-            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) > 0)) {
-              _context33.next = 19;
+          case 11:
+            if (!geolocationInfo) {
+              _context33.next = 13;
               break;
             }
 
-            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), 'USER') > 0 && Tools.compareRegisteredUserLevels(req.level(boardName), user.level) > 0)) {
-              _context33.next = 15;
-              break;
-            }
+            return _context33.abrupt('return', checkGeoBan(geolocationInfo, ip));
 
-            return _context33.abrupt('return');
-
-          case 15:
-            if (!(req.hashpass && req.hashpass === user.hashpass)) {
-              _context33.next = 17;
-              break;
-            }
-
-            return _context33.abrupt('return');
-
-          case 17:
-            if (!(password && password === user.password)) {
-              _context33.next = 19;
-              break;
-            }
-
-            return _context33.abrupt('return');
-
-          case 19:
-            if (board.opModeration) {
-              _context33.next = 21;
-              break;
-            }
-
-            return _context33.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
-
-          case 21:
-            _context33.next = 23;
-            return Threads.getOne(threadNumber, boardName);
-
-          case 23:
-            thread = _context33.sent;
-
-            if (!(thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass))) {
-              _context33.next = 26;
-              break;
-            }
-
-            return _context33.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
-
-          case 26:
-            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0)) {
-              _context33.next = 28;
-              break;
-            }
-
-            return _context33.abrupt('return');
-
-          case 28:
-            if (!(req.hashpass && req.hashpass === user.hashpass)) {
-              _context33.next = 30;
-              break;
-            }
-
-            return _context33.abrupt('return');
-
-          case 30:
-            if (!(password && password === user.password)) {
-              _context33.next = 32;
-              break;
-            }
-
-            return _context33.abrupt('return');
-
-          case 32:
-            return _context33.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
-
-          case 33:
+          case 13:
           case 'end':
             return _context33.stop();
         }
@@ -1329,54 +1228,131 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
     }, _callee33, this);
   }));
 
-  return function checkUserPermissions(_x56, _x57, _x58, _x59, _x60) {
+  return function checkUserBan(_x54, _x55, _x56) {
     return ref.apply(this, arguments);
   };
 }();
 
-var updatePostBanInfo = exports.updatePostBanInfo = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee34(boardName, postNumber) {
-    var post;
+var checkUserPermissions = exports.checkUserPermissions = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee34(req, boardName, postNumber, permission, password) {
+    var board, post, user, threadNumber, thread;
     return regeneratorRuntime.wrap(function _callee34$(_context34) {
       while (1) {
         switch (_context34.prev = _context34.next) {
           case 0:
-            if (_board2.default.board(boardName)) {
-              _context34.next = 2;
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context34.next = 3;
               break;
             }
 
             return _context34.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
-          case 2:
-            postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
-
-            if (postNumber) {
-              _context34.next = 5;
-              break;
-            }
-
-            return _context34.abrupt('return');
-
-          case 5:
-            _context34.next = 7;
+          case 3:
+            _context34.next = 5;
             return PostsModel.getPost(boardName, postNumber);
 
-          case 7:
+          case 5:
             post = _context34.sent;
 
             if (post) {
-              _context34.next = 10;
+              _context34.next = 8;
+              break;
+            }
+
+            return _context34.abrupt('return', Promise.reject(new Error(Tools.translate('Not such post: $[1]', '', '/' + boardName + '/' + postNumber))));
+
+          case 8:
+            user = post.user;
+            threadNumber = post.threadNumber;
+
+            if (!req.isSuperuser()) {
+              _context34.next = 12;
               break;
             }
 
             return _context34.abrupt('return');
 
-          case 10:
-            _context34.next = 12;
-            return IPC.render(boardName, post.threadNumber, postNumber, 'edit');
-
           case 12:
+            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) > 0)) {
+              _context34.next = 19;
+              break;
+            }
+
+            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), 'USER') > 0 && Tools.compareRegisteredUserLevels(req.level(boardName), user.level) > 0)) {
+              _context34.next = 15;
+              break;
+            }
+
+            return _context34.abrupt('return');
+
+          case 15:
+            if (!(req.hashpass && req.hashpass === user.hashpass)) {
+              _context34.next = 17;
+              break;
+            }
+
+            return _context34.abrupt('return');
+
+          case 17:
+            if (!(password && password === user.password)) {
+              _context34.next = 19;
+              break;
+            }
+
+            return _context34.abrupt('return');
+
+          case 19:
+            if (board.opModeration) {
+              _context34.next = 21;
+              break;
+            }
+
+            return _context34.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
+
+          case 21:
+            _context34.next = 23;
+            return Threads.getOne(threadNumber, boardName);
+
+          case 23:
+            thread = _context34.sent;
+
+            if (!(thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass))) {
+              _context34.next = 26;
+              break;
+            }
+
+            return _context34.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
+
+          case 26:
+            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0)) {
+              _context34.next = 28;
+              break;
+            }
+
+            return _context34.abrupt('return');
+
+          case 28:
+            if (!(req.hashpass && req.hashpass === user.hashpass)) {
+              _context34.next = 30;
+              break;
+            }
+
+            return _context34.abrupt('return');
+
+          case 30:
+            if (!(password && password === user.password)) {
+              _context34.next = 32;
+              break;
+            }
+
+            return _context34.abrupt('return');
+
+          case 32:
+            return _context34.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
+
+          case 33:
           case 'end':
             return _context34.stop();
         }
@@ -1384,144 +1360,199 @@ var updatePostBanInfo = exports.updatePostBanInfo = function () {
     }, _callee34, this);
   }));
 
-  return function updatePostBanInfo(_x61, _x62) {
+  return function checkUserPermissions(_x58, _x59, _x60, _x61, _x62) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var updatePostBanInfo = exports.updatePostBanInfo = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee35(boardName, postNumber) {
+    var post;
+    return regeneratorRuntime.wrap(function _callee35$(_context35) {
+      while (1) {
+        switch (_context35.prev = _context35.next) {
+          case 0:
+            if (_board2.default.board(boardName)) {
+              _context35.next = 2;
+              break;
+            }
+
+            return _context35.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+
+          case 2:
+            postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+
+            if (postNumber) {
+              _context35.next = 5;
+              break;
+            }
+
+            return _context35.abrupt('return');
+
+          case 5:
+            _context35.next = 7;
+            return PostsModel.getPost(boardName, postNumber);
+
+          case 7:
+            post = _context35.sent;
+
+            if (post) {
+              _context35.next = 10;
+              break;
+            }
+
+            return _context35.abrupt('return');
+
+          case 10:
+            _context35.next = 12;
+            return IPC.render(boardName, post.threadNumber, postNumber, 'edit');
+
+          case 12:
+          case 'end':
+            return _context35.stop();
+        }
+      }
+    }, _callee35, this);
+  }));
+
+  return function updatePostBanInfo(_x63, _x64) {
     return ref.apply(this, arguments);
   };
 }();
 
 var banUser = exports.banUser = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee36(ip, newBans) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee37(ip, newBans) {
     var oldBans;
-    return regeneratorRuntime.wrap(function _callee36$(_context36) {
+    return regeneratorRuntime.wrap(function _callee37$(_context37) {
       while (1) {
-        switch (_context36.prev = _context36.next) {
+        switch (_context37.prev = _context37.next) {
           case 0:
             ip = Tools.correctAddress(ip);
 
             if (ip) {
-              _context36.next = 3;
+              _context37.next = 3;
               break;
             }
 
-            return _context36.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid IP address'))));
+            return _context37.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid IP address'))));
 
           case 3:
-            _context36.next = 5;
+            _context37.next = 5;
             return UsersModel.getBannedUserBans(userIp);
 
           case 5:
-            oldBans = _context36.sent;
-            _context36.next = 8;
+            oldBans = _context37.sent;
+            _context37.next = 8;
             return Tools.series(_board2.default.boardNames(), function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee35(boardName) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee36(boardName) {
                 var key, ban;
-                return regeneratorRuntime.wrap(function _callee35$(_context35) {
+                return regeneratorRuntime.wrap(function _callee36$(_context36) {
                   while (1) {
-                    switch (_context35.prev = _context35.next) {
+                    switch (_context36.prev = _context36.next) {
                       case 0:
                         key = ip + ':' + boardName;
                         ban = newBans[boardName];
 
                         if (!ban) {
-                          _context35.next = 15;
+                          _context36.next = 15;
                           break;
                         }
 
-                        _context35.next = 5;
+                        _context36.next = 5;
                         return UserBans.set(ban, key);
 
                       case 5:
                         if (!ban.expiresAt) {
-                          _context35.next = 8;
+                          _context36.next = 8;
                           break;
                         }
 
-                        _context35.next = 8;
+                        _context36.next = 8;
                         return UserBans.expire(Math.ceil((+ban.expiresAt - +Tools.now()) / 1000), key);
 
                       case 8:
                         if (!ban.postNumber) {
-                          _context35.next = 13;
+                          _context36.next = 13;
                           break;
                         }
 
-                        _context35.next = 11;
+                        _context36.next = 11;
                         return UserBanPostNumbers.setOne(key, ban.postNumber);
 
                       case 11:
-                        _context35.next = 13;
+                        _context36.next = 13;
                         return updatePostBanInfo(boardName, ban.postNumber);
 
                       case 13:
-                        _context35.next = 24;
+                        _context36.next = 24;
                         break;
 
                       case 15:
                         ban = oldBans[boardName];
 
                         if (ban) {
-                          _context35.next = 18;
+                          _context36.next = 18;
                           break;
                         }
 
-                        return _context35.abrupt('return');
+                        return _context36.abrupt('return');
 
                       case 18:
-                        _context35.next = 20;
+                        _context36.next = 20;
                         return UserBans.delete(key);
 
                       case 20:
                         if (!ban.postNumber) {
-                          _context35.next = 24;
+                          _context36.next = 24;
                           break;
                         }
 
                         UserBanPostNumbers.deleteOne(ban.postNumber, key);
-                        _context35.next = 24;
+                        _context36.next = 24;
                         return updatePostBanInfo(boardName, ban.postNumber);
 
                       case 24:
                       case 'end':
-                        return _context35.stop();
+                        return _context36.stop();
                     }
                   }
-                }, _callee35, this);
+                }, _callee36, this);
               }));
 
-              return function (_x65) {
+              return function (_x67) {
                 return ref.apply(this, arguments);
               };
             }());
 
           case 8:
-            _context36.next = 10;
+            _context37.next = 10;
             return BannedUserIPs[(0, _underscore2.default)(newBans).isEmpty() ? 'deleteOne' : 'addOne'](ip);
 
           case 10:
           case 'end':
-            return _context36.stop();
+            return _context37.stop();
         }
       }
-    }, _callee36, this);
+    }, _callee37, this);
   }));
 
-  return function banUser(_x63, _x64) {
+  return function banUser(_x65, _x66) {
     return ref.apply(this, arguments);
   };
 }();
 
 var updateBanOnMessage = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee37(message) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee38(message) {
     var ip, boardName, postNumber, keys;
-    return regeneratorRuntime.wrap(function _callee37$(_context37) {
+    return regeneratorRuntime.wrap(function _callee38$(_context38) {
       while (1) {
-        switch (_context37.prev = _context37.next) {
+        switch (_context38.prev = _context38.next) {
           case 0:
-            _context37.prev = 0;
+            _context38.prev = 0;
             ip = Tools.correctAddress(message.split(':').slice(1, -1).join(':'));
 
             if (ip) {
-              _context37.next = 4;
+              _context38.next = 4;
               break;
             }
 
@@ -1531,93 +1562,93 @@ var updateBanOnMessage = function () {
             boardName = message.split(':').pop();
 
             if (_board2.default.board(boardName)) {
-              _context37.next = 7;
+              _context38.next = 7;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
           case 7:
-            _context37.next = 9;
+            _context38.next = 9;
             return UserBanPostNumbers.getOne(message);
 
           case 9:
-            postNumber = _context37.sent;
+            postNumber = _context38.sent;
 
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (postNumber) {
-              _context37.next = 13;
+              _context38.next = 13;
               break;
             }
 
             throw new Error(Tools.translate('Invalid post number'));
 
           case 13:
-            _context37.next = 15;
+            _context38.next = 15;
             return UserBanPostNumbers.deleteOne(message);
 
           case 15:
-            _context37.next = 17;
+            _context38.next = 17;
             return UserBans.find(ip + ':*');
 
           case 17:
-            keys = _context37.sent;
+            keys = _context38.sent;
 
             if (!(!keys || keys.length <= 0)) {
-              _context37.next = 21;
+              _context38.next = 21;
               break;
             }
 
-            _context37.next = 21;
+            _context38.next = 21;
             return BannedUserIPs.deleteOne(ip);
 
           case 21:
-            _context37.next = 23;
+            _context38.next = 23;
             return updatePostBanInfo(boardName, postNumber);
 
           case 23:
-            _context37.next = 28;
+            _context38.next = 28;
             break;
 
           case 25:
-            _context37.prev = 25;
-            _context37.t0 = _context37['catch'](0);
+            _context38.prev = 25;
+            _context38.t0 = _context38['catch'](0);
 
-            Logger.error(_context37.t0.stack || _context37.t0);
+            Logger.error(_context38.t0.stack || _context38.t0);
 
           case 28:
           case 'end':
-            return _context37.stop();
+            return _context38.stop();
         }
       }
-    }, _callee37, this, [[0, 25]]);
+    }, _callee38, this, [[0, 25]]);
   }));
 
-  return function updateBanOnMessage(_x66) {
+  return function updateBanOnMessage(_x68) {
     return ref.apply(this, arguments);
   };
 }();
 
 var initializeUserBansMonitoring = exports.initializeUserBansMonitoring = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee38() {
-    return regeneratorRuntime.wrap(function _callee38$(_context38) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee39() {
+    return regeneratorRuntime.wrap(function _callee39$(_context39) {
       while (1) {
-        switch (_context38.prev = _context38.next) {
+        switch (_context39.prev = _context39.next) {
           case 0:
-            _context38.next = 2;
+            _context39.next = 2;
             return (0, _redisClientFactory2.default)().config('SET', 'notify-keyspace-events', 'Ex');
 
           case 2:
-            _context38.next = 4;
+            _context39.next = 4;
             return BanExpiresChannel.subscribe(updateBanOnMessage);
 
           case 4:
           case 'end':
-            return _context38.stop();
+            return _context39.stop();
         }
       }
-    }, _callee38, this);
+    }, _callee39, this);
   }));
 
   return function initializeUserBansMonitoring() {

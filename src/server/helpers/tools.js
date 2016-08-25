@@ -46,6 +46,7 @@ const JS_TYPES = new Set(['string', 'boolean', 'number', 'object']);
 export const SECOND = 1000;
 export const MINUTE = 60 * SECOND;
 export const HOUR = 60 * MINUTE;
+export const DAY = 24 * HOUR;
 export const EXTERNAL_LINK_REGEXP_PATTERN = (function() {
     var schema = "https?:\\/\\/|ftp:\\/\\/";
     var ip = "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}"
@@ -105,67 +106,6 @@ export let toHtml = function(text, replaceSpaces) {
     if (replaceSpaces)
         text = text.split(" ").join("&nbsp;");
     return text;
-};
-
-export let splitCommand = function(cmd) {
-    var args = [];
-    var arg = "";
-    var quot = 0;
-    for (var i = 0; i < cmd.length; ++i) {
-        var c = cmd[i];
-        if (/\s/.test(c)) {
-            if (quot) {
-                arg += c;
-            } else if (arg.length > 0) {
-                args.push(arg);
-                arg = "";
-            }
-        } else {
-            if ("\"" == c && (i < 1 || "\\" != cmd[i - 1])) {
-                switch (quot) {
-                case 1:
-                    quot = 0;
-                    break;
-                case -1:
-                    arg += c;
-                    break;
-                case 0:
-                default:
-                    quot = 1;
-                    break;
-                }
-            } else if ("'" == c && (i < 1 || "\\" != cmd[i - 1])) {
-                switch (quot) {
-                case 1:
-                    arg += c;
-                    break;
-                case -1:
-                    quot = 0;
-                    break;
-                case 0:
-                default:
-                    quot = -1;
-                    break;
-                }
-            } else {
-                if (("\"" == c || "'" == c) && (i > 0 || "\\" == cmd[i - 1]) && arg.length > 0)
-                    arg = arg.substring(0, arg.length - 1);
-                arg += c;
-            }
-        }
-    }
-    if (arg.length > 0) {
-        if (quot)
-            return null;
-        args.push(arg);
-    }
-    var command = null;
-    if (args.length > 0)
-        command = args.shift();
-    return {
-        command: command,
-        arguments: args
-    };
 };
 
 export function mayBeHashpass(password) {

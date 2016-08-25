@@ -9,6 +9,7 @@ import Program from './program';
 
 const DEFAULT_VALUES = new Map([
   ['board.useDefaultBoards', true],
+  ['server.chat.ttl', 10080], //NOTE: 7 days
   ['server.ddosProtection.enabled', true],
   ['server.ddosProtection.ws.connectionLimit', 10],
   ['server.ddosProtection.ws.maxMessageLength', 20480],
@@ -18,6 +19,7 @@ const DEFAULT_VALUES = new Map([
   ['server.rss.ttl', 60],
   ['server.statistics.enabled', true],
   ['server.statistics.ttl', 60],
+  ['server.synchronizationData.ttl', 300], //NOTE: 5 minutes
   ['site.protocol', 'http'],
   ['site.domain', 'localhost:8080'],
   ['site.pathPrefix', ''],
@@ -51,7 +53,9 @@ const DEFAULT_VALUES = new Map([
   ['system.redis.retryDelayOnTryAgain', 100],
   ['system.rerenderCacheOnStartup', true],
   ['system.rerenderArchive', false],
-  ['system.searchLimit', 100],
+  ['system.search.maxResultCount', 100],
+  ['system.search.maxResultPostSubjectLengh', 100],
+  ['system.search.maxResultPostTextLengh', 300],
   ['system.workerCount', OS.cpus().length]
 ]);
 
