@@ -142,7 +142,7 @@ var OrderedSet = function (_CommonKey) {
             switch (_context4.prev = _context4.next) {
               case 0:
                 _context4.next = 2;
-                return this.client.zadd(this.fullKey(subkey), this.stringify(data), score);
+                return this.client.zadd(this.fullKey(subkey), score, this.stringify(data));
 
               case 2:
                 return _context4.abrupt('return', _context4.sent);

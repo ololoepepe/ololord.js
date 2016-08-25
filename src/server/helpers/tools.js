@@ -594,3 +594,13 @@ export function pad(what, length, ch) {
   }
   return Array(length - what.length).join((ch || '0').toString()[0]) + what;
 }
+
+export function chunk(array, size) {
+  return array.reduce((res, item, index) => {
+    if (index % size === 0) {
+      res.push([]);
+    }
+    res[res.length - 1].push(item);
+    return res;
+  }, []);
+}

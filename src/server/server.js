@@ -29,9 +29,8 @@ import * as BoardsModel from './models/boards';
 import * as ChatsModel from './models/chats';
 import * as StatisticsModel from './models/statistics';
 import * as UsersModel from './models/users';
-import sqlClient from './storage/sql-client-factory';
 
-config.installSetHook("site.locale", Tools.setLocale);
+config.installSetHook("site.locale", Tools.setLocale); //TODO
 
 function spawnCluster() {
   expressCluster(async function(worker) {
@@ -42,8 +41,6 @@ function spawnCluster() {
     app.use(controllers);
     try {
       await geolocation.initialize();
-      let main = await sqlClient();
-      await main.initialize();
       await BoardsModel.initialize();
       await Renderer.reloadTemplates();
       var sockets = {};
@@ -190,6 +187,7 @@ function generateFileName() {
 }
 
 function onReady(initCallback) {
+  //TODO: May throw error
   if (!onReady.ready) {
     onReady.ready = 0;
   }
@@ -253,8 +251,6 @@ if (Cluster.isMaster) {
     try {
       await NodeCaptcha.removeOldCaptchImages();
       await NodeCaptchaNoscript.removeOldCaptchImages();
-      let main = await sqlClient();
-      await main.initialize();
       await Renderer.compileTemplates();
       await Renderer.reloadTemplates();
       if (Program.rerender || config('system.rerenderCacheOnStartup')) {

@@ -22,6 +22,7 @@ exports.toHashpass = toHashpass;
 exports.processError = processError;
 exports.rerenderPostsTargetsFromString = rerenderPostsTargetsFromString;
 exports.pad = pad;
+exports.chunk = chunk;
 
 var _underscore = require("underscore");
 
@@ -652,5 +653,15 @@ function pad(what, length, ch) {
         return what;
     }
     return Array(length - what.length).join((ch || '0').toString()[0]) + what;
+}
+
+function chunk(array, size) {
+    return array.reduce(function (res, item, index) {
+        if (index % size === 0) {
+            res.push([]);
+        }
+        res[res.length - 1].push(item);
+        return res;
+    }, []);
 }
 //# sourceMappingURL=tools.js.map

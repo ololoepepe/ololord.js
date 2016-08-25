@@ -23,7 +23,7 @@ export default class OrderedSet extends CommonKey {
   }
 
   async addOne(data, score, subkey) {
-    return await this.client.zadd(this.fullKey(subkey), this.stringify(data), score);
+    return await this.client.zadd(this.fullKey(subkey), score, this.stringify(data));
   }
 
   async addSome(list, subkey) {

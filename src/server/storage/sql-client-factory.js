@@ -13,26 +13,6 @@ function createClient(name) {
         reject(err);
         return;
       }
-      db.initialize = async function() {
-        let path = `${__dirname}/../sqlite/${name}.schema`;
-        let exists = await FS.exists(path);
-        let schema = await FS.read(path);
-        schema = schema.replace(/\/\*(.|\r?\n)*\*\//g, '');
-        schema = schema.replace(/\-\-.*/g, '');
-        schema = schema.replace(/\r?\n+/g, ' ');
-        let statements = schema.split(';').filter((statement) => !/^\s+$/.test(statement));
-        await Tools.series(statements, async function(statement) {
-          return await new Promise((resolve, reject) => {
-            db.run(statement, [], (err) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve();
-              }
-            });
-          });
-        });
-      };
       resolve(db);
     });
   });

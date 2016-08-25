@@ -1,3 +1,5 @@
+import SQLAdapter from './sql-adapter';
+
 export default class CommonKey {
   static selectParser(parse) {
     if (typeof parse === 'function') {
@@ -35,7 +37,7 @@ export default class CommonKey {
   }
 
   constructor(client, key, { parse, stringify } = {}) {
-    this.client = client;
+    this.client = (client instanceof Promise) ? new SQLAdapter(client) : client;
     this.key = key;
     this.parse = CommonKey.selectParser(parse);
     this.stringify = CommonKey.selectStringifier(stringify);
