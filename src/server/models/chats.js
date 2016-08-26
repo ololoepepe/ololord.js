@@ -16,9 +16,7 @@ let Chats = new UnorderedSet(redisClient(), 'chats', {
 });
 
 function createUserHash(user) {
-  let sha256 = Crypto.createHash('sha256');
-  sha256.update(user.hashpass || user.ip);
-  return sha256.digest('hex');
+  return Tools.crypto('sha256', user.hashpass || user.ip);
 }
 
 export async function getChatMessages(user, lastRequestDate) {

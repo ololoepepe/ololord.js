@@ -1767,6 +1767,9 @@ var SQLAdapter = function () {
           while (1) {
             switch (_context48.prev = _context48.next) {
               case 0:
+                _logger2.default.warn(Tools.translate('"zrange" is not implemented for SQL tables. Table: "$[1]"', '', key));
+
+              case 1:
               case 'end':
                 return _context48.stop();
             }
@@ -1782,14 +1785,15 @@ var SQLAdapter = function () {
     }()
   }, {
     key: 'zrangebyscroe',
-
-    //TODO
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee49(key, lb, ub) {
         return regeneratorRuntime.wrap(function _callee49$(_context49) {
           while (1) {
             switch (_context49.prev = _context49.next) {
               case 0:
+                _logger2.default.warn(Tools.translate('"zrangebyscroe" is not implemented for SQL tables. Table: "$[1]"', '', key));
+
+              case 1:
               case 'end':
                 return _context49.stop();
             }
@@ -1805,14 +1809,15 @@ var SQLAdapter = function () {
     }()
   }, {
     key: 'zadd',
-
-    //TODO
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee50(key) {
         return regeneratorRuntime.wrap(function _callee50$(_context50) {
           while (1) {
             switch (_context50.prev = _context50.next) {
               case 0:
+                _logger2.default.warn(Tools.translate('"zadd" is not implemented for SQL tables. Table: "$[1]"', '', key));
+
+              case 1:
               case 'end':
                 return _context50.stop();
             }
@@ -1828,14 +1833,15 @@ var SQLAdapter = function () {
     }()
   }, {
     key: 'zrem',
-
-    //TODO
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee51(key) {
         return regeneratorRuntime.wrap(function _callee51$(_context51) {
           while (1) {
             switch (_context51.prev = _context51.next) {
               case 0:
+                _logger2.default.warn(Tools.translate('"zrem" is not implemented for SQL tables. Table: "$[1]"', '', key));
+
+              case 1:
               case 'end':
                 return _context51.stop();
             }
@@ -1851,14 +1857,15 @@ var SQLAdapter = function () {
     }()
   }, {
     key: 'zcard',
-
-    //TODO
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee52(key) {
         return regeneratorRuntime.wrap(function _callee52$(_context52) {
           while (1) {
             switch (_context52.prev = _context52.next) {
               case 0:
+                _logger2.default.warn(Tools.translate('"zcard" is not implemented for SQL tables. Table: "$[1]"', '', key));
+
+              case 1:
               case 'end':
                 return _context52.stop();
             }

@@ -65,6 +65,7 @@ const DEFAULT_VALUES = new Map([
   ['site.locale', 'en'],
   ['site.dateFormat', 'MM/DD/YYYY hh:mm:ss'],
   ['site.timeOffset', 0],
+  ['site.tripcodeSalt', ''],
   ['site.vkontakte.accessToken', ''],
   ['site.vkontakte.appId', ''],
   ['site.vkontakte.integrationEnabled', false],
@@ -80,6 +81,7 @@ const DEFAULT_VALUES = new Map([
   ['system.log.middleware.verbosity', 'ip'],
   ['system.log.targets', ['console', 'file']],
   ['system.mimeTypeRetrievingTimeout', 5 * 1000], //NOTE: 5 seconds
+  ['system.maxFormFieldsSize', 5 * 1024 * 1024], //NOTE: 5 MB
   ['system.onlineCounter.interval', 60 * 1000], //NOTE: 1 minute
   ['system.onlineCounter.quota', 5 * 60 * 1000], //NOTE: 5 minutes
   ['system.phash.enabled', true],
@@ -99,6 +101,7 @@ const DEFAULT_VALUES = new Map([
   ['system.search.maxResultCount', 100],
   ['system.search.maxResultPostSubjectLengh', 100],
   ['system.search.maxResultPostTextLengh', 300],
+  ['system.tmpPath', `${__dirname}/../tmp`],
   ['system.workerCount', OS.cpus().length]
 ]);
 
@@ -174,5 +177,19 @@ c.on = function(key, hook) {
   list.push(hook);
   return this;
 };
+
+c.proxy = function() {
+  let proxy = c('system.fileDownloadProxy');
+  if (!proxy) {
+    return null;
+  }
+  let parts = proxy.split(':');
+  let auth = config('system.fileDownloadProxyAuth');
+  return {
+    host: parts[0],
+    port: (parts[1] ? +parts[1] : null),
+    auth: (auth ? `Basic ${new Buffer(auth).toString('base64')}` : null)
+  };
+}
 
 export default c;

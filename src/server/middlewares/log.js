@@ -1,3 +1,4 @@
+import * as Files from '../core/files';
 import config from '../helpers/config';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
@@ -31,7 +32,7 @@ export default async function(req, res, next) {
   if (req.method.match(/^post|put|patch|delete$/i) && config('system.log.middleware.verbosity') === 'all') {
     let args = [Tools.preferIPv4(req.ip), req.path, req.query];
     try {
-      let { fields, files } = await Tools.parseForm(req);
+      let { fields, files } = await Files.parseForm(req);
       req.formFields = fields;
       req.formFiles = files;
       args.push(fields);

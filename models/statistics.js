@@ -22,7 +22,7 @@ var gatherBoardStatistics = function () {
             lastPostNumber = _context2.sent;
 
             statistics.postCount = lastPostNumber;
-            statistics.postingSpeed = Tools.postingSpeedString(board.launchDate, lastPostNumber);
+            statistics.postingSpeed = Renderer.postingSpeedString(board.launchDate, lastPostNumber);
             _context2.next = 13;
             break;
 
@@ -130,7 +130,7 @@ var generateStatistics = exports.generateStatistics = function () {
             return _context5.abrupt('return');
 
           case 3:
-            console.log(Tools.translate('Generating statistics...'));
+            console.log(Tools.translate('Generating statistics…'));
             statistics = {
               boards: [],
               total: {
@@ -221,7 +221,7 @@ var generateStatistics = exports.generateStatistics = function () {
                       }());
 
                     case 7:
-                      statistics.total.postingSpeed = Tools.postingSpeedString(launchDate, statistics.total.postCount);
+                      statistics.total.postingSpeed = Renderer.postingSpeedString(launchDate, statistics.total.postCount);
                       _context4.next = 10;
                       return IPC.send('getConnectionIPs');
 
@@ -296,6 +296,10 @@ var _board2 = _interopRequireDefault(_board);
 var _files = require('../core/files');
 
 var Files = _interopRequireWildcard(_files);
+
+var _renderer = require('../core/renderer');
+
+var Renderer = _interopRequireWildcard(_renderer);
 
 var _cache = require('../helpers/cache');
 

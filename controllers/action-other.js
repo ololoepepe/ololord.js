@@ -16,6 +16,10 @@ var _captcha = require('../captchas/captcha');
 
 var _captcha2 = _interopRequireDefault(_captcha);
 
+var _files = require('../core/files');
+
+var Files = _interopRequireWildcard(_files);
+
 var _geolocation = require('../core/geolocation');
 
 var _geolocation2 = _interopRequireDefault(_geolocation);
@@ -122,7 +126,7 @@ router.post('/action/sendChatMessage', function () {
           case 0:
             _context.prev = 0;
             _context.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref = _context.sent;
@@ -206,7 +210,7 @@ router.post('/action/deleteChatMessages', function () {
           case 0:
             _context2.prev = 0;
             _context2.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref2 = _context2.sent;
@@ -281,7 +285,7 @@ router.post('/action/synchronize', function () {
           case 0:
             _context3.prev = 0;
             _context3.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref3 = _context3.sent;
@@ -365,7 +369,7 @@ router.post('/action/search', function () {
                   switch (_context4.prev = _context4.next) {
                     case 0:
                       _context4.next = 2;
-                      return Tools.parseForm(req);
+                      return Files.parseForm(req);
 
                     case 2:
                       _ref4 = _context4.sent;
@@ -447,7 +451,7 @@ router.post('/action/search', function () {
                         }
                       });
                       model.phrases = query.requiredPhrases.concat(query.excludedPhrases).concat(query.possiblePhrases);
-                      model.phrases = Tools.withoutDuplicates(model.phrases);
+                      model.phrases = (0, _underscore2.default)(model.phrases).uniq();
                       _context4.next = 30;
                       return Search.findPosts(query, {
                         boardName: boardName,

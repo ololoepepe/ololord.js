@@ -66,7 +66,7 @@ export default [{
     if (!result.rerender) {
       return;
     }
-    await PostsModel.rerenderPosts(Tools.rerenderPostsTargetsFromString((targets || []).join(' ')));
+    await PostsModel.rerenderPosts(Renderer.targetsFromString((targets || []).join(' ')));
     //TODO: Rerender corresponding pages?
     return 'OK';
   },
@@ -149,7 +149,7 @@ export default [{
     if (!result.rebuild) {
       return;
     }
-    await PostsModel.rebuildSearchIndex(Tools.rerenderPostsTargetsFromString((targets || []).join(' ')));
+    await PostsModel.rebuildSearchIndex(Renderer.targetsFromString((targets || []).join(' ')));
     return 'OK';
   },
   options: {

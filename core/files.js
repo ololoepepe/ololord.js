@@ -15,7 +15,7 @@ var downloadFile = function () {
             path = __dirname + '/../tmp/upload_' + _uuid2.default.v4();
 
             transaction.addFile(path);
-            proxy = Tools.proxy();
+            proxy = _config2.default.proxy();
             options = { timeout: Tools.MINUTE }; //TODO: magic number
 
             if (!/^vk\:\/\//.test(url)) {
@@ -595,7 +595,7 @@ var processFile = function () {
     }, _callee11, this);
   }));
 
-  return function processFile(_x20, _x21, _x22) {
+  return function processFile(_x21, _x22, _x23) {
     return ref.apply(this, arguments);
   };
 }();
@@ -645,7 +645,7 @@ var processFiles = exports.processFiles = function () {
                 }, _callee12, this);
               }));
 
-              return function (_x26) {
+              return function (_x27) {
                 return ref.apply(this, arguments);
               };
             }(), true);
@@ -661,7 +661,7 @@ var processFiles = exports.processFiles = function () {
     }, _callee13, this);
   }));
 
-  return function processFiles(_x23, _x24, _x25) {
+  return function processFiles(_x24, _x25, _x26) {
     return ref.apply(this, arguments);
   };
 }();
@@ -693,7 +693,7 @@ var diskUsage = exports.diskUsage = function () {
     }, _callee14, this);
   }));
 
-  return function diskUsage(_x27) {
+  return function diskUsage(_x28) {
     return ref.apply(this, arguments);
   };
 }();
@@ -737,7 +737,7 @@ var writeFile = exports.writeFile = function () {
     }, _callee15, this);
   }));
 
-  return function writeFile(_x28, _x29) {
+  return function writeFile(_x29, _x30) {
     return ref.apply(this, arguments);
   };
 }();
@@ -791,7 +791,7 @@ var createFile = exports.createFile = function () {
     }, _callee16, this);
   }));
 
-  return function createFile(_x30, _x31, _x32) {
+  return function createFile(_x31, _x32, _x33) {
     return ref.apply(this, arguments);
   };
 }();
@@ -813,7 +813,7 @@ var editFile = exports.editFile = function () {
     }, _callee17, this);
   }));
 
-  return function editFile(_x34, _x35) {
+  return function editFile(_x35, _x36) {
     return ref.apply(this, arguments);
   };
 }();
@@ -837,7 +837,7 @@ var renameFile = exports.renameFile = function () {
     }, _callee18, this);
   }));
 
-  return function renameFile(_x36, _x37) {
+  return function renameFile(_x37, _x38) {
     return ref.apply(this, arguments);
   };
 }();
@@ -859,7 +859,7 @@ var deleteFile = exports.deleteFile = function () {
     }, _callee19, this);
   }));
 
-  return function deleteFile(_x38) {
+  return function deleteFile(_x39) {
     return ref.apply(this, arguments);
   };
 }();
@@ -900,7 +900,7 @@ var generateRandomImage = exports.generateRandomImage = function () {
     }, _callee20, this);
   }));
 
-  return function generateRandomImage(_x39, _x40, _x41) {
+  return function generateRandomImage(_x40, _x41, _x42) {
     return ref.apply(this, arguments);
   };
 }();
@@ -952,12 +952,13 @@ var getMimeType = exports.getMimeType = function () {
     }, _callee21, this, [[2, 8]]);
   }));
 
-  return function getMimeType(_x42) {
+  return function getMimeType(_x43) {
     return ref.apply(this, arguments);
   };
 }();
 
 exports.selectThumbnailingPlugin = selectThumbnailingPlugin;
+exports.parseForm = parseForm;
 exports.isAudioType = isAudioType;
 exports.isVideoType = isVideoType;
 exports.isPdfType = isPdfType;
@@ -998,6 +999,14 @@ var _jdenticon2 = _interopRequireDefault(_jdenticon);
 var _merge = require('merge');
 
 var _merge2 = _interopRequireDefault(_merge);
+
+var _mkpath = require('mkpath');
+
+var _mkpath2 = _interopRequireDefault(_mkpath);
+
+var _multiparty = require('multiparty');
+
+var _multiparty2 = _interopRequireDefault(_multiparty);
 
 var _path = require('path');
 
@@ -1049,6 +1058,8 @@ var mkpath = (0, _promisifyNode2.default)('mkpath');
 
 var FILE_RATINGS = new Set(['SFW', 'R-15', 'R-18', 'R-18G']);
 
+_mkpath2.default.sync((0, _config2.default)('system.tmpPath') + '/form');
+
 var fileTypePlugins = Tools.loadPlugins([__dirname + '/../file-types', __dirname + '/../file-types/custom']);
 
 function setFileRating(file, id, fields) {
@@ -1064,6 +1075,40 @@ function selectThumbnailingPlugin(mimeType) {
   //TODO: Cache
   return (0, _underscore2.default)(fileTypePlugins).find(function (plugin) {
     return plugin.match(mimeType);
+  });
+}
+
+function parseForm() {
+  var req = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+  var formFields = req.formFields;
+  var formFiles = req.formFiles;
+
+  if (formFields) {
+    return {
+      fields: formFields,
+      files: formFiles || []
+    };
+  }
+  var form = new _multiparty2.default.Form();
+  form.uploadDir = (0, _config2.default)('system.tmpPath') + '/form';
+  form.autoFields = true;
+  form.autoFiles = true;
+  form.maxFieldsSize = (0, _config2.default)('system.maxFormFieldsSize');
+  return new Promise(function (resolve, reject) {
+    form.parse(req, function (err, fields, files) {
+      if (err) {
+        return reject(err);
+      }
+      resolve({
+        fields: (0, _underscore2.default)(fields).mapObject(function (value, key) {
+          return 1 === value.length ? value[0] : value;
+        }),
+        files: (0, _underscore2.default)(files).toArray().map(function (file) {
+          file.name = file.originalFilename;
+          return file;
+        })
+      });
+    });
   });
 }
 

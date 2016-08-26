@@ -34,7 +34,7 @@ export function postSubject(post, maxLength) {
   if (post.subject) {
     subject = post.subject;
   } else if (post.text) {
-    subject = Tools.plainText(post.text);
+    subject = Renderer.plainText(post.text);
   }
   subject = subject.replace(/\r*\n+/gi, '');
   maxLength = Tools.option(maxLength, 'number', 0, { test: (l) => { return l > 0; } });
@@ -109,7 +109,7 @@ export async function getPage(boardName, pageNumber) {
     pageCount: pageCount,
     currentPage: pageNumber,
     lastPostNumber: lastPostNumber,
-    postingSpeed: Tools.postingSpeedString(board.launchDate, lastPostNumber)
+    postingSpeed: Renderer.postingSpeedString(board.launchDate, lastPostNumber)
   };
 }
 
@@ -144,7 +144,7 @@ export async function getCatalog(boardName, sortMode) {
   return {
     threads: threads.sort(sortFunction),
     lastPostNumber: lastPostNumber,
-    postingSpeed: Tools.postingSpeedString(board.launchDate, lastPostNumber)
+    postingSpeed: Renderer.postingSpeedString(board.launchDate, lastPostNumber)
   };
 }
 
@@ -173,7 +173,7 @@ export async function getArchive(boardName) {
   return {
     threads: threads.sort((t1, t2) => { return t2 - t1; }), //NOTE: The order is correct (t2 - t1).
     lastPostNumber: lastPostNumber,
-    postingSpeed: Tools.postingSpeedString(board.launchDate, lastPostNumber)
+    postingSpeed: Renderer.postingSpeedString(board.launchDate, lastPostNumber)
   };
 }
 

@@ -328,7 +328,7 @@ export default class Board {
     post.rawSubject = post.subject;
     post.isOp = (post.number === post.threadNumber);
     if (post.options.showTripcode) {
-      post.tripcode = Tools.generateTripcode(post.user.hashpass);
+      post.tripcode = this.generateTripcode(post.user.hashpass);
     }
     delete post.user.ip;
     delete post.user.hashpass;
@@ -337,5 +337,9 @@ export default class Board {
       post.geolocation.countryName = 'Unknown country';
     }
     return post;
+  }
+
+  generateTripcode(source) {
+    return '!' + Tools.Crypto('md5', source + config('site.tripcodeSalt'), 'base64').substr(0, 10);
   }
 }

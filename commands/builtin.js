@@ -213,7 +213,7 @@ exports.default = [{
 
             case 5:
               _context4.next = 7;
-              return PostsModel.rerenderPosts(Tools.rerenderPostsTargetsFromString((targets || []).join(' ')));
+              return PostsModel.rerenderPosts(Renderer.targetsFromString((targets || []).join(' ')));
 
             case 7:
               return _context4.abrupt('return', 'OK');
@@ -482,7 +482,7 @@ exports.default = [{
 
             case 5:
               _context10.next = 7;
-              return PostsModel.rebuildSearchIndex(Tools.rerenderPostsTargetsFromString((targets || []).join(' ')));
+              return PostsModel.rebuildSearchIndex(Renderer.targetsFromString((targets || []).join(' ')));
 
             case 7:
               return _context10.abrupt('return', 'OK');

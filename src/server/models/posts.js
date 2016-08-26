@@ -5,6 +5,7 @@ import * as FilesModel from './files';
 import * as ThreadsModel from './threads';
 import * as UsersModel from './users';
 import Board from '../boards/board';
+import * as Renderer from '../core/renderer';
 import * as Search from '../core/search';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
@@ -183,7 +184,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
   if (!postNumber) {
     postNumber = await BoardsModel.nextPostNumber(boardName);
   }
-  let plainText = text ? Tools.plainText(text, { brToNewline: true }) : null;
+  let plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
   let post = {
     bannedFor: false,
     boardName: boardName,
@@ -365,7 +366,7 @@ export async function editPost(req, fields) {
     referencedPosts: referencedPosts,
     accessLevel: req.level(board.name)
   });
-  let plainText = text ? Tools.plainText(text, { brToNewline: true }) : null;
+  let plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
   let extraData = await board.postExtraData(req, fields, null, post);
   //post.markup = markupModes; //TODO ???
   post.name = name || null;

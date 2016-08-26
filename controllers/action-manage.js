@@ -81,7 +81,7 @@ router.post('/action/registerUser', function () {
 
           case 3:
             _context.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref = _context.sent;
@@ -146,7 +146,7 @@ router.post('/action/updateRegisteredUser', function () {
 
           case 3:
             _context2.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref2 = _context2.sent;
@@ -210,7 +210,7 @@ router.post('/action/unregisterUser', function () {
 
           case 3:
             _context3.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref3 = _context3.sent;
@@ -270,7 +270,7 @@ router.post('/action/superuserAddFile', function () {
 
           case 3:
             _context4.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref4 = _context4.sent;
@@ -345,7 +345,7 @@ router.post('/action/superuserEditFile', function () {
 
           case 3:
             _context5.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref5 = _context5.sent;
@@ -407,7 +407,7 @@ router.post('/action/superuserRenameFile', function () {
 
           case 3:
             _context6.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref6 = _context6.sent;
@@ -469,7 +469,7 @@ router.post('/action/superuserDeleteFile', function () {
 
           case 3:
             _context7.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref7 = _context7.sent;
@@ -529,7 +529,7 @@ router.post('/action/superuserRerender', function () {
 
           case 3:
             _context8.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref8 = _context8.sent;
@@ -617,7 +617,7 @@ router.post('/action/superuserRerenderPosts', function () {
 
           case 3:
             _context9.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref9 = _context9.sent;
@@ -632,7 +632,7 @@ router.post('/action/superuserRerenderPosts', function () {
 
           case 9:
             _context9.next = 11;
-            return PostsModel.rerenderPosts(Tools.rerenderPostsTargetsFromString(_targets2));
+            return PostsModel.rerenderPosts(Renderer.targetsFromString(_targets2));
 
           case 11:
             //TODO: Rerender corresponding pages?
@@ -678,7 +678,7 @@ router.post('/action/superuserRebuildSearchIndex', function () {
 
           case 3:
             _context10.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref10 = _context10.sent;
@@ -693,7 +693,7 @@ router.post('/action/superuserRebuildSearchIndex', function () {
 
           case 9:
             _context10.next = 11;
-            return PostsModel.rebuildSearchIndex(Tools.rerenderPostsTargetsFromString(_targets3));
+            return PostsModel.rebuildSearchIndex(Renderer.targetsFromString(_targets3));
 
           case 11:
             res.json({});
@@ -738,7 +738,7 @@ router.post('/action/superuserReload', function () {
 
           case 3:
             _context11.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref11 = _context11.sent;

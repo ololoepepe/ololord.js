@@ -33,7 +33,7 @@ router.post('/action/registerUser', async function(req, res, next) {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { password } = fields;
     if (!password) {
       throw new Error(Tools.translate('Invalid password'));
@@ -52,7 +52,7 @@ router.post('/action/updateRegisteredUser', async function(req, res, next) {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { hashpass } = fields;
     if (!hashpass || !Tools.mayBeHashpass(hashpass)) {
       throw new Error(Tools.translate('Invalid hashpass'));
@@ -70,7 +70,7 @@ router.post('/action/unregisterUser', async function(req, res, next) {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields: { hashpass } } = await Tools.parseForm(req);
+    let { fields: { hashpass } } = await Files.parseForm(req);
     if (!hashpass || !Tools.mayBeHashpass(hashpass)) {
       throw new Error(Tools.translate('Invalid hashpass'));
     }
@@ -86,7 +86,7 @@ router.post('/action/superuserAddFile', async function(req, res, next) {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields: { dir, fileName, isDir }, files } = await Tools.parseForm(req);
+    let { fields: { dir, fileName, isDir }, files } = await Files.parseForm(req);
     if (!dir || typeof dir !== 'string') {
       throw new Error(Tools.translate('Invalid dir'));
     }
@@ -108,7 +108,7 @@ router.post('/action/superuserEditFile', async function(req, res, next) {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields: { fileName, content } } = await Tools.parseForm(req);
+    let { fields: { fileName, content } } = await Files.parseForm(req);
     if (!fileName || typeof fileName !== 'string') {
       throw new Error(Tools.translate('Invalid file name'));
     }
@@ -124,7 +124,7 @@ router.post('/action/superuserRenameFile', async function(req, res, next) {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields: { oldFileName, fileName } } = await Tools.parseForm(req);
+    let { fields: { oldFileName, fileName } } = await Files.parseForm(req);
     if (!oldFileName || typeof oldFileName !== 'string' || !fileName || typeof fileName !== 'string') {
       throw new Error(Tools.translate('Invalid file name'));
     }
@@ -140,7 +140,7 @@ router.post('/action/superuserDeleteFile', async function(req, res, next) {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields: { fileName } } = await Tools.parseForm(req);
+    let { fields: { fileName } } = await Files.parseForm(req);
     if (!fileName || typeof fileName !== 'string') {
       throw new Error(Tools.translate('Invalid file name'));
     }
@@ -156,7 +156,7 @@ router.post('/action/superuserRerender', async function(req, res, next) {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields: { targets, archive } } = await Tools.parseForm(req);
+    let { fields: { targets, archive } } = await Files.parseForm(req);
     if (typeof targets !== 'string') {
       throw new Error(Tools.translate('Invalid targets'));
     }
@@ -178,11 +178,11 @@ router.post('/action/superuserRerenderPosts', async function(req, res, next) {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields: { targets } } = await Tools.parseForm(req);
+    let { fields: { targets } } = await Files.parseForm(req);
     if (typeof targets !== 'string') {
       throw new Error(Tools.translate('Invalid targets'));
     }
-    await PostsModel.rerenderPosts(Tools.rerenderPostsTargetsFromString(targets));
+    await PostsModel.rerenderPosts(Renderer.targetsFromString(targets));
     //TODO: Rerender corresponding pages?
     res.json({});
   } catch (err) {
@@ -195,11 +195,11 @@ router.post('/action/superuserRebuildSearchIndex', async function(req, res, next
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields: { targets } } = await Tools.parseForm(req);
+    let { fields: { targets } } = await Files.parseForm(req);
     if (typeof targets !== 'string') {
       throw new Error(Tools.translate('Invalid targets'));
     }
-    await PostsModel.rebuildSearchIndex(Tools.rerenderPostsTargetsFromString(targets));
+    await PostsModel.rebuildSearchIndex(Renderer.targetsFromString(targets));
     res.json({});
   } catch (err) {
     next(Tools.processError(err));
@@ -211,7 +211,7 @@ router.post('/action/superuserReload', async function(req, res, next) {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields: { boards, templates } } = await Tools.parseForm(req);
+    let { fields: { boards, templates } } = await Files.parseForm(req);
     if (typeof targets !== 'string') {
       throw new Error(Tools.translate('Invalid targets'));
     }

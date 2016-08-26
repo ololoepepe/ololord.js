@@ -4,6 +4,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _files = require('../core/files');
+
+var Files = _interopRequireWildcard(_files);
+
 var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
@@ -16,9 +20,9 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
@@ -70,7 +74,7 @@ exports.default = function () {
             args = [Tools.preferIPv4(req.ip), req.path, req.query];
             _context.prev = 4;
             _context.next = 7;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 7:
             _ref = _context.sent;

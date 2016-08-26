@@ -3,9 +3,11 @@ import browserify from 'browserify';
 import DOT from 'dot';
 import escapeHTML from 'escape-html';
 import FS from 'q-io/fs';
+import HTMLToText from 'html-to-text';
 import merge from 'merge';
 import micromatch from 'micromatch';
 import moment from 'moment';
+import UUID from 'uuid';
 
 import * as Files from './files';
 import Board from '../boards/board';
@@ -257,4 +259,98 @@ export async function reloadTemplates() {
   } catch (err) {
     Logger.error(err.stack || err);
   }
+}
+
+export function targetsFromString(string) {
+  if (!string || typeof string !== 'string') {
+    return {};
+  }
+  return string.split(/\s+/).reduce((acc, part) => {
+    let [boardName, ...postNumbers] = part.split(':');
+    if (boardName) {
+      if (postNumbers.length > 0) {
+        acc[boardName] = postNumbers.map((postNumber) => {
+          return Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber })
+        }).filter(postNumber => !!postNumber);
+      } else {
+        acc[boardName] = '*';
+      }
+    }
+    return acc;
+  }, {});
+}
+
+export function postingSpeedString(launchDate, lastPostNumber) {
+  launchDate = +launchDate;
+  if (isNaN(launchDate)) {
+    return '-';
+  }
+  function zeroSpeedString(nonZero) {
+    if (lastPostNumber && launchDate) {
+      return `1 ${nonZero}`;
+    } else {
+      return `0 ${Tools.translate('post(s) per hour.')}`;
+    }
+  }
+  function speedString(duptime) {
+    let ss = '' + (lastPostNumber / duptime).toFixed(1);
+    return (ss.split('.').pop() !== '0') ? ss : ss.split('.').shift();
+  }
+  let uptimeMsecs = _.now() - launchDate;
+  let duptime = uptimeMsecs / Tools.HOUR;
+  let uptime = Math.floor(duptime);
+  let shour = Tools.translate('post(s) per hour.');
+  if (!uptime) {
+    return zeroSpeedString(shour);
+  } else if (Math.floor(lastPostNumber / uptime) > 0) {
+    return `${speedString(duptime)} ${shour}`;
+  }
+  duptime /= 24;
+  uptime = Math.floor(duptime);
+  let sday = Tools.translate('post(s) per day.');
+  if (!uptime) {
+    return zeroSpeedString(sday);
+  } else if (Math.floor(lastPostNumber / uptime) > 0) {
+    return `${speedString(duptime)} ${sday}`;
+  }
+  duptime /= (365 / 12);
+  uptime = Math.floor(duptime);
+  let smonth = Tools.translate('post(s) per month.');
+  if (!uptime) {
+    return zeroSpeedString(smonth);
+  } else if (Math.floor(lastPostNumber / uptime) > 0) {
+    return `${speedString(duptime)} ${smonth}`;
+  }
+  duptime /= 12.0;
+  uptime = Math.floor(duptime);
+  let syear = Tools.translate('post(s) per year.');
+  if (!uptime) {
+    return zeroSpeedString(syear);
+  } else if (Math.floor(lastPostNumber / uptime) > 0) {
+    return `${speedString(duptime)} ${syear}`;
+  }
+  return `0 ${syear}`;
+}
+
+export function plainText(text, { brToNewline } = {}) {
+  if (!text) {
+    return '';
+  }
+  text = '' + text;
+  let id = UUID.v4();
+  if (brToNewline) {
+    text = text.replace(/<br \/>/g, id);
+  } else {
+    text = text.replace(/<br \/>/g, ' ');
+  }
+  text = HTMLToText.fromString(text, {
+    wordwrap: null,
+    linkHrefBaseUrl: `${config('site.protocol')}://${config('site.domain')}`,
+    hideLinkHrefIfSameAsText: true,
+    ignoreImages: true
+  });
+  if (brToNewline) {
+    text = text.split(id).join('\n');
+  }
+  return text;
 }

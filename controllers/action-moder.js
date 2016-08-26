@@ -20,6 +20,10 @@ var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
+var _files = require('../core/files');
+
+var Files = _interopRequireWildcard(_files);
+
 var _geolocation = require('../core/geolocation');
 
 var _geolocation2 = _interopRequireDefault(_geolocation);
@@ -113,7 +117,7 @@ router.post('/action/banUser', function () {
 
                     case 2:
                       _context.next = 4;
-                      return Tools.parseForm(req);
+                      return Files.parseForm(req);
 
                     case 4:
                       _ref = _context.sent;
@@ -235,7 +239,7 @@ router.post('/action/delall', function () {
 
           case 3:
             _context3.next = 5;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 5:
             _ref2 = _context3.sent;
@@ -330,7 +334,7 @@ router.post('/action/moveThread', function () {
           case 0:
             _context4.prev = 0;
             _context4.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref3 = _context4.sent;
@@ -429,7 +433,7 @@ router.post('/action/setThreadFixed', function () {
           case 0:
             _context5.prev = 0;
             _context5.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref4 = _context5.sent;
@@ -518,7 +522,7 @@ router.post('/action/setThreadClosed', function () {
           case 0:
             _context6.prev = 0;
             _context6.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref5 = _context6.sent;
@@ -607,7 +611,7 @@ router.post('/action/setThreadUnbumpable', function () {
           case 0:
             _context7.prev = 0;
             _context7.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref6 = _context7.sent;

@@ -3,6 +3,7 @@ import express from 'express';
 
 import Board from '../boards/board';
 import Captcha from '../captchas/captcha';
+import * as Files from '../core/files';
 import geolocation from '../core/geolocation';
 import * as Search from '../core/search';
 import config from '../helpers/config';
@@ -78,7 +79,7 @@ function splitCommand(cmd) {
 
 router.post('/action/sendChatMessage', async function(req, res, next) {
   try {
-    let { fields: { boardName, postNumber, text } } = await Tools.parseForm(req);
+    let { fields: { boardName, postNumber, text } } = await Files.parseForm(req);
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
@@ -103,7 +104,7 @@ router.post('/action/sendChatMessage', async function(req, res, next) {
 
 router.post('/action/deleteChatMessages', async function(req, res, next) {
   try {
-    let { fields: { boardName, postNumber } } = await Tools.parseForm(req);
+    let { fields: { boardName, postNumber } } = await Files.parseForm(req);
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
@@ -125,7 +126,7 @@ router.post('/action/deleteChatMessages', async function(req, res, next) {
 
 router.post('/action/synchronize', async function(req, res, next) {
   try {
-    let { fields: { key, data } } = await Tools.parseForm(req);
+    let { fields: { key, data } } = await Files.parseForm(req);
     if (!key || typeof key !== 'string') {
       throw new Error(Tools.translate('No key specified'));
     }
@@ -148,7 +149,7 @@ router.post('/action/synchronize', async function(req, res, next) {
 
 router.post('/action/search', async function(req, res, next) {
   try {
-    let { fields: { query, boardName, page } } = await Tools.parseForm(req);
+    let { fields: { query, boardName, page } } = await Files.parseForm(req);
     if (!query || typeof query !== 'string') {
       throw new Error(Tools.translate('Search query is empty'));
     }
@@ -190,7 +191,7 @@ router.post('/action/search', async function(req, res, next) {
       }
     });
     model.phrases = query.requiredPhrases.concat(query.excludedPhrases).concat(query.possiblePhrases);
-    model.phrases = Tools.withoutDuplicates(model.phrases);
+    model.phrases = _(model.phrases).uniq();
     let result = await Search.findPosts(query, {
       boardName: boardName,
       page: page

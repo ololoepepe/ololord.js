@@ -167,7 +167,7 @@ var getPage = exports.getPage = function () {
               pageCount: pageCount,
               currentPage: pageNumber,
               lastPostNumber: lastPostNumber,
-              postingSpeed: Tools.postingSpeedString(board.launchDate, lastPostNumber)
+              postingSpeed: Renderer.postingSpeedString(board.launchDate, lastPostNumber)
             });
 
           case 22:
@@ -269,7 +269,7 @@ var getCatalog = exports.getCatalog = function () {
             return _context5.abrupt('return', {
               threads: threads.sort(sortFunction),
               lastPostNumber: lastPostNumber,
-              postingSpeed: Tools.postingSpeedString(board.launchDate, lastPostNumber)
+              postingSpeed: Renderer.postingSpeedString(board.launchDate, lastPostNumber)
             });
 
           case 24:
@@ -373,7 +373,7 @@ var getArchive = exports.getArchive = function () {
                 return t2 - t1;
               }), //NOTE: The order is correct (t2 - t1).
               lastPostNumber: lastPostNumber,
-              postingSpeed: Tools.postingSpeedString(board.launchDate, lastPostNumber)
+              postingSpeed: Renderer.postingSpeedString(board.launchDate, lastPostNumber)
             });
 
           case 22:
@@ -875,7 +875,7 @@ function postSubject(post, maxLength) {
   if (post.subject) {
     subject = post.subject;
   } else if (post.text) {
-    subject = Tools.plainText(post.text);
+    subject = Renderer.plainText(post.text);
   }
   subject = subject.replace(/\r*\n+/gi, '');
   maxLength = Tools.option(maxLength, 'number', 0, { test: function test(l) {

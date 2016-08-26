@@ -143,7 +143,7 @@ var rerender = exports.rerender = function () {
                               while (1) {
                                 switch (_context5.prev = _context5.next) {
                                   case 0:
-                                    console.log(Tools.translate('Rendering $[1]...', '', path));
+                                    console.log(Tools.translate('Rendering $[1]…', '', path));
                                     _context5.next = 3;
                                     return router.router.render(path);
 
@@ -300,7 +300,7 @@ var generateTemplatingJavaScriptFile = exports.generateTemplatingJavaScriptFile 
       while (1) {
         switch (_context10.prev = _context10.next) {
           case 0:
-            console.log('Generating templating JavaScript file...');
+            console.log('Generating templating JavaScript file…');
             models = JSON.stringify({
               base: MiscModel.base(),
               boards: MiscModel.boards(),
@@ -372,7 +372,7 @@ var generateCustomJavaScriptFile = exports.generateCustomJavaScriptFile = functi
       while (1) {
         switch (_context11.prev = _context11.next) {
           case 0:
-            console.log('Checking custom JavaScript file existence...');
+            console.log('Checking custom JavaScript file existence…');
             _context11.next = 3;
             return _fs2.default.exists(__dirname + '/../public/js/custom.js');
 
@@ -384,7 +384,7 @@ var generateCustomJavaScriptFile = exports.generateCustomJavaScriptFile = functi
               break;
             }
 
-            console.log('Creating dummy custom JavaScript file...');
+            console.log('Creating dummy custom JavaScript file…');
             _context11.next = 8;
             return Cache.writeFile('js/custom.js', '');
 
@@ -411,7 +411,7 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
       while (1) {
         switch (_context14.prev = _context14.next) {
           case 0:
-            console.log('Checking custom CSS files existence...');
+            console.log('Checking custom CSS files existence…');
             _context14.next = 3;
             return Tools.series(['combined', 'desktop', 'mobile'], function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(type) {
@@ -456,7 +456,7 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
               break;
             }
 
-            console.log('Creating dummy custom CSS file(s)...');
+            console.log('Creating dummy custom CSS file(s)…');
             _context14.next = 9;
             return Tools.series(types, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(type) {
@@ -500,7 +500,7 @@ var compileTemplates = exports.compileTemplates = function () {
       while (1) {
         switch (_context18.prev = _context18.next) {
           case 0:
-            console.log('Compiling templates...');
+            console.log('Compiling templates…');
             _context18.next = 3;
             return _fs2.default.list(TEMPLATES_PATH);
 
@@ -711,6 +711,9 @@ var reloadTemplates = exports.reloadTemplates = function () {
 }();
 
 exports.render = render;
+exports.targetsFromString = targetsFromString;
+exports.postingSpeedString = postingSpeedString;
+exports.plainText = plainText;
 
 var _underscore = require('underscore');
 
@@ -732,6 +735,10 @@ var _fs = require('q-io/fs');
 
 var _fs2 = _interopRequireDefault(_fs);
 
+var _htmlToText = require('html-to-text');
+
+var _htmlToText2 = _interopRequireDefault(_htmlToText);
+
 var _merge = require('merge');
 
 var _merge2 = _interopRequireDefault(_merge);
@@ -743,6 +750,10 @@ var _micromatch2 = _interopRequireDefault(_micromatch);
 var _moment = require('moment');
 
 var _moment2 = _interopRequireDefault(_moment);
+
+var _uuid = require('uuid');
+
+var _uuid2 = _interopRequireDefault(_uuid);
 
 var _files = require('./files');
 
@@ -775,6 +786,8 @@ var Tools = _interopRequireWildcard(_tools);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
@@ -850,5 +863,112 @@ function render(templateName, model) {
     _logger2.default.error(err.stack || err);
     return '';
   }
+}
+
+function targetsFromString(string) {
+  if (!string || typeof string !== 'string') {
+    return {};
+  }
+  return string.split(/\s+/).reduce(function (acc, part) {
+    var _part$split = part.split(':');
+
+    var _part$split2 = _toArray(_part$split);
+
+    var boardName = _part$split2[0];
+
+    var postNumbers = _part$split2.slice(1);
+
+    if (boardName) {
+      if (postNumbers.length > 0) {
+        acc[boardName] = postNumbers.map(function (postNumber) {
+          return Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+        }).filter(function (postNumber) {
+          return !!postNumber;
+        });
+      } else {
+        acc[boardName] = '*';
+      }
+    }
+    return acc;
+  }, {});
+}
+
+function postingSpeedString(launchDate, lastPostNumber) {
+  launchDate = +launchDate;
+  if (isNaN(launchDate)) {
+    return '-';
+  }
+  function zeroSpeedString(nonZero) {
+    if (lastPostNumber && launchDate) {
+      return '1 ' + nonZero;
+    } else {
+      return '0 ' + Tools.translate('post(s) per hour.');
+    }
+  }
+  function speedString(duptime) {
+    var ss = '' + (lastPostNumber / duptime).toFixed(1);
+    return ss.split('.').pop() !== '0' ? ss : ss.split('.').shift();
+  }
+  var uptimeMsecs = _underscore2.default.now() - launchDate;
+  var duptime = uptimeMsecs / Tools.HOUR;
+  var uptime = Math.floor(duptime);
+  var shour = Tools.translate('post(s) per hour.');
+  if (!uptime) {
+    return zeroSpeedString(shour);
+  } else if (Math.floor(lastPostNumber / uptime) > 0) {
+    return speedString(duptime) + ' ' + shour;
+  }
+  duptime /= 24;
+  uptime = Math.floor(duptime);
+  var sday = Tools.translate('post(s) per day.');
+  if (!uptime) {
+    return zeroSpeedString(sday);
+  } else if (Math.floor(lastPostNumber / uptime) > 0) {
+    return speedString(duptime) + ' ' + sday;
+  }
+  duptime /= 365 / 12;
+  uptime = Math.floor(duptime);
+  var smonth = Tools.translate('post(s) per month.');
+  if (!uptime) {
+    return zeroSpeedString(smonth);
+  } else if (Math.floor(lastPostNumber / uptime) > 0) {
+    return speedString(duptime) + ' ' + smonth;
+  }
+  duptime /= 12.0;
+  uptime = Math.floor(duptime);
+  var syear = Tools.translate('post(s) per year.');
+  if (!uptime) {
+    return zeroSpeedString(syear);
+  } else if (Math.floor(lastPostNumber / uptime) > 0) {
+    return speedString(duptime) + ' ' + syear;
+  }
+  return '0 ' + syear;
+}
+
+function plainText(text) {
+  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+  var brToNewline = _ref.brToNewline;
+
+  if (!text) {
+    return '';
+  }
+  text = '' + text;
+  var id = _uuid2.default.v4();
+  if (brToNewline) {
+    text = text.replace(/<br \/>/g, id);
+  } else {
+    text = text.replace(/<br \/>/g, ' ');
+  }
+  text = _htmlToText2.default.fromString(text, {
+    wordwrap: null,
+    linkHrefBaseUrl: (0, _config2.default)('site.protocol') + '://' + (0, _config2.default)('site.domain'),
+    hideLinkHrefIfSameAsText: true,
+    ignoreImages: true
+  });
+  if (brToNewline) {
+    text = text.split(id).join('\n');
+  }
+  return text;
 }
 //# sourceMappingURL=renderer.js.map

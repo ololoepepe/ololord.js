@@ -484,7 +484,7 @@ var createPost = exports.createPost = function () {
             postNumber = _context9.sent;
 
           case 52:
-            plainText = text ? Tools.plainText(text, { brToNewline: true }) : null;
+            plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
             post = {
               bannedFor: false,
               boardName: boardName,
@@ -1058,7 +1058,7 @@ var editPost = exports.editPost = function () {
 
           case 26:
             text = _context18.sent;
-            plainText = text ? Tools.plainText(text, { brToNewline: true }) : null;
+            plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
             _context18.next = 30;
             return board.postExtraData(req, fields, null, post);
 
@@ -1929,6 +1929,10 @@ var UsersModel = _interopRequireWildcard(_users);
 var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
+
+var _renderer = require('../core/renderer');
+
+var Renderer = _interopRequireWildcard(_renderer);
 
 var _search = require('../core/search');
 

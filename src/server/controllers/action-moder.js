@@ -3,6 +3,7 @@ import express from 'express';
 import moment from 'moment';
 
 import Board from '../boards/board';
+import * as Files from '../core/files';
 import geolocation from '../core/geolocation';
 import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
@@ -52,7 +53,7 @@ router.post('/action/banUser', async function(req, res, next) {
     if (!req.isModer()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { userIp } = fields;
     userIp = Tools.correctAddress(userIp);
     if (!userIp) {
@@ -108,7 +109,7 @@ router.post('/action/delall', async function(req, res, next) {
     if (!req.isModer()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { userIp } = fields;
     userIp = Tools.correctAddress(userIp);
     if (!userIp) {
@@ -145,7 +146,7 @@ router.post('/action/delall', async function(req, res, next) {
 
 router.post('/action/moveThread', async function(req, res, next) {
   try {
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { boardName, threadNumber, targetBoardName, password } = fields;
     if (!Board.board(boardName) || !Board.board(targetBoardName)) {
       throw new Error(Tools.translate('Invalid board'));
@@ -175,7 +176,7 @@ router.post('/action/moveThread', async function(req, res, next) {
 
 router.post('/action/setThreadFixed', async function(req, res, next) {
   try {
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { boardName, threadNumber, fixed, password } = fields;
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
@@ -202,7 +203,7 @@ router.post('/action/setThreadFixed', async function(req, res, next) {
 
 router.post('/action/setThreadClosed', async function(req, res, next) {
   try {
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { boardName, threadNumber, closed, password } = fields;
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
@@ -229,7 +230,7 @@ router.post('/action/setThreadClosed', async function(req, res, next) {
 
 router.post('/action/setThreadUnbumpable', async function(req, res, next) {
   try {
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { boardName, threadNumber, unbumpable, password } = fields;
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));

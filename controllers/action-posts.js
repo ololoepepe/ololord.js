@@ -153,7 +153,7 @@ var router = _express2.default.Router();
 
 router.post('/action/markupText', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, res, next) {
-    var _ref2, _ref2$fields, boardName, text, markupMode, signAsOp, tripcode, rawText, markupModes, data;
+    var _ref2, _ref2$fields, boardName, text, markupMode, signAsOp, tripcode, board, rawText, markupModes, data;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -161,7 +161,7 @@ router.post('/action/markupText', function () {
           case 0:
             _context2.prev = 0;
             _context2.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref2 = _context2.sent;
@@ -171,41 +171,42 @@ router.post('/action/markupText', function () {
             markupMode = _ref2$fields.markupMode;
             signAsOp = _ref2$fields.signAsOp;
             tripcode = _ref2$fields.tripcode;
+            board = _board2.default.board(boardName);
 
-            if (_board2.default.board(boardName)) {
-              _context2.next = 12;
+            if (board) {
+              _context2.next = 13;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
-          case 12:
-            _context2.next = 14;
+          case 13:
+            _context2.next = 15;
             return (0, _geolocation2.default)(req.ip);
 
-          case 14:
+          case 15:
             req.geolocationInfo = _context2.sent;
-            _context2.next = 17;
+            _context2.next = 18;
             return UsersModel.checkUserBan(req.ip, boardName, {
               write: true,
               geolocationInfo: req.geolocationInfo
             });
 
-          case 17:
+          case 18:
             rawText = text || '';
-            _context2.next = 20;
+            _context2.next = 21;
             return testParameters(req, boardName, 'markupText', { fields: fields });
 
-          case 20:
+          case 21:
             markupMode = markupMode || '';
             markupModes = _markup2.default.markupModes(markupMode);
-            _context2.next = 24;
+            _context2.next = 25;
             return (0, _markup2.default)(boardName, text, {
               markupModes: markupModes,
               accessLevel: req.level(boardName)
             });
 
-          case 24:
+          case 25:
             text = _context2.sent;
             data = {
               boardName: boardName,
@@ -219,24 +220,24 @@ router.post('/action/markupText', function () {
             };
 
             if (req.hashpass && tripcode) {
-              data.tripcode = Tools.generateTripcode(req.hashpass);
+              data.tripcode = board.generateTripcode(req.hashpass);
             }
             res.json(data);
-            _context2.next = 33;
+            _context2.next = 34;
             break;
 
-          case 30:
-            _context2.prev = 30;
+          case 31:
+            _context2.prev = 31;
             _context2.t0 = _context2['catch'](0);
 
             next(_context2.t0);
 
-          case 33:
+          case 34:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, this, [[0, 30]]);
+    }, _callee2, this, [[0, 31]]);
   }));
 
   return function (_x6, _x7, _x8) {
@@ -255,7 +256,7 @@ router.post('/action/createPost', function () {
             transaction = void 0;
             _context3.prev = 1;
             _context3.next = 4;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 4:
             _ref3 = _context3.sent;
@@ -374,7 +375,7 @@ router.post('/action/createThread', function () {
             transaction = void 0;
             _context4.prev = 1;
             _context4.next = 4;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 4:
             _ref4 = _context4.sent;
@@ -485,7 +486,7 @@ router.post('/action/editPost', function () {
           case 0:
             _context5.prev = 0;
             _context5.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref5 = _context5.sent;
@@ -570,7 +571,7 @@ router.post('/action/addFiles', function () {
             transaction = void 0;
             _context6.prev = 1;
             _context6.next = 4;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 4:
             _ref6 = _context6.sent;
@@ -696,7 +697,7 @@ router.post('/action/deletePost', function () {
           case 0:
             _context7.prev = 0;
             _context7.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref7 = _context7.sent;
@@ -776,7 +777,7 @@ router.post('/action/deleteFile', function () {
           case 0:
             _context8.prev = 0;
             _context8.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref8 = _context8.sent;
@@ -867,7 +868,7 @@ router.post('/action/editFileRating', function () {
           case 0:
             _context9.prev = 0;
             _context9.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref9 = _context9.sent;
@@ -954,7 +955,7 @@ router.post('/action/editAudioTags', function () {
           case 0:
             _context10.prev = 0;
             _context10.next = 3;
-            return Tools.parseForm(req);
+            return Files.parseForm(req);
 
           case 3:
             _ref10 = _context10.sent;

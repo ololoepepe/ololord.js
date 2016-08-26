@@ -17,6 +17,11 @@ import * as PostsModel from '../models/posts';
 MathJax.config({ MathJax: {} });
 MathJax.start();
 
+var rootZones = require("../misc/root-zones.json").reduce(function(acc, zone) {
+    acc[zone] = {};
+    return acc;
+}, {});
+
 var SkipTypes = {
     NoSkip: "NO_SKIP",
     HtmlSkip: "HTML_SKIP",
@@ -604,7 +609,7 @@ var checkLangsMatch = function(info, matchs, matche) {
 var checkExternalLink = function(info, matchs) {
     if (matchs.index > 0 && ["@", "#"].indexOf(info.text[matchs.index - 1]) >= 0)
         return false;
-    return /^\d+\.\d+\.\d+\.\d+$/.test(matchs[2]) || Tools.externalLinkRootZoneExists(matchs[4]);
+    return /^\d+\.\d+\.\d+\.\d+$/.test(matchs[2]) || rootZones.hasOwnProperty(matchs[4]);
 };
 
 var checkQuotationNotInterrupted = function(info, matchs, matche) {

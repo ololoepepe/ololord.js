@@ -5,7 +5,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function (req, res, next) {
-  req.hashpass = Tools.hashpass(req);
+  var _ref = req.cookies || {};
+
+  var hashpass = _ref.hashpass;
+
+  if (Tools.mayBeHashpass(hashpass)) {
+    req.hashpass = hashpass;
+  }
   next();
 };
 

@@ -7,6 +7,7 @@ import merge from 'merge';
 import Board from '../boards/board';
 import Captcha from '../captchas/captcha';
 import * as Files from '../core/files';
+import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
 import * as BoardsModel from '../models/boards';
 import * as ChatsModel from '../models/chats';
@@ -348,7 +349,7 @@ router.get('/api/fileHeaders.json', async function(req, res, next) {
       method: 'HEAD',
       timeout: Tools.MINUTE //TODO: magic numbers
     };
-    let proxy = Tools.proxy();
+    let proxy = config.proxy();
     if (proxy) {
       options = merge.recursive(options, {
         host: proxy.host,

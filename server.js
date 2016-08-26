@@ -123,7 +123,7 @@ function spawnCluster() {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              console.log('[' + process.pid + '] Initializing...');
+              console.log('[' + process.pid + '] Initializing…');
               app = (0, _express2.default)();
 
               app.use(_middlewares2.default);
@@ -189,7 +189,7 @@ function spawnCluster() {
                 if (s.size < 1) subscriptions.delete(key);
               });
               server.listen((0, _config2.default)("server.port", 8080), function () {
-                console.log("[" + process.pid + "] Listening on port " + (0, _config2.default)("server.port", 8080) + "...");
+                console.log("[" + process.pid + "] Listening on port " + (0, _config2.default)("server.port", 8080) + "…");
                 IPC.on('exit', function (status) {
                   process.exit(status);
                 });
@@ -209,7 +209,7 @@ function spawnCluster() {
                 IPC.on('start', function () {
                   return new Promise(function (resolve, reject) {
                     server.listen((0, _config2.default)("server.port", 8080), function () {
-                      console.log("[" + process.pid + "] Listening on port " + (0, _config2.default)("server.port", 8080) + "...");
+                      console.log("[" + process.pid + "] Listening on port " + (0, _config2.default)("server.port", 8080) + "…");
                       resolve();
                     });
                   });
@@ -328,7 +328,7 @@ function onReady(initCallback) {
 }
 
 function spawnWorkers(initCallback) {
-  console.log(Tools.translate('Spawning workers, please, wait...'));
+  console.log(Tools.translate('Spawning workers, please, wait…'));
   spawnCluster();
   IPC.on('ready', onReady.bind(null, initCallback));
   IPC.on('fileName', generateFileName);

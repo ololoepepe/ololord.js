@@ -566,7 +566,7 @@ var Board = function () {
                 post.rawSubject = post.subject;
                 post.isOp = post.number === post.threadNumber;
                 if (post.options.showTripcode) {
-                  post.tripcode = Tools.generateTripcode(post.user.hashpass);
+                  post.tripcode = this.generateTripcode(post.user.hashpass);
                 }
                 delete post.user.ip;
                 delete post.user.hashpass;
@@ -590,6 +590,11 @@ var Board = function () {
 
       return renderPost;
     }()
+  }, {
+    key: 'generateTripcode',
+    value: function generateTripcode(source) {
+      return '!' + Tools.Crypto('md5', source + (0, _config2.default)('site.tripcodeSalt'), 'base64').substr(0, 10);
+    }
   }]);
 
   return Board;

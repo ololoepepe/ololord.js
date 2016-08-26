@@ -73,11 +73,12 @@ var DEFAULT_VALUES = new Map([['board.useDefaultBoards', true], ['server.chat.tt
 ['server.ddosProtection.ws.maxMessageRate', 6], ['server.rss.enabled', true], ['server.rss.postCount', 500], ['server.rss.ttl', 60], //NOTE: 1 hour
 ['server.statistics.enabled', true], ['server.statistics.ttl', 60], //NOTE: 1 hour
 ['server.synchronizationData.ttl', 300], //NOTE: 5 minutes
-['site.protocol', 'http'], ['site.domain', 'localhost:8080'], ['site.pathPrefix', ''], ['site.locale', 'en'], ['site.dateFormat', 'MM/DD/YYYY hh:mm:ss'], ['site.timeOffset', 0], ['site.vkontakte.accessToken', ''], ['site.vkontakte.appId', ''], ['site.vkontakte.integrationEnabled', false], ['site.twitter.integrationEnabled', true], ['site.ws.transports', ''], ['site.maxSearchQueryLength', 50], ['system.detectRealIp', true], ['system.elasticsearch.host', 'localhost:9200'], ['system.useXRealIp', false], ['system.log.backups', 100], ['system.log.maxSize', 1048576], //NOTE: 1 MB
+['site.protocol', 'http'], ['site.domain', 'localhost:8080'], ['site.pathPrefix', ''], ['site.locale', 'en'], ['site.dateFormat', 'MM/DD/YYYY hh:mm:ss'], ['site.timeOffset', 0], ['site.tripcodeSalt', ''], ['site.vkontakte.accessToken', ''], ['site.vkontakte.appId', ''], ['site.vkontakte.integrationEnabled', false], ['site.twitter.integrationEnabled', true], ['site.ws.transports', ''], ['site.maxSearchQueryLength', 50], ['system.detectRealIp', true], ['system.elasticsearch.host', 'localhost:9200'], ['system.useXRealIp', false], ['system.log.backups', 100], ['system.log.maxSize', 1048576], //NOTE: 1 MB
 ['system.log.middleware.before', 'all'], ['system.log.middleware.verbosity', 'ip'], ['system.log.targets', ['console', 'file']], ['system.mimeTypeRetrievingTimeout', 5 * 1000], //NOTE: 5 seconds
+['system.maxFormFieldsSize', 5 * 1024 * 1024], //NOTE: 5 MB
 ['system.onlineCounter.interval', 60 * 1000], //NOTE: 1 minute
 ['system.onlineCounter.quota', 5 * 60 * 1000], //NOTE: 5 minutes
-['system.phash.enabled', true], ['system.redis.host', '127.0.0.1'], ['system.redis.port', 6379], ['system.redis.family', 4], ['system.redis.password', ''], ['system.redis.db', 0], ['system.redis.enableReadyCheck', false], ['system.redis.maxRedirections', 16], ['system.redis.scaleReads', 'master'], ['system.redis.retryDelayOnFailover', 100], ['system.redis.retryDelayOnClusterDown', 100], ['system.redis.retryDelayOnTryAgain', 100], ['system.rerenderCacheOnStartup', true], ['system.rerenderArchive', false], ['system.search.maxResultCount', 100], ['system.search.maxResultPostSubjectLengh', 100], ['system.search.maxResultPostTextLengh', 300], ['system.workerCount', _os2.default.cpus().length]]);
+['system.phash.enabled', true], ['system.redis.host', '127.0.0.1'], ['system.redis.port', 6379], ['system.redis.family', 4], ['system.redis.password', ''], ['system.redis.db', 0], ['system.redis.enableReadyCheck', false], ['system.redis.maxRedirections', 16], ['system.redis.scaleReads', 'master'], ['system.redis.retryDelayOnFailover', 100], ['system.redis.retryDelayOnClusterDown', 100], ['system.redis.retryDelayOnTryAgain', 100], ['system.rerenderCacheOnStartup', true], ['system.rerenderArchive', false], ['system.search.maxResultCount', 100], ['system.search.maxResultPostSubjectLengh', 100], ['system.search.maxResultPostTextLengh', 300], ['system.tmpPath', __dirname + '/../tmp'], ['system.workerCount', _os2.default.cpus().length]]);
 
 var configFileName = _program2.default.configFile;
 if (configFileName) {
@@ -176,6 +177,20 @@ c.on = function (key, hook) {
   }
   list.push(hook);
   return this;
+};
+
+c.proxy = function () {
+  var proxy = c('system.fileDownloadProxy');
+  if (!proxy) {
+    return null;
+  }
+  var parts = proxy.split(':');
+  var auth = config('system.fileDownloadProxyAuth');
+  return {
+    host: parts[0],
+    port: parts[1] ? +parts[1] : null,
+    auth: auth ? 'Basic ' + new Buffer(auth).toString('base64') : null
+  };
 };
 
 exports.default = c;

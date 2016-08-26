@@ -34,6 +34,10 @@ var _files = require('../core/files');
 
 var Files = _interopRequireWildcard(_files);
 
+var _config = require('../helpers/config');
+
+var _config2 = _interopRequireDefault(_config);
+
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
@@ -1211,7 +1215,7 @@ router.get('/api/fileHeaders.json', function () {
               method: 'HEAD',
               timeout: Tools.MINUTE //TODO: magic numbers
             };
-            proxy = Tools.proxy();
+            proxy = _config2.default.proxy();
 
             if (proxy) {
               options = _merge2.default.recursive(options, {

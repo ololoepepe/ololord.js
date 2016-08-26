@@ -1,6 +1,9 @@
 import * as Tools from '../helpers/tools';
 
 export default function(req, res, next) {
-  req.hashpass = Tools.hashpass(req);
+  let { hashpass } = req.cookies || {};
+  if (Tools.mayBeHashpass(hashpass)) {
+    req.hashpass = hashpass;
+  }
   next();
 }

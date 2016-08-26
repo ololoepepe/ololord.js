@@ -307,8 +307,6 @@ var Chats = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'cha
 });
 
 function createUserHash(user) {
-  var sha256 = _crypto2.default.createHash('sha256');
-  sha256.update(user.hashpass || user.ip);
-  return sha256.digest('hex');
+  return Tools.crypto('sha256', user.hashpass || user.ip);
 }
 //# sourceMappingURL=chats.js.map

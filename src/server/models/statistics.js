@@ -6,6 +6,7 @@ import * as BoardsModel from './boards';
 import * as UsersModel from './users';
 import Board from '../boards/board';
 import * as Files from '../core/files';
+import * as Renderer from '../core/renderer';
 import * as Cache from '../helpers/cache';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
@@ -17,7 +18,7 @@ async function gatherBoardStatistics(board) {
   try {
     let lastPostNumber = await BoardsModel.getLastPostNumber(board.name);
     statistics.postCount = lastPostNumber;
-    statistics.postingSpeed = Tools.postingSpeedString(board.launchDate, lastPostNumber);
+    statistics.postingSpeed = Renderer.postingSpeedString(board.launchDate, lastPostNumber);
   } catch (err) {
     Logger.error(err.stack || err);
   }
@@ -93,7 +94,7 @@ export async function generateStatistics() {
       statistics.total.diskUsage += boardStatistics.diskUsage;
       statistics.boards.push(boardStatistics);
     });
-    statistics.total.postingSpeed = Tools.postingSpeedString(launchDate, statistics.total.postCount);
+    statistics.total.postingSpeed = Renderer.postingSpeedString(launchDate, statistics.total.postCount);
     let data = await IPC.send('getConnectionIPs');
     statistics.online = data.reduce((acc, ips) => {
       _(ips).each((_1, ip) => { acc.add(ip); });

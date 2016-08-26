@@ -49,8 +49,9 @@ async function testParameters(req, boardName, mode, { fields, files, postNumber 
 
 router.post('/action/markupText', async function(req, res, next) {
   try {
-    let { fields: { boardName, text, markupMode, signAsOp, tripcode } } = await Tools.parseForm(req);
-    if (!Board.board(boardName)) {
+    let { fields: { boardName, text, markupMode, signAsOp, tripcode } } = await Files.parseForm(req);
+    let board = Board.board(boardName);
+    if (!board) {
       throw new Error(Tools.translate('Invalid board'));
     }
     req.geolocationInfo = await geolocation(req.ip);
@@ -77,7 +78,7 @@ router.post('/action/markupText', async function(req, res, next) {
       createdAt: Tools.now().toISOString()
     };
     if (req.hashpass && tripcode) {
-      data.tripcode = Tools.generateTripcode(req.hashpass);
+      data.tripcode = board.generateTripcode(req.hashpass);
     }
     res.json(data);
   } catch (err) {
@@ -88,7 +89,7 @@ router.post('/action/markupText', async function(req, res, next) {
 router.post('/action/createPost', async function(req, res, next) {
   let transaction;
   try {
-    let { fields, files } = await Tools.parseForm(req);
+    let { fields, files } = await Files.parseForm(req);
     let { boardName, threadNumber, captchaEngine } = fields;
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
@@ -134,7 +135,7 @@ router.post('/action/createPost', async function(req, res, next) {
 router.post('/action/createThread', async function(req, res, next) {
   let transaction;
   try {
-    let { fields, files } = await Tools.parseForm(req);
+    let { fields, files } = await Files.parseForm(req);
     let { boardName, captchaEngine } = fields;
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
@@ -176,7 +177,7 @@ router.post('/action/createThread', async function(req, res, next) {
 
 router.post('/action/editPost', async function(req, res, next) {
   try {
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { boardName, postNumber } = fields;
     postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
     if (!postNumber) {
@@ -206,7 +207,7 @@ router.post('/action/editPost', async function(req, res, next) {
 router.post('/action/addFiles', async function(req, res, next) {
   let transaction;
   try {
-    let { fields, files } = await Tools.parseForm(req);
+    let { fields, files } = await Files.parseForm(req);
     let { boardName, postNumber } = fields;
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
@@ -249,7 +250,7 @@ router.post('/action/addFiles', async function(req, res, next) {
 
 router.post('/action/deletePost', async function(req, res, next) {
   try {
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { boardName, postNumber, password } = fields;
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
@@ -273,7 +274,7 @@ router.post('/action/deletePost', async function(req, res, next) {
 
 router.post('/action/deleteFile', async function(req, res, next) {
   try {
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { fileName, password } = fields;
     if (!fileName || typeof fileName !== 'string') {
       throw new Error(Tools.translate('Invalid file name'));
@@ -300,7 +301,7 @@ router.post('/action/deleteFile', async function(req, res, next) {
 
 router.post('/action/editFileRating', async function(req, res, next) {
   try {
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { fileName, rating, password } = fields;
     if (!fileName || typeof fileName !== 'string') {
       throw new Error(Tools.translate('Invalid file name'));
@@ -326,7 +327,7 @@ router.post('/action/editFileRating', async function(req, res, next) {
 
 router.post('/action/editAudioTags', async function(req, res, next) {
   try {
-    let { fields } = await Tools.parseForm(req);
+    let { fields } = await Files.parseForm(req);
     let { fileName, password } = fields;
     if (!fileName || typeof fileName !== 'string') {
       throw new Error(Tools.translate('Invalid file name'));

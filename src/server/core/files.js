@@ -7,6 +7,8 @@ import FSSync from 'fs';
 import HTTP from 'q-io/http';
 import Jdenticon from 'jdenticon';
 import merge from 'merge';
+import mkpathSync from 'mkpath';
+import Multiparty from 'multiparty';
 import Path from 'path';
 import promisify from 'promisify-node';
 import UUID from 'uuid';
@@ -23,6 +25,8 @@ const mkpath = promisify('mkpath');
 
 const FILE_RATINGS = new Set(['SFW', 'R-15', 'R-18', 'R-18G']);
 
+mkpathSync.sync(config('system.tmpPath') + '/form');
+
 let fileTypePlugins = Tools.loadPlugins([`${__dirname}/../file-types`, `${__dirname}/../file-types/custom`]);
 
 function setFileRating(file, id, fields) {
@@ -37,7 +41,7 @@ function setFileRating(file, id, fields) {
 async function downloadFile(url, formFieldName, fields, transaction) {
   let path = `${__dirname}/../tmp/upload_${UUID.v4()}`;
   transaction.addFile(path);
-  let proxy = Tools.proxy();
+  let proxy = config.proxy();
   let options = { timeout: Tools.MINUTE }; //TODO: magic number
   if (/^vk\:\/\//.test(url)) {
     let result = await vk('audio.getById', { audios: url.split('/')[2] });
@@ -184,6 +188,35 @@ export async function renderPostFileInfos(post) {
       return;
     }
     await plugin.renderPostFileInfo(fileInfo);
+  });
+}
+
+export function parseForm(req = {}) {
+  let { formFields, formFiles } = req;
+  if (formFields) {
+    return {
+      fields: formFields,
+      files: formFiles || []
+    };
+  }
+  let form = new Multiparty.Form();
+  form.uploadDir = config('system.tmpPath') + '/form';
+  form.autoFields = true;
+  form.autoFiles = true;
+  form.maxFieldsSize = config('system.maxFormFieldsSize');
+  return new Promise((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve({
+        fields: _(fields).mapObject((value, key) => { return (1 === value.length) ? value[0] : value; }),
+        files: _(files).toArray().map((file) => {
+          file.name = file.originalFilename;
+          return file;
+        })
+      });
+    });
   });
 }
 
