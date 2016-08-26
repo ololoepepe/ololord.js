@@ -42,4 +42,4 @@ export default async function(req, res, next) {
     Logger.error(err.stack || err);
     next();
   }
-};
+}

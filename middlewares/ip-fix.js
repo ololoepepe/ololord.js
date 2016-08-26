@@ -5,11 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function (req, res, next) {
-  if (fast && req.socket.ip) {
-    req.ip = req.socket.ip;
-    next();
-    return;
-  }
   var trueIp = Tools.correctAddress(req.ip || req.connection.remoteAddress);
   if (!trueIp) {
     return res.sendStatus(500);
@@ -35,7 +30,7 @@ exports.default = function (req, res, next) {
     }
     trueIp = _address;
   }
-  req.ip = trueIp;
+  Object.defineProperty(req, 'ip', { value: trueIp });
   next();
 };
 

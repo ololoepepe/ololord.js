@@ -52,7 +52,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var langNames = Tools.createWatchedResource(__dirname + '/misc/lang-names.json', function (path) {
+var langNames = _fsWatcher2.default.createWatchedResource(__dirname + '/misc/lang-names.json', function (path) {
   return require(path);
 }, function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(path) {
@@ -86,7 +86,7 @@ function filterNotFoundImageFileNames(fileName) {
   return '.gitignore' !== fileName;
 }
 
-var notFoundImageFileNames = Tools.createWatchedResource(__dirname + '/../public/img/404', function (path) {
+var notFoundImageFileNames = _fsWatcher2.default.createWatchedResource(__dirname + '/../public/img/404', function (path) {
   return _fs4.default.readdirSync(path).filter(filterNotFoundImageFileNames);
 }, function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(path) {

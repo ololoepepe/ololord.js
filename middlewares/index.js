@@ -1,160 +1,126 @@
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
-var _logger = require("../helpers/logger");
+var _cookieParser = require('cookie-parser');
+
+var _cookieParser2 = _interopRequireDefault(_cookieParser);
+
+var _dddos = require('dddos');
+
+var _dddos2 = _interopRequireDefault(_dddos);
+
+var _express = require('express');
+
+var _express2 = _interopRequireDefault(_express);
+
+var _cookies = require('./cookies');
+
+var _cookies2 = _interopRequireDefault(_cookies);
+
+var _hashpass = require('./hashpass');
+
+var _hashpass2 = _interopRequireDefault(_hashpass);
+
+var _ipFix = require('./ip-fix');
+
+var _ipFix2 = _interopRequireDefault(_ipFix);
+
+var _log = require('./log');
+
+var _log2 = _interopRequireDefault(_log);
+
+var _onlineCounter = require('./online-counter');
+
+var _onlineCounter2 = _interopRequireDefault(_onlineCounter);
+
+var _registeredUser = require('./registered-user');
+
+var _registeredUser2 = _interopRequireDefault(_registeredUser);
+
+var _config = require('../helpers/config');
+
+var _config2 = _interopRequireDefault(_config);
+
+var _logger = require('../helpers/logger');
 
 var _logger2 = _interopRequireDefault(_logger);
 
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-var cookieParser = require("cookie-parser");
-var DDDoS = require("dddos");
-var express = require("express");
-
-var config = require("../helpers/config");
-var OnlineCounter = require("../helpers/online-counter");
-var Tools = require("../helpers/tools");
-
-var excludePaths = {};
-var excludeRules = [];
-
-var resetExcluded = function resetExcluded(val, key) {
-    excludePaths = {};
-    excludeRules = [];
-    (val || []).forEach(function (rule) {
-        if (rule.regexp) excludeRules.push(new RegExp(rule.regexp, rule.flags));else if (rule.string) excludePaths[rule.string] = {};
-    });
-};
-
-config.installSetHook("system.log.middleware.exclude", resetExcluded);
-resetExcluded(config("system.log.middleware.exclude", []));
-
-var exclude = function exclude(path) {
-    if (excludePaths.hasOwnProperty(path)) return true;
-    for (var i = 0; i < excludeRules.length; ++i) {
-        if (path.match(excludeRules[i])) return true;
-    }
-    return false;
-};
-
-var log = function log(req, res, next) {
-    if (exclude(req.path)) return next();
-    var args;
-    if (req.method.match(/^post|put|patch|delete$/i) && config("system.log.middleware.verbosity", "ip") == "all") {
-        args = [Tools.preferIPv4(req.ip), req.path, req.query];
-        return Tools.parseForm(req).then(function (result) {
-            req.formFields = result.fields;
-            req.formFiles = result.files;
-            args.push(result.fields);
-            _logger2.default.info.apply(_logger2.default, _toConsumableArray(args));
-            return Promise.resolve();
-        }).catch(function (err) {
-            _logger2.default.error(err);
-            return Promise.resolve();
-        }).then(next);
-    }
-    switch (config("system.log.middleware.verbosity", "ip")) {
-        case "all":
-        case "query":
-            args = [Tools.preferIPv4(req.ip), req.path, req.query];
-            break;
-        case "path":
-            args = [Tools.preferIPv4(req.ip), req.path];
-            break;
-        case "ip":
-            args = [Tools.preferIPv4(req.ip)];
-            break;
-        default:
-            break;
-    }
-    if (args) _logger2.default.info.apply(_logger2.default, _toConsumableArray(args));
-    next();
-};
-
+var BEFORE = (0, _config2.default)('system.log.middleware.before');
 var middlewares = [];
 
-if (config("system.log.middleware.before", "all") == "all") middlewares.push(log);
+function setupDdos() {
+  if ('ddos' === BEFORE) {
+    middlewares.push(_log2.default);
+  }
+  if (!(0, _config2.default)('server.ddosProtection.enabled')) {
+    return;
+  }
+  middlewares.push(new _dddos2.default({
+    errorData: (0, _config2.default)('server.ddosProtection.errorData'),
+    errorCode: (0, _config2.default)('server.ddosProtection.errorCode'),
+    weight: (0, _config2.default)('server.ddosProtection.weight'),
+    maxWeight: (0, _config2.default)('server.ddosProtection.maxWeight'),
+    checkInterval: (0, _config2.default)('server.ddosProtection.checkInterval'),
+    rules: (0, _config2.default)('server.ddosProtection.rules'),
+    logFunction: function logFunction() {
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
 
-middlewares.push(Tools.requireWrapper(require('./ip-fix')));
-middlewares.push(function (req, res, next) {
-    OnlineCounter.alive(req.ip);
-    next();
-});
-
-var setupDdos = function setupDdos() {
-    if (config("system.log.middleware.before", "all") == "ddos") middlewares.push(log);
-
-    if (config("server.ddosProtection.enabled", true)) {
-        middlewares.push(new DDDoS({
-            errorData: config("server.ddosProtection.errorData", "Not so fast!"),
-            errorCode: config("server.ddosProtection.errorCode", 429),
-            weight: config("server.ddosProtection.weight", 1),
-            maxWeight: config("server.ddosProtection.maxWeight", 10),
-            checkInterval: config("server.ddosProtection.checkInterval", 1000),
-            rules: config("server.ddosProtection.rules", [{
-                string: "/misc/base.json",
-                maxWeight: 6,
-                queueSize: 4
-            }, {
-                string: "/api/chatMessages.json",
-                maxWeight: 4,
-                queueSize: 2
-            }, {
-                string: "/api/lastPostNumbers.json",
-                maxWeight: 4,
-                queueSize: 2
-            }, {
-                string: "/api/captchaQuota.json",
-                maxWeight: 4,
-                queueSize: 2
-            }, {
-                string: "/api/lastPostNumber.json",
-                maxWeight: 4,
-                queueSize: 2
-            }, {
-                regexp: "^/api.*",
-                maxWeight: 6,
-                queueSize: 4
-            }, {
-                string: "/action/search",
-                maxWeight: 1
-            }, {
-                regexp: ".*",
-                maxWeight: 10
-            }]),
-            logFunction: _logger2.default.error.bind(_logger2.default, "DDoS detected:")
-        }).express());
+      _logger2.default.error.apply(_logger2.default, [_logger2.default, Tools.translate('DDoS detected:')].concat(args));
     }
-};
-
-var setupStatic = function setupStatic() {
-    if (config("system.log.middleware.before", "all") == "static") middlewares.push(log);
-    middlewares.push(express.static(__dirname + "/../public"));
-};
-
-if (config("server.ddosProtection.static", false)) {
-    setupDdos();
-    setupStatic();
-} else {
-    setupStatic();
-    setupDdos();
+  }).express());
 }
 
-if (config("system.log.middleware.before", "all") == "middleware") middlewares.push(log);
+function setupStatic() {
+  if ('static' === BEFORE) {
+    middlewares.push(_log2.default);
+  }
+  middlewares.push(_express2.default.static(__dirname + '/../public'));
+}
 
-middlewares = middlewares.concat([cookieParser(), function (req, res, next) {
-    req.hashpass = Tools.hashpass(req);
-    next();
-}, Tools.requireWrapper(require("./registered-user"))]);
+if ('all' === BEFORE) {
+  middlewares.push(_log2.default);
+}
 
-if (config("system.log.middleware.before", "all") == "request") middlewares.push(log);
+middlewares.push(_ipFix2.default);
 
-middlewares.push(require("./cookies"));
+middlewares.push(_onlineCounter2.default);
+
+if ((0, _config2.default)('server.ddosProtection.static')) {
+  setupDdos();
+  setupStatic();
+} else {
+  setupStatic();
+  setupDdos();
+}
+
+if ('middleware' === BEFORE) {
+  middlewares.push(_log2.default);
+}
+
+middlewares.push((0, _cookieParser2.default)());
+
+middlewares.push(_hashpass2.default);
+
+middlewares.push(_registeredUser2.default);
+
+if ('request' === BEFORE) {
+  middlewares.push(_log2.default);
+}
+
+middlewares.push(_cookies2.default);
 
 exports.default = middlewares;
 //# sourceMappingURL=index.js.map

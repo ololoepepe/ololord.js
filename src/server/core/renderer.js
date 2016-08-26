@@ -118,7 +118,7 @@ export async function rerender(what) {
   }, true);
   return await Tools.series(routers.filter(router => !!router), async function(router) {
     await Tools.series(router.paths, async function(path) {
-      console.log(Tools.translate('Rendering $[1]...', '', path));
+      console.log(Tools.translate('Rendering $[1]…', '', path));
       let result = await router.router.render(path);
       return await Tools.series(result, async function(data, id) {
         return await Cache.writeFile(id, data);
@@ -144,7 +144,7 @@ export async function renderThread(thread) {
 }
 
 export async function generateTemplatingJavaScriptFile() {
-  console.log('Generating templating JavaScript file...');
+  console.log('Generating templating JavaScript file…');
   let models = JSON.stringify({
     base: MiscModel.base(),
     boards: MiscModel.boards(),
@@ -174,16 +174,16 @@ export async function generateTemplatingJavaScriptFile() {
 }
 
 export async function generateCustomJavaScriptFile() {
-  console.log('Checking custom JavaScript file existence...');
+  console.log('Checking custom JavaScript file existence…');
   let exists = await FS.exists(`${__dirname}/../public/js/custom.js`);
   if (!exists) {
-    console.log('Creating dummy custom JavaScript file...');
+    console.log('Creating dummy custom JavaScript file…');
     return await Cache.writeFile('js/custom.js', '');
   }
 }
 
 export async function generateCustomCSSFiles() {
-  console.log('Checking custom CSS files existence...');
+  console.log('Checking custom CSS files existence…');
   let list = await Tools.series(['combined', 'desktop', 'mobile'], async function(type) {
     let exists = await FS.exists(`${__dirname}/../public/css/custom-base-${type}.css`);
     return {
@@ -193,7 +193,7 @@ export async function generateCustomCSSFiles() {
   }, true);
   let types = list.filter(item => !item.exists).map(item => item.type);
   if (types.length > 0) {
-    console.log('Creating dummy custom CSS file(s)...');
+    console.log('Creating dummy custom CSS file(s)…');
     await Tools.series(types, async function(type) {
       await Cache.writeFile(`css/custom-base-${type}.css`, '');
     });
@@ -201,7 +201,7 @@ export async function generateCustomCSSFiles() {
 }
 
 export async function compileTemplates() {
-  console.log('Compiling templates...');
+  console.log('Compiling templates…');
   let list = await FS.list(TEMPLATES_PATH);
   await Tools.series(list.filter(entry => !EXCLUDED_SOURCE_TEMPLATE_FILES.has(entry)), async function(entry) {
     return await FS.removeTree(`${TEMPLATES_PATH}/${entry}`);

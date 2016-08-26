@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.ipList = exports.plainText = exports.generateTripcode = exports.series = exports.withoutDuplicates = exports.sha256 = exports.preferIPv4 = exports.correctAddress = exports.proxy = exports.parseForm = exports.toHtml = exports.externalLinkRootZoneExists = exports.now = exports.setLocale = exports.hashpass = exports.CODE_STYLES = exports.STYLES = exports.BAN_LEVELS = exports.REGISTERED_USER_LEVELS = exports.NODE_CAPTCHA_ID = exports.FILE_RATINGS = exports.EXTERNAL_LINK_REGEXP_PATTERN = exports.DAY = exports.HOUR = exports.MINUTE = exports.SECOND = exports.translate = undefined;
+exports.ipList = exports.plainText = exports.generateTripcode = exports.series = exports.withoutDuplicates = exports.sha256 = exports.preferIPv4 = exports.correctAddress = exports.proxy = exports.parseForm = exports.toHtml = exports.externalLinkRootZoneExists = exports.now = exports.hashpass = exports.CODE_STYLES = exports.STYLES = exports.BAN_LEVELS = exports.REGISTERED_USER_LEVELS = exports.NODE_CAPTCHA_ID = exports.FILE_RATINGS = exports.EXTERNAL_LINK_REGEXP_PATTERN = exports.DAY = exports.HOUR = exports.MINUTE = exports.SECOND = exports.translate = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -13,7 +13,6 @@ exports.option = option;
 exports.testPostNumber = testPostNumber;
 exports.cloned = cloned;
 exports.addIPv4 = addIPv4;
-exports.createWatchedResource = createWatchedResource;
 exports.compareRegisteredUserLevels = compareRegisteredUserLevels;
 exports.postingSpeedString = postingSpeedString;
 exports.requireWrapper = requireWrapper;
@@ -48,12 +47,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
-
 var Address4 = require("ip-address").Address4;
 var Address6 = require("ip-address").Address6;
 var Crypto = require("crypto");
-var equal = require("deep-equal");
 
 var FS = require("q-io/fs");
 var FSSync = require("fs");
@@ -71,6 +67,10 @@ var translate = require("cute-localize")({
     locale: (0, _config2.default)("site.locale", "en"),
     extraLocations: __dirname + "/../translations/custom",
     silent: true
+});
+
+_config2.default.on('site.locale', function (locale) {
+    translate.setLocale(locale);
 });
 
 exports.translate = translate;
@@ -135,10 +135,6 @@ var hashpass = exports.hashpass = function hashpass(req) {
     var s = req.cookies.hashpass;
     if (!mayBeHashpass(s)) return;
     return s;
-};
-
-var setLocale = exports.setLocale = function setLocale(locale) {
-    translate.setLocale(locale);
 };
 
 var now = exports.now = function now() {
@@ -399,53 +395,6 @@ function addIPv4(object, ip) {
         object.ipv4 = ipv4;
     }
     return object;
-}
-
-function createWatchedResource(path, synchronous, asynchronous) {
-    if (!FSSync.existsSync(path)) {
-        return;
-    }
-    if (typeof asynchronous === 'function') {
-        new _fsWatcher2.default(path).on('change', _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
-            var exists;
-            return regeneratorRuntime.wrap(function _callee$(_context) {
-                while (1) {
-                    switch (_context.prev = _context.next) {
-                        case 0:
-                            _context.prev = 0;
-                            _context.next = 3;
-                            return FS.exists(path);
-
-                        case 3:
-                            exists = _context.sent;
-
-                            if (!exists) {
-                                _context.next = 7;
-                                break;
-                            }
-
-                            _context.next = 7;
-                            return asynchronous(path);
-
-                        case 7:
-                            _context.next = 12;
-                            break;
-
-                        case 9:
-                            _context.prev = 9;
-                            _context.t0 = _context["catch"](0);
-
-                            _logger2.default.error(_context.t0.stack || _context.t0);
-
-                        case 12:
-                        case "end":
-                            return _context.stop();
-                    }
-                }
-            }, _callee, this, [[0, 9]]);
-        })));
-    }
-    return synchronous(path);
 }
 
 function compareRegisteredUserLevels(l1, l2) {

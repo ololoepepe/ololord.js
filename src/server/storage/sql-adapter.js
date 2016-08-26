@@ -344,22 +344,22 @@ export default class SQLAdapter {
   }
 
   async zrange(key, lb, ub) {
-    //TODO
+    Logger.warn(Tools.translate('"zrange" is not implemented for SQL tables. Table: "$[1]"', '', key));
   }
 
   async zrangebyscroe(key, lb, ub) {
-    //TODO
+    Logger.warn(Tools.translate('"zrangebyscroe" is not implemented for SQL tables. Table: "$[1]"', '', key));
   }
 
   async zadd(key, ...items) {
-    //TODO
+    Logger.warn(Tools.translate('"zadd" is not implemented for SQL tables. Table: "$[1]"', '', key));
   }
 
   async zrem(key, ...items) {
-    //TODO
+    Logger.warn(Tools.translate('"zrem" is not implemented for SQL tables. Table: "$[1]"', '', key));
   }
 
   async zcard(key) {
-    //TODO
+    Logger.warn(Tools.translate('"zcard" is not implemented for SQL tables. Table: "$[1]"', '', key));
   }
 }

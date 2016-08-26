@@ -2,7 +2,6 @@ import _ from 'underscore';
 var Address4 = require("ip-address").Address4;
 var Address6 = require("ip-address").Address6;
 var Crypto = require("crypto");
-var equal = require("deep-equal");
 import escapeHTML from 'escape-html';
 var FS = require("q-io/fs");
 var FSSync = require("fs");
@@ -25,6 +24,8 @@ let translate = require("cute-localize")({
     extraLocations: __dirname + "/../translations/custom",
     silent: true
 });
+
+config.on('site.locale', (locale) => { translate.setLocale(locale); });
 
 export { translate as translate };
 
@@ -87,10 +88,6 @@ export let hashpass = function(req) {
     if (!mayBeHashpass(s))
         return;
     return s;
-};
-
-export let setLocale = function(locale) {
-    translate.setLocale(locale);
 };
 
 export let now = function() {
@@ -370,25 +367,6 @@ export function addIPv4(object, ip) {
     object.ipv4 = ipv4;
   }
   return object;
-}
-
-export function createWatchedResource(path, synchronous, asynchronous) {
-  if (!FSSync.existsSync(path)) {
-    return;
-  }
-  if (typeof asynchronous === 'function') {
-    (new FSWatcher(path)).on('change', async function() {
-      try {
-        let exists = await FS.exists(path);
-        if (exists) {
-          await asynchronous(path);
-        }
-      } catch (err) {
-        Logger.error(err.stack || err);
-      }
-    });
-  }
-  return synchronous(path);
 }
 
 export function compareRegisteredUserLevels(l1, l2) {

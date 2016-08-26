@@ -26,46 +26,96 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Watcher = function (_EventEmitter) {
-  _inherits(Watcher, _EventEmitter);
+var FSWatcher = function (_EventEmitter) {
+  _inherits(FSWatcher, _EventEmitter);
 
-  function Watcher(fileName) {
-    _classCallCheck(this, Watcher);
+  _createClass(FSWatcher, null, [{
+    key: 'createWatchedResource',
+    value: function createWatchedResource(path, synchronous, asynchronous) {
+      if (!_fs4.default.existsSync(path)) {
+        return;
+      }
+      if (typeof asynchronous === 'function') {
+        new FSWatcher(path).on('change', _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+          var exists;
+          return regeneratorRuntime.wrap(function _callee$(_context) {
+            while (1) {
+              switch (_context.prev = _context.next) {
+                case 0:
+                  _context.prev = 0;
+                  _context.next = 3;
+                  return _fs2.default.exists(path);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Watcher).call(this));
+                case 3:
+                  exists = _context.sent;
+
+                  if (!exists) {
+                    _context.next = 7;
+                    break;
+                  }
+
+                  _context.next = 7;
+                  return asynchronous(path);
+
+                case 7:
+                  _context.next = 12;
+                  break;
+
+                case 9:
+                  _context.prev = 9;
+                  _context.t0 = _context['catch'](0);
+
+                  require('./logger').default.error(_context.t0.stack || _context.t0);
+
+                case 12:
+                case 'end':
+                  return _context.stop();
+              }
+            }
+          }, _callee, this, [[0, 9]]);
+        })));
+      }
+      return synchronous(path);
+    }
+  }]);
+
+  function FSWatcher(fileName) {
+    _classCallCheck(this, FSWatcher);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(FSWatcher).call(this));
 
     _this.fileName = fileName;
     _this.resetWatcher();
     return _this;
   }
 
-  _createClass(Watcher, [{
+  _createClass(FSWatcher, [{
     key: 'resetWatcher',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
         var _this2 = this;
 
         var exists;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context.prev = _context.next) {
+            switch (_context2.prev = _context2.next) {
               case 0:
                 if (this.watcher) {
                   this.watcher.removeAllListeners('change');
                   this.watcher.close();
                 }
-                _context.next = 3;
+                _context2.next = 3;
                 return _fs2.default.exists(this.fileName);
 
               case 3:
-                exists = _context.sent;
+                exists = _context2.sent;
 
                 if (exists) {
-                  _context.next = 6;
+                  _context2.next = 6;
                   break;
                 }
 
-                return _context.abrupt('return');
+                return _context2.abrupt('return');
 
               case 6:
                 this.watcher = _fs4.default.watch(this.fileName);
@@ -82,10 +132,10 @@ var Watcher = function (_EventEmitter) {
 
               case 8:
               case 'end':
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee, this);
+        }, _callee2, this);
       }));
 
       function resetWatcher() {
@@ -96,8 +146,8 @@ var Watcher = function (_EventEmitter) {
     }()
   }]);
 
-  return Watcher;
+  return FSWatcher;
 }(_events.EventEmitter);
 
-exports.default = Watcher;
+exports.default = FSWatcher;
 //# sourceMappingURL=fs-watcher.js.map

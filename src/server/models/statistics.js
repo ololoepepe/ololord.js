@@ -48,7 +48,7 @@ export async function generateStatistics() {
     Logger.error(Tools.translate('Error: generateStatistics() called from worker process.'));
     return;
   }
-  console.log(Tools.translate('Generating statistics...'));
+  console.log(Tools.translate('Generating statistics…'));
   let statistics = {
     boards: [],
     total: {

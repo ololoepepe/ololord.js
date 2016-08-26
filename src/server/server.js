@@ -30,11 +30,9 @@ import * as ChatsModel from './models/chats';
 import * as StatisticsModel from './models/statistics';
 import * as UsersModel from './models/users';
 
-config.installSetHook("site.locale", Tools.setLocale); //TODO
-
 function spawnCluster() {
   expressCluster(async function(worker) {
-    console.log(`[${process.pid}] Initializing...`);
+    console.log(`[${process.pid}] Initializing…`);
     let app = express();
     app.use(middlewares);
     app.use(controllers);
@@ -90,7 +88,7 @@ function spawnCluster() {
               subscriptions.delete(key);
       });
       server.listen(config("server.port", 8080), function() {
-          console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080) + "...");
+          console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080) + "…");
           IPC.on('exit', function(status) {
               process.exit(status);
           });
@@ -111,7 +109,7 @@ function spawnCluster() {
               return new Promise(function(resolve, reject) {
                   server.listen(config("server.port", 8080), function() {
                       console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080)
-                          + "...");
+                          + "…");
                       resolve();
                   });
               });
@@ -198,7 +196,7 @@ function onReady(initCallback) {
 }
 
 function spawnWorkers(initCallback) {
-  console.log(Tools.translate('Spawning workers, please, wait...'));
+  console.log(Tools.translate('Spawning workers, please, wait…'));
   spawnCluster();
   IPC.on('ready', onReady.bind(null, initCallback));
   IPC.on('fileName', generateFileName);

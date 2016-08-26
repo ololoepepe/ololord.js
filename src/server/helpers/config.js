@@ -1,16 +1,55 @@
-var equal = require("deep-equal");
-var FS = require("q-io/fs");
-var FSSync = require("fs");
-var Path = require("path");
-
+import _ from 'underscore';
+import FSSync from 'fs';
 import OS from 'os';
+import Path from 'path';
 
 import Program from './program';
+import FSWatcher from './fs-watcher';
 
+const DEFAULT_CONFIG_FILE_NAME_1 = `${__dirname}/../config.json`;
+const DEFAULT_CONFIG_FILE_NAME_2 = `${__dirname}/../config.js`;
+const DEFAULT_DDOS_PROTECTION_RULES = [{
+  string: '/misc/base.json',
+  maxWeight: 6,
+  queueSize: 4
+}, {
+  string: '/api/chatMessages.json',
+  maxWeight: 4,
+  queueSize: 2
+}, {
+  string: '/api/lastPostNumbers.json',
+  maxWeight: 4,
+  queueSize: 2
+}, {
+  string: '/api/captchaQuota.json',
+  maxWeight: 4,
+  queueSize: 2
+}, {
+  string: '/api/lastPostNumber.json',
+  maxWeight: 4,
+  queueSize: 2
+}, {
+  regexp: '^/api.*',
+  maxWeight: 6,
+  queueSize: 4
+}, {
+  string: '/action/search',
+  maxWeight: 1
+}, {
+  regexp: '.*',
+  maxWeight: 10
+}];
 const DEFAULT_VALUES = new Map([
   ['board.useDefaultBoards', true],
   ['server.chat.ttl', 10080], //NOTE: 7 days
+  ['server.ddosProtection.checkInterval', 1000], //NOTE: 1 second
   ['server.ddosProtection.enabled', true],
+  ['server.ddosProtection.errorCode', 429],
+  ['server.ddosProtection.errorData', 'Not so fast!'],
+  ['server.ddosProtection.maxWeight', 10],
+  ['server.ddosProtection.rules', DEFAULT_DDOS_PROTECTION_RULES],
+  ['server.ddosProtection.static', false],
+  ['server.ddosProtection.weight', 1],
   ['server.ddosProtection.ws.connectionLimit', 10],
   ['server.ddosProtection.ws.maxMessageLength', 20480], //NOTE: 20 KB
   ['server.ddosProtection.ws.maxMessageRate', 6],
@@ -37,6 +76,8 @@ const DEFAULT_VALUES = new Map([
   ['system.useXRealIp', false],
   ['system.log.backups', 100],
   ['system.log.maxSize', 1048576], //NOTE: 1 MB
+  ['system.log.middleware.before', 'all'],
+  ['system.log.middleware.verbosity', 'ip'],
   ['system.log.targets', ['console', 'file']],
   ['system.mimeTypeRetrievingTimeout', 5 * 1000], //NOTE: 5 seconds
   ['system.onlineCounter.interval', 60 * 1000], //NOTE: 1 minute
@@ -61,117 +102,77 @@ const DEFAULT_VALUES = new Map([
   ['system.workerCount', OS.cpus().length]
 ]);
 
-var contains = function(s, subs) {
-    if (typeof s == "string" && typeof subs == "string")
-        return s.replace(subs, "") != s;
-    if (!s || !s.length || s.length < 1)
-        return false;
-    for (var i = 0; i < s.length; ++i) {
-        if (equal(s[i], subs))
-            return true;
-    }
-    return false;
-};
-
-var configFileName = Program.configFile;
-if (!configFileName)
-    configFileName = __dirname + "/../config.json";
-configFileName = Path.resolve(__dirname + "/..", configFileName);
-var config = {};
-if (FSSync.existsSync(configFileName)) {
-    console.log("[" + process.pid + "] Using config file: \"" + configFileName + "\"...");
-    config = JSON.parse(FSSync.readFileSync(configFileName, "UTF-8"));
+let configFileName = Program.configFile;
+if (configFileName) {
+  configFileName = Path.resolve(`${__dirname}/..${configFileName}`);
 } else {
-    console.log("[" + process.pid + "] Using default config...");
+  if (FSSync.existsSync(DEFAULT_CONFIG_FILE_NAME_1)) {
+    configFileName = Path.resolve(DEFAULT_CONFIG_FILE_NAME_1);
+  } else if (FSSync.existsSync(DEFAULT_CONFIG_FILE_NAME_2)) {
+    configFileName = Path.resolve(DEFAULT_CONFIG_FILE_NAME_2);
+  }
 }
 
-var setHooks = {};
+let config = {};
+let hooks = {};
 
-var c = function(key, def) {
+if (configFileName && FSSync.existsSync(configFileName)) {
+  console.log(`[${process.pid}] Using config file: "${configFileName}"…`);
+  config = FSWatcher.createWatchedResource(configFileName, (path) => {
+    return require(path);
+  }, async function(path) {
+    let oldConfig = config;
+    let id = require.resolve(path);
+    if (require.cache.hasOwnProperty(id)) {
+      delete require.cache[id];
+    }
+    let keys = _(oldConfig).reduce((acc, _1, key) => {
+      acc[key] = true;
+      return acc;
+    }, {});
+    _(config).each((_1, key) => { keys[key] = true; });
+    keys = _(keys).pick((_1, key) => { return hooks.hasOwnProperty(key); }).map((_1, key) => { return key; });
+    oldConfig = keys.reduce((acc, key) => {
+      acc[key] = c(key);
+      return acc;
+    }, {});
+    config = require(id);
+    keys.forEach((key) => {
+      hooks[key].forEach((hook) => {
+        hook(c[key], oldConfig[key], key);
+      });
+    });
+  }) || {};
+} else {
+  console.log(`[${process.pid}] Using default (empty) config…`);
+}
+
+function c(key, def) {
   if (typeof def === 'undefined') {
     def = DEFAULT_VALUES.get(key);
   }
-    var parts = key.split(".");
-    var o = config;
-    while (parts.length > 0) {
-        if (typeof o != "object")
-            return def;
-        o = o[parts.shift()];
+  let parts = key.split('.');
+  let o = config;
+  while (parts.length > 0) {
+    if (typeof o !== 'object') {
+      return def;
     }
-    return (undefined != o) ? o : def;
+    o = o[parts.shift()];
+  }
+  return (typeof o !== 'undefined') ? o : def;
+}
+
+c.on = function(key, hook) {
+  if (typeof hook !== 'function') {
+    return this;
+  }
+  let list = hooks[key];
+  if (!list) {
+    list = [];
+    hooks[key] = list;
+  }
+  list.push(hook);
+  return this;
 };
 
-c.set = function(key, value) {
-    var parts = key.split(".");
-    var o = config;
-    while (parts.length > 1) {
-        if (typeof o != "object")
-            return;
-        var p = parts.shift();
-        if (!o.hasOwnProperty(p))
-            o[p] = {};
-        o = o[p];
-    }
-    if (parts.length < 1 || typeof o != "object")
-        return;
-    var p = parts.shift();
-    var prev = o[p];
-    o[p] = value;
-    var hook = setHooks[key];
-    if (typeof hook == "function")
-        hook(value, key);
-    FS.write(configFileName, JSON.stringify(config, null, 4));
-    return prev;
-};
-
-c.remove = function(key) {
-    var parts = key.split(".");
-    var o = config;
-    while (parts.length > 1) {
-        if (typeof o != "object")
-            return;
-        var p = parts.shift();
-        if (!o.hasOwnProperty(p))
-            o[p] = {};
-        o = o[p];
-    }
-    if (parts.length < 1 || typeof o != "object")
-        return;
-    var p = parts.shift();
-    var prev = o[p];
-    delete o[p];
-    FS.write(configFileName, JSON.stringify(config, null, 4), "utf8");
-    return prev;
-};
-
-c.installSetHook = function(key, hook) {
-    setHooks[key] = hook;
-};
-
-c.reload = function() {
-    config = {};
-    if (FSSync.existsSync(configFileName)) {
-        console.log("[" + process.pid + "] Using config file: \"" + configFileName + "\"...");
-        config = JSON.parse(FSSync.readFileSync(configFileName, "UTF-8"));
-    } else {
-        console.log("[" + process.pid + "] Using default config...");
-    }
-    for (var key in setHooks) {
-        if (!setHooks.hasOwnProperty(key))
-            return;
-        var hook = setHooks[key];
-        if (typeof hook != "function")
-            return;
-        setHooks[key](c(key), key);
-    }
-};
-
-c.setConfigFile = function(fileName) {
-    fileName = fileName || Program.configFile;
-    if (!fileName)
-        fileName = __dirname + "/../config.json";
-    configFileName = Path.resolve(__dirname + "/..", fileName);
-    c.reload(); //TODO: reload on file change
-};
-
-module.exports = c;
+export default c;

@@ -4,11 +4,6 @@ import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
 
 export default function(req, res, next) {
-  if (fast && req.socket.ip) {
-    req.ip = req.socket.ip;
-    next();
-    return;
-  }
   let trueIp = Tools.correctAddress(req.ip || req.connection.remoteAddress);
   if (!trueIp) {
     return res.sendStatus(500);
@@ -34,6 +29,6 @@ export default function(req, res, next) {
     }
     trueIp = address;
   }
-  req.ip = trueIp;
+  Object.defineProperty(req, 'ip', { value: trueIp });
   next();
 }

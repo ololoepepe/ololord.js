@@ -1676,6 +1676,10 @@ var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
 
+var _fsWatcher = require('../helpers/fs-watcher');
+
+var _fsWatcher2 = _interopRequireDefault(_fsWatcher);
+
 var _permissions = require('../helpers/permissions');
 
 var Permissions = _interopRequireWildcard(_permissions);
@@ -1772,7 +1776,7 @@ function transformIPBans(bans) {
   }, {});
 }
 
-var ipBans = Tools.createWatchedResource(__dirname + '/../misc/user-bans.json', function (path) {
+var ipBans = _fsWatcher2.default.createWatchedResource(__dirname + '/../misc/user-bans.json', function (path) {
   return transformIPBans(require(path));
 }, function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(path) {
@@ -1821,7 +1825,7 @@ function transformGeoBans(bans) {
   }, new Map());
 }
 
-var geoBans = Tools.createWatchedResource(__dirname + '/../misc/geo-bans.json', function (path) {
+var geoBans = _fsWatcher2.default.createWatchedResource(__dirname + '/../misc/geo-bans.json', function (path) {
   return transformGeoBans(require(path));
 }, function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(path) {

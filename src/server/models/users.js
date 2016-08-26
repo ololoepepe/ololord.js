@@ -4,6 +4,7 @@ import FS from 'q-io/fs';
 import * as PostsModel from './posts';
 import Board from '../boards/board';
 import config from '../helpers/config';
+import FSWatcher from '../helpers/fs-watcher';
 import * as Permissions from '../helpers/permissions';
 import * as Tools from '../helpers/tools';
 import Channel from '../storage/channel';
@@ -62,7 +63,7 @@ function transformIPBans(bans) {
   }, {});
 }
 
-let ipBans = Tools.createWatchedResource(`${__dirname}/../misc/user-bans.json`, (path) => {
+let ipBans = FSWatcher.createWatchedResource(`${__dirname}/../misc/user-bans.json`, (path) => {
   return transformIPBans(require(path));
 }, async function(path) {
   let data = await FS.read(path);
@@ -84,7 +85,7 @@ function transformGeoBans(bans) {
   }, new Map());
 }
 
-let geoBans = Tools.createWatchedResource(`${__dirname}/../misc/geo-bans.json`, (path) => {
+let geoBans = FSWatcher.createWatchedResource(`${__dirname}/../misc/geo-bans.json`, (path) => {
   return transformGeoBans(require(path));
 }, async function(path) {
   let data = await FS.read(path);
