@@ -2,11 +2,10 @@ import _ from 'underscore';
 import DDDoS from 'dddos';
 import SockJS from 'sockjs';
 
-var OnlineCounter = require("../helpers/online-counter");
-var Tools = require("../helpers/tools");
-
 import config from '../helpers/config';
 import Logger from '../helpers/logger';
+import * as OnlineCounter from '../helpers/online-counter';
+import * as Tools from '../helpers/tools';
 
 const SOCKJS_URL = '//cdn.jsdelivr.net/sockjs/1.0.1/sockjs.min.js';
 

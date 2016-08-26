@@ -1,27 +1,17 @@
 import _ from 'underscore';
 import Cluster from 'cluster';
-
-var FS = require("q-io/fs");
-var merge = require("merge");
-var mkpath = require("mkpath");
-var moment = require("moment");
-var promisify = require("promisify-node");
-var Util = require("util");
-var XML2JS = require("xml2js");
-
-import Board from '../boards/board';
-var Cache = require("../helpers/cache");
-var config = require("../helpers/config");
-var Tools = require("../helpers/tools");
+import FS from 'q-io/fs';
 
 import * as MiscModel from './misc';
 import * as PostsModel from './posts';
 import * as ThreadsModel from './threads';
+import Board from '../boards/board';
 import * as Renderer from '../core/renderer';
-import redisClient from '../storage/redis-client-factory';
-import Hash from '../storage/hash';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
+import * as Tools from '../helpers/tools';
+import redisClient from '../storage/redis-client-factory';
+import Hash from '../storage/hash';
 
 let PostCounters = new Hash(redisClient(), 'postCounters', {
   parse: number => +number,

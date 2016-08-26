@@ -92,7 +92,7 @@ export function render(templateName, model) {
 export async function getRouterPaths(description) {
   let controllers = Tools.requireWrapper(require('../controllers'));
   let paths = await Tools.series(controllers.routers, async function(router) {
-    if (typeof router.paths !== 'function' || typeof router.render !== 'function') {
+    if (typeof router.paths !== 'function') {
       return [];
     }
     return await router.paths(description);

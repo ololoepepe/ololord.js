@@ -12,13 +12,13 @@ const DEFAULT_VALUES = new Map([
   ['server.chat.ttl', 10080], //NOTE: 7 days
   ['server.ddosProtection.enabled', true],
   ['server.ddosProtection.ws.connectionLimit', 10],
-  ['server.ddosProtection.ws.maxMessageLength', 20480],
+  ['server.ddosProtection.ws.maxMessageLength', 20480], //NOTE: 20 KB
   ['server.ddosProtection.ws.maxMessageRate', 6],
   ['server.rss.enabled', true],
   ['server.rss.postCount', 500],
-  ['server.rss.ttl', 60],
+  ['server.rss.ttl', 60], //NOTE: 1 hour
   ['server.statistics.enabled', true],
-  ['server.statistics.ttl', 60],
+  ['server.statistics.ttl', 60], //NOTE: 1 hour
   ['server.synchronizationData.ttl', 300], //NOTE: 5 minutes
   ['site.protocol', 'http'],
   ['site.domain', 'localhost:8080'],
@@ -36,9 +36,11 @@ const DEFAULT_VALUES = new Map([
   ['system.elasticsearch.host', 'localhost:9200'],
   ['system.useXRealIp', false],
   ['system.log.backups', 100],
-  ['system.log.maxSize', 1048576],
+  ['system.log.maxSize', 1048576], //NOTE: 1 MB
   ['system.log.targets', ['console', 'file']],
-  ['system.mimeTypeRetrievingTimeout', 5 * 1000],
+  ['system.mimeTypeRetrievingTimeout', 5 * 1000], //NOTE: 5 seconds
+  ['system.onlineCounter.interval', 60 * 1000], //NOTE: 1 minute
+  ['system.onlineCounter.quota', 5 * 60 * 1000], //NOTE: 5 minutes
   ['system.phash.enabled', true],
   ['system.redis.host', '127.0.0.1'],
   ['system.redis.port', 6379],
@@ -169,7 +171,7 @@ c.setConfigFile = function(fileName) {
     if (!fileName)
         fileName = __dirname + "/../config.json";
     configFileName = Path.resolve(__dirname + "/..", fileName);
-    c.reload();
+    c.reload(); //TODO: reload on file change
 };
 
 module.exports = c;

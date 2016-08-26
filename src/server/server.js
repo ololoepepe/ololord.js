@@ -12,9 +12,9 @@ import Board from './boards/board';
 import Captcha from './captchas/captcha';
 import NodeCaptcha from './captchas/node-captcha';
 import NodeCaptchaNoscript from './captchas/node-captcha-noscript';
+import commands from './commands';
 import controllers from './controllers';
 import BoardController from './controllers/board';
-import commands from './core/commands';
 import geolocation from './core/geolocation';
 import * as Renderer from './core/renderer';
 import WebSocketServer from './core/websocket-server';
@@ -35,7 +35,6 @@ config.installSetHook("site.locale", Tools.setLocale); //TODO
 function spawnCluster() {
   expressCluster(async function(worker) {
     console.log(`[${process.pid}] Initializing...`);
-    controllers.initialize();
     let app = express();
     app.use(middlewares);
     app.use(controllers);
@@ -125,13 +124,6 @@ function spawnCluster() {
           });
           IPC.on('reloadBoards', function() {
               Board.initialize();
-              return Promise.resolve();
-          });
-          IPC.on('reloadConfig', function(data) {
-              if (data)
-                  config.setConfigFile(data);
-              else
-                  config.reload();
               return Promise.resolve();
           });
           IPC.on('reloadTemplates', function() {
@@ -255,6 +247,7 @@ function spawnWorkers(initCallback) {
 
 Board.initialize();
 Captcha.initialize();
+controllers.initialize();
 
 if (Cluster.isMaster) {
   (async function() {

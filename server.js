@@ -41,6 +41,10 @@ var _nodeCaptchaNoscript = require('./captchas/node-captcha-noscript');
 
 var _nodeCaptchaNoscript2 = _interopRequireDefault(_nodeCaptchaNoscript);
 
+var _commands = require('./commands');
+
+var _commands2 = _interopRequireDefault(_commands);
+
 var _controllers = require('./controllers');
 
 var _controllers2 = _interopRequireDefault(_controllers);
@@ -48,10 +52,6 @@ var _controllers2 = _interopRequireDefault(_controllers);
 var _board3 = require('./controllers/board');
 
 var _board4 = _interopRequireDefault(_board3);
-
-var _commands = require('./core/commands');
-
-var _commands2 = _interopRequireDefault(_commands);
 
 var _geolocation = require('./core/geolocation');
 
@@ -126,24 +126,24 @@ function spawnCluster() {
           switch (_context.prev = _context.next) {
             case 0:
               console.log('[' + process.pid + '] Initializing...');
-              _controllers2.default.initialize();
+              //controllers.initialize();
               app = (0, _express2.default)();
 
               app.use(_middlewares2.default);
               app.use(_controllers2.default);
-              _context.prev = 5;
-              _context.next = 8;
+              _context.prev = 4;
+              _context.next = 7;
               return _geolocation2.default.initialize();
 
-            case 8:
-              _context.next = 10;
+            case 7:
+              _context.next = 9;
               return BoardsModel.initialize();
 
-            case 10:
-              _context.next = 12;
+            case 9:
+              _context.next = 11;
               return Renderer.reloadTemplates();
 
-            case 12:
+            case 11:
               sockets = {};
               nextSocketId = 0;
               server = _http2.default.createServer(app);
@@ -226,10 +226,6 @@ function spawnCluster() {
                   _board2.default.initialize();
                   return Promise.resolve();
                 });
-                IPC.on('reloadConfig', function (data) {
-                  if (data) _config2.default.setConfigFile(data);else _config2.default.reload();
-                  return Promise.resolve();
-                });
                 IPC.on('reloadTemplates', function () {
                   return Renderer.reloadTemplates();
                 });
@@ -258,22 +254,22 @@ function spawnCluster() {
                   delete sockets[socketId];
                 });
               });
-              _context.next = 28;
+              _context.next = 27;
               break;
 
-            case 24:
-              _context.prev = 24;
-              _context.t0 = _context['catch'](5);
+            case 23:
+              _context.prev = 23;
+              _context.t0 = _context['catch'](4);
 
               console.log(_context.t0);
               _logger2.default.error(_context.t0.stack || _context.t0);
 
-            case 28:
+            case 27:
             case 'end':
               return _context.stop();
           }
         }
-      }, _callee, this, [[5, 24]]);
+      }, _callee, this, [[4, 23]]);
     }));
 
     return function (_x) {
@@ -402,6 +398,7 @@ function spawnWorkers(initCallback) {
 
 _board2.default.initialize();
 _captcha2.default.initialize();
+_controllers2.default.initialize();
 
 if (_cluster2.default.isMaster) {
   _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {

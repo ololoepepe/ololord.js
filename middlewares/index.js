@@ -80,7 +80,7 @@ var middlewares = [];
 
 if (config("system.log.middleware.before", "all") == "all") middlewares.push(log);
 
-middlewares.push(require("./ip-fix"));
+middlewares.push(Tools.requireWrapper(require('./ip-fix')));
 middlewares.push(function (req, res, next) {
     OnlineCounter.alive(req.ip);
     next();

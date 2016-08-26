@@ -304,7 +304,7 @@ var getArchive = exports.getArchive = function () {
           case 3:
             path = __dirname + '/../public/' + boardName + '/arch';
             _context7.next = 6;
-            return FS.exists(path);
+            return _fs2.default.exists(path);
 
           case 6:
             exists = _context7.sent;
@@ -315,7 +315,7 @@ var getArchive = exports.getArchive = function () {
             }
 
             _context7.next = 10;
-            return FS.list(path);
+            return _fs2.default.list(path);
 
           case 10:
             fileNames = _context7.sent;
@@ -338,7 +338,7 @@ var getArchive = exports.getArchive = function () {
                     switch (_context6.prev = _context6.next) {
                       case 0:
                         _context6.next = 2;
-                        return FS.stat(path + '/' + fileName);
+                        return _fs2.default.stat(path + '/' + fileName);
 
                       case 2:
                         stats = _context6.sent;
@@ -800,9 +800,9 @@ var _cluster = require('cluster');
 
 var _cluster2 = _interopRequireDefault(_cluster);
 
-var _board = require('../boards/board');
+var _fs = require('q-io/fs');
 
-var _board2 = _interopRequireDefault(_board);
+var _fs2 = _interopRequireDefault(_fs);
 
 var _misc = require('./misc');
 
@@ -816,17 +816,13 @@ var _threads = require('./threads');
 
 var ThreadsModel = _interopRequireWildcard(_threads);
 
+var _board = require('../boards/board');
+
+var _board2 = _interopRequireDefault(_board);
+
 var _renderer = require('../core/renderer');
 
 var Renderer = _interopRequireWildcard(_renderer);
-
-var _redisClientFactory = require('../storage/redis-client-factory');
-
-var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
-
-var _hash = require('../storage/hash');
-
-var _hash2 = _interopRequireDefault(_hash);
 
 var _ipc = require('../helpers/ipc');
 
@@ -836,23 +832,23 @@ var _logger = require('../helpers/logger');
 
 var _logger2 = _interopRequireDefault(_logger);
 
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+var _redisClientFactory = require('../storage/redis-client-factory');
+
+var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
+
+var _hash = require('../storage/hash');
+
+var _hash2 = _interopRequireDefault(_hash);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
-
-var FS = require("q-io/fs");
-var merge = require("merge");
-var mkpath = require("mkpath");
-var moment = require("moment");
-var promisify = require("promisify-node");
-var Util = require("util");
-var XML2JS = require("xml2js");
-
-var Cache = require("../helpers/cache");
-var config = require("../helpers/config");
-var Tools = require("../helpers/tools");
 
 var PostCounters = new _hash2.default((0, _redisClientFactory2.default)(), 'postCounters', {
   parse: function parse(number) {

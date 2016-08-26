@@ -595,7 +595,7 @@ function pad(what, length, ch) {
     if (length - what.length <= 0) {
         return what;
     }
-    return Array(length - what.length).join((ch || '0').toString()[0]) + what;
+    return Array(length - what.length + 1).join((ch || '0').toString()[0]) + what;
 }
 
 function chunk(array, size) {

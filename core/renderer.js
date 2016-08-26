@@ -20,7 +20,7 @@ var getRouterPaths = exports.getRouterPaths = function () {
                   while (1) {
                     switch (_context.prev = _context.next) {
                       case 0:
-                        if (!(typeof router.paths !== 'function' || typeof router.render !== 'function')) {
+                        if (!(typeof router.paths !== 'function')) {
                           _context.next = 2;
                           break;
                         }
