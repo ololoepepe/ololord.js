@@ -8,6 +8,7 @@ import XRegExp from 'xregexp';
 import Board from '../boards/board';
 import * as Renderer from '../core/renderer';
 import config from '../helpers/config';
+import FSWatcher from '../helpers/fs-watcher';
 import Logger from '../helpers/logger';
 import * as Permissions from '../helpers/permissions';
 import * as Tools from '../helpers/tools';
@@ -17,21 +18,32 @@ import * as PostsModel from '../models/posts';
 MathJax.config({ MathJax: {} });
 MathJax.start();
 
-var rootZones = require("../misc/root-zones.json").reduce(function(acc, zone) {
-    acc[zone] = {};
+function reloadElements() {
+  return Tools.loadPlugins([__dirname, `${__dirname}/custom`], (fileName, _1, _2, path) => {
+    return ('index.js' !== fileName) || (path.split('/') === 'custom');
+  }).sort((p1, p2) => { return p1.priority < p2.priority; });
+}
+
+function transformRootZones(zones) {
+  return zones.reduce((acc, zone) => {
+    acc[zone] = true;
     return acc;
-}, {});
+  }, {});
+}
 
-var SkipTypes = {
-    NoSkip: "NO_SKIP",
-    HtmlSkip: "HTML_SKIP",
-    CodeSkip: "CODE_SKIP"
-};
+let rootZones = FSWatcher.createWatchedResource(`${__dirname}/../misc/root-zones.json`, (path) => {
+  return transformRootZones(require(path));
+}, async function(path) {
+  return transformRootZones(require(path));
+}) || {};
+let elements = reloadElements();
 
-var MarkupModes = {
-    ExtendedWakabaMark: "EXTENDED_WAKABA_MARK",
-    BBCode: "BB_CODE"
-};
+const EXTENDED_WAKABA_MARK = 'EXTENDED_WAKABA_MARK';
+const BB_CODE = 'BB_CODE';
+const MARKUP_MODES = [EXTENDED_WAKABA_MARK, BB_CODE];
+const NO_SKIP = 'NO_SKIP';
+const HTML_SKIP = 'HTML_SKIP';
+const CODE_SKIP = 'CODE_SKIP';
 
 var MarkupTags = {
     "---": {
@@ -307,163 +319,168 @@ var getVocarooEmbeddedHtml = function(href, defaultHtml) {
     return Promise.resolve(html);
 };
 
-var ProcessingInfo = function(text, boardName, referencedPosts, deletedPost, referencesToReplace) {
+class ProcessingContext {
+  constructor(text, boardName, referencedPosts, deletedPost) {
     this.boardName = boardName;
     this.deletedPost = deletedPost;
     this.referencedPosts = referencedPosts;
-    this.referencesToReplace = referencesToReplace;
     this.text = text;
     this.skipList = [];
-};
+  }
 
-ProcessingInfo.prototype.find = function(rx, from, escapable) {
-    from = (+from > 0) ? from : 0;
-    if (typeof rx == "string") {
-        var ind = this.text.indexOf(rx, from);
-        while (ind >= 0) {
-            var isIn = false;
-            for (var i = 0; i < this.skipList.length; ++i) {
-                var inf = this.skipList[i];
-                if (ind >= inf.from && ind < (inf.from + inf.length)) {
-                    ind = this.text.indexOf(rx, inf.from + inf.length);
-                    isIn = true;
-                    break;
-                }
-            }
-            if (!isIn) {
-                if (escapable && isEscaped(this.text, ind)) {
-                    ind = this.text.indexOf(rx, ind + 1);
-                } else {
-                    return {
-                        0: rx,
-                        index: ind
-                    };
-                }
-            }
+  find(rx, start, escapable) {
+    start = Tools.option(start, 'number', 0, { test: (s) => { return s > 0; } });
+    if (typeof rx === 'string') {
+      let ind = this.text.indexOf(rx, start);
+      while (ind >= 0) {
+        let isIn = this.skipList.some((inf) => {
+          if (ind >= inf.start && ind < (inf.start + inf.length)) {
+            ind = this.text.indexOf(rx, inf.start + inf.length);
+            return true;
+          }
+        });
+        if (!isIn) {
+          if (escapable && isEscaped(this.text, ind)) {
+            ind = this.text.indexOf(rx, ind + 1);
+          } else {
+            return {
+              0: rx,
+              index: ind
+            };
+          }
         }
+      }
     } else {
-        rx.lastIndex = from;
-        var match = rx.exec(this.text);
-        while (match) {
-            var isIn = false;
-            for (var i = 0; i < this.skipList.length; ++i) {
-                var inf = this.skipList[i];
-                if (match && match.index >= inf.from && match.index < (inf.from + inf.length)) {
-                    rx.lastIndex = inf.from + inf.length;
-                    match = rx.exec(this.text);
-                    isIn = true;
-                    break;
-                }
-            }
-            if (!isIn && match) {
-                if (escapable && isEscaped(this.text, match.index)) {
-                    rx.lastIndex = match.index + 1;
-                    match = rx.exec(this.text);
-                } else {
-                    return match;
-                }
-            }
+      rx.lastIndex = start;
+      let match = rx.exec(this.text);
+      while (match) {
+        let isIn = this.skipList.some((inf) => {
+          if (match && match.index >= inf.start && match.index < (inf.start + inf.length)) {
+            rx.lastIndex = inf.start + inf.length;
+            match = rx.exec(this.text);
+            return true;
+          }
+        });
+        if (!isIn && match) {
+          if (escapable && isEscaped(this.text, match.index)) {
+            rx.lastIndex = match.index + 1;
+            match = rx.exec(this.text);
+          } else {
+            return match;
+          }
         }
+      }
     }
     return null;
-};
+  }
 
-ProcessingInfo.prototype.isIn = function(start, length, type) {
-    if (start < 0 || length <= 0 || (start + length) > this.text.length || SkipTypes.NoSkip == type)
-        return false;
-    type = type || SkipTypes.CodeSkip;
+  isIn(start, length, type) {
+    if (start < 0 || length <= 0 || (start + length) > this.text.length || NO_SKIP === type) {
+      return false;
+    }
+    type = type || CODE_SKIP;
     for (var i = 0; i < this.skipList.length; ++i) {
-        var inf = this.skipList[i];
-        if (inf.type != type)
-            continue;
-        var x = start;
-        while (x < start + length) {
-            if (x >= inf.from && x <= (inf.from + inf.length))
-                return true;
-            ++x;
+      let inf = this.skipList[i];
+      if (inf.type !== type) {
+        continue;
+      }
+      let x = start;
+      while (x < start + length) {
+        if (x >= inf.start && x <= (inf.start + inf.length)) {
+          return true;
         }
+        ++x;
+      }
     }
     return false;
-};
+  }
 
-ProcessingInfo.prototype.insert = function(from, txt, type) {
-    if (from < 0 || txt.length <= 0 || from > this.text.length)
-        return;
-    type = type || SkipTypes.HtmlSkip;
-    var info = {
-        from: from,
-        length: txt.length,
-        type: type
+  insert(start, txt, type) {
+    if (start < 0 || txt.length <= 0 || start > this.text.length) {
+      return;
+    }
+    type = type || HTML_SKIP;
+    let info = {
+      start: start,
+      length: txt.length,
+      type: type
     };
-    var found = false;
+    let found = false;
     for (var i = this.skipList.length - 1; i >= 0; --i) {
-        var inf = this.skipList[i];
-        if (from > inf.from) {
-            if (SkipTypes.NoSkip != type)
-                this.skipList.splice(i + 1, 0, info);
-            found = true;
-            break;
+      let inf = this.skipList[i];
+      if (start > inf.start) {
+        if (NO_SKIP !== type) {
+          this.skipList.splice(i + 1, 0, info);
         }
-        inf.from += txt.length;
+        found = true;
+        break;
+      }
+      inf.start += txt.length;
     }
-    if (!found && SkipTypes.NoSkip != type)
-        this.skipList.unshift(info);
-    this.text = this.text.substr(0, from) + txt + this.text.substr(from);
-};
+    if (!found && NO_SKIP !== type) {
+      this.skipList.unshift(info);
+    }
+    this.text = this.text.substr(0, start) + txt + this.text.substr(start);
+  }
 
-ProcessingInfo.prototype.replace = function(from, length, txt, correction, type) {
-    if (from < 0 || length <= 0 || (txt.length < 1) || (length + from) > this.text.length)
-        return;
-    type = type || SkipTypes.HtmlSkip;
-    var info = {
-        from: from,
-        length: txt.length,
-        type: type
+  replace(start, length, txt, correction, type) {
+    if (start < 0 || length <= 0 || (txt.length < 1) || (length + start) > this.text.length) {
+      return;
+    }
+    type = type || HTML_SKIP;
+    let info = {
+      start: start,
+      length: txt.length,
+      type: type
     };
-    var dlength = txt.length - length;
-    var found = false;
+    let dlength = txt.length - length;
+    let found = false;
     for (var i = this.skipList.length - 1; i >= 0; --i) {
-        var inf = this.skipList[i];
-        if (from >= inf.from) {
-            if (SkipTypes.NoSkip != type)
-                this.skipList.splice(i + 1, 0, info);
-            found = true;
-            break;
+      let inf = this.skipList[i];
+      if (start >= inf.start) {
+        if (NO_SKIP !== type) {
+          this.skipList.splice(i + 1, 0, info);
         }
-        if (inf.from < (from + length))
-            inf.from -= correction;
-        else
-            inf.from += dlength;
+        found = true;
+        break;
+      }
+      if (inf.start < (start + length)) {
+        inf.start -= correction;
+      } else {
+        inf.start += dlength;
+      }
     }
-    if (!found && SkipTypes.NoSkip != type)
-        this.skipList.unshift(info);
-    this.text = this.text.substr(0, from) + txt + this.text.substr(from + length);
-};
+    if (!found && NO_SKIP !== type) {
+      this.skipList.unshift(info);
+    }
+    this.text = this.text.substr(0, start) + txt + this.text.substr(start + length);
+  }
 
-ProcessingInfo.prototype.toHtml = function() {
-    var s = "";
-    var last = 0;
-    for (var i = 0; i < this.skipList.length; ++i) {
-        var inf = this.skipList[i];
-        s += Tools.toHtml(withoutEscaped(this.text.substr(last, inf.from - last)));
-        s += this.text.substr(inf.from, inf.length);
-        last = inf.from + inf.length;
-    }
-    s += Tools.toHtml(this.text.substr(last));
-    s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<li/g, "</li><li");
-    s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<\/ul/g, "</li></ul");
-    s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<\/ol/g, "</li></ol");
-    s = s.replace(/<ol>(\s|&nbsp;|<br \/>)+<li/g, "<ol><li");
-    var rx = /<ul type\="(disc|circle|square)">(\s|&nbsp;|<br \/>)+<li/g;
-    var match = rx.exec(s);
+  toHtml() {
+    let s = '';
+    let last = 0;
+    this.skipList.forEach((inf) => {
+      s += Renderer.toHTML(withoutEscaped(this.text.substr(last, inf.start - last)));
+      s += this.text.substr(inf.start, inf.length);
+      last = inf.start + inf.length;
+    });
+    s += Renderer.toHTML(this.text.substr(last));
+    //TODO: Use markup element option
+    s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<li/g, '</li><li');
+    s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<\/ul/g, '</li></ul');
+    s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<\/ol/g, '</li></ol');
+    s = s.replace(/<ol>(\s|&nbsp;|<br \/>)+<li/g, '<ol><li');
+    let rx = /<ul type\="(disc|circle|square)">(\s|&nbsp;|<br \/>)+<li/g;
+    let match = rx.exec(s);
     while (match) {
-        var ns = "<ul type=\"" + match[1] + "\"><li";
-        s = s.substr(0, match.index) + ns + s.substr(match.index + match[0].length);
-        rx.lastIndex = ns.length;
-        match = rx.exec(s);
+      let ns = `<ul type='${match[1]}'><li`;
+      s = s.substr(0, match.index) + ns + s.substr(match.index + match[0].length);
+      rx.lastIndex = ns.length;
+      match = rx.exec(s);
     }
     return s;
-};
+  }
+}
 
 var getIndE = function(info, rxOp, matchs, rxCl, inds, nestable, escapable, nested) {
     nested.nested = false;
@@ -488,12 +505,17 @@ var getIndE = function(info, rxOp, matchs, rxCl, inds, nestable, escapable, nest
     return null;
 };
 
-var process = function(info, conversionFunction, regexps, options) {
+function preReady(text) {
+  return text.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;").split("\"").join("&quot;");
+}
+
+var process = async function(info, conversionFunction, regexps, options) {
     var rxOp = regexps.op;
     var rxCl = regexps.hasOwnProperty("cl") ? regexps.cl : rxOp;
     var nestable = options && options.nestable;
     var escapable = options && options.escapable;
-    var checkFunction = options ? options.checkFunction : undefined;
+    var pre = options && options.pre;
+    var checkFunction = options ? options.check : undefined;
     var nested = {
         nested: false
     };
@@ -516,13 +538,16 @@ var process = function(info, conversionFunction, regexps, options) {
         var options = {
             op: "",
             cl: "",
-            type: SkipTypes.NoSkip
+            type: NO_SKIP
         };
         var start = matche ? (matchs.index + matchs[0].length) : matchs.index;
         var end = matche ? (matche.index - matchs.index - matchs[0].length) : (matchs.index + matchs[0].length);
         var txt = info.text.substr(start, end);
         return conversionFunction(info, txt, matchs, matche, options).then(function(ntxt) {
-            txt = ntxt;
+            txt = escapable ? withoutEscaped(ntxt) : txt;
+            if (pre) {
+              txt = preReady(txt);
+            }
             if (txt) {
                 if (options.cl)
                     info.insert(rxCl ? (matche.index + matche[0].length) : matchs.index + matchs[0].length, options.cl);
@@ -619,25 +644,25 @@ var checkQuotationNotInterrupted = function(info, matchs, matche) {
         return true;
     if ("\n" == info.text.substr(matchs.index - 1, 1))
         return true;
-    return (info.isIn(matchs.index - 6, 6, SkipTypes.HtmlSkip) && info.text.substr(matchs.index - 6, 6) == "<br />");
+    return (info.isIn(matchs.index - 6, 6, HTML_SKIP) && info.text.substr(matchs.index - 6, 6) == "<br />");
 };
 
 var convertMonospace = function(_, text, __, ___, options) {
     options.op = "<font face=\"monospace\">";
     options.cl = "</font>";
-    options.type = SkipTypes.CodeSkip;
-    return Promise.resolve(Tools.toHtml(withoutEscaped(text)));
+    options.type = CODE_SKIP;
+    return Promise.resolve(Renderer.toHTML(text));
 };
 
 var convertNomarkup = function(_, text, __, ___, options) {
-    options.type = SkipTypes.CodeSkip;
-    return Promise.resolve(Tools.toHtml(withoutEscaped(text)));
+    options.type = CODE_SKIP;
+    return Promise.resolve(Renderer.toHTML(text));
 };
 
 var convertPre = function(_, text, __, ___, options) {
     options.op = "<pre>";
     options.cl = "</pre>";
-    options.type = SkipTypes.CodeSkip;
+    options.type = CODE_SKIP;
     text = withoutEscaped(text).split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
     text = text.split("\"").join("&quot;");
     return Promise.resolve(text);
@@ -665,7 +690,7 @@ function markupCode(text, lang) {
 }
 
 var convertCode = function(_, text, matchs, __, options) {
-  options.type = SkipTypes.CodeSkip;
+  options.type = CODE_SKIP;
   let result = markupCode(text, matchs[1]);
   options.op = result.op;
   options.cl = result.cl;
@@ -673,20 +698,20 @@ var convertCode = function(_, text, matchs, __, options) {
 };
 
 var convertVkontaktePost = function(_, __, matchs, ___, options) {
-    options.type = SkipTypes.HtmlSkip;
+    options.type = HTML_SKIP;
     return Promise.resolve("<div class=\"overflow-x-container\">" + matchs[0] + "</div>");
 };
 
 var convertExternalLink = function(info, text, matchs, __, options) {
     if (!text)
         return Promise.resolve("");
-    options.type = SkipTypes.HtmlSkip;
-    if (info.isIn(matchs.index, matchs[0].length, SkipTypes.HtmlSkip))
+    options.type = HTML_SKIP;
+    if (info.isIn(matchs.index, matchs[0].length, HTML_SKIP))
         return Promise.resolve(text);
     var href = matchs[0];
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
-    var def = "<a href=\"" + href + "\">" + Tools.toHtml(matchs[0]) + "</a>";
+    var def = "<a href=\"" + href + "\">" + Renderer.toHTML(matchs[0]) + "</a>";
     if (matchTwitterLink(href))
         return getTwitterEmbeddedHtml(href, def);
     if (matchYoutubeLink(href))
@@ -699,12 +724,12 @@ var convertExternalLink = function(info, text, matchs, __, options) {
 };
 
 var convertProtocol = function(_, __, matchs, ___, options) {
-    options.type = SkipTypes.HtmlSkip;
-    return Promise.resolve("<a href=\"" + matchs[0] + "\">" + Tools.toHtml(matchs[2]) + "</a>");
+    options.type = HTML_SKIP;
+    return Promise.resolve("<a href=\"" + matchs[0] + "\">" + Renderer.toHTML(matchs[2]) + "</a>");
 };
 
 var convertTooltipShitty = function(_, __, matchs, ___, options) {
-    options.type = SkipTypes.NoSkip;
+    options.type = NO_SKIP;
     var tooltip = matchs[2];
     options.op = "<span class=\"tooltip js-with-tooltip\" title=\"" + tooltip + "\">";
     options.cl = "</span>";
@@ -712,7 +737,7 @@ var convertTooltipShitty = function(_, __, matchs, ___, options) {
 };
 
 var convertPostLink = function(info, _, matchs, __, options) {
-    options.type = SkipTypes.HtmlSkip;
+    options.type = HTML_SKIP;
     var boardName = (matchs.length > 2) ? matchs[1] : info.boardName;
     var postNumber = +matchs[(matchs.length > 2) ? 2 : 1];
     var escaped = matchs[0].split(">").join("&gt;");
@@ -750,12 +775,12 @@ var convertPostLink = function(info, _, matchs, __, options) {
 };
 
 var convertHtml = function(_, text, __, ___, options) {
-    options.type = SkipTypes.HtmlSkip;
+    options.type = HTML_SKIP;
     return Promise.resolve(text);
 };
 
 var convertMarkup = function(_, text, matchs, __, options) {
-    options.type = SkipTypes.NoSkip;
+    options.type = NO_SKIP;
     if ("----" == matchs[0])
         return Promise.resolve("\u2014");
     else if ("--" == matchs[0])
@@ -769,20 +794,20 @@ var convertMarkup = function(_, text, matchs, __, options) {
 };
 
 var convertLatex = function(inline, _, text, matchs, __, options) {
-    options.type = SkipTypes.HtmlSkip;
+    options.type = HTML_SKIP;
     return markupLaTeX(text, inline);
 };
 
 var convertUrl = function(info, text, matchs, matche, options) {
     if (!text)
         return Promise.resolve("");
-    options.type = SkipTypes.HtmlSkip;
-    if (info.isIn(matchs.index, matchs[0].length, SkipTypes.HtmlSkip))
+    options.type = HTML_SKIP;
+    if (info.isIn(matchs.index, matchs[0].length, HTML_SKIP))
         return Promise.resolve(text);
     var href = text;
     if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0))
         href = "http://" + href;
-    var def = "<a href=\"" + href + "\">" + Tools.toHtml(text) + "</a>"
+    var def = "<a href=\"" + href + "\">" + Renderer.toHTML(text) + "</a>"
     if (matchTwitterLink(href))
         return getTwitterEmbeddedHtml(href, def);
     if (matchYoutubeLink(href))
@@ -798,7 +823,7 @@ var convertCSpoiler = function(_, text, matchs, __, options) {
     var title = matchs[1];
     if (!title)
         title = "Spoiler";
-    options.type = SkipTypes.NoSkip;
+    options.type = NO_SKIP;
     options.op = "<span class=\"collapsible-spoiler\"><span class=\"collapsible-spoiler-title\" title=\"Spoiler\" "
         + "onclick=\"lord.expandCollapseSpoiler(this);\">" + title
         + "</span><span class=\"collapsible-spoiler-body\" style=\"display: none;\">";
@@ -808,7 +833,7 @@ var convertCSpoiler = function(_, text, matchs, __, options) {
 
 var convertTooltip = function(_, text, matchs, __, options) {
     var tooltip = matchs[1];
-    options.type = SkipTypes.NoSkip;
+    options.type = NO_SKIP;
     options.op = "<span class=\"tooltip js-with-tooltip\" title=\"" + tooltip + "\">";
     options.cl = "</span>";
     return Promise.resolve(text);
@@ -822,7 +847,7 @@ var convertUnorderedList = function(_, text, matchs, __, options) {
         t = ListTypes[t];
     if (!t)
         return Promise.resolve("");
-    options.type = SkipTypes.NoSkip;
+    options.type = NO_SKIP;
     options.op = `<ul type="${t}">`;
     options.cl = "</ul>";
     return Promise.resolve(text);
@@ -832,14 +857,14 @@ var convertOrderedList = function(_, text, matchs, __, options) {
     var t = matchs[2];
     if (!t)
         t = "1";
-    options.type = SkipTypes.NoSkip;
+    options.type = NO_SKIP;
     options.op = `<ol type="${t}">`;
     options.cl = "</ol>";
     return Promise.resolve(text);
 };
 
 var convertListItem = function(_, text, matchs, __, options) {
-    options.type = SkipTypes.NoSkip;
+    options.type = NO_SKIP;
     options.op = "<li";
     if (matchs[2])
         op += " value=\"" + matchs[2] + "\"";
@@ -849,7 +874,7 @@ var convertListItem = function(_, text, matchs, __, options) {
 };
 
 var convertCitation = function(_, text, matchs, matche, options) {
-    options.type = SkipTypes.NoSkip;
+    options.type = NO_SKIP;
     if (matchs[1] == "\n")
         options.op = "<br />";
     options.op += "<span class=\"quotation\">&gt;";
@@ -858,6 +883,48 @@ var convertCitation = function(_, text, matchs, matche, options) {
         options.cl += "<br />";
     return Promise.resolve(text);
 };
+
+async function markup(boardName, text, { deletedPost, markupModes, accessLevel, referencedPosts, } = {}) {
+  if (!text || typeof text !== 'string') {
+    return null;
+  }
+  deletedPost = Tools.option(deletedPost, 'number', 0, { test: Tools.testPostNumber });
+  if (_(markupModes).isArray()) {
+    markupModes = markupModes.filter((mode) => { return MARKUP_MODES.indexOf(mode) >= 0; });
+  } else {
+    markupModes = MARKUP_MODES;
+  }
+  if (!accessLevel || (Tools.REGISTERED_USER_LEVELS.indexOf(accessLevel) < 0)) {
+    accessLevel = null;
+  }
+  text = text.replace(/\r+\n/g, '\n').replace(/\r/g, '\n');
+  let info = new ProcessingContext(text, boardName, referencedPosts, deletedPost);
+  await Tools.series(elements, async function(element) {
+    if (element.markupModes && !element.markupModes.some((mode) => { return markupModes.indexOf(mode) >= 0; })) {
+      return;
+    }
+    if (element.accessLevel && Tools.compareRegisteredUserLevels(accessLevel, element.accessLevel) < 0) {
+      return;
+    }
+    if (element.permission && Tools.compareRegisteredUserLevels(accessLevel, Permissions[element.permission]())) < 0) {
+      return;
+    }
+    if (typeof element.process === 'function') {
+      await element.process(info);
+    } else if (typeof element.convert === 'function') {
+      await process(info, element.convert, {
+        op: element.op,
+        cl: element.cl
+      }, {
+        nestable: !!element.nestable,
+        escapable: !!element.escapable,
+        check: element.check,
+        pre: !!element.pre
+      });
+    }
+  });
+  return info.toHtml();
+}
 
 var processPostText = function(boardName, text, options) {
     if (!text)
@@ -884,8 +951,7 @@ var processPostText = function(boardName, text, options) {
     langs.splice(langs.indexOf("fsharp") + 1, 0, "f#");
     langs = langs.join("|").split("+").join("\\+").split("-").join("\\-").split(".").join("\\.");
     text = text.replace(/\r+\n/g, "\n").replace(/\r/g, "\n");
-    var info = new ProcessingInfo(text, boardName, options ? options.referencedPosts : null, deletedPost,
-        options ? options.referencesToReplace : null);
+    var info = new ProcessingContext(text, boardName, options ? options.referencedPosts : null, deletedPost);
     var p = Promise.resolve();
     if (markupModes.indexOf(MarkupModes.ExtendedWakabaMark) >= 0) {
         p = p.then(function() {
@@ -1124,14 +1190,16 @@ var processPostText = function(boardName, text, options) {
     });
 };
 
-Object.defineProperty(processPostText, "MarkupModes", { value: MarkupModes });
+Object.defineProperty(processPostText, 'EXTENDED_WAKABA_MARK', { value: EXTENDED_WAKABA_MARK });
+Object.defineProperty(processPostText, 'BB_CODE', { value: BB_CODE });
+Object.defineProperty(processPostText, 'MARKUP_MODES', { value: MARKUP_MODES });
 Object.defineProperty(processPostText, "markupCode", { value: markupCode });
 
 processPostText.markupModes = function(string) {
   if (typeof string !== 'string') {
     string = '';
   }
-  return _(MarkupModes).filter((mode) => { return string.indexOf(mode) >= 0; });
+  return MARKUP_MODES.filter((mode) => { return string.indexOf(mode) >= 0; });
 };
 
 processPostText.latex = markupLaTeX;

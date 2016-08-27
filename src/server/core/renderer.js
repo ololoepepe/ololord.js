@@ -354,3 +354,11 @@ export function plainText(text, { brToNewline } = {}) {
   }
   return text;
 }
+
+export function toHTML(text, replaceSpaces) {
+  text = escapeHTML(text).split('\n').join('<br />');
+  if (replaceSpaces) {
+    text = text.split(' ').join('&nbsp;');
+  }
+  return text;
+}

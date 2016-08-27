@@ -57,13 +57,13 @@ export function base() {
       name: 'NONE',
       title: Tools.translate('No markup', 'markupMode')
     }, {
-      name: markup.MarkupModes.ExtendedWakabaMark,
+      name: markup.EXTENDED_WAKABA_MARK,
       title: Tools.translate('Extended WakabaMark only', 'markupMode')
     }, {
-      name: markup.MarkupModes.BBCode,
+      name: markup.BB_CODE,
       title: Tools.translate('bbCode only', 'markupMode')
     }, {
-      name: (markup.MarkupModes.ExtendedWakabaMark + ',' + markup.MarkupModes.BBCode),
+      name: (markup.EXTENDED_WAKABA_MARK + ',' + markup.BB_CODE),
       title: Tools.translate('Extended WakabaMark and bbCode', 'markupMode')
     }],
     supportedCaptchaEngines: Captcha.captchaIDs().filter((id) => {

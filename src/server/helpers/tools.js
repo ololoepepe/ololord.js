@@ -1,7 +1,6 @@
 import _ from 'underscore';
 import { Address4, Address6 } from 'ip-address';
 import Crypto from 'crypto';
-import escapeHTML from 'escape-html';
 import FSSync from 'fs';
 import merge from 'merge';
 import Util from 'util';
@@ -66,14 +65,6 @@ export const CODE_STYLES = FSSync.readdirSync(CODE_STYLES_PATH).filter((fileName
 
 export function now() {
   return new Date();
-}
-
-export function toHtml(text, replaceSpaces) {
-  text = escapeHTML(text).split('\n').join('<br />');
-  if (replaceSpaces) {
-    text = text.split(' ').join('&nbsp;');
-  }
-  return text;
 }
 
 export function mayBeHashpass(password) {
@@ -339,4 +330,11 @@ export function chunk(array, size) {
     res[res.length - 1].push(item);
     return res;
   }, []);
+}
+
+export function escapeRegExp(text) {
+  if (typeof text !== 'string') {
+    return text;
+  }
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }

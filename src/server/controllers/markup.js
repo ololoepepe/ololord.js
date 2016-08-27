@@ -1,5 +1,4 @@
 import express from 'express';
-import Highlight from 'highlight.js';
 
 import * as Renderer from '../core/renderer';
 import * as Tools from '../helpers/tools';
@@ -19,10 +18,6 @@ router.render = async function(path) {
   if ('/markup.html' !== path) {
     return;
   }
-  Highlight.configure({
-    tabReplace: '    ',
-    useBR: true
-  });
   let result = markup.markupCode(CODE_TO_MARKUP, 'cpp');
   let markedUpLatex = await markup.latex(LATEX_TO_MARKUP);
   let markedUpInlineLatex = await markup.latex(INLINE_LATEX_TO_MARKUP, true);

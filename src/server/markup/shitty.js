@@ -1,9 +1,7 @@
-import _ from 'underscore';
-
 const RX_SYMBOL = /(\^H)+/gi;
 const RX_WORD = /(\^W)+/gi;
 
-async function processStrikedOutShitty(info) {
+function processStrikedOutShitty(info) {
   let match = info.find(RX_SYMBOL);
   while (match) {
     let s = match.index - (match[0].length / 2);
@@ -17,7 +15,7 @@ async function processStrikedOutShitty(info) {
   }
 }
 
-async function processStrikedOutShittyWord(info) {
+function processStrikedOutShittyWord(info) {
   let match = info.find(RX_WORD);
   let txt = info.text;
   while (match) {
@@ -39,12 +37,26 @@ async function processStrikedOutShittyWord(info) {
   }
 }
 
+function convertTooltipShitty(_1, _2, matchs, _3, options) {
+  options.type = 'NO_SKIP';
+  let tooltip = matchs[2];
+  options.op = `<span class='tooltip js-with-tooltip' title='${tooltip}'>`;
+  options.cl = '</span>';
+  return matchs[1];
+}
+
 export default [{
-  priority: 100500,
+  priority: 1900,
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
   process: processStrikedOutShitty
 }, {
-  priority: 100600,
+  priority: 2000,
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
   process: processStrikedOutShittyWord
+}, {
+  priority: 2100,
+  markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
+  convert: convertTooltipShitty,
+  op: /([^\?\s]+)\?{3}"([^"]+)"/gi,
+  cl: null
 }];
