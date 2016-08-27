@@ -42,7 +42,7 @@ async function downloadFile(url, formFieldName, fields, transaction) {
   let path = `${__dirname}/../tmp/upload_${UUID.v4()}`;
   transaction.addFile(path);
   let proxy = config.proxy();
-  let options = { timeout: Tools.MINUTE }; //TODO: magic number
+  let options = { timeout: config('system.httpRequestTimeout') };
   if (/^vk\:\/\//.test(url)) {
     let result = await vk('audio.getById', { audios: url.split('/')[2] });
     options.url = result.response[0].url;

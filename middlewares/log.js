@@ -67,7 +67,7 @@ exports.default = function () {
 
           case 2:
             if (!(req.method.match(/^post|put|patch|delete$/i) && (0, _config2.default)('system.log.middleware.verbosity') === 'all')) {
-              _context.next = 20;
+              _context.next = 21;
               break;
             }
 
@@ -96,31 +96,32 @@ exports.default = function () {
 
           case 19:
             next();
+            return _context.abrupt('return');
 
-          case 20:
+          case 21:
             _context.t1 = (0, _config2.default)('system.log.middleware.verbosity');
-            _context.next = _context.t1 === 'all' ? 23 : _context.t1 === 'query' ? 23 : _context.t1 === 'path' ? 25 : _context.t1 === 'ip' ? 27 : 29;
+            _context.next = _context.t1 === 'all' ? 24 : _context.t1 === 'query' ? 24 : _context.t1 === 'path' ? 26 : _context.t1 === 'ip' ? 28 : 30;
             break;
 
-          case 23:
+          case 24:
             _logger2.default.info(Tools.preferIPv4(req.ip), req.path, req.query);
-            return _context.abrupt('break', 30);
+            return _context.abrupt('break', 31);
 
-          case 25:
+          case 26:
             _logger2.default.info(Tools.preferIPv4(req.ip), req.path);
-            return _context.abrupt('break', 30);
+            return _context.abrupt('break', 31);
 
-          case 27:
+          case 28:
             _logger2.default.info(Tools.preferIPv4(req.ip));
-            return _context.abrupt('break', 30);
-
-          case 29:
-            return _context.abrupt('break', 30);
+            return _context.abrupt('break', 31);
 
           case 30:
-            next();
+            return _context.abrupt('break', 31);
 
           case 31:
+            next();
+
+          case 32:
           case 'end':
             return _context.stop();
         }

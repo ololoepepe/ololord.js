@@ -2,6 +2,7 @@ import _ from 'underscore';
 import Highlight from 'highlight.js';
 import MathJax from 'mathjax-node/lib/mj-single.js';
 
+import ProcessingContext from './processing-context';
 import * as Tools from '../helpers/tools';
 import * as MiscModel from '../models/misc';
 
@@ -51,7 +52,7 @@ async function markupLaTeX(text, inline) {
 }
 
 function convertCode(_1, text, matchs, _2, options) {
-  options.type = 'CODE_SKIP';
+  options.type = ProcessingContext.CODE_SKIP;
   let result = markupCode(text, matchs[1]);
   options.op = result.op;
   options.cl = result.cl;
@@ -59,7 +60,7 @@ function convertCode(_1, text, matchs, _2, options) {
 }
 
 function convertLatex(inline, _1, text, _2, _3, options) {
-  options.type = 'HTML_SKIP';
+  options.type = ProcessingContext.HTML_SKIP;
   return markupLaTeX(text, inline);
 }
 
@@ -116,7 +117,7 @@ let elements = [{
   cl: '[/l]'
 }];
 
-elements.markupCode = markupCode;
-elements.markupLaTeX = markupLaTeX;
+Object.defineProperty(elements, "markupCode", { value: markupCode });
+Object.defineProperty(elements, 'markupLaTeX', { value: markupLaTeX });
 
 export default elements;

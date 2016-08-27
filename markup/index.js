@@ -1,81 +1,328 @@
 'use strict';
 
-var markupLaTeX = function () {
-    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(text, inline) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var process = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(info, conversionFunction, regexps) {
+    var f = function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+        var options, start, end, txt, ntxt;
         return regeneratorRuntime.wrap(function _callee$(_context) {
-            while (1) {
-                switch (_context.prev = _context.next) {
-                    case 0:
-                        _context.next = 2;
-                        return new Promise(function (resolve, reject) {
-                            _mjSingle2.default.typeset({
-                                math: text,
-                                format: inline ? 'inline-TeX' : 'TeX',
-                                svg: true
-                            }, function (data) {
-                                if (data.errors) {
-                                    return reject(data.errors[0] || data.errors);
-                                }
-                                var tagName = inline ? 'span' : 'div';
-                                resolve('<' + tagName + ' class=\'latex-' + (inline ? 'inline' : 'block') + '\'>' + data.svg + '</' + tagName + '>');
-                            });
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                if (!(!matchs || rxCl && (!matche || matche.index <= matchs.index))) {
+                  _context.next = 2;
+                  break;
+                }
+
+                return _context.abrupt('return');
+
+              case 2:
+                if (!(typeof check === 'function' && !check(info, matchs, matche))) {
+                  _context.next = 8;
+                  break;
+                }
+
+                if (rxCl && matche) {
+                  matchs = info.find(rxOp, matche.index + matche[0].length, escapable);
+                } else {
+                  matchs = info.find(rxOp, matchs.index + matchs[0].length, escapable);
+                }
+                matche = rxCl ? getIndE({
+                  info: info,
+                  rxOp: rxOp,
+                  matchs: matchs,
+                  rxCl: rxCl,
+                  inds: matchs ? matchs.index : -1,
+                  nestable: nestable,
+                  escapable: escapable,
+                  nested: nested
+                }) : null;
+                _context.next = 7;
+                return f();
+
+              case 7:
+                return _context.abrupt('return', _context.sent);
+
+              case 8:
+                options = {
+                  op: '',
+                  cl: '',
+                  type: _processingContext2.default.NO_SKIP
+                };
+                start = matche ? matchs.index + matchs[0].length : matchs.index;
+                end = matche ? matche.index - matchs.index - matchs[0].length : matchs.index + matchs[0].length;
+                txt = info.text.substr(start, end);
+                _context.next = 14;
+                return conversionFunction(info, txt, matchs, matche, options);
+
+              case 14:
+                ntxt = _context.sent;
+
+                txt = escapable ? _processingContext2.default.withoutEscaped(ntxt, escapableSequencesRegExp) : ntxt;
+                if (pre) {
+                  txt = preReady(txt);
+                }
+                if (txt) {
+                  if (options.cl) {
+                    info.insert(rxCl ? matche.index + matche[0].length : matchs.index + matchs[0].length, options.cl);
+                  }
+                  if (rxCl) {
+                    info.replace(matchs.index, matche.index - matchs.index + matche[0].length, txt, matchs[0].length, options.type);
+                  } else {
+                    info.replace(matchs.index, matchs[0].length, txt, matchs[0].length, options.type);
+                  }
+                  if (options.op) {
+                    info.insert(matchs.index, options.op);
+                  }
+                  matchs = info.find(rxOp, matchs.index + txt.length + options.op.length + options.cl.length, escapable);
+                } else {
+                  if (rxCl) {
+                    matchs = info.find(rxOp, matche ? matche.index + matche[0].length : matchs.index + matchs[0].length, escapable);
+                  } else {
+                    matchs = info.find(rxOp, matchs.index + matchs[0].index, escapable);
+                  }
+                }
+                if (nestable && nested.nested) {
+                  rerun = true;
+                }
+                matche = rxCl ? getIndE({
+                  info: info,
+                  rxOp: rxOp,
+                  matchs: matchs,
+                  rxCl: rxCl,
+                  inds: matchs ? matchs.index : -1,
+                  nestable: nestable,
+                  escapable: escapable,
+                  nested: nested
+                }) : null;
+                _context.next = 22;
+                return f();
+
+              case 22:
+                return _context.abrupt('return', _context.sent);
+
+              case 23:
+              case 'end':
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      return function f() {
+        return ref.apply(this, arguments);
+      };
+    }();
+
+    var _ref2 = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
+
+    var nestable = _ref2.nestable;
+    var escapable = _ref2.escapable;
+    var pre = _ref2.pre;
+    var check = _ref2.check;
+    var rxOp, rxCl, nested, matchs, matche, rerun;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            rxOp = regexps.op;
+            rxCl = regexps.cl;
+
+            if (typeof rxCl === 'undefined') {
+              rxCl = rxOp;
+            }
+            nested = { nested: false };
+            matchs = info.find(rxOp, 0, escapable);
+            matche = rxCl ? getIndE({
+              info: info,
+              rxOp: rxOp,
+              matchs: matchs,
+              rxCl: rxCl,
+              inds: matchs ? matchs.index : -1,
+              nestable: nestable,
+              escapable: escapable,
+              nested: nested
+            }) : null;
+            rerun = false;
+            _context2.next = 9;
+            return f();
+
+          case 9:
+            if (!rerun) {
+              _context2.next = 13;
+              break;
+            }
+
+            _context2.next = 12;
+            return process(info, conversionFunction, {
+              op: rxOp,
+              cl: rxCl
+            }, {
+              nestable: nestable,
+              escapable: escapable,
+              check: check
+            });
+
+          case 12:
+            return _context2.abrupt('return', _context2.sent);
+
+          case 13:
+          case 'end':
+            return _context2.stop();
+        }
+      }
+    }, _callee2, this);
+  }));
+
+  return function process(_x, _x2, _x3, _x4) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var markup = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, text) {
+    var _ref3 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var deletedPost = _ref3.deletedPost;
+    var markupModes = _ref3.markupModes;
+    var accessLevel = _ref3.accessLevel;
+    var referencedPosts = _ref3.referencedPosts;
+    var info;
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            if (!(!text || typeof text !== 'string')) {
+              _context4.next = 2;
+              break;
+            }
+
+            return _context4.abrupt('return', null);
+
+          case 2:
+            deletedPost = Tools.option(deletedPost, 'number', 0, { test: Tools.testPostNumber });
+            if ((0, _underscore2.default)(markupModes).isArray()) {
+              markupModes = markupModes.filter(function (mode) {
+                return MARKUP_MODES.indexOf(mode) >= 0;
+              });
+            } else {
+              markupModes = MARKUP_MODES;
+            }
+            if (!accessLevel || Tools.REGISTERED_USER_LEVELS.indexOf(accessLevel) < 0) {
+              accessLevel = null;
+            }
+            text = text.replace(/\r+\n/g, '\n').replace(/\r/g, '\n');
+            info = new _processingContext2.default(text, boardName, referencedPosts, deletedPost);
+            _context4.next = 9;
+            return Tools.series(elements, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(element) {
+                return regeneratorRuntime.wrap(function _callee3$(_context3) {
+                  while (1) {
+                    switch (_context3.prev = _context3.next) {
+                      case 0:
+                        if (!(element.markupModes && !element.markupModes.some(function (mode) {
+                          return markupModes.indexOf(mode) >= 0;
+                        }))) {
+                          _context3.next = 2;
+                          break;
+                        }
+
+                        return _context3.abrupt('return');
+
+                      case 2:
+                        if (!(element.accessLevel && Tools.compareRegisteredUserLevels(accessLevel, element.accessLevel) < 0)) {
+                          _context3.next = 4;
+                          break;
+                        }
+
+                        return _context3.abrupt('return');
+
+                      case 4:
+                        if (!(element.permission && Tools.compareRegisteredUserLevels(accessLevel, Permissions[element.permission]()) < 0)) {
+                          _context3.next = 6;
+                          break;
+                        }
+
+                        return _context3.abrupt('return');
+
+                      case 6:
+                        if (!(typeof element.process === 'function')) {
+                          _context3.next = 11;
+                          break;
+                        }
+
+                        _context3.next = 9;
+                        return element.process(info);
+
+                      case 9:
+                        _context3.next = 14;
+                        break;
+
+                      case 11:
+                        if (!(typeof element.convert === 'function')) {
+                          _context3.next = 14;
+                          break;
+                        }
+
+                        _context3.next = 14;
+                        return process(info, element.convert, {
+                          op: element.op,
+                          cl: element.cl
+                        }, {
+                          nestable: !!element.nestable,
+                          escapable: !!element.escapable,
+                          check: element.check,
+                          pre: !!element.pre
                         });
 
-                    case 2:
-                        return _context.abrupt('return', _context.sent);
+                      case 14:
+                      case 'end':
+                        return _context3.stop();
+                    }
+                  }
+                }, _callee3, this);
+              }));
 
-                    case 3:
-                    case 'end':
-                        return _context.stop();
-                }
-            }
-        }, _callee, this);
-    }));
+              return function (_x10) {
+                return ref.apply(this, arguments);
+              };
+            }());
 
-    return function markupLaTeX(_x, _x2) {
-        return ref.apply(this, arguments);
-    };
+          case 9:
+            return _context4.abrupt('return', info.toHTML(escapableSequencesRegExp, postProcessors));
+
+          case 10:
+          case 'end':
+            return _context4.stop();
+        }
+      }
+    }, _callee4, this);
+  }));
+
+  return function markup(_x6, _x7, _x8) {
+    return ref.apply(this, arguments);
+  };
 }();
 
 var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _highlight = require('highlight.js');
+var _code = require('./code');
 
-var _highlight2 = _interopRequireDefault(_highlight);
+var _code2 = _interopRequireDefault(_code);
 
-var _http = require('q-io/http');
+var _processingContext = require('./processing-context');
 
-var _http2 = _interopRequireDefault(_http);
-
-var _mjSingle = require('mathjax-node/lib/mj-single.js');
-
-var _mjSingle2 = _interopRequireDefault(_mjSingle);
-
-var _url = require('url');
-
-var _url2 = _interopRequireDefault(_url);
-
-var _xregexp = require('xregexp');
-
-var _xregexp2 = _interopRequireDefault(_xregexp);
-
-var _board = require('../boards/board');
-
-var _board2 = _interopRequireDefault(_board);
-
-var _renderer = require('../core/renderer');
-
-var Renderer = _interopRequireWildcard(_renderer);
+var _processingContext2 = _interopRequireDefault(_processingContext);
 
 var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
-
-var _logger = require('../helpers/logger');
-
-var _logger2 = _interopRequireDefault(_logger);
 
 var _permissions = require('../helpers/permissions');
 
@@ -85,1037 +332,105 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-var _misc = require('../models/misc');
-
-var MiscModel = _interopRequireWildcard(_misc);
-
-var _posts = require('../models/posts');
-
-var PostsModel = _interopRequireWildcard(_posts);
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-_mjSingle2.default.config({ MathJax: {} });
-_mjSingle2.default.start();
+var EXTENDED_WAKABA_MARK = 'EXTENDED_WAKABA_MARK';
+var BB_CODE = 'BB_CODE';
+var MARKUP_MODES = [EXTENDED_WAKABA_MARK, BB_CODE];
 
-var rootZones = require("../misc/root-zones.json").reduce(function (acc, zone) {
-    acc[zone] = {};
-    return acc;
-}, {});
+var elements = [];
+var escapableSequencesRegExp = null;
+var postProcessors = [];
 
-var SkipTypes = {
-    NoSkip: "NO_SKIP",
-    HtmlSkip: "HTML_SKIP",
-    CodeSkip: "CODE_SKIP"
-};
-
-var MarkupModes = {
-    ExtendedWakabaMark: "EXTENDED_WAKABA_MARK",
-    BBCode: "BB_CODE"
-};
-
-var MarkupTags = {
-    "---": {
-        op: "<s>",
-        cl: "</s>"
-    },
-    "***": {
-        op: "<u>",
-        cl: "</u>"
-    },
-    "**": {
-        op: "<strong>",
-        cl: "</strong>"
-    },
-    "*": {
-        op: "<em>",
-        cl: "</em>"
-    },
-    "___": {
-        op: "<u>",
-        cl: "</u>"
-    },
-    "__": {
-        op: "<strong>",
-        cl: "</strong>"
-    },
-    "_": {
-        op: "<em>",
-        cl: "</em>"
-    },
-    "///": {
-        op: "<em>",
-        cl: "</em>"
-    },
-    "%%": {
-        op: "<span class=\"spoiler\">",
-        cl: "</span>"
-    },
-    "[b]": {
-        op: "<strong>",
-        cl: "</strong>"
-    },
-    "[i]": {
-        op: "<em>",
-        cl: "</em>"
-    },
-    "[s]": {
-        op: "<s>",
-        cl: "</s>"
-    },
-    "[u]": {
-        op: "<u>",
-        cl: "</u>"
-    },
-    "[sub]": {
-        op: "<sub>",
-        cl: "</sub>"
-    },
-    "[sup]": {
-        op: "<sup>",
-        cl: "</sup>"
-    },
-    "[spoiler]": {
-        op: "<span class=\"spoiler\">",
-        cl: "</span>"
-    }
-};
-
-var ListTypes = {
-    d: "disc",
-    c: "circle",
-    s: "square"
-};
-
-var isEscaped = function isEscaped(s, pos) {
-    if (pos <= 0 || pos >= s.length) return false;
-    var n = 0;
-    var i = pos - 1;
-    while (i >= 0 && s[i] == "\\") {
-        ++n;
-        --i;
-    }
-    return n % 2;
-};
-
-var withoutEscaped = function withoutEscaped(text) {
-    var rx = /``|''/gi;
-    var ind = text.lastIndexOf(rx);
-    while (ind >= 0) {
-        if (isEscaped(text, ind)) {
-            text.remove(ind - 1, 1);
-            ind = text.lastIndexOf(rx, ind - text.length - 3);
-            continue;
-        }
-        ind = text.lastIndexOf(rx, ind - text.length - 2);
-    }
-    return text;
-};
-
-var matchTwitterLink = function matchTwitterLink(href) {
-    return (0, _config2.default)("site.twitter.integrationEnabled", true) && href.match(/^https?\:\/\/twitter\.com\/[^\/]+\/status\/\d+\/?$/);
-};
-
-var matchYoutubeLink = function matchYoutubeLink(href) {
-    return href.match(/^https?\:\/\/(m\.|www\.)?youtube\.com\/.*v\=[^\/]+.*$/) || href.match(/^https?\:\/\/youtu\.be\/[^\/]+.*$/);
-};
-
-var matchCoubLink = function matchCoubLink(href) {
-    return href.match(/^https?:\/\/coub\.com\/view\/[^\/\?]+.*$/);
-};
-
-var matchVocarooLink = function matchVocarooLink(href) {
-    return href.match(/^https?:\/\/vocaroo\.com\/i\/[a-zA-Z0-9]+$/);
-};
-
-var getTwitterEmbeddedHtml = function getTwitterEmbeddedHtml(href, defaultHtml) {
-    return _http2.default.request({
-        method: "GET",
-        url: 'https://api.twitter.com/1/statuses/oembed.json?url=' + href,
-        timeout: Tools.MINUTE //TODO: magic numbers
-    }).then(function (response) {
-        if (response.status != 200) return Promise.reject(new Error(Tools.translate("Failed to get Twitter embedded HTML")));
-        return response.body.read();
-    }).then(function (data) {
-        try {
-            return Promise.resolve(JSON.parse(data.toString()).html);
-        } catch (err) {
-            return Promise.reject(err);
-        }
-    }).catch(function (err) {
-        _logger2.default.error(err.stack || err);
-        return Promise.resolve(defaultHtml);
-    }).then(function (html) {
-        return Promise.resolve(html);
-    });
-};
-
-var youtubeVideoStartTime = function youtubeVideoStartTime(href) {
-    if (!href) return null;
-    var t = _url2.default.parse(href, true).query.t;
-    if (!t) return null;
-    var match = t.match(/((\d+)h)?((\d+)m)?((\d+)s)?/);
-    if (!match) return null;
-    var start = 0;
-    if (match[2]) start += +match[2] * 3600;
-    if (match[4]) start += +match[4] * 60;
-    if (match[6]) start += +match[6];
-    if (isNaN(start) || start <= 0) return null;
-    return start;
-};
-
-var getYoutubeEmbeddedHtml = function getYoutubeEmbeddedHtml(href, defaultHtml) {
-    var match = href.match(/^https?\:\/\/.*youtube\.com\/.*v\=([^\/#\?&]+).*$/);
-    var videoId = match ? match[1] : null;
-    if (!videoId) {
-        match = href.match(/^https?\:\/\/youtu\.be\/([^\/#\?]+).*$/);
-        videoId = match ? match[1] : null;
-    }
-    var apiKey = (0, _config2.default)("server.youtubeApiKey", "");
-    if (!videoId || !apiKey) return Promise.resolve(defaultHtml);
-    return _http2.default.request({
-        method: "GET",
-        url: 'https://www.googleapis.com/youtube/v3/videos?id=' + videoId + '&key=' + apiKey + '&part=snippet',
-        timeout: Tools.MINUTE //TODO: magic numbers
-    }).then(function (response) {
-        if (response.status != 200) return Promise.reject(new Error(Tools.translate("Failed to get YouTube embedded HTML")));
-        return response.body.read();
-    }).then(function (data) {
-        try {
-            var response = JSON.parse(data.toString());
-            if (!response.items || response.items.length < 1) return Promise.reject(new Error(Tools.translate("Failed to get YouTube video info")));
-            var info = response.items[0].snippet;
-            info.id = videoId;
-            info.href = href;
-            info.start = youtubeVideoStartTime(href);
-            var html = Renderer.render('markup/youtubeVideoLink', { info: info });
-            if (!html) return Promise.reject(new Error(Tools.translate("Failed to create YouTube video link")));
-            return Promise.resolve(html);
-        } catch (err) {
-            return Promise.reject(err);
-        }
-    }).catch(function (err) {
-        _logger2.default.error(err.stack || err);
-        return Promise.resolve(defaultHtml);
-    }).then(function (html) {
-        return Promise.resolve(html);
-    });
-};
-
-var getCoubEmbeddedHtml = function getCoubEmbeddedHtml(href, defaultHtml) {
-    var match = href.match(/^https?:\/\/coub\.com\/view\/([^\/\?#]+).*$/);
-    var videoId = match ? match[1] : null;
-    if (!videoId) return Promise.resolve(defaultHtml);
-    return _http2.default.request({
-        method: "GET",
-        url: 'https://coub.com/api/oembed.json?url=http://coub.com/view/' + videoId,
-        timeout: Tools.MINUTE //TODO: magic numbers
-    }).then(function (response) {
-        if (response.status != 200) return Promise.reject(new Error(Tools.translate("Failed to get Coub embedded HTML")));
-        return response.body.read();
-    }).then(function (data) {
-        try {
-            var response = JSON.parse(data.toString());
-            if (!response) return Promise.reject(new Error(Tools.translate("Failed to get Coub video info")));
-            var info = {
-                href: href,
-                videoTitle: response.title,
-                authorName: response.author_name,
-                thumbnail: response.thumbnail_url ? {
-                    url: response.thumbnail_url,
-                    width: response.thumbnail_width,
-                    height: response.thumbnail_height
-                } : null,
-                id: videoId
-            };
-            var html = Renderer.render('markup/coubVideoLink', { info: info });
-            if (!html) return Promise.reject(new Error(Tools.translate("Failed to create Coub video link")));
-            return Promise.resolve(html);
-        } catch (err) {
-            return Promise.reject(err);
-        }
-    }).catch(function (err) {
-        _logger2.default.error(err.stack || err);
-        return Promise.resolve(defaultHtml);
-    }).then(function (html) {
-        return Promise.resolve(html);
-    });
-};
-
-var getVocarooEmbeddedHtml = function getVocarooEmbeddedHtml(href, defaultHtml) {
-    var match = href.match(/^https?:\/\/vocaroo\.com\/i\/([a-zA-Z0-9]+)$/);
-    var audioId = match ? match[1] : null;
-    if (!audioId) return Promise.resolve(defaultHtml);
-    var html = Renderer.render('markup/vocarooAudioLink', { info: { id: audioId } });
-    if (!html) return Promise.reject(new Error(Tools.translate("Failed to create Vocaroo audio embedded container")));
-    return Promise.resolve(html);
-};
-
-var ProcessingInfo = function ProcessingInfo(text, boardName, referencedPosts, deletedPost, referencesToReplace) {
-    this.boardName = boardName;
-    this.deletedPost = deletedPost;
-    this.referencedPosts = referencedPosts;
-    this.referencesToReplace = referencesToReplace;
-    this.text = text;
-    this.skipList = [];
-};
-
-ProcessingInfo.prototype.find = function (rx, from, escapable) {
-    from = +from > 0 ? from : 0;
-    if (typeof rx == "string") {
-        var ind = this.text.indexOf(rx, from);
-        while (ind >= 0) {
-            var isIn = false;
-            for (var i = 0; i < this.skipList.length; ++i) {
-                var inf = this.skipList[i];
-                if (ind >= inf.from && ind < inf.from + inf.length) {
-                    ind = this.text.indexOf(rx, inf.from + inf.length);
-                    isIn = true;
-                    break;
-                }
-            }
-            if (!isIn) {
-                if (escapable && isEscaped(this.text, ind)) {
-                    ind = this.text.indexOf(rx, ind + 1);
-                } else {
-                    return {
-                        0: rx,
-                        index: ind
-                    };
-                }
-            }
-        }
-    } else {
-        rx.lastIndex = from;
-        var match = rx.exec(this.text);
-        while (match) {
-            var isIn = false;
-            for (var i = 0; i < this.skipList.length; ++i) {
-                var inf = this.skipList[i];
-                if (match && match.index >= inf.from && match.index < inf.from + inf.length) {
-                    rx.lastIndex = inf.from + inf.length;
-                    match = rx.exec(this.text);
-                    isIn = true;
-                    break;
-                }
-            }
-            if (!isIn && match) {
-                if (escapable && isEscaped(this.text, match.index)) {
-                    rx.lastIndex = match.index + 1;
-                    match = rx.exec(this.text);
-                } else {
-                    return match;
-                }
-            }
-        }
-    }
-    return null;
-};
-
-ProcessingInfo.prototype.isIn = function (start, length, type) {
-    if (start < 0 || length <= 0 || start + length > this.text.length || SkipTypes.NoSkip == type) return false;
-    type = type || SkipTypes.CodeSkip;
-    for (var i = 0; i < this.skipList.length; ++i) {
-        var inf = this.skipList[i];
-        if (inf.type != type) continue;
-        var x = start;
-        while (x < start + length) {
-            if (x >= inf.from && x <= inf.from + inf.length) return true;
-            ++x;
-        }
-    }
-    return false;
-};
-
-ProcessingInfo.prototype.insert = function (from, txt, type) {
-    if (from < 0 || txt.length <= 0 || from > this.text.length) return;
-    type = type || SkipTypes.HtmlSkip;
-    var info = {
-        from: from,
-        length: txt.length,
-        type: type
-    };
-    var found = false;
-    for (var i = this.skipList.length - 1; i >= 0; --i) {
-        var inf = this.skipList[i];
-        if (from > inf.from) {
-            if (SkipTypes.NoSkip != type) this.skipList.splice(i + 1, 0, info);
-            found = true;
-            break;
-        }
-        inf.from += txt.length;
-    }
-    if (!found && SkipTypes.NoSkip != type) this.skipList.unshift(info);
-    this.text = this.text.substr(0, from) + txt + this.text.substr(from);
-};
-
-ProcessingInfo.prototype.replace = function (from, length, txt, correction, type) {
-    if (from < 0 || length <= 0 || txt.length < 1 || length + from > this.text.length) return;
-    type = type || SkipTypes.HtmlSkip;
-    var info = {
-        from: from,
-        length: txt.length,
-        type: type
-    };
-    var dlength = txt.length - length;
-    var found = false;
-    for (var i = this.skipList.length - 1; i >= 0; --i) {
-        var inf = this.skipList[i];
-        if (from >= inf.from) {
-            if (SkipTypes.NoSkip != type) this.skipList.splice(i + 1, 0, info);
-            found = true;
-            break;
-        }
-        if (inf.from < from + length) inf.from -= correction;else inf.from += dlength;
-    }
-    if (!found && SkipTypes.NoSkip != type) this.skipList.unshift(info);
-    this.text = this.text.substr(0, from) + txt + this.text.substr(from + length);
-};
-
-ProcessingInfo.prototype.toHtml = function () {
-    var s = "";
-    var last = 0;
-    for (var i = 0; i < this.skipList.length; ++i) {
-        var inf = this.skipList[i];
-        s += Tools.toHtml(withoutEscaped(this.text.substr(last, inf.from - last)));
-        s += this.text.substr(inf.from, inf.length);
-        last = inf.from + inf.length;
-    }
-    s += Tools.toHtml(this.text.substr(last));
-    s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<li/g, "</li><li");
-    s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<\/ul/g, "</li></ul");
-    s = s.replace(/<\/li>(\s|&nbsp;|<br \/>)+<\/ol/g, "</li></ol");
-    s = s.replace(/<ol>(\s|&nbsp;|<br \/>)+<li/g, "<ol><li");
-    var rx = /<ul type\="(disc|circle|square)">(\s|&nbsp;|<br \/>)+<li/g;
-    var match = rx.exec(s);
-    while (match) {
-        var ns = "<ul type=\"" + match[1] + "\"><li";
-        s = s.substr(0, match.index) + ns + s.substr(match.index + match[0].length);
-        rx.lastIndex = ns.length;
-        match = rx.exec(s);
-    }
-    return s;
-};
-
-var getIndE = function getIndE(info, rxOp, matchs, rxCl, inds, nestable, escapable, nested) {
-    nested.nested = false;
-    if (!nestable) return inds >= 0 ? info.find(rxCl, inds + matchs[0].length, escapable) : -1;
-    if (inds >= 0) {
-        var matchst = info.find(rxOp, inds + matchs[0].length, escapable);
-        var matchet = info.find(rxCl, inds + matchs[0].length, escapable);
-        var depth = 1;
-        while (matchst || matchet) {
-            var tmp = matchst && (!matchet || matchst.index < matchet.index) ? matchst : matchet;
-            var offs = matchst && (!matchet || matchst.index < matchet.index) ? matchst[0].length : matchet[0].length;
-            depth += tmp.index == (matchst ? matchst.index : -1) ? 1 : -1;
-            if (depth > 1) nested.nested = true;
-            if (!depth) return tmp;
-            matchst = info.find(rxOp, tmp.index + offs, escapable);
-            matchet = info.find(rxCl, tmp.index + offs, escapable);
-        }
-    }
-    return null;
-};
-
-var process = function process(info, conversionFunction, regexps, options) {
-    var rxOp = regexps.op;
-    var rxCl = regexps.hasOwnProperty("cl") ? regexps.cl : rxOp;
-    var nestable = options && options.nestable;
-    var escapable = options && options.escapable;
-    var checkFunction = options ? options.checkFunction : undefined;
-    var nested = {
-        nested: false
-    };
-    var matchs = info.find(rxOp, 0, escapable);
-    var matche = rxCl ? getIndE(info, rxOp, matchs, rxCl, matchs ? matchs.index : -1, nestable, escapable, nested) : null;
-    var rerun = false;
-    var f = function f() {
-        if (!matchs || rxCl && (!matche || matche.index <= matchs.index)) return Promise.resolve();
-        if (checkFunction && !checkFunction(info, matchs, matche)) {
-            if (rxCl && matche) matchs = info.find(rxOp, matche.index + matche[0].length, escapable);else matchs = info.find(rxOp, matchs.index + matchs[0].length, escapable);
-            matche = rxCl ? getIndE(info, rxOp, matchs, rxCl, matchs ? matchs.index : -1, nestable, escapable, nested) : null;
-            return f();
-        }
-        var options = {
-            op: "",
-            cl: "",
-            type: SkipTypes.NoSkip
-        };
-        var start = matche ? matchs.index + matchs[0].length : matchs.index;
-        var end = matche ? matche.index - matchs.index - matchs[0].length : matchs.index + matchs[0].length;
-        var txt = info.text.substr(start, end);
-        return conversionFunction(info, txt, matchs, matche, options).then(function (ntxt) {
-            txt = ntxt;
-            if (txt) {
-                if (options.cl) info.insert(rxCl ? matche.index + matche[0].length : matchs.index + matchs[0].length, options.cl);
-                if (rxCl) {
-                    info.replace(matchs.index, matche.index - matchs.index + matche[0].length, txt, matchs[0].length, options.type);
-                } else {
-                    info.replace(matchs.index, matchs[0].length, txt, matchs[0].length, options.type);
-                }
-                if (options.op) info.insert(matchs.index, options.op);
-                matchs = info.find(rxOp, matchs.index + txt.length + options.op.length + options.cl.length, escapable);
-            } else {
-                if (rxCl) {
-                    matchs = info.find(rxOp, matche ? matche.index + matche[0].length : matchs.index + matchs[0].length, escapable);
-                } else {
-                    matchs = info.find(rxOp, matchs.index + matchs[0].index, escapable);
-                }
-            }
-            if (nestable && nested.nested) rerun = true;
-            matche = rxCl ? getIndE(info, rxOp, matchs, rxCl, matchs ? matchs.index : -1, nestable, escapable, nested) : null;
-            return f();
-        });
-    };
-    return f().then(function () {
-        if (rerun) return process(info, conversionFunction, {
-            op: rxOp,
-            cl: rxCl
-        }, {
-            nestable: nestable,
-            escapable: escapable,
-            checkFunction: checkFunction
-        });
-        return Promise.resolve();
-    });
-};
-
-var processStrikedOutShitty = function processStrikedOutShitty(info) {
-    var rx = /(\^H)+/gi;
-    var match = info.find(rx);
-    while (match) {
-        var s = match.index - match[0].length / 2;
-        if (s < 0) {
-            match = info.find(rx, match.index + match[0].length);
-            continue;
-        }
-        info.replace(match.index, match[0].length, "</s>", 0);
-        info.insert(s, "<s>");
-        match = info.find(rx, match.index + 7);
-    }
-    return Promise.resolve();
-};
-
-var processStrikedOutShittyWord = function processStrikedOutShittyWord(info) {
-    var rx = /(\^W)+/gi;
-    var match = info.find(rx);
-    var txt = info.text;
-    while (match) {
-        var count = match[0].length / 2;
-        var pcount = count;
-        var s = match.index - 1;
-        while (count > 0) {
-            while (s >= 0 && /\s/.test(txt[s])) {
-                --s;
-            }while (s >= 0 && !/\s/.test(txt[s])) {
-                --s;
-            }--count;
-        }
-        info.replace(match.index, match[0].length, "</s>", 0);
-        info.insert(s + 1, "<s>");
-        match = info.find(rx, match.index + 7 * pcount);
-    }
-    return Promise.resolve();
-};
-
-var checkLangsMatch = function checkLangsMatch(info, matchs, matche) {
-    return matchs && matche && matchs[1] && matchs[1] == matche[1];
-};
-
-var checkExternalLink = function checkExternalLink(info, matchs) {
-    if (matchs.index > 0 && ["@", "#"].indexOf(info.text[matchs.index - 1]) >= 0) return false;
-    return (/^\d+\.\d+\.\d+\.\d+$/.test(matchs[2]) || rootZones.hasOwnProperty(matchs[4])
-    );
-};
-
-var checkQuotationNotInterrupted = function checkQuotationNotInterrupted(info, matchs, matche) {
-    if (info.isIn(matchs.index, matche.index - matchs.index)) return false;
-    if (0 == matchs.index) return true;
-    if ("\n" == info.text.substr(matchs.index - 1, 1)) return true;
-    return info.isIn(matchs.index - 6, 6, SkipTypes.HtmlSkip) && info.text.substr(matchs.index - 6, 6) == "<br />";
-};
-
-var convertMonospace = function convertMonospace(_, text, __, ___, options) {
-    options.op = "<font face=\"monospace\">";
-    options.cl = "</font>";
-    options.type = SkipTypes.CodeSkip;
-    return Promise.resolve(Tools.toHtml(withoutEscaped(text)));
-};
-
-var convertNomarkup = function convertNomarkup(_, text, __, ___, options) {
-    options.type = SkipTypes.CodeSkip;
-    return Promise.resolve(Tools.toHtml(withoutEscaped(text)));
-};
-
-var convertPre = function convertPre(_, text, __, ___, options) {
-    options.op = "<pre>";
-    options.cl = "</pre>";
-    options.type = SkipTypes.CodeSkip;
-    text = withoutEscaped(text).split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-    text = text.split("\"").join("&quot;");
-    return Promise.resolve(text);
-};
-
-function markupCode(text, lang) {
-    if (lang) {
-        lang = lang.replace('++', 'pp').replace('#', 's'); //TODO: You know, this is not OK.
-    }
-    _highlight2.default.configure({
-        tabReplace: '    ',
-        useBR: true
-    });
-    var result = lang ? _highlight2.default.highlight(lang, text, true) : _highlight2.default.highlightAuto(text);
-    text = result.value;
-    lang = result.language || lang;
-    var langClass = lang ? ' ' + lang : '';
-    var langNames = MiscModel.codeLangNames();
-    var langName = langNames.hasOwnProperty(lang) ? langNames[lang] : lang;
-    return {
-        op: '<div class="code-block' + langClass + ' hljs js-with-tooltip" title="' + (langName || '') + '">',
-        cl: '</div>',
-        text: _highlight2.default.fixMarkup(text)
-    };
+function reloadElements() {
+  elements = Tools.loadPlugins([__dirname, __dirname + '/custom'], function (fileName, _1, _2, path) {
+    return 'index.js' !== fileName && 'processing-context.js' !== fileName || path.split('/') === 'custom';
+  }, true).sort(function (p1, p2) {
+    return p1.priority - p2.priority;
+  });
+  var escapableSequences = elements.filter(function (plugin) {
+    return plugin.escapable;
+  }).map(function (plugin) {
+    return [plugin.op, plugin.cl];
+  }).filter(function (sequence) {
+    return sequence && typeof sequence === 'string';
+  });
+  escapableSequences = (0, _underscore2.default)(escapableSequences).flatten();
+  escapableSequences = (0, _underscore2.default)(escapableSequences).uniq().map(function (sequence) {
+    return Tools.escapeRegExp(sequence);
+  });
+  if (escapableSequences.length > 0) {
+    escapableSequencesRegExp = new RegExp(escapableSequences.join('|'), 'g');
+  } else {
+    escapableSequencesRegExp = null;
+  }
+  postProcessors = elements.filter(function (plugin) {
+    return typeof plugin.postProcessor === 'function';
+  }).map(function (plugin) {
+    return plugin.postProcessor;
+  });
 }
 
-var convertCode = function convertCode(_, text, matchs, __, options) {
-    options.type = SkipTypes.CodeSkip;
-    var result = markupCode(text, matchs[1]);
-    options.op = result.op;
-    options.cl = result.cl;
-    return Promise.resolve(result.text);
-};
+reloadElements();
 
-var convertVkontaktePost = function convertVkontaktePost(_, __, matchs, ___, options) {
-    options.type = SkipTypes.HtmlSkip;
-    return Promise.resolve("<div class=\"overflow-x-container\">" + matchs[0] + "</div>");
-};
+function getIndE(_ref) {
+  var info = _ref.info;
+  var rxOp = _ref.rxOp;
+  var matchs = _ref.matchs;
+  var rxCl = _ref.rxCl;
+  var inds = _ref.inds;
+  var nestable = _ref.nestable;
+  var escapable = _ref.escapable;
+  var nested = _ref.nested;
 
-var convertExternalLink = function convertExternalLink(info, text, matchs, __, options) {
-    if (!text) return Promise.resolve("");
-    options.type = SkipTypes.HtmlSkip;
-    if (info.isIn(matchs.index, matchs[0].length, SkipTypes.HtmlSkip)) return Promise.resolve(text);
-    var href = matchs[0];
-    if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0)) href = "http://" + href;
-    var def = "<a href=\"" + href + "\">" + Tools.toHtml(matchs[0]) + "</a>";
-    if (matchTwitterLink(href)) return getTwitterEmbeddedHtml(href, def);
-    if (matchYoutubeLink(href)) return getYoutubeEmbeddedHtml(href, def);
-    if (matchCoubLink(href)) return getCoubEmbeddedHtml(href, def);
-    if (matchVocarooLink(href)) return getVocarooEmbeddedHtml(href, def);
-    return Promise.resolve(def);
-};
-
-var convertProtocol = function convertProtocol(_, __, matchs, ___, options) {
-    options.type = SkipTypes.HtmlSkip;
-    return Promise.resolve("<a href=\"" + matchs[0] + "\">" + Tools.toHtml(matchs[2]) + "</a>");
-};
-
-var convertTooltipShitty = function convertTooltipShitty(_, __, matchs, ___, options) {
-    options.type = SkipTypes.NoSkip;
-    var tooltip = matchs[2];
-    options.op = "<span class=\"tooltip js-with-tooltip\" title=\"" + tooltip + "\">";
-    options.cl = "</span>";
-    return Promise.resolve(matchs[1]);
-};
-
-var convertPostLink = function convertPostLink(info, _, matchs, __, options) {
-    options.type = SkipTypes.HtmlSkip;
-    var boardName = matchs.length > 2 ? matchs[1] : info.boardName;
-    var postNumber = +matchs[matchs.length > 2 ? 2 : 1];
-    var escaped = matchs[0].split(">").join("&gt;");
-    if (postNumber && postNumber != info.deletedPost) {
-        return PostsModel.getPost(boardName, postNumber).then(function (post) {
-            if (!post) return escaped;
-            post = JSON.parse(post);
-            if (info.referencedPosts) {
-                var key = boardName + ":" + postNumber;
-                if (!info.referencedPosts[key]) {
-                    info.referencedPosts[key] = {
-                        boardName: boardName,
-                        postNumber: postNumber,
-                        threadNumber: post.threadNumber,
-                        createdAt: Tools.now()
-                    };
-                }
-            }
-            var href = "href=\"/" + (0, _config2.default)("site.pathPrefix", "") + boardName + "/res/" + post.threadNumber + ".html";
-            if (postNumber != post.threadNumber) href += "#" + postNumber;
-            href += "\"";
-            var result = "<a " + href;
-            if (postNumber === post.threadNumber) {
-                result += ' class="op-post-link"';
-            }
-            result += " data-board-name=\"" + boardName + "\" data-post-number=\"" + postNumber + "\" data-thread-number=\"" + post.threadNumber + "\">" + escaped + "</a>";
-            return result;
-        });
-    } else {
-        return Promise.resolve(escaped);
+  nested.nested = false;
+  if (!nestable) {
+    return inds >= 0 ? info.find(rxCl, inds + matchs[0].length, escapable) : -1;
+  }
+  if (inds >= 0) {
+    var matchst = info.find(rxOp, inds + matchs[0].length, escapable);
+    var matchet = info.find(rxCl, inds + matchs[0].length, escapable);
+    var depth = 1;
+    while (matchst || matchet) {
+      var tmp = matchst && (!matchet || matchst.index < matchet.index) ? matchst : matchet;
+      var offs = matchst && (!matchet || matchst.index < matchet.index) ? matchst[0].length : matchet[0].length;
+      depth += tmp.index == (matchst ? matchst.index : -1) ? 1 : -1;
+      if (depth > 1) {
+        nested.nested = true;
+      }
+      if (!depth) {
+        return tmp;
+      }
+      matchst = info.find(rxOp, tmp.index + offs, escapable);
+      matchet = info.find(rxCl, tmp.index + offs, escapable);
     }
-};
+  }
+  return null;
+}
 
-var convertHtml = function convertHtml(_, text, __, ___, options) {
-    options.type = SkipTypes.HtmlSkip;
-    return Promise.resolve(text);
-};
+function preReady(text) {
+  return text.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;").split("\"").join("&quot;");
+}
 
-var convertMarkup = function convertMarkup(_, text, matchs, __, options) {
-    options.type = SkipTypes.NoSkip;
-    if ("----" == matchs[0]) return Promise.resolve('—');else if ("--" == matchs[0]) return Promise.resolve('–');
-    var tag = MarkupTags[matchs[0]];
-    if (!tag) return Promise.resolve("");
-    options.op = tag.op;
-    options.cl = tag.cl;
-    return Promise.resolve(text);
-};
+function markupModes(string) {
+  if (typeof string !== 'string') {
+    string = '';
+  }
+  return MARKUP_MODES.filter(function (mode) {
+    return string.indexOf(mode) >= 0;
+  });
+}
 
-var convertLatex = function convertLatex(inline, _, text, matchs, __, options) {
-    options.type = SkipTypes.HtmlSkip;
-    return markupLaTeX(text, inline);
-};
+Object.defineProperty(markup, 'EXTENDED_WAKABA_MARK', { value: EXTENDED_WAKABA_MARK });
+Object.defineProperty(markup, 'BB_CODE', { value: BB_CODE });
+Object.defineProperty(markup, 'MARKUP_MODES', { value: MARKUP_MODES });
+Object.defineProperty(markup, "markupCode", { value: _code2.default.markupCode });
+Object.defineProperty(markup, 'markupLaTeX', { value: _code2.default.markupLaTeX });
+Object.defineProperty(markup, 'markupModes', { value: markupModes });
 
-var convertUrl = function convertUrl(info, text, matchs, matche, options) {
-    if (!text) return Promise.resolve("");
-    options.type = SkipTypes.HtmlSkip;
-    if (info.isIn(matchs.index, matchs[0].length, SkipTypes.HtmlSkip)) return Promise.resolve(text);
-    var href = text;
-    if (href.lastIndexOf("http", 0) && href.lastIndexOf("ftp", 0)) href = "http://" + href;
-    var def = "<a href=\"" + href + "\">" + Tools.toHtml(text) + "</a>";
-    if (matchTwitterLink(href)) return getTwitterEmbeddedHtml(href, def);
-    if (matchYoutubeLink(href)) return getYoutubeEmbeddedHtml(href, def);
-    if (matchCoubLink(href)) return getCoubEmbeddedHtml(href, def);
-    if (matchVocarooLink(href)) return getVocarooEmbeddedHtml(href, def);
-    return Promise.resolve(def);
-};
-
-var convertCSpoiler = function convertCSpoiler(_, text, matchs, __, options) {
-    var title = matchs[1];
-    if (!title) title = "Spoiler";
-    options.type = SkipTypes.NoSkip;
-    options.op = "<span class=\"collapsible-spoiler\"><span class=\"collapsible-spoiler-title\" title=\"Spoiler\" " + "onclick=\"lord.expandCollapseSpoiler(this);\">" + title + "</span><span class=\"collapsible-spoiler-body\" style=\"display: none;\">";
-    options.cl = "</span></span>";
-    return Promise.resolve(text);
-};
-
-var convertTooltip = function convertTooltip(_, text, matchs, __, options) {
-    var tooltip = matchs[1];
-    options.type = SkipTypes.NoSkip;
-    options.op = "<span class=\"tooltip js-with-tooltip\" title=\"" + tooltip + "\">";
-    options.cl = "</span>";
-    return Promise.resolve(text);
-};
-
-var convertUnorderedList = function convertUnorderedList(_, text, matchs, __, options) {
-    var t = matchs[2];
-    if (!t) t = "disc";else if (t.length == 1) t = ListTypes[t];
-    if (!t) return Promise.resolve("");
-    options.type = SkipTypes.NoSkip;
-    options.op = '<ul type="' + t + '">';
-    options.cl = "</ul>";
-    return Promise.resolve(text);
-};
-
-var convertOrderedList = function convertOrderedList(_, text, matchs, __, options) {
-    var t = matchs[2];
-    if (!t) t = "1";
-    options.type = SkipTypes.NoSkip;
-    options.op = '<ol type="' + t + '">';
-    options.cl = "</ol>";
-    return Promise.resolve(text);
-};
-
-var convertListItem = function convertListItem(_, text, matchs, __, options) {
-    options.type = SkipTypes.NoSkip;
-    options.op = "<li";
-    if (matchs[2]) op += " value=\"" + matchs[2] + "\"";
-    options.op += ">";
-    options.cl = "</li>";
-    return Promise.resolve(text);
-};
-
-var convertCitation = function convertCitation(_, text, matchs, matche, options) {
-    options.type = SkipTypes.NoSkip;
-    if (matchs[1] == "\n") options.op = "<br />";
-    options.op += "<span class=\"quotation\">&gt;";
-    options.cl = "</span>";
-    if (matche[0] == "\n") options.cl += "<br />";
-    return Promise.resolve(text);
-};
-
-var processPostText = function processPostText(boardName, text, options) {
-    if (!text) return Promise.resolve(null);
-    var deletedPost = options && +options.deletedPost > 0 ? options.deletedPost : 0;
-    var markupModes = options && options.markupModes ? options.markupModes : [MarkupModes.ExtendedWakabaMark, MarkupModes.BBCode];
-    var accessLevel = options && options.accessLevel || null;
-    var c = {};
-    var langs = [];
-    _highlight2.default.listLanguages().forEach(function (lang) {
-        langs.push(lang);
-        var aliases = _highlight2.default.getLanguage(lang).aliases;
-        if (aliases) {
-            aliases.forEach(function (alias) {
-                langs.push(alias);
-            });
-        }
-    });
-    langs.splice(langs.indexOf("cpp") + 1, 0, "c++");
-    langs.splice(langs.indexOf("cs") + 1, 0, "c#");
-    langs.splice(langs.indexOf("fsharp") + 1, 0, "f#");
-    langs = langs.join("|").split("+").join("\\+").split("-").join("\\-").split(".").join("\\.");
-    text = text.replace(/\r+\n/g, "\n").replace(/\r/g, "\n");
-    var info = new ProcessingInfo(text, boardName, options ? options.referencedPosts : null, deletedPost, options ? options.referencesToReplace : null);
-    var p = Promise.resolve();
-    if (markupModes.indexOf(MarkupModes.ExtendedWakabaMark) >= 0) {
-        p = p.then(function () {
-            return process(info, convertMonospace, { op: "``" }, { escapable: true });
-        }).then(function () {
-            return process(info, convertNomarkup, { op: "''" }, { escapable: true });
-        }).then(function () {
-            return process(info, convertPre, {
-                op: /\/\\-\\-pre\s+/g,
-                cl: /\s+\\\\\\-\\-/g
-            });
-        }).then(function () {
-            return process(info, convertCode, {
-                op: new RegExp("/\\-\\-code\\s+(" + langs + ")\\s+", "gi"),
-                cl: /\s+\\\\\\-\\-/g
-            });
-        }).then(function () {
-            return process(info, convertLatex.bind(null, false), { op: "$$$" });
-        }).then(function () {
-            return process(info, convertLatex.bind(null, true), { op: "$$" });
-        });
-    }
-    if (markupModes.indexOf(MarkupModes.BBCode) >= 0) {
-        if (Tools.compareRegisteredUserLevels(accessLevel, Permissions.useRawHTMLMarkup()) >= 0) {
-            p = p.then(function () {
-                return process(info, convertHtml, {
-                    op: "[raw-html]",
-                    cl: "[/raw-html]"
-                });
-            });
-        }
-        p = p.then(function () {
-            return process(info, convertPre, {
-                op: "[pre]",
-                cl: "[/pre]"
-            });
-        }).then(function () {
-            return process(info, convertCode, {
-                op: "[code]",
-                cl: "[/code]"
-            });
-        }).then(function () {
-            return process(info, convertCode, {
-                op: new RegExp("\\[code\\s+lang\\=\"?(" + langs + ")\"?\\s*\\]", "gi"),
-                cl: "[/code]"
-            });
-        }).then(function () {
-            return process(info, convertCode, {
-                op: new RegExp("\\[(" + langs + ")\\]", "gi"),
-                cl: new RegExp("\\[/(" + langs + ")\\]", "gi")
-            }, { checkFunction: checkLangsMatch });
-        }).then(function () {
-            return process(info, convertMonospace, {
-                op: "[m]",
-                cl: "[/m]"
-            });
-        }).then(function () {
-            return process(info, convertNomarkup, {
-                op: "[n]",
-                cl: "[/n]"
-            });
-        }).then(function () {
-            return process(info, convertLatex.bind(null, false), {
-                op: "[latex]",
-                cl: "[/latex]"
-            });
-        }).then(function () {
-            return process(info, convertLatex.bind(null, true), {
-                op: "[l]",
-                cl: "[/l]"
-            });
-        });
-    }
-    if (markupModes.indexOf(MarkupModes.ExtendedWakabaMark) >= 0 || markupModes.indexOf(MarkupModes.BBCode) >= 0) {
-        p = p.then(function () {
-            if (!(0, _config2.default)("site.vkontakte.integrationEnabled", false)) return Promise.resolve();
-            return process(info, convertVkontaktePost, {
-                op: /<div id\="vk_post_\-?\d+_\d+"><\/div><script type="text\/javascript">  \(function\(d\, s\, id\) \{ var js\, fjs \= d\.getElementsByTagName\(s\)\[0\]; if \(d\.getElementById\(id\)\) return; js \= d\.createElement\(s\); js\.id \= id; js\.src \= "\/\/vk\.com\/js\/api\/openapi\.js\?121"; fjs\.parentNode\.insertBefore\(js\, fjs\); \}\(document\, 'script'\, 'vk_openapi_js'\)\);  \(function\(\) \{    if \(\!window\.VK \|\| \!VK\.Widgets \|\| \!VK\.Widgets\.Post \|\| \!VK\.Widgets\.Post\("vk_post_\-?\d+_\d+"\, (\-?\d+)\, (\d+)\, '([a-zA-Z0-9_\-]+)'\, \{width\: 500\}\)\) setTimeout\(arguments\.callee\, 50\);  \}\(\)\);<\/script>/g,
-                cl: null
-            });
-        }).then(function () {
-            return process(info, convertUrl, {
-                op: "[url]",
-                cl: "[/url]"
-            });
-        }).then(function () {
-            return process(info, convertExternalLink, {
-                op: new _xregexp2.default(Tools.EXTERNAL_LINK_REGEXP_PATTERN, "gi"),
-                cl: null
-            }, { checkFunction: checkExternalLink });
-        }).then(function () {
-            return process(info, convertProtocol, {
-                op: /(mailto|irc|news)\:(\S+)/gi,
-                cl: null
-            });
-        }).then(function () {
-            return processStrikedOutShitty(info);
-        }).then(function () {
-            return processStrikedOutShittyWord(info);
-        }).then(function () {
-            return process(info, convertTooltipShitty, {
-                op: /([^\?\s]+)\?{3}"([^"]+)"/gi,
-                cl: null
-            });
-        }).then(function () {
-            return process(info, convertPostLink, {
-                op: />>([1-9][0-9]*)/gi,
-                cl: null
-            });
-        }).then(function () {
-            var boards = _board2.default.boardNames().join("|");
-            return process(info, convertPostLink, {
-                op: new RegExp(">>/(" + boards + ")/([1-9][0-9]*)", "gi"),
-                cl: null
-            });
-        }).then(function () {
-            return process(info, convertMarkup, {
-                op: "----",
-                cl: null
-            });
-        });
-    }
-    if (markupModes.indexOf(MarkupModes.ExtendedWakabaMark) >= 0) {
-        p = p.then(function () {
-            return process(info, convertMarkup, { op: "---" });
-        });
-    }
-    if (markupModes.indexOf(MarkupModes.ExtendedWakabaMark) >= 0 || markupModes.indexOf(MarkupModes.BBCode) >= 0) {
-        p = p.then(function () {
-            return process(info, convertMarkup, {
-                op: "--",
-                cl: null
-            });
-        });
-    }
-    if (markupModes.indexOf(MarkupModes.ExtendedWakabaMark) >= 0) {
-        p = p.then(function () {
-            return process(info, convertMarkup, { op: "***" });
-        }).then(function () {
-            return process(info, convertMarkup, { op: "**" });
-        }).then(function () {
-            return process(info, convertMarkup, { op: "*" });
-        }).then(function () {
-            return process(info, convertMarkup, { op: "___" });
-        }).then(function () {
-            return process(info, convertMarkup, { op: "__" });
-        }).then(function () {
-            return process(info, convertMarkup, { op: "_" });
-        }).then(function () {
-            return process(info, convertMarkup, { op: "///" });
-        }).then(function () {
-            return process(info, convertCSpoiler, { op: "%%%" });
-        }).then(function () {
-            return process(info, convertMarkup, { op: "%%" });
-        });
-    }
-    if (markupModes.indexOf(MarkupModes.BBCode) >= 0) {
-        p = p.then(function () {
-            return process(info, convertMarkup, {
-                op: "[b]",
-                cl: "[/b]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertMarkup, {
-                op: "[i]",
-                cl: "[/i]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertMarkup, {
-                op: "[s]",
-                cl: "[/s]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertMarkup, {
-                op: "[u]",
-                cl: "[/u]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertMarkup, {
-                op: "[sub]",
-                cl: "[/sub]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertMarkup, {
-                op: "[sup]",
-                cl: "[/sup]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertMarkup, {
-                op: "[spoiler]",
-                cl: "[/spoiler]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertCSpoiler, {
-                op: "[cspoiler]",
-                cl: "[/cspoiler]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertCSpoiler, {
-                op: /\[cspoiler\s+title\="([^"]*)"\s*\]/gi,
-                cl: "[/cspoiler]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertTooltip, {
-                op: /\[tooltip\s+value\="([^"]*)"\s*\]/gi,
-                cl: "[/tooltip]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertUnorderedList, {
-                op: /\[ul(\s+type\="?(disc|circle|square|d|c|s)"?)?\s*\]/gi,
-                cl: "[/ul]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertOrderedList, {
-                op: /\[ol(\s+type\="?(A|a|I|i|1)"?)?\s*\]/gi,
-                cl: "[/ol]"
-            }, { nestable: true });
-        }).then(function () {
-            return process(info, convertListItem, {
-                op: /\[li(\s+value\="?(\d+)"?\s*)?\]/gi,
-                cl: "[/li]"
-            }, { nestable: true });
-        });
-    }
-    if (markupModes.indexOf(MarkupModes.ExtendedWakabaMark) >= 0 || markupModes.indexOf(MarkupModes.BBCode) >= 0) {
-        p = p.then(function () {
-            return process(info, convertCitation, {
-                op: ">",
-                cl: /\n|$/gi
-            }, { checkFunction: checkQuotationNotInterrupted });
-        });
-    }
-    return p.then(function () {
-        return info.toHtml();
-    });
-};
-
-Object.defineProperty(processPostText, "MarkupModes", { value: MarkupModes });
-Object.defineProperty(processPostText, "markupCode", { value: markupCode });
-
-processPostText.markupModes = function (string) {
-    if (typeof string !== 'string') {
-        string = '';
-    }
-    return (0, _underscore2.default)(MarkupModes).filter(function (mode) {
-        return string.indexOf(mode) >= 0;
-    });
-};
-
-processPostText.latex = markupLaTeX;
-
-module.exports = processPostText;
+exports.default = markup;
 //# sourceMappingURL=index.js.map

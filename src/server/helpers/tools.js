@@ -259,7 +259,7 @@ export function requireWrapper(m) {
   return (m && m.default) || m;
 }
 
-export function loadPlugins(paths, filter) {
+export function loadPlugins(paths, filter, keepCache) {
   if (typeof filter !== 'function') {
     if (typeof filter === 'undefined' || filter) {
       filter = (fileName) => { return 'index.js' !== fileName; };
@@ -277,7 +277,7 @@ export function loadPlugins(paths, filter) {
       return filter(fileName, index, fileNames, path, pathIndex);
     }).map((fileName) => {
       let id = require.resolve(`${path}/${fileName}`);
-      if (require.cache.hasOwnProperty(id)) {
+      if (!keepCache && require.cache.hasOwnProperty(id)) {
         delete require.cache[id];
       }
       let plugins = requireWrapper(require(id));

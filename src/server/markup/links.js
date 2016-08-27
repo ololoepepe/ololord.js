@@ -1,9 +1,15 @@
+import HTTP from 'q-io/http';
+import URL from 'url';
 import XRegExp from 'xregexp';
 
+import ProcessingContext from './processing-context';
 import Board from '../boards/board';
 import Renderer from '../core/renderer';
 import config from '../helpers/config';
+import FSWatcher from '../helpers/fs-watcher';
 import Logger from '../helpers/logger';
+import * as Tools from '../helpers/tools';
+import * as PostsModel from '../models/posts';
 
 const RX_VK_POST_LINK_PATTERN = '<div id\\="vk_post_\\-?\\d+_\\d+"><\\/div><script type="text\\/javascript">  '
   + '\\(function\\(d\\, s\\, id\\) \\{ var js\\, fjs \\= d\\.getElementsByTagName\\(s\\)\\[0\\]; '
@@ -14,180 +20,178 @@ const RX_VK_POST_LINK_PATTERN = '<div id\\="vk_post_\\-?\\d+_\\d+"><\\/div><scri
   + '(\\-?\\d+)\, (\\d+)\, \'([a-zA-Z0-9_\-]+)\'\\, \\{width\\: 500\\}\\)\\) '
   + 'setTimeout\\(arguments\\.callee\\, 50\\);  \\}\\(\\)\\);<\\/script>';
 const RX_VK_POST_LINK = new RegExp(RX_VK_POST_LINK_PATTERN, 'g');
+const RX_TWITTER_POST_LINK = /^https?\:\/\/twitter\.com\/[^\/]+\/status\/\d+\/?$/;
+const RX_YOUTUBE_VIDEO_LINK_1 = /^https?\:\/\/(m\.|www\.)?youtube\.com\/.*v\=([^\/#\?&]+).*$/;
+const RX_YOUTUBE_VIDEO_LINK_2 = /^https?\:\/\/youtu\.be\/([^\/#\?]+).*$/;
+const RX_COUB_VIDEO_LINK = /^https?:\/\/coub\.com\/view\/([^\/\?#]+).*$/;
+const RX_VOCAROO_AUDIO_LINK = /^https?:\/\/vocaroo\.com\/i\/([a-zA-Z0-9]+)$/;
 
-function matchTwitterLink(href) {
-  return config('site.twitter.integrationEnabled')
-    && href.match(/^https?\:\/\/twitter\.com\/[^\/]+\/status\/\d+\/?$/);
+function transformRootZones(zones) {
+  return zones.reduce((acc, zone) => {
+    acc[zone] = true;
+    return acc;
+  }, {});
 }
 
-function matchYoutubeLink(href) {
-  return href.match(/^https?\:\/\/(m\.|www\.)?youtube\.com\/.*v\=[^\/]+.*$/)
-    || href.match(/^https?\:\/\/youtu\.be\/[^\/]+.*$/);
+let rootZones = FSWatcher.createWatchedResource(`${__dirname}/../misc/root-zones.json`, (path) => {
+  return transformRootZones(require(path));
+}, async function(path) {
+  return transformRootZones(require(path));
+}) || {};
+
+function youtubeVideoStartTime(href) {
+  if (!href) {
+    return null;
+  }
+  let time = URL.parse(href, true).query.t;
+  if (!time) {
+    return null;
+  }
+  let match = time.match(/((\d+)h)?((\d+)m)?((\d+)s)?/);
+  if (!match) {
+    return null;
+  }
+  let start = 0;
+  if (match[2]) {
+    start += +match[2] * 3600; //NOTE: Hours
+  }
+  if (match[4]) {
+    start += +match[4] * 60; //NOTE: Minutes
+  }
+  if (match[6]) {
+    start += +match[6]; //NOTE: Seconds
+  }
+  return Tools.option(start, 'number', null, { test: (s) => { return s > 0; } });
 }
 
-function matchCoubLink(href) {
-  return href.match(/^https?:\/\/coub\.com\/view\/[^\/\?]+.*$/);
-}
-
-function matchVocarooLink(href) {
-  return href.match(/^https?:\/\/vocaroo\.com\/i\/[a-zA-Z0-9]+$/);
-}
-
-var getTwitterEmbeddedHtml = function(href, defaultHTML) {
-    return HTTP.request({
-        method: "GET",
-        url: `https://api.twitter.com/1/statuses/oembed.json?url=${href}`,
-        timeout: Tools.MINUTE //TODO: magic numbers
-    }).then(function(response) {
-        if (response.status != 200)
-            return Promise.reject(new Error(Tools.translate("Failed to get Twitter embedded HTML")));
-        return response.body.read();
-    }).then(function(data) {
-        try {
-            return Promise.resolve(JSON.parse(data.toString()).html);
-        } catch (err) {
-            return Promise.reject(err);
-        }
-    }).catch(function(err) {
-        Logger.error(err.stack || err);
-        return Promise.resolve(defaultHTML);
-    }).then(function(html) {
-        return Promise.resolve(html);
+async function getTwitterEmbeddedHtml(href, defaultHTML) {
+  try {
+    let response = await HTTP.request({
+      method: 'GET',
+      url: `https://api.twitter.com/1/statuses/oembed.json?url=${href}`,
+      timeout: config('system.httpRequestTimeout')
     });
-};
-
-var youtubeVideoStartTime = function(href) {
-    if (!href)
-        return null;
-    var t = URL.parse(href, true).query.t;
-    if (!t)
-        return null;
-    var match = t.match(/((\d+)h)?((\d+)m)?((\d+)s)?/);
-    if (!match)
-        return null;
-    var start = 0;
-    if (match[2])
-        start += +match[2] * 3600;
-    if (match[4])
-        start += +match[4] * 60;
-    if (match[6])
-        start += +match[6];
-    if (isNaN(start) || start <= 0)
-        return null;
-    return start;
-};
-
-var getYoutubeEmbeddedHtml = function(href, defaultHTML) {
-    var match = href.match(/^https?\:\/\/.*youtube\.com\/.*v\=([^\/#\?&]+).*$/);
-    var videoId = match ? match[1] : null;
-    if (!videoId) {
-        match = href.match(/^https?\:\/\/youtu\.be\/([^\/#\?]+).*$/);
-        videoId = match ? match[1] : null;
+    if (response.status !== 200) {
+      throw new Error(Tools.translate('Failed to get Twitter embedded HTML'));
     }
-    var apiKey = config("server.youtubeApiKey", "");
-    if (!videoId || !apiKey)
-        return Promise.resolve(defaultHTML);
-    return HTTP.request({
-        method: "GET",
-        url: `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`,
-        timeout: Tools.MINUTE //TODO: magic numbers
-    }).then(function(response) {
-        if (response.status != 200)
-            return Promise.reject(new Error(Tools.translate("Failed to get YouTube embedded HTML")));
-        return response.body.read();
-    }).then(function(data) {
-        try {
-            var response = JSON.parse(data.toString());
-            if (!response.items || response.items.length < 1)
-                return Promise.reject(new Error(Tools.translate("Failed to get YouTube video info")));
-            var info = response.items[0].snippet;
-            info.id = videoId;
-            info.href = href;
-            info.start = youtubeVideoStartTime(href);
-            let html = Renderer.render('markup/youtubeVideoLink', { info: info });
-            if (!html)
-                return Promise.reject(new Error(Tools.translate("Failed to create YouTube video link")));
-            return Promise.resolve(html);
-        } catch (err) {
-            return Promise.reject(err);
-        }
-    }).catch(function(err) {
-        Logger.error(err.stack || err);
-        return Promise.resolve(defaultHTML);
-    }).then(function(html) {
-        return Promise.resolve(html);
-    });
-};
+    let data = await response.body.read();
+    return JSON.parse(data.toString()).html;
+  } catch (err) {
+    Logger.error(err.stack || err);
+    return defaultHTML;
+  }
+}
 
-var getCoubEmbeddedHtml = function(href, defaultHTML) {
-    var match = href.match(/^https?:\/\/coub\.com\/view\/([^\/\?#]+).*$/);
-    var videoId = match ? match[1] : null;
-    if (!videoId)
-        return Promise.resolve(defaultHTML);
-    return HTTP.request({
-        method: "GET",
-        url: `https://coub.com/api/oembed.json?url=http://coub.com/view/${videoId}`,
-        timeout: Tools.MINUTE //TODO: magic numbers
-    }).then(function(response) {
-        if (response.status != 200)
-            return Promise.reject(new Error(Tools.translate("Failed to get Coub embedded HTML")));
-        return response.body.read();
-    }).then(function(data) {
-        try {
-            var response = JSON.parse(data.toString());
-            if (!response)
-                return Promise.reject(new Error(Tools.translate("Failed to get Coub video info")));
-            var info = {
-                href: href,
-                videoTitle: response.title,
-                authorName: response.author_name,
-                thumbnail: response.thumbnail_url ? {
-                    url: response.thumbnail_url,
-                    width: response.thumbnail_width,
-                    height: response.thumbnail_height
-                } : null,
-                id: videoId
-            };
-            let html = Renderer.render('markup/coubVideoLink', { info: info });
-            if (!html)
-                return Promise.reject(new Error(Tools.translate("Failed to create Coub video link")));
-            return Promise.resolve(html);
-        } catch (err) {
-            return Promise.reject(err);
-        }
-    }).catch(function(err) {
-        Logger.error(err.stack || err);
-        return Promise.resolve(defaultHTML);
-    }).then(function(html) {
-        return Promise.resolve(html);
+async function getYoutubeEmbeddedHtml(href, defaultHTML) {
+  let match = href.match(RX_YOUTUBE_VIDEO_LINK_1);
+  let videoId = match ? match[1] : null;
+  if (!videoId) {
+    match = href.match(RX_YOUTUBE_VIDEO_LINK_2);
+    videoId = match ? match[1] : null;
+  }
+  let apiKey = config('server.youtubeApiKey');
+  if (!videoId || !apiKey) {
+    return defaultHTML;
+  }
+  try {
+    let response = await HTTP.request({
+      method: 'GET',
+      url: `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`,
+      timeout: config('system.httpRequestTimeout')
     });
-};
+    if (response.status !== 200) {
+      throw new Error(Tools.translate('Failed to get YouTube embedded HTML'));
+    }
+    let data = await response.body.read();
+    response = JSON.parse(data.toString());
+    if (!response.items || response.items.length < 1) {
+      throw new new Error(Tools.translate('Failed to get YouTube video info'));
+    }
+    let info = response.items[0].snippet;
+    info.id = videoId;
+    info.href = href;
+    info.start = youtubeVideoStartTime(href);
+    let html = Renderer.render('markup/youtubeVideoLink', { info: info });
+    if (!html) {
+      throw new Error(Tools.translate('Failed to create YouTube video link'));
+    }
+    return html;
+  } catch (err) {
+    Logger.error(err.stack || err);
+    return defaultHTML;
+  }
+}
+
+async function getCoubEmbeddedHtml(href, defaultHTML) {
+  let match = href.match(RX_COUB_VIDEO_LINK);
+  let videoId = match ? match[1] : null;
+  if (!videoId) {
+    return defaultHTML;
+  }
+  try {
+    let response = await HTTP.request({
+      method: 'GET',
+      url: `https://coub.com/api/oembed.json?url=http://coub.com/view/${videoId}`,
+      timeout: config('system.httpRequestTimeout')
+    });
+    if (response.status !== 200) {
+      throw new new Error(Tools.translate('Failed to get Coub embedded HTML'));
+    }
+    let data = await response.body.read();
+    response = JSON.parse(data.toString());
+    if (!response) {
+      throw new Error(Tools.translate('Failed to get Coub video info'));
+    }
+    let info = {
+      href: href,
+      videoTitle: response.title,
+      authorName: response.author_name,
+      thumbnail: response.thumbnail_url ? {
+        url: response.thumbnail_url,
+        width: response.thumbnail_width,
+        height: response.thumbnail_height
+      } : null,
+      id: videoId
+    };
+    let html = Renderer.render('markup/coubVideoLink', { info: info });
+    if (!html) {
+      throw new Error(Tools.translate('Failed to create Coub video link'));
+    }
+    return html;
+  } catch (err) {
+    Logger.error(err.stack || err);
+    return defaultHTML;
+  }
+}
 
 function getVocarooEmbeddedHtml(href, defaultHTML) {
-  let match = href.match(/^https?:\/\/vocaroo\.com\/i\/([a-zA-Z0-9]+)$/);
+  let match = href.match(RX_VOCAROO_AUDIO_LINK);
   let audioId = match ? match[1] : null;
   if (!audioId) {
     return defaultHTML;
   }
   try {
-    return Renderer.render('markup/vocarooAudioLink', { info: { id: audioId } });
+    let html = Renderer.render('markup/vocarooAudioLink', { info: { id: audioId } });
+    if (!html) {
+      throw new Error(Tools.translate('Failed to create Vocaroo audio embedded container'));
+    }
   } catch (err) {
-    Logger.log(Tools.translate('Failed to create Vocaroo audio embedded container'), err.stack || err);
+    Logger.log(err.stack || err);
     return defaultHTML;
   }
 }
 
 function convertVkontaktePost(_1, _2, matchs, _3, options) {
-  options.type = 'HTML_SKIP';
+  options.type = ProcessingContext.HTML_SKIP;
   return `<div class='overflow-x-container'>${matchs[0]}</div>`;
 }
 
-function convertLinkCommon(hrefIsText, info, text, matchs, _1, options) {
+async function convertLinkCommon(hrefIsText, info, text, matchs, _1, options) {
   if (!text) {
     return '';
   }
-  options.type = 'HTML_SKIP';
-  if (info.isIn(matchs.index, matchs[0].length, 'HTML_SKIP')) {
+  options.type = ProcessingContext.HTML_SKIP;
+  if (info.isIn(matchs.index, matchs[0].length, ProcessingContext.HTML_SKIP)) {
     return text;
   }
   let href = hrefIsText ? text : matchs[0];
@@ -195,62 +199,67 @@ function convertLinkCommon(hrefIsText, info, text, matchs, _1, options) {
     href = `http://${href}`;
   }
   let defaultHTML = `<a href='${href}'>${Renderer.toHTML(text)}</a>`;
-  if (matchTwitterLink(href)) {
-    return getTwitterEmbeddedHtml(href, defaultHTML);
+  if (config('site.twitter.integrationEnabled') && RX_TWITTER_POST_LINK.test(href)) {
+    return await getTwitterEmbeddedHtml(href, defaultHTML);
   }
-  if (matchYoutubeLink(href)) {
-    return getYoutubeEmbeddedHtml(href, defaultHTML);
+  if (RX_YOUTUBE_VIDEO_LINK_1.test(href) || RX_YOUTUBE_VIDEO_LINK_2.test(href)) {
+    return await getYoutubeEmbeddedHtml(href, defaultHTML);
   }
-  if (matchCoubLink(href)) {
-    return getCoubEmbeddedHtml(href, defaultHTML);
+  if (RX_COUB_VIDEO_LINK.test(href)) {
+    return await getCoubEmbeddedHtml(href, defaultHTML);
   }
-  if (matchVocarooLink(href)) {
+  if (RX_VOCAROO_AUDIO_LINK.test(href)) {
     return getVocarooEmbeddedHtml(href, defaultHTML);
   }
   return defaultHTML;
 }
 
 function convertProtocol(_1, _2, matchs, _3, options) {
-  options.type = 'HTML_SKIP';
+  options.type = ProcessingContext.HTML_SKIP;
   return `<a href='${matchs[0]}'>${Renderer.toHTML(matchs[2])}</a>`;
 }
 
 async function convertPostLink(info, _1, matchs, _2, options) {
-    options.type = HTML_SKIP;
-    var boardName = (matchs.length > 2) ? matchs[1] : info.boardName;
-    var postNumber = +matchs[(matchs.length > 2) ? 2 : 1];
-    var escaped = matchs[0].split(">").join("&gt;");
-    if (postNumber && (postNumber != info.deletedPost)) {
-        return PostsModel.getPost(boardName, postNumber).then(function(post) {
-            if (!post)
-                return escaped;
-            post = JSON.parse(post);
-            if (info.referencedPosts) {
-                var key = boardName + ":" + postNumber;
-                if (!info.referencedPosts[key]) {
-                    info.referencedPosts[key] = {
-                        boardName: boardName,
-                        postNumber: postNumber,
-                        threadNumber: post.threadNumber,
-                        createdAt: Tools.now()
-                    };
-                }
-            }
-            var href = "href=\"/" + config("site.pathPrefix", "") + boardName + "/res/" + post.threadNumber + ".html";
-            if (postNumber != post.threadNumber)
-                href += "#" + postNumber;
-            href += "\"";
-            var result = "<a " + href;
-            if (postNumber === post.threadNumber) {
-              result += ' class="op-post-link"';
-            }
-            result += " data-board-name=\"" + boardName + "\" data-post-number=\"" + postNumber
-                + "\" data-thread-number=\"" + post.threadNumber + "\">" + escaped + "</a>";
-            return result;
-        });
-    } else {
-        return Promise.resolve(escaped);
+  options.type = ProcessingContext.HTML_SKIP;
+  let boardName = (matchs.length > 2) ? matchs[1] : info.boardName;
+  let postNumber = Tools.option(matchs[(matchs.length > 2) ? 2 : 1], 'number', 0, { test: Tools.testPostNumber });
+  let escaped = matchs[0].split('>').join('&gt;');
+  if (!postNumber || postNumber === info.deletedPost) {
+    return escaped;
+  }
+  let post = await PostsModel.getPost(boardName, postNumber);
+  if (!post) {
+    return escaped;
+  }
+  if (info.referencedPosts) {
+    let key = `${boardName}:${postNumber}`;
+    if (!info.referencedPosts[key]) {
+      info.referencedPosts[key] = {
+        boardName: boardName,
+        postNumber: postNumber,
+        threadNumber: post.threadNumber,
+        createdAt: Tools.now()
+      };
     }
+  }
+  let result = `<a href='/${config('site.pathPrefix')}${boardName}/res/${post.threadNumber}.html`;
+  if (postNumber !== post.threadNumber) {
+    result += `#${postNumber}`;
+  }
+  result += "'";
+  if (postNumber === post.threadNumber) {
+    result += " class='op-post-link'";
+  }
+  result += ` data-board-name='${boardName}' data-post-number='${postNumber}'`;
+  result += ` data-thread-number='${post.threadNumber}'>${escaped}</a>`;
+  return result;
+}
+
+function checkExternalLink(info, matchs) {
+  if (matchs.index > 0 && ['@', '#'].indexOf(info.text[matchs.index - 1]) >= 0) {
+    return false;
+  }
+  return /^\d+\.\d+\.\d+\.\d+$/.test(matchs[2]) || rootZones.hasOwnProperty(matchs[4]);
 }
 
 export default [{
@@ -258,7 +267,7 @@ export default [{
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
   convert: convertVkontaktePost,
   op: RX_VK_POST_LINK,
-  cl: null
+  cl: null,
   enabled: () => { return config('site.vkontakte.integrationEnabled'); }
 }, {
   priority: 1600,
@@ -271,7 +280,7 @@ export default [{
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
   convert: convertLinkCommon.bind(null, false),
   op: new XRegExp(Tools.EXTERNAL_LINK_REGEXP_PATTERN, "gi"),
-  cl: null
+  cl: null,
   check: checkExternalLink
 }, {
   priority: 1800,

@@ -1,6 +1,16 @@
-import ProcessingContext from './processing-context';
+'use strict';
 
-const TAGS = {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _processingContext = require('./processing-context');
+
+var _processingContext2 = _interopRequireDefault(_processingContext);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var TAGS = {
   '---': {
     op: '<s>',
     cl: '</s>'
@@ -68,8 +78,8 @@ const TAGS = {
 };
 
 function convertTags(_1, text, matchs, _2, options) {
-  options.type = ProcessingContext.NO_SKIP;
-  let tag = TAGS[matchs[0]];
+  options.type = _processingContext2.default.NO_SKIP;
+  var tag = TAGS[matchs[0]];
   if (!tag) {
     return '';
   }
@@ -78,7 +88,7 @@ function convertTags(_1, text, matchs, _2, options) {
   return text;
 }
 
-export default [{
+exports.default = [{
   priority: 2500,
   markupModes: ['EXTENDED_WAKABA_MARK'],
   convert: convertTags,
@@ -179,3 +189,4 @@ export default [{
   cl: '[/spoiler]',
   nestable: true
 }];
+//# sourceMappingURL=tags.js.map

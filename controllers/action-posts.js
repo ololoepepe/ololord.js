@@ -153,7 +153,7 @@ var router = _express2.default.Router();
 
 router.post('/action/markupText', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, res, next) {
-    var _ref2, _ref2$fields, boardName, text, markupMode, signAsOp, tripcode, board, rawText, markupModes, data;
+    var _ref2, fields, boardName, text, markupMode, signAsOp, tripcode, board, rawText, markupModes, data;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -165,12 +165,12 @@ router.post('/action/markupText', function () {
 
           case 3:
             _ref2 = _context2.sent;
-            _ref2$fields = _ref2.fields;
-            boardName = _ref2$fields.boardName;
-            text = _ref2$fields.text;
-            markupMode = _ref2$fields.markupMode;
-            signAsOp = _ref2$fields.signAsOp;
-            tripcode = _ref2$fields.tripcode;
+            fields = _ref2.fields;
+            boardName = fields.boardName;
+            text = fields.text;
+            markupMode = fields.markupMode;
+            signAsOp = fields.signAsOp;
+            tripcode = fields.tripcode;
             board = _board2.default.board(boardName);
 
             if (board) {
@@ -247,7 +247,7 @@ router.post('/action/markupText', function () {
 
 router.post('/action/createPost', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, res, next) {
-    var transaction, _ref3, _fields, files, boardName, threadNumber, captchaEngine, _post, hash, path;
+    var transaction, _ref3, fields, files, boardName, threadNumber, captchaEngine, _post, hash, path;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -260,11 +260,11 @@ router.post('/action/createPost', function () {
 
           case 4:
             _ref3 = _context3.sent;
-            _fields = _ref3.fields;
+            fields = _ref3.fields;
             files = _ref3.files;
-            boardName = _fields.boardName;
-            threadNumber = _fields.threadNumber;
-            captchaEngine = _fields.captchaEngine;
+            boardName = fields.boardName;
+            threadNumber = fields.threadNumber;
+            captchaEngine = fields.captchaEngine;
 
             if (_board2.default.board(boardName)) {
               _context3.next = 12;
@@ -297,17 +297,17 @@ router.post('/action/createPost', function () {
 
           case 20:
             _context3.next = 22;
-            return _captcha2.default.checkCaptcha(req.ip, _fields);
+            return _captcha2.default.checkCaptcha(req.ip, fields);
 
           case 22:
             _context3.next = 24;
-            return Files.getFiles(_fields, files);
+            return Files.getFiles(fields, files);
 
           case 24:
             files = _context3.sent;
             _context3.next = 27;
             return testParameters(req, boardName, 'createPost', {
-              fields: _fields,
+              fields: fields,
               files: files
             });
 
@@ -319,7 +319,7 @@ router.post('/action/createPost', function () {
           case 30:
             files = _context3.sent;
             _context3.next = 33;
-            return PostsModel.createPost(req, _fields, files, transaction);
+            return PostsModel.createPost(req, fields, files, transaction);
 
           case 33:
             _post = _context3.sent;
@@ -366,7 +366,7 @@ router.post('/action/createPost', function () {
 
 router.post('/action/createThread', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(req, res, next) {
-    var transaction, _ref4, _fields2, files, boardName, captchaEngine, thread, _post2;
+    var transaction, _ref4, fields, files, boardName, captchaEngine, thread, _post2;
 
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -379,10 +379,10 @@ router.post('/action/createThread', function () {
 
           case 4:
             _ref4 = _context4.sent;
-            _fields2 = _ref4.fields;
+            fields = _ref4.fields;
             files = _ref4.files;
-            boardName = _fields2.boardName;
-            captchaEngine = _fields2.captchaEngine;
+            boardName = fields.boardName;
+            captchaEngine = fields.captchaEngine;
 
             if (_board2.default.board(boardName)) {
               _context4.next = 11;
@@ -405,24 +405,24 @@ router.post('/action/createThread', function () {
 
           case 16:
             _context4.next = 18;
-            return _captcha2.default.checkCaptcha(req.ip, _fields2);
+            return _captcha2.default.checkCaptcha(req.ip, fields);
 
           case 18:
             _context4.next = 20;
-            return Files.getFiles(_fields2, files);
+            return Files.getFiles(fields, files);
 
           case 20:
             files = _context4.sent;
             _context4.next = 23;
             return testParameters(req, boardName, 'createThread', {
-              fields: _fields2,
+              fields: fields,
               files: files
             });
 
           case 23:
             transaction = new _postCreationTransaction2.default(boardName);
             _context4.next = 26;
-            return ThreadsModel.createThread(req, _fields2, transaction);
+            return ThreadsModel.createThread(req, fields, transaction);
 
           case 26:
             thread = _context4.sent;
@@ -432,7 +432,7 @@ router.post('/action/createThread', function () {
           case 29:
             files = _context4.sent;
             _context4.next = 32;
-            return PostsModel.createPost(req, _fields2, files, transaction, {
+            return PostsModel.createPost(req, fields, files, transaction, {
               postNumber: thread.number,
               date: new Date(thread.createdAt)
             });
@@ -478,7 +478,7 @@ router.post('/action/createThread', function () {
 
 router.post('/action/editPost', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(req, res, next) {
-    var _ref5, _fields3, boardName, postNumber, _post3;
+    var _ref5, fields, boardName, postNumber, _post3;
 
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -490,9 +490,9 @@ router.post('/action/editPost', function () {
 
           case 3:
             _ref5 = _context5.sent;
-            _fields3 = _ref5.fields;
-            boardName = _fields3.boardName;
-            postNumber = _fields3.postNumber;
+            fields = _ref5.fields;
+            boardName = fields.boardName;
+            postNumber = fields.postNumber;
 
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
 
@@ -522,13 +522,13 @@ router.post('/action/editPost', function () {
           case 17:
             _context5.next = 19;
             return testParameters(req, boardName, 'editPost', {
-              fields: _fields3,
+              fields: fields,
               postNumber: postNumber
             });
 
           case 19:
             _context5.next = 21;
-            return PostsModel.editPost(req, _fields3);
+            return PostsModel.editPost(req, fields);
 
           case 21:
             _post3 = _context5.sent;
@@ -562,7 +562,7 @@ router.post('/action/editPost', function () {
 
 router.post('/action/addFiles', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(req, res, next) {
-    var transaction, _ref6, _fields4, files, boardName, postNumber, _post4;
+    var transaction, _ref6, fields, files, boardName, postNumber, _post4;
 
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -575,10 +575,10 @@ router.post('/action/addFiles', function () {
 
           case 4:
             _ref6 = _context6.sent;
-            _fields4 = _ref6.fields;
+            fields = _ref6.fields;
             files = _ref6.files;
-            boardName = _fields4.boardName;
-            postNumber = _fields4.postNumber;
+            boardName = fields.boardName;
+            postNumber = fields.postNumber;
 
             if (_board2.default.board(boardName)) {
               _context6.next = 11;
@@ -629,7 +629,7 @@ router.post('/action/addFiles', function () {
 
           case 26:
             _context6.next = 28;
-            return Files.getFiles(_fields4, files);
+            return Files.getFiles(fields, files);
 
           case 28:
             files = _context6.sent;
@@ -644,7 +644,7 @@ router.post('/action/addFiles', function () {
           case 31:
             _context6.next = 33;
             return testParameters(req, boardName, 'addFiles', {
-              fields: _fields4,
+              fields: fields,
               files: files,
               postNumber: postNumber
             });
@@ -689,7 +689,7 @@ router.post('/action/addFiles', function () {
 
 router.post('/action/deletePost', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(req, res, next) {
-    var _ref7, _fields5, boardName, postNumber, password;
+    var _ref7, fields, boardName, postNumber, password;
 
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
@@ -701,10 +701,10 @@ router.post('/action/deletePost', function () {
 
           case 3:
             _ref7 = _context7.sent;
-            _fields5 = _ref7.fields;
-            boardName = _fields5.boardName;
-            postNumber = _fields5.postNumber;
-            password = _fields5.password;
+            fields = _ref7.fields;
+            boardName = fields.boardName;
+            postNumber = fields.postNumber;
+            password = fields.password;
 
             if (_board2.default.board(boardName)) {
               _context7.next = 10;
@@ -741,7 +741,7 @@ router.post('/action/deletePost', function () {
 
           case 20:
             _context7.next = 22;
-            return PostsModel.deletePost(req, _fields5);
+            return PostsModel.deletePost(req, fields);
 
           case 22:
             res.json({});
@@ -769,7 +769,7 @@ router.post('/action/deletePost', function () {
 
 router.post('/action/deleteFile', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(req, res, next) {
-    var _ref8, _fields6, fileName, password, fileInfo, boardName, postNumber, _post5;
+    var _ref8, fields, fileName, password, fileInfo, boardName, postNumber, _post5;
 
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
@@ -781,9 +781,9 @@ router.post('/action/deleteFile', function () {
 
           case 3:
             _ref8 = _context8.sent;
-            _fields6 = _ref8.fields;
-            fileName = _fields6.fileName;
-            password = _fields6.password;
+            fields = _ref8.fields;
+            fileName = fields.fileName;
+            password = fields.password;
 
             if (!(!fileName || typeof fileName !== 'string')) {
               _context8.next = 9;
@@ -860,7 +860,7 @@ router.post('/action/deleteFile', function () {
 
 router.post('/action/editFileRating', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(req, res, next) {
-    var _ref9, _fields7, fileName, rating, password, fileInfo, boardName, postNumber;
+    var _ref9, fields, fileName, rating, password, fileInfo, boardName, postNumber;
 
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
@@ -872,10 +872,10 @@ router.post('/action/editFileRating', function () {
 
           case 3:
             _ref9 = _context9.sent;
-            _fields7 = _ref9.fields;
-            fileName = _fields7.fileName;
-            rating = _fields7.rating;
-            password = _fields7.password;
+            fields = _ref9.fields;
+            fileName = fields.fileName;
+            rating = fields.rating;
+            password = fields.password;
 
             if (!(!fileName || typeof fileName !== 'string')) {
               _context9.next = 10;
@@ -947,7 +947,7 @@ router.post('/action/editFileRating', function () {
 
 router.post('/action/editAudioTags', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(req, res, next) {
-    var _ref10, _fields8, fileName, password, fileInfo, boardName, postNumber;
+    var _ref10, fields, fileName, password, fileInfo, boardName, postNumber;
 
     return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
@@ -959,9 +959,9 @@ router.post('/action/editAudioTags', function () {
 
           case 3:
             _ref10 = _context10.sent;
-            _fields8 = _ref10.fields;
-            fileName = _fields8.fileName;
-            password = _fields8.password;
+            fields = _ref10.fields;
+            fileName = fields.fileName;
+            password = fields.password;
 
             if (!(!fileName || typeof fileName !== 'string')) {
               _context10.next = 9;
@@ -1012,7 +1012,7 @@ router.post('/action/editAudioTags', function () {
 
           case 25:
             _context10.next = 27;
-            return FilesModel.editAudioTags(fileName, _fields8);
+            return FilesModel.editAudioTags(fileName, fields);
 
           case 27:
             IPC.render(boardName, post.threadNumber, postNumber, 'edit');

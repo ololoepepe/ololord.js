@@ -41,6 +41,7 @@ export default async function(req, res, next) {
       Logger.error(err);
     }
     next();
+    return;
   }
   switch (config('system.log.middleware.verbosity')) {
   case 'all':

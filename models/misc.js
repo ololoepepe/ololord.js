@@ -145,13 +145,13 @@ function base() {
       name: 'NONE',
       title: Tools.translate('No markup', 'markupMode')
     }, {
-      name: _markup2.default.MarkupModes.ExtendedWakabaMark,
+      name: _markup2.default.EXTENDED_WAKABA_MARK,
       title: Tools.translate('Extended WakabaMark only', 'markupMode')
     }, {
-      name: _markup2.default.MarkupModes.BBCode,
+      name: _markup2.default.BB_CODE,
       title: Tools.translate('bbCode only', 'markupMode')
     }, {
-      name: _markup2.default.MarkupModes.ExtendedWakabaMark + ',' + _markup2.default.MarkupModes.BBCode,
+      name: _markup2.default.EXTENDED_WAKABA_MARK + ',' + _markup2.default.BB_CODE,
       title: Tools.translate('Extended WakabaMark and bbCode', 'markupMode')
     }],
     supportedCaptchaEngines: Captcha.captchaIDs().filter(function (id) {

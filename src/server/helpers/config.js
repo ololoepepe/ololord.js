@@ -59,6 +59,7 @@ const DEFAULT_VALUES = new Map([
   ['server.statistics.enabled', true],
   ['server.statistics.ttl', 60], //NOTE: 1 hour
   ['server.synchronizationData.ttl', 300], //NOTE: 5 minutes
+  ['server.youtubeApiKey', ''],
   ['site.protocol', 'http'],
   ['site.domain', 'localhost:8080'],
   ['site.pathPrefix', ''],
@@ -74,7 +75,7 @@ const DEFAULT_VALUES = new Map([
   ['site.maxSearchQueryLength', 50],
   ['system.detectRealIp', true],
   ['system.elasticsearch.host', 'localhost:9200'],
-  ['system.useXRealIp', false],
+  ['system.httpRequestTimeout', 60 * 1000], //NOTE: 1 minute
   ['system.log.backups', 100],
   ['system.log.maxSize', 1048576], //NOTE: 1 MB
   ['system.log.middleware.before', 'all'],
@@ -102,6 +103,7 @@ const DEFAULT_VALUES = new Map([
   ['system.search.maxResultPostSubjectLengh', 100],
   ['system.search.maxResultPostTextLengh', 300],
   ['system.tmpPath', `${__dirname}/../tmp`],
+  ['system.useXRealIp', false],
   ['system.workerCount', OS.cpus().length]
 ]);
 

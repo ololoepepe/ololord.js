@@ -16,7 +16,7 @@ var downloadFile = function () {
 
             transaction.addFile(path);
             proxy = _config2.default.proxy();
-            options = { timeout: Tools.MINUTE }; //TODO: magic number
+            options = { timeout: (0, _config2.default)('system.httpRequestTimeout') };
 
             if (!/^vk\:\/\//.test(url)) {
               _context.next = 11;

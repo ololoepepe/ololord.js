@@ -49,7 +49,8 @@ async function testParameters(req, boardName, mode, { fields, files, postNumber 
 
 router.post('/action/markupText', async function(req, res, next) {
   try {
-    let { fields: { boardName, text, markupMode, signAsOp, tripcode } } = await Files.parseForm(req);
+    let { fields } = await Files.parseForm(req);
+    let { boardName, text, markupMode, signAsOp, tripcode } = fields;
     let board = Board.board(boardName);
     if (!board) {
       throw new Error(Tools.translate('Invalid board'));

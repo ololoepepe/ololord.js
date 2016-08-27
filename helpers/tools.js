@@ -73,7 +73,6 @@ var series = exports.series = function () {
 }();
 
 exports.now = now;
-exports.toHtml = toHtml;
 exports.mayBeHashpass = mayBeHashpass;
 exports.correctAddress = correctAddress;
 exports.preferIPv4 = preferIPv4;
@@ -91,6 +90,7 @@ exports.toHashpass = toHashpass;
 exports.processError = processError;
 exports.pad = pad;
 exports.chunk = chunk;
+exports.escapeRegExp = escapeRegExp;
 
 var _underscore = require('underscore');
 
@@ -101,10 +101,6 @@ var _ipAddress = require('ip-address');
 var _crypto = require('crypto');
 
 var _crypto2 = _interopRequireDefault(_crypto);
-
-var _escapeHtml = require('escape-html');
-
-var _escapeHtml2 = _interopRequireDefault(_escapeHtml);
 
 var _fs = require('fs');
 
@@ -188,14 +184,6 @@ var CODE_STYLES = exports.CODE_STYLES = _fs2.default.readdirSync(CODE_STYLES_PAT
 
 function now() {
   return new Date();
-}
-
-function toHtml(text, replaceSpaces) {
-  text = (0, _escapeHtml2.default)(text).split('\n').join('<br />');
-  if (replaceSpaces) {
-    text = text.split(' ').join('&nbsp;');
-  }
-  return text;
 }
 
 function mayBeHashpass(password) {
@@ -370,7 +358,7 @@ function requireWrapper(m) {
   return m && m.default || m;
 }
 
-function loadPlugins(paths, filter) {
+function loadPlugins(paths, filter, keepCache) {
   if (typeof filter !== 'function') {
     if (typeof filter === 'undefined' || filter) {
       filter = function filter(fileName) {
@@ -392,7 +380,7 @@ function loadPlugins(paths, filter) {
       return filter(fileName, index, fileNames, path, pathIndex);
     }).map(function (fileName) {
       var id = require.resolve(path + '/' + fileName);
-      if (require.cache.hasOwnProperty(id)) {
+      if (!keepCache && require.cache.hasOwnProperty(id)) {
         delete require.cache[id];
       }
       var plugins = requireWrapper(require(id));
@@ -447,5 +435,12 @@ function chunk(array, size) {
     res[res.length - 1].push(item);
     return res;
   }, []);
+}
+
+function escapeRegExp(text) {
+  if (typeof text !== 'string') {
+    return text;
+  }
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
 //# sourceMappingURL=tools.js.map

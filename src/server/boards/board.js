@@ -340,6 +340,6 @@ export default class Board {
   }
 
   generateTripcode(source) {
-    return '!' + Tools.Crypto('md5', source + config('site.tripcodeSalt'), 'base64').substr(0, 10);
+    return '!' + Tools.crypto('md5', source + config('site.tripcodeSalt'), 'base64').substr(0, 10);
   }
 }

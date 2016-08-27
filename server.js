@@ -13,10 +13,6 @@ var _cluster = require('cluster');
 
 var _cluster2 = _interopRequireDefault(_cluster);
 
-var _express = require('express');
-
-var _express2 = _interopRequireDefault(_express);
-
 var _expressCluster = require('express-cluster');
 
 var _expressCluster2 = _interopRequireDefault(_expressCluster);
@@ -89,10 +85,6 @@ var _tools = require('./helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-var _middlewares = require('./middlewares');
-
-var _middlewares2 = _interopRequireDefault(_middlewares);
-
 var _boards = require('./models/boards');
 
 var BoardsModel = _interopRequireWildcard(_boards);
@@ -118,32 +110,28 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 function spawnCluster() {
   (0, _expressCluster2.default)(function () {
     var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(worker) {
-      var app, sockets, nextSocketId, server, ws, subscriptions;
+      var sockets, nextSocketId, server, ws, subscriptions;
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
               console.log('[' + process.pid + '] Initializing…');
-              app = (0, _express2.default)();
-
-              app.use(_middlewares2.default);
-              app.use(_controllers2.default);
-              _context.prev = 4;
-              _context.next = 7;
+              _context.prev = 1;
+              _context.next = 4;
               return _geolocation2.default.initialize();
 
-            case 7:
-              _context.next = 9;
+            case 4:
+              _context.next = 6;
               return BoardsModel.initialize();
 
-            case 9:
-              _context.next = 11;
+            case 6:
+              _context.next = 8;
               return Renderer.reloadTemplates();
 
-            case 11:
+            case 8:
               sockets = {};
               nextSocketId = 0;
-              server = _http2.default.createServer(app);
+              server = _http2.default.createServer(_controllers2.default);
               ws = new _websocketServer2.default(server);
 
               ws.on("sendChatMessage", function (msg, conn) {
@@ -251,22 +239,22 @@ function spawnCluster() {
                   delete sockets[socketId];
                 });
               });
-              _context.next = 27;
+              _context.next = 24;
               break;
 
-            case 23:
-              _context.prev = 23;
-              _context.t0 = _context['catch'](4);
+            case 20:
+              _context.prev = 20;
+              _context.t0 = _context['catch'](1);
 
               console.log(_context.t0);
               _logger2.default.error(_context.t0.stack || _context.t0);
 
-            case 27:
+            case 24:
             case 'end':
               return _context.stop();
           }
         }
-      }, _callee, this, [[4, 23]]);
+      }, _callee, this, [[1, 20]]);
     }));
 
     return function (_x) {

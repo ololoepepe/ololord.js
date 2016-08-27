@@ -4,10 +4,6 @@ var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
 
-var _highlight = require('highlight.js');
-
-var _highlight2 = _interopRequireDefault(_highlight);
-
 var _renderer = require('../core/renderer');
 
 var Renderer = _interopRequireWildcard(_renderer);
@@ -51,20 +47,16 @@ router.render = function () {
             return _context.abrupt('return');
 
           case 2:
-            _highlight2.default.configure({
-              tabReplace: '    ',
-              useBR: true
-            });
             result = _markup2.default.markupCode(CODE_TO_MARKUP, 'cpp');
-            _context.next = 6;
+            _context.next = 5;
             return _markup2.default.latex(LATEX_TO_MARKUP);
 
-          case 6:
+          case 5:
             markedUpLatex = _context.sent;
-            _context.next = 9;
+            _context.next = 8;
             return _markup2.default.latex(INLINE_LATEX_TO_MARKUP, true);
 
-          case 9:
+          case 8:
             markedUpInlineLatex = _context.sent;
             model = {
               title: Tools.translate('Markup', 'pageTitle'),
@@ -77,7 +69,7 @@ router.render = function () {
             };
             return _context.abrupt('return', { 'markup.html': Renderer.render('pages/markup', model) });
 
-          case 12:
+          case 11:
           case 'end':
             return _context.stop();
         }

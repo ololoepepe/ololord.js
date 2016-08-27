@@ -714,6 +714,7 @@ exports.render = render;
 exports.targetsFromString = targetsFromString;
 exports.postingSpeedString = postingSpeedString;
 exports.plainText = plainText;
+exports.toHTML = toHTML;
 
 var _underscore = require('underscore');
 
@@ -968,6 +969,14 @@ function plainText(text) {
   });
   if (brToNewline) {
     text = text.split(id).join('\n');
+  }
+  return text;
+}
+
+function toHTML(text, replaceSpaces) {
+  text = (0, _escapeHtml2.default)(text).split('\n').join('<br />');
+  if (replaceSpaces) {
+    text = text.split(' ').join('&nbsp;');
   }
   return text;
 }

@@ -32,6 +32,10 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
+var _middlewares = require('../middlewares');
+
+var _middlewares2 = _interopRequireDefault(_middlewares);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -40,10 +44,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 var EXCLUDED_ROUTERS = new Set(['index.js', 'home.js', 'board.js']);
 
+var app = (0, _express2.default)();
 var router = _express2.default.Router();
-router.routers = [];
+app.routers = [];
 
-router.initialize = function () {
+function initialize() {
+  app.use(_middlewares2.default);
+
   router.use('/redirect', function (req, res, next) {
     if (!req.query.source) {
       return next();
@@ -55,23 +62,25 @@ router.initialize = function () {
     return !EXCLUDED_ROUTERS.has(fileName) || path.split('/') === 'custom';
   }).forEach(function (plugin) {
     router.use('/', plugin);
-    router.routers.push(plugin);
+    app.routers.push(plugin);
   });
 
   ['./board', './home'].forEach(function (id) {
     var r = Tools.requireWrapper(require(id));
     router.use('/', r);
-    router.routers.push(r);
+    app.routers.push(r);
   });
 
-  router.use('*', function (req, res, next) {
+  app.use(router);
+
+  app.use('*', function (req, res, next) {
     var err = new Error();
     err.status = 404;
     err.path = req.baseUrl;
     next(err);
   });
 
-  router.use(function (err, req, res, next) {
+  app.use(function (err, req, res, next) {
     Tools.series(req.formFiles, function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file) {
         var exists;
@@ -149,5 +158,7 @@ router.initialize = function () {
   });
 };
 
-exports.default = router;
+app.initialize = initialize;
+
+exports.default = app;
 //# sourceMappingURL=index.js.map

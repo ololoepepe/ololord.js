@@ -4,7 +4,6 @@ import 'babel-polyfill';
 import 'source-map-support/register';
 import _ from 'underscore';
 import Cluster from 'cluster';
-import express from 'express';
 import expressCluster from 'express-cluster';
 import HTTP from 'http';
 
@@ -24,7 +23,6 @@ import Logger from './helpers/logger';
 import * as OnlineCounter from './helpers/online-counter';
 import Program from './helpers/program';
 import * as Tools from './helpers/tools';
-import middlewares from './middlewares';
 import * as BoardsModel from './models/boards';
 import * as ChatsModel from './models/chats';
 import * as StatisticsModel from './models/statistics';
@@ -33,16 +31,13 @@ import * as UsersModel from './models/users';
 function spawnCluster() {
   expressCluster(async function(worker) {
     console.log(`[${process.pid}] Initializing…`);
-    let app = express();
-    app.use(middlewares);
-    app.use(controllers);
     try {
       await geolocation.initialize();
       await BoardsModel.initialize();
       await Renderer.reloadTemplates();
       var sockets = {};
       var nextSocketId = 0;
-      var server = HTTP.createServer(app);
+      var server = HTTP.createServer(controllers);
       var ws = new WebSocketServer(server);
       ws.on("sendChatMessage", function(msg, conn) {
           var data = msg.data || {};

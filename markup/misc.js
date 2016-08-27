@@ -1,44 +1,57 @@
-import ProcessingContext from './processing-context';
-import * as Tools from '../helpers/tools';
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _processingContext = require('./processing-context');
+
+var _processingContext2 = _interopRequireDefault(_processingContext);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function convertHtml(_1, text, _2, _3, options) {
-  options.type = ProcessingContext.HTML_SKIP;
+  options.type = _processingContext2.default.HTML_SKIP;
   return text;
 }
 
 function convertEmDash(_1, _2, _3, _4, options) {
-  options.type = ProcessingContext.NO_SKIP;
-  return '\u2014';
+  options.type = _processingContext2.default.NO_SKIP;
+  return '—';
 }
 
 function convertEnDash(_1, _2, _3, _4, options) {
-  options.type = ProcessingContext.NO_SKIP;
-  return '\u2013';
+  options.type = _processingContext2.default.NO_SKIP;
+  return '–';
 }
 
 function convertCSpoiler(_1, text, matchs, _2, options) {
-  let title = matchs[1];
+  var title = matchs[1];
   if (!title) {
     title = Tools.translate('Spoiler');
   }
-  options.type = ProcessingContext.NO_SKIP;
-  options.op = "<span class='collapsible-spoiler'><span class='collapsible-spoiler-title' "
-    + `title='${Tools.translate('Spoiler')}' onclick='lord.expandCollapseSpoiler(this);'>${title}`
-    + "</span><span class='collapsible-spoiler-body' style='display: none;'>";
+  options.type = _processingContext2.default.NO_SKIP;
+  options.op = "<span class='collapsible-spoiler'><span class='collapsible-spoiler-title' " + ('title=\'' + Tools.translate('Spoiler') + '\' onclick=\'lord.expandCollapseSpoiler(this);\'>' + title) + "</span><span class='collapsible-spoiler-body' style='display: none;'>";
   options.cl = '</span></span>';
   return text;
 }
 
 function convertTooltip(_1, text, matchs, _2, options) {
-  let tooltip = matchs[1];
-  options.type = ProcessingContext.NO_SKIP;
-  options.op = `<span class='tooltip js-with-tooltip' title='${tooltip}'>`;
+  var tooltip = matchs[1];
+  options.type = _processingContext2.default.NO_SKIP;
+  options.op = '<span class=\'tooltip js-with-tooltip\' title=\'' + tooltip + '\'>';
   options.cl = '</span>';
   return text;
 }
 
 function convertCitation(_1, text, matchs, matche, options) {
-  options.type = ProcessingContext.NO_SKIP;
+  options.type = _processingContext2.default.NO_SKIP;
   if ('\n' === matchs[1]) {
     options.op = '<br />';
   }
@@ -60,11 +73,10 @@ function checkCitationNotInterrupted(info, matchs, matche) {
   if ('\n' === info.text.substr(matchs.index - 1, 1)) {
     return true;
   }
-  return info.isIn(matchs.index - 6, 6, ProcessingContext.HTML_SKIP)
-    && (info.text.substr(matchs.index - 6, 6) === '<br />');
+  return info.isIn(matchs.index - 6, 6, _processingContext2.default.HTML_SKIP) && info.text.substr(matchs.index - 6, 6) === '<br />';
 }
 
-export default [{
+exports.default = [{
   priority: 600,
   markupModes: ['BB_CODE'],
   convert: convertHtml,
@@ -112,3 +124,4 @@ export default [{
   cl: /\n|$/gi,
   check: checkCitationNotInterrupted
 }];
+//# sourceMappingURL=misc.js.map
