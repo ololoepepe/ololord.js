@@ -43,7 +43,7 @@ function buildServer(/*debug*/) {
   .pipe(sourcemaps.init())
   .pipe(babel({ presets: ['es2015', 'stage-2'] }))
   .pipe(sourcemaps.write('./'))
-  .pipe(gulp.dest('./'));
+  .pipe(gulp.dest('./server'));
 }
 
 function buildCSS(custom, debug) {

@@ -2,7 +2,7 @@
   "name": "ololord.js",
   "version": "2.0.0-pa",
   "description": "Imageboard engine in JavaScript to rule them all",
-  "main": "server.js",
+  "main": "server/server.js",
   "scripts": {
     "build-all": "gulp build-all",
     "build": "gulp build",
@@ -22,7 +22,7 @@
     "build-custom-js-debug": "gulp build-custom-js-debug",
     "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "/usr/bin/env node server.js"
+    "start": "/usr/bin/env node server/server.js"
   },
   "repository": {
     "type": "git",

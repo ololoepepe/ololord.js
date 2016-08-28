@@ -11,7 +11,8 @@
                          text: "+" + $data.messages.reduce(function(acc, msg) {
                            return acc + (msg.unread ? 1 : 0);
                          }, 0)'></span>
-        <span data-bind='text: "/" + $data.key.split(":").join("/")'></span>
+        <span data-bind='text: "/" + $data.key.split(":").slice(0, 2).join("/")
+                           + "#" + $data.key.split(":").pop()'></span>
       </span>
       <span class='icon icon-bin button-icon' title='{{!it.translate('Delete this chat')}}'
             data-bind='click: $root.deleteChat'></span>

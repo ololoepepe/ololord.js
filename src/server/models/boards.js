@@ -153,7 +153,7 @@ export async function getArchive(boardName) {
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
-  let path = `${__dirname}/../public/${boardName}/arch`;
+  let path = `${__dirname}/../../public/${boardName}/arch`;
   let exists = await FS.exists(path);
   if (exists) {
     var fileNames = await FS.list(path);

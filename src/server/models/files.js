@@ -128,7 +128,7 @@ export async function deleteFile(fileName) {
   await PostFileInfoNames.deleteOne(fileName, `${boardName}:${postNumber}`);
   await FileInfos.deleteOne(fileName);
   await removeFileHashes(fileInfo);
-  let path = `${__dirname}/../public/${boardName}`;
+  let path = `${__dirname}/../../public/${boardName}`;
   Tools.series([`${path}/src/${fileInfo.name}`, `${path}/thumb/${fileInfo.thumb.name}`], async function() {
     try {
       await FS.remove(path);

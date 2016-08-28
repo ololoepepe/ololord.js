@@ -39,7 +39,7 @@ function setupStatic() {
   if ('static' === BEFORE) {
     middlewares.push(log);
   }
-  middlewares.push(express.static(`${__dirname}/../public`));
+  middlewares.push(express.static(`${__dirname}/../../public`));
 }
 
 if ('all' === BEFORE) {

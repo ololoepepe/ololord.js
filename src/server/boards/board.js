@@ -19,7 +19,7 @@ let banners = {};
 let postFormRules = {};
 
 function getRules(boardName) {
-  let fileName = `${__dirname}/../misc/rules/rules${(boardName ? ('.' + boardName) : '')}.txt`;
+  let fileName = `${__dirname}/../../misc/rules/rules${(boardName ? ('.' + boardName) : '')}.txt`;
   try {
     if (!FSSync.existsSync(fileName)) {
       return [];
@@ -84,7 +84,7 @@ export default class Board {
 
   static reloadBanners() {
     banners = Board.boardNames().reduce((acc, boardName) => {
-      let path = `${__dirname}/../public/img/banners/${boardName}`;
+      let path = `${__dirname}/../../public/img/banners/${boardName}`;
       if (FSSync.existsSync(path)) {
         acc[boardName] = FSSync.readdirSync(path).filter((fileName) => { return '.gitignore' !== fileName; });
       } else {

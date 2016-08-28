@@ -12,7 +12,7 @@ if (logTargets.indexOf('console') >= 0) {
 if (logTargets.indexOf('console') >= 0) {
   appenders.push({
     type: 'file',
-    filename: `${__dirname}/../logs/ololord.log`,
+    filename: `${__dirname}/../../logs/ololord.log`,
     maxLogSize: config('system.log.maxSize'),
     backups: config('system.log.backups')
   });

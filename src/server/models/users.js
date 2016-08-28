@@ -63,7 +63,7 @@ function transformIPBans(bans) {
   }, {});
 }
 
-let ipBans = FSWatcher.createWatchedResource(`${__dirname}/../misc/user-bans.json`, (path) => {
+let ipBans = FSWatcher.createWatchedResource(`${__dirname}/../../misc/user-bans.json`, (path) => {
   return transformIPBans(require(path));
 }, async function(path) {
   let data = await FS.read(path);
@@ -85,7 +85,7 @@ function transformGeoBans(bans) {
   }, new Map());
 }
 
-let geoBans = FSWatcher.createWatchedResource(`${__dirname}/../misc/geo-bans.json`, (path) => {
+let geoBans = FSWatcher.createWatchedResource(`${__dirname}/../../misc/geo-bans.json`, (path) => {
   return transformGeoBans(require(path));
 }, async function(path) {
   let data = await FS.read(path);

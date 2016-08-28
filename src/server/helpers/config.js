@@ -6,8 +6,8 @@ import Path from 'path';
 import Program from './program';
 import FSWatcher from './fs-watcher';
 
-const DEFAULT_CONFIG_FILE_NAME_1 = `${__dirname}/../config.json`;
-const DEFAULT_CONFIG_FILE_NAME_2 = `${__dirname}/../config.js`;
+const DEFAULT_CONFIG_FILE_NAME_1 = `${__dirname}/../../config.json`;
+const DEFAULT_CONFIG_FILE_NAME_2 = `${__dirname}/../../config.js`;
 const DEFAULT_DDOS_PROTECTION_RULES = [{
   string: '/misc/base.json',
   maxWeight: 6,
@@ -103,14 +103,14 @@ const DEFAULT_VALUES = new Map([
   ['system.search.maxResultCount', 100],
   ['system.search.maxResultPostSubjectLengh', 100],
   ['system.search.maxResultPostTextLengh', 300],
-  ['system.tmpPath', `${__dirname}/../tmp`],
+  ['system.tmpPath', `${__dirname}/../../tmp`],
   ['system.useXRealIp', false],
   ['system.workerCount', OS.cpus().length]
 ]);
 
 let configFileName = Program.configFile;
 if (configFileName) {
-  configFileName = Path.resolve(`${__dirname}/..${configFileName}`);
+  configFileName = Path.resolve(`${__dirname}/../..${configFileName}`);
 } else {
   if (FSSync.existsSync(DEFAULT_CONFIG_FILE_NAME_1)) {
     configFileName = Path.resolve(DEFAULT_CONFIG_FILE_NAME_1);

@@ -316,8 +316,8 @@ export async function removePost(boardName, postNumber, { removingThread, leaveR
     fileInfos = fileInfos.filter(fileInfo => !!fileInfo);
     let paths = fileInfos.map((fileInfo) => {
       return [
-        `${__dirname}/../public/${boardName}/src/${fileInfo.name}`,
-        `${__dirname}/../public/${boardName}/thumb/${fileInfo.thumb.name}`
+        `${__dirname}/../../public/${boardName}/src/${fileInfo.name}`,
+        `${__dirname}/../../public/${boardName}/thumb/${fileInfo.thumb.name}`
       ];
     });
     await PostFileInfoNames.delete(key);
@@ -414,7 +414,7 @@ export async function deletePost(req, { boardName, postNumber, archived }) {
   }
   if (isThread && archived) {
     await Tools.series(['json', 'html'], async function(suffix) {
-      return await FS.remove(`${__dirname}/../public/${boardName}/arch/${postNumber}.${suffix}`);
+      return await FS.remove(`${__dirname}/../../public/${boardName}/arch/${postNumber}.${suffix}`);
     });
     await IPC.renderArchive(boardName);
   } else if (!archived) {

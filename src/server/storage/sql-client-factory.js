@@ -8,7 +8,7 @@ let clients = new Map();
 
 function createClient(name) {
   return new Promise((resolve, reject) => {
-    let db = new SQLite3.Database(`${__dirname}/../sqlite/${name}.sqlite`, (err) => {
+    let db = new SQLite3.Database(`${__projroot}/../sqlite/${name}.sqlite`, (err) => {
       if (err) {
         reject(err);
         return;

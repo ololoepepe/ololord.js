@@ -39,7 +39,7 @@ function setFileRating(file, id, fields) {
 }
 
 async function downloadFile(url, formFieldName, fields, transaction) {
-  let path = `${__dirname}/../tmp/upload_${UUID.v4()}`;
+  let path = `${__dirname}/../../tmp/upload_${UUID.v4()}`;
   transaction.addFile(path);
   let proxy = config.proxy();
   let options = { timeout: config('system.httpRequestTimeout') };
@@ -77,13 +77,13 @@ async function downloadFile(url, formFieldName, fields, transaction) {
 }
 
 export async function getFiles(fields, files, transaction) {
-  files = await Tools.series(_(files).pick((file) => {
+  files = await Tools.series(files.filter((file) => {
     if (file.size < 1) {
       FS.remove(file.path).catch((err) => { Logger.error(req, err.stack || err); });
       return false;
     }
     return true;
-  }), async function(file, fileName) {
+  }), async function(file) {
     setFileRating(file, file.fieldName.substr(5), fields);
     let mimeType = await getMimeType(file.path);
     file.mimeType = mimeType;
@@ -211,7 +211,7 @@ export function parseForm(req = {}) {
       }
       resolve({
         fields: _(fields).mapObject((value, key) => { return (1 === value.length) ? value[0] : value; }),
-        files: _(files).toArray().map((file) => {
+        files: _(_(files).toArray()).flatten().map((file) => {
           file.name = file.originalFilename;
           return file;
         })
@@ -226,13 +226,13 @@ async function processFile(boardName, file, transaction) {
     return Promise.reject(new Error(Tools.translate('Unsupported file type')));
   }
   let fn = await generateFileName(file, plugin);
-  let targetFilePath = `${__dirname}/../public/${boardName}/src/${fn.name}`;
-  var targetThumbPath = `${__dirname}/../public/${boardName}/thumb/${fn.thumbName}`;
+  let targetFilePath = `${__dirname}/../../public/${boardName}/src/${fn.name}`;
+  var targetThumbPath = `${__dirname}/../../public/${boardName}/thumb/${fn.thumbName}`;
   transaction.addFile(targetFilePath);
   transaction.addFile(targetThumbPath);
   if (file.copy) {
-    let sourceFilePath = `${__dirname}/../public/${file.boardName}/src/${file.name}`;
-    let sourceThumbPath = `${__dirname}/../public/${file.boardName}/thumb/${file.thumbName}`;
+    let sourceFilePath = `${__dirname}/../../public/${file.boardName}/src/${file.name}`;
+    let sourceThumbPath = `${__dirname}/../../public/${file.boardName}/thumb/${file.thumbName}`;
     await FS.copy(sourceFilePath, targetFilePath);
     await FS.copy(sourceThumbPath, targetThumbPath);
     await waitForFile(targetThumbPath); //TODO: Fix
@@ -283,7 +283,7 @@ export async function processFiles(boardName, files, transaction) {
   if (files.length < 1) {
     return [];
   }
-  let path = `${__dirname}/../public/${boardName}`;
+  let path = `${__dirname}/../../public/${boardName}`;
   await mkpath(`${path}/src`);
   await mkpath(`${path}/thumb`);
   return await Tools.series(files, async function(file) {
@@ -317,7 +317,7 @@ export async function createFile(dir, fileName, { file, isDir } = {}) {
   if (dir.slice(-1)[0] !== '/') {
     dir += '/';
   }
-  let path = `${__dirname}/../${dir}${fileName}`;
+  let path = `${__dirname}/../../${dir}${fileName}`;
   if (isDir) {
     await FS.makeDirectory(path);
   }
@@ -329,23 +329,23 @@ export async function createFile(dir, fileName, { file, isDir } = {}) {
 }
 
 export async function editFile(fileName, content) {
-  await writeFile(`${__dirname}/../${fileName}`, content);
+  await writeFile(`${__dirname}/../../${fileName}`, content);
 }
 
 export async function renameFile(oldFileName, fileName) {
-  let oldPath = `${__dirname}/../${oldFileName}`;
+  let oldPath = `${__dirname}/../../${oldFileName}`;
   await FS.rename(oldPath, oldPath.split('/').slice(0, -1).join('/') + '/' + fileName);
 }
 
 export async function deleteFile(fileName) {
-  await FS.removeTree(`${__dirname}/../${fileName}`);
+  await FS.removeTree(`${__dirname}/../../${fileName}`);
 }
 
 export async function generateRandomImage(hash, mimeType, thumbPath) {
   let canvas = new Canvas(200, 200);
   let ctx = canvas.getContext('2d');
   Jdenticon.drawIcon(ctx, hash, 200);
-  let data = await FS.read(`${__dirname}/../thumbs/${mimeType}.png`, 'b');
+  let data = await FS.read(`${__dirname}/../../misc/thumbs/${mimeType}.png`, 'b');
   let img = new Canvas.Image();
   img.src = data;
   ctx.drawImage(img, 0, 0, 200, 200);

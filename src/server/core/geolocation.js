@@ -57,7 +57,7 @@ async function geolocation(ip) {
 
 geolocation.initialize = async function() {
   await new Promise((resolve) => {
-    db = new SQLite3.Database(`${__dirname}/../sqlite/ip2location.sqlite`, SQLite3.OPEN_READONLY, (err) => {
+    db = new SQLite3.Database(`${__dirname}/../../sqlite/ip2location.sqlite`, SQLite3.OPEN_READONLY, (err) => {
       if (err) {
         db = null;
         Logger.error(err.stack || err);

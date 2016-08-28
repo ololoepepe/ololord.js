@@ -9,7 +9,7 @@ import FSWatcher from '../helpers/fs-watcher';
 import * as Tools from '../helpers/tools';
 import markup from '../markup';
 
-let langNames = FSWatcher.createWatchedResource(`${__dirname}/misc/lang-names.json`, (path) => {
+let langNames = FSWatcher.createWatchedResource(`${__dirname}/../../misc/lang-names.json`, (path) => {
   return require(path);
 }, async function(path) {
   let data = await FS.read(path);
@@ -20,7 +20,7 @@ function filterNotFoundImageFileNames(fileName) {
   return '.gitignore' !== fileName;
 }
 
-let notFoundImageFileNames = FSWatcher.createWatchedResource(`${__dirname}/../public/img/404`, (path) => {
+let notFoundImageFileNames = FSWatcher.createWatchedResource(`${__dirname}/../../public/img/404`, (path) => {
   return FSSync.readdirSync(path).filter(filterNotFoundImageFileNames);
 }, async function(path) {
   let fileNames = await FS.list(path);

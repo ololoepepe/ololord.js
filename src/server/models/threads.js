@@ -288,7 +288,7 @@ async function pushOutOldThread(boardName) {
   //NOTE: This is for the sake of speed.
   (async function() {
     try {
-      let archivePath = `${__dirname}/../public/${boardName}/arch`;
+      let archivePath = `${__dirname}/../../public/${boardName}/arch`;
       let oldThreadNumber = thread.number;
       await mkpath(archivePath);
       let sourceId = `${boardName}/res/${oldThreadNumber}.json`;
@@ -354,10 +354,10 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
   if (!thread) {
     throw new Error(Tools.translate('No such thread'));
   }
-  let sourcePath = `${__dirname}/../public/${sourceBoardName}/src`;
-  let sourceThumbPath = `${__dirname}/../public/${sourceBoardName}/thumb`;
-  let targetPath = `${__dirname}/../public/${targetBoardName}/src`;
-  let targetThumbPath = `${__dirname}/../public/${targetBoardName}/thumb`;
+  let sourcePath = `${__dirname}/../../public/${sourceBoardName}/src`;
+  let sourceThumbPath = `${__dirname}/../../public/${sourceBoardName}/thumb`;
+  let targetPath = `${__dirname}/../../public/${targetBoardName}/src`;
+  let targetThumbPath = `${__dirname}/../../public/${targetBoardName}/thumb`;
   await mkpath(targetPath);
   await mkpath(targetThumbPath);
   delete thread.updatedAt;

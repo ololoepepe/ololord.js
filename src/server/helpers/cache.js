@@ -2,7 +2,7 @@ import FS from 'q-io/fs';
 
 import * as Files from '../core/files';
 
-const ROOT_PATH = `${__dirname}/../public`;
+const ROOT_PATH = `${__dirname}/../../public`;
 
 export async function readFile(fileName) {
   return await FS.read(`${ROOT_PATH}/${fileName}`);

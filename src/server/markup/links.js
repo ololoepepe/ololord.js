@@ -33,7 +33,7 @@ function transformRootZones(zones) {
   }, {});
 }
 
-let rootZones = FSWatcher.createWatchedResource(`${__dirname}/../misc/root-zones.json`, (path) => {
+let rootZones = FSWatcher.createWatchedResource(`${__dirname}/../../misc/root-zones.json`, (path) => {
   return transformRootZones(require(path));
 }, async function(path) {
   return transformRootZones(require(path));

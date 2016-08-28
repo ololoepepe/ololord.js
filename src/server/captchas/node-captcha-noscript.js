@@ -7,7 +7,7 @@ import config from '../helpers/config';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 
-const CAPTCHA_PATH = `${__dirname}/../tmp/node-captcha-noscript`;
+const CAPTCHA_PATH = `${__dirname}/../../tmp/node-captcha-noscript`;
 
 async function getNodeCaptchaImage(req, res, next) {
   let challenge = this.challenges[req.ip];

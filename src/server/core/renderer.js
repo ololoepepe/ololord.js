@@ -7,6 +7,7 @@ import HTMLToText from 'html-to-text';
 import merge from 'merge';
 import micromatch from 'micromatch';
 import moment from 'moment';
+import Path from 'path';
 import UUID from 'uuid';
 
 import * as Files from './files';
@@ -17,10 +18,10 @@ import config from '../helpers/config';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 
-const TEMPLATES_SOURCE_PATH = `${__dirname}/../src/views`;
-const TEMPLATES_PATH = `${__dirname}/../views`;
+const TEMPLATES_SOURCE_PATH = Path.resolve(`${__dirname}/../../src/views`);
+const TEMPLATES_PATH = Path.resolve(`${__dirname}/../../views`);
 const TEMPLATES_INDEX_PATH = `${TEMPLATES_PATH}/index.js`;
-const APP_PATH = __dirname.split('/').slice(0, -1).join('/');
+const APP_PATH = __dirname.split('/').slice(0, -2).join('/');
 const DOT_SETTINGS = {
   evaluate: /\{\{([\s\S]+?)\}\}/g,
   interpolate: /\{\{=([\s\S]+?)\}\}/g,
@@ -156,7 +157,7 @@ export async function generateTemplatingJavaScriptFile() {
   let fileNames = await FS.listTree(TEMPLATES_PATH, (_, stat) => stat.isFile());
   let templateNames = fileNames.filter((fileName) => {
     return fileName.split('.').pop() === 'js' && 'index.js' !== fileName;
-  }).map(fileName => fileName.substr(__dirname.length + 1));
+  }).map(fileName => fileName.substr(TEMPLATES_PATH.length + 1));
   let template = await FS.read(`${TEMPLATES_INDEX_PATH}.template`);
   await FS.write(TEMPLATES_INDEX_PATH, template.replace('{{models}}', models));
   let string = '';
@@ -172,12 +173,12 @@ export async function generateTemplatingJavaScriptFile() {
     stream.on('error', reject);
   });
   string = string.split(APP_PATH).join('.');
-  await FS.write(`${__dirname}/../public/js/templating.js`, string);
+  await FS.write(`${__dirname}/../../public/js/templating.js`, string);
 }
 
 export async function generateCustomJavaScriptFile() {
   console.log('Checking custom JavaScript file existence…');
-  let exists = await FS.exists(`${__dirname}/../public/js/custom.js`);
+  let exists = await FS.exists(`${__dirname}/../../public/js/custom.js`);
   if (!exists) {
     console.log('Creating dummy custom JavaScript file…');
     return await Cache.writeFile('js/custom.js', '');
@@ -187,7 +188,7 @@ export async function generateCustomJavaScriptFile() {
 export async function generateCustomCSSFiles() {
   console.log('Checking custom CSS files existence…');
   let list = await Tools.series(['combined', 'desktop', 'mobile'], async function(type) {
-    let exists = await FS.exists(`${__dirname}/../public/css/custom-base-${type}.css`);
+    let exists = await FS.exists(`${__dirname}/../../public/css/custom-base-${type}.css`);
     return {
       type: type,
       exists: exists
@@ -209,7 +210,7 @@ export async function compileTemplates() {
     return await FS.removeTree(`${TEMPLATES_PATH}/${entry}`);
   });
   let fileNames = await FS.listTree(TEMPLATES_SOURCE_PATH, (_, stat) => stat.isFile());
-  fileNames = fileNames.map(fileName => fileName.substr(__dirname.length + 6));
+  fileNames = fileNames.map(fileName => fileName.substr(TEMPLATES_SOURCE_PATH.length + 1));
   let includes = await Tools.series(fileNames, async function(fileName) {
     if (!/\.def(\.dot|\.jst)?$/.test(fileName)) {
       return;
@@ -247,9 +248,9 @@ export async function reloadTemplates() {
     templates = fileNames.filter((fileName) => {
       return fileName.split('.').pop() === 'js' && fileName.split('/').pop() !== 'index.js';
     }).map((fileName) => {
-      return fileName.substr(__dirname.length + 2).split('.').slice(0, -1).join('.');
+      return fileName.substr(TEMPLATES_PATH.length + 1).split('.').slice(0, -1).join('.');
     }).reduce((acc, templateName) => {
-      let id = `../views/${templateName}.js`;
+      let id = `../../views/${templateName}.js`;
       if (require.cache.hasOwnProperty(id)) {
         delete require.cache[require.resolve(id)];
       }

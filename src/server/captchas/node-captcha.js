@@ -7,7 +7,7 @@ import config from '../helpers/config';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 
-const CAPTCHA_PATH = `${__dirname}/../public/node-captcha`;
+const CAPTCHA_PATH = `${__dirname}/../../public/node-captcha`;
 
 async function getNodeCaptchaImage(_1, res) {
   captcha({

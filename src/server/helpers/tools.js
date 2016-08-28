@@ -9,7 +9,7 @@ import config from './config';
 
 let translate = require('cute-localize')({
   locale: config('site.locale'),
-  extraLocations: `${__dirname}/../translations/custom`,
+  extraLocations: `${__dirname}/../../translations/custom`,
   silent: true
 });
 
@@ -20,8 +20,8 @@ export { translate as translate };
 const NON_THEME_STYLESHEETS = new Set(['', 'custom-'].reduce((acc, prefix) => {
   return acc.concat(['combined', 'desktop', 'mobile'].map(suffix => `${prefix}base-${suffix}`));
 }, []));
-const STYLES_PATH = `${__dirname}/../public/css`;
-const CODE_STYLES_PATH = `${__dirname}/../public/css/3rdparty/highlight.js`;
+const STYLES_PATH = `${__dirname}/../../public/css`;
+const CODE_STYLES_PATH = `${__dirname}/../../public/css/3rdparty/highlight.js`;
 const JS_TYPES = new Set(['string', 'boolean', 'number', 'object']);
 
 export const SECOND = 1000;

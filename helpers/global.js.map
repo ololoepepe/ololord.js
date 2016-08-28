@@ -1,1 +1,0 @@
-{"version":3,"sources":["helpers/global.js"],"names":[],"mappings":";;AAAA,OAAO,OAAP,GAAiB,EAAjB","file":"helpers/global.js","sourcesContent":["module.exports = {};\n"],"sourceRoot":"/source/"}

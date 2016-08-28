@@ -295,7 +295,7 @@ router.get('/api/fileTree.json', async function(req, res, next) {
     if ('/' !== dir.slice(-1)[0]) {
       dir += '/';
     }
-    let path = `${__dirname}/../${dir}`;
+    let path = `${__dirname}/../../${dir}`;
     let list = await FS.list(path);
     list = await Tools.series(list, async function(file) {
       let stat = await FS.stat(`${path}/${file}`);
@@ -328,7 +328,7 @@ router.get('/api/fileContent.json', async function(req, res, next) {
   }
   try {
     let encoding = !TEXT_FORMATS.has((req.query.fileName || '').split('.').pop()) ? 'b' : undefined;
-    let content = await FS.read(`${__dirname}/../${req.query.fileName}`, encoding);
+    let content = await FS.read(`${__dirname}/../../${req.query.fileName}`, encoding);
     res.json({ content: content });
   } catch (err) {
     if ('ENOENT' === err.code) {

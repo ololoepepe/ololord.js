@@ -60,7 +60,7 @@ function initialize() {
     switch (err.status) {
     case 404: {
       Logger.error(Tools.preferIPv4(req.ip), err.path, 404);
-      res.status(404).sendFile('notFound.html', { root: `${__dirname}/../public` });
+      res.status(404).sendFile('notFound.html', { root: `${__dirname}/../../public` });
       break;
     }
     default: {
