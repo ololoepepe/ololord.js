@@ -2,7 +2,7 @@
   "name": "ololord.js",
   "version": "2.0.0-pa",
   "description": "Imageboard engine in JavaScript to rule them all",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
     "build-all": "gulp build-all",
     "build": "gulp build",

@@ -53,6 +53,7 @@ const DEFAULT_VALUES = new Map([
   ['server.ddosProtection.ws.connectionLimit', 10],
   ['server.ddosProtection.ws.maxMessageLength', 20480], //NOTE: 20 KB
   ['server.ddosProtection.ws.maxMessageRate', 6],
+  ['server.port', 8080],
   ['server.rss.enabled', true],
   ['server.rss.postCount', 500],
   ['server.rss.ttl', 60], //NOTE: 1 hour

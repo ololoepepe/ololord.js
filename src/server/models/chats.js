@@ -40,7 +40,7 @@ export async function getChatMessages(user, lastRequestDate) {
   };
 }
 
-export async function addChatMessage(user, boardName, postNumber, text) {
+export async function addChatMessage({ user, boardName, postNumber, chatNumber, text } = {}) {
   if (!Board.board(boardName)) {
     throw new Error(Tools.translate('Invalid board'));
   }
@@ -50,6 +50,10 @@ export async function addChatMessage(user, boardName, postNumber, text) {
   }
   if (!text || typeof text !== 'string') {
     throw new Error(Tools.translate('Message is empty'));
+  }
+  chatNumber = Tools.option(chatNumber, 'number', 0, { test: (n) => { return n > 0; } });
+  if (!chatNumber) {
+    //TODO
   }
   let key = `${boardName}:${postNumber}`;
   let senderHash = createUserHash(user);

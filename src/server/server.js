@@ -35,117 +35,116 @@ function spawnCluster() {
       await geolocation.initialize();
       await BoardsModel.initialize();
       await Renderer.reloadTemplates();
-      var sockets = {};
-      var nextSocketId = 0;
-      var server = HTTP.createServer(controllers);
-      var ws = new WebSocketServer(server);
-      ws.on("sendChatMessage", function(msg, conn) {
-          var data = msg.data || {};
-          return Chats.sendMessage({ //TODO
-              ip: conn.ip,
-              hashpass: conn.hashpass
-          }, data.boardName, data.postNumber, data.text, ws).then(function(result) {
-              var message = result.message;
-              if (result.senderHash != result.receiverHash) {
-                  message.type = "in";
-                  var receiver = result.receiver;
-                  var ip = receiver.hashpass ? null : receiver.ip;
-                  ws.sendMessage("newChatMessage", {
-                      message: message,
-                      boardName: data.boardName,
-                      postNumber: data.postNumber
-                  }, ip, receiver.hashpass);
-              }
-              message.type = "out";
-              return Promise.resolve(message);
-          });
+      let sockets = {};
+      let nextSocketId = 0;
+      let server = HTTP.createServer(controllers);
+      let ws = new WebSocketServer(server);
+      ws.on('sendChatMessage', async function(msg, conn) {
+        let data = msg.data || {};
+        let { message, senderHash, receiverHash, receiver } = await Chats.addChatMessage({
+          user: conn,
+          boardName: data.boardName,
+          postNumber: data.postNumber,
+          chatNumber: data.chatNumber,
+          text: data.text
+        });
+        if (senderHash !== receiverHash) {
+          message.type = 'in';
+          let ip = receiver.hashpass ? null : receiver.ip;
+          ws.sendMessage('newChatMessage', {
+            message: message,
+            boardName: data.boardName,
+            postNumber: data.postNumber
+          }, ip, receiver.hashpass);
+        }
+        message.type = 'out';
+        return message;
       });
-      var subscriptions = new Map();
-      ws.on("subscribeToThreadUpdates", function(msg, conn) {
-          var data = msg.data || {};
-          var key = data.boardName + "/" + data.threadNumber;
-          if (subscriptions.has(key)) {
-              subscriptions.get(key).add(conn);
-          } else {
-              var s = new Set();
-              s.add(conn);
-              subscriptions.set(key, s);
-          }
+      let subscriptions = new Map();
+      ws.on('subscribeToThreadUpdates', (msg, conn) => {
+        let { boardName, threadNumber } = msg.data || {};
+        let key = `${boardName}/${threadNumber}`;
+        if (subscriptions.has(key)) {
+          subscriptions.get(key).add(conn);
+        } else {
+          let s = new Set();
+          s.add(conn);
+          subscriptions.set(key, s);
+        }
       });
-      ws.on("unsubscribeFromThreadUpdates", function(msg, conn) {
-          var data = msg.data || {};
-          var key = data.boardName + "/" + data.threadNumber;
-          var s = subscriptions.get(key);
-          if (!s)
-              return;
-          s.delete(conn);
-          if (s.size < 1)
-              subscriptions.delete(key);
+      ws.on('unsubscribeFromThreadUpdates', (msg, conn) => {
+        let { boardName, threadNumber } = msg.data || {};
+        let key = `${boardName}/${threadNumber}`;
+        let s = subscriptions.get(key);
+        if (!s) {
+          return;
+        }
+        s.delete(conn);
+        if (s.size < 1) {
+          subscriptions.delete(key);
+        }
       });
-      server.listen(config("server.port", 8080), function() {
-          console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080) + "…");
-          IPC.on('exit', function(status) {
-              process.exit(status);
-          });
-          IPC.on('stop', function() {
-              return new Promise(function(resolve, reject) {
-                  server.close(function() {
-                      _(sockets).each((socket, socketId) => {
-                          delete sockets[socketId];
-                          socket.destroy();
-                      });
-                      OnlineCounter.clear();
-                      console.log("[" + process.pid + "] Closed");
-                      resolve();
-                  });
+      server.listen(config('server.port'), () => {
+        console.log(`[${process.pid}] Listening on port ${config('server.port')}…`);
+        IPC.on('exit', (status) => { process.exit(status); });
+        IPC.on('stop', () => {
+          return new Promise((resolve, reject) => {
+            server.close(() => {
+              _(sockets).each((socket, socketId) => {
+                delete sockets[socketId];
+                socket.destroy();
               });
-          });
-          IPC.on('start', function() {
-              return new Promise(function(resolve, reject) {
-                  server.listen(config("server.port", 8080), function() {
-                      console.log("[" + process.pid + "] Listening on port " + config("server.port", 8080)
-                          + "…");
-                      resolve();
-                  });
-              });
-          });
-          IPC.on('render', function(data) {
-              var f = BoardController[`${data.type}`];
-              if (typeof f != "function")
-                  return Promise.reject("Invalid generator function");
-              return f.call(BoardController, data.key, data.data);
-          });
-          IPC.on('reloadBoards', function() {
-              Board.initialize();
-              return Promise.resolve();
-          });
-          IPC.on('reloadTemplates', function() {
-            return Renderer.reloadTemplates();
-          });
-          IPC.on('notifyAboutNewPosts', (keys) => {
-            _(keys).each((_1, key) => {
-              let s = subscriptions.get(key);
-              if (!s) {
-                return;
-              }
-              s.forEach((conn) => {
-                conn.sendMessage('newPost');
-              });
+              OnlineCounter.clear();
+              console.log(`[${process.pid}] Closed`);
+              resolve();
             });
           });
-          IPC.on('getConnectionIPs', function() {
-              return Promise.resolve(OnlineCounter.unique());
+        });
+        IPC.on('start', () => {
+          return new Promise((resolve, reject) => {
+            server.listen(config('server.port'), () => {
+              console.log(`[${process.pid}] Listening on port ${config('server.port')}…`);
+              resolve();
+            });
           });
-          IPC.send('ready').catch(function(err) {
-              Logger.error(err);
+        });
+        IPC.on('render', async function(data) {
+          let f = BoardController[`${data.type}`];
+          if (typeof f !== 'function') {
+            throw new Error(Tools.translate('Invalid generator function'));
+          }
+          return await f.call(BoardController, data.key, data.data);
+        });
+        IPC.on('reloadBoards', () => {
+          Board.initialize();
+        });
+        IPC.on('reloadTemplates', async function() {
+          return await Renderer.reloadTemplates();
+        });
+        IPC.on('notifyAboutNewPosts', (keys) => {
+          _(keys).each((_1, key) => {
+            let s = subscriptions.get(key);
+            if (!s) {
+              return;
+            }
+            s.forEach((conn) => {
+              conn.sendMessage('newPost');
+            });
           });
+        });
+        IPC.on('getConnectionIPs', () => {
+           return OnlineCounter.unique();
+        });
+        IPC.send('ready').catch((err) => {
+          Logger.error(err);
+        });
       });
-      server.on("connection", function(socket) {
-          var socketId = ++nextSocketId;
-          sockets[socketId] = socket;
-          socket.on("close", function() {
-              delete sockets[socketId];
-          });
+      server.on('connection', (socket) => {
+        let socketId = ++nextSocketId;
+        sockets[socketId] = socket;
+        socket.on('close', () => {
+          delete sockets[socketId];
+        });
       });
     } catch (err) {
       console.log(err);

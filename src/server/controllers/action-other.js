@@ -79,7 +79,7 @@ function splitCommand(cmd) {
 
 router.post('/action/sendChatMessage', async function(req, res, next) {
   try {
-    let { fields: { boardName, postNumber, text } } = await Files.parseForm(req);
+    let { fields: { boardName, postNumber, chatNumber, text } } = await Files.parseForm(req);
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
@@ -95,7 +95,13 @@ router.post('/action/sendChatMessage', async function(req, res, next) {
       write: true,
       geolocationInfo: req.geolocationInfo
     });
-    await ChatsModel.addChatMessage(req, boardName, postNumber, text);
+    await ChatsModel.addChatMessage({
+      user: req,
+      boardName: boardName,
+      postNumber: postNumber,
+      chatNumber: chatNumber,
+      text: text
+    });
     res.json({});
   } catch (err) {
     next(err);
