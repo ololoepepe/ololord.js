@@ -471,9 +471,9 @@ var SQLAdapter = function () {
       return set;
     }()
   }, {
-    key: 'hget',
+    key: 'incrby',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(key, id) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(key, value) {
         return regeneratorRuntime.wrap(function _callee13$(_context13) {
           while (1) {
             switch (_context13.prev = _context13.next) {
@@ -487,29 +487,41 @@ var SQLAdapter = function () {
                         switch (_context12.prev = _context12.next) {
                           case 0:
                             _context12.next = 2;
-                            return this._checkType(key, 'hash');
+                            return this._checkType(key, 'string', true);
 
                           case 2:
-                            result = _context12.sent;
+                            _context12.next = 4;
+                            return this._wrapper.get('SELECT value FROM _ololord_keys WHERE key = ?', key);
 
-                            if (result) {
-                              _context12.next = 5;
-                              break;
-                            }
-
-                            return _context12.abrupt('return', rollback(result));
-
-                          case 5:
-                            _context12.next = 7;
-                            return this._wrapper.get('SELECT value FROM ' + key + ' WHERE id = ?', id);
-
-                          case 7:
+                          case 4:
                             result = _context12.sent;
 
                             result = result || {};
-                            commit(typeof result.value !== 'undefined' ? result.value : null);
 
-                          case 10:
+                            if (!(result.value && isNaN(+result.value))) {
+                              _context12.next = 8;
+                              break;
+                            }
+
+                            throw new Error('value is not an integer');
+
+                          case 8:
+                            if (result.value) {
+                              result.value = +result.value + +value;
+                            } else {
+                              result.value = +value;
+                            }
+                            _context12.next = 11;
+                            return this._wrapper.run('UPDATE _ololord_keys SET value = ? WHERE key = ?', result.value, key);
+
+                          case 11:
+                            _context12.next = 13;
+                            return this._wrapper.run('INSERT OR IGNORE INTO _ololord_keys (key, value) VALUES (?, ?)', key, result.value);
+
+                          case 13:
+                            commit(result.value);
+
+                          case 14:
                           case 'end':
                             return _context12.stop();
                         }
@@ -533,20 +545,16 @@ var SQLAdapter = function () {
         }, _callee13, this);
       }));
 
-      function hget(_x18, _x19) {
+      function incrby(_x18, _x19) {
         return ref.apply(this, arguments);
       }
 
-      return hget;
+      return incrby;
     }()
   }, {
-    key: 'hmget',
+    key: 'hget',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(key) {
-        for (var _len = arguments.length, ids = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-          ids[_key - 1] = arguments[_key];
-        }
-
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(key, id) {
         return regeneratorRuntime.wrap(function _callee15$(_context15) {
           while (1) {
             switch (_context15.prev = _context15.next) {
@@ -554,9 +562,7 @@ var SQLAdapter = function () {
                 _context15.next = 2;
                 return this._wrapper.transaction(function () {
                   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(commit, rollback) {
-                    var _wrapper;
-
-                    var result, q, results;
+                    var result;
                     return regeneratorRuntime.wrap(function _callee14$(_context14) {
                       while (1) {
                         switch (_context14.prev = _context14.next) {
@@ -575,30 +581,16 @@ var SQLAdapter = function () {
                             return _context14.abrupt('return', rollback(result));
 
                           case 5:
-                            q = 'SELECT id, value FROM ' + key + ' WHERE id IN (' + ids.map(function (_1) {
-                              return '?';
-                            }).join(', ') + ')';
-                            _context14.next = 8;
-                            return (_wrapper = this._wrapper).get.apply(_wrapper, [q, key].concat(ids));
+                            _context14.next = 7;
+                            return this._wrapper.get('SELECT value FROM ' + key + ' WHERE id = ?', id);
 
-                          case 8:
-                            results = _context14.sent;
+                          case 7:
+                            result = _context14.sent;
 
-                            results = results.reduce(function (acc, res) {
-                              acc[res.id] = res.value;
-                              return acc;
-                            }, {});
-                            commit(ids.reduce(function (acc, id) {
-                              var res = results[id];
-                              if (typeof res === 'undefined') {
-                                acc[id] = null;
-                              } else {
-                                acc[id] = typeof res.value !== 'undefined' ? res.value : null;
-                              }
-                              return acc;
-                            }, {}));
+                            result = result || {};
+                            commit(typeof result.value !== 'undefined' ? result.value : null);
 
-                          case 11:
+                          case 10:
                           case 'end':
                             return _context14.stop();
                         }
@@ -622,16 +614,20 @@ var SQLAdapter = function () {
         }, _callee15, this);
       }));
 
-      function hmget(_x22, _x23) {
+      function hget(_x22, _x23) {
         return ref.apply(this, arguments);
       }
 
-      return hmget;
+      return hget;
     }()
   }, {
-    key: 'hgetall',
+    key: 'hmget',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(key) {
+        for (var _len = arguments.length, ids = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          ids[_key - 1] = arguments[_key];
+        }
+
         return regeneratorRuntime.wrap(function _callee17$(_context17) {
           while (1) {
             switch (_context17.prev = _context17.next) {
@@ -639,7 +635,9 @@ var SQLAdapter = function () {
                 _context17.next = 2;
                 return this._wrapper.transaction(function () {
                   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(commit, rollback) {
-                    var result, results;
+                    var _wrapper;
+
+                    var result, q, results;
                     return regeneratorRuntime.wrap(function _callee16$(_context16) {
                       while (1) {
                         switch (_context16.prev = _context16.next) {
@@ -658,18 +656,30 @@ var SQLAdapter = function () {
                             return _context16.abrupt('return', rollback(result));
 
                           case 5:
-                            _context16.next = 7;
-                            return this._wrapper.get('SELECT id, value FROM ' + key);
+                            q = 'SELECT id, value FROM ' + key + ' WHERE id IN (' + ids.map(function (_1) {
+                              return '?';
+                            }).join(', ') + ')';
+                            _context16.next = 8;
+                            return (_wrapper = this._wrapper).get.apply(_wrapper, [q, key].concat(ids));
 
-                          case 7:
+                          case 8:
                             results = _context16.sent;
 
-                            commit(results.reduce(function (acc, res) {
-                              acc[res.id] = typeof res.value !== 'undefined' ? res.value : null;
+                            results = results.reduce(function (acc, res) {
+                              acc[res.id] = res.value;
+                              return acc;
+                            }, {});
+                            commit(ids.reduce(function (acc, id) {
+                              var res = results[id];
+                              if (typeof res === 'undefined') {
+                                acc[id] = null;
+                              } else {
+                                acc[id] = typeof res.value !== 'undefined' ? res.value : null;
+                              }
                               return acc;
                             }, {}));
 
-                          case 9:
+                          case 11:
                           case 'end':
                             return _context16.stop();
                         }
@@ -677,7 +687,7 @@ var SQLAdapter = function () {
                     }, _callee16, this);
                   }));
 
-                  return function (_x27, _x28) {
+                  return function (_x28, _x29) {
                     return ref.apply(this, arguments);
                   };
                 }());
@@ -693,16 +703,16 @@ var SQLAdapter = function () {
         }, _callee17, this);
       }));
 
-      function hgetall(_x26) {
+      function hmget(_x26, _x27) {
         return ref.apply(this, arguments);
       }
 
-      return hgetall;
+      return hmget;
     }()
   }, {
-    key: 'hexists',
+    key: 'hgetall',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(key, id) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(key) {
         return regeneratorRuntime.wrap(function _callee19$(_context19) {
           while (1) {
             switch (_context19.prev = _context19.next) {
@@ -710,7 +720,7 @@ var SQLAdapter = function () {
                 _context19.next = 2;
                 return this._wrapper.transaction(function () {
                   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(commit, rollback) {
-                    var result;
+                    var result, results;
                     return regeneratorRuntime.wrap(function _callee18$(_context18) {
                       while (1) {
                         switch (_context18.prev = _context18.next) {
@@ -726,19 +736,21 @@ var SQLAdapter = function () {
                               break;
                             }
 
-                            return _context18.abrupt('return', rollback(0));
+                            return _context18.abrupt('return', rollback(result));
 
                           case 5:
                             _context18.next = 7;
-                            return this._wrapper.get('SELECT id FROM ' + key + ' WHERE id = ?', id);
+                            return this._wrapper.get('SELECT id, value FROM ' + key);
 
                           case 7:
-                            result = _context18.sent;
+                            results = _context18.sent;
 
-                            result = result || {};
-                            commit(typeof result.id !== 'undefined' ? 1 : 0);
+                            commit(results.reduce(function (acc, res) {
+                              acc[res.id] = typeof res.value !== 'undefined' ? res.value : null;
+                              return acc;
+                            }, {}));
 
-                          case 10:
+                          case 9:
                           case 'end':
                             return _context18.stop();
                         }
@@ -762,16 +774,16 @@ var SQLAdapter = function () {
         }, _callee19, this);
       }));
 
-      function hexists(_x29, _x30) {
+      function hgetall(_x30) {
         return ref.apply(this, arguments);
       }
 
-      return hexists;
+      return hgetall;
     }()
   }, {
-    key: 'hset',
+    key: 'hexists',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(key, id, data) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(key, id) {
         return regeneratorRuntime.wrap(function _callee21$(_context21) {
           while (1) {
             switch (_context21.prev = _context21.next) {
@@ -785,26 +797,29 @@ var SQLAdapter = function () {
                         switch (_context20.prev = _context20.next) {
                           case 0:
                             _context20.next = 2;
-                            return this._checkType(key, 'hash', true);
+                            return this._checkType(key, 'hash');
 
                           case 2:
-                            _context20.next = 4;
+                            result = _context20.sent;
+
+                            if (result) {
+                              _context20.next = 5;
+                              break;
+                            }
+
+                            return _context20.abrupt('return', rollback(0));
+
+                          case 5:
+                            _context20.next = 7;
                             return this._wrapper.get('SELECT id FROM ' + key + ' WHERE id = ?', id);
 
-                          case 4:
-                            result = _context20.sent;
-                            _context20.next = 7;
-                            return this._wrapper.run('UPDATE ' + key + ' SET value = ? WHERE id = ?', data, id);
-
                           case 7:
-                            _context20.next = 9;
-                            return this._wrapper.run('INSERT OR IGNORE INTO ' + key + ' (id, value) VALUES (?, ?)', id, data);
+                            result = _context20.sent;
 
-                          case 9:
                             result = result || {};
-                            commit(result.id ? 0 : 1);
+                            commit(typeof result.id !== 'undefined' ? 1 : 0);
 
-                          case 11:
+                          case 10:
                           case 'end':
                             return _context20.stop();
                         }
@@ -812,7 +827,7 @@ var SQLAdapter = function () {
                     }, _callee20, this);
                   }));
 
-                  return function (_x36, _x37) {
+                  return function (_x35, _x36) {
                     return ref.apply(this, arguments);
                   };
                 }());
@@ -828,7 +843,73 @@ var SQLAdapter = function () {
         }, _callee21, this);
       }));
 
-      function hset(_x33, _x34, _x35) {
+      function hexists(_x33, _x34) {
+        return ref.apply(this, arguments);
+      }
+
+      return hexists;
+    }()
+  }, {
+    key: 'hset',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(key, id, data) {
+        return regeneratorRuntime.wrap(function _callee23$(_context23) {
+          while (1) {
+            switch (_context23.prev = _context23.next) {
+              case 0:
+                _context23.next = 2;
+                return this._wrapper.transaction(function () {
+                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(commit, rollback) {
+                    var result;
+                    return regeneratorRuntime.wrap(function _callee22$(_context22) {
+                      while (1) {
+                        switch (_context22.prev = _context22.next) {
+                          case 0:
+                            _context22.next = 2;
+                            return this._checkType(key, 'hash', true);
+
+                          case 2:
+                            _context22.next = 4;
+                            return this._wrapper.get('SELECT id FROM ' + key + ' WHERE id = ?', id);
+
+                          case 4:
+                            result = _context22.sent;
+                            _context22.next = 7;
+                            return this._wrapper.run('UPDATE ' + key + ' SET value = ? WHERE id = ?', data, id);
+
+                          case 7:
+                            _context22.next = 9;
+                            return this._wrapper.run('INSERT OR IGNORE INTO ' + key + ' (id, value) VALUES (?, ?)', id, data);
+
+                          case 9:
+                            result = result || {};
+                            commit(result.id ? 0 : 1);
+
+                          case 11:
+                          case 'end':
+                            return _context22.stop();
+                        }
+                      }
+                    }, _callee22, this);
+                  }));
+
+                  return function (_x40, _x41) {
+                    return ref.apply(this, arguments);
+                  };
+                }());
+
+              case 2:
+                return _context23.abrupt('return', _context23.sent);
+
+              case 3:
+              case 'end':
+                return _context23.stop();
+            }
+          }
+        }, _callee23, this);
+      }));
+
+      function hset(_x37, _x38, _x39) {
         return ref.apply(this, arguments);
       }
 
@@ -837,51 +918,51 @@ var SQLAdapter = function () {
   }, {
     key: 'hmset',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(key) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(key) {
         for (var _len2 = arguments.length, items = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
           items[_key2 - 1] = arguments[_key2];
         }
 
-        return regeneratorRuntime.wrap(function _callee24$(_context24) {
+        return regeneratorRuntime.wrap(function _callee26$(_context26) {
           while (1) {
-            switch (_context24.prev = _context24.next) {
+            switch (_context26.prev = _context26.next) {
               case 0:
-                _context24.next = 2;
+                _context26.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(commit, rollback) {
+                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(commit, rollback) {
                     var self;
-                    return regeneratorRuntime.wrap(function _callee23$(_context23) {
+                    return regeneratorRuntime.wrap(function _callee25$(_context25) {
                       while (1) {
-                        switch (_context23.prev = _context23.next) {
+                        switch (_context25.prev = _context25.next) {
                           case 0:
-                            _context23.next = 2;
+                            _context25.next = 2;
                             return this._checkType(key, 'hash', true);
 
                           case 2:
                             self = this;
-                            _context23.next = 5;
+                            _context25.next = 5;
                             return Tools.series(Tools.chunk(items, 2), function () {
-                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(chunk) {
-                                return regeneratorRuntime.wrap(function _callee22$(_context22) {
+                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(chunk) {
+                                return regeneratorRuntime.wrap(function _callee24$(_context24) {
                                   while (1) {
-                                    switch (_context22.prev = _context22.next) {
+                                    switch (_context24.prev = _context24.next) {
                                       case 0:
-                                        _context22.next = 2;
+                                        _context24.next = 2;
                                         return self._wrapper.run('UPDATE ' + key + ' SET value = ? WHERE id = ?', chunk[1], chunk[0]);
 
                                       case 2:
-                                        _context22.next = 4;
+                                        _context24.next = 4;
                                         return self._wrapper.run('INSERT OR IGNORE INTO ' + key + ' (id, value) VALUES (?, ?)', chunk[0], chunk[1]);
 
                                       case 4:
                                       case 'end':
-                                        return _context22.stop();
+                                        return _context24.stop();
                                     }
                                   }
-                                }, _callee22, this);
+                                }, _callee24, this);
                               }));
 
-                              return function (_x42) {
+                              return function (_x46) {
                                 return ref.apply(this, arguments);
                               };
                             }());
@@ -891,94 +972,13 @@ var SQLAdapter = function () {
 
                           case 6:
                           case 'end':
-                            return _context23.stop();
-                        }
-                      }
-                    }, _callee23, this);
-                  }));
-
-                  return function (_x40, _x41) {
-                    return ref.apply(this, arguments);
-                  };
-                }());
-
-              case 2:
-                return _context24.abrupt('return', _context24.sent);
-
-              case 3:
-              case 'end':
-                return _context24.stop();
-            }
-          }
-        }, _callee24, this);
-      }));
-
-      function hmset(_x38, _x39) {
-        return ref.apply(this, arguments);
-      }
-
-      return hmset;
-    }()
-  }, {
-    key: 'hincrby',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(key, id, value) {
-        return regeneratorRuntime.wrap(function _callee26$(_context26) {
-          while (1) {
-            switch (_context26.prev = _context26.next) {
-              case 0:
-                _context26.next = 2;
-                return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(commit, rollback) {
-                    var result;
-                    return regeneratorRuntime.wrap(function _callee25$(_context25) {
-                      while (1) {
-                        switch (_context25.prev = _context25.next) {
-                          case 0:
-                            _context25.next = 2;
-                            return this._checkType(key, 'hash', true);
-
-                          case 2:
-                            _context25.next = 4;
-                            return this._wrapper.get('SELECT id, value FROM ' + key + ' WHERE id = ?', id);
-
-                          case 4:
-                            result = _context25.sent;
-
-                            result = result || {};
-
-                            if (!(result.id && isNaN(+result.value))) {
-                              _context25.next = 8;
-                              break;
-                            }
-
-                            throw new Error('hash value is not an integer');
-
-                          case 8:
-                            if (result.id) {
-                              result.value = +result.value + +value;
-                            } else {
-                              result.value = +value;
-                            }
-                            _context25.next = 11;
-                            return this._wrapper.run('UPDATE ' + key + ' SET value = ? WHERE id = ?', result.value, id);
-
-                          case 11:
-                            _context25.next = 13;
-                            return this._wrapper.run('INSERT OR IGNORE INTO ' + key + ' (id, value) VALUES (?, ?)', id, result.value);
-
-                          case 13:
-                            commit(result.value);
-
-                          case 14:
-                          case 'end':
                             return _context25.stop();
                         }
                       }
                     }, _callee25, this);
                   }));
 
-                  return function (_x46, _x47) {
+                  return function (_x44, _x45) {
                     return ref.apply(this, arguments);
                   };
                 }());
@@ -994,115 +994,69 @@ var SQLAdapter = function () {
         }, _callee26, this);
       }));
 
-      function hincrby(_x43, _x44, _x45) {
+      function hmset(_x42, _x43) {
         return ref.apply(this, arguments);
       }
 
-      return hincrby;
+      return hmset;
     }()
   }, {
-    key: 'hdel',
+    key: 'hincrby',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(key) {
-        for (var _len3 = arguments.length, ids = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-          ids[_key3 - 1] = arguments[_key3];
-        }
-
-        return regeneratorRuntime.wrap(function _callee29$(_context29) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(key, id, value) {
+        return regeneratorRuntime.wrap(function _callee28$(_context28) {
           while (1) {
-            switch (_context29.prev = _context29.next) {
+            switch (_context28.prev = _context28.next) {
               case 0:
-                _context29.next = 2;
+                _context28.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(commit, rollback) {
-                    var result, self, count;
-                    return regeneratorRuntime.wrap(function _callee28$(_context28) {
+                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(commit, rollback) {
+                    var result;
+                    return regeneratorRuntime.wrap(function _callee27$(_context27) {
                       while (1) {
-                        switch (_context28.prev = _context28.next) {
+                        switch (_context27.prev = _context27.next) {
                           case 0:
-                            _context28.next = 2;
-                            return this._checkType(key, 'hash');
+                            _context27.next = 2;
+                            return this._checkType(key, 'hash', true);
 
                           case 2:
-                            result = _context28.sent;
+                            _context27.next = 4;
+                            return this._wrapper.get('SELECT id, value FROM ' + key + ' WHERE id = ?', id);
 
-                            if (result) {
-                              _context28.next = 5;
-                              break;
-                            }
-
-                            return _context28.abrupt('return', rollback(0));
-
-                          case 5:
-                            self = this;
-                            count = 0;
-                            _context28.next = 9;
-                            return Tools.series(ids, function () {
-                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(id) {
-                                var result;
-                                return regeneratorRuntime.wrap(function _callee27$(_context27) {
-                                  while (1) {
-                                    switch (_context27.prev = _context27.next) {
-                                      case 0:
-                                        _context27.next = 2;
-                                        return self._wrapper.get('SELECT id FROM ' + key + ' WHERE id = ?', id);
-
-                                      case 2:
-                                        result = _context27.sent;
-                                        _context27.next = 5;
-                                        return self._wrapper.run('DELETE FROM ' + key + ' WHERE id = ?', id);
-
-                                      case 5:
-                                        result = result || {};
-                                        if (result.id) {
-                                          ++count;
-                                        }
-
-                                      case 7:
-                                      case 'end':
-                                        return _context27.stop();
-                                    }
-                                  }
-                                }, _callee27, this);
-                              }));
-
-                              return function (_x52) {
-                                return ref.apply(this, arguments);
-                              };
-                            }());
-
-                          case 9:
-                            _context28.next = 11;
-                            return this._wrapper.get('SELECT count(id) FROM ' + key);
-
-                          case 11:
-                            result = _context28.sent;
+                          case 4:
+                            result = _context27.sent;
 
                             result = result || {};
 
-                            if (!(Tools.option(result['count(id)'], 'number', { test: function test(c) {
-                                return c > 0;
-                              } }) <= 0)) {
-                              _context28.next = 18;
+                            if (!(result.id && isNaN(+result.value))) {
+                              _context27.next = 8;
                               break;
                             }
 
-                            _context28.next = 16;
-                            return this._wrapper.run('DELETE FROM _ololord_metadata WHERE name LIKE ?', key);
+                            throw new Error('hash value is not an integer');
 
-                          case 16:
-                            _context28.next = 18;
-                            return this._wrapper.run('DROP TABLE ' + key);
+                          case 8:
+                            if (result.id) {
+                              result.value = +result.value + +value;
+                            } else {
+                              result.value = +value;
+                            }
+                            _context27.next = 11;
+                            return this._wrapper.run('UPDATE ' + key + ' SET value = ? WHERE id = ?', result.value, id);
 
-                          case 18:
-                            commit(count);
+                          case 11:
+                            _context27.next = 13;
+                            return this._wrapper.run('INSERT OR IGNORE INTO ' + key + ' (id, value) VALUES (?, ?)', id, result.value);
 
-                          case 19:
+                          case 13:
+                            commit(result.value);
+
+                          case 14:
                           case 'end':
-                            return _context28.stop();
+                            return _context27.stop();
                         }
                       }
-                    }, _callee28, this);
+                    }, _callee27, this);
                   }));
 
                   return function (_x50, _x51) {
@@ -1111,26 +1065,30 @@ var SQLAdapter = function () {
                 }());
 
               case 2:
-                return _context29.abrupt('return', _context29.sent);
+                return _context28.abrupt('return', _context28.sent);
 
               case 3:
               case 'end':
-                return _context29.stop();
+                return _context28.stop();
             }
           }
-        }, _callee29, this);
+        }, _callee28, this);
       }));
 
-      function hdel(_x48, _x49) {
+      function hincrby(_x47, _x48, _x49) {
         return ref.apply(this, arguments);
       }
 
-      return hdel;
+      return hincrby;
     }()
   }, {
-    key: 'hkeys',
+    key: 'hdel',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee31(key) {
+        for (var _len3 = arguments.length, ids = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+          ids[_key3 - 1] = arguments[_key3];
+        }
+
         return regeneratorRuntime.wrap(function _callee31$(_context31) {
           while (1) {
             switch (_context31.prev = _context31.next) {
@@ -1138,7 +1096,7 @@ var SQLAdapter = function () {
                 _context31.next = 2;
                 return this._wrapper.transaction(function () {
                   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee30(commit, rollback) {
-                    var result, results;
+                    var result, self, count;
                     return regeneratorRuntime.wrap(function _callee30$(_context30) {
                       while (1) {
                         switch (_context30.prev = _context30.next) {
@@ -1149,20 +1107,78 @@ var SQLAdapter = function () {
                           case 2:
                             result = _context30.sent;
 
-                            if (!result) {
-                              rollback([]);
+                            if (result) {
+                              _context30.next = 5;
+                              break;
                             }
-                            _context30.next = 6;
-                            return this._wrapper.get('SELECT id FROM ' + key);
 
-                          case 6:
-                            results = _context30.sent;
+                            return _context30.abrupt('return', rollback(0));
 
-                            commit(results.map(function (res) {
-                              return res.id;
-                            }));
+                          case 5:
+                            self = this;
+                            count = 0;
+                            _context30.next = 9;
+                            return Tools.series(ids, function () {
+                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(id) {
+                                var result;
+                                return regeneratorRuntime.wrap(function _callee29$(_context29) {
+                                  while (1) {
+                                    switch (_context29.prev = _context29.next) {
+                                      case 0:
+                                        _context29.next = 2;
+                                        return self._wrapper.get('SELECT id FROM ' + key + ' WHERE id = ?', id);
 
-                          case 8:
+                                      case 2:
+                                        result = _context29.sent;
+                                        _context29.next = 5;
+                                        return self._wrapper.run('DELETE FROM ' + key + ' WHERE id = ?', id);
+
+                                      case 5:
+                                        result = result || {};
+                                        if (result.id) {
+                                          ++count;
+                                        }
+
+                                      case 7:
+                                      case 'end':
+                                        return _context29.stop();
+                                    }
+                                  }
+                                }, _callee29, this);
+                              }));
+
+                              return function (_x56) {
+                                return ref.apply(this, arguments);
+                              };
+                            }());
+
+                          case 9:
+                            _context30.next = 11;
+                            return this._wrapper.get('SELECT count(id) FROM ' + key);
+
+                          case 11:
+                            result = _context30.sent;
+
+                            result = result || {};
+
+                            if (!(Tools.option(result['count(id)'], 'number', { test: function test(c) {
+                                return c > 0;
+                              } }) <= 0)) {
+                              _context30.next = 18;
+                              break;
+                            }
+
+                            _context30.next = 16;
+                            return this._wrapper.run('DELETE FROM _ololord_metadata WHERE name LIKE ?', key);
+
+                          case 16:
+                            _context30.next = 18;
+                            return this._wrapper.run('DROP TABLE ' + key);
+
+                          case 18:
+                            commit(count);
+
+                          case 19:
                           case 'end':
                             return _context30.stop();
                         }
@@ -1186,14 +1202,14 @@ var SQLAdapter = function () {
         }, _callee31, this);
       }));
 
-      function hkeys(_x53) {
+      function hdel(_x52, _x53) {
         return ref.apply(this, arguments);
       }
 
-      return hkeys;
+      return hdel;
     }()
   }, {
-    key: 'hlen',
+    key: 'hkeys',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee33(key) {
         return regeneratorRuntime.wrap(function _callee33$(_context33) {
@@ -1203,7 +1219,7 @@ var SQLAdapter = function () {
                 _context33.next = 2;
                 return this._wrapper.transaction(function () {
                   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee32(commit, rollback) {
-                    var result;
+                    var result, results;
                     return regeneratorRuntime.wrap(function _callee32$(_context32) {
                       while (1) {
                         switch (_context32.prev = _context32.next) {
@@ -1215,20 +1231,19 @@ var SQLAdapter = function () {
                             result = _context32.sent;
 
                             if (!result) {
-                              rollback(0);
+                              rollback([]);
                             }
                             _context32.next = 6;
-                            return this._wrapper.get('SELECT count(id) FROM ' + key);
+                            return this._wrapper.get('SELECT id FROM ' + key);
 
                           case 6:
-                            result = _context32.sent;
+                            results = _context32.sent;
 
-                            result = result || {};
-                            commit(Tools.option(result['count(id)'], 'number', { test: function test(c) {
-                                return c > 0;
-                              } }));
+                            commit(results.map(function (res) {
+                              return res.id;
+                            }));
 
-                          case 9:
+                          case 8:
                           case 'end':
                             return _context32.stop();
                         }
@@ -1236,7 +1251,7 @@ var SQLAdapter = function () {
                     }, _callee32, this);
                   }));
 
-                  return function (_x57, _x58) {
+                  return function (_x58, _x59) {
                     return ref.apply(this, arguments);
                   };
                 }());
@@ -1252,14 +1267,14 @@ var SQLAdapter = function () {
         }, _callee33, this);
       }));
 
-      function hlen(_x56) {
+      function hkeys(_x57) {
         return ref.apply(this, arguments);
       }
 
-      return hlen;
+      return hkeys;
     }()
   }, {
-    key: 'srandmember',
+    key: 'hlen',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee35(key) {
         return regeneratorRuntime.wrap(function _callee35$(_context35) {
@@ -1275,29 +1290,26 @@ var SQLAdapter = function () {
                         switch (_context34.prev = _context34.next) {
                           case 0:
                             _context34.next = 2;
-                            return this._checkType(key, 'set');
+                            return this._checkType(key, 'hash');
 
                           case 2:
                             result = _context34.sent;
 
-                            if (result) {
-                              _context34.next = 5;
-                              break;
+                            if (!result) {
+                              rollback(0);
                             }
+                            _context34.next = 6;
+                            return this._wrapper.get('SELECT count(id) FROM ' + key);
 
-                            return _context34.abrupt('return', rollback(result));
-
-                          case 5:
-                            _context34.next = 7;
-                            return this._wrapper.get('SELECT value FROM ' + key + ' LIMIT 1');
-
-                          case 7:
+                          case 6:
                             result = _context34.sent;
 
                             result = result || {};
-                            commit(typeof result.value !== 'undefined' ? result.value : null);
+                            commit(Tools.option(result['count(id)'], 'number', { test: function test(c) {
+                                return c > 0;
+                              } }));
 
-                          case 10:
+                          case 9:
                           case 'end':
                             return _context34.stop();
                         }
@@ -1305,7 +1317,7 @@ var SQLAdapter = function () {
                     }, _callee34, this);
                   }));
 
-                  return function (_x60, _x61) {
+                  return function (_x61, _x62) {
                     return ref.apply(this, arguments);
                   };
                 }());
@@ -1321,14 +1333,14 @@ var SQLAdapter = function () {
         }, _callee35, this);
       }));
 
-      function srandmember(_x59) {
+      function hlen(_x60) {
         return ref.apply(this, arguments);
       }
 
-      return srandmember;
+      return hlen;
     }()
   }, {
-    key: 'smembers',
+    key: 'srandmember',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee37(key) {
         return regeneratorRuntime.wrap(function _callee37$(_context37) {
@@ -1338,7 +1350,7 @@ var SQLAdapter = function () {
                 _context37.next = 2;
                 return this._wrapper.transaction(function () {
                   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee36(commit, rollback) {
-                    var result, results;
+                    var result;
                     return regeneratorRuntime.wrap(function _callee36$(_context36) {
                       while (1) {
                         switch (_context36.prev = _context36.next) {
@@ -1354,20 +1366,19 @@ var SQLAdapter = function () {
                               break;
                             }
 
-                            return _context36.abrupt('return', rollback([]));
+                            return _context36.abrupt('return', rollback(result));
 
                           case 5:
                             _context36.next = 7;
-                            return this._wrapper.all('SELECT value FROM ' + key);
+                            return this._wrapper.get('SELECT value FROM ' + key + ' LIMIT 1');
 
                           case 7:
-                            results = _context36.sent;
+                            result = _context36.sent;
 
-                            commit(results.map(function (res) {
-                              return typeof res.value !== 'undefined' ? res.value : null;
-                            }));
+                            result = result || {};
+                            commit(typeof result.value !== 'undefined' ? result.value : null);
 
-                          case 9:
+                          case 10:
                           case 'end':
                             return _context36.stop();
                         }
@@ -1375,7 +1386,7 @@ var SQLAdapter = function () {
                     }, _callee36, this);
                   }));
 
-                  return function (_x63, _x64) {
+                  return function (_x64, _x65) {
                     return ref.apply(this, arguments);
                   };
                 }());
@@ -1391,16 +1402,16 @@ var SQLAdapter = function () {
         }, _callee37, this);
       }));
 
-      function smembers(_x62) {
+      function srandmember(_x63) {
         return ref.apply(this, arguments);
       }
 
-      return smembers;
+      return srandmember;
     }()
   }, {
-    key: 'sismember',
+    key: 'smembers',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee39(key, data) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee39(key) {
         return regeneratorRuntime.wrap(function _callee39$(_context39) {
           while (1) {
             switch (_context39.prev = _context39.next) {
@@ -1424,18 +1435,18 @@ var SQLAdapter = function () {
                               break;
                             }
 
-                            return _context38.abrupt('return', rollback(0));
+                            return _context38.abrupt('return', rollback([]));
 
                           case 5:
                             _context38.next = 7;
-                            return this._wrapper.all('SELECT count(value) FROM ' + key + ' WHERE value = ?', data);
+                            return this._wrapper.all('SELECT value FROM ' + key);
 
                           case 7:
                             results = _context38.sent;
 
-                            commit(Tools.option(result['count(value)'], 'number', { test: function test(c) {
-                                return c > 0;
-                              } }));
+                            commit(results.map(function (res) {
+                              return typeof res.value !== 'undefined' ? res.value : null;
+                            }));
 
                           case 9:
                           case 'end':
@@ -1461,7 +1472,77 @@ var SQLAdapter = function () {
         }, _callee39, this);
       }));
 
-      function sismember(_x65, _x66) {
+      function smembers(_x66) {
+        return ref.apply(this, arguments);
+      }
+
+      return smembers;
+    }()
+  }, {
+    key: 'sismember',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee41(key, data) {
+        return regeneratorRuntime.wrap(function _callee41$(_context41) {
+          while (1) {
+            switch (_context41.prev = _context41.next) {
+              case 0:
+                _context41.next = 2;
+                return this._wrapper.transaction(function () {
+                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee40(commit, rollback) {
+                    var result, results;
+                    return regeneratorRuntime.wrap(function _callee40$(_context40) {
+                      while (1) {
+                        switch (_context40.prev = _context40.next) {
+                          case 0:
+                            _context40.next = 2;
+                            return this._checkType(key, 'set');
+
+                          case 2:
+                            result = _context40.sent;
+
+                            if (result) {
+                              _context40.next = 5;
+                              break;
+                            }
+
+                            return _context40.abrupt('return', rollback(0));
+
+                          case 5:
+                            _context40.next = 7;
+                            return this._wrapper.all('SELECT count(value) FROM ' + key + ' WHERE value = ?', data);
+
+                          case 7:
+                            results = _context40.sent;
+
+                            commit(Tools.option(result['count(value)'], 'number', { test: function test(c) {
+                                return c > 0;
+                              } }));
+
+                          case 9:
+                          case 'end':
+                            return _context40.stop();
+                        }
+                      }
+                    }, _callee40, this);
+                  }));
+
+                  return function (_x71, _x72) {
+                    return ref.apply(this, arguments);
+                  };
+                }());
+
+              case 2:
+                return _context41.abrupt('return', _context41.sent);
+
+              case 3:
+              case 'end':
+                return _context41.stop();
+            }
+          }
+        }, _callee41, this);
+      }));
+
+      function sismember(_x69, _x70) {
         return ref.apply(this, arguments);
       }
 
@@ -1470,53 +1551,53 @@ var SQLAdapter = function () {
   }, {
     key: 'sadd',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee42(key) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee44(key) {
         for (var _len4 = arguments.length, items = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
           items[_key4 - 1] = arguments[_key4];
         }
 
-        return regeneratorRuntime.wrap(function _callee42$(_context42) {
+        return regeneratorRuntime.wrap(function _callee44$(_context44) {
           while (1) {
-            switch (_context42.prev = _context42.next) {
+            switch (_context44.prev = _context44.next) {
               case 0:
-                _context42.next = 2;
+                _context44.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee41(commit, rollback) {
+                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee43(commit, rollback) {
                     var self, count;
-                    return regeneratorRuntime.wrap(function _callee41$(_context41) {
+                    return regeneratorRuntime.wrap(function _callee43$(_context43) {
                       while (1) {
-                        switch (_context41.prev = _context41.next) {
+                        switch (_context43.prev = _context43.next) {
                           case 0:
-                            _context41.next = 2;
+                            _context43.next = 2;
                             return this._checkType(key, 'set', true);
 
                           case 2:
                             self = this;
                             count = 0;
-                            _context41.next = 6;
+                            _context43.next = 6;
                             return Tools.series(items, function () {
-                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee40(data) {
+                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee42(data) {
                                 var result;
-                                return regeneratorRuntime.wrap(function _callee40$(_context40) {
+                                return regeneratorRuntime.wrap(function _callee42$(_context42) {
                                   while (1) {
-                                    switch (_context40.prev = _context40.next) {
+                                    switch (_context42.prev = _context42.next) {
                                       case 0:
-                                        _context40.next = 2;
+                                        _context42.next = 2;
                                         return self._wrapper.get('SELECT count(value) FROM ' + key + ' WHERE value = ?', data);
 
                                       case 2:
-                                        result = _context40.sent;
+                                        result = _context42.sent;
 
                                         result = result || {};
 
                                         if (!(Tools.option(result['count(value)'], 'number', { test: function test(c) {
                                             return c > 0;
                                           } }) <= 0)) {
-                                          _context40.next = 8;
+                                          _context42.next = 8;
                                           break;
                                         }
 
-                                        _context40.next = 7;
+                                        _context42.next = 7;
                                         return self._wrapper.run('INSERT INTO ' + key + ' (value) VALUES (?)', data);
 
                                       case 7:
@@ -1524,13 +1605,13 @@ var SQLAdapter = function () {
 
                                       case 8:
                                       case 'end':
-                                        return _context40.stop();
+                                        return _context42.stop();
                                     }
                                   }
-                                }, _callee40, this);
+                                }, _callee42, this);
                               }));
 
-                              return function (_x73) {
+                              return function (_x77) {
                                 return ref.apply(this, arguments);
                               };
                             }());
@@ -1540,29 +1621,29 @@ var SQLAdapter = function () {
 
                           case 7:
                           case 'end':
-                            return _context41.stop();
+                            return _context43.stop();
                         }
                       }
-                    }, _callee41, this);
+                    }, _callee43, this);
                   }));
 
-                  return function (_x71, _x72) {
+                  return function (_x75, _x76) {
                     return ref.apply(this, arguments);
                   };
                 }());
 
               case 2:
-                return _context42.abrupt('return', _context42.sent);
+                return _context44.abrupt('return', _context44.sent);
 
               case 3:
               case 'end':
-                return _context42.stop();
+                return _context44.stop();
             }
           }
-        }, _callee42, this);
+        }, _callee44, this);
       }));
 
-      function sadd(_x69, _x70) {
+      function sadd(_x73, _x74) {
         return ref.apply(this, arguments);
       }
 
@@ -1571,49 +1652,49 @@ var SQLAdapter = function () {
   }, {
     key: 'srem',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee45(key) {
-        return regeneratorRuntime.wrap(function _callee45$(_context45) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee47(key) {
+        return regeneratorRuntime.wrap(function _callee47$(_context47) {
           while (1) {
-            switch (_context45.prev = _context45.next) {
+            switch (_context47.prev = _context47.next) {
               case 0:
-                _context45.next = 2;
+                _context47.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee44(commit, rollback) {
+                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee46(commit, rollback) {
                     var result, self, count;
-                    return regeneratorRuntime.wrap(function _callee44$(_context44) {
+                    return regeneratorRuntime.wrap(function _callee46$(_context46) {
                       while (1) {
-                        switch (_context44.prev = _context44.next) {
+                        switch (_context46.prev = _context46.next) {
                           case 0:
-                            _context44.next = 2;
+                            _context46.next = 2;
                             return this._checkType(key, 'set');
 
                           case 2:
-                            result = _context44.sent;
+                            result = _context46.sent;
 
                             if (result) {
-                              _context44.next = 5;
+                              _context46.next = 5;
                               break;
                             }
 
-                            return _context44.abrupt('return', rollback(0));
+                            return _context46.abrupt('return', rollback(0));
 
                           case 5:
                             self = this;
                             count = 0;
-                            _context44.next = 9;
+                            _context46.next = 9;
                             return Tools.series(ids, function () {
-                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee43(data) {
+                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee45(data) {
                                 var result;
-                                return regeneratorRuntime.wrap(function _callee43$(_context43) {
+                                return regeneratorRuntime.wrap(function _callee45$(_context45) {
                                   while (1) {
-                                    switch (_context43.prev = _context43.next) {
+                                    switch (_context45.prev = _context45.next) {
                                       case 0:
-                                        _context43.next = 2;
+                                        _context45.next = 2;
                                         return self._wrapper.get('SELECT count(value) FROM ' + key + ' WHERE value = ?', data);
 
                                       case 2:
-                                        result = _context43.sent;
-                                        _context43.next = 5;
+                                        result = _context45.sent;
+                                        _context45.next = 5;
                                         return self._wrapper.run('DELETE FROM ' + key + ' WHERE value = ?', data);
 
                                       case 5:
@@ -1626,110 +1707,44 @@ var SQLAdapter = function () {
 
                                       case 7:
                                       case 'end':
-                                        return _context43.stop();
+                                        return _context45.stop();
                                     }
                                   }
-                                }, _callee43, this);
+                                }, _callee45, this);
                               }));
 
-                              return function (_x78) {
+                              return function (_x82) {
                                 return ref.apply(this, arguments);
                               };
                             }());
 
                           case 9:
-                            _context44.next = 11;
+                            _context46.next = 11;
                             return this._wrapper.get('SELECT count(value) FROM ' + key);
 
                           case 11:
-                            result = _context44.sent;
+                            result = _context46.sent;
 
                             result = result || {};
 
                             if (!(Tools.option(result['count(id)'], 'number', { test: function test(c) {
                                 return c > 0;
                               } }) <= 0)) {
-                              _context44.next = 18;
+                              _context46.next = 18;
                               break;
                             }
 
-                            _context44.next = 16;
+                            _context46.next = 16;
                             return this._wrapper.run('DELETE FROM _ololord_metadata WHERE name LIKE ?', key);
 
                           case 16:
-                            _context44.next = 18;
+                            _context46.next = 18;
                             return this._wrapper.run('DROP TABLE ' + key);
 
                           case 18:
                             commit(count);
 
                           case 19:
-                          case 'end':
-                            return _context44.stop();
-                        }
-                      }
-                    }, _callee44, this);
-                  }));
-
-                  return function (_x76, _x77) {
-                    return ref.apply(this, arguments);
-                  };
-                }());
-
-              case 2:
-                return _context45.abrupt('return', _context45.sent);
-
-              case 3:
-              case 'end':
-                return _context45.stop();
-            }
-          }
-        }, _callee45, this);
-      }));
-
-      function srem(_x74, _x75) {
-        return ref.apply(this, arguments);
-      }
-
-      return srem;
-    }()
-  }, {
-    key: 'scard',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee47(key) {
-        return regeneratorRuntime.wrap(function _callee47$(_context47) {
-          while (1) {
-            switch (_context47.prev = _context47.next) {
-              case 0:
-                _context47.next = 2;
-                return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee46(commit, rollback) {
-                    var result;
-                    return regeneratorRuntime.wrap(function _callee46$(_context46) {
-                      while (1) {
-                        switch (_context46.prev = _context46.next) {
-                          case 0:
-                            _context46.next = 2;
-                            return this._checkType(key, 'set');
-
-                          case 2:
-                            result = _context46.sent;
-
-                            if (!result) {
-                              rollback(0);
-                            }
-                            _context46.next = 6;
-                            return this._wrapper.get('SELECT count(value) FROM ' + key);
-
-                          case 6:
-                            result = _context46.sent;
-
-                            result = result || {};
-                            commit(Tools.option(result['count(value)'], 'number', { test: function test(c) {
-                                return c > 0;
-                              } }));
-
-                          case 9:
                           case 'end':
                             return _context46.stop();
                         }
@@ -1753,7 +1768,73 @@ var SQLAdapter = function () {
         }, _callee47, this);
       }));
 
-      function scard(_x79) {
+      function srem(_x78, _x79) {
+        return ref.apply(this, arguments);
+      }
+
+      return srem;
+    }()
+  }, {
+    key: 'scard',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee49(key) {
+        return regeneratorRuntime.wrap(function _callee49$(_context49) {
+          while (1) {
+            switch (_context49.prev = _context49.next) {
+              case 0:
+                _context49.next = 2;
+                return this._wrapper.transaction(function () {
+                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee48(commit, rollback) {
+                    var result;
+                    return regeneratorRuntime.wrap(function _callee48$(_context48) {
+                      while (1) {
+                        switch (_context48.prev = _context48.next) {
+                          case 0:
+                            _context48.next = 2;
+                            return this._checkType(key, 'set');
+
+                          case 2:
+                            result = _context48.sent;
+
+                            if (!result) {
+                              rollback(0);
+                            }
+                            _context48.next = 6;
+                            return this._wrapper.get('SELECT count(value) FROM ' + key);
+
+                          case 6:
+                            result = _context48.sent;
+
+                            result = result || {};
+                            commit(Tools.option(result['count(value)'], 'number', { test: function test(c) {
+                                return c > 0;
+                              } }));
+
+                          case 9:
+                          case 'end':
+                            return _context48.stop();
+                        }
+                      }
+                    }, _callee48, this);
+                  }));
+
+                  return function (_x84, _x85) {
+                    return ref.apply(this, arguments);
+                  };
+                }());
+
+              case 2:
+                return _context49.abrupt('return', _context49.sent);
+
+              case 3:
+              case 'end':
+                return _context49.stop();
+            }
+          }
+        }, _callee49, this);
+      }));
+
+      function scard(_x83) {
         return ref.apply(this, arguments);
       }
 
@@ -1762,60 +1843,12 @@ var SQLAdapter = function () {
   }, {
     key: 'zrange',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee48(key, lb, ub) {
-        return regeneratorRuntime.wrap(function _callee48$(_context48) {
-          while (1) {
-            switch (_context48.prev = _context48.next) {
-              case 0:
-                _logger2.default.warn(Tools.translate('"zrange" is not implemented for SQL tables. Table: "$[1]"', '', key));
-
-              case 1:
-              case 'end':
-                return _context48.stop();
-            }
-          }
-        }, _callee48, this);
-      }));
-
-      function zrange(_x82, _x83, _x84) {
-        return ref.apply(this, arguments);
-      }
-
-      return zrange;
-    }()
-  }, {
-    key: 'zrangebyscroe',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee49(key, lb, ub) {
-        return regeneratorRuntime.wrap(function _callee49$(_context49) {
-          while (1) {
-            switch (_context49.prev = _context49.next) {
-              case 0:
-                _logger2.default.warn(Tools.translate('"zrangebyscroe" is not implemented for SQL tables. Table: "$[1]"', '', key));
-
-              case 1:
-              case 'end':
-                return _context49.stop();
-            }
-          }
-        }, _callee49, this);
-      }));
-
-      function zrangebyscroe(_x85, _x86, _x87) {
-        return ref.apply(this, arguments);
-      }
-
-      return zrangebyscroe;
-    }()
-  }, {
-    key: 'zadd',
-    value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee50(key) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee50(key, lb, ub) {
         return regeneratorRuntime.wrap(function _callee50$(_context50) {
           while (1) {
             switch (_context50.prev = _context50.next) {
               case 0:
-                _logger2.default.warn(Tools.translate('"zadd" is not implemented for SQL tables. Table: "$[1]"', '', key));
+                _logger2.default.warn(Tools.translate('"zrange" is not implemented for SQL tables. Table: "$[1]"', '', key));
 
               case 1:
               case 'end':
@@ -1825,21 +1858,21 @@ var SQLAdapter = function () {
         }, _callee50, this);
       }));
 
-      function zadd(_x88, _x89) {
+      function zrange(_x86, _x87, _x88) {
         return ref.apply(this, arguments);
       }
 
-      return zadd;
+      return zrange;
     }()
   }, {
-    key: 'zrem',
+    key: 'zrangebyscroe',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee51(key) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee51(key, lb, ub) {
         return regeneratorRuntime.wrap(function _callee51$(_context51) {
           while (1) {
             switch (_context51.prev = _context51.next) {
               case 0:
-                _logger2.default.warn(Tools.translate('"zrem" is not implemented for SQL tables. Table: "$[1]"', '', key));
+                _logger2.default.warn(Tools.translate('"zrangebyscroe" is not implemented for SQL tables. Table: "$[1]"', '', key));
 
               case 1:
               case 'end':
@@ -1849,21 +1882,21 @@ var SQLAdapter = function () {
         }, _callee51, this);
       }));
 
-      function zrem(_x90, _x91) {
+      function zrangebyscroe(_x89, _x90, _x91) {
         return ref.apply(this, arguments);
       }
 
-      return zrem;
+      return zrangebyscroe;
     }()
   }, {
-    key: 'zcard',
+    key: 'zadd',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee52(key) {
         return regeneratorRuntime.wrap(function _callee52$(_context52) {
           while (1) {
             switch (_context52.prev = _context52.next) {
               case 0:
-                _logger2.default.warn(Tools.translate('"zcard" is not implemented for SQL tables. Table: "$[1]"', '', key));
+                _logger2.default.warn(Tools.translate('"zadd" is not implemented for SQL tables. Table: "$[1]"', '', key));
 
               case 1:
               case 'end':
@@ -1873,7 +1906,55 @@ var SQLAdapter = function () {
         }, _callee52, this);
       }));
 
-      function zcard(_x92) {
+      function zadd(_x92, _x93) {
+        return ref.apply(this, arguments);
+      }
+
+      return zadd;
+    }()
+  }, {
+    key: 'zrem',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee53(key) {
+        return regeneratorRuntime.wrap(function _callee53$(_context53) {
+          while (1) {
+            switch (_context53.prev = _context53.next) {
+              case 0:
+                _logger2.default.warn(Tools.translate('"zrem" is not implemented for SQL tables. Table: "$[1]"', '', key));
+
+              case 1:
+              case 'end':
+                return _context53.stop();
+            }
+          }
+        }, _callee53, this);
+      }));
+
+      function zrem(_x94, _x95) {
+        return ref.apply(this, arguments);
+      }
+
+      return zrem;
+    }()
+  }, {
+    key: 'zcard',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee54(key) {
+        return regeneratorRuntime.wrap(function _callee54$(_context54) {
+          while (1) {
+            switch (_context54.prev = _context54.next) {
+              case 0:
+                _logger2.default.warn(Tools.translate('"zcard" is not implemented for SQL tables. Table: "$[1]"', '', key));
+
+              case 1:
+              case 'end':
+                return _context54.stop();
+            }
+          }
+        }, _callee54, this);
+      }));
+
+      function zcard(_x96) {
         return ref.apply(this, arguments);
       }
 

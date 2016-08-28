@@ -305,14 +305,14 @@ var WebSocketServer = function () {
       ips.filter(function (ip) {
         return !!ip;
       }).forEach(function (ip) {
-        (_this2.connectionsIP[ip] || []).forEach(function (conn) {
+        (_this2.connectionsIP.get(ip) || []).forEach(function (conn) {
           conn.write(message);
         });
       });
       hashpasses.filter(function (hashpass) {
         return !!hashpass;
       }).forEach(function (hashpass) {
-        (_this2.connectionsHashpass[hashpass] || []).forEach(function (conn) {
+        (_this2.connectionsHashpass.get(hashpass) || []).forEach(function (conn) {
           conn.write(message);
         });
       });

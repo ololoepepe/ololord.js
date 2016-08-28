@@ -2,10 +2,12 @@ import _ from 'underscore';
 import Crypto from 'crypto';
 
 import * as PostsModel from './posts';
+import Board from '../boards/board';
 import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
-import redisClient from '../storage/redis-client-factory';
+import Key from '../storage/key';
 import OrderedSet from '../storage/ordered-set';
+import redisClient from '../storage/redis-client-factory';
 import UnorderedSet from '../storage/unordered-set';
 
 let Chat = new OrderedSet(redisClient(), 'chat');
@@ -14,6 +16,7 @@ let Chats = new UnorderedSet(redisClient(), 'chats', {
   parse: false,
   stringify: false
 });
+let ChatSubchatCount = new Key(redisClient(), 'chatSubchatCount');
 
 function createUserHash(user) {
   return Tools.crypto('sha256', user.hashpass || user.ip);
@@ -52,10 +55,11 @@ export async function addChatMessage({ user, boardName, postNumber, chatNumber, 
     throw new Error(Tools.translate('Message is empty'));
   }
   chatNumber = Tools.option(chatNumber, 'number', 0, { test: (n) => { return n > 0; } });
+  let chatCountKey = `${boardName}:${postNumber}`;
   if (!chatNumber) {
-    //TODO
+    chatNumber = await ChatSubchatCount.incrementBy(1, chatCountKey);
   }
-  let key = `${boardName}:${postNumber}`;
+  let key = `${boardName}:${postNumber}:${chatNumber}`;
   let senderHash = createUserHash(user);
   let date = Tools.now();
   let post = await PostsModel.getPost(boardName, postNumber);
@@ -104,17 +108,19 @@ export async function addChatMessage({ user, boardName, postNumber, chatNumber, 
   await Chats.expire(ttl, receiverHash);
   await Chat.expire(ttl, key);
   await ChatMembers.expire(ttl, key);
+  await ChatSubchatCount.expire(ttl, chatCountKey);
   return {
     message: {
       text: text,
       date: date.toISOString()
     },
+    chatNumber: chatNumber,
     senderHash: senderHash,
     receiverHash: receiverHash,
     receiver: receiver
   };
 }
 
-export async function deleteChatMessages(user, boardName, postNumber) {
-  await Chats.deleteOne(createUserHash(user));
+export async function deleteChatMessages({ user, boardName, postNumber, chatNumber } = {}) {
+  await Chats.deleteOne(`${boardName}:${postNumber}:${chatNumber}`, createUserHash(user));
 }

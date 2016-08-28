@@ -118,7 +118,7 @@ function splitCommand(cmd) {
 
 router.post('/action/sendChatMessage', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(req, res, next) {
-    var _ref, _ref$fields, _boardName, postNumber, text;
+    var _ref, _ref$fields, _boardName, postNumber, chatNumber, text;
 
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -133,66 +133,73 @@ router.post('/action/sendChatMessage', function () {
             _ref$fields = _ref.fields;
             _boardName = _ref$fields.boardName;
             postNumber = _ref$fields.postNumber;
+            chatNumber = _ref$fields.chatNumber;
             text = _ref$fields.text;
 
             if (_board2.default.board(_boardName)) {
-              _context.next = 10;
+              _context.next = 11;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
-          case 10:
+          case 11:
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (postNumber) {
-              _context.next = 13;
+              _context.next = 14;
               break;
             }
 
             throw new Error(Tools.translate('Invalid post number'));
 
-          case 13:
+          case 14:
             if (!(!text || typeof text !== 'string')) {
-              _context.next = 15;
+              _context.next = 16;
               break;
             }
 
             throw new Error(Tools.translate('Message is empty'));
 
-          case 15:
-            _context.next = 17;
+          case 16:
+            _context.next = 18;
             return (0, _geolocation2.default)(req.ip);
 
-          case 17:
+          case 18:
             req.geolocationInfo = _context.sent;
-            _context.next = 20;
+            _context.next = 21;
             return UsersModel.checkUserBan(req.ip, _boardName, {
               write: true,
               geolocationInfo: req.geolocationInfo
             });
 
-          case 20:
-            _context.next = 22;
-            return ChatsModel.addChatMessage(req, _boardName, postNumber, text);
+          case 21:
+            _context.next = 23;
+            return ChatsModel.addChatMessage({
+              user: req,
+              boardName: _boardName,
+              postNumber: postNumber,
+              chatNumber: chatNumber,
+              text: text
+            });
 
-          case 22:
+          case 23:
             res.json({});
-            _context.next = 28;
+            _context.next = 29;
             break;
 
-          case 25:
-            _context.prev = 25;
+          case 26:
+            _context.prev = 26;
             _context.t0 = _context['catch'](0);
 
             next(_context.t0);
 
-          case 28:
+          case 29:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, this, [[0, 25]]);
+    }, _callee, this, [[0, 26]]);
   }));
 
   return function (_x, _x2, _x3) {
@@ -202,7 +209,7 @@ router.post('/action/sendChatMessage', function () {
 
 router.post('/action/deleteChatMessages', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, res, next) {
-    var _ref2, _ref2$fields, _boardName2, postNumber;
+    var _ref2, _ref2$fields, _boardName2, postNumber, chatNumber;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -217,57 +224,75 @@ router.post('/action/deleteChatMessages', function () {
             _ref2$fields = _ref2.fields;
             _boardName2 = _ref2$fields.boardName;
             postNumber = _ref2$fields.postNumber;
+            chatNumber = _ref2$fields.chatNumber;
 
             if (_board2.default.board(_boardName2)) {
-              _context2.next = 9;
+              _context2.next = 10;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
-          case 9:
+          case 10:
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (postNumber) {
-              _context2.next = 12;
+              _context2.next = 13;
               break;
             }
 
             throw new Error(Tools.translate('Invalid post number'));
 
-          case 12:
-            _context2.next = 14;
+          case 13:
+            chatNumber = Tools.option(chatNumber, 'number', 0, { test: function test(n) {
+                n > 0;
+              } });
+
+            if (chatNumber) {
+              _context2.next = 16;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid chat number'));
+
+          case 16:
+            _context2.next = 18;
             return (0, _geolocation2.default)(req.ip);
 
-          case 14:
+          case 18:
             req.geolocationInfo = _context2.sent;
-            _context2.next = 17;
+            _context2.next = 21;
             return UsersModel.checkUserBan(req.ip, _boardName2, {
               write: true,
               geolocationInfo: req.geolocationInfo
             });
 
-          case 17:
-            _context2.next = 19;
-            return ChatsModel.deleteChatMessages(req, _boardName2, postNumber);
+          case 21:
+            _context2.next = 23;
+            return ChatsModel.deleteChatMessages({
+              user: req,
+              boardName: _boardName2,
+              postNumber: postNumber,
+              chatNumber: chatNumber
+            });
 
-          case 19:
+          case 23:
             res.json({});
-            _context2.next = 25;
+            _context2.next = 29;
             break;
 
-          case 22:
-            _context2.prev = 22;
+          case 26:
+            _context2.prev = 26;
             _context2.t0 = _context2['catch'](0);
 
             next(_context2.t0);
 
-          case 25:
+          case 29:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, this, [[0, 22]]);
+    }, _callee2, this, [[0, 26]]);
   }));
 
   return function (_x4, _x5, _x6) {

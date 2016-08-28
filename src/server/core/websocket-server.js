@@ -221,10 +221,10 @@ export default class WebSocketServer {
       data: data
     });
     ips.filter(ip => !!ip).forEach((ip) => {
-      (this.connectionsIP[ip] || []).forEach((conn) => { conn.write(message); });
+      (this.connectionsIP.get(ip) || []).forEach((conn) => { conn.write(message); });
     });
     hashpasses.filter(hashpass => !!hashpass).forEach((hashpass) => {
-      (this.connectionsHashpass[hashpass] || []).forEach((conn) => { conn.write(message); });
+      (this.connectionsHashpass.get(hashpass) || []).forEach((conn) => { conn.write(message); });
     });
   }
 }

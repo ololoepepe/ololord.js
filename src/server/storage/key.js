@@ -15,4 +15,8 @@ export default class Key extends CommonKey {
   async set(data, subkey) {
     return await this.client.set(this.fullKey(subkey), this.stringify(data));
   }
+
+  async incrementBy(n, subkey) {
+    return await this.client.incrby(this.fullKey(subkey), n);
+  }
 }

@@ -70,7 +70,7 @@ var DEFAULT_DDOS_PROTECTION_RULES = [{
 var DEFAULT_VALUES = new Map([['board.useDefaultBoards', true], ['server.chat.ttl', 10080], //NOTE: 7 days
 ['server.ddosProtection.checkInterval', 1000], //NOTE: 1 second
 ['server.ddosProtection.enabled', true], ['server.ddosProtection.errorCode', 429], ['server.ddosProtection.errorData', 'Not so fast!'], ['server.ddosProtection.maxWeight', 10], ['server.ddosProtection.rules', DEFAULT_DDOS_PROTECTION_RULES], ['server.ddosProtection.static', false], ['server.ddosProtection.weight', 1], ['server.ddosProtection.ws.connectionLimit', 10], ['server.ddosProtection.ws.maxMessageLength', 20480], //NOTE: 20 KB
-['server.ddosProtection.ws.maxMessageRate', 6], ['server.rss.enabled', true], ['server.rss.postCount', 500], ['server.rss.ttl', 60], //NOTE: 1 hour
+['server.ddosProtection.ws.maxMessageRate', 6], ['server.port', 8080], ['server.rss.enabled', true], ['server.rss.postCount', 500], ['server.rss.ttl', 60], //NOTE: 1 hour
 ['server.statistics.enabled', true], ['server.statistics.ttl', 60], //NOTE: 1 hour
 ['server.synchronizationData.ttl', 300], //NOTE: 5 minutes
 ['server.youtubeApiKey', ''], ['site.protocol', 'http'], ['site.domain', 'localhost:8080'], ['site.pathPrefix', ''], ['site.locale', 'en'], ['site.dateFormat', 'MM/DD/YYYY hh:mm:ss'], ['site.timeOffset', 0], ['site.tripcodeSalt', ''], ['site.vkontakte.accessToken', ''], ['site.vkontakte.appId', ''], ['site.vkontakte.integrationEnabled', false], ['site.twitter.integrationEnabled', true], ['site.ws.transports', ''], ['site.maxSearchQueryLength', 50], ['system.detectRealIp', true], ['system.elasticsearch.host', 'localhost:9200'], ['system.httpRequestTimeout', 60 * 1000], //NOTE: 1 minute

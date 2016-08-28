@@ -77,13 +77,20 @@ var getChatMessages = exports.getChatMessages = function () {
 }();
 
 var addChatMessage = exports.addChatMessage = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(user, boardName, postNumber, text) {
-    var key, senderHash, date, post, receiver, receiverHash, messages, members, member, ttl;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+    var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+    var user = _ref.user;
+    var boardName = _ref.boardName;
+    var postNumber = _ref.postNumber;
+    var chatNumber = _ref.chatNumber;
+    var text = _ref.text;
+    var chatCountKey, key, senderHash, date, post, receiver, receiverHash, messages, members, member, ttl;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            if (Board.board(boardName)) {
+            if (_board2.default.board(boardName)) {
               _context3.next = 2;
               break;
             }
@@ -109,51 +116,68 @@ var addChatMessage = exports.addChatMessage = function () {
             throw new Error(Tools.translate('Message is empty'));
 
           case 7:
-            key = boardName + ':' + postNumber;
-            senderHash = createUserHash(user);
-            date = Tools.now();
+            chatNumber = Tools.option(chatNumber, 'number', 0, { test: function test(n) {
+                return n > 0;
+              } });
+            chatCountKey = boardName + ':' + postNumber;
+
+            if (chatNumber) {
+              _context3.next = 13;
+              break;
+            }
+
             _context3.next = 12;
-            return PostsModel.getPost(boardName, postNumber);
+            return ChatSubchatCount.incrementBy(1, chatCountKey);
 
           case 12:
+            chatNumber = _context3.sent;
+
+          case 13:
+            key = boardName + ':' + postNumber + ':' + chatNumber;
+            senderHash = createUserHash(user);
+            date = Tools.now();
+            _context3.next = 18;
+            return PostsModel.getPost(boardName, postNumber);
+
+          case 18:
             post = _context3.sent;
 
             if (post) {
-              _context3.next = 15;
+              _context3.next = 21;
               break;
             }
 
             throw new Error(Tools.translate('No such post'));
 
-          case 15:
+          case 21:
             receiver = post.user;
             receiverHash = createUserHash(receiver);
-            _context3.next = 19;
+            _context3.next = 25;
             return Chat.getSome(0, 0, key);
 
-          case 19:
+          case 25:
             messages = _context3.sent;
 
             if (!(messages.length > 0 && messages[0].senderHash !== senderHash && messages[0].receiverHash !== senderHash)) {
-              _context3.next = 22;
+              _context3.next = 28;
               break;
             }
 
             throw new Error(Tools.translate('Somebody is chatting here already'));
 
-          case 22:
-            _context3.next = 24;
+          case 28:
+            _context3.next = 30;
             return ChatMembers.getAll(key);
 
-          case 24:
+          case 30:
             members = _context3.sent;
 
             if (!(members.length < 2)) {
-              _context3.next = 30;
+              _context3.next = 36;
               break;
             }
 
-            _context3.next = 28;
+            _context3.next = 34;
             return ChatMembers.addSome([{
               hash: senderHash,
               ip: user.ip,
@@ -164,11 +188,11 @@ var addChatMessage = exports.addChatMessage = function () {
               hashpass: receiver.hashpass
             }], key);
 
-          case 28:
-            _context3.next = 33;
+          case 34:
+            _context3.next = 39;
             break;
 
-          case 30:
+          case 36:
             if (senderHash === receiverHash) {
               member = (0, _underscore2.default)(members).find(function (member) {
                 return member.hash !== senderHash;
@@ -182,15 +206,15 @@ var addChatMessage = exports.addChatMessage = function () {
                 };
               }
             }
-            _context3.next = 33;
+            _context3.next = 39;
             return Chats.addOne(key, senderHash);
 
-          case 33:
-            _context3.next = 35;
+          case 39:
+            _context3.next = 41;
             return Chats.addOne(key, receiverHash);
 
-          case 35:
-            _context3.next = 37;
+          case 41:
+            _context3.next = 43;
             return Chat.addOne({
               text: text,
               date: date.toISOString(),
@@ -198,35 +222,40 @@ var addChatMessage = exports.addChatMessage = function () {
               receiverHash: receiverHash
             }, date.valueOf(), key);
 
-          case 37:
+          case 43:
             ttl = (0, _config2.default)('server.chat.ttl') * Tools.SECOND;
-            _context3.next = 40;
+            _context3.next = 46;
             return Chats.expire(ttl, senderHash);
 
-          case 40:
-            _context3.next = 42;
+          case 46:
+            _context3.next = 48;
             return Chats.expire(ttl, receiverHash);
 
-          case 42:
-            _context3.next = 44;
+          case 48:
+            _context3.next = 50;
             return Chat.expire(ttl, key);
 
-          case 44:
-            _context3.next = 46;
+          case 50:
+            _context3.next = 52;
             return ChatMembers.expire(ttl, key);
 
-          case 46:
+          case 52:
+            _context3.next = 54;
+            return ChatSubchatCount.expire(ttl, chatCountKey);
+
+          case 54:
             return _context3.abrupt('return', {
               message: {
                 text: text,
                 date: date.toISOString()
               },
+              chatNumber: chatNumber,
               senderHash: senderHash,
               receiverHash: receiverHash,
               receiver: receiver
             });
 
-          case 47:
+          case 55:
           case 'end':
             return _context3.stop();
         }
@@ -234,19 +263,25 @@ var addChatMessage = exports.addChatMessage = function () {
     }, _callee3, this);
   }));
 
-  return function addChatMessage(_x4, _x5, _x6, _x7) {
+  return function addChatMessage(_x4) {
     return ref.apply(this, arguments);
   };
 }();
 
 var deleteChatMessages = exports.deleteChatMessages = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(user, boardName, postNumber) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+    var _ref2 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+    var user = _ref2.user;
+    var boardName = _ref2.boardName;
+    var postNumber = _ref2.postNumber;
+    var chatNumber = _ref2.chatNumber;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
             _context4.next = 2;
-            return Chats.deleteOne(createUserHash(user));
+            return Chats.deleteOne(boardName + ':' + postNumber + ':' + chatNumber, createUserHash(user));
 
           case 2:
           case 'end':
@@ -256,7 +291,7 @@ var deleteChatMessages = exports.deleteChatMessages = function () {
     }, _callee4, this);
   }));
 
-  return function deleteChatMessages(_x8, _x9, _x10) {
+  return function deleteChatMessages(_x6) {
     return ref.apply(this, arguments);
   };
 }();
@@ -273,6 +308,10 @@ var _posts = require('./posts');
 
 var PostsModel = _interopRequireWildcard(_posts);
 
+var _board = require('../boards/board');
+
+var _board2 = _interopRequireDefault(_board);
+
 var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
@@ -281,13 +320,17 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-var _redisClientFactory = require('../storage/redis-client-factory');
+var _key = require('../storage/key');
 
-var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
+var _key2 = _interopRequireDefault(_key);
 
 var _orderedSet = require('../storage/ordered-set');
 
 var _orderedSet2 = _interopRequireDefault(_orderedSet);
+
+var _redisClientFactory = require('../storage/redis-client-factory');
+
+var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
 
 var _unorderedSet = require('../storage/unordered-set');
 
@@ -305,6 +348,7 @@ var Chats = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'cha
   parse: false,
   stringify: false
 });
+var ChatSubchatCount = new _key2.default((0, _redisClientFactory2.default)(), 'chatSubchatCount');
 
 function createUserHash(user) {
   return Tools.crypto('sha256', user.hashpass || user.ip);

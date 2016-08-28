@@ -97,6 +97,34 @@ var Key = function (_CommonKey) {
 
       return set;
     }()
+  }, {
+    key: 'incrementBy',
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(n, subkey) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _context3.next = 2;
+                return this.client.incrby(this.fullKey(subkey), n);
+
+              case 2:
+                return _context3.abrupt('return', _context3.sent);
+
+              case 3:
+              case 'end':
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function incrementBy(_x4, _x5) {
+        return ref.apply(this, arguments);
+      }
+
+      return incrementBy;
+    }()
   }]);
 
   return Key;

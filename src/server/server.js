@@ -41,7 +41,7 @@ function spawnCluster() {
       let ws = new WebSocketServer(server);
       ws.on('sendChatMessage', async function(msg, conn) {
         let data = msg.data || {};
-        let { message, senderHash, receiverHash, receiver } = await Chats.addChatMessage({
+        let { message, chatNumber, senderHash, receiverHash, receiver } = await ChatsModel.addChatMessage({
           user: conn,
           boardName: data.boardName,
           postNumber: data.postNumber,
@@ -51,14 +51,23 @@ function spawnCluster() {
         if (senderHash !== receiverHash) {
           message.type = 'in';
           let ip = receiver.hashpass ? null : receiver.ip;
-          ws.sendMessage('newChatMessage', {
-            message: message,
-            boardName: data.boardName,
-            postNumber: data.postNumber
-          }, ip, receiver.hashpass);
+          IPC.send('sendChatMessage', {
+            type: 'newChatMessage',
+            message: {
+              message: message,
+              boardName: data.boardName,
+              postNumber: data.postNumber,
+              chatNumber: chatNumber
+            },
+            ips: ip,
+            hashpasses: receiver.hashpass
+          });
         }
         message.type = 'out';
-        return message;
+        return {
+          message: message,
+          chatNumber: chatNumber
+        };
       });
       let subscriptions = new Map();
       ws.on('subscribeToThreadUpdates', (msg, conn) => {
@@ -107,6 +116,9 @@ function spawnCluster() {
               resolve();
             });
           });
+        });
+        IPC.on('sendChatMessage', ({ type, message, ips, hashpasses } = {}) => {
+          ws.sendMessage(type, message, ips, hashpasses);
         });
         IPC.on('render', async function(data) {
           let f = BoardController[`${data.type}`];
@@ -194,6 +206,9 @@ function spawnWorkers(initCallback) {
   spawnCluster();
   IPC.on('ready', onReady.bind(null, initCallback));
   IPC.on('fileName', generateFileName);
+  IPC.on('sendChatMessage', (data) => {
+    return IPC.send('sendChatMessage', data);
+  });
   IPC.on('render', (data) => {
     return IPC.render(data.boardName, data.threadNumber, data.postNumber, data.action);
   });

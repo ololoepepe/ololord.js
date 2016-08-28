@@ -125,9 +125,11 @@ export async function deleteChat(key) {
   }
   delete chats[key];
   Storage.chats(Tools.cloned(chats));
+  let [boardName, postNumber, chatNumber] = key.split(':');
   let formData = Tools.createFormData({
-    boardName: key.split(':').shift(),
-    postNumber: +key.split(':').pop()
+    boardName: boardName,
+    postNumber: +postNumber,
+    chatNumber: +chatNumber
   });
   try {
     await AJAX.post(`/${Tools.sitePathPrefix()}action/deleteChatMessages`, formData);
@@ -136,21 +138,17 @@ export async function deleteChat(key) {
   }
 }
 
-export async function sendChatMessage(boardName, postNumber, text) {
-  let data = {
-    boardName: boardName,
-    postNumber: postNumber,
-    text: text
-  };
+export async function sendChatMessage(data = {}) {
+  let { boardName, postNumber, chatNumber } = data;
   try {
     if (Settings.useWebSockets()) {
-      var msg = await WebSocket.sendMessage('sendChatMessage', data);
+      let { message, chatNumber } = await WebSocket.sendMessage('sendChatMessage', data);
       let chats = Storage.chats();
-      let key = `${boardName}:${postNumber}`;
+      let key = `${boardName}:${postNumber}:${chatNumber}`;
       if (!chats.hasOwnProperty(key)) {
-        chats[key] = [msg];
+        chats[key] = [message];
       } else {
-        chats[key].push(msg);
+        chats[key].push(message);
       }
       Storage.chats(Tools.cloned(chats));
     } else {
@@ -176,7 +174,11 @@ export async function chatWithUser(boardName, postNumber) {
     if (!result.accepted || !result.value) {
       return;
     }
-    sendChatMessage(boardName, postNumber, result.value);
+    sendChatMessage({
+      boardName: boardName,
+      postNumber: postNumber,
+      text: result.value
+    });
   } catch (err) {
     DOM.handleError(err);
   }
@@ -184,13 +186,12 @@ export async function chatWithUser(boardName, postNumber) {
 
 WebSocket.registerHandler('newChatMessage', (msg) => {
   let chats = Storage.chats();
-  let data = msg.data;
-  let key = `${data.boardName}:${data.postNumber}`;
+  let { message, boardName, postNumber, chatNumber } = msg.data;
+  let key = `${boardName}:${postNumber}:${chatNumber}`;
   if (!chats.hasOwnProperty(key)) {
     chats[key] = [];
   }
   let list = chats[key];
-  let message = data.message;
   if (isDuplicate(message, list)) {
     return;
   }

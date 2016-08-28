@@ -101,6 +101,25 @@ export default class SQLAdapter {
     });
   }
 
+  async incrby(key, value) {
+    return await this._wrapper.transaction(async function(commit, rollback) {
+      await this._checkType(key, 'string', true);
+      let result = await this._wrapper.get(`SELECT value FROM _ololord_keys WHERE key = ?`, key);
+      result = result || {};
+      if (result.value && isNaN(+result.value)) {
+        throw new Error('value is not an integer');
+      }
+      if (result.value) {
+        result.value = +result.value + +value;
+      } else {
+        result.value = +value;
+      }
+      await this._wrapper.run(`UPDATE _ololord_keys SET value = ? WHERE key = ?`, result.value, key);
+      await this._wrapper.run(`INSERT OR IGNORE INTO _ololord_keys (key, value) VALUES (?, ?)`, key, result.value);
+      commit(result.value);
+    });
+  }
+
   async hget(key, id) {
     return await this._wrapper.transaction(async function(commit, rollback) {
       let result = await this._checkType(key, 'hash');

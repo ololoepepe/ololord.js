@@ -38,7 +38,13 @@ export default class ChatWidget extends MovableWidget {
     });
     let sendMessage = () => {
       let key = selectedChatKey();
-      Chat.sendChatMessage(key.split(':').shift(), +key.split(':').pop(), message());
+      let [boardName, postNumber, chatNumber] = key.split(':');
+      Chat.sendChatMessage({
+        boardName: boardName,
+        postNumber: +postNumber,
+        chatNumber: +chatNumber,
+        text: message()
+      });
       message('');
       $(content).find('.js-chat-input').focus();
     };

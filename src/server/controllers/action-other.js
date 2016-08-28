@@ -110,7 +110,7 @@ router.post('/action/sendChatMessage', async function(req, res, next) {
 
 router.post('/action/deleteChatMessages', async function(req, res, next) {
   try {
-    let { fields: { boardName, postNumber } } = await Files.parseForm(req);
+    let { fields: { boardName, postNumber, chatNumber } } = await Files.parseForm(req);
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
@@ -118,12 +118,21 @@ router.post('/action/deleteChatMessages', async function(req, res, next) {
     if (!postNumber) {
       throw new Error(Tools.translate('Invalid post number'));
     }
+    chatNumber = Tools.option(chatNumber, 'number', 0, { test: (n) => { n > 0; } });
+    if (!chatNumber) {
+      throw new Error(Tools.translate('Invalid chat number'));
+    }
     req.geolocationInfo = await geolocation(req.ip);
     await UsersModel.checkUserBan(req.ip, boardName, {
       write: true,
       geolocationInfo: req.geolocationInfo
     });
-    await ChatsModel.deleteChatMessages(req, boardName, postNumber);
+    await ChatsModel.deleteChatMessages({
+      user: req,
+      boardName: boardName,
+      postNumber: postNumber,
+      chatNumber: chatNumber
+    });
     res.json({});
   } catch (err) {
     next(err);
