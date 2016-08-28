@@ -1104,7 +1104,6 @@ function parseForm() {
           return 1 === value.length ? value[0] : value;
         }),
         files: (0, _underscore2.default)((0, _underscore2.default)(files).toArray()).flatten().map(function (file) {
-          console.log(file);
           file.name = file.originalFilename;
           return file;
         })

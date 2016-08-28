@@ -29,7 +29,6 @@ let lastPostPreview = null;
 let lastPostPreviewTimer = null;
 let postPreviewMask = null;
 
-const POST_LINK_REGEXP = /^>>.*$/gi;
 const TRACK_DATA = ['boardName', 'fileName', 'mimeType', 'width', 'height', 'extraData'];
 const SOURCE_TEXT_MIN_WIDTH = 360;
 const SOURCE_TEXT_MIN_HEIGHT = 420;
@@ -571,7 +570,7 @@ export function globalClickHandler(e) {
     if (Tools.deviceType('mobile')) {
       let boardName = Tools.option(DOM.data('boardName', t), 'string', '');
       let postNumber = Tools.option(+DOM.data('postNumber', t), 'number', 0, { test: Tools.testPostNumber });
-      if (boardName && postNumber && POST_LINK_REGEXP.test(t.textContent)) {
+      if (boardName && postNumber && $(t).hasClass('js-post-link')) {
         e.preventDefault();
         e.stopImmediatePropagation();
         viewPost(t, boardName, postNumber);
@@ -606,7 +605,7 @@ export function globalMouseoverHandler(e) {
   }
   let boardName = DOM.data('boardName', a);
   let postNumber = Tools.option(+DOM.data('postNumber', a), 'number', 0, { test: Tools.testPostNumber });
-  if (!boardName || !postNumber || !POST_LINK_REGEXP.test(a.textContent)) {
+  if (!boardName || !postNumber || !$(a).hasClass('js-post-link')) {
     return;
   }
   a.viewPostTimer = setTimeout(() => {
@@ -625,9 +624,12 @@ export function globalMouseoutHandler(e) {
   }
   let boardName = DOM.data('boardName', a);
   let postNumber = Tools.option(+DOM.data('postNumber', a), 'number', 0, { test: Tools.testPostNumber });
-  if (!boardName || !postNumber || !POST_LINK_REGEXP.test(a.textContent)) {
+  console.log(3, boardName, postNumber, $(a).hasClass('js-post-link'));
+  if (!boardName || !postNumber || !$(a).hasClass('js-post-link')) {
     return;
   }
+  console.log(4);
+  console.log(a.viewPostTimer);
   if (a.viewPostTimer) {
     clearTimeout(a.viewPostTimer);
     delete a.viewPostTimer;

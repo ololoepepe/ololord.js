@@ -391,11 +391,11 @@ var convertPostLink = function () {
             if (postNumber !== post.threadNumber) {
               result += '#' + postNumber;
             }
-            result += "'";
+            result += "' class='js-post-link";
             if (postNumber === post.threadNumber) {
-              result += " class='op-post-link'";
+              result += " op-post-link";
             }
-            result += ' data-board-name=\'' + boardName + '\' data-post-number=\'' + postNumber + '\'';
+            result += '\' data-board-name=\'' + boardName + '\' data-post-number=\'' + postNumber + '\'';
             result += ' data-thread-number=\'' + post.threadNumber + '\'>' + escaped + '</a>';
             return _context6.abrupt('return', result);
 

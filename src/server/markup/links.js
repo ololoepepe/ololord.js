@@ -246,11 +246,11 @@ async function convertPostLink(info, _1, matchs, _2, options) {
   if (postNumber !== post.threadNumber) {
     result += `#${postNumber}`;
   }
-  result += "'";
+  result += "' class='js-post-link";
   if (postNumber === post.threadNumber) {
-    result += " class='op-post-link'";
+    result += " op-post-link";
   }
-  result += ` data-board-name='${boardName}' data-post-number='${postNumber}'`;
+  result += `' data-board-name='${boardName}' data-post-number='${postNumber}'`;
   result += ` data-thread-number='${post.threadNumber}'>${escaped}</a>`;
   return result;
 }
