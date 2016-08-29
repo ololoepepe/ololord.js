@@ -2,17 +2,21 @@
 <html xmlns='http://www.w3.org/1999/xhtml' {{#def.rootBindings}}>
   {{#def.head}}
   <body>
+    <a id='top'></a>
     {{#def.sidebar}}
-    <main id='content'>
+    <div class='content-wrapper'>
       {{#def.toolbar}}
       <header>{{#def['custom/header'] || ''}}</header>
-      <h1 class='page-title'>
-        {{!it.translate('Welcome. Again.', 'welcomeMessage')}}
-      </h1>
-      {{#def['custom/home'] || ''}}
+      <main id='content'>
+        <h1 class='page-title'>
+          {{!it.translate('Welcome. Again.', 'welcomeMessage')}}
+        </h1>
+        {{#def['custom/home'] || ''}}
+      </main>
+      <a id='bottom'></a>
       <footer>{{#def['custom/footer'] || ''}}</footer>
       {{#def.player}}
-    </main>
+    </div>
     {{#def.jQueryUIpositionFix}}
     {{#def.ajaxLoadingOverlay}}
   </body>

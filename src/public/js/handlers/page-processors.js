@@ -7,8 +7,9 @@ export let registerProcessor = Tools.createRegisterFunction(processors);
 
 registerProcessor(DOM.processFormattedDate, { priority: 0 });
 
-export function applyProcessors() {
+export function applyProcessors(parent) {
+  parent = parent || window.document.body;
   return Tools.series(processors.filter(Tools.testFilter).sort(Tools.priorityPredicate), (p) => {
-    return p.processor();
+    return p.processor(parent);
   });
 }

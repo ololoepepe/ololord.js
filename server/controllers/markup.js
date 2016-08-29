@@ -49,12 +49,12 @@ router.render = function () {
           case 2:
             result = _markup2.default.markupCode(CODE_TO_MARKUP, 'cpp');
             _context.next = 5;
-            return _markup2.default.latex(LATEX_TO_MARKUP);
+            return _markup2.default.markupLaTeX(LATEX_TO_MARKUP);
 
           case 5:
             markedUpLatex = _context.sent;
             _context.next = 8;
-            return _markup2.default.latex(INLINE_LATEX_TO_MARKUP, true);
+            return _markup2.default.markupLaTeX(INLINE_LATEX_TO_MARKUP, true);
 
           case 8:
             markedUpInlineLatex = _context.sent;

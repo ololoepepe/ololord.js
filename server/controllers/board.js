@@ -348,9 +348,9 @@ router.paths = function () {
                         paths = paths.concat(threadNumbers.map(function (threadNumber) {
                           return '/' + boardName + '/res/' + threadNumber;
                         }));
-                        paths = paths.concat(archivedThreadNumbers.map(function (threadNumber) {
+                        return _context6.abrupt('return', paths.concat(archivedThreadNumbers.map(function (threadNumber) {
                           return '/' + boardName + '/arch/' + threadNumber;
-                        }));
+                        })));
 
                       case 9:
                       case 'end':

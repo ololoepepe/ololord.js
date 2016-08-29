@@ -122,7 +122,7 @@ router.paths = async function(description) {
     let archivedThreadNumbers = await ThreadsModel.getThreadNumbers(boardName, { archived: true });
     let paths = [`/${boardName}`, `/${boardName}/archive`, `/${boardName}/catalog`];
     paths = paths.concat(threadNumbers.map(threadNumber => `/${boardName}/res/${threadNumber}`));
-    paths = paths.concat(archivedThreadNumbers.map(threadNumber => `/${boardName}/arch/${threadNumber}`));
+    return paths.concat(archivedThreadNumbers.map(threadNumber => `/${boardName}/arch/${threadNumber}`));
   }, true);
   return _(arrays).flatten().concat('/rss');
 };

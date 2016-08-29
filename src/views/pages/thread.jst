@@ -4,67 +4,69 @@
   <body class='thread-page'>
     <a id='top'></a>
     {{#def.sidebar}}
-    <main id='content'>
+    <div class='content-wrapper'>
       {{#def.toolbar}}
       <header>{{#def['custom/header'] || ''}}</header>
-      {{#def.banner}}
-      <h1 class='page-title'>{{!it.title}}</h1>
-      {{? it.thread.archived}}
-        <h2 class='message-posting-disabled'>
-          {{!it.translate('This thread is archived. Posting is disabled', 'archivedThreadText')}}
-        </h2>
-      {{?? !it.thread.postingEnabled}}
-        <h2 class='message-posting-disabled'>
-          {{!it.translate('Posting is disabled in this thread', 'postingDisabledThreadText')}}
-        </h2>
-      {{??}}
-        <h2 class='message-post-limit-reached js-message-post-limit-reached'
-            {{? !it.thread.postLimitReached}}style='display: none;'{{?}}>
-          {{!it.translate('Post limit reached', 'postLimitReachedText')}}
-        </h2>
-        <h3 class='message-bump-limit-reached js-message-bump-limit-reached'
-            {{? it.thread.postLimitReached || !it.thread.bumpLimitReached}}style='display: none;'{{?}}>
-          {{!it.translate('Bump limit reached', 'bumpLimitReachedText')}}
-        </h3>
-        {{? !it.thread.postLimitReached}}
-          <hr class='js-hr-post-limit-not-reached' />
-          {{~['top'] :position}}
-            {{#def['board/createAction']}}
-          {{~}}
+      <main id='content'>
+        {{#def.banner}}
+        <h1 class='page-title'>{{!it.title}}</h1>
+        {{? it.thread.archived}}
+          <h2 class='message-posting-disabled'>
+            {{!it.translate('This thread is archived. Posting is disabled', 'archivedThreadText')}}
+          </h2>
+        {{?? !it.thread.postingEnabled}}
+          <h2 class='message-posting-disabled'>
+            {{!it.translate('Posting is disabled in this thread', 'postingDisabledThreadText')}}
+          </h2>
+        {{??}}
+          <h2 class='message-post-limit-reached js-message-post-limit-reached'
+              {{? !it.thread.postLimitReached}}style='display: none;'{{?}}>
+            {{!it.translate('Post limit reached', 'postLimitReachedText')}}
+          </h2>
+          <h3 class='message-bump-limit-reached js-message-bump-limit-reached'
+              {{? it.thread.postLimitReached || !it.thread.bumpLimitReached}}style='display: none;'{{?}}>
+            {{!it.translate('Bump limit reached', 'bumpLimitReachedText')}}
+          </h3>
+          {{? !it.thread.postLimitReached}}
+            <hr class='js-hr-post-limit-not-reached' />
+            {{~['top'] :position}}
+              {{#def['board/createAction']}}
+            {{~}}
+          {{?}}
         {{?}}
-      {{?}}
-      <hr />
-      {{~['top'] :position}}
-        {{#def['board/threadActions']}}
-      {{~}}
-      <hr />
-      <div id='threads'>
-        {{~[it.thread] :thread}}
-          {{#def['board/thread']}}
+        <hr />
+        {{~['top'] :position}}
+          {{#def['board/threadActions']}}
         {{~}}
-      </div>
-      <hr />
-      {{~['bottom'] :position}}
-        {{#def['board/threadActions']}}
-      {{~}}
-      {{? it.board.postingEnabled && it.thread.postingEnabled && !it.thread.archived && !it.thread.postLimitReached}}
+        <hr />
+        <div id='threads'>
+          {{~[it.thread] :thread}}
+            {{#def['board/thread']}}
+          {{~}}
+        </div>
         <hr />
         {{~['bottom'] :position}}
-          {{#def['board/createAction']}}
+          {{#def['board/threadActions']}}
         {{~}}
-        {{#def['board/draftsSection']}}
-      {{?}}
-      <hr />
+        {{? it.board.postingEnabled && it.thread.postingEnabled && !it.thread.archived && !it.thread.postLimitReached}}
+          <hr />
+          {{~['bottom'] :position}}
+            {{#def['board/createAction']}}
+          {{~}}
+          {{#def['board/draftsSection']}}
+        {{?}}
+        <hr />
+        {{~['top', 'bottom'] :target}}
+          {{#def['board/navigationButton']}}
+        {{~}}
+        {{~['previous', 'next'] :target}}
+          {{#def['board/leafButton']}}
+        {{~}}
+      </main>
       <a id='bottom'></a>
       <footer>{{#def['custom/footer'] || ''}}</footer>
       {{#def.player}}
-      {{~['top', 'bottom'] :target}}
-        {{#def['board/navigationButton']}}
-      {{~}}
-      {{~['previous', 'next'] :target}}
-        {{#def['board/leafButton']}}
-      {{~}}
-    </main>
+    </div>
     {{#def.jQueryUIpositionFix}}
     {{#def.ajaxLoadingOverlay}}
   </body>

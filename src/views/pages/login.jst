@@ -2,51 +2,56 @@
 <html xmlns='http://www.w3.org/1999/xhtml' {{#def.rootBindings}}>
   {{#def.head}}
   <body>
+    <a id='top'></a>
     {{#def.sidebar}}
-    <main id='content'>
+    <div class='content-wrapper'>
       {{#def.toolbar}}
       <header>{{#def['custom/header'] || ''}}</header>
-      <h1 class='page-title'>
-        {{!it.title}}
-      </h1>
-      <div id='login-section' class='js-only login-section'>
-        <div class='login-subsection'>
-          <input id='input-hashpass' type='password' class='input login-input-hashpass' autofocus='true'
-                 placeholder='{{!it.translate('Password/hashpass', 'loginPlaceholderText')}}'
-                 data-bind='event: { keypress: inputKeyPress }' />
-          <button class='button'
-                  data-bind='click: login'>{{!it.translate('Log in', 'loginText')}}</button>
-        </div>
-        <div class='login-subsection'>
-          <button class='button'
-                  data-bind='click: generateHashpass'>{{!it.translate('Generate hashpass', 'generateHashpassButtonText')}}</button>
-          {{? it.site.vkontakte.integrationEnabled}}
-            <div id='vkontakte-login-button' class='vkontakte-login-button'
-                 data-bind='click: loginWithVK'></div>
-          {{?}}
-        </div>
-        <div class='login-subsection'>
-          {{!it.translate('The login systyem does NOT store any data on the server. '
-            + 'It only stores a cookie on your PC to allow post deleting, etc. without entering password every time.'
-            + '<br />It is also used for moderator/administrator authentication.')}}
-        </div>
-        {{? it.site.vkontakte.integrationEnabled}}
+      <main id='content'>
+        <h1 class='page-title'>
+          {{!it.title}}
+        </h1>
+        <div id='login-section' class='js-only login-section'>
           <div class='login-subsection'>
-            {{!it.translate('When logging in with Vkontakte, you may omit the login, but to be logged in with the '
-              + 'same login on each browser, you have to specify it.<br />When logged in with Vkontakte, you are able '
-              + 'to attach your VK audio.<br />This does not affect your anonymity in any way (the files are '
-              + 'downloaded by the server and no links to your VK page are shown).')}}
+            <input id='input-hashpass' type='password' class='input login-input-hashpass' autofocus='true'
+                   placeholder='{{!it.translate('Password/hashpass', 'loginPlaceholderText')}}'
+                   data-bind='event: { keypress: inputKeyPress }' />
+            <button class='button'
+                    data-bind='click: login'>{{!it.translate('Log in', 'loginText')}}</button>
           </div>
-        {{?}}
-        <script type='text/javascript'>
-          (function() {
-            window.lord.require().initializeLogin();
-          })();
-        </script>
-      </div>
-      <div class='no-js-only align-center'>{{!it.translate('JavaScript is disabled')}}</div>
+          <div class='login-subsection'>
+            <button class='button'
+                    data-bind='click: generateHashpass'>{{!it.translate('Generate hashpass', 'generateHashpassButtonText')}}</button>
+            {{? it.site.vkontakte.integrationEnabled}}
+              <div id='vkontakte-login-button' class='vkontakte-login-button'
+                   data-bind='click: loginWithVK'></div>
+            {{?}}
+          </div>
+          <div class='login-subsection'>
+            {{!it.translate('The login systyem does NOT store any data on the server. '
+              + 'It only stores a cookie on your PC to allow post deleting, etc. without entering password every time.'
+              + '<br />It is also used for moderator/administrator authentication.')}}
+          </div>
+          {{? it.site.vkontakte.integrationEnabled}}
+            <div class='login-subsection'>
+              {{!it.translate('When logging in with Vkontakte, you may omit the login, but to be logged in with the '
+                + 'same login on each browser, you have to specify it.<br />When logged in with Vkontakte, you are able '
+                + 'to attach your VK audio.<br />This does not affect your anonymity in any way (the files are '
+                + 'downloaded by the server and no links to your VK page are shown).')}}
+            </div>
+          {{?}}
+          <script type='text/javascript'>
+            (function() {
+              window.lord.require().initializeLogin();
+            })();
+          </script>
+        </div>
+        <div class='no-js-only align-center'>{{!it.translate('JavaScript is disabled')}}</div>
+      </main>
+      <a id='bottom'></a>
       <footer>{{#def['custom/footer'] || ''}}</footer>
-    </main>
+      {{#def.player}}
+    </div>
     {{#def.jQueryUIpositionFix}}
     {{#def.ajaxLoadingOverlay}}
   </body>

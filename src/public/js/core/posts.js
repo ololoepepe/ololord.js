@@ -624,12 +624,9 @@ export function globalMouseoutHandler(e) {
   }
   let boardName = DOM.data('boardName', a);
   let postNumber = Tools.option(+DOM.data('postNumber', a), 'number', 0, { test: Tools.testPostNumber });
-  console.log(3, boardName, postNumber, $(a).hasClass('js-post-link'));
   if (!boardName || !postNumber || !$(a).hasClass('js-post-link')) {
     return;
   }
-  console.log(4);
-  console.log(a.viewPostTimer);
   if (a.viewPostTimer) {
     clearTimeout(a.viewPostTimer);
     delete a.viewPostTimer;

@@ -6,6 +6,11 @@ import * as DOM from './dom';
 import * as Settings from './settings';
 import * as Templating from './templating';
 import * as Tools from './tools';
+import * as Drafts from '../core/drafts';
+import * as Files from '../core/files';
+import * as Widgets from '../widgets';
+import * as PageProcessors from '../handlers/page-processors';
+import * as PostProcessors from '../handlers/post-processors';
 
 export function testSameDomain(href) {
   if (!href || typeof href !== 'string') {
@@ -46,15 +51,23 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
       return window.Node.ELEMENT_NODE === n.nodeType;
     });
     Templating.scriptWorkaround(content);
-    $('#content').replaceWith(content);
-    window.document.title = title;
-    $(window.document.body).scrollTop(0);
-    //TODO: apply processors
     if (!fromHistory) {
       window.history.pushState({
         href: href,
         title: title
       }, '', href);
+    }
+    $('#content').replaceWith(content);
+    window.document.title = title;
+    $(window.document.body).scrollTop(0);
+    //TODO: apply processors
+    PageProcessors.applyProcessors(content).catch(Widgets.handleError);
+    if (Tools.isBoardPage()) {
+      Drafts.initializeDrafts();
+      let posts = DOM.queryAll('.js-post', content[0]);
+      await PostProcessors.applyPreprocessors(posts);
+      await PostProcessors.applyPostprocessors(posts);
+      Files.initializeFiles();
     }
     if (Tools.deviceType('mobile') && 'toolbar' !== Settings.navbarMode() && $('#sidebar-switch').prop('checked')) {
       $('#sidebar-switch').click();
