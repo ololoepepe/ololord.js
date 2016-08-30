@@ -145,10 +145,7 @@ registerHandler('load', () => {
   });
 }, {
   priority: 10,
-  test: () => {
-    return Tools.isBoardPage() && !Tools.isThreadPage()
-      && !/^(archive|catalog(\-(recent|bumps))?)\.html$/.test(Tools.locationPathname());
-  }
+  test: Tools.isBoardPage
 });
 
 registerHandler('load', async function() {
@@ -164,7 +161,9 @@ registerHandler('load', async function() {
   }
 }, {
   priority: 20,
-  test: Tools.isBoardPage
+  test: () => {
+    return Tools.isBoardPage() || Tools.isThreadPage()
+  }
 });
 
 registerHandler('load', () => {

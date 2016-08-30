@@ -375,7 +375,7 @@ export function initializeHead() {
             list.push(`user-level-${lvl.toLowerCase()}`);
           }
         });
-        if (Tools.isBoardPage()) {
+        if (Tools.isBoardRelatedPage()) {
           const BOARD_NAME = Tools.boardName();
           _(Templating.board(BOARD_NAME).permissions).each((_, permission) => {
             if (user.hasPermission(BOARD_NAME, permission)) {
@@ -467,7 +467,7 @@ export function resetBanner() {
     banners = banners.filter((banner) => { return BOARD_NAME !== banner.boardName; });
     break;
   case 'same':
-    if (Tools.isBoardPage()) {
+    if (Tools.isBoardRelatedPage()) {
       banners = banners.filter((banner) => { return BOARD_NAME === banner.boardName; });
     } else {
       banners = [];

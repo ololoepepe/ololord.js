@@ -517,10 +517,29 @@ export function isArchivedThreadPage() {
   return _requireModel('boards').boards.some((board) => { return match[1] === board.name; });
 }
 
-export function isBoardPage() {
-  if (isThreadPage()) {
+export function isArchivePage() {
+  let match = locationPathname().match(/^\/([^\/\.]+)\/archive\.html$/);
+  if (!match) {
+    return false;
+  }
+  if (!_requireModel) {
     return true;
   }
+  return _requireModel('boards').boards.some((board) => { return match[1] === board.name; });
+}
+
+export function isCatalogPage() {
+  let match = locationPathname().match(/^\/([^\/\.]+)\/catalog(\-(recent|bumps))?\.html$/);
+  if (!match) {
+    return false;
+  }
+  if (!_requireModel) {
+    return true;
+  }
+  return _requireModel('boards').boards.some((board) => { return match[1] === board.name; });
+}
+
+export function isBoardPage() {
   let pathname = locationPathname();
   let match = pathname.match(/^\/([^\/]+)\/\d+\.html$/) || pathname.match(/^\/([^\/\.]+)\/?$/);
   if (!match) {
@@ -532,8 +551,12 @@ export function isBoardPage() {
   return _requireModel('boards').boards.some((board) => { return match[1] === board.name; });
 }
 
+export function isBoardRelatedPage() {
+  return isBoardPage() || isThreadPage() || isArchivePage() || isArchivedThreadPage() || isCatalogPage();
+}
+
 export function pageNumber() {
-  if (!isBoardPage() || isThreadPage()) {
+  if (!isBoardPage(true)) {
     return;
   }
   let pathname = locationPathname();
@@ -565,7 +588,8 @@ export function threadNumber() {
 export function boardName() {
   let pathname = locationPathname();
   let match = pathname.match(/^\/([^\/]+)\/(res|arch)\/\d+\.html$/) || pathname.match(/^\/([^\/]+)\/\d+\.html$/)
-    || pathname.match(/^\/([^\/\.]+)\/?$/);
+    || pathname.match(/^\/([^\/\.]+)\/catalog(\-(recent|bumps))?\.html$/)
+    || pathname.match(/^\/([^\/\.]+)\/archive\.html$/) || pathname.match(/^\/([^\/\.]+)\/?$/);
   if (match) {
     if (_requireModel && !_requireModel('boards').boards.some((board) => { return match[1] === board.name; })) {
       return '';
