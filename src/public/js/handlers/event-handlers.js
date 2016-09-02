@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import $ from 'jquery';
 import merge from 'merge';
+import URI from 'urijs';
 import VK from 'vk-openapi';
 
 import * as AJAX from '../helpers/ajax';
@@ -41,65 +42,12 @@ export function hashChangeHandler() {
 
 const TOOLTIP_COUNT_BOARD_SELECT = 5;
 
-registerHandler('load', () => {
-  hashChangeHandler(DOM.hash());
-  WebSocket.initialize();
-  PageProcessors.applyProcessors().catch(Widgets.handleError);
-  Threads.checkFavoriteThreads();
-  if (Settings.showNewPosts()) {
-    Threads.showNewPosts();
-  }
-  if (Settings.chatEnabled()) {
-    Chat.checkChats();
-  }
-  if (Settings.showAutoUpdateDesktopNotifications()) {
-    DOM.checkNotificationQueue();
-  }
-  let sidebarSwitch = $('#sidebar-switch');
-  DOM.detectSwipe(window.document.body, (e) => {
-    if (!Tools.deviceType('mobile')) {
-      return;
-    }
-    let visible = sidebarSwitch.prop('checked');
-    let dx = Math.abs(e.distanceX);
-    let dy = Math.abs(e.distanceY);
-    if (dy >= Constants.SWIPE_MAX_DISTANCE_Y || dx < Constants.SWIPE_MIN_DISTANCE_X) {
-      return;
-    }
-    if ((_(e.types).contains('swiperight') && !visible) || (_(e.types).contains('swipeleft') && visible)) {
-      sidebarSwitch.prop('checked', !visible);
-    }
-  });
-  if (Tools.deviceType('mobile')) {
-    DOM.queryAll('.js-with-tooltip').forEach(DOM.setTooltip);
-    var boardSelect = Storage.getLocalObject('tooltips/boardSelect', 0);
-    if (boardSelect < TOOLTIP_COUNT_BOARD_SELECT) {
-      Storage.setLocalObject('tooltips/boardSelect', boardSelect + 1);
-      DOM.setTooltip(DOM.queryOne('.boardSelectContainer > select'), {
-        position: 'fixed',
-        show: true
-      });
-    }
-  }
-}, {
-  priority: 0,
-  test: () => { return !/^\/login.html$/.test(Tools.locationPathname()); }
-});
-
-Settings.deviceType.subscribe(() => {
-  if (Tools.deviceType('desktop')) {
-    DOM.queryAll('.js-with-tooltip').forEach(DOM.removeTooltip);
-  } else {
-    DOM.queryAll('.js-with-tooltip').forEach(DOM.setTooltip);
-  }
-});
-
-registerHandler('load', () => {
+function initializeInfiniteScroll() {
   let w = $(window);
   let loading = false;
   let infiniteScrollPage;
   w.scroll(async function() {
-    if (!Settings.infiniteScroll() || loading) {
+    if (!Tools.isBoardPage() || !Settings.infiniteScroll() || loading) {
       return;
     }
     let pageCount = Tools.pageCount();
@@ -143,9 +91,60 @@ registerHandler('load', () => {
       loading = false;
     }
   });
+}
+
+registerHandler('load', () => {
+  hashChangeHandler(DOM.hash());
+  WebSocket.initialize();
+  PageProcessors.applyProcessors().catch(Widgets.handleError);
+  Threads.checkFavoriteThreads();
+  if (Settings.showNewPosts()) {
+    Threads.showNewPosts();
+  }
+  if (Settings.chatEnabled()) {
+    Chat.checkChats();
+  }
+  if (Settings.showAutoUpdateDesktopNotifications()) {
+    DOM.checkNotificationQueue();
+  }
+  let sidebarSwitch = $('#sidebar-switch');
+  DOM.detectSwipe(window.document.body, (e) => {
+    if (!Tools.deviceType('mobile')) {
+      return;
+    }
+    let visible = sidebarSwitch.prop('checked');
+    let dx = Math.abs(e.distanceX);
+    let dy = Math.abs(e.distanceY);
+    if (dy >= Constants.SWIPE_MAX_DISTANCE_Y || dx < Constants.SWIPE_MIN_DISTANCE_X) {
+      return;
+    }
+    if ((_(e.types).contains('swiperight') && !visible) || (_(e.types).contains('swipeleft') && visible)) {
+      sidebarSwitch.prop('checked', !visible);
+    }
+  });
+  if (Tools.deviceType('mobile')) {
+    DOM.queryAll('.js-with-tooltip').forEach(DOM.setTooltip);
+    var boardSelect = Storage.getLocalObject('tooltips/boardSelect', 0);
+    if (boardSelect < TOOLTIP_COUNT_BOARD_SELECT) {
+      Storage.setLocalObject('tooltips/boardSelect', boardSelect + 1);
+      DOM.setTooltip(DOM.queryOne('.js-board-select'), {
+        position: 'fixed',
+        show: true
+      });
+    }
+  }
+  initializeInfiniteScroll();
 }, {
-  priority: 10,
-  test: Tools.isBoardPage
+  priority: 0,
+  test: () => { return !/^\/login.html$/.test(Tools.locationPathname()); }
+});
+
+Settings.deviceType.subscribe(() => {
+  if (Tools.deviceType('desktop')) {
+    DOM.queryAll('.js-with-tooltip').forEach(DOM.removeTooltip);
+  } else {
+    DOM.queryAll('.js-with-tooltip').forEach(DOM.setTooltip);
+  }
 });
 
 registerHandler('load', async function() {
@@ -161,9 +160,7 @@ registerHandler('load', async function() {
   }
 }, {
   priority: 20,
-  test: () => {
-    return Tools.isBoardPage() || Tools.isThreadPage()
-  }
+  test: () => { return Tools.isBoardPage() || Tools.isThreadPage() || Tools.isArchivedThreadPage(); }
 });
 
 registerHandler('load', () => {
@@ -173,7 +170,7 @@ registerHandler('load', () => {
   }
 }, {
   priority: 30,
-  test: Tools.isThreadPage
+  test: () => { return Tools.isThreadPage(); }
 });
 
 registerHandler('load', () => {
@@ -229,6 +226,9 @@ registerHandler('click', async function(e) {
     return;
   }
   if (!Navigation.testSameDomain(t.href)) {
+    return;
+  }
+  if (URI(t.href).pathname() === window.location.pathname) {
     return;
   }
   e.preventDefault();

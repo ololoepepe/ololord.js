@@ -60,7 +60,7 @@
 <span class='mobile-only .toolbar-buttons-container'>
   [{{!it.translate('Boards', 'boardsText')}}:
   <span class='board-select-container'>
-    <select name='boardSelect' class='icon icon-list board-select'
+    <select class='icon icon-list board-select js-board-select'
             title='{{!it.translate('Use this button to jump between boards', 'boardSelectTooltip')}}'
             data-bind='event: { change: selectBoard }'>
       <option selected='true' value=''></option>

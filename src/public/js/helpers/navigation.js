@@ -1,13 +1,17 @@
 import _ from 'underscore';
 import $ from 'jquery';
+import URI from 'urijs';
 
 import * as AJAX from './ajax';
 import * as DOM from './dom';
 import * as Settings from './settings';
+import * as Storage from './storage';
 import * as Templating from './templating';
 import * as Tools from './tools';
 import * as Drafts from '../core/drafts';
 import * as Files from '../core/files';
+import * as Management from '../core/management';
+import * as Threads from '../core/threads';
 import * as Widgets from '../widgets';
 import * as PageProcessors from '../handlers/page-processors';
 import * as PostProcessors from '../handlers/post-processors';
@@ -28,7 +32,8 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
     ajax = false;
   }
   ajax = (typeof ajax !== 'undefined') ? !!ajax : Settings.ajaxNavigation();
-  if (!ajax) {
+  let pathname = URI(href).pathname();
+  if (!ajax || /\/login.html$/.test(pathname) || /^\/login.html$/.test(window.location.pathname)) {
     window.location.href = href;
     return;
   }
@@ -60,14 +65,22 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
     $('#content').replaceWith(content);
     window.document.title = title;
     $(window.document.body).scrollTop(0);
-    //TODO: apply processors
     PageProcessors.applyProcessors(content).catch(Widgets.handleError);
-    if (Tools.isBoardPage() || Tools.isThreadPage()) {
+    if (Tools.isBoardPage() || Tools.isThreadPage() || Tools.isArchivedThreadPage()) {
       Drafts.initializeDrafts();
       let posts = DOM.queryAll('.js-post', content[0]);
       await PostProcessors.applyPreprocessors(posts);
       await PostProcessors.applyPostprocessors(posts);
       Files.initializeFiles();
+      if (Tools.isThreadPage()) {
+        var enabled = Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber());
+        if (true === enabled || (false !== enabled && Settings.autoUpdateThreadsByDefault())) {
+          Threads.setAutoUpdateEnabled(true);
+        }
+      }
+    }
+    if (/^\/manage.html$/.test(pathname)) {
+      Management.initializeManagement();
     }
     if (Tools.deviceType('mobile') && 'toolbar' !== Settings.navbarMode() && $('#sidebar-switch').prop('checked')) {
       $('#sidebar-switch').click();
