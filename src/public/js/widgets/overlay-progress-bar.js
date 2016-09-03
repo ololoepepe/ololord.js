@@ -25,10 +25,10 @@ export default class OverlayProgressBar extends EventEmitter {
     default:
       this.labelText = (loaded, total, uploading) => {
         if (typeof loaded !== 'number' || typeof total !== 'number') {
-          return Tools.translate('Performing request…', 'performingRequestText'); //TODO: translate
+          return Tools.translate('Performing request…', 'performingRequestText');
         }
         let statusText = uploading ? Tools.translate('Uploading…', 'uploadingText') :
-          Tools.translate('Downloading…', 'downloadingText'); //TODO: translate
+          Tools.translate('Downloading…', 'downloadingText');
         return `${statusText} ${Math.round((100 * loaded) / total)}%`;
       };
       break;

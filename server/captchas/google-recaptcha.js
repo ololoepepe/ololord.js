@@ -56,7 +56,8 @@ var GoogleRecaptcha = function (_Captcha) {
   _createClass(GoogleRecaptcha, [{
     key: 'checkCaptcha',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(ip, fields) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(_ref, fields) {
+        var ip = _ref.ip;
         var captcha, query, reply, data, result;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {

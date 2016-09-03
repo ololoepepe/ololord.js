@@ -31,7 +31,7 @@ var getNodeCaptchaImage = function () {
               spacing: this.spacing
             }, function (response, fileName) {
               var challengeID = _uuid2.default.v4();
-              _this.challenges.set(challenge, {
+              _this.challenges.set(challengeID, {
                 id: challengeID,
                 fileName: fileName,
                 response: response,
@@ -203,6 +203,7 @@ var NodeCaptcha = function (_Captcha) {
     _this2.defineProperty('noiseColor', function () {
       return (0, _config2.default)('captcha.node-captcha.noiseColor', _this2.color);
     });
+    _this2.defineSetting('ttl', 5 * Tools.MINUTE);
     return _this2;
   }
 

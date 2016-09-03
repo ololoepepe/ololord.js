@@ -20,7 +20,7 @@ export default class Captcha {
     return _(captchas).toArray().sort((c1, c2) => { return c1.id.localeCompare(c2.id); }).map(captcha => captcha.id);
   }
 
-  static async checkCaptcha(ip, fields = {}) {
+  static async checkCaptcha(req, fields = {}) {
     let { boardName, captchaEngine } = fields;
     let board = Board.board(boardName);
     if (!board) {
@@ -29,9 +29,9 @@ export default class Captcha {
     if (!board.captchaEnabled) {
       return;
     }
-    let quota = await UsersModel.getUserCaptchaQuota(boardName, ip);
+    let quota = await UsersModel.getUserCaptchaQuota(boardName, req.hashpass || req.ip);
     if (board.captchaQuota > 0 && +quota > 0) {
-      return await UsersModel.useCaptcha(boardName, ip);
+      return await UsersModel.useCaptcha(boardName, req.hashpass || req.ip);
     }
     let supportedCaptchaEngines = board.supportedCaptchaEngines;
     if (supportedCaptchaEngines.length < 1) {
@@ -49,8 +49,8 @@ export default class Captcha {
     if (!captcha) {
       throw new Error(Tools.translate('Invalid captcha engine'));
     }
-    await captcha.checkCaptcha(ip, fields);
-    return await UsersModel.setUserCaptchaQuota(boardName, ip, board.captchaQuota);
+    await captcha.checkCaptcha(req.hashpass || req.ip, fields);
+    return await UsersModel.setUserCaptchaQuota(boardName, req.hashpass || req.ip, board.captchaQuota);
   }
 
   static initialize() {

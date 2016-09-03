@@ -59,7 +59,7 @@ var Captcha = function () {
   }, {
     key: 'checkCaptcha',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(ip) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(req) {
         var fields = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
         var boardName, captchaEngine, board, quota, supportedCaptchaEngines, ceid, captcha;
         return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -87,7 +87,7 @@ var Captcha = function () {
 
               case 7:
                 _context.next = 9;
-                return UsersModel.getUserCaptchaQuota(boardName, ip);
+                return UsersModel.getUserCaptchaQuota(boardName, req.hashpass || req.ip);
 
               case 9:
                 quota = _context.sent;
@@ -98,7 +98,7 @@ var Captcha = function () {
                 }
 
                 _context.next = 13;
-                return UsersModel.useCaptcha(boardName, ip);
+                return UsersModel.useCaptcha(boardName, req.hashpass || req.ip);
 
               case 13:
                 return _context.abrupt('return', _context.sent);
@@ -134,11 +134,11 @@ var Captcha = function () {
 
               case 22:
                 _context.next = 24;
-                return captcha.checkCaptcha(ip, fields);
+                return captcha.checkCaptcha(req.hashpass || req.ip, fields);
 
               case 24:
                 _context.next = 26;
-                return UsersModel.setUserCaptchaQuota(boardName, ip, board.captchaQuota);
+                return UsersModel.setUserCaptchaQuota(boardName, req.hashpass || req.ip, board.captchaQuota);
 
               case 26:
                 return _context.abrupt('return', _context.sent);

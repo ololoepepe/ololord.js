@@ -49,9 +49,10 @@ var GoogleRecaptchaV1 = function (_Captcha) {
   _createClass(GoogleRecaptchaV1, [{
     key: 'checkCaptcha',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(ip, _ref) {
-        var recaptcha_challenge_field = _ref.recaptcha_challenge_field;
-        var recaptcha_response_field = _ref.recaptcha_response_field;
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(_ref, _ref2) {
+        var ip = _ref.ip;
+        var recaptcha_challenge_field = _ref2.recaptcha_challenge_field;
+        var recaptcha_response_field = _ref2.recaptcha_response_field;
         var challenge, response, query, reply, data, result;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {

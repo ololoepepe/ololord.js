@@ -7,24 +7,36 @@ exports.createThumbnail = undefined;
 
 var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file, thumbPath, path) {
-    var info;
+    var thumbInfo;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
             _context.next = 2;
-            return ImageMagick.convert(['-density', '300', path + '[0]', '-quality', '100', '+adjoin', '-resize', '200x200', 'png:' + thumbPath]);
+            return new Promise(function (resolve, reject) {
+              (0, _gm2.default)(path + '[0]').setFormat('png').resize(200, 200).quality(100).write(thumbPath, function (err) {
+                if (err) {
+                  return reject(err);
+                }
+                resolve();
+              });
+            });
 
           case 2:
-            _context.next = 4;
-            return ImageMagick.identify(thumbPath);
+            thumbInfo = Files.getImageSize(thumbPath);
 
-          case 4:
-            info = _context.sent;
+            if (thumbInfo) {
+              _context.next = 5;
+              break;
+            }
+
+            throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
+
+          case 5:
             return _context.abrupt('return', {
               thumbDimensions: {
-                width: info.width,
-                height: info.height
+                width: thumbInfo.width,
+                height: thumbInfo.height
               }
             });
 
@@ -46,9 +58,9 @@ exports.suffixMatchesMimeType = suffixMatchesMimeType;
 exports.defaultSuffixForMimeType = defaultSuffixForMimeType;
 exports.thumbnailSuffixForMimeType = thumbnailSuffixForMimeType;
 
-var _promisifyNode = require('promisify-node');
+var _gm = require('gm');
 
-var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
+var _gm2 = _interopRequireDefault(_gm);
 
 var _files = require('../core/files');
 
@@ -63,8 +75,6 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
-
-var ImageMagick = (0, _promisifyNode2.default)('imagemagick');
 
 function match(mimeType) {
   return Files.isPdfType(mimeType);

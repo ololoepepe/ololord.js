@@ -104,7 +104,7 @@ router.post('/action/createPost', async function(req, res, next) {
       write: true,
       geolocationInfo: req.geolocationInfo
     });
-    await Captcha.checkCaptcha(req.ip, fields);
+    await Captcha.checkCaptcha(req, fields);
     files = await Files.getFiles(fields, files);
     await testParameters(req, boardName, 'createPost', {
       fields: fields,
@@ -146,7 +146,7 @@ router.post('/action/createThread', async function(req, res, next) {
       write: true,
       geolocationInfo: req.geolocationInfo
     });
-    await Captcha.checkCaptcha(req.ip, fields);
+    await Captcha.checkCaptcha(req, fields);
     files = await Files.getFiles(fields, files);
     await testParameters(req, boardName, 'createThread', {
       fields: fields,

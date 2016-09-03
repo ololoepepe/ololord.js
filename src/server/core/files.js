@@ -4,6 +4,7 @@ import ChildProcess from 'child_process';
 import du from 'du';
 import FS from 'q-io/fs';
 import FSSync from 'fs';
+import gm from 'gm';
 import HTTP from 'q-io/http';
 import Jdenticon from 'jdenticon';
 import merge from 'merge';
@@ -180,7 +181,7 @@ export async function renderPostFileInfos(post) {
     fileInfo.sizeText = fileInfo.sizeKB.toFixed(2) + ' ' + Tools.translate('KB');
     let plugin = selectThumbnailingPlugin(fileInfo.mimeType);
     if (!plugin) {
-      let err = new Error(Tools.translate('Unsupported file type'));
+      let err = new Error(Tools.translate('Unsupported file type: $[1]', '', fileInfo.mimeType));
       Logger.error(err.stack || err);
       return;
     }
@@ -223,7 +224,7 @@ export function parseForm(req = {}) {
 async function processFile(boardName, file, transaction) {
   let plugin = selectThumbnailingPlugin(file.mimeType);
   if (!plugin) {
-    return Promise.reject(new Error(Tools.translate('Unsupported file type')));
+    return Promise.reject(new Error(Tools.translate('Unsupported file type: $[1]', '', file.mimeType)));
   }
   let fn = await generateFileName(file, plugin);
   let targetFilePath = `${__dirname}/../../public/${boardName}/src/${fn.name}`;
@@ -391,4 +392,26 @@ export function isPdfType(mimeType) {
 
 export function isImageType(mimeType) {
   return /^image\//.test(mimeType);
+}
+
+export async function getImageSize(fileName) {
+  return new Promise((resolve, reject) => {
+    gm(fileName).size((err, value) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(value);
+    });
+  });
+}
+
+export async function resizeImage(fileName, width, height, options) {
+  return new Promise((resolve, reject) => {
+    gm(fileName).resize(width, height, options).quality(100).write(fileName, (err) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve();
+    });
+  });
 }

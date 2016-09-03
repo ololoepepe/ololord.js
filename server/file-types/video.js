@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.rerenderPostFileInfo = exports.createThumbnail = undefined;
+exports.renderPostFileInfo = exports.createThumbnail = undefined;
 
 var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(file, thumbPath, path) {
@@ -95,51 +95,67 @@ var createThumbnail = exports.createThumbnail = function () {
               width: 200,
               height: 200
             };
-            _context2.next = 35;
+            _context2.next = 39;
             break;
 
           case 23:
             if (result.dimensions) {
-              _context2.next = 28;
+              _context2.next = 30;
               break;
             }
 
             _context2.next = 26;
-            return ImageMagick.identify(thumbPath);
+            return Files.getImageSize(thumbPath);
 
           case 26:
             thumbInfo = _context2.sent;
 
+            if (thumbInfo) {
+              _context2.next = 29;
+              break;
+            }
+
+            throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
+
+          case 29:
             result.dimensions = {
               width: thumbInfo.width,
               height: thumbInfo.height
             };
 
-          case 28:
+          case 30:
             if (!(result.dimensions.width > 200 || result.dimensions.height > 200)) {
-              _context2.next = 35;
+              _context2.next = 39;
               break;
             }
 
-            _context2.next = 31;
-            return ImageMagick.convert([thumbPath, '-resize', '200x200', thumbPath]);
-
-          case 31:
             _context2.next = 33;
-            return ImageMagick.identify(thumbPath);
+            return Files.resizeImage(thumbPath, 200, 200);
 
           case 33:
+            _context2.next = 35;
+            return Files.getImageSize(thumbPath);
+
+          case 35:
             _thumbInfo = _context2.sent;
 
+            if (_thumbInfo) {
+              _context2.next = 38;
+              break;
+            }
+
+            throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
+
+          case 38:
             result.dimensions = {
               width: _thumbInfo.width,
               height: _thumbInfo.height
             };
 
-          case 35:
+          case 39:
             return _context2.abrupt('return', result);
 
-          case 36:
+          case 40:
           case 'end':
             return _context2.stop();
         }
@@ -152,7 +168,7 @@ var createThumbnail = exports.createThumbnail = function () {
   };
 }();
 
-var rerenderPostFileInfo = exports.rerenderPostFileInfo = function () {
+var renderPostFileInfo = exports.renderPostFileInfo = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(fileInfo) {
     var _ref, duration, bitrate;
 
@@ -182,7 +198,7 @@ var rerenderPostFileInfo = exports.rerenderPostFileInfo = function () {
     }, _callee3, this);
   }));
 
-  return function rerenderPostFileInfo(_x4) {
+  return function renderPostFileInfo(_x4) {
     return ref.apply(this, arguments);
   };
 }();
@@ -222,11 +238,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var ImageMagick = (0, _promisifyNode2.default)('imagemagick');
-
 var MIME_TYPES_FOR_SUFFIXES = new Map();
 var DEFAULT_SUFFIXES_FOR_MIME_TYPES = new Map();
 var THUMB_SUFFIXES_FOR_MIME_TYPE = new Map();
+
+function durationToString(duration) {
+  duration = Math.floor(+duration);
+  var hours = Tools.pad(Math.floor(duration / 3600), 2, '0');
+  duration %= 3600;
+  var minutes = Tools.pad(Math.floor(duration / 60), 2, '0');
+  var seconds = Tools.pad(duration % 60, 2, '0');
+  return hours + ':' + minutes + ':' + seconds;
+}
 
 function defineMimeTypeSuffixes(mimeType, extensions, thumbSuffix) {
   if (!(0, _underscore2.default)(extensions).isArray()) {

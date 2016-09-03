@@ -225,6 +225,9 @@ registerHandler('click', async function(e) {
   if (!t || 'A' !== t.tagName || !t.href) {
     return;
   }
+  if (t.target) {
+    return;
+  }
   if (!Navigation.testSameDomain(t.href)) {
     return;
   }

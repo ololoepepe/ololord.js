@@ -17,7 +17,7 @@ export default class GoogleRecaptcha extends Captcha {
     this.defineSetting('timeout', 15 * Tools.SECOND);
   }
 
-  async checkCaptcha(ip, fields) {
+  async checkCaptcha({ ip }, fields) {
     let captcha = fields['g-recaptcha-response'];
     if (!captcha) {
       throw new Error(Tools.translate('Captcha is empty'));

@@ -29,3 +29,4 @@
 * Add classes for custom post body/header parts
 * Serve local copies of YouTube, Coub and Vocaroo favicons
 * Use GraphicsMagick instead ig ImageMagick
+* Use SQL storage for archived threads/posts/files

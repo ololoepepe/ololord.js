@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import FS from 'q-io/fs';
 
 import * as BoardsModel from './boards';
 import * as FilesModel from './files';
@@ -276,7 +277,7 @@ async function rerenderPost(boardName, postNumber, { nogenerate } = {}) {
 }
 
 async function rerenderReferringPosts({ boardName, number, threadNumber }, { removingThread } = {}) {
-  let referringPosts = ReferringPosts.getAll(`${boardName}:${number}`);
+  let referringPosts = await ReferringPosts.getAll(`${boardName}:${number}`);
   referringPosts = _(referringPosts).filter((ref) => {
     return !removingThread || ref.boardName !== boardName || ref.threadNumber !== threadNumber;
   });
@@ -355,11 +356,6 @@ export async function editPost(req, fields) {
   if (!post) {
     return Promise.reject(new Error(Tools.translate('Invalid post')));
   }
-  /*
-  return db.hget("threads:" + board.name, c.post.threadNumber);
-  if (!thread)
-      return Promise.reject(Tools.translate("No such thread"));
-  */
   let key = `${boardName}:${postNumber}`;
   text = await markup(board.name, rawText, {
     markupModes: /*markupModes*/post.markup, //TODO ???
@@ -367,7 +363,13 @@ export async function editPost(req, fields) {
     accessLevel: req.level(board.name)
   });
   let plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
-  let extraData = await board.postExtraData(req, fields, null, post);
+  let extraData = post.extraData;
+  if (post.hasOwnProperty('extraData')) {
+    delete post.extraData;
+  }
+  if (post.hasOwnProperty('bannedFor')) {
+    delete post.bannedFor;
+  }
   //post.markup = markupModes; //TODO ???
   post.name = name || null;
   post.plainText = plainText;
@@ -375,7 +377,6 @@ export async function editPost(req, fields) {
   post.subject = subject || null;
   post.text = text || null;
   post.updatedAt = date.toISOString();
-  //delete post.bannedFor; //TODO: WTF?
   await Posts.setOne(key, post);
   await board.removeExtraData(postNumber);
   await board.storeExtraData(postNumber, extraData);
@@ -611,7 +612,7 @@ export async function processMovedThreadPosts({ posts, postNumberMap, threadNumb
 
 export async function processMovedThreadRelatedPosts({ posts, sourceBoardName, postNumberMap }) {
   await Tools.series(posts, async function(post) {
-    post = await PostsModel.getPost(post.boardName, post.postNumber);
+    post = await getPost(post.boardName, post.postNumber);
     if (!post.rawText) {
       return;
     }

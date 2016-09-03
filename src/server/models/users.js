@@ -2,15 +2,17 @@ import _ from 'underscore';
 import FS from 'q-io/fs';
 
 import * as PostsModel from './posts';
+import * as ThreadsModel from './threads';
 import Board from '../boards/board';
 import config from '../helpers/config';
 import FSWatcher from '../helpers/fs-watcher';
+import * as IPC from '../helpers/ipc';
 import * as Permissions from '../helpers/permissions';
 import * as Tools from '../helpers/tools';
 import Channel from '../storage/channel';
-import redisClient from '../storage/redis-client-factory';
 import Hash from '../storage/hash';
 import Key from '../storage/key';
+import redisClient from '../storage/redis-client-factory';
 import UnorderedSet from '../storage/unordered-set';
 
 let BanExpiredChannel = new Channel(redisClient('BAN_EXPIRED'), `__keyevent@${config('system.redis.db')}__:expired`, {
@@ -38,7 +40,6 @@ let SuperuserHashes = new UnorderedSet(redisClient(), 'superuserHashes', {
   stringify: false
 });
 let SynchronizationData = new Key(redisClient(), 'synchronizationData');
-let Threads = new Hash(redisClient(), 'threads');
 let UserBanPostNumbers = new Hash(redisClient(), 'userBanPostNumbers', {
   parse: number => +number,
   stringify: number => number.toString()
@@ -92,21 +93,25 @@ let geoBans = FSWatcher.createWatchedResource(`${__dirname}/../../misc/geo-bans.
   geoBans = transformGeoBans(JSON.parse(data));
 }) || new Map();
 
-export async function getUserCaptchaQuota(boardName, userIp) {
+export async function getUserCaptchaQuota(boardName, userID) {
   let board = Board.board(boardName);
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
-  let quota = await UserCaptchaQuotas.getOne(`${boardName}:${userIp}`);
+  let quota = await UserCaptchaQuotas.getOne(userID);
+  quota = Tools.option(quota, 'number', 0, { test: (q) => { return q >= 0; } });
+  if (quota <= 0) {
+    quota = await UserCaptchaQuotas.getOne(`${boardName}:${userID}`);
+  }
   return Tools.option(quota, 'number', 0, { test: (q) => { return q >= 0; } });
 }
 
-export async function setUserCaptchaQuota(boardName, userIp, quota) {
+export async function setUserCaptchaQuota(boardName, userID, quota) {
   quota = Tools.option(quota, 'number', 0, { test: (q) => { return q >= 0; } });
-  return await UserCaptchaQuotas.setOne(`${boardName}:${userIp}`, quota);
+  return await UserCaptchaQuotas.setOne(`${boardName}:${userID}`, quota);
 }
 
-export async function useCaptcha(boardName, userIp) {
+export async function useCaptcha(boardName, userID) {
   let board = Board.board(boardName);
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
@@ -114,7 +119,12 @@ export async function useCaptcha(boardName, userIp) {
   if (board.captchaQuota < 1) {
     return 0;
   }
-  let key = `${boardName}:${userIp}`;
+  let key = userID;
+  quota = await UserCaptchaQuotas.getOne(userID);
+  quota = Tools.option(quota, 'number', 0, { test: (q) => { return q >= 0; } })
+  if (quota <= 0) {
+    key = `${boardName}:${userID}`;
+  }
   let quota = await UserCaptchaQuotas.incrementBy(key, -1);
   if (+quota < 0) {
     return await UserCaptchaQuotas.setOne(key, 0);
@@ -429,7 +439,10 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
   if (!board.opModeration) {
     return Promise.reject(new Error(Tools.translate('Not enough rights')));
   }
-  let thread = await Threads.getOne(threadNumber, boardName);
+  let thread = await ThreadsModel.getThread(boardName, threadNumber);
+  if (!thread) {
+    return Promise.reject(new Error(Tools.translate('Not such thread: $[1]', '', `/${boardName}/${threadNumber}`)));
+  }
   if (thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass)) {
     return Promise.reject(new Error(Tools.translate('Not enough rights')));
   }
@@ -465,7 +478,7 @@ export async function banUser(ip, newBans) {
   if (!ip) {
     return Promise.reject(new Error(Tools.translate('Invalid IP address')));
   }
-  let oldBans = await UsersModel.getBannedUserBans(userIp);
+  let oldBans = await getBannedUserBans(ip);
   await Tools.series(Board.boardNames(), async function(boardName) {
     let key = `${ip}:${boardName}`;
     let ban = newBans[boardName];

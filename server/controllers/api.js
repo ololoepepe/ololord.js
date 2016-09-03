@@ -728,7 +728,7 @@ router.get('/api/captchaQuota.json', function () {
 
           case 5:
             _context14.next = 7;
-            return UsersModel.getUserCaptchaQuota(req.query.boardName, req.ip);
+            return UsersModel.getUserCaptchaQuota(req.query.boardName, req.hashpass || req.ip);
 
           case 7:
             quota = _context14.sent;

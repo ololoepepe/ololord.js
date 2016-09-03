@@ -37,7 +37,7 @@ async function reload() {
   };
   try {
     let model = await AJAX.api('nodeCaptchaImage', {});
-    challenge.value = model.challenge;;
+    challenge.value = model.challenge;
     image.append(createImage(`node-captcha/${model.fileName}`));
     setTimeout(reload.bind(null, captcha), model.ttl);
     let seconds = model.ttl / Constants.SECOND;

@@ -111,7 +111,7 @@ export default [{
     }
   },
   options: {
-    description: Tools.translate("Rerenders the cache (workers are closed and then opened again)."),
+    description: Tools.translate("Rerenders the cache."),
     options: [{
       value: '-a, --archive',
       description: Tools.translate('Rerender archived threads (if no pattern is specified).')
@@ -154,7 +154,7 @@ export default [{
   },
   options: {
     description: Tools.translate('Rebuilds post search index of posts specified as $[1].\n'
-      + 'If $[1] is omitted, rerenders all posts on all boards.\n'
+      + 'If $[1] is omitted, rebuilds post search index of all posts on all boards.\n'
       + 'Each target is a string in the following form:\n'
       + '$[2]', '', '[targets...]', '<board name>[:<post number>[:...]]')
   }

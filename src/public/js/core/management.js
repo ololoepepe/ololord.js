@@ -22,7 +22,7 @@ const USER_INIT_DELAY = 10;
 const TEXT_FORMATS = new Set(['txt', 'js', 'json', 'jst', 'def', 'html', 'xml', 'css', 'md', 'example', 'gitignore',
   'log']);
 const MAX_SHOWN_FREQUENTLY_USED_FILES = 10;
-const RELOADABLE_CONTENT = new Set(['boards', 'config', 'templates']);
+const RELOADABLE_CONTENT = new Set(['boards', 'templates']);
 const ADD_FILE_MIN_WIDTH = 350;
 const ADD_FILE_MIN_HEIGHT = 150;
 const RERENDER_POSTS_MIN_WIDTH = 300;
@@ -310,16 +310,17 @@ async function rerenderCache(archived) {
     + 'and the server will become unavailable for some time.'
     + ' You will have to reload the page manually.');
   try {
-    let accepted = await Widgets.confirm({
+    let result = await Widgets.prompt({
       id: `rerender`,
       title: Tools.translate('Rerendering'),
       label: txt
     });
-    if (!accepted) {
+    if (!result.accepted) {
       return;
     }
-    await AJAX.post(`/${Tools.sitePathPrefix()}action/superuserRerenderCache`, Tools.createFormData({
-      archived: (archived ? 'true' : '')
+    await AJAX.post(`/${Tools.sitePathPrefix()}action/superuserRerender`, Tools.createFormData({
+      targets: result.value,
+      archive: (archive ? 'true' : '')
     }), new OverlayProgressBar());
   } catch (err) {
     DOM.handleError(err);
@@ -327,32 +328,42 @@ async function rerenderCache(archived) {
 }
 
 async function rerenderPosts() {
-  let content = Templating.template('manage/rerenderPostsWidget');
+  /*let content = Templating.template('manage/rerenderPostsWidget');
   let boards = KO.observable([]);
-  KO.applyBindings({ boards: boards }, content);
+  KO.applyBindings({ boards: boards }, content);*/
   try {
-    let options = {
+    /*let options = {
       id: `rerenderPosts`,
       buttons: ['cancel', 'ok']
     };
-    options.title = Tools.translate('Rerendering posts');
-    if (Tools.deviceType('desktop')) {
+    options.title = Tools.translate('Rerendering posts');*/
+    /*if (Tools.deviceType('desktop')) {
       options.minSize = {
         width: RERENDER_POSTS_MIN_WIDTH,
         height: RERENDER_POSTS_MIN_HEIGHT
       }
     } else {
       options.maximized = true;
-    }
-    let accepted = await Widgets.showWidget(content, options).promise;
-    if (!accepted) {
+    }*/
+    let result = await Widgets.prompt({
+      id: `rerenderPosts`,
+      title: Tools.translate('Rerendering posts')//,
+      //label: txt
+    });
+    if (!result.accepted) {
       return;
     }
-    let formData = Tools.createFormData(boards().reduce((acc, boardName) => {
+    /*let accepted = await Widgets.showWidget(content, options).promise;
+    if (!accepted) {
+      return;
+    }*/
+    /*let formData = Tools.createFormData(boards().reduce((acc, boardName) => {
       acc[`board_${boardName}`] = boardName;
       return acc;
-    }, {}));
-    await AJAX.post(`/${Tools.sitePathPrefix()}action/superuserRerenderPosts`, formData, new OverlayProgressBar());
+    }, {}));*/
+    await AJAX.post(`/${Tools.sitePathPrefix()}action/superuserRerenderPosts`, /*formData*/Tools.createFormData({
+      targets: result.value
+    }), new OverlayProgressBar());
   } catch (err) {
     DOM.handleError(err);
   }
@@ -442,7 +453,7 @@ function initializeFileContent() {
         let items = {};
         if ('./' !== node.id) {
           items.rename = {
-            label: Tools.translate('Rename...', 'renameMenuItemText'),
+            label: Tools.translate('Rename…', 'renameMenuItemText'),
             action: renameFile.bind(null, node.id, node.type)
           };
           items.delete = {
@@ -453,7 +464,7 @@ function initializeFileContent() {
         }
         if ('file' === node.type) {
           items.edit = {
-            label: Tools.translate('Edit...', 'editMenuItemText'),
+            label: Tools.translate('Edit…', 'editMenuItemText'),
             _disabled: !TEXT_FORMATS.has(node.id.split('.').pop()),
             action: editFile.bind(null, node.id)
           };
@@ -463,11 +474,11 @@ function initializeFileContent() {
           };
         } else if ('folder' === node.type) {
           items.addFile = {
-            label: Tools.translate('Add file...', 'addFileMenuItemText'),
+            label: Tools.translate('Add file…', 'addFileMenuItemText'),
             action: addFile.bind(null, node.id, false)
           };
           items.addDirectory = {
-            label: Tools.translate('Add directory...', 'addDirectoryMenuItemText'),
+            label: Tools.translate('Add directory…', 'addDirectoryMenuItemText'),
             action: addFile.bind(null, node.id, true)
           };
         }

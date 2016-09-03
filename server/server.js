@@ -284,7 +284,7 @@ function spawnCluster() {
                                         break;
                                       }
 
-                                      throw new Error(Tools.translate('Invalid generator function'));
+                                      throw new Error(Tools.translate('Invalid render function'));
 
                                     case 3:
                                       _context2.next = 5;

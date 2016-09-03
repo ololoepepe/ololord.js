@@ -6,6 +6,7 @@ import * as Tools from './tools';
 
 const DEFAULT_SPELLS = '#wipe(samelines,samewords,longwords,symbols,capslock,numbers,whitespace)';
 const DEFAULT_LAST_CODE_LANG = '-';
+const SCRIPT_VERSION = '2.0.0';
 
 export const DEFAULT_HOTKEYS = _({
   previousPageImage: 'ctrl+left',
@@ -341,4 +342,12 @@ export function vkAuth(expires) {
   } else {
     return getCookie('vkAuth', 'false');
   }
+}
+
+export function checkScriptVersion() {
+  let version = getLocalObject('scriptVersion');
+  if (!version) {
+    localStorage.clear();
+  }
+  setLocalObject('scriptVersion', SCRIPT_VERSION);
 }

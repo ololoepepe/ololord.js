@@ -68,7 +68,7 @@ function getBans(fields) {
       return o >= MIN_TIME_OFFSET && o <= MAX_TIME_OFFSET;
     }
   });
-  bans = (0, _underscore2.default)(bans).reduce(function (acc, value, name) {
+  return (0, _underscore2.default)(bans).reduce(function (acc, value, name) {
     var expiresAt = fields['banExpires_' + value];
     if (expiresAt) {
       var hours = Math.floor(Math.abs(timeOffset) / 60);
@@ -81,7 +81,7 @@ function getBans(fields) {
     } else {
       expiresAt = null;
     }
-    acc[boardName] = {
+    acc[value] = {
       boardName: value,
       expiresAt: expiresAt,
       level: fields['banLevel_' + value],
@@ -145,7 +145,7 @@ router.post('/action/banUser', function () {
                       bans = getBans(fields);
                       banLevels = Tools.BAN_LEVELS.slice(1);
 
-                      bans.each(function (ban) {
+                      (0, _underscore2.default)(bans).each(function (ban) {
                         if (!_board2.default.board(ban.boardName)) {
                           throw new Error(Tools.translate('Invalid board: $[1]', '', ban.boardName));
                         }
@@ -326,7 +326,7 @@ router.post('/action/delall', function () {
 
 router.post('/action/moveThread', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(req, res, next) {
-    var _ref3, fields, _boardName, threadNumber, targetBoardName, password, geolocationInfo, result;
+    var _ref3, fields, boardName, threadNumber, targetBoardName, password, geolocationInfo, result;
 
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -339,12 +339,12 @@ router.post('/action/moveThread', function () {
           case 3:
             _ref3 = _context4.sent;
             fields = _ref3.fields;
-            _boardName = fields.boardName;
+            boardName = fields.boardName;
             threadNumber = fields.threadNumber;
             targetBoardName = fields.targetBoardName;
             password = fields.password;
 
-            if (!(!_board2.default.board(_boardName) || !_board2.default.board(targetBoardName))) {
+            if (!(!_board2.default.board(boardName) || !_board2.default.board(targetBoardName))) {
               _context4.next = 11;
               break;
             }
@@ -370,7 +370,7 @@ router.post('/action/moveThread', function () {
             throw new Error(Tools.translate('Invalid thread number'));
 
           case 16:
-            if (!(!req.isModer(_boardName) || !req.isModer(targetBoardName))) {
+            if (!(!req.isModer(boardName) || !req.isModer(targetBoardName))) {
               _context4.next = 18;
               break;
             }
@@ -384,18 +384,18 @@ router.post('/action/moveThread', function () {
           case 20:
             geolocationInfo = _context4.sent;
             _context4.next = 23;
-            return UsersModel.checkUserBan(req.ip, [_boardName, targetBoardName], {
+            return UsersModel.checkUserBan(req.ip, [boardName, targetBoardName], {
               write: true,
               geolocationInfo: geolocationInfo
             });
 
           case 23:
             _context4.next = 25;
-            return UsersModel.checkUserPermissions(req, _boardName, threadNumber, 'moveThread', Tools.sha1(password));
+            return UsersModel.checkUserPermissions(req, boardName, threadNumber, 'moveThread', Tools.sha1(password));
 
           case 25:
             _context4.next = 27;
-            return ThreadsModel.moveThread(_boardName, threadNumber, targetBoardName);
+            return ThreadsModel.moveThread(boardName, threadNumber, targetBoardName);
 
           case 27:
             result = _context4.sent;
@@ -425,7 +425,7 @@ router.post('/action/moveThread', function () {
 
 router.post('/action/setThreadFixed', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(req, res, next) {
-    var _ref4, fields, _boardName2, threadNumber, fixed, password, geolocationInfo;
+    var _ref4, fields, boardName, threadNumber, fixed, password, geolocationInfo;
 
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -438,12 +438,12 @@ router.post('/action/setThreadFixed', function () {
           case 3:
             _ref4 = _context5.sent;
             fields = _ref4.fields;
-            _boardName2 = fields.boardName;
+            boardName = fields.boardName;
             threadNumber = fields.threadNumber;
             fixed = fields.fixed;
             password = fields.password;
 
-            if (_board2.default.board(_boardName2)) {
+            if (_board2.default.board(boardName)) {
               _context5.next = 11;
               break;
             }
@@ -461,7 +461,7 @@ router.post('/action/setThreadFixed', function () {
             throw new Error(Tools.translate('Invalid thread number'));
 
           case 14:
-            if (req.isModer(_boardName2)) {
+            if (req.isModer(boardName)) {
               _context5.next = 16;
               break;
             }
@@ -475,18 +475,18 @@ router.post('/action/setThreadFixed', function () {
           case 18:
             geolocationInfo = _context5.sent;
             _context5.next = 21;
-            return UsersModel.checkUserBan(req.ip, _boardName2, {
+            return UsersModel.checkUserBan(req.ip, boardName, {
               write: true,
               geolocationInfo: geolocationInfo
             });
 
           case 21:
             _context5.next = 23;
-            return UsersModel.checkUserPermissions(req, _boardName2, threadNumber, 'setThreadFixed', Tools.sha1(password));
+            return UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadFixed', Tools.sha1(password));
 
           case 23:
             _context5.next = 25;
-            return ThreadsModel.setThreadFixed(_boardName2, threadNumber, 'true' === fixed);
+            return ThreadsModel.setThreadFixed(boardName, threadNumber, 'true' === fixed);
 
           case 25:
             res.json({});
@@ -514,7 +514,7 @@ router.post('/action/setThreadFixed', function () {
 
 router.post('/action/setThreadClosed', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(req, res, next) {
-    var _ref5, fields, _boardName3, threadNumber, closed, password, geolocationInfo;
+    var _ref5, fields, boardName, threadNumber, closed, password, geolocationInfo;
 
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -527,12 +527,12 @@ router.post('/action/setThreadClosed', function () {
           case 3:
             _ref5 = _context6.sent;
             fields = _ref5.fields;
-            _boardName3 = fields.boardName;
+            boardName = fields.boardName;
             threadNumber = fields.threadNumber;
             closed = fields.closed;
             password = fields.password;
 
-            if (_board2.default.board(_boardName3)) {
+            if (_board2.default.board(boardName)) {
               _context6.next = 11;
               break;
             }
@@ -550,7 +550,7 @@ router.post('/action/setThreadClosed', function () {
             throw new Error(Tools.translate('Invalid thread number'));
 
           case 14:
-            if (req.isModer(_boardName3)) {
+            if (req.isModer(boardName)) {
               _context6.next = 16;
               break;
             }
@@ -564,18 +564,18 @@ router.post('/action/setThreadClosed', function () {
           case 18:
             geolocationInfo = _context6.sent;
             _context6.next = 21;
-            return UsersModel.checkUserBan(req.ip, _boardName3, {
+            return UsersModel.checkUserBan(req.ip, boardName, {
               write: true,
               geolocationInfo: geolocationInfo
             });
 
           case 21:
             _context6.next = 23;
-            return UsersModel.checkUserPermissions(req, _boardName3, threadNumber, 'setThreadClosed', Tools.sha1(password));
+            return UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadClosed', Tools.sha1(password));
 
           case 23:
             _context6.next = 25;
-            return ThreadsModel.setThreadClosed(_boardName3, threadNumber, 'true' === closed);
+            return ThreadsModel.setThreadClosed(boardName, threadNumber, 'true' === closed);
 
           case 25:
             res.json({});
@@ -603,7 +603,7 @@ router.post('/action/setThreadClosed', function () {
 
 router.post('/action/setThreadUnbumpable', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(req, res, next) {
-    var _ref6, fields, _boardName4, threadNumber, unbumpable, password, geolocationInfo;
+    var _ref6, fields, boardName, threadNumber, unbumpable, password, geolocationInfo;
 
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
@@ -616,12 +616,12 @@ router.post('/action/setThreadUnbumpable', function () {
           case 3:
             _ref6 = _context7.sent;
             fields = _ref6.fields;
-            _boardName4 = fields.boardName;
+            boardName = fields.boardName;
             threadNumber = fields.threadNumber;
             unbumpable = fields.unbumpable;
             password = fields.password;
 
-            if (_board2.default.board(_boardName4)) {
+            if (_board2.default.board(boardName)) {
               _context7.next = 11;
               break;
             }
@@ -639,7 +639,7 @@ router.post('/action/setThreadUnbumpable', function () {
             throw new Error(Tools.translate('Invalid thread number'));
 
           case 14:
-            if (req.isModer(_boardName4)) {
+            if (req.isModer(boardName)) {
               _context7.next = 16;
               break;
             }
@@ -653,18 +653,18 @@ router.post('/action/setThreadUnbumpable', function () {
           case 18:
             geolocationInfo = _context7.sent;
             _context7.next = 21;
-            return UsersModel.checkUserBan(req.ip, _boardName4, {
+            return UsersModel.checkUserBan(req.ip, boardName, {
               write: true,
               geolocationInfo: geolocationInfo
             });
 
           case 21:
             _context7.next = 23;
-            return UsersModel.checkUserPermissions(req, _boardName4, threadNumber, 'setThreadUnbumpable', Tools.sha1(password));
+            return UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadUnbumpable', Tools.sha1(password));
 
           case 23:
             _context7.next = 25;
-            return ThreadsModel.setThreadUnbumpable(_boardName4, threadNumber, 'true' === unbumpable);
+            return ThreadsModel.setThreadUnbumpable(boardName, threadNumber, 'true' === unbumpable);
 
           case 25:
             res.json({});

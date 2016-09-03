@@ -258,14 +258,16 @@ var NodeCaptchaNoscript = function (_Captcha) {
     _this2.defineProperty('noiseColor', function () {
       return (0, _config2.default)('captcha.node-captcha.noiseColor', _this2.color);
     });
+    _this2.defineSetting('ttl', 5 * Tools.MINUTE);
     return _this2;
   }
 
   _createClass(NodeCaptchaNoscript, [{
     key: 'checkCaptcha',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(ip, _ref) {
-        var nodeCaptchaResponse = _ref.nodeCaptchaResponse;
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(_ref, _ref2) {
+        var ip = _ref.ip;
+        var nodeCaptchaResponse = _ref2.nodeCaptchaResponse;
         var challenge, response;
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {

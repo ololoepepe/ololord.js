@@ -11,7 +11,7 @@ var rename = require('gulp-rename');
 var source = require('vinyl-source-stream');
 var sourcemaps = require('gulp-sourcemaps');
 var Stream = require('stream');
-var uglify = require('gulp-uglify');
+var uglify = require('gulp-uglifyjs');
 var webworkify = require('webworkify');
 
 const CODEMIRROR_ADDONS = ['mode/simple'];

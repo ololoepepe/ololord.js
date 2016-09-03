@@ -6,11 +6,18 @@ import * as Files from '../core/files';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 
-const ImageMagick = promisify('imagemagick');
-
 const MIME_TYPES_FOR_SUFFIXES = new Map();
 const DEFAULT_SUFFIXES_FOR_MIME_TYPES = new Map();
 const THUMB_SUFFIXES_FOR_MIME_TYPE = new Map();
+
+function durationToString(duration) {
+  duration = Math.floor(+duration);
+  let hours = Tools.pad(Math.floor(duration / 3600), 2, '0');
+  duration %= 3600;
+  let minutes = Tools.pad(Math.floor(duration / 60), 2, '0');
+  let seconds = Tools.pad(duration % 60, 2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+}
 
 function defineMimeTypeSuffixes(mimeType, extensions, thumbSuffix) {
   if (!_(extensions).isArray()) {
@@ -81,20 +88,21 @@ export async function createThumbnail(file, thumbPath, path) {
     };
   } else {
     if (!result.dimensions) {
-      let thumbInfo = await ImageMagick.identify(thumbPath);
+      let thumbInfo = await Files.getImageSize(thumbPath);
+      if (!thumbInfo) {
+        throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
+      }
       result.dimensions = {
         width: thumbInfo.width,
         height: thumbInfo.height
       };
     }
     if (result.dimensions.width > 200 || result.dimensions.height > 200) {
-      await ImageMagick.convert([
-        thumbPath,
-        '-resize',
-        '200x200',
-        thumbPath
-      ]);
-      let thumbInfo = await ImageMagick.identify(thumbPath);
+      await Files.resizeImage(thumbPath, 200, 200);
+      let thumbInfo = await Files.getImageSize(thumbPath);
+      if (!thumbInfo) {
+        throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
+      }
       result.dimensions = {
         width: thumbInfo.width,
         height: thumbInfo.height
@@ -104,7 +112,7 @@ export async function createThumbnail(file, thumbPath, path) {
   return result;
 }
 
-export async function rerenderPostFileInfo(fileInfo) {
+export async function renderPostFileInfo(fileInfo) {
   if (fileInfo.dimensions) {
     fileInfo.sizeText += `, ${fileInfo.dimensions.width}x${fileInfo.dimensions.height}`;
   }

@@ -25,7 +25,7 @@ async function getNodeCaptchaImage(_1, res) {
     spacing: this.spacing
   }, (response, fileName) => {
     let challengeID = UUID.v4();
-    this.challenges.set(challenge, {
+    this.challenges.set(challengeID, {
       id: challengeID,
       fileName: fileName,
       response: response,
@@ -76,6 +76,7 @@ export default class NodeCaptcha extends Captcha {
     this.defineProperty('noiseColor', () => {
       return config('captcha.node-captcha.noiseColor', this.color);
     });
+    this.defineSetting('ttl', 5 * Tools.MINUTE);
   }
 
   customInfoFields() {

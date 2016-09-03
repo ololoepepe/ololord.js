@@ -82,9 +82,10 @@ export default class NodeCaptchaNoscript extends Captcha {
     this.defineProperty('noiseColor', () => {
       return config('captcha.node-captcha.noiseColor', this.color);
     });
+    this.defineSetting('ttl', 5 * Tools.MINUTE);
   }
 
-  async checkCaptcha(ip, { nodeCaptchaResponse }) {
+  async checkCaptcha({ ip }, { nodeCaptchaResponse }) {
     let challenge = this.challenges.get(ip);
     let response = nodeCaptchaResponse;
     if (!challenge) {

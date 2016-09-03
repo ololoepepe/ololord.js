@@ -10,6 +10,8 @@ import * as Storage from './storage';
 import * as Tools from './tools';
 import PopupMessage from '../widgets/popup-message';
 
+const NOTIFICATION_QUEUE_CHECK_INTERVAL = 10 * Constants.SECOND;
+
 let dialogs = [];
 let sounds = {};
 let unloading = false;
@@ -44,25 +46,55 @@ export let handleError = function(error) {
     } else if (error.hasOwnProperty('readyState')) {
       switch (error.status) {
       case 400:
+        text = Tools.translate('Bad Request');
+        break;
       case 404:
+        text = Tools.translate('Not Found');
+        break;
       case 408:
+        text = Tools.translate('Request Timeout');
+        break;
       case 413:
-      case 429: //DDoS
+        text = Tools.translate('Request Entity Too Large');
+        break;
+      case 429:
+        text = Tools.translate('Temporarily banned (DDoS detected)');
+        break;
       case 500:
+        text = Tools.translate('Internal Server Error');
+        break;
       case 502:
+        text = Tools.translate('Bad Gateway');
+        break;
       case 503:
+        text = Tools.translate('Service Unavailable');
+        break;
       case 504:
-      case 520: //CloudFlare
-      case 521: //CloudFlare
-      case 522: //CloudFlare
-      case 523: //CloudFlare
-      case 524: //CloudFlare
-      case 525: //CloudFlare
-      case 526: //CloudFlare
-        //TODO
+        text = Tools.translate('Gateway Timeout');
+        break;
+      case 520:
+        text = Tools.translate('Web server is returning an unknown error (CloudFlare)');
+        break;
+      case 521:
+        text = Tools.translate('Web server is down (CloudFlare)');
+        break;
+      case 522:
+        text = Tools.translate('Connection timed out (CloudFlare)');
+        break;
+      case 523:
+        text = Tools.translate('Origin is unreachable (CloudFlare)');
+        break;
+      case 524:
+        text = Tools.translate('A timeout occured (CloudFlare)');
+        break;
+      case 525:
+        text = Tools.translate('SSL handshake failed (CloudFlare)');
+        break;
+      case 526:
+        text = Tools.translate('Invalid SSL certificate (CloudFlare)');
         break;
       default:
-        if (0 == error.readyState)
+        if (0 === error.readyState)
           text = Tools.translate('No connection with server', 'error0Text');
           break;
         }
@@ -438,7 +470,7 @@ export async function checkNotificationQueue() {
   let f = () => {
     setTimeout(function() {
       checkNotificationQueue();
-    }, 10 * Constants.SECOND); //TODO: magic numbers
+    }, NOTIFICATION_QUEUE_CHECK_INTERVAL);
   };
   if (notificationQueue.length <= 0) {
     return f();
@@ -463,7 +495,7 @@ export async function checkNotificationQueue() {
     if (post && post.subject || post.rawText) {
       text += ` ${post.subject || post.rawText}`;
     }
-    showNotification('Favorite threads', text.substr(0, 300), icon); //TODO: magic numbers
+    showNotification('Favorite threads', text.substr(0, Constants.MAX_THREAD_TEXT_LENGTH), icon);
     f();
   } catch (err) {
     handleError(err);

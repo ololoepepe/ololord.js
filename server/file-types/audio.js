@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.rerenderPostFileInfo = exports.createThumbnail = exports.AUDIO_TAGS = undefined;
+exports.renderPostFileInfo = exports.createThumbnail = exports.AUDIO_TAGS = undefined;
 
 var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file, thumbPath, path) {
@@ -70,24 +70,35 @@ var createThumbnail = exports.createThumbnail = function () {
 
           case 27:
             _context.next = 29;
-            return ImageMagick.identify(thumbPath);
+            return Files.getImageSize(thumbPath);
 
           case 29:
             thumbInfo = _context.sent;
 
-            if (!(thumbInfo.width > 200 && thumbInfo.height > 200)) {
-              _context.next = 35;
+            if (!(thumbInfo && (thumbInfo.width > 200 || thumbInfo.height > 200))) {
+              _context.next = 36;
               break;
             }
 
             _context.next = 33;
-            return ImageMagick.convert([thumbPath, '-resize', '200x200', thumbPath]);
+            return Files.resizeImage(thumbPath, 200, 200);
 
           case 33:
             _context.next = 35;
-            return ImageMagick.identify(thumbPath);
+            return Files.getImageSize(thumbPath);
 
           case 35:
+            thumbInfo = _context.sent;
+
+          case 36:
+            if (thumbInfo) {
+              _context.next = 38;
+              break;
+            }
+
+            throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
+
+          case 38:
             return _context.abrupt('return', {
               extraData: extraData,
               thumbDimensions: {
@@ -96,7 +107,7 @@ var createThumbnail = exports.createThumbnail = function () {
               }
             });
 
-          case 36:
+          case 39:
           case 'end':
             return _context.stop();
         }
@@ -109,7 +120,7 @@ var createThumbnail = exports.createThumbnail = function () {
   };
 }();
 
-var rerenderPostFileInfo = exports.rerenderPostFileInfo = function () {
+var renderPostFileInfo = exports.renderPostFileInfo = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileInfo) {
     var _ref, duration, bitrate, album, artist, title, year;
 
@@ -149,7 +160,7 @@ var rerenderPostFileInfo = exports.rerenderPostFileInfo = function () {
     }, _callee2, this);
   }));
 
-  return function rerenderPostFileInfo(_x4) {
+  return function renderPostFileInfo(_x4) {
     return ref.apply(this, arguments);
   };
 }();
@@ -193,7 +204,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var ImageMagick = (0, _promisifyNode2.default)('imagemagick');
 var musicMetadata = (0, _promisifyNode2.default)('musicmetadata');
 
 var MIME_TYPES_FOR_SUFFIXES = new Map();
@@ -217,6 +227,15 @@ defineMimeTypeSuffixes('audio/ogg', 'ogg', 'png');
 defineMimeTypeSuffixes('audio/wav', 'wav', 'png');
 
 var AUDIO_TAGS = exports.AUDIO_TAGS = ['album', 'artist', 'title', 'year'];
+
+function durationToString(duration) {
+  duration = Math.floor(+duration);
+  var hours = Tools.pad(Math.floor(duration / 3600), 2, '0');
+  duration %= 3600;
+  var minutes = Tools.pad(Math.floor(duration / 60), 2, '0');
+  var seconds = Tools.pad(duration % 60, 2, '0');
+  return hours + ':' + minutes + ':' + seconds;
+}
 
 function match(mimeType) {
   return Files.isAudioType(mimeType);

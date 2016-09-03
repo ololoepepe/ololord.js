@@ -23,3 +23,5 @@ export const LEVEL_MAP = {
   Admin: 'ADMIN',
   Superuser: 'SUPERUSER'
 };
+
+export const MAX_THREAD_TEXT_LENGTH = 300;

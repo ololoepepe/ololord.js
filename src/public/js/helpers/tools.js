@@ -8,6 +8,15 @@ import merge from 'merge';
 import moment from 'moment/min/moment-with-locales';
 import XRegExp from 'xregexp';
 
+const AUDIO = new Set(['application/ogg', 'audio/mpeg', 'audio/ogg', 'audio/wav']);
+const IMAGE = new Set(['image/gif', 'image/jpeg', 'image/png']);
+const VIDEO = new Set(['video/mp4', 'video/ogg', 'video/webm']);
+const RATINGS = ['SFW', 'R-15', 'R-18', 'R-18G'];
+const USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];
+const DEFAULT_HAMMING_DISTANCE = 1000;
+const JS_TYPES = new Set(['string', 'boolean', 'number', 'object']);
+const DEVICE_TYPES = new Set(['desktop', 'mobile']);
+
 export let translate = cuteLocalize({
   locale: {},
   noDefault: true,
@@ -18,10 +27,6 @@ export let now = function() {
   return new Date();
 }
 
-const AUDIO = new Set(['application/ogg', 'audio/mpeg', 'audio/ogg', 'audio/wav']);
-const IMAGE = new Set(['image/gif', 'image/jpeg', 'image/png']);
-const VIDEO = new Set(['video/mp4', 'video/ogg', 'video/webm']);
-
 let _requireModel = () => null;
 
 export function initialize(requireModel) {
@@ -29,8 +34,6 @@ export function initialize(requireModel) {
   $.datepicker.setDefaults($.datepicker.regional[_requireModel('base').site.locale]);
   translate.setLocale(_requireModel('tr').tr);
 }
-
-const JS_TYPES = new Set(['string', 'boolean', 'number', 'object']);
 
 export function option(source, acceptable, def, { strict, invert, test } = {}) {
   if (typeof source === 'undefined') {
@@ -116,92 +119,6 @@ export function chunk(array, size) {
     return res;
   }, []);
 }
-
-export function gently(obj, f, { delay, n, promise } = {}) {
-  //TODO: simplify
-  if (!obj || typeof f !== 'function') {
-    return Promise.reject(translate('Invalid arguments', 'invalidArgumentsErrorText'));
-  }
-  delay = option(delay, 'number', 1);
-  n = option(n, 'number', 1);
-  promise = option(promise, 'boolean');
-  return new Promise(function(resolve, reject) {
-    if (_(obj).isArray()) {
-      var arr = obj;
-      var ind = 0;
-      var g = function() {
-        if (ind >= arr.length) {
-          return resolve();
-        }
-        if (promise) {
-          var i = ind;
-          var h = function() {
-            return f(arr[i], i).then(function() {
-              ++i;
-              if (i >= Math.min(ind + n, arr.length)) {
-                return Promise.resolve();
-              }
-              return h();
-            });
-          };
-          h().then(function() {
-            ind += n;
-            setTimeout(g, delay);
-          });
-        } else {
-          for (var i = ind; i < Math.min(ind + n, arr.length); ++i) {
-            f(arr[i], i);
-          }
-          ind += n;
-          setTimeout(g, delay);
-        }
-      };
-      g();
-    } else {
-      var arr = [];
-      for (var x in obj) {
-        if (obj.hasOwnProperty(x)) {
-          arr.push({
-            key: x,
-            value: obj[x]
-          });
-        }
-      }
-      var ind = 0;
-      var g = function() {
-        if (ind >= arr.length) {
-          return resolve();
-        }
-        if (promise) {
-          var i = ind;
-          var h = function() {
-            return f(arr[i].value, arr[i].key).then(function() {
-              ++i;
-              if (i >= Math.min(ind + n, arr.length)) {
-                return Promise.resolve();
-              }
-              return h();
-            });
-          };
-          h().then(function() {
-            ind += n;
-            setTimeout(g, delay);
-          });
-        } else {
-          for (var i = ind; i < Math.min(ind + n, arr.length); ++i) {
-            f(arr[i].value, arr[i].key);
-          }
-          ind += n;
-          setTimeout(g, delay);
-        }
-      };
-      g();
-    }
-  });
-}
-
-const RATINGS = ['SFW', 'R-15', 'R-18', 'R-18G'];
-const USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];
 
 export function compareRatings(r1, r2) {
   r1 = RATINGS.indexOf(r1);
@@ -308,8 +225,6 @@ var TYPES = new Set(['object', 'number', 'boolean']);
 export function checkError(result) {
     return !TYPES.has(typeof result) || (result && (result.errorMessage || result.ban));
 }
-
-const DEVICE_TYPES = new Set(['desktop', 'mobile']);
 
 export function deviceType(expected) {
   let type = require('./settings').deviceType();
@@ -760,7 +675,7 @@ export function regexp(string, rep) {
 }
 
 export function hammingDistance(hash1, hash2, max) {
-  max = option(max, 'number', 1000, { test: (m) => { return m > 0 } }); //TODO: magic numbers
+  max = option(max, 'number', DEFAULT_HAMMING_DISTANCE, { test: (m) => { return m > 0 } });
   let dist = 0;
   let val = bigInt(hash1).xor(bigInt(hash2));
   while (dist < max && val.toString() !== '0') {

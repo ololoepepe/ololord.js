@@ -123,7 +123,7 @@ function spawnCluster() {
         IPC.on('render', async function(data) {
           let f = BoardController[`${data.type}`];
           if (typeof f !== 'function') {
-            throw new Error(Tools.translate('Invalid generator function'));
+            throw new Error(Tools.translate('Invalid render function'));
           }
           return await f.call(BoardController, data.key, data.data);
         });

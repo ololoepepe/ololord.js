@@ -326,7 +326,7 @@ var SQLAdapter = function () {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
-                _logger2.default.warn(Tools.translate('"expire" is not implemented for SQL tables. Table: "$[1]"', '', key));
+                _logger2.default.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
 
               case 1:
               case 'end':
@@ -1848,7 +1848,7 @@ var SQLAdapter = function () {
           while (1) {
             switch (_context50.prev = _context50.next) {
               case 0:
-                _logger2.default.warn(Tools.translate('"zrange" is not implemented for SQL tables. Table: "$[1]"', '', key));
+                _logger2.default.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
 
               case 1:
               case 'end':
@@ -1872,7 +1872,7 @@ var SQLAdapter = function () {
           while (1) {
             switch (_context51.prev = _context51.next) {
               case 0:
-                _logger2.default.warn(Tools.translate('"zrangebyscroe" is not implemented for SQL tables. Table: "$[1]"', '', key));
+                _logger2.default.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
 
               case 1:
               case 'end':
@@ -1896,7 +1896,7 @@ var SQLAdapter = function () {
           while (1) {
             switch (_context52.prev = _context52.next) {
               case 0:
-                _logger2.default.warn(Tools.translate('"zadd" is not implemented for SQL tables. Table: "$[1]"', '', key));
+                _logger2.default.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
 
               case 1:
               case 'end':
@@ -1920,7 +1920,7 @@ var SQLAdapter = function () {
           while (1) {
             switch (_context53.prev = _context53.next) {
               case 0:
-                _logger2.default.warn(Tools.translate('"zrem" is not implemented for SQL tables. Table: "$[1]"', '', key));
+                _logger2.default.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
 
               case 1:
               case 'end':
@@ -1944,7 +1944,7 @@ var SQLAdapter = function () {
           while (1) {
             switch (_context54.prev = _context54.next) {
               case 0:
-                _logger2.default.warn(Tools.translate('"zcard" is not implemented for SQL tables. Table: "$[1]"', '', key));
+                _logger2.default.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
 
               case 1:
               case 'end':

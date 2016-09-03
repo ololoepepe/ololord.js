@@ -1,12 +1,10 @@
 import _ from 'underscore';
+import gm from 'gm';
 import phash from 'phash-image';
-import promisify from 'promisify-node';
 
 import * as Files from '../core/files';
 import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
-
-const ImageMagick = promisify('imagemagick');
 
 const MIME_TYPES_FOR_SUFFIXES = new Map();
 const DEFAULT_SUFFIXES_FOR_MIME_TYPES = new Map();
@@ -21,7 +19,7 @@ function defineMimeTypeSuffixes(mimeType, extensions, thumbSuffix) {
   THUMB_SUFFIXES_FOR_MIME_TYPE.set(mimeType, thumbSuffix);
 }
 
-defineMimeTypeSuffixes('image/gif', 'gif');
+defineMimeTypeSuffixes('image/gif', 'gif', 'png');
 defineMimeTypeSuffixes('image/jpeg', ['jpeg', 'jpg']);
 defineMimeTypeSuffixes('image/png', 'png');
 
@@ -42,24 +40,33 @@ export function thumbnailSuffixForMimeType(mimeType) {
 }
 
 export async function createThumbnail(file, thumbPath) {
-  let suffix = ('image/gif' === file.mimeType) ? '[0]' : '';
-  let info = await ImageMagick.identify(file.path + suffix);
-  let args = [file.path + suffix];
-  if (info.width > 200 || info.height > 200) {
-    args.push('-resize', '200x200');
+  let isGIF = ('image/gif' === file.mimeType);
+  let suffix = isGIF ? '[0]' : '';
+  let info = await Files.getImageSize(file.path + suffix);
+  await new Promise((resolve, reject) => {
+    let stream = gm(file.path + suffix);
+    if (isGIF) {
+      stream = stream.setFormat('png');
+    }
+    stream.resize(200, 200).quality(100).write(thumbPath, (err) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve();
+    });
+  });
+  let thumbInfo = await Files.getImageSize(thumbPath);
+  if (!thumbInfo) {
+    throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
   }
-  let prefix = ('image/gif' === file.mimeType) ? 'png:' : '';
-  args.push(prefix + thumbPath);
-  await ImageMagick.convert(args);
-  let thumbInfo = await ImageMagick.identify(thumbPath);
   let result = {
     dimensions: {
       width: info.width,
       height: info.height
     },
     thumbDimensions: {
-      thumbInfo: info.width,
-      thumbInfo: info.height
+      width: thumbInfo.width,
+      height: thumbInfo.height
     }
   };
   if (config('system.phash.enabled')) {
@@ -69,7 +76,7 @@ export async function createThumbnail(file, thumbPath) {
   return result;
 }
 
-export async function rerenderPostFileInfo(fileInfo) {
+export async function renderPostFileInfo(fileInfo) {
   if (fileInfo.dimensions) {
     fileInfo.sizeText += `, ${fileInfo.dimensions.width}x${fileInfo.dimensions.height}`;
   }

@@ -297,7 +297,7 @@ router.post('/action/createPost', function () {
 
           case 20:
             _context3.next = 22;
-            return _captcha2.default.checkCaptcha(req.ip, fields);
+            return _captcha2.default.checkCaptcha(req, fields);
 
           case 22:
             _context3.next = 24;
@@ -405,7 +405,7 @@ router.post('/action/createThread', function () {
 
           case 16:
             _context4.next = 18;
-            return _captcha2.default.checkCaptcha(req.ip, fields);
+            return _captcha2.default.checkCaptcha(req, fields);
 
           case 18:
             _context4.next = 20;

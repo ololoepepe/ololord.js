@@ -24,7 +24,7 @@ function getBans(fields) {
   timeOffset = Tools.option(timeOffset, 'number', config('site.timeOffset'), {
     test: (o) => { return (o >= MIN_TIME_OFFSET) && (o <= MAX_TIME_OFFSET); }
   });
-  bans = _(bans).reduce((acc, value, name) => {
+  return _(bans).reduce((acc, value, name) => {
     let expiresAt = fields[`banExpires_${value}`];
     if (expiresAt) {
       let hours = Math.floor(Math.abs(timeOffset) / 60);
@@ -37,7 +37,7 @@ function getBans(fields) {
     } else {
       expiresAt = null;
     }
-    acc[boardName] = {
+    acc[value] = {
       boardName: value,
       expiresAt: expiresAt,
       level: fields[`banLevel_${value}`],
@@ -64,7 +64,7 @@ router.post('/action/banUser', async function(req, res, next) {
     }
     let bans = getBans(fields);
     let banLevels = Tools.BAN_LEVELS.slice(1);
-    bans.each((ban) => {
+    _(bans).each((ban) => {
       if (!Board.board(ban.boardName)) {
         throw new Error(Tools.translate('Invalid board: $[1]', '', ban.boardName));
       }

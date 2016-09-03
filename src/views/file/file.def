@@ -42,7 +42,7 @@
       <span class='icon icon-paint button-icon' title='{{!it.translate('Draw on this image', 'drawOnImageText')}}'
             data-bind='click: drawOnImage.bind($data, "{{!fileInfo.name}}")'></span>
       <span class='icon icon-search button-icon js-image-search-button'
-            title='{{!it.translate('Find source...', 'findSourceText')}}'
+            title='{{!it.translate('Find source…', 'findSourceText')}}'
             data-menu-selector='#menu-image-search-{{=it.escapedSelector(fileInfo.name)}}'
             data-bind='click: showImageSearchMenu.bind($data, "{{!fileInfo.name}}")'></span>
     {{?}}

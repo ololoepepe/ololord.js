@@ -165,8 +165,8 @@ export let updateThread = async function(silent) {
         if (post.fileInfos.length > 0) {
           icon = `/${Tools.sitePathPrefix()}${boardName}/thumb/${post.fileInfos[0].thumb.name}`;
         }
-        //TODO: magic numbers
-        DOM.showNotification(title, (post.rawText || (`${boardName}/${post.number}`)).substr(0, 300), icon);
+        let text = post.rawText || `${boardName}/${post.number}`;
+        DOM.showNotification(title, text.substr(0, Constants.MAX_THREAD_TEXT_LENGTH), icon);
       }
       if (Settings.playAutoUpdateSound()) {
         DOM.playSound();

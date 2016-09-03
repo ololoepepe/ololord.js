@@ -10,7 +10,7 @@ export default class GoogleRecaptchaV1 extends Captcha {
     this.defineSetting('timeout', 15 * Tools.SECOND);
   }
 
-  async checkCaptcha(ip, { recaptcha_challenge_field, recaptcha_response_field }) {
+  async checkCaptcha({ ip }, { recaptcha_challenge_field, recaptcha_response_field }) {
     let challenge = recaptcha_challenge_field;
     let response = recaptcha_response_field;
     if (!challenge) {

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getMimeType = exports.generateRandomImage = exports.deleteFile = exports.renameFile = exports.editFile = exports.createFile = exports.writeFile = exports.diskUsage = exports.processFiles = exports.renderPostFileInfos = exports.getFiles = undefined;
+exports.resizeImage = exports.getImageSize = exports.getMimeType = exports.generateRandomImage = exports.deleteFile = exports.renameFile = exports.editFile = exports.createFile = exports.writeFile = exports.diskUsage = exports.processFiles = exports.renderPostFileInfos = exports.getFiles = undefined;
 
 var downloadFile = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(url, formFieldName, fields, transaction) {
@@ -427,7 +427,7 @@ var renderPostFileInfos = exports.renderPostFileInfos = function () {
                           break;
                         }
 
-                        err = new Error(Tools.translate('Unsupported file type'));
+                        err = new Error(Tools.translate('Unsupported file type: $[1]', '', fileInfo.mimeType));
 
                         _logger2.default.error(err.stack || err);
                         return _context9.abrupt('return');
@@ -485,7 +485,7 @@ var processFile = function () {
               break;
             }
 
-            return _context11.abrupt('return', Promise.reject(new Error(Tools.translate('Unsupported file type'))));
+            return _context11.abrupt('return', Promise.reject(new Error(Tools.translate('Unsupported file type: $[1]', '', file.mimeType))));
 
           case 3:
             _context11.next = 5;
@@ -957,6 +957,62 @@ var getMimeType = exports.getMimeType = function () {
   };
 }();
 
+var getImageSize = exports.getImageSize = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(fileName) {
+    return regeneratorRuntime.wrap(function _callee22$(_context22) {
+      while (1) {
+        switch (_context22.prev = _context22.next) {
+          case 0:
+            return _context22.abrupt('return', new Promise(function (resolve, reject) {
+              (0, _gm2.default)(fileName).size(function (err, value) {
+                if (err) {
+                  return reject(err);
+                }
+                resolve(value);
+              });
+            }));
+
+          case 1:
+          case 'end':
+            return _context22.stop();
+        }
+      }
+    }, _callee22, this);
+  }));
+
+  return function getImageSize(_x43) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var resizeImage = exports.resizeImage = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(fileName, width, height, options) {
+    return regeneratorRuntime.wrap(function _callee23$(_context23) {
+      while (1) {
+        switch (_context23.prev = _context23.next) {
+          case 0:
+            return _context23.abrupt('return', new Promise(function (resolve, reject) {
+              (0, _gm2.default)(fileName).resize(width, height, options).quality(100).write(fileName, function (err) {
+                if (err) {
+                  return reject(err);
+                }
+                resolve();
+              });
+            }));
+
+          case 1:
+          case 'end':
+            return _context23.stop();
+        }
+      }
+    }, _callee23, this);
+  }));
+
+  return function resizeImage(_x44, _x45, _x46, _x47) {
+    return ref.apply(this, arguments);
+  };
+}();
+
 exports.selectThumbnailingPlugin = selectThumbnailingPlugin;
 exports.parseForm = parseForm;
 exports.isAudioType = isAudioType;
@@ -987,6 +1043,10 @@ var _fs2 = _interopRequireDefault(_fs);
 var _fs3 = require('fs');
 
 var _fs4 = _interopRequireDefault(_fs3);
+
+var _gm = require('gm');
+
+var _gm2 = _interopRequireDefault(_gm);
 
 var _http = require('q-io/http');
 

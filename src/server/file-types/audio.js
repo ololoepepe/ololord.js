@@ -7,7 +7,6 @@ import promisify from 'promisify-node';
 import * as Files from '../core/files';
 import * as Tools from '../helpers/tools';
 
-const ImageMagick = promisify('imagemagick');
 const musicMetadata = promisify('musicmetadata');
 
 const MIME_TYPES_FOR_SUFFIXES = new Map();
@@ -29,6 +28,15 @@ defineMimeTypeSuffixes('audio/ogg', 'ogg', 'png');
 defineMimeTypeSuffixes('audio/wav', 'wav', 'png');
 
 export const AUDIO_TAGS = ['album', 'artist', 'title', 'year'];
+
+function durationToString(duration) {
+  duration = Math.floor(+duration);
+  let hours = Tools.pad(Math.floor(duration / 3600), 2, '0');
+  duration %= 3600;
+  let minutes = Tools.pad(Math.floor(duration / 60), 2, '0');
+  let seconds = Tools.pad(duration % 60, 2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+}
 
 export function match(mimeType) {
   return Files.isAudioType(mimeType);
@@ -76,15 +84,13 @@ export async function createThumbnail(file, thumbPath, path) {
   } else {
     await Files.generateRandomImage(file.hash, file.mimeType, thumbPath);
   }
-  let thumbInfo = await ImageMagick.identify(thumbPath);
-  if (thumbInfo.width > 200 && thumbInfo.height > 200) {
-    await ImageMagick.convert([
-      thumbPath,
-      '-resize',
-      '200x200',
-      thumbPath
-    ]);
-    await ImageMagick.identify(thumbPath);
+  let thumbInfo = await Files.getImageSize(thumbPath);
+  if (thumbInfo && (thumbInfo.width > 200 || thumbInfo.height > 200)) {
+    await Files.resizeImage(thumbPath, 200, 200);
+    thumbInfo = await Files.getImageSize(thumbPath);
+  }
+  if (!thumbInfo) {
+    throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
   }
   return {
     extraData: extraData,
@@ -95,7 +101,7 @@ export async function createThumbnail(file, thumbPath, path) {
   };
 }
 
-export async function rerenderPostFileInfo(fileInfo) {
+export async function renderPostFileInfo(fileInfo) {
   let { duration, bitrate, album, artist, title, year } = fileInfo.extraData || {};
   if (duration) {
     fileInfo.sizeText += `, ${duration}`;

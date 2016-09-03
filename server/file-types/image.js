@@ -3,65 +3,79 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.rerenderPostFileInfo = exports.createThumbnail = undefined;
+exports.renderPostFileInfo = exports.createThumbnail = undefined;
 
 var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file, thumbPath) {
-    var suffix, info, args, prefix, thumbInfo, result, hash;
+    var isGIF, suffix, info, thumbInfo, result, hash;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            suffix = 'image/gif' === file.mimeType ? '[0]' : '';
-            _context.next = 3;
-            return ImageMagick.identify(file.path + suffix);
+            isGIF = 'image/gif' === file.mimeType;
+            suffix = isGIF ? '[0]' : '';
+            _context.next = 4;
+            return Files.getImageSize(file.path + suffix);
 
-          case 3:
+          case 4:
             info = _context.sent;
-            args = [file.path + suffix];
+            _context.next = 7;
+            return new Promise(function (resolve, reject) {
+              var stream = (0, _gm2.default)(file.path + suffix);
+              if (isGIF) {
+                stream = stream.setFormat('png');
+              }
+              stream.resize(200, 200).quality(100).write(thumbPath, function (err) {
+                if (err) {
+                  return reject(err);
+                }
+                resolve();
+              });
+            });
 
-            if (info.width > 200 || info.height > 200) {
-              args.push('-resize', '200x200');
+          case 7:
+            _context.next = 9;
+            return Files.getImageSize(thumbPath);
+
+          case 9:
+            thumbInfo = _context.sent;
+
+            if (thumbInfo) {
+              _context.next = 12;
+              break;
             }
-            prefix = 'image/gif' === file.mimeType ? 'png:' : '';
 
-            args.push(prefix + thumbPath);
-            _context.next = 10;
-            return ImageMagick.convert(args);
-
-          case 10:
-            _context.next = 12;
-            return ImageMagick.identify(thumbPath);
+            throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
 
           case 12:
-            thumbInfo = _context.sent;
             result = {
               dimensions: {
                 width: info.width,
                 height: info.height
               },
-              thumbDimensions: _defineProperty({
-                thumbInfo: info.width
-              }, 'thumbInfo', info.height)
+              thumbDimensions: {
+                width: thumbInfo.width,
+                height: thumbInfo.height
+              }
             };
 
             if (!(0, _config2.default)('system.phash.enabled')) {
-              _context.next = 19;
+              _context.next = 18;
               break;
             }
 
-            _context.next = 17;
+            _context.next = 16;
             return (0, _phashImage2.default)(thumbPath, true);
 
-          case 17:
+          case 16:
             hash = _context.sent;
 
             result.ihash = hash.toString();
 
-          case 19:
+          case 18:
             return _context.abrupt('return', result);
 
-          case 20:
+          case 19:
           case 'end':
             return _context.stop();
         }
@@ -74,7 +88,7 @@ var createThumbnail = exports.createThumbnail = function () {
   };
 }();
 
-var rerenderPostFileInfo = exports.rerenderPostFileInfo = function () {
+var renderPostFileInfo = exports.renderPostFileInfo = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileInfo) {
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -93,7 +107,7 @@ var rerenderPostFileInfo = exports.rerenderPostFileInfo = function () {
     }, _callee2, this);
   }));
 
-  return function rerenderPostFileInfo(_x3) {
+  return function renderPostFileInfo(_x3) {
     return ref.apply(this, arguments);
   };
 }();
@@ -107,13 +121,13 @@ var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
+var _gm = require('gm');
+
+var _gm2 = _interopRequireDefault(_gm);
+
 var _phashImage = require('phash-image');
 
 var _phashImage2 = _interopRequireDefault(_phashImage);
-
-var _promisifyNode = require('promisify-node');
-
-var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
 
 var _files = require('../core/files');
 
@@ -131,11 +145,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
-
-var ImageMagick = (0, _promisifyNode2.default)('imagemagick');
 
 var MIME_TYPES_FOR_SUFFIXES = new Map();
 var DEFAULT_SUFFIXES_FOR_MIME_TYPES = new Map();
@@ -152,7 +162,7 @@ function defineMimeTypeSuffixes(mimeType, extensions, thumbSuffix) {
   THUMB_SUFFIXES_FOR_MIME_TYPE.set(mimeType, thumbSuffix);
 }
 
-defineMimeTypeSuffixes('image/gif', 'gif');
+defineMimeTypeSuffixes('image/gif', 'gif', 'png');
 defineMimeTypeSuffixes('image/jpeg', ['jpeg', 'jpg']);
 defineMimeTypeSuffixes('image/png', 'png');
 

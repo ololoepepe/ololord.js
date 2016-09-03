@@ -53,6 +53,8 @@ const MODULE_SHORTCUTS = new Map([
   ['save-as', 'node-safe-filesaver']
 ]);
 
+Storage.checkScriptVersion();
+
 window.jQuery = $; //NOTE: Workaround for the is-in-viewport plugin
 KO.options.useOnlyNativeEvents = true; //NOT: Use native events, NOT jQuery events
 

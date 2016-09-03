@@ -25,7 +25,7 @@ function fillFormWithDraft(key, createdAt) {
   if (!draft) {
     return;
   }
-  let confirmed = window.confirm('The form is not empty. Do you want to overwrite it?'); //TODO: translate
+  let confirmed = window.confirm(Tools.translate('The form is not empty. Do you want to overwrite it?'));
   if (!confirmed) {
     return;
   }

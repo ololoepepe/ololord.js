@@ -751,12 +751,16 @@ var rerenderReferringPosts = function () {
       while (1) {
         switch (_context14.prev = _context14.next) {
           case 0:
-            referringPosts = ReferringPosts.getAll(boardName + ':' + number);
+            _context14.next = 2;
+            return ReferringPosts.getAll(boardName + ':' + number);
+
+          case 2:
+            referringPosts = _context14.sent;
 
             referringPosts = (0, _underscore2.default)(referringPosts).filter(function (ref) {
               return !removingThread || ref.boardName !== boardName || ref.threadNumber !== threadNumber;
             });
-            _context14.next = 4;
+            _context14.next = 6;
             return Tools.series(referringPosts, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(ref) {
                 return regeneratorRuntime.wrap(function _callee13$(_context13) {
@@ -782,7 +786,7 @@ var rerenderReferringPosts = function () {
               };
             }());
 
-          case 4:
+          case 6:
           case 'end':
             return _context14.stop();
         }
@@ -939,7 +943,7 @@ var removePost = exports.removePost = function () {
                       case 0:
                         _context16.prev = 0;
                         _context16.next = 3;
-                        return FS.remove(path);
+                        return _fs2.default.remove(path);
 
                       case 3:
                         _context16.next = 8;
@@ -1043,11 +1047,6 @@ var editPost = exports.editPost = function () {
             return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post'))));
 
           case 23:
-            /*
-            return db.hget("threads:" + board.name, c.post.threadNumber);
-            if (!thread)
-                return Promise.reject(Tools.translate("No such thread"));
-            */
             key = boardName + ':' + postNumber;
             _context18.next = 26;
             return (0, _markup2.default)(board.name, rawText, {
@@ -1059,12 +1058,14 @@ var editPost = exports.editPost = function () {
           case 26:
             text = _context18.sent;
             plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
-            _context18.next = 30;
-            return board.postExtraData(req, fields, null, post);
+            extraData = post.extraData;
 
-          case 30:
-            extraData = _context18.sent;
-
+            if (post.hasOwnProperty('extraData')) {
+              delete post.extraData;
+            }
+            if (post.hasOwnProperty('bannedFor')) {
+              delete post.bannedFor;
+            }
             //post.markup = markupModes; //TODO ???
             post.name = name || null;
             post.plainText = plainText;
@@ -1072,7 +1073,6 @@ var editPost = exports.editPost = function () {
             post.subject = subject || null;
             post.text = text || null;
             post.updatedAt = date.toISOString();
-            //delete post.bannedFor; //TODO: WTF?
             _context18.next = 39;
             return Posts.setOne(key, post);
 
@@ -1202,7 +1202,7 @@ var deletePost = exports.deletePost = function () {
                     switch (_context19.prev = _context19.next) {
                       case 0:
                         _context19.next = 2;
-                        return FS.remove(__dirname + '/../../public/' + boardName + '/arch/' + postNumber + '.' + suffix);
+                        return _fs2.default.remove(__dirname + '/../../public/' + boardName + '/arch/' + postNumber + '.' + suffix);
 
                       case 2:
                         return _context19.abrupt('return', _context19.sent);
@@ -1776,11 +1776,11 @@ var processMovedThreadPosts = exports.processMovedThreadPosts = function () {
                                 switch (_context32.prev = _context32.next) {
                                   case 0:
                                     _context32.next = 2;
-                                    return FS.move(sourcePath + '/' + fileInfo.name, targetPath + '/' + fileInfo.name);
+                                    return _fs2.default.move(sourcePath + '/' + fileInfo.name, targetPath + '/' + fileInfo.name);
 
                                   case 2:
                                     _context32.next = 4;
-                                    return FS.move(sourceThumbPath + '/' + fileInfo.thumb.name, targetThumbPath + '/' + fileInfo.thumb.name);
+                                    return _fs2.default.move(sourceThumbPath + '/' + fileInfo.thumb.name, targetThumbPath + '/' + fileInfo.thumb.name);
 
                                   case 4:
                                   case 'end':
@@ -1848,7 +1848,7 @@ var processMovedThreadRelatedPosts = exports.processMovedThreadRelatedPosts = fu
                     switch (_context35.prev = _context35.next) {
                       case 0:
                         _context35.next = 2;
-                        return PostsModel.getPost(post.boardName, post.postNumber);
+                        return getPost(post.boardName, post.postNumber);
 
                       case 2:
                         post = _context35.sent;
@@ -1909,6 +1909,10 @@ var processMovedThreadRelatedPosts = exports.processMovedThreadRelatedPosts = fu
 var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
+
+var _fs = require('q-io/fs');
+
+var _fs2 = _interopRequireDefault(_fs);
 
 var _boards = require('./boards');
 

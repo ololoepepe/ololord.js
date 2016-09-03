@@ -8,7 +8,7 @@ exports.initializeUserBansMonitoring = exports.banUser = exports.updatePostBanIn
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var getUserCaptchaQuota = exports.getUserCaptchaQuota = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, userIp) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, userID) {
     var board, quota;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -25,15 +25,32 @@ var getUserCaptchaQuota = exports.getUserCaptchaQuota = function () {
 
           case 3:
             _context3.next = 5;
-            return UserCaptchaQuotas.getOne(boardName + ':' + userIp);
+            return UserCaptchaQuotas.getOne(userID);
 
           case 5:
             quota = _context3.sent;
+
+            quota = Tools.option(quota, 'number', 0, { test: function test(q) {
+                return q >= 0;
+              } });
+
+            if (!(quota <= 0)) {
+              _context3.next = 11;
+              break;
+            }
+
+            _context3.next = 10;
+            return UserCaptchaQuotas.getOne(boardName + ':' + userID);
+
+          case 10:
+            quota = _context3.sent;
+
+          case 11:
             return _context3.abrupt('return', Tools.option(quota, 'number', 0, { test: function test(q) {
                 return q >= 0;
               } }));
 
-          case 7:
+          case 12:
           case 'end':
             return _context3.stop();
         }
@@ -47,7 +64,7 @@ var getUserCaptchaQuota = exports.getUserCaptchaQuota = function () {
 }();
 
 var setUserCaptchaQuota = exports.setUserCaptchaQuota = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, userIp, quota) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, userID, quota) {
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
@@ -56,7 +73,7 @@ var setUserCaptchaQuota = exports.setUserCaptchaQuota = function () {
                 return q >= 0;
               } });
             _context4.next = 3;
-            return UserCaptchaQuotas.setOne(boardName + ':' + userIp, quota);
+            return UserCaptchaQuotas.setOne(boardName + ':' + userID, quota);
 
           case 3:
             return _context4.abrupt('return', _context4.sent);
@@ -75,7 +92,7 @@ var setUserCaptchaQuota = exports.setUserCaptchaQuota = function () {
 }();
 
 var useCaptcha = exports.useCaptcha = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName, userIp) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName, userID) {
     var board, key, quota;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -99,30 +116,42 @@ var useCaptcha = exports.useCaptcha = function () {
             return _context5.abrupt('return', 0);
 
           case 5:
-            key = boardName + ':' + userIp;
+            key = userID;
             _context5.next = 8;
-            return UserCaptchaQuotas.incrementBy(key, -1);
+            return UserCaptchaQuotas.getOne(userID);
 
           case 8:
             quota = _context5.sent;
 
+            quota = Tools.option(quota, 'number', 0, { test: function test(q) {
+                return q >= 0;
+              } });
+            if (quota <= 0) {
+              key = boardName + ':' + userID;
+            }
+            _context5.next = 13;
+            return UserCaptchaQuotas.incrementBy(key, -1);
+
+          case 13:
+            quota = _context5.sent;
+
             if (!(+quota < 0)) {
-              _context5.next = 13;
+              _context5.next = 18;
               break;
             }
 
-            _context5.next = 12;
+            _context5.next = 17;
             return UserCaptchaQuotas.setOne(key, 0);
 
-          case 12:
+          case 17:
             return _context5.abrupt('return', _context5.sent);
 
-          case 13:
+          case 18:
             return _context5.abrupt('return', Tools.option(quota, 'number', 0, { test: function test(q) {
                 return q >= 0;
               } }));
 
-          case 14:
+          case 19:
           case 'end':
             return _context5.stop();
         }
@@ -1313,28 +1342,28 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
 
           case 21:
             _context34.next = 23;
-            return Threads.getOne(threadNumber, boardName);
+            return ThreadsModel.getThread(boardName, threadNumber);
 
           case 23:
             thread = _context34.sent;
 
-            if (!(thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass))) {
+            if (thread) {
               _context34.next = 26;
+              break;
+            }
+
+            return _context34.abrupt('return', Promise.reject(new Error(Tools.translate('Not such thread: $[1]', '', '/' + boardName + '/' + threadNumber))));
+
+          case 26:
+            if (!(thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass))) {
+              _context34.next = 28;
               break;
             }
 
             return _context34.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
 
-          case 26:
-            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0)) {
-              _context34.next = 28;
-              break;
-            }
-
-            return _context34.abrupt('return');
-
           case 28:
-            if (!(req.hashpass && req.hashpass === user.hashpass)) {
+            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0)) {
               _context34.next = 30;
               break;
             }
@@ -1342,7 +1371,7 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
             return _context34.abrupt('return');
 
           case 30:
-            if (!(password && password === user.password)) {
+            if (!(req.hashpass && req.hashpass === user.hashpass)) {
               _context34.next = 32;
               break;
             }
@@ -1350,9 +1379,17 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
             return _context34.abrupt('return');
 
           case 32:
+            if (!(password && password === user.password)) {
+              _context34.next = 34;
+              break;
+            }
+
+            return _context34.abrupt('return');
+
+          case 34:
             return _context34.abrupt('return', Promise.reject(new Error(Tools.translate('Not enough rights'))));
 
-          case 33:
+          case 35:
           case 'end':
             return _context34.stop();
         }
@@ -1438,7 +1475,7 @@ var banUser = exports.banUser = function () {
 
           case 3:
             _context37.next = 5;
-            return UsersModel.getBannedUserBans(userIp);
+            return getBannedUserBans(ip);
 
           case 5:
             oldBans = _context37.sent;
@@ -1668,6 +1705,10 @@ var _posts = require('./posts');
 
 var PostsModel = _interopRequireWildcard(_posts);
 
+var _threads = require('./threads');
+
+var ThreadsModel = _interopRequireWildcard(_threads);
+
 var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
@@ -1679,6 +1720,10 @@ var _config2 = _interopRequireDefault(_config);
 var _fsWatcher = require('../helpers/fs-watcher');
 
 var _fsWatcher2 = _interopRequireDefault(_fsWatcher);
+
+var _ipc = require('../helpers/ipc');
+
+var IPC = _interopRequireWildcard(_ipc);
 
 var _permissions = require('../helpers/permissions');
 
@@ -1692,10 +1737,6 @@ var _channel = require('../storage/channel');
 
 var _channel2 = _interopRequireDefault(_channel);
 
-var _redisClientFactory = require('../storage/redis-client-factory');
-
-var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
-
 var _hash = require('../storage/hash');
 
 var _hash2 = _interopRequireDefault(_hash);
@@ -1703,6 +1744,10 @@ var _hash2 = _interopRequireDefault(_hash);
 var _key = require('../storage/key');
 
 var _key2 = _interopRequireDefault(_key);
+
+var _redisClientFactory = require('../storage/redis-client-factory');
+
+var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
 
 var _unorderedSet = require('../storage/unordered-set');
 
@@ -1739,7 +1784,6 @@ var SuperuserHashes = new _unorderedSet2.default((0, _redisClientFactory2.defaul
   stringify: false
 });
 var SynchronizationData = new _key2.default((0, _redisClientFactory2.default)(), 'synchronizationData');
-var Threads = new _hash2.default((0, _redisClientFactory2.default)(), 'threads');
 var UserBanPostNumbers = new _hash2.default((0, _redisClientFactory2.default)(), 'userBanPostNumbers', {
   parse: function parse(number) {
     return +number;

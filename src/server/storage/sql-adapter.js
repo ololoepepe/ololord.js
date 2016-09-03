@@ -77,7 +77,7 @@ export default class SQLAdapter {
   }
 
   async expire(key) {
-    Logger.warn(Tools.translate('"expire" is not implemented for SQL tables. Table: "$[1]"', '', key));
+    Logger.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
   }
 
   async get(key) {
@@ -363,22 +363,22 @@ export default class SQLAdapter {
   }
 
   async zrange(key, lb, ub) {
-    Logger.warn(Tools.translate('"zrange" is not implemented for SQL tables. Table: "$[1]"', '', key));
+    Logger.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
   }
 
   async zrangebyscroe(key, lb, ub) {
-    Logger.warn(Tools.translate('"zrangebyscroe" is not implemented for SQL tables. Table: "$[1]"', '', key));
+    Logger.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
   }
 
   async zadd(key, ...items) {
-    Logger.warn(Tools.translate('"zadd" is not implemented for SQL tables. Table: "$[1]"', '', key));
+    Logger.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
   }
 
   async zrem(key, ...items) {
-    Logger.warn(Tools.translate('"zrem" is not implemented for SQL tables. Table: "$[1]"', '', key));
+    Logger.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
   }
 
   async zcard(key) {
-    Logger.warn(Tools.translate('"zcard" is not implemented for SQL tables. Table: "$[1]"', '', key));
+    Logger.warn(Tools.translate('"$[1]" is not implemented for SQL tables. Table: "$[2]"', '', '', key));
   }
 }
