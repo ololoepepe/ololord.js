@@ -1,0 +1,5 @@
+<a href='/{{!it.site.pathPrefix}}{{!reference.boardName}}/res/{{!reference.threadNumber}}.html{{? reference.threadNumber !== reference.postNumber}}#{{!reference.postNumber}}{{?}}'
+   class='js-post-link {{? reference.threadNumber === reference.postNumber}} op-post-link{{?}}'
+   data-board-name='{{!reference.boardName}}'
+   data-post-number='{{!reference.postNumber}}'
+   data-thread-number='{{!reference.threadNumber}}'>&gt;&gt;{{? reference.boardName !== it.board.name}}/{{!reference.boardName}}/{{?}}{{!reference.postNumber}}</a>

@@ -1,0 +1,84 @@
+.create-action-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.post-form-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.post-form {
+  display: inline-block;
+}
+
+.post-form-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 4px;
+  cursor: move;
+}
+
+.post-form-body {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.post-form-row {
+  &:not(.post-form-textarea-container) {
+    box-sizing: border-box;
+    width: 0;
+    min-width: 100%;
+  }
+
+  + .post-form-row {
+    margin-top: 4px;
+  }
+
+  &:empty {
+    display: none;
+  }
+}
+
+.post-form-input {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.post-form-textarea {
+  font-size: 14px;
+}
+
+.symbol-counter-container {
+  margin-top: 0px !important; //NOTE: Fixing extra space
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.toggle-post-form-markup-visibility-button,
+.toggle-post-form-rules-visibility-button,
+.symbol-counter {
+  font-size: 0.8em;
+}
+
+.post-form-submit-button {
+  font-size: 1.2em;
+}
+
+.post-form-option {
+  white-space: nowrap;
+}
+
+.post-form-captcha-label {
+  font-weight: bold;
+}
+
+.post-form-rules {
+  margin: 4px 0px 0px 0px;
+  font-size: 0.8em;
+}

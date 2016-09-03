@@ -1,0 +1,361 @@
+<div id='settings' class='settings-widget'>
+  <ul class='tab-widget-header js-tab-widget-header'>
+    <li data-index='0'
+        class='tab-widget-header-activated'>
+      <span data-bind='click: activateTab.bind($data, 0)'>{{!it.translate('General', 'generalTabText')}}</span>
+    </li>
+    <li data-index='1'>
+      <span data-bind='click: activateTab.bind($data, 1)'>{{!it.translate('Posts and threads', 'postsTabText')}}</span>
+    </li>
+    <li data-index='2'>
+      <span data-bind='click: activateTab.bind($data, 2)'>{{!it.translate('Files', 'filesTabText')}}</span>
+    </li>
+  </ul>
+  <ul class='tab-widget-header js-tab-widget-header'>
+    <li data-index='3'>
+      <span data-bind='click: activateTab.bind($data, 3)'>{{!it.translate('Postform and posting',
+        'postformTabText')}}</span>
+    </li>
+    <li data-index='4'>
+      <span data-bind='click: activateTab.bind($data, 4)'>{{!it.translate('Hiding', 'hidingTabText')}}</span>
+    </li>
+    <li data-index='5'>
+      <span data-bind='click: activateTab.bind($data, 5)'>{{!it.translate('Other', 'otherTabText')}}</span>
+    </li>
+  </ul>
+  <div class='js-tab-widget-body'>
+    <div data-index='0'>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Device type:', 'deviceTypeLabelText')}}
+        <select class='select'
+                data-bind='value: settings.deviceType,
+                           event: { change: changeDeviceType }'>
+          <option value='auto'>{{!it.translate('Detect automatically', 'deviceTypeAutoText')}}</option>
+          <option value='desktop'>{{!it.translate('Desktop', 'deviceTypeDesktopText')}}</option>
+          <option value='mobile'>{{!it.translate('Mobile', 'deviceTypeMobileText')}}</option>
+        </select>
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Style:', 'styleLabelText')}}
+        <select class='select'
+                data-bind='value: settings.style'>
+          {{~it.styles :style}}
+            <option value='{{!style.name}}'>{{!style.title}}</option>
+          {{~}}
+        </select>
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Code style:', 'codeStyleLabelText')}}
+        <select class='select'
+                data-bind='value: settings.codeStyle'>
+          {{~it.codeStyles :style}}
+            <option value='{{!style.name}}'>{{!style.title}}</option>
+          {{~}}
+        </select>
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Time:', 'timeLabelText')}}
+        <select class='select'
+                data-bind='value: settings.time,
+                           event: { change: changeTime }'>
+          <option value='server'>{{!it.translate('Server', 'timeServerText')}}</option>
+          <option value='local'>{{!it.translate('Local', 'timeLocalText')}}</option>
+        </select>
+        {{!it.translate('Offset:', 'timeZoneOffsetLabelText')}}
+        <input type='number' min='-720' max='840' class='length-3'
+               data-bind='textInput: settings.timeZoneOffset' />
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Maximum rating:', 'maxAllowedRatingLabelText')}}
+        <select class='select'
+                data-bind='value: settings.maxAllowedRating'>
+          <option value='SFW'>SFW</option>
+          <option value='R-15'>R-15</option>
+          <option value='R-18'>R-18</option>
+          <option value='R-18G'>R-18G</option>
+        </select>
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.ajaxNavigation' />
+        {{!it.translate('AJAX navigation')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.useWebSockets' />
+        {{!it.translate('Use WebSockets')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.shrinkPosts' />
+        {{!it.translate('Shrink posts')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Password:', 'postFormLabelPassword')}}
+        <input type='password' size='16'
+               data-bind='attr: { type: (passwordVisible() ? "text" : "password") },
+                          textInput: password' />
+        <button data-bind='text: (passwordVisible() ? "{{!it.translate('Hide', 'hidePasswordButtonText')}}"
+                             : "{{!it.translate('Show', 'showPasswordButtonText')}}"),
+                           click: togglePasswordVisibility'></button>
+        <button data-bind='click: generateNewPassword'>{{!it.translate('New', 'newPasswordButtonText')}}</button>
+      </div>
+      <div class='settings-widget-tab-row'>
+        <button data-bind='click: exportSettings'>{{!it.translate('Export', 'exportSettingsButtonText')}}</button>
+        <button data-bind='click: importSettings'>{{!it.translate('Import', 'importSettingsButtonText')}}</button>
+        <button data-bind='click: synchronizeSettings'>{{!it.translate('Synchronize', 'synchronizationText')}}</button>
+      </div>
+    </div>
+    <div data-index='1' style='display: none;'>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Auto update interval (sec):', 'autoUpdateIntervalLabelText')}}
+        <input type='number' min='1' class='length-3'
+               data-bind='textInput: settings.autoUpdateInterval' />
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.autoUpdateThreadsByDefault' />
+        {{!it.translate('Auto update threads by default', 'autoUpdateThreadsByDefaultLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.addExpander' />
+        {{!it.translate('Expand long posts on click', 'addExpanderLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.signOPPostLinks' />
+        {{!it.translate('Mark OP post links', 'signOpPostLinksLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.signOwnPostLinks' />
+        {{!it.translate('Mark own post links', 'signOwnPostLinksLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Post preview appearance delay (ms):', 'viewPostPreviewDelayLabelText')}}
+        <input type='number' class='length-3' min='0'
+               data-bind='textInput: settings.viewPostPreviewDelay' />
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Post preview disappearance delay (ms):', 'hidePostPreviewDelayLabelText')}}
+        <input type='number' class='length-4' min='0'
+               data-bind='textInput: settings.hidePostPreviewDelay' />
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.infiniteScroll' />
+        {{!it.translate('Infinite scroll', 'infiniteScrollLabelText')}}
+      </div>
+    </div>
+    <div data-index='2' style='display: none;'>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Image zoom sensitivity:', 'imageZoomSensitivityLabelText')}}
+        <input type='number' class='length-3' min='1' max='100'
+               data-bind='textInput: settings.imageZoomSensitivity' />
+        %
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Default volume:', 'defaultAudioVideoVolumeLabelText')}}
+        <input type='number' class='length-3' min='0' max='100'
+               data-bind='textInput: settings.defaultAudioVideoVolume' />
+        %
+        <input type='checkbox'
+               data-bind='checked: settings.rememberAudioVideoVolume' />
+        {{!it.translate('Remember', 'rememberAudioVideoVolumeLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.closeFilesByClickingOnly' />
+        {{!it.translate('Close files only by clicking on them', 'closeFilesByClickingOnlyLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.resetFileScaleOnOpening' />
+        {{!it.translate('Reset image scale on every opening', 'resetFileScaleOnOpeningLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.playAudioVideoImmediately' />
+        {{!it.translate('Play media immediately', 'playAudioVideoImmediatelyLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.loopAudioVideo' />
+        {{!it.translate('Loop media', 'loopAudioVideoLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.showLeafButtons' />
+        {{!it.translate('Show file leaf buttons', 'showLeafButtonsLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.leafThroughImagesOnly' />
+        {{!it.translate('Leaf through images only', 'leafThroughImagesOnlyLabelText')}}
+      </div>
+    </div>
+    <div data-index='3' style='display: none;'>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Captcha:', 'captchaLabelText')}}
+        <select class='select'
+                data-bind='value: settings.captchaEngine'>
+          {{~it.supportedCaptchaEngines :engine}}
+            <option value='{{!engine.id}}'>{{!engine.title}}</option>
+          {{~}}
+        </select>
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Markup mode:')}}
+        <select class='select'
+                data-bind='value: settings.markupMode'>
+          {{~it.markupModes :mode}}
+            <option value='{{!mode.name}}'>{{!mode.title}}</option>
+          {{~}}
+        </select>
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Quick reply outside thread:', 'quickReplyActionLabelText')}}
+        <select class='select'
+                data-bind='value: settings.quickReplyAction'>
+          <option value='append_post'>{{!it.translate('Appends a new post', 'quickReplyActionAppendPostText')}}</option>
+          <option value='goto_thread'>{{!it.translate('Redirects to thread', 'quickReplyActionGotoThreadText')}}</option>
+        </select>
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.moveToPostOnReplyInThread' />
+        {{!it.translate('Move to post after replying in thread', 'moveToPostOnReplyInThreadLabelText')}}
+      </div>      
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.checkFileExistence' />
+        {{!it.translate('Check if attached file exists on server', 'checkFileExistenceLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.showAttachedFilePreview' />
+        {{!it.translate('Show previews when attaching files', 'showAttachedFilePreviewLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.addToFavoritesOnReply' />
+        {{!it.translate('Add thread to favorites on reply', 'addToFavoritesOnReplyLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.stripExifFromJpeg' />
+        {{!it.translate('Strip EXIF from JPEG files', 'stripExifFromJpegLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.hidePostFormMarkup' />
+        {{!it.translate('Hide postform markup', 'hidePostformMarkupLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.hidePostFormRules' />
+        {{!it.translate('Hide postform rules', 'hidePostformRulesLabelText')}}
+      </div>
+    </div>
+    <div data-index='4' style='display: none;'>
+      <div class='settings-widget-tab-row'>
+        <div>{{!it.translate('Hide boards:', 'hiddenBoardsLabelText')}}</div>
+        <div class='scroll-area-300-x-60 bordered'>
+          {{~it.boards.filter(function(board) { return !board.hidden; }) :board}}
+            <div>
+              <input type='checkbox' value='{{!board.name}}'
+                     data-bind='checked: settings.hiddenBoards'>[{{!board.name}}] {{!board.title}}</input>
+            </div>
+          {{~}}
+        </div>
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.hideTripcodes' />
+        {{!it.translate('Hide tripcodes', 'hideTripcodesLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.hideUserNames' />
+        {{!it.translate('Hide user names', 'hideUserNamesLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.strikeOutHiddenPostLinks' />
+        {{!it.translate('Strike out links to hidden posts', 'strikeOutHiddenPostLinksLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.spellsEnabled' />
+        {{!it.translate('Spells (command-based post hiding)', 'spellsLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Image similarity:', 'ihashDistanceLabelText')}}
+        <input type='number' class='length-3' min='1' max='1000'
+               data-bind='textInput: settings.ihashDistance' />
+      </div>
+      <div class='settings-widget-tab-row'>
+        <button class='button'
+                data-bind='click: editSpells'>{{!it.translate('Edit spells', 'editSpellsText')}}</button>
+        <button class='button'
+                data-bind='click: showHiddenPostList'>{{!it.translate('Show hidden post list', 'showHiddenPostListText')}}</button>
+      </div>
+    </div>
+    <div data-index='5' style='display: none;'>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.showAutoUpdateDesktopNotifications' />
+        {{!it.translate('Show desktop notifications', 'showAutoUpdateDesktopNotificationsLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.playAutoUpdateSound' />
+        {{!it.translate('Play sound', 'playAutoUpdateSoundLabelText')}}
+        <input type='number' class='length-3' min='0' max='100'
+               data-bind='textInput: settings.soundNotificationsVolume' />
+        %
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Banners mode:', 'bannersModeLabelText')}}
+        <select class='select'
+                data-bind='value: settings.bannerMode'>
+          <option value='random'>{{!it.translate('Show random board banner', 'bannersModeRandomText')}}</option>
+          <option value='same'>{{!it.translate('Show current board banner', 'bannersModeSameText')}}</option>
+          <option value='none'>{{!it.translate('Do not show banners', 'bannersModeNoneText')}}</option>
+        </select>
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.showNewPosts' />
+        {{!it.translate('New post count near board names', 'showNewPostsLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.chatEnabled' />
+        {{!it.translate('Enable private chat', 'chatLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row desktop-only'>
+        <input type='checkbox'
+               data-bind='checked: settings.hotkeysEnabled' />
+        {{!it.translate('Hotkeys enabled', 'hotkeysLabelText')}}
+        <button class='button'
+                data-bind='click: editHotkeys'>{{!it.translate('Edit', 'editHotkeysText')}}</button>
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.userCSSEnabled' />
+        {{!it.translate('User CSS enabled', 'userCssLabelText')}}
+        <button class='button'
+                data-bind='click: editUserCss'>{{!it.translate('Edit', 'editUserCssText')}}</button>
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.userJavaScriptEnabled' />
+        {{!it.translate('User JavaScript enabled', 'userJavaScriptLabelText')}}
+        <button class='button'
+                data-bind='click: editUserJavaScript'>{{!it.translate('Edit', 'editUserJavaScriptText')}}</button>
+      </div>
+    </div>
+  </div>
+</div>

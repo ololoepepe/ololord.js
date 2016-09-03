@@ -1,0 +1,8 @@
+<div id='banner' class='banner'>{{? it.banner}}
+  <a href='/{{!it.site.pathPrefix}}{{!it.banner.boardName}}'
+     title='{{!it.banner.boardTitle}}'><img class='hide-if-mum-watching'
+                                            src='/{{!it.site.pathPrefix}}img/banners/{{!it.banner.boardName}}/{{!it.banner.fileName}}'></a>
+{{?}}</div>
+<script type='text/javascript'>
+  window.lord.require().initializeBanner();
+</script>

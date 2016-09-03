@@ -1,0 +1,624 @@
+/*Øchan Mint*/
+
+@color-primary: #C7C7C7;
+@color-secondary: #C7C7C7;
+@color-title: #37C999;
+@color-link: #37C999;
+@color-link-hover: #36AB85;
+@color-link-button: #049666;
+@color-link-button-hover: #26B888;
+@color-quotation: #789922;
+@color-warning: #E08000;
+@color-critical: #FF0000;
+@color-highlighted: #0080C0;
+@color-extra: #CCCCCC;
+@background-color-primary: #2C333D;
+@background-color-secondary: #363F4C;
+@background-color-new: #3C3C3C;
+@background-color-targeted: #004A58;
+@background-color-spoiler: #000000;
+@font-weight-primary: normal;
+@font-family: Verdana,sans-serif;
+@border-color-primary: #1F252C;
+@border-color-secondary: #0F151C;
+@border-color-temporary: #000000;
+@border-primary: 1px solid @border-color-primary;
+@border-secondary: 1px solid @border-color-secondary;
+@border-temporary: 1px solid @border-color-temporary;
+@border-radius: 0px;
+@inversion: invert(1);
+
+.invert {
+  filter: @inversion;
+  -webkit-filter: @inversion;
+}
+
+.no-invert {
+  filter: invert(0);
+  -webkit-filter: invert(0);
+}
+
+body {
+  font-family: @font-family;
+  font-weight: @font-weight-primary;
+  color: @color-primary;
+  background-color: @background-color-primary;
+}
+
+hr {
+  height: 1px;
+  border: none;
+  color: @border-color-primary;
+  background-color: @border-color-primary;
+}
+
+.section-body {
+  background-color: @background-color-secondary;
+  border: @border-primary;
+  border-radius: @border-radius;
+}
+
+.page-title {
+  color: @color-title;
+}
+
+.widget {
+  border: @border-primary;
+  border-radius: @border-radius;
+  background-color: @background-color-primary;
+}
+
+.widget-header {
+  border: @border-secondary;
+  border-radius: @border-radius;
+  background-color: @background-color-secondary;
+}
+
+.tab-widget-header {
+  > li {
+    border: @border-primary;
+    border-radius: @border-radius;
+    background-color: @background-color-secondary;
+
+    &.tab-widget-header-activated {
+      background-color: @background-color-new;
+    }
+
+    &:hover {
+      background-color: @background-color-targeted;
+    }
+  }
+}
+
+.popup {
+  background-color: @background-color-secondary;
+  border: @border-secondary;
+  border-radius: @border-radius;
+}
+
+.warning {
+  color: @color-warning;
+  border: 1px dotted @color-warning;
+}
+
+.critical {
+  color: @color-critical;
+  border: 1px dotted @color-critical;
+}
+
+.button {
+  border: @border-primary;
+  border-radius: @border-radius;
+  background-color: @background-color-primary;
+}
+
+.input {
+  border: @border-primary;
+  border-radius: @border-radius;
+  background-color: @background-color-primary;
+}
+
+.select {
+  border: @border-primary;
+  border-radius: @border-radius;
+  color: @color-primary;
+  background-color: @background-color-primary;
+
+  > option {
+    color: @color-primary;
+    background-color: @background-color-primary;
+    .no-invert;
+  }
+}
+
+button, input:not([type='image']), select {
+  border-radius: @border-radius;
+}
+
+.input,
+input:not([type=image]),
+textarea {
+  color: #a7a7a7;
+  background-color: #2A3037;
+  border: 1px solid rgba(255, 255, 255, .18);
+  transition-property: background-color, border-color, box-shadow;
+  transition-duration: .4s
+}
+
+.input:focus,
+input:not([type=image]):focus,
+textarea:focus {
+  border: 1px solid rgba(55, 201, 153, .62);
+  color: #D8D8D8;
+  outline: 0;
+  box-shadow: inset 0 0 40px rgba(55, 201, 153, .32);
+  background-color: #1D2228
+}
+
+input:not([type=image]):hover,
+textarea:hover {
+    background-color: #1D2228
+}
+
+.input:hover {
+    background-color: #1D2228
+}
+
+.bordered {
+  border: @border-primary;
+  border-radius: @border-radius;
+}
+
+.menu {
+  border-radius: @border-radius;
+  background-color: @background-color-primary;
+
+  > li {
+    border-radius: @border-radius;
+  }
+}
+
+.button-icon {
+  .invert();
+}
+
+.sign-icon {
+  .invert();
+}
+
+/* Navbar */
+
+.sidebar-switch {
+  + label {
+    .invert();
+  }
+}
+
+#sidebar-switch:checked:not(:disabled) {
+  + label {
+    box-shadow: inset 1px 2px 3px #FFFFFF;
+  }
+}
+
+.sidebar,
+.toolbar {
+  background-color: @background-color-primary;
+}
+
+.sidebar {
+  border-right: @border-primary;
+}
+
+.toolbar {
+  border-bottom: @border-primary;
+}
+
+.sidebar-content {
+  border-top: @border-primary;
+}
+
+.sidebar-group {
+  border: @border-primary;
+  border-radius: @border-radius;
+}
+
+.sidebar-group-title {
+  font-weight: bold;
+  background-color: @background-color-secondary;
+  border-bottom: @border-primary;
+  border-radius: @border-radius;
+}
+
+.toolbar-group-title {
+  font-weight: bold;
+  border-bottom: 1px dashed @color-primary;
+}
+
+.drop-area {
+  border: @border-temporary;
+  background-color: @background-color-targeted;
+}
+
+.notification-button {
+  &::after {
+    color: @color-extra;
+  }
+}
+
+/* Chat */
+
+.chat-contact-list,
+.chat-messaging-area {
+  border: @border-primary;
+}
+
+.chat-contact {
+  background-color: @background-color-secondary;
+
+  &.chat-contact-selected {
+    background-color: @background-color-new;
+  }
+
+  &:hover {
+    background-color: @background-color-targeted;
+  }
+}
+
+.chat-contact-new-messages {
+  color: @color-extra;
+}
+
+.chat-message {
+  border: @border-primary;
+  border-radius: @border-radius;
+  background-color: @background-color-secondary;
+
+  &.chat-message-unread {
+    background-color: @background-color-new;
+  }
+}
+
+.chat-message-header {
+  border-bottom: 1px dotted @border-color-secondary;
+}
+
+/* Board */
+
+.catalog-thread {
+  border: @border-primary;
+  border-radius: @border-radius;
+  background-color: @background-color-secondary;
+}
+
+.search-result-highlighted {
+  background-color: @color-highlighted;
+}
+
+.favorite {
+  background-color: @background-color-secondary;
+  border: @border-primary;
+}
+
+.board-select {
+  .invert();
+}
+
+/* Post form */
+
+.post-form {
+  background-color: @background-color-primary;
+}
+
+.post-form-header {
+  border: @border-primary;
+  border-radius: @border-radius;
+  background-color: @background-color-secondary;
+}
+
+.post-form-submit-button {
+  border: 1px solid @color-link;
+}
+
+.file-input {
+  border: 1px dashed @border-color-secondary;
+
+  .drag {
+    border: 1px dashed @border-color-temporary;
+    background-color: @background-color-secondary;
+  }
+}
+
+/* Post */
+
+.post {
+  border-radius: @border-radius;
+
+  &.reply-post {
+    .post-internal-wrapper {
+      border: @border-primary;
+      background-color: @background-color-secondary;
+    }
+  }
+
+  &.new-post {
+    .post-internal-wrapper {
+      background-color: @background-color-new;
+    }
+  }
+
+  &.temporary-post {
+    .post-internal-wrapper {
+      border: @border-temporary;
+    }
+  }
+
+  &:target {
+    .post-internal-wrapper {
+      background-color: @background-color-targeted;
+    }
+  }
+}
+
+.new-post-count {
+  color: @color-extra;
+}
+
+.post-file-size {
+  color: @color-secondary;
+}
+
+.message-bump-limit-reached {
+  color: @color-critical;
+}
+
+.message-post-limit-reached {
+  color: @color-warning;
+}
+
+.post-subject {
+  color: #8DA1B4;
+  font-weight: bold;
+}
+
+.post-name {
+  color: #789EB8;
+  font-weight: bold;
+
+  &.post-name-moder {
+    color: #0000FF;
+    font-weight: bold;
+  }
+}
+
+.hiding-reason {
+
+  font-weight: bold;
+}
+
+.op-sign,
+.post-sequence-number,
+.tripcode {
+  color: @color-extra;
+}
+
+.modification-date-time {
+
+  font-style: italic;
+}
+
+.referring-posts {
+  color: @color-secondary;
+  font-style: italic;
+}
+
+.banned-for {
+  color: @color-critical;
+}
+
+/* Markup */
+
+a {
+  color: @color-link;
+
+  &:hover {
+    color: @color-link-hover;
+  }
+}
+
+.spoiler {
+  color: @background-color-spoiler;
+  background-color: @background-color-spoiler;
+
+  &:hover {
+    color: @color-primary;
+  }
+}
+
+.quotation {
+  color: @color-quotation;
+}
+
+.collapsible-spoiler-title {
+  color: @color-link-button;
+
+  &:hover{
+    color: @color-link-button-hover;
+  }
+}
+
+.expandable {
+  color: @color-link-button;
+
+  &:hover{
+    color: @color-link-button-hover;
+  }
+}
+
+.tooltip {
+  color: @color-link-button;
+
+  &:hover {
+    color: @color-link-button-hover;
+  }
+}
+
+.collapsible-spoiler-body {
+  border-radius: @border-radius;
+  background-color: @background-color-new;
+}
+
+/* Player */
+
+.player {
+  border: @border-primary;
+  border-radius: @border-radius;
+  background-color: @background-color-primary;
+
+  &.minimized {
+    background-color: @background-color-secondary;
+  }
+}
+
+.player-header {
+  border: @border-primary;
+  border-radius: @border-radius;
+  background-color: @background-color-secondary;
+}
+
+.player-track {
+  border: @border-primary;
+  border-radius: @border-radius;
+  background-color: @background-color-secondary;
+
+  .selected {
+    background-color: @background-color-targeted;
+
+    .player-track-info {
+      font-weight: bold;
+    }
+  }
+
+  &:hover {
+    border: @border-primary;
+    background-color: @background-color-new;
+  }
+}
+
+/* jQuery UI */
+
+.ui-widget,
+.ui-widget input,
+.ui-widget select,
+.ui-widget textarea,
+.ui-widget button {
+  font-family: @font-family;
+}
+
+.ui-widget-content {
+  border: @border-primary;
+  color: @color-primary;
+}
+
+.ui-widget-header {
+  border: @border-primary;
+  border-radius: @border-radius;
+  background-color: @background-color-secondary;
+  color: @color-primary;
+}
+
+.ui-widget-content a,
+.ui-widget-header a,
+.ui-state-hover a,
+.ui-state-hover a:hover,
+.ui-state-hover a:link,
+.ui-state-hover a:visited,
+.ui-state-focus a,
+.ui-state-focus a:hover,
+.ui-state-focus a:link,
+.ui-state-focus a:visited,
+.ui-state-default a,
+.ui-state-default a:link,
+.ui-state-default a:visited,
+.ui-state-active a,
+.ui-state-active a:link,
+.ui-state-active a:visited {
+  color: @color-primary;
+}
+
+.ui-state-default,
+.ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default {
+  border: @border-primary;
+  color: @color-primary;
+  background-color: @background-color-primary;
+}
+
+.ui-state-hover,
+.ui-widget-content .ui-state-hover,
+.ui-widget-header .ui-state-hover,
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus,
+.ui-state-active,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active {
+  border: @border-primary;
+  background-color: @background-color-targeted;
+  color: @color-primary;
+}
+
+.ui-corner-all,
+.ui-corner-top,
+.ui-corner-left,
+.ui-corner-tl {
+  border-top-left-radius: @border-radius;
+}
+
+.ui-corner-all,
+.ui-corner-top,
+.ui-corner-right,
+.ui-corner-tr {
+  border-top-right-radius: @border-radius;
+}
+
+.ui-corner-all,
+.ui-corner-bottom,
+.ui-corner-left,
+.ui-corner-bl {
+  border-bottom-left-radius: @border-radius;
+}
+
+.ui-corner-all,
+.ui-corner-bottom,
+.ui-corner-right,
+.ui-corner-br {
+  border-bottom-right-radius: @border-radius;
+}
+
+.ui-widget-overlay {
+  background: @background-color-primary;
+}
+
+.ui-widget-shadow {
+  margin: (-2 * @border-radius) 0 0 (-2 * @border-radius);
+  padding: 2 * @border-radius;
+  background: @background-color-primary;
+  border-radius: 2 * @border-radius;
+}
+
+.ui-icon {
+  .invert();
+}
+
+.ui-tooltip {
+  background-color: @background-color-primary;
+}
+
+.ui-tooltip-content::after {
+  border-color: @border-color-primary transparent;
+}
+
+.ui-slider,
+.ui-slider-handle {
+  border: 1px solid @border-color-temporary !important;
+}

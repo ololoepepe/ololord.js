@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' {{#def.rootBindings}}>
+  {{#def.head}}
+  <body>
+    <a id='top'></a>
+    {{#def.sidebar}}
+    <div class='content-wrapper'>
+      {{#def.toolbar}}
+      <header>{{#def['custom/header'] || ''}}</header>
+      <main id='content'>
+        {{#def.banner}}
+        <h1 class='page-title'>
+          <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}'>{{!it.board.title}}</a>
+        </h1>
+        <div id='threads' class='archival-threads'>
+          {{~it.threads :thread}}
+            <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/arch/{{!thread.number}}.html'
+               class='archival-thread-link'>{{!thread.number}}.html</a>
+          {{~}}
+        </div>
+        <hr />
+        {{#def['board/postingSpeed']}}
+        {{~['top', 'bottom'] :target}}
+          {{#def['board/navigationButton']}}
+        {{~}}
+      </main>
+      <a id='bottom'></a>
+      <footer>{{#def['custom/footer'] || ''}}</footer>
+      {{#def.player}}
+    </div>
+    {{#def.jQueryUIpositionFix}}
+    {{#def.ajaxLoadingOverlay}}
+  </body>
+</html>

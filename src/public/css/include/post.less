@@ -1,0 +1,163 @@
+:root {
+  &.no-shrink-posts {
+    .post-internal-wrapper {
+      width: 100%;
+    }
+  }
+
+  &.add-expander {
+    .post {
+      .post-text {
+        overflow-y: hidden;
+      }
+    }
+  }
+
+  &.thread-page .post-text,
+  &.thread-page .post-text.expand {
+    max-height: none;
+  }
+
+  &:not(.no-sign-op-post-links) .op-post-link {
+    &::after {
+      content: ' (OP)';
+    }
+  }
+}
+
+.post {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.reply-post {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.post.temporary-post {
+  box-sizing: border-box;
+  width: auto;
+  z-index: 41;
+}
+
+.post-internal-wrapper {
+  display: inline-block;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding-left: 10px;
+  padding-right: 4px;
+  padding-bottom: 4px;
+  padding-top: 10px;
+}
+
+.post-header {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.post-subject,
+.post-name {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.op-sign::after {
+  content: '[OP]';
+}
+
+.post-sequence-number {
+  font-size: 75%;
+}
+
+.hiding-reason {
+  font-size: 75%;
+}
+
+.post-body {
+  box-sizing: border-box;
+  max-width: 100%;
+  text-align: left;
+}
+
+.post-files {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.post-text-wrapper {
+  box-sizing: border-box;
+}
+
+.post-file-name, .post-file-size {
+  white-space: nowrap;
+}
+
+.post-file-actions {
+  padding-bottom: 4px;
+}
+
+.post-text-wrapper {
+  padding: 14.4px 25px 14.4px 25px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+  flex-grow: 1;
+  min-width: 25%;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
+.post-text {
+  box-sizing: border-box;
+  max-height: 300px;
+  margin: 0px;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+.post-text.expand {
+  max-height: none;
+}
+
+.post-text-expander {
+  box-sizing: border-box;
+  width: 100%;
+  text-align: left;
+}
+
+.referring-posts {
+  font-size: 0.8em;
+}
+
+.thread-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.omitted-posts {
+  display: inline-block;
+}
+
+.reply-to-thread-button {
+  text-decoration: none;
+  padding: 8px;
+  font-size: 1.2em;
+}
+
+.temporary-post-overlay-mask {
+  position: fixed;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  z-index: 40;
+  background-color: #000000;
+  opacity: 0.6;
+}

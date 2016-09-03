@@ -1,3 +1,4 @@
+[done] Add Vocaroo embedding support
 * Use Babel
 * Use LESS
 * Use Gulp
@@ -26,3 +27,6 @@
 * Auto save post form
 * Do not show update and auto update buttons in archived threads
 * Add classes for custom post body/header parts
+* Serve local copies of YouTube, Coub and Vocaroo favicons
+* Use GraphicsMagick instead ig ImageMagick
+* Use SQL storage for archived threads/posts/files

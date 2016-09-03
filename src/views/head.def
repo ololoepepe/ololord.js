@@ -1,0 +1,31 @@
+<head>
+  <title>{{!it.title}}</title>
+  <meta http-equiv='Content-Type' content='text/html;charset=utf-8'>
+  <link id='favicon' rel='shortcut icon' href='/{{!it.site.pathPrefix}}favicon.ico'>
+  <link rel='apple-touch-icon' sizes='180x180' href='/{{!it.site.pathPrefix}}apple-touch-icon.png'>
+  <link rel='icon" type='image/png' href='/{{!it.site.pathPrefix}}favicon-32x32.png' sizes='32x32'>
+  <link rel='icon" type='image/png' href='/{{!it.site.pathPrefix}}favicon-16x16.png' sizes='16x16'>
+  <link rel='manifest' href='/{{!it.site.pathPrefix}}manifest.json'>
+  <link rel='mask-icon' href='/{{!it.site.pathPrefix}}safari-pinned-tab.svg' color='#111111'>
+  <meta name='theme-color' content='#eeeeee'>
+  <link id='stylesheet-base' rel='stylesheet' type='text/css' href='/{{!it.site.pathPrefix}}css/base-combined.css'>
+  <link id='stylesheet-custom-base' rel='stylesheet' type='text/css'
+        href='/{{!it.site.pathPrefix}}css/custom-base-combined.css'>
+  <link id='stylesheet-theme' rel='stylesheet' type='text/css' href='/{{!it.site.pathPrefix}}css/photon.css'
+        data-bind='stopBindings: true,
+                   attr: { href: "/{{!it.site.pathPrefix}}css/" + settings.style() + ".css" }'>
+  <link id='stylesheet-code-theme' rel='stylesheet' type='text/css'
+        href='/{{!it.site.pathPrefix}}css/3rdparty/highlight.js/default.css'
+        data-bind='stopBindings: true,
+                   attr: {
+                     href: "/{{!it.site.pathPrefix}}css/3rdparty/highlight.js/" + settings.codeStyle() + ".css"
+                   }'>
+  <script type='text/javascript' src='/{{!it.site.pathPrefix}}js/index.js'></script>
+  <script type='text/javascript' src='/{{!it.site.pathPrefix}}js/templating.js'></script>
+  <script type='text/javascript' src='/{{!it.site.pathPrefix}}js/custom.js'></script>
+  <script type='text/javascript'>
+    (function() {
+      window.lord.require().initializeHead();
+    })();
+  </script>
+</head>

@@ -1,0 +1,150 @@
+<form id='post-form' class='post-form' method='post' accept-charset='utf-8' enctype='multipart/form-data'
+      action='/{{!it.site.pathPrefix}}action/{{? it.thread}}createPost{{??}}createThread{{?}}'
+      data-bind='event: { submit: submit }'>
+  <div class='js-only desktop-only post-form-header' draggable='true'
+       data-bind='event: { dragstart: makeFormFloat }'>
+    <div>{{!it.translate('Start dragging to make post form float')}}</div>
+    <div>
+      <span class='icon icon-cross button-icon' title='{{!it.translate('Close', 'closeButtonText')}}'
+            data-bind='click: close'></span>
+    </div>
+  </div>
+  <div class='post-form-body'>
+    <div class='js-post-form-hidden-section' style='display: none;'>
+      <input name='boardName' type='hidden' value='{{!it.board.name}}' />
+      {{? it.thread}}
+        <input name='threadNumber' type='hidden' value='{{!it.thread.number}}' />
+      {{?}}
+      <input name='captchaEngine' type='hidden' value='node-captcha-noscript' />
+      <input name='fileHashes' type='hidden' class='js-file-hashes' value='' />
+      <input name='markupMode' type='hidden'
+             data-bind='value: settings.markupMode' />
+    </div>
+    <div class='post-form-row'>{{#def['custom/postFormField/0'] || ''}}</div>
+    <div class='post-form-row'>
+      <input name='name' type='text' class='post-form-input' maxlength='{{!it.board.maxNameLength}}'
+             placeholder='{{!it.translate('Name', 'postFormPlaceholderName')}}' />
+    </div>
+    <div class='post-form-row'>{{#def['custom/postFormField/10'] || ''}}</div>
+    <div class='post-form-row'>
+      <input name='subject' type='text' class='post-form-input' maxlength='{{!it.board.maxSubjectLength}}'
+             placeholder='{{!it.translate('Subject', 'postFormPlaceholderSubject')}}' />
+    </div>
+    <div class='post-form-row'>{{#def['custom/postFormField/20'] || ''}}</div>
+    <div class='post-form-row post-form-textarea-container'>
+      <textarea name='text' class='post-form-input post-form-textarea' rows='10' cols='41' 
+                placeholder='{{!it.translate('Comment. Max length:')}} {{!it.board.maxTextLength}}'
+                data-bind='event: { input: countSymbols }'></textarea>
+    </div>
+    <div class='post-form-row symbol-counter-container js-only'>
+      <a href='javascript:void(0);' class='toggle-post-form-markup-visibility-button'
+         data-bind='text: (settings.hidePostFormMarkup() ? "{{!it.translate('Show markup', 'showPostformMarkupText')}}"
+                    : "{{!it.translate('Hide markup', 'hidePostformMarkupText')}}"),
+                    click: toggleMarkupVisibility'></a>
+      <span class='symbol-counter'><span class='js-symbols-used'>0</span>/{{!it.board.maxTextLength}}</span>
+    </div>
+    <div class='post-form-row'>{{#def['custom/postFormField/30'] || ''}}</div>
+    <div class='js-only post-form-row' data-bind='visible: !settings.hidePostFormMarkup()'>{{#def['postForm/markup']}}</div>
+    <div class='post-form-row'>{{#def['custom/postFormField/40'] || ''}}</div>
+    <div class='post-form-row'>
+      <input name='submit' type='submit' class='post-form-submit-button post-form-input button'
+             value='{{!it.translate('Submit', 'postFormButtonSubmit')}}'
+             data-bind='attr: { title: shortcutSuffix("submitReply", true) }' />
+    </div>
+    <div class='post-form-row'>{{#def['custom/postFormField/50'] || ''}}</div>
+    <div class='post-form-row'>
+      <div class='post-form-input'>
+        <span class='post-form-option'>{{#def['custom/postFormOption/0'] || ''}}</span>
+        <span class='post-form-option'>
+          <input id='post-form-option-sage' name='sage' type='checkbox' value='true'
+                 data-bind='checked: sageEnabled,
+                            click: toggleSageEnabled' />
+          <label for='post-form-option-sage'>{{!it.translate('SAGE', 'postFormLabelSAGE')}}</label>
+        </span>
+        <span class='post-form-option'>{{#def['custom/postFormOption/10'] || ''}}</span>
+        <span class='post-form-option'>
+          <input id='post-form-option-op' name='signAsOp' type='checkbox' value='true' />
+          <label for='post-form-option-op'>{{!it.translate('OP', 'postFormLabelSignAsOp')}}</label>
+        </span>
+        <span class='post-form-option'>{{#def['custom/postFormOption/20'] || ''}}</span>
+        <span class='post-form-option'>
+          <input id='post-form-option-tripcode' name='tripcode' type='checkbox' class='user-logged-in-only'
+                 value='true'
+                 data-bind='checked: showTripcode,
+                            click: toggleShowTripcode' />
+          <label for='post-form-option-tripcode'
+                 class='user-logged-in-only'>{{!it.translate('Tripcode', 'postFormLabelTripcode')}}</label>
+        </span>
+        <span class='post-form-option'>{{#def['custom/postFormOption/30'] || ''}}</span>
+        <span class='post-form-option js-only'>
+          <a href='javascript:void(0);'
+             data-bind='click: addToDrafts'>{{!it.translate('To drafts', 'addToDraftsText')}}</a>
+        </span>
+        <span class='post-form-option'>{{#def['custom/postFormOption/40'] || ''}}</span>
+      </div>
+    </div>
+    <div class='post-form-row'>{{#def['custom/postFormField/60'] || ''}}</div>
+    <div class='post-form-row js-file-inputs'>
+      <noscript>
+        {{~it._.range(it.board.maxFileCount) :index}}
+          <div>
+            <input name='file_{{!(index + 1).toString()}}' type='file'
+                   accept='{{!it.board.supportedFileTypes.join(',')}}' />
+            {{#def['postForm/ratingSelect']}}
+          </div>
+        {{~}}
+      </noscript>
+    </div>
+    <div class='post-form-row'>{{#def['custom/postFormField/70'] || ''}}</div>
+    <div class='post-form-row'>
+      <input name='password' type='password' class='post-form-input' maxlength='{{!it.board.maxPasswordLength}}'
+             placeholder='{{!it.translate('Password', 'postFormPlaceholderPassword')}}'
+             data-bind='textInput: password' />
+    </div>
+    <div class='post-form-row'>{{#def['custom/postFormField/80'] || ''}}</div>
+    <div class='post-form-row'>
+      <div>
+        <span class='post-form-captcha-label'>{{!it.translate('Captcha:', 'postFormLabelCaptcha')}}</span>
+        {{? !it.board.captchaEnabled}}
+          <span class='nowrap'>{{!it.translate('You don\'t have to enter captcha', 'noCaptchaText')}}</span>
+        {{?}}
+        <span id='no-captcha' style='display: none;'>
+          <span class='nowrap'>{{!it.translate('You don\'t have to enter captcha', 'noCaptchaText')}}.</span>
+          <span class='nowrap'>
+            {{!it.translate('Posts left:', 'captchaQuotaText')}}
+            <span id='captcha-quota'></span>
+          </span>
+        </span>
+      </div>
+      {{? it.board.captchaEnabled}}
+        <div id='captcha-container'>
+          <noscript>
+            <div id='captcha'>
+              <div>
+                <img src='/{{!it.site.pathPrefix}}api/nodeCaptchaImage.png' />
+              </div>
+              <div>
+                <input type='text' name='nodeCaptchaResponse' />
+              </div>
+            </div>
+          </noscript>
+        </div>
+      {{?}}
+    </div>
+    <div class='post-form-row'>{{#def['custom/postFormField/90'] || ''}}</div>
+    <div class='post-form-row'>
+      <div class='js-only'>
+        <a href='javascript:void(0);' class='toggle-post-form-rules-visibility-button'
+           data-bind='text: (settings.hidePostFormRules() ? "{{!it.translate('Show rules', 'showPostformRulesText')}}"
+                        : "{{!it.translate('Hide rules', 'hidePostformRulesText')}}"),
+                      click: toggleRulesVisibility'></a>
+      </div>
+      <ul class='post-form-rules' data-bind='visible: !settings.hidePostFormRules()'>
+        {{~it.board.postFormRules: rule}}
+          <li>{{=rule}}</li>
+        {{~}}
+      </ul>
+    </div>
+    <div class='post-form-row'>{{#def['custom/postFormField/100'] || ''}}</div>
+  </div>
+</form>

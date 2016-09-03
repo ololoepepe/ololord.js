@@ -1,0 +1,13 @@
+<span data-video-id='{{!it.info.id}}' data-video-title='{{!it.info.title}}'
+      data-video-author='{{!it.info.channelTitle}}'
+      {{? it.info.thumbnails.medium}}data-thumb-url='{{!it.info.thumbnails.medium.url}}'
+      data-thumb-width='{{!it.info.thumbnails.medium.width}}'
+      data-thumb-height='{{!it.info.thumbnails.medium.height}}'{{?}}
+      {{? it.info.start}}data-start='{{!it.info.start}}'{{?}}>
+    <span title='YouTube' class='favicon favicon-youtube sign-image bo-invert'></span>
+    <a href='{{!it.info.href}}' title='{{!it.info.channelTitle}}' {{? it.info.thumbnails.medium}}
+       onmouseover='lord.showVideoThumb(event, this);' onmousemove='lord.moveVideoThumb(event, this);'
+       onmouseout='lord.hideVideoThumb(event, this);'{{?}}>{{!it.info.title}}</a>
+    <span class='expandable'
+          onclick='lord.expandCollapseYoutubeVideo(this); return false;'>[{{!it.translate('Expand video')}}]</span>
+</span>

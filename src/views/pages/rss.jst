@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<rss version='2.0' xmlns:dc='http://purl.org/dc/elements/1.1/' xmlns:atom='http://www.w3.org/2005/Atom'>
+  <channel>
+    <title>{{!it.translate('Feed')}} {{!it.site.domain}}/{{!it.site.pathPrefix}}{{!it.board.name}}</title>
+    <link>{{!it.site.protocol}}://{{!it.site.domain}}/{{!it.site.pathPrefix}}{{!it.board.name}}</link>
+    <description>{{!it.translate('Last posts from board')}} /{{!it.board.name}}/</description>
+    <language>{{!it.site.locale}}</language>
+    <pubDate>{{!it.formattedDate(it.date)}}</pubDate>
+    <ttl>{{!it.ttl.toString()}}</ttl>
+    <atom:link href='{{!it.site.protocol}}://{{!it.site.domain}}/{{!it.site.pathPrefix}}{{!it.board.name}}/rss.xml'
+               rel='self' type='application/rss+xml' />
+    {{~it.posts :post}}
+      <item>
+        {{? post.number == post.threadNumber}}
+          <title>[{{!it.translate('New thread')}}] {{!post.subject}}</title>
+        {{??}}
+          <title>{{!it.translate('Reply to thread')}} &quot;{{!post.subject}}&quot;</title>
+        {{?}}
+        <link>{{!it.site.protocol}}://{{!it.site.domain}}/{{!it.site.pathPrefix}}{{!it.board.name}}/res/{{!post.threadNumber}}.html</link>
+        <description><![CDATA[{{~post.fileInfos :fileInfo}}<img src='{{!it.site.protocol}}://{{!it.site.domain}}/{{!it.site.pathPrefix}}{{!it.board.name}}/thumb/{{!fileInfo.thumb.name}}'><br />{{~}}{{=post.text || ''}}]]></description>
+        <pubDate>{{!it.formattedDate(post.createdAt)}}</pubDate>
+        <guid isPermalink='true'>{{!it.site.protocol}}://{{!it.site.domain}}/{{!it.site.pathPrefix}}{{!it.board.name}}/res/{{!post.threadNumber}}.html#{{!post.number}}</guid>
+        <dc:creator>{{!post.name}}</dc:creator>
+      </item>
+    {{~}}
+  </channel>
+</rss>

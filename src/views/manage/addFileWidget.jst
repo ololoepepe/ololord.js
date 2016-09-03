@@ -1,0 +1,13 @@
+<div>
+  <div class='row'>
+    <span data-bind='text: (isDir ? "{{!it.translate('Directory name:')}}"
+                       : "{{!it.translate('File name:')}}")'></span>
+    <input type='text'
+           data-bind='textInput: fileName' />
+  </div>
+  <div class='row'
+       data-bind='visible: !isDir'>
+    {{!it.translate('File:')}}
+    <input type='file' data-bind='fileUpload: file'>
+  </div>
+</div>

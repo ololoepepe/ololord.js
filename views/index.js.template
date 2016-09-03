@@ -1,0 +1,25 @@
+var lord = window.lord;
+
+if (!lord) {
+  lord = {};
+}
+
+if (!lord.require) {
+  lord.require = function() {
+    return { initialize: function() {} };
+  };
+}
+
+var models = {{models}};
+
+var requireModel = function(modelName) {
+  return models[modelName];
+};
+
+lord.require('./helpers/templating').initialize({
+  requireModel: requireModel,
+  requireTemplate: function(templateName) {
+    return require('./views/' + templateName + '.js');
+  }
+});
+lord.require('./helpers/tools').initialize(requireModel);

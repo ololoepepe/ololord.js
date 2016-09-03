@@ -1,0 +1,141 @@
+<div id='player' class='player player-minimized'>
+  <div id='minimized-player' class='minimized-player'
+       data-bind='click: togglePlayerVisibility'>
+    <div class='minimized-player-actions-contaner-wrapper'>
+    <span class='minimized-player-actions-contaner'>
+      <span class='desktop-only icon icon-music button-icon'
+            title='{{!it.translate('Maximize player', 'maximizePlayerText')}}'
+            data-bind='click: togglePlayerVisibility'></span>
+      <span class='icon button-icon' title='{{!it.translate('Play', 'playerPlayText')}}'
+            data-bind='attr: {
+                         title: playing() ? "{{!it.translate('Pause', 'playerPauseText')}}"
+                           : "{{!it.translate('Play', 'playerPlayText')}}"
+                       },
+                       css: {
+                         "icon-play": !playing(),
+                         "icon-pause": playing(),
+                         "button-icon-disabled": !currentTrack()
+                       },
+                       click: playPause'></span>
+      <span class='desktop-only icon icon-backward button-icon'
+            title='{{!it.translate('Previous track', 'playerPreviousTrackText')}}'
+            data-bind='css: {
+                         "button-icon-disabled": !currentTrack() || (tracks().length < 2)
+                       },
+                       click: playPreviousTrack'></span>
+      <span class='desktop-only icon icon-forward button-icon'
+            title='{{!it.translate('Next track', 'playerNextTrackText')}}'
+            data-bind='css: {
+                         "button-icon-disabled": !currentTrack() || (tracks().length < 2)
+                       },
+                       click: playNextTrack'></span>
+      <span class='mobile-only maximize-player-text-container'>
+        {{!it.translate('Maximize player', 'maximizePlayerText')}}
+      </span>
+    </span>
+    </div>
+  </div>
+  <div id='maximized-player' class='maximized-player'>
+    <div class='player-header player-current-track-actions'>
+      <span class='icon-32 button-icon'
+            data-bind='attr: {
+                         title: playing() ? "{{!it.translate('Pause', 'playerPauseText')}}"
+                           : "{{!it.translate('Play', 'playerPlayText')}}"
+                       },
+                       css: {
+                         "icon-play": !playing(),
+                         "icon-pause": playing(),
+                         "button-icon-disabled": !currentTrack()
+                       },
+                       click: playPause'></span>
+      <span class='icon-32 icon-backward button-icon'
+            title='{{!it.translate('Previous track', 'playerPreviousTrackText')}}'
+            data-bind='css: {
+                         "button-icon-disabled": !currentTrack() || (tracks().length < 2)
+                       },
+                       click: playPreviousTrack'></span>
+      <span class='icon-32 icon-forward button-icon' title='{{!it.translate('Next track', 'playerNextTrackText')}}'
+            data-bind='css: {
+                         "button-icon-disabled": !currentTrack() || (tracks().length < 2)
+                       },
+                       click: playNextTrack'></span>
+      <div class='player-current-track-info-container'>
+        <span class='player-current-track-info' data-bind='text: trackInfoText'></span>
+      </div>
+      <span class='desktop-only icon-32 button-icon'
+            data-bind='attr: {
+                         title: ((volume() > 0) ? "{{!it.translate('Mute', 'playerMuteText')}}"
+                           : "{{!it.translate('Unmute', 'playerUnmuteText')}}")
+                       },
+                       css: {
+                         "icon-volume": volume() > 0,
+                         "icon-volume-mute": volume() <= 0
+                       },
+                       click: toggleMute'></span>
+    </div>
+    <div class='player-header player-current-track-tags'
+         data-bind='style: { display: (trackTagsVisible() ? "" : "none") },
+                    text: trackTagsText'></div>
+    <div class='player-header'>
+      <div id='player-slider-duration' class='player-slider-duration'></div>
+      <div id='player-slider-volume' class='desktop-only player-slider-volume'></div>
+    </div>
+    <div class='player-tracks' data-bind='foreach: tracks'>
+      <div class='player-track' draggable='true'
+           data-bind='attr: {
+                        id: $data.id,
+                        "data-board-name": $data.boardName || "",
+                        "data-file-name": $data.fileName || "",
+                        "data-href": $data.href || "" },
+                      css: { selected: $data.isCurrent },
+                      click: $root.playTrack,
+                      event: {
+                        dragstart: $root.trackDrag,
+                        dragover: function() { /*NOTE: Just prevent default.*/ },
+                        drop: $root.trackDrop
+                      }'>
+        <span class='player-track-info' data-bind='html: $root.trackInfo($data)'></span>
+        <span class='player-track-actions'>
+          <span data-bind='if: $data.duration'>
+            <span data-bind='text: $data.duration'></span>
+            <span data-bind='if: $data.bitrate'><span data-bind='text: " | " + $data.bitrate + "kbps"'></span></span>
+            <a class='icon icon-download button-icon' draggable='false'
+               title='{{!it.translate('Download file', 'downloadPlaylistFileText')}}'
+               onclick='event.stopPropagation();' download='fileName'
+               data-bind='attr: { href: "/{{!it.site.pathPrefix}}" + $data.boardName + "/src/" + $data.fileName }'></a>
+            <span data-bind='if: $root.isAudioType($data.mimeType)'>
+              <span class='icon icon-tag button-icon' draggable='false'
+                 title='{{!it.translate('Edit audio file tags', 'editAudioTagsText')}}'
+                 data-bind='click: $root.editAudioTags'></span>
+            </span>
+          </span>
+          <span class='icon icon-minus button-icon' draggable='false'
+             title='{{!it.translate('Remove from playlist', 'removeFromPlaylistText')}}'
+             data-bind='click: $root.removeFromPlaylist'></span>
+        </span>
+      </div>
+    </div>
+    <div class='player-tracks-empty-hint'>
+      <div>
+        {{!it.translate('Add tracks by clicking the "Add to playlist" button')}}
+        [<span class='icon icon-music'></span>]
+      </div>
+      <div>
+        <img src='/{{!it.site.pathPrefix}}img/add_to_playlist.png' />
+      </div>
+    </div>
+    <div class='player-actions'>
+      <span class='player-button-add-stream icon-32 icon-broadcast button-icon'
+            title='{{!it.translate('Add radio stream')}}'
+            data-bind='click: addRadioStream'></span>
+      <span class='player-button-minimize icon-32 icon-eye-blocked button-icon'
+            title='{{!it.translate('Minimize player', 'minimizePlayerText')}}'
+            data-bind='click: togglePlayerVisibility'></span>
+    </div>
+  </div>
+</div>
+<script type='text/javascript'>
+  (function() {
+    window.lord.require('./core/player').initialize();
+  })();
+</script>

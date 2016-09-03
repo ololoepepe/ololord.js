@@ -1,0 +1,130 @@
+.desktop-only {
+  display: none !important;
+}
+
+:root {
+  &.rating-r-18,
+  &.rating-r-15,
+  &.rating-sfw {
+    .post-file-link[data-rating='R-18G'] {
+      width: 140px;
+      height: 140px;
+    }
+  }
+
+  &.rating-r-15,
+  &.rating-sfw {
+    .post-file-link[data-rating='R-18'] {
+      width: 140px;
+      height: 140px;
+    }
+  }
+
+  &.rating-sfw {
+    .post-file-link[data-rating='R-15'] {
+      width: 140px;
+      height: 140px;
+    }
+  }
+}
+
+.ui-widget {
+  font-size: 14px !important;
+}
+
+body {
+  text-size-adjust: 100%;
+  font-size: 14px;
+}
+
+#sidebarSwitch:checked:not(:disabled) ~ .sidebarPlaceholder {
+  display: none;
+}
+
+#sidebarSwitch:checked:not(:disabled) ~ .content-wrapper {
+  max-width: 100%;
+}
+
+#sidebarFooter > select {
+  font-size: 1.2em;
+}
+
+
+/* Markup */
+
+.spoiler {
+  cursor: pointer;
+}
+
+/* Post form */
+
+.post-form-textarea {
+  min-width: 400px;
+}
+
+.post-file-link-image {
+  width: auto;
+  height: auto;
+  max-width: 140px;
+  max-height: 140px;
+}
+
+/* Post */
+
+.post-subject,
+.post-date-time,
+.post-name {
+  font-size: 0.8em;
+}
+
+.tripcode {
+  font-size: 0.8em;
+  display: block;
+}
+
+.post-file {
+  padding-left: 10px;
+}
+
+.post-file-name {
+  font-size: 0.9em;
+}
+
+.post-file-size {
+  font-size: 0.6em;
+}
+
+.post.temporary-post {
+  position: fixed;
+}
+
+/* Player */
+
+.player {
+  width: 80%;
+}
+
+.player-current-track-info,
+.player-current-track-tags {
+  font-size: 1.1em;
+}
+
+.player-slider-duration {
+  width: ~'calc(100% - 6px)';
+  margin-right: 0px;
+}
+
+/* MovablePlayer */
+
+.movable-player-sliders {
+  width: ~'calc(100% - 28px)';
+}
+
+.movable-player-duration-slider {
+  width: ~'calc(100% - 6px)';
+  margin-right: 0px;
+}
+
+.movable-player-volume-slider {
+  display: none;
+}

@@ -1,0 +1,93 @@
+.navbar {
+  font-size: 1.2em;
+}
+
+.navbar-item {
+  white-space: nowrap;
+}
+
+.notification-button {
+  position: relative;
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    font-size: 12px; //NOTE: Yep, the font size is bound to icon size.
+    animation: blinker 2s infinite;
+    filter: invert(0);
+    -webkit-filter: invert(0);
+  }
+
+  &.notification-button-plus-1 {
+    &::after {
+      content: '+1';
+    }
+  }
+
+  &.notification-button-plus-2 {
+    &::after {
+      content: '+2';
+    }
+  }
+
+  &.notification-button-plus-3 {
+    &::after {
+      content: '+3';
+    }
+  }
+
+  &.notification-button-plus-4 {
+    &::after {
+      content: '+4';
+    }
+  }
+
+  &.notification-button-plus-5 {
+    &::after {
+      content: '+5';
+    }
+  }
+
+  &.notification-button-plus-6 {
+    &::after {
+      content: '+6';
+    }
+  }
+
+  &.notification-button-plus-7 {
+    &::after {
+      content: '+7';
+    }
+  }
+
+  &.notification-button-plus-8 {
+    &::after {
+      content: '+8';
+    }
+  }
+
+  &.notification-button-plus-9 {
+    &::after {
+      content: '+9';
+    }
+  }
+}
+
+.sidebar .notification-button {
+  &::after {
+    left: 18px;
+    top: 1px;
+  }
+}
+
+.toolbar .notification-button {
+  &::after {
+    top: 16px;
+    left: -1px;
+  }
+}
+
+.drop-area {
+  box-sizing: border-box;
+}

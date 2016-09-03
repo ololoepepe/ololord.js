@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' {{#def.rootBindings}}>
+  {{#def.head}}
+  <body>
+    <a id='top'></a>
+    {{#def.sidebar}}
+    <div class='content-wrapper'>
+      {{#def.toolbar}}
+      <header>{{#def['custom/header'] || ''}}</header>
+      <main id='content'>
+        {{#def.banner}}
+        <h1 class='page-title'>
+          <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{!it.board.title}}</a>
+        </h1>
+        <div class='sorting-mode-select-container'>
+          {{!it.translate('Sort by:', 'sortingModeLabelText')}}
+          <span class='js-only'>
+            <select class='select'
+                    onchange='location = "/{{!it.site.pathPrefix}}{{!it.board.name}}/catalog-" + this.value + ".html";'>
+              <option {{? 'date' === it.sortMode}}selected='true'{{?}}
+                      value=''>{{!it.translate('Creation date', 'sortingModeDateLabelText')}}</option>
+              <option {{? 'recent' === it.sortMode}}selected='true'{{?}}
+                      value='recent'>{{!it.translate('Last post date', 'sortingModeRecentLabelText')}}</option>
+              <option {{? 'bumps' === it.sortMode}}selected='true'{{?}}
+                      value='bumps'>{{!it.translate('Bump count', 'sortingModeBumpsLabelText')}}</option>
+            </select>
+          </span>
+          <span class='no-js-only'>
+            {{? 'date' === it.sortMode}}
+              <b>
+            {{??}}
+              <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/catalog.html'>
+            {{?}}
+            {{!it.translate('Creation date', 'sortingModeDateLabelText')}}{{? 'date' === it.sortMode}}</b>{{??}}</a>{{?}}
+            {{? 'recent' === it.sortMode}}
+              <b>
+            {{??}}
+              <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/catalog-recent.html'>
+            {{?}}
+            {{!it.translate('Last post date', 'sortingModeRecentLabelText')}}{{? 'recent' === it.sortMode}}</b>{{??}}</a>{{?}}
+            {{? 'bumps' === it.sortMode}}
+              <b>
+            {{??}}
+              <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/catalog-bumps.html'>
+            {{?}}
+            {{!it.translate('Bump count', 'sortingModeBumpsLabelText')}}{{? 'bumpse' === it.sortMode}}</b>{{??}}</a>{{?}}
+          </span>
+        </div>
+        <hr />
+        <div id='threads' class='catalog-threads'>
+          {{~it.threads :thread}}
+            <div class='catalog-thread-container'>
+              <div class='catalog-thread'>
+                <div>
+                  <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/res/{{!thread.opPost.number}}.html'
+                     class='post-file-link'
+                     {{? thread.opPost.fileInfos.length > 0}}data-rating='{{!thread.opPost.fileInfos[0].rating}}'{{?}}>
+                    {{? thread.opPost.fileInfos.length > 0}}
+                      {{~[thread.opPost.fileInfos[0]] :fileInfo}}
+                        {{#def['file/fileThumb']}} 
+                      {{~}}
+                    {{??}}
+                      &gt;&gt;/{{!it.board.name}}/{{!thread.opPost.number}}
+                    {{?}}
+                  </a>
+                </div>
+                {{~[thread.opPost] :post}}
+                  <div>
+                    {{#def['post/name']}}
+                    {{!it.translate('Reply count:', 'replyCountLabelText')}} {{!(thread.postCount - 1).toString()}}
+                    {{? post.subject}}
+                      <br />
+                    {{?}}
+                    {{#def['post/subject']}}
+                  </div>
+                  <div>
+                    <blockquote>{{!(post.text || '')}}</blockquote>
+                  </div>
+                  {{? post.referringPosts.length > 0}}
+                    <div>
+                      {{#def['post/referringPosts']}}
+                    </div>
+                  {{?}}
+                {{~}}
+              </div>
+            </div>
+          {{~}}
+        </div>
+        <hr />
+        {{#def['board/postingSpeed']}}
+        {{~['top', 'bottom'] :target}}
+          {{#def['board/navigationButton']}}
+        {{~}}
+      </main>
+      <a id='bottom'></a>
+      <footer>{{#def['custom/footer'] || ''}}</footer>
+      {{#def.player}}
+    </div>
+    {{#def.jQueryUIpositionFix}}
+    {{#def.ajaxLoadingOverlay}}
+  </body>
+</html>

@@ -1,0 +1,11 @@
+<span style='display: none;'
+   class='leaf-button leaf-button-{{!target}} js-leaf-button-{{!target}} icon-32 icon-arrow-{{? target === 'next'}}right{{??}}left{{?}} button-icon js-leaf-button js-leaf-button-{{!target}}'
+   data-bind='attr: { title: {{? target === 'next'}}"{{!it.translate('Next file', 'nextFileText')}}"
+                + shortcutSuffix("nextPageImage"){{??}}"{{!it.translate('Previous file', 'previousFileText')}}"
+                + shortcutSuffix("previousPageImage"){{?}} },
+              click: switchFile'></span>
+<script type='text/javascript'>
+  (function() {
+    window.lord.require().initializeLeafButton('{{!target}}');
+  })();
+</script>

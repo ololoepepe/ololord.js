@@ -1,8 +1,0 @@
-{{? target == "previous"}}
-    <a class="leafButton leafButtonPrevious" title="{{=it.tr.previousFileText}}"
-       onclick="lord.previousFile(); return false;"
-       style="display: none;"><img src="/{{=it.site.pathPrefix}}img/left.png"></a>
-{{?? target == "next"}}
-    <a class="leafButton leafButtonNext" title="{{=it.tr.nextFileText}}" onclick="lord.nextFile(); return false;"
-       style="display: none;"><img src="/{{=it.site.pathPrefix}}img/right.png"></a>
-{{?}}

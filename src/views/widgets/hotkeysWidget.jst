@@ -1,0 +1,21 @@
+<div data-bind='foreach: hotkeys'>
+  <div class='hotkey-row'>
+    <span class='icon icon-cross button-icon' title='{{!it.translate('Remove', 'removeButtonText')}}'
+          data-bind='click: $root.removeHotkey.bind($data, $index)'></span>
+    <select class='select'
+            data-bind='value: $data.action,
+                       event: { change: $root.updateHotkeys },
+                       foreach: $root.actions'>
+      <option data-bind='value: $data.name,
+                         text: $data.title'></option>
+    </select>
+    <input type='text'
+           data-bind='value: $data.shortcut,
+                      event: {
+                        keydown: function() { return false; },
+                        keyup: function() { return false; },
+                        focus: $root.recordHotkey.bind($data, $index),
+                        blur: $root.stopRecordHotkey.bind($data, $index)
+                      }' />
+  </div>
+</div>

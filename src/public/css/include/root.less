@@ -1,0 +1,83 @@
+:root {
+  &:not(.js-on) {
+    .js-only {
+      display: none !important;
+    }
+  }
+
+  &.js-on {
+    .no-js-only {
+      display: none !important;
+    }
+  }
+
+  &.mum-watching {
+    .hide-if-mum-watching:not(:hover) {
+      opacity: 0.05 !important;
+    }
+  }
+
+  &.no-show-leaf-buttons {
+    .leaf-button {
+      display: none;
+    }
+  }
+
+  &:not(.user-logged-in) .user-logged-in-only,
+  &:not(.user-level-user) .user-level-user-only,
+  &:not(.user-level-moder) .user-level-moder-only,
+  &:not(.user-level-admin) .user-level-admin-only,
+  &:not(.user-level-superuser) .user-level-superuser-only,
+  &:not(.user-permission-use-raw-html-markup) .user-permission-use-raw-html-markup-only,
+  &:not(.user-vk-auth) .user-vk-auth-only {
+    display: none !important;
+  }
+
+  &.rating-r-18,
+  &.rating-r-15,
+  &.rating-sfw {
+    .post-file-link[data-rating='R-18G'] {
+      display: inline-block;
+      background: url('../img/rating/r-18g.png') center center;
+
+      img {
+        display: none;
+      }
+    }
+  }
+
+  &.rating-r-15,
+  &.rating-sfw {
+    .post-file-link[data-rating='R-18'] {
+      display: inline-block;
+      background: url('../img/rating/r-18.png') center center;
+
+      img {
+        display: none;
+      }
+    }
+  }
+
+  &.rating-sfw {
+    .post-file-link[data-rating='R-15'] {
+      display: inline-block;
+      background: url('../img/rating/r-15.png') center center;
+
+      img {
+        display: none;
+      }
+    }
+  }
+
+  &.hide-tripcodes {
+    .tripcode {
+      display: none;
+    }
+  }
+
+  &.hide-user-names {
+    .post-name {
+      display: none;
+    }
+  }
+}

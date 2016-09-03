@@ -1,0 +1,49 @@
+<div class='movable-player'>
+    <div class='movable-player-track-info
+         data-bind='visible: controlsVisible,
+                    text: trackInfoText'></div>
+    <div class='movable-player-content js-movable-player-content'>
+        {{? it.isAudioType(it.fileInfo.mimeType)}}
+            <img src='{{ out += it.fileInfo.href.split('.').slice(0, -1).join('.').replace(/src(\/\d+)/, 'thumb$1') + 's.png'; }}'>
+            <audio style='display: none;'>
+                <source type='{{!it.fileInfo.mimeType}}' src='{{!it.fileInfo.href}}'></source>
+            </audio>
+        {{?? it.isVideoType(it.fileInfo.mimeType)}}
+            {{? !it.fileInfo.width || !it.fileInfo.height }}
+                <img src='{{ out += it.fileInfo.href.split('.').slice(0, -1).join('.').replace(/src(\/\d+)/, 'thumb$1') + 's.png'; }}'>
+            {{?}}
+            <video {{? !it.fileInfo.width || !it.fileInfo.height }}style='display: none;'{{?}}>
+                <source type='{{!it.fileInfo.mimeType}}' src='{{!it.fileInfo.href}}'></source>
+            </video>
+        {{?? it.isImageType(it.fileInfo.mimeType)}}
+            <img src='{{!it.fileInfo.href}}'>
+        {{?}}
+    </div>
+    <div class='movable-player-controls js-movable-player-controls'
+         data-bind='visible: controlsVisible'>
+        <span class='icon button-icon'
+              data-bind='attr: {
+                           title: playing() ? "{{!it.translate('Pause', 'playerPauseText')}}"
+                             : "{{!it.translate('Play', 'playerPlayText')}}"
+                         },
+                         css: {
+                           "icon-play": !playing(),
+                           "icon-pause": playing()
+                         },
+                         click: playPause'></span>
+        <div class='movable-player-sliders js-movable-player-sliders'>
+            <div class='movable-player-duration-slider js-movable-player-duration-slider'></div>
+            <div class='movable-player-volume-slider js-movable-player-volume-slider'></div>
+        </div>
+        <span class='icon button-icon no-invert desktop-only'
+              data-bind='attr: {
+                           title: ((volume() > 0) ? "{{!it.translate('Mute', 'playerMuteText')}}"
+                             : "{{!it.translate('Unmute', 'playerUnmuteText')}}")
+                         },
+                         css: {
+                           "icon-volume": volume() > 0,
+                           "icon-volume-mute": volume() <= 0
+                         },
+                         click: toggleMute'></span>
+    </div>
+</div>

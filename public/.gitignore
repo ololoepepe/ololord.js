@@ -1,8 +1,7 @@
 *
-!audio
-!css
-!img
-!js
-!node-captcha
-!templates
+!audio/
+!css/
+!img/
+!js/
+!node-captcha/
 !.gitignore

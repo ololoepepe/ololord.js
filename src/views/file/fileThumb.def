@@ -1,0 +1,4 @@
+<img src='/{{!it.site.pathPrefix}}{{!it.board.name}}/thumb/{{!fileInfo.thumb.name}}'
+     class='post-file-link-image hide-if-mum-watching'
+     {{? fileInfo.thumb.dimensions}}width='{{!fileInfo.thumb.dimensions.width}}'{{?}}
+     {{? fileInfo.thumb.dimensions}}height='{{!fileInfo.thumb.dimensions.height}}'{{?}} />

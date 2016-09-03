@@ -1,0 +1,150 @@
+.player {
+  position: fixed;
+  z-index: 1; //The player is displayed over the page elements
+  right: 0px;
+  bottom: 10%;
+  height: 80%;
+
+  .minimized-player {
+    display: none;
+  }
+
+  .maximized-player {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    height: 100%;
+    padding: 4px;
+  }
+}
+
+.player.player-minimized {
+  width: 24px;
+  height: auto;
+  cursor: pointer;
+
+  .minimized-player {
+    display: block;
+    float: left;
+  }
+
+  .maximized-player {
+    display: none;
+  }
+}
+
+.minimized-player-actions-contaner-wrapper {
+  display: inline-block;
+  width: 1.5em;
+  padding: 6px;
+  overflow: hidden;
+}
+
+.minimized-player-actions-contaner {
+  display: inline-block;
+  transform: translate(1.1em,0) rotate(90deg);
+  transform-origin: 0 0;
+  white-space: nowrap;
+
+  &::before {
+    content: '';
+    float: left;
+    margin-top: 100%;
+  }
+}
+
+.player-header {
+  flex-shrink: 0;
+  margin-bottom: 4px;
+  padding: 4px;
+}
+
+.player-current-track-actions {
+  display: flex;
+  flex-direction: row;
+}
+
+.player-current-track-info-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-grow: 1;
+  font-weight: bold;
+}
+
+.player-current-track-info {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.player-slider-duration {
+  display: inline-block;
+  margin-left: 6px;
+}
+
+.player-tracks {
+  overflow-y: auto;
+  min-height: 100px;
+  flex-grow: 1;
+
+  &:empty {
+    display: none;
+
+    ~ .player-tracks-empty-hint {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+
+      * {
+        text-align: center;
+        font-size: 1.2em;
+      }
+    }
+  }
+}
+
+.player-tracks-empty-hint {
+  display: none;
+  flex-grow: 1;
+}
+
+.player-track {
+  padding: 2px 2px 2px 2px;
+  cursor: pointer;
+  position: relative;
+
+  + .player-track {
+    margin-top: 2px;
+  }
+}
+
+.player-track-info {
+  display: inline-block;
+}
+
+.player-track-actions {
+  display: inline-block;
+  position: absolute;
+  right: 4px;
+  top: 2px;
+}
+
+.player-actions {
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.player-button-add-stream {
+  display: inline-block;
+  position: absolute;
+  right: 50px;
+  bottom: 16px;
+}
+
+.player-button-minimize {
+  display: inline-block;
+  position: absolute;
+  right: 8px;
+  bottom: 16px;
+}
