@@ -1,6 +1,7 @@
 import 'babel-polyfill';
 import _ from 'underscore';
 import $ from 'jquery';
+import { EventEmitter } from 'events';
 import KO from 'knockout';
 import Mousetrap from 'mousetrap';
 
@@ -39,6 +40,9 @@ import './core/player';
 import './core/post-form';
 import './core/posts';
 import './core/threads';
+import './handlers/post-processors';
+import './helpers/ajax';
+import './widgets/overlay-progress-bar';
 import './worker/spells';
 
 const CODEMIRROR_ADDONS = ['mode/simple'];
@@ -176,7 +180,7 @@ $.fn.loadWithScripts = function(url, params, callback) {
 	return this;
 };
 
-window.lord = window.lord || {};
+window.lord = window.lord || new EventEmitter();
 
 window.lord.require = (moduleName) => {
   if (!moduleName) {

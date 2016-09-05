@@ -1,4 +1,4 @@
-/*Øchan Mint*/
+/*!Øchan Mint*/
 
 @color-primary: #C7C7C7;
 @color-secondary: #C7C7C7;
@@ -164,6 +164,10 @@ textarea:hover {
     background-color: #1D2228
 }
 
+.border-radius {
+  border-radius: @border-radius;
+}
+
 .bordered {
   border: @border-primary;
   border-radius: @border-radius;
@@ -183,6 +187,14 @@ textarea:hover {
 }
 
 .sign-icon {
+  .invert();
+}
+
+.half-transparent-background {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.invertable {
   .invert();
 }
 

@@ -30,7 +30,7 @@ import * as UsersModel from './models/users';
 
 function spawnCluster() {
   expressCluster(async function(worker) {
-    console.log(`[${process.pid}] Initializing…`);
+    console.log(Tools.translate('[$[1]] Initializing…', '', process.pid));
     try {
       await geolocation.initialize();
       await BoardsModel.initialize();
@@ -94,7 +94,7 @@ function spawnCluster() {
         }
       });
       server.listen(config('server.port'), () => {
-        console.log(`[${process.pid}] Listening on port ${config('server.port')}…`);
+        console.log(Tools.translate('[$[1]] Listening on port $[2]…', '', process.pid, config('server.port')););
         IPC.on('exit', (status) => { process.exit(status); });
         IPC.on('stop', () => {
           return new Promise((resolve, reject) => {
@@ -104,7 +104,7 @@ function spawnCluster() {
                 socket.destroy();
               });
               OnlineCounter.clear();
-              console.log(`[${process.pid}] Closed`);
+              console.log(Tools.translate('[$[1]] Closed', '', process.pid);
               resolve();
             });
           });
@@ -112,7 +112,7 @@ function spawnCluster() {
         IPC.on('start', () => {
           return new Promise((resolve, reject) => {
             server.listen(config('server.port'), () => {
-              console.log(`[${process.pid}] Listening on port ${config('server.port')}…`);
+              console.log(Tools.translate('[$[1]] Listening on port $[2]…', '', process.pid, config('server.port')););
               resolve();
             });
           });

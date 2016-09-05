@@ -415,8 +415,7 @@ async function editPost(boardName, postNumber) {
     if (!accepted) {
       return;
     }
-    await AJAX.post(`/${Tools.sitePathPrefix()}action/editPost`,
-      Tools.createFormData(widget.createData()), new OverlayProgressBar());
+    await AJAX.post(`/${Tools.sitePathPrefix()}action/editPost`, widget.createData(), new OverlayProgressBar());
     removeReferences(postNumber, true);
     await updatePost(postNumber);
   } catch (err) {

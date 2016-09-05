@@ -45,7 +45,7 @@ export const STYLES = FSSync.readdirSync(STYLES_PATH).filter((fileName) => {
   return fileName.split('.').pop() === 'css' && !NON_THEME_STYLESHEETS.has(fileName.split('.').shift());
 }).map((fileName) => {
   let name = fileName.split('.').slice(0, -1).join('.');
-  let match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(FSSync.readFileSync(`${STYLES_PATH}/${fileName}`, 'utf8'));
+  let match = /\/\*\!\s*([^\*]+?)\s*\*\//gi.exec(FSSync.readFileSync(`${STYLES_PATH}/${fileName}`, 'utf8'));
   return {
     name: name,
     title: (match ? match[1] : name)

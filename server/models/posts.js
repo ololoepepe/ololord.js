@@ -1058,7 +1058,11 @@ var editPost = exports.editPost = function () {
           case 26:
             text = _context18.sent;
             plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
-            extraData = post.extraData;
+            _context18.next = 30;
+            return board.postExtraData(req, fields, null, post);
+
+          case 30:
+            extraData = _context18.sent;
 
             if (post.hasOwnProperty('extraData')) {
               delete post.extraData;
@@ -1073,37 +1077,37 @@ var editPost = exports.editPost = function () {
             post.subject = subject || null;
             post.text = text || null;
             post.updatedAt = date.toISOString();
-            _context18.next = 39;
-            return Posts.setOne(key, post);
-
-          case 39:
             _context18.next = 41;
-            return board.removeExtraData(postNumber);
+            return Posts.setOne(key, post);
 
           case 41:
             _context18.next = 43;
-            return board.storeExtraData(postNumber, extraData);
+            return board.removeExtraData(postNumber);
 
           case 43:
             _context18.next = 45;
-            return removeReferencedPosts(post);
+            return board.storeExtraData(postNumber, extraData);
 
           case 45:
             _context18.next = 47;
-            return addReferencedPosts(post, referencedPosts);
+            return removeReferencedPosts(post);
 
           case 47:
             _context18.next = 49;
+            return addReferencedPosts(post, referencedPosts);
+
+          case 49:
+            _context18.next = 51;
             return Search.updatePostIndex(boardName, postNumber, function (body) {
               body.plainText = plainText;
               body.subject = subject;
               return body;
             });
 
-          case 49:
+          case 51:
             return _context18.abrupt('return', post);
 
-          case 50:
+          case 52:
           case 'end':
             return _context18.stop();
         }

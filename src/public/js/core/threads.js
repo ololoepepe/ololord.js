@@ -390,6 +390,9 @@ export async function showNewPosts() {
       }
       $(`<span class='new-post-count'>+${newPostCount} </span>`).insertBefore(isSelect ? $(a).children().first() : a);
     });
+    if (typeof window.lord.emit === 'function') {
+      window.lord.emit('lastPostNumbersReceived', getNewPostCount);
+    }
     _(result).each((lastPostNumber, boardName) => {
       if (!newLastPostNumbers.hasOwnProperty(boardName)) {
         newLastPostNumbers[boardName] = lastPostNumber;

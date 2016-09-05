@@ -218,7 +218,7 @@ export async function getThreadsUpdateTimes(boardName, threadNumbers) {
 }
 
 export async function setThreadUpdateTime(boardName, threadNumber, dateTme) {
-  await ThreadUpdateTimes.setOne(threadNumber, boardName, dateTme);
+  await ThreadUpdateTimes.setOne(threadNumber, dateTme, boardName);
 }
 
 export async function isThreadDeleted(boardName, threadNumber) {
@@ -308,7 +308,7 @@ async function pushOutOldThread(boardName) {
   })();
 }
 
-export async function createThread(req, fields, files, transaction) {
+export async function createThread(req, fields, transaction) {
   let { boardName, password } = fields;
   let board = Board.board(boardName);
   if (!board) {
@@ -317,9 +317,9 @@ export async function createThread(req, fields, files, transaction) {
   if (!board.postingEnabled) {
     return Promise.reject(new Error(Tools.translate('Posting is disabled at this board')));
   }
-  date = date || Tools.now();
+  let date = Tools.now();
   password = Tools.sha1(password);
-  hashpass = (req.hashpass || null);
+  let hashpass = (req.hashpass || null);
   let threadNumber = await BoardsModel.nextPostNumber(boardName);
   let thread = {
     archived: false,
@@ -386,9 +386,8 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
     targetThumbPath: targetThumbPath
   });
   await Threads.setOne(thead.number, thread, targetBoardName);
-  let threadKey = `${targetBoardName}:${thread.number}`;
-  await ThreadUpdateTimes.setOne(threadKey, Tools.now().toISOString());
-  await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), threadKey);
+  await ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
+  await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), `${targetBoardName}:${thread.number}`);
   await PostsModel.processMovedThreadRelatedPosts({
     posts: toRerender,
     sourceBoardName: sourceBoardName,

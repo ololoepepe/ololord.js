@@ -12,16 +12,16 @@
   <div class='post-internal-wrapper'>
     <div class='post-header'>
       <span class='nowrap'>
-        {{#def['custom-postHeaderPart0'] || ''}}
+        {{#def['custom/postHeaderPart/0'] || ''}}
         {{? post.isOp}}
           {{? thread.fixed}}
             <span class='icon icon-pin' title='{{!it.translate('Fixed', 'fixedText')}}'></span>
           {{?}}
-          {{#def['custom-postHeaderPart10'] || ''}}
+          {{#def['custom/postHeaderPart/10'] || ''}}
           {{? thread.closed}}
             <span class='icon icon-lock' title='{{!it.translate('The thread is closed', 'closedText')}}'></span>
           {{?}}
-          {{#def['custom-postHeaderPart20'] || ''}}
+          {{#def['custom/postHeaderPart/20'] || ''}}
           {{? thread.postLimitReached}}
             <span class='icon icon-blocked'
                   title='{{!it.translate('Post limit reached', 'postLimitReachedText')}}'></span>
@@ -29,38 +29,38 @@
             <span class='icon icon-bumplimit'
                   title='{{!it.translate('Bump limit reached', 'bumpLimitReachedText')}}'></span>
           {{?}}
-          {{#def['custom-postHeaderPart30'] || ''}}
+          {{#def['custom/postHeaderPart/30'] || ''}}
         {{?}}
         {{? post.options.sage}}
           <span class='icon icon-angry sign-image js-sage' title='{{!it.translate('SAGE')}}'></span>
         {{?}}
-        {{#def['custom-postHeaderPart40'] || ''}}
+        {{#def['custom/postHeaderPart/40'] || ''}}
       </span>
-      {{#def['custom-postHeaderPart50'] || ''}}
+      {{#def['custom/postHeaderPart/50'] || ''}}
       {{#def['post/subject']}}
-      {{#def['custom-postHeaderPart60'] || ''}}
+      {{#def['custom/postHeaderPart/60'] || ''}}
       {{? post.options.showTripcode && (it.compareRegisteredUserLevels(post.user.level, 'USER') >= 0)}}
         <span class='icon icon-checkmark'
               title='{{!it.translate('This user is registered', 'registeredText')}}'></span>
       {{?}}
-      {{#def['custom-postHeaderPart70'] || ''}}
+      {{#def['custom/postHeaderPart/70'] || ''}}
       {{#def['post/name']}}
-      {{#def['custom-postHeaderPart80'] || ''}}
+      {{#def['custom/postHeaderPart/80'] || ''}}
       {{? post.opIp && post.options.signAsOp}}
         <span class='op-sign'></span>
       {{?}}
-      {{#def['custom-postHeaderPart90'] || ''}}
+      {{#def['custom/postHeaderPart/90'] || ''}}
       {{? post.options.showTripcode && post.tripcode}}
         <span class='tripcode js-tripcode'>{{!post.tripcode}}</span>
       {{?}}
-      {{#def['custom-postHeaderPart100'] || ''}}
+      {{#def['custom/postHeaderPart/100'] || ''}}
       {{? it.board.showWhois}}
         <span class='flag {{? post.geolocation.countryCode}}flag-{{!post.geolocation.countryCode.toLowerCase()}}{{?}} js-with-tooltip'
               title='{{? post.geolocation.cityName}}{{!post.geolocation.cityName}}, {{?}}{{!post.geolocation.countryName}}'></span>
       {{?}}
-      {{#def['custom-postHeaderPart110'] || ''}}
+      {{#def['custom/postHeaderPart/110'] || ''}}
       <time class='post-date-time nowrap js-date-time' data-date-time='{{!post.createdAt}}'>{{!it.formattedDate(post.createdAt)}}</time>
-      {{#def['custom-postHeaderPart120'] || ''}}
+      {{#def['custom/postHeaderPart/120'] || ''}}
       <span class='nowrap'>
         <a class='post-number  {{? post.isOp}}op-post-link{{?}}'
            href='/{{!it.site.pathPrefix}}{{!it.board.name}}/res/{{!post.threadNumber}}.html{{? post.threadNumber != post.number}}#post-{{!post.number}}{{?}}'
@@ -68,11 +68,11 @@
            data-post-number='{{!post.number}}'
            data-thread-number='{{!post.threadNumber}}'
            {{? thread.postingEnabled && !thread.archived}}data-bind='click: insertPostNumber.bind($data, {{!post.number}})'{{?}}>#{{!post.number}}</a>
-        {{#def['custom-postHeaderPart130'] || ''}}
+        {{#def['custom/postHeaderPart/130'] || ''}}
         <span class='post-sequence-number'>{{!post.sequenceNumber}}</span>
-        {{#def['custom-postHeaderPart140'] || ''}}
+        {{#def['custom/postHeaderPart/140'] || ''}}
         <span class='hiding-reason js-hiding-reason'></span>
-        {{#def['custom-postHeaderPart150'] || ''}}
+        {{#def['custom/postHeaderPart/150'] || ''}}
         {{? thread.postingEnabled && !thread.archived && !thread.postLimitReached}}
           <span class='js-only js-quick-reply-container'>
             <span class='icon icon-undo button-icon'
@@ -81,14 +81,14 @@
                              click: quickReply.bind($data, {{!post.number}}, {{!post.threadNumber}})'></span>
           </span>
         {{?}}
-        {{#def['custom-postHeaderPart160'] || ''}}
+        {{#def['custom/postHeaderPart/160'] || ''}}
         <span class='js-only js-post-actions-button-container'>
           <span class='icon icon-menu button-icon js-post-actions-button'
                title='{{!it.translate('Actions', 'postActionsText')}}'
                  data-menu-selector='#menu-post-{{!post.number}}'
                 data-bind='click: showPostActionsMenu.bind($data, {{!post.number}})'></span>
         </span>
-        {{#def['custom-postHeaderPart170'] || ''}}
+        {{#def['custom/postHeaderPart/170'] || ''}}
         {{? post.isOp && !it.isThreadPage}}
           <span class='desktop-only js-reply-to-thread-button-container'>
             [<a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/res/{{!post.number}}.html'
@@ -97,34 +97,34 @@
                            }'>{{!it.translate('Reply', 'toThread')}}</a>]
           </span>
         {{?}}
-        {{#def['custom-postHeaderPart180'] || ''}}
+        {{#def['custom/postHeaderPart/180'] || ''}}
       </span>
     </div>
     <div class='post-body'>
-      {{#def['custom-postBodyPart0'] || ''}}
+      {{#def['custom/postBodyPart/0'] || ''}}
       <div class='post-files'>
         {{~post.fileInfos :fileInfo}}
           {{#def['file/file']}}
         {{~}}
-        {{#def['custom-postBodyPart10'] || ''}}
+        {{#def['custom/postBodyPart/10'] || ''}}
         <div class='post-text-wrapper js-post-text-wrapper'>
           <blockquote id='post-{{!post.number}}-text' class='post-text js-post-text'>{{=post.text || ''}}</blockquote>
         </div>
       </div>
-      {{#def['custom-postBodyPart20'] || ''}}
+      {{#def['custom/postBodyPart/20'] || ''}}
       {{? post.updatedAt}}
         <div class='modification-date-time'>
           {{!it.translate('Last modified:', 'modificationDateTimeText')}}
           <span class='js-date-time' data-date-time='{{!post.updatedAt}}'>{{!it.formattedDate(post.updatedAt)}}</span>
         </div>
       {{?}}
-      {{#def['custom-postBodyPart30'] || ''}}
+      {{#def['custom/postBodyPart/30'] || ''}}
       {{? post.bannedFor}}
         <div class='banned-for'>{{!it.translate('User was banned for this post', 'bannedForText')}}</div>
       {{?}}
-      {{#def['custom-postBodyPart40'] || ''}}
+      {{#def['custom/postBodyPart/40'] || ''}}
       {{#def['post/referringPosts']}}
-      {{#def['custom-postBodyPart50'] || ''}}
+      {{#def['custom/postBodyPart/50'] || ''}}
     </div>
   </div>
 </div>

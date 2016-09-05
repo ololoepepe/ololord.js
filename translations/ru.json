@@ -3192,5 +3192,55 @@
         "loadingThreadsMessage": {
             "value": "Загрузка тредов…"
         }
+    },
+    "Error parsing WebSocket message:": {
+        "_default": {
+            "value": "Ошибка парсинга WebSocket-сообщения:"
+        }
+    },
+    "Generating templating JavaScript file…": {
+        "_default": {
+            "value": "Генерируется JavaScript-файл шаблонов…"
+        }
+    },
+    "Checking custom JavaScript file existence…": {
+        "_default": {
+            "value": "Проверяется наличие пользовательского JavaScript-файла…"
+        }
+    },
+    "Creating dummy custom JavaScript file…": {
+        "_default": {
+            "value": "Создается фиктивный пользовательский JavaScript-файл…"
+        }
+    },
+    "Checking custom CSS files existence…": {
+        "_default": {
+            "value": "Проверяется наличие пользовательского CSS-файла…"
+        }
+    },
+    "Creating dummy custom CSS file(s)…": {
+        "_default": {
+            "value": "Создаются фиктивные пользовательские CSS-файлы…"
+        }
+    },
+    "Compiling templates…": {
+        "_default": {
+            "value": "Компилируются шаблоны…"
+        }
+    },
+    "[$[1]] Initializing…": {
+        "_default": {
+            "value": "[$[1]] Инициализируется…"
+        }
+    },
+    "[$[1]] Listening on port $[2]…": {
+        "_default": {
+            "value": "[$[1]] Слушает порт $[2]…"
+        }
+    },
+    "[$[1]] Closed": {
+        "_default": {
+            "value": "[$[1]] Завершен"
+        }
     }
 }

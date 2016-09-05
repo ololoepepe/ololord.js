@@ -164,7 +164,7 @@ var STYLES = exports.STYLES = _fs2.default.readdirSync(STYLES_PATH).filter(funct
   return fileName.split('.').pop() === 'css' && !NON_THEME_STYLESHEETS.has(fileName.split('.').shift());
 }).map(function (fileName) {
   var name = fileName.split('.').slice(0, -1).join('.');
-  var match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(_fs2.default.readFileSync(STYLES_PATH + '/' + fileName, 'utf8'));
+  var match = /\/\*\!\s*([^\*]+?)\s*\*\//gi.exec(_fs2.default.readFileSync(STYLES_PATH + '/' + fileName, 'utf8'));
   return {
     name: name,
     title: match ? match[1] : name

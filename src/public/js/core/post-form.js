@@ -181,7 +181,9 @@ function resetPostForm() {
   let postForm = DOM.id('post-form');
   postForm.reset();
   DOM.queryAll('.file-input', postForm).reverse().forEach(FileInputs.removeFile);
-  //TODO: custom reset
+  if (typeof window.lord.emit === 'function') {
+    window.lord.emit('postFormReset');
+  }
 }
 
 export async function submit() {

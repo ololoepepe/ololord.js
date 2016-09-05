@@ -1,7 +1,7 @@
 <ul id='menu-post-{{!it.post.number}}' class='menu'>
   {{#def['custom/postMenuAction/0'] || ''}}
   <li class='ui-widget-header'>{{!it.translate('Post', 'postMenuCategoryPostText')}}</li>
-  {{#def['custom-postMenuAction10'] || ''}}
+  {{#def['custom/postMenuAction/10'] || ''}}
   {{? it.post.rawText}}
     <li data-bind='click: showPostSourceText'>
       <span class='icon icon-file-text sign-icon'></span>
@@ -46,7 +46,7 @@
   {{#def['custom/postMenuAction/70'] || ''}}
   {{? it.post.isOp}}
     <li class='ui-widget-header'>{{!it.translate('Thread', 'postMenuCategoryThreadText')}}</li>
-    {{#def['custom-postMenuAction80'] || ''}}
+    {{#def['custom/postMenuAction/80'] || ''}}
     <li data-bind='click: addToOrRemoveFromFavorites'>
       <span data-bind='css: "icon sign-icon icon-star-" + {{? it.thread.isInFavorites}}"full"{{??}}"empty"{{?}}'></span>
       <span data-bind='text: {{? it.thread.isInFavorites}}"{{!it.translate('Remove from favorites')}}"

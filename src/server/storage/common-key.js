@@ -30,7 +30,7 @@ export default class CommonKey {
         return stringify(data);
       };
     } else if (stringify || typeof stringify === 'undefined') {
-      return JSON.stringify.bind(null);
+      return JSON.stringify.bind(JSON);
     } else {
       return data => data;
     }

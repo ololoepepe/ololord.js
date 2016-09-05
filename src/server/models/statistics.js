@@ -14,7 +14,12 @@ import * as Tools from '../helpers/tools';
 
 async function gatherBoardStatistics(board) {
   const BOARD_PUBLIC_PATH = `${__dirname}/../../public/${board.name}`;
-  let statistics = { diskUsage: 0 };
+  let statistics = {
+    postCount: 0,
+    postingSpeed: '-',
+    fileCount: 0,
+    diskUsage: 0
+  };
   try {
     let lastPostNumber = await BoardsModel.getLastPostNumber(board.name);
     statistics.postCount = lastPostNumber;

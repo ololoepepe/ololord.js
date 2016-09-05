@@ -616,7 +616,7 @@ var setThreadUpdateTime = exports.setThreadUpdateTime = function () {
         switch (_context15.prev = _context15.next) {
           case 0:
             _context15.next = 2;
-            return ThreadUpdateTimes.setOne(threadNumber, boardName, dateTme);
+            return ThreadUpdateTimes.setOne(threadNumber, dateTme, boardName);
 
           case 2:
           case 'end':
@@ -979,8 +979,8 @@ var pushOutOldThread = function () {
 }();
 
 var createThread = exports.createThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(req, fields, files, transaction) {
-    var boardName, password, board, threadNumber, thread;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(req, fields, transaction) {
+    var boardName, password, board, date, hashpass, threadNumber, thread;
     return regeneratorRuntime.wrap(function _callee25$(_context25) {
       while (1) {
         switch (_context25.prev = _context25.next) {
@@ -1005,7 +1005,8 @@ var createThread = exports.createThread = function () {
             return _context25.abrupt('return', Promise.reject(new Error(Tools.translate('Posting is disabled at this board'))));
 
           case 7:
-            date = date || Tools.now();
+            date = Tools.now();
+
             password = Tools.sha1(password);
             hashpass = req.hashpass || null;
             _context25.next = 12;
@@ -1044,14 +1045,14 @@ var createThread = exports.createThread = function () {
     }, _callee25, this);
   }));
 
-  return function createThread(_x51, _x52, _x53, _x54) {
+  return function createThread(_x51, _x52, _x53) {
     return ref.apply(this, arguments);
   };
 }();
 
 var moveThread = exports.moveThread = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(sourceBoardName, threadNumber, targetBoardName) {
-    var targetBoard, thread, sourcePath, sourceThumbPath, targetPath, targetThumbPath, posts, lastPostNumber, postNumberMap, _ref6, toRerender, toUpdate, threadKey;
+    var targetBoard, thread, sourcePath, sourceThumbPath, targetPath, targetThumbPath, posts, lastPostNumber, postNumberMap, _ref6, toRerender, toUpdate;
 
     return regeneratorRuntime.wrap(function _callee27$(_context27) {
       while (1) {
@@ -1148,24 +1149,23 @@ var moveThread = exports.moveThread = function () {
             return Threads.setOne(thead.number, thread, targetBoardName);
 
           case 37:
-            threadKey = targetBoardName + ':' + thread.number;
-            _context27.next = 40;
-            return ThreadUpdateTimes.setOne(threadKey, Tools.now().toISOString());
+            _context27.next = 39;
+            return ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
 
-          case 40:
-            _context27.next = 42;
-            return ThreadPostNumbers.addSome((0, _underscore2.default)(postNumberMap).toArray(), threadKey);
+          case 39:
+            _context27.next = 41;
+            return ThreadPostNumbers.addSome((0, _underscore2.default)(postNumberMap).toArray(), targetBoardName + ':' + thread.number);
 
-          case 42:
-            _context27.next = 44;
+          case 41:
+            _context27.next = 43;
             return PostsModel.processMovedThreadRelatedPosts({
               posts: toRerender,
               sourceBoardName: sourceBoardName,
               postNumberMap: postNumberMap
             });
 
-          case 44:
-            _context27.next = 46;
+          case 43:
+            _context27.next = 45;
             return Tools.series(toUpdate, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(o) {
                 return regeneratorRuntime.wrap(function _callee26$(_context26) {
@@ -1186,30 +1186,30 @@ var moveThread = exports.moveThread = function () {
                 }, _callee26, this);
               }));
 
-              return function (_x58) {
+              return function (_x57) {
                 return ref.apply(this, arguments);
               };
             }());
 
-          case 46:
-            _context27.next = 48;
+          case 45:
+            _context27.next = 47;
             return removeThread(sourceBoardName, threadNumber, {
               leaveFileInfos: true,
               leaveReferences: true
             });
 
-          case 48:
+          case 47:
             IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
-            _context27.next = 51;
+            _context27.next = 50;
             return IPC.render(targetBoardName, thread.number, thread.number, 'create');
 
-          case 51:
+          case 50:
             return _context27.abrupt('return', {
               boardName: targetBoardName,
               threadNumber: thread.number
             });
 
-          case 52:
+          case 51:
           case 'end':
             return _context27.stop();
         }
@@ -1217,7 +1217,7 @@ var moveThread = exports.moveThread = function () {
     }, _callee27, this);
   }));
 
-  return function moveThread(_x55, _x56, _x57) {
+  return function moveThread(_x54, _x55, _x56) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1269,7 +1269,7 @@ var setThreadFixed = exports.setThreadFixed = function () {
     }, _callee28, this);
   }));
 
-  return function setThreadFixed(_x59, _x60, _x61) {
+  return function setThreadFixed(_x58, _x59, _x60) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1321,7 +1321,7 @@ var setThreadClosed = exports.setThreadClosed = function () {
     }, _callee29, this);
   }));
 
-  return function setThreadClosed(_x62, _x63, _x64) {
+  return function setThreadClosed(_x61, _x62, _x63) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1373,7 +1373,7 @@ var setThreadUnbumpable = exports.setThreadUnbumpable = function () {
     }, _callee30, this);
   }));
 
-  return function setThreadUnbumpable(_x65, _x66, _x67) {
+  return function setThreadUnbumpable(_x64, _x65, _x66) {
     return ref.apply(this, arguments);
   };
 }();

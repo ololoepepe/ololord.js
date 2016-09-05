@@ -30,7 +30,7 @@ class WebSocketWrapper extends EventEmitter {
       try {
         message = JSON.parse(message.data);
       } catch (err) {
-        console.log('Error parsing WebSocket message:', err);
+        console.log(Tools.translate('Error parsing WebSocket message:'), err);
       }
       this.emit('message', message);
     };

@@ -51,7 +51,7 @@ var CommonKey = function () {
           return stringify(data);
         };
       } else if (stringify || typeof stringify === 'undefined') {
-        return JSON.stringify.bind(null);
+        return JSON.stringify.bind(JSON);
       } else {
         return function (data) {
           return data;

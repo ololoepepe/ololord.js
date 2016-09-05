@@ -12,6 +12,7 @@ import * as Tools from '../helpers/tools';
 import markup from '../markup';
 import * as FilesModel from '../models/files';
 import * as PostsModel from '../models/posts';
+import * as ThreadsModel from '../models/threads';
 import * as UsersModel from '../models/users';
 
 let router = express.Router();

@@ -12,6 +12,7 @@ let OrderedSet = require('../server/storage/ordered-set').default;
 
 let Chat = new OrderedSet(redisClient(), 'chat');
 //let ChatSubchatCount = new Key(redisClient(), 'chatSubchatCount');
+let PostExtraData = new Hash(redisClient(), 'postExtraData');
 let Posts = new Hash(redisClient(), 'posts');
 let UserBanPostNumbers = new Hash(redisClient(), 'userBanPostNumbers', {
   parse: number => +number,
@@ -56,6 +57,10 @@ Posts.keys().then((keys) => {
     });
   });
 }).then(() => {
+  return FS.write(`${__dirname}/../backup/extraDataFromPost.json`, JSON.stringify(extraData));
+}).then(() => {
+  return PostExtraData.getAll();
+}).then((extraData) => {
   return FS.write(`${__dirname}/../backup/extraData.json`, JSON.stringify(extraData));
 }).then(() => {
   return UserBanPostNumbers.getAll();

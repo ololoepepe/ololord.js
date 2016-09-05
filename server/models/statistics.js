@@ -13,7 +13,12 @@ var gatherBoardStatistics = function () {
         switch (_context2.prev = _context2.next) {
           case 0:
             BOARD_PUBLIC_PATH = __dirname + '/../../public/' + board.name;
-            statistics = { diskUsage: 0 };
+            statistics = {
+              postCount: 0,
+              postingSpeed: '-',
+              fileCount: 0,
+              diskUsage: 0
+            };
             _context2.prev = 2;
             _context2.next = 5;
             return BoardsModel.getLastPostNumber(board.name);

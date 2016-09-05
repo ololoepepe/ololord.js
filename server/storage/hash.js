@@ -205,7 +205,8 @@ var Hash = function (_CommonKey) {
     key: 'setSome',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(items, subkey) {
-        var _client$hmset;
+        var _client$hmset,
+            _this2 = this;
 
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
@@ -235,7 +236,9 @@ var Hash = function (_CommonKey) {
 
               case 5:
                 _context6.next = 7;
-                return (_client$hmset = this.client.hmset).call.apply(_client$hmset, [this.client, this.fullKey(subkey)].concat(_toConsumableArray(items)));
+                return (_client$hmset = this.client.hmset).call.apply(_client$hmset, [this.client, this.fullKey(subkey)].concat(_toConsumableArray(items.map(function (item, index) {
+                  return index % 2 ? _this2.stringify(item) : item;
+                }))));
 
               case 7:
                 return _context6.abrupt('return', _context6.sent);

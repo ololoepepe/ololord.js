@@ -363,7 +363,7 @@ export async function editPost(req, fields) {
     accessLevel: req.level(board.name)
   });
   let plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
-  let extraData = post.extraData;
+  let extraData = await board.postExtraData(req, fields, null, post);
   if (post.hasOwnProperty('extraData')) {
     delete post.extraData;
   }

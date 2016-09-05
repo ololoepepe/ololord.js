@@ -28,7 +28,10 @@ const VENDORS = ['big-integer', 'codemirror', 'cute-localize', 'dot', 'jquery', 
   .concat(MOUSETRAP_PLUGINS.map(name => `mousetrap/plugins/${name}/mousetrap-${name}`));
 
 var autoprefix = new LessPluginAutoprefix({ browsers: ['> 5%'] });
-var cleanCSS = new LessPluginCleanCSS({ advanced: true });
+var cleanCSS = new LessPluginCleanCSS({
+  advanced: true,
+  keepSpecialComments: 1
+});
 
 function stringStream(string) {
   var s = new Stream.Readable();
@@ -38,8 +41,8 @@ function stringStream(string) {
   return s;
 }
 
-function buildServer(/*debug*/) {
-  return gulp.src('./src/server/**/*.js')
+function buildServer(custom/*, debug*/) {
+  return gulp.src(custom ? './src/server/**/custom/**.js' : './src/server/**/!(custom)/**.js')
   .pipe(sourcemaps.init())
   .pipe(babel({ presets: ['es2015', 'stage-2'] }))
   .pipe(sourcemaps.write('./'))
@@ -92,29 +95,31 @@ function buildJS(custom, debug) {
   if (custom) {
     stream = stream.pipe(rename('custom.js'));
   }
-  stream.pipe(sourcemaps.init({ loadMaps: true }))
-  .pipe(sourcemaps.write('./'));
+  stream = stream.pipe(sourcemaps.init({ loadMaps: true }));
   if (!debug) {
     stream = stream.pipe(uglify());
   }
+  stream = stream.pipe(sourcemaps.write('./'));
   return stream.pipe(gulp.dest('./public/js'));
 }
 
 gulp.task('build-all', ['build', 'build-custom']);
 gulp.task('build', ['build-server', 'build-css', 'build-js']);
-gulp.task('build-custom', ['build-custom-css', 'build-custom-js']);
+gulp.task('build-custom', ['build-custom-server', 'build-custom-css', 'build-custom-js']);
 
 gulp.task('build-all-debug', ['build-debug', 'build-custom-debug']);
 gulp.task('build-debug', ['build-server-debug', 'build-css-debug', 'build-js-debug']);
-gulp.task('build-custom-debug', ['build-custom-css-debug', 'build-custom-js-debug']);
+gulp.task('build-custom-debug', ['build-custom-server-debug', 'build-custom-css-debug', 'build-custom-js-debug']);
 
-gulp.task('build-server', buildServer.bind(null, false));
+gulp.task('build-server', buildServer.bind(null, false, false));
 gulp.task('build-css', buildCSS.bind(null, false, false));
 gulp.task('build-js', buildJS.bind(null, false, false));
+gulp.task('build-custom-server', buildServer.bind(null, true, false));
 gulp.task('build-custom-css', buildCSS.bind(null, true, false));
 gulp.task('build-custom-js', buildJS.bind(null, true, false));
-gulp.task('build-server-debug', buildServer.bind(null, true));
+gulp.task('build-server-debug', buildServer.bind(null, false, true));
 gulp.task('build-css-debug', buildCSS.bind(null, false, true));
 gulp.task('build-js-debug', buildJS.bind(null, false, true));
+gulp.task('build-custom-server-debug', buildServer.bind(null, true, true));
 gulp.task('build-custom-css-debug', buildCSS.bind(null, true, true));
 gulp.task('build-custom-js-debug', buildJS.bind(null, true, true));

@@ -121,7 +121,7 @@ var getYoutubeEmbeddedHtml = function () {
             info.id = videoId;
             info.href = href;
             info.start = youtubeVideoStartTime(href);
-            html = _renderer2.default.render('markup/youtubeVideoLink', { info: info });
+            html = Renderer.render('markup/youtubeVideoLink', { info: info });
 
             if (html) {
               _context3.next = 25;
@@ -217,7 +217,7 @@ var getCoubEmbeddedHtml = function () {
               } : null,
               id: videoId
             };
-            html = _renderer2.default.render('markup/coubVideoLink', { info: info });
+            html = Renderer.render('markup/coubVideoLink', { info: info });
 
             if (html) {
               _context4.next = 20;
@@ -279,7 +279,7 @@ var convertLinkCommon = function () {
             if (href.lastIndexOf('http', 0) && href.lastIndexOf('ftp', 0)) {
               href = 'http://' + href;
             }
-            defaultHTML = '<a href=\'' + href + '\'>' + _renderer2.default.toHTML(text) + '</a>';
+            defaultHTML = '<a href=\'' + href + '\'>' + Renderer.toHTML(text) + '</a>';
 
             if (!((0, _config2.default)('site.twitter.integrationEnabled') && RX_TWITTER_POST_LINK.test(href))) {
               _context5.next = 12;
@@ -434,7 +434,7 @@ var _board2 = _interopRequireDefault(_board);
 
 var _renderer = require('../core/renderer');
 
-var _renderer2 = _interopRequireDefault(_renderer);
+var Renderer = _interopRequireWildcard(_renderer);
 
 var _config = require('../helpers/config');
 
@@ -534,7 +534,7 @@ function getVocarooEmbeddedHtml(href, defaultHTML) {
     return defaultHTML;
   }
   try {
-    var html = _renderer2.default.render('markup/vocarooAudioLink', { info: { id: audioId } });
+    var html = Renderer.render('markup/vocarooAudioLink', { info: { id: audioId } });
     if (!html) {
       throw new Error(Tools.translate('Failed to create Vocaroo audio embedded container'));
     }
@@ -551,7 +551,7 @@ function convertVkontaktePost(_1, _2, matchs, _3, options) {
 
 function convertProtocol(_1, _2, matchs, _3, options) {
   options.type = _processingContext2.default.HTML_SKIP;
-  return '<a href=\'' + matchs[0] + '\'>' + _renderer2.default.toHTML(matchs[2]) + '</a>';
+  return '<a href=\'' + matchs[0] + '\'>' + Renderer.toHTML(matchs[2]) + '</a>';
 }
 
 function checkExternalLink(info, matchs) {
@@ -560,6 +560,10 @@ function checkExternalLink(info, matchs) {
   }
   return (/^\d+\.\d+\.\d+\.\d+$/.test(matchs[2]) || rootZones.hasOwnProperty(matchs[4])
   );
+}
+
+function checkPostLink(_1, matchs) {
+  return _board2.default.boardNames().indexOf(matchs[1]) >= 0;
 }
 
 exports.default = [{
@@ -600,7 +604,8 @@ exports.default = [{
   priority: 2300,
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
   convert: convertPostLink,
-  op: new RegExp('>>/(' + _board2.default.boardNames().join('|') + ')/([1-9][0-9]*)', 'gi'),
-  cl: null
+  op: new RegExp('>>/([^/s]+)/([1-9][0-9]*)', 'gi'),
+  cl: null,
+  check: checkPostLink
 }];
 //# sourceMappingURL=links.js.map

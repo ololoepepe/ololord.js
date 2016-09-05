@@ -190,6 +190,10 @@ registerHandler('load', Management.initializeManagement, {
   test: /^\/manage.html$/
 });
 
+registerHandler('load', () => {
+  window.lord.emit('contentLoad');
+}, { priority: 40 });
+
 registerHandler('beforeunload', DOM.setUnloading);
 
 let w = $(window);

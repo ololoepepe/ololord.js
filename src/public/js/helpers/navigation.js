@@ -86,6 +86,7 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
       $('#sidebar-switch').click();
     }
     $('#ajax-loading-overlay').hide();
+    window.lord.emit('contentLoad');
   } catch (err) {
     DOM.handleError(err);
     $('#ajax-loading-overlay').hide();

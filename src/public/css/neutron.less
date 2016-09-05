@@ -1,4 +1,4 @@
-/*Neutron*/
+/*!Neutron*/
 
 @color-primary: #698CC0;
 @color-secondary: #707070;
@@ -144,6 +144,10 @@ input:not([type='image']) {
   background-color: #111111;
 }
 
+.border-radius {
+  border-radius: @border-radius;
+}
+
 .bordered {
   border: @border-primary;
   border-radius: @border-radius;
@@ -163,6 +167,14 @@ input:not([type='image']) {
 }
 
 .sign-icon {
+  .invert();
+}
+
+.half-transparent-background {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.invertable {
   .invert();
 }
 

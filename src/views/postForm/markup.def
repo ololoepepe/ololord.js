@@ -100,7 +100,6 @@
                        click: markup.bind($data, "code")'></span>
     </span>
   {{?}}
-  {{#def['custom-postFormOption30'] || ''}}
   <span class='user-permission-use-raw-html-markup-only icon-20 icon-code button-icon'
         title='{{!it.translate('Raw HTML', 'markupHtml')}}'
         data-bind='click: markup.bind($data, "raw-html")'></span>

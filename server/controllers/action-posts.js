@@ -139,6 +139,10 @@ var _posts = require('../models/posts');
 
 var PostsModel = _interopRequireWildcard(_posts);
 
+var _threads = require('../models/threads');
+
+var ThreadsModel = _interopRequireWildcard(_threads);
+
 var _users = require('../models/users');
 
 var UsersModel = _interopRequireWildcard(_users);

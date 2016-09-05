@@ -490,7 +490,7 @@ export function pageCount() {
 }
 
 export function threadNumber() {
-  let match = locationPathname().match(/^\/([^\/])\/(res|arch)\/(\d+)\.html$/);
+  let match = locationPathname().match(/^\/([^\/]+)\/(res|arch)\/(\d+)\.html$/);
   if (match) {
     if (_requireModel && !_requireModel('boards').boards.some((board) => { return match[1] === board.name; })) {
       return 0;

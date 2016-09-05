@@ -4,7 +4,7 @@ import XRegExp from 'xregexp';
 
 import ProcessingContext from './processing-context';
 import Board from '../boards/board';
-import Renderer from '../core/renderer';
+import * as Renderer from '../core/renderer';
 import config from '../helpers/config';
 import FSWatcher from '../helpers/fs-watcher';
 import Logger from '../helpers/logger';
@@ -262,6 +262,10 @@ function checkExternalLink(info, matchs) {
   return /^\d+\.\d+\.\d+\.\d+$/.test(matchs[2]) || rootZones.hasOwnProperty(matchs[4]);
 }
 
+function checkPostLink(_1, matchs) {
+  return Board.boardNames().indexOf(matchs[1]) >= 0;
+}
+
 export default [{
   priority: 1500,
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
@@ -298,6 +302,7 @@ export default [{
   priority: 2300,
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
   convert: convertPostLink,
-  op: new RegExp(`>>/(${Board.boardNames().join('|')})/([1-9][0-9]*)`, 'gi'),
-  cl: null
+  op: new RegExp(`>>/([^\/\s]+)/([1-9][0-9]*)`, 'gi'),
+  cl: null,
+  check: checkPostLink
 }];

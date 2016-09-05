@@ -391,7 +391,7 @@ const TOOLTIP_MARGIN_TOP = 15;
 const TOOLTIP_OFFSET_LEFT = 8;
 const TOOLTIP_DEFAULT_TIMEOUT = 15 * Constants.SECOND;
 
-export  function setTooltip(where, { what, position, show, keep, timeout } = {}) {
+export function setTooltip(where, { what, position, show, keep, timeout } = {}) {
   where = $(where);
   keep = keep || !show;
   where.css('cursor', 'pointer');
