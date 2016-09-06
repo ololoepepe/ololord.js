@@ -118,7 +118,7 @@ function splitCommand(cmd) {
 
 router.post('/action/sendChatMessage', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(req, res, next) {
-    var _ref, _ref$fields, _boardName, postNumber, chatNumber, text;
+    var _ref, _ref$fields, _boardName, postNumber, chatNumber, text, result, message, senderHash, receiverHash, receiver, ip;
 
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -184,22 +184,44 @@ router.post('/action/sendChatMessage', function () {
             });
 
           case 23:
+            result = _context.sent;
+            message = result.message;
+            senderHash = result.senderHash;
+            receiverHash = result.receiverHash;
+            receiver = result.receiver;
+
+            if (senderHash !== receiverHash) {
+              message.type = 'in';
+              ip = receiver.hashpass ? null : receiver.ip;
+
+              IPC.send('sendChatMessage', {
+                type: 'newChatMessage',
+                message: {
+                  message: message,
+                  boardName: _boardName,
+                  postNumber: postNumber,
+                  chatNumber: result.chatNumber
+                },
+                ips: ip,
+                hashpasses: receiver.hashpass
+              });
+            }
             res.json({});
-            _context.next = 29;
+            _context.next = 35;
             break;
 
-          case 26:
-            _context.prev = 26;
+          case 32:
+            _context.prev = 32;
             _context.t0 = _context['catch'](0);
 
             next(_context.t0);
 
-          case 29:
+          case 35:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, this, [[0, 26]]);
+    }, _callee, this, [[0, 32]]);
   }));
 
   return function (_x, _x2, _x3) {

@@ -95,7 +95,7 @@ function initializeInfiniteScroll() {
 
 registerHandler('load', () => {
   hashChangeHandler(DOM.hash());
-  WebSocket.initialize();
+  WebSocket.initializeOnload();
   PageProcessors.applyProcessors().catch(Widgets.handleError);
   Threads.checkFavoriteThreads();
   if (Settings.showNewPosts()) {
@@ -137,14 +137,6 @@ registerHandler('load', () => {
 }, {
   priority: 0,
   test: () => { return !/^\/login.html$/.test(Tools.locationPathname()); }
-});
-
-Settings.deviceType.subscribe(() => {
-  if (Tools.deviceType('desktop')) {
-    DOM.queryAll('.js-with-tooltip').forEach(DOM.removeTooltip);
-  } else {
-    DOM.queryAll('.js-with-tooltip').forEach(DOM.setTooltip);
-  }
 });
 
 registerHandler('load', async function() {
@@ -264,5 +256,15 @@ export function installHandlers() {
     list.filter(Tools.testFilter).sort(Tools.priorityPredicate).forEach((h) => {
       window.addEventListener(eventType, h.handler, false);
     });
+  });
+}
+
+export function initialize() {
+  Settings.deviceType.subscribe(() => {
+    if (Tools.deviceType('desktop')) {
+      DOM.queryAll('.js-with-tooltip').forEach(DOM.removeTooltip);
+    } else {
+      DOM.queryAll('.js-with-tooltip').forEach(DOM.setTooltip);
+    }
   });
 }

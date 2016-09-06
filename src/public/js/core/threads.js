@@ -580,14 +580,6 @@ export function addToOrRemoveFromFavorites(boardName, threadNumber) {
   }
 }
 
-Settings.useWebSockets.subscribe(async function() {
-  if (!autoUpdateTimer) {
-    return;
-  }
-  await setAutoUpdateEnabled(false);
-  await setAutoUpdateEnabled(true);
-});
-
 export async function setAutoUpdateEnabled(enabled) {
   Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber(), enabled);
   if (Settings.useWebSockets()) {
@@ -681,3 +673,13 @@ WebSocket.registerHandler('newPost', updateThread.bind(null, true), {
   priority: 0,
   test: Tools.isThreadPage
 });
+
+export function initialize() {
+  Settings.useWebSockets.subscribe(async function() {
+    if (!autoUpdateTimer) {
+      return;
+    }
+    await setAutoUpdateEnabled(false);
+    await setAutoUpdateEnabled(true);
+  });
+}

@@ -44,8 +44,6 @@ export function resetHiddenPostsCSS() {
   });
 }
 
-Storage.hiddenPosts.subscribe(resetHiddenPostsCSS);
-
 export function addPostToHidden(boardName, postNumber, threadNumber, { hiddenPosts, reason } = {}) {
   boardName = Tools.option(boardName, 'string', '');
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
@@ -207,18 +205,6 @@ function process(hiddenPosts, list, map) {
   Storage.hiddenPosts(Tools.cloned(hiddenPosts));
 }
 
-Settings.spellsEnabled.subscribe((value) => {
-  if (value) {
-    applySpells(DOM.queryAll('.post'));
-  }
-});
-
-Storage.spells.subscribe(() => {
-  if (Settings.spellsEnabled()) {
-    applySpells(DOM.queryAll('.post'), true);
-  }
-});
-
 export async function applySpells(posts, force) {
   if (!_(posts).isArray()) {
     posts = [posts];
@@ -341,4 +327,18 @@ export function removeHidden(boardName, postNumber) {
     delete similarText[key];
     Storage.similarText(similarText);
   }
-};
+}
+
+export function initialize() {
+  Storage.hiddenPosts.subscribe(resetHiddenPostsCSS);
+  Storage.spells.subscribe(() => {
+    if (Settings.spellsEnabled()) {
+      applySpells(DOM.queryAll('.post'), true);
+    }
+  });
+  Settings.spellsEnabled.subscribe((value) => {
+    if (value) {
+      applySpells(DOM.queryAll('.post'));
+    }
+  });
+}

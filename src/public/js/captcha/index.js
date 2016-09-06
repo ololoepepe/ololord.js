@@ -66,8 +66,6 @@ export async function createCaptcha() {
   }
 }
 
-Settings.captchaEngine.subscribe(createCaptcha);
-
 export async function resetCaptcha() {
   let container = $('#captcha-container');
   try {
@@ -86,4 +84,8 @@ export async function resetCaptcha() {
   } catch (err) {
     DOM.handleError(err);
   }
+}
+
+export function initialize() {
+  Settings.captchaEngine.subscribe(createCaptcha);
 }

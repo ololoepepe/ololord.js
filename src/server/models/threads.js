@@ -254,7 +254,7 @@ async function removeThread(boardName, threadNumber, { archived, leaveFileInfos,
     } catch (err) {
       Logger.error(err.stack || err);
     }
-  }, 5000); //TODO: magic numbers
+  }, 5000); //TODO: This is not OK
 }
 
 async function pushOutOldThread(boardName) {

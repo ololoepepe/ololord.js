@@ -786,7 +786,7 @@ var removeThread = function () {
                   }
                 }
               }, _callee20, this, [[0, 12]]);
-            })), 5000); //TODO: magic numbers
+            })), 5000); //TODO: This is not OK
 
           case 9:
           case 'end':

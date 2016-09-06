@@ -72,13 +72,6 @@ let messages = {};
 let currentMessage = null;
 let handlers = {};
 
-Settings.useWebSockets.subscribe((value) => {
-  if (!initialized) {
-    return;
-  }
-  ws[value ? 'open' : 'close']();
-});
-
 function checkQueue() {
   if (!ready || queue.length < 1) {
     return;
@@ -184,6 +177,15 @@ export async function sendMessage(type, data) {
 }
 
 export function initialize() {
+  Settings.useWebSockets.subscribe((value) => {
+    if (!initialized) {
+      return;
+    }
+    ws[value ? 'open' : 'close']();
+  });
+}
+
+export function initializeOnload() {
   if (initialized) {
     return;
   }

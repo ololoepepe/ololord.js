@@ -34,6 +34,7 @@ const SOURCE_TEXT_MIN_WIDTH = 360;
 const SOURCE_TEXT_MIN_HEIGHT = 420;
 const BAN_USER_MIN_WIDTH = 700;
 const BAN_USER_MIN_HEIGHT = 600;
+const MOUSEOUT_CANCEL_DELAY = 0.5 * Constants.SECOND;
 
 class PostViewModel {
   constructor() {
@@ -204,8 +205,6 @@ export function resetOwnPostLinksCSS() {
     replace: '#stylesheet-own-post-links'
   });
 }
-
-Storage.ownPosts.subscribe(resetOwnPostLinksCSS);
 
 async function banUser(boardName, postNumber) {
   try {
@@ -636,7 +635,7 @@ export function globalMouseoutHandler(e) {
       }
       if (lastPostPreview.mustHide && lastPostPreview.parentNode)
         lastPostPreview.parentNode.removeChild(lastPostPreview);
-    }, 500); //TODO: magic numbers
+    }, MOUSEOUT_CANCEL_DELAY);
   }
 }
 
@@ -721,12 +720,15 @@ PostProcessors.registerPostprocessor(checkExpander, {
   }
 });
 
-Settings.addExpander.subscribe((value) => {
-  if (value) {
-    $('.js-post-text').scrollTop(0);
-    DOM.queryAll('.js-post').forEach(checkExpander);
-  } else {
-    $('.js-post-text-expander').remove();
-    $('.js-post-text').css('max-height', '');
-  }
-});
+export function initialize() {
+  Storage.ownPosts.subscribe(resetOwnPostLinksCSS);
+  Settings.addExpander.subscribe((value) => {
+    if (value) {
+      $('.js-post-text').scrollTop(0);
+      DOM.queryAll('.js-post').forEach(checkExpander);
+    } else {
+      $('.js-post-text-expander').remove();
+      $('.js-post-text').css('max-height', '');
+    }
+  });
+}

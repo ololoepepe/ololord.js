@@ -8,7 +8,7 @@ export const DEFAULT_DRAWING_BACKGROUND_COLOR = 'rgba(255, 255, 255, 1)';
 
 let prevent = false;
 
-export const DEFAULT = {
+export const DEFAULT_SETTINGS = {
   deviceType: 'auto',
   time: 'server',
   timeZoneOffset: -(new Date()).getTimezoneOffset(),
@@ -54,7 +54,6 @@ export const DEFAULT = {
   userJavaScriptEnabled: true,
   sourceHighlightingEnabled: false,
   chatEnabled: true,
-  drawingEnabled: true,
   drawingBackgroundDrawable: true,
   drawingBackgroundColor: DEFAULT_DRAWING_BACKGROUND_COLOR,
   drawingBackgroundWidth: 0,
@@ -63,8 +62,7 @@ export const DEFAULT = {
   closeFilesByClickingOnly: false,
   viewPostPreviewDelay: 200,
   hidePostPreviewDelay: 1000,
-  infiniteScroll: false,
-  apiRequestCachingEnabled: false,
+  infiniteScroll: () => { return Tools.deviceType('mobile'); },
   bannerMode: 'random',
   captchaEngine: 'node-captcha',
   style: 'photon',
@@ -73,40 +71,37 @@ export const DEFAULT = {
   ajaxNavigation: false
 };
 
+function getDefaultValue(key) {
+  let val = DEFAULT_SETTINGS[key];
+  return (typeof val === 'function') ? val() : val;
+}
+
 export function initialize() {
   let settings = Storage.getLocalObject('settings', {});
-  _({ infiniteScroll: Tools.deviceType('mobile') }).each((value, key) => {
-    DEFAULT[key] = value;
-    value = settings[key];
-    module.exports[key]((typeof value !== 'undefined') ? value : DEFAULT[key]);
+  _(DEFAULT_SETTINGS).each((_, key) => {
+    let value = settings[key];
+    let o = KO.observable((typeof value !== 'undefined') ? value : getDefaultValue(key));
+    o.subscribe((value) => {
+      if (prevent) {
+        return;
+      }
+      let settings = Storage.getLocalObject('settings', {});
+      settings[key] = value;
+      Storage.setLocalObject('settings', settings);
+    });
+    module.exports[key] = o;
   });
 }
 
-let settings = Storage.getLocalObject('settings', {});
-
-_(DEFAULT).each((_, key) => {
-  let value = settings[key];
-  let o = KO.observable((typeof value !== 'undefined') ? value : DEFAULT[key]);
-  o.subscribe((value) => {
-    if (prevent) {
-      return;
-    }
-    let settings = Storage.getLocalObject('settings', {});
-    settings[key] = value;
-    Storage.setLocalObject('settings', settings);
-  });
-  module.exports[key] = o;
-});
-
 export function getAll() {
-  return _(DEFAULT).reduce((acc, _, key) => {
+  return _(DEFAULT_SETTINGS).reduce((acc, _, key) => {
     acc[key] = module.exports[key]();
     return acc;
   }, {});
 }
 
 export function setAll(o) {
-  return _(DEFAULT).each((_, key) => {
+  return _(DEFAULT_SETTINGS).each((_, key) => {
     if (!o.hasOwnProperty(key)) {
       return;
     }
@@ -160,8 +155,6 @@ export const SYNCHRONIZABLE_DATA = {
   playerTracks: { get: [] },
   lastChatCheckDate: { get: null },
   audioVideoVolume: { get: 1 },
-  ownLikes: { set: true },
-  ownVotes: { set: true },
   lastPostNumbers: {},
   showTripcode: {}
 };
@@ -221,7 +214,7 @@ export function setLocalData(o, { includeSettings, includeCustom, includePasswor
 
 Storage.on('settings', (settings) => {
   prevent = true;
-  _(DEFAULT).each((_, key) => {
+  _(DEFAULT_SETTINGS).each((_, key) => {
     module.exports[key](settings[key]);
   });
   prevent = false;
