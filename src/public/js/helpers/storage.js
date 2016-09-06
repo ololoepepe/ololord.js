@@ -335,12 +335,12 @@ export function lastWidgetGeometry(id, geometry) {
 
 export function vkAuth(expires) {
   if (typeof expires !== 'undefined') {
-    return setCookie('vkAuth', 'true', {
+    return setCookie('vkAuth', (expires > 0) ? 'true' : '', {
       expires: expires,
       path: '/'
     });
   } else {
-    return getCookie('vkAuth', 'false');
+    return getCookie('vkAuth', 'false') === 'true';
   }
 }
 

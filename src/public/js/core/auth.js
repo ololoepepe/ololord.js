@@ -21,13 +21,11 @@ function vkLogin(timeout) {
       }
       resolve(response.session);
     }, VK.access.AUDIO);
-    if (!result) {
-      reject(Tools.translate('Vkontakte is not initialized'));
-    }
   });
 }
 
 function vkLogout(timeout) {
+  initializeVK();
   timeout = Tools.option(timeout, 'number', DEFAULT_VK_LOGOUT_TIMEOUT, { test: (t) => { t > 0; } });
   return new Promise((resolve, reject) => {
     setTimeout(reject.bind(null, Tools.translate('Vkontakte logout timeout')), timeout);
@@ -59,17 +57,17 @@ export async function login(hashpass, vk) {
   } catch (err) {
     DOM.handleError(err);
   }
-};
+}
 
 export async function logout() {
   try {
-    if (Storage.vkAuth() === 'true') {
+    if (Storage.vkAuth()) {
       try {
         await vkLogout();
       } catch (err) {
         DOM.handleError(err);
       }
-      Storage.deleteCookie('vkAuth', '/');
+      Storage.vkAuth(-1);
     }
     Storage.hashpass('', -1);
     Storage.removeLocalObject('levels');

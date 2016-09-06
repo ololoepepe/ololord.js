@@ -2530,11 +2530,6 @@
             "value": "Ошибка логина Вкотнакте"
         }
     },
-    "Vkontakte is not initialized": {
-        "_default": {
-            "value": "Вконтакте не инициализирован"
-        }
-    },
     "Vkontakte logout timeout": {
         "_default": {
             "value": "Время ожидания логаута вконтакте истекло"
@@ -3241,6 +3236,11 @@
     "[$[1]] Closed": {
         "_default": {
             "value": "[$[1]] Завершен"
+        }
+    },
+    "[Attached file]": {
+        "_default": {
+            "value": "[Прикрепленный файл]"
         }
     }
 }
