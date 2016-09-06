@@ -25,7 +25,7 @@ function getFileHashes(div) {
   let parent = $(div).parent();
   let hashes = parent.find('.js-file-hashes');
   while (parent[0] && !hashes[0]) {
-    parent = $(parent).parent();
+    parent = parent.parent();
     hashes = parent.find('.js-file-hashes');
   }
   return hashes[0];
@@ -93,11 +93,13 @@ function setFileName(div, id) {
 
 async function checkFileExistence(div) {
   try {
-    let data = await Tools.readAs(div.file);
-    div.fileHash = Tools.sha1(new Buffer(data));
+    if (!div.fileHash) {
+      let data = await Tools.readAs(div.file);
+      div.fileHash = Tools.sha1(new Buffer(data));
+    }
     let exists = await AJAX.api('fileExistence', { fileHash: div.fileHash });
     if (!exists) {
-      return;
+      return false;
     }
     setFileName(div, div.fileHash);
     $(div).find('.js-sign-file-exists-on-server').show();
@@ -112,8 +114,10 @@ async function checkFileExistence(div) {
       div.fileBackup = div.file;
       delete div.file;
     }
+    return true;
   } catch (err) {
     DOM.handleError(err);
+    return false;
   }
 }
 
@@ -170,35 +174,50 @@ function isEmpty(div) {
 }
 
 export async function fileAddedCommon(div) {
-  if (!div || (!div.file && !div.fileUrl)) {
+  if (!div || (!div.file && !div.fileUrl && !div.fileHash)) {
     return;
   }
-  let fileName = (div.file ? div.file.name : div.fileUrl.split('/').pop()) || '';
-  let fullFileName = fileName;
-  if (fileName.length > MAX_FILE_NAME_LENGTH) {
-    fileName = fileName.substr(0, MAX_FILE_NAME_LENGTH - 1) + '…';
-  }
-  try {
-    let txt = await getFileDescription(div);
-    $(div).find('.js-file-input-label-text').text(`${fileName} ${txt}`).attr('title', fullFileName);
-  } catch (err) {
-    DOM.handleError(err);
-  }
-  let uuid = UUID.v4();
-  setFileName(div, uuid);
-  removeFileHash(div);
-  if (div.file && Settings.checkFileExistence()) {
-    checkFileExistence(div);
-  }
-  if (div.file && fullFileName.match(/\.(jpe?g|png|gif)$/i) && Settings.showAttachedFilePreview()) {
-    if (!fileName.match(/\.(jpe?g)$/i) || !Settings.stripExifFromJpeg()) {
-      previewImage(div);
+  if (div.fileHash) {
+    let fileName = div.fileName || Tools.translate('[Attached file]');
+    let exists = await checkFileExistence(div);
+    if (!exists) {
+      return;
+    }
+    $(div).find('.js-file-input-label-text').text(fileName).attr('title', fileName);
+    if (div.filePreviewURL) {
+      let img = $(`<img src='${div.filePreviewURL}' class='invert' />`); //NOTE: Double inversion --> not inverted
+      $(div).find('.js-file-input-preview').removeClass('icon-32').removeClassWild('icon-file-*').append(img);
+    } else {
+      $(div).find('.js-file-input-preview').empty().addClass('icon-32 icon-file-open');
     }
   } else {
-    previewFileType(div, fullFileName);
-  }
-  if (div.file && fullFileName.match(/\.(jpe?g)$/i) && Settings.stripExifFromJpeg()) {
-    stripEXIF(div);
+    let fileName = (div.file ? div.file.name : div.fileUrl.split('/').pop()) || '';
+    let fullFileName = fileName;
+    if (fileName.length > MAX_FILE_NAME_LENGTH) {
+      fileName = fileName.substr(0, MAX_FILE_NAME_LENGTH - 1) + '…';
+    }
+    try {
+      let txt = await getFileDescription(div);
+      $(div).find('.js-file-input-label-text').text(`${fileName} ${txt}`).attr('title', fullFileName);
+    } catch (err) {
+      DOM.handleError(err);
+    }
+    removeFileHash(div);
+    if (div.file && Settings.checkFileExistence()) {
+      checkFileExistence(div);
+    }
+    if (div.file && fullFileName.match(/\.(jpe?g|png|gif)$/i) && Settings.showAttachedFilePreview()) {
+      if (!fileName.match(/\.(jpe?g)$/i) || !Settings.stripExifFromJpeg()) {
+        previewImage(div);
+      }
+    } else {
+      previewFileType(div, fullFileName);
+    }
+    if (div.file && fullFileName.match(/\.(jpe?g)$/i) && Settings.stripExifFromJpeg()) {
+      stripEXIF(div);
+    }
+    let uuid = UUID.v4();
+    setFileName(div, uuid);
   }
   if (div.hasOwnProperty('fileInput')) {
     delete div.fileInput;
@@ -342,7 +361,7 @@ export function removeFile(div) {
 }
 
 export function createFileInput() {
-  let fileInput = Templating.template('postForm/fileInput');
+  let fileInput = Templating.template('postForm/fileInput', {}, { boardName: Tools.boardName() });
   KO.applyBindings({
     browseFile: browseFile.bind(null, fileInput),
     attachFileByLink: (_, e) => {

@@ -42,7 +42,9 @@ import './core/posts';
 import './core/threads';
 import './handlers/post-processors';
 import './helpers/ajax';
+import './widgets/movable-widget';
 import './widgets/overlay-progress-bar';
+import './widgets/popup-message';
 import './worker/spells';
 
 const CODEMIRROR_ADDONS = ['mode/simple'];

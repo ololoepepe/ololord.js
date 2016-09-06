@@ -103,6 +103,11 @@ export function showWidget(content, options = {}) {
       break;
     }
   }
+  if (options.widgetClass) {
+    widget = new options.widgetClass(options);
+  } else if (options.widget) {
+    widget = options.widget;
+  }
   if (!widget) {
     widget = new MovableWidget(content, options);
   }

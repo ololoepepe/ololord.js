@@ -55,7 +55,7 @@ function buildCSS(custom, debug) {
     path += '/custom';
   }
   var stream = gulp.src(fs.readdirSync(`${__dirname}/${path}`).filter(function(fileName) {
-    return fileName.split('.').pop() === 'less' && 'base.less' != fileName;
+    return fileName.split('.').pop() === 'less' && 'base.less' !== fileName;
   }).map(function(fileName) {
     return `${path}/${fileName}`;
   }))

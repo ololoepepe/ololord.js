@@ -64,7 +64,11 @@ export async function login(hashpass, vk) {
 export async function logout() {
   try {
     if (Storage.vkAuth() === 'true') {
-      await vkLogout();
+      try {
+        await vkLogout();
+      } catch (err) {
+        DOM.handleError(err);
+      }
       Storage.deleteCookie('vkAuth', '/');
     }
     Storage.hashpass('', -1);
