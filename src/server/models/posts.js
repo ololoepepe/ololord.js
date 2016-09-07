@@ -358,7 +358,7 @@ export async function editPost(req, fields) {
   }
   let key = `${boardName}:${postNumber}`;
   text = await markup(board.name, rawText, {
-    markupModes: /*markupModes*/post.markup, //TODO ???
+    markupModes: markupModes,
     referencedPosts: referencedPosts,
     accessLevel: req.level(board.name)
   });
@@ -370,7 +370,7 @@ export async function editPost(req, fields) {
   if (post.hasOwnProperty('bannedFor')) {
     delete post.bannedFor;
   }
-  //post.markup = markupModes; //TODO ???
+  post.markup = markupModes;
   post.name = name || null;
   post.plainText = plainText;
   post.rawText = rawText;

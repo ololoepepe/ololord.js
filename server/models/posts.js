@@ -1050,7 +1050,7 @@ var editPost = exports.editPost = function () {
             key = boardName + ':' + postNumber;
             _context18.next = 26;
             return (0, _markup2.default)(board.name, rawText, {
-              markupModes: /*markupModes*/post.markup, //TODO ???
+              markupModes: markupModes,
               referencedPosts: referencedPosts,
               accessLevel: req.level(board.name)
             });
@@ -1070,44 +1070,44 @@ var editPost = exports.editPost = function () {
             if (post.hasOwnProperty('bannedFor')) {
               delete post.bannedFor;
             }
-            //post.markup = markupModes; //TODO ???
+            post.markup = markupModes;
             post.name = name || null;
             post.plainText = plainText;
             post.rawText = rawText;
             post.subject = subject || null;
             post.text = text || null;
             post.updatedAt = date.toISOString();
-            _context18.next = 41;
+            _context18.next = 42;
             return Posts.setOne(key, post);
 
-          case 41:
-            _context18.next = 43;
+          case 42:
+            _context18.next = 44;
             return board.removeExtraData(postNumber);
 
-          case 43:
-            _context18.next = 45;
+          case 44:
+            _context18.next = 46;
             return board.storeExtraData(postNumber, extraData);
 
-          case 45:
-            _context18.next = 47;
+          case 46:
+            _context18.next = 48;
             return removeReferencedPosts(post);
 
-          case 47:
-            _context18.next = 49;
+          case 48:
+            _context18.next = 50;
             return addReferencedPosts(post, referencedPosts);
 
-          case 49:
-            _context18.next = 51;
+          case 50:
+            _context18.next = 52;
             return Search.updatePostIndex(boardName, postNumber, function (body) {
               body.plainText = plainText;
               body.subject = subject;
               return body;
             });
 
-          case 51:
+          case 52:
             return _context18.abrupt('return', post);
 
-          case 52:
+          case 53:
           case 'end':
             return _context18.stop();
         }

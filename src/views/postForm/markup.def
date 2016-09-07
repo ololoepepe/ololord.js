@@ -29,10 +29,10 @@
                      click: markup.bind($data, "spoiler")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('QUOTATION') >= 0}}
-    <span class='icon-20 icon-quotes-left button-icon'
+    <a href='javascript:void(0);' class='icon-20 icon-quotes-left button-icon'
           data-bind='attr: { title: "{{!it.translate('Quote selected text', 'markupQuotation')}}"
                        + shortcutSuffix("markupQuotation") },
-                     click: markup.bind($data, ">")'></span>
+                     click: markup.bind($data, ">")'></a>
   {{?}}
   {{? it.board.markupElements.indexOf('UNORDERED_LIST') >= 0}}
     <span class='icon-20 icon-list button-icon' title='{{!it.translate('Unordered list', 'markupUnorderedList')}}'

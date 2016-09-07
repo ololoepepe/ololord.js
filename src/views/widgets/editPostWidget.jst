@@ -23,5 +23,12 @@
       <span class='symbol-counter'><span class='js-symbols-used'></span>/{{!it.board.maxTextLength}}</span>
     </div>
     <div class='post-form-row'>{{#def['custom/editPostField/30'] || ''}}</div>
+      <select name='markupMode' class='select'
+              data-bind='value: ((post.markup.length > 0) ? post.markup.join(",") : "NONE")'>
+        {{~it.markupModes :mode}}
+          <option value='{{!mode.name}}'>{{!mode.title}}</option>
+        {{~}}
+      </select>
+    <div class='post-form-row'>{{#def['custom/editPostField/40'] || ''}}</div>
   </div>
 </form>
