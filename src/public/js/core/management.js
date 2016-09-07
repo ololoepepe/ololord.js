@@ -236,7 +236,10 @@ async function editFile(id) {
   };
   try {
     let result = await AJAX.api('fileContent', { fileName: id }, { indicator: new OverlayProgressBar() });
-    let { accepted, value } = await Widgets.editCode(id, modes[id.split('.').pop()] || '', result.content);
+    let { accepted, value } = await Widgets.editCode(modes[id.split('.').pop()] || '', {
+      name: id,
+      value: result.content
+    });
     if (!accepted) {
       return;
     }

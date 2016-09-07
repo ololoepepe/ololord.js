@@ -258,10 +258,11 @@ function createCodemirrorEditor(parent, mode, value) {
   });
 }
 
-export async function editCode(name, mode, value) {
-  if (typeof value !== 'string' && Storage.hasOwnProperty(name)) {
-    value = Storage[name];
+export async function editCode(mode, { name, value } = {}) {
+  if (typeof value === 'undefined' && typeof name !== 'unedefined' && Storage.hasOwnProperty(name)) {
+    value = Storage[name]();
   }
+  value = '' + value;
   let div = $('<div class="auto-resizable-div"></div>');
   let editor = createCodemirrorEditor(div[0], mode, value);
   try {
