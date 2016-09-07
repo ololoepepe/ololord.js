@@ -65,7 +65,7 @@ var getYoutubeEmbeddedHtml = function () {
         switch (_context3.prev = _context3.next) {
           case 0:
             match = href.match(RX_YOUTUBE_VIDEO_LINK_1);
-            videoId = match ? match[1] : null;
+            videoId = match ? match[2] : null;
 
             if (!videoId) {
               match = href.match(RX_YOUTUBE_VIDEO_LINK_2);

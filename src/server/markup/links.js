@@ -93,7 +93,7 @@ async function getTwitterEmbeddedHtml(href, defaultHTML) {
 
 async function getYoutubeEmbeddedHtml(href, defaultHTML) {
   let match = href.match(RX_YOUTUBE_VIDEO_LINK_1);
-  let videoId = match ? match[1] : null;
+  let videoId = match ? match[2] : null;
   if (!videoId) {
     match = href.match(RX_YOUTUBE_VIDEO_LINK_2);
     videoId = match ? match[1] : null;
