@@ -35,8 +35,7 @@ function spawnCluster() {
       await geolocation.initialize();
       await BoardsModel.initialize();
       await Renderer.reloadTemplates();
-      let sockets = {};
-      let nextSocketId = 0;
+      let sockets = new WeakSet();
       let server = HTTP.createServer(controllers);
       let ws = new WebSocketServer(server);
       ws.on('sendChatMessage', async function(msg, conn) {
@@ -99,8 +98,8 @@ function spawnCluster() {
         IPC.on('stop', () => {
           return new Promise((resolve, reject) => {
             server.close(() => {
-              _(sockets).each((socket, socketId) => {
-                delete sockets[socketId];
+              sockets.forEach((socket) => {
+                sockets.delete(socket);
                 socket.destroy();
               });
               OnlineCounter.clear();
@@ -152,10 +151,9 @@ function spawnCluster() {
         });
       });
       server.on('connection', (socket) => {
-        let socketId = ++nextSocketId;
-        sockets[socketId] = socket;
+        sockets.add(socket);
         socket.on('close', () => {
-          delete sockets[socketId];
+          sockets.delete(socket);
         });
       });
     } catch (err) {

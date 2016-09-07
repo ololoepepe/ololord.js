@@ -13,11 +13,7 @@ if (!FS.existsSync(path)) {
     process.exit(0);
 }
 
-var dbPath = __dirname + "/../geolocation";
-
-mkpath.sync(dbPath);
-
-var db = new SQLite3.Database(dbPath + "/ip2location.sqlite");
+var db = new SQLite3.Database(__dirname + "/../sqlite/ip2location.sqlite");
 db.pexec = promisify(db.exec);
 db.prun = promisify(db.run);
 var stream = FS.createReadStream(path, "utf8");
