@@ -54,7 +54,7 @@ var createThumbnail = exports.createThumbnail = function () {
                 while (1) {
                   switch (_context.prev = _context.next) {
                     case 0:
-                      pngThumbPath = filePath + '.png';
+                      pngThumbPath = thumbPath + '.png';
                       _context.next = 3;
                       return new Promise(function (resolve, reject) {
                         (0, _fluentFfmpeg2.default)(path).frames(1).on('error', reject).on('end', resolve).save(pngThumbPath);
@@ -130,11 +130,11 @@ var createThumbnail = exports.createThumbnail = function () {
             }
 
             _context2.next = 33;
-            return Files.resizeImage(thumbPath, 200, 200);
+            return Files.resizeImage(file.thumbPath, 200, 200);
 
           case 33:
             _context2.next = 35;
-            return Files.getImageSize(thumbPath);
+            return Files.getImageSize(file.thumbPath);
 
           case 35:
             _thumbInfo = _context2.sent;
@@ -144,7 +144,7 @@ var createThumbnail = exports.createThumbnail = function () {
               break;
             }
 
-            throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
+            throw new Error(Tools.translate('Failed to identify image file: $[1]', '', file.thumbPath));
 
           case 38:
             result.dimensions = {
