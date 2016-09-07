@@ -92,8 +92,7 @@ exports.default = [{
   priority: 2500,
   markupModes: ['EXTENDED_WAKABA_MARK'],
   convert: convertTags,
-  op: '---',
-  cl: null
+  op: '---'
 }, {
   priority: 2700,
   markupModes: ['EXTENDED_WAKABA_MARK'],
