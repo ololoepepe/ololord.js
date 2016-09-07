@@ -120,10 +120,11 @@ export let updateThread = async function(silent) {
     if (typeof popup !== 'undefined') {
       let txt = (posts.length >= 1) ? Tools.translate('New posts:', 'newPostsText')
         : Tools.translate('No new posts', 'noNewPostsText');
-      if (posts.length >= 1)
-        txt += `  + ${posts.length}`;
-        popup.resetContent(txt);
-        popup.resetTimeout();
+      if (posts.length >= 1) {
+        txt += ` ${posts.length}`;
+      }
+      popup.resetContent(txt);
+      popup.resetTimeout();
     }
     if (posts.length < 1) {
       return;
@@ -133,16 +134,16 @@ export let updateThread = async function(silent) {
       threadNumber: threadNumber
     }, { indicator: new OverlayProgressBar() });
     let sequenceNumber = _(posts).last().sequenceNumber;
-    posts = await Tools.series(posts, (post) => {
-      return Posts.createPostNode(post, true, threadInfo);
+    posts = await Tools.series(posts, async function(post) {
+      return await Posts.createPostNode(post, true, threadInfo);
     }, true);
-    await Tools.series(posts, (post) => {
+    await Tools.series(posts, async function(post) {
       if (DOM.id(post.id)) {
         return;
       }
       $(post).addClass('new-post').one('mouseover', () => { $(post).removeClass('new-post'); });
       $('.js-thread-posts').append(post);
-      return PostProcessors.applyPostprocessors(post);
+      return await PostProcessors.applyPostprocessors(post);
     });
     Files.initializeFiles();
     let board = Templating.board(boardName);
@@ -609,7 +610,7 @@ export function visibilityChangeHandler() {
   if (window.document.hidden === undefined) {
     return;
   }
-  pageVisible = !!window.document.hidden;
+  pageVisible = !window.document.hidden;
   if (!pageVisible || !blinkTimer) {
     return;
   }

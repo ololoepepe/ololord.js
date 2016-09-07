@@ -548,7 +548,7 @@ export let removeReferences = function(postNumber, referencedOnly) {
     if ($(parent).hasClass('.js-referring-posts')) {
       parent.removeChild(a);
       if (parent.children.length <= 1) {
-        parent.parentNode.style.display = 'none';
+        $(parent).empty();
       }
     } else if (!referencedOnly) {
       parent.replaceChild(DOM.node('text', a.textContent), a);
@@ -639,20 +639,22 @@ export function globalMouseoutHandler(e) {
   }
 }
 
-function procerssReferencedPosts(node, post) {
-  let ownPosts = Storage.ownPosts();
+function procerssReferencedPosts(post) {
   post.referencedPosts.filter((reference) => {
-    return reference.boardName === Tools.boardName() && DOM.id(reference.postNumber);
+    return (reference.boardName === Tools.boardName()) && DOM.id(`post-${reference.postNumber}`);
   }).forEach((reference) => {
-    let targetPost = DOM.id(reference.postNumber);
+    let targetPost = DOM.id(`post-${reference.postNumber}`);
     let referencedBy = DOM.queryOne('.js-referring-posts', targetPost);
     let any = DOM.queryAll('a', referencedBy).some((ref) => {
-      return DOM.data('boardName', ref) === post.boardName && DOM.data('postNumber', ref) === post.number;
+      return (DOM.data('boardName', ref) === post.boardName) && (DOM.data('postNumber', ref) === post.number);
     });
     if (any) {
       return;
     }
-    let a = Templating.template('postReference', {
+    if (!DOM.queryOne('a', referencedBy)) {
+      $(referencedBy).text(Tools.translate('Replies:', 'referencedByText'));
+    }
+    let a = Templating.template('post/reference', {
       reference: {
         boardName: post.boardName,
         postNumber: post.number,
@@ -699,7 +701,7 @@ export let createPostNode = async function(post, permanent, threadInfo) {
       DOM.handleError(err);
     }
     if (permanent && post.referencedPosts && post.referencedPosts.length > 0) {
-      procerssReferencedPosts(node, post);
+      procerssReferencedPosts(post);
     }
     return node;
   } catch (err) {

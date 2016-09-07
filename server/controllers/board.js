@@ -27,34 +27,33 @@ var renderThreadHTML = function () {
             return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
-            thread.title = thread.title || board.title + ' — ' + thread.number;
-            model = { thread: thread };
-
-            model.isThreadPage = true;
-            model.board = MiscModel.board(board).board;
-            model.threadNumber = thread.number;
-            if (archived) {
-              model.archived = true;
-            }
+            model = {
+              thread: thread,
+              title: thread.title || board.title + ' — ' + thread.number,
+              isThreadPage: true,
+              board: MiscModel.board(board).board,
+              threadNumber: thread.number,
+              archived: !!archived
+            };
             data = Renderer.render('pages/thread', model);
 
             if (!targetPath) {
-              _context.next = 15;
+              _context.next = 10;
               break;
             }
 
-            _context.next = 13;
+            _context.next = 8;
             return _fs2.default.write(targetPath, data);
 
-          case 13:
-            _context.next = 17;
+          case 8:
+            _context.next = 12;
             break;
 
-          case 15:
-            _context.next = 17;
+          case 10:
+            _context.next = 12;
             return Cache.writeFile(thread.boardName + '/res/' + thread.number + '.html', data);
 
-          case 17:
+          case 12:
           case 'end':
             return _context.stop();
         }

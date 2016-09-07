@@ -1,4 +1,4 @@
-<div class='referring-posts'>
+<div class='referring-posts js-referring-posts'>
   {{? post.referringPosts.length > 0}}
     {{!it.translate('Replies:', 'referencedByText')}}
   {{?}}

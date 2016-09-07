@@ -52,14 +52,14 @@ async function renderThreadHTML(thread, { targetPath, archived } = {}) {
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
-  thread.title = thread.title || (`${board.title} — ${thread.number}`);
-  let model = { thread: thread };
-  model.isThreadPage = true;
-  model.board = MiscModel.board(board).board;
-  model.threadNumber = thread.number;
-  if (archived) {
-    model.archived = true;
-  }
+  let model = {
+    thread: thread,
+    title: thread.title || `${board.title} — ${thread.number}`,
+    isThreadPage: true,
+    board: MiscModel.board(board).board,
+    threadNumber: thread.number,
+    archived: !!archived
+  };
   let data = Renderer.render('pages/thread', model);
   if (targetPath) {
     await FS.write(targetPath, data);
