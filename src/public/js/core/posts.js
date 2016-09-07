@@ -646,7 +646,7 @@ function procerssReferencedPosts(post) {
     let targetPost = DOM.id(`post-${reference.postNumber}`);
     let referencedBy = DOM.queryOne('.js-referring-posts', targetPost);
     let any = DOM.queryAll('a', referencedBy).some((ref) => {
-      return (DOM.data('boardName', ref) === post.boardName) && (DOM.data('postNumber', ref) === post.number);
+      return (DOM.data('boardName', ref) === post.boardName) && (+DOM.data('postNumber', ref) === post.number);
     });
     if (any) {
       return;
