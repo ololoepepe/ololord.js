@@ -158,7 +158,7 @@ export let updateThread = async function(silent) {
         blinkTimer.start();
       }
       if (Settings.showAutoUpdateDesktopNotifications()) {
-        let subject = DOM.queryOne('.theTitle > h1').textContent;
+        let subject = DOM.queryOne('.page-title').textContent;
         let title = `[${subject}] ${Tools.translate('New posts:', 'newPostsText')} ${posts.length}`;
         let icon = `/${Tools.sitePathPrefix()}favicon.ico`;
         let post = posts[0];

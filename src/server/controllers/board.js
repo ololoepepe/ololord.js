@@ -23,7 +23,7 @@ function pickPostsToRerender(oldPosts, posts) {
   return _(posts).pick((post, postNumber) => {
     let oldPost = oldPosts[postNumber];
     if (!oldPost || oldPost.updatedAt < post.updatedAt || oldPost.bannedFor !== post.bannedFor
-      || oldPost.text === post.text) {
+      || oldPost.text !== post.text) {
       return true;
     }
     let oldRefs = oldPost.referringPosts.reduce((acc, ref) => {

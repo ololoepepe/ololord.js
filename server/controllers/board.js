@@ -268,7 +268,7 @@ var router = _express2.default.Router();
 function pickPostsToRerender(oldPosts, posts) {
   return (0, _underscore2.default)(posts).pick(function (post, postNumber) {
     var oldPost = oldPosts[postNumber];
-    if (!oldPost || oldPost.updatedAt < post.updatedAt || oldPost.bannedFor !== post.bannedFor || oldPost.text === post.text) {
+    if (!oldPost || oldPost.updatedAt < post.updatedAt || oldPost.bannedFor !== post.bannedFor || oldPost.text !== post.text) {
       return true;
     }
     var oldRefs = oldPost.referringPosts.reduce(function (acc, ref) {

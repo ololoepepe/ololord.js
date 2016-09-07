@@ -116,10 +116,10 @@ function spawnCluster() {
         while (1) {
           switch (_context5.prev = _context5.next) {
             case 0:
-              console.log('[' + process.pid + '] Initializing…');
+              console.log(Tools.translate('[$[1]] Initializing…', '', process.pid));
               _context5.prev = 1;
               return _context5.delegateYield(regeneratorRuntime.mark(function _callee4() {
-                var sockets, nextSocketId, server, ws, subscriptions;
+                var sockets, server, ws, subscriptions;
                 return regeneratorRuntime.wrap(function _callee4$(_context4) {
                   while (1) {
                     switch (_context4.prev = _context4.next) {
@@ -136,8 +136,7 @@ function spawnCluster() {
                         return Renderer.reloadTemplates();
 
                       case 6:
-                        sockets = {};
-                        nextSocketId = 0;
+                        sockets = new WeakSet();
                         server = _http2.default.createServer(_controllers2.default);
                         ws = new _websocketServer2.default(server);
 
@@ -235,19 +234,19 @@ function spawnCluster() {
                           }
                         });
                         server.listen((0, _config2.default)('server.port'), function () {
-                          console.log('[' + process.pid + '] Listening on port ' + (0, _config2.default)('server.port') + '…');
+                          console.log(Tools.translate('[$[1]] Listening on port $[2]…', '', process.pid, (0, _config2.default)('server.port')));
                           IPC.on('exit', function (status) {
                             process.exit(status);
                           });
                           IPC.on('stop', function () {
                             return new Promise(function (resolve, reject) {
                               server.close(function () {
-                                (0, _underscore2.default)(sockets).each(function (socket, socketId) {
-                                  delete sockets[socketId];
+                                sockets.forEach(function (socket) {
+                                  sockets.delete(socket);
                                   socket.destroy();
                                 });
                                 OnlineCounter.clear();
-                                console.log('[' + process.pid + '] Closed');
+                                console.log(Tools.translate('[$[1]] Closed', '', process.pid));
                                 resolve();
                               });
                             });
@@ -255,7 +254,7 @@ function spawnCluster() {
                           IPC.on('start', function () {
                             return new Promise(function (resolve, reject) {
                               server.listen((0, _config2.default)('server.port'), function () {
-                                console.log('[' + process.pid + '] Listening on port ' + (0, _config2.default)('server.port') + '…');
+                                console.log(Tools.translate('[$[1]] Listening on port $[2]…', '', process.pid, (0, _config2.default)('server.port')));
                                 resolve();
                               });
                             });
@@ -345,14 +344,13 @@ function spawnCluster() {
                           });
                         });
                         server.on('connection', function (socket) {
-                          var socketId = ++nextSocketId;
-                          sockets[socketId] = socket;
+                          sockets.add(socket);
                           socket.on('close', function () {
-                            delete sockets[socketId];
+                            sockets.delete(socket);
                           });
                         });
 
-                      case 16:
+                      case 15:
                       case 'end':
                         return _context4.stop();
                     }

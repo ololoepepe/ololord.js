@@ -93,7 +93,7 @@ function spawnCluster() {
         }
       });
       server.listen(config('server.port'), () => {
-        console.log(Tools.translate('[$[1]] Listening on port $[2]…', '', process.pid, config('server.port')););
+        console.log(Tools.translate('[$[1]] Listening on port $[2]…', '', process.pid, config('server.port')));
         IPC.on('exit', (status) => { process.exit(status); });
         IPC.on('stop', () => {
           return new Promise((resolve, reject) => {
@@ -103,7 +103,7 @@ function spawnCluster() {
                 socket.destroy();
               });
               OnlineCounter.clear();
-              console.log(Tools.translate('[$[1]] Closed', '', process.pid);
+              console.log(Tools.translate('[$[1]] Closed', '', process.pid));
               resolve();
             });
           });
@@ -111,7 +111,7 @@ function spawnCluster() {
         IPC.on('start', () => {
           return new Promise((resolve, reject) => {
             server.listen(config('server.port'), () => {
-              console.log(Tools.translate('[$[1]] Listening on port $[2]…', '', process.pid, config('server.port')););
+              console.log(Tools.translate('[$[1]] Listening on port $[2]…', '', process.pid, config('server.port')));
               resolve();
             });
           });

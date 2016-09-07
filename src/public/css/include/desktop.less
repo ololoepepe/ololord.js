@@ -56,7 +56,12 @@ input, select {
 
 /* Post */
 
+.post.temporary-post {
+  position: absolute;
+}
+
 .post-file {
+  max-width: 200px;
   padding-left: 20px;
 }
 
@@ -64,12 +69,13 @@ input, select {
   font-size: 0.8em;
 }
 
-.post-text-wrapper {
-  flex-basis: ~'calc(100% - 230px)';
+.post-file-link-container {
+  max-width: 200px;
+  max-height: 200px;
 }
 
-.post.temporary-post {
-  position: absolute;
+.post-text-wrapper {
+  flex-basis: ~'calc(100% - 230px)';
 }
 
 /* Player */

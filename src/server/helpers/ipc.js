@@ -130,7 +130,7 @@ async function performTask(type, key, data) {
     workerLoads.set(workerID, 1);
   }
   try {
-    let result = send('render', {
+    let result = await send('render', {
       type: type,
       key: key,
       data: data

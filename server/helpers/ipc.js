@@ -99,28 +99,32 @@ var performTask = function () {
               workerLoads.set(workerID, 1);
             }
             _context2.prev = 2;
-            result = send('render', {
+            _context2.next = 5;
+            return send('render', {
               type: type,
               key: key,
               data: data
             }, false, workerID);
 
+          case 5:
+            result = _context2.sent;
+
             workerLoads.set(workerID, workerLoads.get(workerID) - 1);
             return _context2.abrupt('return', result);
 
-          case 8:
-            _context2.prev = 8;
+          case 10:
+            _context2.prev = 10;
             _context2.t0 = _context2['catch'](2);
 
             workerLoads.set(workerID, workerLoads.get(workerID) - 1);
             return _context2.abrupt('return', Promise.reject(_context2.t0));
 
-          case 12:
+          case 14:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, this, [[2, 8]]);
+    }, _callee2, this, [[2, 10]]);
   }));
 
   return function performTask(_x3, _x4, _x5) {

@@ -62,7 +62,7 @@
     {{?}}
     {{#def['custom/postFileAction/60'] || ''}}
   </div>
-  <div>
+  <div class='post-file-link-container'>
     <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/src/{{!fileInfo.name}}' target='_blank' class='post-file-link'
        data-rating='{{!fileInfo.rating}}'
        data-bind='click: showImage.bind($data, "{{!fileInfo.name}}")'>{{#def['file/fileThumb']}}</a>
