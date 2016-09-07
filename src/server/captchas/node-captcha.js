@@ -97,7 +97,7 @@ export default class NodeCaptcha extends Captcha {
       throw new Error(Tools.translate('Invalid captcha'));
     }
     clearTimeout(challenge.timer);
-    FS.remove(`${CAPTCHA_PATH}/${fileName}`).catch((err) => {
+    FS.remove(`${CAPTCHA_PATH}/${challenge.fileName}`).catch((err) => {
       Logger.error(err);
     });
     this.challenges.delete(challengeID);
