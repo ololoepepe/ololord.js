@@ -1145,27 +1145,29 @@ var moveThread = exports.moveThread = function () {
             _ref6 = _context27.sent;
             toRerender = _ref6.toRerender;
             toUpdate = _ref6.toUpdate;
-            _context27.next = 37;
+
+            thread.boardName = targetBoardName;
+            _context27.next = 38;
             return Threads.setOne(thead.number, thread, targetBoardName);
 
-          case 37:
-            _context27.next = 39;
+          case 38:
+            _context27.next = 40;
             return ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
 
-          case 39:
-            _context27.next = 41;
+          case 40:
+            _context27.next = 42;
             return ThreadPostNumbers.addSome((0, _underscore2.default)(postNumberMap).toArray(), targetBoardName + ':' + thread.number);
 
-          case 41:
-            _context27.next = 43;
+          case 42:
+            _context27.next = 44;
             return PostsModel.processMovedThreadRelatedPosts({
               posts: toRerender,
               sourceBoardName: sourceBoardName,
               postNumberMap: postNumberMap
             });
 
-          case 43:
-            _context27.next = 45;
+          case 44:
+            _context27.next = 46;
             return Tools.series(toUpdate, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(o) {
                 return regeneratorRuntime.wrap(function _callee26$(_context26) {
@@ -1191,25 +1193,25 @@ var moveThread = exports.moveThread = function () {
               };
             }());
 
-          case 45:
-            _context27.next = 47;
+          case 46:
+            _context27.next = 48;
             return removeThread(sourceBoardName, threadNumber, {
               leaveFileInfos: true,
               leaveReferences: true
             });
 
-          case 47:
+          case 48:
             IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
-            _context27.next = 50;
+            _context27.next = 51;
             return IPC.render(targetBoardName, thread.number, thread.number, 'create');
 
-          case 50:
+          case 51:
             return _context27.abrupt('return', {
               boardName: targetBoardName,
               threadNumber: thread.number
             });
 
-          case 51:
+          case 52:
           case 'end':
             return _context27.stop();
         }

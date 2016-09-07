@@ -385,6 +385,7 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
     targetPath: targetPath,
     targetThumbPath: targetThumbPath
   });
+  thread.boardName = targetBoardName;
   await Threads.setOne(thead.number, thread, targetBoardName);
   await ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
   await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), `${targetBoardName}:${thread.number}`);

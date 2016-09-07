@@ -33,8 +33,6 @@ import './core/chat';
 import './core/drafts';
 import './core/file-inputs';
 import './core/files';
-import './core/hiding';
-import './core/hotkeys';
 import './core/management';
 import './core/markup';
 import './core/player';

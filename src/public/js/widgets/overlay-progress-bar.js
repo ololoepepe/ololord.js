@@ -68,7 +68,7 @@ export default class OverlayProgressBar extends EventEmitter {
     this.text.empty();
     if (typeof e.lengthComputable === 'boolean' && !e.lengthComputable) {
       this.progressBar.progressbar({ value: false });
-      this.text(this.labelText() + ' ');
+      this.text.text(this.labelText() + ' ');
       return;
     }
     this.progressBar.progressbar({
@@ -89,7 +89,7 @@ export default class OverlayProgressBar extends EventEmitter {
     this.text.empty();
     if (typeof e.lengthComputable === 'boolean' && !e.lengthComputable) {
       this.progressBar.progressbar({ value: false });
-      this.text(this.labelText(undefined, undefined, true) + ' ');
+      this.text.text(this.labelText(undefined, undefined, true) + ' ');
       return;
     }
     this.progressBar.progressbar({

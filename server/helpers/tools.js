@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.series = exports.CODE_STYLES = exports.STYLES = exports.BAN_LEVELS = exports.REGISTERED_USER_LEVELS = exports.NODE_CAPTCHA_ID = exports.FILE_RATINGS = exports.EXTERNAL_LINK_REGEXP_PATTERN = exports.DAY = exports.HOUR = exports.MINUTE = exports.SECOND = exports.translate = undefined;
+exports.series = exports.CODE_STYLES = exports.STYLES = exports.BAN_LEVELS = exports.REGISTERED_USER_LEVELS = exports.NODE_CAPTCHA_ID = exports.FILE_RATINGS = exports.DAY = exports.HOUR = exports.MINUTE = exports.SECOND = exports.translate = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -148,14 +148,6 @@ var SECOND = exports.SECOND = 1000;
 var MINUTE = exports.MINUTE = 60 * SECOND;
 var HOUR = exports.HOUR = 60 * MINUTE;
 var DAY = exports.DAY = 24 * HOUR;
-var EXTERNAL_LINK_REGEXP_PATTERN = exports.EXTERNAL_LINK_REGEXP_PATTERN = function () {
-  var schema = "https?:\\/\\/|ftp:\\/\\/";
-  var ip = "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}" + "(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])";
-  var hostname = "([\\w\\p{L}\\.\\-]+)\\.([\\p{L}]{2,17}\\.?)";
-  var port = ":\\d+";
-  var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\'\"\\,\\(\\)\\[\\]«»]*)*\\/?";
-  return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
-}();
 var FILE_RATINGS = exports.FILE_RATINGS = ['SFW', 'R-15', 'R-18', 'R-18G'];
 var NODE_CAPTCHA_ID = exports.NODE_CAPTCHA_ID = 'node-captcha';
 var REGISTERED_USER_LEVELS = exports.REGISTERED_USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];

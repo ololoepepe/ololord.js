@@ -113,7 +113,7 @@ var getYoutubeEmbeddedHtml = function () {
               break;
             }
 
-            throw new new Error(Tools.translate('Failed to get YouTube video info'))();
+            throw new Error(Tools.translate('Failed to get YouTube video info'));
 
           case 18:
             info = response.items[0].snippet;
@@ -187,7 +187,7 @@ var getCoubEmbeddedHtml = function () {
               break;
             }
 
-            throw new new Error(Tools.translate('Failed to get Coub embedded HTML'))();
+            throw new Error(Tools.translate('Failed to get Coub embedded HTML'));
 
           case 10:
             _context4.next = 12;
@@ -274,7 +274,10 @@ var convertLinkCommon = function () {
             return _context5.abrupt('return', text);
 
           case 5:
-            href = hrefIsText ? text : matchs[0];
+            if (!hrefIsText) {
+              text = matchs[0];
+            }
+            href = text;
 
             if (href.lastIndexOf('http', 0) && href.lastIndexOf('ftp', 0)) {
               href = 'http://' + href;
@@ -282,52 +285,52 @@ var convertLinkCommon = function () {
             defaultHTML = '<a href=\'' + href + '\'>' + Renderer.toHTML(text) + '</a>';
 
             if (!((0, _config2.default)('site.twitter.integrationEnabled') && RX_TWITTER_POST_LINK.test(href))) {
-              _context5.next = 12;
+              _context5.next = 13;
               break;
             }
 
-            _context5.next = 11;
+            _context5.next = 12;
             return getTwitterEmbeddedHtml(href, defaultHTML);
 
-          case 11:
+          case 12:
             return _context5.abrupt('return', _context5.sent);
 
-          case 12:
+          case 13:
             if (!(RX_YOUTUBE_VIDEO_LINK_1.test(href) || RX_YOUTUBE_VIDEO_LINK_2.test(href))) {
-              _context5.next = 16;
+              _context5.next = 17;
               break;
             }
 
-            _context5.next = 15;
+            _context5.next = 16;
             return getYoutubeEmbeddedHtml(href, defaultHTML);
 
-          case 15:
+          case 16:
             return _context5.abrupt('return', _context5.sent);
 
-          case 16:
+          case 17:
             if (!RX_COUB_VIDEO_LINK.test(href)) {
-              _context5.next = 20;
+              _context5.next = 21;
               break;
             }
 
-            _context5.next = 19;
+            _context5.next = 20;
             return getCoubEmbeddedHtml(href, defaultHTML);
 
-          case 19:
+          case 20:
             return _context5.abrupt('return', _context5.sent);
 
-          case 20:
+          case 21:
             if (!RX_VOCAROO_AUDIO_LINK.test(href)) {
-              _context5.next = 22;
+              _context5.next = 23;
               break;
             }
 
             return _context5.abrupt('return', getVocarooEmbeddedHtml(href, defaultHTML));
 
-          case 22:
+          case 23:
             return _context5.abrupt('return', defaultHTML);
 
-          case 23:
+          case 24:
           case 'end':
             return _context5.stop();
         }
@@ -462,6 +465,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
+var EXTERNAL_LINK_REGEXP_PATTERN = function () {
+  var schema = 'https?:\\/\\/|ftp:\\/\\/';
+  var ip = '(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}' + '(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])';
+  var hostname = '([\\w\\p{L}\\.\\-]+)\\.([\\p{L}]{2,17}\\.?)';
+  var port = ':\\d+';
+  var path = '(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\'\"\\,\\(\\)\\[\\]«»]*)*\\/?';
+  return '(' + schema + ')?(' + hostname + '|' + ip + ')(' + port + ')?' + path;
+}();
 var RX_VK_POST_LINK_PATTERN = '<div id\\="vk_post_\\-?\\d+_\\d+"><\\/div><script type="text\\/javascript">  ' + '\\(function\\(d\\, s\\, id\\) \\{ var js\\, fjs \\= d\\.getElementsByTagName\\(s\\)\\[0\\]; ' + 'if \\(d\\.getElementById\\(id\\)\\) return; js \\= d\\.createElement\\(s\\); js\\.id \\= id; js\\.src \\= ' + '"\\/\\/vk\\.com\\/js\\/api\\/openapi\\.js\\?121"; fjs\\.parentNode\\.insertBefore\\(js\\, fjs\\); ' + '\\}\\(document\\, \'script\'\\, \'vk_openapi_js\'\\)\\);  \\(function\\(\\) \\{    if \\(\\!window\\.VK \\|\\|' + ' \\!VK\\.Widgets \\|\\| \\!VK\\.Widgets\\.Post \\|\\| \\!VK\\.Widgets\\.Post\\("vk_post_\\-?\\d+_\\d+"\\, ' + '(\\-?\\d+)\, (\\d+)\, \'([a-zA-Z0-9_\-]+)\'\\, \\{width\\: 500\\}\\)\\) ' + 'setTimeout\\(arguments\\.callee\\, 50\\);  \\}\\(\\)\\);<\\/script>';
 var RX_VK_POST_LINK = new RegExp(RX_VK_POST_LINK_PATTERN, 'g');
 var RX_TWITTER_POST_LINK = /^https?\:\/\/twitter\.com\/[^\/]+\/status\/\d+\/?$/;
@@ -580,13 +591,13 @@ exports.default = [{
   priority: 1600,
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
   convert: convertLinkCommon.bind(null, true),
-  op: "[url]",
-  cl: "[/url]"
+  op: '[url]',
+  cl: '[/url]'
 }, {
   priority: 1700,
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
   convert: convertLinkCommon.bind(null, false),
-  op: new _xregexp2.default(Tools.EXTERNAL_LINK_REGEXP_PATTERN, "gi"),
+  op: new _xregexp2.default(EXTERNAL_LINK_REGEXP_PATTERN, 'gi'),
   cl: null,
   check: checkExternalLink
 }, {
