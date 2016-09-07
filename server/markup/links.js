@@ -538,6 +538,7 @@ function getVocarooEmbeddedHtml(href, defaultHTML) {
     if (!html) {
       throw new Error(Tools.translate('Failed to create Vocaroo audio embedded container'));
     }
+    return html;
   } catch (err) {
     _logger2.default.log(err.stack || err);
     return defaultHTML;
