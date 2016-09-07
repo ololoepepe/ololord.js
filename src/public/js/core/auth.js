@@ -2,6 +2,7 @@ import URI from 'urijs';
 import VK from 'vk-openapi';
 
 import * as Constants from '../helpers/constants';
+import * as AJAX from '../helpers/ajax';
 import * as DOM from '../helpers/dom';
 import * as Navigation from '../helpers/navigation';
 import * as Storage from '../helpers/storage';
@@ -46,12 +47,13 @@ export async function login(hashpass, vk) {
     if (!hashpass) {
       return;
     }
-    Storage.hashpass(hashpass, (vkSession && !realHashpass) ? vkSession.expire : Constants.BILLION)
+    Storage.hashpass(hashpass, (vkSession && !realHashpass) ? vkSession.expire : Constants.BILLION);
     if (vkSession) {
       Storage.vkAuth(vkSession.expire);
     }
-    Storage.removeLocalObject('levels');
     Storage.removeLocalObject('lastChatCheckDate');
+    let levels = await AJAX.api('userLevels');
+    Storage.setLocalObject('levels', levels);
     let href = `/${Tools.sitePathPrefix()}redirect?source=${URI(window.location.href).search(true).source}`;
     await Navigation.setPage(href, { ajax: false });
   } catch (err) {

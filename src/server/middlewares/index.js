@@ -2,7 +2,6 @@ import cookieParser from 'cookie-parser';
 import DDDoS from 'dddos';
 import express from 'express';
 
-import cookies from './cookies';
 import hashpass from './hashpass';
 import ipFix from './ip-fix';
 import log from './log';
@@ -71,7 +70,5 @@ middlewares.push(registeredUser);
 if ('request' === BEFORE) {
   middlewares.push(log);
 }
-
-middlewares.push(cookies);
 
 export default middlewares;

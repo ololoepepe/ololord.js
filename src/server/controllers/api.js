@@ -204,6 +204,14 @@ router.get('/api/captchaQuota.json', async function(req, res, next) {
   }
 });
 
+router.get('/api/userLevels.json', async function(req, res, next) {
+  try {
+    res.json(req.levels || {});
+  } catch(err) {
+    next(err);
+  }
+});
+
 router.get('/api/userIp.json', async function(req, res, next) {
   if (!req.query.boardName) {
     return next(Tools.translate('Invalid board'));
