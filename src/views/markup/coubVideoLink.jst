@@ -1,7 +1,7 @@
 <span data-video-id='{{!it.info.id}}' data-video-title='{{!it.info.videoTitle}}'
       data-video-author='{{!it.info.authorName}}' {{? it.info.thumbnail}}data-thumb-url='{{!it.info.thumbnail.url}}'
       data-thumb-width='{{!it.info.thumbnail.width}}' data-thumb-height='{{!it.info.thumbnail.height}}'{{?}}>
-    <span title='COUB' class='icon icon-coub-16 sign-image no-invert'></span>
+    <span title='COUB' class='icon icon-coub-16 sign-icon no-invert'></span>
     <a href='{{!it.info.href}}' title='{{!it.info.authorName}}' {{? it.info.thumbnail}}
        onmouseover='lord.showVideoThumb(event, this);' onmousemove='lord.moveVideoThumb(event, this);'
        onmouseout='lord.hideVideoThumb(event, this);'{{?}}>{{!it.info.videoTitle}}</a>
