@@ -32,26 +32,26 @@
           data-bind='visible: settings.hiddenBoardGroups().indexOf("_general") < 0'>
       [
       <span class='navbar-item'>
-        <a href='/{{!it.site.pathPrefix}}' class='icon icon-home button-icon'
+        <a href='/{{!it.site.pathPrefix}}' class='icon icon-home-16 button-icon'
            title='{{!it.translate('Home', 'toHomePageText')}}'></a>
       </span>
       <span class='navbar-item'>
         /
       </span>
       <span class='navbar-item'>
-        <a href='/{{!it.site.pathPrefix}}markup.html' class='icon icon-code button-icon'
+        <a href='/{{!it.site.pathPrefix}}markup.html' class='icon icon-code-16 button-icon'
            title='{{!it.translate('Markup', 'toMarkupPageText')}}'></a>
         /
       </span>
       <span class='navbar-item'>
-        <a href='/{{!it.site.pathPrefix}}faq.html' class='icon icon-question button-icon'
+        <a href='/{{!it.site.pathPrefix}}faq.html' class='icon icon-question-16 button-icon'
            title='{{!it.translate('F.A.Q.', 'toFaqPageText')}}'></a>
       </span>
       <span class='navbar-item user-level-moder-only'>
         /
       </span>
       <span class='navbar-item user-level-moder-only'>
-        <a href='/{{!it.site.pathPrefix}}manage.html' class='icon icon-gear button-icon'
+        <a href='/{{!it.site.pathPrefix}}manage.html' class='icon icon-gear-16 button-icon'
            title='{{!it.translate('Management', 'toManagePageText')}}'></a>
       </span>
       ]
@@ -60,7 +60,7 @@
 <span class='mobile-only .toolbar-buttons-container'>
   [{{!it.translate('Boards', 'boardsText')}}:
   <span class='board-select-container'>
-    <select class='icon icon-list board-select js-board-select'
+    <select class='icon icon-list-16 board-select js-board-select'
             title='{{!it.translate('Use this button to jump between boards', 'boardSelectTooltip')}}'
             data-bind='event: { change: selectBoard }'>
       <option selected='true' value=''></option>
@@ -76,10 +76,10 @@
     </select>
   </span>
   ]
-  <a href='/{{!it.site.pathPrefix}}' class='icon icon-home button-icon'
+  <a href='/{{!it.site.pathPrefix}}' class='icon icon-home-16 button-icon'
      title='{{!it.translate('Home', 'toHomePageText')}}'></a>
-  <a href='/{{!it.site.pathPrefix}}markup.html' class='icon icon-code button-icon'
+  <a href='/{{!it.site.pathPrefix}}markup.html' class='icon icon-code-16 button-icon'
      title='{{!it.translate('Markup', 'toMarkupPageText')}}'></a>
-  <a href='/{{!it.site.pathPrefix}}faq.html' class='icon icon-question button-icon'
+  <a href='/{{!it.site.pathPrefix}}faq.html' class='icon icon-question-16 button-icon'
      title='{{!it.translate('F.A.Q.', 'toFaqPageText')}}'></a>
 </span>

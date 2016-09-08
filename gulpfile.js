@@ -4,12 +4,15 @@ var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var fs = require('fs');
 var gulp = require('gulp');
+var imagemin = require('gulp-imagemin');
 var less = require('gulp-less');
 var LessPluginAutoprefix = require('less-plugin-autoprefix');
 var LessPluginCleanCSS = require('less-plugin-clean-css');
+var mergeStream = require('merge-stream');
 var rename = require('gulp-rename');
 var source = require('vinyl-source-stream');
 var sourcemaps = require('gulp-sourcemaps');
+var spritesmith = require('gulp.spritesmith');
 var Stream = require('stream');
 var uglify = require('gulp-uglifyjs');
 var webworkify = require('webworkify');
@@ -47,6 +50,26 @@ function buildServer(custom/*, debug*/) {
   .pipe(babel({ presets: ['es2015', 'stage-2'] }))
   .pipe(sourcemaps.write('./'))
   .pipe(gulp.dest('./server'));
+}
+
+function buildSprites(custom) {
+  var spriteData = gulp.src(`./src/public/img/sprites/${custom ? 'custom/' : ''}*.png`).pipe(spritesmith({
+    imgName: 'icons.png',
+    cssName: 'icons.css',
+    imgPath: `../img/sprites${custom ? '/custom' : ''}/icons.png`,
+    cssVarMap: function(sprite) {
+      if (custom) {
+        sprite.name = 'custom-' + sprite.name;
+      }
+    }
+  }));
+  var imgStream = spriteData.img
+  .pipe(buffer())
+  .pipe(imagemin())
+  .pipe(gulp.dest(`./public/img/sprites${custom ? '/custom' : ''}`));
+  var cssStream = spriteData.css
+  .pipe(gulp.dest(`./src/public/css/${custom ? 'custom/' : ''}sprites`));
+  return mergeStream(imgStream, cssStream);
 }
 
 function buildCSS(custom, debug) {
@@ -112,14 +135,20 @@ gulp.task('build-debug', ['build-server-debug', 'build-css-debug', 'build-js-deb
 gulp.task('build-custom-debug', ['build-custom-server-debug', 'build-custom-css-debug', 'build-custom-js-debug']);
 
 gulp.task('build-server', buildServer.bind(null, false, false));
-gulp.task('build-css', buildCSS.bind(null, false, false));
+gulp.task('internal-build-sprites', buildSprites.bind(null, false));
+gulp.task('internal-build-css', buildCSS.bind(null, false, false));
+gulp.task('build-css', ['internal-build-sprites', 'internal-build-css']);
 gulp.task('build-js', buildJS.bind(null, false, false));
 gulp.task('build-custom-server', buildServer.bind(null, true, false));
-gulp.task('build-custom-css', buildCSS.bind(null, true, false));
+gulp.task('internal-build-custom-sprites', buildSprites.bind(null, true));
+gulp.task('internal-build-custom-css', buildCSS.bind(null, true, false));
+gulp.task('build-custom-css', ['internal-build-custom-sprites', 'internal-build-custom-css']);
 gulp.task('build-custom-js', buildJS.bind(null, true, false));
 gulp.task('build-server-debug', buildServer.bind(null, false, true));
-gulp.task('build-css-debug', buildCSS.bind(null, false, true));
+gulp.task('internal-build-css-debug', buildCSS.bind(null, false, true));
+gulp.task('build-css-debug', ['internal-build-sprites', 'internal-build-css-debug']);
 gulp.task('build-js-debug', buildJS.bind(null, false, true));
 gulp.task('build-custom-server-debug', buildServer.bind(null, true, true));
-gulp.task('build-custom-css-debug', buildCSS.bind(null, true, true));
+gulp.task('internal-build-custom-css-debug', buildCSS.bind(null, true, true));
+gulp.task('build-custom-css-debug', ['internal-build-custom-sprites', 'internal-build-custom-css-debug']);
 gulp.task('build-custom-js-debug', buildJS.bind(null, true, true));

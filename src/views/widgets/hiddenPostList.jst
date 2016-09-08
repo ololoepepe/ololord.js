@@ -10,14 +10,14 @@
     </span>
     <span>
       <span data-bind='if: !$data.hidden'>
-        <span class='icon icon-plus button-icon'
+        <span class='icon icon-plus-16 button-icon'
               title='{{!it.translate('Hide', 'hidePostText')}}'
               data-bind='click: $root.makeHidden.bind($data)'></span>
       </span>
       <span class='icon button-icon'
             data-bind='css: {
-                         "icon-cross": $data.hidden,
-                         "icon-bin": !$data.hidden
+                         "icon-cross-16": $data.hidden,
+                         "icon-bin-16": !$data.hidden
                        },
                        attr: { title: ($data.auto ? "{{!it.translate('Show', 'showPostText')}}"
                          : "{{!it.translate('Remove from hidden post/thread list')}}") },

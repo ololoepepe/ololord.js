@@ -17,13 +17,13 @@
   </div>
   <div class='js-only post-file-actions'>
     {{#def['custom/postFileAction/0'] || ''}}
-    <span class='icon icon-bin button-icon' title='{{!it.translate('Delete file', 'deleteFileText')}}'
+    <span class='icon icon-bin-16 button-icon' title='{{!it.translate('Delete file', 'deleteFileText')}}'
           data-bind='click: deleteFile.bind($data, "{{!fileInfo.name}}")'></span>
     {{#def['custom/postFileAction/10'] || ''}}
-    <span class='icon icon-shield button-icon' title='{{!it.translate('Edit file rating', 'editFileRatingText')}}'
+    <span class='icon icon-shield-16 button-icon' title='{{!it.translate('Edit file rating', 'editFileRatingText')}}'
           data-bind='click: editFileRating.bind($data, "{{!fileInfo.name}}")'></span>
     {{? it.isImageType(fileInfo.mimeType)}}
-      <span class='icon icon-eye-plus button-icon js-image-hiding-button'
+      <span class='icon icon-eye-plus-16 button-icon js-image-hiding-button'
             title='{{!it.translate('Hide by image', 'hideByImageText')}}'
             data-menu-selector='#menu-image-hide-{{=it.escapedSelector(fileInfo.name)}}'
             data-bind='click: showImageHidingMenu'></span>
@@ -42,22 +42,22 @@
         {{?}}
       </ul>
       {{#def['custom/postFileAction/20'] || ''}}
-      <span class='icon icon-paint button-icon' title='{{!it.translate('Draw on this image', 'drawOnImageText')}}'
+      <span class='icon icon-paint-16 button-icon' title='{{!it.translate('Draw on this image', 'drawOnImageText')}}'
             data-bind='click: drawOnImage.bind($data, "{{!fileInfo.name}}")'></span>
       {{#def['custom/postFileAction/30'] || ''}}
-      <span class='icon icon-search button-icon js-image-search-button'
+      <span class='icon icon-search-16 button-icon js-image-search-button'
             title='{{!it.translate('Find source…', 'findSourceText')}}'
             data-menu-selector='#menu-image-search-{{=it.escapedSelector(fileInfo.name)}}'
             data-bind='click: showImageSearchMenu.bind($data, "{{!fileInfo.name}}")'></span>
     {{?}}
     {{#def['custom/postFileAction/40'] || ''}}
     {{? it.isAudioType(fileInfo.mimeType)}}
-      <span class='icon icon-tag button-icon' title='{{!it.translate('Edit audio file tags', 'editAudioTagsText')}}'
+      <span class='icon icon-tag-16 button-icon' title='{{!it.translate('Edit audio file tags', 'editAudioTagsText')}}'
             data-bind='click: editAudioTags.bind($data, "{{!fileInfo.name}}")'></span>
     {{?}}
     {{#def['custom/postFileAction/50'] || ''}}
     {{? it.isAudioType(fileInfo.mimeType) || it.isVideoType(fileInfo.mimeType)}}
-      <span class='icon icon-music-plus button-icon' title='{{!it.translate('Add to playlist', 'addToPlaylistText')}}'
+      <span class='icon icon-music-plus-16 button-icon' title='{{!it.translate('Add to playlist', 'addToPlaylistText')}}'
             data-bind='click: addToPlaylist.bind($data, "{{!fileInfo.name}}")'></span>
     {{?}}
     {{#def['custom/postFileAction/60'] || ''}}

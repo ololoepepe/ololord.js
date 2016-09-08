@@ -12,12 +12,12 @@
         {{#def.banner}}
         <h1 class='page-title'>
           {{!it.board.title}}
-          <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/catalog.html' class='icon-24 icon-table button-icon'
+          <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/catalog.html' class='icon icon-table-24 button-icon'
              title='{{!it.translate('Threads catalog', 'boardCatalogLinkText')}}'></a>
-          <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/archive.html' class='icon-24 icon-archive button-icon'
+          <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/archive.html' class='icon icon-archive-24 button-icon'
              title='{{!it.translate('Thread archive', 'boardArchiveLinkText')}}'></a>
           <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/rss.xml' target='_blank'
-             class='icon-24 icon-rss button-icon' title='{{!it.translate('RSS feed', 'boardRssLinkText')}}'></a>
+             class='icon icon-rss-24 button-icon' title='{{!it.translate('RSS feed', 'boardRssLinkText')}}'></a>
         </h1>
         {{? it.board.postingEnabled}}
           <hr />
@@ -43,7 +43,7 @@
           {{#def['board/draftsSection']}}
         {{?}}
         <div id='infinite-scroll-loading-message' class='loading-message' style='display: none;'>
-          <span class='icon-24 icon-spinner'></span>
+          <span class='icon icon-spinner-24'></span>
           <h1 class='loading-message-text'>{{!it.translate('Loading threads…', 'loadingThreadsMessage')}}</h1>
         </div>
         <hr />

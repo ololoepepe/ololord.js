@@ -489,8 +489,8 @@ function initializeFileContent() {
       }
     },
     types: {
-      file: { icon: 'icon icon-file' },
-      folder: { icon: 'icon icon-folder' }
+      file: { icon: 'icon icon-file-16' },
+      folder: { icon: 'icon icon-folder-16' }
     }
   });
 }

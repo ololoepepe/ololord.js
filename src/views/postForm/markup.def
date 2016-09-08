@@ -1,41 +1,41 @@
 <div id='markup' class='post-form-input'>
   {{? it.board.markupElements.indexOf('BOLD') >= 0}}
-    <span class='icon-20 icon-bold button-icon'
+    <span class='icon icon-bold-20 button-icon'
           data-bind='attr: { title: "{{!it.translate('Bold text', 'markupBold')}}" + shortcutSuffix("markupBold") },
                      click: markup.bind($data, "b")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('ITALICS') >= 0}}
-    <span class='icon-20 icon-italic button-icon'
+    <span class='icon icon-italic-20 button-icon'
           data-bind='attr: { title: "{{!it.translate('Italics', 'markupItalics')}}" + shortcutSuffix("markupItalics") },
                      click: markup.bind($data, "i")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('STRIKED_OUT') >= 0}}
-    <span class='icon-20 icon-strikethrough button-icon'
+    <span class='icon icon-strikethrough-20 button-icon'
           data-bind='attr: { title: "{{!it.translate('Striked out text', 'markupStrikedOut')}}"
                        + shortcutSuffix("markupStrikedOut") },
                      click: markup.bind($data, "s")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('UNDERLINED') >= 0}}
-    <span class='icon-20 icon-underline button-icon'
+    <span class='icon icon-underline-20 button-icon'
           data-bind='attr: { title: "{{!it.translate('Underlined text', 'markupUnderlined')}}"
                        + shortcutSuffix("markupUnderlined") },
                      click: markup.bind($data, "u")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('SPOILER') >= 0}}
-    <span class='icon-20 icon-eye-blocked button-icon'
+    <span class='icon icon-eye-blocked-20 button-icon'
           data-bind='attr: {
                        title: "{{!it.translate('Spoiler', 'markupSpoiler')}}" + shortcutSuffix("markupSpoiler")
                      },
                      click: markup.bind($data, "spoiler")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('QUOTATION') >= 0}}
-    <a href='javascript:void(0);' class='icon-20 icon-quotes-left button-icon'
+    <a href='javascript:void(0);' class='icon icon-quotes-left-20 button-icon'
           data-bind='attr: { title: "{{!it.translate('Quote selected text', 'markupQuotation')}}"
                        + shortcutSuffix("markupQuotation") },
                      click: markup.bind($data, ">")'></a>
   {{?}}
   {{? it.board.markupElements.indexOf('UNORDERED_LIST') >= 0}}
-    <span class='icon-20 icon-list button-icon' title='{{!it.translate('Unordered list', 'markupUnorderedList')}}'
+    <span class='icon icon-list-20 button-icon' title='{{!it.translate('Unordered list', 'markupUnorderedList')}}'
           data-menu-selector='#menu-markup-unordered-list'
           data-bind='click: showMenuMarkupUnorderedList'></span>
     <ul id='menu-markup-unordered-list' class='menu'>
@@ -51,7 +51,7 @@
     </ul>
   {{?}}
   {{? it.board.markupElements.indexOf('ORDERED_LIST') >= 0}}
-    <span class='icon-20 icon-list-numbered button-icon' title='{{!it.translate('Ordered list', 'markupOrderedList')}}'
+    <span class='icon icon-list-numbered-20 button-icon' title='{{!it.translate('Ordered list', 'markupOrderedList')}}'
           data-menu-selector='#menu-markup-ordered-list'
           data-bind='click: showMenuMarkupOrderedList'></span>
     <ol id='menu-markup-ordered-list' class='menu'>
@@ -63,27 +63,27 @@
     </ol>
   {{?}}
   {{? it.board.markupElements.indexOf('LIST_ITEM') >= 0}}
-    <span class='icon-20 icon-list-item button-icon' title='{{!it.translate('List item', 'markupListItem')}}'
+    <span class='icon icon-list-item-20 button-icon' title='{{!it.translate('List item', 'markupListItem')}}'
           data-bind='click: markup.bind($data, "li")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('SUBSCRIPT') >= 0}}
-    <span class='icon-20 icon-subscript button-icon' title='{{!it.translate('Subscript', 'markupSubscript')}}'
+    <span class='icon icon-subscript-20 button-icon' title='{{!it.translate('Subscript', 'markupSubscript')}}'
           data-bind='click: markup.bind($data, "sub")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('SUPERSCRIPT') >= 0}}
-    <span class='icon-20 icon-superscript button-icon' title='{{!it.translate('Superscript', 'markupSuperscript')}}'
+    <span class='icon icon-superscript-20 button-icon' title='{{!it.translate('Superscript', 'markupSuperscript')}}'
           data-bind='click: markup.bind($data, "sup")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('URL') >= 0}}
-    <span class='icon-20 icon-share button-icon' title='{{!it.translate('URL (external link)', 'markupUrl')}}'
+    <span class='icon icon-share-20 button-icon' title='{{!it.translate('URL (external link)', 'markupUrl')}}'
           data-bind='click: markup.bind($data, "url")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('LATEX') >= 0}}
-    <span class='icon-20 icon-latex button-icon' title='{{!it.translate('LaTeX', 'markupLatex')}}'
+    <span class='icon icon-latex-20 button-icon' title='{{!it.translate('LaTeX', 'markupLatex')}}'
           data-bind='click: markup.bind($data, "latex")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('INLINE_LATEX') >= 0}}
-    <span class='icon-20 icon-latex button-icon' title='{{!it.translate('Inline LaTeX', 'markupInlineLatex')}}'
+    <span class='icon icon-latex-20 button-icon' title='{{!it.translate('Inline LaTeX', 'markupInlineLatex')}}'
           data-bind='click: markup.bind($data, "l")'></span>
   {{?}}
   {{? it.board.markupElements.indexOf('CODE') >= 0}}
@@ -95,12 +95,12 @@
           <option value='{{!lang.id}}'>{{!lang.name}}</option>
         {{~}}
       </select>
-      <span class='icon-20 icon-code button-icon'
+      <span class='icon icon-code-20 button-icon'
             data-bind='attr: { title: "{{!it.translate('Code block', 'markupCode')}}" + shortcutSuffix("markupCode") },
                        click: markup.bind($data, "code")'></span>
     </span>
   {{?}}
-  <span class='user-permission-use-raw-html-markup-only icon-20 icon-code button-icon'
+  <span class='user-permission-use-raw-html-markup-only icon icon-code-20 button-icon'
         title='{{!it.translate('Raw HTML', 'markupHtml')}}'
         data-bind='click: markup.bind($data, "raw-html")'></span>
 </div>

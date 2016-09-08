@@ -1,6 +1,6 @@
 <div data-bind='foreach: hotkeys'>
   <div class='hotkey-row'>
-    <span class='icon icon-cross button-icon' title='{{!it.translate('Remove', 'removeButtonText')}}'
+    <span class='icon icon-cross-16 button-icon' title='{{!it.translate('Remove', 'removeButtonText')}}'
           data-bind='click: $root.removeHotkey.bind($data, $index)'></span>
     <select class='select'
             data-bind='value: $data.action,

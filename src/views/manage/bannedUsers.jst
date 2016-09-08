@@ -20,7 +20,7 @@
                     <input type='radio' name='banLevel_{{!board.name}}' class='switch switch-16'
                            data-bind='checked: $data.bans["{{!board.name}}"].level'
                            value='{{!level.level}}'><label title='{{!level.description}}'
-                                                           class='icon icon-{{!level.icon}} sign-icon'
+                                                           class='icon icon-{{!level.icon}}-16 sign-icon'
                                                            data-bind='click: $root.check.bind($data.bans["{{!board.name}}"])'></label>
                   {{~}}
                 </form>
@@ -28,7 +28,7 @@
                   <input type='text' class='length-15 js-expires-at' readonly
                          data-bind='boundData: $data.bans["{{!board.name}}"].expiresAt,
                                     textInput: $data.bans["{{!board.name}}"].expiresAt' />
-                  <span class='icon icon-cross button-icon' title='{{!it.translate('Clear date field')}}'
+                  <span class='icon icon-cross-16 button-icon' title='{{!it.translate('Clear date field')}}'
                         data-bind='click: $root.clearDate.bind($data.bans["{{!board.name}}"])'></span>
                 </div>
                 <div class='display-table-cell'>
@@ -46,7 +46,7 @@
                   <input type='radio' name='banLevel_{{!board.name}}' class='switch switch-16'
                          data-bind='checked: $data.level'
                          value='{{!level.level}}'><label title='{{!level.description}}'
-                                                         class='icon icon-{{!level.icon}} sign-icon'
+                                                         class='icon icon-{{!level.icon}}-16 sign-icon'
                                                          data-bind='click: $root.check.bind($data)'></label>
                 {{~}}
               </form>
@@ -54,7 +54,7 @@
                 <input type='text' class='length-15 js-expires-at' readonly
                        data-bind='boundData: $data.expiresAt,
                                   textInput: $data.expiresAt' />
-                <span class='icon icon-cross button-icon' title='{{!it.translate('Clear date field')}}'
+                <span class='icon icon-cross-16 button-icon' title='{{!it.translate('Clear date field')}}'
                       data-bind='click: $root.clearDate.bind($data)'></span>
               </div>
               <div class='display-table-cell'>

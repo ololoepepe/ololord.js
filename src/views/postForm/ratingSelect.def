@@ -6,7 +6,7 @@
             data-bind='click: function(_, e) { e.stopPropagation(); }'>{{!rating}}</option>
   {{~}}
 </select>
-<span class='icon icon-question sign-icon'
+<span class='icon icon-question-16 sign-icon'
       title='{{!it.translate('SFW - safe for work (no socially condemned content)\n'
         + 'R-15 - restricted for 15 years (contains ecchi, idols, violence)\n'
         + 'R-18 - restricted for 18 years (genitalis, coitus, offensive religious/racist/nationalist content)\n'

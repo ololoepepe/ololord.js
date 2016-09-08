@@ -15,24 +15,24 @@
         {{#def['custom/postHeaderPart/0'] || ''}}
         {{? post.isOp}}
           {{? thread.fixed}}
-            <span class='icon icon-pin' title='{{!it.translate('Fixed', 'fixedText')}}'></span>
+            <span class='icon icon-pin-16' title='{{!it.translate('Fixed', 'fixedText')}}'></span>
           {{?}}
           {{#def['custom/postHeaderPart/10'] || ''}}
           {{? thread.closed}}
-            <span class='icon icon-lock' title='{{!it.translate('The thread is closed', 'closedText')}}'></span>
+            <span class='icon icon-lock-16' title='{{!it.translate('The thread is closed', 'closedText')}}'></span>
           {{?}}
           {{#def['custom/postHeaderPart/20'] || ''}}
           {{? thread.postLimitReached}}
-            <span class='icon icon-blocked'
+            <span class='icon icon-blocked-16'
                   title='{{!it.translate('Post limit reached', 'postLimitReachedText')}}'></span>
           {{?? thread.bumpLimitReached}}
-            <span class='icon icon-bumplimit'
+            <span class='icon icon-bumplimit-16'
                   title='{{!it.translate('Bump limit reached', 'bumpLimitReachedText')}}'></span>
           {{?}}
           {{#def['custom/postHeaderPart/30'] || ''}}
         {{?}}
         {{? post.options.sage}}
-          <span class='icon icon-angry sign-image js-sage' title='{{!it.translate('SAGE')}}'></span>
+          <span class='icon icon-arrow-down-16 sign-image js-sage' title='{{!it.translate('SAGE')}}'></span>
         {{?}}
         {{#def['custom/postHeaderPart/40'] || ''}}
       </span>
@@ -40,7 +40,7 @@
       {{#def['post/subject']}}
       {{#def['custom/postHeaderPart/60'] || ''}}
       {{? post.options.showTripcode && (it.compareRegisteredUserLevels(post.user.level, 'USER') >= 0)}}
-        <span class='icon icon-checkmark'
+        <span class='icon icon-checkmark-16'
               title='{{!it.translate('This user is registered', 'registeredText')}}'></span>
       {{?}}
       {{#def['custom/postHeaderPart/70'] || ''}}
@@ -75,7 +75,7 @@
         {{#def['custom/postHeaderPart/150'] || ''}}
         {{? thread.postingEnabled && !thread.archived && !thread.postLimitReached}}
           <span class='js-only js-quick-reply-container'>
-            <span class='icon icon-undo button-icon'
+            <span class='icon icon-undo-16 button-icon'
                   data-bind='attr: { title: "{{!it.translate('Quick reply', 'quickReplyText')}}"
                                + shortcutSuffix("quickReply") },
                              click: quickReply.bind($data, {{!post.number}}, {{!post.threadNumber}})'></span>
@@ -83,7 +83,7 @@
         {{?}}
         {{#def['custom/postHeaderPart/160'] || ''}}
         <span class='js-only js-post-actions-button-container'>
-          <span class='icon icon-menu button-icon js-post-actions-button'
+          <span class='icon icon-menu-16 button-icon js-post-actions-button'
                title='{{!it.translate('Actions', 'postActionsText')}}'
                  data-menu-selector='#menu-post-{{!post.number}}'
                 data-bind='click: showPostActionsMenu.bind($data, {{!post.number}})'></span>

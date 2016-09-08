@@ -28,19 +28,19 @@
           </ul>
           <div class='js-tab-widget-body'>
             <div id='bans' data-index='0' class='loading-message'>
-              <span class='icon-24 icon-spinner'></span>
+              <span class='icon icon-spinner-24'></span>
               <h1 class='loading-message-text'>{{!it.translate('Loading bans…', 'loadingBansMessage')}}</h1>
             </div>
             <div id='users' data-index='1' class='loading-message' style='display: none;'>
-              <span class='icon-24 icon-spinner'></span>
+              <span class='icon icon-spinner-24'></span>
               <h1 class='loading-message-text'>{{!it.translate('Loading users…', 'loadingUsersMessage')}}</h1>
             </div>
             <div id='contentData' class='display-flex-row' data-index='2' style='display: none;'>
               <div class='display-flex-column flex-justify-start management-actions'>
-                <span class='icon icon-star-full button-icon' title='{{!it.translate('Frequently used files')}}'
+                <span class='icon icon-star-full-16 button-icon' title='{{!it.translate('Frequently used files')}}'
                       data-menu-selector='#menu-management-frequently-used-files'
                       data-bind='click: showFrequentlyUsedFilesMenu'></span>
-                <span class='icon icon-gear button-icon' title='{{!it.translate('Server actions')}}'
+                <span class='icon icon-gear-16 button-icon' title='{{!it.translate('Server actions')}}'
                       data-menu-selector='#menu-management-server-actions'
                       data-bind='click: showServerActionsMenu'></span>
                 <ul id='menu-management-server-actions' class='menu' style='display: none;'>

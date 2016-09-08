@@ -12,7 +12,7 @@
     <div class='post reply-post'>
       <div class='post-header'>
         <!-- ko if: $data.options.sage -->
-          <span class='icon icon-angry' title='{{!it.translate('SAGE')}}'></span>
+          <span class='icon icon-angry-16' title='{{!it.translate('SAGE')}}'></span>
         <!-- /ko-->
         <span class='post-subject'
               data-bind='css: { "js-post-subject-default": !!$data.subject }'>
@@ -44,9 +44,9 @@
         <time class='post-date-time nowrap js-date-time'
               data-bind='attr: { "data-date-time": $data.createdAt },
                          text: $root.formattedDate($data.createdAt)'></time>
-        <span class='icon icon-pencil button-icon' title='{{!it.translate('Fill form with this draft')}}'
+        <span class='icon icon-pencil-16 button-icon' title='{{!it.translate('Fill form with this draft')}}'
               data-bind='click: $root.fillFormWithDraft.bind($data)'></span>
-        <span class='icon icon-bin button-icon' title='{{!it.translate('Delete this draft')}}'
+        <span class='icon icon-bin-16 button-icon' title='{{!it.translate('Delete this draft')}}'
               data-bind='click: $root.deleteDraft.bind($data)'></span>
       </div>
       <div class='post-body'>

@@ -34,19 +34,19 @@
         <div class='sidebar-group-body js-navbar-group-body'
              data-bind='visible: settings.hiddenBoardGroups().indexOf("_general") < 0'>
           <div class='navbar-item'>
-            <a href='/{{!it.site.pathPrefix}}' class='icon icon-home button-icon'></a>
+            <a href='/{{!it.site.pathPrefix}}' class='icon icon-home-16 button-icon'></a>
             <a href='/{{!it.site.pathPrefix}}'>{{!it.translate('Home', 'toHomePageText')}}</a>
           </div>
           <div class='navbar-item'>
-            <a href='/{{!it.site.pathPrefix}}markup.html' class='icon icon-code button-icon'></a>
+            <a href='/{{!it.site.pathPrefix}}markup.html' class='icon icon-code-16 button-icon'></a>
             <a href='/{{!it.site.pathPrefix}}markup.html'>{{!it.translate('Markup', 'toMarkupPageText')}}</a>
           </div>
           <div class='navbar-item'>
-            <a href='/{{!it.site.pathPrefix}}faq.html' class='icon icon-question button-icon'></a>
+            <a href='/{{!it.site.pathPrefix}}faq.html' class='icon icon-question-16 button-icon'></a>
             <a href='/{{!it.site.pathPrefix}}faq.html'>{{!it.translate('F.A.Q.', 'toFaqPageText')}}</a>
           </div>
           <div class='navbar-item user-level-moder-only'>
-            <a href='/{{!it.site.pathPrefix}}manage.html' class='icon icon-gear button-icon'></a>
+            <a href='/{{!it.site.pathPrefix}}manage.html' class='icon icon-gear-16 button-icon'></a>
             <a href='/{{!it.site.pathPrefix}}manage.html'>{{!it.translate('Management', 'toManagePageText')}}</a>
           </div>
         </div>
