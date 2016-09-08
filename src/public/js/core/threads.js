@@ -134,16 +134,16 @@ export let updateThread = async function(silent) {
       threadNumber: threadNumber
     }, { indicator: new OverlayProgressBar() });
     let sequenceNumber = _(posts).last().sequenceNumber;
-    posts = await Tools.series(posts, async function(post) {
+    let postNodes = await Tools.series(posts, async function(post) {
       return await Posts.createPostNode(post, true, threadInfo);
     }, true);
-    await Tools.series(posts, async function(post) {
+    await Tools.series(postNodes, async function(postNode) {
       if (DOM.id(post.id)) {
         return;
       }
-      $(post).addClass('new-post').one('mouseover', () => { $(post).removeClass('new-post'); });
-      $('.js-thread-posts').append(post);
-      return await PostProcessors.applyPostprocessors(post);
+      $(post).addClass('new-post').one('mouseover', () => { $(postNode).removeClass('new-post'); });
+      $('.js-thread-posts').append(postNode);
+      return await PostProcessors.applyPostprocessors(postNode);
     });
     Files.initializeFiles();
     let board = Templating.board(boardName);
