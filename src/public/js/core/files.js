@@ -167,7 +167,7 @@ export function showImage(href, mimeType, width, height) {
   });
   if (players.hasOwnProperty(href)) {
     if (Settings.resetFileScaleOnOpening()) {
-      currentPlayer.reset();
+      currentPlayer.reset(Settings.playAudioVideoImmediately() && Constants.AUTO_PLAY_DELAY);
     }
   } else {
     currentPlayer.on('requestClose', (e) => {
