@@ -138,7 +138,7 @@ export let updateThread = async function(silent) {
       return await Posts.createPostNode(post, true, threadInfo);
     }, true);
     await Tools.series(postNodes, async function(postNode) {
-      if (DOM.id(post.id)) {
+      if (DOM.id(postNode.id)) {
         return;
       }
       $(post).addClass('new-post').one('mouseover', () => { $(postNode).removeClass('new-post'); });
