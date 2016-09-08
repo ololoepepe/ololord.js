@@ -176,6 +176,7 @@ export let insertPostNumber = function(postNumber) {
   } catch (err) {
     console.log(err);
   }
+  return true;
 };
 
 function resetPostForm() {

@@ -64,9 +64,8 @@ class BlinkTimer {
     window.document.title =  `* ${window.document.title}`;
     this.newmessageFavicon = false;
     this.timer = setInterval(() => {
-      this.newmessageFavicon;
       let link = DOM.id('favicon');
-      link.href.replace(/\/[\/]+$/, `/favicon${this.newmessageFavicon ? '' : '_newmessage'}.ico`);
+      link.href = link.href.replace(/\/[^\/]+$/, `/favicon${this.newmessageFavicon ? '' : '_newmessage'}.ico`);
       this.newmessageFavicon = !this.newmessageFavicon;
     }, this.blinkInterval);
   }
@@ -78,7 +77,7 @@ class BlinkTimer {
     clearInterval(this.timer);
     this.timer = null;
     let link = DOM.id('favicon');
-    link.href = link.href.replace(/\/[\/]+$/, '/favicon.ico');
+    link.href = link.href.replace(/\/[^\/]+$/, '/favicon.ico');
     window.document.title = window.document.title.substr(2);
   }
 }
@@ -141,7 +140,7 @@ export let updateThread = async function(silent) {
       if (DOM.id(postNode.id)) {
         return;
       }
-      $(post).addClass('new-post').one('mouseover', () => { $(postNode).removeClass('new-post'); });
+      $(postNode).addClass('new-post').one('mouseover', () => { $(postNode).removeClass('new-post'); });
       $('.js-thread-posts').append(postNode);
       return await PostProcessors.applyPostprocessors(postNode);
     });

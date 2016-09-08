@@ -53,8 +53,10 @@ class PostViewModel {
     Player.addToPlaylist(data);
   }
 
-  insertPostNumber(postNumber) {
-    PostForm.insertPostNumber(postNumber);
+  insertPostNumber(postNumber, _1, e) {
+    if (PostForm.insertPostNumber(postNumber)) {
+      e.stopImmediatePropagation();
+    }
   }
 
   quickReply(postNumber, threadNumber) {
