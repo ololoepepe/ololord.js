@@ -48,7 +48,7 @@ async function gatherBoardStatistics(board) {
   return statistics;
 }
 
-//Must be called from the master process only.
+//NOTE: Must be called from the master process only.
 export async function generateStatistics() {
   if (!Cluster.isMaster) {
     Logger.error(Tools.translate('Error: generateStatistics() called from worker process.'));
@@ -86,7 +86,7 @@ export async function generateStatistics() {
         return;
       }
       let boardLaunchDate = board.launchDate.valueOf();
-      if (boardLaunchDate < statistics.launchDate) {
+      if (boardLaunchDate < launchDate) {
         launchDate = boardLaunchDate;
       }
       let boardStatistics = await gatherBoardStatistics(board);

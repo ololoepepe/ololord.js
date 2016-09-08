@@ -114,7 +114,7 @@ var gatherBoardStatistics = function () {
   };
 }();
 
-//Must be called from the master process only.
+//NOTE: Must be called from the master process only.
 
 
 var generateStatistics = exports.generateStatistics = function () {
@@ -194,7 +194,7 @@ var generateStatistics = exports.generateStatistics = function () {
                                 case 3:
                                   boardLaunchDate = board.launchDate.valueOf();
 
-                                  if (boardLaunchDate < statistics.launchDate) {
+                                  if (boardLaunchDate < launchDate) {
                                     launchDate = boardLaunchDate;
                                   }
                                   _context3.next = 7;
