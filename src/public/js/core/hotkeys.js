@@ -20,6 +20,7 @@ import * as Widgets from '../widgets';
 let actionMap = {};
 
 const SKIPPED_TAGS = new Set(['INPUT', 'TEXTAREA']);
+const ARROW_KEYS = ['left', 'right', 'up', 'down'];
 
 Mousetrap.prototype.stopCallback = (e, element, combo) => {
   if (!Settings.hotkeysEnabled()) {
@@ -27,7 +28,12 @@ Mousetrap.prototype.stopCallback = (e, element, combo) => {
   }
   let action = actionMap[combo];
   if (action && typeof action.test === 'function') {
-    return action.test(e, element, combo);
+    let result = action.test(e, element, combo);
+    if (!result) {
+      return true;
+    }
+    e.preventDefault();
+    return false;
   }
   if (SKIPPED_TAGS.has(element.tagName)) {
     return true;
@@ -122,14 +128,33 @@ function markupCommon(tag) {
   Markup.markup(tag);
 }
 
+function testAccepted(_1, element, combo) {
+  if (!combo || !element) {
+    return;
+  }
+  if (!SKIPPED_TAGS.has(element.tagName)) {
+    return true;
+  }
+  let keys = combo.split('+');
+  if (keys.length < 2) {
+    return;
+  }
+  if (SKIPPED_TAGS.has(element.tagName) && ARROW_KEYS.some((key) => { return keys.indexOf(key) >= 0; })) {
+    return;
+  }
+  return (keys.length > 2) || ('shift' !== keys[0]);
+}
+
 export const ACTIONS = {
   showFavorites: {
     title: () => { return Tools.translate('Show favorites'); },
-    handler: Widgets.showFavorites
+    handler: Widgets.showFavorites,
+    test: testAccepted
   },
   showSettings: {
     title: () => { return Tools.translate('Show settings'); },
-    handler: Widgets.showSettings
+    handler: Widgets.showSettings,
+    test: testAccepted
   },
   previousPageImage: {
     title: () => { return Tools.translate('Previous page/image'); },
@@ -221,7 +246,8 @@ export const ACTIONS = {
   },
   submitReply: {
     title: () => { return Tools.translate('Submit reply'); },
-    handler: PostForm.submit
+    handler: PostForm.submit,
+    test: testAccepted
   },
   updateThread: {
     title: () => { return Tools.translate('Update thread'); },
@@ -235,31 +261,38 @@ export const ACTIONS = {
   },
   markupBold: {
     title: () => { return Tools.translate('Markup: bold'); },
-    handler: markupCommon.bind(null, 'b')
+    handler: markupCommon.bind(null, 'b'),
+    test: testAccepted
   },
   markupItalics: {
     title: () => { return Tools.translate('Markup: italics'); },
-    handler: markupCommon.bind(null, 'i')
+    handler: markupCommon.bind(null, 'i'),
+    test: testAccepted
   },
   markupStrikedOut: {
     title: () => { return Tools.translate('Markup: striked out'); },
-    handler: markupCommon.bind(null, 's')
+    handler: markupCommon.bind(null, 's'),
+    test: testAccepted
   },
   markupUnderlined: {
     title: () => { return Tools.translate('Markup: underlined'); },
-    handler: markupCommon.bind(null, 'u')
+    handler: markupCommon.bind(null, 'u'),
+    test: testAccepted
   },
   markupSpoiler: {
     title: () => { return Tools.translate('Markup: spoiler'); },
-    handler: markupCommon.bind(null, 'spoiler')
+    handler: markupCommon.bind(null, 'spoiler'),
+    test: testAccepted
   },
   markupQuotation: {
     title: () => { return Tools.translate('Markup: quotation'); },
-    handler: markupCommon.bind(null, '>')
+    handler: markupCommon.bind(null, '>'),
+    test: testAccepted
   },
   markupCode: {
     title: () => { return Tools.translate('Markup: code'); },
-    handler: markupCommon.bind(null, 'code')
+    handler: markupCommon.bind(null, 'code'),
+    test: testAccepted
   }
 };
 
@@ -282,14 +315,15 @@ function rebind() {
   actionMap = {};
   Mousetrap.bind(Storage.hotkeys().reduce((acc, hotkey) => {
     let action = ACTIONS[hotkey.action];
+    let handler = action;
     if (typeof action === 'object') {
-      action = action.handler;
+      handler = action.handler;
     }
-    if (typeof action !== 'function') {
+    if (typeof handler !== 'function') {
       return acc;
     }
-    acc[hotkey.shortcut] = action;
-    actionMap[hotkey.shortcut] = hotkey;
+    actionMap[hotkey.shortcut] = action;
+    acc[hotkey.shortcut] = handler;
     return acc;
   }, {}), 'keyup');
 }
