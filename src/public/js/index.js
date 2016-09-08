@@ -498,7 +498,8 @@ export function resetBanner() {
     boardTitle,
     fileName
   } = _(banners).sample();
-  let img = $(`<img src='/${Tools.sitePathPrefix()}img/banners/${boardName}/${fileName}' />`);
+  let className = 'hide-if-mum-watching';
+  let img = $(`<img src='/${Tools.sitePathPrefix()}img/banners/${boardName}/${fileName}' class='${className}' />`);
   if ('same' === BANNER_MODE) {
     banner.append(img);
   } else {
