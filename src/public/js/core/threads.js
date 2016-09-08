@@ -368,12 +368,18 @@ function createGetNewPostCountFunction(lastPostNumbers, newLastPostNumbers, boar
   };
 }
 
+let showNewPostsTimer = null;
+
 export async function showNewPosts() {
+  if (showNewPostsTimer) {
+    clearTimeout(showNewPostsTimer);
+    showNewPostsTimer = null;
+  }
   let newLastPostNumbers = Storage.lastPostNumbers();
   try {
     let result = await AJAX.api('lastPostNumbers');
     let getNewPostCount = createGetNewPostCountFunction(result, newLastPostNumbers);
-    let selector = '.js-navbar .js-navbar-item a';
+    let selector = '.js-navbar .js-navbar-item-board a';
     if (Tools.deviceType('mobile')) {
       selector += ', .board-select option';
     }
@@ -409,10 +415,10 @@ export async function showNewPosts() {
       }
     });
     Storage.lastPostNumbers(lastPostNumbers);
-    setTimeout(showNewPosts, SHOW_NEW_POSTS_INTERVAL);
+    showNewPostsTimer = setTimeout(showNewPosts, SHOW_NEW_POSTS_INTERVAL);
   } catch (err) {
     DOM.handleError(err);
-    setTimeout(showNewPosts, SHOW_NEW_POSTS_FAIL_INTERVAL);
+    showNewPostsTimer = setTimeout(showNewPosts, SHOW_NEW_POSTS_FAIL_INTERVAL);
   }
 }
 

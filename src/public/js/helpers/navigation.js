@@ -66,6 +66,9 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
     window.document.title = title;
     $(window.document.body).scrollTop(0);
     PageProcessors.applyProcessors(content).catch(Widgets.handleError);
+    if (Settings.showNewPosts()) {
+      Threads.showNewPosts();
+    }
     if (Tools.isBoardPage() || Tools.isThreadPage() || Tools.isArchivedThreadPage()) {
       Drafts.initializeDrafts();
       let posts = DOM.queryAll('.js-post', content[0]);
