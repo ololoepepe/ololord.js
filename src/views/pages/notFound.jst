@@ -8,6 +8,7 @@
       {{#def.toolbar}}
       <header>{{#def['custom/header'] || ''}}</header>
       <main id='content'>
+        {{#def['custom/content/0'] || ''}}
         <h1 class='page-title'>{{!it.translate('Page or file not found', 'notFoundMessage')}}</h1>
         <div class='not-found-image-container'>
           {{? it.notFoundImageFileName}}

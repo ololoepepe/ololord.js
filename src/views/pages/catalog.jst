@@ -8,6 +8,7 @@
       {{#def.toolbar}}
       <header>{{#def['custom/header'] || ''}}</header>
       <main id='content'>
+        {{#def['custom/content/0'] || ''}}
         {{#def.banner}}
         <h1 class='page-title'>
           <a href="/{{=it.site.pathPrefix}}{{=it.board.name}}">{{!it.board.title}}</a>
