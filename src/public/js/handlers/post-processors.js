@@ -2,6 +2,7 @@ import _ from 'underscore';
 import $ from 'jquery';
 
 import * as DOM from '../helpers/dom';
+import * as Settings from '../helpers/settings';
 import * as Storage from '../helpers/storage';
 import * as Tools from '../helpers/tools';
 
@@ -21,7 +22,9 @@ export async function applyPreprocessors(posts) {
       return p.processor(post);
     });
   });
-  await require('../core/hiding').applySpells(posts);
+  if (Settings.spellsEnabled()) {
+    await require('../core/hiding').applySpells(posts);
+  }
 }
 
 export function applyPostprocessors(posts) {

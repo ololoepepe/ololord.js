@@ -253,22 +253,6 @@ export async function applySpells(posts, force) {
   }
 }
 
-export async function processPosts(parent) {
-  parent = parent || window.document.body;
-  let posts = ($(parent).hasClass('post') || $(parent).hasClass('opPost')) ? [parent]
-    : DOM.queryAll('.post', parent);
-  try {
-    await PostProcessors.applyPreprocessors(posts);
-    if (Settings.spellsEnabled()) {
-      applySpells(posts).catch(DOM.handleError);
-    } else {
-      posts.forEach(process.bind(null, Storage.hiddenPosts()));
-    }
-  } catch (err) {
-    return Promise.reject(err);
-  }
-}
-
 export function hideByImage({ hash, size, width, height } = {}) {
   let spells = Storage.spells();
   if (spells && _(spells).last() !== '\n') {
