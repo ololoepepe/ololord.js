@@ -17,7 +17,8 @@ import * as ThreadsModel from '../models/threads';
 import * as UsersModel from '../models/users';
 
 const GET_FILE_HEADERS_TIMEOUT = Tools.MINUTE;
-const TEXT_FORMATS = new Set(['txt', 'js', 'json', 'jst', 'html', 'xml', 'css', 'md', 'example', 'gitignore', 'log']);
+const TEXT_FORMATS = new Set(['txt', 'js', 'json', 'jst', 'def', 'html', 'xml', 'css', 'md', 'example', 'gitignore',
+  'log']);
 
 let router = Express.Router();
 
