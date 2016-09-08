@@ -308,7 +308,7 @@ async function addFile(sourceId, isDir) {
   }
 }
 
-async function rerenderCache(archived) {
+async function rerenderCache(archive) {
   let txt = Tools.translate('Connection with the server will be lost, '
     + 'and the server will become unavailable for some time.'
     + ' You will have to reload the page manually.');
