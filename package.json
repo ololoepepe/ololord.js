@@ -100,7 +100,7 @@
     "log4js": "^0.6.29",
     "mathjax-node": "^0.5.1",
     "merge": "^1.2.0",
-    "merge-stream": "^1.0.0",
+    "merge2": "^1.0.2",
     "micromatch": "^2.3.11",
     "minami": "^1.1.1",
     "mkpath": "^1.0.0",

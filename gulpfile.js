@@ -8,7 +8,7 @@ var imagemin = require('gulp-imagemin');
 var less = require('gulp-less');
 var LessPluginAutoprefix = require('less-plugin-autoprefix');
 var LessPluginCleanCSS = require('less-plugin-clean-css');
-var mergeStream = require('merge-stream');
+var merge2 = require('merge2');
 var rename = require('gulp-rename');
 var source = require('vinyl-source-stream');
 var sourcemaps = require('gulp-sourcemaps');
@@ -69,7 +69,7 @@ function buildSprites(custom) {
   .pipe(gulp.dest(`./public/img/sprites${custom ? '/custom' : ''}`));
   var cssStream = spriteData.css
   .pipe(gulp.dest(`./src/public/css/${custom ? 'custom/' : ''}sprites`));
-  return mergeStream(imgStream, cssStream);
+  return merge2(imgStream, cssStream);
 }
 
 function buildCSS(custom, debug) {
