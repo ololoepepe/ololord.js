@@ -413,22 +413,26 @@ var Board = function () {
                 return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Attempt to create a thread without attaching a file'))));
 
               case 20:
+                if ('deleteFile' === mode && existingFileCount > 0) {
+                  --existingFileCount;
+                }
+
                 if (!(text.length <= 0 && files.length + existingFileCount <= 0)) {
-                  _context.next = 22;
+                  _context.next = 23;
                   break;
                 }
 
                 return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Both file and comment are missing'))));
 
-              case 22:
+              case 23:
                 if (!(files.length + existingFileCount > this.maxFileCount)) {
-                  _context.next = 24;
+                  _context.next = 25;
                   break;
                 }
 
                 return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Too many files'))));
 
-              case 24:
+              case 25:
                 err = files.reduce(function (err, file) {
                   if (err) {
                     return err;
@@ -442,13 +446,13 @@ var Board = function () {
                 }, '');
 
                 if (!err) {
-                  _context.next = 27;
+                  _context.next = 28;
                   break;
                 }
 
                 return _context.abrupt('return', Promise.reject(err));
 
-              case 27:
+              case 28:
               case 'end':
                 return _context.stop();
             }

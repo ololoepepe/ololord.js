@@ -14,11 +14,11 @@ export default class HiddenPostList extends MovableWidget {
     options.resizable = false;
     let post = options.post || { rawText: '' };
     let content = Templating.template('widgets/editPostWidget', {}, { boardName: post.boardName });
-    $(content).find('.js-symbols-used').empty().text(post.rawText.length);
+    $(content).find('.js-symbols-used').empty().text((post.rawText || '').length);
     KO.applyBindings({
       post: post,
       countSymbols: () => {
-        $(content).find('.js-symbols-used').empty().text(post.rawText.length);
+        $(content).find('.js-symbols-used').empty().text((post.rawText || '').length);
         return true;
       }
     }, content);

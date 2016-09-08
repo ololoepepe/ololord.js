@@ -286,6 +286,9 @@ export default class Board {
     if ('createThread' === mode && this.maxFileCount && files.length <= 0) {
       return Promise.reject(new Error(Tools.translate('Attempt to create a thread without attaching a file')));
     }
+    if ('deleteFile' === mode && (existingFileCount > 0)) {
+      --existingFileCount;
+    }
     if (text.length <= 0 && (files.length + existingFileCount) <= 0) {
       return Promise.reject(new Error(Tools.translate('Both file and comment are missing')));
     }

@@ -9,7 +9,7 @@ var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(file, thumbPath, path) {
     var _this = this;
 
-    var metadata, width, height, result, duration, bitrate, extraData, thumbInfo, _thumbInfo;
+    var metadata, width, height, result, duration, bitrate, thumbInfo, _thumbInfo;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -43,7 +43,8 @@ var createThumbnail = exports.createThumbnail = function () {
             }
             duration = metadata.format.duration;
             bitrate = +metadata.format.bit_rate;
-            extraData = {
+
+            result.extraData = {
               duration: +duration ? durationToString(duration) : duration,
               bitrate: bitrate ? Math.floor(bitrate / 1024) : 0
             };

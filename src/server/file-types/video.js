@@ -67,7 +67,7 @@ export async function createThumbnail(file, thumbPath, path) {
   }
   let duration = metadata.format.duration;
   let bitrate = +metadata.format.bit_rate;
-  let extraData = {
+  result.extraData = {
     duration: (+duration ? durationToString(duration) : duration),
     bitrate: (bitrate ? Math.floor(bitrate / 1024) : 0)
   };
