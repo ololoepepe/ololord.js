@@ -84,6 +84,8 @@ function getDefaultBoards() {
   return [new Board('3dpd', Tools.translate.noop('3D pron', 'boardTitle')), new Board('a', Tools.translate.noop('/a/nime', 'boardTitle'), { defaultUserName: Tools.translate.noop('Kamina', 'defaultUserName') }), new Board('b', Tools.translate.noop('/b/rotherhood', 'boardTitle')), new Board('d', Tools.translate.noop('Board /d/iscussion', 'boardTitle')), new Board('h', Tools.translate.noop('/h/entai', 'boardTitle')), prBoard, new Board('rf', Tools.translate.noop('Refuge', 'boardTitle'), { defaultUserName: Tools.translate.noop('Whiner', 'defaultUserName') }), new Board('vg', Tools.translate.noop('Video games', 'boardTitle'), { defaultUserName: Tools.translate.noop('PC Nobleman', 'defaultUserName') })];
 }
 
+/** Class representing a board. */
+
 var Board = function () {
   _createClass(Board, null, [{
     key: 'board',
