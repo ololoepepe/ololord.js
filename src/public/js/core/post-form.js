@@ -179,9 +179,10 @@ export let insertPostNumber = function(postNumber) {
 };
 
 function resetPostForm() {
-  let postForm = DOM.id('post-form');
-  postForm.reset();
-  DOM.queryAll('.file-input', postForm).reverse().forEach(FileInputs.removeFile);
+  let postForm = $('#post-form');
+  postForm.find('[name="name"], [name="subject"], [name="text"]').val('');
+  postForm.find('[name="signAsOp"]').prop('checked', false);
+  DOM.queryAll('.file-input', postForm[0]).reverse().forEach(FileInputs.removeFile);
   if (typeof window.lord.emit === 'function') {
     window.lord.emit('postFormReset');
   }
