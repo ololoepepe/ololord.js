@@ -1,3 +1,12 @@
 *
+!content/
+!editPostField/
+!fileInputButton/
+!postBodyPart/
+!postFileAction/
+!postFormField/
+!postFormOption/
+!postHeaderPart/
+!postMenuAction
 !*.example
 !.gitignore
