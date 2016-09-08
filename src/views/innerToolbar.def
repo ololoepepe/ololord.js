@@ -11,7 +11,7 @@
         {{ var boards = group.boards.filter(function(board) { return !board.hidden; }); }}
         {{~boards :board:index}}
           <span class='navbar-item js-navbar-item-board'
-                data-bind='visible: settings.hiddenBoards().indexOf("{{!board.name}}") < 0'>
+                data-bind='visible: (settings.hiddenBoards() || []).indexOf("{{!board.name}}") < 0'>
             <a href='/{{!it.site.pathPrefix}}{{!board.name}}' data-board-name='{{!board.name}}'>{{!board.name}}</a>
           </span>
           {{? index < boards.length - 1}}
@@ -69,7 +69,7 @@
         {{~group.boards.filter(function(board) { return !board.hidden; }) :board}}
           <option value='/{{!it.site.pathPrefix}}{{!board.name}}'
                   data-board-name='{{!board.name}}'
-                  data-bind='visible: settings.hiddenBoards().indexOf("{{!board.name}}") < 0'>[{{!board.name}}] {{!board.title}}</option>
+                  data-bind='visible: (settings.hiddenBoards() || []).indexOf("{{!board.name}}") < 0'>[{{!board.name}}] {{!board.title}}</option>
         {{~}}
       {{~}}
       <option value=''></option>

@@ -272,7 +272,7 @@ export let dateTimeData = function() {
   let base = _requireModel('base');
   let Settings = require('./settings');
   return {
-    timeOffset: (('local' === Settings.time()) ? Settings.timeZoneOffset() : base.site.timeOffset),
+    timeOffset: (('local' === Settings.time()) ? Settings.timeZoneOffset() : base.site.timeOffset) || 0,
     dateFormat: base.site.dateFormat,
     locale: base.site.locale
   };

@@ -351,7 +351,7 @@ export function initializeHead() {
       if (Settings.mumWatching()) {
         list.push('mum-watching');
       }
-      let rating = Settings.maxAllowedRating();
+      let rating = Settings.maxAllowedRating() || 'R-18G';
       if (Tools.compareRatings(rating, 'R-18G') < 0) {
         list.push(`rating-${rating.toLowerCase()}`);
       }

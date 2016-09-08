@@ -18,7 +18,7 @@
                data-bind='visible: settings.hiddenBoardGroups().indexOf("{{!group.name || '_boards'}}") < 0'>
             {{~group.boards.filter(function(board) { return !board.hidden; }) :board}}
               <div class='navbar-item js-navbar-item-board'
-                   data-bind='visible: settings.hiddenBoards().indexOf("{{!board.name}}") < 0'>
+                   data-bind='visible: (settings.hiddenBoards() || []).indexOf("{{!board.name}}") < 0'>
                 <a href='/{{!it.site.pathPrefix}}{{!board.name}}'
                    data-board-name='{{!board.name}}'>{{!board.title}}</a>
               </div>
