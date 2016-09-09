@@ -122,15 +122,13 @@ if (configFileName && _fs2.default.existsSync(configFileName)) {
               });
               keys = (0, _underscore2.default)(keys).pick(function (_1, key) {
                 return hooks.hasOwnProperty(key);
-              }).map(function (_1, key) {
-                return key;
               });
-              oldConfig = keys.reduce(function (acc, key) {
+              oldConfig = (0, _underscore2.default)(keys).reduce(function (acc, _1, key) {
                 acc[key] = c(key);
                 return acc;
               }, {});
               config = require(id);
-              keys.forEach(function (key) {
+              (0, _underscore2.default)(keys).each(function (_1, key) {
                 hooks[key].forEach(function (hook) {
                   hook(c[key], oldConfig[key], key);
                 });
