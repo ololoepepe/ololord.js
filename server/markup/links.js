@@ -392,7 +392,7 @@ var convertPostLink = function () {
             result = '<a href=\'/' + (0, _config2.default)('site.pathPrefix') + boardName + '/res/' + post.threadNumber + '.html';
 
             if (postNumber !== post.threadNumber) {
-              result += '#' + postNumber;
+              result += '#post-' + postNumber;
             }
             result += "' class='js-post-link";
             if (postNumber === post.threadNumber) {

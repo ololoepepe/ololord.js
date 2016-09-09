@@ -40,11 +40,11 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
   }
   try {
     $('.js-post.temporary-post, .temporary-post-overlay-mask').remove();
+    $('#ajax-loading-overlay').show();
     if (Tools.isThreadPage() && Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber())) {
       await Threads.setAutoUpdateEnabled(false);
       Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber(), true);
     }
-    $('#ajax-loading-overlay').show();
     let html = await $.ajax({
       url: href,
       type: 'GET',

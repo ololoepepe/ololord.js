@@ -257,7 +257,7 @@ async function convertPostLink(info, _1, matchs, _2, options) {
   }
   let result = `<a href='/${config('site.pathPrefix')}${boardName}/res/${post.threadNumber}.html`;
   if (postNumber !== post.threadNumber) {
-    result += `#${postNumber}`;
+    result += `#post-${postNumber}`;
   }
   result += "' class='js-post-link";
   if (postNumber === post.threadNumber) {
