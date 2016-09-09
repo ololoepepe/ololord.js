@@ -241,7 +241,7 @@ export async function requestPassword({ id, title, value } = {}) {
     }
     return {
       accepted: true,
-      value: password()
+      password: password()
     };
   } catch (err) {
     DOM.handleError(err);

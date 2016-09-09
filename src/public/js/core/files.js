@@ -81,13 +81,13 @@ export async function deleteFile(fileName) {
     return false;
   }
   try {
-    let { accepted, value } = await Widgets.requestPassword({ id: `deleteFile/${fileName}` });
+    let { accepted, password } = await Widgets.requestPassword({ id: `deleteFile/${fileName}` });
     if (!accepted) {
       return false;
     }
     await AJAX.post(`/${Tools.sitePathPrefix()}action/deleteFile`, Tools.createFormData({
       fileName: fileName,
-      password: value
+      password: password
     }), new OverlayProgressBar());
     return true;
   } catch (err) {
