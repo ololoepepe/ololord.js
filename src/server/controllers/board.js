@@ -76,7 +76,19 @@ async function renderThread(boardName, threadNumber) {
 }
 
 async function renderArchivedThread(boardName, threadNumber) {
-  //TODO: Implement!!!
+  let archPath = `${__dirname}/../../public/${boardName}/arch`;
+  let jsonPath = `${archPath}/${threadNumber}.json`;
+  let htmlPath = `${archPath}/${threadNumber}.html`;
+  let jsonExists = await FS.exists(jsonPath);
+  let htmlExists = await FS.exists(htmlPath);
+  if (!jsonExists) {
+    throw new Error(Tools.translate('Archived thread JSON file does not exist: >>/$[1]/$[2]', '',
+      boardName, threadNumber));
+  }
+  let thread = await BoardsModel.getThread(boardName, threadNumber);
+  await Renderer.renderThread(thread);
+  await FS.write(jsonPath, JSON.stringify({ thread: thread }));
+  await renderThreadHTML(thread, { targetPath: htmlPath });
 }
 
 async function renderPage(boardName, pageNumber) {

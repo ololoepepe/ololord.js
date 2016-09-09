@@ -104,10 +104,50 @@ var renderThread = function () {
 
 var renderArchivedThread = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, threadNumber) {
+    var archPath, jsonPath, htmlPath, jsonExists, htmlExists, thread;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
+            archPath = __dirname + '/../../public/' + boardName + '/arch';
+            jsonPath = archPath + '/' + threadNumber + '.json';
+            htmlPath = archPath + '/' + threadNumber + '.html';
+            _context3.next = 5;
+            return _fs2.default.exists(jsonPath);
+
+          case 5:
+            jsonExists = _context3.sent;
+            _context3.next = 8;
+            return _fs2.default.exists(htmlPath);
+
+          case 8:
+            htmlExists = _context3.sent;
+
+            if (jsonExists) {
+              _context3.next = 11;
+              break;
+            }
+
+            throw new Error(Tools.translate('Archived thread JSON file does not exist: >>/$[1]/$[2]', '', boardName, threadNumber));
+
+          case 11:
+            _context3.next = 13;
+            return BoardsModel.getThread(boardName, threadNumber);
+
+          case 13:
+            thread = _context3.sent;
+            _context3.next = 16;
+            return Renderer.renderThread(thread);
+
+          case 16:
+            _context3.next = 18;
+            return _fs2.default.write(jsonPath, JSON.stringify({ thread: thread }));
+
+          case 18:
+            _context3.next = 20;
+            return renderThreadHTML(thread, { targetPath: htmlPath });
+
+          case 20:
           case 'end':
             return _context3.stop();
         }
@@ -119,8 +159,6 @@ var renderArchivedThread = function () {
     return ref.apply(this, arguments);
   };
 }();
-
-//TODO: Implement!!!
 
 var renderPage = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName, pageNumber) {
