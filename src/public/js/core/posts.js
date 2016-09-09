@@ -635,8 +635,9 @@ export function globalMouseoutHandler(e) {
       if (!lastPostPreview) {
         return;
       }
-      if (lastPostPreview.mustHide && lastPostPreview.parentNode)
+      if (lastPostPreview.mustHide && lastPostPreview.parentNode) {
         lastPostPreview.parentNode.removeChild(lastPostPreview);
+      }
     }, MOUSEOUT_CANCEL_DELAY);
   }
 }

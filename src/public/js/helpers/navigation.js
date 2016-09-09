@@ -12,6 +12,7 @@ import * as Drafts from '../core/drafts';
 import * as Files from '../core/files';
 import * as Management from '../core/management';
 import * as Threads from '../core/threads';
+import * as WebSocket from '../core/websocket';
 import * as Widgets from '../widgets';
 import * as PageProcessors from '../handlers/page-processors';
 import * as PostProcessors from '../handlers/post-processors';
@@ -38,6 +39,11 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
     return;
   }
   try {
+    $('.js-post.temporary-post, .temporary-post-overlay-mask').remove();
+    if (Tools.isThreadPage() && Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber())) {
+      await Threads.setAutoUpdateEnabled(false);
+      Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber(), true);
+    }
     $('#ajax-loading-overlay').show();
     let html = await $.ajax({
       url: href,
