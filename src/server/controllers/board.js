@@ -168,11 +168,11 @@ router.renderThread = async function(key, data) {
       withFileInfos: true,
       withReferences: true
     });
-    let opPost = posts.splice(0, 1)[0];
-    posts = posts.reduce((acc, post) => {
+    posts = posts.slice(1).reduce((acc, post) => {
       acc[post.number] = post;
       return acc;
     }, {});
+    lastPosts = _(lastPosts).pick((_1, postNumber) => posts.hasOwnProperty(postNumber));
     let postsToRerender = pickPostsToRerender(lastPosts, posts);
     await Tools.series(postsToRerender, async function(post, postNumber) {
       await Files.renderPostFileInfos(post);

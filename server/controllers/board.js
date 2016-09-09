@@ -443,7 +443,7 @@ router.renderThread = function () {
 
           case 15:
             return _context10.delegateYield(regeneratorRuntime.mark(function _callee9() {
-              var threadID, threadData, model, thread, lastPosts, posts, opPost, postsToRerender;
+              var threadID, threadData, model, thread, lastPosts, posts, postsToRerender;
               return regeneratorRuntime.wrap(function _callee9$(_context9) {
                 while (1) {
                   switch (_context9.prev = _context9.next) {
@@ -469,12 +469,14 @@ router.renderThread = function () {
 
                     case 9:
                       posts = _context9.sent;
-                      opPost = posts.splice(0, 1)[0];
 
-                      posts = posts.reduce(function (acc, post) {
+                      posts = posts.slice(1).reduce(function (acc, post) {
                         acc[post.number] = post;
                         return acc;
                       }, {});
+                      lastPosts = (0, _underscore2.default)(lastPosts).pick(function (_1, postNumber) {
+                        return posts.hasOwnProperty(postNumber);
+                      });
                       postsToRerender = pickPostsToRerender(lastPosts, posts);
                       _context9.next = 15;
                       return Tools.series(postsToRerender, function () {
