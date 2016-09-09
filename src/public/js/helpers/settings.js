@@ -214,8 +214,10 @@ export function setLocalData(o, { includeSettings, includeCustom, includePasswor
 
 Storage.on('settings', (settings) => {
   prevent = true;
-  _(DEFAULT_SETTINGS).each((_, key) => {
-    module.exports[key](settings[key]);
+  _(DEFAULT_SETTINGS).each((defValue, key) => {
+    let value = settings[key];
+    value = (typeof value !== 'undefined') ? value : ((typeof defValue === 'function') ? defValue() : defValue);
+    module.exports[key](value);
   });
   prevent = false;
 });

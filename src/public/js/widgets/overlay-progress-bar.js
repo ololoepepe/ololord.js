@@ -35,15 +35,15 @@ export default class OverlayProgressBar extends EventEmitter {
     }
     this.visible = false;
     this.finished = false;
-    this.node = $('<div class="overlay-progress-bar"></div>')[0];
+    this.node = $('<div class="overlay-progress-bar"></div>');
     this.progressBar = $('<div class="progress-bar"></div>');
     this.label = $('<div class="progress-bar-label"></div>');
-    this.text = $(`<span name='text'>${this.labelText(undefined, undefined, true)}</span>`);
+    this.text = $(`<span name='text'></span>`).text(this.labelText(undefined, undefined, true));
     this.label.append(this.text);
     this.button = $(`<button class='button'></button>`).text(Tools.translate('Cancel', 'cancelButtonText'));
     this.label.append(this.button);
+    this.node.append(this.progressBar);
     this.progressBar.append(this.label);
-    this.node.appendChild(this.progressBar[0]);
     this.progressBar.progressbar({ value: false });
     let show = () => {
       if (this.finished) {
@@ -51,7 +51,7 @@ export default class OverlayProgressBar extends EventEmitter {
       }
       this.visible = true;
       this.showTime = Tools.now();
-      window.document.body.appendChild(this.node);
+      window.document.body.appendChild(this.node[0]);
       this.button.one('click', this.abort.bind(this));
     };
     if (showDelay > 0) {
@@ -126,7 +126,7 @@ export default class OverlayProgressBar extends EventEmitter {
     }
     let hide = () => {
       this.visible = false;
-      window.document.body.removeChild(this.node);
+      window.document.body.removeChild(this.node[0]);
     };
     let visibleTime = Tools.now() - this.showTime;
     if (this.hideDelay > 0 && visibleTime < this.hideDelay) {
