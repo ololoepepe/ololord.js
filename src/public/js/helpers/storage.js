@@ -269,7 +269,10 @@ export let playerCurrentTime = createDataFunction('playerCurrentTime', 0, {
   storage: window.sessionStorage
 });
 
-export let password = createObservable('password', Tools.generatePassword());
+if (typeof getLocalObject('password') !== 'string') {
+  setLocalObject('password', Tools.generatePassword());
+}
+export let password = createObservable('password', '');
 export let hotkeys = createObservable('hotkeys', DEFAULT_HOTKEYS);
 export let chats = createObservable('chats', {});
 export let spells = createObservable('spells', DEFAULT_SPELLS);
