@@ -11,7 +11,6 @@ var renderThreadHTML = function () {
     var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     var targetPath = _ref.targetPath;
-    var archived = _ref.archived;
     var board, model, data;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -32,8 +31,7 @@ var renderThreadHTML = function () {
               title: thread.title || board.title + ' — ' + thread.number,
               isThreadPage: true,
               board: MiscModel.board(board).board,
-              threadNumber: thread.number,
-              archived: !!archived
+              threadNumber: thread.number
             };
             data = Renderer.render('pages/thread', model);
 
@@ -115,7 +113,7 @@ var renderArchivedThread = function () {
           case 2:
             thread = _context3.sent;
 
-            if (thread) {
+            if (!(!thread || !thread.archived)) {
               _context3.next = 5;
               break;
             }

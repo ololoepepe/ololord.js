@@ -135,6 +135,10 @@ export async function addToDrafts() {
 };
 
 export function initializeDrafts() {
+  let draftsNode = $('#drafts')[0];
+  if (!draftsNode) {
+    return;
+  }
   KO.applyBindings({
     draftsVisible: Storage.draftsVisible,
     toggleDraftsVisibility: () => {
@@ -158,5 +162,5 @@ export function initializeDrafts() {
     },
     compareRegisteredUserLevels: Tools.compareRegisteredUserLevels,
     formattedDate: Tools.formattedDate
-  }, $('#drafts')[0]);
+  }, draftsNode);
 }

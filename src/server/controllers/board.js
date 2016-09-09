@@ -50,7 +50,7 @@ function pickPostsToRerender(oldPosts, posts) {
   });
 }
 
-async function renderThreadHTML(thread, { targetPath, archived } = {}) {
+async function renderThreadHTML(thread, { targetPath } = {}) {
   let board = Board.board(thread.boardName);
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
@@ -61,7 +61,6 @@ async function renderThreadHTML(thread, { targetPath, archived } = {}) {
     isThreadPage: true,
     board: MiscModel.board(board).board,
     threadNumber: thread.number,
-    archived: !!archived
   };
   let data = Renderer.render('pages/thread', model);
   if (targetPath) {
@@ -80,7 +79,7 @@ async function renderThread(boardName, threadNumber) {
 
 async function renderArchivedThread(boardName, threadNumber) {
   let thread = await BoardsModel.getThread(boardName, threadNumber);
-  if (!thread) {
+  if (!thread || !thread.archived) {
     throw new Error(Tools.translate('No such thread: >>/$[1]/$[2]', '', boardName, threadNumber));
   }
   let archPath = `${__dirname}/../../public/${boardName}/arch`;

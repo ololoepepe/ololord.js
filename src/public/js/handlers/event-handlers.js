@@ -141,7 +141,9 @@ registerHandler('load', () => {
 
 registerHandler('load', async function() {
   try {
-    Drafts.initializeDrafts();
+    if (!Tools.isArchivedThreadPage()) {
+      Drafts.initializeDrafts();
+    }
     let posts = DOM.queryAll('#content .js-post');
     await PostProcessors.applyPreprocessors(posts);
     await PostProcessors.applyPostprocessors(posts);

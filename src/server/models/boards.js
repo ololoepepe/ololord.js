@@ -44,7 +44,7 @@ export function postSubject(post, maxLength) {
   return subject;
 }
 
-export async function getThread(boardName, threadNumber, archived) {
+export async function getThread(boardName, threadNumber) {
   let board = Board.board(boardName);
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
@@ -59,7 +59,6 @@ export async function getThread(boardName, threadNumber, archived) {
   thread.opPost = posts.splice(0, 1)[0];
   thread.lastPosts = posts;
   thread.title = postSubject(thread.opPost, 50) || null;
-  thread.archived = !!archived;
   addDataToThread(thread, board);
   return thread;
 }
