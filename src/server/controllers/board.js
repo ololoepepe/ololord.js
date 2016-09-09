@@ -2,6 +2,7 @@ import _ from 'underscore';
 import express from 'express';
 import FS from 'q-io/fs';
 import moment from 'moment';
+import promisify from 'promisify-node';
 
 import Board from '../boards/board';
 import * as Files from '../core/files';
@@ -14,6 +15,8 @@ import * as BoardsModel from '../models/boards';
 import * as MiscModel from '../models/misc';
 import * as PostsModel from '../models/posts';
 import * as ThreadsModel from '../models/threads';
+
+const mkpath = promisify('mkpath');
 
 const RSS_DATE_TIME_FORMAT = 'ddd, DD MMM YYYY HH:mm:ss +0000';
 
@@ -76,19 +79,15 @@ async function renderThread(boardName, threadNumber) {
 }
 
 async function renderArchivedThread(boardName, threadNumber) {
-  let archPath = `${__dirname}/../../public/${boardName}/arch`;
-  let jsonPath = `${archPath}/${threadNumber}.json`;
-  let htmlPath = `${archPath}/${threadNumber}.html`;
-  let jsonExists = await FS.exists(jsonPath);
-  let htmlExists = await FS.exists(htmlPath);
-  if (!jsonExists) {
-    throw new Error(Tools.translate('Archived thread JSON file does not exist: >>/$[1]/$[2]', '',
-      boardName, threadNumber));
-  }
   let thread = await BoardsModel.getThread(boardName, threadNumber);
+  if (!thread) {
+    throw new Error(Tools.translate('No such thread: >>/$[1]/$[2]', '', boardName, threadNumber));
+  }
+  let archPath = `${__dirname}/../../public/${boardName}/arch`;
+  await mkpath(archPath);
   await Renderer.renderThread(thread);
-  await FS.write(jsonPath, JSON.stringify({ thread: thread }));
-  await renderThreadHTML(thread, { targetPath: htmlPath });
+  await FS.write(`${archPath}/${threadNumber}.json`, JSON.stringify({ thread: thread }));
+  await renderThreadHTML(thread, { targetPath: `${archPath}/${threadNumber}.html` });
 }
 
 async function renderPage(boardName, pageNumber) {

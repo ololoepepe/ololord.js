@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import FS from 'q-io/fs';
-import mkpath from 'mkpath';
+import promisify from 'promisify-node';
 
 import * as BoardsModel from './boards';
 import * as PostsModel from './posts';
@@ -12,6 +12,8 @@ import * as Tools from '../helpers/tools';
 import redisClient from '../storage/redis-client-factory';
 import Hash from '../storage/hash';
 import UnorderedSet from '../storage/unordered-set';
+
+const mkpath = promisify('mkpath');
 
 let ArchivedThreads = new Hash(redisClient(), 'archivedThreads');
 let DeletedThreads = new UnorderedSet(redisClient(), 'deletedThreads', {

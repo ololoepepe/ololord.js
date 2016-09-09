@@ -104,50 +104,42 @@ var renderThread = function () {
 
 var renderArchivedThread = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, threadNumber) {
-    var archPath, jsonPath, htmlPath, jsonExists, htmlExists, thread;
+    var thread, archPath;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            archPath = __dirname + '/../../public/' + boardName + '/arch';
-            jsonPath = archPath + '/' + threadNumber + '.json';
-            htmlPath = archPath + '/' + threadNumber + '.html';
-            _context3.next = 5;
-            return _fs2.default.exists(jsonPath);
+            _context3.next = 2;
+            return BoardsModel.getThread(boardName, threadNumber);
 
-          case 5:
-            jsonExists = _context3.sent;
-            _context3.next = 8;
-            return _fs2.default.exists(htmlPath);
+          case 2:
+            thread = _context3.sent;
 
-          case 8:
-            htmlExists = _context3.sent;
-
-            if (jsonExists) {
-              _context3.next = 11;
+            if (thread) {
+              _context3.next = 5;
               break;
             }
 
-            throw new Error(Tools.translate('Archived thread JSON file does not exist: >>/$[1]/$[2]', '', boardName, threadNumber));
+            throw new Error(Tools.translate('No such thread: >>/$[1]/$[2]', '', boardName, threadNumber));
 
-          case 11:
-            _context3.next = 13;
-            return BoardsModel.getThread(boardName, threadNumber);
+          case 5:
+            archPath = __dirname + '/../../public/' + boardName + '/arch';
+            _context3.next = 8;
+            return mkpath(archPath);
 
-          case 13:
-            thread = _context3.sent;
-            _context3.next = 16;
+          case 8:
+            _context3.next = 10;
             return Renderer.renderThread(thread);
 
-          case 16:
-            _context3.next = 18;
-            return _fs2.default.write(jsonPath, JSON.stringify({ thread: thread }));
+          case 10:
+            _context3.next = 12;
+            return _fs2.default.write(archPath + '/' + threadNumber + '.json', JSON.stringify({ thread: thread }));
 
-          case 18:
-            _context3.next = 20;
-            return renderThreadHTML(thread, { targetPath: htmlPath });
+          case 12:
+            _context3.next = 14;
+            return renderThreadHTML(thread, { targetPath: archPath + '/' + threadNumber + '.html' });
 
-          case 20:
+          case 14:
           case 'end':
             return _context3.stop();
         }
@@ -248,6 +240,10 @@ var _moment = require('moment');
 
 var _moment2 = _interopRequireDefault(_moment);
 
+var _promisifyNode = require('promisify-node');
+
+var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
+
 var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
@@ -297,6 +293,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
+var mkpath = (0, _promisifyNode2.default)('mkpath');
 
 var RSS_DATE_TIME_FORMAT = 'ddd, DD MMM YYYY HH:mm:ss +0000';
 

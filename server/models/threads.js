@@ -917,7 +917,7 @@ var pushOutOldThread = function () {
                       archivePath = __dirname + '/../../public/' + boardName + '/arch';
                       oldThreadNumber = thread.number;
                       _context23.next = 5;
-                      return (0, _mkpath2.default)(archivePath);
+                      return mkpath(archivePath);
 
                     case 5:
                       sourceId = boardName + '/res/' + oldThreadNumber + '.json';
@@ -1097,11 +1097,11 @@ var moveThread = exports.moveThread = function () {
             targetPath = __dirname + '/../../public/' + targetBoardName + '/src';
             targetThumbPath = __dirname + '/../../public/' + targetBoardName + '/thumb';
             _context27.next = 17;
-            return (0, _mkpath2.default)(targetPath);
+            return mkpath(targetPath);
 
           case 17:
             _context27.next = 19;
-            return (0, _mkpath2.default)(targetThumbPath);
+            return mkpath(targetThumbPath);
 
           case 19:
             delete thread.updatedAt;
@@ -1392,9 +1392,9 @@ var _fs = require('q-io/fs');
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _mkpath = require('mkpath');
+var _promisifyNode = require('promisify-node');
 
-var _mkpath2 = _interopRequireDefault(_mkpath);
+var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
 
 var _boards = require('./boards');
 
@@ -1441,6 +1441,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
+var mkpath = (0, _promisifyNode2.default)('mkpath');
 
 var ArchivedThreads = new _hash2.default((0, _redisClientFactory2.default)(), 'archivedThreads');
 var DeletedThreads = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'deletedThreads', {

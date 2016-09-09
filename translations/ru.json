@@ -3242,10 +3242,5 @@
         "_default": {
             "value": "Информация"
         }
-    },
-    "Archived thread JSON file does not exist: >>/$[1]/$[2]": {
-        "_default": {
-            "value": "Отсутствует JSON-файл архивного треда: >>/$[1]/$[2]"
-        }
     }
 }
