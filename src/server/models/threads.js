@@ -59,7 +59,7 @@ export function sortThreadsByPostCount(t1, t2) {
   return t2.postCount - t1.postCount;
 }
 
-export async function getThreadPostCount(boardName, threadNumber, { archived }) {
+export async function getThreadPostCount(boardName, threadNumber, { archived } = {}) {
   let source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
   return await source.count(`${boardName}:${threadNumber}`);
 }
