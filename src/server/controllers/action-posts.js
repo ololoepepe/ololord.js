@@ -32,8 +32,8 @@ async function testParameters(req, boardName, mode, { fields, files, postNumber 
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
   let post;
   if (postNumber) {
+    post = await PostsModel.getPost(boardName, postNumber);
     if (typeof fields.text === 'undefined') {
-      post = await PostsModel.getPost(boardName, postNumber);
       fields.text = post.rawText;
     }
     fileCount = await FilesModel.getPostFileCount(boardName, postNumber, { archived: post.archived });

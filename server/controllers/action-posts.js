@@ -38,32 +38,27 @@ var testParameters = function () {
             post = void 0;
 
             if (!postNumber) {
-              _context.next = 17;
+              _context.next = 16;
               break;
             }
 
-            if (!(typeof fields.text === 'undefined')) {
-              _context.next = 14;
-              break;
-            }
-
-            _context.next = 12;
+            _context.next = 11;
             return PostsModel.getPost(boardName, postNumber);
 
-          case 12:
+          case 11:
             post = _context.sent;
 
-            fields.text = post.rawText;
-
-          case 14:
-            _context.next = 16;
+            if (typeof fields.text === 'undefined') {
+              fields.text = post.rawText;
+            }
+            _context.next = 15;
             return FilesModel.getPostFileCount(boardName, postNumber, { archived: post.archived });
 
-          case 16:
+          case 15:
             fileCount = _context.sent;
 
-          case 17:
-            _context.next = 19;
+          case 16:
+            _context.next = 18;
             return board.testParameters({
               req: req,
               mode: mode,
@@ -72,10 +67,10 @@ var testParameters = function () {
               existingFileCount: fileCount
             });
 
-          case 19:
+          case 18:
             return _context.abrupt('return', post);
 
-          case 20:
+          case 19:
           case 'end':
             return _context.stop();
         }
