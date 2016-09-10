@@ -337,8 +337,14 @@ class Board {
     delete post.user.ip;
     delete post.user.hashpass;
     delete post.user.password;
-    if (!post.geolocation.countryName) {
-      post.geolocation.countryName = 'Unknown country';
+    if (post.hasOwnProperty('geolocation')) {
+      if (this.showWhois) {
+        if (!post.geolocation.countryName) {
+          post.geolocation.countryName = 'Unknown country';
+        }
+      } else {
+        delete post.geolocation;
+      }
     }
     return post;
   }
