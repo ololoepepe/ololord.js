@@ -49,7 +49,7 @@ export default class SQLAdapter {
 
   async exists(key) {
     let t = await this.type(key);
-    return 'none' !== type;
+    return 'none' !== t;
   }
 
   async keys(query) {
@@ -59,7 +59,7 @@ export default class SQLAdapter {
     return (results || []).map(result => result.name);
   }
 
-  async delete(key) {
+  async del(key) {
     await this._wrapper.transaction(async function(commit, rollback) {
       let t = await this.type(key);
       if ('none' === t) {

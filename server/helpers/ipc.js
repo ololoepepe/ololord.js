@@ -392,24 +392,24 @@ var renderArchive = exports.renderArchive = function () {
 }();
 
 var render = exports.render = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(boardName, threadNumber, postNumber, action) {
-    return regeneratorRuntime.wrap(function _callee15$(_context15) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, threadNumber, postNumber, action) {
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
-        switch (_context15.prev = _context15.next) {
+        switch (_context12.prev = _context12.next) {
           case 0:
-            _context15.prev = 0;
+            _context12.prev = 0;
 
             if (!_cluster2.default.isMaster) {
-              _context15.next = 23;
+              _context12.next = 23;
               break;
             }
 
-            _context15.t0 = action;
-            _context15.next = _context15.t0 === 'create' ? 5 : _context15.t0 === 'edit' ? 9 : _context15.t0 === 'delete' ? 9 : 19;
+            _context12.t0 = action;
+            _context12.next = _context12.t0 === 'create' ? 5 : _context12.t0 === 'edit' ? 9 : _context12.t0 === 'delete' ? 9 : 19;
             break;
 
           case 5:
-            _context15.next = 7;
+            _context12.next = 7;
             return renderThread(boardName, threadNumber, postNumber, action);
 
           case 7:
@@ -426,148 +426,90 @@ var render = exports.render = function () {
                       return renderCatalog(boardName);
 
                     case 4:
-                      _context9.next = 6;
-                      return renderArchive(boardName);
-
-                    case 6:
                     case 'end':
                       return _context9.stop();
                   }
                 }
               }, _callee9, this);
             }))();
-            return _context15.abrupt('break', 21);
+            return _context12.abrupt('break', 21);
 
           case 9:
             if (!(threadNumber === postNumber)) {
-              _context15.next = 17;
+              _context12.next = 17;
               break;
             }
 
-            _context15.next = 12;
+            _context12.next = 12;
             return renderThread(boardName, threadNumber, postNumber, action);
 
           case 12:
-            _context15.next = 14;
+            _context12.next = 14;
             return renderPages(boardName);
 
           case 14:
+            renderCatalog(boardName);
+            _context12.next = 18;
+            break;
+
+          case 17:
             _asyncToGenerator(regeneratorRuntime.mark(function _callee10() {
               return regeneratorRuntime.wrap(function _callee10$(_context10) {
                 while (1) {
                   switch (_context10.prev = _context10.next) {
                     case 0:
                       _context10.next = 2;
-                      return renderCatalog(boardName);
+                      return renderThread(boardName, threadNumber, postNumber, action);
 
                     case 2:
                       _context10.next = 4;
-                      return renderArchive(boardName);
+                      return renderPages(boardName);
 
                     case 4:
+                      renderCatalog(boardName);
+
+                    case 5:
                     case 'end':
                       return _context10.stop();
                   }
                 }
               }, _callee10, this);
             }))();
-            _context15.next = 18;
-            break;
-
-          case 17:
-            _asyncToGenerator(regeneratorRuntime.mark(function _callee12() {
-              return regeneratorRuntime.wrap(function _callee12$(_context12) {
-                while (1) {
-                  switch (_context12.prev = _context12.next) {
-                    case 0:
-                      _context12.next = 2;
-                      return renderThread(boardName, threadNumber, postNumber, action);
-
-                    case 2:
-                      _context12.next = 4;
-                      return renderPages(boardName);
-
-                    case 4:
-                      _asyncToGenerator(regeneratorRuntime.mark(function _callee11() {
-                        return regeneratorRuntime.wrap(function _callee11$(_context11) {
-                          while (1) {
-                            switch (_context11.prev = _context11.next) {
-                              case 0:
-                                _context11.next = 2;
-                                return renderCatalog(boardName);
-
-                              case 2:
-                                _context11.next = 4;
-                                return renderArchive(boardName);
-
-                              case 4:
-                              case 'end':
-                                return _context11.stop();
-                            }
-                          }
-                        }, _callee11, this);
-                      }))();
-
-                    case 5:
-                    case 'end':
-                      return _context12.stop();
-                  }
-                }
-              }, _callee12, this);
-            }))();
 
           case 18:
-            return _context15.abrupt('break', 21);
+            return _context12.abrupt('break', 21);
 
           case 19:
-            _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
-              return regeneratorRuntime.wrap(function _callee14$(_context14) {
+            _asyncToGenerator(regeneratorRuntime.mark(function _callee11() {
+              return regeneratorRuntime.wrap(function _callee11$(_context11) {
                 while (1) {
-                  switch (_context14.prev = _context14.next) {
+                  switch (_context11.prev = _context11.next) {
                     case 0:
-                      _context14.next = 2;
+                      _context11.next = 2;
                       return renderThread(boardName, threadNumber, postNumber, action);
 
                     case 2:
-                      _context14.next = 4;
+                      _context11.next = 4;
                       return renderPages(boardName);
 
                     case 4:
-                      _asyncToGenerator(regeneratorRuntime.mark(function _callee13() {
-                        return regeneratorRuntime.wrap(function _callee13$(_context13) {
-                          while (1) {
-                            switch (_context13.prev = _context13.next) {
-                              case 0:
-                                _context13.next = 2;
-                                return renderCatalog(boardName);
-
-                              case 2:
-                                _context13.next = 4;
-                                return renderArchive(boardName);
-
-                              case 4:
-                              case 'end':
-                                return _context13.stop();
-                            }
-                          }
-                        }, _callee13, this);
-                      }))();
+                      renderCatalog(boardName);
 
                     case 5:
                     case 'end':
-                      return _context14.stop();
+                      return _context11.stop();
                   }
                 }
-              }, _callee14, this);
+              }, _callee11, this);
             }));
-            return _context15.abrupt('break', 21);
+            return _context12.abrupt('break', 21);
 
           case 21:
-            _context15.next = 25;
+            _context12.next = 25;
             break;
 
           case 23:
-            _context15.next = 25;
+            _context12.next = 25;
             return send('render', {
               boardName: boardName,
               threadNumber: threadNumber,
@@ -576,21 +518,21 @@ var render = exports.render = function () {
             });
 
           case 25:
-            _context15.next = 30;
+            _context12.next = 30;
             break;
 
           case 27:
-            _context15.prev = 27;
-            _context15.t1 = _context15['catch'](0);
+            _context12.prev = 27;
+            _context12.t1 = _context12['catch'](0);
 
-            _logger2.default.error(_context15.t1.stack || _context15.t1);
+            _logger2.default.error(_context12.t1.stack || _context12.t1);
 
           case 30:
           case 'end':
-            return _context15.stop();
+            return _context12.stop();
         }
       }
-    }, _callee15, this, [[0, 27]]);
+    }, _callee12, this, [[0, 27]]);
   }));
 
   return function render(_x19, _x20, _x21, _x22) {

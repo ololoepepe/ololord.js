@@ -1178,7 +1178,7 @@ var deletePost = exports.deletePost = function () {
             }
 
             _context18.next = 18;
-            return removeThread(boardName, postNumber, { archived: archived });
+            return ThreadsModel.removeThread(boardName, postNumber, { archived: archived });
 
           case 18:
             _context18.next = 22;
@@ -1882,14 +1882,14 @@ var pushPostToArchive = exports.pushPostToArchive = function () {
 
           case 9:
             _context34.next = 11;
-            return Search.updatePostIndex(boardName, postNumbers, function (body) {
+            return Search.updatePostIndex(boardName, postNumber, function (body) {
               body.archived = true;
               return body;
             });
 
           case 11:
             _context34.next = 13;
-            return pushPostFileInfosToArchive(boardName, postNumber);
+            return FilesModel.pushPostFileInfosToArchive(boardName, postNumber);
 
           case 13:
           case 'end':

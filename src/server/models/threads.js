@@ -8,6 +8,8 @@ import Board from '../boards/board';
 import BoardController from '../controllers/board';
 import * as Search from '../core/search';
 import * as Cache from '../helpers/cache';
+import * as IPC from '../helpers/ipc';
+import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 import redisClient from '../storage/redis-client-factory';
 import sqlClient from '../storage/sql-client-factory';
@@ -244,7 +246,7 @@ export async function clearDeletedThreads() {
   return DeletedThreads.delete();
 }
 
-async function removeThread(boardName, threadNumber, { archived, leaveFileInfos, leaveReferences } = {}) {
+export async function removeThread(boardName, threadNumber, { archived, leaveFileInfos, leaveReferences } = {}) {
   let source = archived ? ArchivedThreads : Threads;
   let key = `${boardName}:${threadNumber}`
   await ThreadsPlannedForDeletion.addOne(key);
@@ -272,54 +274,73 @@ async function removeThread(boardName, threadNumber, { archived, leaveFileInfos,
 
 async function pushOutOldThread(boardName) {
   try {
-    let client = await sqlClient();
-    await client.transaction();
+    let board = Board.board(boardName);
+    if (!board) {
+      throw new Error(Tools.translate('Invalid board'));
+    }
     let threadNumbers = await getThreadNumbers(boardName);
     let threads = await getThreads(boardName, threadNumbers);
     threads.sort(sortThreadsByDate);
     if (threads.length < board.threadLimit) {
       return;
     }
+    let client = await sqlClient();
+    await client.transaction();
     let archivedThreadNumbers = await getThreadNumbers(boardName, { archived: true });
     let archivedThreads = await getThreads(boardName, archivedThreadNumbers);
     archivedThreads.sort(sortThreadsByDate);
-    if (archivedThreads.length > 0 && archivedThreads.length >= board.archiveLimit) {
+    let removeLastArchivedThread = (archivedThreads.length > 0) && (archivedThreads.length >= board.archiveLimit);
+    if (removeLastArchivedThread) {
       await removeThread(boardName, archivedThreads.pop().number, { archived: true });
     }
     let thread = threads.pop();
     if (board.archiveLimit <= 0) {
       await removeThread(boardName, thread.number);
+      await client.commit();
+      if (removeLastArchivedThread) {
+        await IPC.renderArchive(boardName);
+      }
       return;
     }
-    ArchivedThreadUpdateTimes.setOne(thread.number, thread.updatedAt, boardName);
-    ThreadUpdateTimes.deleteOne(thread.number, boardName);
-    thread.archived = true;
-    delete thread.updatedAt;
-    await ArchivedThreads.setOne(thread.number, thread, boardName);
     await Threads.deleteOne(thread.number, boardName);
-    let key = `${boardName}:${thread.number}`;
-    let postNumbers = await getThreadPostNumbers(boardName, thread.number);
-    await ArchivedThreadPostNumbers.addSome(postNumber, key);
-    await ThreadPostNumbers.delete(key);
-    await Tools.series(postNumbers, async function(postNumber) {
-      await PostsModel.pushPostToArchive(boardName, postNumber);
-    });
-    client.commit();
-    let archivePath = `${__dirname}/../../public/${boardName}/arch`;
-    let oldThreadNumber = thread.number;
-    await mkpath(archivePath);
-    let sourceId = `${boardName}/res/${oldThreadNumber}.json`;
-    let data = await Cache.readFile(sourceId);
-    let model = JSON.parse(data);
-    model.thread.archived = true;
-    await FS.write(`${archivePath}/${oldThreadNumber}.json`, JSON.stringify(model));
-    await BoardController.renderThreadHTML(model.thread, {
-      targetPath: `${archivePath}/${oldThreadNumber}.html`,
-      archived: true
-    });
-    await Cache.removeFile(sourceId);
-    await Cache.removeFile(`${boardName}/res/${oldThreadNumber}.html`);
+    (async function() {
+      try {
+        ArchivedThreadUpdateTimes.setOne(thread.number, thread.updatedAt, boardName);
+        ThreadUpdateTimes.deleteOne(thread.number, boardName);
+        thread.archived = true;
+        delete thread.updatedAt;
+        await ArchivedThreads.setOne(thread.number, thread, boardName);
+        let key = `${boardName}:${thread.number}`;
+        let postNumbers = await getThreadPostNumbers(boardName, thread.number);
+        await ArchivedThreadPostNumbers.addSome(postNumbers, key);
+        await ThreadPostNumbers.delete(key);
+        await Tools.series(postNumbers, async function(postNumber) {
+          await PostsModel.pushPostToArchive(boardName, postNumber);
+        });
+        await client.commit();
+        let archivePath = `${__dirname}/../../public/${boardName}/arch`;
+        let oldThreadNumber = thread.number;
+        await mkpath(archivePath);
+        let sourceId = `${boardName}/res/${oldThreadNumber}.json`;
+        let data = await Cache.readFile(sourceId);
+        let model = JSON.parse(data);
+        model.thread.archived = true;
+        await FS.write(`${archivePath}/${oldThreadNumber}.json`, JSON.stringify(model));
+        await BoardController.renderThreadHTML(model.thread, {
+          targetPath: `${archivePath}/${oldThreadNumber}.html`,
+          archived: true
+        });
+        await Cache.removeFile(sourceId);
+        await Cache.removeFile(`${boardName}/res/${oldThreadNumber}.html`);
+        await IPC.renderArchive(boardName);
+      } catch (err) {
+        client.rollback();
+        Logger.error(err.stack || err);
+      }
+    })();
+    //NOTE: This is for the sake of speed.
   } catch (err) {
+    client.rollback();
     Logger.error(err.stack || err);
   }
 }
@@ -333,7 +354,7 @@ export async function createThread(req, fields, transaction) {
   if (!board.postingEnabled) {
     return Promise.reject(new Error(Tools.translate('Posting is disabled at this board')));
   }
-  pushOutOldThread(); //NOTE: No, "await" should not be here. Executing in parallel. This is for the sake of speed.
+  await pushOutOldThread(boardName);
   let date = Tools.now();
   password = Tools.sha1(password);
   let hashpass = (req.hashpass || null);

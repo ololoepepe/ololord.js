@@ -186,7 +186,7 @@ var SQLAdapter = function () {
 
               case 2:
                 t = _context3.sent;
-                return _context3.abrupt('return', 'none' !== type);
+                return _context3.abrupt('return', 'none' !== t);
 
               case 4:
               case 'end':
@@ -237,7 +237,7 @@ var SQLAdapter = function () {
       return keys;
     }()
   }, {
-    key: 'delete',
+    key: 'del',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(key) {
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
@@ -312,11 +312,11 @@ var SQLAdapter = function () {
         }, _callee6, this);
       }));
 
-      function _delete(_x7) {
+      function del(_x7) {
         return ref.apply(this, arguments);
       }
 
-      return _delete;
+      return del;
     }()
   }, {
     key: 'expire',

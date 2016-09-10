@@ -211,7 +211,7 @@ export async function renderCatalog(boardName) {
   return await addTask('renderCatalog', boardName);
 }
 
-export async function renderArchive(boardName) { //TODO
+export async function renderArchive(boardName) {
   try {
     if (Cluster.isMaster) {
       return await addTask('renderArchive', boardName);
@@ -232,7 +232,6 @@ export async function render(boardName, threadNumber, postNumber, action) {
         (async function() {
           await renderPages(boardName);
           await renderCatalog(boardName);
-          await renderArchive(boardName);
         })();
         break;
       case 'edit':
@@ -240,18 +239,12 @@ export async function render(boardName, threadNumber, postNumber, action) {
         if (threadNumber === postNumber) {
           await renderThread(boardName, threadNumber, postNumber, action);
           await renderPages(boardName);
-          (async function() {
-            await renderCatalog(boardName);
-            await renderArchive(boardName);
-          })();
+          renderCatalog(boardName);
         } else {
           (async function() {
             await renderThread(boardName, threadNumber, postNumber, action);
             await renderPages(boardName);
-            (async function() {
-              await renderCatalog(boardName);
-              await renderArchive(boardName);
-            })();
+            renderCatalog(boardName);
           })();
         }
         break;
@@ -259,10 +252,7 @@ export async function render(boardName, threadNumber, postNumber, action) {
         (async function() {
           await renderThread(boardName, threadNumber, postNumber, action);
           await renderPages(boardName);
-          (async function() {
-            await renderCatalog(boardName);
-            await renderArchive(boardName);
-          })();
+          renderCatalog(boardName);
         });
         break;
       }

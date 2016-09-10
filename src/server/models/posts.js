@@ -429,7 +429,7 @@ export async function deletePost(req, { boardName, postNumber, archived }) {
     return Promise.reject(new Error(Tools.translate('Deleting posts from archived threads is not allowed')));
   }
   if (isThread) {
-    await removeThread(boardName, postNumber, { archived: archived });
+    await ThreadsModel.removeThread(boardName, postNumber, { archived: archived });
   } else {
     await removePost(boardName, postNumber);
   }
@@ -647,9 +647,9 @@ export async function pushPostToArchive(boardName, postNumber) {
   post.archived = true;
   await ArchivedPosts.setOne(key, post);
   await Posts.deleteOne(key);
-  await Search.updatePostIndex(boardName, postNumbers, (body) => {
+  await Search.updatePostIndex(boardName, postNumber, (body) => {
     body.archived = true;
     return body;
   });
-  await pushPostFileInfosToArchive(boardName, postNumber);
+  await FilesModel.pushPostFileInfosToArchive(boardName, postNumber);
 }
