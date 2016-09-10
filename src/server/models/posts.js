@@ -146,9 +146,9 @@ export async function getPostKeys({ archived, nonArchived } = {}) {
     archivedKeys = await ArchivedPosts.keys();
   }
   if (nonArchived || (!archived && !nonArchived)) {
-    nonArchived = await Posts.keys();
+    nonArchivedKeys = await Posts.keys();
   }
-  return nonArchived.concat(archived);
+  return nonArchivedKeys.concat(archivedKeys);
 }
 
 async function addReferencedPosts(post, referencedPosts, { nogenerate, archived } = {}) {

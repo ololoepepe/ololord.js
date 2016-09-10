@@ -375,10 +375,10 @@ var getPostKeys = exports.getPostKeys = function () {
             return Posts.keys();
 
           case 9:
-            nonArchived = _context6.sent;
+            nonArchivedKeys = _context6.sent;
 
           case 10:
-            return _context6.abrupt('return', nonArchived.concat(archived));
+            return _context6.abrupt('return', nonArchivedKeys.concat(archivedKeys));
 
           case 11:
           case 'end':
