@@ -32,11 +32,11 @@ async function testParameters(req, boardName, mode, { fields, files, postNumber 
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
   let post;
   if (postNumber) {
-    fileCount = await PostsModel.getPostFileCount(boardName, postNumber);
     if (typeof fields.text === 'undefined') {
       post = await PostsModel.getPost(boardName, postNumber);
       fields.text = post.rawText;
     }
+    fileCount = await FilesModel.getPostFileCount(boardName, postNumber, { archived: post.archived });
   }
   await board.testParameters({
     req: req,
@@ -239,7 +239,7 @@ router.post('/action/addFiles', async function(req, res, next) {
     });
     transaction = new PostCreationTransaction(boardName);
     files = await Files.processFiles(boardName, files, transaction);
-    await FilesModel.addFilesToPost(boardName, postNumber, files, transaction);
+    await FilesModel.addFilesToPost(boardName, postNumber, files, { archived: post.archived });
     IPC.render(boardName, post.threadNumber, postNumber, 'edit');
     res.json({});
   } catch (err) {

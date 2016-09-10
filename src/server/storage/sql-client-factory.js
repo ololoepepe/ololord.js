@@ -8,11 +8,47 @@ let clients = new Map();
 
 function createClient(name) {
   return new Promise((resolve, reject) => {
-    let db = new SQLite3.Database(`${__projroot}/../sqlite/${name}.sqlite`, (err) => {
+    let db = new SQLite3.Database(`${__dirname}/../../sqlite/${name}.sqlite`, (err) => {
       if (err) {
         reject(err);
         return;
       }
+      db.transaction = () => {
+        return new Promise((resolve, reject) => {
+          db.run('BEGIN TRANSACTION', [], (err) => {
+            if (err) {
+              reject(err);
+            } else {
+              db.manualTransaction = true;
+              resolve();
+            }
+          });
+        });
+      };
+      db.commit = () => {
+        return new Promise((resolve, reject) => {
+          db.run('COMMIT TRANSACTION', [], (err) => {
+            db.manualTransaction = false;
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      };
+      db.rollback = () => {
+        return new Promise((resolve, reject) => {
+          db.run('ROLLBACK TRANSACTION', [], (err) => {
+            db.manualTransaction = false;
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      };
       resolve(db);
     });
   });

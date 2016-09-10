@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.editAudioTags = exports.editFileRating = exports.deleteFile = exports.addFilesToPost = exports.removeFileInfos = exports.removeFileHashes = exports.addFileHashes = exports.addFileInfo = exports.getFileInfosByHashes = exports.fileInfoExistsByHash = exports.fileInfoExistsByName = exports.getFileInfoByHash = exports.getFileInfoByName = undefined;
+exports.pushPostFileInfosToArchive = exports.removePostFileInfos = exports.getPostFileInfos = exports.getPostFileCount = exports.editAudioTags = exports.editFileRating = exports.deleteFile = exports.addFilesToPost = exports.removeFileInfos = exports.removeFileHashes = exports.addFileHashes = exports.addFileInfo = exports.getFileInfosByHashes = exports.fileInfoExistsByHash = exports.fileInfoExistsByName = exports.getFileInfoByHash = exports.getFileInfoByName = undefined;
 
 var getFileInfo = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(name, hash) {
@@ -13,7 +13,7 @@ var getFileInfo = function () {
         switch (_context.prev = _context.next) {
           case 0:
             if (!(!name && hash)) {
-              _context.next = 5;
+              _context.next = 9;
               break;
             }
 
@@ -24,31 +24,51 @@ var getFileInfo = function () {
             info = _context.sent;
 
             if (info) {
+              _context.next = 8;
+              break;
+            }
+
+            _context.next = 7;
+            return ArchivedFileHashes.getOne(hash);
+
+          case 7:
+            info = _context.sent;
+
+          case 8:
+            if (info) {
               name = info.name;
             }
 
-          case 5:
+          case 9:
             if (name) {
-              _context.next = 7;
+              _context.next = 11;
               break;
             }
 
             return _context.abrupt('return', Promise.reject(new Error(Tools.translate('No such file'))));
-
-          case 7:
-            fileInfo = FileInfos.getOne(name);
-
-            if (fileInfo) {
-              _context.next = 10;
-              break;
-            }
-
-            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('No such file'))));
-
-          case 10:
-            return _context.abrupt('return', fileInfo);
 
           case 11:
+            _context.next = 13;
+            return FileInfos.getOne(name);
+
+          case 13:
+            fileInfo = _context.sent;
+
+            if (!fileInfo) {
+              fileInfo = ArchivedFileInfos.getOne(name);
+            }
+
+            if (fileInfo) {
+              _context.next = 17;
+              break;
+            }
+
+            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('No such file'))));
+
+          case 17:
+            return _context.abrupt('return', fileInfo);
+
+          case 18:
           case 'end':
             return _context.stop();
         }
@@ -113,6 +133,7 @@ var getFileInfoByHash = exports.getFileInfoByHash = function () {
 
 var fileInfoExistsByName = exports.fileInfoExistsByName = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(name) {
+    var exists;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
@@ -121,9 +142,23 @@ var fileInfoExistsByName = exports.fileInfoExistsByName = function () {
             return FileInfos.existsOne(name);
 
           case 2:
+            exists = _context4.sent;
+
+            if (!exists) {
+              _context4.next = 5;
+              break;
+            }
+
+            return _context4.abrupt('return', true);
+
+          case 5:
+            _context4.next = 7;
+            return ArchivedFileInfos.existsOne(name);
+
+          case 7:
             return _context4.abrupt('return', _context4.sent);
 
-          case 3:
+          case 8:
           case 'end':
             return _context4.stop();
         }
@@ -138,6 +173,7 @@ var fileInfoExistsByName = exports.fileInfoExistsByName = function () {
 
 var fileInfoExistsByHash = exports.fileInfoExistsByHash = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(hash) {
+    var exists;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
@@ -146,9 +182,23 @@ var fileInfoExistsByHash = exports.fileInfoExistsByHash = function () {
             return FileHashes.exists(hash);
 
           case 2:
+            exists = _context5.sent;
+
+            if (!exists) {
+              _context5.next = 5;
+              break;
+            }
+
+            return _context5.abrupt('return', true);
+
+          case 5:
+            _context5.next = 7;
+            return ArchivedFileHashes.exists(hash);
+
+          case 7:
             return _context5.abrupt('return', _context5.sent);
 
-          case 3:
+          case 8:
           case 'end':
             return _context5.stop();
         }
@@ -193,11 +243,23 @@ var getFileInfosByHashes = exports.getFileInfosByHashes = function () {
                         fileInfo = _context6.sent;
 
                         if (fileInfo) {
+                          _context6.next = 7;
+                          break;
+                        }
+
+                        _context6.next = 6;
+                        return ArchivedFileHashes.getOne(hash);
+
+                      case 6:
+                        fileInfo = _context6.sent;
+
+                      case 7:
+                        if (fileInfo) {
                           fileInfo.hash = hash;
                         }
                         return _context6.abrupt('return', fileInfo);
 
-                      case 5:
+                      case 9:
                       case 'end':
                         return _context6.stop();
                     }
@@ -228,14 +290,19 @@ var getFileInfosByHashes = exports.getFileInfosByHashes = function () {
 
 var addFileInfo = exports.addFileInfo = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(fileInfo) {
+    var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var archived = _ref.archived;
+    var source;
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
-            _context8.next = 2;
-            return FileInfos.setOne(fileInfo.name, fileInfo);
+            source = archived ? ArchivedFileInfos : FileInfos;
+            _context8.next = 3;
+            return source.setOne(fileInfo.name, fileInfo);
 
-          case 2:
+          case 3:
           case 'end':
             return _context8.stop();
         }
@@ -243,7 +310,7 @@ var addFileInfo = exports.addFileInfo = function () {
     }, _callee8, this);
   }));
 
-  return function addFileInfo(_x9) {
+  return function addFileInfo(_x9, _x10) {
     return ref.apply(this, arguments);
   };
 }();
@@ -262,17 +329,19 @@ var addFileHashes = exports.addFileHashes = function () {
               return !!fileInfo;
             }), function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(fileInfo) {
+                var source;
                 return regeneratorRuntime.wrap(function _callee9$(_context9) {
                   while (1) {
                     switch (_context9.prev = _context9.next) {
                       case 0:
-                        _context9.next = 2;
-                        return FileHashes.addOne(createFileHash(fileInfo), fileInfo.hash);
-
-                      case 2:
-                        return _context9.abrupt('return', _context9.sent);
+                        source = fileInfo.archived ? ArchivedFileHashes : FileHashes;
+                        _context9.next = 3;
+                        return source.addOne(createFileHash(fileInfo), fileInfo.hash);
 
                       case 3:
+                        return _context9.abrupt('return', _context9.sent);
+
+                      case 4:
                       case 'end':
                         return _context9.stop();
                     }
@@ -280,7 +349,7 @@ var addFileHashes = exports.addFileHashes = function () {
                 }, _callee9, this);
               }));
 
-              return function (_x11) {
+              return function (_x13) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -293,7 +362,7 @@ var addFileHashes = exports.addFileHashes = function () {
     }, _callee10, this);
   }));
 
-  return function addFileHashes(_x10) {
+  return function addFileHashes(_x12) {
     return ref.apply(this, arguments);
   };
 }();
@@ -319,30 +388,31 @@ var removeFileHashes = exports.removeFileHashes = function () {
             _context12.next = 5;
             return Tools.series(fileInfos, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(fileInfo) {
-                var size;
+                var source, size;
                 return regeneratorRuntime.wrap(function _callee11$(_context11) {
                   while (1) {
                     switch (_context11.prev = _context11.next) {
                       case 0:
-                        _context11.next = 2;
-                        return FileHashes.deleteOne(createFileHash(fileInfo), fileInfo.hash);
+                        source = fileInfo.archived ? ArchivedFileHashes : FileHashes;
+                        _context11.next = 3;
+                        return source.deleteOne(createFileHash(fileInfo), fileInfo.hash);
 
-                      case 2:
-                        _context11.next = 4;
-                        return FileHashes.count(fileInfo.hash);
+                      case 3:
+                        _context11.next = 5;
+                        return source.count(fileInfo.hash);
 
-                      case 4:
+                      case 5:
                         size = _context11.sent;
 
                         if (!(size <= 0)) {
-                          _context11.next = 8;
+                          _context11.next = 9;
                           break;
                         }
 
-                        _context11.next = 8;
-                        return FileHashes.delete(fileInfo.hash);
+                        _context11.next = 9;
+                        return source.delete(fileInfo.hash);
 
-                      case 8:
+                      case 9:
                       case 'end':
                         return _context11.stop();
                     }
@@ -350,7 +420,7 @@ var removeFileHashes = exports.removeFileHashes = function () {
                 }, _callee11, this);
               }));
 
-              return function (_x13) {
+              return function (_x15) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -363,13 +433,17 @@ var removeFileHashes = exports.removeFileHashes = function () {
     }, _callee12, this);
   }));
 
-  return function removeFileHashes(_x12) {
+  return function removeFileHashes(_x14) {
     return ref.apply(this, arguments);
   };
 }();
 
 var removeFileInfos = exports.removeFileInfos = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(fileInfoNames) {
+    var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var archived = _ref2.archived;
+    var source;
     return regeneratorRuntime.wrap(function _callee13$(_context13) {
       while (1) {
         switch (_context13.prev = _context13.next) {
@@ -386,10 +460,11 @@ var removeFileInfos = exports.removeFileInfos = function () {
             return _context13.abrupt('return', 0);
 
           case 3:
-            _context13.next = 5;
-            return FileInfos.deleteSome(fileInfoNames);
+            source = archived ? ArchivedFileInfos : FileInfos;
+            _context13.next = 6;
+            return source.deleteSome(fileInfoNames);
 
-          case 5:
+          case 6:
           case 'end':
             return _context13.stop();
         }
@@ -397,18 +472,23 @@ var removeFileInfos = exports.removeFileInfos = function () {
     }, _callee13, this);
   }));
 
-  return function removeFileInfos(_x14) {
+  return function removeFileInfos(_x16, _x17) {
     return ref.apply(this, arguments);
   };
 }();
 
 var addFilesToPost = exports.addFilesToPost = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(boardName, postNumber, files) {
+    var _ref3 = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
+
+    var archived = _ref3.archived;
+    var source;
     return regeneratorRuntime.wrap(function _callee15$(_context15) {
       while (1) {
         switch (_context15.prev = _context15.next) {
           case 0:
-            _context15.next = 2;
+            source = archived ? ArchivedPostFileInfoNames : PostFileInfoNames;
+            _context15.next = 3;
             return Tools.series(files, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(file) {
                 return regeneratorRuntime.wrap(function _callee14$(_context14) {
@@ -418,11 +498,11 @@ var addFilesToPost = exports.addFilesToPost = function () {
                         file.boardName = boardName;
                         file.postNumber = postNumber;
                         _context14.next = 4;
-                        return addFileInfo(file);
+                        return addFileInfo(file, { archived: archived });
 
                       case 4:
                         _context14.next = 6;
-                        return PostFileInfoNames.addOne(file.name, boardName + ':' + postNumber);
+                        return source.addOne(file.name, boardName + ':' + postNumber);
 
                       case 6:
                       case 'end':
@@ -432,16 +512,16 @@ var addFilesToPost = exports.addFilesToPost = function () {
                 }, _callee14, this);
               }));
 
-              return function (_x18) {
+              return function (_x24) {
                 return ref.apply(this, arguments);
               };
             }());
 
-          case 2:
-            _context15.next = 4;
+          case 3:
+            _context15.next = 5;
             return addFileHashes(files);
 
-          case 4:
+          case 5:
           case 'end':
             return _context15.stop();
         }
@@ -449,14 +529,14 @@ var addFilesToPost = exports.addFilesToPost = function () {
     }, _callee15, this);
   }));
 
-  return function addFilesToPost(_x15, _x16, _x17) {
+  return function addFilesToPost(_x19, _x20, _x21, _x22) {
     return ref.apply(this, arguments);
   };
 }();
 
 var deleteFile = exports.deleteFile = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(fileName) {
-    var fileInfo, boardName, postNumber, path;
+    var fileInfo, boardName, postNumber, archived, infosSource, namesSource, path;
     return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
         switch (_context17.prev = _context17.next) {
@@ -468,18 +548,21 @@ var deleteFile = exports.deleteFile = function () {
             fileInfo = _context17.sent;
             boardName = fileInfo.boardName;
             postNumber = fileInfo.postNumber;
-            _context17.next = 7;
-            return PostFileInfoNames.deleteOne(fileName, boardName + ':' + postNumber);
+            archived = fileInfo.archived;
+            infosSource = archived ? ArchivedFileInfos : FileInfos;
+            namesSource = archived ? ArchivedPostFileInfoNames : PostFileInfoNames;
+            _context17.next = 10;
+            return namesSource.deleteOne(fileName, boardName + ':' + postNumber);
 
-          case 7:
-            _context17.next = 9;
-            return FileInfos.deleteOne(fileName);
+          case 10:
+            _context17.next = 12;
+            return infosSource.deleteOne(fileName);
 
-          case 9:
-            _context17.next = 11;
+          case 12:
+            _context17.next = 14;
             return removeFileHashes(fileInfo);
 
-          case 11:
+          case 14:
             path = __dirname + '/../../public/' + boardName;
 
             Tools.series([path + '/src/' + fileInfo.name, path + '/thumb/' + fileInfo.thumb.name], _asyncToGenerator(regeneratorRuntime.mark(function _callee16() {
@@ -489,7 +572,7 @@ var deleteFile = exports.deleteFile = function () {
                     case 0:
                       _context16.prev = 0;
                       _context16.next = 3;
-                      return FS.remove(path);
+                      return _fs2.default.remove(path);
 
                     case 3:
                       _context16.next = 8;
@@ -509,7 +592,7 @@ var deleteFile = exports.deleteFile = function () {
               }, _callee16, this, [[0, 5]]);
             })));
 
-          case 13:
+          case 16:
           case 'end':
             return _context17.stop();
         }
@@ -517,14 +600,14 @@ var deleteFile = exports.deleteFile = function () {
     }, _callee17, this);
   }));
 
-  return function deleteFile(_x19) {
+  return function deleteFile(_x25) {
     return ref.apply(this, arguments);
   };
 }();
 
 var editFileRating = exports.editFileRating = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(fileName, rating) {
-    var fileInfo;
+    var fileInfo, source;
     return regeneratorRuntime.wrap(function _callee18$(_context18) {
       while (1) {
         switch (_context18.prev = _context18.next) {
@@ -539,10 +622,11 @@ var editFileRating = exports.editFileRating = function () {
               rating = Tools.FILE_RATINGS[0];
             }
             fileInfo.rating = rating;
-            _context18.next = 7;
-            return FileInfos.setOne(fileName, fileInfo);
+            source = fileInfo.archived ? ArchivedFileInfos : FileInfos;
+            _context18.next = 8;
+            return source.setOne(fileName, fileInfo);
 
-          case 7:
+          case 8:
           case 'end':
             return _context18.stop();
         }
@@ -550,14 +634,14 @@ var editFileRating = exports.editFileRating = function () {
     }, _callee18, this);
   }));
 
-  return function editFileRating(_x20, _x21) {
+  return function editFileRating(_x26, _x27) {
     return ref.apply(this, arguments);
   };
 }();
 
 var editAudioTags = exports.editAudioTags = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(fileName, fields) {
-    var fileInfo;
+    var fileInfo, source;
     return regeneratorRuntime.wrap(function _callee19$(_context19) {
       while (1) {
         switch (_context19.prev = _context19.next) {
@@ -576,10 +660,11 @@ var editAudioTags = exports.editAudioTags = function () {
                 delete fileInfo.extraData[tag];
               }
             });
-            _context19.next = 6;
-            return FileInfos.setOne(fileName, fileInfo);
+            source = fileInfo.archived ? ArchivedFileInfos : FileInfos;
+            _context19.next = 7;
+            return source.setOne(fileName, fileInfo);
 
-          case 6:
+          case 7:
           case 'end':
             return _context19.stop();
         }
@@ -587,7 +672,297 @@ var editAudioTags = exports.editAudioTags = function () {
     }, _callee19, this);
   }));
 
-  return function editAudioTags(_x22, _x23) {
+  return function editAudioTags(_x28, _x29) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var getPostFileCount = exports.getPostFileCount = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(boardName, postNumber) {
+    var _ref4 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var archived = _ref4.archived;
+    var source;
+    return regeneratorRuntime.wrap(function _callee20$(_context20) {
+      while (1) {
+        switch (_context20.prev = _context20.next) {
+          case 0:
+            source = archived ? ArchivedPostFileInfoNames : PostFileInfoNames;
+            _context20.next = 3;
+            return source.count(boardName + ':' + postNumber);
+
+          case 3:
+            return _context20.abrupt('return', _context20.sent);
+
+          case 4:
+          case 'end':
+            return _context20.stop();
+        }
+      }
+    }, _callee20, this);
+  }));
+
+  return function getPostFileCount(_x30, _x31, _x32) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var getPostFileInfos = exports.getPostFileInfos = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(boardName, postNumber) {
+    var _ref5 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var archived = _ref5.archived;
+    var namesSource, infosSource, fileNames;
+    return regeneratorRuntime.wrap(function _callee21$(_context21) {
+      while (1) {
+        switch (_context21.prev = _context21.next) {
+          case 0:
+            namesSource = archived ? ArchivedPostFileInfoNames : PostFileInfoNames;
+            infosSource = archived ? ArchivedFileInfos : FileInfos;
+            _context21.next = 4;
+            return namesSource.getAll(boardName + ':' + postNumber);
+
+          case 4:
+            fileNames = _context21.sent;
+            _context21.next = 7;
+            return infosSource.getSome(fileNames);
+
+          case 7:
+            return _context21.abrupt('return', _context21.sent);
+
+          case 8:
+          case 'end':
+            return _context21.stop();
+        }
+      }
+    }, _callee21, this);
+  }));
+
+  return function getPostFileInfos(_x34, _x35, _x36) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var removePostFileInfos = exports.removePostFileInfos = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(boardName, postNumber) {
+    var _ref6 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var archived = _ref6.archived;
+    var key, namesSource, fileNames, fileInfos, paths;
+    return regeneratorRuntime.wrap(function _callee24$(_context24) {
+      while (1) {
+        switch (_context24.prev = _context24.next) {
+          case 0:
+            key = boardName + ':' + postNumber;
+            namesSource = archived ? ArchivedPostFileInfoNames : PostFileInfoNames;
+            _context24.next = 4;
+            return namesSource.getAll(key);
+
+          case 4:
+            fileNames = _context24.sent;
+            _context24.next = 7;
+            return Tools.series(fileNames, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(fileName) {
+                return regeneratorRuntime.wrap(function _callee22$(_context22) {
+                  while (1) {
+                    switch (_context22.prev = _context22.next) {
+                      case 0:
+                        _context22.next = 2;
+                        return getFileInfoByName(fileName);
+
+                      case 2:
+                        return _context22.abrupt('return', _context22.sent);
+
+                      case 3:
+                      case 'end':
+                        return _context22.stop();
+                    }
+                  }
+                }, _callee22, this);
+              }));
+
+              return function (_x42) {
+                return ref.apply(this, arguments);
+              };
+            }(), true);
+
+          case 7:
+            fileInfos = _context24.sent;
+
+            fileInfos = fileInfos.filter(function (fileInfo) {
+              return !!fileInfo;
+            });
+            paths = fileInfos.map(function (fileInfo) {
+              return [__dirname + '/../../public/' + boardName + '/src/' + fileInfo.name, __dirname + '/../../public/' + boardName + '/thumb/' + fileInfo.thumb.name];
+            });
+            _context24.next = 12;
+            return namesSource.delete(key);
+
+          case 12:
+            _context24.next = 14;
+            return removeFileInfos(fileNames, { archived: archived });
+
+          case 14:
+            _context24.next = 16;
+            return removeFileHashes(fileInfos);
+
+          case 16:
+            Tools.series((0, _underscore2.default)(paths).flatten(), function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(path) {
+                return regeneratorRuntime.wrap(function _callee23$(_context23) {
+                  while (1) {
+                    switch (_context23.prev = _context23.next) {
+                      case 0:
+                        _context23.prev = 0;
+                        _context23.next = 3;
+                        return _fs2.default.remove(path);
+
+                      case 3:
+                        _context23.next = 8;
+                        break;
+
+                      case 5:
+                        _context23.prev = 5;
+                        _context23.t0 = _context23['catch'](0);
+
+                        Logger.error(_context23.t0.stack || _context23.t0);
+
+                      case 8:
+                      case 'end':
+                        return _context23.stop();
+                    }
+                  }
+                }, _callee23, this, [[0, 5]]);
+              }));
+
+              return function (_x43) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 17:
+          case 'end':
+            return _context24.stop();
+        }
+      }
+    }, _callee24, this);
+  }));
+
+  return function removePostFileInfos(_x38, _x39, _x40) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var pushPostFileInfosToArchive = exports.pushPostFileInfosToArchive = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(boardName, postNumber) {
+    var key, fileNames, fileInfos;
+    return regeneratorRuntime.wrap(function _callee27$(_context27) {
+      while (1) {
+        switch (_context27.prev = _context27.next) {
+          case 0:
+            key = boardName + ':' + postNumber;
+            _context27.next = 3;
+            return PostFileInfoNames.getAll(key);
+
+          case 3:
+            fileNames = _context27.sent;
+            _context27.next = 6;
+            return ArchivedPostFileInfoNames.addSome(fileNames, key);
+
+          case 6:
+            _context27.next = 8;
+            return PostFileInfoNames.delete(key);
+
+          case 8:
+            _context27.next = 10;
+            return Tools.series(fileNames, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(fileName) {
+                return regeneratorRuntime.wrap(function _callee25$(_context25) {
+                  while (1) {
+                    switch (_context25.prev = _context25.next) {
+                      case 0:
+                        _context25.next = 2;
+                        return getFileInfoByName(fileName);
+
+                      case 2:
+                        return _context25.abrupt('return', _context25.sent);
+
+                      case 3:
+                      case 'end':
+                        return _context25.stop();
+                    }
+                  }
+                }, _callee25, this);
+              }));
+
+              return function (_x46) {
+                return ref.apply(this, arguments);
+              };
+            }(), {});
+
+          case 10:
+            fileInfos = _context27.sent;
+            _context27.next = 13;
+            return ArchivedFileInfos.setSome(fileInfos);
+
+          case 13:
+            _context27.next = 15;
+            return FileInfos.deleteSome(fileNames);
+
+          case 15:
+            _context27.next = 17;
+            return Tools.series(fileInfos, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(fileInfo) {
+                var fileHash, size;
+                return regeneratorRuntime.wrap(function _callee26$(_context26) {
+                  while (1) {
+                    switch (_context26.prev = _context26.next) {
+                      case 0:
+                        fileHash = createFileHash(fileInfo);
+                        _context26.next = 3;
+                        return ArchivedFileHashes.addOne(fileHash, fileInfo.hash);
+
+                      case 3:
+                        _context26.next = 5;
+                        return FileHashes.deleteOne(fileHash, fileInfo.hash);
+
+                      case 5:
+                        _context26.next = 7;
+                        return FileHashes.count(fileInfo.hash);
+
+                      case 7:
+                        size = _context26.sent;
+
+                        if (!(size <= 0)) {
+                          _context26.next = 11;
+                          break;
+                        }
+
+                        _context26.next = 11;
+                        return FileHashes.delete(fileInfo.hash);
+
+                      case 11:
+                      case 'end':
+                        return _context26.stop();
+                    }
+                  }
+                }, _callee26, this);
+              }));
+
+              return function (_x47) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 17:
+          case 'end':
+            return _context27.stop();
+        }
+      }
+    }, _callee27, this);
+  }));
+
+  return function pushPostFileInfosToArchive(_x44, _x45) {
     return ref.apply(this, arguments);
   };
 }();
@@ -598,17 +973,25 @@ var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
+var _fs = require('q-io/fs');
+
+var _fs2 = _interopRequireDefault(_fs);
+
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
+
+var _hash = require('../storage/hash');
+
+var _hash2 = _interopRequireDefault(_hash);
 
 var _redisClientFactory = require('../storage/redis-client-factory');
 
 var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
 
-var _hash = require('../storage/hash');
+var _sqlClientFactory = require('../storage/sql-client-factory');
 
-var _hash2 = _interopRequireDefault(_hash);
+var _sqlClientFactory2 = _interopRequireDefault(_sqlClientFactory);
 
 var _unorderedSet = require('../storage/unordered-set');
 
@@ -622,6 +1005,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
+var ArchivedFileHashes = new _unorderedSet2.default((0, _sqlClientFactory2.default)(), 'archivedFileHashes');
+var ArchivedFileInfos = new _hash2.default((0, _sqlClientFactory2.default)(), 'archivedFileInfos');
+var ArchivedPostFileInfoNames = new _unorderedSet2.default((0, _sqlClientFactory2.default)(), 'archivedPostFileInfoNames', {
+  parse: false,
+  stringify: false
+});
 var FileHashes = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'fileHashes');
 var FileInfos = new _hash2.default((0, _redisClientFactory2.default)(), 'fileInfos');
 var PostFileInfoNames = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'postFileInfoNames', {

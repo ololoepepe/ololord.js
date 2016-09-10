@@ -42,24 +42,25 @@ var testParameters = function () {
               break;
             }
 
-            _context.next = 11;
-            return PostsModel.getPostFileCount(boardName, postNumber);
-
-          case 11:
-            fileCount = _context.sent;
-
             if (!(typeof fields.text === 'undefined')) {
-              _context.next = 17;
+              _context.next = 14;
               break;
             }
 
-            _context.next = 15;
+            _context.next = 12;
             return PostsModel.getPost(boardName, postNumber);
 
-          case 15:
+          case 12:
             post = _context.sent;
 
             fields.text = post.rawText;
+
+          case 14:
+            _context.next = 16;
+            return FilesModel.getPostFileCount(boardName, postNumber, { archived: post.archived });
+
+          case 16:
+            fileCount = _context.sent;
 
           case 17:
             _context.next = 19;
@@ -661,7 +662,7 @@ router.post('/action/addFiles', function () {
           case 36:
             files = _context6.sent;
             _context6.next = 39;
-            return FilesModel.addFilesToPost(boardName, postNumber, files, transaction);
+            return FilesModel.addFilesToPost(boardName, postNumber, files, { archived: _post4.archived });
 
           case 39:
             IPC.render(boardName, _post4.threadNumber, postNumber, 'edit');
