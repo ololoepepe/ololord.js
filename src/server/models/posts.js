@@ -105,7 +105,7 @@ export async function getPosts(boardName, postNumbers, options) {
       post: post,
       index: index
     };
-  }).filter((post) => !post.thread).map((post) => {
+  }).filter((post) => !post.post).map((post) => {
     return {
       index: post.index,
       postNumber: postNumbers[post.index]

@@ -219,7 +219,7 @@ var getPosts = exports.getPosts = function () {
                 index: index
               };
             }).filter(function (post) {
-              return !post.thread;
+              return !post.post;
             }).map(function (post) {
               return {
                 index: post.index,
