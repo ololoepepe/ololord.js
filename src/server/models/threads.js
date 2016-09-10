@@ -72,12 +72,12 @@ export async function getThreadPostNumbers(boardName, threadNumber) {
   return postNumbers.sort((a, b) => { return a - b; });
 }
 
-export async function addThreadPostNumber(boardName, threadNumber, postNumber, { archived }) {
+export async function addThreadPostNumber(boardName, threadNumber, postNumber, { archived } = {}) {
   let source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
   await source.addOne(postNumber, `${boardName}:${threadNumber}`);
 }
 
-export async function removeThreadPostNumber(boardName, threadNumber, postNumber, { archived }) {
+export async function removeThreadPostNumber(boardName, threadNumber, postNumber, { archived } = {}) {
   let source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
   await source.deleteOne(postNumber, `${boardName}:${threadNumber}`);
 }
