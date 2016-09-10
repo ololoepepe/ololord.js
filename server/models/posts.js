@@ -36,7 +36,7 @@ var addDataToPost = function () {
             }
 
             _context.next = 8;
-            return board.loadExtraData(post.number);
+            return board.loadExtraData(post.number, !!post.archived);
 
           case 8:
             extraData = _context.sent;
@@ -621,7 +621,7 @@ var createPost = exports.createPost = function () {
 
           case 57:
             _context9.next = 59;
-            return board.storeExtraData(postNumber, extraData);
+            return board.storeExtraData(postNumber, extraData, false);
 
           case 59:
             _context9.next = 61;
@@ -965,7 +965,7 @@ var removePost = exports.removePost = function () {
               FilesModel.removePostFileInfos(boardName, postNumber, { archived: post.archived });
             }
             _context15.next = 36;
-            return board.removeExtraData(postNumber);
+            return board.removeExtraData(postNumber, !!post.archived);
 
           case 36:
             _context15.next = 38;
@@ -1078,11 +1078,11 @@ var editPost = exports.editPost = function () {
 
           case 43:
             _context16.next = 45;
-            return board.removeExtraData(postNumber);
+            return board.removeExtraData(postNumber, !!post.archived);
 
           case 45:
             _context16.next = 47;
-            return board.storeExtraData(postNumber, extraData);
+            return board.storeExtraData(postNumber, extraData, !!post.archived);
 
           case 47:
             _context16.next = 49;
@@ -1682,7 +1682,7 @@ var processMovedThreadPosts = exports.processMovedThreadPosts = function () {
 
                       case 20:
                         _context30.next = 22;
-                        return targetBoard.storeExtraData(post.number, extraData);
+                        return targetBoard.storeExtraData(post.number, extraData, !!post.archived);
 
                       case 22:
                         _context30.next = 24;
@@ -1860,38 +1860,61 @@ var processMovedThreadRelatedPosts = exports.processMovedThreadRelatedPosts = fu
 
 var pushPostToArchive = exports.pushPostToArchive = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee34(boardName, postNumber) {
-    var key, post;
+    var board, key, post, extraData;
     return regeneratorRuntime.wrap(function _callee34$(_context34) {
       while (1) {
         switch (_context34.prev = _context34.next) {
           case 0:
-            key = boardName + ':' + postNumber;
-            _context34.next = 3;
-            return Posts.getOne(key);
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context34.next = 3;
+              break;
+            }
+
+            return _context34.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
+            key = boardName + ':' + postNumber;
+            _context34.next = 6;
+            return Posts.getOne(key);
+
+          case 6:
             post = _context34.sent;
 
             post.archived = true;
-            _context34.next = 7;
+            _context34.next = 10;
             return ArchivedPosts.setOne(key, post);
 
-          case 7:
-            _context34.next = 9;
+          case 10:
+            _context34.next = 12;
             return Posts.deleteOne(key);
 
-          case 9:
-            _context34.next = 11;
+          case 12:
+            _context34.next = 14;
+            return board.loadExtraData(postNumber, false);
+
+          case 14:
+            extraData = _context34.sent;
+            _context34.next = 17;
+            return board.storeExtraData(postNumber, extraData, true);
+
+          case 17:
+            _context34.next = 19;
+            return board.removeExtraData(postNumber, false);
+
+          case 19:
+            _context34.next = 21;
             return Search.updatePostIndex(boardName, postNumber, function (body) {
               body.archived = true;
               return body;
             });
 
-          case 11:
-            _context34.next = 13;
+          case 21:
+            _context34.next = 23;
             return FilesModel.pushPostFileInfosToArchive(boardName, postNumber);
 
-          case 13:
+          case 23:
           case 'end':
             return _context34.stop();
         }

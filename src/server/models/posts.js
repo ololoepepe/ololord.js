@@ -45,7 +45,7 @@ async function addDataToPost(board, post, { withExtraData, withFileInfos, withRe
   let ban = await UserBans.get(`${post.user.ip}:${post.boardName}`);
   post.bannedFor = !!(ban && ban.postNumber === post.number);
   if (withExtraData) {
-    let extraData = await board.loadExtraData(post.number);
+    let extraData = await board.loadExtraData(post.number, !!post.archived);
     post.extraData = extraData;
   }
   if (withFileInfos) {
@@ -251,7 +251,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
   };
   transaction.setPostNumber(postNumber);
   await Posts.setOne(`${boardName}:${postNumber}`, post);
-  await board.storeExtraData(postNumber, extraData);
+  await board.storeExtraData(postNumber, extraData, false);
   await addReferencedPosts(post, referencedPosts);
   await UsersModel.addUserPostNumber(req.ip, boardName, postNumber);
   await FilesModel.addFilesToPost(boardName, postNumber, files);
@@ -351,7 +351,7 @@ export async function removePost(boardName, postNumber, { removingThread, leaveR
   if (!leaveFileInfos) {
     FilesModel.removePostFileInfos(boardName, postNumber, { archived: post.archived });
   }
-  await board.removeExtraData(postNumber);
+  await board.removeExtraData(postNumber, !!post.archived);
   await Search.removePostIndex(boardName, postNumber);
   await PostsPlannedForDeletion.deleteOne(key);
 }
@@ -398,8 +398,8 @@ export async function editPost(req, fields) {
   post.updatedAt = date.toISOString();
   let source = post.archived ? ArchivedPosts : Posts;
   await source.setOne(key, post);
-  await board.removeExtraData(postNumber);
-  await board.storeExtraData(postNumber, extraData);
+  await board.removeExtraData(postNumber, !!post.archived);
+  await board.storeExtraData(postNumber, extraData, !!post.archived);
   await removeReferencedPosts(post);
   await addReferencedPosts(post, referencedPosts, { archived: post.archived });
   await Search.updatePostIndex(boardName, postNumber, (body) => {
@@ -584,7 +584,7 @@ export async function processMovedThreadPosts({ posts, postNumberMap, threadNumb
     }
     let source = post.archived ? ArchivedPosts : Posts;
     await source.setOne(`${targetBoard.name}:${post.number}`, post);
-    await targetBoard.storeExtraData(post.number, extraData);
+    await targetBoard.storeExtraData(post.number, extraData, !!post.archived);
     await processMovedThreadPostReferences({
       references: referencedPosts,
       entity: ReferencedPosts,
@@ -642,11 +642,18 @@ export async function processMovedThreadRelatedPosts({ posts, sourceBoardName, p
 }
 
 export async function pushPostToArchive(boardName, postNumber) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
   let key = `${boardName}:${postNumber}`;
   let post = await Posts.getOne(key);
   post.archived = true;
   await ArchivedPosts.setOne(key, post);
   await Posts.deleteOne(key);
+  let extraData = await board.loadExtraData(postNumber, false);
+  await board.storeExtraData(postNumber, extraData, true);
+  await board.removeExtraData(postNumber, false);
   await Search.updatePostIndex(boardName, postNumber, (body) => {
     body.archived = true;
     return body;

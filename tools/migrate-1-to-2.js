@@ -334,7 +334,7 @@ Tools.series(toProcess, (id) => {
   return f();
 }).then(() => {
   console.log('Done!');
-  //process.exit(0);
+  process.exit(0);
 }).catch((err) => {
   console.log(err);
   process.exit(1);

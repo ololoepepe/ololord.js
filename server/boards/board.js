@@ -495,7 +495,7 @@ var Board = function () {
   }, {
     key: 'storeExtraData',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(postNumber, extraData) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(postNumber, extraData, archived) {
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -507,7 +507,7 @@ var Board = function () {
         }, _callee3, this);
       }));
 
-      function storeExtraData(_x7, _x8) {
+      function storeExtraData(_x7, _x8, _x9) {
         return ref.apply(this, arguments);
       }
 
@@ -518,7 +518,7 @@ var Board = function () {
 
     //NOTE: Do nothing by default.
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(postNumber) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(postNumber, archived) {
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -530,7 +530,7 @@ var Board = function () {
         }, _callee4, this);
       }));
 
-      function loadExtraData(_x9) {
+      function loadExtraData(_x10, _x11) {
         return ref.apply(this, arguments);
       }
 
@@ -541,7 +541,7 @@ var Board = function () {
 
     //NOTE: Do nothing by default.
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(postNumber) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(postNumber, archived) {
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -553,7 +553,7 @@ var Board = function () {
         }, _callee5, this);
       }));
 
-      function removeExtraData(_x10) {
+      function removeExtraData(_x12, _x13) {
         return ref.apply(this, arguments);
       }
 
@@ -590,7 +590,7 @@ var Board = function () {
         }, _callee6, this);
       }));
 
-      function renderPost(_x11) {
+      function renderPost(_x14) {
         return ref.apply(this, arguments);
       }
 

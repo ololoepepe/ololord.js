@@ -316,15 +316,15 @@ class Board {
     return oldPost ? oldPost.extraData : null;
   }
 
-  async storeExtraData(postNumber, extraData) {
+  async storeExtraData(postNumber, extraData, archived) {
     //NOTE: Do nothing by default.
   }
 
-  async loadExtraData(postNumber) {
+  async loadExtraData(postNumber, archived) {
     //NOTE: Do nothing by default.
   }
 
-  async removeExtraData(postNumber) {
+  async removeExtraData(postNumber, archived) {
     //NOTE: Do nothing by default.
   }
 
