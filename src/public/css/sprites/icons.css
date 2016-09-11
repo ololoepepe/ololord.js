@@ -24,7 +24,7 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-arrow-down-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: 0px -180px;
+  background-position: -16px -180px;
   width: 16px;
   height: 16px;
 }
@@ -60,7 +60,7 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-backward-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: 0px -212px;
+  background-position: -32px -212px;
   width: 16px;
   height: 16px;
 }
@@ -72,13 +72,13 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-bin-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -216px -176px;
+  background-position: 0px -212px;
   width: 16px;
   height: 16px;
 }
 .icon-blocked-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -216px -144px;
+  background-position: -216px -176px;
   width: 16px;
   height: 16px;
 }
@@ -96,7 +96,7 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-bubble-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -216px -128px;
+  background-position: -216px -160px;
   width: 16px;
   height: 16px;
 }
@@ -186,7 +186,7 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-eye-blocked-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -16px -180px;
+  background-position: 0px -180px;
   width: 16px;
   height: 16px;
 }
@@ -252,7 +252,7 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-file-text-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -216px -64px;
+  background-position: -216px -96px;
   width: 16px;
   height: 16px;
 }
@@ -270,7 +270,7 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-forward-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -200px -128px;
+  background-position: -200px -144px;
   width: 16px;
   height: 16px;
 }
@@ -342,13 +342,13 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-list-20 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -45px -160px;
+  background-position: -160px -24px;
   width: 20px;
   height: 20px;
 }
 .icon-list-item-20 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -160px -24px;
+  background-position: -45px -160px;
   width: 20px;
   height: 20px;
 }
@@ -462,13 +462,13 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-plus-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -184px 0px;
+  background-position: -200px -128px;
   width: 16px;
   height: 16px;
 }
 .icon-question-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -200px -144px;
+  background-position: -184px 0px;
   width: 16px;
   height: 16px;
 }
@@ -586,6 +586,18 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
   width: 16px;
   height: 16px;
 }
+.icon-triangle-03-00-16 {
+  background-image: url(../img/sprites/icons.png);
+  background-position: -216px -64px;
+  width: 16px;
+  height: 16px;
+}
+.icon-triangle-16-30-16 {
+  background-image: url(../img/sprites/icons.png);
+  background-position: -216px -80px;
+  width: 16px;
+  height: 16px;
+}
 .icon-underline-20 {
   background-image: url(../img/sprites/icons.png);
   background-position: -160px -84px;
@@ -594,19 +606,19 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-undo-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -216px -80px;
+  background-position: -216px -112px;
   width: 16px;
   height: 16px;
 }
 .icon-unlocked-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -216px -96px;
+  background-position: -216px -128px;
   width: 16px;
   height: 16px;
 }
 .icon-unpin-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -216px -112px;
+  background-position: -216px -144px;
   width: 16px;
   height: 16px;
 }
@@ -624,7 +636,7 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-volume-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -216px -160px;
+  background-position: -216px -192px;
   width: 16px;
   height: 16px;
 }
@@ -636,7 +648,7 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-volume-mute-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -216px -192px;
+  background-position: -16px -212px;
   width: 16px;
   height: 16px;
 }
@@ -648,19 +660,19 @@ To change `display` (e.g. `display: inline-block;`), we suggest using a common C
 }
 .icon-whatanime-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -16px -212px;
+  background-position: -48px -212px;
   width: 16px;
   height: 16px;
 }
 .icon-yandex-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -32px -212px;
+  background-position: -64px -212px;
   width: 16px;
   height: 16px;
 }
 .icon-youtube-16 {
   background-image: url(../img/sprites/icons.png);
-  background-position: -48px -212px;
+  background-position: -80px -212px;
   width: 16px;
   height: 16px;
 }
