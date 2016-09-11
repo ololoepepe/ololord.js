@@ -212,8 +212,9 @@ export default class WebSocketServer {
       Logger.info(Tools.preferIPv4(conn.ip), Tools.translate('WebSocket message'),
         `${Tools.translate('Type:')} ${message.type}`, `${Tools.translate('ID:')} ${message.id}`);
     } else if ('query' === LOG_VERBOSITY || 'all' === LOG_VERBOSITY) {
+      let loggedData = ('init' === message.type) ? {} : message.data;
       Logger.info(Tools.preferIPv4(conn.ip), Tools.translate('WebSocket message'),
-        `${Tools.translate('Type:')} ${message.type}`, `${Tools.translate('ID:')} ${message.id}`, message.data);
+        `${Tools.translate('Type:')} ${message.type}`, `${Tools.translate('ID:')} ${message.id}`, loggedData);
     }
     switch (message.type) {
     case 'init':
