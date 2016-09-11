@@ -3242,5 +3242,30 @@
         "_default": {
             "value": "Информация"
         }
+    },
+    "WebSocket connection": {
+        "_default": {
+            "value": "WebSocket-подключение"
+        }
+    },
+    "WebSocket message": {
+        "_default": {
+            "value": "WebSocket-сообщение"
+        }
+    },
+    "Type:": {
+        "_default": {
+            "value": "Тип:"
+        }
+    },
+    "ID:": {
+        "_default": {
+            "value": "ID:"
+        }
+    },
+    "[$[1]] Died, respawning…": {
+        "_default": {
+            "value": "[$[1]] Умер, респавнится…"
+        }
     }
 }

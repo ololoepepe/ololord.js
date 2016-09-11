@@ -43,14 +43,14 @@
           <a target='_blank'
              data-bind='attr: { href: "/{{!it.site.pathPrefix}}" + $data.boardName + "/"
                           + ($data.archived ? "arch" : "res") + "/" + $data.threadNumber + ".html"
-                          + (($data.threadNumber === $data.postNumber) ? ("#post-" + $data.postNumber) : "") },
+                          + (($data.threadNumber !== $data.postNumber) ? ("#post-" + $data.postNumber) : "") },
                         text: $data.subject'></a>
         </div>
         <div class='search-result-thread'>
           <span class='quotation'
                 data-bind='text: "/" + $data.boardName + "/" + ($data.archived ? "arch" : "res") + "/"
                              + $data.threadNumber + ".html"
-                             + (($data.threadNumber === $data.postNumber) ? ("#post-" + $data.postNumber) : "")'></span>
+                             + (($data.threadNumber !== $data.postNumber) ? ("#post-" + $data.postNumber) : "")'></span>
         </div>
         <div class='post-body'
              data-bind='visible: $data.text'>
