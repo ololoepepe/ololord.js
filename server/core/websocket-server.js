@@ -46,9 +46,9 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var SOCKJS_URL = '//cdn.jsdelivr.net/sockjs/1.0.1/sockjs.min.js';
 var LOG_BEFORE = (0, _config2.default)('system.log.middleware.before');
@@ -101,104 +101,6 @@ function getTrueIP(conn) {
   return trueIp;
 }
 
-function initSendChatMessage() {
-  this.on('sendChatMessage', function () {
-    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(msg, conn) {
-      var data, _ref, message, chatNumber, senderHash, receiverHash, receiver, ip;
-
-      return regeneratorRuntime.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              data = msg.data || {};
-              _context.next = 3;
-              return ChatsModel.addChatMessage({
-                user: conn,
-                boardName: data.boardName,
-                postNumber: data.postNumber,
-                chatNumber: data.chatNumber,
-                text: data.text
-              });
-
-            case 3:
-              _ref = _context.sent;
-              message = _ref.message;
-              chatNumber = _ref.chatNumber;
-              senderHash = _ref.senderHash;
-              receiverHash = _ref.receiverHash;
-              receiver = _ref.receiver;
-
-              if (senderHash !== receiverHash) {
-                message.type = 'in';
-                ip = receiver.hashpass ? null : receiver.ip;
-
-                IPC.send('sendChatMessage', {
-                  type: 'newChatMessage',
-                  message: {
-                    message: message,
-                    boardName: data.boardName,
-                    postNumber: data.postNumber,
-                    chatNumber: chatNumber
-                  },
-                  ips: ip,
-                  hashpasses: receiver.hashpass
-                });
-              }
-              message.type = 'out';
-              return _context.abrupt('return', {
-                message: message,
-                chatNumber: chatNumber
-              });
-
-            case 12:
-            case 'end':
-              return _context.stop();
-          }
-        }
-      }, _callee, this);
-    }));
-
-    return function (_x, _x2) {
-      return ref.apply(this, arguments);
-    };
-  }());
-}
-
-function initThreadSubscriptions() {
-  var subscriptions = new Map();
-  this.on('subscribeToThreadUpdates', function (msg, conn) {
-    var _ref2 = msg.data || {};
-
-    var boardName = _ref2.boardName;
-    var threadNumber = _ref2.threadNumber;
-
-    var key = boardName + '/' + threadNumber;
-    if (subscriptions.has(key)) {
-      subscriptions.get(key).add(conn);
-    } else {
-      var s = new WeakSet();
-      s.add(conn);
-      subscriptions.set(key, s);
-    }
-  });
-  this.on('unsubscribeFromThreadUpdates', function (msg, conn) {
-    var _ref3 = msg.data || {};
-
-    var boardName = _ref3.boardName;
-    var threadNumber = _ref3.threadNumber;
-
-    var key = boardName + '/' + threadNumber;
-    var s = subscriptions.get(key);
-    if (!s) {
-      return;
-    }
-    s.delete(conn);
-    if (s.size < 1) {
-      subscriptions.delete(key);
-    }
-  });
-}
-
 var WebSocketServer = function () {
   function WebSocketServer(server) {
     _classCallCheck(this, WebSocketServer);
@@ -221,8 +123,8 @@ var WebSocketServer = function () {
     this.handlers = new Map();
     this.wsserver.on('connection', this._handleConnection.bind(this));
     this.wsserver.installHandlers(this.server, { prefix: '/ws' });
-    initSendChatMessage.call(this);
-    initThreadSubscriptions.call(this);
+    this._initSendChatMessage();
+    this._initThreadSubscriptions();
   }
 
   _createClass(WebSocketServer, [{
@@ -309,43 +211,43 @@ var WebSocketServer = function () {
   }, {
     key: '_handleOtherMessage',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(conn, message) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(conn, message) {
         var handler, data;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context.prev = _context.next) {
               case 0:
                 handler = this.handlers.get(message.type);
 
                 if (handler) {
-                  _context2.next = 4;
+                  _context.next = 4;
                   break;
                 }
 
                 _logger2.default.error(Tools.translate('Unknown WebSocket message type:'), Tools.preferIPv4(conn.ip), message.type);
-                return _context2.abrupt('return');
+                return _context.abrupt('return');
 
               case 4:
-                _context2.prev = 4;
-                _context2.next = 7;
+                _context.prev = 4;
+                _context.next = 7;
                 return handler(message, conn);
 
               case 7:
-                data = _context2.sent;
+                data = _context.sent;
 
                 conn.write(JSON.stringify({
                   id: message.id,
                   type: message.type,
                   data: data
                 }));
-                _context2.next = 15;
+                _context.next = 15;
                 break;
 
               case 11:
-                _context2.prev = 11;
-                _context2.t0 = _context2['catch'](4);
+                _context.prev = 11;
+                _context.t0 = _context['catch'](4);
 
-                _logger2.default.error('WebSocket:', Tools.preferIPv4(conn.ip), message.type, _context2.t0.stack || _context2.t0);
+                _logger2.default.error('WebSocket:', Tools.preferIPv4(conn.ip), message.type, _context.t0.stack || _context.t0);
                 try {
                   conn.write(JSON.stringify({
                     id: message.id,
@@ -358,13 +260,13 @@ var WebSocketServer = function () {
 
               case 15:
               case 'end':
-                return _context2.stop();
+                return _context.stop();
             }
           }
-        }, _callee2, this, [[4, 11]]);
+        }, _callee, this, [[4, 11]]);
       }));
 
-      function _handleOtherMessage(_x3, _x4) {
+      function _handleOtherMessage(_x, _x2) {
         return ref.apply(this, arguments);
       }
 
@@ -411,6 +313,108 @@ var WebSocketServer = function () {
       }
     }
   }, {
+    key: '_initSendChatMessage',
+    value: function _initSendChatMessage() {
+      this.on('sendChatMessage', function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(msg, conn) {
+          var data, _ref, message, chatNumber, senderHash, receiverHash, receiver, ip;
+
+          return regeneratorRuntime.wrap(function _callee2$(_context2) {
+            while (1) {
+              switch (_context2.prev = _context2.next) {
+                case 0:
+                  data = msg.data || {};
+                  _context2.next = 3;
+                  return ChatsModel.addChatMessage({
+                    user: conn,
+                    boardName: data.boardName,
+                    postNumber: data.postNumber,
+                    chatNumber: data.chatNumber,
+                    text: data.text
+                  });
+
+                case 3:
+                  _ref = _context2.sent;
+                  message = _ref.message;
+                  chatNumber = _ref.chatNumber;
+                  senderHash = _ref.senderHash;
+                  receiverHash = _ref.receiverHash;
+                  receiver = _ref.receiver;
+
+                  if (senderHash !== receiverHash) {
+                    message.type = 'in';
+                    ip = receiver.hashpass ? null : receiver.ip;
+
+                    IPC.send('sendChatMessage', {
+                      type: 'newChatMessage',
+                      message: {
+                        message: message,
+                        boardName: data.boardName,
+                        postNumber: data.postNumber,
+                        chatNumber: chatNumber
+                      },
+                      ips: ip,
+                      hashpasses: receiver.hashpass
+                    });
+                  }
+                  message.type = 'out';
+                  return _context2.abrupt('return', {
+                    message: message,
+                    chatNumber: chatNumber
+                  });
+
+                case 12:
+                case 'end':
+                  return _context2.stop();
+              }
+            }
+          }, _callee2, this);
+        }));
+
+        return function (_x3, _x4) {
+          return ref.apply(this, arguments);
+        };
+      }());
+    }
+  }, {
+    key: '_initThreadSubscriptions',
+    value: function _initThreadSubscriptions() {
+      var _this2 = this;
+
+      this._subscriptions = new Map();
+      this.on('subscribeToThreadUpdates', function (msg, conn) {
+        var _ref2 = msg.data || {};
+
+        var boardName = _ref2.boardName;
+        var threadNumber = _ref2.threadNumber;
+
+        var key = boardName + '/' + threadNumber;
+        if (_this2._subscriptions.has(key)) {
+          _this2._subscriptions.get(key).add(conn);
+        } else {
+          var s = new Set();
+          s.add(conn);
+          _this2._subscriptions.set(key, s);
+        }
+      });
+      this.on('unsubscribeFromThreadUpdates', function (msg, conn) {
+        var _ref3 = msg.data || {};
+
+        var boardName = _ref3.boardName;
+        var threadNumber = _ref3.threadNumber;
+
+        var key = boardName + '/' + threadNumber;
+        var s = _this2._subscriptions.get(key);
+        if (!s) {
+          return;
+        }
+        s.delete(conn);
+        if (s.size < 1) {
+          _this2._subscriptions.delete(key);
+        }
+      });
+    }
+  }, {
     key: 'on',
     value: function on(type, handler) {
       this.handlers.set(type, handler);
@@ -419,7 +423,7 @@ var WebSocketServer = function () {
   }, {
     key: 'sendMessage',
     value: function sendMessage(type, data, ips, hashpasses) {
-      var _this2 = this;
+      var _this3 = this;
 
       if (!type) {
         return;
@@ -437,14 +441,14 @@ var WebSocketServer = function () {
       ips.filter(function (ip) {
         return !!ip;
       }).forEach(function (ip) {
-        (_this2.connectionsIP.get(ip) || []).forEach(function (conn) {
+        (_this3.connectionsIP.get(ip) || []).forEach(function (conn) {
           conn.write(message);
         });
       });
       hashpasses.filter(function (hashpass) {
         return !!hashpass;
       }).forEach(function (hashpass) {
-        (_this2.connectionsHashpass.get(hashpass) || []).forEach(function (conn) {
+        (_this3.connectionsHashpass.get(hashpass) || []).forEach(function (conn) {
           conn.write(message);
         });
       });
@@ -452,10 +456,10 @@ var WebSocketServer = function () {
   }, {
     key: 'notifyAboutNewPosts',
     value: function notifyAboutNewPosts(keys) {
-      var _this3 = this;
+      var _this4 = this;
 
       (0, _underscore2.default)(keys).each(function (_1, key) {
-        var s = _this3.subscriptions.get(key);
+        var s = _this4._subscriptions.get(key);
         if (!s) {
           return;
         }

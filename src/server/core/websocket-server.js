@@ -60,66 +60,6 @@ function getTrueIP(conn) {
   return trueIp;
 }
 
-function initSendChatMessage() {
-  this.on('sendChatMessage', async function(msg, conn) {
-    let data = msg.data || {};
-    let { message, chatNumber, senderHash, receiverHash, receiver } = await ChatsModel.addChatMessage({
-      user: conn,
-      boardName: data.boardName,
-      postNumber: data.postNumber,
-      chatNumber: data.chatNumber,
-      text: data.text
-    });
-    if (senderHash !== receiverHash) {
-      message.type = 'in';
-      let ip = receiver.hashpass ? null : receiver.ip;
-      IPC.send('sendChatMessage', {
-        type: 'newChatMessage',
-        message: {
-          message: message,
-          boardName: data.boardName,
-          postNumber: data.postNumber,
-          chatNumber: chatNumber
-        },
-        ips: ip,
-        hashpasses: receiver.hashpass
-      });
-    }
-    message.type = 'out';
-    return {
-      message: message,
-      chatNumber: chatNumber
-    };
-  });
-}
-
-function initThreadSubscriptions() {
-  let subscriptions = new Map();
-  this.on('subscribeToThreadUpdates', (msg, conn) => {
-    let { boardName, threadNumber } = msg.data || {};
-    let key = `${boardName}/${threadNumber}`;
-    if (subscriptions.has(key)) {
-      subscriptions.get(key).add(conn);
-    } else {
-      let s = new WeakSet();
-      s.add(conn);
-      subscriptions.set(key, s);
-    }
-  });
-  this.on('unsubscribeFromThreadUpdates', (msg, conn) => {
-    let { boardName, threadNumber } = msg.data || {};
-    let key = `${boardName}/${threadNumber}`;
-    let s = subscriptions.get(key);
-    if (!s) {
-      return;
-    }
-    s.delete(conn);
-    if (s.size < 1) {
-      subscriptions.delete(key);
-    }
-  });
-}
-
 export default class WebSocketServer {
   constructor(server) {
     if (config('server.ddosProtection.enabled')) {
@@ -141,8 +81,8 @@ export default class WebSocketServer {
     this.handlers = new Map();
     this.wsserver.on('connection', this._handleConnection.bind(this));
     this.wsserver.installHandlers(this.server, { prefix: '/ws' });
-    initSendChatMessage.call(this);
-    initThreadSubscriptions.call(this);
+    this._initSendChatMessage();
+    this._initThreadSubscriptions();
   }
 
   _handleConnection(conn) {
@@ -291,6 +231,66 @@ export default class WebSocketServer {
     }
   }
 
+  _initSendChatMessage() {
+    this.on('sendChatMessage', async function(msg, conn) {
+      let data = msg.data || {};
+      let { message, chatNumber, senderHash, receiverHash, receiver } = await ChatsModel.addChatMessage({
+        user: conn,
+        boardName: data.boardName,
+        postNumber: data.postNumber,
+        chatNumber: data.chatNumber,
+        text: data.text
+      });
+      if (senderHash !== receiverHash) {
+        message.type = 'in';
+        let ip = receiver.hashpass ? null : receiver.ip;
+        IPC.send('sendChatMessage', {
+          type: 'newChatMessage',
+          message: {
+            message: message,
+            boardName: data.boardName,
+            postNumber: data.postNumber,
+            chatNumber: chatNumber
+          },
+          ips: ip,
+          hashpasses: receiver.hashpass
+        });
+      }
+      message.type = 'out';
+      return {
+        message: message,
+        chatNumber: chatNumber
+      };
+    });
+  }
+
+  _initThreadSubscriptions() {
+    this._subscriptions = new Map();
+    this.on('subscribeToThreadUpdates', (msg, conn) => {
+      let { boardName, threadNumber } = msg.data || {};
+      let key = `${boardName}/${threadNumber}`;
+      if (this._subscriptions.has(key)) {
+        this._subscriptions.get(key).add(conn);
+      } else {
+        let s = new Set();
+        s.add(conn);
+        this._subscriptions.set(key, s);
+      }
+    });
+    this.on('unsubscribeFromThreadUpdates', (msg, conn) => {
+      let { boardName, threadNumber } = msg.data || {};
+      let key = `${boardName}/${threadNumber}`;
+      let s = this._subscriptions.get(key);
+      if (!s) {
+        return;
+      }
+      s.delete(conn);
+      if (s.size < 1) {
+        this._subscriptions.delete(key);
+      }
+    });
+  }
+
   on(type, handler) {
     this.handlers.set(type, handler);
     return this;
@@ -320,7 +320,7 @@ export default class WebSocketServer {
 
   notifyAboutNewPosts(keys) {
     _(keys).each((_1, key) => {
-      let s = this.subscriptions.get(key);
+      let s = this._subscriptions.get(key);
       if (!s) {
         return;
       }
