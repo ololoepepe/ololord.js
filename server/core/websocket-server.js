@@ -294,7 +294,7 @@ var WebSocketServer = function () {
       if ('path' === LOG_VERBOSITY) {
         _logger2.default.info(Tools.preferIPv4(conn.ip), Tools.translate('WebSocket message'), Tools.translate('Type:') + ' ' + message.type, Tools.translate('ID:') + ' ' + message.id);
       } else if ('query' === LOG_VERBOSITY || 'all' === LOG_VERBOSITY) {
-        var loggedData = 'init' === message.type ? {} : message.data;
+        var loggedData = 'init' === message.type ? {} : message.data; //NOTE: This is for the sake of security.
         _logger2.default.info(Tools.preferIPv4(conn.ip), Tools.translate('WebSocket message'), Tools.translate('Type:') + ' ' + message.type, Tools.translate('ID:') + ' ' + message.id, loggedData);
       }
       switch (message.type) {
