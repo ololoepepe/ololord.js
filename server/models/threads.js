@@ -1213,9 +1213,9 @@ var moveThread = exports.moveThread = function () {
             lastPostNumber = lastPostNumber - posts.length + 1;
             thread.number = lastPostNumber;
             postNumberMap = posts.reduce(function (acc, post) {
-              acc.set(post.number, lastPostNumber++);
+              acc[post.number] = lastPostNumber++;
               return acc;
-            }, new Map());
+            }, {});
             _context26.next = 32;
             return PostsModel.processMovedThreadPosts({
               posts: posts,
@@ -1236,7 +1236,7 @@ var moveThread = exports.moveThread = function () {
 
             thread.boardName = targetBoardName;
             _context26.next = 38;
-            return Threads.setOne(thead.number, thread, targetBoardName);
+            return Threads.setOne(thread.number, thread, targetBoardName);
 
           case 38:
             _context26.next = 40;
@@ -1251,6 +1251,7 @@ var moveThread = exports.moveThread = function () {
             return PostsModel.processMovedThreadRelatedPosts({
               posts: toRerender,
               sourceBoardName: sourceBoardName,
+              targetBoardName: targetBoardName,
               postNumberMap: postNumberMap
             });
 

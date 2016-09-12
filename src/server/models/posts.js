@@ -520,15 +520,15 @@ export async function rebuildSearchIndex(targets) {
 }
 
 async function processMovedThreadPostReferences({ references, entity, sourceBoardName, targetBoardName, threadNumber,
-  postNumberMap, toRerender, toUpdate }) {
+  postNumber, oldThreadNumber, oldPostNumber, postNumberMap, toRerender, toUpdate }) {
   await Tools.series(references, async function(ref) {
     let nref;
-    if (ref.boardName === sourceBoardName && ref.threadNumber === threadNumber) {
-        nref = {
-          boardName: targetBoardName,
-          threadNumber: post.threadNumber,
-          postNumber: postNumberMap[ref.postNumber]
-        };
+    if (ref.boardName === sourceBoardName && ref.threadNumber === oldThreadNumber) {
+      nref = {
+        boardName: targetBoardName,
+        threadNumber: threadNumber,
+        postNumber: postNumberMap[ref.postNumber]
+      };
     } else {
       nref = ref;
       toUpdate[`${ref.boardName}:${ref.threadNumber}`] = {
@@ -543,7 +543,7 @@ async function processMovedThreadPostReferences({ references, entity, sourceBoar
       }
     }
     await entity.deleteOne(`${ref.boardName}:${ref.postNumber}`, `${sourceBoardName}:${oldPostNumber}`);
-    await entity.setOne(`${nref.boardName}:${nref.postNumber}`, `${targetBoard.name}:${post.number}`, nref);
+    await entity.setOne(`${nref.boardName}:${nref.postNumber}`, nref, `${targetBoardName}:${postNumber}`);
   });
 }
 
@@ -553,7 +553,8 @@ export async function processMovedThreadPosts({ posts, postNumberMap, threadNumb
   let toUpdate = {};
   await Tools.series(posts, async function(post) {
     let oldPostNumber = post.number;
-    post.number = postNumberMap.get(post.number);
+    let oldThreadNumber = post.threadNumber;
+    post.number = postNumberMap[post.number];
     post.threadNumber = threadNumber;
     post.boardName = targetBoard.name;
     let referencedPosts = post.referencedPosts;
@@ -590,6 +591,9 @@ export async function processMovedThreadPosts({ posts, postNumberMap, threadNumb
       entity: ReferencedPosts,
       sourceBoardName: sourceBoardName,
       targetBoardName: targetBoard.name,
+      postNumber: post.number,
+      oldThreadNumber: oldThreadNumber,
+      oldPostNumber: oldPostNumber,
       threadNumber: threadNumber,
       postNumberMap: postNumberMap,
       toUpdate: toUpdate
@@ -600,6 +604,9 @@ export async function processMovedThreadPosts({ posts, postNumberMap, threadNumb
       sourceBoardName: sourceBoardName,
       targetBoardName: targetBoard.name,
       threadNumber: threadNumber,
+      postNumber: post.number,
+      oldThreadNumber: oldThreadNumber,
+      oldPostNumber: oldPostNumber,
       postNumberMap: postNumberMap,
       toRerender: toRerender,
       toUpdate: toUpdate
@@ -618,7 +625,7 @@ export async function processMovedThreadPosts({ posts, postNumberMap, threadNumb
   };
 }
 
-export async function processMovedThreadRelatedPosts({ posts, sourceBoardName, postNumberMap }) {
+export async function processMovedThreadRelatedPosts({ posts, sourceBoardName, targetBoardName, postNumberMap }) {
   await Tools.series(posts, async function(post) {
     post = await getPost(post.boardName, post.postNumber);
     if (!post || !post.rawText) {
@@ -638,6 +645,7 @@ export async function processMovedThreadRelatedPosts({ posts, sourceBoardName, p
     });
     let source = post.archived ? ArchivedPosts : Posts;
     await source.setOne(`${post.boardName}:${post.number}`, post);
+    //TODO: Update references
   });
 }
 

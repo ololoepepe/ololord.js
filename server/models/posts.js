@@ -1534,6 +1534,8 @@ var processMovedThreadPostReferences = function () {
     var sourceBoardName = _ref12.sourceBoardName;
     var targetBoardName = _ref12.targetBoardName;
     var threadNumber = _ref12.threadNumber;
+    var postNumber = _ref12.postNumber;
+    var oldPostNumber = _ref12.oldPostNumber;
     var postNumberMap = _ref12.postNumberMap;
     var toRerender = _ref12.toRerender;
     var toUpdate = _ref12.toUpdate;
@@ -1554,7 +1556,7 @@ var processMovedThreadPostReferences = function () {
                         if (ref.boardName === sourceBoardName && ref.threadNumber === threadNumber) {
                           nref = {
                             boardName: targetBoardName,
-                            threadNumber: post.threadNumber,
+                            threadNumber: threadNumber,
                             postNumber: postNumberMap[ref.postNumber]
                           };
                         } else {
@@ -1575,7 +1577,7 @@ var processMovedThreadPostReferences = function () {
 
                       case 4:
                         _context27.next = 6;
-                        return entity.setOne(nref.boardName + ':' + nref.postNumber, targetBoard.name + ':' + post.number, nref);
+                        return entity.setOne(nref.boardName + ':' + nref.postNumber, nref, targetBoardName + ':' + postNumber);
 
                       case 6:
                       case 'end':
@@ -1631,7 +1633,7 @@ var processMovedThreadPosts = exports.processMovedThreadPosts = function () {
                       case 0:
                         oldPostNumber = post.number;
 
-                        post.number = postNumberMap.get(post.number);
+                        post.number = postNumberMap[post.number];
                         post.threadNumber = threadNumber;
                         post.boardName = targetBoard.name;
                         referencedPosts = post.referencedPosts;
@@ -1691,6 +1693,8 @@ var processMovedThreadPosts = exports.processMovedThreadPosts = function () {
                           entity: ReferencedPosts,
                           sourceBoardName: sourceBoardName,
                           targetBoardName: targetBoard.name,
+                          postNumber: post.number,
+                          oldPostNumber: oldPostNumber,
                           threadNumber: threadNumber,
                           postNumberMap: postNumberMap,
                           toUpdate: toUpdate
@@ -1704,6 +1708,8 @@ var processMovedThreadPosts = exports.processMovedThreadPosts = function () {
                           sourceBoardName: sourceBoardName,
                           targetBoardName: targetBoard.name,
                           threadNumber: threadNumber,
+                          postNumber: post.number,
+                          oldPostNumber: oldPostNumber,
                           postNumberMap: postNumberMap,
                           toRerender: toRerender,
                           toUpdate: toUpdate
@@ -1785,6 +1791,7 @@ var processMovedThreadRelatedPosts = exports.processMovedThreadRelatedPosts = fu
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee33(_ref14) {
     var posts = _ref14.posts;
     var sourceBoardName = _ref14.sourceBoardName;
+    var targetBoardName = _ref14.targetBoardName;
     var postNumberMap = _ref14.postNumberMap;
     return regeneratorRuntime.wrap(function _callee33$(_context33) {
       while (1) {

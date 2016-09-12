@@ -409,9 +409,9 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
   lastPostNumber = lastPostNumber - posts.length + 1;
   thread.number = lastPostNumber;
   let postNumberMap = posts.reduce((acc, post) => {
-    acc.set(post.number, lastPostNumber++);
+    acc[post.number] = lastPostNumber++;
     return acc;
-  }, new Map());
+  }, {});
   let { toRerender, toUpdate } = await PostsModel.processMovedThreadPosts({
     posts: posts,
     postNumberMap: postNumberMap,
@@ -424,12 +424,13 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
     targetThumbPath: targetThumbPath
   });
   thread.boardName = targetBoardName;
-  await Threads.setOne(thead.number, thread, targetBoardName);
+  await Threads.setOne(thread.number, thread, targetBoardName);
   await ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
   await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), `${targetBoardName}:${thread.number}`);
   await PostsModel.processMovedThreadRelatedPosts({
     posts: toRerender,
     sourceBoardName: sourceBoardName,
+    targetBoardName: targetBoardName,
     postNumberMap: postNumberMap
   });
   await Tools.series(toUpdate, async function(o) {

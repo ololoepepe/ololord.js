@@ -151,7 +151,7 @@ router.post('/action/moveThread', async function(req, res, next) {
     if (!Board.board(boardName) || !Board.board(targetBoardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
-    if (sourceBoardName == targetBoardName) {
+    if (boardName === targetBoardName) {
       throw new Error(Tools.translate('Source and target boards are the same'));
     }
     threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
