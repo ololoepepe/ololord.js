@@ -393,18 +393,17 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
   delete thread.updatedAt;
   thread.boardName = targetBoardName;
   let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, postNumbers.length);
-  lastPostNumber = lastPostNumber - postNumbers.length + 1;
-  thread.number = lastPostNumber;
+  let initialPostNumber = lastPostNumber - postNumbers.length + 1;
+  thread.number = initialPostNumber;
   let { toRerender, toUpdate, postNumberMap } = await PostsModel.copyPosts({
     sourceBoardName: sourceBoardName,
     postNumbers: postNumbers,
     targetBoardName: targetBoardName,
-    initialPostNumber: lastPostNumber
+    initialPostNumber: initialPostNumber
   });
   await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), `${targetBoardName}:${thread.number}`);
   await ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
   await Threads.setOne(thread.number, thread, targetBoardName);
-  console.log('creating');
   await IPC.render(targetBoardName, thread.number, thread.number, 'create');
   toRerender = toRerender.reduce((acc, ref) => {
     acc[`${ref.boardName}:${ref.postNumber}`] = ref;
@@ -418,23 +417,24 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
     posts: toRerender,
     sourceBoardName: sourceBoardName,
     targetBoardName: targetBoardName,
+    postNumberMap: postNumberMap
+  });
+  await PostsModel.updateMovedThreadRelatedPosts({
+    posts: toUpdate,
+    sourceBoardName: sourceBoardName,
+    targetBoardName: targetBoardName,
     sourceThreadNumber: threadNumber,
-    targetThreadNumber: thread.number,
+    targetThreadNumber: initialPostNumber,
     postNumberMap: postNumberMap
   });
   await Tools.series(toRerender, async function(ref) {
-    console.log('rerendering', ref);
     return await IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
   });
   await Tools.series(toUpdate, async function(ref) {
-    console.log('updating', ref);
     return await IPC.render(ref.boardName, ref.threadNumber, ref.threadNumber, 'create');
   });
-  console.log('removing');
   await removeThread(sourceBoardName, threadNumber);
-  console.log('deleting');
   await IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
-  console.log('opa!');
   return {
     boardName: targetBoardName,
     threadNumber: thread.number

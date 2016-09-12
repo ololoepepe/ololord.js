@@ -1134,7 +1134,7 @@ var createThread = exports.createThread = function () {
 
 var moveThread = exports.moveThread = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(sourceBoardName, threadNumber, targetBoardName) {
-    var targetBoard, thread, postNumbers, lastPostNumber, _ref10, toRerender, toUpdate, postNumberMap;
+    var targetBoard, thread, postNumbers, lastPostNumber, initialPostNumber, _ref10, toRerender, toUpdate, postNumberMap;
 
     return regeneratorRuntime.wrap(function _callee27$(_context27) {
       while (1) {
@@ -1184,15 +1184,15 @@ var moveThread = exports.moveThread = function () {
 
           case 17:
             lastPostNumber = _context27.sent;
+            initialPostNumber = lastPostNumber - postNumbers.length + 1;
 
-            lastPostNumber = lastPostNumber - postNumbers.length + 1;
-            thread.number = lastPostNumber;
+            thread.number = initialPostNumber;
             _context27.next = 22;
             return PostsModel.copyPosts({
               sourceBoardName: sourceBoardName,
               postNumbers: postNumbers,
               targetBoardName: targetBoardName,
-              initialPostNumber: lastPostNumber
+              initialPostNumber: initialPostNumber
             });
 
           case 22:
@@ -1212,11 +1212,10 @@ var moveThread = exports.moveThread = function () {
             return Threads.setOne(thread.number, thread, targetBoardName);
 
           case 32:
-            console.log('creating');
-            _context27.next = 35;
+            _context27.next = 34;
             return IPC.render(targetBoardName, thread.number, thread.number, 'create');
 
-          case 35:
+          case 34:
             toRerender = toRerender.reduce(function (acc, ref) {
               acc[ref.boardName + ':' + ref.postNumber] = ref;
               return acc;
@@ -1225,32 +1224,40 @@ var moveThread = exports.moveThread = function () {
               acc[ref.boardName + ':' + ref.threadNumber] = ref;
               return acc;
             }, {});
-            _context27.next = 39;
+            _context27.next = 38;
             return PostsModel.rerenderMovedThreadRelatedPosts({
               posts: toRerender,
               sourceBoardName: sourceBoardName,
               targetBoardName: targetBoardName,
-              sourceThreadNumber: threadNumber,
-              targetThreadNumber: thread.number,
               postNumberMap: postNumberMap
             });
 
-          case 39:
-            _context27.next = 41;
+          case 38:
+            _context27.next = 40;
+            return PostsModel.updateMovedThreadRelatedPosts({
+              posts: toUpdate,
+              sourceBoardName: sourceBoardName,
+              targetBoardName: targetBoardName,
+              sourceThreadNumber: threadNumber,
+              targetThreadNumber: initialPostNumber,
+              postNumberMap: postNumberMap
+            });
+
+          case 40:
+            _context27.next = 42;
             return Tools.series(toRerender, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(ref) {
                 return regeneratorRuntime.wrap(function _callee25$(_context25) {
                   while (1) {
                     switch (_context25.prev = _context25.next) {
                       case 0:
-                        console.log('rerendering', ref);
-                        _context25.next = 3;
+                        _context25.next = 2;
                         return IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
 
-                      case 3:
+                      case 2:
                         return _context25.abrupt('return', _context25.sent);
 
-                      case 4:
+                      case 3:
                       case 'end':
                         return _context25.stop();
                     }
@@ -1263,22 +1270,21 @@ var moveThread = exports.moveThread = function () {
               };
             }());
 
-          case 41:
-            _context27.next = 43;
+          case 42:
+            _context27.next = 44;
             return Tools.series(toUpdate, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(ref) {
                 return regeneratorRuntime.wrap(function _callee26$(_context26) {
                   while (1) {
                     switch (_context26.prev = _context26.next) {
                       case 0:
-                        console.log('updating', ref);
-                        _context26.next = 3;
+                        _context26.next = 2;
                         return IPC.render(ref.boardName, ref.threadNumber, ref.threadNumber, 'create');
 
-                      case 3:
+                      case 2:
                         return _context26.abrupt('return', _context26.sent);
 
-                      case 4:
+                      case 3:
                       case 'end':
                         return _context26.stop();
                     }
@@ -1291,24 +1297,21 @@ var moveThread = exports.moveThread = function () {
               };
             }());
 
-          case 43:
-            console.log('removing');
+          case 44:
             _context27.next = 46;
             return removeThread(sourceBoardName, threadNumber);
 
           case 46:
-            console.log('deleting');
-            _context27.next = 49;
+            _context27.next = 48;
             return IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
 
-          case 49:
-            console.log('opa!');
+          case 48:
             return _context27.abrupt('return', {
               boardName: targetBoardName,
               threadNumber: thread.number
             });
 
-          case 51:
+          case 49:
           case 'end':
             return _context27.stop();
         }
