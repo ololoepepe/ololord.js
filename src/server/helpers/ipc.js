@@ -145,19 +145,22 @@ async function performTask(type, key, data) {
 
 async function nextTask(type, key, map) {
   let scheduled = map.get(key);
-  let next = scheduled.next;
-  if (!next || next.length <= 0) {
+  if (!scheduled) {
+    return;
+  }
+  if (scheduled.length <= 0) {
     map.delete(key);
     return;
   }
-  delete scheduled.next;
+  //NOTE: Clearing initial array, but preserving it's copy
+  scheduled = scheduled.splice(0, scheduled.length);
   try {
-    await performTask(type, key, next.map(n => n.data));
+    await performTask(type, key, scheduled.map(n => n.data));
   } catch (err) {
     Logger.error(err.stack || err);
   }
-  nextTask();
-  next.forEach((n) => { n.resolve(); });
+  nextTask(type, key, map);
+  scheduled.forEach((n) => { n.resolve(); });
 }
 
 async function addTask(type, key, data) {
@@ -165,16 +168,13 @@ async function addTask(type, key, data) {
   let scheduled = map.get(key);
   if (scheduled) {
     return new Promise((resolve) => {
-      if (!scheduled.next) {
-        scheduled.next = [];
-      }
-      scheduled.next.push({
+      scheduled.push({
         resolve: resolve,
         data: data
       });
     });
   } else {
-    map.set(key, new Map());
+    map.set(key, []);
     try {
       await performTask(type, key, data);
     } catch (err) {

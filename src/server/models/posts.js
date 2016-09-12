@@ -1,8 +1,10 @@
 import _ from 'underscore';
 import FS from 'q-io/fs';
+import promisify from 'promisify-node';
 
 import * as BoardsModel from './boards';
 import * as FilesModel from './files';
+import * as PostReferencesModel from './post-references';
 import * as ThreadsModel from './threads';
 import * as UsersModel from './users';
 import Board from '../boards/board';
@@ -18,30 +20,17 @@ import redisClient from '../storage/redis-client-factory';
 import sqlClient from '../storage/sql-client-factory';
 import UnorderedSet from '../storage/unordered-set';
 
+const mkpath = promisify('mkpath');
+
 let ArchivedPosts = new Hash(sqlClient(), 'archivedPosts');
-let ArchivedReferringPosts = new Hash(sqlClient(), 'archivedReferringPosts');
-let ArchivedReferencedPosts = new Hash(sqlClient(), 'archivedReferencedPosts');
 let Posts = new Hash(redisClient(), 'posts');
 let PostsPlannedForDeletion = new UnorderedSet(redisClient(), 'postsPlannedForDeletion', {
   parse: false,
   stringify: false
 });
-let ReferringPosts = new Hash(redisClient(), 'referringPosts');
-let ReferencedPosts = new Hash(redisClient(), 'referencedPosts');
 let UserBans = new Key(redisClient(), 'userBans');
 
-function sortedReferences(references) {
-  return _(references).toArray().sort((a, b) => {
-    return (a.createdAt && b.createdAt && a.createdAt.localeCompare(b.createdAt))
-      || a.boardName.localeCompare(b.boardName) || (a.postNumber - b.postNumber);
-  }).map((reference) => {
-    delete reference.createdAt;
-    return reference;
-  });
-}
-
 async function addDataToPost(board, post, { withExtraData, withFileInfos, withReferences } = {}) {
-  let key = `${post.boardName}:${post.number}`;
   let ban = await UserBans.get(`${post.user.ip}:${post.boardName}`);
   post.bannedFor = !!(ban && ban.postNumber === post.number);
   if (withExtraData) {
@@ -52,12 +41,7 @@ async function addDataToPost(board, post, { withExtraData, withFileInfos, withRe
     post.fileInfos = await FilesModel.getPostFileInfos(post.boardName, post.number, { archived: post.archived });
   }
   if (withReferences) {
-    let referringSource = post.archived ? ArchivedReferringPosts : ReferringPosts;
-    let referencedSource = post.archived ? ArchivedReferencedPosts : ReferencedPosts;
-    let referringPosts = await referringSource.getAll(key);
-    let referencedPosts = await referencedSource.getAll(key);
-    post.referringPosts = sortedReferences(referringPosts);
-    post.referencedPosts = sortedReferences(referencedPosts);
+    await PostReferencesModel.addReferencesToPost(post)
   }
 }
 
@@ -151,29 +135,6 @@ export async function getPostKeys({ archived, nonArchived } = {}) {
   return nonArchivedKeys.concat(archivedKeys);
 }
 
-async function addReferencedPosts(post, referencedPosts, { nogenerate, archived } = {}) {
-  let key = `${post.boardName}:${post.number}`;
-  let referringSource = post.archived ? ArchivedReferringPosts : ReferringPosts;
-  let referencedSource = post.archived ? ArchivedReferencedPosts : ReferencedPosts;
-  //TODO: Optimise (hmset)
-  await Tools.series(referencedPosts, async function(ref, refKey) {
-    await referencedSource.setOne(refKey, ref, key);
-    await referringSource.setOne(key, {
-      boardName: post.boardName,
-      postNumber: post.number,
-      threadNumber: post.threadNumber,
-      createdAt: refKey.createdAt
-    }, refKey);
-  });
-  if (!nogenerate) {
-    _(referencedPosts).each((ref, refKey) => {
-      if (ref.boardName !== post.boardName || ref.threadNumber !== post.threadNumber) {
-        IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
-      }
-    });
-  }
-}
-
 export async function createPost(req, fields, files, transaction, { postNumber, date } = {}) {
   let { boardName, threadNumber, text, markupMode, name, subject, sage, signAsOp, tripcode, password } = fields;
   threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
@@ -252,7 +213,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
   transaction.setPostNumber(postNumber);
   await Posts.setOne(`${boardName}:${postNumber}`, post);
   await board.storeExtraData(postNumber, extraData, false);
-  await addReferencedPosts(post, referencedPosts);
+  await PostReferencesModel.addReferencedPosts(post, referencedPosts);
   await UsersModel.addUserPostNumber(req.ip, boardName, postNumber);
   await FilesModel.addFilesToPost(boardName, postNumber, files);
   await Search.indexPost({
@@ -271,24 +232,6 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
   return post;
 }
 
-async function removeReferencedPosts({ boardName, number, threadNumber, archived }, { nogenerate } = {}) {
-  let key = `${boardName}:${number}`;
-  let referencedSource = archived ? ArchivedReferencedPosts : ReferencedPosts;
-  let referringSource = archived ? ArchivedReferringPosts : ReferringPosts;
-  let referencedPosts = await referencedSource.getAll(key);
-  await Tools.series(referencedPosts, async function(ref, refKey) {
-    return await referringSource.deleteOne(key, refKey);
-  });
-  if (!nogenerate) {
-    _(referencedPosts).filter((ref) => {
-      return (ref.boardName !== boardName) || (ref.threadNumber !== threadNumber);
-    }).forEach((ref) => {
-      IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
-    });
-  }
-  referencedSource.delete(key);
-}
-
 async function rerenderPost(boardName, postNumber, { nogenerate } = {}) {
   let post = await getPost(boardName, postNumber);
   if (!post) {
@@ -303,8 +246,8 @@ async function rerenderPost(boardName, postNumber, { nogenerate } = {}) {
   post.text = text;
   let source = post.archived ? ArchivedPosts : Posts;
   await source.setOne(`${boardName}:${postNumber}`, post);
-  await removeReferencedPosts(post, { nogenerate: nogenerate });
-  await addReferencedPosts(post, referencedPosts, {
+  await PostReferencesModel.removeReferencedPosts(post, { nogenerate: nogenerate });
+  await PostReferencesModel.addReferencedPosts(post, referencedPosts, {
     nogenerate: nogenerate,
     archived: post.archived
   });
@@ -313,18 +256,7 @@ async function rerenderPost(boardName, postNumber, { nogenerate } = {}) {
   }
 }
 
-async function rerenderReferringPosts({ boardName, number, threadNumber, archived }, { removingThread } = {}) {
-  let referringSource = archived ? ArchivedReferringPosts : ReferringPosts;
-  let referringPosts = await referringSource.getAll(`${boardName}:${number}`);
-  referringPosts = _(referringPosts).filter((ref) => {
-    return !removingThread || ref.boardName !== boardName || ref.threadNumber !== threadNumber;
-  });
-  await Tools.series(referringPosts, async function(ref) {
-    return await rerenderPost(ref.boardName, ref.postNumber);
-  });
-}
-
-export async function removePost(boardName, postNumber, { removingThread, leaveReferences, leaveFileInfos } = {}) {
+export async function removePost(boardName, postNumber, { removingThread } = {}) {
   let board = Board.board(boardName);
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
@@ -335,22 +267,18 @@ export async function removePost(boardName, postNumber, { removingThread, leaveR
   await ThreadsModel.removeThreadPostNumber(boardName, post.threadNumber, postNumber, { archived: post.archived });
   let source = post.archived ? ArchivedPosts : Posts;
   await source.deleteOne(key);
-  if (!leaveReferences) {
-    try {
-      await rerenderReferringPosts(post, { removingThread: removingThread });
-    } catch (err) {
-      Logger.error(err.stack || err);
-    }
-    try {
-      await removeReferencedPosts(post);
-    } catch (err) {
-      Logger.error(err.stack || err);
-    }
+  try {
+    await PostReferencesModel.rerenderReferringPosts(post, { removingThread: removingThread });
+  } catch (err) {
+    Logger.error(err.stack || err);
+  }
+  try {
+    await PostReferencesModel.removeReferencedPosts(post);
+  } catch (err) {
+    Logger.error(err.stack || err);
   }
   await UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber);
-  if (!leaveFileInfos) {
-    FilesModel.removePostFileInfos(boardName, postNumber, { archived: post.archived });
-  }
+  await FilesModel.removePostFileInfos(boardName, postNumber, { archived: post.archived });
   await board.removeExtraData(postNumber, !!post.archived);
   await Search.removePostIndex(boardName, postNumber);
   await PostsPlannedForDeletion.deleteOne(key);
@@ -400,8 +328,8 @@ export async function editPost(req, fields) {
   await source.setOne(key, post);
   await board.removeExtraData(postNumber, !!post.archived);
   await board.storeExtraData(postNumber, extraData, !!post.archived);
-  await removeReferencedPosts(post);
-  await addReferencedPosts(post, referencedPosts, { archived: post.archived });
+  await PostReferencesModel.removeReferencedPosts(post);
+  await PostReferencesModel.addReferencedPosts(post, referencedPosts, { archived: post.archived });
   await Search.updatePostIndex(boardName, postNumber, (body) => {
     body.plainText = plainText;
     body.subject = subject;
@@ -519,133 +447,150 @@ export async function rebuildSearchIndex(targets) {
   });
 }
 
-async function processMovedThreadPostReferences({ references, entity, sourceBoardName, targetBoardName, threadNumber,
-  postNumber, oldThreadNumber, oldPostNumber, postNumberMap, toRerender, toUpdate }) {
-  await Tools.series(references, async function(ref) {
-    let nref;
-    if (ref.boardName === sourceBoardName && ref.threadNumber === oldThreadNumber) {
-      nref = {
-        boardName: targetBoardName,
-        threadNumber: threadNumber,
-        postNumber: postNumberMap[ref.postNumber]
-      };
-    } else {
-      nref = ref;
-      toUpdate[`${ref.boardName}:${ref.threadNumber}`] = {
-        boardName: ref.boardName,
-        threadNumber: ref.threadNumber
-      };
-      if (toRerender) {
-        toRerender[`${ref.boardName}:${ref.postNumber}`] = {
-          boardName: ref.boardName,
-          postNumber: ref.postNumber
-        };
+export async function copyPosts({ sourceBoardName, postNumbers, targetBoardName, initialPostNumber }) {
+  let targetBoard = Board.board(targetBoardName);
+  if (!targetBoard) {
+    throw new Error(Tools.translate('Invalid board'));
+  }
+  let posts = await getPosts(sourceBoardName, postNumbers, {
+    withFileInfos: true,
+    withReferences: true,
+    withExtraData: true
+  });
+  let postNumberMap = posts.reduce((acc, post, index) => {
+    acc[post.number] = initialPostNumber + index;
+    return acc;
+  }, {});
+  let sourcePath = `${__dirname}/../../public/${sourceBoardName}/src`;
+  let sourceThumbPath = `${__dirname}/../../public/${sourceBoardName}/thumb`;
+  let targetPath = `${__dirname}/../../public/${targetBoardName}/src`;
+  let targetThumbPath = `${__dirname}/../../public/${targetBoardName}/thumb`;
+  await mkpath(targetPath);
+  await mkpath(targetThumbPath);
+  let toUpdate = [];
+  let toRerender = [];
+  await Tools.series(posts, async function(post) {
+    post.number = postNumberMap[post.number];
+    post.boardName = targetBoardName;
+    post.threadNumber = initialPostNumber;
+    let { fileInfos, referencedPosts, referringPosts, extraData } = post;
+    delete post.fileInfos;
+    delete post.referencedPosts;
+    delete post.referringPosts;
+    delete post.extraData;
+    if (post.hasOwnProperty('bannedFor')) {
+      delete post.bannedFor;
+    }
+    if (post.rawText) {
+      let text = PostReferencesModel.replacePostLinks(post.rawText, sourceBoardName, referencedPosts, postNumberMap);
+      if (text !== post.rawText) {
+        post.text = await markup(targetBoardName, text, {
+          markupModes: post.markup,
+          accessLevel: post.user.level
+        });
+        post.plainText = Renderer.plainText(text, { brToNewline: true });
       }
     }
-    await entity.deleteOne(`${ref.boardName}:${ref.postNumber}`, `${sourceBoardName}:${oldPostNumber}`);
-    await entity.setOne(`${nref.boardName}:${nref.postNumber}`, nref, `${targetBoardName}:${postNumber}`);
-  });
-}
-
-export async function processMovedThreadPosts({ posts, postNumberMap, threadNumber, targetBoard, sourceBoardName,
-  sourcePath, sourceThumbPath, targetPath, targetThumbPath }) {
-  let toRerender = {};
-  let toUpdate = {};
-  await Tools.series(posts, async function(post) {
-    let oldPostNumber = post.number;
-    let oldThreadNumber = post.threadNumber;
-    post.number = postNumberMap[post.number];
-    post.threadNumber = threadNumber;
-    post.boardName = targetBoard.name;
-    let referencedPosts = post.referencedPosts;
-    delete post.referencedPosts;
-    let extraData = post.extraData;
-    delete post.extraData;
-    let referringPosts = post.referringPosts;
-    delete post.referringPosts;
-    let fileInfos = post.fileInfos;
-    delete post.fileInfos;
-    if (post.rawText) {
-      _(postNumberMap).each((newPostNumber, previousPostNumber) => {
-        let rx = new RegExp(`>>/${sourceBoardName}/${previousPostNumber}`, 'g');
-        post.rawText = post.rawText.replace(rx, `>>/${targetBoard.name}/${newPostNumber}`);
-        rx = new RegExp(`>>${previousPostNumber}`, 'g');
-        post.rawText = post.rawText.replace(rx, `>>${newPostNumber}`);
-      });
-      referencedPosts.filter((ref) => { return ref.boardName === sourceBoardName; }).forEach((ref) => {
-        let rx = new RegExp(`>>${ref.postNumber}`, 'g');
-        post.rawText = post.rawText.replace(rx, `>>/${sourceBoardName}/${ref.postNumber}`);
-      });
-    }
-    if (post.rawText) {
-      post.text = await markup(targetBoard.name, post.rawText, {
-        markupModes: post.markup,
-        accessLevel: post.user.level
-      });
-    }
-    let source = post.archived ? ArchivedPosts : Posts;
-    await source.setOne(`${targetBoard.name}:${post.number}`, post);
-    await targetBoard.storeExtraData(post.number, extraData, !!post.archived);
-    await processMovedThreadPostReferences({
-      references: referencedPosts,
-      entity: ReferencedPosts,
-      sourceBoardName: sourceBoardName,
-      targetBoardName: targetBoard.name,
-      postNumber: post.number,
-      oldThreadNumber: oldThreadNumber,
-      oldPostNumber: oldPostNumber,
-      threadNumber: threadNumber,
-      postNumberMap: postNumberMap,
-      toUpdate: toUpdate
-    });
-    await processMovedThreadPostReferences({
-      references: referringPosts,
-      entity: ReferringPosts,
-      sourceBoardName: sourceBoardName,
-      targetBoardName: targetBoard.name,
-      threadNumber: threadNumber,
-      postNumber: post.number,
-      oldThreadNumber: oldThreadNumber,
-      oldPostNumber: oldPostNumber,
-      postNumberMap: postNumberMap,
-      toRerender: toRerender,
-      toUpdate: toUpdate
-    });
-    await UsersModel.addUserPostNumber(post.user.ip, targetBoard.name, post.number);
-    await FilesModel.addFilesToPost(targetBoard.name, post.number, fileInfos, { archived: post.archived });
+    referencedPosts = PostReferencesModel.replacePostReferences(referencedPosts, {
+      boardName: sourceBoardName,
+      threadNumber: post.threadNumber
+    }, {
+      boardName: targetBoardName,
+      threadNumber: initialPostNumber
+    }, postNumberMap, toUpdate);
+    referringPosts = PostReferencesModel.replacePostReferences(referringPosts, {
+      boardName: sourceBoardName,
+      threadNumber: post.threadNumber
+    }, {
+      boardName: targetBoardName,
+      threadNumber: initialPostNumber
+    }, postNumberMap, toRerender);
     await Tools.series(fileInfos, async function(fileInfo) {
-      await FS.move(`${sourcePath}/${fileInfo.name}`, `${targetPath}/${fileInfo.name}`);
-      await FS.move(`${sourceThumbPath}/${fileInfo.thumb.name}`, `${targetThumbPath}/${fileInfo.thumb.name}`);
+      let oldFileName = fileInfo.name;
+      let oldThumbName = fileInfo.thumb.name;
+      let baseName = await IPC.send('fileName');
+      fileInfo.name = fileInfo.name.replace(/^\d+/, baseName);
+      fileInfo.thumb.name = fileInfo.thumb.name.replace(/^\d+/, baseName);
+      console.log('copying fi', fileInfo);
+      await FS.copy(`${sourcePath}/${oldFileName}`, `${targetPath}/${fileInfo.name}`);
+      await FS.copy(`${sourceThumbPath}/${oldThumbName}`, `${targetThumbPath}/${fileInfo.thumb.name}`);
     });
-    await Search.indexPost(targetBoard.name, post.number, threadNumber, post.plainText, post.subject);
+    await FilesModel.addFilesToPost(targetBoardName, post.number, fileInfos);
+    await PostReferencesModel.storeReferencedPosts(targetBoardName, post.number, referencedPosts);
+    await PostReferencesModel.storeReferringPosts(targetBoardName, post.number, referringPosts);
+    await targetBoard.storeExtraData(post.number, extraData, false);
+    await Posts.setOne(`${targetBoardName}:${post.number}`, post);
+    await UsersModel.addUserPostNumber(post.user.ip, targetBoardName, post.number);
+    await Search.indexPost({
+      boardName: targetBoardName,
+      postNumber: post.number,
+      threadNumber: initialPostNumber,
+      plainText: post.plainText,
+      subject: post.subject
+    });
   });
   return {
-    toRerender: toRerender,
-    toUpdate: toUpdate
+    postNumberMap: postNumberMap,
+    toUpdate: toUpdate,
+    toRerender: toRerender
   };
 }
 
-export async function processMovedThreadRelatedPosts({ posts, sourceBoardName, targetBoardName, postNumberMap }) {
+export async function rerenderMovedThreadRelatedPosts({ posts, sourceBoardName, targetBoardName, sourceThreadNumber,
+  targetThreadNumber, postNumberMap }) {
+  console.log('related posts', posts);
   await Tools.series(posts, async function(post) {
-    post = await getPost(post.boardName, post.postNumber);
+    post = await getPost(post.boardName, post.postNumber, { withReferences: true });
     if (!post || !post.rawText) {
       return;
     }
-    _(postNumberMap).each((newPostNumber, previousPostNumber) => {
-      let rx = new RegExp(`>>/${sourceBoardName}/${previousPostNumber}`, 'g');
-      post.rawText = post.rawText.replace(rx, `>>/${targetBoardName}/${newPostNumber}`);
-      if (post.boardName === sourceBoardName) {
-        rx = new RegExp(`>>${previousPostNumber}`, 'g');
-        post.rawText = post.rawText.replace(rx, `>>/${targetBoardName}/${newPostNumber}`);
+    let { referencedPosts, referringPosts } = post;
+    delete post.referencedPosts;
+    delete post.referringPosts;
+    if (post.hasOwnProperty('bannedFor')) {
+      delete post.bannedFor;
+    }
+    if (post.rawText) {
+      let text = PostReferencesModel.replaceRelatedPostLinks({
+        text: post.rawText,
+        sourceBoardName: sourceBoardName,
+        targetBoardName: targetBoardName,
+        postBoardName: post.boardName,
+        referencedPosts: referencedPosts,
+        postNumberMap: postNumberMap
+      });
+      if (text !== post.rawText) {
+        post.text = await markup(targetBoardName, text, {
+          markupModes: post.markup,
+          accessLevel: post.user.level
+        });
+        post.plainText = Renderer.plainText(text, { brToNewline: true });
       }
-    });
-    post.text = await markup(post.boardName, post.rawText, {
-      markupModes: post.markup,
-      accessLevel: post.user.level
-    });
-    let source = post.archived ? ArchivedPosts : Posts;
-    await source.setOne(`${post.boardName}:${post.number}`, post);
-    //TODO: Update references
+      let source = post.archived ? ArchivedPosts : Posts;
+      await source.setOne(`${post.boardName}:${post.number}`, post);
+    }
+    referencedPosts = PostReferencesModel.replaceRelatedPostReferences(referencedPosts, {
+      boardName: sourceBoardName,
+      threadNumber: post.threadNumber
+    }, {
+      boardName: targetBoardName,
+      threadNumber: initialPostNumber
+    }, postNumberMap);
+    console.log('do', referringPosts);
+    referringPosts = PostReferencesModel.replaceRelatedPostReferences(referringPosts, {
+      boardName: sourceBoardName,
+      threadNumber: post.threadNumber
+    }, {
+      boardName: targetBoardName,
+      threadNumber: initialPostNumber
+    }, postNumberMap);
+    console.log('posle', referringPosts);
+    await PostReferencesModel.removeReferencedPosts(post.boardName, post.number, { archived: post.archived });
+    await PostReferencesModel.removeReferring(post.boardName, post.number, { archived: post.archived });
+    await PostReferencesModel.storeReferencedPosts(post.boardName, post.number, referencedPosts,
+      { archived: post.archived });
+    await PostReferencesModel.storeReferringPosts(post.boardName, post.number, referringPosts,
+      { archived: post.archived });
   });
 }
 

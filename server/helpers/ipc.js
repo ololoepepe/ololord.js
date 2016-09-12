@@ -134,52 +134,60 @@ var performTask = function () {
 
 var nextTask = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(type, key, map) {
-    var scheduled, next;
+    var scheduled;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
             scheduled = map.get(key);
-            next = scheduled.next;
 
-            if (!(!next || next.length <= 0)) {
-              _context3.next = 5;
+            if (scheduled) {
+              _context3.next = 3;
+              break;
+            }
+
+            return _context3.abrupt('return');
+
+          case 3:
+            if (!(scheduled.length <= 0)) {
+              _context3.next = 6;
               break;
             }
 
             map.delete(key);
             return _context3.abrupt('return');
 
-          case 5:
-            delete scheduled.next;
-            _context3.prev = 6;
-            _context3.next = 9;
-            return performTask(type, key, next.map(function (n) {
+          case 6:
+            //NOTE: Clearing initial array, but preserving it's copy
+            scheduled = scheduled.splice(0, scheduled.length);
+            _context3.prev = 7;
+            _context3.next = 10;
+            return performTask(type, key, scheduled.map(function (n) {
               return n.data;
             }));
 
-          case 9:
-            _context3.next = 14;
+          case 10:
+            _context3.next = 15;
             break;
 
-          case 11:
-            _context3.prev = 11;
-            _context3.t0 = _context3['catch'](6);
+          case 12:
+            _context3.prev = 12;
+            _context3.t0 = _context3['catch'](7);
 
             _logger2.default.error(_context3.t0.stack || _context3.t0);
 
-          case 14:
-            nextTask();
-            next.forEach(function (n) {
+          case 15:
+            nextTask(type, key, map);
+            scheduled.forEach(function (n) {
               n.resolve();
             });
 
-          case 16:
+          case 17:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[6, 11]]);
+    }, _callee3, this, [[7, 12]]);
   }));
 
   return function nextTask(_x6, _x7, _x8) {
@@ -203,17 +211,14 @@ var addTask = function () {
             }
 
             return _context4.abrupt('return', new Promise(function (resolve) {
-              if (!scheduled.next) {
-                scheduled.next = [];
-              }
-              scheduled.next.push({
+              scheduled.push({
                 resolve: resolve,
                 data: data
               });
             }));
 
           case 6:
-            map.set(key, new Map());
+            map.set(key, []);
             _context4.prev = 7;
             _context4.next = 10;
             return performTask(type, key, data);

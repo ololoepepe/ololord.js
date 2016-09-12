@@ -246,7 +246,7 @@ export async function clearDeletedThreads() {
   return DeletedThreads.delete();
 }
 
-export async function removeThread(boardName, threadNumber, { archived, leaveFileInfos, leaveReferences } = {}) {
+export async function removeThread(boardName, threadNumber, { archived } = {}) {
   let source = archived ? ArchivedThreads : Threads;
   let key = `${boardName}:${threadNumber}`
   await ThreadsPlannedForDeletion.addOne(key);
@@ -259,11 +259,7 @@ export async function removeThread(boardName, threadNumber, { archived, leaveFil
       let postNumbersSource = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
       await postNumbersSource.delete(key);
       await Tools.series(postNumbers, async function(postNumber) {
-        return await PostsModel.removePost(boardName, postNumber, {
-          leaveFileInfos: leaveFileInfos,
-          leaveReferences: leaveReferences,
-          removingThread: true
-        });
+        return await PostsModel.removePost(boardName, postNumber, { removingThread: true });
       });
       await ThreadsPlannedForDeletion.deleteOne(key);
     } catch (err) {
@@ -392,56 +388,53 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
   if (!thread) {
     throw new Error(Tools.translate('No such thread'));
   }
-  let sourcePath = `${__dirname}/../../public/${sourceBoardName}/src`;
-  let sourceThumbPath = `${__dirname}/../../public/${sourceBoardName}/thumb`;
-  let targetPath = `${__dirname}/../../public/${targetBoardName}/src`;
-  let targetThumbPath = `${__dirname}/../../public/${targetBoardName}/thumb`;
-  await mkpath(targetPath);
-  await mkpath(targetThumbPath);
-  delete thread.updatedAt;
-  let posts = await PostsModel.getPosts(sourceBoardName, thread.postNumbers, {
-    withFileInfos: true,
-    withReferences: true,
-    withExtraData: true
-  });
+  let postNumbers = thread.postNumbers;
   delete thread.postNumbers;
-  let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, posts.length);
-  lastPostNumber = lastPostNumber - posts.length + 1;
+  delete thread.updatedAt;
+  thread.boardName = targetBoardName;
+  let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, postNumbers.length);
+  lastPostNumber = lastPostNumber - postNumbers.length + 1;
   thread.number = lastPostNumber;
-  let postNumberMap = posts.reduce((acc, post) => {
-    acc[post.number] = lastPostNumber++;
+  let { toRerender, toUpdate, postNumberMap } = await PostsModel.copyPosts({
+    sourceBoardName: sourceBoardName,
+    postNumbers: postNumbers,
+    targetBoardName: targetBoardName,
+    initialPostNumber: lastPostNumber
+  });
+  await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), `${targetBoardName}:${thread.number}`);
+  await ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
+  await Threads.setOne(thread.number, thread, targetBoardName);
+  console.log('creating');
+  await IPC.render(targetBoardName, thread.number, thread.number, 'create');
+  toRerender = toRerender.reduce((acc, ref) => {
+    acc[`${ref.boardName}:${ref.postNumber}`] = ref;
     return acc;
   }, {});
-  let { toRerender, toUpdate } = await PostsModel.processMovedThreadPosts({
-    posts: posts,
-    postNumberMap: postNumberMap,
-    threadNumber: thread.number,
-    targetBoard: targetBoard,
-    sourceBoardName: sourceBoardName,
-    sourcePath: sourcePath,
-    sourceThumbPath: sourceThumbPath,
-    targetPath: targetPath,
-    targetThumbPath: targetThumbPath
-  });
-  thread.boardName = targetBoardName;
-  await Threads.setOne(thread.number, thread, targetBoardName);
-  await ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
-  await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), `${targetBoardName}:${thread.number}`);
-  await PostsModel.processMovedThreadRelatedPosts({
+  toUpdate = toUpdate.reduce((acc, ref) => {
+    acc[`${ref.boardName}:${ref.threadNumber}`] = ref;
+    return acc;
+  }, {});
+  await PostsModel.rerenderMovedThreadRelatedPosts({
     posts: toRerender,
     sourceBoardName: sourceBoardName,
     targetBoardName: targetBoardName,
+    sourceThreadNumber: threadNumber,
+    targetThreadNumber: thread.number,
     postNumberMap: postNumberMap
   });
-  await Tools.series(toUpdate, async function(o) {
-    return await IPC.render(o.boardName, o.threadNumber, o.threadNumber, 'create');
+  await Tools.series(toRerender, async function(ref) {
+    console.log('rerendering', ref);
+    return await IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
   });
-  await removeThread(sourceBoardName, threadNumber, {
-    leaveFileInfos: true,
-    leaveReferences: true
+  await Tools.series(toUpdate, async function(ref) {
+    console.log('updating', ref);
+    return await IPC.render(ref.boardName, ref.threadNumber, ref.threadNumber, 'create');
   });
-  IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
-  await IPC.render(targetBoardName, thread.number, thread.number, 'create');
+  console.log('removing');
+  await removeThread(sourceBoardName, threadNumber);
+  console.log('deleting');
+  await IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
+  console.log('opa!');
   return {
     boardName: targetBoardName,
     threadNumber: thread.number
