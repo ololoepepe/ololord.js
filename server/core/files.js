@@ -6,34 +6,32 @@ Object.defineProperty(exports, "__esModule", {
 exports.resizeImage = exports.getImageSize = exports.getMimeType = exports.generateRandomImage = exports.deleteFile = exports.renameFile = exports.editFile = exports.createFile = exports.writeFile = exports.diskUsage = exports.processFiles = exports.renderPostFileInfos = exports.getFiles = undefined;
 
 var downloadFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(url, formFieldName, fields, transaction) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(url, formFieldName, fields) {
     var path, proxy, options, result, response, data, file, mimeType;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
             path = __dirname + '/../../tmp/upload_' + _uuid2.default.v4();
-
-            transaction.addFile(path);
             proxy = _config2.default.proxy();
             options = { timeout: (0, _config2.default)('system.httpRequestTimeout') };
 
             if (!/^vk\:\/\//.test(url)) {
-              _context.next = 11;
+              _context.next = 10;
               break;
             }
 
-            _context.next = 7;
+            _context.next = 6;
             return (0, _vk2.default)('audio.getById', { audios: url.split('/')[2] });
 
-          case 7:
+          case 6:
             result = _context.sent;
 
             options.url = result.response[0].url;
-            _context.next = 12;
+            _context.next = 11;
             break;
 
-          case 11:
+          case 10:
             if (proxy) {
               options = _merge2.default.recursive(options, {
                 host: proxy.host,
@@ -45,39 +43,39 @@ var downloadFile = function () {
               optons.url = url;
             }
 
-          case 12:
-            _context.next = 14;
+          case 11:
+            _context.next = 13;
             return _http2.default.request(options);
 
-          case 14:
+          case 13:
             response = _context.sent;
 
             if (!(200 !== response.status)) {
-              _context.next = 17;
+              _context.next = 16;
               break;
             }
 
             return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Failed to download file'))));
 
-          case 17:
-            _context.next = 19;
+          case 16:
+            _context.next = 18;
             return response.body.read();
 
-          case 19:
+          case 18:
             data = _context.sent;
 
             if (!(data.length < 1)) {
-              _context.next = 22;
+              _context.next = 21;
               break;
             }
 
             return _context.abrupt('return', Promise.reject(new Error(Tools.translate('File is empty'))));
 
-          case 22:
-            _context.next = 24;
+          case 21:
+            _context.next = 23;
             return writeFile(path, data);
 
-          case 24:
+          case 23:
             file = {
               name: url.split('/').pop(),
               size: data.length,
@@ -85,16 +83,16 @@ var downloadFile = function () {
             };
 
             setFileRating(file, formFieldName.substr(9), fields);
-            _context.next = 28;
+            _context.next = 27;
             return getMimeType(path);
 
-          case 28:
+          case 27:
             mimeType = _context.sent;
 
             file.mimeType = mimeType;
             return _context.abrupt('return', file);
 
-          case 31:
+          case 30:
           case 'end':
             return _context.stop();
         }
@@ -102,13 +100,13 @@ var downloadFile = function () {
     }, _callee, this);
   }));
 
-  return function downloadFile(_x, _x2, _x3, _x4) {
+  return function downloadFile(_x, _x2, _x3) {
     return ref.apply(this, arguments);
   };
 }();
 
 var getFiles = exports.getFiles = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(fields, files, transaction) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(fields, files) {
     var downloadedFiles, hashes, fileInfos, existingFiles;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -148,7 +146,7 @@ var getFiles = exports.getFiles = function () {
                 }, _callee2, this);
               }));
 
-              return function (_x8) {
+              return function (_x6) {
                 return ref.apply(this, arguments);
               };
             }(), true);
@@ -166,7 +164,7 @@ var getFiles = exports.getFiles = function () {
                     switch (_context3.prev = _context3.next) {
                       case 0:
                         _context3.next = 2;
-                        return downloadFile(url, formFieldName, fields, transaction);
+                        return downloadFile(url, formFieldName, fields);
 
                       case 2:
                         return _context3.abrupt('return', _context3.sent);
@@ -179,7 +177,7 @@ var getFiles = exports.getFiles = function () {
                 }, _callee3, this);
               }));
 
-              return function (_x9, _x10) {
+              return function (_x7, _x8) {
                 return ref.apply(this, arguments);
               };
             }(), true);
@@ -219,7 +217,7 @@ var getFiles = exports.getFiles = function () {
     }, _callee4, this);
   }));
 
-  return function getFiles(_x5, _x6, _x7) {
+  return function getFiles(_x4, _x5) {
     return ref.apply(this, arguments);
   };
 }();
@@ -294,7 +292,7 @@ var waitForFile = function () {
     }, _callee6, this);
   }));
 
-  return function waitForFile(_x11, _x12) {
+  return function waitForFile(_x9, _x10) {
     return ref.apply(this, arguments);
   };
 }();
@@ -337,7 +335,7 @@ var generateFileName = function () {
     }, _callee7, this);
   }));
 
-  return function generateFileName(_x13, _x14) {
+  return function generateFileName(_x11, _x12) {
     return ref.apply(this, arguments);
   };
 }();
@@ -383,7 +381,7 @@ var createFileThumb = function () {
     }, _callee8, this);
   }));
 
-  return function createFileThumb(_x15, _x16) {
+  return function createFileThumb(_x13, _x14) {
     return ref.apply(this, arguments);
   };
 }();
@@ -452,7 +450,7 @@ var renderPostFileInfos = exports.renderPostFileInfos = function () {
                 }, _callee9, this);
               }));
 
-              return function (_x18) {
+              return function (_x16) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -465,7 +463,7 @@ var renderPostFileInfos = exports.renderPostFileInfos = function () {
     }, _callee10, this);
   }));
 
-  return function renderPostFileInfos(_x17) {
+  return function renderPostFileInfos(_x15) {
     return ref.apply(this, arguments);
   };
 }();
@@ -595,7 +593,7 @@ var processFile = function () {
     }, _callee11, this);
   }));
 
-  return function processFile(_x20, _x21, _x22) {
+  return function processFile(_x18, _x19, _x20) {
     return ref.apply(this, arguments);
   };
 }();
@@ -645,7 +643,7 @@ var processFiles = exports.processFiles = function () {
                 }, _callee12, this);
               }));
 
-              return function (_x26) {
+              return function (_x24) {
                 return ref.apply(this, arguments);
               };
             }(), true);
@@ -661,7 +659,7 @@ var processFiles = exports.processFiles = function () {
     }, _callee13, this);
   }));
 
-  return function processFiles(_x23, _x24, _x25) {
+  return function processFiles(_x21, _x22, _x23) {
     return ref.apply(this, arguments);
   };
 }();
@@ -693,7 +691,7 @@ var diskUsage = exports.diskUsage = function () {
     }, _callee14, this);
   }));
 
-  return function diskUsage(_x27) {
+  return function diskUsage(_x25) {
     return ref.apply(this, arguments);
   };
 }();
@@ -737,7 +735,7 @@ var writeFile = exports.writeFile = function () {
     }, _callee15, this);
   }));
 
-  return function writeFile(_x28, _x29) {
+  return function writeFile(_x26, _x27) {
     return ref.apply(this, arguments);
   };
 }();
@@ -791,7 +789,7 @@ var createFile = exports.createFile = function () {
     }, _callee16, this);
   }));
 
-  return function createFile(_x30, _x31, _x32) {
+  return function createFile(_x28, _x29, _x30) {
     return ref.apply(this, arguments);
   };
 }();
@@ -813,7 +811,7 @@ var editFile = exports.editFile = function () {
     }, _callee17, this);
   }));
 
-  return function editFile(_x34, _x35) {
+  return function editFile(_x32, _x33) {
     return ref.apply(this, arguments);
   };
 }();
@@ -837,7 +835,7 @@ var renameFile = exports.renameFile = function () {
     }, _callee18, this);
   }));
 
-  return function renameFile(_x36, _x37) {
+  return function renameFile(_x34, _x35) {
     return ref.apply(this, arguments);
   };
 }();
@@ -859,7 +857,7 @@ var deleteFile = exports.deleteFile = function () {
     }, _callee19, this);
   }));
 
-  return function deleteFile(_x38) {
+  return function deleteFile(_x36) {
     return ref.apply(this, arguments);
   };
 }();
@@ -900,7 +898,7 @@ var generateRandomImage = exports.generateRandomImage = function () {
     }, _callee20, this);
   }));
 
-  return function generateRandomImage(_x39, _x40, _x41) {
+  return function generateRandomImage(_x37, _x38, _x39) {
     return ref.apply(this, arguments);
   };
 }();
@@ -952,7 +950,7 @@ var getMimeType = exports.getMimeType = function () {
     }, _callee21, this, [[2, 8]]);
   }));
 
-  return function getMimeType(_x42) {
+  return function getMimeType(_x40) {
     return ref.apply(this, arguments);
   };
 }();
@@ -980,7 +978,7 @@ var getImageSize = exports.getImageSize = function () {
     }, _callee22, this);
   }));
 
-  return function getImageSize(_x43) {
+  return function getImageSize(_x41) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1008,7 +1006,7 @@ var resizeImage = exports.resizeImage = function () {
     }, _callee23, this);
   }));
 
-  return function resizeImage(_x44, _x45, _x46, _x47) {
+  return function resizeImage(_x42, _x43, _x44, _x45) {
     return ref.apply(this, arguments);
   };
 }();
