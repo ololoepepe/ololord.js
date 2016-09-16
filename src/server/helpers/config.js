@@ -187,7 +187,7 @@ c.proxy = function() {
     return null;
   }
   let parts = proxy.split(':');
-  let auth = config('system.fileDownloadProxyAuth');
+  let auth = c('system.fileDownloadProxyAuth');
   return {
     host: parts[0],
     port: (parts[1] ? +parts[1] : null),
