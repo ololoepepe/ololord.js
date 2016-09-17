@@ -2,6 +2,7 @@ import _ from 'underscore';
 import express from 'express';
 import FS from 'q-io/fs';
 import moment from 'moment';
+import promisify from 'promisify-node';
 
 import Board from '../boards/board';
 import * as Files from '../core/files';
@@ -15,6 +16,8 @@ import * as MiscModel from '../models/misc';
 import * as PostsModel from '../models/posts';
 import * as ThreadsModel from '../models/threads';
 
+const mkpath = promisify('mkpath');
+
 const RSS_DATE_TIME_FORMAT = 'ddd, DD MMM YYYY HH:mm:ss +0000';
 
 let router = express.Router();
@@ -23,7 +26,7 @@ function pickPostsToRerender(oldPosts, posts) {
   return _(posts).pick((post, postNumber) => {
     let oldPost = oldPosts[postNumber];
     if (!oldPost || oldPost.updatedAt < post.updatedAt || oldPost.bannedFor !== post.bannedFor
-      || oldPost.text === post.text) {
+      || oldPost.text !== post.text) {
       return true;
     }
     let oldRefs = oldPost.referringPosts.reduce((acc, ref) => {
@@ -47,19 +50,18 @@ function pickPostsToRerender(oldPosts, posts) {
   });
 }
 
-async function renderThreadHTML(thread, { targetPath, archived } = {}) {
+async function renderThreadHTML(thread, { targetPath } = {}) {
   let board = Board.board(thread.boardName);
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
   }
-  thread.title = thread.title || (`${board.title} — ${thread.number}`);
-  let model = { thread: thread };
-  model.isThreadPage = true;
-  model.board = MiscModel.board(board).board;
-  model.threadNumber = thread.number;
-  if (archived) {
-    model.archived = true;
-  }
+  let model = {
+    thread: thread,
+    title: thread.title || `${board.title} — ${thread.number}`,
+    isThreadPage: true,
+    board: MiscModel.board(board).board,
+    threadNumber: thread.number,
+  };
   let data = Renderer.render('pages/thread', model);
   if (targetPath) {
     await FS.write(targetPath, data);
@@ -76,7 +78,15 @@ async function renderThread(boardName, threadNumber) {
 }
 
 async function renderArchivedThread(boardName, threadNumber) {
-  //TODO: Implement!!!
+  let thread = await BoardsModel.getThread(boardName, threadNumber);
+  if (!thread || !thread.archived) {
+    throw new Error(Tools.translate('No such thread: >>/$[1]/$[2]', '', boardName, threadNumber));
+  }
+  let archPath = `${__dirname}/../../public/${boardName}/arch`;
+  await mkpath(archPath);
+  await Renderer.renderThread(thread);
+  await FS.write(`${archPath}/${threadNumber}.json`, JSON.stringify({ thread: thread }));
+  await renderThreadHTML(thread, { targetPath: `${archPath}/${threadNumber}.html` });
 }
 
 async function renderPage(boardName, pageNumber) {
@@ -168,11 +178,11 @@ router.renderThread = async function(key, data) {
       withFileInfos: true,
       withReferences: true
     });
-    let opPost = posts.splice(0, 1)[0];
-    posts = posts.reduce((acc, post) => {
+    posts = posts.slice(1).reduce((acc, post) => {
       acc[post.number] = post;
       return acc;
     }, {});
+    lastPosts = _(lastPosts).pick((_1, postNumber) => posts.hasOwnProperty(postNumber));
     let postsToRerender = pickPostsToRerender(lastPosts, posts);
     await Tools.series(postsToRerender, async function(post, postNumber) {
       await Files.renderPostFileInfos(post);

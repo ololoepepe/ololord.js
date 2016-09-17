@@ -253,7 +253,7 @@ var NodeCaptcha = function (_Captcha) {
 
               case 9:
                 clearTimeout(challenge.timer);
-                _fs2.default.remove(CAPTCHA_PATH + '/' + c.fileName).catch(function (err) {
+                _fs2.default.remove(CAPTCHA_PATH + '/' + challenge.fileName).catch(function (err) {
                   _logger2.default.error(err);
                 });
                 this.challenges.delete(challengeID);

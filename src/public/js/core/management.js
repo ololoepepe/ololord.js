@@ -236,7 +236,10 @@ async function editFile(id) {
   };
   try {
     let result = await AJAX.api('fileContent', { fileName: id }, { indicator: new OverlayProgressBar() });
-    let { accepted, value } = await Widgets.editCode(id, modes[id.split('.').pop()] || '', result.content);
+    let { accepted, value } = await Widgets.editCode(modes[id.split('.').pop()] || '', {
+      name: id,
+      value: result.content
+    });
     if (!accepted) {
       return;
     }
@@ -305,7 +308,7 @@ async function addFile(sourceId, isDir) {
   }
 }
 
-async function rerenderCache(archived) {
+async function rerenderCache(archive) {
   let txt = Tools.translate('Connection with the server will be lost, '
     + 'and the server will become unavailable for some time.'
     + ' You will have to reload the page manually.');
@@ -486,8 +489,8 @@ function initializeFileContent() {
       }
     },
     types: {
-      file: { icon: 'icon icon-file' },
-      folder: { icon: 'icon icon-folder' }
+      file: { icon: 'icon icon-file-16' },
+      folder: { icon: 'icon icon-folder-16' }
     }
   });
 }

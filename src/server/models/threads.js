@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import FS from 'q-io/fs';
-import mkpath from 'mkpath';
+import promisify from 'promisify-node';
 
 import * as BoardsModel from './boards';
 import * as PostsModel from './posts';
@@ -8,12 +8,25 @@ import Board from '../boards/board';
 import BoardController from '../controllers/board';
 import * as Search from '../core/search';
 import * as Cache from '../helpers/cache';
+import * as IPC from '../helpers/ipc';
+import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 import redisClient from '../storage/redis-client-factory';
+import sqlClient from '../storage/sql-client-factory';
 import Hash from '../storage/hash';
 import UnorderedSet from '../storage/unordered-set';
 
-let ArchivedThreads = new Hash(redisClient(), 'archivedThreads');
+const mkpath = promisify('mkpath');
+
+let ArchivedThreadPostNumbers = new UnorderedSet(sqlClient(), 'archivedThreadPostNumbers', {
+  parse: number => +number,
+  stringify: number => number.toString()
+});
+let ArchivedThreads = new Hash(sqlClient(), 'archivedThreads');
+let ArchivedThreadUpdateTimes = new Hash(sqlClient(), 'archivedThreadUpdateTimes', {
+  parse: false,
+  stringify: false
+});
 let DeletedThreads = new UnorderedSet(redisClient(), 'deletedThreads', {
   parse: false,
   stringify: false
@@ -48,25 +61,32 @@ export function sortThreadsByPostCount(t1, t2) {
   return t2.postCount - t1.postCount;
 }
 
-export async function getThreadPostCount(boardName, threadNumber) {
-  return await ThreadPostNumbers.count(`${boardName}:${threadNumber}`);
+export async function getThreadPostCount(boardName, threadNumber, { archived } = {}) {
+  let source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
+  return await source.count(`${boardName}:${threadNumber}`);
 }
 
 export async function getThreadPostNumbers(boardName, threadNumber) {
   let postNumbers = await ThreadPostNumbers.getAll(`${boardName}:${threadNumber}`);
+  if (!postNumbers || postNumbers.length <= 0) {
+    postNumbers = await ArchivedThreadPostNumbers.getAll(`${boardName}:${threadNumber}`);
+  }
   return postNumbers.sort((a, b) => { return a - b; });
 }
 
-export async function addThreadPostNumber(boardName, threadNumber, postNumber) {
-  await ThreadPostNumbers.addOne(postNumber, `${boardName}:${threadNumber}`);
+export async function addThreadPostNumber(boardName, threadNumber, postNumber, { archived } = {}) {
+  let source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
+  await source.addOne(postNumber, `${boardName}:${threadNumber}`);
 }
 
-export async function removeThreadPostNumber(boardName, threadNumber, postNumber) {
-  await ThreadPostNumbers.deleteOne(postNumber, `${boardName}:${threadNumber}`);
+export async function removeThreadPostNumber(boardName, threadNumber, postNumber, { archived } = {}) {
+  let source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
+  await source.deleteOne(postNumber, `${boardName}:${threadNumber}`);
 }
 
 async function addDataToThread(thread, { withPostNumbers } = {}) {
-  thread.updatedAt = await ThreadUpdateTimes.getOne(thread.number, thread.boardName);
+  let source = thread.archived ? ArchivedThreadUpdateTimes : ThreadUpdateTimes;
+  thread.updatedAt = await source.getOne(thread.number, thread.boardName);
   if (withPostNumbers) {
     thread.postNumbers = await getThreadPostNumbers(thread.boardName, thread.number);
   }
@@ -209,16 +229,9 @@ export async function getThreadLastPostNumber(boardName, threadNumber) {
   return (threadPostNumbers.length > 0) ? _(threadPostNumbers).last() : 0;
 }
 
-export async function getThreadUpdateTime(boardName, threadNumber) {
-  return await ThreadUpdateTimes.getOne(threadNumber, boardName);
-}
-
-export async function getThreadsUpdateTimes(boardName, threadNumbers) {
-  return await ThreadUpdateTimes.getSome(threadNumbers, boardName);
-}
-
-export async function setThreadUpdateTime(boardName, threadNumber, dateTme) {
-  await ThreadUpdateTimes.setOne(threadNumber, boardName, dateTme);
+export async function setThreadUpdateTime(boardName, threadNumber, dateTme, { archived } = {}) {
+  let source = archived ? ArchivedThreadUpdateTimes : ThreadUpdateTimes;
+  await source.setOne(threadNumber, dateTme, boardName);
 }
 
 export async function isThreadDeleted(boardName, threadNumber) {
@@ -233,82 +246,102 @@ export async function clearDeletedThreads() {
   return DeletedThreads.delete();
 }
 
-async function removeThread(boardName, threadNumber, { archived, leaveFileInfos, leaveReferences } = {}) {
+export async function removeThread(boardName, threadNumber, { archived } = {}) {
   let source = archived ? ArchivedThreads : Threads;
   let key = `${boardName}:${threadNumber}`
   await ThreadsPlannedForDeletion.addOne(key);
   await source.deleteOne(threadNumber, boardName);
-  await ThreadUpdateTimes.deleteOne(threadNumber, boardName);
+  let updateTimeSource = archived ? ArchivedThreadUpdateTimes : ThreadUpdateTimes;
+  await updateTimeSource.deleteOne(threadNumber, boardName);
   setTimeout(async function() {
     try {
       let postNumbers = await getThreadPostNumbers(boardName, threadNumber);
-      await ThreadPostNumbers.delete(key);
+      let postNumbersSource = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
+      await postNumbersSource.delete(key);
       await Tools.series(postNumbers, async function(postNumber) {
-        return await PostsModel.removePost(boardName, postNumber, {
-          leaveFileInfos: leaveFileInfos,
-          leaveReferences: leaveReferences,
-          removingThread: true
-        });
+        return await PostsModel.removePost(boardName, postNumber, { removingThread: true });
       });
       await ThreadsPlannedForDeletion.deleteOne(key);
     } catch (err) {
       Logger.error(err.stack || err);
     }
-  }, 5000); //TODO: magic numbers
+  }, 5000); //TODO: This is not OK
 }
 
 async function pushOutOldThread(boardName) {
-  let threadNumbers = await getThreadNumbers(boardName);
-  let threads = await getThreads(boardName, threadNumbers);
-  threads.sort(sortThreadsByDate);
-  if (threads.length < board.threadLimit) {
-    return;
-  }
-  let archivedThreadNumbers = await getThreadNumbers(boardName, { archived: true });
-  let archivedThreads = await getThreads(boardName, archivedThreadNumbers);
-  archivedThreads.sort(sortThreadsByDate);
-  if (archivedThreads.length > 0 && archivedThreads.length >= board.archiveLimit) {
-    await removeThread(boardName, archivedThreads.pop().number, { archived: true });
-  }
-  let thread = threads.pop();
-  if (board.archiveLimit <= 0) {
-    await removeThread(boardName, thread.number);
-    return;
-  }
-  thread.archived = true;
-  await ArchivedThreads.setOne(thread.number, thread, boardName);
-  await Threads.deleteOne(thread.number, boardName);
-  let postNumbers = await getThreadPostNumbers(boardName, thread.number);
-  await Tools.series(postNumbers, async function(postNumber) {
-    await Search.updatePostIndex((body) => {
-      body.archived = true;
-      return body;
-    });
-  });
-  //NOTE: This is for the sake of speed.
-  (async function() {
-    try {
-      let archivePath = `${__dirname}/../../public/${boardName}/arch`;
-      let oldThreadNumber = thread.number;
-      await mkpath(archivePath);
-      let sourceId = `${boardName}/res/${oldThreadNumber}.json`;
-      let data = await Cache.readFile(sourceId);
-      let model = JSON.parse(data);
-      model.thread.archived = true;
-      await FS.write(`${archivePath}/${oldThreadNumber}.json`, JSON.stringify(model));
-      await BoardController.renderThreadHTML(model.thread, {
-        targetPath: `${archivePath}/${oldThreadNumber}.html`,
-        archived: true
-      });
-      await Cache.removeFile(sourceId);
-      await Cache.removeFile(`${boardName}/res/${oldThreadNumber}.html`);
-    } catch (err) {
-      Logger.error(err.stack || err);
+  try {
+    let board = Board.board(boardName);
+    if (!board) {
+      throw new Error(Tools.translate('Invalid board'));
     }
-  })();
+    let threadNumbers = await getThreadNumbers(boardName);
+    let threads = await getThreads(boardName, threadNumbers);
+    threads.sort(sortThreadsByDate);
+    if (threads.length < board.threadLimit) {
+      return;
+    }
+    let client = await sqlClient();
+    await client.transaction();
+    let archivedThreadNumbers = await getThreadNumbers(boardName, { archived: true });
+    let archivedThreads = await getThreads(boardName, archivedThreadNumbers);
+    archivedThreads.sort(sortThreadsByDate);
+    let removeLastArchivedThread = (archivedThreads.length > 0) && (archivedThreads.length >= board.archiveLimit);
+    if (removeLastArchivedThread) {
+      await removeThread(boardName, archivedThreads.pop().number, { archived: true });
+    }
+    let thread = threads.pop();
+    if (board.archiveLimit <= 0) {
+      await removeThread(boardName, thread.number);
+      await client.commit();
+      if (removeLastArchivedThread) {
+        await IPC.renderArchive(boardName);
+      }
+      return;
+    }
+    await Threads.deleteOne(thread.number, boardName);
+    (async function() {
+      try {
+        ArchivedThreadUpdateTimes.setOne(thread.number, thread.updatedAt, boardName);
+        ThreadUpdateTimes.deleteOne(thread.number, boardName);
+        thread.archived = true;
+        delete thread.updatedAt;
+        await ArchivedThreads.setOne(thread.number, thread, boardName);
+        let key = `${boardName}:${thread.number}`;
+        let postNumbers = await getThreadPostNumbers(boardName, thread.number);
+        await ArchivedThreadPostNumbers.addSome(postNumbers, key);
+        await ThreadPostNumbers.delete(key);
+        await Tools.series(postNumbers, async function(postNumber) {
+          await PostsModel.pushPostToArchive(boardName, postNumber);
+        });
+        await client.commit();
+        let archivePath = `${__dirname}/../../public/${boardName}/arch`;
+        let oldThreadNumber = thread.number;
+        await mkpath(archivePath);
+        let sourceId = `${boardName}/res/${oldThreadNumber}.json`;
+        let data = await Cache.readFile(sourceId);
+        let model = JSON.parse(data);
+        model.thread.archived = true;
+        await FS.write(`${archivePath}/${oldThreadNumber}.json`, JSON.stringify(model));
+        await BoardController.renderThreadHTML(model.thread, {
+          targetPath: `${archivePath}/${oldThreadNumber}.html`,
+          archived: true
+        });
+        await Cache.removeFile(sourceId);
+        await Cache.removeFile(`${boardName}/res/${oldThreadNumber}.html`);
+        await IPC.renderArchive(boardName);
+      } catch (err) {
+        client.rollback();
+        Logger.error(err.stack || err);
+      }
+    })();
+    //NOTE: This is for the sake of speed.
+  } catch (err) {
+    client.rollback();
+    Logger.error(err.stack || err);
+  }
 }
 
-export async function createThread(req, fields, files, transaction) {
+export async function createThread(req, fields, transaction) {
   let { boardName, password } = fields;
   let board = Board.board(boardName);
   if (!board) {
@@ -317,9 +350,10 @@ export async function createThread(req, fields, files, transaction) {
   if (!board.postingEnabled) {
     return Promise.reject(new Error(Tools.translate('Posting is disabled at this board')));
   }
-  date = date || Tools.now();
+  await pushOutOldThread(boardName);
+  let date = Tools.now();
   password = Tools.sha1(password);
-  hashpass = (req.hashpass || null);
+  let hashpass = (req.hashpass || null);
   let threadNumber = await BoardsModel.nextPostNumber(boardName);
   let thread = {
     archived: false,
@@ -354,55 +388,53 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
   if (!thread) {
     throw new Error(Tools.translate('No such thread'));
   }
-  let sourcePath = `${__dirname}/../../public/${sourceBoardName}/src`;
-  let sourceThumbPath = `${__dirname}/../../public/${sourceBoardName}/thumb`;
-  let targetPath = `${__dirname}/../../public/${targetBoardName}/src`;
-  let targetThumbPath = `${__dirname}/../../public/${targetBoardName}/thumb`;
-  await mkpath(targetPath);
-  await mkpath(targetThumbPath);
-  delete thread.updatedAt;
-  let posts = await PostsModel.getPosts(sourceBoardName, thread.postNumbers, {
-    withFileInfos: true,
-    withReferences: true,
-    withExtraData: true
-  });
+  let postNumbers = thread.postNumbers;
   delete thread.postNumbers;
-  let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, posts.length);
-  lastPostNumber = lastPostNumber - posts.length + 1;
-  thread.number = lastPostNumber;
-  let postNumberMap = posts.reduce((acc, post) => {
-    acc.set(post.number, lastPostNumber++);
-    return acc;
-  }, new Map());
-  let { toRerender, toUpdate } = await PostsModel.processMovedThreadPosts({
-    posts: posts,
-    postNumberMap: postNumberMap,
-    threadNumber: thread.number,
-    targetBoard: targetBoard,
+  delete thread.updatedAt;
+  thread.boardName = targetBoardName;
+  let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, postNumbers.length);
+  let initialPostNumber = lastPostNumber - postNumbers.length + 1;
+  thread.number = initialPostNumber;
+  let { toRerender, toUpdate, postNumberMap } = await PostsModel.copyPosts({
     sourceBoardName: sourceBoardName,
-    sourcePath: sourcePath,
-    sourceThumbPath: sourceThumbPath,
-    targetPath: targetPath,
-    targetThumbPath: targetThumbPath
+    postNumbers: postNumbers,
+    targetBoardName: targetBoardName,
+    initialPostNumber: initialPostNumber
   });
-  await Threads.setOne(thead.number, thread, targetBoardName);
-  let threadKey = `${targetBoardName}:${thread.number}`;
-  await ThreadUpdateTimes.setOne(threadKey, Tools.now().toISOString());
-  await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), threadKey);
-  await PostsModel.processMovedThreadRelatedPosts({
+  await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), `${targetBoardName}:${thread.number}`);
+  await ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
+  await Threads.setOne(thread.number, thread, targetBoardName);
+  await IPC.render(targetBoardName, thread.number, thread.number, 'create');
+  toRerender = toRerender.reduce((acc, ref) => {
+    acc[`${ref.boardName}:${ref.postNumber}`] = ref;
+    return acc;
+  }, {});
+  toUpdate = toUpdate.reduce((acc, ref) => {
+    acc[`${ref.boardName}:${ref.threadNumber}`] = ref;
+    return acc;
+  }, {});
+  await PostsModel.rerenderMovedThreadRelatedPosts({
     posts: toRerender,
     sourceBoardName: sourceBoardName,
+    targetBoardName: targetBoardName,
     postNumberMap: postNumberMap
   });
-  await Tools.series(toUpdate, async function(o) {
-    return await IPC.render(o.boardName, o.threadNumber, o.threadNumber, 'create');
+  await PostsModel.updateMovedThreadRelatedPosts({
+    posts: toUpdate,
+    sourceBoardName: sourceBoardName,
+    targetBoardName: targetBoardName,
+    sourceThreadNumber: threadNumber,
+    targetThreadNumber: initialPostNumber,
+    postNumberMap: postNumberMap
   });
-  await removeThread(sourceBoardName, threadNumber, {
-    leaveFileInfos: true,
-    leaveReferences: true
+  await Tools.series(toRerender, async function(ref) {
+    return await IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
   });
-  IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
-  await IPC.render(targetBoardName, thread.number, thread.number, 'create');
+  await Tools.series(toUpdate, async function(ref) {
+    return await IPC.render(ref.boardName, ref.threadNumber, ref.threadNumber, 'create');
+  });
+  await removeThread(sourceBoardName, threadNumber);
+  await IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
   return {
     boardName: targetBoardName,
     threadNumber: thread.number

@@ -38,31 +38,27 @@ var testParameters = function () {
             post = void 0;
 
             if (!postNumber) {
-              _context.next = 17;
+              _context.next = 16;
               break;
             }
 
             _context.next = 11;
-            return PostsModel.getPostFileCount(boardName, postNumber);
-
-          case 11:
-            fileCount = _context.sent;
-
-            if (!(typeof fields.text === 'undefined')) {
-              _context.next = 17;
-              break;
-            }
-
-            _context.next = 15;
             return PostsModel.getPost(boardName, postNumber);
 
-          case 15:
+          case 11:
             post = _context.sent;
 
-            fields.text = post.rawText;
+            if (typeof fields.text === 'undefined') {
+              fields.text = post.rawText;
+            }
+            _context.next = 15;
+            return FilesModel.getPostFileCount(boardName, postNumber, { archived: post.archived });
 
-          case 17:
-            _context.next = 19;
+          case 15:
+            fileCount = _context.sent;
+
+          case 16:
+            _context.next = 18;
             return board.testParameters({
               req: req,
               mode: mode,
@@ -71,10 +67,10 @@ var testParameters = function () {
               existingFileCount: fileCount
             });
 
-          case 19:
+          case 18:
             return _context.abrupt('return', post);
 
-          case 20:
+          case 19:
           case 'end':
             return _context.stop();
         }
@@ -138,6 +134,10 @@ var FilesModel = _interopRequireWildcard(_files2);
 var _posts = require('../models/posts');
 
 var PostsModel = _interopRequireWildcard(_posts);
+
+var _threads = require('../models/threads');
+
+var ThreadsModel = _interopRequireWildcard(_threads);
 
 var _users = require('../models/users');
 
@@ -657,7 +657,7 @@ router.post('/action/addFiles', function () {
           case 36:
             files = _context6.sent;
             _context6.next = 39;
-            return FilesModel.addFilesToPost(boardName, postNumber, files, transaction);
+            return FilesModel.addFilesToPost(boardName, postNumber, files, { archived: _post4.archived });
 
           case 39:
             IPC.render(boardName, _post4.threadNumber, postNumber, 'edit');

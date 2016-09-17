@@ -1,10 +1,5 @@
 @import '../3rdparty/index';
-@import './sprite-favicons-16x16';
-@import './sprite-flags-16x11';
-@import './sprite-icons-16x16';
-@import './sprite-icons-20x20';
-@import './sprite-icons-24x24';
-@import './sprite-icons-32x32';
+@import '../sprites/index';
 @import './animations';
 @import './board';
 @import './chat';
@@ -208,6 +203,7 @@ header:empty, footer:empty {
   position: absolute;
   top: 4px;
   width: 100%;
+  z-index: 1;
   text-align: center;
   font-weight: bold;
   text-shadow: 1px 1px 0 #fff;
@@ -281,12 +277,12 @@ header:empty, footer:empty {
 
 .background-checkerboard {
   background-image:
-    -moz-linear-gradient(45deg, #666666 25%, transparent 25%), 
+    -moz-linear-gradient(45deg, #666666 25%, transparent 25%),
     -moz-linear-gradient(-45deg, #666666 25%, transparent 25%),
     -moz-linear-gradient(45deg, transparent 75%, #666666 75%),
     -moz-linear-gradient(-45deg, #999999 75%, #666666 75%);
   background-image:
-    -webkit-gradient(linear, 0 100%, 100% 0, color-stop(.25, #666666), color-stop(.25, transparent)), 
+    -webkit-gradient(linear, 0 100%, 100% 0, color-stop(.25, #666666), color-stop(.25, transparent)),
     -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, #666666), color-stop(.25, transparent)),
     -webkit-gradient(linear, 0 100%, 100% 0, color-stop(.75, transparent), color-stop(.75, #666666)),
     -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.75, #999999), color-stop(.75, #666666));

@@ -88,19 +88,20 @@
   flex-direction: row;
 }
 
-.post-text-wrapper {
-  box-sizing: border-box;
-}
-
 .post-file-name, .post-file-size {
-  white-space: nowrap;
+  white-space: nowrap; //NOTE: This makes text overflow the container, but since there is some extra space, it is OK
 }
 
 .post-file-actions {
   padding-bottom: 4px;
 }
 
+.post-file-link-container {
+  padding: 0px;
+}
+
 .post-text-wrapper {
+  box-sizing: border-box;
   padding: 14.4px 25px 14.4px 25px;
   overflow-wrap: break-word;
   word-wrap: break-word;
@@ -147,7 +148,7 @@
 
 .reply-to-thread-button {
   text-decoration: none;
-  padding: 8px;
+  padding: 4px;
   font-size: 1.2em;
 }
 

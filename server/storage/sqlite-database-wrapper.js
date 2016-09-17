@@ -45,25 +45,36 @@ var SQLiteDatabaseWrapper = function () {
 
               case 4:
                 this._client = _context.sent;
-                _context.next = 7;
+
+                if (this._client.manualTransaction) {
+                  _context.next = 8;
+                  break;
+                }
+
+                _context.next = 8;
                 return this._runRaw('BEGIN TRANSACTION');
 
-              case 7:
-                _context.next = 9;
+              case 8:
+                _context.next = 10;
                 return this._runRaw(METADATA_SCHEMA);
 
-              case 9:
-                _context.next = 11;
+              case 10:
+                _context.next = 12;
                 return this._runRaw(KEYS_SCHEMA);
 
-              case 11:
-                _context.next = 13;
+              case 12:
+                if (this._client.manualTransaction) {
+                  _context.next = 15;
+                  break;
+                }
+
+                _context.next = 15;
                 return this._runRaw('COMMIT TRANSACTION');
 
-              case 13:
+              case 15:
                 this._initialized = true;
 
-              case 14:
+              case 16:
               case 'end':
                 return _context.stop();
             }
@@ -260,17 +271,27 @@ var SQLiteDatabaseWrapper = function () {
 
               case 7:
                 _context6.prev = 7;
-                _context6.next = 10;
-                return this._runRaw('BEGIN ' + (next.type || '') + ' TRANSACTION');
 
-              case 10:
+                if (this._client.manualTransaction) {
+                  _context6.next = 11;
+                  break;
+                }
+
+                _context6.next = 11;
+                return this._runRaw('BEGIN TRANSACTION');
+
+              case 11:
                 state = void 0;
 
                 next.resolve({
                   state: state,
                   commit: function commit() {
                     return new Promise(function (resolve, reject) {
-                      _this4._runRaw('COMMIT TRANSACTION').then(function () {
+                      Promise.resolve().then(function () {
+                        if (!_this4._client.manualTransaction) {
+                          return _this4._runRaw('COMMIT TRANSACTION');
+                        }
+                      }).then(function () {
                         state = true;
                         resolve();
                         _this4._checkTransactionQueue();
@@ -293,21 +314,21 @@ var SQLiteDatabaseWrapper = function () {
                     });
                   }
                 });
-                _context6.next = 17;
+                _context6.next = 18;
                 break;
 
-              case 14:
-                _context6.prev = 14;
+              case 15:
+                _context6.prev = 15;
                 _context6.t0 = _context6['catch'](7);
 
                 next.reject(_context6.t0);
 
-              case 17:
+              case 18:
               case 'end':
                 return _context6.stop();
             }
           }
-        }, _callee6, this, [[7, 14]]);
+        }, _callee6, this, [[7, 15]]);
       }));
 
       function _checkTransactionQueue() {
@@ -319,7 +340,7 @@ var SQLiteDatabaseWrapper = function () {
   }, {
     key: '_transaction',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(transactionType) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
         var _this5 = this;
 
         var promise;
@@ -330,8 +351,7 @@ var SQLiteDatabaseWrapper = function () {
                 promise = new Promise(function (resolve, reject) {
                   _this5._transactionQueue.push({
                     resolve: resolve,
-                    reject: reject,
-                    type: transactionType || ''
+                    reject: reject
                   });
                 });
 
@@ -348,7 +368,7 @@ var SQLiteDatabaseWrapper = function () {
         }, _callee7, this);
       }));
 
-      function _transaction(_x8) {
+      function _transaction() {
         return ref.apply(this, arguments);
       }
 
@@ -434,7 +454,7 @@ var SQLiteDatabaseWrapper = function () {
         }, _callee8, this, [[1, 19], [22, 27]]);
       }));
 
-      function transaction(_x9) {
+      function transaction(_x8) {
         return ref.apply(this, arguments);
       }
 

@@ -410,13 +410,21 @@
   background: transparent;
 }
 .jstree-default .jstree-open > .jstree-ocl {
-  background-position: -132px -4px;
+  background-image: url(../img/sprites/icons.png);
+  background-position: -216px -80px;
+  width: 16px;
+  height: 16px;
 }
 .jstree-default .jstree-closed > .jstree-ocl {
-  background-position: -100px -4px;
+  background-image: url(../img/sprites/icons.png);
+  background-position: -216px -64px;
+  width: 16px;
+  height: 16px;
 }
 .jstree-default .jstree-leaf > .jstree-ocl {
-  background-position: -68px -4px;
+  /*background-position: -68px -4px;*/
+  width: 16px;
+  height: 16px;
 }
 .jstree-default .jstree-themeicon {
   /*background-position: -260px -4px;*/
@@ -508,8 +516,8 @@
   /*background: url("throbber.gif") center center no-repeat;*/
   width: 16px;
   height: 16px;
-  background-image: url('../img/sprites/icons-16x16.svg');
-  background-position: 0 -64px;
+  background-image: url('../img/sprites/icons.png');
+  background-position: -96px -196px;
   animation-name: spinner;
   animation-duration: 0.5s;
   animation-timing-function: linear;

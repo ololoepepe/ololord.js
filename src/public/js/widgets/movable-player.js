@@ -313,8 +313,8 @@ export default class MovablePlayer extends EventEmitter {
       }
     }
     this.scaleFactor += (imageZoomSensitivity * BASE_SCALE_FACTOR / this.scaleFactorModifier);
-    if (this.scaled(this.fileInfo.width) < this.minimumContentWidth
-      || this.scaled(this.fileInfo.height) < this.minimumContentHeight) {
+    if ((imageZoomSensitivity < 0) && ((this.scaled(this.fileInfo.width) < this.minimumContentWidth)
+      || (this.scaled(this.fileInfo.height) < this.minimumContentHeight))) {
       this.scaleFactor = previousScaleFactor;
       this.scaleFactorModifier = previousScaleFactorModifier;
     }
@@ -359,7 +359,7 @@ export default class MovablePlayer extends EventEmitter {
     this.visible = false;
   }
 
-  reset() {
+  reset(play) {
     let width = this.fileInfo.width;
     let height = this.fileInfo.height;
     let w = $(window);
@@ -400,6 +400,15 @@ export default class MovablePlayer extends EventEmitter {
         let defVol = Settings.defaultAudioVideoVolume() / 100;
         let remember = Settings.rememberAudioVideoVolume();
         this.content.volume = remember ? Storage.getLocalObject('audioVideoVolume', defVol) : defVol;
+      }
+    }
+    if (play) {
+      if (+play > 0) {
+        setTimeout(() => {
+          this.content.play();
+        }, +play);
+      } else {
+        this.content.play();
       }
     }
   }

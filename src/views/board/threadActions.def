@@ -1,16 +1,18 @@
 <div id='thread-actions-{{!position}}' class='thread-actions'>
   [<a href='/{{!it.site.pathPrefix}}{{!it.board.name}}{{? it.thread.archived}}/archive.html{{?}}'
-      class='icon-24 icon-arrow-left button-icon' title='{{!it.translate('Back', 'backText')}}'></a>]
-  <span class='js-only'>[<span class='icon-24 icon-update button-icon' 
-         data-bind='attr: {
-                      title: "{{!it.translate('Update thread', 'updateThreadText')}}" + shortcutSuffix("updateThread")
-                    },
-                    click: updateThread'></span>]</span>
-  <span class='js-only'
-        data-bind='click: toggleAutoUpdate'>[<input class='js-auto-update-thread' type='text' />]</span>
-  <script type='text/javascript'>
-    (function() {
-      window.lord.require('./core/threads').initializeThreadActions('{{!position}}');
-    })();
-  </script>
+      class='icon icon-arrow-left-24 button-icon' title='{{!it.translate('Back', 'backText')}}'></a>]
+  {{? it.board.postingEnabled && it.thread.postingEnabled && !it.thread.archived && !it.thread.postLimitReached}}
+    <span class='js-only'>[<span class='icon icon-update-24 button-icon' 
+           data-bind='attr: {
+                        title: "{{!it.translate('Update thread', 'updateThreadText')}}" + shortcutSuffix("updateThread")
+                      },
+                      click: updateThread'></span>]</span>
+    <span class='js-only'
+          data-bind='click: toggleAutoUpdate'>[<input class='js-auto-update-thread' type='text' />]</span>
+    <script type='text/javascript'>
+      (function() {
+        window.lord.require('./core/threads').initializeThreadActions('{{!position}}');
+      })();
+    </script>
+  {{?}}
 </div>

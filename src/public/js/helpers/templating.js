@@ -16,21 +16,9 @@ let _requireModel = () => null;
 export function initialize({ requireModel, requireTemplate } = {}) {
   _requireModel = requireModel;
   _requireTemplate = requireTemplate;
-  var hashpass = Storage.getCookie('hashpass');
-  var levels = hashpass ? Storage.getLocalObject('levels', {}) : {};
-  var tmpLevels = Storage.getCookie('tmp_levels');
-  if (tmpLevels) {
-    try {
-      tmpLevels = JSON.parse(tmpLevels);
-    } catch (ex) {
-      //Do nothing
-    }
-  }
-  if (tmpLevels) {
-    levels = tmpLevels;
-    Storage.setLocalObject('levels', levels);
-  }
-  var base = _requireModel('base');
+  let hashpass = Storage.getCookie('hashpass');
+  let levels = hashpass ? Storage.getLocalObject('levels', {}) : {};
+  let base = _requireModel('base');
   base.user = {
     levels: levels,
     hashpass: hashpass,

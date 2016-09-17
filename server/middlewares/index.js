@@ -16,10 +16,6 @@ var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
 
-var _cookies = require('./cookies');
-
-var _cookies2 = _interopRequireDefault(_cookies);
-
 var _hashpass = require('./hashpass');
 
 var _hashpass2 = _interopRequireDefault(_hashpass);
@@ -119,8 +115,6 @@ middlewares.push(_registeredUser2.default);
 if ('request' === BEFORE) {
   middlewares.push(_log2.default);
 }
-
-middlewares.push(_cookies2.default);
 
 exports.default = middlewares;
 //# sourceMappingURL=index.js.map

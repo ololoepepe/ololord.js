@@ -3,6 +3,7 @@ import KO from 'knockout';
 
 import MovableWidget from './movable-widget';
 import * as Templating from '../helpers/templating';
+import * as Tools from '../helpers/tools';
 
 export default class HiddenPostList extends MovableWidget {
   constructor(options) {
@@ -11,34 +12,25 @@ export default class HiddenPostList extends MovableWidget {
     }
     options.buttons = ['cancel', 'ok'];
     options.resizable = false;
-    let post = options.post || {};
-    post = {
-      boardName: post.boardName,
-      number: post.number,
-      name: KO.observable(post.name),
-      subject: KO.observable(post.subject),
-      text: KO.observable(post.rawText || '')
-    };
+    let post = options.post || { rawText: '' };
     let content = Templating.template('widgets/editPostWidget', {}, { boardName: post.boardName });
-    $(content).find('.js-symbols-used').empty().text(post.text().length);
+    $(content).find('.js-symbols-used').empty().text((post.rawText || '').length);
     KO.applyBindings({
       post: post,
       countSymbols: () => {
-        $(content).find('.js-symbols-used').empty().text(post.text().length);
+        $(content).find('.js-symbols-used').empty().text((post.rawText || '').length);
         return true;
       }
     }, content);
     super(content, options);
+    this.content = content;
     this.post = post;
   }
 
   createData() {
-    return {
+    return Tools.createFormData(this.content, {
       boardName: this.post.boardName,
-      postNumber: this.post.number,
-      name: this.post.name(),
-      subject: this.post.subject(),
-      text: this.post.text()
-    };
+      postNumber: this.post.number
+    });
   }
 }

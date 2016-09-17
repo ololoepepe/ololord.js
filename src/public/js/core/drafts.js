@@ -98,7 +98,6 @@ function deleteDraft(key, createdAt) {
 export async function addToDrafts() {
   let postForm = DOM.id('post-form');
   let boardName = DOM.nameOne('boardName', postForm).value;
-  let threadNumber = Tools.option(DOM.nameOne('threadNumber', postForm), 'number', 0, { test: Tools.testPostNumber });
   let data = {
     boardName: boardName,
     text: DOM.nameOne('text', postForm).value,
@@ -120,7 +119,8 @@ export async function addToDrafts() {
     result.name = DOM.nameOne('name', postForm).value;
     result.subject = DOM.nameOne('subject', postForm).value;
     result.options.markupMode = Settings.markupMode();
-    let key = boardName + (threadNumber ? ('/' + threadNumber) : '');
+    let threadNumber = Tools.threadNumber();
+    let key = Tools.boardName() + (threadNumber ? ('/' + threadNumber) : '');
     result.key = key;
     let drafts = Storage.drafts();
     if (!drafts.hasOwnProperty(key)) {
@@ -135,6 +135,10 @@ export async function addToDrafts() {
 };
 
 export function initializeDrafts() {
+  let draftsNode = $('#drafts')[0];
+  if (!draftsNode) {
+    return;
+  }
   KO.applyBindings({
     draftsVisible: Storage.draftsVisible,
     toggleDraftsVisibility: () => {
@@ -158,5 +162,5 @@ export function initializeDrafts() {
     },
     compareRegisteredUserLevels: Tools.compareRegisteredUserLevels,
     formattedDate: Tools.formattedDate
-  }, $('#drafts')[0]);
+  }, draftsNode);
 }

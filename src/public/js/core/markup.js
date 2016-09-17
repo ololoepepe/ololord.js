@@ -7,7 +7,7 @@ import * as Tools from '../helpers/tools';
 
 export let quoteSelectedText = function(selection) {
   try {
-    let field = DOM.nameOne('text', DOM.id('postForm'));
+    let field = DOM.nameOne('text', DOM.id('post-form'));
     let value = '';
     if (window.document.getSelection()) {
       let sel = (selection || window.document.getSelection().toString()).split(/\r?\n/).forEach((line) => {
@@ -19,10 +19,10 @@ export let quoteSelectedText = function(selection) {
       value = value.substr(0, value.length - 1);
     }
     if (!value) {
-      value += '>';
+      value = '>';
     }
     value += '\n';
-    if (selection && selection.length < 1) {
+    if (typeof selection !== 'undefined' && selection.length <= 0) {
       return;
     }
     let startPos = field.selectionStart;
@@ -62,7 +62,7 @@ const NORMAL_TAGS = new Set(['b', 'i', 's', 'u', 'spoiler', 'ul', 'ol', 'li', 's
   'l']);
 const UL_TAGS_REGEXP = /^ul(d|c|s)$/;
 const OL_TAGS_REGEXP = /^ol(1|I|i|A|a)$/;
-const UL_TAGS_MAP = new Map([['d', 'dick'], ['c', 'circle'], ['s', 'square']]);
+const UL_TAGS_MAP = new Map([['d', 'disc'], ['c', 'circle'], ['s', 'square']]);
 
 export function markup(tag) {
   if (typeof tag !== 'string') {

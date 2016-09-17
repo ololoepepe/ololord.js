@@ -28,12 +28,15 @@ import OverlayProgressBar from '../widgets/overlay-progress-bar';
 let lastPostPreview = null;
 let lastPostPreviewTimer = null;
 let postPreviewMask = null;
+let postPreviewsEnabled = true;
+let scheduledPostPreviews = new Set();
 
 const TRACK_DATA = ['boardName', 'fileName', 'mimeType', 'width', 'height', 'extraData'];
 const SOURCE_TEXT_MIN_WIDTH = 360;
 const SOURCE_TEXT_MIN_HEIGHT = 420;
 const BAN_USER_MIN_WIDTH = 700;
 const BAN_USER_MIN_HEIGHT = 600;
+const MOUSEOUT_CANCEL_DELAY = 0.5 * Constants.SECOND;
 
 class PostViewModel {
   constructor() {
@@ -52,8 +55,10 @@ class PostViewModel {
     Player.addToPlaylist(data);
   }
 
-  insertPostNumber(postNumber) {
-    PostForm.insertPostNumber(postNumber);
+  insertPostNumber(postNumber, _1, e) {
+    if (PostForm.insertPostNumber(postNumber)) {
+      e.stopImmediatePropagation();
+    }
   }
 
   quickReply(postNumber, threadNumber) {
@@ -204,8 +209,6 @@ export function resetOwnPostLinksCSS() {
     replace: '#stylesheet-own-post-links'
   });
 }
-
-Storage.ownPosts.subscribe(resetOwnPostLinksCSS);
 
 async function banUser(boardName, postNumber) {
   try {
@@ -415,8 +418,7 @@ async function editPost(boardName, postNumber) {
     if (!accepted) {
       return;
     }
-    await AJAX.post(`/${Tools.sitePathPrefix()}action/editPost`,
-      Tools.createFormData(widget.createData()), new OverlayProgressBar());
+    await AJAX.post(`/${Tools.sitePathPrefix()}action/editPost`, widget.createData(), new OverlayProgressBar());
     removeReferences(postNumber, true);
     await updatePost(postNumber);
   } catch (err) {
@@ -550,13 +552,27 @@ export let removeReferences = function(postNumber, referencedOnly) {
     if ($(parent).hasClass('.js-referring-posts')) {
       parent.removeChild(a);
       if (parent.children.length <= 1) {
-        parent.parentNode.style.display = 'none';
+        $(parent).empty();
       }
     } else if (!referencedOnly) {
       parent.replaceChild(DOM.node('text', a.textContent), a);
     }
   });
 };
+
+export function setPostPreviewsEnabled(enabled) {
+  postPreviewsEnabled = enabled;
+  if (!postPreviewsEnabled) {
+    scheduledPostPreviews.forEach((a) => {
+      if (a.viewPostTimer) {
+        clearTimeout(a.viewPostTimer);
+        delete a.viewPostTimer;
+      }
+    });
+    scheduledPostPreviews.clear();
+    $('.js-post.temporary-post, .temporary-post-overlay-mask').remove();
+  }
+}
 
 export function globalClickHandler(e) {
   if (e.button) {
@@ -573,6 +589,9 @@ export function globalClickHandler(e) {
       if (boardName && postNumber && $(t).hasClass('js-post-link')) {
         e.preventDefault();
         e.stopImmediatePropagation();
+        if (!postPreviewsEnabled) {
+          return;
+        }
         viewPost(t, boardName, postNumber);
       }
     }
@@ -608,10 +627,15 @@ export function globalMouseoverHandler(e) {
   if (!boardName || !postNumber || !$(a).hasClass('js-post-link')) {
     return;
   }
+  if (!postPreviewsEnabled) {
+    return;
+  }
   a.viewPostTimer = setTimeout(() => {
+    scheduledPostPreviews.delete(a);
     delete a.viewPostTimer;
     viewPost(a, boardName, postNumber, DOM.data('hiddenPost', a) === 'true');
   }, Settings.viewPostPreviewDelay());
+  scheduledPostPreviews.add(a);
 }
 
 export function globalMouseoutHandler(e) {
@@ -628,6 +652,7 @@ export function globalMouseoutHandler(e) {
     return;
   }
   if (a.viewPostTimer) {
+    scheduledPostPreviews.delete(a);
     clearTimeout(a.viewPostTimer);
     delete a.viewPostTimer;
   } else {
@@ -635,26 +660,29 @@ export function globalMouseoutHandler(e) {
       if (!lastPostPreview) {
         return;
       }
-      if (lastPostPreview.mustHide && lastPostPreview.parentNode)
+      if (lastPostPreview.mustHide && lastPostPreview.parentNode) {
         lastPostPreview.parentNode.removeChild(lastPostPreview);
-    }, 500); //TODO: magic numbers
+      }
+    }, MOUSEOUT_CANCEL_DELAY);
   }
 }
 
-function procerssReferencedPosts(node, post) {
-  let ownPosts = Storage.ownPosts();
+function procerssReferencedPosts(post) {
   post.referencedPosts.filter((reference) => {
-    return reference.boardName === Tools.boardName() && DOM.id(reference.postNumber);
+    return (reference.boardName === Tools.boardName()) && DOM.id(`post-${reference.postNumber}`);
   }).forEach((reference) => {
-    let targetPost = DOM.id(reference.postNumber);
+    let targetPost = DOM.id(`post-${reference.postNumber}`);
     let referencedBy = DOM.queryOne('.js-referring-posts', targetPost);
     let any = DOM.queryAll('a', referencedBy).some((ref) => {
-      return DOM.data('boardName', ref) === post.boardName && DOM.data('postNumber', ref) === post.number;
+      return (DOM.data('boardName', ref) === post.boardName) && (+DOM.data('postNumber', ref) === post.number);
     });
     if (any) {
       return;
     }
-    let a = Templating.template('postReference', {
+    if (!DOM.queryOne('a', referencedBy)) {
+      $(referencedBy).text(Tools.translate('Replies:', 'referencedByText'));
+    }
+    let a = Templating.template('post/reference', {
       reference: {
         boardName: post.boardName,
         postNumber: post.number,
@@ -701,7 +729,7 @@ export let createPostNode = async function(post, permanent, threadInfo) {
       DOM.handleError(err);
     }
     if (permanent && post.referencedPosts && post.referencedPosts.length > 0) {
-      procerssReferencedPosts(node, post);
+      procerssReferencedPosts(post);
     }
     return node;
   } catch (err) {
@@ -722,12 +750,15 @@ PostProcessors.registerPostprocessor(checkExpander, {
   }
 });
 
-Settings.addExpander.subscribe((value) => {
-  if (value) {
-    $('.js-post-text').scrollTop(0);
-    DOM.queryAll('.js-post').forEach(checkExpander);
-  } else {
-    $('.js-post-text-expander').remove();
-    $('.js-post-text').css('max-height', '');
-  }
-});
+export function initialize() {
+  Storage.ownPosts.subscribe(resetOwnPostLinksCSS);
+  Settings.addExpander.subscribe((value) => {
+    if (value) {
+      $('.js-post-text').scrollTop(0);
+      DOM.queryAll('.js-post').forEach(checkExpander);
+    } else {
+      $('.js-post-text-expander').remove();
+      $('.js-post-text').css('max-height', '');
+    }
+  });
+}

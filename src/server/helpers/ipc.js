@@ -130,7 +130,7 @@ async function performTask(type, key, data) {
     workerLoads.set(workerID, 1);
   }
   try {
-    let result = send('render', {
+    let result = await send('render', {
       type: type,
       key: key,
       data: data
@@ -145,19 +145,22 @@ async function performTask(type, key, data) {
 
 async function nextTask(type, key, map) {
   let scheduled = map.get(key);
-  let next = scheduled.next;
-  if (!next || next.length <= 0) {
+  if (!scheduled) {
+    return;
+  }
+  if (scheduled.length <= 0) {
     map.delete(key);
     return;
   }
-  delete scheduled.next;
+  //NOTE: Clearing initial array, but preserving it's copy
+  scheduled = scheduled.splice(0, scheduled.length);
   try {
-    await performTask(type, key, next.map(n => n.data));
+    await performTask(type, key, scheduled.map(n => n.data));
   } catch (err) {
     Logger.error(err.stack || err);
   }
-  nextTask();
-  next.forEach((n) => { n.resolve(); });
+  nextTask(type, key, map);
+  scheduled.forEach((n) => { n.resolve(); });
 }
 
 async function addTask(type, key, data) {
@@ -165,16 +168,13 @@ async function addTask(type, key, data) {
   let scheduled = map.get(key);
   if (scheduled) {
     return new Promise((resolve) => {
-      if (!scheduled.next) {
-        scheduled.next = [];
-      }
-      scheduled.next.push({
+      scheduled.push({
         resolve: resolve,
         data: data
       });
     });
   } else {
-    map.set(key, new Map());
+    map.set(key, []);
     try {
       await performTask(type, key, data);
     } catch (err) {
@@ -211,7 +211,7 @@ export async function renderCatalog(boardName) {
   return await addTask('renderCatalog', boardName);
 }
 
-export async function renderArchive(boardName) { //TODO
+export async function renderArchive(boardName) {
   try {
     if (Cluster.isMaster) {
       return await addTask('renderArchive', boardName);
@@ -232,7 +232,6 @@ export async function render(boardName, threadNumber, postNumber, action) {
         (async function() {
           await renderPages(boardName);
           await renderCatalog(boardName);
-          await renderArchive(boardName);
         })();
         break;
       case 'edit':
@@ -240,18 +239,12 @@ export async function render(boardName, threadNumber, postNumber, action) {
         if (threadNumber === postNumber) {
           await renderThread(boardName, threadNumber, postNumber, action);
           await renderPages(boardName);
-          (async function() {
-            await renderCatalog(boardName);
-            await renderArchive(boardName);
-          })();
+          renderCatalog(boardName);
         } else {
           (async function() {
             await renderThread(boardName, threadNumber, postNumber, action);
             await renderPages(boardName);
-            (async function() {
-              await renderCatalog(boardName);
-              await renderArchive(boardName);
-            })();
+            renderCatalog(boardName);
           })();
         }
         break;
@@ -259,10 +252,7 @@ export async function render(boardName, threadNumber, postNumber, action) {
         (async function() {
           await renderThread(boardName, threadNumber, postNumber, action);
           await renderPages(boardName);
-          (async function() {
-            await renderCatalog(boardName);
-            await renderArchive(boardName);
-          })();
+          renderCatalog(boardName);
         });
         break;
       }

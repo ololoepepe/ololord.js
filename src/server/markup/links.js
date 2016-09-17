@@ -4,13 +4,22 @@ import XRegExp from 'xregexp';
 
 import ProcessingContext from './processing-context';
 import Board from '../boards/board';
-import Renderer from '../core/renderer';
+import * as Renderer from '../core/renderer';
 import config from '../helpers/config';
 import FSWatcher from '../helpers/fs-watcher';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 import * as PostsModel from '../models/posts';
 
+const EXTERNAL_LINK_REGEXP_PATTERN = (() => {
+  let schema = 'https?:\\/\\/|ftp:\\/\\/';
+  let ip = '(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}'
+    + '(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])';
+  let hostname = '([\\w\\p{L}\\.\\-]+)\\.([\\p{L}]{2,17}\\.?)';
+  let port = ':\\d+';
+  let path = '(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\'\"\\,\\(\\)\\[\\]«»]*)*\\/?';
+  return `(${schema})?(${hostname}|${ip})(${port})?${path}`;
+})();
 const RX_VK_POST_LINK_PATTERN = '<div id\\="vk_post_\\-?\\d+_\\d+"><\\/div><script type="text\\/javascript">  '
   + '\\(function\\(d\\, s\\, id\\) \\{ var js\\, fjs \\= d\\.getElementsByTagName\\(s\\)\\[0\\]; '
   + 'if \\(d\\.getElementById\\(id\\)\\) return; js \\= d\\.createElement\\(s\\); js\\.id \\= id; js\\.src \\= '
@@ -84,7 +93,7 @@ async function getTwitterEmbeddedHtml(href, defaultHTML) {
 
 async function getYoutubeEmbeddedHtml(href, defaultHTML) {
   let match = href.match(RX_YOUTUBE_VIDEO_LINK_1);
-  let videoId = match ? match[1] : null;
+  let videoId = match ? match[2] : null;
   if (!videoId) {
     match = href.match(RX_YOUTUBE_VIDEO_LINK_2);
     videoId = match ? match[1] : null;
@@ -105,7 +114,7 @@ async function getYoutubeEmbeddedHtml(href, defaultHTML) {
     let data = await response.body.read();
     response = JSON.parse(data.toString());
     if (!response.items || response.items.length < 1) {
-      throw new new Error(Tools.translate('Failed to get YouTube video info'));
+      throw new Error(Tools.translate('Failed to get YouTube video info'));
     }
     let info = response.items[0].snippet;
     info.id = videoId;
@@ -135,7 +144,7 @@ async function getCoubEmbeddedHtml(href, defaultHTML) {
       timeout: config('system.httpRequestTimeout')
     });
     if (response.status !== 200) {
-      throw new new Error(Tools.translate('Failed to get Coub embedded HTML'));
+      throw new Error(Tools.translate('Failed to get Coub embedded HTML'));
     }
     let data = await response.body.read();
     response = JSON.parse(data.toString());
@@ -175,6 +184,7 @@ function getVocarooEmbeddedHtml(href, defaultHTML) {
     if (!html) {
       throw new Error(Tools.translate('Failed to create Vocaroo audio embedded container'));
     }
+    return html;
   } catch (err) {
     Logger.log(err.stack || err);
     return defaultHTML;
@@ -194,7 +204,10 @@ async function convertLinkCommon(hrefIsText, info, text, matchs, _1, options) {
   if (info.isIn(matchs.index, matchs[0].length, ProcessingContext.HTML_SKIP)) {
     return text;
   }
-  let href = hrefIsText ? text : matchs[0];
+  if (!hrefIsText) {
+    text = matchs[0];
+  }
+  let href = text;
   if (href.lastIndexOf('http', 0) && href.lastIndexOf('ftp', 0)) {
     href = `http://${href}`;
   }
@@ -244,7 +257,7 @@ async function convertPostLink(info, _1, matchs, _2, options) {
   }
   let result = `<a href='/${config('site.pathPrefix')}${boardName}/res/${post.threadNumber}.html`;
   if (postNumber !== post.threadNumber) {
-    result += `#${postNumber}`;
+    result += `#post-${postNumber}`;
   }
   result += "' class='js-post-link";
   if (postNumber === post.threadNumber) {
@@ -262,6 +275,10 @@ function checkExternalLink(info, matchs) {
   return /^\d+\.\d+\.\d+\.\d+$/.test(matchs[2]) || rootZones.hasOwnProperty(matchs[4]);
 }
 
+function checkPostLink(_1, matchs) {
+  return Board.boardNames().indexOf(matchs[1]) >= 0;
+}
+
 export default [{
   priority: 1500,
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
@@ -273,13 +290,13 @@ export default [{
   priority: 1600,
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
   convert: convertLinkCommon.bind(null, true),
-  op: "[url]",
-  cl: "[/url]"
+  op: '[url]',
+  cl: '[/url]'
 }, {
   priority: 1700,
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
   convert: convertLinkCommon.bind(null, false),
-  op: new XRegExp(Tools.EXTERNAL_LINK_REGEXP_PATTERN, "gi"),
+  op: new XRegExp(EXTERNAL_LINK_REGEXP_PATTERN, 'gi'),
   cl: null,
   check: checkExternalLink
 }, {
@@ -298,6 +315,7 @@ export default [{
   priority: 2300,
   markupModes: ['EXTENDED_WAKABA_MARK', 'BB_CODE'],
   convert: convertPostLink,
-  op: new RegExp(`>>/(${Board.boardNames().join('|')})/([1-9][0-9]*)`, 'gi'),
-  cl: null
+  op: new RegExp(`>>/([^\/\s]+)/([1-9][0-9]*)`, 'gi'),
+  cl: null,
+  check: checkPostLink
 }];

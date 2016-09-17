@@ -16,10 +16,14 @@ export default class SQLiteDatabaseWrapper {
       return;
     }
     this._client = await this._client;
-    await this._runRaw(`BEGIN TRANSACTION`);
+    if (!this._client.manualTransaction) {
+      await this._runRaw('BEGIN TRANSACTION');
+    }
     await this._runRaw(METADATA_SCHEMA);
     await this._runRaw(KEYS_SCHEMA);
-    await this._runRaw(`COMMIT TRANSACTION`);
+    if (!this._client.manualTransaction) {
+      await this._runRaw('COMMIT TRANSACTION');
+    }
     this._initialized = true;
   }
 
@@ -75,13 +79,19 @@ export default class SQLiteDatabaseWrapper {
     this._currentTransaction = true;
     await this._awaitClient();
     try {
-      await this._runRaw(`BEGIN ${next.type || ''} TRANSACTION`);
+      if (!this._client.manualTransaction) {
+        await this._runRaw('BEGIN TRANSACTION');
+      }
       let state;
       next.resolve({
         state: state,
         commit: () => {
           return new Promise((resolve, reject) => {
-            this._runRaw(`COMMIT TRANSACTION`).then(() => {
+            Promise.resolve().then(() => {
+              if (!this._client.manualTransaction) {
+                return this._runRaw('COMMIT TRANSACTION');
+              }
+            }).then(() => {
               state = true;
               resolve();
               this._checkTransactionQueue();
@@ -109,12 +119,11 @@ export default class SQLiteDatabaseWrapper {
     }
   }
 
-  async _transaction(transactionType) {
+  async _transaction() {
     let promise = new Promise((resolve, reject) => {
       this._transactionQueue.push({
         resolve: resolve,
         reject: reject,
-        type: transactionType || ''
       });
     });
     if (!this._currentTransaction) {

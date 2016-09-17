@@ -25,7 +25,7 @@ function notifyAboutNewMessage(keys) {
   let key = _(keys).last();
   let title = Tools.translate('Private chat', 'chatText');
   let txt = Tools.translate('New private messages');
-  let div = $(`<div><span class='icon icon-bubble button-icon' title='${title}'></span> ${txt} [${key}]</div>`);
+  let div = $(`<div><span class='icon icon-bubble-16 button-icon' title='${title}'></span> ${txt} [${key}]</div>`);
   div.find('span').click(showChat.bind(null, key));
   Widgets.PopupMessage.showPopup(div[0], { type: 'node' });
   if (Settings.playAutoUpdateSound()) {

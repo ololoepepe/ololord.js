@@ -36,6 +36,7 @@ const FAVORITES_MIN_HEIGHT = 400;
 let pageVisible = true;
 let blinkTimer = null;
 let autoUpdateTimer = null;
+let updateThreadPopup = null;
 
 class AutoUpdateViewModel {
   constructor() {
@@ -64,9 +65,8 @@ class BlinkTimer {
     window.document.title =  `* ${window.document.title}`;
     this.newmessageFavicon = false;
     this.timer = setInterval(() => {
-      this.newmessageFavicon;
       let link = DOM.id('favicon');
-      link.href.replace(/\/[\/]+$/, `/favicon${this.newmessageFavicon ? '' : '_newmessage'}.ico`);
+      link.href = link.href.replace(/\/[^\/]+$/, `/favicon${this.newmessageFavicon ? '' : '_newmessage'}.ico`);
       this.newmessageFavicon = !this.newmessageFavicon;
     }, this.blinkInterval);
   }
@@ -78,17 +78,19 @@ class BlinkTimer {
     clearInterval(this.timer);
     this.timer = null;
     let link = DOM.id('favicon');
-    link.href = link.href.replace(/\/[\/]+$/, '/favicon.ico');
+    link.href = link.href.replace(/\/[^\/]+$/, '/favicon.ico');
     window.document.title = window.document.title.substr(2);
   }
 }
 
 function showLoadingPostsPopup(text) {
   text = text || Tools.translate('Loading posts…', 'loadingPostsMessage');
-  return PopupMessage.showPopup($(`<span><span class='icon-24 icon-spinner'></span><span>${text}</span></span>`)[0], {
+  let node = $(`<span><span class='icon-24 icon-spinner'></span><span>${text}</span></span>`)[0];
+  let popup = PopupMessage.showPopup(node, {
     type: 'node',
     timeout: Constants.BILLION
   });
+  return popup;
 }
 
 export let updateThread = async function(silent) {
@@ -100,7 +102,13 @@ export let updateThread = async function(silent) {
   }
   let lastPostNumber = +DOM.data('number', _(posts).last());
   if (!silent) {
-    var popup = showLoadingPostsPopup();
+    if (updateThreadPopup) {
+      return;
+    }
+    updateThreadPopup = showLoadingPostsPopup();
+    updateThreadPopup.on('hide', () => {
+      updateThreadPopup = null;
+    });
   }
   try {
     let result = await AJAX.api('threadLastPostNumber', {
@@ -117,13 +125,14 @@ export let updateThread = async function(silent) {
       var model = await AJAX.api(threadNumber, {}, { prefix: `${boardName}/res` });
     }
     let posts = model.thread.lastPosts.filter((post) => { return post.number > lastPostNumber; });
-    if (typeof popup !== 'undefined') {
+    if (updateThreadPopup) {
       let txt = (posts.length >= 1) ? Tools.translate('New posts:', 'newPostsText')
         : Tools.translate('No new posts', 'noNewPostsText');
-      if (posts.length >= 1)
-        txt += `  + ${posts.length}`;
-        popup.resetContent(txt);
-        popup.resetTimeout();
+      if (posts.length >= 1) {
+        txt += ` ${posts.length}`;
+      }
+      updateThreadPopup.resetContent(txt);
+      updateThreadPopup.resetTimeout();
     }
     if (posts.length < 1) {
       return;
@@ -133,16 +142,16 @@ export let updateThread = async function(silent) {
       threadNumber: threadNumber
     }, { indicator: new OverlayProgressBar() });
     let sequenceNumber = _(posts).last().sequenceNumber;
-    posts = await Tools.series(posts, (post) => {
-      return Posts.createPostNode(post, true, threadInfo);
+    let postNodes = await Tools.series(posts, async function(post) {
+      return await Posts.createPostNode(post, true, threadInfo);
     }, true);
-    await Tools.series(posts, (post) => {
-      if (DOM.id(post.id)) {
+    await Tools.series(postNodes, async function(postNode) {
+      if (DOM.id(postNode.id)) {
         return;
       }
-      $(post).addClass('new-post').one('mouseover', () => { $(post).removeClass('new-post'); });
-      $('.js-thread-posts').append(post);
-      return PostProcessors.applyPostprocessors(post);
+      $(postNode).addClass('new-post').one('mouseover', () => { $(postNode).removeClass('new-post'); });
+      $('.js-thread-posts').append(postNode);
+      return await PostProcessors.applyPostprocessors(postNode);
     });
     Files.initializeFiles();
     let board = Templating.board(boardName);
@@ -158,7 +167,7 @@ export let updateThread = async function(silent) {
         blinkTimer.start();
       }
       if (Settings.showAutoUpdateDesktopNotifications()) {
-        let subject = DOM.queryOne('.theTitle > h1').textContent;
+        let subject = DOM.queryOne('.page-title').textContent;
         let title = `[${subject}] ${Tools.translate('New posts:', 'newPostsText')} ${posts.length}`;
         let icon = `/${Tools.sitePathPrefix()}favicon.ico`;
         let post = posts[0];
@@ -173,8 +182,9 @@ export let updateThread = async function(silent) {
       }
     }
   } catch (err) {
-    if (typeof popup !== 'undefined') {
-      popup.hide();
+    if (updateThreadPopup) {
+      updateThreadPopup.hide();
+      updateThreadPopup = null;
     }
     DOM.handleError(err);
   }
@@ -367,12 +377,18 @@ function createGetNewPostCountFunction(lastPostNumbers, newLastPostNumbers, boar
   };
 }
 
+let showNewPostsTimer = null;
+
 export async function showNewPosts() {
+  if (showNewPostsTimer) {
+    clearTimeout(showNewPostsTimer);
+    showNewPostsTimer = null;
+  }
   let newLastPostNumbers = Storage.lastPostNumbers();
   try {
     let result = await AJAX.api('lastPostNumbers');
     let getNewPostCount = createGetNewPostCountFunction(result, newLastPostNumbers);
-    let selector = '.js-navbar .js-navbar-item a';
+    let selector = '.js-navbar .js-navbar-item-board a';
     if (Tools.deviceType('mobile')) {
       selector += ', .board-select option';
     }
@@ -390,6 +406,9 @@ export async function showNewPosts() {
       }
       $(`<span class='new-post-count'>+${newPostCount} </span>`).insertBefore(isSelect ? $(a).children().first() : a);
     });
+    if (typeof window.lord.emit === 'function') {
+      window.lord.emit('lastPostNumbersReceived', getNewPostCount);
+    }
     _(result).each((lastPostNumber, boardName) => {
       if (!newLastPostNumbers.hasOwnProperty(boardName)) {
         newLastPostNumbers[boardName] = lastPostNumber;
@@ -405,10 +424,10 @@ export async function showNewPosts() {
       }
     });
     Storage.lastPostNumbers(lastPostNumbers);
-    setTimeout(showNewPosts, SHOW_NEW_POSTS_INTERVAL);
+    showNewPostsTimer = setTimeout(showNewPosts, SHOW_NEW_POSTS_INTERVAL);
   } catch (err) {
     DOM.handleError(err);
-    setTimeout(showNewPosts, SHOW_NEW_POSTS_FAIL_INTERVAL);
+    showNewPostsTimer = setTimeout(showNewPosts, SHOW_NEW_POSTS_FAIL_INTERVAL);
   }
 }
 
@@ -577,14 +596,6 @@ export function addToOrRemoveFromFavorites(boardName, threadNumber) {
   }
 }
 
-Settings.useWebSockets.subscribe(async function() {
-  if (!autoUpdateTimer) {
-    return;
-  }
-  await setAutoUpdateEnabled(false);
-  await setAutoUpdateEnabled(true);
-});
-
 export async function setAutoUpdateEnabled(enabled) {
   Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber(), enabled);
   if (Settings.useWebSockets()) {
@@ -614,7 +625,7 @@ export function visibilityChangeHandler() {
   if (window.document.hidden === undefined) {
     return;
   }
-  pageVisible = !!window.document.hidden;
+  pageVisible = !window.document.hidden;
   if (!pageVisible || !blinkTimer) {
     return;
   }
@@ -678,3 +689,13 @@ WebSocket.registerHandler('newPost', updateThread.bind(null, true), {
   priority: 0,
   test: Tools.isThreadPage
 });
+
+export function initialize() {
+  Settings.useWebSockets.subscribe(async function() {
+    if (!autoUpdateTimer) {
+      return;
+    }
+    await setAutoUpdateEnabled(false);
+    await setAutoUpdateEnabled(true);
+  });
+}

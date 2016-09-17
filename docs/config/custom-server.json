@@ -1,0 +1,26 @@
+{
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc"]
+    },
+    "source": {
+        "include": ["src/server"],
+        "includePattern": "\\/custom\\/.+\\.js$"
+    },
+    "plugins": [
+        "plugins/markdown",
+        "node_modules/jsdoc-strip-async-await"
+    ],
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": true,
+        "useLongnameInNav": false
+    },
+    "opts": {
+        "destination": "./docs/custom-server",
+        "encoding": "utf8",
+        "private": true,
+        "recurse": true,
+        "template": "./node_modules/minami"
+    }
+}

@@ -352,7 +352,7 @@ router.post('/action/moveThread', function () {
             throw new Error(Tools.translate('Invalid board'));
 
           case 11:
-            if (!(sourceBoardName == targetBoardName)) {
+            if (!(boardName === targetBoardName)) {
               _context4.next = 13;
               break;
             }

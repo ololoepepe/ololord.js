@@ -28,6 +28,7 @@ let floatingPostForm = false;
 let visiblePostFormContainerPosition = KO.observable('');
 let sageEnabled = KO.observable(Storage.sageEnabled());
 let showTripcode = KO.observable(Storage.showTripcode());
+let submitHandlers = [];
 
 function postFormFixedButtonTitle() {
   return Storage.postFormFixed() ? Tools.translate('Fixed', 'postFormFixedButtonText')
@@ -175,19 +176,44 @@ export let insertPostNumber = function(postNumber) {
   } catch (err) {
     console.log(err);
   }
+  return true;
 };
 
 function resetPostForm() {
-  let postForm = DOM.id('post-form');
-  postForm.reset();
-  DOM.queryAll('.file-input', postForm).reverse().forEach(FileInputs.removeFile);
-  //TODO: custom reset
+  let postForm = $('#post-form');
+  postForm.find('[name="name"], [name="subject"], [name="text"]').val('');
+  postForm.find('[name="signAsOp"]').prop('checked', false);
+  DOM.queryAll('.file-input', postForm[0]).reverse().forEach(FileInputs.removeFile);
+  if (typeof window.lord.emit === 'function') {
+    window.lord.emit('postFormReset');
+  }
+}
+
+export function registerSubmitHandler(handler) {
+  if (typeof handler !== 'function') {
+    return;
+  }
+  submitHandlers.push(handler);
 }
 
 export async function submit() {
   let form = $('#post-form');
   let btn = form.find('[name="submit"]');
   btn.prop('disabled', true);
+  let interrupted = false;
+  await Tools.series(submitHandlers, async function(handler) {
+    if (interrupted) {
+      return;
+    }
+    let result = await handler(form);
+    if (typeof result !== 'undefined' && !result) {
+      interrupted = true;
+    }
+  });
+  if (interrupted) {
+    btn.prop('disabled', false);
+    return;
+  }
   let formData = Tools.createFormData(form[0]);
   try {
     let result = await AJAX.post(form.attr('action'), formData, new OverlayProgressBar());

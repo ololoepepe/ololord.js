@@ -2,6 +2,7 @@ import URI from 'urijs';
 import VK from 'vk-openapi';
 
 import * as Constants from '../helpers/constants';
+import * as AJAX from '../helpers/ajax';
 import * as DOM from '../helpers/dom';
 import * as Navigation from '../helpers/navigation';
 import * as Storage from '../helpers/storage';
@@ -21,13 +22,11 @@ function vkLogin(timeout) {
       }
       resolve(response.session);
     }, VK.access.AUDIO);
-    if (!result) {
-      reject(Tools.translate('Vkontakte is not initialized'));
-    }
   });
 }
 
 function vkLogout(timeout) {
+  initializeVK();
   timeout = Tools.option(timeout, 'number', DEFAULT_VK_LOGOUT_TIMEOUT, { test: (t) => { t > 0; } });
   return new Promise((resolve, reject) => {
     setTimeout(reject.bind(null, Tools.translate('Vkontakte logout timeout')), timeout);
@@ -48,24 +47,29 @@ export async function login(hashpass, vk) {
     if (!hashpass) {
       return;
     }
-    Storage.hashpass(hashpass, (vkSession && !realHashpass) ? vkSession.expire : Constants.BILLION)
+    Storage.hashpass(hashpass, (vkSession && !realHashpass) ? vkSession.expire : Constants.BILLION);
     if (vkSession) {
       Storage.vkAuth(vkSession.expire);
     }
-    Storage.removeLocalObject('levels');
     Storage.removeLocalObject('lastChatCheckDate');
+    let levels = await AJAX.api('userLevels');
+    Storage.setLocalObject('levels', levels);
     let href = `/${Tools.sitePathPrefix()}redirect?source=${URI(window.location.href).search(true).source}`;
     await Navigation.setPage(href, { ajax: false });
   } catch (err) {
     DOM.handleError(err);
   }
-};
+}
 
 export async function logout() {
   try {
-    if (Storage.vkAuth() === 'true') {
-      await vkLogout();
-      Storage.deleteCookie('vkAuth', '/');
+    if (Storage.vkAuth()) {
+      try {
+        await vkLogout();
+      } catch (err) {
+        DOM.handleError(err);
+      }
+      Storage.vkAuth(-1);
     }
     Storage.hashpass('', -1);
     Storage.removeLocalObject('levels');

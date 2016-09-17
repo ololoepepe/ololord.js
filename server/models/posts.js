@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.processMovedThreadRelatedPosts = exports.processMovedThreadPosts = exports.rebuildSearchIndex = exports.rerenderPosts = exports.getPostFileCount = exports.deletePost = exports.editPost = exports.removePost = exports.createPost = exports.addReferencedPosts = exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
+exports.pushPostToArchive = exports.updateMovedThreadRelatedPosts = exports.rerenderMovedThreadRelatedPosts = exports.copyPosts = exports.rebuildSearchIndex = exports.rerenderPosts = exports.deletePost = exports.editPost = exports.removePost = exports.rerenderPost = exports.createPost = exports.getPostKeys = exports.getPosts = exports.getPost = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -16,73 +16,54 @@ var addDataToPost = function () {
     var withExtraData = _ref.withExtraData;
     var withFileInfos = _ref.withFileInfos;
     var withReferences = _ref.withReferences;
-    var key, ban, extraData, fileNames, fileInfos, referringPosts, referencedPosts;
+    var ban, extraData;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            key = post.boardName + ':' + post.number;
-            _context.next = 3;
+            _context.next = 2;
             return UserBans.get(post.user.ip + ':' + post.boardName);
 
-          case 3:
+          case 2:
             ban = _context.sent;
 
             post.bannedFor = !!(ban && ban.postNumber === post.number);
 
             if (!withExtraData) {
-              _context.next = 10;
+              _context.next = 9;
               break;
             }
 
-            _context.next = 8;
-            return board.loadExtraData(post.number);
+            _context.next = 7;
+            return board.loadExtraData(post.number, !!post.archived);
 
-          case 8:
+          case 7:
             extraData = _context.sent;
 
             post.extraData = extraData;
 
-          case 10:
+          case 9:
             if (!withFileInfos) {
-              _context.next = 18;
+              _context.next = 13;
               break;
             }
 
-            _context.next = 13;
-            return PostFileInfoNames.getAll(key);
+            _context.next = 12;
+            return FilesModel.getPostFileInfos(post.boardName, post.number, { archived: post.archived });
+
+          case 12:
+            post.fileInfos = _context.sent;
 
           case 13:
-            fileNames = _context.sent;
-            _context.next = 16;
-            return FileInfos.getSome(fileNames);
-
-          case 16:
-            fileInfos = _context.sent;
-
-            post.fileInfos = fileInfos;
-
-          case 18:
             if (!withReferences) {
-              _context.next = 27;
+              _context.next = 16;
               break;
             }
 
-            _context.next = 21;
-            return ReferringPosts.getAll(key);
+            _context.next = 16;
+            return PostReferencesModel.addReferencesToPost(post);
 
-          case 21:
-            referringPosts = _context.sent;
-            _context.next = 24;
-            return ReferencedPosts.getAll(key);
-
-          case 24:
-            referencedPosts = _context.sent;
-
-            post.referringPosts = sortedReferences(referringPosts);
-            post.referencedPosts = sortedReferences(referencedPosts);
-
-          case 27:
+          case 16:
           case 'end':
             return _context.stop();
         }
@@ -130,27 +111,39 @@ var getPost = exports.getPost = function () {
             post = _context2.sent;
 
             if (post) {
-              _context2.next = 12;
+              _context2.next = 14;
+              break;
+            }
+
+            _context2.next = 13;
+            return ArchivedPosts.getOne(key);
+
+          case 13:
+            post = _context2.sent;
+
+          case 14:
+            if (post) {
+              _context2.next = 16;
               break;
             }
 
             return _context2.abrupt('return', post);
 
-          case 12:
-            _context2.next = 14;
+          case 16:
+            _context2.next = 18;
             return ThreadsModel.getThreadPostNumbers(boardName, post.threadNumber);
 
-          case 14:
+          case 18:
             threadPostNumbers = _context2.sent;
 
             post.sequenceNumber = threadPostNumbers.indexOf(post.number) + 1;
-            _context2.next = 18;
+            _context2.next = 22;
             return addDataToPost(board, post, options);
 
-          case 18:
+          case 22:
             return _context2.abrupt('return', post);
 
-          case 19:
+          case 23:
           case 'end':
             return _context2.stop();
         }
@@ -164,20 +157,20 @@ var getPost = exports.getPost = function () {
 }();
 
 var getPosts = exports.getPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, postNumbers, options) {
-    var board, posts, threadPostNumbers;
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName, postNumbers, options) {
+    var board, posts, mayBeArchivedPostNumbers, numbers, archivedPosts, uniqueThreadNumbers, threadsPostNumbers;
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
-        switch (_context4.prev = _context4.next) {
+        switch (_context5.prev = _context5.next) {
           case 0:
             board = _board2.default.board(boardName);
 
             if (board) {
-              _context4.next = 3;
+              _context5.next = 3;
               break;
             }
 
-            return _context4.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            return _context5.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             if (!(0, _underscore2.default)(postNumbers).isArray()) {
@@ -190,56 +183,82 @@ var getPosts = exports.getPosts = function () {
             if (!postNumbers.some(function (postNumber) {
               return !postNumber;
             })) {
-              _context4.next = 7;
+              _context5.next = 7;
               break;
             }
 
-            return _context4.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post number'))));
+            return _context5.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post number'))));
 
           case 7:
-            _context4.next = 9;
+            _context5.next = 9;
             return Posts.getSome(postNumbers.map(function (postNumber) {
               return boardName + ':' + postNumber;
             }));
 
           case 9:
-            posts = _context4.sent;
+            posts = _context5.sent;
 
             posts = (0, _underscore2.default)(posts).toArray();
+            mayBeArchivedPostNumbers = posts.map(function (post, index) {
+              return {
+                post: post,
+                index: index
+              };
+            }).filter(function (post) {
+              return !post.post;
+            }).map(function (post) {
+              return {
+                index: post.index,
+                postNumber: postNumbers[post.index]
+              };
+            });
 
-            if (!(posts.length <= 0)) {
-              _context4.next = 13;
+            if (!(mayBeArchivedPostNumbers.length > 0)) {
+              _context5.next = 18;
               break;
             }
 
-            return _context4.abrupt('return', []);
+            numbers = mayBeArchivedPostNumbers.map(function (post) {
+              return post.postNumber;
+            });
+            _context5.next = 16;
+            return ArchivedPosts.getSome(numbers.map(function (postNumber) {
+              return boardName + ':' + postNumber;
+            }));
 
-          case 13:
-            _context4.next = 15;
-            return ThreadsModel.getThreadPostNumbers(boardName, posts[0].threadNumber);
+          case 16:
+            archivedPosts = _context5.sent;
 
-          case 15:
-            threadPostNumbers = _context4.sent;
-            _context4.next = 18;
-            return Tools.series(posts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(post, index) {
+            archivedPosts.forEach(function (post, index) {
+              posts[mayBeArchivedPostNumbers[index].index] = post;
+            });
+
+          case 18:
+            if (!(posts.length <= 0)) {
+              _context5.next = 20;
+              break;
+            }
+
+            return _context5.abrupt('return', []);
+
+          case 20:
+            uniqueThreadNumbers = (0, _underscore2.default)(posts.map(function (post) {
+              return post.threadNumber;
+            })).uniq();
+            _context5.next = 23;
+            return Tools.series(uniqueThreadNumbers, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(threadNumber) {
                 return regeneratorRuntime.wrap(function _callee3$(_context3) {
                   while (1) {
                     switch (_context3.prev = _context3.next) {
                       case 0:
-                        if (post) {
-                          _context3.next = 2;
-                          break;
-                        }
-
-                        return _context3.abrupt('return');
+                        _context3.next = 2;
+                        return ThreadsModel.getThreadPostNumbers(boardName, threadNumber);
 
                       case 2:
-                        post.sequenceNumber = threadPostNumbers.indexOf(post.number) + 1;
-                        _context3.next = 5;
-                        return addDataToPost(board, post, options);
+                        return _context3.abrupt('return', _context3.sent);
 
-                      case 5:
+                      case 3:
                       case 'end':
                         return _context3.stop();
                     }
@@ -247,20 +266,59 @@ var getPosts = exports.getPosts = function () {
                 }, _callee3, this);
               }));
 
-              return function (_x11, _x12) {
+              return function (_x11) {
+                return ref.apply(this, arguments);
+              };
+            }(), true);
+
+          case 23:
+            threadsPostNumbers = _context5.sent;
+
+            threadsPostNumbers = threadsPostNumbers.reduce(function (acc, list, index) {
+              acc[uniqueThreadNumbers[index]] = list;
+              return acc;
+            }, {});
+            _context5.next = 27;
+            return Tools.series(posts, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(post, index) {
+                return regeneratorRuntime.wrap(function _callee4$(_context4) {
+                  while (1) {
+                    switch (_context4.prev = _context4.next) {
+                      case 0:
+                        if (post) {
+                          _context4.next = 2;
+                          break;
+                        }
+
+                        return _context4.abrupt('return');
+
+                      case 2:
+                        post.sequenceNumber = threadsPostNumbers[post.threadNumber].indexOf(post.number) + 1;
+                        _context4.next = 5;
+                        return addDataToPost(board, post, options);
+
+                      case 5:
+                      case 'end':
+                        return _context4.stop();
+                    }
+                  }
+                }, _callee4, this);
+              }));
+
+              return function (_x12, _x13) {
                 return ref.apply(this, arguments);
               };
             }());
 
-          case 18:
-            return _context4.abrupt('return', posts);
+          case 27:
+            return _context5.abrupt('return', posts);
 
-          case 19:
+          case 28:
           case 'end':
-            return _context4.stop();
+            return _context5.stop();
         }
       }
-    }, _callee4, this);
+    }, _callee5, this);
   }));
 
   return function getPosts(_x8, _x9, _x10) {
@@ -269,107 +327,68 @@ var getPosts = exports.getPosts = function () {
 }();
 
 var getPostKeys = exports.getPostKeys = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
-    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6() {
+    var _ref2 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+    var archived = _ref2.archived;
+    var nonArchived = _ref2.nonArchived;
+    var archivedKeys, nonArchivedKeys;
+    return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
-        switch (_context5.prev = _context5.next) {
+        switch (_context6.prev = _context6.next) {
           case 0:
-            _context5.next = 2;
-            return Posts.keys();
+            archivedKeys = [];
+            nonArchivedKeys = [];
 
-          case 2:
-            return _context5.abrupt('return', _context5.sent);
-
-          case 3:
-          case 'end':
-            return _context5.stop();
-        }
-      }
-    }, _callee5, this);
-  }));
-
-  return function getPostKeys() {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var addReferencedPosts = exports.addReferencedPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(post, referencedPosts) {
-    var _ref2 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var nogenerate = _ref2.nogenerate;
-    var key;
-    return regeneratorRuntime.wrap(function _callee7$(_context7) {
-      while (1) {
-        switch (_context7.prev = _context7.next) {
-          case 0:
-            key = post.boardName + ':' + post.number;
-            //TODO: Optimise (hmset)
-
-            _context7.next = 3;
-            return Tools.series(referencedPosts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(ref, refKey) {
-                return regeneratorRuntime.wrap(function _callee6$(_context6) {
-                  while (1) {
-                    switch (_context6.prev = _context6.next) {
-                      case 0:
-                        _context6.next = 2;
-                        return ReferencedPosts.setOne(refKey, ref, key);
-
-                      case 2:
-                        _context6.next = 4;
-                        return ReferringPosts.setOne(key, {
-                          boardName: post.boardName,
-                          postNumber: post.number,
-                          threadNumber: post.threadNumber,
-                          createdAt: refKey.createdAt
-                        }, refKey);
-
-                      case 4:
-                      case 'end':
-                        return _context6.stop();
-                    }
-                  }
-                }, _callee6, this);
-              }));
-
-              return function (_x17, _x18) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 3:
-            if (!nogenerate) {
-              (0, _underscore2.default)(referencedPosts).each(function (ref, refKey) {
-                if (ref.boardName !== post.boardName || ref.threadNumber !== post.threadNumber) {
-                  IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
-                }
-              });
+            if (!archived) {
+              _context6.next = 6;
+              break;
             }
 
-          case 4:
+            _context6.next = 5;
+            return ArchivedPosts.keys();
+
+          case 5:
+            archivedKeys = _context6.sent;
+
+          case 6:
+            if (!(nonArchived || !archived && !nonArchived)) {
+              _context6.next = 10;
+              break;
+            }
+
+            _context6.next = 9;
+            return Posts.keys();
+
+          case 9:
+            nonArchivedKeys = _context6.sent;
+
+          case 10:
+            return _context6.abrupt('return', nonArchivedKeys.concat(archivedKeys));
+
+          case 11:
           case 'end':
-            return _context7.stop();
+            return _context6.stop();
         }
       }
-    }, _callee7, this);
+    }, _callee6, this);
   }));
 
-  return function addReferencedPosts(_x13, _x14, _x15) {
+  return function getPostKeys(_x14) {
     return ref.apply(this, arguments);
   };
 }();
 
 var createPost = exports.createPost = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(req, fields, files, transaction) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(req, fields, files, transaction) {
     var _ref3 = arguments.length <= 4 || arguments[4] === undefined ? {} : arguments[4];
 
     var postNumber = _ref3.postNumber;
     var date = _ref3.date;
     var boardName, threadNumber, text, markupMode, name, subject, sage, signAsOp, tripcode, password, board, rawText, markupModes, referencedPosts, hashpass, thread, unbumpable, accessLevel, postCount, extraData, plainText, post;
-    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
-        switch (_context9.prev = _context9.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
             boardName = fields.boardName;
             threadNumber = fields.threadNumber;
@@ -387,19 +406,19 @@ var createPost = exports.createPost = function () {
             board = _board2.default.board(boardName);
 
             if (board) {
-              _context9.next = 15;
+              _context7.next = 15;
               break;
             }
 
-            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            return _context7.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 15:
             if (board.postingEnabled) {
-              _context9.next = 17;
+              _context7.next = 17;
               break;
             }
 
-            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Posting is disabled at this board'))));
+            return _context7.abrupt('return', Promise.reject(new Error(Tools.translate('Posting is disabled at this board'))));
 
           case 17:
             date = date || Tools.now();
@@ -415,45 +434,45 @@ var createPost = exports.createPost = function () {
             signAsOp = 'true' === signAsOp;
             password = Tools.sha1(password);
             hashpass = req.hashpass || null;
-            _context9.next = 29;
+            _context7.next = 29;
             return ThreadsModel.getThread(boardName, threadNumber);
 
           case 29:
-            thread = _context9.sent;
+            thread = _context7.sent;
 
             if (thread) {
-              _context9.next = 32;
+              _context7.next = 32;
               break;
             }
 
-            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('No such thread'))));
+            return _context7.abrupt('return', Promise.reject(new Error(Tools.translate('No such thread'))));
 
           case 32:
             if (!thread.closed) {
-              _context9.next = 34;
+              _context7.next = 34;
               break;
             }
 
-            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Posting is disabled in this thread'))));
+            return _context7.abrupt('return', Promise.reject(new Error(Tools.translate('Posting is disabled in this thread'))));
 
           case 34:
             unbumpable = !!thread.unbumpable;
             accessLevel = req.level(boardName) || null;
-            _context9.next = 38;
+            _context7.next = 38;
             return ThreadsModel.getThreadPostCount(boardName, threadNumber);
 
           case 38:
-            postCount = _context9.sent;
+            postCount = _context7.sent;
 
             if (!(postCount >= board.postLimit)) {
-              _context9.next = 41;
+              _context7.next = 41;
               break;
             }
 
-            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Post limit reached'))));
+            return _context7.abrupt('return', Promise.reject(new Error(Tools.translate('Post limit reached'))));
 
           case 41:
-            _context9.next = 43;
+            _context7.next = 43;
             return (0, _markup2.default)(boardName, rawText, {
               markupModes: markupModes,
               referencedPosts: referencedPosts,
@@ -461,27 +480,27 @@ var createPost = exports.createPost = function () {
             });
 
           case 43:
-            text = _context9.sent;
-            _context9.next = 46;
+            text = _context7.sent;
+            _context7.next = 46;
             return board.postExtraData(req, fields, files);
 
           case 46:
-            extraData = _context9.sent;
+            extraData = _context7.sent;
 
             if (typeof extraData === 'undefined') {
               extraData = null;
             }
 
             if (postNumber) {
-              _context9.next = 52;
+              _context7.next = 52;
               break;
             }
 
-            _context9.next = 51;
+            _context7.next = 51;
             return BoardsModel.nextPostNumber(boardName);
 
           case 51:
-            postNumber = _context9.sent;
+            postNumber = _context7.sent;
 
           case 52:
             plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
@@ -513,57 +532,27 @@ var createPost = exports.createPost = function () {
             };
 
             transaction.setPostNumber(postNumber);
-            _context9.next = 57;
+            _context7.next = 57;
             return Posts.setOne(boardName + ':' + postNumber, post);
 
           case 57:
-            _context9.next = 59;
-            return board.storeExtraData(postNumber, extraData);
+            _context7.next = 59;
+            return board.storeExtraData(postNumber, extraData, false);
 
           case 59:
-            _context9.next = 61;
-            return addReferencedPosts(post, referencedPosts);
+            _context7.next = 61;
+            return PostReferencesModel.addReferencedPosts(post, referencedPosts);
 
           case 61:
-            _context9.next = 63;
+            _context7.next = 63;
             return UsersModel.addUserPostNumber(req.ip, boardName, postNumber);
 
           case 63:
-            _context9.next = 65;
-            return Tools.series(files, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(file) {
-                return regeneratorRuntime.wrap(function _callee8$(_context8) {
-                  while (1) {
-                    switch (_context8.prev = _context8.next) {
-                      case 0:
-                        file.boardName = boardName;
-                        file.postNumber = postNumber;
-                        _context8.next = 4;
-                        return FilesModel.addFileInfo(file);
-
-                      case 4:
-                        _context8.next = 6;
-                        return PostFileInfoNames.addOne(file.name, boardName + ':' + postNumber);
-
-                      case 6:
-                      case 'end':
-                        return _context8.stop();
-                    }
-                  }
-                }, _callee8, this);
-              }));
-
-              return function (_x25) {
-                return ref.apply(this, arguments);
-              };
-            }());
+            _context7.next = 65;
+            return FilesModel.addFilesToPost(boardName, postNumber, files);
 
           case 65:
-            _context9.next = 67;
-            return FilesModel.addFileHashes(files);
-
-          case 67:
-            _context9.next = 69;
+            _context7.next = 67;
             return Search.indexPost({
               boardName: boardName,
               postNumber: postNumber,
@@ -572,132 +561,63 @@ var createPost = exports.createPost = function () {
               subject: subject
             });
 
-          case 69:
-            _context9.next = 71;
+          case 67:
+            _context7.next = 69;
             return ThreadsModel.addThreadPostNumber(boardName, threadNumber, postNumber);
 
-          case 71:
+          case 69:
             if (!(!sage && postCount < board.bumpLimit && !unbumpable)) {
-              _context9.next = 74;
+              _context7.next = 72;
               break;
             }
 
-            _context9.next = 74;
+            _context7.next = 72;
             return ThreadsModel.setThreadUpdateTime(boardName, threadNumber, date.toISOString());
 
-          case 74:
+          case 72:
             post.referencedPosts = referencedPosts;
             post.fileInfos = files;
-            return _context9.abrupt('return', post);
+            return _context7.abrupt('return', post);
 
-          case 77:
+          case 75:
           case 'end':
-            return _context9.stop();
+            return _context7.stop();
         }
       }
-    }, _callee9, this);
+    }, _callee7, this);
   }));
 
-  return function createPost(_x19, _x20, _x21, _x22, _x23) {
+  return function createPost(_x16, _x17, _x18, _x19, _x20) {
     return ref.apply(this, arguments);
   };
 }();
 
-var removeReferencedPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(_ref4) {
-    var boardName = _ref4.boardName;
-    var number = _ref4.number;
-    var threadNumber = _ref4.threadNumber;
+var rerenderPost = exports.rerenderPost = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(boardName, postNumber) {
+    var _ref4 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-    var _ref5 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-    var nogenerate = _ref5.nogenerate;
-    var key, referencedPosts;
-    return regeneratorRuntime.wrap(function _callee11$(_context11) {
+    var nogenerate = _ref4.nogenerate;
+    var post, referencedPosts, text, source;
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context11.prev = _context11.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
-            key = boardName + ':' + number;
-            _context11.next = 3;
-            return ReferencedPosts.getAll(key);
-
-          case 3:
-            referencedPosts = _context11.sent;
-            _context11.next = 6;
-            return Tools.series(referencedPosts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(ref, refKey) {
-                return regeneratorRuntime.wrap(function _callee10$(_context10) {
-                  while (1) {
-                    switch (_context10.prev = _context10.next) {
-                      case 0:
-                        _context10.next = 2;
-                        return ReferringPosts.deleteOne(key, refKey);
-
-                      case 2:
-                        return _context10.abrupt('return', _context10.sent);
-
-                      case 3:
-                      case 'end':
-                        return _context10.stop();
-                    }
-                  }
-                }, _callee10, this);
-              }));
-
-              return function (_x29, _x30) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 6:
-            if (!nogenerate) {
-              (0, _underscore2.default)(referencedPosts).filter(function (ref) {
-                return ref.boardName !== boardName || ref.threadNumber !== threadNumber;
-              }).forEach(function (ref) {
-                IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
-              });
-            }
-            ReferencedPosts.delete(key);
-
-          case 8:
-          case 'end':
-            return _context11.stop();
-        }
-      }
-    }, _callee11, this);
-  }));
-
-  return function removeReferencedPosts(_x26, _x27) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var rerenderPost = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, postNumber) {
-    var _ref6 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var nogenerate = _ref6.nogenerate;
-    var post, referencedPosts, text;
-    return regeneratorRuntime.wrap(function _callee12$(_context12) {
-      while (1) {
-        switch (_context12.prev = _context12.next) {
-          case 0:
-            _context12.next = 2;
+            _context8.next = 2;
             return getPost(boardName, postNumber);
 
           case 2:
-            post = _context12.sent;
+            post = _context8.sent;
 
             if (post) {
-              _context12.next = 5;
+              _context8.next = 5;
               break;
             }
 
-            return _context12.abrupt('return', Promise.reject(new Error(Tools.translate('No such post'))));
+            return _context8.abrupt('return', Promise.reject(new Error(Tools.translate('No such post'))));
 
           case 5:
             referencedPosts = {};
-            _context12.next = 8;
+            _context8.next = 8;
             return (0, _markup2.default)(boardName, post.rawText, {
               markupModes: post.markup,
               referencedPosts: referencedPosts,
@@ -705,300 +625,149 @@ var rerenderPost = function () {
             });
 
           case 8:
-            text = _context12.sent;
+            text = _context8.sent;
 
             post.text = text;
-            _context12.next = 12;
-            return Posts.setOne(boardName + ':' + postNumber, post);
+            source = post.archived ? ArchivedPosts : Posts;
+            _context8.next = 13;
+            return source.setOne(boardName + ':' + postNumber, post);
 
-          case 12:
-            _context12.next = 14;
-            return removeReferencedPosts(post, { nogenerate: nogenerate });
+          case 13:
+            _context8.next = 15;
+            return PostReferencesModel.removeReferencedPosts(post, { nogenerate: nogenerate });
 
-          case 14:
-            _context12.next = 16;
-            return addReferencedPosts(post, referencedPosts, { nogenerate: nogenerate });
+          case 15:
+            _context8.next = 17;
+            return PostReferencesModel.addReferencedPosts(post, referencedPosts, {
+              nogenerate: nogenerate,
+              archived: post.archived
+            });
 
-          case 16:
+          case 17:
             if (!nogenerate) {
               IPC.render(boardName, post.threadNumber, postNumber, 'edit');
             }
 
-          case 17:
+          case 18:
           case 'end':
-            return _context12.stop();
+            return _context8.stop();
         }
       }
-    }, _callee12, this);
+    }, _callee8, this);
   }));
 
-  return function rerenderPost(_x31, _x32, _x33) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var rerenderReferringPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(_ref7) {
-    var boardName = _ref7.boardName;
-    var number = _ref7.number;
-    var threadNumber = _ref7.threadNumber;
-
-    var _ref8 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-    var removingThread = _ref8.removingThread;
-    var referringPosts;
-    return regeneratorRuntime.wrap(function _callee14$(_context14) {
-      while (1) {
-        switch (_context14.prev = _context14.next) {
-          case 0:
-            _context14.next = 2;
-            return ReferringPosts.getAll(boardName + ':' + number);
-
-          case 2:
-            referringPosts = _context14.sent;
-
-            referringPosts = (0, _underscore2.default)(referringPosts).filter(function (ref) {
-              return !removingThread || ref.boardName !== boardName || ref.threadNumber !== threadNumber;
-            });
-            _context14.next = 6;
-            return Tools.series(referringPosts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(ref) {
-                return regeneratorRuntime.wrap(function _callee13$(_context13) {
-                  while (1) {
-                    switch (_context13.prev = _context13.next) {
-                      case 0:
-                        _context13.next = 2;
-                        return rerenderPost(ref.boardName, ref.postNumber);
-
-                      case 2:
-                        return _context13.abrupt('return', _context13.sent);
-
-                      case 3:
-                      case 'end':
-                        return _context13.stop();
-                    }
-                  }
-                }, _callee13, this);
-              }));
-
-              return function (_x38) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 6:
-          case 'end':
-            return _context14.stop();
-        }
-      }
-    }, _callee14, this);
-  }));
-
-  return function rerenderReferringPosts(_x35, _x36) {
+  return function rerenderPost(_x22, _x23, _x24) {
     return ref.apply(this, arguments);
   };
 }();
 
 var removePost = exports.removePost = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(boardName, postNumber) {
-    var _ref9 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(boardName, postNumber) {
+    var _ref5 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-    var removingThread = _ref9.removingThread;
-    var leaveReferences = _ref9.leaveReferences;
-    var leaveFileInfos = _ref9.leaveFileInfos;
-    var board, key, post, fileNames, fileInfos, paths;
-    return regeneratorRuntime.wrap(function _callee17$(_context17) {
+    var removingThread = _ref5.removingThread;
+    var board, key, post, source;
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
-        switch (_context17.prev = _context17.next) {
+        switch (_context9.prev = _context9.next) {
           case 0:
             board = _board2.default.board(boardName);
 
             if (board) {
-              _context17.next = 3;
+              _context9.next = 3;
               break;
             }
 
-            return _context17.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             key = boardName + ':' + postNumber;
-            _context17.next = 6;
+            _context9.next = 6;
             return PostsPlannedForDeletion.addOne(key);
 
           case 6:
-            _context17.next = 8;
+            _context9.next = 8;
             return getPost(boardName, postNumber, { withReferences: true });
 
           case 8:
-            post = _context17.sent;
-            _context17.next = 11;
-            return ThreadsModel.removeThreadPostNumber(boardName, post.threadNumber, postNumber);
+            post = _context9.sent;
+            _context9.next = 11;
+            return ThreadsModel.removeThreadPostNumber(boardName, post.threadNumber, postNumber, { archived: post.archived });
 
           case 11:
-            _context17.next = 13;
-            return Posts.deleteOne(key);
+            source = post.archived ? ArchivedPosts : Posts;
+            _context9.next = 14;
+            return source.deleteOne(key);
 
-          case 13:
-            if (leaveReferences) {
-              _context17.next = 30;
-              break;
-            }
-
-            _context17.prev = 14;
-            _context17.next = 17;
-            return rerenderReferringPosts(post, { removingThread: removingThread });
+          case 14:
+            _context9.prev = 14;
+            _context9.next = 17;
+            return PostReferencesModel.rerenderReferringPosts(post, { removingThread: removingThread });
 
           case 17:
-            _context17.next = 22;
+            _context9.next = 22;
             break;
 
           case 19:
-            _context17.prev = 19;
-            _context17.t0 = _context17['catch'](14);
+            _context9.prev = 19;
+            _context9.t0 = _context9['catch'](14);
 
-            _logger2.default.error(_context17.t0.stack || _context17.t0);
+            _logger2.default.error(_context9.t0.stack || _context9.t0);
 
           case 22:
-            _context17.prev = 22;
-            _context17.next = 25;
-            return removeReferencedPosts(post);
+            _context9.prev = 22;
+            _context9.next = 25;
+            return PostReferencesModel.removeReferencedPosts(post);
 
           case 25:
-            _context17.next = 30;
+            _context9.next = 30;
             break;
 
           case 27:
-            _context17.prev = 27;
-            _context17.t1 = _context17['catch'](22);
+            _context9.prev = 27;
+            _context9.t1 = _context9['catch'](22);
 
-            _logger2.default.error(_context17.t1.stack || _context17.t1);
+            _logger2.default.error(_context9.t1.stack || _context9.t1);
 
           case 30:
-            _context17.next = 32;
+            _context9.next = 32;
             return UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber);
 
           case 32:
-            if (leaveFileInfos) {
-              _context17.next = 48;
-              break;
-            }
+            _context9.next = 34;
+            return FilesModel.removePostFileInfos(boardName, postNumber, { archived: post.archived });
 
-            _context17.next = 35;
-            return PostFileInfoNames.getAll(key);
+          case 34:
+            _context9.next = 36;
+            return board.removeExtraData(postNumber, !!post.archived);
 
-          case 35:
-            fileNames = _context17.sent;
-            _context17.next = 38;
-            return Tools.series(fileNames, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(fileName) {
-                return regeneratorRuntime.wrap(function _callee15$(_context15) {
-                  while (1) {
-                    switch (_context15.prev = _context15.next) {
-                      case 0:
-                        _context15.next = 2;
-                        return FilesModel.getFileInfoByName(fileName);
-
-                      case 2:
-                        return _context15.abrupt('return', _context15.sent);
-
-                      case 3:
-                      case 'end':
-                        return _context15.stop();
-                    }
-                  }
-                }, _callee15, this);
-              }));
-
-              return function (_x43) {
-                return ref.apply(this, arguments);
-              };
-            }(), true);
-
-          case 38:
-            fileInfos = _context17.sent;
-
-            fileInfos = fileInfos.filter(function (fileInfo) {
-              return !!fileInfo;
-            });
-            paths = fileInfos.map(function (fileInfo) {
-              return [__dirname + '/../../public/' + boardName + '/src/' + fileInfo.name, __dirname + '/../../public/' + boardName + '/thumb/' + fileInfo.thumb.name];
-            });
-            _context17.next = 43;
-            return PostFileInfoNames.delete(key);
-
-          case 43:
-            _context17.next = 45;
-            return FilesModel.removeFileInfos(fileNames);
-
-          case 45:
-            _context17.next = 47;
-            return FilesModel.removeFileHashes(fileInfos);
-
-          case 47:
-            Tools.series((0, _underscore2.default)(paths).flatten(), function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(path) {
-                return regeneratorRuntime.wrap(function _callee16$(_context16) {
-                  while (1) {
-                    switch (_context16.prev = _context16.next) {
-                      case 0:
-                        _context16.prev = 0;
-                        _context16.next = 3;
-                        return _fs2.default.remove(path);
-
-                      case 3:
-                        _context16.next = 8;
-                        break;
-
-                      case 5:
-                        _context16.prev = 5;
-                        _context16.t0 = _context16['catch'](0);
-
-                        _logger2.default.error(_context16.t0.stack || _context16.t0);
-
-                      case 8:
-                      case 'end':
-                        return _context16.stop();
-                    }
-                  }
-                }, _callee16, this, [[0, 5]]);
-              }));
-
-              return function (_x44) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 48:
-            _context17.next = 50;
-            return board.removeExtraData(postNumber);
-
-          case 50:
-            _context17.next = 52;
+          case 36:
+            _context9.next = 38;
             return Search.removePostIndex(boardName, postNumber);
 
-          case 52:
-            _context17.next = 54;
+          case 38:
+            _context9.next = 40;
             return PostsPlannedForDeletion.deleteOne(key);
 
-          case 54:
+          case 40:
           case 'end':
-            return _context17.stop();
+            return _context9.stop();
         }
       }
-    }, _callee17, this, [[14, 19], [22, 27]]);
+    }, _callee9, this, [[14, 19], [22, 27]]);
   }));
 
-  return function removePost(_x39, _x40, _x41) {
+  return function removePost(_x26, _x27, _x28) {
     return ref.apply(this, arguments);
   };
 }();
 
 var editPost = exports.editPost = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(req, fields) {
-    var boardName, postNumber, text, name, subject, sage, markupMode, board, date, rawText, markupModes, referencedPosts, post, key, plainText, extraData;
-    return regeneratorRuntime.wrap(function _callee18$(_context18) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(req, fields) {
+    var boardName, postNumber, text, name, subject, sage, markupMode, board, date, rawText, markupModes, referencedPosts, post, key, plainText, extraData, source;
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
-        switch (_context18.prev = _context18.next) {
+        switch (_context10.prev = _context10.next) {
           case 0:
             boardName = fields.boardName;
             postNumber = fields.postNumber;
@@ -1010,21 +779,21 @@ var editPost = exports.editPost = function () {
             board = _board2.default.board(boardName);
 
             if (board) {
-              _context18.next = 10;
+              _context10.next = 10;
               break;
             }
 
-            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            return _context10.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 10:
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (postNumber) {
-              _context18.next = 13;
+              _context10.next = 13;
               break;
             }
 
-            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post number'))));
+            return _context10.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post number'))));
 
           case 13:
             date = Tools.now();
@@ -1033,32 +802,36 @@ var editPost = exports.editPost = function () {
             referencedPosts = {};
 
             sage = 'true' === sage;
-            _context18.next = 20;
+            _context10.next = 20;
             return getPost(boardName, postNumber, { withExtraData: true });
 
           case 20:
-            post = _context18.sent;
+            post = _context10.sent;
 
             if (post) {
-              _context18.next = 23;
+              _context10.next = 23;
               break;
             }
 
-            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post'))));
+            return _context10.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post'))));
 
           case 23:
             key = boardName + ':' + postNumber;
-            _context18.next = 26;
+            _context10.next = 26;
             return (0, _markup2.default)(board.name, rawText, {
-              markupModes: /*markupModes*/post.markup, //TODO ???
+              markupModes: markupModes,
               referencedPosts: referencedPosts,
               accessLevel: req.level(board.name)
             });
 
           case 26:
-            text = _context18.sent;
+            text = _context10.sent;
             plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
-            extraData = post.extraData;
+            _context10.next = 30;
+            return board.postExtraData(req, fields, null, post);
+
+          case 30:
+            extraData = _context10.sent;
 
             if (post.hasOwnProperty('extraData')) {
               delete post.extraData;
@@ -1066,98 +839,99 @@ var editPost = exports.editPost = function () {
             if (post.hasOwnProperty('bannedFor')) {
               delete post.bannedFor;
             }
-            //post.markup = markupModes; //TODO ???
+            post.markup = markupModes;
             post.name = name || null;
             post.plainText = plainText;
             post.rawText = rawText;
             post.subject = subject || null;
             post.text = text || null;
             post.updatedAt = date.toISOString();
-            _context18.next = 39;
-            return Posts.setOne(key, post);
-
-          case 39:
-            _context18.next = 41;
-            return board.removeExtraData(postNumber);
-
-          case 41:
-            _context18.next = 43;
-            return board.storeExtraData(postNumber, extraData);
+            source = post.archived ? ArchivedPosts : Posts;
+            _context10.next = 43;
+            return source.setOne(key, post);
 
           case 43:
-            _context18.next = 45;
-            return removeReferencedPosts(post);
+            _context10.next = 45;
+            return board.removeExtraData(postNumber, !!post.archived);
 
           case 45:
-            _context18.next = 47;
-            return addReferencedPosts(post, referencedPosts);
+            _context10.next = 47;
+            return board.storeExtraData(postNumber, extraData, !!post.archived);
 
           case 47:
-            _context18.next = 49;
+            _context10.next = 49;
+            return PostReferencesModel.removeReferencedPosts(post);
+
+          case 49:
+            _context10.next = 51;
+            return PostReferencesModel.addReferencedPosts(post, referencedPosts, { archived: post.archived });
+
+          case 51:
+            _context10.next = 53;
             return Search.updatePostIndex(boardName, postNumber, function (body) {
               body.plainText = plainText;
               body.subject = subject;
               return body;
             });
 
-          case 49:
-            return _context18.abrupt('return', post);
+          case 53:
+            return _context10.abrupt('return', post);
 
-          case 50:
+          case 54:
           case 'end':
-            return _context18.stop();
+            return _context10.stop();
         }
       }
-    }, _callee18, this);
+    }, _callee10, this);
   }));
 
-  return function editPost(_x45, _x46) {
+  return function editPost(_x30, _x31) {
     return ref.apply(this, arguments);
   };
 }();
 
 var deletePost = exports.deletePost = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(req, _ref10) {
-    var boardName = _ref10.boardName;
-    var postNumber = _ref10.postNumber;
-    var archived = _ref10.archived;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(req, _ref6) {
+    var boardName = _ref6.boardName;
+    var postNumber = _ref6.postNumber;
+    var archived = _ref6.archived;
     var board, post, isThread;
-    return regeneratorRuntime.wrap(function _callee20$(_context20) {
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
-        switch (_context20.prev = _context20.next) {
+        switch (_context12.prev = _context12.next) {
           case 0:
             board = _board2.default.board(boardName);
 
             if (board) {
-              _context20.next = 3;
+              _context12.next = 3;
               break;
             }
 
-            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            return _context12.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (postNumber) {
-              _context20.next = 6;
+              _context12.next = 6;
               break;
             }
 
-            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post number'))));
+            return _context12.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid post number'))));
 
           case 6:
-            _context20.next = 8;
+            _context12.next = 8;
             return getPost(boardName, postNumber);
 
           case 8:
-            post = _context20.sent;
+            post = _context12.sent;
 
             if (post) {
-              _context20.next = 11;
+              _context12.next = 11;
               break;
             }
 
-            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('No such post'))));
+            return _context12.abrupt('return', Promise.reject(new Error(Tools.translate('No such post'))));
 
           case 11:
             isThread = post.threadNumber === post.number;
@@ -1165,129 +939,104 @@ var deletePost = exports.deletePost = function () {
             archived = 'true' === archived;
 
             if (!(archived && !isThread)) {
-              _context20.next = 15;
+              _context12.next = 15;
               break;
             }
 
-            return _context20.abrupt('return', Promise.reject(new Error(Tools.translate('Deleting posts from archived threads is not allowed'))));
+            return _context12.abrupt('return', Promise.reject(new Error(Tools.translate('Deleting posts from archived threads is not allowed'))));
 
           case 15:
             if (!isThread) {
-              _context20.next = 20;
+              _context12.next = 20;
               break;
             }
 
-            _context20.next = 18;
-            return removeThread(boardName, postNumber, { archived: archived });
+            _context12.next = 18;
+            return ThreadsModel.removeThread(boardName, postNumber, { archived: archived });
 
           case 18:
-            _context20.next = 22;
+            _context12.next = 22;
             break;
 
           case 20:
-            _context20.next = 22;
+            _context12.next = 22;
             return removePost(boardName, postNumber);
 
           case 22:
             if (!(isThread && archived)) {
-              _context20.next = 29;
+              _context12.next = 29;
               break;
             }
 
-            _context20.next = 25;
+            _context12.next = 25;
             return Tools.series(['json', 'html'], function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(suffix) {
-                return regeneratorRuntime.wrap(function _callee19$(_context19) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(suffix) {
+                return regeneratorRuntime.wrap(function _callee11$(_context11) {
                   while (1) {
-                    switch (_context19.prev = _context19.next) {
+                    switch (_context11.prev = _context11.next) {
                       case 0:
-                        _context19.next = 2;
+                        _context11.next = 2;
                         return _fs2.default.remove(__dirname + '/../../public/' + boardName + '/arch/' + postNumber + '.' + suffix);
 
                       case 2:
-                        return _context19.abrupt('return', _context19.sent);
+                        return _context11.abrupt('return', _context11.sent);
 
                       case 3:
                       case 'end':
-                        return _context19.stop();
+                        return _context11.stop();
                     }
                   }
-                }, _callee19, this);
+                }, _callee11, this);
               }));
 
-              return function (_x49) {
+              return function (_x34) {
                 return ref.apply(this, arguments);
               };
             }());
 
           case 25:
-            _context20.next = 27;
+            _context12.next = 27;
             return IPC.renderArchive(boardName);
 
           case 27:
-            _context20.next = 32;
+            _context12.next = 32;
             break;
 
           case 29:
             if (archived) {
-              _context20.next = 32;
+              _context12.next = 32;
               break;
             }
 
-            _context20.next = 32;
+            _context12.next = 32;
             return IPC.render(boardName, post.threadNumber, postNumber, isThread ? 'delete' : 'edit');
 
           case 32:
           case 'end':
-            return _context20.stop();
+            return _context12.stop();
         }
       }
-    }, _callee20, this);
+    }, _callee12, this);
   }));
 
-  return function deletePost(_x47, _x48) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var getPostFileCount = exports.getPostFileCount = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(boardName, postNumber) {
-    return regeneratorRuntime.wrap(function _callee21$(_context21) {
-      while (1) {
-        switch (_context21.prev = _context21.next) {
-          case 0:
-            _context21.next = 2;
-            return PostFileInfoNames.count(boardName + ':' + postNumber);
-
-          case 2:
-            return _context21.abrupt('return', _context21.sent);
-
-          case 3:
-          case 'end':
-            return _context21.stop();
-        }
-      }
-    }, _callee21, this);
-  }));
-
-  return function getPostFileCount(_x50, _x51) {
+  return function deletePost(_x32, _x33) {
     return ref.apply(this, arguments);
   };
 }();
 
 var forEachPost = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(targets, action) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(targets, action) {
     var postKeys;
-    return regeneratorRuntime.wrap(function _callee24$(_context24) {
+    return regeneratorRuntime.wrap(function _callee15$(_context15) {
       while (1) {
-        switch (_context24.prev = _context24.next) {
+        switch (_context15.prev = _context15.next) {
           case 0:
             if (!((typeof targets === 'undefined' ? 'undefined' : _typeof(targets)) !== 'object')) {
-              _context24.next = 2;
+              _context15.next = 2;
               break;
             }
 
-            return _context24.abrupt('return');
+            return _context15.abrupt('return');
 
           case 2:
             if ((0, _underscore2.default)(targets).toArray().length <= 0) {
@@ -1299,11 +1048,14 @@ var forEachPost = function () {
                 return acc;
               }, {});
             }
-            _context24.next = 6;
-            return Posts.keys();
+            _context15.next = 6;
+            return getPostKeys({
+              archived: true,
+              nonArchived: true
+            });
 
           case 6:
-            postKeys = _context24.sent;
+            postKeys = _context15.sent;
 
             postKeys = postKeys.reduce(function (acc, key) {
               var _key$split = key.split(':');
@@ -1321,29 +1073,29 @@ var forEachPost = function () {
               set.add(+postNumber);
               return acc;
             }, new Map());
-            _context24.next = 10;
+            _context15.next = 10;
             return Tools.series(targets, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(postNumbers, boardName) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(postNumbers, boardName) {
                 var set;
-                return regeneratorRuntime.wrap(function _callee23$(_context23) {
+                return regeneratorRuntime.wrap(function _callee14$(_context14) {
                   while (1) {
-                    switch (_context23.prev = _context23.next) {
+                    switch (_context14.prev = _context14.next) {
                       case 0:
                         if (!(typeof postNumbers !== 'string' && !(0, _underscore2.default)(postNumbers).isArray())) {
-                          _context23.next = 2;
+                          _context14.next = 2;
                           break;
                         }
 
-                        return _context23.abrupt('return');
+                        return _context14.abrupt('return');
 
                       case 2:
                         if (_board2.default.board(boardName)) {
-                          _context23.next = 5;
+                          _context14.next = 5;
                           break;
                         }
 
                         _logger2.default.error(new Error(Tools.translate('Invalid board name: $[1]', '', boardName)));
-                        return _context23.abrupt('return');
+                        return _context14.abrupt('return');
 
                       case 5:
                         set = postKeys.get(boardName);
@@ -1355,166 +1107,606 @@ var forEachPost = function () {
                             return set.has(postNumber);
                           }) : [];
                         }
-                        _context23.next = 9;
+                        _context14.next = 9;
                         return Tools.series(postNumbers, function () {
-                          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(postNumber) {
-                            return regeneratorRuntime.wrap(function _callee22$(_context22) {
+                          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(postNumber) {
+                            return regeneratorRuntime.wrap(function _callee13$(_context13) {
                               while (1) {
-                                switch (_context22.prev = _context22.next) {
+                                switch (_context13.prev = _context13.next) {
                                   case 0:
-                                    _context22.prev = 0;
-                                    _context22.next = 3;
+                                    _context13.prev = 0;
+                                    _context13.next = 3;
                                     return action(boardName, postNumber);
 
                                   case 3:
-                                    return _context22.abrupt('return', _context22.sent);
+                                    return _context13.abrupt('return', _context13.sent);
 
                                   case 6:
-                                    _context22.prev = 6;
-                                    _context22.t0 = _context22['catch'](0);
+                                    _context13.prev = 6;
+                                    _context13.t0 = _context13['catch'](0);
 
-                                    _logger2.default.error(_context22.t0.stack || _context22.t0);
+                                    _logger2.default.error(_context13.t0.stack || _context13.t0);
 
                                   case 9:
                                   case 'end':
-                                    return _context22.stop();
+                                    return _context13.stop();
                                 }
                               }
-                            }, _callee22, this, [[0, 6]]);
+                            }, _callee13, this, [[0, 6]]);
                           }));
 
-                          return function (_x56) {
+                          return function (_x39) {
                             return ref.apply(this, arguments);
                           };
                         }());
 
                       case 9:
-                        return _context23.abrupt('return', _context23.sent);
+                        return _context14.abrupt('return', _context14.sent);
 
                       case 10:
                       case 'end':
-                        return _context23.stop();
+                        return _context14.stop();
                     }
                   }
-                }, _callee23, this);
+                }, _callee14, this);
               }));
 
-              return function (_x54, _x55) {
+              return function (_x37, _x38) {
                 return ref.apply(this, arguments);
               };
             }());
 
           case 10:
           case 'end':
-            return _context24.stop();
+            return _context15.stop();
         }
       }
-    }, _callee24, this);
+    }, _callee15, this);
   }));
 
-  return function forEachPost(_x52, _x53) {
+  return function forEachPost(_x35, _x36) {
     return ref.apply(this, arguments);
   };
 }();
 
 var rerenderPosts = exports.rerenderPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(targets) {
-    return regeneratorRuntime.wrap(function _callee26$(_context26) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(targets) {
+    return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
-        switch (_context26.prev = _context26.next) {
+        switch (_context17.prev = _context17.next) {
           case 0:
-            _context26.next = 2;
+            _context17.next = 2;
             return forEachPost(targets, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(boardName, postNumber) {
-                return regeneratorRuntime.wrap(function _callee25$(_context25) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(boardName, postNumber) {
+                return regeneratorRuntime.wrap(function _callee16$(_context16) {
                   while (1) {
-                    switch (_context25.prev = _context25.next) {
+                    switch (_context16.prev = _context16.next) {
                       case 0:
                         console.log(Tools.translate('Rendering post: >>/$[1]/$[2]', '', boardName, postNumber));
-                        _context25.next = 3;
+                        _context16.next = 3;
                         return rerenderPost(boardName, postNumber, { nogenerate: true });
 
                       case 3:
-                        return _context25.abrupt('return', _context25.sent);
+                        return _context16.abrupt('return', _context16.sent);
 
                       case 4:
                       case 'end':
-                        return _context25.stop();
+                        return _context16.stop();
                     }
                   }
-                }, _callee25, this);
+                }, _callee16, this);
               }));
 
-              return function (_x58, _x59) {
+              return function (_x41, _x42) {
                 return ref.apply(this, arguments);
               };
             }());
 
           case 2:
-            return _context26.abrupt('return', _context26.sent);
+            return _context17.abrupt('return', _context17.sent);
 
           case 3:
           case 'end':
-            return _context26.stop();
+            return _context17.stop();
         }
       }
-    }, _callee26, this);
+    }, _callee17, this);
   }));
 
-  return function rerenderPosts(_x57) {
+  return function rerenderPosts(_x40) {
     return ref.apply(this, arguments);
   };
 }();
 
 var rebuildPostSearchIndex = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(boardName, postNumber, threads) {
-    var key, post, threadNumber, threadKey, thread;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(boardName, postNumber) {
+    var key, post;
+    return regeneratorRuntime.wrap(function _callee18$(_context18) {
+      while (1) {
+        switch (_context18.prev = _context18.next) {
+          case 0:
+            key = boardName + ':' + postNumber;
+            _context18.next = 3;
+            return getPost(boardName, postNumber);
+
+          case 3:
+            post = _context18.sent;
+            _context18.next = 6;
+            return Search.updatePostIndex(boardName, postNumber, function (body) {
+              body.plainText = post.plainText;
+              body.subject = post.subject;
+              body.archived = !!post.archived;
+              return body;
+            });
+
+          case 6:
+          case 'end':
+            return _context18.stop();
+        }
+      }
+    }, _callee18, this);
+  }));
+
+  return function rebuildPostSearchIndex(_x43, _x44) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var rebuildSearchIndex = exports.rebuildSearchIndex = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(targets) {
+    return regeneratorRuntime.wrap(function _callee20$(_context20) {
+      while (1) {
+        switch (_context20.prev = _context20.next) {
+          case 0:
+            _context20.next = 2;
+            return forEachPost(targets || {}, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(boardName, postNumber) {
+                return regeneratorRuntime.wrap(function _callee19$(_context19) {
+                  while (1) {
+                    switch (_context19.prev = _context19.next) {
+                      case 0:
+                        console.log(Tools.translate('Rebuilding post search index: >>/$[1]/$[2]', '', boardName, postNumber));
+                        _context19.next = 3;
+                        return rebuildPostSearchIndex(boardName, postNumber);
+
+                      case 3:
+                        return _context19.abrupt('return', _context19.sent);
+
+                      case 4:
+                      case 'end':
+                        return _context19.stop();
+                    }
+                  }
+                }, _callee19, this);
+              }));
+
+              return function (_x46, _x47) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 2:
+            return _context20.abrupt('return', _context20.sent);
+
+          case 3:
+          case 'end':
+            return _context20.stop();
+        }
+      }
+    }, _callee20, this);
+  }));
+
+  return function rebuildSearchIndex(_x45) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var copyPosts = exports.copyPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(_ref7) {
+    var sourceBoardName = _ref7.sourceBoardName;
+    var postNumbers = _ref7.postNumbers;
+    var targetBoardName = _ref7.targetBoardName;
+    var initialPostNumber = _ref7.initialPostNumber;
+    var targetBoard, posts, postNumberMap, sourcePath, sourceThumbPath, targetPath, targetThumbPath, toUpdate, toRerender;
+    return regeneratorRuntime.wrap(function _callee23$(_context23) {
+      while (1) {
+        switch (_context23.prev = _context23.next) {
+          case 0:
+            targetBoard = _board2.default.board(targetBoardName);
+
+            if (targetBoard) {
+              _context23.next = 3;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid board'));
+
+          case 3:
+            _context23.next = 5;
+            return getPosts(sourceBoardName, postNumbers, {
+              withFileInfos: true,
+              withReferences: true,
+              withExtraData: true
+            });
+
+          case 5:
+            posts = _context23.sent;
+            postNumberMap = posts.reduce(function (acc, post, index) {
+              acc[post.number] = initialPostNumber + index;
+              return acc;
+            }, {});
+            sourcePath = __dirname + '/../../public/' + sourceBoardName + '/src';
+            sourceThumbPath = __dirname + '/../../public/' + sourceBoardName + '/thumb';
+            targetPath = __dirname + '/../../public/' + targetBoardName + '/src';
+            targetThumbPath = __dirname + '/../../public/' + targetBoardName + '/thumb';
+            _context23.next = 13;
+            return mkpath(targetPath);
+
+          case 13:
+            _context23.next = 15;
+            return mkpath(targetThumbPath);
+
+          case 15:
+            toUpdate = [];
+            toRerender = [];
+            _context23.next = 19;
+            return Tools.series(posts, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(post) {
+                var fileInfos, referencedPosts, referringPosts, extraData, text;
+                return regeneratorRuntime.wrap(function _callee22$(_context22) {
+                  while (1) {
+                    switch (_context22.prev = _context22.next) {
+                      case 0:
+                        post.number = postNumberMap[post.number];
+                        post.boardName = targetBoardName;
+                        post.threadNumber = initialPostNumber;
+                        fileInfos = post.fileInfos;
+                        referencedPosts = post.referencedPosts;
+                        referringPosts = post.referringPosts;
+                        extraData = post.extraData;
+
+                        delete post.fileInfos;
+                        delete post.referencedPosts;
+                        delete post.referringPosts;
+                        delete post.extraData;
+                        if (post.hasOwnProperty('bannedFor')) {
+                          delete post.bannedFor;
+                        }
+
+                        if (!post.rawText) {
+                          _context22.next = 19;
+                          break;
+                        }
+
+                        text = PostReferencesModel.replacePostLinks(post.rawText, sourceBoardName, referencedPosts, postNumberMap);
+
+                        if (!(text !== post.rawText)) {
+                          _context22.next = 19;
+                          break;
+                        }
+
+                        _context22.next = 17;
+                        return (0, _markup2.default)(targetBoardName, text, {
+                          markupModes: post.markup,
+                          accessLevel: post.user.level
+                        });
+
+                      case 17:
+                        post.text = _context22.sent;
+
+                        post.plainText = Renderer.plainText(text, { brToNewline: true });
+
+                      case 19:
+                        referencedPosts = PostReferencesModel.replacePostReferences(referencedPosts, {
+                          boardName: sourceBoardName,
+                          threadNumber: post.threadNumber
+                        }, {
+                          boardName: targetBoardName,
+                          threadNumber: initialPostNumber
+                        }, postNumberMap, toUpdate);
+                        referringPosts = PostReferencesModel.replacePostReferences(referringPosts, {
+                          boardName: sourceBoardName,
+                          threadNumber: post.threadNumber
+                        }, {
+                          boardName: targetBoardName,
+                          threadNumber: initialPostNumber
+                        }, postNumberMap, toRerender);
+                        _context22.next = 23;
+                        return Tools.series(fileInfos, function () {
+                          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(fileInfo) {
+                            var oldFileName, oldThumbName, baseName;
+                            return regeneratorRuntime.wrap(function _callee21$(_context21) {
+                              while (1) {
+                                switch (_context21.prev = _context21.next) {
+                                  case 0:
+                                    oldFileName = fileInfo.name;
+                                    oldThumbName = fileInfo.thumb.name;
+                                    _context21.next = 4;
+                                    return IPC.send('fileName');
+
+                                  case 4:
+                                    baseName = _context21.sent;
+
+                                    fileInfo.name = fileInfo.name.replace(/^\d+/, baseName);
+                                    fileInfo.thumb.name = fileInfo.thumb.name.replace(/^\d+/, baseName);
+                                    _context21.next = 9;
+                                    return _fs2.default.copy(sourcePath + '/' + oldFileName, targetPath + '/' + fileInfo.name);
+
+                                  case 9:
+                                    _context21.next = 11;
+                                    return _fs2.default.copy(sourceThumbPath + '/' + oldThumbName, targetThumbPath + '/' + fileInfo.thumb.name);
+
+                                  case 11:
+                                  case 'end':
+                                    return _context21.stop();
+                                }
+                              }
+                            }, _callee21, this);
+                          }));
+
+                          return function (_x50) {
+                            return ref.apply(this, arguments);
+                          };
+                        }());
+
+                      case 23:
+                        _context22.next = 25;
+                        return FilesModel.addFilesToPost(targetBoardName, post.number, fileInfos);
+
+                      case 25:
+                        _context22.next = 27;
+                        return PostReferencesModel.storeReferencedPosts(targetBoardName, post.number, referencedPosts);
+
+                      case 27:
+                        _context22.next = 29;
+                        return PostReferencesModel.storeReferringPosts(targetBoardName, post.number, referringPosts);
+
+                      case 29:
+                        _context22.next = 31;
+                        return targetBoard.storeExtraData(post.number, extraData, false);
+
+                      case 31:
+                        _context22.next = 33;
+                        return Posts.setOne(targetBoardName + ':' + post.number, post);
+
+                      case 33:
+                        _context22.next = 35;
+                        return UsersModel.addUserPostNumber(post.user.ip, targetBoardName, post.number);
+
+                      case 35:
+                        _context22.next = 37;
+                        return Search.indexPost({
+                          boardName: targetBoardName,
+                          postNumber: post.number,
+                          threadNumber: initialPostNumber,
+                          plainText: post.plainText,
+                          subject: post.subject
+                        });
+
+                      case 37:
+                      case 'end':
+                        return _context22.stop();
+                    }
+                  }
+                }, _callee22, this);
+              }));
+
+              return function (_x49) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 19:
+            return _context23.abrupt('return', {
+              postNumberMap: postNumberMap,
+              toUpdate: toUpdate,
+              toRerender: toRerender
+            });
+
+          case 20:
+          case 'end':
+            return _context23.stop();
+        }
+      }
+    }, _callee23, this);
+  }));
+
+  return function copyPosts(_x48) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var rerenderMovedThreadRelatedPosts = exports.rerenderMovedThreadRelatedPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(_ref8) {
+    var posts = _ref8.posts;
+    var sourceBoardName = _ref8.sourceBoardName;
+    var targetBoardName = _ref8.targetBoardName;
+    var postNumberMap = _ref8.postNumberMap;
+    return regeneratorRuntime.wrap(function _callee25$(_context25) {
+      while (1) {
+        switch (_context25.prev = _context25.next) {
+          case 0:
+            _context25.next = 2;
+            return Tools.series(posts, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(post) {
+                var _post, referencedPosts, text, source;
+
+                return regeneratorRuntime.wrap(function _callee24$(_context24) {
+                  while (1) {
+                    switch (_context24.prev = _context24.next) {
+                      case 0:
+                        _context24.next = 2;
+                        return getPost(post.boardName, post.postNumber, { withReferences: true });
+
+                      case 2:
+                        post = _context24.sent;
+
+                        if (!(!post || !post.rawText)) {
+                          _context24.next = 5;
+                          break;
+                        }
+
+                        return _context24.abrupt('return');
+
+                      case 5:
+                        _post = post;
+                        referencedPosts = _post.referencedPosts;
+
+                        delete post.referencedPosts;
+                        delete post.referringPosts;
+                        if (post.hasOwnProperty('bannedFor')) {
+                          delete post.bannedFor;
+                        }
+
+                        if (post.rawText) {
+                          _context24.next = 12;
+                          break;
+                        }
+
+                        return _context24.abrupt('return');
+
+                      case 12:
+                        text = PostReferencesModel.replaceRelatedPostLinks({
+                          text: post.rawText,
+                          sourceBoardName: sourceBoardName,
+                          targetBoardName: targetBoardName,
+                          postBoardName: post.boardName,
+                          referencedPosts: referencedPosts,
+                          postNumberMap: postNumberMap
+                        });
+
+                        if (!(text !== post.rawText)) {
+                          _context24.next = 18;
+                          break;
+                        }
+
+                        _context24.next = 16;
+                        return (0, _markup2.default)(targetBoardName, text, {
+                          markupModes: post.markup,
+                          accessLevel: post.user.level
+                        });
+
+                      case 16:
+                        post.text = _context24.sent;
+
+                        post.plainText = Renderer.plainText(text, { brToNewline: true });
+
+                      case 18:
+                        source = post.archived ? ArchivedPosts : Posts;
+                        _context24.next = 21;
+                        return source.setOne(post.boardName + ':' + post.number, post);
+
+                      case 21:
+                        _context24.next = 23;
+                        return Search.updatePostIndex(post.boardName, post.number, function (body) {
+                          body.plainText = post.plainText;
+                          return body;
+                        });
+
+                      case 23:
+                      case 'end':
+                        return _context24.stop();
+                    }
+                  }
+                }, _callee24, this);
+              }));
+
+              return function (_x52) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 2:
+          case 'end':
+            return _context25.stop();
+        }
+      }
+    }, _callee25, this);
+  }));
+
+  return function rerenderMovedThreadRelatedPosts(_x51) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var updateMovedThreadRelatedPosts = exports.updateMovedThreadRelatedPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(_ref9) {
+    var posts = _ref9.posts;
+    var sourceBoardName = _ref9.sourceBoardName;
+    var targetBoardName = _ref9.targetBoardName;
+    var sourceThreadNumber = _ref9.sourceThreadNumber;
+    var targetThreadNumber = _ref9.targetThreadNumber;
+    var postNumberMap = _ref9.postNumberMap;
     return regeneratorRuntime.wrap(function _callee27$(_context27) {
       while (1) {
         switch (_context27.prev = _context27.next) {
           case 0:
-            threads = threads || new Map();
-            key = boardName + ':' + postNumber;
-            _context27.next = 4;
-            return getPost(boardName, postNumber);
+            _context27.next = 2;
+            return Tools.series(posts, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(post) {
+                var _post2, referencedPosts, referringPosts, source, target;
 
-          case 4:
-            post = _context27.sent;
-            threadNumber = post.threadNumber;
-            threadKey = boardName + ':' + threadNumber;
-            thread = threads.get(threadKey);
+                return regeneratorRuntime.wrap(function _callee26$(_context26) {
+                  while (1) {
+                    switch (_context26.prev = _context26.next) {
+                      case 0:
+                        _context26.next = 2;
+                        return getPost(post.boardName, post.postNumber, { withReferences: true });
 
-            if (thread) {
-              _context27.next = 15;
-              break;
-            }
+                      case 2:
+                        post = _context26.sent;
 
-            _context27.next = 11;
-            return ThreadsModel.getThread(boardName, threadNumber);
+                        if (post) {
+                          _context26.next = 5;
+                          break;
+                        }
 
-          case 11:
-            thread = _context27.sent;
+                        return _context26.abrupt('return');
 
-            if (thread) {
-              _context27.next = 14;
-              break;
-            }
+                      case 5:
+                        _post2 = post;
+                        referencedPosts = _post2.referencedPosts;
+                        referringPosts = _post2.referringPosts;
+                        source = {
+                          boardName: sourceBoardName,
+                          threadNumber: sourceThreadNumber
+                        };
+                        target = {
+                          boardName: targetBoardName,
+                          threadNumber: targetThreadNumber
+                        };
 
-            return _context27.abrupt('return', Promise.reject(new Error(Tools.translate('No such thread: >>/$[1]/$[2]', '', boardName, threadNumber))));
+                        referencedPosts = PostReferencesModel.replaceRelatedPostReferences(referencedPosts, source, target, postNumberMap);
+                        referringPosts = PostReferencesModel.replaceRelatedPostReferences(referringPosts, source, target, postNumberMap);
+                        _context26.next = 14;
+                        return PostReferencesModel.removeReferencedPosts(post.boardName, post.number, { archived: post.archived });
 
-          case 14:
-            threads.set(threadKey, thread);
+                      case 14:
+                        _context26.next = 16;
+                        return PostReferencesModel.removeReferringPosts(post.boardName, post.number, { archived: post.archived });
 
-          case 15:
-            _context27.next = 17;
-            return Search.updatePostIndex(boardName, postNumber, function (body) {
-              body.plainText = post.plainText;
-              body.subject = post.subject;
-              body.archived = !!thread.archived;
-              return body;
-            });
+                      case 16:
+                        _context26.next = 18;
+                        return PostReferencesModel.storeReferencedPosts(post.boardName, post.number, referencedPosts, { archived: post.archived });
 
-          case 17:
+                      case 18:
+                        _context26.next = 20;
+                        return PostReferencesModel.storeReferringPosts(post.boardName, post.number, referringPosts, { archived: post.archived });
+
+                      case 20:
+                      case 'end':
+                        return _context26.stop();
+                    }
+                  }
+                }, _callee26, this);
+              }));
+
+              return function (_x54) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 2:
           case 'end':
             return _context27.stop();
         }
@@ -1522,386 +1714,76 @@ var rebuildPostSearchIndex = function () {
     }, _callee27, this);
   }));
 
-  return function rebuildPostSearchIndex(_x60, _x61, _x62) {
+  return function updateMovedThreadRelatedPosts(_x53) {
     return ref.apply(this, arguments);
   };
 }();
 
-var rebuildSearchIndex = exports.rebuildSearchIndex = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(targets) {
-    var threads;
-    return regeneratorRuntime.wrap(function _callee29$(_context29) {
+var pushPostToArchive = exports.pushPostToArchive = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(boardName, postNumber) {
+    var board, key, post, extraData;
+    return regeneratorRuntime.wrap(function _callee28$(_context28) {
       while (1) {
-        switch (_context29.prev = _context29.next) {
+        switch (_context28.prev = _context28.next) {
           case 0:
-            threads = new Map();
-            _context29.next = 3;
-            return forEachPost(targets || {}, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(boardName, postNumber) {
-                return regeneratorRuntime.wrap(function _callee28$(_context28) {
-                  while (1) {
-                    switch (_context28.prev = _context28.next) {
-                      case 0:
-                        console.log(Tools.translate('Rebuilding post search index: >>/$[1]/$[2]', '', boardName, postNumber));
-                        _context28.next = 3;
-                        return rebuildPostSearchIndex(boardName, postNumber, threads);
+            board = _board2.default.board(boardName);
 
-                      case 3:
-                        return _context28.abrupt('return', _context28.sent);
+            if (board) {
+              _context28.next = 3;
+              break;
+            }
 
-                      case 4:
-                      case 'end':
-                        return _context28.stop();
-                    }
-                  }
-                }, _callee28, this);
-              }));
-
-              return function (_x64, _x65) {
-                return ref.apply(this, arguments);
-              };
-            }());
+            return _context28.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
-            return _context29.abrupt('return', _context29.sent);
+            key = boardName + ':' + postNumber;
+            _context28.next = 6;
+            return Posts.getOne(key);
 
-          case 4:
-          case 'end':
-            return _context29.stop();
-        }
-      }
-    }, _callee29, this);
-  }));
+          case 6:
+            post = _context28.sent;
 
-  return function rebuildSearchIndex(_x63) {
-    return ref.apply(this, arguments);
-  };
-}();
+            post.archived = true;
+            _context28.next = 10;
+            return ArchivedPosts.setOne(key, post);
 
-var processMovedThreadPostReferences = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee31(_ref11) {
-    var references = _ref11.references;
-    var entity = _ref11.entity;
-    var sourceBoardName = _ref11.sourceBoardName;
-    var targetBoardName = _ref11.targetBoardName;
-    var threadNumber = _ref11.threadNumber;
-    var postNumberMap = _ref11.postNumberMap;
-    var toRerender = _ref11.toRerender;
-    var toUpdate = _ref11.toUpdate;
-    return regeneratorRuntime.wrap(function _callee31$(_context31) {
-      while (1) {
-        switch (_context31.prev = _context31.next) {
-          case 0:
-            _context31.next = 2;
-            return Tools.series(references, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee30(ref) {
-                var nref;
-                return regeneratorRuntime.wrap(function _callee30$(_context30) {
-                  while (1) {
-                    switch (_context30.prev = _context30.next) {
-                      case 0:
-                        nref = void 0;
+          case 10:
+            _context28.next = 12;
+            return Posts.deleteOne(key);
 
-                        if (ref.boardName === sourceBoardName && ref.threadNumber === threadNumber) {
-                          nref = {
-                            boardName: targetBoardName,
-                            threadNumber: post.threadNumber,
-                            postNumber: postNumberMap[ref.postNumber]
-                          };
-                        } else {
-                          nref = ref;
-                          toUpdate[ref.boardName + ':' + ref.threadNumber] = {
-                            boardName: ref.boardName,
-                            threadNumber: ref.threadNumber
-                          };
-                          if (toRerender) {
-                            toRerender[ref.boardName + ':' + ref.postNumber] = {
-                              boardName: ref.boardName,
-                              postNumber: ref.postNumber
-                            };
-                          }
-                        }
-                        _context30.next = 4;
-                        return entity.deleteOne(ref.boardName + ':' + ref.postNumber, sourceBoardName + ':' + oldPostNumber);
+          case 12:
+            _context28.next = 14;
+            return board.loadExtraData(postNumber, false);
 
-                      case 4:
-                        _context30.next = 6;
-                        return entity.setOne(nref.boardName + ':' + nref.postNumber, targetBoard.name + ':' + post.number, nref);
+          case 14:
+            extraData = _context28.sent;
+            _context28.next = 17;
+            return board.storeExtraData(postNumber, extraData, true);
 
-                      case 6:
-                      case 'end':
-                        return _context30.stop();
-                    }
-                  }
-                }, _callee30, this);
-              }));
+          case 17:
+            _context28.next = 19;
+            return board.removeExtraData(postNumber, false);
 
-              return function (_x67) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 2:
-          case 'end':
-            return _context31.stop();
-        }
-      }
-    }, _callee31, this);
-  }));
-
-  return function processMovedThreadPostReferences(_x66) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var processMovedThreadPosts = exports.processMovedThreadPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee34(_ref12) {
-    var posts = _ref12.posts;
-    var postNumberMap = _ref12.postNumberMap;
-    var threadNumber = _ref12.threadNumber;
-    var targetBoard = _ref12.targetBoard;
-    var sourceBoardName = _ref12.sourceBoardName;
-    var sourcePath = _ref12.sourcePath;
-    var sourceThumbPath = _ref12.sourceThumbPath;
-    var targetPath = _ref12.targetPath;
-    var targetThumbPath = _ref12.targetThumbPath;
-    var toRerender, toUpdate;
-    return regeneratorRuntime.wrap(function _callee34$(_context34) {
-      while (1) {
-        switch (_context34.prev = _context34.next) {
-          case 0:
-            toRerender = {};
-            toUpdate = {};
-            _context34.next = 4;
-            return Tools.series(posts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee33(post) {
-                var oldPostNumber, referencedPosts, extraData, referringPosts, fileInfos;
-                return regeneratorRuntime.wrap(function _callee33$(_context33) {
-                  while (1) {
-                    switch (_context33.prev = _context33.next) {
-                      case 0:
-                        oldPostNumber = post.number;
-
-                        post.number = postNumberMap.get(post.number);
-                        post.threadNumber = threadNumber;
-                        post.boardName = targetBoard.name;
-                        referencedPosts = post.referencedPosts;
-
-                        delete post.referencedPosts;
-                        extraData = post.extraData;
-
-                        delete post.extraData;
-                        referringPosts = post.referringPosts;
-
-                        delete post.referringPosts;
-                        fileInfos = post.fileInfos;
-
-                        delete post.fileInfos;
-                        if (post.rawText) {
-                          (0, _underscore2.default)(postNumberMap).each(function (newPostNumber, previousPostNumber) {
-                            var rx = new RegExp('>>/' + sourceBoardName + '/' + previousPostNumber, 'g');
-                            post.rawText = post.rawText.replace(rx, '>>/' + targetBoard.name + '/' + newPostNumber);
-                            rx = new RegExp('>>' + previousPostNumber, 'g');
-                            post.rawText = post.rawText.replace(rx, '>>' + newPostNumber);
-                          });
-                          referencedPosts.filter(function (ref) {
-                            return ref.boardName === sourceBoardName;
-                          }).forEach(function (ref) {
-                            var rx = new RegExp('>>' + ref.postNumber, 'g');
-                            post.rawText = post.rawText.replace(rx, '>>/' + sourceBoardName + '/' + ref.postNumber);
-                          });
-                        }
-
-                        if (!post.rawText) {
-                          _context33.next = 17;
-                          break;
-                        }
-
-                        _context33.next = 16;
-                        return (0, _markup2.default)(targetBoard.name, post.rawText, {
-                          markupModes: post.markup,
-                          accessLevel: post.user.level
-                        });
-
-                      case 16:
-                        post.text = _context33.sent;
-
-                      case 17:
-                        _context33.next = 19;
-                        return Posts.setOne(targetBoard.name + ':' + post.number, post);
-
-                      case 19:
-                        _context33.next = 21;
-                        return targetBoard.storeExtraData(post.number, extraData);
-
-                      case 21:
-                        _context33.next = 23;
-                        return processMovedThreadPostReferences({
-                          references: referencedPosts,
-                          entity: ReferencedPosts,
-                          sourceBoardName: sourceBoardName,
-                          targetBoardName: targetBoard.name,
-                          threadNumber: threadNumber,
-                          postNumberMap: postNumberMap,
-                          toUpdate: toUpdate
-                        });
-
-                      case 23:
-                        _context33.next = 25;
-                        return processMovedThreadPostReferences({
-                          references: referringPosts,
-                          entity: ReferringPosts,
-                          sourceBoardName: sourceBoardName,
-                          targetBoardName: targetBoard.name,
-                          threadNumber: threadNumber,
-                          postNumberMap: postNumberMap,
-                          toRerender: toRerender,
-                          toUpdate: toUpdate
-                        });
-
-                      case 25:
-                        _context33.next = 27;
-                        return UsersModel.addUserPostNumber(post.user.ip, targetBoard.name, post.number);
-
-                      case 27:
-                        _context33.next = 29;
-                        return FilesModel.addFilesToPost(targetBoard.name, post.number, fileInfos);
-
-                      case 29:
-                        _context33.next = 31;
-                        return Tools.series(fileInfos, function () {
-                          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee32(fileInfo) {
-                            return regeneratorRuntime.wrap(function _callee32$(_context32) {
-                              while (1) {
-                                switch (_context32.prev = _context32.next) {
-                                  case 0:
-                                    _context32.next = 2;
-                                    return _fs2.default.move(sourcePath + '/' + fileInfo.name, targetPath + '/' + fileInfo.name);
-
-                                  case 2:
-                                    _context32.next = 4;
-                                    return _fs2.default.move(sourceThumbPath + '/' + fileInfo.thumb.name, targetThumbPath + '/' + fileInfo.thumb.name);
-
-                                  case 4:
-                                  case 'end':
-                                    return _context32.stop();
-                                }
-                              }
-                            }, _callee32, this);
-                          }));
-
-                          return function (_x70) {
-                            return ref.apply(this, arguments);
-                          };
-                        }());
-
-                      case 31:
-                        _context33.next = 33;
-                        return Search.indexPost(targetBoard.name, post.number, threadNumber, post.plainText, post.subject);
-
-                      case 33:
-                      case 'end':
-                        return _context33.stop();
-                    }
-                  }
-                }, _callee33, this);
-              }));
-
-              return function (_x69) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 4:
-            return _context34.abrupt('return', {
-              toRerender: toRerender,
-              toUpdate: toUpdate
+          case 19:
+            _context28.next = 21;
+            return Search.updatePostIndex(boardName, postNumber, function (body) {
+              body.archived = true;
+              return body;
             });
 
-          case 5:
+          case 21:
+            _context28.next = 23;
+            return FilesModel.pushPostFileInfosToArchive(boardName, postNumber);
+
+          case 23:
           case 'end':
-            return _context34.stop();
+            return _context28.stop();
         }
       }
-    }, _callee34, this);
+    }, _callee28, this);
   }));
 
-  return function processMovedThreadPosts(_x68) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var processMovedThreadRelatedPosts = exports.processMovedThreadRelatedPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee36(_ref13) {
-    var posts = _ref13.posts;
-    var sourceBoardName = _ref13.sourceBoardName;
-    var postNumberMap = _ref13.postNumberMap;
-    return regeneratorRuntime.wrap(function _callee36$(_context36) {
-      while (1) {
-        switch (_context36.prev = _context36.next) {
-          case 0:
-            _context36.next = 2;
-            return Tools.series(posts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee35(post) {
-                return regeneratorRuntime.wrap(function _callee35$(_context35) {
-                  while (1) {
-                    switch (_context35.prev = _context35.next) {
-                      case 0:
-                        _context35.next = 2;
-                        return getPost(post.boardName, post.postNumber);
-
-                      case 2:
-                        post = _context35.sent;
-
-                        if (post.rawText) {
-                          _context35.next = 5;
-                          break;
-                        }
-
-                        return _context35.abrupt('return');
-
-                      case 5:
-                        (0, _underscore2.default)(postNumberMap).each(function (newPostNumber, previousPostNumber) {
-                          var rx = new RegExp('>>/' + sourceBoardName + '/' + previousPostNumber, 'g');
-                          post.rawText = post.rawText.replace(rx, '>>/' + targetBoardName + '/' + newPostNumber);
-                          if (post.boardName === sourceBoardName) {
-                            rx = new RegExp('>>' + previousPostNumber, 'g');
-                            post.rawText = post.rawText.replace(rx, '>>/' + targetBoardName + '/' + newPostNumber);
-                          }
-                        });
-                        _context35.next = 8;
-                        return (0, _markup2.default)(post.boardName, post.rawText, {
-                          markupModes: post.markup,
-                          accessLevel: post.user.level
-                        });
-
-                      case 8:
-                        post.text = _context35.sent;
-                        _context35.next = 11;
-                        return Posts.setOne(post.boardName + ':' + post.number, post);
-
-                      case 11:
-                      case 'end':
-                        return _context35.stop();
-                    }
-                  }
-                }, _callee35, this);
-              }));
-
-              return function (_x72) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 2:
-          case 'end':
-            return _context36.stop();
-        }
-      }
-    }, _callee36, this);
-  }));
-
-  return function processMovedThreadRelatedPosts(_x71) {
+  return function pushPostToArchive(_x55, _x56) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1914,6 +1796,10 @@ var _fs = require('q-io/fs');
 
 var _fs2 = _interopRequireDefault(_fs);
 
+var _promisifyNode = require('promisify-node');
+
+var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
+
 var _boards = require('./boards');
 
 var BoardsModel = _interopRequireWildcard(_boards);
@@ -1921,6 +1807,10 @@ var BoardsModel = _interopRequireWildcard(_boards);
 var _files = require('./files');
 
 var FilesModel = _interopRequireWildcard(_files);
+
+var _postReferences = require('./post-references');
+
+var PostReferencesModel = _interopRequireWildcard(_postReferences);
 
 var _threads = require('./threads');
 
@@ -1958,10 +1848,6 @@ var _markup = require('../markup');
 
 var _markup2 = _interopRequireDefault(_markup);
 
-var _redisClientFactory = require('../storage/redis-client-factory');
-
-var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
-
 var _hash = require('../storage/hash');
 
 var _hash2 = _interopRequireDefault(_hash);
@@ -1969,6 +1855,14 @@ var _hash2 = _interopRequireDefault(_hash);
 var _key = require('../storage/key');
 
 var _key2 = _interopRequireDefault(_key);
+
+var _redisClientFactory = require('../storage/redis-client-factory');
+
+var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
+
+var _sqlClientFactory = require('../storage/sql-client-factory');
+
+var _sqlClientFactory2 = _interopRequireDefault(_sqlClientFactory);
 
 var _unorderedSet = require('../storage/unordered-set');
 
@@ -1980,26 +1874,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var FileInfos = new _hash2.default((0, _redisClientFactory2.default)(), 'fileInfos');
-var PostFileInfoNames = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'postFileInfoNames', {
-  parse: false,
-  stringify: false
-});
+var mkpath = (0, _promisifyNode2.default)('mkpath');
+
+var ArchivedPosts = new _hash2.default((0, _sqlClientFactory2.default)(), 'archivedPosts');
 var Posts = new _hash2.default((0, _redisClientFactory2.default)(), 'posts');
 var PostsPlannedForDeletion = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'postsPlannedForDeletion', {
   parse: false,
   stringify: false
 });
-var ReferringPosts = new _hash2.default((0, _redisClientFactory2.default)(), 'referringPosts');
-var ReferencedPosts = new _hash2.default((0, _redisClientFactory2.default)(), 'referencedPosts');
 var UserBans = new _key2.default((0, _redisClientFactory2.default)(), 'userBans');
-
-function sortedReferences(references) {
-  return (0, _underscore2.default)(references).toArray().sort(function (a, b) {
-    return a.createdAt && b.createdAt && a.createdAt.localeCompare(b.createdAt) || a.boardName.localeCompare(b.boardName) || a.postNumber - b.postNumber;
-  }).map(function (reference) {
-    delete reference.createdAt;
-    return reference;
-  });
-}
 //# sourceMappingURL=posts.js.map

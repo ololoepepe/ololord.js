@@ -84,6 +84,8 @@ function getDefaultBoards() {
   return [new Board('3dpd', Tools.translate.noop('3D pron', 'boardTitle')), new Board('a', Tools.translate.noop('/a/nime', 'boardTitle'), { defaultUserName: Tools.translate.noop('Kamina', 'defaultUserName') }), new Board('b', Tools.translate.noop('/b/rotherhood', 'boardTitle')), new Board('d', Tools.translate.noop('Board /d/iscussion', 'boardTitle')), new Board('h', Tools.translate.noop('/h/entai', 'boardTitle')), prBoard, new Board('rf', Tools.translate.noop('Refuge', 'boardTitle'), { defaultUserName: Tools.translate.noop('Whiner', 'defaultUserName') }), new Board('vg', Tools.translate.noop('Video games', 'boardTitle'), { defaultUserName: Tools.translate.noop('PC Nobleman', 'defaultUserName') })];
 }
 
+/** Class representing a board. */
+
 var Board = function () {
   _createClass(Board, null, [{
     key: 'board',
@@ -413,22 +415,26 @@ var Board = function () {
                 return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Attempt to create a thread without attaching a file'))));
 
               case 20:
+                if ('deleteFile' === mode && existingFileCount > 0) {
+                  --existingFileCount;
+                }
+
                 if (!(text.length <= 0 && files.length + existingFileCount <= 0)) {
-                  _context.next = 22;
+                  _context.next = 23;
                   break;
                 }
 
                 return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Both file and comment are missing'))));
 
-              case 22:
+              case 23:
                 if (!(files.length + existingFileCount > this.maxFileCount)) {
-                  _context.next = 24;
+                  _context.next = 25;
                   break;
                 }
 
                 return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Too many files'))));
 
-              case 24:
+              case 25:
                 err = files.reduce(function (err, file) {
                   if (err) {
                     return err;
@@ -442,13 +448,13 @@ var Board = function () {
                 }, '');
 
                 if (!err) {
-                  _context.next = 27;
+                  _context.next = 28;
                   break;
                 }
 
                 return _context.abrupt('return', Promise.reject(err));
 
-              case 27:
+              case 28:
               case 'end':
                 return _context.stop();
             }
@@ -489,7 +495,7 @@ var Board = function () {
   }, {
     key: 'storeExtraData',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(postNumber, extraData) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(postNumber, extraData, archived) {
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -501,7 +507,7 @@ var Board = function () {
         }, _callee3, this);
       }));
 
-      function storeExtraData(_x7, _x8) {
+      function storeExtraData(_x7, _x8, _x9) {
         return ref.apply(this, arguments);
       }
 
@@ -512,7 +518,7 @@ var Board = function () {
 
     //NOTE: Do nothing by default.
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(postNumber) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(postNumber, archived) {
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -524,7 +530,7 @@ var Board = function () {
         }, _callee4, this);
       }));
 
-      function loadExtraData(_x9) {
+      function loadExtraData(_x10, _x11) {
         return ref.apply(this, arguments);
       }
 
@@ -535,7 +541,7 @@ var Board = function () {
 
     //NOTE: Do nothing by default.
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(postNumber) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(postNumber, archived) {
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -547,7 +553,7 @@ var Board = function () {
         }, _callee5, this);
       }));
 
-      function removeExtraData(_x10) {
+      function removeExtraData(_x12, _x13) {
         return ref.apply(this, arguments);
       }
 
@@ -571,8 +577,14 @@ var Board = function () {
                 delete post.user.ip;
                 delete post.user.hashpass;
                 delete post.user.password;
-                if (!post.geolocation.countryName) {
-                  post.geolocation.countryName = 'Unknown country';
+                if (post.hasOwnProperty('geolocation')) {
+                  if (this.showWhois) {
+                    if (!post.geolocation.countryName) {
+                      post.geolocation.countryName = 'Unknown country';
+                    }
+                  } else {
+                    delete post.geolocation;
+                  }
                 }
                 return _context6.abrupt('return', post);
 
@@ -584,7 +596,7 @@ var Board = function () {
         }, _callee6, this);
       }));
 
-      function renderPost(_x11) {
+      function renderPost(_x14) {
         return ref.apply(this, arguments);
       }
 

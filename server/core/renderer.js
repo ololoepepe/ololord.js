@@ -300,7 +300,7 @@ var generateTemplatingJavaScriptFile = exports.generateTemplatingJavaScriptFile 
       while (1) {
         switch (_context10.prev = _context10.next) {
           case 0:
-            console.log('Generating templating JavaScript file…');
+            console.log(Tools.translate('Generating templating JavaScript file…'));
             models = JSON.stringify({
               base: MiscModel.base(),
               boards: MiscModel.boards(),
@@ -372,7 +372,7 @@ var generateCustomJavaScriptFile = exports.generateCustomJavaScriptFile = functi
       while (1) {
         switch (_context11.prev = _context11.next) {
           case 0:
-            console.log('Checking custom JavaScript file existence…');
+            console.log(Tools.translate('Checking custom JavaScript file existence…'));
             _context11.next = 3;
             return _fs2.default.exists(__dirname + '/../../public/js/custom.js');
 
@@ -384,7 +384,7 @@ var generateCustomJavaScriptFile = exports.generateCustomJavaScriptFile = functi
               break;
             }
 
-            console.log('Creating dummy custom JavaScript file…');
+            console.log(Tools.translate('Creating dummy custom JavaScript file…'));
             _context11.next = 8;
             return Cache.writeFile('js/custom.js', '');
 
@@ -411,7 +411,7 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
       while (1) {
         switch (_context14.prev = _context14.next) {
           case 0:
-            console.log('Checking custom CSS files existence…');
+            console.log(Tools.translate('Checking custom CSS files existence…'));
             _context14.next = 3;
             return Tools.series(['combined', 'desktop', 'mobile'], function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(type) {
@@ -456,7 +456,7 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
               break;
             }
 
-            console.log('Creating dummy custom CSS file(s)…');
+            console.log(Tools.translate('Creating dummy custom CSS file(s)…'));
             _context14.next = 9;
             return Tools.series(types, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(type) {
@@ -500,7 +500,7 @@ var compileTemplates = exports.compileTemplates = function () {
       while (1) {
         switch (_context18.prev = _context18.next) {
           case 0:
-            console.log('Compiling templates…');
+            console.log(Tools.translate('Compiling templates…'));
             _context18.next = 3;
             return _fs2.default.list(TEMPLATES_PATH);
 
@@ -681,9 +681,9 @@ var reloadTemplates = exports.reloadTemplates = function () {
             }).map(function (fileName) {
               return fileName.substr(TEMPLATES_PATH.length + 1).split('.').slice(0, -1).join('.');
             }).reduce(function (acc, templateName) {
-              var id = '../../views/' + templateName + '.js';
+              var id = require.resolve('../../views/' + templateName + '.js');
               if (require.cache.hasOwnProperty(id)) {
-                delete require.cache[require.resolve(id)];
+                delete require.cache[id];
               }
               acc[templateName] = require(id);
               return acc;

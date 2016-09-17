@@ -11,7 +11,6 @@ var renderThreadHTML = function () {
     var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     var targetPath = _ref.targetPath;
-    var archived = _ref.archived;
     var board, model, data;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -27,34 +26,32 @@ var renderThreadHTML = function () {
             return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
 
           case 3:
-            thread.title = thread.title || board.title + ' — ' + thread.number;
-            model = { thread: thread };
-
-            model.isThreadPage = true;
-            model.board = MiscModel.board(board).board;
-            model.threadNumber = thread.number;
-            if (archived) {
-              model.archived = true;
-            }
+            model = {
+              thread: thread,
+              title: thread.title || board.title + ' — ' + thread.number,
+              isThreadPage: true,
+              board: MiscModel.board(board).board,
+              threadNumber: thread.number
+            };
             data = Renderer.render('pages/thread', model);
 
             if (!targetPath) {
-              _context.next = 15;
+              _context.next = 10;
               break;
             }
 
-            _context.next = 13;
+            _context.next = 8;
             return _fs2.default.write(targetPath, data);
 
-          case 13:
-            _context.next = 17;
+          case 8:
+            _context.next = 12;
             break;
 
-          case 15:
-            _context.next = 17;
+          case 10:
+            _context.next = 12;
             return Cache.writeFile(thread.boardName + '/res/' + thread.number + '.html', data);
 
-          case 17:
+          case 12:
           case 'end':
             return _context.stop();
         }
@@ -105,10 +102,42 @@ var renderThread = function () {
 
 var renderArchivedThread = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, threadNumber) {
+    var thread, archPath;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
+            _context3.next = 2;
+            return BoardsModel.getThread(boardName, threadNumber);
+
+          case 2:
+            thread = _context3.sent;
+
+            if (!(!thread || !thread.archived)) {
+              _context3.next = 5;
+              break;
+            }
+
+            throw new Error(Tools.translate('No such thread: >>/$[1]/$[2]', '', boardName, threadNumber));
+
+          case 5:
+            archPath = __dirname + '/../../public/' + boardName + '/arch';
+            _context3.next = 8;
+            return mkpath(archPath);
+
+          case 8:
+            _context3.next = 10;
+            return Renderer.renderThread(thread);
+
+          case 10:
+            _context3.next = 12;
+            return _fs2.default.write(archPath + '/' + threadNumber + '.json', JSON.stringify({ thread: thread }));
+
+          case 12:
+            _context3.next = 14;
+            return renderThreadHTML(thread, { targetPath: archPath + '/' + threadNumber + '.html' });
+
+          case 14:
           case 'end':
             return _context3.stop();
         }
@@ -120,8 +149,6 @@ var renderArchivedThread = function () {
     return ref.apply(this, arguments);
   };
 }();
-
-//TODO: Implement!!!
 
 var renderPage = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName, pageNumber) {
@@ -211,6 +238,10 @@ var _moment = require('moment');
 
 var _moment2 = _interopRequireDefault(_moment);
 
+var _promisifyNode = require('promisify-node');
+
+var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
+
 var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
@@ -261,6 +292,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
+var mkpath = (0, _promisifyNode2.default)('mkpath');
+
 var RSS_DATE_TIME_FORMAT = 'ddd, DD MMM YYYY HH:mm:ss +0000';
 
 var router = _express2.default.Router();
@@ -268,7 +301,7 @@ var router = _express2.default.Router();
 function pickPostsToRerender(oldPosts, posts) {
   return (0, _underscore2.default)(posts).pick(function (post, postNumber) {
     var oldPost = oldPosts[postNumber];
-    if (!oldPost || oldPost.updatedAt < post.updatedAt || oldPost.bannedFor !== post.bannedFor || oldPost.text === post.text) {
+    if (!oldPost || oldPost.updatedAt < post.updatedAt || oldPost.bannedFor !== post.bannedFor || oldPost.text !== post.text) {
       return true;
     }
     var oldRefs = oldPost.referringPosts.reduce(function (acc, ref) {
@@ -444,7 +477,7 @@ router.renderThread = function () {
 
           case 15:
             return _context10.delegateYield(regeneratorRuntime.mark(function _callee9() {
-              var threadID, threadData, model, thread, lastPosts, posts, opPost, postsToRerender;
+              var threadID, threadData, model, thread, lastPosts, posts, postsToRerender;
               return regeneratorRuntime.wrap(function _callee9$(_context9) {
                 while (1) {
                   switch (_context9.prev = _context9.next) {
@@ -470,12 +503,14 @@ router.renderThread = function () {
 
                     case 9:
                       posts = _context9.sent;
-                      opPost = posts.splice(0, 1)[0];
 
-                      posts = posts.reduce(function (acc, post) {
+                      posts = posts.slice(1).reduce(function (acc, post) {
                         acc[post.number] = post;
                         return acc;
                       }, {});
+                      lastPosts = (0, _underscore2.default)(lastPosts).pick(function (_1, postNumber) {
+                        return posts.hasOwnProperty(postNumber);
+                      });
                       postsToRerender = pickPostsToRerender(lastPosts, posts);
                       _context9.next = 15;
                       return Tools.series(postsToRerender, function () {

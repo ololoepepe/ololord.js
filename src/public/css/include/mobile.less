@@ -62,14 +62,11 @@ body {
   min-width: 400px;
 }
 
-.post-file-link-image {
-  width: auto;
-  height: auto;
-  max-width: 140px;
-  max-height: 140px;
-}
-
 /* Post */
+
+.post.temporary-post {
+  position: fixed;
+}
 
 .post-subject,
 .post-date-time,
@@ -83,6 +80,7 @@ body {
 }
 
 .post-file {
+  max-width: 140px;
   padding-left: 10px;
 }
 
@@ -94,8 +92,16 @@ body {
   font-size: 0.6em;
 }
 
-.post.temporary-post {
-  position: fixed;
+.post-file-link-container {
+  max-width: 140px;
+  max-height: 140px;
+}
+
+.post-file-link-image {
+  width: auto;
+  height: auto;
+  max-width: 140px;
+  max-height: 140px;
 }
 
 /* Player */

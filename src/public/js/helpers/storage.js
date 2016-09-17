@@ -269,7 +269,10 @@ export let playerCurrentTime = createDataFunction('playerCurrentTime', 0, {
   storage: window.sessionStorage
 });
 
-export let password = createObservable('password', Tools.generatePassword());
+if (typeof getLocalObject('password') !== 'string') {
+  setLocalObject('password', Tools.generatePassword());
+}
+export let password = createObservable('password', '');
 export let hotkeys = createObservable('hotkeys', DEFAULT_HOTKEYS);
 export let chats = createObservable('chats', {});
 export let spells = createObservable('spells', DEFAULT_SPELLS);
@@ -335,19 +338,116 @@ export function lastWidgetGeometry(id, geometry) {
 
 export function vkAuth(expires) {
   if (typeof expires !== 'undefined') {
-    return setCookie('vkAuth', 'true', {
+    return setCookie('vkAuth', (expires > 0) ? 'true' : '', {
       expires: expires,
       path: '/'
     });
   } else {
-    return getCookie('vkAuth', 'false');
+    return getCookie('vkAuth', 'false') === 'true';
   }
 }
 
-export function checkScriptVersion() {
+export const V1_TO_V2_SETTINGS = {
+  deviceType: true,
+  time: true,
+  timeZoneOffset: true,
+  shrinkPosts: true,
+  useWebSockets: true,
+  markupMode: true,
+  hidePostFormMarkup: true,
+  hidePostFormRules: true,
+  hiddenBoards: true,
+  maxAllowedRating: true,
+  autoUpdateThreadsByDefault: true,
+  autoUpdateInterval: true,
+  showAutoUpdateDesktopNotifications: true,
+  playAutoUpdateSound: true,
+  soundNotificationsVolume: true,
+  addExpander: true,
+  signOpPostLinks: 'signOPPostLinks',
+  signOwnPostLinks: true,
+  showLeafButtons: true,
+  leafThroughImagesOnly: true,
+  imageZoomSensitivity: true,
+  defaultAudioVideoVolume: true,
+  rememberAudioVideoVolume: true,
+  playAudioVideoImmediately: true,
+  loopAudioVideo: true,
+  quickReplyAction: true,
+  moveToPostOnReplyInThread: true,
+  checkFileExistence: true,
+  showAttachedFilePreview: true,
+  addToFavoritesOnReply: true,
+  stripExifFromJpeg: true,
+  hideTripcodes: true,
+  hideUserNames: true,
+  strikeOutHiddenPostLinks: true,
+  spellsEnabled: true,
+  ihashDistance: true,
+  showNewPosts: true,
+  hotkeysEnabled: true,
+  userCssEnabled: 'userCSSEnabled',
+  userJavaScriptEnabled: true,
+  sourceHighlightingEnabled: true,
+  chatEnabled: true,
+  backgroundDrawable: 'drawingBackgroundDrawable',
+  drawingBackgroundColor: true,
+  drawingBackgroundWidth: true,
+  drawingBackgroundHeight: true,
+  resetFileScaleOnOpening: true,
+  closeFilesByClickingOnly: true,
+  viewPostPreviewDelay: true,
+  hidePostPreviewDelay: true,
+  infiniteScroll: true,
+  bannersMode: 'bannerMode',
+  captchaEngine: true,
+  style: true,
+  codeStyle: true,
+  mumWatching: true
+};
+
+export const V1_TO_V2_OTHER = {
+  audioVideoVolume: true,
+  chats: true,
+  draftsVisible: true,
+  frequentlyUsedFiles: true,
+  lastPostNumbers: true,
+  levels: true,
+  ownPosts: true,
+  password: true,
+  spells: true,
+  userCss: 'userCSS',
+  userJavaScript: true
+};
+
+function v1ToV2() {
+  let settings = _(V1_TO_V2_SETTINGS).reduce((acc, newKey, key) => {
+    if (typeof newKey !== 'string') {
+      newKey = key;
+    }
+    let value = getLocalObject(key);
+    if (typeof value !== 'undefined') {
+      acc[newKey] = value;
+    }
+    return acc;
+  }, {});
+  setLocalObject('settings', settings);
+  _(V1_TO_V2_SETTINGS).each((newKey, key) => {
+    if (typeof newKey !== 'string') {
+      newKey = key;
+    }
+    let value = getLocalObject(key);
+    if (typeof value !== 'undefined') {
+      setLocalObject(newKey, value);
+    }
+  });
+  localStorage.clear();
+}
+
+export function initialize() {
   let version = getLocalObject('scriptVersion');
   if (!version) {
-    localStorage.clear();
+    v1ToV2();
   }
   setLocalObject('scriptVersion', SCRIPT_VERSION);
 }

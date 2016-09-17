@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.delall = exports.initialize = exports.nextPostNumber = exports.getPageCount = exports.getLastPostNumbers = exports.getLastPostNumber = exports.getArchive = exports.getCatalog = exports.getPage = exports.getThread = undefined;
 
 var getThread = exports.getThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, threadNumber, archived) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, threadNumber) {
     var board, thread, posts;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -41,11 +41,10 @@ var getThread = exports.getThread = function () {
             thread.opPost = posts.splice(0, 1)[0];
             thread.lastPosts = posts;
             thread.title = postSubject(thread.opPost, 50) || null;
-            thread.archived = !!archived;
             addDataToThread(thread, board);
             return _context.abrupt('return', thread);
 
-          case 16:
+          case 15:
           case 'end':
             return _context.stop();
         }
@@ -53,7 +52,7 @@ var getThread = exports.getThread = function () {
     }, _callee, this);
   }));
 
-  return function getThread(_x, _x2, _x3) {
+  return function getThread(_x, _x2) {
     return ref.apply(this, arguments);
   };
 }();
@@ -151,7 +150,7 @@ var getPage = exports.getPage = function () {
                 }, _callee2, this);
               }));
 
-              return function (_x6) {
+              return function (_x5) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -178,7 +177,7 @@ var getPage = exports.getPage = function () {
     }, _callee3, this);
   }));
 
-  return function getPage(_x4, _x5) {
+  return function getPage(_x3, _x4) {
     return ref.apply(this, arguments);
   };
 }();
@@ -238,7 +237,7 @@ var getCatalog = exports.getCatalog = function () {
                 }, _callee4, this);
               }));
 
-              return function (_x9) {
+              return function (_x8) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -280,7 +279,7 @@ var getCatalog = exports.getCatalog = function () {
     }, _callee5, this);
   }));
 
-  return function getCatalog(_x7, _x8) {
+  return function getCatalog(_x6, _x7) {
     return ref.apply(this, arguments);
   };
 }();
@@ -356,7 +355,7 @@ var getArchive = exports.getArchive = function () {
                 }, _callee6, this);
               }));
 
-              return function (_x11) {
+              return function (_x10) {
                 return ref.apply(this, arguments);
               };
             }(), true);
@@ -384,7 +383,7 @@ var getArchive = exports.getArchive = function () {
     }, _callee7, this);
   }));
 
-  return function getArchive(_x10) {
+  return function getArchive(_x9) {
     return ref.apply(this, arguments);
   };
 }();
@@ -417,7 +416,7 @@ var getLastPostNumber = exports.getLastPostNumber = function () {
     }, _callee8, this);
   }));
 
-  return function getLastPostNumber(_x12) {
+  return function getLastPostNumber(_x11) {
     return ref.apply(this, arguments);
   };
 }();
@@ -456,7 +455,7 @@ var getLastPostNumbers = exports.getLastPostNumbers = function () {
     }, _callee9, this);
   }));
 
-  return function getLastPostNumbers(_x13) {
+  return function getLastPostNumbers(_x12) {
     return ref.apply(this, arguments);
   };
 }();
@@ -496,7 +495,7 @@ var getPageCount = exports.getPageCount = function () {
     }, _callee10, this);
   }));
 
-  return function getPageCount(_x14) {
+  return function getPageCount(_x13) {
     return ref.apply(this, arguments);
   };
 }();
@@ -557,7 +556,7 @@ var nextPostNumber = exports.nextPostNumber = function () {
     }, _callee11, this);
   }));
 
-  return function nextPostNumber(_x15, _x16) {
+  return function nextPostNumber(_x14, _x15) {
     return ref.apply(this, arguments);
   };
 }();
@@ -586,7 +585,7 @@ var initialize = exports.initialize = function () {
                 }, _callee12, this);
               }));
 
-              return function (_x17) {
+              return function (_x16) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -676,7 +675,7 @@ var delall = exports.delall = function () {
                 }, _callee14, this);
               }));
 
-              return function (_x21) {
+              return function (_x20) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -700,7 +699,7 @@ var delall = exports.delall = function () {
                 }, _callee15, this);
               }));
 
-              return function (_x22) {
+              return function (_x21) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -724,7 +723,7 @@ var delall = exports.delall = function () {
                 }, _callee16, this);
               }));
 
-              return function (_x23) {
+              return function (_x22) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -748,7 +747,7 @@ var delall = exports.delall = function () {
                 }, _callee17, this);
               }));
 
-              return function (_x24) {
+              return function (_x23) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -772,7 +771,7 @@ var delall = exports.delall = function () {
                 }, _callee18, this);
               }));
 
-              return function (_x25) {
+              return function (_x24) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -785,7 +784,7 @@ var delall = exports.delall = function () {
     }, _callee19, this);
   }));
 
-  return function delall(_x18, _x19, _x20) {
+  return function delall(_x17, _x18, _x19) {
     return ref.apply(this, arguments);
   };
 }();

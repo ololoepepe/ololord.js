@@ -84,7 +84,7 @@ function addButtons({ buttons, headerButtons }) {
   }).forEach((button) => {
     el.append($(`<button class='widget-button'></button>`).text(button.title).click(() => {
       if (typeof button.action === 'function') {
-        let result = button.action();
+        let result = button.action.call(this);
         if (typeof result !== 'undefined') {
           this.hide(!!result);
         }
@@ -193,6 +193,17 @@ export default class MovableWidget extends EventEmitter {
       width: ((minSize && +minSize.width > 0) ? minSize.width : 0),
       height: ((minSize && +minSize.height > 0) ? minSize.height : 0)
     };
+    let w = $(window);
+    let maxSize = {
+      width: w.width() - (2 * WIDGET_MARGIN),
+      height: w.height() - (2 * WIDGET_MARGIN)
+    };
+    if (this.minSize.width > maxSize.width) {
+      this.minSize.width = maxSize.width;
+    }
+    if (this.minSize.height > maxSize.height) {
+      this.minSize.height = maxSize.height;
+    }
     this.maximized = !!maximized;
     this.resizable = (typeof resizable !== 'undefined') ? !!resizable : true;
     this.div = $(Templating.template('widgets/widget', { title: title }, { noparse: true }));

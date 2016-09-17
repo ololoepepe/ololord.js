@@ -28,15 +28,6 @@ export const SECOND = 1000;
 export const MINUTE = 60 * SECOND;
 export const HOUR = 60 * MINUTE;
 export const DAY = 24 * HOUR;
-export const EXTERNAL_LINK_REGEXP_PATTERN = (function() {
-    var schema = "https?:\\/\\/|ftp:\\/\\/";
-    var ip = "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}"
-        + "(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])";
-    var hostname = "([\\w\\p{L}\\.\\-]+)\\.([\\p{L}]{2,17}\\.?)";
-    var port = ":\\d+";
-    var path = "(\\/[\\w\\p{L}\\.\\-\\!\\?\\=\\+#~&%:;\'\"\\,\\(\\)\\[\\]«»]*)*\\/?";
-    return "(" + schema + ")?(" + hostname + "|" + ip + ")(" + port + ")?" + path;
-})();
 export const FILE_RATINGS = ['SFW', 'R-15', 'R-18', 'R-18G'];
 export const NODE_CAPTCHA_ID = 'node-captcha';
 export const REGISTERED_USER_LEVELS = ['USER', 'MODER', 'ADMIN', 'SUPERUSER'];
@@ -45,7 +36,7 @@ export const STYLES = FSSync.readdirSync(STYLES_PATH).filter((fileName) => {
   return fileName.split('.').pop() === 'css' && !NON_THEME_STYLESHEETS.has(fileName.split('.').shift());
 }).map((fileName) => {
   let name = fileName.split('.').slice(0, -1).join('.');
-  let match = /\/\*\s*([^\*]+?)\s*\*\//gi.exec(FSSync.readFileSync(`${STYLES_PATH}/${fileName}`, 'utf8'));
+  let match = /\/\*\!\s*([^\*]+?)\s*\*\//gi.exec(FSSync.readFileSync(`${STYLES_PATH}/${fileName}`, 'utf8'));
   return {
     name: name,
     title: (match ? match[1] : name)

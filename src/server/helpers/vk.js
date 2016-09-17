@@ -4,6 +4,9 @@ import HTTP from 'q-io/http';
 import config from '../helpers/tools';
 import * as Tools from '../helpers/tools';
 
+
+const VK_API_CALL_TIMEOUT = Tools.MINUTE;
+
 export default async function(method, params) {
   if (!method) {
     return Promise.reject(new Error(Tools.translate('Invalid VK API method')));
@@ -19,7 +22,7 @@ export default async function(method, params) {
   let response = await HTTP.request({
     url: `https://api.vk.com/method/${method}?${params}`,
     method: 'POST',
-    timeout: Tools.MINUTE //TODO: magic number
+    timeout: VK_API_CALL_TIMEOUT
   });
   if (200 !== response.status) {
     return Promise.reject(new Error(Tools.translate('Failed to call VK API method')));

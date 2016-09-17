@@ -45,7 +45,9 @@ export default class Hash extends CommonKey {
     if (items.length <= 0) {
       return 0;
     }
-    return await this.client.hmset.call(this.client, this.fullKey(subkey), ...items);
+    return await this.client.hmset.call(this.client, this.fullKey(subkey), ...items.map((item, index) => {
+      return (index % 2) ? this.stringify(item) : item;
+    }));
   }
 
   async incrementBy(id, n, subkey) {

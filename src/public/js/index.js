@@ -1,6 +1,7 @@
 import 'babel-polyfill';
 import _ from 'underscore';
 import $ from 'jquery';
+import { EventEmitter } from 'events';
 import KO from 'knockout';
 import Mousetrap from 'mousetrap';
 
@@ -13,6 +14,7 @@ import * as Templating from './helpers/templating';
 import * as Tools from './helpers/tools';
 import * as Actions from './core/actions';
 import * as Auth from './core/auth';
+import * as Captcha from './captcha';
 import * as Chat from './core/chat';
 import * as Drafts from './core/drafts';
 import * as Files from './core/files';
@@ -20,25 +22,28 @@ import * as Hiding from './core/hiding';
 import * as Hotkeys from './core/hotkeys';
 import * as Posts from './core/posts';
 import * as Threads from './core/threads';
+import * as WebSocket from './core/websocket';
 import * as Worker from './worker';
 import * as EventHandlers from './handlers/event-handlers';
 import * as PreloadProcessors from './handlers/preload-processors';
 import * as Widgets from './widgets';
 
-import './captcha';
 import './core/auth';
 import './core/chat';
 import './core/drafts';
 import './core/file-inputs';
 import './core/files';
-import './core/hiding';
-import './core/hotkeys';
 import './core/management';
 import './core/markup';
 import './core/player';
 import './core/post-form';
 import './core/posts';
 import './core/threads';
+import './handlers/post-processors';
+import './helpers/ajax';
+import './widgets/movable-widget';
+import './widgets/overlay-progress-bar';
+import './widgets/popup-message';
 import './worker/spells';
 
 const CODEMIRROR_ADDONS = ['mode/simple'];
@@ -52,8 +57,6 @@ const MODULE_SHORTCUTS = new Map([
   ['filesaver', 'node-safe-filesaver'],
   ['save-as', 'node-safe-filesaver']
 ]);
-
-Storage.checkScriptVersion();
 
 window.jQuery = $; //NOTE: Workaround for the is-in-viewport plugin
 KO.options.useOnlyNativeEvents = true; //NOT: Use native events, NOT jQuery events
@@ -176,7 +179,7 @@ $.fn.loadWithScripts = function(url, params, callback) {
 	return this;
 };
 
-window.lord = window.lord || {};
+window.lord = window.lord || new EventEmitter();
 
 window.lord.require = (moduleName) => {
   if (!moduleName) {
@@ -241,7 +244,7 @@ function initializeNavbar(navbar) {
     }),
     showChat: Chat.showChat,
     showHiddenPostList: Hiding.showHiddenPostList,
-    editSpells: Widgets.editCode.bind(null, 'spells', 'spells'),
+    editSpells: Widgets.editCode.bind(null, 'spells', { name: 'spells' }),
     showSettings: Widgets.showSettings,
     showSearch: Widgets.showSearch,
     showFavorites: Threads.showFavorites,
@@ -328,11 +331,18 @@ function reloadUserCSS(value) {
   }
 }
 
-Settings.userCSSEnabled.subscribe(reloadUserCSS);
-Storage.userCSS.subscribe(reloadUserCSS);
-
 export function initializeHead() {
+  Storage.initialize();
   Settings.initialize();
+  Storage.userCSS.subscribe(reloadUserCSS);
+  Settings.userCSSEnabled.subscribe(reloadUserCSS);
+  Settings.bannerMode.subscribe(resetBanner);
+  Captcha.initialize();
+  Hiding.initialize();
+  Posts.initialize();
+  Threads.initialize();
+  WebSocket.initialize();
+  EventHandlers.initialize();
   Navigation.initialize();
   Hotkeys.initialize();
   KO.applyBindings({
@@ -341,7 +351,7 @@ export function initializeHead() {
       if (Settings.mumWatching()) {
         list.push('mum-watching');
       }
-      let rating = Settings.maxAllowedRating();
+      let rating = Settings.maxAllowedRating() || 'R-18G';
       if (Tools.compareRatings(rating, 'R-18G') < 0) {
         list.push(`rating-${rating.toLowerCase()}`);
       }
@@ -488,7 +498,8 @@ export function resetBanner() {
     boardTitle,
     fileName
   } = _(banners).sample();
-  let img = $(`<img src='/${Tools.sitePathPrefix()}img/banners/${boardName}/${fileName}' />`);
+  let className = 'hide-if-mum-watching';
+  let img = $(`<img src='/${Tools.sitePathPrefix()}img/banners/${boardName}/${fileName}' class='${className}' />`);
   if ('same' === BANNER_MODE) {
     banner.append(img);
   } else {
@@ -497,10 +508,6 @@ export function resetBanner() {
     banner.append(a);
   }
 }
-
-Settings.bannerMode.subscribe(() => {
-  resetBanner();
-});
 
 export function initializeBanner() {
   resetBanner();

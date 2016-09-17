@@ -60,7 +60,8 @@ function getDefaultBoards() {
   ];
 }
 
-export default class Board {
+/** Class representing a board. */
+class Board {
   static board(name) {
     return boards[name];
   }
@@ -286,6 +287,9 @@ export default class Board {
     if ('createThread' === mode && this.maxFileCount && files.length <= 0) {
       return Promise.reject(new Error(Tools.translate('Attempt to create a thread without attaching a file')));
     }
+    if ('deleteFile' === mode && (existingFileCount > 0)) {
+      --existingFileCount;
+    }
     if (text.length <= 0 && (files.length + existingFileCount) <= 0) {
       return Promise.reject(new Error(Tools.translate('Both file and comment are missing')));
     }
@@ -312,15 +316,15 @@ export default class Board {
     return oldPost ? oldPost.extraData : null;
   }
 
-  async storeExtraData(postNumber, extraData) {
+  async storeExtraData(postNumber, extraData, archived) {
     //NOTE: Do nothing by default.
   }
 
-  async loadExtraData(postNumber) {
+  async loadExtraData(postNumber, archived) {
     //NOTE: Do nothing by default.
   }
 
-  async removeExtraData(postNumber) {
+  async removeExtraData(postNumber, archived) {
     //NOTE: Do nothing by default.
   }
 
@@ -333,8 +337,14 @@ export default class Board {
     delete post.user.ip;
     delete post.user.hashpass;
     delete post.user.password;
-    if (!post.geolocation.countryName) {
-      post.geolocation.countryName = 'Unknown country';
+    if (post.hasOwnProperty('geolocation')) {
+      if (this.showWhois) {
+        if (!post.geolocation.countryName) {
+          post.geolocation.countryName = 'Unknown country';
+        }
+      } else {
+        delete post.geolocation;
+      }
     }
     return post;
   }
@@ -343,3 +353,5 @@ export default class Board {
     return '!' + Tools.crypto('md5', source + config('site.tripcodeSalt'), 'base64').substr(0, 10);
   }
 }
+
+export default Board;

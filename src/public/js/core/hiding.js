@@ -44,8 +44,6 @@ export function resetHiddenPostsCSS() {
   });
 }
 
-Storage.hiddenPosts.subscribe(resetHiddenPostsCSS);
-
 export function addPostToHidden(boardName, postNumber, threadNumber, { hiddenPosts, reason } = {}) {
   boardName = Tools.option(boardName, 'string', '');
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
@@ -207,18 +205,6 @@ function process(hiddenPosts, list, map) {
   Storage.hiddenPosts(Tools.cloned(hiddenPosts));
 }
 
-Settings.spellsEnabled.subscribe((value) => {
-  if (value) {
-    applySpells(DOM.queryAll('.post'));
-  }
-});
-
-Storage.spells.subscribe(() => {
-  if (Settings.spellsEnabled()) {
-    applySpells(DOM.queryAll('.post'), true);
-  }
-});
-
 export async function applySpells(posts, force) {
   if (!_(posts).isArray()) {
     posts = [posts];
@@ -261,22 +247,6 @@ export async function applySpells(posts, force) {
       await Promise.all(promises);
     } else {
       process(hiddenPosts, posts);
-    }
-  } catch (err) {
-    return Promise.reject(err);
-  }
-}
-
-export async function processPosts(parent) {
-  parent = parent || window.document.body;
-  let posts = ($(parent).hasClass('post') || $(parent).hasClass('opPost')) ? [parent]
-    : DOM.queryAll('.post', parent);
-  try {
-    await PostProcessors.applyPreprocessors(posts);
-    if (Settings.spellsEnabled()) {
-      applySpells(posts).catch(DOM.handleError);
-    } else {
-      posts.forEach(process.bind(null, Storage.hiddenPosts()));
     }
   } catch (err) {
     return Promise.reject(err);
@@ -341,4 +311,18 @@ export function removeHidden(boardName, postNumber) {
     delete similarText[key];
     Storage.similarText(similarText);
   }
-};
+}
+
+export function initialize() {
+  Storage.hiddenPosts.subscribe(resetHiddenPostsCSS);
+  Storage.spells.subscribe(() => {
+    if (Settings.spellsEnabled()) {
+      applySpells(DOM.queryAll('.post'), true);
+    }
+  });
+  Settings.spellsEnabled.subscribe((value) => {
+    if (value) {
+      applySpells(DOM.queryAll('.post'));
+    }
+  });
+}

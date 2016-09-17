@@ -30,7 +30,7 @@ class WebSocketWrapper extends EventEmitter {
       try {
         message = JSON.parse(message.data);
       } catch (err) {
-        console.log('Error parsing WebSocket message:', err);
+        console.log(Tools.translate('Error parsing WebSocket message:'), err);
       }
       this.emit('message', message);
     };
@@ -71,13 +71,6 @@ let queue = [];
 let messages = {};
 let currentMessage = null;
 let handlers = {};
-
-Settings.useWebSockets.subscribe((value) => {
-  if (!initialized) {
-    return;
-  }
-  ws[value ? 'open' : 'close']();
-});
 
 function checkQueue() {
   if (!ready || queue.length < 1) {
@@ -184,6 +177,15 @@ export async function sendMessage(type, data) {
 }
 
 export function initialize() {
+  Settings.useWebSockets.subscribe((value) => {
+    if (!initialized) {
+      return;
+    }
+    ws[value ? 'open' : 'close']();
+  });
+}
+
+export function initializeOnload() {
   if (initialized) {
     return;
   }

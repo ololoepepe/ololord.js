@@ -14,7 +14,7 @@
         <span data-bind='text: "/" + $data.key.split(":").slice(0, 2).join("/")
                            + "#" + $data.key.split(":").pop()'></span>
       </span>
-      <span class='icon icon-bin button-icon' title='{{!it.translate('Delete this chat')}}'
+      <span class='icon icon-bin-16 button-icon' title='{{!it.translate('Delete this chat')}}'
             data-bind='click: $root.deleteChat'></span>
     </div>
   </div>
@@ -27,8 +27,8 @@
         <div class='chat-message-header'>
           <span class='icon sign-icon'
                 data-bind='css: {
-                             "icon-undo": ("out" === $data.type),
-                             "icon-redo": ("in" === $data.type)
+                             "icon-undo-16": ("out" === $data.type),
+                             "icon-redo-16": ("in" === $data.type)
                            }'></span>
           <span data-bind='text: $root.formattedDate($data.date)'></span>
         </div>

@@ -137,13 +137,13 @@ if (configFileName && FSSync.existsSync(configFileName)) {
       return acc;
     }, {});
     _(config).each((_1, key) => { keys[key] = true; });
-    keys = _(keys).pick((_1, key) => { return hooks.hasOwnProperty(key); }).map((_1, key) => { return key; });
-    oldConfig = keys.reduce((acc, key) => {
+    keys = _(keys).pick((_1, key) => { return hooks.hasOwnProperty(key); });
+    oldConfig = _(keys).reduce((acc, _1, key) => {
       acc[key] = c(key);
       return acc;
     }, {});
     config = require(id);
-    keys.forEach((key) => {
+    _(keys).each((_1, key) => {
       hooks[key].forEach((hook) => {
         hook(c[key], oldConfig[key], key);
       });
@@ -187,7 +187,7 @@ c.proxy = function() {
     return null;
   }
   let parts = proxy.split(':');
-  let auth = config('system.fileDownloadProxyAuth');
+  let auth = c('system.fileDownloadProxyAuth');
   return {
     host: parts[0],
     port: (parts[1] ? +parts[1] : null),

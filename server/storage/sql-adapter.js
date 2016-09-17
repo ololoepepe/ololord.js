@@ -76,28 +76,28 @@ var SQLAdapter = function () {
 
               case 12:
                 _context.next = 14;
-                return this._wrapper.run('CREATE TABLE IF NOT EXISTS ' + key + ' (id TEXT PRIMARY KEY NOT NULL, value TEXT)');
+                return this._wrapper.run('CREATE TABLE IF NOT EXISTS "' + key + '" (id TEXT PRIMARY KEY NOT NULL, value TEXT)');
 
               case 14:
                 return _context.abrupt('break', 25);
 
               case 15:
                 _context.next = 17;
-                return this._wrapper.run('CREATE TABLE IF NOT EXISTS ' + key + ' (value TEXT)');
+                return this._wrapper.run('CREATE TABLE IF NOT EXISTS "' + key + '" (value TEXT)');
 
               case 17:
                 return _context.abrupt('break', 25);
 
               case 18:
                 _context.next = 20;
-                return this._wrapper.run('CREATE TABLE IF NOT EXISTS ' + key + ' (value TEXT PRIMARY KEY NOT NULL)');
+                return this._wrapper.run('CREATE TABLE IF NOT EXISTS "' + key + '" (value TEXT PRIMARY KEY NOT NULL)');
 
               case 20:
                 return _context.abrupt('break', 25);
 
               case 21:
                 _context.next = 23;
-                return this._wrapper.run('CREATE TABLE IF NOT EXISTS ' + key + ' (value TEXT PRIMARY KEY, score INTEGER)');
+                return this._wrapper.run('CREATE TABLE IF NOT EXISTS "' + key + '" (value TEXT PRIMARY KEY, score INTEGER)');
 
               case 23:
                 return _context.abrupt('break', 25);
@@ -186,7 +186,7 @@ var SQLAdapter = function () {
 
               case 2:
                 t = _context3.sent;
-                return _context3.abrupt('return', 'none' !== type);
+                return _context3.abrupt('return', 'none' !== t);
 
               case 4:
               case 'end':
@@ -203,7 +203,7 @@ var SQLAdapter = function () {
       return exists;
     }()
   }, {
-    key: 'find',
+    key: 'keys',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(query) {
         var results;
@@ -214,11 +214,11 @@ var SQLAdapter = function () {
                 //TODO: improve replacing, handle unsupported symbols
                 query = query.split('*').join('%').split('?').join('_');
                 _context4.next = 3;
-                return this._wrapper.get('SELECT name FROM _ololord_metadata WHERE name LIKE ?', query);
+                return this._wrapper.all('SELECT name FROM _ololord_metadata WHERE name LIKE ?', query);
 
               case 3:
                 results = _context4.sent;
-                return _context4.abrupt('return', results.map(function (result) {
+                return _context4.abrupt('return', (results || []).map(function (result) {
                   return result.name;
                 }));
 
@@ -230,14 +230,14 @@ var SQLAdapter = function () {
         }, _callee4, this);
       }));
 
-      function find(_x6) {
+      function keys(_x6) {
         return ref.apply(this, arguments);
       }
 
-      return find;
+      return keys;
     }()
   }, {
-    key: 'delete',
+    key: 'del',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(key) {
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
@@ -286,7 +286,7 @@ var SQLAdapter = function () {
 
                           case 14:
                             _context5.next = 16;
-                            return this._wrapper.run('DROP TABLE ' + key);
+                            return this._wrapper.run('DROP TABLE "' + key + '"');
 
                           case 16:
                             commit(1);
@@ -312,11 +312,11 @@ var SQLAdapter = function () {
         }, _callee6, this);
       }));
 
-      function _delete(_x7) {
+      function del(_x7) {
         return ref.apply(this, arguments);
       }
 
-      return _delete;
+      return del;
     }()
   }, {
     key: 'expire',
@@ -582,7 +582,7 @@ var SQLAdapter = function () {
 
                           case 5:
                             _context14.next = 7;
-                            return this._wrapper.get('SELECT value FROM ' + key + ' WHERE id = ?', id);
+                            return this._wrapper.get('SELECT value FROM "' + key + '" WHERE id = ?', id);
 
                           case 7:
                             result = _context14.sent;
@@ -656,28 +656,23 @@ var SQLAdapter = function () {
                             return _context16.abrupt('return', rollback(result));
 
                           case 5:
-                            q = 'SELECT id, value FROM ' + key + ' WHERE id IN (' + ids.map(function (_1) {
+                            q = 'SELECT id, value FROM "' + key + '" WHERE id IN (' + ids.map(function (_1) {
                               return '?';
                             }).join(', ') + ')';
                             _context16.next = 8;
-                            return (_wrapper = this._wrapper).get.apply(_wrapper, [q, key].concat(ids));
+                            return (_wrapper = this._wrapper).all.apply(_wrapper, [q].concat(ids));
 
                           case 8:
                             results = _context16.sent;
 
-                            results = results.reduce(function (acc, res) {
+                            results = (results || []).reduce(function (acc, res) {
                               acc[res.id] = res.value;
                               return acc;
                             }, {});
-                            commit(ids.reduce(function (acc, id) {
+                            commit(ids.map(function (id) {
                               var res = results[id];
-                              if (typeof res === 'undefined') {
-                                acc[id] = null;
-                              } else {
-                                acc[id] = typeof res.value !== 'undefined' ? res.value : null;
-                              }
-                              return acc;
-                            }, {}));
+                              return typeof res !== 'undefined' ? res : null;
+                            }));
 
                           case 11:
                           case 'end':
@@ -740,12 +735,12 @@ var SQLAdapter = function () {
 
                           case 5:
                             _context18.next = 7;
-                            return this._wrapper.get('SELECT id, value FROM ' + key);
+                            return this._wrapper.all('SELECT id, value FROM "' + key + '"');
 
                           case 7:
                             results = _context18.sent;
 
-                            commit(results.reduce(function (acc, res) {
+                            commit((results || []).reduce(function (acc, res) {
                               acc[res.id] = typeof res.value !== 'undefined' ? res.value : null;
                               return acc;
                             }, {}));
@@ -811,7 +806,7 @@ var SQLAdapter = function () {
 
                           case 5:
                             _context20.next = 7;
-                            return this._wrapper.get('SELECT id FROM ' + key + ' WHERE id = ?', id);
+                            return this._wrapper.get('SELECT id FROM "' + key + '" WHERE id = ?', id);
 
                           case 7:
                             result = _context20.sent;
@@ -870,16 +865,16 @@ var SQLAdapter = function () {
 
                           case 2:
                             _context22.next = 4;
-                            return this._wrapper.get('SELECT id FROM ' + key + ' WHERE id = ?', id);
+                            return this._wrapper.get('SELECT id FROM "' + key + '" WHERE id = ?', id);
 
                           case 4:
                             result = _context22.sent;
                             _context22.next = 7;
-                            return this._wrapper.run('UPDATE ' + key + ' SET value = ? WHERE id = ?', data, id);
+                            return this._wrapper.run('UPDATE "' + key + '" SET value = ? WHERE id = ?', data, id);
 
                           case 7:
                             _context22.next = 9;
-                            return this._wrapper.run('INSERT OR IGNORE INTO ' + key + ' (id, value) VALUES (?, ?)', id, data);
+                            return this._wrapper.run('INSERT OR IGNORE INTO "' + key + '" (id, value) VALUES (?, ?)', id, data);
 
                           case 9:
                             result = result || {};
@@ -948,11 +943,11 @@ var SQLAdapter = function () {
                                     switch (_context24.prev = _context24.next) {
                                       case 0:
                                         _context24.next = 2;
-                                        return self._wrapper.run('UPDATE ' + key + ' SET value = ? WHERE id = ?', chunk[1], chunk[0]);
+                                        return self._wrapper.run('UPDATE "' + key + '" SET value = ? WHERE id = ?', chunk[1], chunk[0]);
 
                                       case 2:
                                         _context24.next = 4;
-                                        return self._wrapper.run('INSERT OR IGNORE INTO ' + key + ' (id, value) VALUES (?, ?)', chunk[0], chunk[1]);
+                                        return self._wrapper.run('INSERT OR IGNORE INTO "' + key + '" (id, value) VALUES (?, ?)', chunk[0], chunk[1]);
 
                                       case 4:
                                       case 'end':
@@ -1021,7 +1016,7 @@ var SQLAdapter = function () {
 
                           case 2:
                             _context27.next = 4;
-                            return this._wrapper.get('SELECT id, value FROM ' + key + ' WHERE id = ?', id);
+                            return this._wrapper.get('SELECT id, value FROM "' + key + '" WHERE id = ?', id);
 
                           case 4:
                             result = _context27.sent;
@@ -1042,11 +1037,11 @@ var SQLAdapter = function () {
                               result.value = +value;
                             }
                             _context27.next = 11;
-                            return this._wrapper.run('UPDATE ' + key + ' SET value = ? WHERE id = ?', result.value, id);
+                            return this._wrapper.run('UPDATE "' + key + '" SET value = ? WHERE id = ?', result.value, id);
 
                           case 11:
                             _context27.next = 13;
-                            return this._wrapper.run('INSERT OR IGNORE INTO ' + key + ' (id, value) VALUES (?, ?)', id, result.value);
+                            return this._wrapper.run('INSERT OR IGNORE INTO "' + key + '" (id, value) VALUES (?, ?)', id, result.value);
 
                           case 13:
                             commit(result.value);
@@ -1126,12 +1121,12 @@ var SQLAdapter = function () {
                                     switch (_context29.prev = _context29.next) {
                                       case 0:
                                         _context29.next = 2;
-                                        return self._wrapper.get('SELECT id FROM ' + key + ' WHERE id = ?', id);
+                                        return self._wrapper.get('SELECT id FROM "' + key + '" WHERE id = ?', id);
 
                                       case 2:
                                         result = _context29.sent;
                                         _context29.next = 5;
-                                        return self._wrapper.run('DELETE FROM ' + key + ' WHERE id = ?', id);
+                                        return self._wrapper.run('DELETE FROM "' + key + '" WHERE id = ?', id);
 
                                       case 5:
                                         result = result || {};
@@ -1154,7 +1149,7 @@ var SQLAdapter = function () {
 
                           case 9:
                             _context30.next = 11;
-                            return this._wrapper.get('SELECT count(id) FROM ' + key);
+                            return this._wrapper.get('SELECT count(id) FROM "' + key + '"');
 
                           case 11:
                             result = _context30.sent;
@@ -1173,7 +1168,7 @@ var SQLAdapter = function () {
 
                           case 16:
                             _context30.next = 18;
-                            return this._wrapper.run('DROP TABLE ' + key);
+                            return this._wrapper.run('DROP TABLE "' + key + '"');
 
                           case 18:
                             commit(count);
@@ -1230,20 +1225,25 @@ var SQLAdapter = function () {
                           case 2:
                             result = _context32.sent;
 
-                            if (!result) {
-                              rollback([]);
+                            if (result) {
+                              _context32.next = 5;
+                              break;
                             }
-                            _context32.next = 6;
-                            return this._wrapper.get('SELECT id FROM ' + key);
 
-                          case 6:
+                            return _context32.abrupt('return', rollback([]));
+
+                          case 5:
+                            _context32.next = 7;
+                            return this._wrapper.all('SELECT id FROM "' + key + '"');
+
+                          case 7:
                             results = _context32.sent;
 
-                            commit(results.map(function (res) {
+                            commit((results || []).map(function (res) {
                               return res.id;
                             }));
 
-                          case 8:
+                          case 9:
                           case 'end':
                             return _context32.stop();
                         }
@@ -1295,13 +1295,18 @@ var SQLAdapter = function () {
                           case 2:
                             result = _context34.sent;
 
-                            if (!result) {
-                              rollback(0);
+                            if (result) {
+                              _context34.next = 5;
+                              break;
                             }
-                            _context34.next = 6;
-                            return this._wrapper.get('SELECT count(id) FROM ' + key);
 
-                          case 6:
+                            return _context34.abrupt('return', rollback(0));
+
+                          case 5:
+                            _context34.next = 7;
+                            return this._wrapper.get('SELECT count(id) FROM "' + key + '"');
+
+                          case 7:
                             result = _context34.sent;
 
                             result = result || {};
@@ -1309,7 +1314,7 @@ var SQLAdapter = function () {
                                 return c > 0;
                               } }));
 
-                          case 9:
+                          case 10:
                           case 'end':
                             return _context34.stop();
                         }
@@ -1370,7 +1375,7 @@ var SQLAdapter = function () {
 
                           case 5:
                             _context36.next = 7;
-                            return this._wrapper.get('SELECT value FROM ' + key + ' LIMIT 1');
+                            return this._wrapper.get('SELECT value FROM "' + key + '" LIMIT 1');
 
                           case 7:
                             result = _context36.sent;
@@ -1439,7 +1444,7 @@ var SQLAdapter = function () {
 
                           case 5:
                             _context38.next = 7;
-                            return this._wrapper.all('SELECT value FROM ' + key);
+                            return this._wrapper.all('SELECT value FROM "' + key + '"');
 
                           case 7:
                             results = _context38.sent;
@@ -1509,7 +1514,7 @@ var SQLAdapter = function () {
 
                           case 5:
                             _context40.next = 7;
-                            return this._wrapper.all('SELECT count(value) FROM ' + key + ' WHERE value = ?', data);
+                            return this._wrapper.all('SELECT count(value) FROM "' + key + '" WHERE value = ?', data);
 
                           case 7:
                             results = _context40.sent;
@@ -1583,7 +1588,7 @@ var SQLAdapter = function () {
                                     switch (_context42.prev = _context42.next) {
                                       case 0:
                                         _context42.next = 2;
-                                        return self._wrapper.get('SELECT count(value) FROM ' + key + ' WHERE value = ?', data);
+                                        return self._wrapper.get('SELECT count(value) FROM "' + key + '" WHERE value = ?', data);
 
                                       case 2:
                                         result = _context42.sent;
@@ -1598,7 +1603,7 @@ var SQLAdapter = function () {
                                         }
 
                                         _context42.next = 7;
-                                        return self._wrapper.run('INSERT INTO ' + key + ' (value) VALUES (?)', data);
+                                        return self._wrapper.run('INSERT INTO "' + key + '" (value) VALUES (?)', data);
 
                                       case 7:
                                         ++count;
@@ -1690,12 +1695,12 @@ var SQLAdapter = function () {
                                     switch (_context45.prev = _context45.next) {
                                       case 0:
                                         _context45.next = 2;
-                                        return self._wrapper.get('SELECT count(value) FROM ' + key + ' WHERE value = ?', data);
+                                        return self._wrapper.get('SELECT count(value) FROM "' + key + '" WHERE value = ?', data);
 
                                       case 2:
                                         result = _context45.sent;
                                         _context45.next = 5;
-                                        return self._wrapper.run('DELETE FROM ' + key + ' WHERE value = ?', data);
+                                        return self._wrapper.run('DELETE FROM "' + key + '" WHERE value = ?', data);
 
                                       case 5:
                                         result = result || {};
@@ -1720,7 +1725,7 @@ var SQLAdapter = function () {
 
                           case 9:
                             _context46.next = 11;
-                            return this._wrapper.get('SELECT count(value) FROM ' + key);
+                            return this._wrapper.get('SELECT count(value) FROM "' + key + '"');
 
                           case 11:
                             result = _context46.sent;
@@ -1739,7 +1744,7 @@ var SQLAdapter = function () {
 
                           case 16:
                             _context46.next = 18;
-                            return this._wrapper.run('DROP TABLE ' + key);
+                            return this._wrapper.run('DROP TABLE "' + key + '"');
 
                           case 18:
                             commit(count);
@@ -1796,13 +1801,18 @@ var SQLAdapter = function () {
                           case 2:
                             result = _context48.sent;
 
-                            if (!result) {
-                              rollback(0);
+                            if (result) {
+                              _context48.next = 5;
+                              break;
                             }
-                            _context48.next = 6;
-                            return this._wrapper.get('SELECT count(value) FROM ' + key);
 
-                          case 6:
+                            return _context48.abrupt('return', rollback(0));
+
+                          case 5:
+                            _context48.next = 7;
+                            return this._wrapper.get('SELECT count(value) FROM "' + key + '"');
+
+                          case 7:
                             result = _context48.sent;
 
                             result = result || {};
@@ -1810,7 +1820,7 @@ var SQLAdapter = function () {
                                 return c > 0;
                               } }));
 
-                          case 9:
+                          case 10:
                           case 'end':
                             return _context48.stop();
                         }

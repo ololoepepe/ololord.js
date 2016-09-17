@@ -95,7 +95,7 @@ function initializeInfiniteScroll() {
 
 registerHandler('load', () => {
   hashChangeHandler(DOM.hash());
-  WebSocket.initialize();
+  WebSocket.initializeOnload();
   PageProcessors.applyProcessors().catch(Widgets.handleError);
   Threads.checkFavoriteThreads();
   if (Settings.showNewPosts()) {
@@ -139,17 +139,11 @@ registerHandler('load', () => {
   test: () => { return !/^\/login.html$/.test(Tools.locationPathname()); }
 });
 
-Settings.deviceType.subscribe(() => {
-  if (Tools.deviceType('desktop')) {
-    DOM.queryAll('.js-with-tooltip').forEach(DOM.removeTooltip);
-  } else {
-    DOM.queryAll('.js-with-tooltip').forEach(DOM.setTooltip);
-  }
-});
-
 registerHandler('load', async function() {
   try {
-    Drafts.initializeDrafts();
+    if (!Tools.isArchivedThreadPage()) {
+      Drafts.initializeDrafts();
+    }
     let posts = DOM.queryAll('#content .js-post');
     await PostProcessors.applyPreprocessors(posts);
     await PostProcessors.applyPostprocessors(posts);
@@ -189,6 +183,10 @@ registerHandler('load', Management.initializeManagement, {
   priority: 10,
   test: /^\/manage.html$/
 });
+
+registerHandler('load', () => {
+  window.lord.emit('contentLoad');
+}, { priority: 40 });
 
 registerHandler('beforeunload', DOM.setUnloading);
 
@@ -260,5 +258,15 @@ export function installHandlers() {
     list.filter(Tools.testFilter).sort(Tools.priorityPredicate).forEach((h) => {
       window.addEventListener(eventType, h.handler, false);
     });
+  });
+}
+
+export function initialize() {
+  Settings.deviceType.subscribe(() => {
+    if (Tools.deviceType('desktop')) {
+      DOM.queryAll('.js-with-tooltip').forEach(DOM.removeTooltip);
+    } else {
+      DOM.queryAll('.js-with-tooltip').forEach(DOM.setTooltip);
+    }
   });
 }

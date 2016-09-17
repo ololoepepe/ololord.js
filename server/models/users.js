@@ -1304,7 +1304,7 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
             return _context34.abrupt('return');
 
           case 12:
-            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) > 0)) {
+            if (!(Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) >= 0)) {
               _context34.next = 19;
               break;
             }

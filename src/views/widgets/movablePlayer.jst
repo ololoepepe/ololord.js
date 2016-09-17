@@ -27,8 +27,8 @@
                              : "{{!it.translate('Play', 'playerPlayText')}}"
                          },
                          css: {
-                           "icon-play": !playing(),
-                           "icon-pause": playing()
+                           "icon-play-16": !playing(),
+                           "icon-pause-16": playing()
                          },
                          click: playPause'></span>
         <div class='movable-player-sliders js-movable-player-sliders'>
@@ -41,8 +41,8 @@
                              : "{{!it.translate('Unmute', 'playerUnmuteText')}}")
                          },
                          css: {
-                           "icon-volume": volume() > 0,
-                           "icon-volume-mute": volume() <= 0
+                           "icon-volume-16": volume() > 0,
+                           "icon-volume-mute-16": volume() <= 0
                          },
                          click: toggleMute'></span>
     </div>

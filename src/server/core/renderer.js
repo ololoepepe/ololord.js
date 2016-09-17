@@ -147,7 +147,7 @@ export async function renderThread(thread) {
 }
 
 export async function generateTemplatingJavaScriptFile() {
-  console.log('Generating templating JavaScript file…');
+  console.log(Tools.translate('Generating templating JavaScript file…'));
   let models = JSON.stringify({
     base: MiscModel.base(),
     boards: MiscModel.boards(),
@@ -177,16 +177,16 @@ export async function generateTemplatingJavaScriptFile() {
 }
 
 export async function generateCustomJavaScriptFile() {
-  console.log('Checking custom JavaScript file existence…');
+  console.log(Tools.translate('Checking custom JavaScript file existence…'));
   let exists = await FS.exists(`${__dirname}/../../public/js/custom.js`);
   if (!exists) {
-    console.log('Creating dummy custom JavaScript file…');
+    console.log(Tools.translate('Creating dummy custom JavaScript file…'));
     return await Cache.writeFile('js/custom.js', '');
   }
 }
 
 export async function generateCustomCSSFiles() {
-  console.log('Checking custom CSS files existence…');
+  console.log(Tools.translate('Checking custom CSS files existence…'));
   let list = await Tools.series(['combined', 'desktop', 'mobile'], async function(type) {
     let exists = await FS.exists(`${__dirname}/../../public/css/custom-base-${type}.css`);
     return {
@@ -196,7 +196,7 @@ export async function generateCustomCSSFiles() {
   }, true);
   let types = list.filter(item => !item.exists).map(item => item.type);
   if (types.length > 0) {
-    console.log('Creating dummy custom CSS file(s)…');
+    console.log(Tools.translate('Creating dummy custom CSS file(s)…'));
     await Tools.series(types, async function(type) {
       await Cache.writeFile(`css/custom-base-${type}.css`, '');
     });
@@ -204,7 +204,7 @@ export async function generateCustomCSSFiles() {
 }
 
 export async function compileTemplates() {
-  console.log('Compiling templates…');
+  console.log(Tools.translate('Compiling templates…'));
   let list = await FS.list(TEMPLATES_PATH);
   await Tools.series(list.filter(entry => !EXCLUDED_SOURCE_TEMPLATE_FILES.has(entry)), async function(entry) {
     return await FS.removeTree(`${TEMPLATES_PATH}/${entry}`);
@@ -250,9 +250,9 @@ export async function reloadTemplates() {
     }).map((fileName) => {
       return fileName.substr(TEMPLATES_PATH.length + 1).split('.').slice(0, -1).join('.');
     }).reduce((acc, templateName) => {
-      let id = `../../views/${templateName}.js`;
+      let id = require.resolve(`../../views/${templateName}.js`);
       if (require.cache.hasOwnProperty(id)) {
-        delete require.cache[require.resolve(id)];
+        delete require.cache[id];
       }
       acc[templateName] = require(id);
       return acc;

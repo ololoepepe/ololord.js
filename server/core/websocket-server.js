@@ -22,6 +22,10 @@ var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
 
+var _ipc = require('../helpers/ipc');
+
+var IPC = _interopRequireWildcard(_ipc);
+
 var _logger = require('../helpers/logger');
 
 var _logger2 = _interopRequireDefault(_logger);
@@ -34,6 +38,10 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
+var _chats = require('../models/chats');
+
+var ChatsModel = _interopRequireWildcard(_chats);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -43,6 +51,8 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var SOCKJS_URL = '//cdn.jsdelivr.net/sockjs/1.0.1/sockjs.min.js';
+var LOG_BEFORE = (0, _config2.default)('system.log.middleware.before');
+var LOG_VERBOSITY = (0, _config2.default)('system.log.middleware.verbosity');
 
 function sendMessage(type, data) {
   if (!this) {
@@ -113,6 +123,8 @@ var WebSocketServer = function () {
     this.handlers = new Map();
     this.wsserver.on('connection', this._handleConnection.bind(this));
     this.wsserver.installHandlers(this.server, { prefix: '/ws' });
+    this._initSendChatMessage();
+    this._initThreadSubscriptions();
   }
 
   _createClass(WebSocketServer, [{
@@ -120,13 +132,27 @@ var WebSocketServer = function () {
     value: function _handleConnection(conn) {
       var _this = this;
 
+      if ('all' === LOG_BEFORE) {
+        _logger2.default.info(Tools.preferIPv4(conn.ip), Tools.translate('WebSocket connection'));
+      }
       var trueIp = getTrueIP(conn);
       if (!trueIp) {
         return conn.end();
       }
       conn.ip = trueIp;
       OnlineCounter.alive(conn.ip);
-      //TODO: log
+      if ('ddos' === LOG_BEFORE) {
+        _logger2.default.info(Tools.preferIPv4(conn.ip), Tools.translate('WebSocket connection'));
+      }
+      switch (LOG_BEFORE) {
+        case 'static':
+        case 'middleware':
+        case 'request':
+          _logger2.default.info(Tools.preferIPv4(conn.ip), Tools.translate('WebSocket connection'));
+          break;
+        default:
+          break;
+      }
       if (this.ddosProtection) {
         var count = (this.connectionCount.get(conn.ip) || 0) + 1;
         if (count > this.connectionLimit) {
@@ -154,7 +180,9 @@ var WebSocketServer = function () {
     key: '_handleMessage',
     value: function _handleMessage(conn, message) {
       OnlineCounter.alive(conn.ip);
-      //TODO: log
+      if ('ip' === LOG_VERBOSITY) {
+        _logger2.default.info(Tools.preferIPv4(conn.ip), Tools.translate('WebSocket message'));
+      }
       if (this.ddosProtection && message.length > this.maxMessageLength) {
         _logger2.default.error(Tools.translate('DDoS detected (too long WebSocket message):'), Tools.preferIPv4(conn.ip), message.length, this.maxMessageLength);
         return conn.end();
@@ -164,6 +192,12 @@ var WebSocketServer = function () {
       } catch (err) {
         _logger2.default.error('Failed to parse WebSocket message:', Tools.preferIPv4(conn.ip));
         message = {};
+      }
+      if ('path' === LOG_VERBOSITY) {
+        _logger2.default.info(Tools.preferIPv4(conn.ip), Tools.translate('WebSocket message'), Tools.translate('Type:') + ' ' + message.type, Tools.translate('ID:') + ' ' + message.id);
+      } else if ('query' === LOG_VERBOSITY || 'all' === LOG_VERBOSITY) {
+        var loggedData = 'init' === message.type ? {} : message.data; //NOTE: This is for the sake of security.
+        _logger2.default.info(Tools.preferIPv4(conn.ip), Tools.translate('WebSocket message'), Tools.translate('Type:') + ' ' + message.type, Tools.translate('ID:') + ' ' + message.id, loggedData);
       }
       switch (message.type) {
         case 'init':
@@ -279,6 +313,108 @@ var WebSocketServer = function () {
       }
     }
   }, {
+    key: '_initSendChatMessage',
+    value: function _initSendChatMessage() {
+      this.on('sendChatMessage', function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(msg, conn) {
+          var data, _ref, message, chatNumber, senderHash, receiverHash, receiver, ip;
+
+          return regeneratorRuntime.wrap(function _callee2$(_context2) {
+            while (1) {
+              switch (_context2.prev = _context2.next) {
+                case 0:
+                  data = msg.data || {};
+                  _context2.next = 3;
+                  return ChatsModel.addChatMessage({
+                    user: conn,
+                    boardName: data.boardName,
+                    postNumber: data.postNumber,
+                    chatNumber: data.chatNumber,
+                    text: data.text
+                  });
+
+                case 3:
+                  _ref = _context2.sent;
+                  message = _ref.message;
+                  chatNumber = _ref.chatNumber;
+                  senderHash = _ref.senderHash;
+                  receiverHash = _ref.receiverHash;
+                  receiver = _ref.receiver;
+
+                  if (senderHash !== receiverHash) {
+                    message.type = 'in';
+                    ip = receiver.hashpass ? null : receiver.ip;
+
+                    IPC.send('sendChatMessage', {
+                      type: 'newChatMessage',
+                      message: {
+                        message: message,
+                        boardName: data.boardName,
+                        postNumber: data.postNumber,
+                        chatNumber: chatNumber
+                      },
+                      ips: ip,
+                      hashpasses: receiver.hashpass
+                    });
+                  }
+                  message.type = 'out';
+                  return _context2.abrupt('return', {
+                    message: message,
+                    chatNumber: chatNumber
+                  });
+
+                case 12:
+                case 'end':
+                  return _context2.stop();
+              }
+            }
+          }, _callee2, this);
+        }));
+
+        return function (_x3, _x4) {
+          return ref.apply(this, arguments);
+        };
+      }());
+    }
+  }, {
+    key: '_initThreadSubscriptions',
+    value: function _initThreadSubscriptions() {
+      var _this2 = this;
+
+      this._subscriptions = new Map();
+      this.on('subscribeToThreadUpdates', function (msg, conn) {
+        var _ref2 = msg.data || {};
+
+        var boardName = _ref2.boardName;
+        var threadNumber = _ref2.threadNumber;
+
+        var key = boardName + '/' + threadNumber;
+        if (_this2._subscriptions.has(key)) {
+          _this2._subscriptions.get(key).add(conn);
+        } else {
+          var s = new Set();
+          s.add(conn);
+          _this2._subscriptions.set(key, s);
+        }
+      });
+      this.on('unsubscribeFromThreadUpdates', function (msg, conn) {
+        var _ref3 = msg.data || {};
+
+        var boardName = _ref3.boardName;
+        var threadNumber = _ref3.threadNumber;
+
+        var key = boardName + '/' + threadNumber;
+        var s = _this2._subscriptions.get(key);
+        if (!s) {
+          return;
+        }
+        s.delete(conn);
+        if (s.size < 1) {
+          _this2._subscriptions.delete(key);
+        }
+      });
+    }
+  }, {
     key: 'on',
     value: function on(type, handler) {
       this.handlers.set(type, handler);
@@ -287,7 +423,7 @@ var WebSocketServer = function () {
   }, {
     key: 'sendMessage',
     value: function sendMessage(type, data, ips, hashpasses) {
-      var _this2 = this;
+      var _this3 = this;
 
       if (!type) {
         return;
@@ -305,15 +441,30 @@ var WebSocketServer = function () {
       ips.filter(function (ip) {
         return !!ip;
       }).forEach(function (ip) {
-        (_this2.connectionsIP.get(ip) || []).forEach(function (conn) {
+        (_this3.connectionsIP.get(ip) || []).forEach(function (conn) {
           conn.write(message);
         });
       });
       hashpasses.filter(function (hashpass) {
         return !!hashpass;
       }).forEach(function (hashpass) {
-        (_this2.connectionsHashpass.get(hashpass) || []).forEach(function (conn) {
+        (_this3.connectionsHashpass.get(hashpass) || []).forEach(function (conn) {
           conn.write(message);
+        });
+      });
+    }
+  }, {
+    key: 'notifyAboutNewPosts',
+    value: function notifyAboutNewPosts(keys) {
+      var _this4 = this;
+
+      (0, _underscore2.default)(keys).each(function (_1, key) {
+        var s = _this4._subscriptions.get(key);
+        if (!s) {
+          return;
+        }
+        s.forEach(function (conn) {
+          conn.sendMessage('newPost');
         });
       });
     }

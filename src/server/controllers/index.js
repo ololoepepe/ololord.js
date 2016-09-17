@@ -65,27 +65,16 @@ function initialize() {
     }
     default: {
       Logger.error(Tools.preferIPv4(req.ip), req.path, err.stack || err);
-      if (err.ban) {
+      if (err.hasOwnProperty('ban')) {
         var model = { ban: err.ban };
       } else {
         if (_(err).isError()) {
-          var model = {
-            errorMessage: Tools.translate('Internal error'),
-            errorDescription: err.message
-          };
-        } else if (err.error) {
-          var model = {
-            errorMessage: error.description ? err.error : Tools.translate('Error'),
-            errorDescription: err.description || err.error
-          };
+          var message = err.message;
         } else {
-          var model = {
-            errorMessage: Tools.translate('Error'),
-            errorDescription: ((typeof err === 'string') ? err : '')
-          };
+          var message = (typeof err === 'string') ? err : '';
         }
       }
-      res.json(model);
+      res.json({ message: message });
       break;
     }
     }

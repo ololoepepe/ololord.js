@@ -424,7 +424,7 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
   if (req.isSuperuser()) {
     return;
   }
-  if (Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) > 0) {
+  if (Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) >= 0) {
     if (Tools.compareRegisteredUserLevels(req.level(boardName), 'USER') > 0
       && Tools.compareRegisteredUserLevels(req.level(boardName), user.level) > 0) {
       return;

@@ -27,12 +27,9 @@ export let handleError = function(error) {
   }
   var text;
   if (error) {
-    if (error.errorMessage) {
-      text = error.errorMessage;
-      if (error.errorDescription) {
-        text += `: ${error.errorDescription}`;
-      }
-    } else if (error.ban) {
+    if (error.hasOwnProperty('message')) {
+      text = `${Tools.translate('Error')}: ${error.message}`;
+    } else if (error.hasOwnProperty('ban')) {
       text = `${Tools.translate('You are banned', 'bannedText')}.`;
       if (error.ban.reason) {
         text += ` ${Tools.translate('Reason:', 'banReasonLabelText')} ${error.ban.reason}.`;
@@ -391,7 +388,7 @@ const TOOLTIP_MARGIN_TOP = 15;
 const TOOLTIP_OFFSET_LEFT = 8;
 const TOOLTIP_DEFAULT_TIMEOUT = 15 * Constants.SECOND;
 
-export  function setTooltip(where, { what, position, show, keep, timeout } = {}) {
+export function setTooltip(where, { what, position, show, keep, timeout } = {}) {
   where = $(where);
   keep = keep || !show;
   where.css('cursor', 'pointer');

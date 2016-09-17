@@ -11,7 +11,9 @@ import * as Tools from './tools';
 import * as Drafts from '../core/drafts';
 import * as Files from '../core/files';
 import * as Management from '../core/management';
+import * as Posts from '../core/posts';
 import * as Threads from '../core/threads';
+import * as WebSocket from '../core/websocket';
 import * as Widgets from '../widgets';
 import * as PageProcessors from '../handlers/page-processors';
 import * as PostProcessors from '../handlers/post-processors';
@@ -38,7 +40,12 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
     return;
   }
   try {
+    Posts.setPostPreviewsEnabled(false);
     $('#ajax-loading-overlay').show();
+    if (Tools.isThreadPage() && Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber())) {
+      await Threads.setAutoUpdateEnabled(false);
+      Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber(), true);
+    }
     let html = await $.ajax({
       url: href,
       type: 'GET',
@@ -66,6 +73,9 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
     window.document.title = title;
     $(window.document.body).scrollTop(0);
     PageProcessors.applyProcessors(content).catch(Widgets.handleError);
+    if (Settings.showNewPosts()) {
+      Threads.showNewPosts();
+    }
     if (Tools.isBoardPage() || Tools.isThreadPage() || Tools.isArchivedThreadPage()) {
       Drafts.initializeDrafts();
       let posts = DOM.queryAll('.js-post', content[0]);
@@ -86,9 +96,12 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
       $('#sidebar-switch').click();
     }
     $('#ajax-loading-overlay').hide();
+    Posts.setPostPreviewsEnabled(true);
+    window.lord.emit('contentLoad');
   } catch (err) {
     DOM.handleError(err);
     $('#ajax-loading-overlay').hide();
+    Posts.setPostPreviewsEnabled(true);
     window.location.href = href;
   }
 }

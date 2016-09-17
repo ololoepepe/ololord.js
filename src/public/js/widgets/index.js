@@ -103,6 +103,11 @@ export function showWidget(content, options = {}) {
       break;
     }
   }
+  if (options.widgetClass) {
+    widget = new options.widgetClass(options);
+  } else if (options.widget) {
+    widget = options.widget;
+  }
   if (!widget) {
     widget = new MovableWidget(content, options);
   }
@@ -236,7 +241,7 @@ export async function requestPassword({ id, title, value } = {}) {
     }
     return {
       accepted: true,
-      value: password()
+      password: password()
     };
   } catch (err) {
     DOM.handleError(err);
@@ -253,10 +258,11 @@ function createCodemirrorEditor(parent, mode, value) {
   });
 }
 
-export async function editCode(name, mode, value) {
-  if (typeof value !== 'string' && Storage.hasOwnProperty(name)) {
-    value = Storage[name];
+export async function editCode(mode, { name, value } = {}) {
+  if (typeof value === 'undefined' && typeof name !== 'unedefined' && Storage.hasOwnProperty(name)) {
+    value = Storage[name]();
   }
+  value = '' + value;
   let div = $('<div class="auto-resizable-div"></div>');
   let editor = createCodemirrorEditor(div[0], mode, value);
   try {

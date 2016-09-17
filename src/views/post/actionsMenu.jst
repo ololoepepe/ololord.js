@@ -1,17 +1,17 @@
 <ul id='menu-post-{{!it.post.number}}' class='menu'>
   {{#def['custom/postMenuAction/0'] || ''}}
   <li class='ui-widget-header'>{{!it.translate('Post', 'postMenuCategoryPostText')}}</li>
-  {{#def['custom-postMenuAction10'] || ''}}
+  {{#def['custom/postMenuAction/10'] || ''}}
   {{? it.post.rawText}}
     <li data-bind='click: showPostSourceText'>
-      <span class='icon icon-file-text sign-icon'></span>
+      <span class='icon icon-file-text-16 sign-icon'></span>
       {{!it.translate('Source text', 'postSourceText')}}
     </li>
   {{?}}
   {{#def['custom/postMenuAction/20'] || ''}}
   {{? !it.archived && (it.user.isModer(it.board.name) || it.board.opModeration)}}
     <li data-bind='click: editPost'>
-      <span class='icon icon-pencil sign-icon'></span>
+      <span class='icon icon-pencil-16 sign-icon'></span>
       {{!it.translate('Edit', 'editPostText')}}
     </li>
   {{?}}
@@ -19,48 +19,48 @@
   {{? (it.user.isModer(it.board.name) || it.board.opModeration)
     && (it.post.fileInfos.length < it.board.maxFileCount) && !it.archived}}
     <li data-bind='click: addFiles'>
-      <span class='icon icon-plus sign-icon'></span>
+      <span class='icon icon-plus-16 sign-icon'></span>
       {{!it.translate('Add files', 'addFilesText')}}
     </li>
   {{?}}
   {{#def['custom/postMenuAction/40'] || ''}}
   <li data-bind='click: setPostHidden'>
-    <span data-bind='css: "icon sign-icon icon-eye-" + {{? it.post.hidden}}"minus"{{??}}"plus"{{?}}'></span>
+    <span data-bind='css: "icon sign-icon icon-eye-{{? it.post.hidden}}minus{{??}}plus{{?}}-16"'></span>
     <span data-bind='text: {{? it.post.hidden}}"{{!it.translate('Show', 'showPostText')}}"
                        {{??}}"{{!it.translate('Hide', 'hidePostText')}}"{{?}} + shortcutSuffix("hidePost")'></span>
   </li>
   {{#def['custom/postMenuAction/50'] || ''}}
   {{? !it.post.hidden && it.post.rawText}}
     <li data-bind='click: hideSimilarPosts'>
-      <span class='icon icon-copy sign-icon'></span>
+      <span class='icon icon-copy-16 sign-icon'></span>
       {{!it.translate('Hide similar', 'hideSimilarPostsText')}}
     </li>
   {{?}}
   {{#def['custom/postMenuAction/60'] || ''}}
   {{? (!it.archived || it.post.isOp) && (it.user.hasPermission(it.board, 'deletePost') || it.board.opModeration)}}
     <li data-bind='click: deletePost'>
-      <span class='icon icon-bin sign-icon'></span>
+      <span class='icon icon-bin-16 sign-icon'></span>
       {{!it.translate('Delete', 'deletePostText')}}
     </li>
   {{?}}
   {{#def['custom/postMenuAction/70'] || ''}}
   {{? it.post.isOp}}
     <li class='ui-widget-header'>{{!it.translate('Thread', 'postMenuCategoryThreadText')}}</li>
-    {{#def['custom-postMenuAction80'] || ''}}
+    {{#def['custom/postMenuAction/80'] || ''}}
     <li data-bind='click: addToOrRemoveFromFavorites'>
-      <span data-bind='css: "icon sign-icon icon-star-" + {{? it.thread.isInFavorites}}"full"{{??}}"empty"{{?}}'></span>
+      <span data-bind='css: "icon sign-icon icon-star-{{? it.thread.isInFavorites}}full{{??}}empty{{?}}-16"'></span>
       <span data-bind='text: {{? it.thread.isInFavorites}}"{{!it.translate('Remove from favorites')}}"
                          {{??}}"{{!it.translate('Add to favorites')}}"{{?}}'></span>
     </li>
     {{#def['custom/postMenuAction/90'] || ''}}
       <li data-bind='click: downloadThreadFiles'>
-        <span class='icon icon-download sign-icon'></span>
+        <span class='icon icon-download-16 sign-icon'></span>
         {{!it.translate('Download all files', 'downloadThreadFilesText')}}
       </li>
     {{#def['custom/postMenuAction/100'] || ''}}
     {{? !it.isThreadPage}}
       <li data-bind='click: expandCollapseThread'>
-        <span data-bind='css: "icon sign-icon icon-" + {{? it.thread.expanded}}"shrink"{{??}}"enlarge"{{?}}'></span>
+        <span data-bind='css: "icon sign-icon icon-{{? it.thread.expanded}}shrink{{??}}enlarge{{?}}-16"'></span>
         <span data-bind='text: {{? it.thread.expanded}}"{{!it.translate('Collapse', 'collapseThreadText')}}"
                            {{??}}"{{!it.translate('Expand', 'expandThreadText')}}"{{?}}'></span>
       </li>
@@ -68,25 +68,25 @@
     {{#def['custom/postMenuAction/110'] || ''}}
     {{? !it.archived && it.user.isModer(it.board.name)}}
       <li data-bind='click: setThreadFixed.bind($data, {{=!it.thread.fixed}})'>
-        <span data-bind='css: "icon sign-icon icon-" + {{? it.thread.fixed}}"pin"{{??}}"unpin"{{?}}'></span>
+        <span data-bind='css: "icon sign-icon icon-{{? it.thread.fixed}}pin{{??}}unpin{{?}}-16"'></span>
         <span data-bind='text: {{? it.thread.fixed}}"{{!it.translate('Unfix', 'unfixThreadText')}}"
                            {{??}}"{{!it.translate('Fix', 'fixThreadText')}}"{{?}}'></span>
       </li>
       {{#def['custom/postMenuAction/120'] || ''}}
       <li data-bind='click: setThreadClosed.bind($data, {{=!it.thread.closed}})'>
-        <span data-bind='css: "icon sign-icon icon-" + {{? it.thread.closed}}"lock"{{??}}"unlocked"{{?}}'></span>
+        <span data-bind='css: "icon sign-icon icon-{{? it.thread.closed}}lock{{??}}unlocked{{?}}-16"'></span>
         <span data-bind='text: {{? it.thread.closed}}"{{!it.translate('Open', 'openThreadText')}}"
                            {{??}}"{{!it.translate('Close', 'closeThreadText')}}"{{?}}'></span>
       </li>
       {{#def['custom/postMenuAction/130'] || ''}}
       <li data-bind='click: setThreadUnbumpable'>
-        <span data-bind='css: "icon sign-icon icon-magnet" + {{? it.thread.unbumpable}}"-full"{{??}}""{{?}}'></span>
+        <span data-bind='css: "icon sign-icon icon-magnet{{? it.thread.unbumpable}}-full{{?}}-16"'></span>
         <span data-bind='text: {{? it.thread.unbumpable}}"{{!it.translate('Allow bumping', 'setThreadBumpableText')}}"
                            {{??}}"{{!it.translate('Disallow bumping', 'setThreadUnbumpableText')}}"{{?}}'></span>
       </li>
       {{#def['custom/postMenuAction/140'] || ''}}
       <li data-bind='click: moveThread'>
-        <span class='icon icon-move sign-icon'></span>
+        <span class='icon icon-move-16 sign-icon'></span>
         {{!it.translate('Move', 'moveThreadText')}}
       </li>
       {{#def['custom/postMenuAction/150'] || ''}}
@@ -96,18 +96,18 @@
   <li class="ui-widget-header">{{!it.translate('User', 'postMenuCategoryUserText')}}</li>
   {{#def['custom/postMenuAction/170'] || ''}}
   <li data-bind='click: chatWithUser'>
-    <span class='icon icon-bubble sign-icon'></span>
+    <span class='icon icon-bubble-16 sign-icon'></span>
     {{!it.translate('Chat privately', 'chatWithUserText')}}
   </li>
   {{#def['custom/postMenuAction/180'] || ''}}
   {{? it.user.isModer()}}
     <li data-bind='click: showUserInfo'>
-      <span class='icon icon-info sign-icon'></span>
-      {{!it.translate('User info')}}
+      <span class='icon icon-info-16 sign-icon'></span>
+      {{!it.translate('Info')}}
     </li>
     {{#def['custom/postMenuAction/190'] || ''}}
     <li data-bind='click: banUser'>
-      <span class='icon icon-hammer sign-icon'></span>
+      <span class='icon icon-hammer-16 sign-icon'></span>
       {{!it.translate('Ban', 'banUserText')}}
     </li>
     {{#def['custom/postMenuAction/200'] || ''}}

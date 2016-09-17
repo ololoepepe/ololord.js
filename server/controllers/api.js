@@ -72,7 +72,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var TEXT_FORMATS = new Set(['txt', 'js', 'json', 'jst', 'html', 'xml', 'css', 'md', 'example', 'gitignore', 'log']);
+var GET_FILE_HEADERS_TIMEOUT = Tools.MINUTE;
+var TEXT_FORMATS = new Set(['txt', 'js', 'json', 'jst', 'def', 'html', 'xml', 'css', 'md', 'example', 'gitignore', 'log']);
 
 var router = _express2.default.Router();
 
@@ -756,56 +757,24 @@ router.get('/api/captchaQuota.json', function () {
   };
 }());
 
-router.get('/api/userIp.json', function () {
+router.get('/api/userLevels.json', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(req, res, next) {
-    var ip;
     return regeneratorRuntime.wrap(function _callee15$(_context15) {
       while (1) {
         switch (_context15.prev = _context15.next) {
           case 0:
-            if (req.query.boardName) {
-              _context15.next = 2;
-              break;
+            try {
+              res.json(req.levels || {});
+            } catch (err) {
+              next(err);
             }
 
-            return _context15.abrupt('return', next(Tools.translate('Invalid board')));
-
-          case 2:
-            _context15.prev = 2;
-            _context15.next = 5;
-            return UsersModel.checkUserBan(req.ip, req.query.boardName);
-
-          case 5:
-            if (req.isModer()) {
-              _context15.next = 7;
-              break;
-            }
-
-            return _context15.abrupt('return', next(Tools.translate('Not enough rights')));
-
-          case 7:
-            _context15.next = 9;
-            return UsersModel.getUserIP(req.query.boardName, +req.query.postNumber);
-
-          case 9:
-            ip = _context15.sent;
-
-            res.json(Tools.addIPv4({ ip: ip }));
-            _context15.next = 16;
-            break;
-
-          case 13:
-            _context15.prev = 13;
-            _context15.t0 = _context15['catch'](2);
-
-            next(_context15.t0);
-
-          case 16:
+          case 1:
           case 'end':
             return _context15.stop();
         }
       }
-    }, _callee15, this, [[2, 13]]);
+    }, _callee15, this);
   }));
 
   return function (_x39, _x40, _x41) {
@@ -813,59 +782,56 @@ router.get('/api/userIp.json', function () {
   };
 }());
 
-router.get('/api/bannedUser.json', function () {
+router.get('/api/userIp.json', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(req, res, next) {
-    var ip, bans;
+    var ip;
     return regeneratorRuntime.wrap(function _callee16$(_context16) {
       while (1) {
         switch (_context16.prev = _context16.next) {
           case 0:
-            ip = Tools.correctAddress(req.query.ip);
-
-            if (ip) {
-              _context16.next = 3;
+            if (req.query.boardName) {
+              _context16.next = 2;
               break;
             }
 
-            return _context16.abrupt('return', next(Tools.translate('Invalid IP address')));
+            return _context16.abrupt('return', next(Tools.translate('Invalid board')));
 
-          case 3:
+          case 2:
+            _context16.prev = 2;
+            _context16.next = 5;
+            return UsersModel.checkUserBan(req.ip, req.query.boardName);
+
+          case 5:
             if (req.isModer()) {
-              _context16.next = 5;
+              _context16.next = 7;
               break;
             }
 
             return _context16.abrupt('return', next(Tools.translate('Not enough rights')));
 
-          case 5:
-            _context16.prev = 5;
-            _context16.next = 8;
-            return UsersModel.getBannedUserBans(ip, _board2.default.boardNames().filter(function (boardName) {
-              return req.isModer(boardName);
-            }));
+          case 7:
+            _context16.next = 9;
+            return UsersModel.getUserIP(req.query.boardName, +req.query.postNumber);
 
-          case 8:
-            bans = _context16.sent;
+          case 9:
+            ip = _context16.sent;
 
-            res.json(Tools.addIPv4({
-              ip: ip,
-              bans: bans
-            }));
-            _context16.next = 15;
+            res.json(Tools.addIPv4({ ip: ip }));
+            _context16.next = 16;
             break;
 
-          case 12:
-            _context16.prev = 12;
-            _context16.t0 = _context16['catch'](5);
+          case 13:
+            _context16.prev = 13;
+            _context16.t0 = _context16['catch'](2);
 
             next(_context16.t0);
 
-          case 15:
+          case 16:
           case 'end':
             return _context16.stop();
         }
       }
-    }, _callee16, this, [[5, 12]]);
+    }, _callee16, this, [[2, 13]]);
   }));
 
   return function (_x42, _x43, _x44) {
@@ -873,51 +839,59 @@ router.get('/api/bannedUser.json', function () {
   };
 }());
 
-router.get('/api/bannedUsers.json', function () {
+router.get('/api/bannedUser.json', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(req, res, next) {
-    var users;
+    var ip, bans;
     return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
         switch (_context17.prev = _context17.next) {
           case 0:
+            ip = Tools.correctAddress(req.query.ip);
+
+            if (ip) {
+              _context17.next = 3;
+              break;
+            }
+
+            return _context17.abrupt('return', next(Tools.translate('Invalid IP address')));
+
+          case 3:
             if (req.isModer()) {
-              _context17.next = 2;
+              _context17.next = 5;
               break;
             }
 
             return _context17.abrupt('return', next(Tools.translate('Not enough rights')));
 
-          case 2:
-            _context17.prev = 2;
-            _context17.next = 5;
-            return UsersModel.getBannedUsers(_board2.default.boardNames().filter(function (boardName) {
+          case 5:
+            _context17.prev = 5;
+            _context17.next = 8;
+            return UsersModel.getBannedUserBans(ip, _board2.default.boardNames().filter(function (boardName) {
               return req.isModer(boardName);
             }));
 
-          case 5:
-            users = _context17.sent;
+          case 8:
+            bans = _context17.sent;
 
-            res.json((0, _underscore2.default)(users).map(function (bans, ip) {
-              return Tools.addIPv4({
-                ip: ip,
-                bans: bans
-              });
+            res.json(Tools.addIPv4({
+              ip: ip,
+              bans: bans
             }));
-            _context17.next = 12;
+            _context17.next = 15;
             break;
 
-          case 9:
-            _context17.prev = 9;
-            _context17.t0 = _context17['catch'](2);
+          case 12:
+            _context17.prev = 12;
+            _context17.t0 = _context17['catch'](5);
 
             next(_context17.t0);
 
-          case 12:
+          case 15:
           case 'end':
             return _context17.stop();
         }
       }
-    }, _callee17, this, [[2, 9]]);
+    }, _callee17, this, [[5, 12]]);
   }));
 
   return function (_x45, _x46, _x47) {
@@ -925,14 +899,14 @@ router.get('/api/bannedUsers.json', function () {
   };
 }());
 
-router.get('/api/registeredUser.json', function () {
+router.get('/api/bannedUsers.json', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(req, res, next) {
-    var hashpass, user;
+    var users;
     return regeneratorRuntime.wrap(function _callee18$(_context18) {
       while (1) {
         switch (_context18.prev = _context18.next) {
           case 0:
-            if (req.isSuperuser()) {
+            if (req.isModer()) {
               _context18.next = 2;
               break;
             }
@@ -940,39 +914,36 @@ router.get('/api/registeredUser.json', function () {
             return _context18.abrupt('return', next(Tools.translate('Not enough rights')));
 
           case 2:
-            hashpass = req.query.hashpass;
-
-            if (Tools.mayBeHashpass(hashpass)) {
-              _context18.next = 5;
-              break;
-            }
-
-            return _context18.abrupt('return', next(Tools.translate('Invalid hashpass')));
+            _context18.prev = 2;
+            _context18.next = 5;
+            return UsersModel.getBannedUsers(_board2.default.boardNames().filter(function (boardName) {
+              return req.isModer(boardName);
+            }));
 
           case 5:
-            _context18.prev = 5;
-            _context18.next = 8;
-            return UsersModel.getRegisteredUser(hashpass);
+            users = _context18.sent;
 
-          case 8:
-            user = _context18.sent;
-
-            res.json(Tools.addIPv4(user));
-            _context18.next = 15;
+            res.json((0, _underscore2.default)(users).map(function (bans, ip) {
+              return Tools.addIPv4({
+                ip: ip,
+                bans: bans
+              });
+            }));
+            _context18.next = 12;
             break;
 
-          case 12:
-            _context18.prev = 12;
-            _context18.t0 = _context18['catch'](5);
+          case 9:
+            _context18.prev = 9;
+            _context18.t0 = _context18['catch'](2);
 
             next(_context18.t0);
 
-          case 15:
+          case 12:
           case 'end':
             return _context18.stop();
         }
       }
-    }, _callee18, this, [[5, 12]]);
+    }, _callee18, this, [[2, 9]]);
   }));
 
   return function (_x48, _x49, _x50) {
@@ -980,9 +951,9 @@ router.get('/api/registeredUser.json', function () {
   };
 }());
 
-router.get('/api/registeredUsers.json', function () {
+router.get('/api/registeredUser.json', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(req, res, next) {
-    var users;
+    var hashpass, user;
     return regeneratorRuntime.wrap(function _callee19$(_context19) {
       while (1) {
         switch (_context19.prev = _context19.next) {
@@ -995,31 +966,39 @@ router.get('/api/registeredUsers.json', function () {
             return _context19.abrupt('return', next(Tools.translate('Not enough rights')));
 
           case 2:
-            _context19.prev = 2;
-            _context19.next = 5;
-            return UsersModel.getRegisteredUsers();
+            hashpass = req.query.hashpass;
+
+            if (Tools.mayBeHashpass(hashpass)) {
+              _context19.next = 5;
+              break;
+            }
+
+            return _context19.abrupt('return', next(Tools.translate('Invalid hashpass')));
 
           case 5:
-            users = _context19.sent;
+            _context19.prev = 5;
+            _context19.next = 8;
+            return UsersModel.getRegisteredUser(hashpass);
 
-            res.json(users.map(function (user) {
-              return Tools.addIPv4(user);
-            }));
-            _context19.next = 12;
+          case 8:
+            user = _context19.sent;
+
+            res.json(Tools.addIPv4(user));
+            _context19.next = 15;
             break;
 
-          case 9:
-            _context19.prev = 9;
-            _context19.t0 = _context19['catch'](2);
+          case 12:
+            _context19.prev = 12;
+            _context19.t0 = _context19['catch'](5);
 
             next(_context19.t0);
 
-          case 12:
+          case 15:
           case 'end':
             return _context19.stop();
         }
       }
-    }, _callee19, this, [[2, 9]]);
+    }, _callee19, this, [[5, 12]]);
   }));
 
   return function (_x51, _x52, _x53) {
@@ -1027,116 +1006,46 @@ router.get('/api/registeredUsers.json', function () {
   };
 }());
 
-router.get('/api/fileTree.json', function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(req, res, next) {
-    var _this = this;
-
-    return regeneratorRuntime.wrap(function _callee22$(_context22) {
+router.get('/api/registeredUsers.json', function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(req, res, next) {
+    var users;
+    return regeneratorRuntime.wrap(function _callee20$(_context20) {
       while (1) {
-        switch (_context22.prev = _context22.next) {
+        switch (_context20.prev = _context20.next) {
           case 0:
             if (req.isSuperuser()) {
-              _context22.next = 2;
+              _context20.next = 2;
               break;
             }
 
-            return _context22.abrupt('return', next(Tools.translate('Not enough rights')));
+            return _context20.abrupt('return', next(Tools.translate('Not enough rights')));
 
           case 2:
-            _context22.prev = 2;
-            return _context22.delegateYield(regeneratorRuntime.mark(function _callee21() {
-              var dir, path, list;
-              return regeneratorRuntime.wrap(function _callee21$(_context21) {
-                while (1) {
-                  switch (_context21.prev = _context21.next) {
-                    case 0:
-                      dir = req.query.dir;
+            _context20.prev = 2;
+            _context20.next = 5;
+            return UsersModel.getRegisteredUsers();
 
-                      if (!dir || '#' === dir) {
-                        dir = './';
-                      }
-                      if ('/' !== dir.slice(-1)[0]) {
-                        dir += '/';
-                      }
-                      path = __dirname + '/../../' + dir;
-                      _context21.next = 6;
-                      return _fs2.default.list(path);
+          case 5:
+            users = _context20.sent;
 
-                    case 6:
-                      list = _context21.sent;
-                      _context21.next = 9;
-                      return Tools.series(list, function () {
-                        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(file) {
-                          var stat, node;
-                          return regeneratorRuntime.wrap(function _callee20$(_context20) {
-                            while (1) {
-                              switch (_context20.prev = _context20.next) {
-                                case 0:
-                                  _context20.next = 2;
-                                  return _fs2.default.stat(path + '/' + file);
-
-                                case 2:
-                                  stat = _context20.sent;
-                                  node = {
-                                    id: dir + file,
-                                    text: file
-                                  };
-
-                                  if (stat.isDirectory()) {
-                                    node.type = 'folder';
-                                    node.children = true;
-                                  } else if (stat.isFile()) {
-                                    node.type = 'file';
-                                  }
-                                  return _context20.abrupt('return', node);
-
-                                case 6:
-                                case 'end':
-                                  return _context20.stop();
-                              }
-                            }
-                          }, _callee20, this);
-                        }));
-
-                        return function (_x57) {
-                          return ref.apply(this, arguments);
-                        };
-                      }(), true);
-
-                    case 9:
-                      list = _context21.sent;
-
-                      res.json(list);
-
-                    case 11:
-                    case 'end':
-                      return _context21.stop();
-                  }
-                }
-              }, _callee21, _this);
-            })(), 't0', 4);
-
-          case 4:
-            _context22.next = 10;
+            res.json(users.map(function (user) {
+              return Tools.addIPv4(user);
+            }));
+            _context20.next = 12;
             break;
 
-          case 6:
-            _context22.prev = 6;
-            _context22.t1 = _context22['catch'](2);
+          case 9:
+            _context20.prev = 9;
+            _context20.t0 = _context20['catch'](2);
 
-            if ('ENOENT' === _context22.t1.code) {
-              _context22.t1.status = 404;
-            } else if ('ENOTDIR' === _context22.t1.code) {
-              _context22.t1 = Tools.translate('Not a directory');
-            }
-            next(_context22.t1);
+            next(_context20.t0);
 
-          case 10:
+          case 12:
           case 'end':
-            return _context22.stop();
+            return _context20.stop();
         }
       }
-    }, _callee22, this, [[2, 6]]);
+    }, _callee20, this, [[2, 9]]);
   }));
 
   return function (_x54, _x55, _x56) {
@@ -1144,9 +1053,10 @@ router.get('/api/fileTree.json', function () {
   };
 }());
 
-router.get('/api/fileContent.json', function () {
+router.get('/api/fileTree.json', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(req, res, next) {
-    var encoding, content;
+    var _this = this;
+
     return regeneratorRuntime.wrap(function _callee23$(_context23) {
       while (1) {
         switch (_context23.prev = _context23.next) {
@@ -1160,60 +1070,176 @@ router.get('/api/fileContent.json', function () {
 
           case 2:
             _context23.prev = 2;
-            encoding = !TEXT_FORMATS.has((req.query.fileName || '').split('.').pop()) ? 'b' : undefined;
-            _context23.next = 6;
-            return _fs2.default.read(__dirname + '/../../' + req.query.fileName, encoding);
+            return _context23.delegateYield(regeneratorRuntime.mark(function _callee22() {
+              var dir, path, list;
+              return regeneratorRuntime.wrap(function _callee22$(_context22) {
+                while (1) {
+                  switch (_context22.prev = _context22.next) {
+                    case 0:
+                      dir = req.query.dir;
 
-          case 6:
-            content = _context23.sent;
+                      if (!dir || '#' === dir) {
+                        dir = './';
+                      }
+                      if ('/' !== dir.slice(-1)[0]) {
+                        dir += '/';
+                      }
+                      path = __dirname + '/../../' + dir;
+                      _context22.next = 6;
+                      return _fs2.default.list(path);
 
-            res.json({ content: content });
-            _context23.next = 14;
+                    case 6:
+                      list = _context22.sent;
+                      _context22.next = 9;
+                      return Tools.series(list, function () {
+                        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(file) {
+                          var stat, node;
+                          return regeneratorRuntime.wrap(function _callee21$(_context21) {
+                            while (1) {
+                              switch (_context21.prev = _context21.next) {
+                                case 0:
+                                  _context21.next = 2;
+                                  return _fs2.default.stat(path + '/' + file);
+
+                                case 2:
+                                  stat = _context21.sent;
+                                  node = {
+                                    id: dir + file,
+                                    text: file
+                                  };
+
+                                  if (stat.isDirectory()) {
+                                    node.type = 'folder';
+                                    node.children = true;
+                                  } else if (stat.isFile()) {
+                                    node.type = 'file';
+                                  }
+                                  return _context21.abrupt('return', node);
+
+                                case 6:
+                                case 'end':
+                                  return _context21.stop();
+                              }
+                            }
+                          }, _callee21, this);
+                        }));
+
+                        return function (_x60) {
+                          return ref.apply(this, arguments);
+                        };
+                      }(), true);
+
+                    case 9:
+                      list = _context22.sent;
+
+                      res.json(list);
+
+                    case 11:
+                    case 'end':
+                      return _context22.stop();
+                  }
+                }
+              }, _callee22, _this);
+            })(), 't0', 4);
+
+          case 4:
+            _context23.next = 10;
             break;
 
-          case 10:
-            _context23.prev = 10;
-            _context23.t0 = _context23['catch'](2);
+          case 6:
+            _context23.prev = 6;
+            _context23.t1 = _context23['catch'](2);
 
-            if ('ENOENT' === _context23.t0.code) {
-              _context23.t0.status = 404;
-            } else if ('EISDIR' === _context23.t0.code) {
-              _context23.t0 = Tools.translate('Not a file');
+            if ('ENOENT' === _context23.t1.code) {
+              _context23.t1.status = 404;
+            } else if ('ENOTDIR' === _context23.t1.code) {
+              _context23.t1 = Tools.translate('Not a directory');
             }
-            next(_context23.t0);
+            next(_context23.t1);
 
-          case 14:
+          case 10:
           case 'end':
             return _context23.stop();
         }
       }
-    }, _callee23, this, [[2, 10]]);
+    }, _callee23, this, [[2, 6]]);
   }));
 
-  return function (_x58, _x59, _x60) {
+  return function (_x57, _x58, _x59) {
+    return ref.apply(this, arguments);
+  };
+}());
+
+router.get('/api/fileContent.json', function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(req, res, next) {
+    var encoding, content;
+    return regeneratorRuntime.wrap(function _callee24$(_context24) {
+      while (1) {
+        switch (_context24.prev = _context24.next) {
+          case 0:
+            if (req.isSuperuser()) {
+              _context24.next = 2;
+              break;
+            }
+
+            return _context24.abrupt('return', next(Tools.translate('Not enough rights')));
+
+          case 2:
+            _context24.prev = 2;
+            encoding = !TEXT_FORMATS.has((req.query.fileName || '').split('.').pop()) ? 'b' : undefined;
+            _context24.next = 6;
+            return _fs2.default.read(__dirname + '/../../' + req.query.fileName, encoding);
+
+          case 6:
+            content = _context24.sent;
+
+            res.json({ content: content });
+            _context24.next = 14;
+            break;
+
+          case 10:
+            _context24.prev = 10;
+            _context24.t0 = _context24['catch'](2);
+
+            if ('ENOENT' === _context24.t0.code) {
+              _context24.t0.status = 404;
+            } else if ('EISDIR' === _context24.t0.code) {
+              _context24.t0 = Tools.translate('Not a file');
+            }
+            next(_context24.t0);
+
+          case 14:
+          case 'end':
+            return _context24.stop();
+        }
+      }
+    }, _callee24, this, [[2, 10]]);
+  }));
+
+  return function (_x61, _x62, _x63) {
     return ref.apply(this, arguments);
   };
 }());
 
 router.get('/api/fileHeaders.json', function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(req, res, next) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(req, res, next) {
     var options, proxy, response;
-    return regeneratorRuntime.wrap(function _callee24$(_context24) {
+    return regeneratorRuntime.wrap(function _callee25$(_context25) {
       while (1) {
-        switch (_context24.prev = _context24.next) {
+        switch (_context25.prev = _context25.next) {
           case 0:
             if (req.query.url) {
-              _context24.next = 2;
+              _context25.next = 2;
               break;
             }
 
-            return _context24.abrupt('return', next(Tools.translate('Invalid URL')));
+            return _context25.abrupt('return', next(Tools.translate('Invalid URL')));
 
           case 2:
-            _context24.prev = 2;
+            _context25.prev = 2;
             options = {
               method: 'HEAD',
-              timeout: Tools.MINUTE //TODO: magic numbers
+              timeout: GET_FILE_HEADERS_TIMEOUT
             };
             proxy = _config2.default.proxy();
 
@@ -1227,39 +1253,39 @@ router.get('/api/fileHeaders.json', function () {
             } else {
               options.url = req.query.url;
             }
-            _context24.next = 8;
+            _context25.next = 8;
             return _http2.default.request(options);
 
           case 8:
-            response = _context24.sent;
+            response = _context25.sent;
 
             if (!(200 !== +response.status)) {
-              _context24.next = 11;
+              _context25.next = 11;
               break;
             }
 
-            return _context24.abrupt('return', next(Tools.translate('Failed to get file headers')));
+            return _context25.abrupt('return', next(Tools.translate('Failed to get file headers')));
 
           case 11:
             res.json(response.headers);
-            _context24.next = 17;
+            _context25.next = 17;
             break;
 
           case 14:
-            _context24.prev = 14;
-            _context24.t0 = _context24['catch'](2);
+            _context25.prev = 14;
+            _context25.t0 = _context25['catch'](2);
 
-            next(_context24.t0);
+            next(_context25.t0);
 
           case 17:
           case 'end':
-            return _context24.stop();
+            return _context25.stop();
         }
       }
-    }, _callee24, this, [[2, 14]]);
+    }, _callee25, this, [[2, 14]]);
   }));
 
-  return function (_x61, _x62, _x63) {
+  return function (_x64, _x65, _x66) {
     return ref.apply(this, arguments);
   };
 }());

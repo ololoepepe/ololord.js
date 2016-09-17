@@ -39,9 +39,8 @@ function setFileRating(file, id, fields) {
   }
 }
 
-async function downloadFile(url, formFieldName, fields, transaction) {
+async function downloadFile(url, formFieldName, fields) {
   let path = `${__dirname}/../../tmp/upload_${UUID.v4()}`;
-  transaction.addFile(path);
   let proxy = config.proxy();
   let options = { timeout: config('system.httpRequestTimeout') };
   if (/^vk\:\/\//.test(url)) {
@@ -77,7 +76,7 @@ async function downloadFile(url, formFieldName, fields, transaction) {
   return file;
 }
 
-export async function getFiles(fields, files, transaction) {
+export async function getFiles(fields, files) {
   files = await Tools.series(files.filter((file) => {
     if (file.size < 1) {
       FS.remove(file.path).catch((err) => { Logger.error(req, err.stack || err); });
@@ -93,7 +92,7 @@ export async function getFiles(fields, files, transaction) {
   let downloadedFiles = await Tools.series(_(fields).pick((_1, key) => {
     return /^file_url_\S+$/.test(key);
   }), async function(url, formFieldName) {
-    return await downloadFile(url, formFieldName, fields, transaction);
+    return await downloadFile(url, formFieldName, fields);
   }, true);
   files = files.concat(downloadedFiles);
   let hashes = (typeof fields.fileHashes === 'string') ? fields.fileHashes.split(',').filter(hash => !!hash) : [];
@@ -139,12 +138,13 @@ async function generateFileName(file, plugin) {
   if (typeof suffix === 'string') {
     suffix = suffix.substr(1);
   }
-  if (!suffix || !plugin.suffixMatchesMimeType(suffix, file.mimeType)) {
+  let canonicalSuffix = suffix ? suffix.toLowerCase() : '';
+  if (!suffix || !plugin.suffixMatchesMimeType(canonicalSuffix, file.mimeType)) {
     suffix = plugin.defaultSuffixForMimeType(file.mimeType);
   }
   let thumbSuffix = suffix;
   if (typeof plugin.thumbnailSuffixForMimeType === 'function') {
-    thumbSuffix = plugin.thumbnailSuffixForMimeType(file.mimeType) || suffix;
+    thumbSuffix = plugin.thumbnailSuffixForMimeType(file.mimeType) || canonicalSuffix;
   }
   return {
     name: `${baseName}.${suffix}`,

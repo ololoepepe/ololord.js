@@ -16,7 +16,9 @@ import * as PostsModel from '../models/posts';
 import * as ThreadsModel from '../models/threads';
 import * as UsersModel from '../models/users';
 
-const TEXT_FORMATS = new Set(['txt', 'js', 'json', 'jst', 'html', 'xml', 'css', 'md', 'example', 'gitignore', 'log']);
+const GET_FILE_HEADERS_TIMEOUT = Tools.MINUTE;
+const TEXT_FORMATS = new Set(['txt', 'js', 'json', 'jst', 'def', 'html', 'xml', 'css', 'md', 'example', 'gitignore',
+  'log']);
 
 let router = Express.Router();
 
@@ -203,6 +205,14 @@ router.get('/api/captchaQuota.json', async function(req, res, next) {
   }
 });
 
+router.get('/api/userLevels.json', async function(req, res, next) {
+  try {
+    res.json(req.levels || {});
+  } catch(err) {
+    next(err);
+  }
+});
+
 router.get('/api/userIp.json', async function(req, res, next) {
   if (!req.query.boardName) {
     return next(Tools.translate('Invalid board'));
@@ -347,7 +357,7 @@ router.get('/api/fileHeaders.json', async function(req, res, next) {
   try {
     let options = {
       method: 'HEAD',
-      timeout: Tools.MINUTE //TODO: magic numbers
+      timeout: GET_FILE_HEADERS_TIMEOUT
     };
     let proxy = config.proxy();
     if (proxy) {

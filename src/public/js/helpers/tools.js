@@ -220,10 +220,16 @@ export function getWords(text) {
   return text.replace(/\s+/g, ' ').replace(new XRegExp('[^\\p{L} ]', 'gi'), '').trim().substring(0, 800).split(' ');
 }
 
-var TYPES = new Set(['object', 'number', 'boolean']);
+const TYPES = new Set(['object', 'number', 'boolean']);
 
 export function checkError(result) {
-    return !TYPES.has(typeof result) || (result && (result.errorMessage || result.ban));
+  if (!TYPES.has(typeof result)) {
+    return true;
+  }
+  if (!result) {
+    return false;
+  }
+  return result.hasOwnProperty('message') || result.hasOwnProperty('ban');
 }
 
 export function deviceType(expected) {
@@ -272,7 +278,7 @@ export let dateTimeData = function() {
   let base = _requireModel('base');
   let Settings = require('./settings');
   return {
-    timeOffset: (('local' === Settings.time()) ? Settings.timeZoneOffset() : base.site.timeOffset),
+    timeOffset: (('local' === Settings.time()) ? Settings.timeZoneOffset() : base.site.timeOffset) || 0,
     dateFormat: base.site.dateFormat,
     locale: base.site.locale
   };
@@ -490,7 +496,7 @@ export function pageCount() {
 }
 
 export function threadNumber() {
-  let match = locationPathname().match(/^\/([^\/])\/(res|arch)\/(\d+)\.html$/);
+  let match = locationPathname().match(/^\/([^\/]+)\/(res|arch)\/(\d+)\.html$/);
   if (match) {
     if (_requireModel && !_requireModel('boards').boards.some((board) => { return match[1] === board.name; })) {
       return 0;

@@ -67,12 +67,12 @@ export async function createThumbnail(file, thumbPath, path) {
   }
   let duration = metadata.format.duration;
   let bitrate = +metadata.format.bit_rate;
-  let extraData = {
+  result.extraData = {
     duration: (+duration ? durationToString(duration) : duration),
     bitrate: (bitrate ? Math.floor(bitrate / 1024) : 0)
   };
   try {
-    let pngThumbPath = filePath + '.png';
+    let pngThumbPath = thumbPath + '.png';
     await new Promise((resolve, reject) => {
       ffmpeg(path).frames(1).on('error', reject).on('end', resolve).save(pngThumbPath);
     });
@@ -98,10 +98,10 @@ export async function createThumbnail(file, thumbPath, path) {
       };
     }
     if (result.dimensions.width > 200 || result.dimensions.height > 200) {
-      await Files.resizeImage(thumbPath, 200, 200);
-      let thumbInfo = await Files.getImageSize(thumbPath);
+      await Files.resizeImage(file.thumbPath, 200, 200);
+      let thumbInfo = await Files.getImageSize(file.thumbPath);
       if (!thumbInfo) {
-        throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
+        throw new Error(Tools.translate('Failed to identify image file: $[1]', '', file.thumbPath));
       }
       result.dimensions = {
         width: thumbInfo.width,

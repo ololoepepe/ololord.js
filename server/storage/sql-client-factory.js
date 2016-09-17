@@ -40,11 +40,47 @@ var clients = new Map();
 
 function createClient(name) {
   return new Promise(function (resolve, reject) {
-    var db = new _sqlite2.default.Database(__projroot + '/../sqlite/' + name + '.sqlite', function (err) {
+    var db = new _sqlite2.default.Database(__dirname + '/../../sqlite/' + name + '.sqlite', function (err) {
       if (err) {
         reject(err);
         return;
       }
+      db.transaction = function () {
+        return new Promise(function (resolve, reject) {
+          db.run('BEGIN TRANSACTION', [], function (err) {
+            if (err) {
+              reject(err);
+            } else {
+              db.manualTransaction = true;
+              resolve();
+            }
+          });
+        });
+      };
+      db.commit = function () {
+        return new Promise(function (resolve, reject) {
+          db.run('COMMIT TRANSACTION', [], function (err) {
+            db.manualTransaction = false;
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      };
+      db.rollback = function () {
+        return new Promise(function (resolve, reject) {
+          db.run('ROLLBACK TRANSACTION', [], function (err) {
+            db.manualTransaction = false;
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      };
       resolve(db);
     });
   });
