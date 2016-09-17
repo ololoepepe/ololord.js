@@ -299,7 +299,7 @@ var waitForFile = function () {
 
 var generateFileName = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(file, plugin) {
-    var baseName, suffix, thumbSuffix;
+    var baseName, suffix, canonicalSuffix, thumbSuffix;
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
@@ -314,20 +314,22 @@ var generateFileName = function () {
             if (typeof suffix === 'string') {
               suffix = suffix.substr(1);
             }
-            if (!suffix || !plugin.suffixMatchesMimeType(suffix, file.mimeType)) {
+            canonicalSuffix = suffix ? suffix.toLower() : '';
+
+            if (!suffix || !plugin.suffixMatchesMimeType(canonicalSuffix, file.mimeType)) {
               suffix = plugin.defaultSuffixForMimeType(file.mimeType);
             }
             thumbSuffix = suffix;
 
             if (typeof plugin.thumbnailSuffixForMimeType === 'function') {
-              thumbSuffix = plugin.thumbnailSuffixForMimeType(file.mimeType) || suffix;
+              thumbSuffix = plugin.thumbnailSuffixForMimeType(file.mimeType) || canonicalSuffix;
             }
             return _context7.abrupt('return', {
               name: baseName + '.' + suffix,
               thumbName: baseName + 's.' + thumbSuffix
             });
 
-          case 9:
+          case 10:
           case 'end':
             return _context7.stop();
         }

@@ -138,12 +138,13 @@ async function generateFileName(file, plugin) {
   if (typeof suffix === 'string') {
     suffix = suffix.substr(1);
   }
-  if (!suffix || !plugin.suffixMatchesMimeType(suffix, file.mimeType)) {
+  let canonicalSuffix = suffix ? suffix.toLower() : '';
+  if (!suffix || !plugin.suffixMatchesMimeType(canonicalSuffix, file.mimeType)) {
     suffix = plugin.defaultSuffixForMimeType(file.mimeType);
   }
   let thumbSuffix = suffix;
   if (typeof plugin.thumbnailSuffixForMimeType === 'function') {
-    thumbSuffix = plugin.thumbnailSuffixForMimeType(file.mimeType) || suffix;
+    thumbSuffix = plugin.thumbnailSuffixForMimeType(file.mimeType) || canonicalSuffix;
   }
   return {
     name: `${baseName}.${suffix}`,

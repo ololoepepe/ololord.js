@@ -27,12 +27,9 @@ export let handleError = function(error) {
   }
   var text;
   if (error) {
-    if (error.errorMessage) {
-      text = error.errorMessage;
-      if (error.errorDescription) {
-        text += `: ${error.errorDescription}`;
-      }
-    } else if (error.ban) {
+    if (error.hasOwnProperty('message')) {
+      text = `${Tools.translate('Error')}: ${error.message}`;
+    } else if (error.hasOwnProperty('ban')) {
       text = `${Tools.translate('You are banned', 'bannedText')}.`;
       if (error.ban.reason) {
         text += ` ${Tools.translate('Reason:', 'banReasonLabelText')} ${error.ban.reason}.`;

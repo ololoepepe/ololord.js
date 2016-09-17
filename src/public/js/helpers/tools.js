@@ -220,10 +220,16 @@ export function getWords(text) {
   return text.replace(/\s+/g, ' ').replace(new XRegExp('[^\\p{L} ]', 'gi'), '').trim().substring(0, 800).split(' ');
 }
 
-var TYPES = new Set(['object', 'number', 'boolean']);
+const TYPES = new Set(['object', 'number', 'boolean']);
 
 export function checkError(result) {
-    return !TYPES.has(typeof result) || (result && (result.errorMessage || result.ban));
+  if (!TYPES.has(typeof result)) {
+    return true;
+  }
+  if (!result) {
+    return false;
+  }
+  return result.hasOwnProperty('message') || result.hasOwnProperty('ban');
 }
 
 export function deviceType(expected) {
