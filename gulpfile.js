@@ -14,7 +14,7 @@ var source = require('vinyl-source-stream');
 var sourcemaps = require('gulp-sourcemaps');
 var spritesmith = require('gulp.spritesmith');
 var Stream = require('stream');
-var uglify = require('gulp-uglifyjs');
+var uglify = require('gulp-uglify');
 var webworkify = require('webworkify');
 
 const CODEMIRROR_ADDONS = ['mode/simple'];
@@ -114,11 +114,11 @@ function buildJS(custom, debug) {
     var stream = stringStream('');
   }
   stream = stream.pipe(source('index.js'))
-  .pipe(buffer());
+  .pipe(buffer())
+  .pipe(sourcemaps.init());
   if (custom) {
     stream = stream.pipe(rename('custom.js'));
   }
-  stream = stream.pipe(sourcemaps.init());
   if (!debug) {
     stream = stream.pipe(uglify());
   }
