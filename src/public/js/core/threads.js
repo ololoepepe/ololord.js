@@ -36,6 +36,7 @@ const FAVORITES_MIN_HEIGHT = 400;
 let pageVisible = true;
 let blinkTimer = null;
 let autoUpdateTimer = null;
+let updateThreadPopup = null;
 
 class AutoUpdateViewModel {
   constructor() {
@@ -84,10 +85,12 @@ class BlinkTimer {
 
 function showLoadingPostsPopup(text) {
   text = text || Tools.translate('Loading posts…', 'loadingPostsMessage');
-  return PopupMessage.showPopup($(`<span><span class='icon-24 icon-spinner'></span><span>${text}</span></span>`)[0], {
+  let node = $(`<span><span class='icon-24 icon-spinner'></span><span>${text}</span></span>`)[0];
+  let popup = PopupMessage.showPopup(node, {
     type: 'node',
     timeout: Constants.BILLION
   });
+  return popup;
 }
 
 export let updateThread = async function(silent) {
@@ -99,7 +102,13 @@ export let updateThread = async function(silent) {
   }
   let lastPostNumber = +DOM.data('number', _(posts).last());
   if (!silent) {
-    var popup = showLoadingPostsPopup();
+    if (updateThreadPopup) {
+      return;
+    }
+    updateThreadPopup = showLoadingPostsPopup();
+    updateThreadPopup.on('hide', () => {
+      updateThreadPopup = null;
+    });
   }
   try {
     let result = await AJAX.api('threadLastPostNumber', {
@@ -116,14 +125,14 @@ export let updateThread = async function(silent) {
       var model = await AJAX.api(threadNumber, {}, { prefix: `${boardName}/res` });
     }
     let posts = model.thread.lastPosts.filter((post) => { return post.number > lastPostNumber; });
-    if (typeof popup !== 'undefined') {
+    if (updateThreadPopup) {
       let txt = (posts.length >= 1) ? Tools.translate('New posts:', 'newPostsText')
         : Tools.translate('No new posts', 'noNewPostsText');
       if (posts.length >= 1) {
         txt += ` ${posts.length}`;
       }
-      popup.resetContent(txt);
-      popup.resetTimeout();
+      updateThreadPopup.resetContent(txt);
+      updateThreadPopup.resetTimeout();
     }
     if (posts.length < 1) {
       return;
@@ -173,8 +182,9 @@ export let updateThread = async function(silent) {
       }
     }
   } catch (err) {
-    if (typeof popup !== 'undefined') {
-      popup.hide();
+    if (updateThreadPopup) {
+      updateThreadPopup.hide();
+      updateThreadPopup = null;
     }
     DOM.handleError(err);
   }

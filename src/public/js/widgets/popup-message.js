@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import $ from 'jquery';
+import { EventEmitter } from 'events';
 
 import * as Constants from '../helpers/constants';
 import * as Tools from '../helpers/tools';
@@ -57,8 +58,9 @@ function moveSubjacent(from, deltaHeight) {
   });
 }
 
-export default class PopupMessage {
+export default class PopupMessage extends EventEmitter {
   constructor(content, { timeout, classNames, type, click } = {}) {
+    super();
     this.hideTimer = null;
     this.timeout = Tools.option(timeout, 'number', DEFAULT_HIDE_TIMEOUT);
     this.msg = window.document.createElement('div');
@@ -80,6 +82,7 @@ export default class PopupMessage {
     window.document.body.appendChild(this.msg);
     popups.push(this);
     this.hideTimer = setTimeout(this.hide.bind(this), this.timeout);
+    this.emit('show');
   }
 
   hide() {
@@ -93,6 +96,7 @@ export default class PopupMessage {
     var ind = popups.indexOf(this);
     popups.splice(ind, 1);
     moveSubjacent(ind, -deltaHeight);
+    this.emit('hide');
   }
 
   resetTimeout(timeout) {
