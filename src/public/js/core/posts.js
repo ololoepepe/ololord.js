@@ -549,7 +549,7 @@ export let removeReferences = function(postNumber, referencedOnly) {
   }
   DOM.queryAll(`a[data-board-name='${Tools.boardName()}'][data-post-number='${postNumber}']`).forEach((a) => {
     let parent = a.parentNode;
-    if ($(parent).hasClass('.js-referring-posts')) {
+    if ($(parent).hasClass('js-referring-posts')) {
       parent.removeChild(a);
       if (parent.children.length <= 1) {
         $(parent).empty();
