@@ -1,32 +1,28 @@
 [done] Add Vocaroo embedding support
-* Use Babel
-* Use LESS
-* Use Gulp
-* Refactor: use ES-2015 features
-* Remove React dependency
+[done] Use Babel
+[done] Use LESS
+[done] Use Gulp
+[done] Refactor: use ES-2015 features
+[done] Embed search results into page (no separate search page)
+[done] Limit WebSocket request count per period of time
+[done] Implement limiting access by country
+[done] Implement plugin support
+[done] Improve time correction
+[done] Improve hotkeys (add ability to disable a singel hotkey; fix Ctrl+Right, etc.)
+[done] Do not show update and auto update buttons in archived threads
+[done] Serve local copies of YouTube, Coub and Vocaroo favicons
+[done] Use GraphicsMagick instead of ImageMagick
+[done] Use SQL storage for archived threads/posts/files
 * Optimize HTML structure
-* Embed search results into page (no separate search page)
 * Use WebSockets for trakcing favorite threads
 * Add ability to reply to post previews (use floating post form)
 * Improve posting speed statistics
 * Add thread statistics
 * Remove "NO_ACCESS" ban level (retain "READ_ONLY")
 * Implement subnet support
-* Limit WebSocket request count per period of time
-* Implement limiting access by country
 * Improve DB structure
 * Incapsulate actions (reduce coherence)
-* Implement plugin support
 * Fix post previews
-* Rename "d" board to "withUserAgent"
 * Remove some boards and add them to the Wiki as an example of custom boards
-* Remove unneeded arguments from "custom*" funcion calls
-* Improve time correction
-* Improve hotkeys (add ability to disable a singel hotkey; fix Ctrl+Right, etc.)
 * Validate post form before submitting
 * Auto save post form
-* Do not show update and auto update buttons in archived threads
-* Add classes for custom post body/header parts
-* Serve local copies of YouTube, Coub and Vocaroo favicons
-* Use GraphicsMagick instead ig ImageMagick
-* Use SQL storage for archived threads/posts/files
