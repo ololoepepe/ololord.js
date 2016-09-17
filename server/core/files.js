@@ -314,7 +314,7 @@ var generateFileName = function () {
             if (typeof suffix === 'string') {
               suffix = suffix.substr(1);
             }
-            canonicalSuffix = suffix ? suffix.toLower() : '';
+            canonicalSuffix = suffix ? suffix.toLowerCase() : '';
 
             if (!suffix || !plugin.suffixMatchesMimeType(canonicalSuffix, file.mimeType)) {
               suffix = plugin.defaultSuffixForMimeType(file.mimeType);

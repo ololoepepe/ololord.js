@@ -138,7 +138,7 @@ async function generateFileName(file, plugin) {
   if (typeof suffix === 'string') {
     suffix = suffix.substr(1);
   }
-  let canonicalSuffix = suffix ? suffix.toLower() : '';
+  let canonicalSuffix = suffix ? suffix.toLowerCase() : '';
   if (!suffix || !plugin.suffixMatchesMimeType(canonicalSuffix, file.mimeType)) {
     suffix = plugin.defaultSuffixForMimeType(file.mimeType);
   }
