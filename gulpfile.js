@@ -82,7 +82,7 @@ function buildCSS(custom, debug) {
   }).map(function(fileName) {
     return `${path}/${fileName}`;
   }))
-  .pipe(sourcemaps.init({ loadMaps: true }));
+  .pipe(sourcemaps.init());
   var plugins = [autoprefix];
   if (!debug) {
     plugins.push(cleanCSS);
@@ -118,7 +118,7 @@ function buildJS(custom, debug) {
   if (custom) {
     stream = stream.pipe(rename('custom.js'));
   }
-  stream = stream.pipe(sourcemaps.init({ loadMaps: true }));
+  stream = stream.pipe(sourcemaps.init());
   if (!debug) {
     stream = stream.pipe(uglify());
   }

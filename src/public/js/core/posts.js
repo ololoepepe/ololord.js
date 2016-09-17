@@ -28,6 +28,8 @@ import OverlayProgressBar from '../widgets/overlay-progress-bar';
 let lastPostPreview = null;
 let lastPostPreviewTimer = null;
 let postPreviewMask = null;
+let postPreviewsEnabled = true;
+let scheduledPostPreviews = new Set();
 
 const TRACK_DATA = ['boardName', 'fileName', 'mimeType', 'width', 'height', 'extraData'];
 const SOURCE_TEXT_MIN_WIDTH = 360;
@@ -558,6 +560,20 @@ export let removeReferences = function(postNumber, referencedOnly) {
   });
 };
 
+export function setPostPreviewsEnabled(enabled) {
+  postPreviewsEnabled = enabled;
+  if (!postPreviewsEnabled) {
+    scheduledPostPreviews.forEach((a) => {
+      if (a.viewPostTimer) {
+        clearTimeout(a.viewPostTimer);
+        delete a.viewPostTimer;
+      }
+    });
+    scheduledPostPreviews.clear();
+    $('.js-post.temporary-post, .temporary-post-overlay-mask').remove();
+  }
+}
+
 export function globalClickHandler(e) {
   if (e.button) {
     return;
@@ -573,6 +589,9 @@ export function globalClickHandler(e) {
       if (boardName && postNumber && $(t).hasClass('js-post-link')) {
         e.preventDefault();
         e.stopImmediatePropagation();
+        if (!postPreviewsEnabled) {
+          return;
+        }
         viewPost(t, boardName, postNumber);
       }
     }
@@ -608,10 +627,15 @@ export function globalMouseoverHandler(e) {
   if (!boardName || !postNumber || !$(a).hasClass('js-post-link')) {
     return;
   }
+  if (!postPreviewsEnabled) {
+    return;
+  }
   a.viewPostTimer = setTimeout(() => {
+    scheduledPostPreviews.delete(a);
     delete a.viewPostTimer;
     viewPost(a, boardName, postNumber, DOM.data('hiddenPost', a) === 'true');
   }, Settings.viewPostPreviewDelay());
+  scheduledPostPreviews.add(a);
 }
 
 export function globalMouseoutHandler(e) {
@@ -628,6 +652,7 @@ export function globalMouseoutHandler(e) {
     return;
   }
   if (a.viewPostTimer) {
+    scheduledPostPreviews.delete(a);
     clearTimeout(a.viewPostTimer);
     delete a.viewPostTimer;
   } else {
