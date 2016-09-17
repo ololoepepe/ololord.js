@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.removeReferringPosts = exports.storeReferringPosts = exports.storeReferencedPosts = exports.rerenderReferringPosts = exports.removeReferencedPosts = exports.addReferencedPosts = exports.addReferencesToPost = undefined;
+exports.removeReferringPosts = exports.removeReferencedPosts = exports.storeReferringPosts = exports.storeReferencedPosts = exports.rerenderReferringPosts = exports.removeReferences = exports.addReferencedPosts = exports.addReferencesToPost = undefined;
 
 var addReferencesToPost = exports.addReferencesToPost = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(post) {
@@ -112,7 +112,7 @@ var addReferencedPosts = exports.addReferencedPosts = function () {
   };
 }();
 
-var removeReferencedPosts = exports.removeReferencedPosts = function () {
+var removeReferences = exports.removeReferences = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(_ref2) {
     var boardName = _ref2.boardName;
     var number = _ref2.number;
@@ -122,20 +122,19 @@ var removeReferencedPosts = exports.removeReferencedPosts = function () {
     var _ref3 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     var nogenerate = _ref3.nogenerate;
-    var key, referencedSource, referringSource, referencedPosts;
+    var key, referencedSource, referencedPosts;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
             key = boardName + ':' + number;
             referencedSource = archived ? ArchivedReferencedPosts : ReferencedPosts;
-            referringSource = archived ? ArchivedReferringPosts : ReferringPosts;
-            _context5.next = 5;
+            _context5.next = 4;
             return referencedSource.getAll(key);
 
-          case 5:
+          case 4:
             referencedPosts = _context5.sent;
-            _context5.next = 8;
+            _context5.next = 7;
             return Tools.series(referencedPosts, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(ref, refKey) {
                 return regeneratorRuntime.wrap(function _callee4$(_context4) {
@@ -143,12 +142,13 @@ var removeReferencedPosts = exports.removeReferencedPosts = function () {
                     switch (_context4.prev = _context4.next) {
                       case 0:
                         _context4.next = 2;
-                        return referringSource.deleteOne(key, refKey);
+                        return ReferringPosts.deleteOne(key, refKey);
 
                       case 2:
-                        return _context4.abrupt('return', _context4.sent);
+                        _context4.next = 4;
+                        return ArchivedReferringPosts.deleteOne(key, refKey);
 
-                      case 3:
+                      case 4:
                       case 'end':
                         return _context4.stop();
                     }
@@ -161,7 +161,7 @@ var removeReferencedPosts = exports.removeReferencedPosts = function () {
               };
             }());
 
-          case 8:
+          case 7:
             if (!nogenerate) {
               (0, _underscore2.default)(referencedPosts).filter(function (ref) {
                 return ref.boardName !== boardName || ref.threadNumber !== threadNumber;
@@ -171,7 +171,7 @@ var removeReferencedPosts = exports.removeReferencedPosts = function () {
             }
             referencedSource.delete(key);
 
-          case 10:
+          case 9:
           case 'end':
             return _context5.stop();
         }
@@ -179,7 +179,7 @@ var removeReferencedPosts = exports.removeReferencedPosts = function () {
     }, _callee5, this);
   }));
 
-  return function removeReferencedPosts(_x8, _x9) {
+  return function removeReferences(_x8, _x9) {
     return ref.apply(this, arguments);
   };
 }();

@@ -55,13 +55,13 @@ export async function addReferencedPosts(post, referencedPosts, { nogenerate, ar
   }
 }
 
-export async function removeReferencedPosts({ boardName, number, threadNumber, archived }, { nogenerate } = {}) {
+export async function removeReferences({ boardName, number, threadNumber, archived }, { nogenerate } = {}) {
   let key = `${boardName}:${number}`;
   let referencedSource = archived ? ArchivedReferencedPosts : ReferencedPosts;
-  let referringSource = archived ? ArchivedReferringPosts : ReferringPosts;
   let referencedPosts = await referencedSource.getAll(key);
   await Tools.series(referencedPosts, async function(ref, refKey) {
-    return await referringSource.deleteOne(key, refKey);
+    await ReferringPosts.deleteOne(key, refKey);
+    await ArchivedReferringPosts.deleteOne(key, refKey);
   });
   if (!nogenerate) {
     _(referencedPosts).filter((ref) => {

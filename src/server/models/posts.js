@@ -273,7 +273,7 @@ export async function removePost(boardName, postNumber, { removingThread } = {})
     Logger.error(err.stack || err);
   }
   try {
-    await PostReferencesModel.removeReferencedPosts(post);
+    await PostReferencesModel.removeReferences(post);
   } catch (err) {
     Logger.error(err.stack || err);
   }

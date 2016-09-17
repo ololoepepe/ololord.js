@@ -717,7 +717,7 @@ var removePost = exports.removePost = function () {
           case 22:
             _context9.prev = 22;
             _context9.next = 25;
-            return PostReferencesModel.removeReferencedPosts(post);
+            return PostReferencesModel.removeReferences(post);
 
           case 25:
             _context9.next = 30;
