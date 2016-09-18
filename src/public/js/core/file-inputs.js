@@ -52,7 +52,7 @@ export function clearFileInput(div) {
   if (!div) {
     return;
   }
-  $(div).find('.js-file-input-preview').empty().addClass('icon-32 icon-file-open');
+  $(div).find('.js-file-input-preview').empty().addClass('icon icon-file-open-32');
   $(div).find('.js-file-input-label-text').empty().attr('title', '');
   removeFileHash(div);
   ['fileInput', 'file', 'fileBackup', 'fileUrl'].forEach((name) => {
@@ -128,7 +128,7 @@ async function previewImage(div) {
   try {
     let url = await Tools.readAs(div.file, 'DataURL');
     let img = $(`<img src='${url}' class='invert' />`); //NOTE: Double inversion --> not inverted
-    $(div).find('.js-file-input-preview').removeClass('icon-32').removeClassWild('icon-file-*').append(img);
+    $(div).find('.js-file-input-preview').removeClass('icon').removeClassWild('icon-file-*-32').append(img);
   } catch (err) {
     DOM.handleError(err);
   }
@@ -151,7 +151,7 @@ const FILE_TYPE_REGEXPS = [{
 function previewFileType(div, fileName) {
   let fileType = _(FILE_TYPE_REGEXPS).find(o => fileName.match(o.regexp));
   fileType = fileType ? fileType.type : 'open';
-  $(div).find('.js-file-input-preview').removeClassWild('icon-file-*').addClass(`icon-32 icon-file-${fileType}`);
+  $(div).find('.js-file-input-preview').removeClassWild('icon-file-*-32').addClass(`icon icon-file-${fileType}-32`);
 }
 
 async function stripEXIF(div) {
@@ -186,9 +186,9 @@ export async function fileAddedCommon(div) {
     $(div).find('.js-file-input-label-text').text(fileName).attr('title', fileName);
     if (div.filePreviewURL) {
       let img = $(`<img src='${div.filePreviewURL}' class='invert' />`); //NOTE: Double inversion --> not inverted
-      $(div).find('.js-file-input-preview').removeClass('icon-32').removeClassWild('icon-file-*').append(img);
+      $(div).find('.js-file-input-preview').removeClass('icon').removeClassWild('icon-file-*-32').append(img);
     } else {
-      $(div).find('.js-file-input-preview').empty().addClass('icon-32 icon-file-open');
+      $(div).find('.js-file-input-preview').empty().addClass('icon icon-file-open-32');
     }
   } else {
     let fileName = (div.file ? div.file.name : div.fileUrl.split('/').pop()) || '';

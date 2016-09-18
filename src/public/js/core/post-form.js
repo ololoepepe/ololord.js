@@ -45,11 +45,11 @@ function makeFormFloat({ previousPosition } = {}) {
     buttons: [],
     headerButtons: {
       title: postFormFixedButtonTitle(),
-      class: `icon ${(Storage.postFormFixed() ? 'icon-pin' : 'icon-unpin')} button-icon`,
+      class: `icon ${(Storage.postFormFixed() ? 'icon-pin-16' : 'icon-unpin-16')} button-icon`,
       action: (btn) => {
         let fixed = !Storage.postFormFixed();
         Storage.postFormFixed(fixed);
-        btn.removeClass('icon-pin icon-unpin').addClass(fixed ? 'icon-pin' : 'icon-unpin')
+        btn.removeClass('icon-pin-16 icon-unpin-16').addClass(fixed ? 'icon-pin-16' : 'icon-unpin-16')
         .attr('title', postFormFixedButtonTitle());
       }
     },

@@ -555,6 +555,6 @@ export function resetDeviceType() {
 
 export function createLoadingMessage(txt) {
   txt = txt || Tools.translate('Loading…');
-  let spinnerHTML = '<span class="icon-24 icon-spinner"></span>';
+  let spinnerHTML = '<span class="icon icon-spinner-24"></span>';
   return $(`<div class='loading-message'>${spinnerHTML}<h1 class='loading-message-text'>${txt}</h1></div>`);
 }

@@ -85,7 +85,7 @@ class BlinkTimer {
 
 function showLoadingPostsPopup(text) {
   text = text || Tools.translate('Loading posts…', 'loadingPostsMessage');
-  let node = $(`<span><span class='icon-24 icon-spinner'></span><span>${text}</span></span>`)[0];
+  let node = $(`<span><span class='icon icon-spinner-24'></span><span>${text}</span></span>`)[0];
   let popup = PopupMessage.showPopup(node, {
     type: 'node',
     timeout: Constants.BILLION
