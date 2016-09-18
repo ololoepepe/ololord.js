@@ -1,9 +1,9 @@
 <form id='post-form' class='post-form' method='post' accept-charset='utf-8' enctype='multipart/form-data'
       action='/{{!it.site.pathPrefix}}action/{{? it.thread}}createPost{{??}}createThread{{?}}'
       data-bind='event: { submit: submit }'>
-  <div class='js-only desktop-only post-form-header' draggable='true'
+  <div class='js-only post-form-header' draggable='true'
        data-bind='event: { dragstart: makeFormFloat }'>
-    <div>{{!it.translate('Start dragging to make post form float')}}</div>
+    <div><span class='desktop-only'>{{!it.translate('Start dragging to make post form float')}}</span></div>
     <div>
       <span class='icon icon-cross-16 button-icon' title='{{!it.translate('Close', 'closeButtonText')}}'
             data-bind='click: close'></span>

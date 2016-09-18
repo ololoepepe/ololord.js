@@ -267,6 +267,9 @@ export function initialize() {
   KO.applyBindings({
     submit: submit,
     makeFormFloat: () => {
+      if (Tools.deviceType('mobile')) {
+        return;
+      }
       if (floatingPostForm) {
         return;
       }
