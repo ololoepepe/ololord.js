@@ -82,28 +82,26 @@ export async function createThumbnail(file, thumbPath, path) {
   }
   if (thumbPath === file.thumbPath) {
     await Files.generateRandomImage(file.hash, file.mimeType, thumbPath);
-    result.dimensions = result.dimensions || {
+    result.thumbDimensions = {
       width: 200,
       height: 200
     };
   } else {
-    if (!result.dimensions) {
-      let thumbInfo = await Files.getImageSize(thumbPath);
-      if (!thumbInfo) {
-        throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
-      }
-      result.dimensions = {
-        width: thumbInfo.width,
-        height: thumbInfo.height
-      };
+    let thumbInfo = await Files.getImageSize(file.thumbPath);
+    if (!thumbInfo) {
+      throw new Error(Tools.translate('Failed to identify image file: $[1]', '', file.thumbPath));
     }
-    if (result.dimensions.width > 200 || result.dimensions.height > 200) {
+    result.thumbDimensions = {
+      width: thumbInfo.width,
+      height: thumbInfo.height
+    };
+    if (result.thumbDimensions.width > 200 || result.thumbDimensions.height > 200) {
       await Files.resizeImage(file.thumbPath, 200, 200);
       let thumbInfo = await Files.getImageSize(file.thumbPath);
       if (!thumbInfo) {
         throw new Error(Tools.translate('Failed to identify image file: $[1]', '', file.thumbPath));
       }
-      result.dimensions = {
+      result.thumbDimensions = {
         width: thumbInfo.width,
         height: thumbInfo.height
       };

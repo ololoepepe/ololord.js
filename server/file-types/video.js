@@ -92,71 +92,65 @@ var createThumbnail = exports.createThumbnail = function () {
             return Files.generateRandomImage(file.hash, file.mimeType, thumbPath);
 
           case 20:
-            result.dimensions = result.dimensions || {
+            result.thumbDimensions = {
               width: 200,
               height: 200
             };
-            _context2.next = 39;
+            _context2.next = 38;
             break;
 
           case 23:
-            if (result.dimensions) {
-              _context2.next = 30;
-              break;
-            }
+            _context2.next = 25;
+            return Files.getImageSize(file.thumbPath);
 
-            _context2.next = 26;
-            return Files.getImageSize(thumbPath);
-
-          case 26:
+          case 25:
             thumbInfo = _context2.sent;
 
             if (thumbInfo) {
-              _context2.next = 29;
-              break;
-            }
-
-            throw new Error(Tools.translate('Failed to identify image file: $[1]', '', thumbPath));
-
-          case 29:
-            result.dimensions = {
-              width: thumbInfo.width,
-              height: thumbInfo.height
-            };
-
-          case 30:
-            if (!(result.dimensions.width > 200 || result.dimensions.height > 200)) {
-              _context2.next = 39;
-              break;
-            }
-
-            _context2.next = 33;
-            return Files.resizeImage(file.thumbPath, 200, 200);
-
-          case 33:
-            _context2.next = 35;
-            return Files.getImageSize(file.thumbPath);
-
-          case 35:
-            _thumbInfo = _context2.sent;
-
-            if (_thumbInfo) {
-              _context2.next = 38;
+              _context2.next = 28;
               break;
             }
 
             throw new Error(Tools.translate('Failed to identify image file: $[1]', '', file.thumbPath));
 
-          case 38:
-            result.dimensions = {
+          case 28:
+            result.thumbDimensions = {
+              width: thumbInfo.width,
+              height: thumbInfo.height
+            };
+
+            if (!(result.thumbDimensions.width > 200 || result.thumbDimensions.height > 200)) {
+              _context2.next = 38;
+              break;
+            }
+
+            _context2.next = 32;
+            return Files.resizeImage(file.thumbPath, 200, 200);
+
+          case 32:
+            _context2.next = 34;
+            return Files.getImageSize(file.thumbPath);
+
+          case 34:
+            _thumbInfo = _context2.sent;
+
+            if (_thumbInfo) {
+              _context2.next = 37;
+              break;
+            }
+
+            throw new Error(Tools.translate('Failed to identify image file: $[1]', '', file.thumbPath));
+
+          case 37:
+            result.thumbDimensions = {
               width: _thumbInfo.width,
               height: _thumbInfo.height
             };
 
-          case 39:
+          case 38:
             return _context2.abrupt('return', result);
 
-          case 40:
+          case 39:
           case 'end':
             return _context2.stop();
         }
