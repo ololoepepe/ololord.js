@@ -28,9 +28,6 @@
         }
     },
     "Internal error": {
-        "_default": {
-            "value": "Внутренняя ошибка"
-        },
         "internalErrorText": {
             "value": "Внутренняя ошибка"
         }
@@ -1927,11 +1924,6 @@
     "Disallow bumping": {
         "setThreadUnbumpableText": {
             "value": "Запретить бампать"
-        }
-    },
-    "Use this button to jump between boards": {
-        "boardSelectTooltip": {
-            "value": "Используйте эту кнопку для перехода между досками"
         }
     },
     "Neither file name nor hash is specified": {

@@ -61,7 +61,6 @@
   [{{!it.translate('Boards', 'boardsText')}}:
   <span class='board-select-container'>
     <select class='icon icon-list-16 board-select js-board-select'
-            title='{{!it.translate('Use this button to jump between boards', 'boardSelectTooltip')}}'
             data-bind='event: { change: selectBoard }'>
       <option selected='true' value=''></option>
       {{~it.boardGroups :group}}

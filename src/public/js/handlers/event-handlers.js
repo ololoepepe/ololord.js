@@ -122,17 +122,6 @@ registerHandler('load', () => {
       sidebarSwitch.prop('checked', !visible);
     }
   });
-  if (Tools.deviceType('mobile')) {
-    DOM.queryAll('.js-with-tooltip').forEach(DOM.setTooltip);
-    var boardSelect = Storage.getLocalObject('tooltips/boardSelect', 0);
-    if (boardSelect < TOOLTIP_COUNT_BOARD_SELECT) {
-      Storage.setLocalObject('tooltips/boardSelect', boardSelect + 1);
-      DOM.setTooltip(DOM.queryOne('.js-board-select'), {
-        position: 'fixed',
-        show: true
-      });
-    }
-  }
   initializeInfiniteScroll();
 }, {
   priority: 0,

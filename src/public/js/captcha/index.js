@@ -45,13 +45,14 @@ export async function createCaptcha() {
   let container = $('#captcha-container');
   if (selectedEngine) {
     $('#post-form [name="captchaEngine"]').val(selectedEngine.id);
+    let data = Tools.captchaEngine(selectedEngine.id);
     if (selectedEngine.widgetHtml) {
       container.html(selectedEngine.widgetHtml);
     } else if (selectedEngine.widgetTemplate) {
-      container.html(Templating.template(selectedEngine.widgetTemplate, selectedEngine, true));
+      container.html(Templating.template(selectedEngine.widgetTemplate, data, true));
     }
     if (typeof selectedEngine.initialize === 'function') {
-      selectedEngine.initialize(Tools.captchaEngine(selectedEngine.id));
+      selectedEngine.initialize(data);
     }
   }
   try {
