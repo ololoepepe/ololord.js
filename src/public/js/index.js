@@ -299,24 +299,6 @@ function initializeDragAndDrop(selector) {
       return;
     }
     Settings.navbarMode(navbarMode);
-    let sidebar = $('#sidebar');
-    let sidebarSwitch = $('#sidebar-switch');
-    let toolbar = $('#toolbar');
-    if ('sidebar' === navbarMode) {
-      toolbar.hide();
-      toolbar.next('.toolbar-placeholder').hide();
-      Storage.sidebarVisible(true);
-      sidebarSwitch.prop('checked', true);
-      sidebarSwitch.prop('disabled', false);
-      sidebarSwitch.next('label').show();
-    } else {
-      Storage.sidebarVisible(false);
-      sidebarSwitch.prop('disabled', true);
-      sidebarSwitch.prop('checked', false);
-      sidebarSwitch.next('label').hide();
-      toolbar.show();
-      toolbar.next('.toolbar-placeholder').show();
-    }
   });
 }
 
@@ -331,12 +313,34 @@ function reloadUserCSS(value) {
   }
 }
 
+function handleNavbarModeChange(mode) {
+  let sidebar = $('#sidebar');
+  let sidebarSwitch = $('#sidebar-switch');
+  let toolbar = $('#toolbar');
+  if ('sidebar' === mode) {
+    toolbar.hide();
+    toolbar.next('.toolbar-placeholder').hide();
+    Storage.sidebarVisible(true);
+    sidebarSwitch.prop('checked', true);
+    sidebarSwitch.prop('disabled', false);
+    sidebarSwitch.next('label').show();
+  } else {
+    Storage.sidebarVisible(false);
+    sidebarSwitch.prop('disabled', true);
+    sidebarSwitch.prop('checked', false);
+    sidebarSwitch.next('label').hide();
+    toolbar.show();
+    toolbar.next('.toolbar-placeholder').show();
+  }
+}
+
 export function initializeHead() {
   Storage.initialize();
   Settings.initialize();
   Storage.userCSS.subscribe(reloadUserCSS);
   Settings.userCSSEnabled.subscribe(reloadUserCSS);
   Settings.bannerMode.subscribe(resetBanner);
+  Settings.navbarMode.subscribe(handleNavbarModeChange);
   Captcha.initialize();
   Hiding.initialize();
   Posts.initialize();

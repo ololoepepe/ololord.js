@@ -3259,5 +3259,25 @@
         "_default": {
             "value": "[$[1]] Умер, респавнится…"
         }
+    },
+    "Security": {
+        "securityTabText": {
+            "value": "Безопасность"
+        }
+    },
+    "Sidebar": {
+        "_default": {
+            "value": "Боковая панель"
+        }
+    },
+    "Toolbar": {
+        "_default": {
+            "value": "Панель инструментов"
+        }
+    },
+    "Navbar mode:": {
+        "_default": {
+            "value": "Режим панели навигации:"
+        }
     }
 }

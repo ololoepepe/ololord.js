@@ -10,17 +10,20 @@
     <li data-index='2'>
       <span data-bind='click: activateTab.bind($data, 2)'>{{!it.translate('Files', 'filesTabText')}}</span>
     </li>
+    <li data-index='3'>
+      <span data-bind='click: activateTab.bind($data, 3)'>{{!it.translate('Other', 'otherTabText')}}</span>
+    </li>
   </ul>
   <ul class='tab-widget-header js-tab-widget-header'>
-    <li data-index='3'>
-      <span data-bind='click: activateTab.bind($data, 3)'>{{!it.translate('Postform and posting',
+    <li data-index='4'>
+      <span data-bind='click: activateTab.bind($data, 4)'>{{!it.translate('Postform and posting',
         'postformTabText')}}</span>
     </li>
-    <li data-index='4'>
-      <span data-bind='click: activateTab.bind($data, 4)'>{{!it.translate('Hiding', 'hidingTabText')}}</span>
-    </li>
     <li data-index='5'>
-      <span data-bind='click: activateTab.bind($data, 5)'>{{!it.translate('Other', 'otherTabText')}}</span>
+      <span data-bind='click: activateTab.bind($data, 5)'>{{!it.translate('Hiding', 'hidingTabText')}}</span>
+    </li>
+    <li data-index='6'>
+      <span data-bind='click: activateTab.bind($data, 6)'>{{!it.translate('Security', 'securityTabText')}}</span>
     </li>
   </ul>
   <div class='js-tab-widget-body'>
@@ -91,19 +94,12 @@
         {{!it.translate('Shrink posts')}}
       </div>
       <div class='settings-widget-tab-row'>
-        {{!it.translate('Password:', 'postFormLabelPassword')}}
-        <input type='password' size='16'
-               data-bind='attr: { type: (passwordVisible() ? "text" : "password") },
-                          textInput: password' />
-        <button data-bind='text: (passwordVisible() ? "{{!it.translate('Hide', 'hidePasswordButtonText')}}"
-                             : "{{!it.translate('Show', 'showPasswordButtonText')}}"),
-                           click: togglePasswordVisibility'></button>
-        <button data-bind='click: generateNewPassword'>{{!it.translate('New', 'newPasswordButtonText')}}</button>
-      </div>
-      <div class='settings-widget-tab-row'>
-        <button data-bind='click: exportSettings'>{{!it.translate('Export', 'exportSettingsButtonText')}}</button>
-        <button data-bind='click: importSettings'>{{!it.translate('Import', 'importSettingsButtonText')}}</button>
-        <button data-bind='click: synchronizeSettings'>{{!it.translate('Synchronize', 'synchronizationText')}}</button>
+        {{!it.translate('Navbar mode:')}}
+        <select class='select'
+                data-bind='value: settings.navbarMode'>
+          <option value='sidebar'>{{!it.translate('Sidebar')}}</option>
+          <option value='toolbar'>{{!it.translate('Toolbar')}}</option>
+        </select>
       </div>
     </div>
     <div data-index='1' style='display: none;'>
@@ -197,6 +193,61 @@
     </div>
     <div data-index='3' style='display: none;'>
       <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.showAutoUpdateDesktopNotifications' />
+        {{!it.translate('Show desktop notifications', 'showAutoUpdateDesktopNotificationsLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.playAutoUpdateSound' />
+        {{!it.translate('Play sound', 'playAutoUpdateSoundLabelText')}}
+        <input type='number' class='length-3' min='0' max='100'
+               data-bind='textInput: settings.soundNotificationsVolume' />
+        %
+      </div>
+      <div class='settings-widget-tab-row'>
+        {{!it.translate('Banners mode:', 'bannersModeLabelText')}}
+        <select class='select'
+                data-bind='value: settings.bannerMode'>
+          <option value='random'>{{!it.translate('Show random board banner', 'bannersModeRandomText')}}</option>
+          <option value='same'>{{!it.translate('Show current board banner', 'bannersModeSameText')}}</option>
+          <option value='none'>{{!it.translate('Do not show banners', 'bannersModeNoneText')}}</option>
+        </select>
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.showNewPosts' />
+        {{!it.translate('New post count near board names', 'showNewPostsLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.chatEnabled' />
+        {{!it.translate('Enable private chat', 'chatLabelText')}}
+      </div>
+      <div class='settings-widget-tab-row desktop-only'>
+        <input type='checkbox'
+               data-bind='checked: settings.hotkeysEnabled' />
+        {{!it.translate('Hotkeys enabled', 'hotkeysLabelText')}}
+        <button class='button'
+                data-bind='click: editHotkeys'>{{!it.translate('Edit', 'editHotkeysText')}}</button>
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.userCSSEnabled' />
+        {{!it.translate('User CSS enabled', 'userCssLabelText')}}
+        <button class='button'
+                data-bind='click: editUserCss'>{{!it.translate('Edit', 'editUserCssText')}}</button>
+      </div>
+      <div class='settings-widget-tab-row'>
+        <input type='checkbox'
+               data-bind='checked: settings.userJavaScriptEnabled' />
+        {{!it.translate('User JavaScript enabled', 'userJavaScriptLabelText')}}
+        <button class='button'
+                data-bind='click: editUserJavaScript'>{{!it.translate('Edit', 'editUserJavaScriptText')}}</button>
+      </div>
+    </div>
+    <div data-index='4' style='display: none;'>
+      <div class='settings-widget-tab-row'>
         {{!it.translate('Captcha:', 'captchaLabelText')}}
         <select class='select'
                 data-bind='value: settings.captchaEngine'>
@@ -258,7 +309,7 @@
         {{!it.translate('Hide postform rules', 'hidePostformRulesLabelText')}}
       </div>
     </div>
-    <div data-index='4' style='display: none;'>
+    <div data-index='5' style='display: none;'>
       <div class='settings-widget-tab-row'>
         <div>{{!it.translate('Hide boards:', 'hiddenBoardsLabelText')}}</div>
         <div class='scroll-area-300-x-60 bordered'>
@@ -302,59 +353,21 @@
                 data-bind='click: showHiddenPostList'>{{!it.translate('Show hidden post list', 'showHiddenPostListText')}}</button>
       </div>
     </div>
-    <div data-index='5' style='display: none;'>
+    <div data-index='6' style='display: none;'>
       <div class='settings-widget-tab-row'>
-        <input type='checkbox'
-               data-bind='checked: settings.showAutoUpdateDesktopNotifications' />
-        {{!it.translate('Show desktop notifications', 'showAutoUpdateDesktopNotificationsLabelText')}}
+        {{!it.translate('Password:', 'postFormLabelPassword')}}
+        <input type='password' size='16'
+               data-bind='attr: { type: (passwordVisible() ? "text" : "password") },
+                          textInput: password' />
+        <button data-bind='text: (passwordVisible() ? "{{!it.translate('Hide', 'hidePasswordButtonText')}}"
+                             : "{{!it.translate('Show', 'showPasswordButtonText')}}"),
+                           click: togglePasswordVisibility'></button>
+        <button data-bind='click: generateNewPassword'>{{!it.translate('New', 'newPasswordButtonText')}}</button>
       </div>
       <div class='settings-widget-tab-row'>
-        <input type='checkbox'
-               data-bind='checked: settings.playAutoUpdateSound' />
-        {{!it.translate('Play sound', 'playAutoUpdateSoundLabelText')}}
-        <input type='number' class='length-3' min='0' max='100'
-               data-bind='textInput: settings.soundNotificationsVolume' />
-        %
-      </div>
-      <div class='settings-widget-tab-row'>
-        {{!it.translate('Banners mode:', 'bannersModeLabelText')}}
-        <select class='select'
-                data-bind='value: settings.bannerMode'>
-          <option value='random'>{{!it.translate('Show random board banner', 'bannersModeRandomText')}}</option>
-          <option value='same'>{{!it.translate('Show current board banner', 'bannersModeSameText')}}</option>
-          <option value='none'>{{!it.translate('Do not show banners', 'bannersModeNoneText')}}</option>
-        </select>
-      </div>
-      <div class='settings-widget-tab-row'>
-        <input type='checkbox'
-               data-bind='checked: settings.showNewPosts' />
-        {{!it.translate('New post count near board names', 'showNewPostsLabelText')}}
-      </div>
-      <div class='settings-widget-tab-row'>
-        <input type='checkbox'
-               data-bind='checked: settings.chatEnabled' />
-        {{!it.translate('Enable private chat', 'chatLabelText')}}
-      </div>
-      <div class='settings-widget-tab-row desktop-only'>
-        <input type='checkbox'
-               data-bind='checked: settings.hotkeysEnabled' />
-        {{!it.translate('Hotkeys enabled', 'hotkeysLabelText')}}
-        <button class='button'
-                data-bind='click: editHotkeys'>{{!it.translate('Edit', 'editHotkeysText')}}</button>
-      </div>
-      <div class='settings-widget-tab-row'>
-        <input type='checkbox'
-               data-bind='checked: settings.userCSSEnabled' />
-        {{!it.translate('User CSS enabled', 'userCssLabelText')}}
-        <button class='button'
-                data-bind='click: editUserCss'>{{!it.translate('Edit', 'editUserCssText')}}</button>
-      </div>
-      <div class='settings-widget-tab-row'>
-        <input type='checkbox'
-               data-bind='checked: settings.userJavaScriptEnabled' />
-        {{!it.translate('User JavaScript enabled', 'userJavaScriptLabelText')}}
-        <button class='button'
-                data-bind='click: editUserJavaScript'>{{!it.translate('Edit', 'editUserJavaScriptText')}}</button>
+        <button data-bind='click: exportSettings'>{{!it.translate('Export', 'exportSettingsButtonText')}}</button>
+        <button data-bind='click: importSettings'>{{!it.translate('Import', 'importSettingsButtonText')}}</button>
+        <button data-bind='click: synchronizeSettings'>{{!it.translate('Synchronize', 'synchronizationText')}}</button>
       </div>
     </div>
   </div>

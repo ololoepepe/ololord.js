@@ -28,7 +28,7 @@
     "build-custom-docs": "npm run build-custom-docs-server && npm run build-custom-docs-js",
     "build-custom-docs-server": "node_modules/.bin/jsdoc --configure docs/config/custom-server.json --verbose",
     "build-custom-docs-js": "node_modules/.bin/jsdoc --configure docs/config/custom-js.json --verbose",
-    "translate": "./node_modules/cute-localize/bin/clupdate.js -e js,jst,def -l ru -d \"TRANSLATE_ME\" -X \"$(pwd)/public\",\"$(pwd)/server\",\"$(pwd)/views\"",
+    "translate": "./node_modules/cute-localize/bin/clupdate.js -e js,jst,def -l ru -d \"TRANSLATE_ME\" -X \"$(pwd)/public\",\"$(pwd)/server\",\"$(pwd)/views\",\"$(pwd)/node_modules\"",
     "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "/usr/bin/env node server/server.js"
@@ -57,7 +57,7 @@
     "codemirror": "^5.15.2",
     "commander": "^2.9.0",
     "cookie-parser": "^1.4.0",
-    "cute-localize": "^0.1.19",
+    "cute-localize": "^0.1.20",
     "dddos": "^0.1.1",
     "dot": "^1.0.3",
     "du": "^0.1.0",
