@@ -27,97 +27,97 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 var vorpal = require('vorpal')();
 
-var prompt = vorpal.prompt;
+function setupMethods(command) {
+  var prompt = command.prompt;
 
-vorpal.prompt = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(options) {
-    var _this = this;
+  command.prompt = function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(options) {
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              return _context.abrupt('return', new Promise(function (resolve, reject) {
+                var simple = typeof options === 'string';
+                if (simple) {
+                  options = {
+                    message: options,
+                    name: 'input'
+                  };
+                }
+                prompt.call(command, options, function (result) {
+                  resolve(simple ? result.input : result);
+                });
+              }));
 
-    return regeneratorRuntime.wrap(function _callee$(_context) {
+            case 1:
+            case 'end':
+              return _context.stop();
+          }
+        }
+      }, _callee, this);
+    }));
+
+    return function (_x) {
+      return ref.apply(this, arguments);
+    };
+  }();
+
+  command.requestPassword = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+    var result, password;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
-        switch (_context.prev = _context.next) {
+        switch (_context2.prev = _context2.next) {
           case 0:
-            return _context.abrupt('return', new Promise(function (resolve, reject) {
-              var simple = typeof options === 'string';
-              if (simple) {
-                options = {
-                  message: options,
-                  name: 'input'
-                };
-              }
-              prompt.call(_this, options, function (result) {
-                resolve(simple ? result.input : result);
-              });
-            }));
+            _context2.next = 2;
+            return command.prompt({
+              type: 'password',
+              name: 'password',
+              message: Tools.translate('Enter password: ')
+            });
 
-          case 1:
+          case 2:
+            result = _context2.sent;
+            password = result.password;
+
+            if (password) {
+              _context2.next = 6;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid password'));
+
+          case 6:
+            if (Tools.mayBeHashpass(password)) {
+              _context2.next = 8;
+              break;
+            }
+
+            return _context2.abrupt('return');
+
+          case 8:
+            _context2.next = 10;
+            return command.prompt({
+              type: 'confirm',
+              name: 'hashpass',
+              default: true,
+              message: Tools.translate("That is a hashpass, isn't it? ")
+            });
+
+          case 10:
+            result = _context2.sent;
+            return _context2.abrupt('return', {
+              password: password,
+              notHashpass: !result || !result.hashpass
+            });
+
+          case 12:
           case 'end':
-            return _context.stop();
+            return _context2.stop();
         }
       }
-    }, _callee, this);
+    }, _callee2, this);
   }));
-
-  return function (_x) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-vorpal.requestPassword = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
-  var result, password;
-  return regeneratorRuntime.wrap(function _callee2$(_context2) {
-    while (1) {
-      switch (_context2.prev = _context2.next) {
-        case 0:
-          _context2.next = 2;
-          return this.prompt({
-            type: 'password',
-            name: 'password',
-            message: Tools.translate('Enter password: ')
-          });
-
-        case 2:
-          result = _context2.sent;
-          password = result.password;
-
-          if (password) {
-            _context2.next = 6;
-            break;
-          }
-
-          throw new Error(Tools.translate('Invalid password'));
-
-        case 6:
-          if (Tools.mayBeHashpass(password)) {
-            _context2.next = 8;
-            break;
-          }
-
-          return _context2.abrupt('return');
-
-        case 8:
-          _context2.next = 10;
-          return this.prompt({
-            type: 'confirm',
-            name: 'hashpass',
-            default: true,
-            message: Tools.translate("That is a hashpass, isn't it? ")
-          });
-
-        case 10:
-          result = _context2.sent;
-          return _context2.abrupt('return', {
-            password: password,
-            notHashpass: !result || !result.hashpass
-          });
-
-        case 12:
-        case 'end':
-          return _context2.stop();
-      }
-    }
-  }, _callee2, this);
-}));
+}
 
 vorpal.installHandler = function (command, handler) {
   var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
@@ -134,32 +134,34 @@ vorpal.installHandler = function (command, handler) {
           switch (_context3.prev = _context3.next) {
             case 0:
               _context3.prev = 0;
-              _context3.next = 3;
+
+              setupMethods(this);
+              _context3.next = 4;
               return handler.call(this, args);
 
-            case 3:
+            case 4:
               result = _context3.sent;
 
               if (result) {
                 console.log(result);
               }
               callback();
-              _context3.next = 12;
+              _context3.next = 13;
               break;
 
-            case 8:
-              _context3.prev = 8;
+            case 9:
+              _context3.prev = 9;
               _context3.t0 = _context3['catch'](0);
 
               console.log(_context3.t0.stack || _context3.t0);
               callback();
 
-            case 12:
+            case 13:
             case 'end':
               return _context3.stop();
           }
         }
-      }, _callee3, this, [[0, 8]]);
+      }, _callee3, this, [[0, 9]]);
     }));
 
     return function (_x3, _x4) {

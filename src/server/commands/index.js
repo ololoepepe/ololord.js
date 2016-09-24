@@ -5,51 +5,54 @@ import * as Tools from '../helpers/tools';
 
 let vorpal = require('vorpal')();
 
-let prompt = vorpal.prompt;
+function setupMethods(command) {
+  let prompt = command.prompt;
 
-vorpal.prompt = async function(options) {
-  return new Promise((resolve, reject) => {
-    let simple = (typeof options === 'string');
-    if (simple) {
-      options = {
-        message: options,
-        name: 'input'
-      };
-    }
-    prompt.call(this, options, (result) => {
-      resolve(simple ? result.input : result);
+  command.prompt = async function(options) {
+    return new Promise((resolve, reject) => {
+      let simple = (typeof options === 'string');
+      if (simple) {
+        options = {
+          message: options,
+          name: 'input'
+        };
+      }
+      prompt.call(command, options, (result) => {
+        resolve(simple ? result.input : result);
+      });
     });
-  });
-};
-
-vorpal.requestPassword = async function() {
-  let result = await this.prompt({
-    type: 'password',
-    name: 'password',
-    message: Tools.translate('Enter password: ')
-  });
-  let password = result.password;
-  if (!password) {
-    throw new Error(Tools.translate('Invalid password'));
-  }
-  if (!Tools.mayBeHashpass(password)) {
-    return;
-  }
-  result = await this.prompt({
-    type: 'confirm',
-    name: 'hashpass',
-    default: true,
-    message: Tools.translate("That is a hashpass, isn't it? ")
-  });
-  return {
-    password: password,
-    notHashpass: !result || !result.hashpass
   };
-};
+
+  command.requestPassword = async function() {
+    let result = await command.prompt({
+      type: 'password',
+      name: 'password',
+      message: Tools.translate('Enter password: ')
+    });
+    let password = result.password;
+    if (!password) {
+      throw new Error(Tools.translate('Invalid password'));
+    }
+    if (!Tools.mayBeHashpass(password)) {
+      return;
+    }
+    result = await command.prompt({
+      type: 'confirm',
+      name: 'hashpass',
+      default: true,
+      message: Tools.translate("That is a hashpass, isn't it? ")
+    });
+    return {
+      password: password,
+      notHashpass: !result || !result.hashpass
+    };
+  };
+}
 
 vorpal.installHandler = function(command, handler, { description, alias, options } = {}) {
   command = vorpal.command(command, description || undefined).action(async function(args, callback) {
     try {
+      setupMethods(this);
       let result = await handler.call(this, args);
       if (result) {
         console.log(result);
