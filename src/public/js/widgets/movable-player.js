@@ -183,7 +183,7 @@ export default class MovablePlayer extends EventEmitter {
           this.content.volume = volume;
         }
       });
-      if (play) {
+      if (play && (Tools.isAudioType(this.fileInfo.mimeType) || Tools.isVideoType(this.fileInfo.mimeType))) {
         if (+play > 0) {
           setTimeout(() => {
             this.content.play();

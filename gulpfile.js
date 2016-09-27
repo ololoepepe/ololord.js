@@ -106,7 +106,8 @@ function buildJS(custom, debug) {
       });
     }
     stream = stream.transform('babelify', {
-      presets: ['es2015', 'stage-2']
+      presets: ['es2015', 'stage-2'],
+      sourceMaps: true
     })
     .bundle();
   } else {
@@ -115,7 +116,7 @@ function buildJS(custom, debug) {
   }
   stream = stream.pipe(source('index.js'))
   .pipe(buffer())
-  .pipe(sourcemaps.init());
+  .pipe(sourcemaps.init({ loadMaps: true }));
   if (custom) {
     stream = stream.pipe(rename('custom.js'));
   }
