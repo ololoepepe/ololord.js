@@ -510,7 +510,7 @@ async function viewPost(a, boardName, postNumber, hiddenPost) {
     }
     window.document.body.appendChild(post);
     if (Tools.deviceType('desktop')) {
-      let doPosition = () => {
+      var doPosition = () => {
         $(post).position({
           my: 'left top',
           at: 'center bottom+2',
@@ -518,25 +518,27 @@ async function viewPost(a, boardName, postNumber, hiddenPost) {
           collision: 'flipfit flip'
         });
       };
-      //NOTE: Yep, positioning is don in three steps.
-      //This may look like a hack, but it is more like how browsers render.
       doPosition();
-      setTimeout(() => {
-        doPosition();
-        setTimeout(doPosition);
-      });
     } else {
-      //NOTE: Yep, positioning is done in two steps.
-      //This may look like a hack, but it is more like how browsers render.
-      $(post).addClass('cursor-pointer').position({});
-      setTimeout(() => {
+      $(post).addClass('cursor-pointer');
+      var doPosition = () => {
         $(post).position({});
-      });
+      };
       if (!postPreviewMask) {
         postPreviewMask = $('<div class="temporary-post-overlay-mask cursor-pointer"></div>');
         $(window.document.body).append(postPreviewMask);
       }
+      $(post).position({
+        my: 'left top',
+        at: 'left top'
+      });
     }
+    //NOTE: Yep, positioning is done in three steps.
+    //This may look like a hack, but it is more like how browsers render.
+    setTimeout(() => {
+      doPosition();
+      setTimeout(doPosition);
+    });
   } catch (err) {
     DOM.handleError(err);
   }
