@@ -346,6 +346,8 @@ export async function showSearch() {
       width: SEARCH_MIN_WIDTH,
       height: SEARCH_MIN_HEIGHT
     };
+  } else {
+    options.maximized = true;
   }
   return await showWidget(null, options).promise;
 }

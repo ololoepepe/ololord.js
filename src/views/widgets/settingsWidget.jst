@@ -1,31 +1,35 @@
 <div id='settings' class='settings-widget'>
-  <ul class='tab-widget-header js-tab-widget-header'>
-    <li data-index='0'
-        class='tab-widget-header-activated'>
-      <span data-bind='click: activateTab.bind($data, 0)'>{{!it.translate('General', 'generalTabText')}}</span>
-    </li>
-    <li data-index='1'>
-      <span data-bind='click: activateTab.bind($data, 1)'>{{!it.translate('Posts and threads', 'postsTabText')}}</span>
-    </li>
-    <li data-index='2'>
-      <span data-bind='click: activateTab.bind($data, 2)'>{{!it.translate('Files', 'filesTabText')}}</span>
-    </li>
-    <li data-index='3'>
-      <span data-bind='click: activateTab.bind($data, 3)'>{{!it.translate('Other', 'otherTabText')}}</span>
-    </li>
-  </ul>
-  <ul class='tab-widget-header js-tab-widget-header'>
-    <li data-index='4'>
-      <span data-bind='click: activateTab.bind($data, 4)'>{{!it.translate('Postform and posting',
-        'postformTabText')}}</span>
-    </li>
-    <li data-index='5'>
-      <span data-bind='click: activateTab.bind($data, 5)'>{{!it.translate('Hiding', 'hidingTabText')}}</span>
-    </li>
-    <li data-index='6'>
-      <span data-bind='click: activateTab.bind($data, 6)'>{{!it.translate('Security', 'securityTabText')}}</span>
-    </li>
-  </ul>
+  <div class='tab-widget-header js-tab-widget-header'>
+    <div class='tab-widget-header-activated'
+         data-index='0'
+         data-bind='click: activateTab.bind($data, 0)'>
+      {{!it.translate('General', 'generalTabText')}}
+    </div>
+    <div data-index='4'
+         data-bind='click: activateTab.bind($data, 4)'>
+      {{!it.translate('Postform and posting', 'postformTabText')}}
+    </div>
+    <div data-index='1'
+         data-bind='click: activateTab.bind($data, 1)'>
+      {{!it.translate('Posts and threads', 'postsTabText')}}
+    </div>
+    <div data-index='2'
+         data-bind='click: activateTab.bind($data, 2)'>
+      {{!it.translate('Files', 'filesTabText')}}
+    </div>
+    <div data-index='5'
+         data-bind='click: activateTab.bind($data, 5)'>
+      {{!it.translate('Hiding', 'hidingTabText')}}
+    </div>
+    <div data-index='6'
+         data-bind='click: activateTab.bind($data, 6)'>
+      {{!it.translate('Security', 'securityTabText')}}
+    </div>
+    <div data-index='3'
+         data-bind='click: activateTab.bind($data, 3)'>
+      {{!it.translate('Other', 'otherTabText')}}
+    </div>
+  </div>
   <div class='js-tab-widget-body'>
     <div data-index='0'>
       <div class='settings-widget-tab-row'>

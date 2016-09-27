@@ -13,19 +13,23 @@
           {{!it.title}}
         </h1>
         <div id='management' class='js-only'>
-          <ul class='tab-widget-header js-tab-widget-header'>
-            <li data-index='0' class='tab-widget-header-activated'>
-              <span data-bind='click: activateTab.bind($data, 0, null)'>{{!it.translate('Bans', 'bansTabText')}}</span>
-            </li>
-            <li data-index='1' class='user-level-superuser-only'>
-              <span data-bind='click: activateTab.bind($data, 1, "users")'>{{!it.translate('Users',
-                'usersTabText')}}</span>
-            </li>
-            <li data-index='2' class='user-level-superuser-only'>
-              <span data-bind='click: activateTab.bind($data, 2, "content")'>{{!it.translate('Content',
-                'contentTabText')}}</span>
-            </li>
-          </ul>
+          <div class='tab-widget-header js-tab-widget-header'>
+            <div class='tab-widget-header-activated'
+                 data-index='0'
+                 data-bind='click: activateTab.bind($data, 0, null)'>
+              {{!it.translate('Bans', 'bansTabText')}}
+            </div>
+            <div class='user-level-superuser-only'
+                 data-index='1'
+                 data-bind='click: activateTab.bind($data, 1, "users")'>
+              {{!it.translate('Users', 'usersTabText')}}
+            </div>
+            <div class='user-level-superuser-only'
+                 data-index='2'
+                 data-bind='click: activateTab.bind($data, 2, "content")'>
+              {{!it.translate('Content', 'contentTabText')}}
+            </div>
+          </div>
           <div class='js-tab-widget-body'>
             <div id='bans' data-index='0' class='loading-message'>
               <span class='icon icon-spinner-24'></span>
