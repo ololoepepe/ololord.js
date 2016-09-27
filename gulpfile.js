@@ -96,7 +96,7 @@ function buildJS(custom, debug) {
   if (!custom || fs.existsSync(`${__dirname}/src/public/js/custom/index.js`)) {
     var stream = browserify({
       entries: (custom ? './src/public/js/custom/index.js' : './src/public/js/index.js'),
-      debug: debug
+      debug: true
     });
     if (custom) {
       stream = stream.external(VENDORS);
