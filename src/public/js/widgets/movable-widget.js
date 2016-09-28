@@ -135,6 +135,12 @@ function makeDraggable() {
         left: Math.min(this.position.left, w.width() - this.div.width() - WIDGET_MARGIN),
         top: Math.min(this.position.top, w.height() - this.div.height() - WIDGET_MARGIN)
       };
+      if (this.position.left < WIDGET_MARGIN) {
+        this.position.left = WIDGET_MARGIN;
+      }
+      if (this.position.top < WIDGET_MARGIN) {
+        this.position.top = WIDGET_MARGIN;
+      }
       ui.position.left = this.position.left;
       ui.position.top = this.position.top;
       this.div.css({
