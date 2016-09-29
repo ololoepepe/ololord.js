@@ -519,7 +519,8 @@ export function initializeBanner() {
 
 export function initializeLeafButton(target) {
   KO.applyBindings({
-    switchFile: () => {
+    switchFile: (_, e) => {
+      e.stopPropagation();
       let file = Files.nextOrPreviousFile('next' === target);
       if (!file) {
         return;
