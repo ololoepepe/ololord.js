@@ -468,7 +468,7 @@ async function viewPost(a, boardName, postNumber, hiddenPost) {
       }, { indicator: new OverlayProgressBar() });
       post = await createPostNode(post, false);
     }
-    $(post).removeClass('op-post').addClass('reply-post temporary-post').find('.js-hiding-reason, '
+    $(post).attr('id', '').removeClass('op-post').addClass('reply-post temporary-post').find('.js-hiding-reason, '
      + '.js-post-actions-button-container, .js-quick-reply-container, .js-reply-to-thread-button-container').remove();
     if (Tools.deviceType('desktop')) {
       post.addEventListener('mouseout', (e) => {

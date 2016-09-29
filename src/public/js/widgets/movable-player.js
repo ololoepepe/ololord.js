@@ -402,7 +402,7 @@ export default class MovablePlayer extends EventEmitter {
         this.content.volume = remember ? Storage.getLocalObject('audioVideoVolume', defVol) : defVol;
       }
     }
-    if (play) {
+    if (play && (Tools.isAudioType(this.fileInfo.mimeType) || Tools.isVideoType(this.fileInfo.mimeType))) {
       if (+play > 0) {
         setTimeout(() => {
           this.content.play();

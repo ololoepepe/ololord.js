@@ -558,3 +558,9 @@ export function createLoadingMessage(txt) {
   let spinnerHTML = '<span class="icon icon-spinner-24"></span>';
   return $(`<div class='loading-message'>${spinnerHTML}<h1 class='loading-message-text'>${txt}</h1></div>`);
 }
+
+export function proportionalSize(size) {
+  let style = window.getComputedStyle(window.document.body, null).getPropertyValue('font-size');
+  let fontSize = parseFloat(style);
+  return (size / 14.4) * fontSize;
+}

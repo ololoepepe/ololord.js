@@ -192,12 +192,12 @@ export default class MovableWidget extends EventEmitter {
     }
     this.position = position;
     this.size = {
-      width: ((size && +size.width > 0) ? size.width : 0),
-      height: ((size && +size.height > 0) ? size.height : 0)
+      width: DOM.proportionalSize((size && +size.width > 0) ? size.width : 0),
+      height: DOM.proportionalSize((size && +size.height > 0) ? size.height : 0)
     };
     this.minSize = {
-      width: ((minSize && +minSize.width > 0) ? minSize.width : 0),
-      height: ((minSize && +minSize.height > 0) ? minSize.height : 0)
+      width: DOM.proportionalSize((minSize && +minSize.width > 0) ? minSize.width : 0),
+      height: DOM.proportionalSize((minSize && +minSize.height > 0) ? minSize.height : 0)
     };
     let w = $(window);
     let maxSize = {
