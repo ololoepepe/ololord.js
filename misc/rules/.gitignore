@@ -1,4 +1,3 @@
 *
-!rules.b.txt.example
-!rules.txt.example
+!*.txt.example
 !.gitignore

@@ -1,5 +1,6 @@
 *
 !rules
+!thumbs
 !geo-bans.json.example
 !ip-bans.json.example
 !lang-names.json
