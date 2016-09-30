@@ -32,6 +32,7 @@ let loadedTabContent = {};
 let bannedUsers = KO.observableArray([]);
 let registeredUsers = KO.observableArray([]);
 let jstreeRoot = null;
+let initialized = {};
 
 export async function showUserInfo(boardName, postNumber) {
   postNumber = Tools.option(postNumber, 'number', 0, { test: (pn) => { return pn > 0; } });
@@ -430,11 +431,15 @@ async function initializeRegiteredUsers() {
     });
     $('#users').empty().removeClass('loading-message').append(content);
     registeredUsers.subscribe(() => {
+      if (!initialized.registeredUsers) {
+        return;
+      }
       $(content).accordion('refresh');
     });
   } catch (err) {
     DOM.handleError(err);
   }
+  initialized.registeredUsers = true;
 }
 
 function initializeFileContent() {
@@ -730,6 +735,8 @@ export function createBannedUsersSection(users, { showHideButton, banUserCallbac
 }
 
 export async function initializeManagement() {
+  loadedTabContent = {};
+  initialized = {};
   KO.applyBindings({
     activateTab: (index, tab) => {
       DOM.activateTab('#management', index);
@@ -770,9 +777,15 @@ export async function initializeManagement() {
       }
     });
     $('#bans').empty().removeClass('loading-message').append(content);
-    bannedUsers.subscribe(() => {
-      $(content).accordion('refresh');
-    });
+    if (!initialized.bans) {
+      bannedUsers.subscribe(() => {
+        if (!initialized.bans) {
+          return;
+        }
+        $(content).accordion('refresh');
+      });
+      initialized.bans = true;
+    }
   } catch (err) {
     DOM.handleError(err);
   }
