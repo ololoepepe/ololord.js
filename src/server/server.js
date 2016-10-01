@@ -67,6 +67,7 @@ function initializeMaster() {
       await NodeCaptchaNoscript.removeOldCaptchImages();
       await Renderer.compileTemplates();
       await Renderer.reloadTemplates();
+      await Renderer.generateTemplatingJavaScriptFile();
       if (Program.rerender || config('system.rerenderCacheOnStartup')) {
         if (Program.archive || config('system.rerenderArchive')) {
           await Renderer.rerender();
@@ -75,7 +76,6 @@ function initializeMaster() {
         }
       }
       await StatisticsModel.generateStatistics();
-      await Renderer.generateTemplatingJavaScriptFile();
       await Renderer.generateCustomJavaScriptFile();
       await Renderer.generateCustomCSSFiles();
       console.log(Tools.translate('Spawning workers, please, wait…'));
@@ -110,6 +110,7 @@ function initializeMaster() {
       IPC.on('reloadTemplates', async function() {
         await Renderer.compileTemplates();
         await Renderer.reloadTemplates();
+        await Renderer.generateTemplatingJavaScriptFile();
         return IPC.send('reloadTemplates');
       });
       let hasNewPosts = {};

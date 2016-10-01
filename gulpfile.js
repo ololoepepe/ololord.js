@@ -128,12 +128,16 @@ function buildJS(custom, debug) {
 }
 
 gulp.task('build-all', ['build', 'build-custom']);
-gulp.task('build', ['build-server', 'build-css', 'build-js']);
-gulp.task('build-custom', ['build-custom-server', 'build-custom-css', 'build-custom-js']);
+gulp.task('build', ['build-server', 'build-public']);
+gulp.task('build-public', ['build-js', 'build-css']);
+gulp.task('build-custom', ['build-custom-server', 'build-custom-public']);
+gulp.task('build-custom-public', ['build-custom-js', 'build-custom-css']);
 
 gulp.task('build-all-debug', ['build-debug', 'build-custom-debug']);
-gulp.task('build-debug', ['build-server-debug', 'build-css-debug', 'build-js-debug']);
-gulp.task('build-custom-debug', ['build-custom-server-debug', 'build-custom-css-debug', 'build-custom-js-debug']);
+gulp.task('build-debug', ['build-server-debug', 'build-public-debug']);
+gulp.task('build-public-debug', ['build-js-debug', 'build-css-debug']);
+gulp.task('build-custom-debug', ['build-custom-server-debug', 'build-custom-public-debug']);
+gulp.task('build-custom-public-debug', ['build-custom-js-debug', 'build-custom-css-debug']);
 
 gulp.task('build-server', buildServer.bind(null, false, false));
 gulp.task('internal-build-sprites', buildSprites.bind(null, false));

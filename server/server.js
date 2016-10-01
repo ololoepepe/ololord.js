@@ -181,34 +181,34 @@ function initializeMaster() {
                       return Renderer.reloadTemplates();
 
                     case 8:
+                      _context3.next = 10;
+                      return Renderer.generateTemplatingJavaScriptFile();
+
+                    case 10:
                       if (!(_program2.default.rerender || (0, _config2.default)('system.rerenderCacheOnStartup'))) {
-                        _context3.next = 16;
+                        _context3.next = 18;
                         break;
                       }
 
                       if (!(_program2.default.archive || (0, _config2.default)('system.rerenderArchive'))) {
-                        _context3.next = 14;
+                        _context3.next = 16;
                         break;
                       }
 
-                      _context3.next = 12;
+                      _context3.next = 14;
                       return Renderer.rerender();
 
-                    case 12:
-                      _context3.next = 16;
-                      break;
-
                     case 14:
-                      _context3.next = 16;
-                      return Renderer.rerender(['**', '!/*/arch/*']);
+                      _context3.next = 18;
+                      break;
 
                     case 16:
                       _context3.next = 18;
-                      return StatisticsModel.generateStatistics();
+                      return Renderer.rerender(['**', '!/*/arch/*']);
 
                     case 18:
                       _context3.next = 20;
-                      return Renderer.generateTemplatingJavaScriptFile();
+                      return StatisticsModel.generateStatistics();
 
                     case 20:
                       _context3.next = 22;
@@ -261,9 +261,13 @@ function initializeMaster() {
                                 return Renderer.reloadTemplates();
 
                               case 4:
+                                _context2.next = 6;
+                                return Renderer.generateTemplatingJavaScriptFile();
+
+                              case 6:
                                 return _context2.abrupt('return', IPC.send('reloadTemplates'));
 
-                              case 5:
+                              case 7:
                               case 'end':
                                 return _context2.stop();
                             }
