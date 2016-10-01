@@ -221,7 +221,7 @@ function initializeMaster() {
                     case 24:
                       console.log(Tools.translate('Spawning workers, please, wait…'));
                       _cluster2.default.on('exit', function (worker) {
-                        console.log(Tools.translate('[$[1]] Died, respawning…', '', worker.process.pid));
+                        _logger2.default.log(Tools.translate('[$[1]] Died, respawning…', '', worker.process.pid));
                         _cluster2.default.fork();
                       });
                       for (i = 0; i < (0, _config2.default)('system.workerCount'); ++i) {

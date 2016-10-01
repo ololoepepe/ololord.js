@@ -80,7 +80,7 @@ function initializeMaster() {
       await Renderer.generateCustomCSSFiles();
       console.log(Tools.translate('Spawning workers, please, wait…'));
       Cluster.on('exit', (worker) => {
-        console.log(Tools.translate('[$[1]] Died, respawning…', '', worker.process.pid));
+        Logger.log(Tools.translate('[$[1]] Died, respawning…', '', worker.process.pid));
         Cluster.fork();
       });
       for (let i = 0; i < config('system.workerCount'); ++i) {
