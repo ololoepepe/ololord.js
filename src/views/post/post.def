@@ -1,3 +1,6 @@
+{{? it.prerendered && it.prerendered[post.number]}}
+{{=it.prerendered[post.number]}}
+{{??}}
 <div id='post-{{!post.number}}' class='post {{? post.isOp}}op-post{{??}}reply-post{{?}} js-post'
      data-board-name='{{!post.boardName}}'
      data-number='{{!post.number}}'
@@ -127,4 +130,5 @@
       {{#def['custom/postBodyPart/50'] || ''}}
     </div>
   </div>
-</div>
+</div><!--__ololord_end_post#{{!post.number}}-->
+{{?}}

@@ -10,6 +10,7 @@ var renderThreadHTML = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(thread) {
     var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
+    var prerendered = _ref.prerendered;
     var targetPath = _ref.targetPath;
     var board, model, data;
     return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -31,7 +32,8 @@ var renderThreadHTML = function () {
               title: thread.title || board.title + ' — ' + thread.number,
               isThreadPage: true,
               board: MiscModel.board(board).board,
-              threadNumber: thread.number
+              threadNumber: thread.number,
+              prerendered: prerendered
             };
             data = Renderer.render('pages/thread', model);
 
@@ -325,6 +327,19 @@ function pickPostsToRerender(oldPosts, posts) {
   });
 }
 
+function getPrerenderedPost(html, postNumber) {
+  var startIndex = html.indexOf('<div id=\'post-' + postNumber + '\'');
+  if (startIndex < 0) {
+    return;
+  }
+  var endPattern = '<!--__ololord_end_post#' + postNumber + '-->';
+  var endIndex = html.lastIndexOf(endPattern);
+  if (endIndex < 0) {
+    return;
+  }
+  return html.substring(startIndex, endIndex + endPattern.length);
+}
+
 router.paths = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(description) {
     var arrays;
@@ -477,14 +492,14 @@ router.renderThread = function () {
 
           case 15:
             return _context10.delegateYield(regeneratorRuntime.mark(function _callee9() {
-              var threadID, threadData, model, thread, lastPosts, posts, postsToRerender;
+              var threadID, threadData, model, thread, lastPosts, posts, postsToRerender, threadHTML, prerendered;
               return regeneratorRuntime.wrap(function _callee9$(_context9) {
                 while (1) {
                   switch (_context9.prev = _context9.next) {
                     case 0:
-                      threadID = data.boardName + '/res/' + data.threadNumber + '.json';
+                      threadID = data.boardName + '/res/' + data.threadNumber;
                       _context9.next = 3;
-                      return Cache.readFile(threadID);
+                      return Cache.readFile(threadID + '.json');
 
                     case 3:
                       threadData = _context9.sent;
@@ -513,6 +528,18 @@ router.renderThread = function () {
                       });
                       postsToRerender = pickPostsToRerender(lastPosts, posts);
                       _context9.next = 15;
+                      return Cache.readFile(threadID + '.html');
+
+                    case 15:
+                      threadHTML = _context9.sent;
+                      prerendered = (0, _underscore2.default)(lastPosts).pick(function (_1, postNumber) {
+                        return !postsToRerender.hasOwnProperty(postNumber);
+                      });
+
+                      prerendered = (0, _underscore2.default)(prerendered).mapObject(function (_1, postNumber) {
+                        return getPrerenderedPost(threadHTML, postNumber);
+                      });
+                      _context9.next = 20;
                       return Tools.series(postsToRerender, function () {
                         var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(post, postNumber) {
                           var renderedPost;
@@ -545,19 +572,19 @@ router.renderThread = function () {
                         };
                       }());
 
-                    case 15:
-                      thread.lastPosts = (0, _underscore2.default)(lastPosts).toArray();
-                      _context9.next = 18;
-                      return Cache.writeFile(threadID, JSON.stringify(model));
-
-                    case 18:
-                      _context9.next = 20;
-                      return renderThreadHTML(thread);
-
                     case 20:
+                      thread.lastPosts = (0, _underscore2.default)(lastPosts).toArray();
+                      _context9.next = 23;
+                      return Cache.writeFile(threadID + '.json', JSON.stringify(model));
+
+                    case 23:
+                      _context9.next = 25;
+                      return renderThreadHTML(thread, { prerendered: prerendered });
+
+                    case 25:
                       return _context9.abrupt('return', 'break');
 
-                    case 21:
+                    case 26:
                     case 'end':
                       return _context9.stop();
                   }

@@ -50,7 +50,7 @@ function pickPostsToRerender(oldPosts, posts) {
   });
 }
 
-async function renderThreadHTML(thread, { targetPath } = {}) {
+async function renderThreadHTML(thread, { prerendered, targetPath } = {}) {
   let board = Board.board(thread.boardName);
   if (!board) {
     return Promise.reject(new Error(Tools.translate('Invalid board')));
@@ -61,6 +61,7 @@ async function renderThreadHTML(thread, { targetPath } = {}) {
     isThreadPage: true,
     board: MiscModel.board(board).board,
     threadNumber: thread.number,
+    prerendered: prerendered
   };
   let data = Renderer.render('pages/thread', model);
   if (targetPath) {
@@ -103,6 +104,19 @@ async function renderPage(boardName, pageNumber) {
   page.board = MiscModel.board(board).board;
   let pageID = (pageNumber > 0) ? pageNumber : 'index';
   await Cache.writeFile(`${boardName}/${pageID}.html`, Renderer.render('pages/board', page));
+}
+
+function getPrerenderedPost(html, postNumber) {
+  let startIndex = html.indexOf(`<div id='post-${postNumber}'`);
+  if (startIndex < 0) {
+    return;
+  }
+  let endPattern = `<!--__ololord_end_post#${postNumber}-->`;
+  let endIndex = html.lastIndexOf(endPattern);
+  if (endIndex < 0) {
+    return;
+  }
+  return html.substring(startIndex, endIndex + endPattern.length);
 }
 
 router.paths = async function(description) {
@@ -165,8 +179,8 @@ router.renderThread = async function(key, data) {
     break;
   }
   case 'edit': {
-    let threadID = `${data.boardName}/res/${data.threadNumber}.json`;
-    let threadData = await Cache.readFile(threadID);
+    let threadID = `${data.boardName}/res/${data.threadNumber}`;
+    let threadData = await Cache.readFile(`${threadID}.json`);
     let model = JSON.parse(threadData);
     let thread = model.thread;
     let lastPosts = thread.lastPosts.reduce((acc, post) => {
@@ -184,14 +198,19 @@ router.renderThread = async function(key, data) {
     }, {});
     lastPosts = _(lastPosts).pick((_1, postNumber) => posts.hasOwnProperty(postNumber));
     let postsToRerender = pickPostsToRerender(lastPosts, posts);
+    let threadHTML = await Cache.readFile(`${threadID}.html`);
+    let prerendered = _(lastPosts).pick((_1, postNumber) => !postsToRerender.hasOwnProperty(postNumber));
+    prerendered = _(prerendered).mapObject((_1, postNumber) => {
+      return getPrerenderedPost(threadHTML, postNumber);
+    });
     await Tools.series(postsToRerender, async function(post, postNumber) {
       await Files.renderPostFileInfos(post);
       let renderedPost = await board.renderPost(post);
       lastPosts[postNumber] = renderedPost;
     });
     thread.lastPosts = _(lastPosts).toArray();
-    await Cache.writeFile(threadID, JSON.stringify(model));
-    await renderThreadHTML(thread);
+    await Cache.writeFile(`${threadID}.json`, JSON.stringify(model));
+    await renderThreadHTML(thread, { prerendered: prerendered });
     break;
   }
   case 'delete': {
