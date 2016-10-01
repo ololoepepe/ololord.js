@@ -14,7 +14,7 @@
     display: block;
     position: absolute;
     font-size: 12px; //NOTE: Yep, the font size is bound to icon size.
-    animation: blinker 2s infinite;
+    //animation: blinker 2s infinite; //NOTE: Moved to improve performance
     filter: invert(0);
     -webkit-filter: invert(0);
   }
@@ -22,54 +22,63 @@
   &.notification-button-plus-1 {
     &::after {
       content: '+1';
+      animation: blinker 2s infinite;
     }
   }
 
   &.notification-button-plus-2 {
     &::after {
       content: '+2';
+      animation: blinker 2s infinite;
     }
   }
 
   &.notification-button-plus-3 {
     &::after {
       content: '+3';
+      animation: blinker 2s infinite;
     }
   }
 
   &.notification-button-plus-4 {
     &::after {
       content: '+4';
+      animation: blinker 2s infinite;
     }
   }
 
   &.notification-button-plus-5 {
     &::after {
       content: '+5';
+      animation: blinker 2s infinite;
     }
   }
 
   &.notification-button-plus-6 {
     &::after {
       content: '+6';
+      animation: blinker 2s infinite;
     }
   }
 
   &.notification-button-plus-7 {
     &::after {
       content: '+7';
+      animation: blinker 2s infinite;
     }
   }
 
   &.notification-button-plus-8 {
     &::after {
       content: '+8';
+      animation: blinker 2s infinite;
     }
   }
 
   &.notification-button-plus-9 {
     &::after {
       content: '+9';
+      animation: blinker 2s infinite;
     }
   }
 }
