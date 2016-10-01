@@ -30,16 +30,6 @@ let handlers = {};
 
 export let registerHandler = Tools.createRegisterFunction(handlers, 'handler');
 
-export function hashChangeHandler() {
-  var target = $(':target');
-  if (!target || !target[0]) {
-    return;
-  }
-  var offset = target.offset();
-  var scrollto = offset.top - $('.toolbar.sticky').height() - 4;
-  $('html, body').animate({ scrollTop: scrollto }, 0);
-}
-
 const TOOLTIP_COUNT_BOARD_SELECT = 5;
 
 function initializeInfiniteScroll() {
@@ -94,7 +84,6 @@ function initializeInfiniteScroll() {
 }
 
 registerHandler('load', () => {
-  hashChangeHandler(DOM.hash());
   WebSocket.initializeOnload();
   PageProcessors.applyProcessors().catch(Widgets.handleError);
   Threads.checkFavoriteThreads();
