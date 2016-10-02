@@ -102,8 +102,7 @@ export async function getThreadPosts(boardName, threadNumber,
   if (!threadNumber) {
     return Promise.reject(new Error(Tools.translate('Invalid thread number')));
   }
-  let threadPostNumbers = await getThreadPostNumbers(boardName, threadNumber);
-  let postNumbers = Tools.cloned(threadPostNumbers);
+  let postNumbers = await getThreadPostNumbers(boardName, threadNumber);
   if (notOP) {
     postNumbers.splice(0, 1);
   }

@@ -59,7 +59,7 @@ var getThread = exports.getThread = function () {
 
 var getPage = exports.getPage = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, pageNumber) {
-    var board, pageCount, threadNumbers, threads, start, lastPostNumber;
+    var board, pageCount, threads, lastPostNumber;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -88,21 +88,13 @@ var getPage = exports.getPage = function () {
 
           case 7:
             _context3.next = 9;
-            return ThreadsModel.getThreadNumbers(boardName);
+            return (0, _redisClientFactory2.default)().getThreads(boardName, board.threadsPerPage, pageNumber).map(function (thread) {
+              return JSON.parse(thread);
+            });
 
           case 9:
-            threadNumbers = _context3.sent;
-            _context3.next = 12;
-            return ThreadsModel.getThreads(boardName, threadNumbers, { withPostNumbers: true });
-
-          case 12:
             threads = _context3.sent;
-
-            threads.sort(ThreadsModel.sortThreadsByDate);
-            start = pageNumber * board.threadsPerPage;
-
-            threads = threads.slice(start, start + board.threadsPerPage);
-            _context3.next = 18;
+            _context3.next = 12;
             return Tools.series(threads, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(thread) {
                 var lastPosts;
@@ -155,11 +147,11 @@ var getPage = exports.getPage = function () {
               };
             }());
 
-          case 18:
-            _context3.next = 20;
+          case 12:
+            _context3.next = 14;
             return getLastPostNumber(boardName);
 
-          case 20:
+          case 14:
             lastPostNumber = _context3.sent;
             return _context3.abrupt('return', {
               threads: threads,
@@ -169,7 +161,7 @@ var getPage = exports.getPage = function () {
               postingSpeed: Renderer.postingSpeedString(board.launchDate, lastPostNumber)
             });
 
-          case 22:
+          case 16:
           case 'end':
             return _context3.stop();
         }

@@ -184,7 +184,7 @@ var getThreadPosts = exports.getThreadPosts = function () {
     var withExtraData = _ref5.withExtraData;
     var withFileInfos = _ref5.withFileInfos;
     var withReferences = _ref5.withReferences;
-    var board, threadPostNumbers, postNumbers;
+    var board, postNumbers;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
@@ -213,8 +213,7 @@ var getThreadPosts = exports.getThreadPosts = function () {
             return getThreadPostNumbers(boardName, threadNumber);
 
           case 8:
-            threadPostNumbers = _context6.sent;
-            postNumbers = Tools.cloned(threadPostNumbers);
+            postNumbers = _context6.sent;
 
             if (notOP) {
               postNumbers.splice(0, 1);
@@ -228,13 +227,13 @@ var getThreadPosts = exports.getThreadPosts = function () {
             if (limit) {
               postNumbers.splice(limit);
             }
-            _context6.next = 16;
+            _context6.next = 15;
             return PostsModel.getPosts(boardName, postNumbers, { withExtraData: withExtraData, withFileInfos: withFileInfos, withReferences: withReferences });
 
-          case 16:
+          case 15:
             return _context6.abrupt('return', _context6.sent);
 
-          case 17:
+          case 16:
           case 'end':
             return _context6.stop();
         }

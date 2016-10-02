@@ -1,10 +1,32 @@
 import _ from 'underscore';
+import FSSync from 'fs';
 import Redis from 'ioredis';
 
 import config from '../helpers/config';
 
 let defaultClient = null;
 let clients = new Map();
+let scripts = new Map();
+
+function loadScripts(path) {
+  FSSync.readdirSync(path).forEach((entry) => {
+    let entryPath = `${path}/${entry}`
+    let stat = FSSync.statSync(entryPath);
+    if (stat.isFile()) {
+      let match = entry.match(/^(.+?)\.((\d+)\.)?lua$/);
+      if (match) {
+        scripts.set(match[1], {
+          numberOfKeys: match[3] || 0,
+          lua: FSSync.readFileSync(entryPath, 'utf8')
+        });
+      }
+    } else if (stat.isDirectory()) {
+      loadScripts(entryPath);
+    }
+  });
+}
+
+loadScripts(`${__dirname}/../../misc/lua`);
 
 function createOptions() {
   return {
@@ -18,8 +40,9 @@ function createOptions() {
 
 function createClient() {
   let redisNodes = config('system.redis.nodes');
+  let client;
   if (_.isArray(redisNodes) && redisNodes.length > 0) {
-    return new Redis.Cluster(redisNodes, {
+    client = new Redis.Cluster(redisNodes, {
       clusterRetryStrategy: config('system.redis.clusterRetryStrategy', (times) => {
           return Math.min(100 + times * 2, 2000);
       }),
@@ -32,8 +55,12 @@ function createClient() {
       redisOptions: createOptions()
     });
   } else {
-    return new Redis(createOptions());
+    client = new Redis(createOptions());
   }
+  scripts.forEach((script, name) => {
+    client.defineCommand(name, script);
+  });
+  return client;
 }
 
 export default function(id) {

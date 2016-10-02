@@ -73,11 +73,9 @@ export async function getPage(boardName, pageNumber) {
   if (pageNumber < 0 || pageNumber >= pageCount) {
     return Promise.reject(new Error(Tools.translate('Invalid page number')));
   }
-  let threadNumbers = await ThreadsModel.getThreadNumbers(boardName);
-  let threads = await ThreadsModel.getThreads(boardName, threadNumbers, { withPostNumbers: true });
-  threads.sort(ThreadsModel.sortThreadsByDate);
-  let start = pageNumber * board.threadsPerPage;
-  threads = threads.slice(start, start + board.threadsPerPage);
+  let threads = await redisClient().getThreads(boardName, board.threadsPerPage, pageNumber).map((thread) => {
+    return JSON.parse(thread);
+  });
   await Tools.series(threads, async function(thread) {
     thread.opPost = await PostsModel.getPost(boardName, thread.number, {
       withExtraData: true,

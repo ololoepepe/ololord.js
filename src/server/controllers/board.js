@@ -90,22 +90,6 @@ async function renderArchivedThread(boardName, threadNumber) {
   await renderThreadHTML(thread, { targetPath: `${archPath}/${threadNumber}.html` });
 }
 
-async function renderPage(boardName, pageNumber) {
-  let board = Board.board(boardName);
-  if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
-  }
-  let page = await BoardsModel.getPage(boardName, pageNumber);
-  await Tools.series(page.threads, async function(thread) {
-    return await Renderer.renderThread(thread);
-  });
-  await Cache.writeFile(`${boardName}/${pageNumber}.json`, JSON.stringify(page));
-  page.title = board.title;
-  page.board = MiscModel.board(board).board;
-  let pageID = (pageNumber > 0) ? pageNumber : 'index';
-  await Cache.writeFile(`${boardName}/${pageID}.html`, Renderer.render('pages/board', page));
-}
-
 function getPrerenderedPost(html, postNumber) {
   let startIndex = html.indexOf(`<div id='post-${postNumber}'`);
   if (startIndex < 0) {
@@ -118,6 +102,56 @@ function getPrerenderedPost(html, postNumber) {
   }
   return html.substring(startIndex, endIndex + endPattern.length);
 }
+
+async function renderPage(boardName, pageNumber, { allowPrerender } = {}) {
+  let board = Board.board(boardName);
+  if (!board) {
+    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  }
+  let page = await BoardsModel.getPage(boardName, pageNumber);
+  await Tools.series(page.threads, async function(thread) {
+    return await Renderer.renderThread(thread);
+  });
+  let pageID = (pageNumber > 0) ? pageNumber : 'index';
+  if (allowPrerender) {
+    let pageJSON = await Cache.readFile(`${boardName}/${pageNumber}.json`);
+    pageJSON = JSON.parse(pageJSON);
+    let pageHTML = await Cache.readFile(`${boardName}/${pageID}.html`);
+    let lastPosts = pageJSON.threads.map(thread => thread.lastPosts.concat(thread.opPost));
+    lastPosts = _(lastPosts).flatten().reduce((acc, post) => {
+      acc[post.number] = post;
+      return acc;
+    }, {});
+    let posts = page.threads.map(thread => thread.lastPosts.concat(thread.opPost));
+    posts = _(posts).flatten().reduce((acc, post) => {
+      acc[post.number] = post;
+      return acc;
+    }, {});
+    lastPosts = _(lastPosts).pick((_1, postNumber) => posts.hasOwnProperty(postNumber));
+    let postsToRerender = pickPostsToRerender(lastPosts, posts);
+    if (_(postsToRerender).isEmpty()) {
+      return;
+    }
+    let prerendered = _(lastPosts).pick((_1, postNumber) => !postsToRerender.hasOwnProperty(postNumber));
+    prerendered = _(prerendered).mapObject((_1, postNumber) => {
+      return getPrerenderedPost(pageHTML, postNumber);
+    });
+    await Cache.writeFile(`${boardName}/${pageNumber}.json`, JSON.stringify(page));
+    page.prerendered = prerendered;
+  } else {
+    await Cache.writeFile(`${boardName}/${pageNumber}.json`, JSON.stringify(page));
+  }
+  page.title = board.title;
+  page.board = MiscModel.board(board).board;
+  await Cache.writeFile(`${boardName}/${pageID}.html`, Renderer.render('pages/board', page));
+}
+
+async function renderPages(boardName, { allowPrerender } = {}) {
+  let pageCount = await BoardsModel.getPageCount(boardName);
+  return await Tools.series(_.range(pageCount), async function(pageNumber) {
+    return await renderPage(boardName, pageNumber, { allowPrerender });
+  });
+};
 
 router.paths = async function(description) {
   if (description) {
@@ -226,10 +260,7 @@ router.renderThread = async function(key, data) {
 }
 
 router.renderPages = async function(boardName) {
-  let pageCount = await BoardsModel.getPageCount(boardName);
-  return await Tools.series(_.range(pageCount), async function(pageNumber) {
-    return await renderPage(boardName, pageNumber);
-  });
+  return await renderPages(boardName, { allowPrerender: true });
 };
 
 router.renderCatalog = async function(boardName) {
@@ -316,7 +347,7 @@ router.render = async function(path) {
   }
   match = path.match(/^\/([^\/]+)$/);
   if (match) {
-    return await router.renderPages(match[1]);
+    return await renderPages(match[1]);
   }
   match = path.match(/^\/([^\/]+)\/archive$/);
   if (match) {
