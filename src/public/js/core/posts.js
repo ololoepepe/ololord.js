@@ -30,6 +30,7 @@ let lastPostPreviewTimer = null;
 let postPreviewMask = null;
 let postPreviewsEnabled = true;
 let scheduledPostPreviews = new Set();
+let postPreviewContexts = new Set();
 
 const TRACK_DATA = ['boardName', 'fileName', 'mimeType', 'width', 'height', 'extraData'];
 const SOURCE_TEXT_MIN_WIDTH = 360;
@@ -50,7 +51,7 @@ class PostViewModel {
         data[key] = value;
       });
     } catch (err) {
-      console.log(err);
+      DOM.handleError(err);
     }
     Player.addToPlaylist(data);
   }
@@ -458,15 +459,24 @@ async function viewPost(a, boardName, postNumber, hiddenPost) {
   if (Tools.boardName() === boardName) {
     var post = DOM.id(postNumber);
   }
+  let context = {};
   try {
     if (post) {
       post = post.cloneNode(true);
     } else {
+      postPreviewContexts.add(context);
       post = await AJAX.api('post', {
         boardName: boardName,
         postNumber: postNumber
       }, { indicator: new OverlayProgressBar() });
+      if (context.interrupt) {
+        return;
+      }
       post = await createPostNode(post, false);
+      if (context.interrupt) {
+        return false;
+      }
+      postPreviewContexts.delete(context);
     }
     $(post).attr('id', '').removeClass('op-post').addClass('reply-post temporary-post').find('.js-hiding-reason, '
      + '.js-post-actions-button-container, .js-quick-reply-container, .js-reply-to-thread-button-container').remove();
@@ -541,6 +551,7 @@ async function viewPost(a, boardName, postNumber, hiddenPost) {
     });
   } catch (err) {
     DOM.handleError(err);
+    postPreviewContexts.delete(context);
   }
 }
 
@@ -572,6 +583,10 @@ export function setPostPreviewsEnabled(enabled) {
       }
     });
     scheduledPostPreviews.clear();
+    postPreviewContexts.forEach((context) => {
+      context.interrupt = true;
+    });
+    postPreviewContexts.clear();
     $('.js-post.temporary-post, .temporary-post-overlay-mask').remove();
   }
 }

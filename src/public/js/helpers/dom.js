@@ -15,6 +15,7 @@ const NOTIFICATION_QUEUE_CHECK_INTERVAL = 10 * Constants.SECOND;
 let dialogs = [];
 let sounds = {};
 let unloading = false;
+let errorPopups = new Map();
 
 export function setUnloading() {
   unloading = true;
@@ -101,7 +102,15 @@ export let handleError = function(error) {
   } else {
     text = Tools.translate('Unknown error', 'errorUnknownText');
   }
-  PopupMessage.showPopup(text, { type: 'critical' });
+  //NOTE: Preventing duplicate error messages
+  if (errorPopups.has(text)) {
+    return;
+  }
+  let popup = PopupMessage.showPopup(text, { type: 'critical' });
+  popup.on('hide', () => {
+    errorPopups.delete(text);
+  });
+  errorPopups.set(text, popup);
 };
 
 export let node = function(type, text) {
