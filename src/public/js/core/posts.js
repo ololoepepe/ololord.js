@@ -518,6 +518,7 @@ async function viewPost(a, boardName, postNumber, hiddenPost) {
       clearTimeout(lastPostPreviewTimer);
       lastPostPreviewTimer = null;
     }
+    $(post).css('visibility', 'hidden'); //NOTE: Used to hide post flickering while positioning
     window.document.body.appendChild(post);
     if (Tools.deviceType('desktop')) {
       var doPosition = () => {
@@ -547,7 +548,10 @@ async function viewPost(a, boardName, postNumber, hiddenPost) {
     //This may look like a hack, but it is more like how browsers render.
     setTimeout(() => {
       doPosition();
-      setTimeout(doPosition);
+      setTimeout(() => {
+        doPosition();
+        $(post).css('visibility', 'visible');
+      });
     });
   } catch (err) {
     DOM.handleError(err);
