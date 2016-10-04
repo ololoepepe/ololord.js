@@ -18,18 +18,18 @@
         {{#def['custom/postHeaderPart/0'] || ''}}
         {{? post.isOp}}
           {{? thread.fixed}}
-            <span class='icon icon-pin-16' title='{{!it.translate('Fixed', 'fixedText')}}'></span>
+            <span class='icon icon-pin-16 sign-icon' title='{{!it.translate('Fixed', 'fixedText')}}'></span>
           {{?}}
           {{#def['custom/postHeaderPart/10'] || ''}}
           {{? thread.closed}}
-            <span class='icon icon-lock-16' title='{{!it.translate('The thread is closed', 'closedText')}}'></span>
+            <span class='icon icon-lock-16 sign-icon' title='{{!it.translate('The thread is closed', 'closedText')}}'></span>
           {{?}}
           {{#def['custom/postHeaderPart/20'] || ''}}
           {{? thread.postLimitReached}}
-            <span class='icon icon-blocked-16'
+            <span class='icon icon-blocked-16 sign-icon'
                   title='{{!it.translate('Post limit reached', 'postLimitReachedText')}}'></span>
           {{?? thread.bumpLimitReached}}
-            <span class='icon icon-bumplimit-16'
+            <span class='icon icon-bumplimit-16 sign-icon'
                   title='{{!it.translate('Bump limit reached', 'bumpLimitReachedText')}}'></span>
           {{?}}
           {{#def['custom/postHeaderPart/30'] || ''}}

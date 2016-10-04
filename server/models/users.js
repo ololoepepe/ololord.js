@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.initializeUserBansMonitoring = exports.banUser = exports.updatePostBanInfo = exports.checkUserPermissions = exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.setSynchronizationData = exports.getSynchronizationData = exports.removeSuperuser = exports.addSuperuser = exports.unregisterUser = exports.updateRegisteredUser = exports.registerUser = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getRegisteredUserLevelsByIp = exports.getRegisteredUserLevels = exports.getRegisteredUserLevelByIp = exports.getRegisteredUserLevel = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
+exports.initializeUserBansMonitoring = exports.isUserBanned = exports.banUser = exports.updatePostBanInfo = exports.checkUserPermissions = exports.checkUserBan = exports.removeUserPostNumber = exports.addUserPostNumber = exports.getUserPostNumbers = exports.setSynchronizationData = exports.getSynchronizationData = exports.removeSuperuser = exports.addSuperuser = exports.unregisterUser = exports.updateRegisteredUser = exports.registerUser = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getRegisteredUserLevelsByIp = exports.getRegisteredUserLevels = exports.getRegisteredUserLevelByIp = exports.getRegisteredUserLevel = exports.getBannedUsers = exports.getBannedUserBans = exports.getUserIP = exports.useCaptcha = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -1126,6 +1126,7 @@ var setSynchronizationData = exports.setSynchronizationData = function () {
 
 var getUserPostNumbers = exports.getUserPostNumbers = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee30(ip, boardName) {
+    var normal, archived;
     return regeneratorRuntime.wrap(function _callee30$(_context30) {
       while (1) {
         switch (_context30.prev = _context30.next) {
@@ -1136,9 +1137,15 @@ var getUserPostNumbers = exports.getUserPostNumbers = function () {
             return UserPostNumbers.find(ip + ':' + boardName);
 
           case 4:
-            return _context30.abrupt('return', _context30.sent);
+            normal = _context30.sent;
+            _context30.next = 7;
+            return ArchivedUserPostNumbers.find(ip + ':' + boardName);
 
-          case 5:
+          case 7:
+            archived = _context30.sent;
+            return _context30.abrupt('return', normal.concat(archived));
+
+          case 9:
           case 'end':
             return _context30.stop();
         }
@@ -1153,15 +1160,20 @@ var getUserPostNumbers = exports.getUserPostNumbers = function () {
 
 var addUserPostNumber = exports.addUserPostNumber = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee31(ip, boardName, postNumber) {
+    var _ref = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
+
+    var archived = _ref.archived;
+    var source;
     return regeneratorRuntime.wrap(function _callee31$(_context31) {
       while (1) {
         switch (_context31.prev = _context31.next) {
           case 0:
             ip = Tools.correctAddress(ip);
-            _context31.next = 3;
-            return UserPostNumbers.addOne(postNumber, ip + ':' + boardName);
+            source = archived ? ArchivedUserPostNumbers : UserPostNumbers;
+            _context31.next = 4;
+            return source.addOne(postNumber, ip + ':' + boardName);
 
-          case 3:
+          case 4:
           case 'end':
             return _context31.stop();
         }
@@ -1169,22 +1181,27 @@ var addUserPostNumber = exports.addUserPostNumber = function () {
     }, _callee31, this);
   }));
 
-  return function addUserPostNumber(_x48, _x49, _x50) {
+  return function addUserPostNumber(_x48, _x49, _x50, _x51) {
     return ref.apply(this, arguments);
   };
 }();
 
 var removeUserPostNumber = exports.removeUserPostNumber = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee32(ip, boardName, postNumber) {
+    var _ref2 = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
+
+    var archived = _ref2.archived;
+    var source;
     return regeneratorRuntime.wrap(function _callee32$(_context32) {
       while (1) {
         switch (_context32.prev = _context32.next) {
           case 0:
             ip = Tools.correctAddress(ip);
-            _context32.next = 3;
-            return UserPostNumbers.deleteOne(postNumber, ip + ':' + boardName);
+            source = archived ? ArchivedUserPostNumbers : UserPostNumbers;
+            _context32.next = 4;
+            return source.deleteOne(postNumber, ip + ':' + boardName);
 
-          case 3:
+          case 4:
           case 'end':
             return _context32.stop();
         }
@@ -1192,17 +1209,17 @@ var removeUserPostNumber = exports.removeUserPostNumber = function () {
     }, _callee32, this);
   }));
 
-  return function removeUserPostNumber(_x51, _x52, _x53) {
+  return function removeUserPostNumber(_x53, _x54, _x55, _x56) {
     return ref.apply(this, arguments);
   };
 }();
 
 var checkUserBan = exports.checkUserBan = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee33(ip, boardNames) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+    var _ref3 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-    var write = _ref.write;
-    var geolocationInfo = _ref.geolocationInfo;
+    var write = _ref3.write;
+    var geolocationInfo = _ref3.geolocationInfo;
     var ban, bans;
     return regeneratorRuntime.wrap(function _callee33$(_context33) {
       while (1) {
@@ -1257,7 +1274,7 @@ var checkUserBan = exports.checkUserBan = function () {
     }, _callee33, this);
   }));
 
-  return function checkUserBan(_x54, _x55, _x56) {
+  return function checkUserBan(_x58, _x59, _x60) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1397,7 +1414,7 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
     }, _callee34, this);
   }));
 
-  return function checkUserPermissions(_x58, _x59, _x60, _x61, _x62) {
+  return function checkUserPermissions(_x62, _x63, _x64, _x65, _x66) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1452,7 +1469,7 @@ var updatePostBanInfo = exports.updatePostBanInfo = function () {
     }, _callee35, this);
   }));
 
-  return function updatePostBanInfo(_x63, _x64) {
+  return function updatePostBanInfo(_x67, _x68) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1556,7 +1573,7 @@ var banUser = exports.banUser = function () {
                 }, _callee36, this);
               }));
 
-              return function (_x67) {
+              return function (_x71) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -1573,23 +1590,50 @@ var banUser = exports.banUser = function () {
     }, _callee37, this);
   }));
 
-  return function banUser(_x65, _x66) {
+  return function banUser(_x69, _x70) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var isUserBanned = exports.isUserBanned = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee38(ip, boardName, postNumber) {
+    var ban;
+    return regeneratorRuntime.wrap(function _callee38$(_context38) {
+      while (1) {
+        switch (_context38.prev = _context38.next) {
+          case 0:
+            _context38.next = 2;
+            return UserBans.get(ip + ':' + boardName);
+
+          case 2:
+            ban = _context38.sent;
+            return _context38.abrupt('return', !!(ban && ban.postNumber === postNumber));
+
+          case 4:
+          case 'end':
+            return _context38.stop();
+        }
+      }
+    }, _callee38, this);
+  }));
+
+  return function isUserBanned(_x72, _x73, _x74) {
     return ref.apply(this, arguments);
   };
 }();
 
 var updateBanOnMessage = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee38(message) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee39(message) {
     var ip, boardName, postNumber, keys;
-    return regeneratorRuntime.wrap(function _callee38$(_context38) {
+    return regeneratorRuntime.wrap(function _callee39$(_context39) {
       while (1) {
-        switch (_context38.prev = _context38.next) {
+        switch (_context39.prev = _context39.next) {
           case 0:
-            _context38.prev = 0;
+            _context39.prev = 0;
             ip = Tools.correctAddress(message.split(':').slice(1, -1).join(':'));
 
             if (ip) {
-              _context38.next = 4;
+              _context39.next = 4;
               break;
             }
 
@@ -1599,93 +1643,93 @@ var updateBanOnMessage = function () {
             boardName = message.split(':').pop();
 
             if (_board2.default.board(boardName)) {
-              _context38.next = 7;
+              _context39.next = 7;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
           case 7:
-            _context38.next = 9;
+            _context39.next = 9;
             return UserBanPostNumbers.getOne(message);
 
           case 9:
-            postNumber = _context38.sent;
+            postNumber = _context39.sent;
 
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (postNumber) {
-              _context38.next = 13;
+              _context39.next = 13;
               break;
             }
 
             throw new Error(Tools.translate('Invalid post number'));
 
           case 13:
-            _context38.next = 15;
+            _context39.next = 15;
             return UserBanPostNumbers.deleteOne(message);
 
           case 15:
-            _context38.next = 17;
+            _context39.next = 17;
             return UserBans.find(ip + ':*');
 
           case 17:
-            keys = _context38.sent;
+            keys = _context39.sent;
 
             if (!(!keys || keys.length <= 0)) {
-              _context38.next = 21;
+              _context39.next = 21;
               break;
             }
 
-            _context38.next = 21;
+            _context39.next = 21;
             return BannedUserIPs.deleteOne(ip);
 
           case 21:
-            _context38.next = 23;
+            _context39.next = 23;
             return updatePostBanInfo(boardName, postNumber);
 
           case 23:
-            _context38.next = 28;
+            _context39.next = 28;
             break;
 
           case 25:
-            _context38.prev = 25;
-            _context38.t0 = _context38['catch'](0);
+            _context39.prev = 25;
+            _context39.t0 = _context39['catch'](0);
 
-            Logger.error(_context38.t0.stack || _context38.t0);
+            Logger.error(_context39.t0.stack || _context39.t0);
 
           case 28:
           case 'end':
-            return _context38.stop();
+            return _context39.stop();
         }
       }
-    }, _callee38, this, [[0, 25]]);
+    }, _callee39, this, [[0, 25]]);
   }));
 
-  return function updateBanOnMessage(_x68) {
+  return function updateBanOnMessage(_x75) {
     return ref.apply(this, arguments);
   };
 }();
 
 var initializeUserBansMonitoring = exports.initializeUserBansMonitoring = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee39() {
-    return regeneratorRuntime.wrap(function _callee39$(_context39) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee40() {
+    return regeneratorRuntime.wrap(function _callee40$(_context40) {
       while (1) {
-        switch (_context39.prev = _context39.next) {
+        switch (_context40.prev = _context40.next) {
           case 0:
-            _context39.next = 2;
+            _context40.next = 2;
             return (0, _redisClientFactory2.default)().config('SET', 'notify-keyspace-events', 'Ex');
 
           case 2:
-            _context39.next = 4;
+            _context40.next = 4;
             return BanExpiresChannel.subscribe(updateBanOnMessage);
 
           case 4:
           case 'end':
-            return _context39.stop();
+            return _context40.stop();
         }
       }
-    }, _callee39, this);
+    }, _callee40, this);
   }));
 
   return function initializeUserBansMonitoring() {
@@ -1749,6 +1793,10 @@ var _redisClientFactory = require('../storage/redis-client-factory');
 
 var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
 
+var _sqlClientFactory = require('../storage/sql-client-factory');
+
+var _sqlClientFactory2 = _interopRequireDefault(_sqlClientFactory);
+
 var _unorderedSet = require('../storage/unordered-set');
 
 var _unorderedSet2 = _interopRequireDefault(_unorderedSet);
@@ -1759,6 +1807,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
+var ArchivedUserPostNumbers = new _unorderedSet2.default((0, _sqlClientFactory2.default)(), 'archivedUserPostNumbers', {
+  parse: function parse(number) {
+    return +number;
+  },
+  stringify: function stringify(number) {
+    return number.toString();
+  }
+});
 var BanExpiredChannel = new _channel2.default((0, _redisClientFactory2.default)('BAN_EXPIRED'), '__keyevent@' + (0, _config2.default)('system.redis.db') + '__:expired', {
   parse: false,
   stringify: false

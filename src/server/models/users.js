@@ -13,8 +13,13 @@ import Channel from '../storage/channel';
 import Hash from '../storage/hash';
 import Key from '../storage/key';
 import redisClient from '../storage/redis-client-factory';
+import sqlClient from '../storage/sql-client-factory';
 import UnorderedSet from '../storage/unordered-set';
 
+let ArchivedUserPostNumbers = new UnorderedSet(sqlClient(), 'archivedUserPostNumbers', {
+  parse: number => +number,
+  stringify: number => number.toString()
+});
 let BanExpiredChannel = new Channel(redisClient('BAN_EXPIRED'), `__keyevent@${config('system.redis.db')}__:expired`, {
   parse: false,
   stringify: false
@@ -356,17 +361,21 @@ export async function setSynchronizationData(key, data) {
 export async function getUserPostNumbers(ip, boardName) {
   ip = Tools.correctAddress(ip) || '*';
   boardName = boardName || '*';
-  return await UserPostNumbers.find(`${ip}:${boardName}`);
+  let normal = await UserPostNumbers.find(`${ip}:${boardName}`);
+  let archived = await ArchivedUserPostNumbers.find(`${ip}:${boardName}`);
+  return normal.concat(archived);
 }
 
-export async function addUserPostNumber(ip, boardName, postNumber) {
+export async function addUserPostNumber(ip, boardName, postNumber, { archived } = {}) {
   ip = Tools.correctAddress(ip);
-  await UserPostNumbers.addOne(postNumber, `${ip}:${boardName}`);
+  let source = archived ? ArchivedUserPostNumbers : UserPostNumbers;
+  await source.addOne(postNumber, `${ip}:${boardName}`);
 }
 
-export async function removeUserPostNumber(ip, boardName, postNumber) {
+export async function removeUserPostNumber(ip, boardName, postNumber, { archived } = {}) {
   ip = Tools.correctAddress(ip);
-  await UserPostNumbers.deleteOne(postNumber, `${ip}:${boardName}`);
+  let source = archived ? ArchivedUserPostNumbers : UserPostNumbers;
+  await source.deleteOne(postNumber, `${ip}:${boardName}`);
 }
 
 function checkGeoBan(geolocationInfo, ip) {
@@ -504,6 +513,11 @@ export async function banUser(ip, newBans) {
     }
   });
   await BannedUserIPs[_(newBans).isEmpty() ? 'deleteOne' : 'addOne'](ip);
+}
+
+export async function isUserBanned(ip, boardName, postNumber) {
+  let ban = await UserBans.get(`${ip}:${boardName}`);
+  return !!(ban && ban.postNumber === postNumber);
 }
 
 async function updateBanOnMessage(message) {

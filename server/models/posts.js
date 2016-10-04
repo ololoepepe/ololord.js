@@ -16,54 +16,52 @@ var addDataToPost = function () {
     var withExtraData = _ref.withExtraData;
     var withFileInfos = _ref.withFileInfos;
     var withReferences = _ref.withReferences;
-    var ban, extraData;
+    var extraData;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
             _context.next = 2;
-            return UserBans.get(post.user.ip + ':' + post.boardName);
+            return UsersModel.isUserBanned(post.user.ip, post.boardName, post.number);
 
           case 2:
-            ban = _context.sent;
-
-            post.bannedFor = !!(ban && ban.postNumber === post.number);
+            post.bannedFor = _context.sent;
 
             if (!withExtraData) {
-              _context.next = 9;
+              _context.next = 8;
               break;
             }
 
-            _context.next = 7;
+            _context.next = 6;
             return board.loadExtraData(post.number, !!post.archived);
 
-          case 7:
+          case 6:
             extraData = _context.sent;
 
             post.extraData = extraData;
 
-          case 9:
+          case 8:
             if (!withFileInfos) {
-              _context.next = 13;
+              _context.next = 12;
               break;
             }
 
-            _context.next = 12;
+            _context.next = 11;
             return FilesModel.getPostFileInfos(post.boardName, post.number, { archived: post.archived });
 
-          case 12:
+          case 11:
             post.fileInfos = _context.sent;
 
-          case 13:
+          case 12:
             if (!withReferences) {
-              _context.next = 16;
+              _context.next = 15;
               break;
             }
 
-            _context.next = 16;
+            _context.next = 15;
             return PostReferencesModel.addReferencesToPost(post);
 
-          case 16:
+          case 15:
           case 'end':
             return _context.stop();
         }
@@ -731,7 +729,7 @@ var removePost = exports.removePost = function () {
 
           case 30:
             _context9.next = 32;
-            return UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber);
+            return UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber, { archived: post.archived });
 
           case 32:
             _context9.next = 34;
@@ -1776,6 +1774,14 @@ var pushPostToArchive = exports.pushPostToArchive = function () {
             return FilesModel.pushPostFileInfosToArchive(boardName, postNumber);
 
           case 23:
+            _context28.next = 25;
+            return UsersModel.addUserPostNumber(post.user.ip, boardName, postNumber, { archived: true });
+
+          case 25:
+            _context28.next = 27;
+            return UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber);
+
+          case 27:
           case 'end':
             return _context28.stop();
         }
@@ -1882,5 +1888,4 @@ var PostsPlannedForDeletion = new _unorderedSet2.default((0, _redisClientFactory
   parse: false,
   stringify: false
 });
-var UserBans = new _key2.default((0, _redisClientFactory2.default)(), 'userBans');
 //# sourceMappingURL=posts.js.map

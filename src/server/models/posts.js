@@ -28,11 +28,9 @@ let PostsPlannedForDeletion = new UnorderedSet(redisClient(), 'postsPlannedForDe
   parse: false,
   stringify: false
 });
-let UserBans = new Key(redisClient(), 'userBans');
 
 async function addDataToPost(board, post, { withExtraData, withFileInfos, withReferences } = {}) {
-  let ban = await UserBans.get(`${post.user.ip}:${post.boardName}`);
-  post.bannedFor = !!(ban && ban.postNumber === post.number);
+  post.bannedFor = await UsersModel.isUserBanned(post.user.ip, post.boardName, post.number);
   if (withExtraData) {
     let extraData = await board.loadExtraData(post.number, !!post.archived);
     post.extraData = extraData;
@@ -277,7 +275,7 @@ export async function removePost(boardName, postNumber, { removingThread } = {})
   } catch (err) {
     Logger.error(err.stack || err);
   }
-  await UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber);
+  await UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber, { archived: post.archived });
   await FilesModel.removePostFileInfos(boardName, postNumber, { archived: post.archived });
   await board.removeExtraData(postNumber, !!post.archived);
   await Search.removePostIndex(boardName, postNumber);
@@ -619,4 +617,6 @@ export async function pushPostToArchive(boardName, postNumber) {
     return body;
   });
   await FilesModel.pushPostFileInfosToArchive(boardName, postNumber);
+  await UsersModel.addUserPostNumber(post.user.ip, boardName, postNumber, { archived: true });
+  await UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber);
 }

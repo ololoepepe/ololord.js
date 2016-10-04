@@ -5,6 +5,7 @@ require('source-map-support/register');
 let _ = require('underscore');
 let FS = require('q-io/fs');
 
+let Board = require('../server/boards/board').default;
 let Tools = require('../server/helpers/tools');
 let Hash = require('../server/storage/hash').default;
 let OrderedSet = require('../server/storage/ordered-set').default;
@@ -27,9 +28,17 @@ let ArchivedThreadPostNumbers = new UnorderedSet(sqlClient(), 'archivedThreadPos
 let ArchivedPosts = new Hash(sqlClient(), 'archivedPosts');
 let ArchivedThreads = new Hash(sqlClient(), 'archivedThreads');
 let ArchivedThreadsOld = new Hash(redisClient(), 'archivedThreads');
+let ArchivedThreadFixedFlags = new Hash(sqlClient(), 'archivedThreadFixedFlags', {
+  parse: flag => !!flag,
+  stringify: flag => +(!!flag)
+});
 let ArchivedThreadUpdateTimes = new Hash(sqlClient(), 'archivedThreadUpdateTimes', {
   parse: false,
   stringify: false
+});
+let ArchivedUserPostNumbers = new UnorderedSet(sqlClient(), 'archivedUserPostNumbers', {
+  parse: number => +number,
+  stringify: number => number.toString()
 });
 let Chat = new OrderedSet(redisClient(), 'chat');
 let FileHashes = new UnorderedSet(redisClient(), 'fileHashes');
@@ -42,9 +51,14 @@ let PostFileInfoNames = new UnorderedSet(redisClient(), 'postFileInfoNames', {
 let Posts = new Hash(redisClient(), 'posts');
 let ReferringPosts = new Hash(redisClient(), 'referringPosts');
 let ReferencedPosts = new Hash(redisClient(), 'referencedPosts');
+let Threads = new Hash(redisClient(), 'threads');
 let ThreadPostNumbers = new UnorderedSet(redisClient(), 'threadPostNumbers', {
   parse: number => +number,
   stringify: number => number.toString()
+});
+let ThreadFixedFlags = new Hash(redisClient(), 'threadFixedFlags', {
+  parse: flag => !!flag,
+  stringify: flag => +(!!flag)
 });
 let ThreadUpdateTimes = new Hash(redisClient(), 'threadUpdateTimes', {
   parse: false,
@@ -54,8 +68,14 @@ let UserBanPostNumbers = new Hash(redisClient(), 'userBanPostNumbers', {
   parse: number => +number,
   stringify: number => number.toString()
 });
+let UserPostNumbers = new UnorderedSet(redisClient(), 'userPostNumbers', {
+  parse: number => +number,
+  stringify: number => number.toString()
+});
 
 console.log('Starting...');
+
+Board.initialize();
 
 function processPosts() {
   let extraData = {};
@@ -303,6 +323,64 @@ function processArchivedFiles() {
   });
 }
 
+function processUserPostNumbers() {
+  return sqlClient().then((client) => {
+    return client.transaction();
+  }).then(() => {
+    return ArchivedPosts.keys();
+  }).then((keys) => {
+    return Tools.series(keys, (key) => {
+      let [boardName, postNumber] = key.split(':');
+      postNumber = +postNumber;
+      let c = {};
+      return ArchivedPosts.getOne(key).then((post) => {
+        c.post = post;
+        return UserPostNumbers.deleteOne(postNumber, `${post.user.ip}:${boardName}`);
+      }).then(() => {
+        return ArchivedUserPostNumbers.addOne(postNumber, `${c.post.user.ip}:${boardName}`);
+      });
+    });
+  }).then(() => {
+    return sqlClient();
+  }).then((client) => {
+    return client.commit();
+  });
+}
+
+function processThreadFixedFlags() {
+  return sqlClient().then((client) => {
+    return client.transaction();
+  }).then(() => {
+    return Tools.series([{
+      threadsSource: Threads,
+      fixedFlagsSource: ThreadFixedFlags
+    }], ({ threadsSource, fixedFlagsSource }) => {
+      return Tools.series(Board.boardNames(), (boardName) => {
+        return threadsSource.keys(boardName).then((threadNumbers) => {
+          return Tools.series(threadNumbers, (threadNumber) => {
+            let c = {};
+            return threadsSource.getOne(threadNumber, boardName).then((thread) => {
+              c.fixed = !!thread.fixed;
+              if (thread.hasOwnProperty('fixed')) {
+                delete thread.fixed;
+                return threadsSource.setOne(threadNumber, thread, boardName);
+              }
+            }).then(() => {
+              if (c.fixed) {
+                return fixedFlagsSource.setOne(threadNumber, true, boardName);
+              }
+            });
+          });
+        });
+      });
+    });
+  }).then(() => {
+    return sqlClient();
+  }).then((client) => {
+    return client.commit();
+  });
+}
+
 const MAP = {
   'posts': processPosts,
   'user-bans': processUserBans,
@@ -312,7 +390,9 @@ const MAP = {
   'thread-post-numbers': processThreadPostNumbers,
   'archived-posts': processArchivedPosts,
   'archived-post-references': processArchivedPostReferences,
-  'archived-files': processArchivedFiles
+  'archived-files': processArchivedFiles,
+  'user-post-numbers': processUserPostNumbers,
+  'thread-fixed-flags': processThreadFixedFlags
 }
 
 const ALL = _(MAP).map((_1, key) => { return key; });

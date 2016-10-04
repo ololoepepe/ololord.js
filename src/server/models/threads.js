@@ -31,6 +31,10 @@ let DeletedThreads = new UnorderedSet(redisClient(), 'deletedThreads', {
   parse: false,
   stringify: false
 });
+let ThreadFixedFlags = new Hash(redisClient(), 'threadFixedFlags', {
+  parse: flag => !!flag,
+  stringify: flag => +(!!flag)
+});
 let ThreadPostNumbers = new UnorderedSet(redisClient(), 'threadPostNumbers', {
   parse: number => +number,
   stringify: number => number.toString()
@@ -250,6 +254,9 @@ export async function removeThread(boardName, threadNumber, { archived } = {}) {
   let key = `${boardName}:${threadNumber}`
   await ThreadsPlannedForDeletion.addOne(key);
   await source.deleteOne(threadNumber, boardName);
+  if (!archived) {
+    await ThreadFixedFlags.deleteOne(threadNumber, boardName);
+  }
   let updateTimeSource = archived ? ArchivedThreadUpdateTimes : ThreadUpdateTimes;
   await updateTimeSource.deleteOne(threadNumber, boardName);
   setTimeout(async function() {
@@ -298,6 +305,7 @@ async function pushOutOldThread(boardName) {
       return;
     }
     await Threads.deleteOne(thread.number, boardName);
+    await ThreadFixedFlags.deleteOne(thread.number, boardName);
     (async function() {
       try {
         ArchivedThreadUpdateTimes.setOne(thread.number, thread.updatedAt, boardName);
@@ -359,7 +367,6 @@ export async function createThread(req, fields, transaction) {
     boardName: boardName,
     closed: false,
     createdAt: date.toISOString(),
-    fixed: false,
     unbumpable: false,
     number: threadNumber,
     user: {
@@ -388,8 +395,10 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
     throw new Error(Tools.translate('No such thread'));
   }
   let postNumbers = thread.postNumbers;
+  let fixed = thread.fixed;
   delete thread.postNumbers;
   delete thread.updatedAt;
+  delete thread.fixed;
   thread.boardName = targetBoardName;
   let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, postNumbers.length);
   let initialPostNumber = lastPostNumber - postNumbers.length + 1;
@@ -403,6 +412,7 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
   await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), `${targetBoardName}:${thread.number}`);
   await ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
   await Threads.setOne(thread.number, thread, targetBoardName);
+  await ThreadFixedFlags.setOne(thread.number, fixed, targetBoardName);
   await IPC.render(targetBoardName, thread.number, thread.number, 'create');
   toRerender = toRerender.reduce((acc, ref) => {
     acc[`${ref.boardName}:${ref.postNumber}`] = ref;
@@ -449,8 +459,7 @@ export async function setThreadFixed(boardName, threadNumber, fixed) {
   if (fixed === !!thread.fixed) {
     return;
   }
-  thread.fixed = fixed;
-  await Threads.setOne(threadNumber, thread, boardName);
+  await ThreadFixedFlags.setOne(threadNumber, fixed, boardName);
   await IPC.render(boardName, threadNumber, threadNumber, 'edit');
 }
 
@@ -463,6 +472,7 @@ export async function setThreadClosed(boardName, threadNumber, closed) {
   if (closed === !!thread.closed) {
     return;
   }
+  delete thread.fixed;
   thread.closed = closed;
   await Threads.setOne(threadNumber, thread, boardName);
   await IPC.render(boardName, threadNumber, threadNumber, 'edit');
