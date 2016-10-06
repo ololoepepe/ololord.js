@@ -22,11 +22,11 @@ async function reload() {
   }
   let image = $(DOM.nameOne('image', captcha));
   let challenge = DOM.nameOne('nodeCaptchaChallenge', captcha);
-  let response = DOM.nameOne('nodeCaptchaResponse', captcha);
-  if (!challenge || !response) {
+  let response = $('[name="nodeCaptchaResponse"]', captcha);
+  if (!challenge || !response[0]) {
     return PopupMessage.showPopup(Tools.translate('No challenge/response'), { type: 'critical' });
   }
-  response.value = '';
+  response.val('');
   response.attr('placeholder', '');
   image.empty();
   let createImage = (src, title) => {
