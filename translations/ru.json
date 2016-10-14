@@ -1753,11 +1753,6 @@
             "value": "Недействительный тред"
         }
     },
-    "Invalid post": {
-        "_default": {
-            "value": "Недействительный пост"
-        }
-    },
     "Invalid IP address": {
         "_default": {
             "value": "Недействительный IP-адрес"
@@ -2146,11 +2141,6 @@
             "value": "Недействительный уровень доступа"
         }
     },
-    "A user with this hashpass is already registered as superuser": {
-        "_default": {
-            "value": "Пользователь с таким хешпассом уже зарегистрирован как суперпользователь"
-        }
-    },
     "Hashpass:": {
         "hashpassLabelText": {
             "value": "Хешпасс:"
@@ -2169,11 +2159,6 @@
     "Are you sure?": {
         "confirmationText": {
             "value": "Вы уверены?"
-        }
-    },
-    "Deleting posts from archived threads is not allowed": {
-        "_default": {
-            "value": "Удаление постов из архивных тредов запрещено"
         }
     },
     "Enter password: ": {
@@ -2284,11 +2269,6 @@
     "Connection with the server will be lost, and the server will become unavailable for some time. You will have to reload the page manually.": {
         "_default": {
             "value": "Соединение с сервером будет потеряно, и сервер будет недоступен в течение некоторого времени. Вам придется перезагрузить страницу вручную."
-        }
-    },
-    "Rerender posts": {
-        "_default": {
-            "value": "Отрендерить посты заново"
         }
     },
     "Rebuild post search index": {
@@ -2767,11 +2747,6 @@
             "value": "Отсутствует капча для этого IP-адреса"
         }
     },
-    "Rerenders posts specified as $[1].\nIf $[1] is omitted, rerenders all posts on all boards.\nEach target is a string in the following form:\n$[2]": {
-        "_default": {
-            "value": "Рендерит посты, заданные как $[1].\nЕсли параметр $[1] не указан, рендерит все посты на всех досках.\nКаждая цель (target) является строкой следующего формата:\n$[2]"
-        }
-    },
     "Rerender archived threads (if no pattern is specified).": {
         "_default": {
             "value": "Рендерить архивные треды (если не указаны шаблоны)."
@@ -2835,11 +2810,6 @@
     "An archived thread": {
         "_default": {
             "value": "Архивный тред"
-        }
-    },
-    "RSS feed (for all boards)": {
-        "_default": {
-            "value": "Лента RSS (для всех досок)"
         }
     },
     "Invalid action": {
@@ -2932,19 +2902,9 @@
             "value": "Недействительное имя доски: $[1]"
         }
     },
-    "Rendering post: >>/$[1]/$[2]": {
-        "_default": {
-            "value": "Рендерится пост: >>/$[1]/$[2]"
-        }
-    },
     "No such thread: >>/$[1]/$[2]": {
         "_default": {
             "value": "Нет такого треда: >>/$[1]/$[2]"
-        }
-    },
-    "Rebuilding post search index: >>/$[1]/$[2]": {
-        "_default": {
-            "value": "Строится поисковый индекс поста: >>/$[1]/$[2]"
         }
     },
     "Error: generateStatistics() called from worker process.": {
@@ -3135,11 +3095,6 @@
             "value": "Рендерит кеш."
         }
     },
-    "Rebuilds post search index of posts specified as $[1].\nIf $[1] is omitted, rebuilds post search index of all posts on all boards.\nEach target is a string in the following form:\n$[2]": {
-        "_default": {
-            "value": "Пересоздает поисковый индекс постов, задынных как $[1].\nЕсли параметр $[1] не задан, пересоздает поисковый индекс всех постов на всех досках.\nКаждая цель (target) является строкой следующего формата:\n$[2]"
-        }
-    },
     "Invalid render function": {
         "_default": {
             "value": "Недействительная функция рендеринга."
@@ -3278,6 +3233,41 @@
     "Navbar mode:": {
         "_default": {
             "value": "Режим панели навигации:"
+        }
+    },
+    "Rerendering text of posts": {
+        "_default": {
+            "value": "Заново рендерится текст постов"
+        }
+    },
+    "Rerenders text of posts specified as $[1].\nIf $[1] is omitted, rerenders text of all posts on all boards.\nEach target is a string in the following form:\n$[2]": {
+        "_default": {
+            "value": "Рендерит заново текст постов, заданных как $[1].\nЕсли параметр $[1] не указан, рендерит текст всех постов на всех досках.\nКаждая цель (target) является строкой следующего формата:\n$[2]"
+        }
+    },
+    "Board RSS feed": {
+        "_default": {
+            "value": "RSS-лента доски"
+        }
+    },
+    "Rendering post text: >>/$[1]/$[2]": {
+        "_default": {
+            "value": "Рендерится текст поста: >>/$[1]/$[2]"
+        }
+    },
+    "Connecting to MongoDB, please, wait…": {
+        "_default": {
+            "value": "Происходит подключение к MongoDB, подождите…"
+        }
+    },
+    "Subnet mask:": {
+        "_default": {
+            "value": "Маска подсети"
+        }
+    },
+    "Rerender text of posts": {
+        "_default": {
+            "value": "Отрендерить заново текст постов"
         }
     }
 }
