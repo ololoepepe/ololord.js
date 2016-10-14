@@ -5,41 +5,70 @@ import * as PostsModel from './posts';
 import Board from '../boards/board';
 import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
-import Key from '../storage/key';
-import OrderedSet from '../storage/ordered-set';
-import redisClient from '../storage/redis-client-factory';
-import UnorderedSet from '../storage/unordered-set';
+import mongodbClient from '../storage/mongodb-client-factory';
 
-let Chat = new OrderedSet(redisClient(), 'chat');
-let ChatMembers = new UnorderedSet(redisClient(), 'chatMembers');
-let Chats = new UnorderedSet(redisClient(), 'chats', {
-  parse: false,
-  stringify: false
-});
-let ChatSubchatCount = new Key(redisClient(), 'chatSubchatCount');
+let client = mongodbClient();
 
 function createUserHash(user) {
   return Tools.crypto('sha256', user.hashpass || user.ip);
 }
 
+async function getChatNumber(boardName, postNumber, chatNumber) {
+  let ChatNumberCounter = await client.collection('chatNumberCounter');
+  let key = `${boardName}:${postNumber}`;
+  let counter = await ChatNumberCounter.findOne({
+    _id: key,
+    lastChatNumber: { $lte: chatNumber }
+  });
+  if (counter) {
+    return chatNumber;
+  }
+  let result = await ChatNumberCounter.findOneAndUpdate({ _id: key }, {
+    $inc: { lastChatNumber: 1 }
+  }, {
+    projection: { lastChatNumber: 1 },
+    upsert: true,
+    returnOriginal: false
+  });
+  if (!result) {
+    return 0;
+  }
+  let { lastChatNumber } = result.value;
+  return lastChatNumber;
+}
+
 export async function getChatMessages(user, lastRequestDate) {
-  lastRequestDate = +(new Date(lastRequestDate)) || 0;
+  let ChatMessage = await client.collection('chatMessage');
   let hash = createUserHash(user);
-  let date = Tools.now().toISOString();
-  let keys = await Chats.getAll(hash);
-  let chats = await Tools.series(keys, async function(key) {
-    let list = await Chat.getSomeByScore(lastRequestDate, Infinity, key);
-    return (list || []).map((msg) => {
-      return {
-        text: msg.text,
-        date: msg.date,
-        type: ((hash === msg.senderHash) ? 'out' : 'in')
-      };
-    });
+  let date = Tools.now();
+  let messages = await ChatMessage.find({
+    $or: [{
+      senderHash: hash,
+      date: { $gt: lastRequestDate }
+    }, {
+      receiverHash: hash,
+      date: { $gt: lastRequestDate }
+    }]
+  }, {
+    _id: 0,
+    receiverHash: 0
+  }).sort({ date: 1 }).toArray();
+  let chats = messages.reduce((acc, message) => {
+    message.type = (hash === message.senderHash) ? 'out' : 'in';
+    let chat = acc[message.key];
+    if (!chat) {
+      chat = [];
+      acc[message.key] = chat;
+    }
+    delete message.key;
+    delete message.senderHash;
+    message.date = message.date.toISOString();
+    chat.push(message);
+    return acc;
   }, {});
   return {
-    lastRequestDate: date,
-    chats: _(chats).pick((list) => { return list.length > 0; })
+    lastRequestDate: date.toISOString(),
+    chats: chats
   };
 }
 
@@ -54,61 +83,39 @@ export async function addChatMessage({ user, boardName, postNumber, chatNumber, 
   if (!text || typeof text !== 'string') {
     throw new Error(Tools.translate('Message is empty'));
   }
-  chatNumber = Tools.option(chatNumber, 'number', 0, { test: (n) => { return n > 0; } });
-  let chatCountKey = `${boardName}:${postNumber}`;
-  if (!chatNumber) {
-    chatNumber = await ChatSubchatCount.incrementBy(1, chatCountKey);
-  }
-  let key = `${boardName}:${postNumber}:${chatNumber}`;
-  let senderHash = createUserHash(user);
-  let date = Tools.now();
-  let post = await PostsModel.getPost(boardName, postNumber);
+  let Post = await client.collection('post');
+  let post = await Post.findOne({
+    boardName: boardName,
+    number: postNumber
+  }, {
+    'user.ip': 1,
+    'user.hash': 1
+  });
   if (!post) {
     throw new Error(Tools.translate('No such post'));
   }
   let receiver = post.user;
   let receiverHash = createUserHash(receiver);
-  let messages = await Chat.getSome(0, 0, key);
-  if (messages.length > 0 && messages[0].senderHash !== senderHash && messages[0].receiverHash !== senderHash) {
+  let senderHash = createUserHash(user);
+  chatNumber = Tools.option(chatNumber, 'number', 0, { test: (n) => { return n > 0; } });
+  chatNumber = await getChatNumber(boardName, postNumber, chatNumber);
+  let key = `${boardName}:${postNumber}:${chatNumber}`;
+  let ChatMessage = await client.collection('chatMessage');
+  let message = await ChatMessage.findOne({ key: key }, {
+    senderHash: 1,
+    receiverHash: 1
+  });
+  if (message && (message.senderHash !== senderHash && message.receiverHash !== receiverHash)) {
     throw new Error(Tools.translate('Somebody is chatting here already'));
   }
-  let members = await ChatMembers.getAll(key);
-  if (members.length < 2) {
-    await ChatMembers.addSome([{
-      hash: senderHash,
-      ip: user.ip,
-      hashpass: user.hashpass
-    }, {
-      hash: receiverHash,
-      ip: receiver.ip,
-      hashpass: receiver.hashpass
-    }], key);
-  } else {
-    if (senderHash === receiverHash) {
-      let member = _(members).find((member) => { return member.hash !== senderHash; });
-      if (member) {
-        receiverHash = member.hash;
-        receiver = {
-          ip: member.ip,
-          hashpass: member.hashpass
-        };
-      }
-    }
-    await Chats.addOne(key, senderHash);
-  }
-  await Chats.addOne(key, receiverHash);
-  await Chat.addOne({
+  let date = Tools.now();
+  await ChatMessage.insertOne({
+    key: key,
     text: text,
-    date: date.toISOString(),
+    date: date,
     senderHash: senderHash,
     receiverHash: receiverHash
-  }, date.valueOf(), key);
-  let ttl = config('server.chat.ttl') * Tools.SECOND;
-  await Chats.expire(ttl, senderHash);
-  await Chats.expire(ttl, receiverHash);
-  await Chat.expire(ttl, key);
-  await ChatMembers.expire(ttl, key);
-  await ChatSubchatCount.expire(ttl, chatCountKey);
+  });
   return {
     message: {
       text: text,
@@ -122,5 +129,16 @@ export async function addChatMessage({ user, boardName, postNumber, chatNumber, 
 }
 
 export async function deleteChatMessages({ user, boardName, postNumber, chatNumber } = {}) {
-  await Chats.deleteOne(`${boardName}:${postNumber}:${chatNumber}`, createUserHash(user));
+  let ChatMessage = await client.collection('chatMessage');
+  let key = `${boardName}:${postNumber}:${chatNumber}`;
+  let hash = createUserHash(user);
+  await ChatMessage.deleteMany({
+    $or: [{
+      senderHash: hash,
+      key: key
+    }, {
+      receiverHash: hash,
+      key: key
+    }]
+  });
 }

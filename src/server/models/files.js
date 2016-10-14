@@ -1,71 +1,45 @@
 import _ from 'underscore';
 import FS from 'q-io/fs';
+import promisify from 'promisify-node';
 
+import * as IPC from '../helpers/ipc';
+import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
-import Hash from '../storage/hash';
-import redisClient from '../storage/redis-client-factory';
-import sqlClient from '../storage/sql-client-factory';
-import UnorderedSet from '../storage/unordered-set';
+import mongodbClient from '../storage/mongodb-client-factory';
 import { AUDIO_TAGS } from '../file-types/audio';
 
-let ArchivedFileHashes = new UnorderedSet(sqlClient(), 'archivedFileHashes');
-let ArchivedFileInfos = new Hash(sqlClient(), 'archivedFileInfos');
-let ArchivedPostFileInfoNames = new UnorderedSet(sqlClient(), 'archivedPostFileInfoNames', {
-  parse: false,
-  stringify: false
-});
-let FileHashes = new UnorderedSet(redisClient(), 'fileHashes');
-let FileInfos = new Hash(redisClient(), 'fileInfos');
-let PostFileInfoNames = new UnorderedSet(redisClient(), 'postFileInfoNames', {
-  parse: false,
-  stringify: false
-});
+const mkpath = promisify('mkpath');
 
-async function getFileInfo(name, hash) {
-  if (!name && hash) {
-    let info = await FileHashes.getOne(hash);
-    if (!info) {
-      info = await ArchivedFileHashes.getOne(hash);
-    }
-    if (info) {
-      name = info.name;
-    }
-  }
-  if (!name) {
-    return Promise.reject(new Error(Tools.translate('No such file')));
-  }
-  let fileInfo = await FileInfos.getOne(name);
-  if (!fileInfo) {
-    fileInfo = ArchivedFileInfos.getOne(name);
-  }
-  if (!fileInfo) {
-    return Promise.reject(new Error(Tools.translate('No such file')));
-  }
-  return fileInfo;
-}
+let client = mongodbClient();
 
 export async function getFileInfoByName(name) {
-  return await getFileInfo(name);
+  let Post = await client.collection('post');
+  let post = await Post.findOne({ 'fileInfos.name': name }, { 'fileInfos.$': 1 });
+  if (!post) {
+    throw new Error(Tools.translate('No such file'));
+  }
+  return post.fileInfos[0];
 }
 
 export async function getFileInfoByHash(hash) {
-  return await getFileInfo(null, hash);
+  let Post = await client.collection('post');
+  let post = await Post.findOne({ 'fileInfos.hash': hash }, { 'fileInfos.$': 1 });
+  if (!post) {
+    throw new Error(Tools.translate('No such file'));
+  }
+  return post.fileInfos[0];
 }
 
 export async function fileInfoExistsByName(name) {
-  let exists = await FileInfos.existsOne(name);
-  if (exists) {
-    return true;
-  }
-  return await ArchivedFileInfos.existsOne(name);
+  let Post = await client.collection('post');
+  let count = await Post.count({ 'fileInfos.name': name });
+  return (count > 0);
 }
 
 export async function fileInfoExistsByHash(hash) {
-  let exists = await FileHashes.exists(hash);
-  if (exists) {
-    return true;
-  }
-  return await ArchivedFileHashes.exists(hash);
+  let Post = await client.collection('post');
+  let count = await Post.count({ 'fileInfos.hash': hash });
+  return (count > 0);
 }
 
 export async function getFileInfosByHashes(hashes) {
@@ -75,180 +49,195 @@ export async function getFileInfosByHashes(hashes) {
   if (!_(hashes).isArray()) {
     hashes = [hashes];
   }
-  return await Tools.series(hashes, async function(hash) {
-    let fileInfo = await FileHashes.getOne(hash);
-    if (!fileInfo) {
-      fileInfo = await ArchivedFileHashes.getOne(hash);
+  if (hashes.length <= 0) {
+    return [];
+  }
+  let Post = await client.collection('post');
+  let posts = await Post.find({
+    'fileInfos.hash': { $in: hashes }
+  }, { 'fileInfos.$': 1 }).toArray();
+  if (hashes.length !== posts.length) {
+    throw new Error(Tools.translate('No such file'));
+  }
+  return posts.map(({ fileInfos }) => fileInfos[0]);
+}
+
+function createFileInfo(file, boardName, postNumber) {
+  file.boardName = boardName;
+  file.postNumber = postNumber;
+  return file;
+}
+
+export function createFileInfos(files, boardName, postNumber) {
+  return files.map((file) => { return createFileInfo(file, boardName, postNumber); });
+}
+
+export async function addFilesToPost(boardName, postNumber, files) {
+  let Post = await client.collection('post');
+  let result = await Post.findOneAndUpdate({
+    boardName: boardName,
+    number: postNumber
+  }, {
+    $push: {
+      fileInfos: { $each: createFileInfos(files, boardName, postNumber) }
     }
-    if (fileInfo) {
-      fileInfo.hash = hash;
+  }, {
+    projection: { threadNumber: 1 },
+    returnOriginal: false
+  });
+  let post = result.value;
+  if (!post) {
+    throw new Error(Tools.translate('No such post'));
+  }
+  await IPC.render(boardName, post.threadNumber, postNumber, 'edit');
+}
+
+async function removeFile({ boardName, name, thumb }) {
+  let path = `${__dirname}/../../public/${boardName}`;
+  try {
+    await FS.remove(`${path}/src/${name}`);
+  } catch (err) {
+    Logger.error(err.stack || err);
+  }
+  try {
+    await FS.remove(`${path}/thumb/${thumb.name}`);
+  } catch (err) {
+    Logger.error(err.stack || err);
+  }
+}
+
+export async function removeFiles(fileInfos) {
+  await Tools.series(fileInfos, removeFile);
+}
+
+export async function moveThreadFilesToArchive(boardName, threadNumber) {
+  let archivePath = `${__dirname}/../../public/${boardName}/arch`;
+  await mkpath(archivePath);
+  let sourceId = `${boardName}/res/${threadNumber}.json`;
+  let data = await Cache.readFile(sourceId);
+  let model = JSON.parse(data);
+  model.thread.archived = true;
+  await FS.write(`${archivePath}/${threadNumber}.json`, JSON.stringify(model));
+  await BoardController.renderThreadHTML(model.thread, {
+    targetPath: `${archivePath}/${threadNumber}.html`,
+    archived: true
+  });
+  await Cache.removeFile(sourceId);
+  await Cache.removeFile(`${boardName}/res/${threadNumber}.html`);
+}
+
+export async function removeArchivedThreadFiles(boardName, threadNumber) {
+  await Tools.series(['json', 'html'], async function(suffix) {
+    try {
+      await FS.remove(`${__dirname}/../../public/${boardName}/arch/${threadNumber}.${suffix}`);
+    } catch (err) {
+      Logger.error(err.stack || err);
     }
-    return fileInfo;
-  }, true);
-}
-
-export async function addFileInfo(fileInfo, { archived } = {}) {
-  let source = archived ? ArchivedFileInfos : FileInfos;
-  await source.setOne(fileInfo.name, fileInfo);
-}
-
-export function createFileHash(fileInfo) {
-  return {
-    name: fileInfo.name,
-    thumb: { name: fileInfo.thumb.name },
-    size: fileInfo.size,
-    boardName: fileInfo.boardName,
-    mimeType: fileInfo.mimeType,
-    rating: fileInfo.rating
-  };
-}
-
-export async function addFileHashes(fileInfos) {
-  if (!_(fileInfos).isArray()) {
-    fileInfos = [fileInfos];
-  }
-  await Tools.series(fileInfos.filter(fileInfo => !!fileInfo), async function(fileInfo) {
-    let source = fileInfo.archived ? ArchivedFileHashes : FileHashes;
-    return await source.addOne(createFileHash(fileInfo), fileInfo.hash);
   });
-}
-
-export async function removeFileHashes(fileInfos) {
-  if (!_(fileInfos).isArray()) {
-    fileInfos = [fileInfos];
-  }
-  if (fileInfos.length <= 0) {
-    return;
-  }
-  await Tools.series(fileInfos, async function(fileInfo) {
-    let source = fileInfo.archived ? ArchivedFileHashes : FileHashes;
-    await source.deleteOne(createFileHash(fileInfo), fileInfo.hash);
-    let size = await source.count(fileInfo.hash);
-    if (size <= 0) {
-      await source.delete(fileInfo.hash);
-    }
-  });
-}
-
-export async function removeFileInfos(fileInfoNames, { archived } = {}) {
-  if (!_(fileInfoNames).isArray()) {
-    fileInfoNames = [fileInfoNames];
-  }
-  if (fileInfoNames.length <= 0) {
-    return 0;
-  }
-  let source = archived ? ArchivedFileInfos : FileInfos;
-  await source.deleteSome(fileInfoNames);
-}
-
-export async function addFilesToPost(boardName, postNumber, files, { archived } = {}) {
-  let source = archived ? ArchivedPostFileInfoNames : PostFileInfoNames;
-  await Tools.series(files, async function(file) {
-    file.boardName = boardName;
-    file.postNumber = postNumber;
-    await addFileInfo(file, { archived: archived });
-    await source.addOne(file.name, `${boardName}:${postNumber}`);
-  });
-  await addFileHashes(files);
 }
 
 export async function deleteFile(fileName) {
-  let fileInfo = await getFileInfoByName(fileName);
-  let { boardName, postNumber, archived } = fileInfo;
-  let infosSource = archived ? ArchivedFileInfos : FileInfos;
-  let namesSource = archived ? ArchivedPostFileInfoNames : PostFileInfoNames;
-  await namesSource.deleteOne(fileName, `${boardName}:${postNumber}`);
-  await infosSource.deleteOne(fileName);
-  await removeFileHashes(fileInfo);
-  let path = `${__dirname}/../../public/${boardName}`;
-  Tools.series([`${path}/src/${fileInfo.name}`, `${path}/thumb/${fileInfo.thumb.name}`], async function() {
-    try {
-      await FS.remove(path);
-    } catch (err) {
-      Logger.error(err.stack || err);
+  let Post = await client.collection('post');
+  let result = await Post.findOneAndUpdate({ 'fileInfos.name': fileName }, {
+    $pull: {
+      fileInfos: { name: fileName }
     }
+  }, {
+    projection: {
+      boardName: 1,
+      number: 1,
+      threadNumber: 1,
+      'fileInfos.$': 1
+    },
+    returnOriginal: true
   });
+  let post = result.value;
+  if (!post) {
+    throw new Error(Tools.translate('No such file'));
+  }
+  await IPC.render(post.boardName, post.threadNumber, post.number, 'edit');
+  removeFile(post.fileInfos[0]);
 }
 
 export async function editFileRating(fileName, rating) {
-  let fileInfo = await getFileInfoByName(fileName);
+  let Post = await client.collection('post');
   if (Tools.FILE_RATINGS.indexOf(rating) < 0) {
     rating = Tools.FILE_RATINGS[0];
   }
-  fileInfo.rating = rating;
-  let source = fileInfo.archived ? ArchivedFileInfos : FileInfos;
-  await source.setOne(fileName, fileInfo);
+  let result = await Post.findOneAndUpdate({ 'fileInfos.name': fileName }, {
+    $set: { 'fileInfos.$.rating': rating }
+  }, {
+    projection: {
+      boardName: 1,
+      number: 1,
+      threadNumber: 1
+    },
+    returnOriginal: false
+  });
+  let post = result.value;
+  if (!post) {
+    throw new Error(Tools.translate('No such file'));
+  }
+  await IPC.render(post.boardName, post.threadNumber, post.number, 'edit');
 }
 
 export async function editAudioTags(fileName, fields) {
-  let fileInfo = await getFileInfoByName(fileName);
-  AUDIO_TAGS.forEach((tag) => {
-    let value = fields[tag];
-    if (value && typeof value === 'string') {
-      fileInfo.extraData[tag] = value;
-    } else if (fileInfo.extraData.hasOwnProperty(tag)) {
-      delete fileInfo.extraData[tag];
-    }
+  let Post = await client.collection('post');
+  let extraData = AUDIO_TAGS.map((tagName) => {
+    return {
+      tagName: tagName,
+      value: fields[tagName]
+    };
+  }).filter(({ value }) => {
+    return (value && (typeof value === 'string'));
+  }).reduce((acc, { tagName, value }) => {
+    acc[tagName] = value;
+    return acc;
+  }, {});
+  let result = await Post.findOneAndUpdate({ 'fileInfos.name': fileName }, {
+    $set: { 'fileInfos.$.extraData': extraData }
+  }, {
+    projection: {
+      boardName: 1,
+      number: 1,
+      threadNumber: 1
+    },
+    returnOriginal: false
   });
-  let source = fileInfo.archived ? ArchivedFileInfos : FileInfos;
-  await source.setOne(fileName, fileInfo);
+  let post = result.value;
+  if (!post) {
+    throw new Error(Tools.translate('No such file'));
+  }
+  await IPC.render(post.boardName, post.threadNumber, post.number, 'edit');
 }
 
 export async function getPostFileCount(boardName, postNumber, { archived } = {}) {
-  let source = archived ? ArchivedPostFileInfoNames : PostFileInfoNames;
-  return await source.count(`${boardName}:${postNumber}`);
+  let Post = await client.collection('post');
+  let post = await Post.findOne({
+    boardName: boardName,
+    number: postNumber
+  }, { fileInfoCount: 1 });
+  if (!post) {
+    throw new Error(Tools.translate('No such post'));
+  }
+  return post.fileInfoCount;
 }
 
-export async function getPostFileInfos(boardName, postNumber, { archived } = {}) {
-  let namesSource = archived ? ArchivedPostFileInfoNames : PostFileInfoNames;
-  let infosSource = archived ? ArchivedFileInfos : FileInfos;
-  let fileNames = await namesSource.getAll(`${boardName}:${postNumber}`);
-  return await infosSource.getSome(fileNames);
-}
-
-export async function removePostFileInfos(boardName, postNumber, { archived } = {}) {
-  let key = `${boardName}:${postNumber}`
-  let namesSource = archived ? ArchivedPostFileInfoNames : PostFileInfoNames;
-  let fileNames = await namesSource.getAll(key);
-  let fileInfos = await Tools.series(fileNames, async function(fileName) {
-    return await getFileInfoByName(fileName);
+export async function copyFiles(fileInfos, sourceBoardName, targetBoardName) {
+  let sourcePath = `${__dirname}/../../public/${sourceBoardName}/src`;
+  let sourceThumbPath = `${__dirname}/../../public/${sourceBoardName}/thumb`;
+  let targetPath = `${__dirname}/../../public/${targetBoardName}/src`;
+  let targetThumbPath = `${__dirname}/../../public/${targetBoardName}/thumb`;
+  await mkpath(targetPath);
+  await mkpath(targetThumbPath);
+  return await Tools.series(fileInfos, async function(fileInfo) {
+    let oldFileName = fileInfo.name;
+    let oldThumbName = fileInfo.thumb.name;
+    let baseName = await IPC.send('fileName');
+    fileInfo.name = fileInfo.name.replace(/^\d+/, baseName);
+    fileInfo.thumb.name = fileInfo.thumb.name.replace(/^\d+/, baseName);
+    await FS.copy(`${sourcePath}/${oldFileName}`, `${targetPath}/${fileInfo.name}`);
+    await FS.copy(`${sourceThumbPath}/${oldThumbName}`, `${targetThumbPath}/${fileInfo.thumb.name}`);
+    return fileInfo;
   }, true);
-  fileInfos = fileInfos.filter(fileInfo => !!fileInfo);
-  let paths = fileInfos.map((fileInfo) => {
-    return [
-      `${__dirname}/../../public/${boardName}/src/${fileInfo.name}`,
-      `${__dirname}/../../public/${boardName}/thumb/${fileInfo.thumb.name}`
-    ];
-  });
-  await namesSource.delete(key);
-  await removeFileInfos(fileNames, { archived: archived });
-  await removeFileHashes(fileInfos);
-  Tools.series(_(paths).flatten(), async function(path) {
-    try {
-      await FS.remove(path);
-    } catch (err) {
-      Logger.error(err.stack || err);
-    }
-  });
-}
-
-export async function pushPostFileInfosToArchive(boardName, postNumber) {
-  let key = `${boardName}:${postNumber}`
-  let fileNames = await PostFileInfoNames.getAll(key);
-  await ArchivedPostFileInfoNames.addSome(fileNames, key);
-  await PostFileInfoNames.delete(key);
-  let fileInfos = await Tools.series(fileNames, async function(fileName) {
-    return await getFileInfoByName(fileName);
-  }, {});
-  await ArchivedFileInfos.setSome(fileInfos);
-  await FileInfos.deleteSome(fileNames);
-  await Tools.series(fileInfos, async function(fileInfo) {
-    let fileHash = createFileHash(fileInfo);
-    await ArchivedFileHashes.addOne(fileHash, fileInfo.hash);
-    await FileHashes.deleteOne(fileHash, fileInfo.hash);
-    let size = await FileHashes.count(fileInfo.hash);
-    if (size <= 0) {
-      await FileHashes.delete(fileInfo.hash);
-    }
-  });
 }

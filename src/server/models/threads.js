@@ -3,6 +3,7 @@ import FS from 'q-io/fs';
 import promisify from 'promisify-node';
 
 import * as BoardsModel from './boards';
+import * as PostReferencesModel from './post-references';
 import * as PostsModel from './posts';
 import Board from '../boards/board';
 import BoardController from '../controllers/board';
@@ -11,40 +12,14 @@ import * as Cache from '../helpers/cache';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
+import mongodbClient from '../storage/mongodb-client-factory';
 import redisClient from '../storage/redis-client-factory';
-import sqlClient from '../storage/sql-client-factory';
-import Hash from '../storage/hash';
 import UnorderedSet from '../storage/unordered-set';
 
 const mkpath = promisify('mkpath');
 
-let ArchivedThreadPostNumbers = new UnorderedSet(sqlClient(), 'archivedThreadPostNumbers', {
-  parse: number => +number,
-  stringify: number => number.toString()
-});
-let ArchivedThreads = new Hash(sqlClient(), 'archivedThreads');
-let ArchivedThreadUpdateTimes = new Hash(sqlClient(), 'archivedThreadUpdateTimes', {
-  parse: false,
-  stringify: false
-});
+let client = mongodbClient();
 let DeletedThreads = new UnorderedSet(redisClient(), 'deletedThreads', {
-  parse: false,
-  stringify: false
-});
-let ThreadFixedFlags = new Hash(redisClient(), 'threadFixedFlags', {
-  parse: flag => !!flag,
-  stringify: flag => +(!!flag)
-});
-let ThreadPostNumbers = new UnorderedSet(redisClient(), 'threadPostNumbers', {
-  parse: number => +number,
-  stringify: number => number.toString()
-});
-let Threads = new Hash(redisClient(), 'threads');
-let ThreadsPlannedForDeletion = new UnorderedSet(redisClient(), 'threadsPlannedForDeletion', {
-  parse: false,
-  stringify: false
-});
-let ThreadUpdateTimes = new Hash(redisClient(), 'threadUpdateTimes', {
   parse: false,
   stringify: false
 });
@@ -65,145 +40,136 @@ export function sortThreadsByPostCount(t1, t2) {
   return t2.postCount - t1.postCount;
 }
 
-export async function getThreadPostCount(boardName, threadNumber, { archived } = {}) {
-  let source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
-  return await source.count(`${boardName}:${threadNumber}`);
-}
-
-export async function getThreadPostNumbers(boardName, threadNumber) {
-  let postNumbers = await ThreadPostNumbers.getAll(`${boardName}:${threadNumber}`);
-  if (!postNumbers || postNumbers.length <= 0) {
-    postNumbers = await ArchivedThreadPostNumbers.getAll(`${boardName}:${threadNumber}`);
+export async function getThreadPostCount(boardName, threadNumber, { lastPostNumber } = {}) {
+  let Post = await client.collection('post');
+  let query = {
+    boardName: boardName,
+    threadNumber: threadNumber
+  };
+  lastPostNumber = Tools.option(lastPostNumber, 'number', 0, { test: Tools.testPostNumber });
+  if (lastPostNumber) {
+    query.number = { $gt: lastPostNumber };
   }
-  return postNumbers.sort((a, b) => { return a - b; });
-}
-
-export async function addThreadPostNumber(boardName, threadNumber, postNumber, { archived } = {}) {
-  let source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
-  await source.addOne(postNumber, `${boardName}:${threadNumber}`);
-}
-
-export async function removeThreadPostNumber(boardName, threadNumber, postNumber, { archived } = {}) {
-  let source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
-  await source.deleteOne(postNumber, `${boardName}:${threadNumber}`);
-}
-
-async function addDataToThread(thread, { withPostNumbers } = {}) {
-  let source = thread.archived ? ArchivedThreadUpdateTimes : ThreadUpdateTimes;
-  thread.updatedAt = await source.getOne(thread.number, thread.boardName);
-  if (withPostNumbers) {
-    thread.postNumbers = await getThreadPostNumbers(thread.boardName, thread.number);
-  }
-}
-
-export async function getThreadPosts(boardName, threadNumber,
-  { reverse, limit, notOP, withExtraData, withFileInfos, withReferences } = {}) {
-  let board = Board.board(boardName);
-  if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
-  }
-  threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
-  if (!threadNumber) {
-    return Promise.reject(new Error(Tools.translate('Invalid thread number')));
-  }
-  let postNumbers = await getThreadPostNumbers(boardName, threadNumber);
-  if (notOP) {
-    postNumbers.splice(0, 1);
-  }
-  if (reverse) {
-    postNumbers.reverse();
-  }
-  limit = Tools.option(limit, 'number', 0, { test: (l) => { return l > 0; } });
-  if (limit) {
-    postNumbers.splice(limit);
-  }
-  return await PostsModel.getPosts(boardName, postNumbers, { withExtraData, withFileInfos, withReferences });
+  return await Post.count(query);
 }
 
 export async function getThreadNumbers(boardName, { archived } = {}) {
-  let source = archived ? ArchivedThreads : Threads;
-  return await source.keys(boardName);
+  let Thread = await client.collection('thread');
+  let threads = await Thread.find({
+    boardName: boardName,
+    archived: !!archived
+  }, { number: 1 }).sort({ number: -1 }).toArray();
+  return threads.map(({ number }) => number);
 }
 
-export async function getThread(boardName, threadNumber, options) {
+export async function getThread(boardName, threadNumber) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!threadNumber) {
-    return Promise.reject(new Error(Tools.translate('Invalid thread number')));
+    throw new Error(Tools.translate('Invalid thread number'));
   }
-  let thread = await Threads.getOne(threadNumber, boardName);
+  let Thread = await client.collection('thread');
+  let thread = await Thread.findOne({
+    boardName: boardName,
+    number: threadNumber
+  }, { _id: 0 });
   if (!thread) {
-    thread = await ArchivedThreads.getOne(threadNumber, boardName);
+    throw new Error(Tools.translate('No such thread'));
   }
-  if (!thread) {
-    return Promise.reject(new Error(Tools.translate('No such thread')));
-  }
-  await addDataToThread(thread, options);
   return thread;
 }
 
-export async function getThreads(boardName, threadNumbers, options) {
+export async function threadExists(boardName, threadNumber) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
-  if (!_(threadNumbers).isArray()) {
-    threadNumbers = [threadNumbers];
+  threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+  if (!threadNumber) {
+    throw new Error(Tools.translate('Invalid thread number'));
   }
-  threadNumbers = threadNumbers.map((threadNumber) => {
-    return Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+  let Thread = await client.collection('thread');
+  let count = await Thread.count({
+    boardName: boardName,
+    number: threadNumber
   });
-  if (threadNumbers.some(threadNumber => !threadNumber)) {
-    return Promise.reject(new Error(Tools.translate('Invalid thread number')));
+  return (count > 0);
+}
+
+export async function getThreads(boardName, { archived, limit, offset, sort } = {}) {
+  let board = Board.board(boardName);
+  if (!board) {
+    throw new Error(Tools.translate('Invalid board'));
   }
-  let threads = await Threads.getSome(threadNumbers, boardName);
-  threads = _(threads).toArray();
-  let mayBeArchivedThreadNumbers = threads.map((thread, index) => {
-    return {
-      thread: thread,
-      index: index
-    };
-  }).filter((thread) => !thread.thread).map((thread) => {
-    return {
-      index: thread.index,
-      threadNumber: threadNumbers[thread.index]
-    };
-  });
-  if (mayBeArchivedThreadNumbers.length > 0) {
-    let numbers = mayBeArchivedThreadNumbers.map(thread => thread.threadNumber);
-    let archivedThreads = await ArchivedThreads.getSome(numbers, boardName);
-    archivedThreads.forEach((thread, index) => {
-      threads[mayBeArchivedThreadNumbers[index].index] = thread;
+  let Thread = await client.collection('thread');
+  let cursor = Thread.find({
+    boardName: boardName,
+    archived: !!archived
+  }, { _id: 0 });
+  if (sort) {
+    cursor = cursor.sort({
+      fixed: -1,
+      updatedAt: -1
     });
   }
-  if (threads.length <= 0) {
-    return [];
+  if (offset) {
+    cursor = cursor.skip(offset);
   }
-  await Tools.series(threads, async function(thread) {
-    await addDataToThread(thread, options);
-  });
+  if (limit) {
+    cursor = cursor.limit(limit);
+  }
+  let threads = await cursor.toArray();
   return threads;
+}
+
+export async function getThreadCount(boardName, { archived } = {}) {
+  let board = Board.board(boardName);
+  if (!board) {
+    throw new Error(Tools.translate('Invalid board'));
+  }
+  let Thread = await client.collection('thread');
+  return await Thread.count({
+    boardName: boardName,
+    archived: !!archived
+  });
+}
+
+export async function getThreadLastPostNumber(boardName, threadNumber) {
+  if (!Board.board(boardName)) {
+    throw new Error(Tools.translate('Invalid board'));
+  }
+  threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+  if (!threadNumber) {
+    throw new Error(Tools.translate('Invalid thread number'));
+  }
+  let Post = await client.collection('post');
+  let posts = await Post.find({
+    boardName: boardName,
+    threadNumber: threadNumber
+  }, { number: 1 }).sort({ number: -1 }).limit(1).toArray();
+  return (posts.length > 0) ? posts[0].number : 0;
 }
 
 export async function getThreadInfo(boardName, threadNumber, { lastPostNumber }) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!threadNumber) {
-    return Promise.reject(new Error(Tools.translate('Invalid thread number')));
+    throw new Error(Tools.translate('Invalid thread number'));
   }
-  let thread = await getThread(boardName, threadNumber, { withPostNumbers: true });
+  let Thread = await client.collection('thread');
+  let thread = await getThread(boardName, threadNumber);
   if (!thread) {
     return thread;
   }
-  let postCount = thread.postNumbers.length;
-  lastPostNumber = Tools.option(lastPostNumber, 'number', 0, { test: Tools.testPostNumber });
-  let newPostCount = thread.postNumbers.filter((pn) => { return pn > lastPostNumber; }).length;
+  let postCount = await getThreadPostCount(boardName, threadNumber);
+  let newPostCount = await getThreadPostCount(boardName, threadNumber, { lastPostNumber: lastPostNumber });
+  lastPostNumber = await getThreadLastPostNumber(boardName, threadNumber);
   return {
     number: thread.number,
     bumpLimit: board.bumpLimit,
@@ -215,26 +181,9 @@ export async function getThreadInfo(boardName, threadNumber, { lastPostNumber })
     unbumpable: thread.unbumpable,
     postCount: postCount,
     postingEnabled: (board.postingEnabled && !thread.closed),
-    lastPostNumber: thread.postNumbers.pop(),
+    lastPostNumber: lastPostNumber,
     newPostCount: newPostCount
   };
-}
-
-export async function getThreadLastPostNumber(boardName, threadNumber) {
-  if (!Board.board(boardName)) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
-  }
-  threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
-  if (!threadNumber) {
-    return Promise.reject(new Error(Tools.translate('Invalid thread number')));
-  }
-  let threadPostNumbers = await getThreadPostNumbers(boardName, threadNumber);
-  return (threadPostNumbers.length > 0) ? _(threadPostNumbers).last() : 0;
-}
-
-export async function setThreadUpdateTime(boardName, threadNumber, dateTme, { archived } = {}) {
-  let source = archived ? ArchivedThreadUpdateTimes : ThreadUpdateTimes;
-  await source.setOne(threadNumber, dateTme, boardName);
 }
 
 export async function isThreadDeleted(boardName, threadNumber) {
@@ -249,136 +198,112 @@ export async function clearDeletedThreads() {
   return DeletedThreads.delete();
 }
 
-export async function removeThread(boardName, threadNumber, { archived } = {}) {
-  let source = archived ? ArchivedThreads : Threads;
-  let key = `${boardName}:${threadNumber}`
-  await ThreadsPlannedForDeletion.addOne(key);
-  await source.deleteOne(threadNumber, boardName);
-  if (!archived) {
-    await ThreadFixedFlags.deleteOne(threadNumber, boardName);
-  }
-  let updateTimeSource = archived ? ArchivedThreadUpdateTimes : ThreadUpdateTimes;
-  await updateTimeSource.deleteOne(threadNumber, boardName);
-  setTimeout(async function() {
-    try {
-      let postNumbers = await getThreadPostNumbers(boardName, threadNumber);
-      let postNumbersSource = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
-      await postNumbersSource.delete(key);
-      await Tools.series(postNumbers, async function(postNumber) {
-        return await PostsModel.removePost(boardName, postNumber, { removingThread: true });
-      });
-      await ThreadsPlannedForDeletion.deleteOne(key);
-    } catch (err) {
-      Logger.error(err.stack || err);
-    }
-  }, 5000); //TODO: This is not OK
-}
-
 async function pushOutOldThread(boardName) {
-  try {
-    let board = Board.board(boardName);
-    if (!board) {
-      throw new Error(Tools.translate('Invalid board'));
-    }
-    let threadNumbers = await getThreadNumbers(boardName);
-    let threads = await getThreads(boardName, threadNumbers);
-    threads.sort(sortThreadsByDate);
-    if (threads.length < board.threadLimit) {
-      return;
-    }
-    let client = await sqlClient();
-    await client.transaction();
-    let archivedThreadNumbers = await getThreadNumbers(boardName, { archived: true });
-    let archivedThreads = await getThreads(boardName, archivedThreadNumbers);
-    archivedThreads.sort(sortThreadsByDate);
-    let removeLastArchivedThread = (archivedThreads.length > 0) && (archivedThreads.length >= board.archiveLimit);
-    if (removeLastArchivedThread) {
-      await removeThread(boardName, archivedThreads.pop().number, { archived: true });
-    }
-    let thread = threads.pop();
-    if (board.archiveLimit <= 0) {
-      await removeThread(boardName, thread.number);
-      await client.commit();
-      if (removeLastArchivedThread) {
-        await IPC.renderArchive(boardName);
-      }
-      return;
-    }
-    await Threads.deleteOne(thread.number, boardName);
-    await ThreadFixedFlags.deleteOne(thread.number, boardName);
-    (async function() {
-      try {
-        ArchivedThreadUpdateTimes.setOne(thread.number, thread.updatedAt, boardName);
-        ThreadUpdateTimes.deleteOne(thread.number, boardName);
-        thread.archived = true;
-        delete thread.updatedAt;
-        await ArchivedThreads.setOne(thread.number, thread, boardName);
-        let key = `${boardName}:${thread.number}`;
-        let postNumbers = await getThreadPostNumbers(boardName, thread.number);
-        await ArchivedThreadPostNumbers.addSome(postNumbers, key);
-        await ThreadPostNumbers.delete(key);
-        await Tools.series(postNumbers, async function(postNumber) {
-          await PostsModel.pushPostToArchive(boardName, postNumber);
-        });
-        await client.commit();
-        let archivePath = `${__dirname}/../../public/${boardName}/arch`;
-        let oldThreadNumber = thread.number;
-        await mkpath(archivePath);
-        let sourceId = `${boardName}/res/${oldThreadNumber}.json`;
-        let data = await Cache.readFile(sourceId);
-        let model = JSON.parse(data);
-        model.thread.archived = true;
-        await FS.write(`${archivePath}/${oldThreadNumber}.json`, JSON.stringify(model));
-        await BoardController.renderThreadHTML(model.thread, {
-          targetPath: `${archivePath}/${oldThreadNumber}.html`,
-          archived: true
-        });
-        await Cache.removeFile(sourceId);
-        await Cache.removeFile(`${boardName}/res/${oldThreadNumber}.html`);
-        await IPC.renderArchive(boardName);
-      } catch (err) {
-        client.rollback();
-        Logger.error(err.stack || err);
-      }
-    })();
-    //NOTE: This is for the sake of speed.
-  } catch (err) {
-    client.rollback();
-    Logger.error(err.stack || err);
+  let board = Board.board(boardName);
+  if (!board) {
+    throw new Error(Tools.translate('Invalid board'));
   }
+  let threadCount = await getThreadCount(boardName);
+  if (threadCount < board.threadLimit) {
+    return;
+  }
+  let archivedThreadCount = await getThreadCount(boardName, { archived: true });
+  let removeLastArchivedThread = (board.archiveLimit > 0) && (archivedThreadCount >= board.archiveLimit);
+  let Thread = await client.collection('thread');
+  let [lastThread] = await getThreads(boardName, {
+    sort: true,
+    limit: 1
+  });
+  if (removeLastArchivedThread) {
+    let [lastArchivedThread] = await getThreads(boardName, {
+      archived: true,
+      sort: true,
+      limit: 1
+    });
+    if (lastArchivedThread) {
+      await deleteThread(boardName, lastArchivedThread.number);
+      await IPC.renderArchive(boardName);
+    }
+  }
+  if (board.archiveLimit <= 0) {
+    await deleteThread(boardName, lastThread.number);
+    return;
+  }
+  await Thread.updateOne({
+    boardName: boardName,
+    number: lastThread.number
+  }, {
+    $set: { archived: true }
+  });
+  let Post = await client.collection('post');
+  await Post.updateMany({
+    boardName: boardName,
+    threadNumber: lastThread.number
+  }, {
+    $set: { archived: true }
+  });
+  await FilesModel.moveThreadFilesToArchive(boardName, lastThread.number);
+  await IPC.renderArchive(boardName);
 }
 
 export async function createThread(req, fields, transaction) {
   let { boardName, password } = fields;
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   if (!board.postingEnabled) {
-    return Promise.reject(new Error(Tools.translate('Posting is disabled at this board')));
+    throw new Error(Tools.translate('Posting is disabled at this board'));
   }
-  await pushOutOldThread(boardName);
+  try {
+    await pushOutOldThread(boardName);
+  } catch (err) {
+    Logger.error(err.stack || err);
+  }
   let date = Tools.now();
-  password = Tools.sha1(password);
-  let hashpass = (req.hashpass || null);
   let threadNumber = await BoardsModel.nextPostNumber(boardName);
   let thread = {
-    archived: false,
     boardName: boardName,
-    closed: false,
-    createdAt: date.toISOString(),
-    unbumpable: false,
     number: threadNumber,
-    user: {
-      hashpass: hashpass,
-      ip: req.ip,
-      level: req.level(boardName),
-      password: password
-    }
+    archived: false,
+    fixed: false,
+    closed: false,
+    unbumpable: false,
+    user: PostsModel.createPostUser(req, req.level(boardName), password),
+    createdAt: date.toISOString()
   };
   transaction.setThreadNumber(threadNumber);
-  await Threads.setOne(threadNumber, thread, boardName);
+  let Thread = await client.collection('thread');
+  await Thread.insertOne(thread);
   return thread;
+}
+
+async function setThreadFlag(boardName, threadNumber, flagName, flagValue) {
+  let Thread = await client.collection('thread');
+  let { matchedCount, modifiedCount } = await Thread.updateOne({
+    boardName: boardName,
+    number: threadNumber
+  }, {
+    $set: { [flagName]: !!flagValue }
+  });
+  if (matchedCount <= 0) {
+    throw new Error(Tools.translate('No such thread'));
+  }
+  if (modifiedCount > 0) {
+    await IPC.render(boardName, threadNumber, threadNumber, 'edit');
+  }
+}
+
+export async function setThreadFixed(boardName, threadNumber, fixed) {
+  return await setThreadFlag(boardName, threadNumber, 'fixed', fixed);
+}
+
+export async function setThreadClosed(boardName, threadNumber, closed) {
+  return await setThreadFlag(boardName, threadNumber, 'closed', closed);
+}
+
+export async function setThreadUnbumpable(boardName, threadNumber, unbumpable) {
+  return await setThreadFlag(boardName, threadNumber, 'unbumpable', unbumpable);
 }
 
 export async function moveThread(sourceBoardName, threadNumber, targetBoardName) {
@@ -390,104 +315,104 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
   if (!threadNumber) {
     throw new Error(Tools.translate('Invalid thread number'));
   }
-  let thread = await getThread(sourceBoardName, threadNumber, { withPostNumbers: true });
+  let thread = await getThread(sourceBoardName, threadNumber);
   if (!thread) {
     throw new Error(Tools.translate('No such thread'));
   }
-  let postNumbers = thread.postNumbers;
-  let fixed = thread.fixed;
-  delete thread.postNumbers;
-  delete thread.updatedAt;
-  delete thread.fixed;
   thread.boardName = targetBoardName;
-  let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, postNumbers.length);
-  let initialPostNumber = lastPostNumber - postNumbers.length + 1;
+  let postCount = await getThreadPostCount(sourceBoardName, threadNumber);
+  let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, postCount);
+  let initialPostNumber = lastPostNumber - postCount + 1;
   thread.number = initialPostNumber;
-  let { toRerender, toUpdate, postNumberMap } = await PostsModel.copyPosts({
+  let { toRerender, toMarkup, postNumberMap } = await PostsModel.copyPosts({
     sourceBoardName: sourceBoardName,
-    postNumbers: postNumbers,
+    sourceThreadNumber: threadNumber,
     targetBoardName: targetBoardName,
     initialPostNumber: initialPostNumber
   });
-  await ThreadPostNumbers.addSome(_(postNumberMap).toArray(), `${targetBoardName}:${thread.number}`);
-  await ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
-  await Threads.setOne(thread.number, thread, targetBoardName);
-  await ThreadFixedFlags.setOne(thread.number, fixed, targetBoardName);
+  let Thread = await client.collection('thread');
+  await Thread.insertOne(thread);
   await IPC.render(targetBoardName, thread.number, thread.number, 'create');
-  toRerender = toRerender.reduce((acc, ref) => {
+  toMarkup = toMarkup.reduce((acc, ref) => {
     acc[`${ref.boardName}:${ref.postNumber}`] = ref;
     return acc;
   }, {});
-  toUpdate = toUpdate.reduce((acc, ref) => {
+  toRerender = toRerender.reduce((acc, ref) => {
     acc[`${ref.boardName}:${ref.threadNumber}`] = ref;
     return acc;
   }, {});
-  await PostsModel.rerenderMovedThreadRelatedPosts({
-    posts: toRerender,
+  await PostsModel.markupMovedThreadRelatedPosts({
+    posts: toMarkup,
     sourceBoardName: sourceBoardName,
     targetBoardName: targetBoardName,
     postNumberMap: postNumberMap
   });
   await PostsModel.updateMovedThreadRelatedPosts({
-    posts: toUpdate,
+    posts: toRerender,
     sourceBoardName: sourceBoardName,
     targetBoardName: targetBoardName,
     sourceThreadNumber: threadNumber,
     targetThreadNumber: initialPostNumber,
     postNumberMap: postNumberMap
   });
-  await Tools.series(toRerender, async function(ref) {
-    return await IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
+  await Tools.series(_.extend(toRerender, toMarkup), async function(ref) {
+    return await IPC.render(ref.boardName, ref.threadNumber, ref.threadNumber, 'edit');
   });
-  await Tools.series(toUpdate, async function(ref) {
-    return await IPC.render(ref.boardName, ref.threadNumber, ref.threadNumber, 'create');
-  });
-  await removeThread(sourceBoardName, threadNumber);
-  await IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
+  await deleteThread(sourceBoardName, threadNumber);
   return {
     boardName: targetBoardName,
     threadNumber: thread.number
   };
 }
 
-export async function setThreadFixed(boardName, threadNumber, fixed) {
-  let thread = await getThread(boardName, threadNumber);
+export async function deleteThread(boardName, threadNumber) {
+  let Thread = await client.collection('thread');
+  let result = await Thread.findOneAndDelete({
+    boardName: boardName,
+    number: threadNumber,
+  }, {
+    projection: { lastPostNumber: 1 }
+  });
+  let thread = result.value;
   if (!thread) {
     throw new Error(Tools.translate('No such thread'));
   }
-  fixed = !!fixed;
-  if (fixed === !!thread.fixed) {
-    return;
+  setTimeout(async function() {
+    try {
+      let Post = await client.collection('post');
+      let query = {
+        boardName: boardName,
+        threadNumber: threadNumber
+      };
+      let posts = await Post.find(query, {
+        number: 1,
+        referencedPosts: 1,
+        referringPosts: 1,
+        fileInfos: 1
+      }).toArray();
+      await Post.deleteMany(query);
+      await Tools.series(posts, async function(post) {
+        await PostReferencesModel.removeReferringPosts(post.boardName, post.postNumber);
+      }, true);
+      (async function() {
+        let refs = await Tools.series(posts, (post) => {
+          return PostReferencesModel.updateReferringPosts(post.referringPosts, post.boardName, post.number,
+            threadNumber);
+        }, true);
+        refs = _.extend(...refs);
+        let referencedPosts = _.extend(...posts.map(({ referencedPosts }) => referencedPosts));
+        await PostReferencesModel.rerenderReferencedPosts(boardName, threadNumber, refs, referencedPosts);
+        let fileInfos = posts.map(({ fileInfos }) => fileInfos);
+        await FilesModel.removeFiles(_(fileInfos).flatten());
+      })();
+    } catch (err) {
+      Logger.error(err.stack || err);
+    }
+  }, 5000); //TODO: This is not OK
+  if (thread.archived) {
+    await FilesModel.removeArchivedThreadFiles(boardName, threadNumber);
+    await IPC.renderArchive(boardName);
+  } else {
+    await IPC.render(boardName, threadNumber, threadNumber, 'delete');
   }
-  await ThreadFixedFlags.setOne(threadNumber, fixed, boardName);
-  await IPC.render(boardName, threadNumber, threadNumber, 'edit');
-}
-
-export async function setThreadClosed(boardName, threadNumber, closed) {
-  let thread = await getThread(boardName, threadNumber);
-  if (!thread) {
-    throw new Error(Tools.translate('No such thread'));
-  }
-  closed = !!closed;
-  if (closed === !!thread.closed) {
-    return;
-  }
-  delete thread.fixed;
-  thread.closed = closed;
-  await Threads.setOne(threadNumber, thread, boardName);
-  await IPC.render(boardName, threadNumber, threadNumber, 'edit');
-}
-
-export async function setThreadUnbumpable(boardName, threadNumber, unbumpable) {
-  let thread = await getThread(boardName, threadNumber);
-  if (!thread) {
-    throw new Error(Tools.translate('No such thread'));
-  }
-  unbumpable = !!unbumpable;
-  if (unbumpable === !!thread.unbumpable) {
-    return;
-  }
-  thread.unbumpable = unbumpable;
-  await Threads.setOne(threadNumber, thread, boardName);
-  await IPC.render(boardName, threadNumber, threadNumber, 'edit');
 }

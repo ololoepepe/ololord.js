@@ -64,4 +64,8 @@ export default class CommonKey {
   async expire(ttl, subkey) {
     return await this.client.expire(this.fullKey(subkey), ttl);
   }
+
+  async ttl(subkey) {
+    return await this.client.ttl(this.fullKey(subkey));
+  }
 }

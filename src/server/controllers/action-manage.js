@@ -10,18 +10,21 @@ import * as UsersModel from '../models/users';
 
 let router = express.Router();
 
-function getRegisteredUserData(fields) {
+async function getRegisteredUserData(fields) {
   let ips = Tools.ipList(fields.ips);
   if (typeof ips === 'string') {
-    return Promise.reject(new Error(ips));
+    throw new Error(ips);
   }
-  let levels = _(fields).reduce((acc, value, name) => {
+  let levels = _(fields).map((value, name) => {
     let match = name.match(/^accessLevelBoard_(\S+)$/);
-    if (match && 'NONE' !== value) {
-      acc[match[1]] = value;
+    if (!match || 'NONE' === value) {
+      return;
     }
-    return acc;
-  });
+    return {
+      boardName: match[1],
+      level: value
+    };
+  }).filter(level => !!level);
   return {
     levels: levels,
     ips: ips
@@ -38,7 +41,7 @@ router.post('/action/registerUser', async function(req, res, next) {
     if (!password) {
       throw new Error(Tools.translate('Invalid password'));
     }
-    let { levels, ips } = getRegisteredUserData(fields);
+    let { levels, ips } = await getRegisteredUserData(fields);
     let hashpass = Tools.mayBeHashpass(password) ? password : Tools.toHashpass(password);
     await UsersModel.registerUser(hashpass, levels, ips);
     res.json({ hashpass: hashpass });
@@ -57,8 +60,8 @@ router.post('/action/updateRegisteredUser', async function(req, res, next) {
     if (!hashpass || !Tools.mayBeHashpass(hashpass)) {
       throw new Error(Tools.translate('Invalid hashpass'));
     }
-    let { levels, ips } = getRegisteredUserData(fields);
-    await UsersModel.updateRegisterUser(hashpass, levels, ips);
+    let { levels, ips } = await getRegisteredUserData(fields);
+    await UsersModel.updateRegisteredUser(hashpass, levels, ips);
     res.json({});
   } catch (err) {
     next(err);
@@ -173,7 +176,7 @@ router.post('/action/superuserRerender', async function(req, res, next) {
   }
 });
 
-router.post('/action/superuserRerenderPosts', async function(req, res, next) {
+router.post('/action/superuserMarkupPosts', async function(req, res, next) {
   try {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
@@ -182,24 +185,8 @@ router.post('/action/superuserRerenderPosts', async function(req, res, next) {
     if (typeof targets !== 'string') {
       throw new Error(Tools.translate('Invalid targets'));
     }
-    await PostsModel.rerenderPosts(Renderer.targetsFromString(targets));
+    await PostsModel.markupPosts(Renderer.targetsFromString(targets));
     //TODO: Rerender corresponding pages?
-    res.json({});
-  } catch (err) {
-    next(Tools.processError(err));
-  }
-});
-
-router.post('/action/superuserRebuildSearchIndex', async function(req, res, next) {
-  try {
-    if (!req.isSuperuser()) {
-      throw new Error(Tools.translate('Not enough rights'));
-    }
-    let { fields: { targets } } = await Files.parseForm(req);
-    if (typeof targets !== 'string') {
-      throw new Error(Tools.translate('Invalid targets'));
-    }
-    await PostsModel.rebuildSearchIndex(Renderer.targetsFromString(targets));
     res.json({});
   } catch (err) {
     next(Tools.processError(err));

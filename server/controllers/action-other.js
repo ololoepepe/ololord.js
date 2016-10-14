@@ -267,7 +267,7 @@ router.post('/action/deleteChatMessages', function () {
 
           case 13:
             chatNumber = Tools.option(chatNumber, 'number', 0, { test: function test(n) {
-                n > 0;
+                return n > 0;
               } });
 
             if (chatNumber) {
@@ -511,7 +511,7 @@ router.post('/action/search', function () {
                       maxTextLength = (0, _config2.default)('system.search.maxResultPostTextLengh');
 
                       model.searchResults = result.posts.map(function (post) {
-                        var text = (post.plainText || '').replace(/\r*\n+/g, ' ');
+                        var text = (post.rawText || '').replace(/\r*\n+/g, ' '); //TODO: plain text
                         if (text.length > maxTextLength) {
                           text = text.substr(0, maxTextLength - 1) + '…';
                         }

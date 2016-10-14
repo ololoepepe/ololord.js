@@ -10,15 +10,9 @@ import * as Renderer from '../core/renderer';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
-import redisClient from '../storage/redis-client-factory';
-import Hash from '../storage/hash';
+import mongodbClient from '../storage/mongodb-client-factory';
 
-let PostCounters = new Hash(redisClient(), 'postCounters', {
-  parse: number => +number,
-  stringify: number => number.toString()
-});
-let Threads = new Hash(redisClient(), 'threads');
-
+let client = mongodbClient();
 let pageCounts = new Map();
 
 function addDataToThread(thread, board) {
@@ -47,14 +41,10 @@ export function postSubject(post, maxLength) {
 export async function getThread(boardName, threadNumber) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   let thread = await ThreadsModel.getThread(boardName, threadNumber);
-  let posts = await ThreadsModel.getThreadPosts(boardName, threadNumber, {
-    withExtraData: true,
-    withFileInfos: true,
-    withReferences: true
-  });
+  let posts = await PostsModel.getThreadPosts(boardName, threadNumber);
   thread.postCount = posts.length;
   thread.opPost = posts.splice(0, 1)[0];
   thread.lastPosts = posts;
@@ -66,33 +56,31 @@ export async function getThread(boardName, threadNumber) {
 export async function getPage(boardName, pageNumber) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   pageNumber = Tools.option(pageNumber, 'number', -1, { test: (n) => { return n >= 0; } });
   let pageCount = pageCounts.get(boardName);
   if (pageNumber < 0 || pageNumber >= pageCount) {
-    return Promise.reject(new Error(Tools.translate('Invalid page number')));
+    throw new Error(Tools.translate('Invalid page number'));
   }
-  let threads = await redisClient().getThreads(boardName, board.threadsPerPage, pageNumber).map((thread) => {
-    return JSON.parse(thread);
+  let threads = await ThreadsModel.getThreads(boardName, {
+    sort: true,
+    limit: board.threadsPerPage,
+    offset: pageNumber * board.threadsPerPage
   });
+  let Post = await client.collection('post');
   await Tools.series(threads, async function(thread) {
     thread.opPost = await PostsModel.getPost(boardName, thread.number, {
       withExtraData: true,
       withFileInfos: true,
       withReferences: true
     });
-    let lastPosts = await ThreadsModel.getThreadPosts(boardName, thread.number, {
+    thread.lastPosts = await PostsModel.getThreadPosts(boardName, thread.number, {
       limit: board.maxLastPosts,
-      reverse: true,
-      notOP: true,
-      withExtraData: true,
-      withFileInfos: true,
-      withReferences: true
+      offset: 1,
+      sort: true
     });
-    thread.lastPosts = lastPosts.reverse();
-    thread.postCount = thread.postNumbers.length;
-    delete thread.postNumbers;
+    thread.postCount = await ThreadsModel.getThreadPostCount(boardName, thread.number);
     addDataToThread(thread, board);
     if (thread.postCount > (board.maxLastPosts + 1)) {
       thread.omittedPosts = thread.postCount - board.maxLastPosts - 1;
@@ -113,17 +101,16 @@ export async function getPage(boardName, pageNumber) {
 export async function getCatalog(boardName, sortMode) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
-  let threadNumbers = await ThreadsModel.getThreadNumbers(boardName);
-  let threads = await ThreadsModel.getThreads(boardName, threadNumbers, { withPostNumbers: true });
+  let threads = await ThreadsModel.getThreads(boardName);
+  let Post = await client.collection('post');
   await Tools.series(threads, async function(thread) {
     thread.opPost = await PostsModel.getPost(boardName, thread.number, {
       withFileInfos: true,
       withReferences: true
     });
-    thread.postCount = thread.postNumbers.length;
-    delete thread.postNumbers;
+    thread.postCount = await ThreadsModel.getThreadPostCount(boardName, thread.number);
     addDataToThread(thread, board);
   });
   let sortFunction = ThreadsModel.sortThreadsByCreationDate;
@@ -148,7 +135,7 @@ export async function getCatalog(boardName, sortMode) {
 export async function getArchive(boardName) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   let path = `${__dirname}/../../public/${boardName}/arch`;
   let exists = await FS.exists(path);
@@ -176,9 +163,11 @@ export async function getArchive(boardName) {
 
 export async function getLastPostNumber(boardName) {
   if (!Board.board(boardName)) {
-    return Promise.reject(new Error(Tools.translate('Invalid boardName')));
+    throw new Error(Tools.translate('Invalid boardName'));
   }
-  return await PostCounters.getOne(boardName);
+  let PostCounter = await client.collection('postCounter');
+  let result = await PostCounter.findOne({ _id: boardName }, { lastPostNumber: 1 });
+  return result ? result.lastPostNumber : 0;
 }
 
 export async function getLastPostNumbers(boardNames) {
@@ -186,17 +175,23 @@ export async function getLastPostNumbers(boardNames) {
     boardNames = [boardNames];
   }
   if (boardNames.some(boardName => !Board.board(boardName))) {
-    return Promise.reject(new Error(Tools.translate('Invalid boardName')));
+    throw new Error(Tools.translate('Invalid boardName'));
   }
-  return await PostCounters.getSome(boardNames);
+  let PostCounter = await client.collection('postCounter');
+  let query = {
+    _id: { $in: boardNames }
+  };
+  let result = await PostCounter.find(query, { lastPostNumber: 1 });
+  return result.map(({ lastPostNumber }) => lastPostNumber);
 }
 
 export async function getPageCount(boardName) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
-  let threadCount = await Threads.count(boardName);
+  let Thread = await client.collection('thread');
+  let threadCount = await ThreadsModel.getThreadCount(boardName);
   let pageCount = Math.ceil(threadCount / board.threadsPerPage) || 1;
   pageCounts.set(boardName, pageCount);
   return pageCount;
@@ -205,18 +200,26 @@ export async function getPageCount(boardName) {
 export async function nextPostNumber(boardName, incrementBy) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   incrementBy = Tools.option(incrementBy, 'number', 1, { test: (i) => { i >= 1; } });
-  let postNumber = await PostCounters.incrementBy(boardName, incrementBy);
-  if (!postNumber) {
+  let PostCounter = await client.collection('postCounter');
+  let result = await PostCounter.findOneAndUpdate({ _id: boardName }, {
+    $inc: { lastPostNumber: 1 }
+  }, {
+    projection: { lastPostNumber: 1 },
+    upsert: true,
+    returnOriginal: false
+  });
+  if (!result) {
     return 0;
   }
+  let { lastPostNumber } = result.value;
   //TODO: improve get skipping
-  if (1 === incrementBy && board.skippedGetOrder > 0 && !(postNumber % Math.pow(10, board.skippedGetOrder))) {
+  if ((1 === incrementBy) && (board.skippedGetOrder > 0) && !(lastPostNumber % Math.pow(10, board.skippedGetOrder))) {
     return await nextPostNumber(boardName, incrementBy);
   }
-  return postNumber;
+  return lastPostNumber;
 }
 
 export async function initialize() {
@@ -234,9 +237,15 @@ export async function delall(req, ip, boardNames) {
   let deletedThreads = {};
   let updatedThreads = {};
   let deletedPosts = {};
+  let Post = await client.collection('post');
   await Tools.series(boardNames, async function(boardName) {
-    let postNumbers = await UsersModel.getUserPostNumbers(ip, boardName);
-    let posts = await PostsModel.getPosts(boardName, postNumbers);
+    let posts = await Post.find({
+      boardName: boardName,
+      'user.ip': ip
+    }, {
+      number: 1,
+      threadNumber: 1
+    }).toArray();
     posts.forEach((post) => {
       if (post.threadNumber === post.number) {
         deletedThreads[`${boardName}:${post.threadNumber}`] = {
@@ -252,12 +261,17 @@ export async function delall(req, ip, boardNames) {
       };
       deletedPosts[`${boardName}:${post.number}`] = {
         boardName: boardName,
-        number: post.number
+        number: post.number,
+        threadNumber: post.threadNumber
       };
     });
   });
   await Tools.series(deletedPosts, async function(post) {
-    await PostsModel.removePost(post.boardName, post.number);
+    await Post.deleteOne({
+      boardName: post.boardName,
+      number: post.number
+    });
+    await PostsModel.removePostData(post.boardName, post.number, post.threadNumber);
   });
   await Tools.series(deletedThreads, async function(thread) {
     await ThreadsModel.removeThread(thread.boardName, thread.number);

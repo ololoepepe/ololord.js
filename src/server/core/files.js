@@ -58,11 +58,11 @@ async function downloadFile(url, formFieldName, fields) {
   }
   let response = await HTTP.request(options);
   if (200 !== response.status) {
-    return Promise.reject(new Error(Tools.translate('Failed to download file')));
+    throw new Error(Tools.translate('Failed to download file'));
   }
   let data = await response.body.read();
   if (data.length < 1) {
-    return Promise.reject(new Error(Tools.translate('File is empty')));
+    throw new Error(Tools.translate('File is empty'));
   }
   await writeFile(path, data);
   let file = {
@@ -120,7 +120,7 @@ async function waitForFile(filePath, options) { //TODO: That is not okay
     let exists = await FS.exists(filePath);
     if (!exists) {
       if (!retry) {
-        return Promise.reject(new Error(Tools.translate('Failed to copy file')));
+        throw new Error(Tools.translate('Failed to copy file'));
       }
       --retry;
       await new Promise((resolve, reject) => {
@@ -224,7 +224,7 @@ export function parseForm(req = {}) {
 async function processFile(boardName, file, transaction) {
   let plugin = selectThumbnailingPlugin(file.mimeType);
   if (!plugin) {
-    return Promise.reject(new Error(Tools.translate('Unsupported file type: $[1]', '', file.mimeType)));
+    throw new Error(Tools.translate('Unsupported file type: $[1]', '', file.mimeType));
   }
   let fn = await generateFileName(file, plugin);
   let targetFilePath = `${__dirname}/../../public/${boardName}/src/${fn.name}`;
@@ -287,8 +287,8 @@ export async function processFiles(boardName, files, transaction) {
   let path = `${__dirname}/../../public/${boardName}`;
   await mkpath(`${path}/src`);
   await mkpath(`${path}/thumb`);
-  return await Tools.series(files, async function(file) {
-    return await processFile(boardName, file, transaction);
+  return await Tools.series(files, (file) => {
+    return processFile(boardName, file, transaction);
   }, true);
 }
 

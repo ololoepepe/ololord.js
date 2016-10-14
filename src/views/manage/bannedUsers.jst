@@ -6,6 +6,11 @@
       <input type='text' class='length-40' placeholder='IP: <192.168.0.1>'
              data-bind='textInput: $data.ip' />
     </div>
+    <div>
+      {{!it.translate('Subnet mask:')}}
+      <input type='number' class='length-3' min='0' max='128'
+             data-bind='textInput: $data.subnet' />
+    </div>
     <div class='container-display-inline-block'>
       <div>
         <div class='display-table border-spacing-4'>

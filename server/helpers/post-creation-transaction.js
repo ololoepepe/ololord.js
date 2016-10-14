@@ -18,6 +18,10 @@ var _tools = require('./tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
+var _mongodbClientFactory = require('../storage/mongodb-client-factory');
+
+var _mongodbClientFactory2 = _interopRequireDefault(_mongodbClientFactory);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -25,6 +29,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var client = (0, _mongodbClientFactory2.default)();
 
 var PostCreationTransaction = function () {
   function PostCreationTransaction(boardName) {
@@ -175,26 +181,39 @@ var PostCreationTransaction = function () {
     key: '_rollbackThread',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+        var Thread;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                try {
-                  /*
-                  return removeThread(_this.board.name, _this.threadNumber).catch(function(err) {
-                      Logger.error(err.stack || err);
-                  });
-                  */
-                } catch (err) {
-                  _logger2.default.error(err.stack || err);
-                }
+                _context4.prev = 0;
+                _context4.next = 3;
+                return client.collection('thread');
 
-              case 1:
+              case 3:
+                Thread = _context4.sent;
+                _context4.next = 6;
+                return Thread.deleteOne({
+                  boardName: this.boardName,
+                  number: this.threadNumber
+                });
+
+              case 6:
+                _context4.next = 11;
+                break;
+
+              case 8:
+                _context4.prev = 8;
+                _context4.t0 = _context4['catch'](0);
+
+                _logger2.default.error(_context4.t0.stack || _context4.t0);
+
+              case 11:
               case 'end':
                 return _context4.stop();
             }
           }
-        }, _callee4, this);
+        }, _callee4, this, [[0, 8]]);
       }));
 
       function _rollbackThread() {
@@ -207,26 +226,39 @@ var PostCreationTransaction = function () {
     key: '_rollbackPost',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
+        var Post;
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
-                try {
-                  /*
-                  return removePost(_this.board.name, _this.postNumber).catch(function(err) {
-                      Logger.error(err.stack || err);
-                  });
-                  */
-                } catch (err) {
-                  _logger2.default.error(err.stack || err);
-                }
+                _context5.prev = 0;
+                _context5.next = 3;
+                return client.collection('post');
 
-              case 1:
+              case 3:
+                Post = _context5.sent;
+                _context5.next = 6;
+                return Post.deleteOne({
+                  boardName: this.boardName,
+                  number: this.postNumber
+                });
+
+              case 6:
+                _context5.next = 11;
+                break;
+
+              case 8:
+                _context5.prev = 8;
+                _context5.t0 = _context5['catch'](0);
+
+                _logger2.default.error(_context5.t0.stack || _context5.t0);
+
+              case 11:
               case 'end':
                 return _context5.stop();
             }
           }
-        }, _callee5, this);
+        }, _callee5, this, [[0, 8]]);
       }));
 
       function _rollbackPost() {

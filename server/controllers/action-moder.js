@@ -102,7 +102,7 @@ router.post('/action/banUser', function () {
           case 0:
             _context2.prev = 0;
             return _context2.delegateYield(regeneratorRuntime.mark(function _callee() {
-              var _ref, fields, userIp, bans, banLevels, oldBans, date, modifiedBanBoards, newBans, levels;
+              var _ref, fields, userIp, subnet, bans, banLevels, bannedUser, oldBans, date, modifiedBanBoards, newBans, levels;
 
               return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
@@ -123,25 +123,27 @@ router.post('/action/banUser', function () {
                       _ref = _context.sent;
                       fields = _ref.fields;
                       userIp = fields.userIp;
+                      subnet = fields.subnet;
 
                       userIp = Tools.correctAddress(userIp);
+                      subnet = Tools.subnet(userIp, subnet);
 
                       if (userIp) {
-                        _context.next = 10;
+                        _context.next = 12;
                         break;
                       }
 
                       throw new Error(Tools.translate('Invalid IP address'));
 
-                    case 10:
+                    case 12:
                       if (!(userIp === req.ip)) {
-                        _context.next = 12;
+                        _context.next = 14;
                         break;
                       }
 
                       throw new Error(Tools.translate('Not enough rights'));
 
-                    case 12:
+                    case 14:
                       bans = getBans(fields);
                       banLevels = Tools.BAN_LEVELS.slice(1);
 
@@ -153,11 +155,12 @@ router.post('/action/banUser', function () {
                           throw new Error(Tools.translate('Invalid ban level: $[1]', '', ban.level));
                         }
                       });
-                      _context.next = 17;
-                      return UsersModel.getBannedUserBans(userIp);
+                      _context.next = 19;
+                      return UsersModel.getBannedUser(userIp);
 
-                    case 17:
-                      oldBans = _context.sent;
+                    case 19:
+                      bannedUser = _context.sent;
+                      oldBans = bannedUser ? bannedUser.bans : {};
                       date = Tools.now();
                       modifiedBanBoards = new Set();
                       newBans = _board2.default.boardNames().reduce(function (acc, boardName) {
@@ -175,7 +178,11 @@ router.post('/action/banUser', function () {
                         }
                         return acc;
                       }, {});
-                      levels = UsersModel.getRegisteredUserLevelsByIp(userIp);
+                      _context.next = 26;
+                      return UsersModel.getRegisteredUserLevelsByIp(userIp, subnet);
+
+                    case 26:
+                      levels = _context.sent;
 
                       modifiedBanBoards.forEach(function (boardName) {
                         var level = req.level(boardName);
@@ -183,13 +190,13 @@ router.post('/action/banUser', function () {
                           throw new Error(Tools.translate('Not enough rights'));
                         }
                       });
-                      _context.next = 25;
-                      return UsersModel.banUser(userIp, newBans);
+                      _context.next = 30;
+                      return UsersModel.banUser(userIp, newBans, subnet);
 
-                    case 25:
+                    case 30:
                       res.json({});
 
-                    case 26:
+                    case 31:
                     case 'end':
                       return _context.stop();
                   }

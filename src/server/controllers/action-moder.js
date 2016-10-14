@@ -54,8 +54,9 @@ router.post('/action/banUser', async function(req, res, next) {
       throw new Error(Tools.translate('Not enough rights'));
     }
     let { fields } = await Files.parseForm(req);
-    let { userIp } = fields;
+    let { userIp, subnet } = fields;
     userIp = Tools.correctAddress(userIp);
+    subnet = Tools.subnet(userIp, subnet);
     if (!userIp) {
       throw new Error(Tools.translate('Invalid IP address'));
     }
@@ -72,7 +73,8 @@ router.post('/action/banUser', async function(req, res, next) {
         throw new Error(Tools.translate('Invalid ban level: $[1]', '', ban.level));
       }
     });
-    let oldBans = await UsersModel.getBannedUserBans(userIp);
+    let bannedUser = await UsersModel.getBannedUser(userIp);
+    let oldBans = bannedUser ? bannedUser.bans : {};
     let date = Tools.now();
     let modifiedBanBoards = new Set();
     let newBans = Board.boardNames().reduce((acc, boardName) => {
@@ -90,14 +92,14 @@ router.post('/action/banUser', async function(req, res, next) {
       }
       return acc;
     }, {});
-    let levels = UsersModel.getRegisteredUserLevelsByIp(userIp);
+    let levels = await UsersModel.getRegisteredUserLevelsByIp(userIp, subnet);
     modifiedBanBoards.forEach((boardName) => {
       let level = req.level(boardName);
       if (!req.isSuperuser(boardName) && Tools.compareRegisteredUserLevels(level, levels[boardName]) <= 0) {
         throw new Error(Tools.translate('Not enough rights'));
       }
     });
-    await UsersModel.banUser(userIp, newBans);
+    await UsersModel.banUser(userIp, newBans, subnet);
     res.json({});
   } catch (err) {
     next(err);

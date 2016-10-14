@@ -14,362 +14,308 @@ import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 import markup from '../markup';
-import Hash from '../storage/hash';
-import Key from '../storage/key';
-import redisClient from '../storage/redis-client-factory';
-import sqlClient from '../storage/sql-client-factory';
-import UnorderedSet from '../storage/unordered-set';
+import mongodbClient from '../storage/mongodb-client-factory';
 
-const mkpath = promisify('mkpath');
+let client = mongodbClient();
 
-let ArchivedPosts = new Hash(sqlClient(), 'archivedPosts');
-let Posts = new Hash(redisClient(), 'posts');
-let PostsPlannedForDeletion = new UnorderedSet(redisClient(), 'postsPlannedForDeletion', {
-  parse: false,
-  stringify: false
-});
-
-async function addDataToPost(board, post, { withExtraData, withFileInfos, withReferences } = {}) {
-  post.bannedFor = await UsersModel.isUserBanned(post.user.ip, post.boardName, post.number);
-  if (withExtraData) {
-    let extraData = await board.loadExtraData(post.number, !!post.archived);
-    post.extraData = extraData;
+function createPostProjection({ withExtraData, withFileInfos, withReferences } = {}) {
+  let projection = { _id: 0 };
+  if (!withExtraData) {
+    projection.extraData = 0;
   }
-  if (withFileInfos) {
-    post.fileInfos = await FilesModel.getPostFileInfos(post.boardName, post.number, { archived: post.archived });
+  if (!withFileInfos) {
+    projection.fileInfos = 0;
   }
-  if (withReferences) {
-    await PostReferencesModel.addReferencesToPost(post)
+  if (!withReferences) {
+    projection.referencedPosts = 0;
+    projection.referringPosts = 0;
   }
+  return projection;
 }
 
 export async function getPost(boardName, postNumber, options) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!postNumber) {
-    return Promise.reject(new Error(Tools.translate('Invalid post number')));
+    throw new Error(Tools.translate('Invalid post number'));
   }
-  let key = `${boardName}:${postNumber}`;
-  let post = await Posts.getOne(key);
-  if (!post) {
-    post = await ArchivedPosts.getOne(key);
-  }
-  if (!post) {
-    return post;
-  }
-  let threadPostNumbers = await ThreadsModel.getThreadPostNumbers(boardName, post.threadNumber);
-  post.sequenceNumber = threadPostNumbers.indexOf(post.number) + 1;
-  await addDataToPost(board, post, options);
-  return post;
+  let Post = await client.collection('post');
+  return await Post.findOne({
+    boardName: boardName,
+    number: postNumber
+  }, createPostProjection(options));
 }
 
-export async function getPosts(boardName, postNumbers, options) {
+function getPostBoard(boardName) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
-  if (!_(postNumbers).isArray()) {
-    postNumbers = [postNumbers];
+  if (!board.postingEnabled) {
+    throw new Error(Tools.translate('Posting is disabled at this board'));
   }
-  postNumbers = postNumbers.map((postNumber) => {
-    return Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
-  });
-  if (postNumbers.some(postNumber => !postNumber)) {
-    return Promise.reject(new Error(Tools.translate('Invalid post number')));
-  }
-  let posts = await Posts.getSome(postNumbers.map(postNumber => `${boardName}:${postNumber}`));
-  posts = _(posts).toArray();
-  let mayBeArchivedPostNumbers = posts.map((post, index) => {
-    return {
-      post: post,
-      index: index
-    };
-  }).filter((post) => !post.post).map((post) => {
-    return {
-      index: post.index,
-      postNumber: postNumbers[post.index]
-    };
-  });
-  if (mayBeArchivedPostNumbers.length > 0) {
-    let numbers = mayBeArchivedPostNumbers.map(post => post.postNumber);
-    let archivedPosts = await ArchivedPosts.getSome(numbers.map(postNumber => `${boardName}:${postNumber}`));
-    archivedPosts.forEach((post, index) => {
-      posts[mayBeArchivedPostNumbers[index].index] = post;
-    });
-  }
-  if (posts.length <= 0) {
-    return [];
-  }
-  let uniqueThreadNumbers = _(posts.map(post => post.threadNumber)).uniq();
-  let threadsPostNumbers = await Tools.series(uniqueThreadNumbers, async function(threadNumber) {
-    return await ThreadsModel.getThreadPostNumbers(boardName, threadNumber);
-  }, true);
-  threadsPostNumbers = threadsPostNumbers.reduce((acc, list, index) => {
-    acc[uniqueThreadNumbers[index]] = list;
-    return acc;
-  }, {});
-  await Tools.series(posts, async function(post, index) {
-    if (!post) {
-      return;
-    }
-    post.sequenceNumber = threadsPostNumbers[post.threadNumber].indexOf(post.number) + 1;
-    await addDataToPost(board, post, options);
-  });
-  return posts;
+  return board;
 }
 
-export async function getPostKeys({ archived, nonArchived } = {}) {
-  let archivedKeys = [];
-  let nonArchivedKeys = [];
-  if (archived) {
-    archivedKeys = await ArchivedPosts.keys();
+async function getPostThread(boardName, threadNumber) {
+  let Thread = await client.collection('thread');
+  let thread = await Thread.findOne({
+    boardName: boardName,
+    number: threadNumber
+  }, {
+    closed: 1,
+    unbumpable: 1
+  });
+  if (!thread) {
+    throw new Error(Tools.translate('No such thread'));
   }
-  if (nonArchived || (!archived && !nonArchived)) {
-    nonArchivedKeys = await Posts.keys();
+  if (thread.closed) {
+    throw new Error(Tools.translate('Posting is disabled in this thread'));
   }
-  return nonArchivedKeys.concat(archivedKeys);
+  return thread;
+}
+
+async function getPostCount(boardName, threadNumber, lastPostNumber) {
+  let Post = await client.collection('post');
+  let query = {
+    boardName: boardName,
+    threadNumber: threadNumber
+  };
+  if (lastPostNumber) {
+    query.number = { $lt: lastPostNumber };
+  }
+  return await Post.count(query);
+}
+
+function createPostOptions(req, sage, tripcode, signAsOp) {
+  return {
+    sage: sage,
+    showTripcode: !!req.hashpass && ('true' === tripcode),
+    signAsOp: ('true' === signAsOp),
+    bannedFor: false
+  };
+}
+
+export function createPostUser(req, accessLevel, password) {
+  return {
+    hashpass: (req.hashpass || null),
+    ip: req.ip,
+    level: accessLevel,
+    password: Tools.sha1(password)
+  };
+}
+
+async function adjustPostSequenceNumber(boardName, postNumber, oldPostCount, newPostCount) {
+  let Post = await client.collection('post');
+  await Post.updateOne({
+    boardName: boardName,
+    number: postNumber
+  }, {
+    $inc: { sequenceNumber: (newPostCount - oldPostCount) }
+  });
+}
+
+async function setThreadUpdateTime(boardName, threadNumber, dateTime) {
+  let Thread = await client.collection('thread');
+  let { matchedCount } = await Thread.updateOne({
+    boardName: boardName,
+    number: threadNumber
+  }, {
+    $set: { updatedAt: dateTime.toISOString() }
+  });
+  if (matchedCount <= 0) {
+    throw new Error(Tools.translate('No such thread'));
+  }
 }
 
 export async function createPost(req, fields, files, transaction, { postNumber, date } = {}) {
   let { boardName, threadNumber, text, markupMode, name, subject, sage, signAsOp, tripcode, password } = fields;
   threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
-  let board = Board.board(boardName);
-  if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
-  }
-  if (!board.postingEnabled) {
-    return Promise.reject(new Error(Tools.translate('Posting is disabled at this board')));
-  }
   date = date || Tools.now();
+  let board = getPostBoard(boardName);
   if (postNumber) {
     threadNumber = postNumber;
+  }
+  let { unbumpable } = await getPostThread(boardName, threadNumber);
+  unbumpable = !!unbumpable;
+  let Post = await client.collection('post');
+  let postCount = await getPostCount(boardName, threadNumber);
+  if (postCount >= board.postLimit) {
+    throw new Error(Tools.translate('Post limit reached'));
   }
   let rawText = text || null;
   let markupModes = markup.markupModes(markupMode);
   let referencedPosts = {};
   sage = ('true' === sage);
-  tripcode = ('true' === tripcode);
-  signAsOp = ('true' === signAsOp);
-  password = Tools.sha1(password);
-  let hashpass = (req.hashpass || null);
-  let thread = await ThreadsModel.getThread(boardName, threadNumber);
-  if (!thread) {
-    return Promise.reject(new Error(Tools.translate('No such thread')));
-  }
-  if (thread.closed) {
-    return Promise.reject(new Error(Tools.translate('Posting is disabled in this thread')));
-  }
-  let unbumpable = !!thread.unbumpable;
   let accessLevel = req.level(boardName) || null;
-  let postCount = await ThreadsModel.getThreadPostCount(boardName, threadNumber);
-  if (postCount >= board.postLimit) {
-    return Promise.reject(new Error(Tools.translate('Post limit reached')));
-  }
   text = await markup(boardName, rawText, {
     markupModes: markupModes,
-    referencedPosts: referencedPosts,
-    accessLevel: accessLevel
+    accessLevel: accessLevel,
+    referencedPosts: referencedPosts
   });
-  let extraData = await board.postExtraData(req, fields, files);
-  if (typeof extraData === 'undefined') {
-    extraData = null;
-  }
+  let extraData = await board.getPostExtraData(req, fields, files);
   if (!postNumber) {
     postNumber = await BoardsModel.nextPostNumber(boardName);
   }
-  let plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
+  let fileInfos = FilesModel.createFileInfos(files, boardName, postNumber);
   let post = {
-    bannedFor: false,
     boardName: boardName,
-    createdAt: date.toISOString(),
-    geolocation: req.geolocationInfo,
-    markup: markupModes,
-    name: name || null,
     number: postNumber,
-    options: {
-      sage: sage,
-      showTripcode: !!req.hashpass && tripcode,
-      signAsOp: signAsOp
-    },
-    rawText: rawText,
-    subject: subject || null,
-    text: text || null,
-    plainText: plainText,
     threadNumber: threadNumber,
-    updatedAt: null,
-    user: {
-      hashpass: hashpass,
-      ip: req.ip,
-      level: accessLevel,
-      password: password
-    }
+    sequenceNumber: postCount + 1,
+    archived: false,
+    name: name || null,
+    subject: subject || null,
+    rawText: rawText,
+    text: text || null,
+    markup: markupModes,
+    options: createPostOptions(req, sage, tripcode, signAsOp),
+    user: createPostUser(req, accessLevel, password),
+    geolocation: req.geolocationInfo,
+    fileInfos: fileInfos,
+    fileInfoCount: fileInfos.length,
+    extraData: extraData,
+    referencedPosts: _(referencedPosts).toArray(),
+    referringPosts: [],
+    createdAt: date.toISOString(),
+    updatedAt: null
   };
   transaction.setPostNumber(postNumber);
-  await Posts.setOne(`${boardName}:${postNumber}`, post);
-  await board.storeExtraData(postNumber, extraData, false);
-  await PostReferencesModel.addReferencedPosts(post, referencedPosts);
-  await UsersModel.addUserPostNumber(req.ip, boardName, postNumber);
-  await FilesModel.addFilesToPost(boardName, postNumber, files);
-  await Search.indexPost({
-    boardName: boardName,
-    postNumber: postNumber,
-    threadNumber: threadNumber,
-    plainText: plainText,
-    subject: subject
-  });
-  await ThreadsModel.addThreadPostNumber(boardName, threadNumber, postNumber);
-  if (!sage && postCount < board.bumpLimit && !unbumpable) {
-    await ThreadsModel.setThreadUpdateTime(boardName, threadNumber, date.toISOString());
+  await Post.insertOne(post);
+  let postCountNew = await getPostCount(boardName, threadNumber, postNumber);
+  if (postCountNew !== postCount) {
+    await adjustPostSequenceNumber(boardName, postNumber, postCount, postCountNew);
+    //TODO: Get new sequenceNumber
   }
-  post.referencedPosts = referencedPosts;
-  post.fileInfos = files;
+  if (!sage && (postCount < board.bumpLimit) && !unbumpable) {
+    await setThreadUpdateTime(boardName, threadNumber, date);
+  }
+  await PostReferencesModel.addReferringPosts(referencedPosts, boardName, postNumber, threadNumber);
+  await IPC.render(boardName, threadNumber, postNumber, 'create');
+  (async function() {
+    await PostReferencesModel.rerenderReferencedPosts(boardName, threadNumber, referencedPosts);
+  })();
   return post;
-}
-
-export async function rerenderPost(boardName, postNumber, { nogenerate } = {}) {
-  let post = await getPost(boardName, postNumber);
-  if (!post) {
-    return Promise.reject(new Error(Tools.translate('No such post')));
-  }
-  let referencedPosts = {};
-  let text = await markup(boardName, post.rawText, {
-    markupModes: post.markup,
-    referencedPosts: referencedPosts,
-    accessLevel: post.user.level
-  });
-  post.text = text;
-  let source = post.archived ? ArchivedPosts : Posts;
-  await source.setOne(`${boardName}:${postNumber}`, post);
-  await PostReferencesModel.removeReferencedPosts(post, { nogenerate: nogenerate });
-  await PostReferencesModel.addReferencedPosts(post, referencedPosts, {
-    nogenerate: nogenerate,
-    archived: post.archived
-  });
-  if (!nogenerate) {
-    IPC.render(boardName, post.threadNumber, postNumber, 'edit');
-  }
-}
-
-export async function removePost(boardName, postNumber, { removingThread } = {}) {
-  let board = Board.board(boardName);
-  if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
-  }
-  let key = `${boardName}:${postNumber}`
-  await PostsPlannedForDeletion.addOne(key);
-  let post = await getPost(boardName, postNumber, { withReferences: true });
-  await ThreadsModel.removeThreadPostNumber(boardName, post.threadNumber, postNumber, { archived: post.archived });
-  let source = post.archived ? ArchivedPosts : Posts;
-  await source.deleteOne(key);
-  try {
-    await PostReferencesModel.rerenderReferringPosts(post, { removingThread: removingThread });
-  } catch (err) {
-    Logger.error(err.stack || err);
-  }
-  try {
-    await PostReferencesModel.removeReferences(post);
-  } catch (err) {
-    Logger.error(err.stack || err);
-  }
-  await UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber, { archived: post.archived });
-  await FilesModel.removePostFileInfos(boardName, postNumber, { archived: post.archived });
-  await board.removeExtraData(postNumber, !!post.archived);
-  await Search.removePostIndex(boardName, postNumber);
-  await PostsPlannedForDeletion.deleteOne(key);
 }
 
 export async function editPost(req, fields) {
   let { boardName, postNumber, text, name, subject, sage, markupMode } = fields;
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!postNumber) {
-    return Promise.reject(new Error(Tools.translate('Invalid post number')));
+    throw new Error(Tools.translate('Invalid post number'));
   }
+  let Post = await client.collection('post');
+  let query = {
+    boardName: boardName,
+    number: postNumber
+  };
+  let post = await Post.findOne(query, {
+    threadNumber: 1,
+    referencedPosts: 1,
+    extraData: 1
+  });
+  if (!post) {
+    throw new Error(Tools.translate('No such post'));
+  }
+  let threadNumber = post.threadNumber;
+  let oldReferencedPosts = post.referencedPosts;
   let date = Tools.now();
   let rawText = text || null;
   let markupModes = markup.markupModes(markupMode);
   let referencedPosts = {};
   sage = ('true' === sage);
-  let post = await getPost(boardName, postNumber, { withExtraData: true });
-  if (!post) {
-    return Promise.reject(new Error(Tools.translate('Invalid post')));
-  }
-  let key = `${boardName}:${postNumber}`;
-  text = await markup(board.name, rawText, {
+  text = await markup(boardName, rawText, {
     markupModes: markupModes,
-    referencedPosts: referencedPosts,
-    accessLevel: req.level(board.name)
+    accessLevel: req.level(boardName),
+    referencedPosts: referencedPosts
   });
-  let plainText = text ? Renderer.plainText(text, { brToNewline: true }) : null;
-  let extraData = await board.postExtraData(req, fields, null, post);
-  if (post.hasOwnProperty('extraData')) {
-    delete post.extraData;
-  }
-  if (post.hasOwnProperty('bannedFor')) {
-    delete post.bannedFor;
-  }
-  post.markup = markupModes;
-  post.name = name || null;
-  post.plainText = plainText;
-  post.rawText = rawText;
-  post.subject = subject || null;
-  post.text = text || null;
-  post.updatedAt = date.toISOString();
-  let source = post.archived ? ArchivedPosts : Posts;
-  await source.setOne(key, post);
-  await board.removeExtraData(postNumber, !!post.archived);
-  await board.storeExtraData(postNumber, extraData, !!post.archived);
-  await PostReferencesModel.removeReferencedPosts(post);
-  await PostReferencesModel.addReferencedPosts(post, referencedPosts, { archived: post.archived });
-  await Search.updatePostIndex(boardName, postNumber, (body) => {
-    body.plainText = plainText;
-    body.subject = subject;
-    return body;
+  let extraData = await board.editPostExtraData(req, fields, post.extraData);
+  let result = await Post.findOneAndUpdate(query, {
+    $set: {
+      markup: markupModes,
+      name: name || null,
+      rawText: rawText,
+      subject: subject || null,
+      text: text || null,
+      referencedPosts: _(referencedPosts).toArray(),
+      updatedAt: date
+    }
+  }, {
+    projection: createPostProjection({
+      withFileInfos: true,
+      withExtraData: true,
+      withReferences: true
+    }),
+    returnOriginal: false
   });
+  post = result.value;
+  if (!post) {
+    throw new Error(Tools.translate('No such post'));
+  }
+  await PostReferencesModel.removeReferringPosts(boardName, postNumber);
+  await PostReferencesModel.addReferringPosts(referencedPosts, boardName, postNumber, threadNumber);
+  (async function() {
+    await IPC.render(boardName, threadNumber, postNumber, 'edit');
+    await PostReferencesModel.rerenderReferencedPosts(boardName, threadNumber, referencedPosts, oldReferencedPosts);
+  })();
   return post;
 }
 
-export async function deletePost(req, { boardName, postNumber, archived }) {
+export async function deletePost(boardName, postNumber) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!postNumber) {
-    return Promise.reject(new Error(Tools.translate('Invalid post number')));
+    throw new Error(Tools.translate('Invalid post number'));
   }
-  let post = await getPost(boardName, postNumber);
+  let Post = await client.collection('post');
+  let result = await Post.findOneAndDelete({
+    boardName: boardName,
+    threadNumber: { $ne: postNumber },
+    number: postNumber,
+    archived: false
+  }, {
+    projection: {
+      threadNumber: 1,
+      referencedPosts: 1,
+      referringPosts: 1,
+      fileInfos: 1
+    }
+  });
+  let post = result.value;
   if (!post) {
-    return Promise.reject(new Error(Tools.translate('No such post')));
+    throw new Error(Tools.translate('No such post'));
   }
-  let isThread = post.threadNumber === post.number;
-  archived = ('true' === archived);
-  if (archived && !isThread) {
-    return Promise.reject(new Error(Tools.translate('Deleting posts from archived threads is not allowed')));
-  }
-  if (isThread) {
-    await ThreadsModel.removeThread(boardName, postNumber, { archived: archived });
-  } else {
-    await removePost(boardName, postNumber);
-  }
-  if (isThread && archived) {
-    await Tools.series(['json', 'html'], async function(suffix) {
-      return await FS.remove(`${__dirname}/../../public/${boardName}/arch/${postNumber}.${suffix}`);
-    });
-    await IPC.renderArchive(boardName);
-  } else if (!archived) {
-    await IPC.render(boardName, post.threadNumber, postNumber, isThread ? 'delete' : 'edit');
-  }
+  let threadNumber = post.threadNumber;
+  let oldReferencedPosts = post.referencedPosts;
+  let referringPosts = post.referringPosts;
+  await Post.updateMany({
+    boardName: boardName,
+    threadNumber: threadNumber,
+    number: { $gt: postNumber }
+  }, {
+    $inc: { sequenceNumber: -1 }
+  });
+  await PostReferencesModel.removeReferringPosts(boardName, postNumber);
+  await IPC.render(boardName, threadNumber, postNumber, 'edit');
+  (async function() {
+    let refs = await PostReferencesModel.updateReferringPosts(referringPosts, boardName, postNumber, threadNumber);
+    await PostReferencesModel.rerenderReferencedPosts(boardName, threadNumber, refs, oldReferencedPosts);
+    await FilesModel.removeFiles(post.fileInfos);
+  })();
 }
 
-async function forEachPost(targets, action) {
+export async function markupPosts(targets) {
   if (typeof targets !== 'object') {
     return;
   }
@@ -382,168 +328,102 @@ async function forEachPost(targets, action) {
       return acc;
     }, {});
   }
-  let postKeys = await getPostKeys({
-    archived: true,
-    nonArchived: true
-  });
-  postKeys = postKeys.reduce((acc, key) => {
-    let [boardName, postNumber] = key.split(':');
-    let set = acc.get(boardName);
-    if (!set) {
-      set = new Set();
-      acc.set(boardName, set);
-    }
-    set.add(+postNumber);
-    return acc;
-  }, new Map());
-  await Tools.series(targets, async function(postNumbers, boardName) {
+  let Post = await client.collection('post');
+  let posts = await Tools.series(targets, async function(postNumbers, boardName) {
     if (typeof postNumbers !== 'string' && !_(postNumbers).isArray()) {
-      return;
+      return [];
     }
     if (!Board.board(boardName)) {
       Logger.error(new Error(Tools.translate('Invalid board name: $[1]', '', boardName)));
-      return;
+      return [];
     }
-    let set = postKeys.get(boardName);
-    if ('*' === postNumbers) {
-      postNumbers = set ? Array.from(set) : [];
-    } else {
-      postNumbers = set ? postNumbers.filter(postNumber => set.has(postNumber)) : [];
-    }
-    return await Tools.series(postNumbers, async function(postNumber) {
-      try {
-        return await action(boardName, postNumber);
-      } catch (err) {
-        Logger.error(err.stack || err);
-      }
+    let posts = await Post.find({ boardName: boardName }, {
+      number: 1,
+      threadNumber: 1
     });
-  });
+    posts = posts.map(({ number, threadNumber }) => {
+      return {
+        boardName: boardName,
+        postNumber: postNumber,
+        threadNumber: threadNumber
+      };
+    });
+    if ('*' !== postNumbers) {
+      posts = posts.filter(({ postNumber }) => postNumber.hasOwnProperty(postNumber));
+    }
+    return posts;
+  }, true);
+  let refs = await PostReferencesModel.updateReferringPosts(posts);
+  await PostReferencesModel.rerenderReferencedPosts(undefined, undefined, refs);
 }
 
-export async function rerenderPosts(targets) {
-  return await forEachPost(targets, async function(boardName, postNumber) {
-    console.log(Tools.translate('Rendering post: >>/$[1]/$[2]', '', boardName, postNumber));
-    return await rerenderPost(boardName, postNumber, { nogenerate: true });
-  });
-}
-
-async function rebuildPostSearchIndex(boardName, postNumber) {
-  let key = `${boardName}:${postNumber}`;
-  let post = await getPost(boardName, postNumber);
-  await Search.updatePostIndex(boardName, postNumber, (body) => {
-    body.plainText = post.plainText;
-    body.subject = post.subject;
-    body.archived = !!post.archived;
-    return body;
-  });
-}
-
-export async function rebuildSearchIndex(targets) {
-  return await forEachPost(targets || {}, async function(boardName, postNumber) {
-    console.log(Tools.translate('Rebuilding post search index: >>/$[1]/$[2]', '', boardName, postNumber));
-    return await rebuildPostSearchIndex(boardName, postNumber);
-  });
-}
-
-export async function copyPosts({ sourceBoardName, postNumbers, targetBoardName, initialPostNumber }) {
+export async function copyPosts({ sourceBoardName, sourceThreadNumber, targetBoardName, initialPostNumber }) {
+  let sourceBoard = Board.board(sourceBoardName);
+  if (!sourceBoard) {
+    throw new Error(Tools.translate('Invalid board'));
+  }
   let targetBoard = Board.board(targetBoardName);
   if (!targetBoard) {
     throw new Error(Tools.translate('Invalid board'));
   }
-  let posts = await getPosts(sourceBoardName, postNumbers, {
-    withFileInfos: true,
-    withReferences: true,
-    withExtraData: true
-  });
+  let Post = await client.collection('post');
+  let posts = await Post.find({
+    boardName: sourceBoardName,
+    threadNumber: sourceThreadNumber
+  }, { _id: 0 }).toArray();
   let postNumberMap = posts.reduce((acc, post, index) => {
     acc[post.number] = initialPostNumber + index;
     return acc;
   }, {});
-  let sourcePath = `${__dirname}/../../public/${sourceBoardName}/src`;
-  let sourceThumbPath = `${__dirname}/../../public/${sourceBoardName}/thumb`;
-  let targetPath = `${__dirname}/../../public/${targetBoardName}/src`;
-  let targetThumbPath = `${__dirname}/../../public/${targetBoardName}/thumb`;
-  await mkpath(targetPath);
-  await mkpath(targetThumbPath);
-  let toUpdate = [];
   let toRerender = [];
-  await Tools.series(posts, async function(post) {
+  let toMarkup = [];
+  posts = await Tools.series(posts, async function(post) {
     post.number = postNumberMap[post.number];
     post.boardName = targetBoardName;
     post.threadNumber = initialPostNumber;
-    let { fileInfos, referencedPosts, referringPosts, extraData } = post;
-    delete post.fileInfos;
-    delete post.referencedPosts;
-    delete post.referringPosts;
-    delete post.extraData;
-    if (post.hasOwnProperty('bannedFor')) {
-      delete post.bannedFor;
-    }
     if (post.rawText) {
-      let text = PostReferencesModel.replacePostLinks(post.rawText, sourceBoardName, referencedPosts, postNumberMap);
+      let text = PostReferencesModel.replacePostLinks(post.rawText, sourceBoardName, post.referencedPosts,
+        postNumberMap);
       if (text !== post.rawText) {
         post.text = await markup(targetBoardName, text, {
           markupModes: post.markup,
           accessLevel: post.user.level
         });
-        post.plainText = Renderer.plainText(text, { brToNewline: true });
       }
     }
-    referencedPosts = PostReferencesModel.replacePostReferences(referencedPosts, {
-      boardName: sourceBoardName,
-      threadNumber: post.threadNumber
-    }, {
-      boardName: targetBoardName,
-      threadNumber: initialPostNumber
-    }, postNumberMap, toUpdate);
-    referringPosts = PostReferencesModel.replacePostReferences(referringPosts, {
+    post.extraData = await targetBoard.transformPostExtraData(post.extraData, sourceBoard);
+    post.referencedPosts = PostReferencesModel.replacePostReferences(post.referencedPosts, {
       boardName: sourceBoardName,
       threadNumber: post.threadNumber
     }, {
       boardName: targetBoardName,
       threadNumber: initialPostNumber
     }, postNumberMap, toRerender);
-    await Tools.series(fileInfos, async function(fileInfo) {
-      let oldFileName = fileInfo.name;
-      let oldThumbName = fileInfo.thumb.name;
-      let baseName = await IPC.send('fileName');
-      fileInfo.name = fileInfo.name.replace(/^\d+/, baseName);
-      fileInfo.thumb.name = fileInfo.thumb.name.replace(/^\d+/, baseName);
-      await FS.copy(`${sourcePath}/${oldFileName}`, `${targetPath}/${fileInfo.name}`);
-      await FS.copy(`${sourceThumbPath}/${oldThumbName}`, `${targetThumbPath}/${fileInfo.thumb.name}`);
-    });
-    await FilesModel.addFilesToPost(targetBoardName, post.number, fileInfos);
-    await PostReferencesModel.storeReferencedPosts(targetBoardName, post.number, referencedPosts);
-    await PostReferencesModel.storeReferringPosts(targetBoardName, post.number, referringPosts);
-    await targetBoard.storeExtraData(post.number, extraData, false);
-    await Posts.setOne(`${targetBoardName}:${post.number}`, post);
-    await UsersModel.addUserPostNumber(post.user.ip, targetBoardName, post.number);
-    await Search.indexPost({
+    post.referringPosts = PostReferencesModel.replacePostReferences(post.referringPosts, {
+      boardName: sourceBoardName,
+      threadNumber: post.threadNumber
+    }, {
       boardName: targetBoardName,
-      postNumber: post.number,
-      threadNumber: initialPostNumber,
-      plainText: post.plainText,
-      subject: post.subject
-    });
-  });
+      threadNumber: initialPostNumber
+    }, postNumberMap, toMarkup);
+    let newFileInfos = await FilesModel.copyFiles(post.fileInfos, sourceBoardName, targetBoardName);
+    post.fileInfos = FilesModel.createFileInfos(newFileInfos, targetBoardName, post.number);
+    return post;
+  }, true);
+  await Post.insertMany(posts);
   return {
     postNumberMap: postNumberMap,
-    toUpdate: toUpdate,
-    toRerender: toRerender
+    toRerender: toRerender,
+    toMarkup: toMarkup
   };
 }
 
-export async function rerenderMovedThreadRelatedPosts({ posts, sourceBoardName, targetBoardName, postNumberMap }) {
+export async function markupMovedThreadRelatedPosts({ posts, sourceBoardName, targetBoardName, postNumberMap }) {
+  let Post = await client.collection('post');
   await Tools.series(posts, async function(post) {
     post = await getPost(post.boardName, post.postNumber, { withReferences: true });
     if (!post || !post.rawText) {
       return;
-    }
-    let { referencedPosts } = post;
-    delete post.referencedPosts;
-    delete post.referringPosts;
-    if (post.hasOwnProperty('bannedFor')) {
-      delete post.bannedFor;
     }
     if (!post.rawText) {
       return;
@@ -553,27 +433,27 @@ export async function rerenderMovedThreadRelatedPosts({ posts, sourceBoardName, 
       sourceBoardName: sourceBoardName,
       targetBoardName: targetBoardName,
       postBoardName: post.boardName,
-      referencedPosts: referencedPosts,
+      referencedPosts: post.referencedPosts,
       postNumberMap: postNumberMap
     });
     if (text !== post.rawText) {
-      post.text = await markup(targetBoardName, text, {
+      text = await markup(targetBoardName, text, {
         markupModes: post.markup,
         accessLevel: post.user.level
       });
-      post.plainText = Renderer.plainText(text, { brToNewline: true });
     }
-    let source = post.archived ? ArchivedPosts : Posts;
-    await source.setOne(`${post.boardName}:${post.number}`, post);
-    await Search.updatePostIndex(post.boardName, post.number, (body) => {
-      body.plainText = post.plainText;
-      return body;
+    await Post.updateOne({
+      boardName: post.boardName,
+      number: post.number
+    }, {
+      $set: { text: text }
     });
   });
 }
 
 export async function updateMovedThreadRelatedPosts({ posts, sourceBoardName, targetBoardName, sourceThreadNumber,
   targetThreadNumber, postNumberMap }) {
+  let Post = await client.collection('post');
   await Tools.series(posts, async function(post) {
     post = await getPost(post.boardName, post.postNumber, { withReferences: true });
     if (!post) {
@@ -590,33 +470,54 @@ export async function updateMovedThreadRelatedPosts({ posts, sourceBoardName, ta
     };
     referencedPosts = PostReferencesModel.replaceRelatedPostReferences(referencedPosts, source, target, postNumberMap);
     referringPosts = PostReferencesModel.replaceRelatedPostReferences(referringPosts, source, target, postNumberMap);
-    await PostReferencesModel.removeReferencedPosts(post.boardName, post.number, { archived: post.archived });
-    await PostReferencesModel.removeReferringPosts(post.boardName, post.number, { archived: post.archived });
-    await PostReferencesModel.storeReferencedPosts(post.boardName, post.number, referencedPosts,
-      { archived: post.archived });
-    await PostReferencesModel.storeReferringPosts(post.boardName, post.number, referringPosts,
-      { archived: post.archived });
+    await Post.updateOne({
+      boardName: post.boardName,
+      number: post.number
+    }, {
+      $set: {
+        referencedPosts: referencedPosts,
+        referringPosts: referringPosts
+      }
+    });
   });
 }
 
-export async function pushPostToArchive(boardName, postNumber) {
+export async function getThreadPosts(boardName, threadNumber, { limit, offset, sort } = {}) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
-  let key = `${boardName}:${postNumber}`;
-  let post = await Posts.getOne(key);
-  post.archived = true;
-  await ArchivedPosts.setOne(key, post);
-  await Posts.deleteOne(key);
-  let extraData = await board.loadExtraData(postNumber, false);
-  await board.storeExtraData(postNumber, extraData, true);
-  await board.removeExtraData(postNumber, false);
-  await Search.updatePostIndex(boardName, postNumber, (body) => {
-    body.archived = true;
-    return body;
-  });
-  await FilesModel.pushPostFileInfosToArchive(boardName, postNumber);
-  await UsersModel.addUserPostNumber(post.user.ip, boardName, postNumber, { archived: true });
-  await UsersModel.removeUserPostNumber(post.user.ip, boardName, postNumber);
+  threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+  if (!threadNumber) {
+    throw new Error(Tools.translate('Invalid thread number'));
+  }
+  let Post = await client.collection('post');
+  let cursor = Post.find({
+    boardName: boardName,
+    threadNumber: threadNumber
+  }, createPostProjection({
+    withExtraData: true,
+    withFileInfos: true,
+    withReferences: true
+  }));
+  if (sort) {
+    cursor = cursor.sort({ number: -1 });
+  }
+  limit = Tools.option(limit, 'number', 0, { test: (l) => { return l > 0; } });
+  offset = Tools.option(offset, 'number', 0, { test: (o) => { return o > 0; } });
+  if (limit || offset) {
+    cursor = cursor.limit(limit + offset);
+  }
+  let posts = await cursor.toArray();
+  if (sort) {
+    posts.reverse();
+  }
+  if (limit) {
+    if (posts.length > limit) {
+      posts.splice(0, posts.length - limit);
+    } else if (offset) {
+      posts.splice(0, offset);
+    }
+  }
+  return posts;
 }

@@ -1,87 +1,140 @@
 import _ from 'underscore';
 
 import * as IPC from '../helpers/ipc';
+import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 import * as PostsModel from './posts';
-import Hash from '../storage/hash';
-import redisClient from '../storage/redis-client-factory';
-import sqlClient from '../storage/sql-client-factory';
+import markup from '../markup';
+import mongodbClient from '../storage/mongodb-client-factory';
 
-let ArchivedReferringPosts = new Hash(sqlClient(), 'archivedReferringPosts');
-let ArchivedReferencedPosts = new Hash(sqlClient(), 'archivedReferencedPosts');
-let ReferringPosts = new Hash(redisClient(), 'referringPosts');
-let ReferencedPosts = new Hash(redisClient(), 'referencedPosts');
+let client = mongodbClient();
 
-function sortedReferences(references) {
-  return _(references).toArray().sort((a, b) => {
-    return (a.createdAt && b.createdAt && a.createdAt.localeCompare(b.createdAt))
-      || a.boardName.localeCompare(b.boardName) || (a.postNumber - b.postNumber);
-  }).map((reference) => {
-    delete reference.createdAt;
-    return reference;
+export async function removeReferringPosts(boardName, postNumber) {
+  let Post = await client.collection('post');
+  return await Post.updateMany({
+    referringPosts: {
+      $elemMatch: {
+        boardName: boardName,
+        postNumber: postNumber
+      }
+    }
+  }, {
+    $pull: {
+      referringPosts: {
+        boardName: boardName,
+        postNumber: postNumber
+      }
+    }
   });
 }
 
-export async function addReferencesToPost(post) {
-  let key = `${post.boardName}:${post.number}`;
-  let referringSource = post.archived ? ArchivedReferringPosts : ReferringPosts;
-  let referencedSource = post.archived ? ArchivedReferencedPosts : ReferencedPosts;
-  let referringPosts = await referringSource.getAll(key);
-  let referencedPosts = await referencedSource.getAll(key);
-  post.referringPosts = sortedReferences(referringPosts);
-  post.referencedPosts = sortedReferences(referencedPosts);
-}
-
-export async function addReferencedPosts(post, referencedPosts, { nogenerate, archived } = {}) {
-  let key = `${post.boardName}:${post.number}`;
-  let referringSource = post.archived ? ArchivedReferringPosts : ReferringPosts;
-  let referencedSource = post.archived ? ArchivedReferencedPosts : ReferencedPosts;
-  //TODO: Optimise (hmset)
-  await Tools.series(referencedPosts, async function(ref, refKey) {
-    await referencedSource.setOne(refKey, ref, key);
-    await referringSource.setOne(key, {
-      boardName: post.boardName,
-      postNumber: post.number,
-      threadNumber: post.threadNumber,
-      createdAt: refKey.createdAt
-    }, refKey);
-  });
-  if (!nogenerate) {
-    _(referencedPosts).each((ref, refKey) => {
-      if (ref.boardName !== post.boardName || ref.threadNumber !== post.threadNumber) {
-        IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
+export async function addReferringPosts(referencedPosts, boardName, postNumber, threadNumber) {
+  let Post = await client.collection('post');
+  await Tools.series(referencedPosts, (ref) => {
+    return Post.updateOne({
+      boardName: ref.boardName,
+      number: ref.postNumber
+    }, {
+      $push: {
+        referringPosts: {
+          boardName: boardName,
+          postNumber: postNumber,
+          threadNumber: threadNumber,
+          createdAt: ref.createdAt
+        }
       }
     });
-  }
+  });
 }
 
-export async function removeReferences({ boardName, number, threadNumber, archived }, { nogenerate } = {}) {
-  let key = `${boardName}:${number}`;
-  let referencedSource = archived ? ArchivedReferencedPosts : ReferencedPosts;
-  let referencedPosts = await referencedSource.getAll(key);
-  await Tools.series(referencedPosts, async function(ref, refKey) {
-    await ReferringPosts.deleteOne(key, refKey);
-    await ArchivedReferringPosts.deleteOne(key, refKey);
+function pickPostsToRerender(referencedPosts, boardName, postNumber) {
+  return _(referencedPosts).filter((ref) => {
+    return (boardName !== ref.boardName) || (postNumber !== ref.postNumber);
+  }).reduce((acc, ref) => {
+    acc[`${ref.boardName}:${ref.postNumber}`] = ref;
+    return acc;
+  }, {});
+}
+
+function pickThreadsToRerender(referencedPosts, boardName, threadNumber) {
+  return _(referencedPosts).filter((ref) => {
+    return (boardName !== ref.boardName) || (threadNumber !== ref.threadNumber);
+  }).reduce((acc, ref) => {
+    acc[`${ref.boardName}:${ref.threadNumber}`] = ref;
+    return acc;
+  }, {});
+}
+
+async function updatePostMarkup(boardName, postNumber) {
+  console.log(Tools.translate('Rendering post text: >>/$[1]/$[2]', '', boardName, postNumber));
+  let Post = await client.collection('post');
+  let query = {
+    boardName: boardName,
+    number: postNumber
+  };
+  let post = await Post.findOne(query, {
+    threadNumber: 1,
+    rawText: 1,
+    markup: 1,
+    'user.level': 1,
+    referencedPosts: 1
   });
-  if (!nogenerate) {
-    _(referencedPosts).filter((ref) => {
-      return (ref.boardName !== boardName) || (ref.threadNumber !== threadNumber);
-    }).forEach((ref) => {
-      IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
+  if (!post) {
+    throw new Error(Tools.translate('No such post'));
+  }
+  let oldReferencedPosts = post.referencedPosts;
+  let referencedPosts = {};
+  let text = await markup(boardName, post.rawText, {
+    markupModes: post.markup,
+    referencedPosts: referencedPosts,
+    accessLevel: post.user.level
+  });
+  let { matchedCount } = await Post.updateOne(query, {
+    $set: {
+      text: text,
+      referencedPosts: _(referencedPosts).toArray()
+    }
+  });
+  if (matchedCount <= 0) {
+    throw new Error(Tools.translate('No such post'));
+  }
+  return {
+    oldReferencedPosts: oldReferencedPosts,
+    newReferencedPosts: referencedPosts
+  };
+}
+
+export async function updateReferringPosts(referringPosts, boardName, postNumber, threadNumber) {
+  let shouldAddReferringPosts = (boardName && postNumber && threadNumber);
+  let refs = await Tools.series(referringPosts, async function(ref) {
+    try {
+      let { oldReferencedPosts, newReferencedPosts } = await updatePostMarkup(ref.boardName, ref.postNumber);
+      oldReferencedPosts = pickPostsToRerender(oldReferencedPosts, boardName, postNumber);
+      await removeReferringPosts(ref.boardName, ref.postNumber);
+      newReferencedPosts = pickPostsToRerender(newReferencedPosts, boardName, postNumber);
+      await addReferringPosts(newReferencedPosts, ref.boardName, ref.postNumber, ref.threadNumber);
+      return _.extend(oldReferencedPosts, newReferencedPosts);
+    } catch (err) {
+      Logger.error(err.stack || err);
+      return {};
+    }
+  }, true);
+  return _(_.extend({}, ...refs)).reduce((acc, ref) => {
+    acc[`${ref.boardName}:${ref.threadNumber}`] = ref;
+    return acc;
+  }, {});
+}
+
+export async function rerenderReferencedPosts(boardName, threadNumber, newReferencedPosts, oldReferencedPosts) {
+  let newRefs = pickThreadsToRerender(newReferencedPosts, boardName, threadNumber);
+  let oldRefs = pickThreadsToRerender(oldReferencedPosts, boardName, threadNumber);
+  try {
+    await Tools.series(_.extend(newRefs, oldRefs), (ref) => {
+      return IPC.render(ref.boardName, ref.threadNumber, ref.threadNumber, 'edit');
     });
+  } catch (err) {
+    Logger.error(err.stack || err);
   }
-  referencedSource.delete(key);
-}
-
-export async function rerenderReferringPosts({ boardName, number, threadNumber, archived }, { removingThread } = {}) {
-  let referringSource = archived ? ArchivedReferringPosts : ReferringPosts;
-  let referringPosts = await referringSource.getAll(`${boardName}:${number}`);
-  referringPosts = _(referringPosts).filter((ref) => {
-    return !removingThread || ref.boardName !== boardName || ref.threadNumber !== threadNumber;
-  });
-  await Tools.series(referringPosts, async function(ref) {
-    return await PostsModel.rerenderPost(ref.boardName, ref.postNumber);
-  });
 }
 
 export function replacePostLinks(text, sourceBoardName, referencedPosts, postNumberMap) {
@@ -121,7 +174,8 @@ export function replacePostReferences(references, source, target, postNumberMap,
       return {
         boardName: targetBoardName,
         threadNumber: targetThreadNumber,
-        postNumber: postNumberMap[ref.postNumber]
+        postNumber: postNumberMap[ref.postNumber],
+        createdAt: ref.createdAt
       };
     } else {
       related.push(ref);
@@ -140,34 +194,11 @@ export function replaceRelatedPostReferences(references, source, target, postNum
       return {
         boardName: targetBoardName,
         threadNumber: targetThreadNumber,
-        postNumber: postNumberMap[ref.postNumber]
+        postNumber: postNumberMap[ref.postNumber],
+        createdAt: ref.createdAt
       };
     } else {
       return ref;
     }
   });
-}
-
-export async function storeReferencedPosts(boardName, postNumber, referencedPosts, { archived } = {}) {
-  let source = archived ? ArchivedReferencedPosts : ReferencedPosts;
-  await Tools.series(referencedPosts, async function(ref) {
-    await source.setOne(`${ref.boardName}:${ref.postNumber}`, ref, `${boardName}:${postNumber}`);
-  });
-}
-
-export async function storeReferringPosts(boardName, postNumber, referringPosts, { archived } = {}) {
-  let source = archived ? ArchivedReferringPosts : ReferringPosts;
-  await Tools.series(referringPosts, async function(ref) {
-    source.setOne(`${ref.boardName}:${ref.postNumber}`, ref, `${boardName}:${postNumber}`);
-  });
-}
-
-export async function removeReferencedPosts(boardName, postNumber, { archived } = {}) {
-  let source = archived ? ArchivedReferencedPosts : ReferencedPosts;
-  source.delete(`${boardName}:${postNumber}`);
-}
-
-export async function removeReferringPosts(boardName, postNumber, { archived } = {}) {
-  let source = archived ? ArchivedReferringPosts : ReferringPosts;
-  source.delete(`${boardName}:${postNumber}`);
 }

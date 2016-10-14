@@ -12,51 +12,19 @@ import * as Tools from '../helpers/tools';
 import Channel from '../storage/channel';
 import Hash from '../storage/hash';
 import Key from '../storage/key';
+import mongodbClient from '../storage/mongodb-client-factory';
 import redisClient from '../storage/redis-client-factory';
-import sqlClient from '../storage/sql-client-factory';
-import UnorderedSet from '../storage/unordered-set';
 
-let ArchivedUserPostNumbers = new UnorderedSet(sqlClient(), 'archivedUserPostNumbers', {
-  parse: number => +number,
-  stringify: number => number.toString()
-});
+let client = mongodbClient();
+
 let BanExpiredChannel = new Channel(redisClient('BAN_EXPIRED'), `__keyevent@${config('system.redis.db')}__:expired`, {
   parse: false,
   stringify: false
-});
-let BannedUserIPs = new UnorderedSet(redisClient(), 'bannedUserIps', {
-  parse: false,
-  stringify: false
-});
-let RegisteredUserHashes = new Hash(redisClient(), 'registeredUserHashes', {
-  parse: false,
-  stringify: false
-});
-let RegisteredUserIPs = new UnorderedSet(redisClient(), 'registeredUserIps', {
-  parse: false,
-  stringify: false
-});
-let RegisteredUserLevels = new Hash(redisClient(), 'registeredUserLevels', {
-  parse: false,
-  stringify: false
-});
-let SuperuserHashes = new UnorderedSet(redisClient(), 'superuserHashes', {
-  parse: false,
-  stringify: false
-});
-let SynchronizationData = new Key(redisClient(), 'synchronizationData');
-let UserBanPostNumbers = new Hash(redisClient(), 'userBanPostNumbers', {
-  parse: number => +number,
-  stringify: number => number.toString()
 });
 let UserBans = new Key(redisClient(), 'userBans');
 let UserCaptchaQuotas = new Hash(redisClient(), 'captchaQuotas', {
   parse: quota => +quota,
   stringify: quota => quota.toString()
-});
-let UserPostNumbers = new UnorderedSet(redisClient(), 'userPostNumbers', {
-  parse: number => +number,
-  stringify: number => number.toString()
 });
 
 function transformIPBans(bans) {
@@ -138,244 +106,247 @@ export async function useCaptcha(boardName, userID) {
 }
 
 export async function getUserIP(boardName, postNumber) {
-  let post = await PostsModel.getPost(boardName, postNumber);
+  let Post = await client.collection('post');
+  let post = await Post.findOne({
+    boardName: boardName,
+    number: postNumber
+  }, { 'user.ip': 1 });
   if (!post) {
-    return Promise.reject(new Error(Tools.translate('No such post')));
+    throw new Error(Tools.translate('No such post'));
   }
   return post.user.ip;
 }
 
-export async function getBannedUserBans(ip, boardNames) {
-  ip = Tools.correctAddress(ip);
+function getBannedUserBoardNames(boardNames) {
   if (!boardNames) {
-    boardNames = Board.boardNames();
+    return Board.boardNames();
   } else if (!_(boardNames).isArray()) {
-    boardNames = [boardNames];
+    return [boardNames];
+  } else {
+    return boardNames;
   }
-  let bans = await Tools.series(boardNames, async function(boardName) {
-    return await UserBans.get(`${ip}:${boardName}`);
+}
+
+function processBannedUser(boardNames, bannedUser) {
+  bannedUser.bans = bannedUser.bans.filter((ban) => {
+    return boardNames.indexOf(ban.boardName) >= 0;
+  }).reduce((acc, ban) => {
+    acc[ban.boardName] = ban;
+    return acc;
   }, {});
-  return _(bans).pick(ban => !!ban);
+  return bannedUser;
+}
+
+export async function getBannedUser(ip, boardNames) {
+  ip = Tools.correctAddress(ip);
+  let BannedUser = await client.collection('bannedUser');
+  let binaryAddress = Tools.binaryAddress(ip);
+  let bannedUser = await BannedUser.findOne({
+    $or: [
+      { ip: ip },
+      {
+        subnet: {
+          start: { $lte: binaryAddress },
+          end: { $gte: binaryAddress }
+        }
+      }
+    ]
+  }, { _id: 0 });
+  if (!bannedUser) {
+    return {
+      ip: ip,
+      bans: {}
+    };
+  }
+  return processBannedUser(getBannedUserBoardNames(boardNames), bannedUser);
 }
 
 export async function getBannedUsers(boardNames) {
-  let ips = await BannedUserIPs.getAll();
-  return await Tools.series(ips, async function(ip) {
-    return await getBannedUserBans(ip, boardNames);
+  let BannedUser = await client.collection('bannedUser');
+  let bannedUsers = await BannedUser.find({}, { _id: 0 }).toArray();
+  boardNames = getBannedUserBoardNames(boardNames);
+  return bannedUsers.map(processBannedUser.bind(null, boardNames)).reduce((acc, bannedUser) => {
+    acc[bannedUser.ip] = bannedUser;
+    return acc;
   }, {});
 }
 
-export async function getRegisteredUserLevel(hashpass, boardName) {
-  if (!hashpass || !Tools.mayBeHashpass(hashpass)) {
-    return Promise.reject(new Error(Tools.translate('Invalid hashpass')));
-  }
-  if (!Board.board(boardName)) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
-  }
-  let exists = await SuperuserHashes.contains(hashpass);
-  if (exists) {
-    return 'SUPERUSER';
-  }
-  let level = await RegisteredUserLevels.getOne(boardName, hashpass);
-  return level || null;
-}
-
-export async function getRegisteredUserLevelByIp(ip, boardName) {
-  ip = Tools.correctAddress(ip);
-  if (!ip) {
-    return Promise.reject(new Error(Tools.translate('Invalid IP address')));
-  }
-  let hashpass = await RegisteredUserHashes.getOne(ip);
-  if (!hashpass) {
-    return null;
-  }
-  return await getRegisteredUserLevel(hashpass, boardName);
-}
-
-export async function getRegisteredUserLevels(hashpass) {
-  if (!hashpass || !Tools.mayBeHashpass(hashpass)) {
-    return {};
-  }
-  let exists = await SuperuserHashes.contains(hashpass);
-  if (exists) {
-    return Board.boardNames().reduce((acc, boardName) => {
+function processRegisteredUser(user) {
+  if (user.superuser) {
+    user.levels = Board.boardNames().reduce((acc, boardName) => {
       acc[boardName] = 'SUPERUSER';
       return acc;
     }, {});
+  } else {
+    user.levels = user.levels.reduce((acc, level) => {
+      acc[level.boardName] = level.level;
+      return acc;
+    }, {});
   }
-  let levels = await RegisteredUserLevels.getAll(hashpass);
-  return levels || {};
+  return user;
 }
 
-export async function getRegisteredUserLevelsByIp(ip) {
+async function getRegisteredUserInternal(query, { full } = {}) {
+  let User = await client.collection('user');
+  let projection = { _id: 0 };
+  if (!full) {
+    projection = {
+      superuser: 1,
+      levels: 1
+    };
+  }
+  let user = await User.findOne(query, projection);
+  if (!user) {
+    return null;
+  }
+  return processRegisteredUser(user);
+}
+
+export async function getRegisteredUserLevels(hashpass) {
+  let user = await getRegisteredUserInternal({ hashpass: hashpass });
+  return user ? user.levels : {};
+}
+
+export async function getRegisteredUserLevelsByIp(ip, subnet) {
   ip = Tools.correctAddress(ip);
   if (!ip) {
     return {};
   }
-  let hashpass = await RegisteredUserHashes.getOne(ip);
-  if (!hashpass) {
-    return {};
+  let query = {
+    $or: [{ 'ips.ip': ip }]
+  };
+  if (subnet) {
+    query.$or.push({
+      'ips.binary': {
+        $elemMatch: {
+          $gte: subnet.start,
+          $lte: subnet.end
+        }
+      }
+    });
   }
-  return await getRegisteredUserLevels(hashpass);
+  let user = await getRegisteredUserInternal(query);
+  return user ? user.levels : {};
 }
 
 export async function getRegisteredUser(hashpass) {
-  let user = { hashpass: hashpass };
-  let levels = await RegisteredUserLevels.getAll(hashpass);
-  if (_(levels).isEmpty()) {
-    return Promise.reject(new Error(Tools.translate('No user with this hashpass')));
+  let user = await getRegisteredUserInternal({ hashpass: hashpass }, { full: true });
+  if (!user) {
+    throw new Error(Tools.translate('No user with this hashpass'));
   }
-  user.levels = levels;
-  let ips = await RegisteredUserIPs.getAll(hashpass);
-  user.ips = ips || [];
   return user;
 }
 
 export async function getRegisteredUsers() {
-  let keys = await RegisteredUserLevels.find();
-  return await Tools.series(keys.map((key) => {
-    return key.split(':')[1];
-  }), async function(hashpass) {
-    return await getRegisteredUser(hashpass);
-  }, true);
+  let User = await client.collection('user');
+  let users = await User.find({}, { _id: 0 }).toArray();
+  return users.map(processRegisteredUser);
 }
 
-async function processUserIPs(ips) {
+function processUserIPs(ips) {
   if (_(ips).isArray()) {
     ips = ips.map(ip => Tools.correctAddress(ip));
     if (ips.some(ip => !ip)) {
-      return Promise.reject(new Error(Tools.translate('Invalid IP address')));
+      throw new Error(Tools.translate('Invalid IP address'));
     }
   }
   return ips;
 }
 
-async function processRegisteredUserData(levels, ips) {
-  if (_(levels).isEmpty()) {
-    return Promise.reject(new Error(Tools.translate('Access level is not specified for any board')));
+function processRegisteredUserData(levels, ips) {
+  if (levels.length <= 0) {
+    throw new Error(Tools.translate('Access level is not specified for any board'));
   }
-  if (Object.keys(levels).some(boardName => !Board.board(boardName))) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  if (levels.some(level => !Board.board(level.boardName))) {
+    throw new Error(Tools.translate('Invalid board'));
   }
   let invalidLevel = _(levels).some((level) => {
-    return (Tools.compareRegisteredUserLevels(level, 'USER') < 0)
-      || (Tools.compareRegisteredUserLevels(level, 'SUPERUSER') >= 0);
+    return (Tools.compareRegisteredUserLevels(level.level, 'USER') < 0)
+      || (Tools.compareRegisteredUserLevels(level.level, 'SUPERUSER') >= 0);
   });
   if (invalidLevel) {
-    return Promise.reject(new Error(Tools.translate('Invalid access level')));
+    throw new Error(Tools.translate('Invalid access level'));
   }
-  return await processUserIPs(ips);
-}
-
-async function addUserIPs(hashpass, ips) {
-  //TODO: May be optimised (hmset)
-  await Tools.series(ips, async function(ip) {
-    await RegisteredUserHashes.setOne(ip, hashpass);
-    await RegisteredUserIPs.addOne(ip, hashpass);
-  });
-}
-
-async function removeUserIPs(hashpass) {
-  let ips = await RegisteredUserIPs.getAll(hashpass);
-  if (ips && ips.length > 0) {
-    await RegisteredUserHashes.deleteSome(ips);
-  }
-  await RegisteredUserIPs.delete(hashpass);
+  return processUserIPs(ips);
 }
 
 export async function registerUser(hashpass, levels, ips) {
-  ips = await processRegisteredUserData(levels, ips);
-  let existingUserLevel = await RegisteredUserLevels.exists(hashpass);
-  if (existingUserLevel) {
-    return Promise.reject(new Error(Tools.translate('A user with this hashpass is already registered')));
+  let User = await client.collection('user');
+  let count = await User.count({ hashpass: hashpass });
+  if (count > 0) {
+    throw new Error(Tools.translate('A user with this hashpass is already registered'));
   }
-  let existingSuperuserHash = await SuperuserHashes.contains(hashpass);
-  if (existingSuperuserHash) {
-    return Promise.reject(new Error(Tools.translate('A user with this hashpass is already registered as superuser')));
-  }
-  await RegisteredUserLevels.setSome(levels, hashpass);
-  if (_(ips).isArray()) {
-    await addUserIPs(hashpass, ips);
-  }
+  await User.insertOne({
+    hashpass: hashpass,
+    levels: levels,
+    ips: processRegisteredUserData(levels, ips)
+  });
 }
 
 export async function updateRegisteredUser(hashpass, levels, ips) {
-  ips = await processRegisteredUserData(levels, ips);
-  let existingUserLevel = await RegisteredUserLevels.exists(hashpass);
-  if (!existingUserLevel) {
-    return Promise.reject(new Error(Tools.translate('No user with this hashpass')));
-  }
-  await RegisteredUserLevels.setSome(levels, hashpass);
-  await removeUserIPs(hashpass);
-  if (_(ips).isArray()) {
-    await addUserIPs(hashpass, ips);
+  let User = await client.collection('user');
+  let { matchedCount } = await User.updateOne({
+    hashpass: hashpass
+  }, {
+    $set: {
+      levels: levels,
+      ips: processRegisteredUserData(levels, ips)
+    }
+  });
+  if (matchedCount <= 0) {
+    throw new Error(Tools.translate('No user with this hashpass'));
   }
 }
 
 export async function unregisterUser(hashpass) {
-  let count = await RegisteredUserLevels.delete(hashpass);
-  if (count <= 0) {
-    return Promise.reject(new Error(Tools.translate('No user with this hashpass')));
+  let User = await client.collection('user');
+  let { deletedCount } = await User.deleteOne({ hashpass: hashpass });
+  if (deletedCount <= 0) {
+    throw new Error(Tools.translate('No user with this hashpass'));
   }
-  await removeUserIPs(hashpass);
 }
 
 export async function addSuperuser(hashpass, ips) {
   if (!hashpass) {
-    return Promise.reject(new Error(Tools.translate('Invalid hashpass')));
+    throw new Error(Tools.translate('Invalid hashpass'));
   }
-  ips = await processUserIPs(ips);
-  let existingUserLevel = await RegisteredUserLevels.exists(hashpass);
-  if (existingUserLevel) {
-    return Promise.reject(new Error(Tools.translate('A user with this hashpass is already registered')));
+  let User = await client.collection('user');
+  if (count > 0) {
+    throw new Error(Tools.translate('A user with this hashpass is already registered'));
   }
-  let count = await SuperuserHashes.addOne(hashpass);
-  if (count <= 0) {
-    return Promise.reject(new Error(Tools.translate('A user with this hashpass is already registered')));
-  }
-  if (_(ips).isArray()) {
-    await addUserIPs(hashpass, ips);
-  }
+  await User.insertOne({
+    hashpass: hashpass,
+    superuser: true,
+    ips: processUserIPs(ips)
+  });
 }
 
-export async function removeSuperuser(password, notHashpass) {
+export async function removeSuperuser(hashpass) {
   if (!hashpass) {
-    return Promise.reject(new Error(Tools.translate('Invalid hashpass')));
+    throw new Error(Tools.translate('Invalid hashpass'));
   }
-  let count = await SuperuserHashes.deleteOne(hashpass);
-  if (count <= 0) {
-    return Promise.reject(new Error(Tools.translate('No user with this hashpass')));
+  let User = await client.collection('user');
+  let { deletedCount } = await User.deleteOne({ hashpass: hashpass });
+  if (deletedCount <= 0) {
+    throw new Error(Tools.translate('No user with this hashpass'));
   }
-  await removeUserIPs();
 }
 
 export async function getSynchronizationData(key) {
-  return await SynchronizationData.get(key);
+  let SynchronizationData = await client.collection('synchronizationData');
+  return await SynchronizationData.findOne({ key: key });
 }
 
 export async function setSynchronizationData(key, data) {
-  await SynchronizationData.set(data, key);
-  await SynchronizationData.expire(config('server.synchronizationData.ttl'), key);
-}
-
-export async function getUserPostNumbers(ip, boardName) {
-  ip = Tools.correctAddress(ip) || '*';
-  boardName = boardName || '*';
-  let normal = await UserPostNumbers.find(`${ip}:${boardName}`);
-  let archived = await ArchivedUserPostNumbers.find(`${ip}:${boardName}`);
-  return normal.concat(archived);
-}
-
-export async function addUserPostNumber(ip, boardName, postNumber, { archived } = {}) {
-  ip = Tools.correctAddress(ip);
-  let source = archived ? ArchivedUserPostNumbers : UserPostNumbers;
-  await source.addOne(postNumber, `${ip}:${boardName}`);
-}
-
-export async function removeUserPostNumber(ip, boardName, postNumber, { archived } = {}) {
-  ip = Tools.correctAddress(ip);
-  let source = archived ? ArchivedUserPostNumbers : UserPostNumbers;
-  await source.deleteOne(postNumber, `${ip}:${boardName}`);
+  let SynchronizationData = await client.collection('synchronizationData');
+  let expireAt = Tools.now();
+  expireAt.setSeconds(expireAt.getSeconds() + config('server.synchronizationData.ttl'));
+  await await SynchronizationData.updateOne({ key: key }, {
+    $set: {
+      data: data,
+      expiresAt: expireAt
+    }
+  }, { upsert: true });
 }
 
 function checkGeoBan(geolocationInfo, ip) {
@@ -399,20 +370,20 @@ function checkGeoBan(geolocationInfo, ip) {
   if (!user && !def) {
     return;
   }
-  return Promise.reject(new Error(Tools.translate('Posting is disabled for this country')));
+  throw new Error(Tools.translate('Posting is disabled for this country'));
 }
 
 export async function checkUserBan(ip, boardNames, { write, geolocationInfo } = {}) {
   ip = Tools.correctAddress(ip);
   let ban = ipBans[ip];
   if (ban && (write || 'NO_ACCESS' === ban.level)) {
-    return Promise.reject({ ban: ban });
+    throw { ban: ban };
   }
   if (boardNames) {
-    let bans = await getBannedUserBans(ip, boardNames);
-    ban = _(bans).find((ban) => { return ban && (write || 'NO_ACCESS' === ban.level); });
+    let bannedUser = await getBannedUser(ip, boardNames);
+    ban = _(bannedUser.bans).find((ban) => { return ban && (write || 'NO_ACCESS' === ban.level); });
     if (ban) {
-      return Promise.reject({ ban: ban });
+      throw { ban: ban };
     }
   }
   if (geolocationInfo) {
@@ -423,11 +394,18 @@ export async function checkUserBan(ip, boardNames, { write, geolocationInfo } = 
 export async function checkUserPermissions(req, boardName, postNumber, permission, password) {
   let board = Board.board(boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
-  let post = await PostsModel.getPost(boardName, postNumber);
+  let Post = await client.collection('post');
+  let post = await Post.findOne({
+    boardName: boardName,
+    number: postNumber
+  }, {
+    threadNumber: 1,
+    user: 1
+  });
   if (!post) {
-    return Promise.reject(new Error(Tools.translate('Not such post: $[1]', '', `/${boardName}/${postNumber}`)));
+    throw new Error(Tools.translate('Not such post: $[1]', '', `/${boardName}/${postNumber}`));
   }
   let { user, threadNumber } = post;
   if (req.isSuperuser()) {
@@ -446,14 +424,18 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
     }
   }
   if (!board.opModeration) {
-    return Promise.reject(new Error(Tools.translate('Not enough rights')));
+    throw new Error(Tools.translate('Not enough rights'));
   }
-  let thread = await ThreadsModel.getThread(boardName, threadNumber);
+  let Thread = await client.collection('thread');
+  let thread = await Thread.fineOne({
+    boardName: boardName,
+    number: threadNumber
+  });
   if (!thread) {
-    return Promise.reject(new Error(Tools.translate('Not such thread: $[1]', '', `/${boardName}/${threadNumber}`)));
+    throw new Error(Tools.translate('Not such thread: $[1]', '', `/${boardName}/${threadNumber}`));
   }
   if (thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass)) {
-    return Promise.reject(new Error(Tools.translate('Not enough rights')));
+    throw new Error(Tools.translate('Not enough rights'));
   }
   if (Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0) {
     return;
@@ -464,60 +446,98 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
   if (password && password === user.password) {
     return;
   }
-  return Promise.reject(new Error(Tools.translate('Not enough rights')));
+  throw new Error(Tools.translate('Not enough rights'));
 }
 
-export async function updatePostBanInfo(boardName, postNumber) {
+export async function updatePostBanInfo(boardName, postNumber, bannedFor) {
   if (!Board.board(boardName)) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!postNumber) {
     return;
   }
-  let post = await PostsModel.getPost(boardName, postNumber);
+  let Post = await client.collection('post');
+  let result = await Post.findOneAndUpdate({
+    boardName: boardName,
+    number: postNumber
+  }, {
+    $set: {
+      options: { bannedFor: !!bannedFor }
+    }
+  }, {
+    projection: { threadNumber: 1 },
+    returnOriginal: false
+  });
+  let post = result.value;
   if (!post) {
     return;
   }
   await IPC.render(boardName, post.threadNumber, postNumber, 'edit');
 }
 
-export async function banUser(ip, newBans) {
-  ip = Tools.correctAddress(ip);
-  if (!ip) {
-    return Promise.reject(new Error(Tools.translate('Invalid IP address')));
-  }
-  let oldBans = await getBannedUserBans(ip);
-  await Tools.series(Board.boardNames(), async function(boardName) {
-    let key = `${ip}:${boardName}`;
+function getPostsToUpdate(oldBans, newBans) {
+  let postsBannedFor = [];
+  let postsNotBannedFor = [];
+  Board.boardNames().forEach((boardName) => {
     let ban = newBans[boardName];
     if (ban) {
-      await UserBans.set(ban, key);
-      if (ban.expiresAt) {
-        await UserBans.expire(Math.ceil((+ban.expiresAt - +Tools.now()) / 1000), key);
-      }
       if (ban.postNumber) {
-        await UserBanPostNumbers.setOne(key, ban.postNumber);
-        await updatePostBanInfo(boardName, ban.postNumber);
+        postsBannedFor.push({
+          boardName: boardName,
+          postNumber: ban.postNumber
+        });
       }
     } else {
       ban = oldBans[boardName];
-      if (!ban) {
-        return;
-      }
-      await UserBans.delete(key);
-      if (ban.postNumber) {
-        UserBanPostNumbers.deleteOne(ban.postNumber, key);
-        await updatePostBanInfo(boardName, ban.postNumber);
+      if (ban && ban.postNumber) {
+        postsNotBannedFor.push({
+          boardName: boardName,
+          postNumber: ban.postNumber
+        });
       }
     }
   });
-  await BannedUserIPs[_(newBans).isEmpty() ? 'deleteOne' : 'addOne'](ip);
+  return {
+    postsBannedFor: postsBannedFor,
+    postsNotBannedFor: postsNotBannedFor
+  };
 }
 
-export async function isUserBanned(ip, boardName, postNumber) {
-  let ban = await UserBans.get(`${ip}:${boardName}`);
-  return !!(ban && ban.postNumber === postNumber);
+export async function banUser(ip, newBans, subnet) {
+  ip = Tools.correctAddress(ip);
+  if (!ip) {
+    throw new Error(Tools.translate('Invalid IP address'));
+  }
+  let bannedUser = await getBannedUser(ip);
+  let oldBans = bannedUser.bans;
+  await Tools.series(oldBans, async function(_1, boardName) {
+    await UserBans.delete(`${ip}:${boardName}`);
+  });
+  let BannedUser = await client.collection('bannedUser');
+  if (_(newBans).isEmpty()) {
+    await BannedUser.deleteOne({ ip: ip });
+  } else {
+    await BannedUser.updateOne({ ip: ip }, {
+      $set: {
+        subnet: subnet,
+        bans: _(newBans).toArray()
+      }
+    }, { upsert: true });
+    await Tools.series(_(newBans).pick((ban) => {
+      return ban.expiresAt && ban.postNumber;
+    }), async function(ban) {
+      let delay = Math.ceil((+ban.expiresAt - +Tools.now()) / Tools.SECOND);
+      await UserBans.setex(ban, delay, `${ip}:${boardName}`);
+    });
+  }
+  let { postsBannedFor, postsNotBannedFor } = getPostsToUpdate(oldBans, newBans);
+  await Tools.series(postsBannedFor, ({ postNumber, boardName }) => {
+    return updatePostBanInfo(boardName, postNumber, true);
+  });
+  await Tools.series(postsNotBannedFor, ({ postNumber, boardName }) => {
+    return updatePostBanInfo(boardName, postNumber, false);
+  });
 }
 
 async function updateBanOnMessage(message) {
@@ -530,17 +550,21 @@ async function updateBanOnMessage(message) {
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
-    let postNumber = await UserBanPostNumbers.getOne(message);
-    postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
+    let postNumber = Tools.option(ban.postNumber, 'number', 0, { test: Tools.testPostNumber });
     if (!postNumber) {
       throw new Error(Tools.translate('Invalid post number'));
     }
-    await UserBanPostNumbers.deleteOne(message);
-    let keys = await UserBans.find(`${ip}:*`);
-    if (!keys || keys.length <= 0) {
-      await BannedUserIPs.deleteOne(ip);
-    }
-    await updatePostBanInfo(boardName, postNumber);
+    let BannedUser = await client.collection('bannedUser');
+    await BannedUser.updateOne({ ip: ip }, {
+      $pull: {
+        bans: { boardName: boardName }
+      }
+    });
+    await BannedUser.deleteOne({
+      ip: ip,
+      bans: { $size: 0 }
+    });
+    await updatePostBanInfo(boardName, postNumber, false);
   } catch (err) {
     Logger.error(err.stack || err);
   }
@@ -549,5 +573,5 @@ async function updateBanOnMessage(message) {
 export async function initializeUserBansMonitoring() {
   //NOTE: Enabling "key expired" notifications
   await redisClient().config('SET', 'notify-keyspace-events', 'Ex');
-  await BanExpiresChannel.subscribe(updateBanOnMessage);
+  await BanExpiredChannel.subscribe(updateBanOnMessage);
 }

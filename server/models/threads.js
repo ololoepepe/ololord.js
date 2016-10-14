@@ -3,28 +3,41 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.setThreadUnbumpable = exports.setThreadClosed = exports.setThreadFixed = exports.moveThread = exports.createThread = exports.removeThread = exports.clearDeletedThreads = exports.setThreadDeleted = exports.isThreadDeleted = exports.setThreadUpdateTime = exports.getThreadLastPostNumber = exports.getThreadInfo = exports.getThreads = exports.getThread = exports.getThreadNumbers = exports.getThreadPosts = exports.removeThreadPostNumber = exports.addThreadPostNumber = exports.getThreadPostNumbers = exports.getThreadPostCount = undefined;
+exports.deleteThread = exports.moveThread = exports.setThreadUnbumpable = exports.setThreadClosed = exports.setThreadFixed = exports.createThread = exports.clearDeletedThreads = exports.setThreadDeleted = exports.isThreadDeleted = exports.getThreadInfo = exports.getThreadLastPostNumber = exports.getThreadCount = exports.getThreads = exports.threadExists = exports.getThread = exports.getThreadNumbers = exports.getThreadPostCount = undefined;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 var getThreadPostCount = exports.getThreadPostCount = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, threadNumber) {
     var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-    var archived = _ref.archived;
-    var source;
+    var lastPostNumber = _ref.lastPostNumber;
+    var Post, query;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
-            _context.next = 3;
-            return source.count(boardName + ':' + threadNumber);
+            _context.next = 2;
+            return client.collection('post');
 
-          case 3:
+          case 2:
+            Post = _context.sent;
+            query = {
+              boardName: boardName,
+              threadNumber: threadNumber
+            };
+
+            lastPostNumber = Tools.option(lastPostNumber, 'number', 0, { test: Tools.testPostNumber });
+            if (lastPostNumber) {
+              query.number = { $gt: lastPostNumber };
+            }
+            _context.next = 8;
+            return Post.count(query);
+
+          case 8:
             return _context.abrupt('return', _context.sent);
 
-          case 4:
+          case 9:
           case 'end':
             return _context.stop();
         }
@@ -37,36 +50,35 @@ var getThreadPostCount = exports.getThreadPostCount = function () {
   };
 }();
 
-var getThreadPostNumbers = exports.getThreadPostNumbers = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(boardName, threadNumber) {
-    var postNumbers;
+var getThreadNumbers = exports.getThreadNumbers = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(boardName) {
+    var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var archived = _ref2.archived;
+    var Thread, threads;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             _context2.next = 2;
-            return ThreadPostNumbers.getAll(boardName + ':' + threadNumber);
+            return client.collection('thread');
 
           case 2:
-            postNumbers = _context2.sent;
+            Thread = _context2.sent;
+            _context2.next = 5;
+            return Thread.find({
+              boardName: boardName,
+              archived: !!archived
+            }, { number: 1 }).sort({ number: -1 }).toArray();
 
-            if (!(!postNumbers || postNumbers.length <= 0)) {
-              _context2.next = 7;
-              break;
-            }
-
-            _context2.next = 6;
-            return ArchivedThreadPostNumbers.getAll(boardName + ':' + threadNumber);
-
-          case 6:
-            postNumbers = _context2.sent;
-
-          case 7:
-            return _context2.abrupt('return', postNumbers.sort(function (a, b) {
-              return a - b;
+          case 5:
+            threads = _context2.sent;
+            return _context2.abrupt('return', threads.map(function (_ref3) {
+              var number = _ref3.number;
+              return number;
             }));
 
-          case 8:
+          case 7:
           case 'end':
             return _context2.stop();
         }
@@ -74,26 +86,63 @@ var getThreadPostNumbers = exports.getThreadPostNumbers = function () {
     }, _callee2, this);
   }));
 
-  return function getThreadPostNumbers(_x5, _x6) {
+  return function getThreadNumbers(_x5, _x6) {
     return ref.apply(this, arguments);
   };
 }();
 
-var addThreadPostNumber = exports.addThreadPostNumber = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, threadNumber, postNumber) {
-    var _ref2 = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
-
-    var archived = _ref2.archived;
-    var source;
+var getThread = exports.getThread = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, threadNumber) {
+    var board, Thread, thread;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
-            _context3.next = 3;
-            return source.addOne(postNumber, boardName + ':' + threadNumber);
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context3.next = 3;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid board'));
 
           case 3:
+            threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+
+            if (threadNumber) {
+              _context3.next = 6;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid thread number'));
+
+          case 6:
+            _context3.next = 8;
+            return client.collection('thread');
+
+          case 8:
+            Thread = _context3.sent;
+            _context3.next = 11;
+            return Thread.findOne({
+              boardName: boardName,
+              number: threadNumber
+            }, { _id: 0 });
+
+          case 11:
+            thread = _context3.sent;
+
+            if (thread) {
+              _context3.next = 14;
+              break;
+            }
+
+            throw new Error(Tools.translate('No such thread'));
+
+          case 14:
+            return _context3.abrupt('return', thread);
+
+          case 15:
           case 'end':
             return _context3.stop();
         }
@@ -101,26 +150,54 @@ var addThreadPostNumber = exports.addThreadPostNumber = function () {
     }, _callee3, this);
   }));
 
-  return function addThreadPostNumber(_x7, _x8, _x9, _x10) {
+  return function getThread(_x8, _x9) {
     return ref.apply(this, arguments);
   };
 }();
 
-var removeThreadPostNumber = exports.removeThreadPostNumber = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, threadNumber, postNumber) {
-    var _ref3 = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
-
-    var archived = _ref3.archived;
-    var source;
+var threadExists = exports.threadExists = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, threadNumber) {
+    var board, Thread, count;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            source = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
-            _context4.next = 3;
-            return source.deleteOne(postNumber, boardName + ':' + threadNumber);
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context4.next = 3;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid board'));
 
           case 3:
+            threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+
+            if (threadNumber) {
+              _context4.next = 6;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid thread number'));
+
+          case 6:
+            _context4.next = 8;
+            return client.collection('thread');
+
+          case 8:
+            Thread = _context4.sent;
+            _context4.next = 11;
+            return Thread.count({
+              boardName: boardName,
+              number: threadNumber
+            });
+
+          case 11:
+            count = _context4.sent;
+            return _context4.abrupt('return', count > 0);
+
+          case 13:
           case 'end':
             return _context4.stop();
         }
@@ -128,40 +205,64 @@ var removeThreadPostNumber = exports.removeThreadPostNumber = function () {
     }, _callee4, this);
   }));
 
-  return function removeThreadPostNumber(_x12, _x13, _x14, _x15) {
+  return function threadExists(_x10, _x11) {
     return ref.apply(this, arguments);
   };
 }();
 
-var addDataToThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(thread) {
+var getThreads = exports.getThreads = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName) {
     var _ref4 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-    var withPostNumbers = _ref4.withPostNumbers;
-    var source;
+    var archived = _ref4.archived;
+    var limit = _ref4.limit;
+    var offset = _ref4.offset;
+    var sort = _ref4.sort;
+    var board, Thread, cursor, threads;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            source = thread.archived ? ArchivedThreadUpdateTimes : ThreadUpdateTimes;
-            _context5.next = 3;
-            return source.getOne(thread.number, thread.boardName);
+            board = _board2.default.board(boardName);
 
-          case 3:
-            thread.updatedAt = _context5.sent;
-
-            if (!withPostNumbers) {
-              _context5.next = 8;
+            if (board) {
+              _context5.next = 3;
               break;
             }
 
-            _context5.next = 7;
-            return getThreadPostNumbers(thread.boardName, thread.number);
+            throw new Error(Tools.translate('Invalid board'));
 
-          case 7:
-            thread.postNumbers = _context5.sent;
+          case 3:
+            _context5.next = 5;
+            return client.collection('thread');
 
-          case 8:
+          case 5:
+            Thread = _context5.sent;
+            cursor = Thread.find({
+              boardName: boardName,
+              archived: !!archived
+            }, { _id: 0 });
+
+            if (sort) {
+              cursor = cursor.sort({
+                fixed: -1,
+                updatedAt: -1
+              });
+            }
+            if (offset) {
+              cursor = cursor.skip(offset);
+            }
+            if (limit) {
+              cursor = cursor.limit(limit);
+            }
+            _context5.next = 12;
+            return cursor.toArray();
+
+          case 12:
+            threads = _context5.sent;
+            return _context5.abrupt('return', threads);
+
+          case 14:
           case 'end':
             return _context5.stop();
         }
@@ -169,22 +270,17 @@ var addDataToThread = function () {
     }, _callee5, this);
   }));
 
-  return function addDataToThread(_x17, _x18) {
+  return function getThreads(_x12, _x13) {
     return ref.apply(this, arguments);
   };
 }();
 
-var getThreadPosts = exports.getThreadPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(boardName, threadNumber) {
-    var _ref5 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+var getThreadCount = exports.getThreadCount = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(boardName) {
+    var _ref5 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-    var reverse = _ref5.reverse;
-    var limit = _ref5.limit;
-    var notOP = _ref5.notOP;
-    var withExtraData = _ref5.withExtraData;
-    var withFileInfos = _ref5.withFileInfos;
-    var withReferences = _ref5.withReferences;
-    var board, postNumbers;
+    var archived = _ref5.archived;
+    var board, Thread;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
@@ -196,44 +292,24 @@ var getThreadPosts = exports.getThreadPosts = function () {
               break;
             }
 
-            return _context6.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            throw new Error(Tools.translate('Invalid board'));
 
           case 3:
-            threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+            _context6.next = 5;
+            return client.collection('thread');
 
-            if (threadNumber) {
-              _context6.next = 6;
-              break;
-            }
-
-            return _context6.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid thread number'))));
-
-          case 6:
+          case 5:
+            Thread = _context6.sent;
             _context6.next = 8;
-            return getThreadPostNumbers(boardName, threadNumber);
+            return Thread.count({
+              boardName: boardName,
+              archived: !!archived
+            });
 
           case 8:
-            postNumbers = _context6.sent;
-
-            if (notOP) {
-              postNumbers.splice(0, 1);
-            }
-            if (reverse) {
-              postNumbers.reverse();
-            }
-            limit = Tools.option(limit, 'number', 0, { test: function test(l) {
-                return l > 0;
-              } });
-            if (limit) {
-              postNumbers.splice(limit);
-            }
-            _context6.next = 15;
-            return PostsModel.getPosts(boardName, postNumbers, { withExtraData: withExtraData, withFileInfos: withFileInfos, withReferences: withReferences });
-
-          case 15:
             return _context6.abrupt('return', _context6.sent);
 
-          case 16:
+          case 9:
           case 'end':
             return _context6.stop();
         }
@@ -241,29 +317,52 @@ var getThreadPosts = exports.getThreadPosts = function () {
     }, _callee6, this);
   }));
 
-  return function getThreadPosts(_x20, _x21, _x22) {
+  return function getThreadCount(_x15, _x16) {
     return ref.apply(this, arguments);
   };
 }();
 
-var getThreadNumbers = exports.getThreadNumbers = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(boardName) {
-    var _ref6 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-    var archived = _ref6.archived;
-    var source;
+var getThreadLastPostNumber = exports.getThreadLastPostNumber = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(boardName, threadNumber) {
+    var Post, posts;
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            source = archived ? ArchivedThreads : Threads;
-            _context7.next = 3;
-            return source.keys(boardName);
+            if (_board2.default.board(boardName)) {
+              _context7.next = 2;
+              break;
+            }
 
-          case 3:
-            return _context7.abrupt('return', _context7.sent);
+            throw new Error(Tools.translate('Invalid board'));
 
-          case 4:
+          case 2:
+            threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+
+            if (threadNumber) {
+              _context7.next = 5;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid thread number'));
+
+          case 5:
+            _context7.next = 7;
+            return client.collection('post');
+
+          case 7:
+            Post = _context7.sent;
+            _context7.next = 10;
+            return Post.find({
+              boardName: boardName,
+              threadNumber: threadNumber
+            }, { number: 1 }).sort({ number: -1 }).limit(1).toArray();
+
+          case 10:
+            posts = _context7.sent;
+            return _context7.abrupt('return', posts.length > 0 ? posts[0].number : 0);
+
+          case 12:
           case 'end':
             return _context7.stop();
         }
@@ -271,14 +370,15 @@ var getThreadNumbers = exports.getThreadNumbers = function () {
     }, _callee7, this);
   }));
 
-  return function getThreadNumbers(_x24, _x25) {
+  return function getThreadLastPostNumber(_x18, _x19) {
     return ref.apply(this, arguments);
   };
 }();
 
-var getThread = exports.getThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(boardName, threadNumber, options) {
-    var board, thread;
+var getThreadInfo = exports.getThreadInfo = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(boardName, threadNumber, _ref6) {
+    var lastPostNumber = _ref6.lastPostNumber;
+    var board, Thread, thread, postCount, newPostCount;
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
@@ -290,7 +390,7 @@ var getThread = exports.getThread = function () {
               break;
             }
 
-            return _context8.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            throw new Error(Tools.translate('Invalid board'));
 
           case 3:
             threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
@@ -300,224 +400,44 @@ var getThread = exports.getThread = function () {
               break;
             }
 
-            return _context8.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid thread number'))));
+            throw new Error(Tools.translate('Invalid thread number'));
 
           case 6:
             _context8.next = 8;
-            return Threads.getOne(threadNumber, boardName);
+            return client.collection('thread');
 
           case 8:
-            thread = _context8.sent;
-
-            if (thread) {
-              _context8.next = 13;
-              break;
-            }
-
-            _context8.next = 12;
-            return ArchivedThreads.getOne(threadNumber, boardName);
-
-          case 12:
-            thread = _context8.sent;
-
-          case 13:
-            if (thread) {
-              _context8.next = 15;
-              break;
-            }
-
-            return _context8.abrupt('return', Promise.reject(new Error(Tools.translate('No such thread'))));
-
-          case 15:
-            _context8.next = 17;
-            return addDataToThread(thread, options);
-
-          case 17:
-            return _context8.abrupt('return', thread);
-
-          case 18:
-          case 'end':
-            return _context8.stop();
-        }
-      }
-    }, _callee8, this);
-  }));
-
-  return function getThread(_x27, _x28, _x29) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var getThreads = exports.getThreads = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(boardName, threadNumbers, options) {
-    var board, threads, mayBeArchivedThreadNumbers, numbers, archivedThreads;
-    return regeneratorRuntime.wrap(function _callee10$(_context10) {
-      while (1) {
-        switch (_context10.prev = _context10.next) {
-          case 0:
-            board = _board2.default.board(boardName);
-
-            if (board) {
-              _context10.next = 3;
-              break;
-            }
-
-            return _context10.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
-
-          case 3:
-            if (!(0, _underscore2.default)(threadNumbers).isArray()) {
-              threadNumbers = [threadNumbers];
-            }
-            threadNumbers = threadNumbers.map(function (threadNumber) {
-              return Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
-            });
-
-            if (!threadNumbers.some(function (threadNumber) {
-              return !threadNumber;
-            })) {
-              _context10.next = 7;
-              break;
-            }
-
-            return _context10.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid thread number'))));
-
-          case 7:
-            _context10.next = 9;
-            return Threads.getSome(threadNumbers, boardName);
-
-          case 9:
-            threads = _context10.sent;
-
-            threads = (0, _underscore2.default)(threads).toArray();
-            mayBeArchivedThreadNumbers = threads.map(function (thread, index) {
-              return {
-                thread: thread,
-                index: index
-              };
-            }).filter(function (thread) {
-              return !thread.thread;
-            }).map(function (thread) {
-              return {
-                index: thread.index,
-                threadNumber: threadNumbers[thread.index]
-              };
-            });
-
-            if (!(mayBeArchivedThreadNumbers.length > 0)) {
-              _context10.next = 18;
-              break;
-            }
-
-            numbers = mayBeArchivedThreadNumbers.map(function (thread) {
-              return thread.threadNumber;
-            });
-            _context10.next = 16;
-            return ArchivedThreads.getSome(numbers, boardName);
-
-          case 16:
-            archivedThreads = _context10.sent;
-
-            archivedThreads.forEach(function (thread, index) {
-              threads[mayBeArchivedThreadNumbers[index].index] = thread;
-            });
-
-          case 18:
-            if (!(threads.length <= 0)) {
-              _context10.next = 20;
-              break;
-            }
-
-            return _context10.abrupt('return', []);
-
-          case 20:
-            _context10.next = 22;
-            return Tools.series(threads, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(thread) {
-                return regeneratorRuntime.wrap(function _callee9$(_context9) {
-                  while (1) {
-                    switch (_context9.prev = _context9.next) {
-                      case 0:
-                        _context9.next = 2;
-                        return addDataToThread(thread, options);
-
-                      case 2:
-                      case 'end':
-                        return _context9.stop();
-                    }
-                  }
-                }, _callee9, this);
-              }));
-
-              return function (_x33) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 22:
-            return _context10.abrupt('return', threads);
-
-          case 23:
-          case 'end':
-            return _context10.stop();
-        }
-      }
-    }, _callee10, this);
-  }));
-
-  return function getThreads(_x30, _x31, _x32) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var getThreadInfo = exports.getThreadInfo = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName, threadNumber, _ref7) {
-    var lastPostNumber = _ref7.lastPostNumber;
-    var board, thread, postCount, newPostCount;
-    return regeneratorRuntime.wrap(function _callee11$(_context11) {
-      while (1) {
-        switch (_context11.prev = _context11.next) {
-          case 0:
-            board = _board2.default.board(boardName);
-
-            if (board) {
-              _context11.next = 3;
-              break;
-            }
-
-            return _context11.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
-
-          case 3:
-            threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
-
-            if (threadNumber) {
-              _context11.next = 6;
-              break;
-            }
-
-            return _context11.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid thread number'))));
-
-          case 6:
-            _context11.next = 8;
-            return getThread(boardName, threadNumber, { withPostNumbers: true });
-
-          case 8:
-            thread = _context11.sent;
-
-            if (thread) {
-              _context11.next = 11;
-              break;
-            }
-
-            return _context11.abrupt('return', thread);
+            Thread = _context8.sent;
+            _context8.next = 11;
+            return getThread(boardName, threadNumber);
 
           case 11:
-            postCount = thread.postNumbers.length;
+            thread = _context8.sent;
 
-            lastPostNumber = Tools.option(lastPostNumber, 'number', 0, { test: Tools.testPostNumber });
-            newPostCount = thread.postNumbers.filter(function (pn) {
-              return pn > lastPostNumber;
-            }).length;
-            return _context11.abrupt('return', {
+            if (thread) {
+              _context8.next = 14;
+              break;
+            }
+
+            return _context8.abrupt('return', thread);
+
+          case 14:
+            _context8.next = 16;
+            return getThreadPostCount(boardName, threadNumber);
+
+          case 16:
+            postCount = _context8.sent;
+            _context8.next = 19;
+            return getThreadPostCount(boardName, threadNumber, { lastPostNumber: lastPostNumber });
+
+          case 19:
+            newPostCount = _context8.sent;
+            _context8.next = 22;
+            return getThreadLastPostNumber(boardName, threadNumber);
+
+          case 22:
+            lastPostNumber = _context8.sent;
+            return _context8.abrupt('return', {
               number: thread.number,
               bumpLimit: board.bumpLimit,
               postLimit: board.postLimit,
@@ -528,11 +448,74 @@ var getThreadInfo = exports.getThreadInfo = function () {
               unbumpable: thread.unbumpable,
               postCount: postCount,
               postingEnabled: board.postingEnabled && !thread.closed,
-              lastPostNumber: thread.postNumbers.pop(),
+              lastPostNumber: lastPostNumber,
               newPostCount: newPostCount
             });
 
-          case 15:
+          case 24:
+          case 'end':
+            return _context8.stop();
+        }
+      }
+    }, _callee8, this);
+  }));
+
+  return function getThreadInfo(_x20, _x21, _x22) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var isThreadDeleted = exports.isThreadDeleted = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(boardName, threadNumber) {
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            return _context9.abrupt('return', DeletedThreads.contains(boardName + ':' + threadNumber));
+
+          case 1:
+          case 'end':
+            return _context9.stop();
+        }
+      }
+    }, _callee9, this);
+  }));
+
+  return function isThreadDeleted(_x23, _x24) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var setThreadDeleted = exports.setThreadDeleted = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(boardName, threadNumber) {
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            return _context10.abrupt('return', DeletedThreads.addOne(boardName + ':' + threadNumber));
+
+          case 1:
+          case 'end':
+            return _context10.stop();
+        }
+      }
+    }, _callee10, this);
+  }));
+
+  return function setThreadDeleted(_x25, _x26) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var clearDeletedThreads = exports.clearDeletedThreads = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11() {
+    return regeneratorRuntime.wrap(function _callee11$(_context11) {
+      while (1) {
+        switch (_context11.prev = _context11.next) {
+          case 0:
+            return _context11.abrupt('return', DeletedThreads.delete());
+
+          case 1:
           case 'end':
             return _context11.stop();
         }
@@ -540,44 +523,138 @@ var getThreadInfo = exports.getThreadInfo = function () {
     }, _callee11, this);
   }));
 
-  return function getThreadInfo(_x34, _x35, _x36) {
+  return function clearDeletedThreads() {
     return ref.apply(this, arguments);
   };
 }();
 
-var getThreadLastPostNumber = exports.getThreadLastPostNumber = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, threadNumber) {
-    var threadPostNumbers;
+var pushOutOldThread = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName) {
+    var board, threadCount, archivedThreadCount, removeLastArchivedThread, Thread, _ref7, _ref8, lastThread, _ref9, _ref10, lastArchivedThread, Post;
+
     return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
         switch (_context12.prev = _context12.next) {
           case 0:
-            if (_board2.default.board(boardName)) {
-              _context12.next = 2;
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context12.next = 3;
               break;
             }
 
-            return _context12.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            throw new Error(Tools.translate('Invalid board'));
 
-          case 2:
-            threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
-
-            if (threadNumber) {
-              _context12.next = 5;
-              break;
-            }
-
-            return _context12.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid thread number'))));
+          case 3:
+            _context12.next = 5;
+            return getThreadCount(boardName);
 
           case 5:
-            _context12.next = 7;
-            return getThreadPostNumbers(boardName, threadNumber);
+            threadCount = _context12.sent;
 
-          case 7:
-            threadPostNumbers = _context12.sent;
-            return _context12.abrupt('return', threadPostNumbers.length > 0 ? (0, _underscore2.default)(threadPostNumbers).last() : 0);
+            if (!(threadCount < board.threadLimit)) {
+              _context12.next = 8;
+              break;
+            }
 
-          case 9:
+            return _context12.abrupt('return');
+
+          case 8:
+            _context12.next = 10;
+            return getThreadCount(boardName, { archived: true });
+
+          case 10:
+            archivedThreadCount = _context12.sent;
+            removeLastArchivedThread = board.archiveLimit > 0 && archivedThreadCount >= board.archiveLimit;
+            _context12.next = 14;
+            return client.collection('thread');
+
+          case 14:
+            Thread = _context12.sent;
+            _context12.next = 17;
+            return getThreads(boardName, {
+              sort: true,
+              limit: 1
+            });
+
+          case 17:
+            _ref7 = _context12.sent;
+            _ref8 = _slicedToArray(_ref7, 1);
+            lastThread = _ref8[0];
+
+            if (!removeLastArchivedThread) {
+              _context12.next = 31;
+              break;
+            }
+
+            _context12.next = 23;
+            return getThreads(boardName, {
+              archived: true,
+              sort: true,
+              limit: 1
+            });
+
+          case 23:
+            _ref9 = _context12.sent;
+            _ref10 = _slicedToArray(_ref9, 1);
+            lastArchivedThread = _ref10[0];
+
+            if (!lastArchivedThread) {
+              _context12.next = 31;
+              break;
+            }
+
+            _context12.next = 29;
+            return deleteThread(boardName, lastArchivedThread.number);
+
+          case 29:
+            _context12.next = 31;
+            return IPC.renderArchive(boardName);
+
+          case 31:
+            if (!(board.archiveLimit <= 0)) {
+              _context12.next = 35;
+              break;
+            }
+
+            _context12.next = 34;
+            return deleteThread(boardName, lastThread.number);
+
+          case 34:
+            return _context12.abrupt('return');
+
+          case 35:
+            _context12.next = 37;
+            return Thread.updateOne({
+              boardName: boardName,
+              number: lastThread.number
+            }, {
+              $set: { archived: true }
+            });
+
+          case 37:
+            _context12.next = 39;
+            return client.collection('post');
+
+          case 39:
+            Post = _context12.sent;
+            _context12.next = 42;
+            return Post.updateMany({
+              boardName: boardName,
+              threadNumber: lastThread.number
+            }, {
+              $set: { archived: true }
+            });
+
+          case 42:
+            _context12.next = 44;
+            return FilesModel.moveThreadFilesToArchive(boardName, lastThread.number);
+
+          case 44:
+            _context12.next = 46;
+            return IPC.renderArchive(boardName);
+
+          case 46:
           case 'end':
             return _context12.stop();
         }
@@ -585,47 +662,138 @@ var getThreadLastPostNumber = exports.getThreadLastPostNumber = function () {
     }, _callee12, this);
   }));
 
-  return function getThreadLastPostNumber(_x37, _x38) {
+  return function pushOutOldThread(_x27) {
     return ref.apply(this, arguments);
   };
 }();
 
-var setThreadUpdateTime = exports.setThreadUpdateTime = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(boardName, threadNumber, dateTme) {
-    var _ref8 = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
-
-    var archived = _ref8.archived;
-    var source;
+var createThread = exports.createThread = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(req, fields, transaction) {
+    var boardName, password, board, date, threadNumber, thread, Thread;
     return regeneratorRuntime.wrap(function _callee13$(_context13) {
       while (1) {
         switch (_context13.prev = _context13.next) {
           case 0:
-            source = archived ? ArchivedThreadUpdateTimes : ThreadUpdateTimes;
-            _context13.next = 3;
-            return source.setOne(threadNumber, dateTme, boardName);
+            boardName = fields.boardName;
+            password = fields.password;
+            board = _board2.default.board(boardName);
 
-          case 3:
+            if (board) {
+              _context13.next = 5;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid board'));
+
+          case 5:
+            if (board.postingEnabled) {
+              _context13.next = 7;
+              break;
+            }
+
+            throw new Error(Tools.translate('Posting is disabled at this board'));
+
+          case 7:
+            _context13.prev = 7;
+            _context13.next = 10;
+            return pushOutOldThread(boardName);
+
+          case 10:
+            _context13.next = 15;
+            break;
+
+          case 12:
+            _context13.prev = 12;
+            _context13.t0 = _context13['catch'](7);
+
+            _logger2.default.error(_context13.t0.stack || _context13.t0);
+
+          case 15:
+            date = Tools.now();
+            _context13.next = 18;
+            return BoardsModel.nextPostNumber(boardName);
+
+          case 18:
+            threadNumber = _context13.sent;
+            thread = {
+              boardName: boardName,
+              number: threadNumber,
+              archived: false,
+              fixed: false,
+              closed: false,
+              unbumpable: false,
+              user: PostsModel.createPostUser(req, req.level(boardName), password),
+              createdAt: date.toISOString()
+            };
+
+            transaction.setThreadNumber(threadNumber);
+            _context13.next = 23;
+            return client.collection('thread');
+
+          case 23:
+            Thread = _context13.sent;
+            _context13.next = 26;
+            return Thread.insertOne(thread);
+
+          case 26:
+            return _context13.abrupt('return', thread);
+
+          case 27:
           case 'end':
             return _context13.stop();
         }
       }
-    }, _callee13, this);
+    }, _callee13, this, [[7, 12]]);
   }));
 
-  return function setThreadUpdateTime(_x39, _x40, _x41, _x42) {
+  return function createThread(_x28, _x29, _x30) {
     return ref.apply(this, arguments);
   };
 }();
 
-var isThreadDeleted = exports.isThreadDeleted = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(boardName, threadNumber) {
+var setThreadFlag = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(boardName, threadNumber, flagName, flagValue) {
+    var Thread, _ref11, matchedCount, modifiedCount;
+
     return regeneratorRuntime.wrap(function _callee14$(_context14) {
       while (1) {
         switch (_context14.prev = _context14.next) {
           case 0:
-            return _context14.abrupt('return', DeletedThreads.contains(boardName + ':' + threadNumber));
+            _context14.next = 2;
+            return client.collection('thread');
 
-          case 1:
+          case 2:
+            Thread = _context14.sent;
+            _context14.next = 5;
+            return Thread.updateOne({
+              boardName: boardName,
+              number: threadNumber
+            }, {
+              $set: _defineProperty({}, flagName, !!flagValue)
+            });
+
+          case 5:
+            _ref11 = _context14.sent;
+            matchedCount = _ref11.matchedCount;
+            modifiedCount = _ref11.modifiedCount;
+
+            if (!(matchedCount <= 0)) {
+              _context14.next = 10;
+              break;
+            }
+
+            throw new Error(Tools.translate('No such thread'));
+
+          case 10:
+            if (!(modifiedCount > 0)) {
+              _context14.next = 13;
+              break;
+            }
+
+            _context14.next = 13;
+            return IPC.render(boardName, threadNumber, threadNumber, 'edit');
+
+          case 13:
           case 'end':
             return _context14.stop();
         }
@@ -633,20 +801,24 @@ var isThreadDeleted = exports.isThreadDeleted = function () {
     }, _callee14, this);
   }));
 
-  return function isThreadDeleted(_x44, _x45) {
+  return function setThreadFlag(_x31, _x32, _x33, _x34) {
     return ref.apply(this, arguments);
   };
 }();
 
-var setThreadDeleted = exports.setThreadDeleted = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(boardName, threadNumber) {
+var setThreadFixed = exports.setThreadFixed = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(boardName, threadNumber, fixed) {
     return regeneratorRuntime.wrap(function _callee15$(_context15) {
       while (1) {
         switch (_context15.prev = _context15.next) {
           case 0:
-            return _context15.abrupt('return', DeletedThreads.addOne(boardName + ':' + threadNumber));
+            _context15.next = 2;
+            return setThreadFlag(boardName, threadNumber, 'fixed', fixed);
 
-          case 1:
+          case 2:
+            return _context15.abrupt('return', _context15.sent);
+
+          case 3:
           case 'end':
             return _context15.stop();
         }
@@ -654,20 +826,24 @@ var setThreadDeleted = exports.setThreadDeleted = function () {
     }, _callee15, this);
   }));
 
-  return function setThreadDeleted(_x46, _x47) {
+  return function setThreadFixed(_x35, _x36, _x37) {
     return ref.apply(this, arguments);
   };
 }();
 
-var clearDeletedThreads = exports.clearDeletedThreads = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16() {
+var setThreadClosed = exports.setThreadClosed = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(boardName, threadNumber, closed) {
     return regeneratorRuntime.wrap(function _callee16$(_context16) {
       while (1) {
         switch (_context16.prev = _context16.next) {
           case 0:
-            return _context16.abrupt('return', DeletedThreads.delete());
+            _context16.next = 2;
+            return setThreadFlag(boardName, threadNumber, 'closed', closed);
 
-          case 1:
+          case 2:
+            return _context16.abrupt('return', _context16.sent);
+
+          case 3:
           case 'end':
             return _context16.stop();
         }
@@ -675,486 +851,48 @@ var clearDeletedThreads = exports.clearDeletedThreads = function () {
     }, _callee16, this);
   }));
 
-  return function clearDeletedThreads() {
+  return function setThreadClosed(_x38, _x39, _x40) {
     return ref.apply(this, arguments);
   };
 }();
 
-var removeThread = exports.removeThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(boardName, threadNumber) {
-    var _ref9 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var archived = _ref9.archived;
-    var source, key, updateTimeSource;
-    return regeneratorRuntime.wrap(function _callee19$(_context19) {
+var setThreadUnbumpable = exports.setThreadUnbumpable = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(boardName, threadNumber, unbumpable) {
+    return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
-        switch (_context19.prev = _context19.next) {
+        switch (_context17.prev = _context17.next) {
           case 0:
-            source = archived ? ArchivedThreads : Threads;
-            key = boardName + ':' + threadNumber;
-            _context19.next = 4;
-            return ThreadsPlannedForDeletion.addOne(key);
-
-          case 4:
-            _context19.next = 6;
-            return source.deleteOne(threadNumber, boardName);
-
-          case 6:
-            if (archived) {
-              _context19.next = 9;
-              break;
-            }
-
-            _context19.next = 9;
-            return ThreadFixedFlags.deleteOne(threadNumber, boardName);
-
-          case 9:
-            updateTimeSource = archived ? ArchivedThreadUpdateTimes : ThreadUpdateTimes;
-            _context19.next = 12;
-            return updateTimeSource.deleteOne(threadNumber, boardName);
-
-          case 12:
-            setTimeout(_asyncToGenerator(regeneratorRuntime.mark(function _callee18() {
-              var postNumbers, postNumbersSource;
-              return regeneratorRuntime.wrap(function _callee18$(_context18) {
-                while (1) {
-                  switch (_context18.prev = _context18.next) {
-                    case 0:
-                      _context18.prev = 0;
-                      _context18.next = 3;
-                      return getThreadPostNumbers(boardName, threadNumber);
-
-                    case 3:
-                      postNumbers = _context18.sent;
-                      postNumbersSource = archived ? ArchivedThreadPostNumbers : ThreadPostNumbers;
-                      _context18.next = 7;
-                      return postNumbersSource.delete(key);
-
-                    case 7:
-                      _context18.next = 9;
-                      return Tools.series(postNumbers, function () {
-                        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(postNumber) {
-                          return regeneratorRuntime.wrap(function _callee17$(_context17) {
-                            while (1) {
-                              switch (_context17.prev = _context17.next) {
-                                case 0:
-                                  _context17.next = 2;
-                                  return PostsModel.removePost(boardName, postNumber, { removingThread: true });
-
-                                case 2:
-                                  return _context17.abrupt('return', _context17.sent);
-
-                                case 3:
-                                case 'end':
-                                  return _context17.stop();
-                              }
-                            }
-                          }, _callee17, this);
-                        }));
-
-                        return function (_x52) {
-                          return ref.apply(this, arguments);
-                        };
-                      }());
-
-                    case 9:
-                      _context18.next = 11;
-                      return ThreadsPlannedForDeletion.deleteOne(key);
-
-                    case 11:
-                      _context18.next = 16;
-                      break;
-
-                    case 13:
-                      _context18.prev = 13;
-                      _context18.t0 = _context18['catch'](0);
-
-                      _logger2.default.error(_context18.t0.stack || _context18.t0);
-
-                    case 16:
-                    case 'end':
-                      return _context18.stop();
-                  }
-                }
-              }, _callee18, this, [[0, 13]]);
-            })), 5000); //TODO: This is not OK
-
-          case 13:
-          case 'end':
-            return _context19.stop();
-        }
-      }
-    }, _callee19, this);
-  }));
-
-  return function removeThread(_x48, _x49, _x50) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var pushOutOldThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(boardName) {
-    var _this = this;
-
-    var _ret;
-
-    return regeneratorRuntime.wrap(function _callee23$(_context23) {
-      while (1) {
-        switch (_context23.prev = _context23.next) {
-          case 0:
-            _context23.prev = 0;
-            return _context23.delegateYield(regeneratorRuntime.mark(function _callee22() {
-              var board, threadNumbers, threads, client, archivedThreadNumbers, archivedThreads, removeLastArchivedThread, thread;
-              return regeneratorRuntime.wrap(function _callee22$(_context22) {
-                while (1) {
-                  switch (_context22.prev = _context22.next) {
-                    case 0:
-                      board = _board2.default.board(boardName);
-
-                      if (board) {
-                        _context22.next = 3;
-                        break;
-                      }
-
-                      throw new Error(Tools.translate('Invalid board'));
-
-                    case 3:
-                      _context22.next = 5;
-                      return getThreadNumbers(boardName);
-
-                    case 5:
-                      threadNumbers = _context22.sent;
-                      _context22.next = 8;
-                      return getThreads(boardName, threadNumbers);
-
-                    case 8:
-                      threads = _context22.sent;
-
-                      threads.sort(sortThreadsByDate);
-
-                      if (!(threads.length < board.threadLimit)) {
-                        _context22.next = 12;
-                        break;
-                      }
-
-                      return _context22.abrupt('return', {
-                        v: void 0
-                      });
-
-                    case 12:
-                      _context22.next = 14;
-                      return (0, _sqlClientFactory2.default)();
-
-                    case 14:
-                      client = _context22.sent;
-                      _context22.next = 17;
-                      return client.transaction();
-
-                    case 17:
-                      _context22.next = 19;
-                      return getThreadNumbers(boardName, { archived: true });
-
-                    case 19:
-                      archivedThreadNumbers = _context22.sent;
-                      _context22.next = 22;
-                      return getThreads(boardName, archivedThreadNumbers);
-
-                    case 22:
-                      archivedThreads = _context22.sent;
-
-                      archivedThreads.sort(sortThreadsByDate);
-                      removeLastArchivedThread = archivedThreads.length > 0 && archivedThreads.length >= board.archiveLimit;
-
-                      if (!removeLastArchivedThread) {
-                        _context22.next = 28;
-                        break;
-                      }
-
-                      _context22.next = 28;
-                      return removeThread(boardName, archivedThreads.pop().number, { archived: true });
-
-                    case 28:
-                      thread = threads.pop();
-
-                      if (!(board.archiveLimit <= 0)) {
-                        _context22.next = 38;
-                        break;
-                      }
-
-                      _context22.next = 32;
-                      return removeThread(boardName, thread.number);
-
-                    case 32:
-                      _context22.next = 34;
-                      return client.commit();
-
-                    case 34:
-                      if (!removeLastArchivedThread) {
-                        _context22.next = 37;
-                        break;
-                      }
-
-                      _context22.next = 37;
-                      return IPC.renderArchive(boardName);
-
-                    case 37:
-                      return _context22.abrupt('return', {
-                        v: void 0
-                      });
-
-                    case 38:
-                      _context22.next = 40;
-                      return Threads.deleteOne(thread.number, boardName);
-
-                    case 40:
-                      _context22.next = 42;
-                      return ThreadFixedFlags.deleteOne(thread.number, boardName);
-
-                    case 42:
-                      _asyncToGenerator(regeneratorRuntime.mark(function _callee21() {
-                        var key, postNumbers, archivePath, oldThreadNumber, sourceId, data, model;
-                        return regeneratorRuntime.wrap(function _callee21$(_context21) {
-                          while (1) {
-                            switch (_context21.prev = _context21.next) {
-                              case 0:
-                                _context21.prev = 0;
-
-                                ArchivedThreadUpdateTimes.setOne(thread.number, thread.updatedAt, boardName);
-                                ThreadUpdateTimes.deleteOne(thread.number, boardName);
-                                thread.archived = true;
-                                delete thread.updatedAt;
-                                _context21.next = 7;
-                                return ArchivedThreads.setOne(thread.number, thread, boardName);
-
-                              case 7:
-                                key = boardName + ':' + thread.number;
-                                _context21.next = 10;
-                                return getThreadPostNumbers(boardName, thread.number);
-
-                              case 10:
-                                postNumbers = _context21.sent;
-                                _context21.next = 13;
-                                return ArchivedThreadPostNumbers.addSome(postNumbers, key);
-
-                              case 13:
-                                _context21.next = 15;
-                                return ThreadPostNumbers.delete(key);
-
-                              case 15:
-                                _context21.next = 17;
-                                return Tools.series(postNumbers, function () {
-                                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(postNumber) {
-                                    return regeneratorRuntime.wrap(function _callee20$(_context20) {
-                                      while (1) {
-                                        switch (_context20.prev = _context20.next) {
-                                          case 0:
-                                            _context20.next = 2;
-                                            return PostsModel.pushPostToArchive(boardName, postNumber);
-
-                                          case 2:
-                                          case 'end':
-                                            return _context20.stop();
-                                        }
-                                      }
-                                    }, _callee20, this);
-                                  }));
-
-                                  return function (_x54) {
-                                    return ref.apply(this, arguments);
-                                  };
-                                }());
-
-                              case 17:
-                                _context21.next = 19;
-                                return client.commit();
-
-                              case 19:
-                                archivePath = __dirname + '/../../public/' + boardName + '/arch';
-                                oldThreadNumber = thread.number;
-                                _context21.next = 23;
-                                return mkpath(archivePath);
-
-                              case 23:
-                                sourceId = boardName + '/res/' + oldThreadNumber + '.json';
-                                _context21.next = 26;
-                                return Cache.readFile(sourceId);
-
-                              case 26:
-                                data = _context21.sent;
-                                model = JSON.parse(data);
-
-                                model.thread.archived = true;
-                                _context21.next = 31;
-                                return _fs2.default.write(archivePath + '/' + oldThreadNumber + '.json', JSON.stringify(model));
-
-                              case 31:
-                                _context21.next = 33;
-                                return _board4.default.renderThreadHTML(model.thread, {
-                                  targetPath: archivePath + '/' + oldThreadNumber + '.html',
-                                  archived: true
-                                });
-
-                              case 33:
-                                _context21.next = 35;
-                                return Cache.removeFile(sourceId);
-
-                              case 35:
-                                _context21.next = 37;
-                                return Cache.removeFile(boardName + '/res/' + oldThreadNumber + '.html');
-
-                              case 37:
-                                _context21.next = 39;
-                                return IPC.renderArchive(boardName);
-
-                              case 39:
-                                _context21.next = 45;
-                                break;
-
-                              case 41:
-                                _context21.prev = 41;
-                                _context21.t0 = _context21['catch'](0);
-
-                                client.rollback();
-                                _logger2.default.error(_context21.t0.stack || _context21.t0);
-
-                              case 45:
-                              case 'end':
-                                return _context21.stop();
-                            }
-                          }
-                        }, _callee21, this, [[0, 41]]);
-                      }))();
-                      //NOTE: This is for the sake of speed.
-
-                    case 43:
-                    case 'end':
-                      return _context22.stop();
-                  }
-                }
-              }, _callee22, _this);
-            })(), 't0', 2);
+            _context17.next = 2;
+            return setThreadFlag(boardName, threadNumber, 'unbumpable', unbumpable);
 
           case 2:
-            _ret = _context23.t0;
+            return _context17.abrupt('return', _context17.sent);
 
-            if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
-              _context23.next = 5;
-              break;
-            }
-
-            return _context23.abrupt('return', _ret.v);
-
-          case 5:
-            _context23.next = 11;
-            break;
-
-          case 7:
-            _context23.prev = 7;
-            _context23.t1 = _context23['catch'](0);
-
-            client.rollback();
-            _logger2.default.error(_context23.t1.stack || _context23.t1);
-
-          case 11:
+          case 3:
           case 'end':
-            return _context23.stop();
+            return _context17.stop();
         }
       }
-    }, _callee23, this, [[0, 7]]);
+    }, _callee17, this);
   }));
 
-  return function pushOutOldThread(_x53) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var createThread = exports.createThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(req, fields, transaction) {
-    var boardName, password, board, date, hashpass, threadNumber, thread;
-    return regeneratorRuntime.wrap(function _callee24$(_context24) {
-      while (1) {
-        switch (_context24.prev = _context24.next) {
-          case 0:
-            boardName = fields.boardName;
-            password = fields.password;
-            board = _board2.default.board(boardName);
-
-            if (board) {
-              _context24.next = 5;
-              break;
-            }
-
-            return _context24.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
-
-          case 5:
-            if (board.postingEnabled) {
-              _context24.next = 7;
-              break;
-            }
-
-            return _context24.abrupt('return', Promise.reject(new Error(Tools.translate('Posting is disabled at this board'))));
-
-          case 7:
-            _context24.next = 9;
-            return pushOutOldThread(boardName);
-
-          case 9:
-            date = Tools.now();
-
-            password = Tools.sha1(password);
-            hashpass = req.hashpass || null;
-            _context24.next = 14;
-            return BoardsModel.nextPostNumber(boardName);
-
-          case 14:
-            threadNumber = _context24.sent;
-            thread = {
-              archived: false,
-              boardName: boardName,
-              closed: false,
-              createdAt: date.toISOString(),
-              unbumpable: false,
-              number: threadNumber,
-              user: {
-                hashpass: hashpass,
-                ip: req.ip,
-                level: req.level(boardName),
-                password: password
-              }
-            };
-
-            transaction.setThreadNumber(threadNumber);
-            _context24.next = 19;
-            return Threads.setOne(threadNumber, thread, boardName);
-
-          case 19:
-            return _context24.abrupt('return', thread);
-
-          case 20:
-          case 'end':
-            return _context24.stop();
-        }
-      }
-    }, _callee24, this);
-  }));
-
-  return function createThread(_x55, _x56, _x57) {
+  return function setThreadUnbumpable(_x41, _x42, _x43) {
     return ref.apply(this, arguments);
   };
 }();
 
 var moveThread = exports.moveThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(sourceBoardName, threadNumber, targetBoardName) {
-    var targetBoard, thread, postNumbers, fixed, lastPostNumber, initialPostNumber, _ref10, toRerender, toUpdate, postNumberMap;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(sourceBoardName, threadNumber, targetBoardName) {
+    var targetBoard, thread, postCount, lastPostNumber, initialPostNumber, _ref12, toRerender, toMarkup, postNumberMap, Thread;
 
-    return regeneratorRuntime.wrap(function _callee27$(_context27) {
+    return regeneratorRuntime.wrap(function _callee19$(_context19) {
       while (1) {
-        switch (_context27.prev = _context27.next) {
+        switch (_context19.prev = _context19.next) {
           case 0:
             targetBoard = _board2.default.board(targetBoardName);
 
             if (!(!targetBoard || !_board2.default.board(sourceBoardName))) {
-              _context27.next = 3;
+              _context19.next = 3;
               break;
             }
 
@@ -1164,95 +902,87 @@ var moveThread = exports.moveThread = function () {
             threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (threadNumber) {
-              _context27.next = 6;
+              _context19.next = 6;
               break;
             }
 
             throw new Error(Tools.translate('Invalid thread number'));
 
           case 6:
-            _context27.next = 8;
-            return getThread(sourceBoardName, threadNumber, { withPostNumbers: true });
+            _context19.next = 8;
+            return getThread(sourceBoardName, threadNumber);
 
           case 8:
-            thread = _context27.sent;
+            thread = _context19.sent;
 
             if (thread) {
-              _context27.next = 11;
+              _context19.next = 11;
               break;
             }
 
             throw new Error(Tools.translate('No such thread'));
 
           case 11:
-            postNumbers = thread.postNumbers;
-            fixed = thread.fixed;
-
-            delete thread.postNumbers;
-            delete thread.updatedAt;
-            delete thread.fixed;
             thread.boardName = targetBoardName;
-            _context27.next = 19;
-            return BoardsModel.nextPostNumber(targetBoardName, postNumbers.length);
+            _context19.next = 14;
+            return getThreadPostCount(sourceBoardName, threadNumber);
 
-          case 19:
-            lastPostNumber = _context27.sent;
-            initialPostNumber = lastPostNumber - postNumbers.length + 1;
+          case 14:
+            postCount = _context19.sent;
+            _context19.next = 17;
+            return BoardsModel.nextPostNumber(targetBoardName, postCount);
+
+          case 17:
+            lastPostNumber = _context19.sent;
+            initialPostNumber = lastPostNumber - postCount + 1;
 
             thread.number = initialPostNumber;
-            _context27.next = 24;
+            _context19.next = 22;
             return PostsModel.copyPosts({
               sourceBoardName: sourceBoardName,
-              postNumbers: postNumbers,
+              sourceThreadNumber: threadNumber,
               targetBoardName: targetBoardName,
               initialPostNumber: initialPostNumber
             });
 
-          case 24:
-            _ref10 = _context27.sent;
-            toRerender = _ref10.toRerender;
-            toUpdate = _ref10.toUpdate;
-            postNumberMap = _ref10.postNumberMap;
-            _context27.next = 30;
-            return ThreadPostNumbers.addSome((0, _underscore2.default)(postNumberMap).toArray(), targetBoardName + ':' + thread.number);
+          case 22:
+            _ref12 = _context19.sent;
+            toRerender = _ref12.toRerender;
+            toMarkup = _ref12.toMarkup;
+            postNumberMap = _ref12.postNumberMap;
+            _context19.next = 28;
+            return client.collection('thread');
 
-          case 30:
-            _context27.next = 32;
-            return ThreadUpdateTimes.setOne(thread.number, Tools.now().toISOString(), targetBoardName);
+          case 28:
+            Thread = _context19.sent;
+            _context19.next = 31;
+            return Thread.insertOne(thread);
 
-          case 32:
-            _context27.next = 34;
-            return Threads.setOne(thread.number, thread, targetBoardName);
-
-          case 34:
-            _context27.next = 36;
-            return ThreadFixedFlags.setOne(thread.number, fixed, targetBoardName);
-
-          case 36:
-            _context27.next = 38;
+          case 31:
+            _context19.next = 33;
             return IPC.render(targetBoardName, thread.number, thread.number, 'create');
 
-          case 38:
-            toRerender = toRerender.reduce(function (acc, ref) {
+          case 33:
+            toMarkup = toMarkup.reduce(function (acc, ref) {
               acc[ref.boardName + ':' + ref.postNumber] = ref;
               return acc;
             }, {});
-            toUpdate = toUpdate.reduce(function (acc, ref) {
+            toRerender = toRerender.reduce(function (acc, ref) {
               acc[ref.boardName + ':' + ref.threadNumber] = ref;
               return acc;
             }, {});
-            _context27.next = 42;
-            return PostsModel.rerenderMovedThreadRelatedPosts({
-              posts: toRerender,
+            _context19.next = 37;
+            return PostsModel.markupMovedThreadRelatedPosts({
+              posts: toMarkup,
               sourceBoardName: sourceBoardName,
               targetBoardName: targetBoardName,
               postNumberMap: postNumberMap
             });
 
-          case 42:
-            _context27.next = 44;
+          case 37:
+            _context19.next = 39;
             return PostsModel.updateMovedThreadRelatedPosts({
-              posts: toUpdate,
+              posts: toRerender,
               sourceBoardName: sourceBoardName,
               targetBoardName: targetBoardName,
               sourceThreadNumber: threadNumber,
@@ -1260,239 +990,242 @@ var moveThread = exports.moveThread = function () {
               postNumberMap: postNumberMap
             });
 
-          case 44:
-            _context27.next = 46;
-            return Tools.series(toRerender, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(ref) {
-                return regeneratorRuntime.wrap(function _callee25$(_context25) {
+          case 39:
+            _context19.next = 41;
+            return Tools.series(_underscore2.default.extend(toRerender, toMarkup), function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(ref) {
+                return regeneratorRuntime.wrap(function _callee18$(_context18) {
                   while (1) {
-                    switch (_context25.prev = _context25.next) {
+                    switch (_context18.prev = _context18.next) {
                       case 0:
-                        _context25.next = 2;
-                        return IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
+                        _context18.next = 2;
+                        return IPC.render(ref.boardName, ref.threadNumber, ref.threadNumber, 'edit');
 
                       case 2:
-                        return _context25.abrupt('return', _context25.sent);
+                        return _context18.abrupt('return', _context18.sent);
 
                       case 3:
                       case 'end':
-                        return _context25.stop();
+                        return _context18.stop();
                     }
                   }
-                }, _callee25, this);
+                }, _callee18, this);
               }));
 
-              return function (_x61) {
+              return function (_x47) {
                 return ref.apply(this, arguments);
               };
             }());
 
-          case 46:
-            _context27.next = 48;
-            return Tools.series(toUpdate, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(ref) {
-                return regeneratorRuntime.wrap(function _callee26$(_context26) {
-                  while (1) {
-                    switch (_context26.prev = _context26.next) {
-                      case 0:
-                        _context26.next = 2;
-                        return IPC.render(ref.boardName, ref.threadNumber, ref.threadNumber, 'create');
+          case 41:
+            _context19.next = 43;
+            return deleteThread(sourceBoardName, threadNumber);
 
-                      case 2:
-                        return _context26.abrupt('return', _context26.sent);
-
-                      case 3:
-                      case 'end':
-                        return _context26.stop();
-                    }
-                  }
-                }, _callee26, this);
-              }));
-
-              return function (_x62) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 48:
-            _context27.next = 50;
-            return removeThread(sourceBoardName, threadNumber);
-
-          case 50:
-            _context27.next = 52;
-            return IPC.render(sourceBoardName, threadNumber, threadNumber, 'delete');
-
-          case 52:
-            return _context27.abrupt('return', {
+          case 43:
+            return _context19.abrupt('return', {
               boardName: targetBoardName,
               threadNumber: thread.number
             });
 
-          case 53:
+          case 44:
           case 'end':
-            return _context27.stop();
+            return _context19.stop();
         }
       }
-    }, _callee27, this);
+    }, _callee19, this);
   }));
 
-  return function moveThread(_x58, _x59, _x60) {
+  return function moveThread(_x44, _x45, _x46) {
     return ref.apply(this, arguments);
   };
 }();
 
-var setThreadFixed = exports.setThreadFixed = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(boardName, threadNumber, fixed) {
-    var thread;
-    return regeneratorRuntime.wrap(function _callee28$(_context28) {
+var deleteThread = exports.deleteThread = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(boardName, threadNumber) {
+    var Thread, result, thread;
+    return regeneratorRuntime.wrap(function _callee24$(_context24) {
       while (1) {
-        switch (_context28.prev = _context28.next) {
+        switch (_context24.prev = _context24.next) {
           case 0:
-            _context28.next = 2;
-            return getThread(boardName, threadNumber);
+            _context24.next = 2;
+            return client.collection('thread');
 
           case 2:
-            thread = _context28.sent;
+            Thread = _context24.sent;
+            _context24.next = 5;
+            return Thread.findOneAndDelete({
+              boardName: boardName,
+              number: threadNumber
+            }, {
+              projection: { lastPostNumber: 1 }
+            });
+
+          case 5:
+            result = _context24.sent;
+            thread = result.value;
 
             if (thread) {
-              _context28.next = 5;
+              _context24.next = 9;
               break;
             }
 
             throw new Error(Tools.translate('No such thread'));
 
-          case 5:
-            fixed = !!fixed;
+          case 9:
+            setTimeout(_asyncToGenerator(regeneratorRuntime.mark(function _callee23() {
+              var _this = this;
 
-            if (!(fixed === !!thread.fixed)) {
-              _context28.next = 8;
+              return regeneratorRuntime.wrap(function _callee23$(_context23) {
+                while (1) {
+                  switch (_context23.prev = _context23.next) {
+                    case 0:
+                      _context23.prev = 0;
+                      return _context23.delegateYield(regeneratorRuntime.mark(function _callee22() {
+                        var Post, query, posts;
+                        return regeneratorRuntime.wrap(function _callee22$(_context22) {
+                          while (1) {
+                            switch (_context22.prev = _context22.next) {
+                              case 0:
+                                _context22.next = 2;
+                                return client.collection('post');
+
+                              case 2:
+                                Post = _context22.sent;
+                                query = {
+                                  boardName: boardName,
+                                  threadNumber: threadNumber
+                                };
+                                _context22.next = 6;
+                                return Post.find(query, {
+                                  number: 1,
+                                  referencedPosts: 1,
+                                  referringPosts: 1,
+                                  fileInfos: 1
+                                }).toArray();
+
+                              case 6:
+                                posts = _context22.sent;
+                                _context22.next = 9;
+                                return Post.deleteMany(query);
+
+                              case 9:
+                                _context22.next = 11;
+                                return Tools.series(posts, function () {
+                                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(post) {
+                                    return regeneratorRuntime.wrap(function _callee20$(_context20) {
+                                      while (1) {
+                                        switch (_context20.prev = _context20.next) {
+                                          case 0:
+                                            _context20.next = 2;
+                                            return PostReferencesModel.removeReferringPosts(post.boardName, post.postNumber);
+
+                                          case 2:
+                                          case 'end':
+                                            return _context20.stop();
+                                        }
+                                      }
+                                    }, _callee20, this);
+                                  }));
+
+                                  return function (_x50) {
+                                    return ref.apply(this, arguments);
+                                  };
+                                }(), true);
+
+                              case 11:
+                                _asyncToGenerator(regeneratorRuntime.mark(function _callee21() {
+                                  var refs, referencedPosts, fileInfos;
+                                  return regeneratorRuntime.wrap(function _callee21$(_context21) {
+                                    while (1) {
+                                      switch (_context21.prev = _context21.next) {
+                                        case 0:
+                                          _context21.next = 2;
+                                          return Tools.series(posts, function (post) {
+                                            return PostReferencesModel.updateReferringPosts(post.referringPosts, post.boardName, post.number, threadNumber);
+                                          }, true);
+
+                                        case 2:
+                                          refs = _context21.sent;
+
+                                          refs = _underscore2.default.extend.apply(_underscore2.default, _toConsumableArray(refs));
+                                          referencedPosts = _underscore2.default.extend.apply(_underscore2.default, _toConsumableArray(posts.map(function (_ref13) {
+                                            var referencedPosts = _ref13.referencedPosts;
+                                            return referencedPosts;
+                                          })));
+                                          _context21.next = 7;
+                                          return PostReferencesModel.rerenderReferencedPosts(boardName, threadNumber, refs, referencedPosts);
+
+                                        case 7:
+                                          fileInfos = posts.map(function (_ref14) {
+                                            var fileInfos = _ref14.fileInfos;
+                                            return fileInfos;
+                                          });
+                                          _context21.next = 10;
+                                          return FilesModel.removeFiles((0, _underscore2.default)(fileInfos).flatten());
+
+                                        case 10:
+                                        case 'end':
+                                          return _context21.stop();
+                                      }
+                                    }
+                                  }, _callee21, this);
+                                }))();
+
+                              case 12:
+                              case 'end':
+                                return _context22.stop();
+                            }
+                          }
+                        }, _callee22, _this);
+                      })(), 't0', 2);
+
+                    case 2:
+                      _context23.next = 7;
+                      break;
+
+                    case 4:
+                      _context23.prev = 4;
+                      _context23.t1 = _context23['catch'](0);
+
+                      _logger2.default.error(_context23.t1.stack || _context23.t1);
+
+                    case 7:
+                    case 'end':
+                      return _context23.stop();
+                  }
+                }
+              }, _callee23, this, [[0, 4]]);
+            })), 5000); //TODO: This is not OK
+
+            if (!thread.archived) {
+              _context24.next = 17;
               break;
             }
 
-            return _context28.abrupt('return');
-
-          case 8:
-            _context28.next = 10;
-            return ThreadFixedFlags.setOne(threadNumber, fixed, boardName);
-
-          case 10:
-            _context28.next = 12;
-            return IPC.render(boardName, threadNumber, threadNumber, 'edit');
-
-          case 12:
-          case 'end':
-            return _context28.stop();
-        }
-      }
-    }, _callee28, this);
-  }));
-
-  return function setThreadFixed(_x63, _x64, _x65) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var setThreadClosed = exports.setThreadClosed = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(boardName, threadNumber, closed) {
-    var thread;
-    return regeneratorRuntime.wrap(function _callee29$(_context29) {
-      while (1) {
-        switch (_context29.prev = _context29.next) {
-          case 0:
-            _context29.next = 2;
-            return getThread(boardName, threadNumber);
-
-          case 2:
-            thread = _context29.sent;
-
-            if (thread) {
-              _context29.next = 5;
-              break;
-            }
-
-            throw new Error(Tools.translate('No such thread'));
-
-          case 5:
-            closed = !!closed;
-
-            if (!(closed === !!thread.closed)) {
-              _context29.next = 8;
-              break;
-            }
-
-            return _context29.abrupt('return');
-
-          case 8:
-            delete thread.fixed;
-            thread.closed = closed;
-            _context29.next = 12;
-            return Threads.setOne(threadNumber, thread, boardName);
-
-          case 12:
-            _context29.next = 14;
-            return IPC.render(boardName, threadNumber, threadNumber, 'edit');
-
-          case 14:
-          case 'end':
-            return _context29.stop();
-        }
-      }
-    }, _callee29, this);
-  }));
-
-  return function setThreadClosed(_x66, _x67, _x68) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var setThreadUnbumpable = exports.setThreadUnbumpable = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee30(boardName, threadNumber, unbumpable) {
-    var thread;
-    return regeneratorRuntime.wrap(function _callee30$(_context30) {
-      while (1) {
-        switch (_context30.prev = _context30.next) {
-          case 0:
-            _context30.next = 2;
-            return getThread(boardName, threadNumber);
-
-          case 2:
-            thread = _context30.sent;
-
-            if (thread) {
-              _context30.next = 5;
-              break;
-            }
-
-            throw new Error(Tools.translate('No such thread'));
-
-          case 5:
-            unbumpable = !!unbumpable;
-
-            if (!(unbumpable === !!thread.unbumpable)) {
-              _context30.next = 8;
-              break;
-            }
-
-            return _context30.abrupt('return');
-
-          case 8:
-            thread.unbumpable = unbumpable;
-            _context30.next = 11;
-            return Threads.setOne(threadNumber, thread, boardName);
-
-          case 11:
-            _context30.next = 13;
-            return IPC.render(boardName, threadNumber, threadNumber, 'edit');
+            _context24.next = 13;
+            return FilesModel.removeArchivedThreadFiles(boardName, threadNumber);
 
           case 13:
+            _context24.next = 15;
+            return IPC.renderArchive(boardName);
+
+          case 15:
+            _context24.next = 19;
+            break;
+
+          case 17:
+            _context24.next = 19;
+            return IPC.render(boardName, threadNumber, threadNumber, 'delete');
+
+          case 19:
           case 'end':
-            return _context30.stop();
+            return _context24.stop();
         }
       }
-    }, _callee30, this);
+    }, _callee24, this);
   }));
 
-  return function setThreadUnbumpable(_x69, _x70, _x71) {
+  return function deleteThread(_x48, _x49) {
     return ref.apply(this, arguments);
   };
 }();
@@ -1516,6 +1249,10 @@ var _promisifyNode2 = _interopRequireDefault(_promisifyNode);
 var _boards = require('./boards');
 
 var BoardsModel = _interopRequireWildcard(_boards);
+
+var _postReferences = require('./post-references');
+
+var PostReferencesModel = _interopRequireWildcard(_postReferences);
 
 var _posts = require('./posts');
 
@@ -1549,17 +1286,13 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
+var _mongodbClientFactory = require('../storage/mongodb-client-factory');
+
+var _mongodbClientFactory2 = _interopRequireDefault(_mongodbClientFactory);
+
 var _redisClientFactory = require('../storage/redis-client-factory');
 
 var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
-
-var _sqlClientFactory = require('../storage/sql-client-factory');
-
-var _sqlClientFactory2 = _interopRequireDefault(_sqlClientFactory);
-
-var _hash = require('../storage/hash');
-
-var _hash2 = _interopRequireDefault(_hash);
 
 var _unorderedSet = require('../storage/unordered-set');
 
@@ -1569,49 +1302,16 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var mkpath = (0, _promisifyNode2.default)('mkpath');
 
-var ArchivedThreadPostNumbers = new _unorderedSet2.default((0, _sqlClientFactory2.default)(), 'archivedThreadPostNumbers', {
-  parse: function parse(number) {
-    return +number;
-  },
-  stringify: function stringify(number) {
-    return number.toString();
-  }
-});
-var ArchivedThreads = new _hash2.default((0, _sqlClientFactory2.default)(), 'archivedThreads');
-var ArchivedThreadUpdateTimes = new _hash2.default((0, _sqlClientFactory2.default)(), 'archivedThreadUpdateTimes', {
-  parse: false,
-  stringify: false
-});
+var client = (0, _mongodbClientFactory2.default)();
 var DeletedThreads = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'deletedThreads', {
-  parse: false,
-  stringify: false
-});
-var ThreadFixedFlags = new _hash2.default((0, _redisClientFactory2.default)(), 'threadFixedFlags', {
-  parse: function parse(flag) {
-    return !!flag;
-  },
-  stringify: function stringify(flag) {
-    return +!!flag;
-  }
-});
-var ThreadPostNumbers = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'threadPostNumbers', {
-  parse: function parse(number) {
-    return +number;
-  },
-  stringify: function stringify(number) {
-    return number.toString();
-  }
-});
-var Threads = new _hash2.default((0, _redisClientFactory2.default)(), 'threads');
-var ThreadsPlannedForDeletion = new _unorderedSet2.default((0, _redisClientFactory2.default)(), 'threadsPlannedForDeletion', {
-  parse: false,
-  stringify: false
-});
-var ThreadUpdateTimes = new _hash2.default((0, _redisClientFactory2.default)(), 'threadUpdateTimes', {
   parse: false,
   stringify: false
 });

@@ -3,7 +3,6 @@ import Cluster from 'cluster';
 import FS from 'q-io/fs';
 
 import * as BoardsModel from './boards';
-import * as UsersModel from './users';
 import Board from '../boards/board';
 import * as Files from '../core/files';
 import * as Renderer from '../core/renderer';
@@ -11,6 +10,9 @@ import * as Cache from '../helpers/cache';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
+import mongodbClient from '../storage/mongodb-client-factory';
+
+let client = mongodbClient();
 
 async function gatherBoardStatistics(board) {
   const BOARD_PUBLIC_PATH = `${__dirname}/../../public/${board.name}`;
@@ -65,21 +67,9 @@ export async function generateStatistics() {
   };
   let launchDate = _.now();
   try {
-    let keys = await UsersModel.getUserPostNumbers();
-    let uniqueUsers = Board.boardNames().reduce((acc, boardName) => {
-      acc[boardName] = 0;
-      return acc;
-    }, {});
-    statistics.total.uniqueIPCount = keys.map((key) => {
-      return {
-        ip: key.split(':').slice(1, -1).join(':'),
-        boardName: key.split(':').pop()
-      };
-    }).filter(userPostInfo => uniqueUsers.hasOwnProperty(userPostInfo.boardName)).reduce((acc, userPostInfo) => {
-      ++uniqueUsers[userPostInfo.boardName];
-      acc.add(userPostInfo.ip);
-      return acc;
-    }, new Set()).size;
+    let Post = await client.collection('post');
+    let ips = await Post.distinct('user.ip');
+    statistics.total.uniqueIPCount = ips.length;
     await Tools.series(Board.boardNames(), async function(boardName) {
       let board = Board.board(boardName);
       if (!board) {
@@ -93,7 +83,8 @@ export async function generateStatistics() {
       boardStatistics.name = board.name;
       boardStatistics.title = board.title;
       boardStatistics.hidden = board.hidden;
-      boardStatistics.uniqueIPCount = uniqueUsers[board.name];
+      let ips = await Post.distinct('user.ip', { boardName: boardName });
+      boardStatistics.uniqueIPCount = ips.length;
       statistics.total.postCount += boardStatistics.postCount;
       statistics.total.fileCount += boardStatistics.fileCount;
       statistics.total.diskUsage += boardStatistics.diskUsage;

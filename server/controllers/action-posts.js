@@ -247,7 +247,7 @@ router.post('/action/markupText', function () {
 
 router.post('/action/createPost', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, res, next) {
-    var transaction, _ref3, fields, files, boardName, threadNumber, captchaEngine, _post, hash, path;
+    var transaction, _ref3, fields, files, boardName, threadNumber, captchaEngine, post, hash, path;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -322,28 +322,25 @@ router.post('/action/createPost', function () {
             return PostsModel.createPost(req, fields, files, transaction);
 
           case 33:
-            _post = _context3.sent;
-            _context3.next = 36;
-            return IPC.render(_post.boardName, _post.threadNumber, _post.number, 'create');
+            post = _context3.sent;
 
-          case 36:
             IPC.send('notifyAboutNewPosts', boardName + '/' + threadNumber);
             if ('node-captcha-noscript' !== captchaEngine) {
               res.json({
-                boardName: _post.boardName,
-                postNumber: _post.number
+                boardName: post.boardName,
+                postNumber: post.number
               });
             } else {
-              hash = 'post-' + _post.number;
-              path = '/' + (0, _config2.default)('site.pathPrefix') + _post.boardName + '/res/' + _post.threadNumber + '.html#' + hash;
+              hash = 'post-' + post.number;
+              path = '/' + (0, _config2.default)('site.pathPrefix') + post.boardName + '/res/' + post.threadNumber + '.html#' + hash;
 
               res.redirect(303, path);
             }
-            _context3.next = 44;
+            _context3.next = 42;
             break;
 
-          case 40:
-            _context3.prev = 40;
+          case 38:
+            _context3.prev = 38;
             _context3.t0 = _context3['catch'](1);
 
             if (transaction) {
@@ -351,12 +348,12 @@ router.post('/action/createPost', function () {
             }
             next(_context3.t0);
 
-          case 44:
+          case 42:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[1, 40]]);
+    }, _callee3, this, [[1, 38]]);
   }));
 
   return function (_x9, _x10, _x11) {
@@ -366,7 +363,7 @@ router.post('/action/createPost', function () {
 
 router.post('/action/createThread', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(req, res, next) {
-    var transaction, _ref4, fields, files, boardName, captchaEngine, thread, _post2;
+    var transaction, _ref4, fields, files, boardName, captchaEngine, thread, post;
 
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -438,11 +435,8 @@ router.post('/action/createThread', function () {
             });
 
           case 32:
-            _post2 = _context4.sent;
-            _context4.next = 35;
-            return IPC.render(_post2.boardName, _post2.threadNumber, _post2.number, 'create');
+            post = _context4.sent;
 
-          case 35:
             if ('node-captcha-noscript' !== captchaEngine) {
               res.json({
                 boardName: thread.boardName,
@@ -451,11 +445,11 @@ router.post('/action/createThread', function () {
             } else {
               res.redirect(303, '/' + (0, _config2.default)('site.pathPrefix') + thread.boardName + '/res/' + thread.number + '.html');
             }
-            _context4.next = 42;
+            _context4.next = 40;
             break;
 
-          case 38:
-            _context4.prev = 38;
+          case 36:
+            _context4.prev = 36;
             _context4.t0 = _context4['catch'](1);
 
             if (transaction) {
@@ -463,12 +457,12 @@ router.post('/action/createThread', function () {
             }
             next(_context4.t0);
 
-          case 42:
+          case 40:
           case 'end':
             return _context4.stop();
         }
       }
-    }, _callee4, this, [[1, 38]]);
+    }, _callee4, this, [[1, 36]]);
   }));
 
   return function (_x12, _x13, _x14) {
@@ -478,7 +472,7 @@ router.post('/action/createThread', function () {
 
 router.post('/action/editPost', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(req, res, next) {
-    var _ref5, fields, boardName, postNumber, _post3;
+    var _ref5, fields, boardName, postNumber, post;
 
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -531,28 +525,27 @@ router.post('/action/editPost', function () {
             return PostsModel.editPost(req, fields);
 
           case 21:
-            _post3 = _context5.sent;
+            post = _context5.sent;
 
-            IPC.render(boardName, _post3.threadNumber, postNumber, 'edit');
             res.json({
-              boardName: _post3.boardName,
-              postNumber: _post3.number
+              boardName: post.boardName,
+              postNumber: post.number
             });
-            _context5.next = 29;
+            _context5.next = 28;
             break;
 
-          case 26:
-            _context5.prev = 26;
+          case 25:
+            _context5.prev = 25;
             _context5.t0 = _context5['catch'](0);
 
             next(_context5.t0);
 
-          case 29:
+          case 28:
           case 'end':
             return _context5.stop();
         }
       }
-    }, _callee5, this, [[0, 26]]);
+    }, _callee5, this, [[0, 25]]);
   }));
 
   return function (_x15, _x16, _x17) {
@@ -562,7 +555,7 @@ router.post('/action/editPost', function () {
 
 router.post('/action/addFiles', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(req, res, next) {
-    var transaction, _ref6, fields, files, boardName, postNumber, _post4;
+    var transaction, _ref6, fields, files, boardName, postNumber, post;
 
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -618,14 +611,14 @@ router.post('/action/addFiles', function () {
             return PostsModel.getPost(boardName, postNumber);
 
           case 23:
-            _post4 = _context6.sent;
+            post = _context6.sent;
 
-            if (_post4) {
+            if (post) {
               _context6.next = 26;
               break;
             }
 
-            return _context6.abrupt('return', Promise.reject(Tools.translate('No such post')));
+            throw new Error(Tools.translate('No such post'));
 
           case 26:
             _context6.next = 28;
@@ -657,16 +650,15 @@ router.post('/action/addFiles', function () {
           case 36:
             files = _context6.sent;
             _context6.next = 39;
-            return FilesModel.addFilesToPost(boardName, postNumber, files, { archived: _post4.archived });
+            return FilesModel.addFilesToPost(boardName, postNumber, files, { archived: post.archived });
 
           case 39:
-            IPC.render(boardName, _post4.threadNumber, postNumber, 'edit');
             res.json({});
-            _context6.next = 47;
+            _context6.next = 46;
             break;
 
-          case 43:
-            _context6.prev = 43;
+          case 42:
+            _context6.prev = 42;
             _context6.t0 = _context6['catch'](1);
 
             if (transaction) {
@@ -674,12 +666,12 @@ router.post('/action/addFiles', function () {
             }
             next(_context6.t0);
 
-          case 47:
+          case 46:
           case 'end':
             return _context6.stop();
         }
       }
-    }, _callee6, this, [[1, 43]]);
+    }, _callee6, this, [[1, 42]]);
   }));
 
   return function (_x18, _x19, _x20) {
@@ -689,7 +681,7 @@ router.post('/action/addFiles', function () {
 
 router.post('/action/deletePost', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(req, res, next) {
-    var _ref7, fields, boardName, postNumber, password;
+    var _ref7, fields, boardName, postNumber, password, isThread;
 
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
@@ -741,25 +733,44 @@ router.post('/action/deletePost', function () {
 
           case 20:
             _context7.next = 22;
-            return PostsModel.deletePost(req, fields);
+            return ThreadsModel.threadExists(boardName, postNumber);
 
           case 22:
-            res.json({});
-            _context7.next = 28;
+            isThread = _context7.sent;
+
+            if (!isThread) {
+              _context7.next = 28;
+              break;
+            }
+
+            _context7.next = 26;
+            return ThreadsModel.deleteThread(boardName, postNumber);
+
+          case 26:
+            _context7.next = 30;
             break;
 
-          case 25:
-            _context7.prev = 25;
+          case 28:
+            _context7.next = 30;
+            return PostsModel.deletePost(boardName, postNumber);
+
+          case 30:
+            res.json({});
+            _context7.next = 36;
+            break;
+
+          case 33:
+            _context7.prev = 33;
             _context7.t0 = _context7['catch'](0);
 
             next(_context7.t0);
 
-          case 28:
+          case 36:
           case 'end':
             return _context7.stop();
         }
       }
-    }, _callee7, this, [[0, 25]]);
+    }, _callee7, this, [[0, 33]]);
   }));
 
   return function (_x21, _x22, _x23) {
@@ -769,7 +780,7 @@ router.post('/action/deletePost', function () {
 
 router.post('/action/deleteFile', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(req, res, next) {
-    var _ref8, fields, fileName, password, fileInfo, boardName, postNumber, _post5;
+    var _ref8, fields, fileName, password, fileInfo, boardName, postNumber, post;
 
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
@@ -829,28 +840,27 @@ router.post('/action/deleteFile', function () {
             return testParameters(req, boardName, 'deleteFile', { postNumber: postNumber });
 
           case 25:
-            _post5 = _context8.sent;
+            post = _context8.sent;
             _context8.next = 28;
             return FilesModel.deleteFile(fileName);
 
           case 28:
-            IPC.render(boardName, _post5.threadNumber, postNumber, 'edit');
             res.json({});
-            _context8.next = 35;
+            _context8.next = 34;
             break;
 
-          case 32:
-            _context8.prev = 32;
+          case 31:
+            _context8.prev = 31;
             _context8.t0 = _context8['catch'](0);
 
             next(_context8.t0);
 
-          case 35:
+          case 34:
           case 'end':
             return _context8.stop();
         }
       }
-    }, _callee8, this, [[0, 32]]);
+    }, _callee8, this, [[0, 31]]);
   }));
 
   return function (_x24, _x25, _x26) {
@@ -921,23 +931,22 @@ router.post('/action/editFileRating', function () {
             return FilesModel.editFileRating(fileName, rating);
 
           case 26:
-            IPC.render(boardName, post.threadNumber, postNumber, 'edit');
             res.json({});
-            _context9.next = 33;
+            _context9.next = 32;
             break;
 
-          case 30:
-            _context9.prev = 30;
+          case 29:
+            _context9.prev = 29;
             _context9.t0 = _context9['catch'](0);
 
             next(_context9.t0);
 
-          case 33:
+          case 32:
           case 'end':
             return _context9.stop();
         }
       }
-    }, _callee9, this, [[0, 30]]);
+    }, _callee9, this, [[0, 29]]);
   }));
 
   return function (_x27, _x28, _x29) {
@@ -1015,23 +1024,22 @@ router.post('/action/editAudioTags', function () {
             return FilesModel.editAudioTags(fileName, fields);
 
           case 27:
-            IPC.render(boardName, post.threadNumber, postNumber, 'edit');
             res.json({});
-            _context10.next = 34;
+            _context10.next = 33;
             break;
 
-          case 31:
-            _context10.prev = 31;
+          case 30:
+            _context10.prev = 30;
             _context10.t0 = _context10['catch'](0);
 
             next(_context10.t0);
 
-          case 34:
+          case 33:
           case 'end':
             return _context10.stop();
         }
       }
-    }, _callee10, this, [[0, 31]]);
+    }, _callee10, this, [[0, 30]]);
   }));
 
   return function (_x30, _x31, _x32) {

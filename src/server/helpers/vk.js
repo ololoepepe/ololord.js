@@ -9,7 +9,7 @@ const VK_API_CALL_TIMEOUT = Tools.MINUTE;
 
 export default async function(method, params) {
   if (!method) {
-    return Promise.reject(new Error(Tools.translate('Invalid VK API method')));
+    throw new Error(Tools.translate('Invalid VK API method'));
   }
   params = params || {};
   params.access_token = config('site.vkontakte.accessToken');
@@ -25,12 +25,8 @@ export default async function(method, params) {
     timeout: VK_API_CALL_TIMEOUT
   });
   if (200 !== response.status) {
-    return Promise.reject(new Error(Tools.translate('Failed to call VK API method')));
+    throw new Error(Tools.translate('Failed to call VK API method'));
   }
   let data = await response.body.read();
-  try {
-    return Promise.resolve(JSON.parse(data.toString()));
-  } catch (err) {
-    return Promise.reject(err);
-  }
+  return JSON.parse(data.toString());
 }

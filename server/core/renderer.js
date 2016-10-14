@@ -234,7 +234,7 @@ var renderThread = exports.renderThread = function () {
               break;
             }
 
-            return _context9.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            throw new Error(Tools.translate('Invalid board'));
 
           case 3:
             _context9.next = 5;

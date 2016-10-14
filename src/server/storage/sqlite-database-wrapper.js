@@ -103,7 +103,11 @@ export default class SQLiteDatabaseWrapper {
         },
         rollback: () => {
           return new Promise((resolve, reject) => {
-            this._runRaw(`ROLLBACK TRANSACTION`).then(() => {
+            Promise.resolve().then(() => {
+              if (!this._client.manualTransaction) {
+                return this._runRaw(`ROLLBACK TRANSACTION`);
+              }
+            }).then(() => {
               state = false;
               resolve();
               this._checkTransactionQueue();

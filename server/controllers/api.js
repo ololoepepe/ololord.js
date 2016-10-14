@@ -635,7 +635,7 @@ router.get('/api/chatMessages.json', function () {
           case 0:
             _context12.prev = 0;
             _context12.next = 3;
-            return ChatsModel.getChatMessages(req, req.query.lastRequestDate);
+            return ChatsModel.getChatMessages(req, new Date(req.query.lastRequestDate));
 
           case 3:
             chats = _context12.sent;
@@ -841,7 +841,7 @@ router.get('/api/userIp.json', function () {
 
 router.get('/api/bannedUser.json', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(req, res, next) {
-    var ip, bans;
+    var ip, boardNames, bannedUser;
     return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
         switch (_context17.prev = _context17.next) {
@@ -865,33 +865,32 @@ router.get('/api/bannedUser.json', function () {
 
           case 5:
             _context17.prev = 5;
-            _context17.next = 8;
-            return UsersModel.getBannedUserBans(ip, _board2.default.boardNames().filter(function (boardName) {
+            boardNames = _board2.default.boardNames().filter(function (boardName) {
               return req.isModer(boardName);
-            }));
+            });
+            _context17.next = 9;
+            return UsersModel.getBannedUser(ip, boardNames);
 
-          case 8:
-            bans = _context17.sent;
+          case 9:
+            bannedUser = _context17.sent;
 
-            res.json(Tools.addIPv4({
-              ip: ip,
-              bans: bans
-            }));
-            _context17.next = 15;
+            bannedUser.subnet = bannedUser.subnet ? bannedUser.subnet.subnet : 0;
+            res.json(Tools.addIPv4(bannedUser));
+            _context17.next = 17;
             break;
 
-          case 12:
-            _context17.prev = 12;
+          case 14:
+            _context17.prev = 14;
             _context17.t0 = _context17['catch'](5);
 
             next(_context17.t0);
 
-          case 15:
+          case 17:
           case 'end':
             return _context17.stop();
         }
       }
-    }, _callee17, this, [[5, 12]]);
+    }, _callee17, this, [[5, 14]]);
   }));
 
   return function (_x45, _x46, _x47) {
@@ -901,7 +900,7 @@ router.get('/api/bannedUser.json', function () {
 
 router.get('/api/bannedUsers.json', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(req, res, next) {
-    var users;
+    var boardNames, users;
     return regeneratorRuntime.wrap(function _callee18$(_context18) {
       while (1) {
         switch (_context18.prev = _context18.next) {
@@ -915,35 +914,34 @@ router.get('/api/bannedUsers.json', function () {
 
           case 2:
             _context18.prev = 2;
-            _context18.next = 5;
-            return UsersModel.getBannedUsers(_board2.default.boardNames().filter(function (boardName) {
+            boardNames = _board2.default.boardNames().filter(function (boardName) {
               return req.isModer(boardName);
-            }));
+            });
+            _context18.next = 6;
+            return UsersModel.getBannedUsers(boardNames);
 
-          case 5:
+          case 6:
             users = _context18.sent;
 
-            res.json((0, _underscore2.default)(users).map(function (bans, ip) {
-              return Tools.addIPv4({
-                ip: ip,
-                bans: bans
-              });
+            res.json((0, _underscore2.default)(users).map(function (bannedUser) {
+              bannedUser.subnet = bannedUser.subnet ? bannedUser.subnet.subnet : 0;
+              return Tools.addIPv4(bannedUser);
             }));
-            _context18.next = 12;
+            _context18.next = 13;
             break;
 
-          case 9:
-            _context18.prev = 9;
+          case 10:
+            _context18.prev = 10;
             _context18.t0 = _context18['catch'](2);
 
             next(_context18.t0);
 
-          case 12:
+          case 13:
           case 'end':
             return _context18.stop();
         }
       }
-    }, _callee18, this, [[2, 9]]);
+    }, _callee18, this, [[2, 10]]);
   }));
 
   return function (_x48, _x49, _x50) {
@@ -1028,9 +1026,7 @@ router.get('/api/registeredUsers.json', function () {
           case 5:
             users = _context20.sent;
 
-            res.json(users.map(function (user) {
-              return Tools.addIPv4(user);
-            }));
+            res.json(users.map(Tools.addIPv4));
             _context20.next = 12;
             break;
 

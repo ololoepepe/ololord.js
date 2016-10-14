@@ -173,7 +173,7 @@ router.get('/api/lastPostNumbers.json', async function(req, res, next) {
 
 router.get('/api/chatMessages.json', async function(req, res, next) {
   try {
-    let chats = await ChatsModel.getChatMessages(req, req.query.lastRequestDate);
+    let chats = await ChatsModel.getChatMessages(req, new Date(req.query.lastRequestDate));
     res.json(chats);
   } catch (err) {
     next(err);
@@ -238,11 +238,10 @@ router.get('/api/bannedUser.json', async function(req, res, next) {
     return next(Tools.translate('Not enough rights'));
   }
   try {
-    let bans = await UsersModel.getBannedUserBans(ip, Board.boardNames().filter(boardName => req.isModer(boardName)));
-    res.json(Tools.addIPv4({
-      ip: ip,
-      bans: bans
-    }));
+    let boardNames = Board.boardNames().filter(boardName => req.isModer(boardName));
+    let bannedUser = await UsersModel.getBannedUser(ip, boardNames);
+    bannedUser.subnet = bannedUser.subnet ? bannedUser.subnet.subnet : 0;
+    res.json(Tools.addIPv4(bannedUser));
   } catch (err) {
     next(err);
   }
@@ -253,12 +252,11 @@ router.get('/api/bannedUsers.json', async function(req, res, next) {
     return next(Tools.translate('Not enough rights'));
   }
   try {
-    let users = await UsersModel.getBannedUsers(Board.boardNames().filter(boardName => req.isModer(boardName)));
-    res.json(_(users).map((bans, ip) => {
-      return Tools.addIPv4({
-        ip: ip,
-        bans: bans
-      });
+    let boardNames = Board.boardNames().filter(boardName => req.isModer(boardName));
+    let users = await UsersModel.getBannedUsers(boardNames);
+    res.json(_(users).map((bannedUser) => {
+      bannedUser.subnet = bannedUser.subnet ? bannedUser.subnet.subnet : 0;
+      return Tools.addIPv4(bannedUser);
     }));
   } catch (err) {
     next(err);
@@ -287,7 +285,7 @@ router.get('/api/registeredUsers.json', async function(req, res, next) {
   }
   try {
     let users = await UsersModel.getRegisteredUsers();
-    res.json(users.map(user => Tools.addIPv4(user)));
+    res.json(users.map(Tools.addIPv4));
   } catch (err) {
     next(err);
   }

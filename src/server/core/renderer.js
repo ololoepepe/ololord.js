@@ -133,7 +133,7 @@ export async function rerender(what) {
 export async function renderThread(thread) {
   let board = Board.board(thread.boardName);
   if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+    throw new Error(Tools.translate('Invalid board'));
   }
   await Files.renderPostFileInfos(thread.opPost);
   await board.renderPost(thread.opPost);

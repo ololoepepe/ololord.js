@@ -93,22 +93,22 @@ if (Cluster.isMaster) {
   });
 }
 
-export function send(type, data, nowait, workerID) {
+export async function send(type, data, nowait, workerID) {
   if (Cluster.isMaster) {
     if (workerID) {
       let worker = Cluster.workers[workerID];
       if (!worker) {
-        return Promise.reject(new Error(Tools.translate('Invalid worker ID')));
+        throw new Error(Tools.translate('Invalid worker ID'));
       }
-      return sendMessage(worker.process, type, data, nowait);
+      return await sendMessage(worker.process, type, data, nowait);
     } else {
       let promises = _(Cluster.workers).map((worker) => {
         return sendMessage(worker.process, type, data, nowait);
       });
-      return Promise.all(promises);
+      return await Promise.all(promises);
     }
   } else {
-    return sendMessage(process, type, data, nowait);
+    return await sendMessage(process, type, data, nowait);
   }
 }
 
@@ -139,7 +139,7 @@ async function performTask(type, key, data) {
     return result;
   } catch (err) {
     workerLoads.set(workerID, workerLoads.get(workerID) - 1);
-    return Promise.reject(err);
+    throw err;
   }
 }
 
@@ -189,11 +189,7 @@ async function renderThread(boardName, threadNumber, postNumber, action) {
   if (isDeleted) {
     return;
   }
-  if (threadNumber === postNumber) {
-    if ('edit' === action) {
-      action = 'create';
-    }
-  } else {
+  if (threadNumber !== postNumber) {
     action = 'edit';
   }
   return await addTask('renderThread', `${boardName}:${threadNumber}`, {
@@ -203,8 +199,8 @@ async function renderThread(boardName, threadNumber, postNumber, action) {
   });
 }
 
-export async function renderPages(boardName) {
-  return await addTask('renderPages', boardName);
+export async function renderPages(boardName, threadNumber) {
+  return await addTask('renderPages', boardName, threadNumber);
 }
 
 export async function renderCatalog(boardName) {
@@ -238,7 +234,7 @@ export async function render(boardName, threadNumber, postNumber, action) {
       case 'delete':
         if (threadNumber === postNumber) {
           await renderThread(boardName, threadNumber, postNumber, action);
-          await renderPages(boardName);
+          await renderPages(boardName, threadNumber);
           renderCatalog(boardName);
         } else {
           (async function() {

@@ -16,6 +16,10 @@ export default class Key extends CommonKey {
     return await this.client.set(this.fullKey(subkey), this.stringify(data));
   }
 
+  async setex(data, seconds, subkey) {
+    return await this.client.setex(this.fullKey(subkey), this.stringify(data), seconds);
+  }
+
   async incrementBy(n, subkey) {
     return await this.client.incrby(this.fullKey(subkey), n);
   }

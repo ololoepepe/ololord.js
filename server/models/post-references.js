@@ -3,33 +3,41 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.removeReferringPosts = exports.removeReferencedPosts = exports.storeReferringPosts = exports.storeReferencedPosts = exports.rerenderReferringPosts = exports.removeReferences = exports.addReferencedPosts = exports.addReferencesToPost = undefined;
+exports.rerenderReferencedPosts = exports.updateReferringPosts = exports.addReferringPosts = exports.removeReferringPosts = undefined;
 
-var addReferencesToPost = exports.addReferencesToPost = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(post) {
-    var key, referringSource, referencedSource, referringPosts, referencedPosts;
+var removeReferringPosts = exports.removeReferringPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, postNumber) {
+    var Post;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            key = post.boardName + ':' + post.number;
-            referringSource = post.archived ? ArchivedReferringPosts : ReferringPosts;
-            referencedSource = post.archived ? ArchivedReferencedPosts : ReferencedPosts;
+            _context.next = 2;
+            return client.collection('post');
+
+          case 2:
+            Post = _context.sent;
             _context.next = 5;
-            return referringSource.getAll(key);
+            return Post.updateMany({
+              referringPosts: {
+                $elemMatch: {
+                  boardName: boardName,
+                  postNumber: postNumber
+                }
+              }
+            }, {
+              $pull: {
+                referringPosts: {
+                  boardName: boardName,
+                  postNumber: postNumber
+                }
+              }
+            });
 
           case 5:
-            referringPosts = _context.sent;
-            _context.next = 8;
-            return referencedSource.getAll(key);
+            return _context.abrupt('return', _context.sent);
 
-          case 8:
-            referencedPosts = _context.sent;
-
-            post.referringPosts = sortedReferences(referringPosts);
-            post.referencedPosts = sortedReferences(referencedPosts);
-
-          case 11:
+          case 6:
           case 'end':
             return _context.stop();
         }
@@ -37,69 +45,128 @@ var addReferencesToPost = exports.addReferencesToPost = function () {
     }, _callee, this);
   }));
 
-  return function addReferencesToPost(_x) {
+  return function removeReferringPosts(_x, _x2) {
     return ref.apply(this, arguments);
   };
 }();
 
-var addReferencedPosts = exports.addReferencedPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(post, referencedPosts) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+var addReferringPosts = exports.addReferringPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(referencedPosts, boardName, postNumber, threadNumber) {
+    var Post;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.next = 2;
+            return client.collection('post');
 
-    var nogenerate = _ref.nogenerate;
-    var archived = _ref.archived;
-    var key, referringSource, referencedSource;
+          case 2:
+            Post = _context2.sent;
+            _context2.next = 5;
+            return Tools.series(referencedPosts, function (ref) {
+              return Post.updateOne({
+                boardName: ref.boardName,
+                number: ref.postNumber
+              }, {
+                $push: {
+                  referringPosts: {
+                    boardName: boardName,
+                    postNumber: postNumber,
+                    threadNumber: threadNumber,
+                    createdAt: ref.createdAt
+                  }
+                }
+              });
+            });
+
+          case 5:
+          case 'end':
+            return _context2.stop();
+        }
+      }
+    }, _callee2, this);
+  }));
+
+  return function addReferringPosts(_x3, _x4, _x5, _x6) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var updatePostMarkup = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, postNumber) {
+    var Post, query, post, oldReferencedPosts, referencedPosts, text, _ref, matchedCount;
+
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            key = post.boardName + ':' + post.number;
-            referringSource = post.archived ? ArchivedReferringPosts : ReferringPosts;
-            referencedSource = post.archived ? ArchivedReferencedPosts : ReferencedPosts;
-            //TODO: Optimise (hmset)
+            console.log(Tools.translate('Rendering post text: >>/$[1]/$[2]', '', boardName, postNumber));
+            _context3.next = 3;
+            return client.collection('post');
 
-            _context3.next = 5;
-            return Tools.series(referencedPosts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(ref, refKey) {
-                return regeneratorRuntime.wrap(function _callee2$(_context2) {
-                  while (1) {
-                    switch (_context2.prev = _context2.next) {
-                      case 0:
-                        _context2.next = 2;
-                        return referencedSource.setOne(refKey, ref, key);
+          case 3:
+            Post = _context3.sent;
+            query = {
+              boardName: boardName,
+              number: postNumber
+            };
+            _context3.next = 7;
+            return Post.findOne(query, {
+              threadNumber: 1,
+              rawText: 1,
+              markup: 1,
+              'user.level': 1,
+              referencedPosts: 1
+            });
 
-                      case 2:
-                        _context2.next = 4;
-                        return referringSource.setOne(key, {
-                          boardName: post.boardName,
-                          postNumber: post.number,
-                          threadNumber: post.threadNumber,
-                          createdAt: refKey.createdAt
-                        }, refKey);
+          case 7:
+            post = _context3.sent;
 
-                      case 4:
-                      case 'end':
-                        return _context2.stop();
-                    }
-                  }
-                }, _callee2, this);
-              }));
-
-              return function (_x6, _x7) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 5:
-            if (!nogenerate) {
-              (0, _underscore2.default)(referencedPosts).each(function (ref, refKey) {
-                if (ref.boardName !== post.boardName || ref.threadNumber !== post.threadNumber) {
-                  IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
-                }
-              });
+            if (post) {
+              _context3.next = 10;
+              break;
             }
 
-          case 6:
+            throw new Error(Tools.translate('No such post'));
+
+          case 10:
+            oldReferencedPosts = post.referencedPosts;
+            referencedPosts = {};
+            _context3.next = 14;
+            return (0, _markup2.default)(boardName, post.rawText, {
+              markupModes: post.markup,
+              referencedPosts: referencedPosts,
+              accessLevel: post.user.level
+            });
+
+          case 14:
+            text = _context3.sent;
+            _context3.next = 17;
+            return Post.updateOne(query, {
+              $set: {
+                text: text,
+                referencedPosts: (0, _underscore2.default)(referencedPosts).toArray()
+              }
+            });
+
+          case 17:
+            _ref = _context3.sent;
+            matchedCount = _ref.matchedCount;
+
+            if (!(matchedCount <= 0)) {
+              _context3.next = 21;
+              break;
+            }
+
+            throw new Error(Tools.translate('No such post'));
+
+          case 21:
+            return _context3.abrupt('return', {
+              oldReferencedPosts: oldReferencedPosts,
+              newReferencedPosts: referencedPosts
+            });
+
+          case 22:
           case 'end':
             return _context3.stop();
         }
@@ -107,71 +174,77 @@ var addReferencedPosts = exports.addReferencedPosts = function () {
     }, _callee3, this);
   }));
 
-  return function addReferencedPosts(_x2, _x3, _x4) {
+  return function updatePostMarkup(_x7, _x8) {
     return ref.apply(this, arguments);
   };
 }();
 
-var removeReferences = exports.removeReferences = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(_ref2) {
-    var boardName = _ref2.boardName;
-    var number = _ref2.number;
-    var threadNumber = _ref2.threadNumber;
-    var archived = _ref2.archived;
-
-    var _ref3 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-    var nogenerate = _ref3.nogenerate;
-    var key, referencedSource, referencedPosts;
+var updateReferringPosts = exports.updateReferringPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(referringPosts, boardName, postNumber, threadNumber) {
+    var shouldAddReferringPosts, refs;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            key = boardName + ':' + number;
-            referencedSource = archived ? ArchivedReferencedPosts : ReferencedPosts;
-            _context5.next = 4;
-            return referencedSource.getAll(key);
+            shouldAddReferringPosts = boardName && postNumber && threadNumber;
+            _context5.next = 3;
+            return Tools.series(referringPosts, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(ref) {
+                var _ref2, oldReferencedPosts, newReferencedPosts;
 
-          case 4:
-            referencedPosts = _context5.sent;
-            _context5.next = 7;
-            return Tools.series(referencedPosts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(ref, refKey) {
                 return regeneratorRuntime.wrap(function _callee4$(_context4) {
                   while (1) {
                     switch (_context4.prev = _context4.next) {
                       case 0:
-                        _context4.next = 2;
-                        return ReferringPosts.deleteOne(key, refKey);
+                        _context4.prev = 0;
+                        _context4.next = 3;
+                        return updatePostMarkup(ref.boardName, ref.postNumber);
 
-                      case 2:
-                        _context4.next = 4;
-                        return ArchivedReferringPosts.deleteOne(key, refKey);
+                      case 3:
+                        _ref2 = _context4.sent;
+                        oldReferencedPosts = _ref2.oldReferencedPosts;
+                        newReferencedPosts = _ref2.newReferencedPosts;
 
-                      case 4:
+                        oldReferencedPosts = pickPostsToRerender(oldReferencedPosts, boardName, postNumber);
+                        _context4.next = 9;
+                        return removeReferringPosts(ref.boardName, ref.postNumber);
+
+                      case 9:
+                        newReferencedPosts = pickPostsToRerender(newReferencedPosts, boardName, postNumber);
+                        _context4.next = 12;
+                        return addReferringPosts(newReferencedPosts, ref.boardName, ref.postNumber, ref.threadNumber);
+
+                      case 12:
+                        return _context4.abrupt('return', _underscore2.default.extend(oldReferencedPosts, newReferencedPosts));
+
+                      case 15:
+                        _context4.prev = 15;
+                        _context4.t0 = _context4['catch'](0);
+
+                        _logger2.default.error(_context4.t0.stack || _context4.t0);
+                        return _context4.abrupt('return', {});
+
+                      case 19:
                       case 'end':
                         return _context4.stop();
                     }
                   }
-                }, _callee4, this);
+                }, _callee4, this, [[0, 15]]);
               }));
 
-              return function (_x11, _x12) {
+              return function (_x13) {
                 return ref.apply(this, arguments);
               };
-            }());
+            }(), true);
 
-          case 7:
-            if (!nogenerate) {
-              (0, _underscore2.default)(referencedPosts).filter(function (ref) {
-                return ref.boardName !== boardName || ref.threadNumber !== threadNumber;
-              }).forEach(function (ref) {
-                IPC.render(ref.boardName, ref.threadNumber, ref.postNumber, 'edit');
-              });
-            }
-            referencedSource.delete(key);
+          case 3:
+            refs = _context5.sent;
+            return _context5.abrupt('return', (0, _underscore2.default)(_underscore2.default.extend.apply(_underscore2.default, [{}].concat(_toConsumableArray(refs)))).reduce(function (acc, ref) {
+              acc[ref.boardName + ':' + ref.threadNumber] = ref;
+              return acc;
+            }, {}));
 
-          case 9:
+          case 5:
           case 'end':
             return _context5.stop();
         }
@@ -179,218 +252,45 @@ var removeReferences = exports.removeReferences = function () {
     }, _callee5, this);
   }));
 
-  return function removeReferences(_x8, _x9) {
+  return function updateReferringPosts(_x9, _x10, _x11, _x12) {
     return ref.apply(this, arguments);
   };
 }();
 
-var rerenderReferringPosts = exports.rerenderReferringPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(_ref4) {
-    var boardName = _ref4.boardName;
-    var number = _ref4.number;
-    var threadNumber = _ref4.threadNumber;
-    var archived = _ref4.archived;
-
-    var _ref5 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-    var removingThread = _ref5.removingThread;
-    var referringSource, referringPosts;
-    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+var rerenderReferencedPosts = exports.rerenderReferencedPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(boardName, threadNumber, newReferencedPosts, oldReferencedPosts) {
+    var newRefs, oldRefs;
+    return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
-        switch (_context7.prev = _context7.next) {
+        switch (_context6.prev = _context6.next) {
           case 0:
-            referringSource = archived ? ArchivedReferringPosts : ReferringPosts;
-            _context7.next = 3;
-            return referringSource.getAll(boardName + ':' + number);
-
-          case 3:
-            referringPosts = _context7.sent;
-
-            referringPosts = (0, _underscore2.default)(referringPosts).filter(function (ref) {
-              return !removingThread || ref.boardName !== boardName || ref.threadNumber !== threadNumber;
+            newRefs = pickThreadsToRerender(newReferencedPosts, boardName, threadNumber);
+            oldRefs = pickThreadsToRerender(oldReferencedPosts, boardName, threadNumber);
+            _context6.prev = 2;
+            _context6.next = 5;
+            return Tools.series(_underscore2.default.extend(newRefs, oldRefs), function (ref) {
+              return IPC.render(ref.boardName, ref.threadNumber, ref.threadNumber, 'edit');
             });
-            _context7.next = 7;
-            return Tools.series(referringPosts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(ref) {
-                return regeneratorRuntime.wrap(function _callee6$(_context6) {
-                  while (1) {
-                    switch (_context6.prev = _context6.next) {
-                      case 0:
-                        _context6.next = 2;
-                        return PostsModel.rerenderPost(ref.boardName, ref.postNumber);
 
-                      case 2:
-                        return _context6.abrupt('return', _context6.sent);
-
-                      case 3:
-                      case 'end':
-                        return _context6.stop();
-                    }
-                  }
-                }, _callee6, this);
-              }));
-
-              return function (_x16) {
-                return ref.apply(this, arguments);
-              };
-            }());
+          case 5:
+            _context6.next = 10;
+            break;
 
           case 7:
+            _context6.prev = 7;
+            _context6.t0 = _context6['catch'](2);
+
+            _logger2.default.error(_context6.t0.stack || _context6.t0);
+
+          case 10:
           case 'end':
-            return _context7.stop();
+            return _context6.stop();
         }
       }
-    }, _callee7, this);
+    }, _callee6, this, [[2, 7]]);
   }));
 
-  return function rerenderReferringPosts(_x13, _x14) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var storeReferencedPosts = exports.storeReferencedPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(boardName, postNumber, referencedPosts) {
-    var _ref7 = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
-
-    var archived = _ref7.archived;
-    var source;
-    return regeneratorRuntime.wrap(function _callee9$(_context9) {
-      while (1) {
-        switch (_context9.prev = _context9.next) {
-          case 0:
-            source = archived ? ArchivedReferencedPosts : ReferencedPosts;
-            _context9.next = 3;
-            return Tools.series(referencedPosts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(ref) {
-                return regeneratorRuntime.wrap(function _callee8$(_context8) {
-                  while (1) {
-                    switch (_context8.prev = _context8.next) {
-                      case 0:
-                        _context8.next = 2;
-                        return source.setOne(ref.boardName + ':' + ref.postNumber, ref, boardName + ':' + postNumber);
-
-                      case 2:
-                      case 'end':
-                        return _context8.stop();
-                    }
-                  }
-                }, _callee8, this);
-              }));
-
-              return function (_x22) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 3:
-          case 'end':
-            return _context9.stop();
-        }
-      }
-    }, _callee9, this);
-  }));
-
-  return function storeReferencedPosts(_x17, _x18, _x19, _x20) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var storeReferringPosts = exports.storeReferringPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName, postNumber, referringPosts) {
-    var _ref8 = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
-
-    var archived = _ref8.archived;
-    var source;
-    return regeneratorRuntime.wrap(function _callee11$(_context11) {
-      while (1) {
-        switch (_context11.prev = _context11.next) {
-          case 0:
-            source = archived ? ArchivedReferringPosts : ReferringPosts;
-            _context11.next = 3;
-            return Tools.series(referringPosts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(ref) {
-                return regeneratorRuntime.wrap(function _callee10$(_context10) {
-                  while (1) {
-                    switch (_context10.prev = _context10.next) {
-                      case 0:
-                        source.setOne(ref.boardName + ':' + ref.postNumber, ref, boardName + ':' + postNumber);
-
-                      case 1:
-                      case 'end':
-                        return _context10.stop();
-                    }
-                  }
-                }, _callee10, this);
-              }));
-
-              return function (_x28) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 3:
-          case 'end':
-            return _context11.stop();
-        }
-      }
-    }, _callee11, this);
-  }));
-
-  return function storeReferringPosts(_x23, _x24, _x25, _x26) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var removeReferencedPosts = exports.removeReferencedPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, postNumber) {
-    var _ref9 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var archived = _ref9.archived;
-    var source;
-    return regeneratorRuntime.wrap(function _callee12$(_context12) {
-      while (1) {
-        switch (_context12.prev = _context12.next) {
-          case 0:
-            source = archived ? ArchivedReferencedPosts : ReferencedPosts;
-
-            source.delete(boardName + ':' + postNumber);
-
-          case 2:
-          case 'end':
-            return _context12.stop();
-        }
-      }
-    }, _callee12, this);
-  }));
-
-  return function removeReferencedPosts(_x29, _x30, _x31) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var removeReferringPosts = exports.removeReferringPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(boardName, postNumber) {
-    var _ref10 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var archived = _ref10.archived;
-    var source;
-    return regeneratorRuntime.wrap(function _callee13$(_context13) {
-      while (1) {
-        switch (_context13.prev = _context13.next) {
-          case 0:
-            source = archived ? ArchivedReferringPosts : ReferringPosts;
-
-            source.delete(boardName + ':' + postNumber);
-
-          case 2:
-          case 'end':
-            return _context13.stop();
-        }
-      }
-    }, _callee13, this);
-  }));
-
-  return function removeReferringPosts(_x33, _x34, _x35) {
+  return function rerenderReferencedPosts(_x14, _x15, _x16, _x17) {
     return ref.apply(this, arguments);
   };
 }();
@@ -408,6 +308,10 @@ var _ipc = require('../helpers/ipc');
 
 var IPC = _interopRequireWildcard(_ipc);
 
+var _logger = require('../helpers/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
@@ -416,36 +320,40 @@ var _posts = require('./posts');
 
 var PostsModel = _interopRequireWildcard(_posts);
 
-var _hash = require('../storage/hash');
+var _markup = require('../markup');
 
-var _hash2 = _interopRequireDefault(_hash);
+var _markup2 = _interopRequireDefault(_markup);
 
-var _redisClientFactory = require('../storage/redis-client-factory');
+var _mongodbClientFactory = require('../storage/mongodb-client-factory');
 
-var _redisClientFactory2 = _interopRequireDefault(_redisClientFactory);
-
-var _sqlClientFactory = require('../storage/sql-client-factory');
-
-var _sqlClientFactory2 = _interopRequireDefault(_sqlClientFactory);
+var _mongodbClientFactory2 = _interopRequireDefault(_mongodbClientFactory);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var ArchivedReferringPosts = new _hash2.default((0, _sqlClientFactory2.default)(), 'archivedReferringPosts');
-var ArchivedReferencedPosts = new _hash2.default((0, _sqlClientFactory2.default)(), 'archivedReferencedPosts');
-var ReferringPosts = new _hash2.default((0, _redisClientFactory2.default)(), 'referringPosts');
-var ReferencedPosts = new _hash2.default((0, _redisClientFactory2.default)(), 'referencedPosts');
+var client = (0, _mongodbClientFactory2.default)();
 
-function sortedReferences(references) {
-  return (0, _underscore2.default)(references).toArray().sort(function (a, b) {
-    return a.createdAt && b.createdAt && a.createdAt.localeCompare(b.createdAt) || a.boardName.localeCompare(b.boardName) || a.postNumber - b.postNumber;
-  }).map(function (reference) {
-    delete reference.createdAt;
-    return reference;
-  });
+function pickPostsToRerender(referencedPosts, boardName, postNumber) {
+  return (0, _underscore2.default)(referencedPosts).filter(function (ref) {
+    return boardName !== ref.boardName || postNumber !== ref.postNumber;
+  }).reduce(function (acc, ref) {
+    acc[ref.boardName + ':' + ref.postNumber] = ref;
+    return acc;
+  }, {});
+}
+
+function pickThreadsToRerender(referencedPosts, boardName, threadNumber) {
+  return (0, _underscore2.default)(referencedPosts).filter(function (ref) {
+    return boardName !== ref.boardName || threadNumber !== ref.threadNumber;
+  }).reduce(function (acc, ref) {
+    acc[ref.boardName + ':' + ref.threadNumber] = ref;
+    return acc;
+  }, {});
 }
 
 function replacePostLinks(text, sourceBoardName, referencedPosts, postNumberMap) {
@@ -462,13 +370,13 @@ function replacePostLinks(text, sourceBoardName, referencedPosts, postNumberMap)
   return text;
 }
 
-function replaceRelatedPostLinks(_ref6) {
-  var text = _ref6.text;
-  var sourceBoardName = _ref6.sourceBoardName;
-  var targetBoardName = _ref6.targetBoardName;
-  var postBoardName = _ref6.postBoardName;
-  var referencedPosts = _ref6.referencedPosts;
-  var postNumberMap = _ref6.postNumberMap;
+function replaceRelatedPostLinks(_ref3) {
+  var text = _ref3.text;
+  var sourceBoardName = _ref3.sourceBoardName;
+  var targetBoardName = _ref3.targetBoardName;
+  var postBoardName = _ref3.postBoardName;
+  var referencedPosts = _ref3.referencedPosts;
+  var postNumberMap = _ref3.postNumberMap;
 
   if (!text) {
     return text;
@@ -495,7 +403,8 @@ function replacePostReferences(references, source, target, postNumberMap, relate
       return {
         boardName: targetBoardName,
         threadNumber: targetThreadNumber,
-        postNumber: postNumberMap[ref.postNumber]
+        postNumber: postNumberMap[ref.postNumber],
+        createdAt: ref.createdAt
       };
     } else {
       related.push(ref);
@@ -514,7 +423,8 @@ function replaceRelatedPostReferences(references, source, target, postNumberMap)
       return {
         boardName: targetBoardName,
         threadNumber: targetThreadNumber,
-        postNumber: postNumberMap[ref.postNumber]
+        postNumber: postNumberMap[ref.postNumber],
+        createdAt: ref.createdAt
       };
     } else {
       return ref;

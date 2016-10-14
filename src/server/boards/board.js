@@ -270,31 +270,31 @@ class Board {
     text = text || '';
     password = password || '';
     if (name.length > this.maxNameLength) {
-      return Promise.reject(new Error(Tools.translate('Name is too long')));
+      throw new Error(Tools.translate('Name is too long'));
     }
     if (subject.length > this.maxSubjectLength) {
-      return Promise.reject(new Error(Tools.translate('Subject is too long')));
+      throw new Error(Tools.translate('Subject is too long'));
     }
     if (text.length > this.maxTextFieldLength) {
-      return Promise.reject(new Error(Tools.translate('Comment is too long')));
+      throw new Error(Tools.translate('Comment is too long'));
     }
     if (password.length > this.maxPasswordLength) {
-      return Promise.reject(new Error(Tools.translate('Password is too long')));
+      throw new Error(Tools.translate('Password is too long'));
     }
     if ('markupText' === mode || 'editPost' === mode) {
       return;
     }
     if ('createThread' === mode && this.maxFileCount && files.length <= 0) {
-      return Promise.reject(new Error(Tools.translate('Attempt to create a thread without attaching a file')));
+      throw new Error(Tools.translate('Attempt to create a thread without attaching a file'));
     }
     if ('deleteFile' === mode && (existingFileCount > 0)) {
       --existingFileCount;
     }
     if (text.length <= 0 && (files.length + existingFileCount) <= 0) {
-      return Promise.reject(new Error(Tools.translate('Both file and comment are missing')));
+      throw new Error(Tools.translate('Both file and comment are missing'));
     }
     if ((files.length + existingFileCount) > this.maxFileCount) {
-      return Promise.reject(new Error(Tools.translate('Too many files')));
+      throw new Error(Tools.translate('Too many files'));
     }
     let err = files.reduce((err, file) => {
       if (err) {
@@ -308,24 +308,20 @@ class Board {
       }
     }, '');
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
   }
 
-  async postExtraData(req, fields, files, oldPost) {
-    return oldPost ? oldPost.extraData : null;
+  async getPostExtraData(req, fields, files) {
+    return null;
   }
 
-  async storeExtraData(postNumber, extraData, archived) {
-    //NOTE: Do nothing by default.
+  async editPostExtraData(req, fields, extraData) {
+    return extraData || null;
   }
 
-  async loadExtraData(postNumber, archived) {
-    //NOTE: Do nothing by default.
-  }
-
-  async removeExtraData(postNumber, archived) {
-    //NOTE: Do nothing by default.
+  async transformPostExtraData(extraData, sourceBoard) {
+    return null;
   }
 
   async renderPost(post) {

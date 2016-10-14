@@ -82,8 +82,10 @@ const DEFAULT_VALUES = new Map([
   ['system.log.middleware.before', 'all'],
   ['system.log.middleware.verbosity', 'ip'],
   ['system.log.targets', ['console', 'file']],
-  ['system.mimeTypeRetrievingTimeout', 5 * 1000], //NOTE: 5 seconds
   ['system.maxFormFieldsSize', 5 * 1024 * 1024], //NOTE: 5 MB
+  ['system.mimeTypeRetrievingTimeout', 5 * 1000], //NOTE: 5 seconds
+  ['system.mongodb.uri_decode_auth', false],
+  ['system.mongodb.url', 'mongodb://127.0.0.1:27017/ololordjs'],
   ['system.onlineCounter.interval', 60 * 1000], //NOTE: 1 minute
   ['system.onlineCounter.quota', 5 * 60 * 1000], //NOTE: 5 minutes
   ['system.phash.enabled', true],

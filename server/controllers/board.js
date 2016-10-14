@@ -4,8 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var renderThreadHTML = function () {
@@ -26,7 +24,7 @@ var renderThreadHTML = function () {
               break;
             }
 
-            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            throw new Error(Tools.translate('Invalid board'));
 
           case 3:
             model = {
@@ -175,7 +173,7 @@ var renderPage = function () {
               break;
             }
 
-            return _context6.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            throw new Error(Tools.translate('Invalid board'));
 
           case 3:
             _context6.next = 5;
@@ -218,7 +216,7 @@ var renderPage = function () {
             }
 
             return _context6.delegateYield(regeneratorRuntime.mark(function _callee5() {
-              var pageJSON, pageHTML, lastPosts, posts, postsToRerender, prerendered;
+              var pageJSON, pageHTML, mustRender, lastPosts, posts, postsToRerender, prerendered;
               return regeneratorRuntime.wrap(function _callee5$(_context5) {
                 while (1) {
                   switch (_context5.prev = _context5.next) {
@@ -235,8 +233,15 @@ var renderPage = function () {
 
                     case 6:
                       pageHTML = _context5.sent;
+                      mustRender = page.threads.some(function (thread) {
+                        return allowPrerender === thread.number;
+                      });
                       lastPosts = pageJSON.threads.map(function (thread) {
-                        return thread.lastPosts.concat(thread.opPost);
+                        var posts = thread.lastPosts.concat(thread.opPost);
+                        if (allowPrerender === thread.number) {
+                          posts.splice(-1, 1);
+                        }
+                        return posts;
                       });
 
                       lastPosts = (0, _underscore2.default)(lastPosts).flatten().reduce(function (acc, post) {
@@ -244,7 +249,11 @@ var renderPage = function () {
                         return acc;
                       }, {});
                       posts = page.threads.map(function (thread) {
-                        return thread.lastPosts.concat(thread.opPost);
+                        var posts = thread.lastPosts.concat(thread.opPost);
+                        if (allowPrerender === thread.number) {
+                          posts.splice(-1, 1);
+                        }
+                        return posts;
                       });
 
                       posts = (0, _underscore2.default)(posts).flatten().reduce(function (acc, post) {
@@ -256,8 +265,8 @@ var renderPage = function () {
                       });
                       postsToRerender = pickPostsToRerender(lastPosts, posts);
 
-                      if (!(0, _underscore2.default)(postsToRerender).isEmpty()) {
-                        _context5.next = 15;
+                      if (!(!mustRender && (0, _underscore2.default)(postsToRerender).isEmpty())) {
+                        _context5.next = 16;
                         break;
                       }
 
@@ -265,7 +274,7 @@ var renderPage = function () {
                         v: void 0
                       });
 
-                    case 15:
+                    case 16:
                       prerendered = (0, _underscore2.default)(lastPosts).pick(function (_1, postNumber) {
                         return !postsToRerender.hasOwnProperty(postNumber);
                       });
@@ -273,13 +282,13 @@ var renderPage = function () {
                       prerendered = (0, _underscore2.default)(prerendered).mapObject(function (_1, postNumber) {
                         return getPrerenderedPost(pageHTML, postNumber);
                       });
-                      _context5.next = 19;
+                      _context5.next = 20;
                       return Cache.writeFile(boardName + '/' + pageNumber + '.json', JSON.stringify(page));
 
-                    case 19:
+                    case 20:
                       page.prerendered = prerendered;
 
-                    case 20:
+                    case 21:
                     case 'end':
                       return _context5.stop();
                   }
@@ -445,6 +454,10 @@ var _threads = require('../models/threads');
 
 var ThreadsModel = _interopRequireWildcard(_threads);
 
+var _mongodbClientFactory = require('../storage/mongodb-client-factory');
+
+var _mongodbClientFactory2 = _interopRequireDefault(_mongodbClientFactory);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -455,12 +468,25 @@ var mkpath = (0, _promisifyNode2.default)('mkpath');
 
 var RSS_DATE_TIME_FORMAT = 'ddd, DD MMM YYYY HH:mm:ss +0000';
 
+var client = (0, _mongodbClientFactory2.default)();
 var router = _express2.default.Router();
 
 function pickPostsToRerender(oldPosts, posts) {
   return (0, _underscore2.default)(posts).pick(function (post, postNumber) {
     var oldPost = oldPosts[postNumber];
-    if (!oldPost || oldPost.updatedAt < post.updatedAt || oldPost.bannedFor !== post.bannedFor || oldPost.text !== post.text) {
+    if (!oldPost) {
+      return true;
+    }
+    if (oldPost.options.bannedFor !== post.options.bannedFor) {
+      return true;
+    }
+    if (oldPost.sequenceNumber !== post.sequenceNumber) {
+      return true;
+    }
+    if (oldPost.updatedAt < post.updatedAt) {
+      return true;
+    }
+    if (oldPost.text !== post.text) {
       return true;
     }
     var oldRefs = oldPost.referringPosts.reduce(function (acc, ref) {
@@ -521,14 +547,14 @@ router.paths = function () {
               path: '/<board name>/catalog',
               description: Tools.translate('Board catalog page')
             }, {
+              path: '/<board name>/rss',
+              description: Tools.translate('Board RSS feed')
+            }, {
               path: '/<board name>/res/<thread number>',
               description: Tools.translate('A thread')
             }, {
               path: '/<board name>/arch/<thread number>',
               description: Tools.translate('An archived thread')
-            }, {
-              path: '/rss',
-              description: Tools.translate('RSS feed (for all boards)')
             }]);
 
           case 2:
@@ -550,7 +576,7 @@ router.paths = function () {
 
                       case 5:
                         archivedThreadNumbers = _context9.sent;
-                        paths = ['/' + boardName, '/' + boardName + '/archive', '/' + boardName + '/catalog'];
+                        paths = ['/' + boardName, '/' + boardName + '/archive', '/' + boardName + '/catalog', '/' + boardName + '/rss'];
 
                         paths = paths.concat(threadNumbers.map(function (threadNumber) {
                           return '/' + boardName + '/res/' + threadNumber;
@@ -635,7 +661,7 @@ router.renderThread = function () {
               break;
             }
 
-            return _context13.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            throw new Error(Tools.translate('Invalid board'));
 
           case 9:
             _context13.t0 = data.action;
@@ -669,19 +695,15 @@ router.renderThread = function () {
                         return acc;
                       }, {});
                       _context12.next = 9;
-                      return ThreadsModel.getThreadPosts(data.boardName, data.threadNumber, {
-                        withExtraData: true,
-                        withFileInfos: true,
-                        withReferences: true
-                      });
+                      return BoardsModel.getThread(data.boardName, data.threadNumber);
 
                     case 9:
-                      posts = _context12.sent;
-
-                      posts = posts.slice(1).reduce(function (acc, post) {
+                      thread = _context12.sent;
+                      posts = thread.lastPosts.reduce(function (acc, post) {
                         acc[post.number] = post;
                         return acc;
                       }, {});
+
                       lastPosts = (0, _underscore2.default)(lastPosts).pick(function (_1, postNumber) {
                         return posts.hasOwnProperty(postNumber);
                       });
@@ -699,6 +721,15 @@ router.renderThread = function () {
                         return getPrerenderedPost(threadHTML, postNumber);
                       });
                       _context12.next = 20;
+                      return Files.renderPostFileInfos(thread.opPost);
+
+                    case 20:
+                      _context12.next = 22;
+                      return board.renderPost(thread.opPost);
+
+                    case 22:
+                      thread.opPost = _context12.sent;
+                      _context12.next = 25;
                       return Tools.series(postsToRerender, function () {
                         var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(post, postNumber) {
                           var renderedPost;
@@ -731,19 +762,20 @@ router.renderThread = function () {
                         };
                       }());
 
-                    case 20:
+                    case 25:
                       thread.lastPosts = (0, _underscore2.default)(lastPosts).toArray();
-                      _context12.next = 23;
+                      model.thread = thread;
+                      _context12.next = 29;
                       return Cache.writeFile(threadID + '.json', JSON.stringify(model));
 
-                    case 23:
-                      _context12.next = 25;
+                    case 29:
+                      _context12.next = 31;
                       return renderThreadHTML(thread, { prerendered: prerendered });
 
-                    case 25:
+                    case 31:
                       return _context12.abrupt('return', 'break');
 
-                    case 26:
+                    case 32:
                     case 'end':
                       return _context12.stop();
                   }
@@ -777,7 +809,7 @@ router.renderThread = function () {
             return _context13.abrupt('break', 27);
 
           case 26:
-            return _context13.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid action'))));
+            throw new Error(Tools.translate('Invalid action'));
 
           case 27:
           case 'end':
@@ -793,13 +825,13 @@ router.renderThread = function () {
 }();
 
 router.renderPages = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(boardName) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(boardName, threadNumber) {
     return regeneratorRuntime.wrap(function _callee14$(_context14) {
       while (1) {
         switch (_context14.prev = _context14.next) {
           case 0:
             _context14.next = 2;
-            return renderPages(boardName, { allowPrerender: true });
+            return renderPages(boardName, { allowPrerender: threadNumber || true });
 
           case 2:
             return _context14.abrupt('return', _context14.sent);
@@ -812,7 +844,7 @@ router.renderPages = function () {
     }, _callee14, this);
   }));
 
-  return function (_x23) {
+  return function (_x23, _x24) {
     return ref.apply(this, arguments);
   };
 }();
@@ -831,7 +863,7 @@ router.renderCatalog = function () {
               break;
             }
 
-            return _context17.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            throw new Error(Tools.translate('Invalid board'));
 
           case 3:
             _context17.next = 5;
@@ -868,7 +900,7 @@ router.renderCatalog = function () {
                             }, _callee15, this);
                           }));
 
-                          return function (_x26) {
+                          return function (_x27) {
                             return ref.apply(this, arguments);
                           };
                         }());
@@ -892,7 +924,7 @@ router.renderCatalog = function () {
                 }, _callee16, this);
               }));
 
-              return function (_x25) {
+              return function (_x26) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -905,7 +937,7 @@ router.renderCatalog = function () {
     }, _callee17, this);
   }));
 
-  return function (_x24) {
+  return function (_x25) {
     return ref.apply(this, arguments);
   };
 }();
@@ -924,7 +956,7 @@ router.renderArchive = function () {
               break;
             }
 
-            return _context18.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid board'))));
+            throw new Error(Tools.translate('Invalid board'));
 
           case 3:
             _context18.next = 5;
@@ -949,242 +981,198 @@ router.renderArchive = function () {
     }, _callee18, this);
   }));
 
-  return function (_x27) {
+  return function (_x28) {
     return ref.apply(this, arguments);
   };
 }();
 
-router.renderRSS = _asyncToGenerator(regeneratorRuntime.mark(function _callee21() {
-  var _this3 = this;
-
-  return regeneratorRuntime.wrap(function _callee21$(_context21) {
-    while (1) {
-      switch (_context21.prev = _context21.next) {
-        case 0:
-          _context21.prev = 0;
-          return _context21.delegateYield(regeneratorRuntime.mark(function _callee20() {
-            var rssPostCount, keys, postNumbers;
-            return regeneratorRuntime.wrap(function _callee20$(_context20) {
-              while (1) {
-                switch (_context20.prev = _context20.next) {
-                  case 0:
-                    rssPostCount = (0, _config2.default)('server.rss.postCount');
-                    _context20.next = 3;
-                    return PostsModel.getPostKeys();
-
-                  case 3:
-                    keys = _context20.sent;
-                    postNumbers = keys.reduce(function (acc, key) {
-                      var _key$split = key.split(':');
-
-                      var _key$split2 = _slicedToArray(_key$split, 2);
-
-                      var boardName = _key$split2[0];
-                      var postNumber = _key$split2[1];
-
-                      postNumber = +postNumber;
-                      if (!postNumber) {
-                        return acc;
-                      }
-                      if (!acc.hasOwnProperty(boardName)) {
-                        acc[boardName] = [];
-                      }
-                      acc[boardName].push(postNumber);
-                      return acc;
-                    }, {});
-                    _context20.next = 7;
-                    return Tools.series(_board2.default.boardNames(), function () {
-                      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(boardName) {
-                        var numbers, board, posts, rss;
-                        return regeneratorRuntime.wrap(function _callee19$(_context19) {
-                          while (1) {
-                            switch (_context19.prev = _context19.next) {
-                              case 0:
-                                numbers = postNumbers[boardName];
-
-                                if (!(!numbers || numbers.length <= 0)) {
-                                  _context19.next = 3;
-                                  break;
-                                }
-
-                                return _context19.abrupt('return');
-
-                              case 3:
-                                board = _board2.default.board(boardName);
-
-                                if (board) {
-                                  _context19.next = 6;
-                                  break;
-                                }
-
-                                return _context19.abrupt('return');
-
-                              case 6:
-                                numbers = numbers.sort(function (pn1, pn2) {
-                                  return pn2 - pn1;
-                                }).slice(0, rssPostCount).reverse();
-                                _context19.next = 9;
-                                return PostsModel.getPosts(boardName, numbers, { withFileInfos: true });
-
-                              case 9:
-                                posts = _context19.sent;
-
-                                posts.forEach(function (post) {
-                                  post.subject = BoardsModel.postSubject(post, 150) || post.number;
-                                });
-                                rss = {
-                                  date: Tools.now(),
-                                  ttl: (0, _config2.default)('server.rss.ttl'),
-                                  board: MiscModel.board(board).board,
-                                  posts: posts,
-                                  formattedDate: function formattedDate(date) {
-                                    return (0, _moment2.default)().utc().locale('en').format(RSS_DATE_TIME_FORMAT);
-                                  }
-                                };
-                                _context19.next = 14;
-                                return Cache.writeFile(boardName + '/rss.xml', Renderer.render('pages/rss', rss));
-
-                              case 14:
-                                return _context19.abrupt('return', _context19.sent);
-
-                              case 15:
-                              case 'end':
-                                return _context19.stop();
-                            }
-                          }
-                        }, _callee19, this);
-                      }));
-
-                      return function (_x28) {
-                        return ref.apply(this, arguments);
-                      };
-                    }());
-
-                  case 7:
-                  case 'end':
-                    return _context20.stop();
-                }
-              }
-            }, _callee20, _this3);
-          })(), 't0', 2);
-
-        case 2:
-          _context21.next = 7;
-          break;
-
-        case 4:
-          _context21.prev = 4;
-          _context21.t1 = _context21['catch'](0);
-
-          _logger2.default.error(_context21.t1.stack || _context21.t1);
-
-        case 7:
-        case 'end':
-          return _context21.stop();
-      }
-    }
-  }, _callee21, this, [[0, 4]]);
-}));
-
-router.render = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(path) {
-    var match;
-    return regeneratorRuntime.wrap(function _callee22$(_context22) {
+router.renderRSS = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(boardName) {
+    var board, rssPostCount, Post, posts, rss;
+    return regeneratorRuntime.wrap(function _callee19$(_context19) {
       while (1) {
-        switch (_context22.prev = _context22.next) {
+        switch (_context19.prev = _context19.next) {
           case 0:
-            match = path.match(/^\/rss$/);
-
-            if (!match) {
-              _context22.next = 5;
+            if (boardName) {
+              _context19.next = 4;
               break;
             }
 
-            _context22.next = 4;
-            return router.renderRSS();
+            _context19.next = 3;
+            return Tools.series(_board2.default.boardNames(), router.renderRSS.bind(router));
+
+          case 3:
+            return _context19.abrupt('return', _context19.sent);
 
           case 4:
-            return _context22.abrupt('return', _context22.sent);
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context19.next = 7;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid board name: $[1]', '', boardName));
+
+          case 7:
+            rssPostCount = (0, _config2.default)('server.rss.postCount');
+            _context19.next = 10;
+            return client.collection('post');
+
+          case 10:
+            Post = _context19.sent;
+            _context19.next = 13;
+            return Post.find({ boardName: boardName }, {
+              number: 1,
+              threadNumber: 1,
+              subject: 1,
+              name: 1,
+              text: 1,
+              fileInfos: 1,
+              createdAt: 1
+            }).sort({ createdAt: -1 }).limit(rssPostCount).sort({ createdAt: 1 }).toArray();
+
+          case 13:
+            posts = _context19.sent;
+
+            if (!(!posts.length <= 0)) {
+              _context19.next = 16;
+              break;
+            }
+
+            return _context19.abrupt('return');
+
+          case 16:
+            posts.forEach(function (post) {
+              post.subject = BoardsModel.postSubject(post, 150) || post.number; //TODO: Magic number
+            });
+            rss = {
+              date: Tools.now(),
+              ttl: (0, _config2.default)('server.rss.ttl'),
+              board: MiscModel.board(board).board,
+              posts: posts,
+              formattedDate: function formattedDate(date) {
+                return (0, _moment2.default)().utc().locale('en').format(RSS_DATE_TIME_FORMAT);
+              }
+            };
+            _context19.next = 20;
+            return Cache.writeFile(boardName + '/rss.xml', Renderer.render('pages/rss', rss));
+
+          case 20:
+            return _context19.abrupt('return', _context19.sent);
+
+          case 21:
+          case 'end':
+            return _context19.stop();
+        }
+      }
+    }, _callee19, this);
+  }));
+
+  return function (_x29) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+router.render = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(path) {
+    var match;
+    return regeneratorRuntime.wrap(function _callee20$(_context20) {
+      while (1) {
+        switch (_context20.prev = _context20.next) {
+          case 0:
+            match = path.match(/^\/([^\/]+)\/rss$/);
+
+            if (!match) {
+              _context20.next = 5;
+              break;
+            }
+
+            _context20.next = 4;
+            return router.renderRSS(match[1]);
+
+          case 4:
+            return _context20.abrupt('return', _context20.sent);
 
           case 5:
             match = path.match(/^\/([^\/]+)$/);
 
             if (!match) {
-              _context22.next = 10;
+              _context20.next = 10;
               break;
             }
 
-            _context22.next = 9;
+            _context20.next = 9;
             return renderPages(match[1]);
 
           case 9:
-            return _context22.abrupt('return', _context22.sent);
+            return _context20.abrupt('return', _context20.sent);
 
           case 10:
             match = path.match(/^\/([^\/]+)\/archive$/);
 
             if (!match) {
-              _context22.next = 15;
+              _context20.next = 15;
               break;
             }
 
-            _context22.next = 14;
+            _context20.next = 14;
             return router.renderArchive(match[1]);
 
           case 14:
-            return _context22.abrupt('return', _context22.sent);
+            return _context20.abrupt('return', _context20.sent);
 
           case 15:
             match = path.match(/^\/([^\/]+)\/catalog$/);
 
             if (!match) {
-              _context22.next = 20;
+              _context20.next = 20;
               break;
             }
 
-            _context22.next = 19;
+            _context20.next = 19;
             return router.renderCatalog(match[1]);
 
           case 19:
-            return _context22.abrupt('return', _context22.sent);
+            return _context20.abrupt('return', _context20.sent);
 
           case 20:
             match = path.match(/^\/([^\/]+)\/res\/(\d+)$/);
 
             if (!match) {
-              _context22.next = 25;
+              _context20.next = 25;
               break;
             }
 
-            _context22.next = 24;
+            _context20.next = 24;
             return renderThread(match[1], +match[2]);
 
           case 24:
-            return _context22.abrupt('return', _context22.sent);
+            return _context20.abrupt('return', _context20.sent);
 
           case 25:
             match = path.match(/^\/([^\/]+)\/arch\/(\d+)$/);
 
             if (!match) {
-              _context22.next = 30;
+              _context20.next = 30;
               break;
             }
 
-            _context22.next = 29;
+            _context20.next = 29;
             return renderArchivedThread(match[1], +match[2]);
 
           case 29:
-            return _context22.abrupt('return', _context22.sent);
+            return _context20.abrupt('return', _context20.sent);
 
           case 30:
           case 'end':
-            return _context22.stop();
+            return _context20.stop();
         }
       }
-    }, _callee22, this);
+    }, _callee20, this);
   }));
 
-  return function (_x29) {
+  return function (_x30) {
     return ref.apply(this, arguments);
   };
 }();

@@ -134,7 +134,7 @@ router.post('/action/deleteChatMessages', async function(req, res, next) {
     if (!postNumber) {
       throw new Error(Tools.translate('Invalid post number'));
     }
-    chatNumber = Tools.option(chatNumber, 'number', 0, { test: (n) => { n > 0; } });
+    chatNumber = Tools.option(chatNumber, 'number', 0, { test: (n) => { return n > 0; } });
     if (!chatNumber) {
       throw new Error(Tools.translate('Invalid chat number'));
     }
@@ -230,7 +230,7 @@ router.post('/action/search', async function(req, res, next) {
     let maxSubjectLength = config('system.search.maxResultPostSubjectLengh');
     let maxTextLength = config('system.search.maxResultPostTextLengh');
     model.searchResults = result.posts.map((post) => {
-      let text = (post.plainText || '').replace(/\r*\n+/g, ' ');
+      let text = (post.rawText || '').replace(/\r*\n+/g, ' '); //TODO: plain text
       if (text.length > maxTextLength) {
         text = text.substr(0, maxTextLength - 1) + '…';
       }

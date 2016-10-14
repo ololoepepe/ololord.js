@@ -75,6 +75,8 @@ var series = exports.series = function () {
 exports.now = now;
 exports.mayBeHashpass = mayBeHashpass;
 exports.correctAddress = correctAddress;
+exports.binaryAddress = binaryAddress;
+exports.subnet = subnet;
 exports.preferIPv4 = preferIPv4;
 exports.crypto = crypto;
 exports.sha1 = sha1;
@@ -143,6 +145,8 @@ var NON_THEME_STYLESHEETS = new Set(['', 'custom-'].reduce(function (acc, prefix
 var STYLES_PATH = __dirname + '/../../public/css';
 var CODE_STYLES_PATH = __dirname + '/../../public/css/3rdparty/highlight.js';
 var JS_TYPES = new Set(['string', 'boolean', 'number', 'object']);
+var IP_V6_MAX_SUBNET = 128;
+var IP_V4_MAX_SUBNET = 32;
 
 var SECOND = exports.SECOND = 1000;
 var MINUTE = exports.MINUTE = 60 * SECOND;
@@ -213,6 +217,37 @@ function correctAddress(ip) {
     //
   }
   return null;
+}
+
+function binaryAddress(address) {
+  if (!(address instanceof _ipAddress.Address6)) {
+    address = new _ipAddress.Address6(correctAddress(address));
+  }
+  return Buffer.from(address.toUnsignedByteArray());
+}
+
+function subnet(ip, s) {
+  s = +s;
+  if (isNaN(s) || s <= 0) {
+    return null;
+  }
+  var ns = s;
+  if (ns <= IP_V4_MAX_SUBNET) {
+    ns = IP_V6_MAX_SUBNET - (IP_V4_MAX_SUBNET - ns);
+  }
+  try {
+    var address = new _ipAddress.Address6(correctAddress(ip) + '/' + ns);
+    if (! +address.possibleSubnets(ns)) {
+      return null;
+    }
+    return {
+      subnet: s,
+      start: binaryAddress(address.startAddress()),
+      end: binaryAddress(address.endAddress())
+    };
+  } catch (err) {
+    return null;
+  }
 }
 
 function preferIPv4(ip) {

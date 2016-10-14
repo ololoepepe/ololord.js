@@ -36,7 +36,7 @@ exports.default = function () {
               break;
             }
 
-            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Invalid VK API method'))));
+            throw new Error(Tools.translate('Invalid VK API method'));
 
           case 2:
             params = params || {};
@@ -64,7 +64,7 @@ exports.default = function () {
               break;
             }
 
-            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Failed to call VK API method'))));
+            throw new Error(Tools.translate('Failed to call VK API method'));
 
           case 10:
             _context.next = 12;
@@ -72,20 +72,14 @@ exports.default = function () {
 
           case 12:
             data = _context.sent;
-            _context.prev = 13;
-            return _context.abrupt('return', Promise.resolve(JSON.parse(data.toString())));
+            return _context.abrupt('return', JSON.parse(data.toString()));
 
-          case 17:
-            _context.prev = 17;
-            _context.t0 = _context['catch'](13);
-            return _context.abrupt('return', Promise.reject(_context.t0));
-
-          case 20:
+          case 14:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, this, [[13, 17]]);
+    }, _callee, this);
   }));
 
   return function (_x, _x2) {

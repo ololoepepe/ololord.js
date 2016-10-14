@@ -122,7 +122,7 @@ function registeredUserFromViewModel(model) {
 
 export function createRegisteredUserFormData(data) {
   let o = {
-    password: data.hashpass,
+    hashpass: data.hashpass,
     ips: data.ips
   };
   _(data.levels).each((level, boardName) => {
@@ -331,7 +331,7 @@ async function rerenderCache(archive) {
   }
 }
 
-async function rerenderPosts() {
+async function markupPosts() {
   /*let content = Templating.template('manage/rerenderPostsWidget');
   let boards = KO.observable([]);
   KO.applyBindings({ boards: boards }, content);*/
@@ -350,8 +350,8 @@ async function rerenderPosts() {
       options.maximized = true;
     }*/
     let result = await Widgets.prompt({
-      id: `rerenderPosts`,
-      title: Tools.translate('Rerendering posts')//,
+      id: `markupPosts`,
+      title: Tools.translate('Rerendering text of posts')//,
       //label: txt
     });
     if (!result.accepted) {
@@ -365,7 +365,7 @@ async function rerenderPosts() {
       acc[`board_${boardName}`] = boardName;
       return acc;
     }, {}));*/
-    await AJAX.post(`/${Tools.sitePathPrefix()}action/superuserRerenderPosts`, /*formData*/Tools.createFormData({
+    await AJAX.post(`/${Tools.sitePathPrefix()}action/superuserMarkupPosts`, /*formData*/Tools.createFormData({
       targets: result.value
     }), new OverlayProgressBar());
   } catch (err) {
@@ -548,7 +548,8 @@ export function bannedUserToViewModel(user) {
   user = user || {
     ip: '',
     ipv4: '',
-    bans: {}
+    bans: {},
+    subnet: 0
   };
   if (!user.bans) {
     user.bans = {};
@@ -600,6 +601,7 @@ export function bannedUserToViewModel(user) {
     inputIP: inputIP,
     ip: KO.observable(user.ip || ''),
     ipv4: KO.observable(user.ipv4 || ''),
+    subnet: KO.observable(user.subnet || 0),
     bans: bans,
     level: level,
     expiresAt: expiresAt,
@@ -625,6 +627,7 @@ function bannedUserFromViewModel(model) {
   }, {});
   return {
     ip: model.ip(),
+    subnet: model.subnet(),
     bans: bans,
     delall: model.delall(),
     delallBoards: model.delallBoards()
@@ -652,7 +655,10 @@ export function initializeBannedUser(node) {
 }
 
 export function createBannedUserFormData(data) {
-  let o = { userIp: data.ip };
+  let o = {
+    userIp: data.ip,
+    subnet: data.subnet
+  };
   _(data.bans).each((ban, boardName) => {
     o[`banBoard_${boardName}`] = boardName;
     o[`banLevel_${boardName}`] = ban.level;
@@ -750,7 +756,7 @@ export async function initializeManagement() {
     },
     rerenderCache: rerenderCache,
     rerenderCacheWithArchived: rerenderCache.bind(null, true),
-    rerenderPosts: rerenderPosts,
+    markupPosts: markupPosts,
     rebuildSearchIndex: rebuildSearchIndex,
     reloadBoards: reload.bind(null, 'boards'),
     reloadConfig: reload.bind(null, 'config'),

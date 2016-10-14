@@ -182,7 +182,7 @@ exports.default = [{
   }(),
   options: { description: Tools.translate('Unregisters a superuser.') }
 }, {
-  command: 'rerender-posts [targets...]',
+  command: 'markup-posts [targets...]',
   handler: function () {
     var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
       var _ref5 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -196,7 +196,7 @@ exports.default = [{
               _context4.next = 2;
               return this.prompt({
                 type: 'confirm',
-                name: 'rerender',
+                name: 'markup',
                 default: true,
                 message: Tools.translate('Are you sure? ')
               });
@@ -204,7 +204,7 @@ exports.default = [{
             case 2:
               result = _context4.sent;
 
-              if (result.rerender) {
+              if (result.markup) {
                 _context4.next = 5;
                 break;
               }
@@ -213,7 +213,7 @@ exports.default = [{
 
             case 5:
               _context4.next = 7;
-              return PostsModel.rerenderPosts(Renderer.targetsFromString((targets || []).join(' ')));
+              return PostsModel.markupPosts(Renderer.targetsFromString((targets || []).join(' ')));
 
             case 7:
               return _context4.abrupt('return', 'OK');
@@ -233,7 +233,7 @@ exports.default = [{
     return handler;
   }(),
   options: {
-    description: Tools.translate('Rerenders posts specified as $[1].\n' + 'If $[1] is omitted, rerenders all posts on all boards.\n' + 'Each target is a string in the following form:\n' + '$[2]', '', '[targets...]', '<board name>[:<post number>[:...]]')
+    description: Tools.translate('Rerenders text of posts specified as $[1].\n' + 'If $[1] is omitted, rerenders text of all posts on all boards.\n' + 'Each target is a string in the following form:\n' + '$[2]', '', '[targets...]', '<board name>[:<post number>[:...]]')
   }
 }, {
   command: 'stop',
@@ -302,64 +302,65 @@ exports.default = [{
       var options = _ref6.options;
       var what = _ref6.what;
 
-      var _ref7, list, archive, paths;
+      var timeStart, _ref7, list, archive, paths;
 
       return regeneratorRuntime.wrap(function _callee7$(_context7) {
         while (1) {
           switch (_context7.prev = _context7.next) {
             case 0:
+              timeStart = new Date();
               _ref7 = options || {};
               list = _ref7.list;
               archive = _ref7.archive;
 
               if (!list) {
-                _context7.next = 10;
+                _context7.next = 11;
                 break;
               }
 
-              _context7.next = 6;
+              _context7.next = 7;
               return Renderer.getRouterPaths(true);
 
-            case 6:
+            case 7:
               paths = _context7.sent;
               return _context7.abrupt('return', paths.map(function (path) {
                 return (typeof path === 'undefined' ? 'undefined' : _typeof(path)) === 'object' ? path.path + ' ' + path.description : path;
               }).join('\n'));
 
-            case 10:
+            case 11:
               if (!what) {
-                _context7.next = 15;
+                _context7.next = 16;
                 break;
               }
 
-              _context7.next = 13;
+              _context7.next = 14;
               return Renderer.rerender(what);
 
-            case 13:
-              _context7.next = 22;
+            case 14:
+              _context7.next = 23;
               break;
 
-            case 15:
+            case 16:
               if (!archive) {
-                _context7.next = 20;
+                _context7.next = 21;
                 break;
               }
 
-              _context7.next = 18;
+              _context7.next = 19;
               return Renderer.rerender();
 
-            case 18:
-              _context7.next = 22;
+            case 19:
+              _context7.next = 23;
               break;
 
-            case 20:
-              _context7.next = 22;
+            case 21:
+              _context7.next = 23;
               return Renderer.rerender(['**', '!/*/arch/*']);
 
-            case 22:
-              return _context7.abrupt('return', 'OK');
-
             case 23:
+              return _context7.abrupt('return', 'OK (' + (new Date() - timeStart) + 'ms)');
+
+            case 24:
             case 'end':
               return _context7.stop();
           }
@@ -450,60 +451,6 @@ exports.default = [{
     return handler;
   }(),
   options: { description: Tools.translate('Reloads the templates and the partials (including public ones).') }
-}, {
-  command: 'rebuild-search-index [targets...]',
-  handler: function () {
-    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10() {
-      var _ref8 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-      var targets = _ref8.targets;
-      var result;
-      return regeneratorRuntime.wrap(function _callee10$(_context10) {
-        while (1) {
-          switch (_context10.prev = _context10.next) {
-            case 0:
-              _context10.next = 2;
-              return this.prompt({
-                type: 'confirm',
-                name: 'rebuild',
-                default: true,
-                message: Tools.translate('Are you sure? ')
-              });
-
-            case 2:
-              result = _context10.sent;
-
-              if (result.rebuild) {
-                _context10.next = 5;
-                break;
-              }
-
-              return _context10.abrupt('return');
-
-            case 5:
-              _context10.next = 7;
-              return PostsModel.rebuildSearchIndex(Renderer.targetsFromString((targets || []).join(' ')));
-
-            case 7:
-              return _context10.abrupt('return', 'OK');
-
-            case 8:
-            case 'end':
-              return _context10.stop();
-          }
-        }
-      }, _callee10, this);
-    }));
-
-    function handler(_x8) {
-      return ref.apply(this, arguments);
-    }
-
-    return handler;
-  }(),
-  options: {
-    description: Tools.translate('Rebuilds post search index of posts specified as $[1].\n' + 'If $[1] is omitted, rebuilds post search index of all posts on all boards.\n' + 'Each target is a string in the following form:\n' + '$[2]', '', '[targets...]', '<board name>[:<post number>[:...]]')
-  }
 }, {
   command: 'uptime',
   handler: function handler() {

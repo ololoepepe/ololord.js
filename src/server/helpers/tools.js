@@ -23,6 +23,8 @@ const NON_THEME_STYLESHEETS = new Set(['', 'custom-'].reduce((acc, prefix) => {
 const STYLES_PATH = `${__dirname}/../../public/css`;
 const CODE_STYLES_PATH = `${__dirname}/../../public/css/3rdparty/highlight.js`;
 const JS_TYPES = new Set(['string', 'boolean', 'number', 'object']);
+const IP_V6_MAX_SUBNET = 128;
+const IP_V4_MAX_SUBNET = 32;
 
 export const SECOND = 1000;
 export const MINUTE = 60 * SECOND;
@@ -93,6 +95,37 @@ export function correctAddress(ip) {
     //
   }
   return null;
+}
+
+export function binaryAddress(address) {
+  if (!(address instanceof Address6)) {
+    address = new Address6(correctAddress(address));
+  }
+  return Buffer.from(address.toUnsignedByteArray());
+}
+
+export function subnet(ip, s) {
+  s = +s;
+  if (isNaN(s) || s <= 0) {
+    return null;
+  }
+  let ns = s;
+  if (ns <= IP_V4_MAX_SUBNET) {
+    ns = IP_V6_MAX_SUBNET - (IP_V4_MAX_SUBNET - ns);
+  }
+  try {
+    let address = new Address6(`${correctAddress(ip)}/${ns}`);
+    if (!+address.possibleSubnets(ns)) {
+      return null;
+    }
+    return {
+      subnet: s,
+      start: binaryAddress(address.startAddress()),
+      end: binaryAddress(address.endAddress())
+    };
+  } catch (err) {
+    return null;
+  }
 }
 
 export function preferIPv4(ip) {

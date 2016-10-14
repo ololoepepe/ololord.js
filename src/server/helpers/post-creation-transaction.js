@@ -2,6 +2,9 @@ import FS from 'q-io/fs';
 
 import Logger from './logger';
 import * as Tools from './tools';
+import mongodbClient from '../storage/mongodb-client-factory';
+
+let client = mongodbClient();
 
 export default class PostCreationTransaction {
   constructor(boardName) {
@@ -50,11 +53,11 @@ export default class PostCreationTransaction {
 
   async _rollbackThread() {
     try {
-      /*
-      return removeThread(_this.board.name, _this.threadNumber).catch(function(err) {
-          Logger.error(err.stack || err);
+      let Thread = await client.collection('thread');
+      await Thread.deleteOne({
+        boardName: this.boardName,
+        number: this.threadNumber
       });
-      */
     } catch (err) {
       Logger.error(err.stack || err);
     }
@@ -62,11 +65,11 @@ export default class PostCreationTransaction {
 
   async _rollbackPost() {
     try {
-      /*
-      return removePost(_this.board.name, _this.postNumber).catch(function(err) {
-          Logger.error(err.stack || err);
+      let Post = await client.collection('post');
+      await Post.deleteOne({
+        boardName: this.boardName,
+        number: this.postNumber
       });
-      */
     } catch (err) {
       Logger.error(err.stack || err);
     }

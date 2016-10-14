@@ -55,7 +55,7 @@ var downloadFile = function () {
               break;
             }
 
-            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('Failed to download file'))));
+            throw new Error(Tools.translate('Failed to download file'));
 
           case 16:
             _context.next = 18;
@@ -69,7 +69,7 @@ var downloadFile = function () {
               break;
             }
 
-            return _context.abrupt('return', Promise.reject(new Error(Tools.translate('File is empty'))));
+            throw new Error(Tools.translate('File is empty'));
 
           case 21:
             _context.next = 23;
@@ -247,7 +247,7 @@ var waitForFile = function () {
                   break;
                 }
 
-                return _context5.abrupt('return', Promise.reject(new Error(Tools.translate('Failed to copy file'))));
+                throw new Error(Tools.translate('Failed to copy file'));
 
               case 6:
                 --retry;
@@ -485,7 +485,7 @@ var processFile = function () {
               break;
             }
 
-            return _context11.abrupt('return', Promise.reject(new Error(Tools.translate('Unsupported file type: $[1]', '', file.mimeType))));
+            throw new Error(Tools.translate('Unsupported file type: $[1]', '', file.mimeType));
 
           case 3:
             _context11.next = 5;
@@ -601,64 +601,43 @@ var processFile = function () {
 }();
 
 var processFiles = exports.processFiles = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(boardName, files, transaction) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, files, transaction) {
     var path;
-    return regeneratorRuntime.wrap(function _callee13$(_context13) {
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
-        switch (_context13.prev = _context13.next) {
+        switch (_context12.prev = _context12.next) {
           case 0:
             if (!(files.length < 1)) {
-              _context13.next = 2;
+              _context12.next = 2;
               break;
             }
 
-            return _context13.abrupt('return', []);
+            return _context12.abrupt('return', []);
 
           case 2:
             path = __dirname + '/../../public/' + boardName;
-            _context13.next = 5;
+            _context12.next = 5;
             return mkpath(path + '/src');
 
           case 5:
-            _context13.next = 7;
+            _context12.next = 7;
             return mkpath(path + '/thumb');
 
           case 7:
-            _context13.next = 9;
-            return Tools.series(files, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(file) {
-                return regeneratorRuntime.wrap(function _callee12$(_context12) {
-                  while (1) {
-                    switch (_context12.prev = _context12.next) {
-                      case 0:
-                        _context12.next = 2;
-                        return processFile(boardName, file, transaction);
-
-                      case 2:
-                        return _context12.abrupt('return', _context12.sent);
-
-                      case 3:
-                      case 'end':
-                        return _context12.stop();
-                    }
-                  }
-                }, _callee12, this);
-              }));
-
-              return function (_x24) {
-                return ref.apply(this, arguments);
-              };
-            }(), true);
+            _context12.next = 9;
+            return Tools.series(files, function (file) {
+              return processFile(boardName, file, transaction);
+            }, true);
 
           case 9:
-            return _context13.abrupt('return', _context13.sent);
+            return _context12.abrupt('return', _context12.sent);
 
           case 10:
           case 'end':
-            return _context13.stop();
+            return _context12.stop();
         }
       }
-    }, _callee13, this);
+    }, _callee12, this);
   }));
 
   return function processFiles(_x21, _x22, _x23) {
@@ -667,12 +646,12 @@ var processFiles = exports.processFiles = function () {
 }();
 
 var diskUsage = exports.diskUsage = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(path) {
-    return regeneratorRuntime.wrap(function _callee14$(_context14) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(path) {
+    return regeneratorRuntime.wrap(function _callee13$(_context13) {
       while (1) {
-        switch (_context14.prev = _context14.next) {
+        switch (_context13.prev = _context13.next) {
           case 0:
-            _context14.next = 2;
+            _context13.next = 2;
             return new Promise(function (resolve, reject) {
               (0, _du2.default)(path, function (err, size) {
                 if (err) {
@@ -683,9 +662,53 @@ var diskUsage = exports.diskUsage = function () {
             });
 
           case 2:
-            return _context14.abrupt('return', _context14.sent);
+            return _context13.abrupt('return', _context13.sent);
 
           case 3:
+          case 'end':
+            return _context13.stop();
+        }
+      }
+    }, _callee13, this);
+  }));
+
+  return function diskUsage(_x24) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var writeFile = exports.writeFile = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(filePath, data) {
+    var tmpFilePath, path, exists;
+    return regeneratorRuntime.wrap(function _callee14$(_context14) {
+      while (1) {
+        switch (_context14.prev = _context14.next) {
+          case 0:
+            tmpFilePath = filePath + '.tmp';
+            path = filePath.split('/').slice(0, -1).join('/');
+            _context14.next = 4;
+            return _fs2.default.exists(path);
+
+          case 4:
+            exists = _context14.sent;
+
+            if (exists) {
+              _context14.next = 8;
+              break;
+            }
+
+            _context14.next = 8;
+            return _fs2.default.makeTree(path);
+
+          case 8:
+            _context14.next = 10;
+            return _fs2.default.write(tmpFilePath, data);
+
+          case 10:
+            _context14.next = 12;
+            return _fs2.default.rename(tmpFilePath, filePath);
+
+          case 12:
           case 'end':
             return _context14.stop();
         }
@@ -693,41 +716,51 @@ var diskUsage = exports.diskUsage = function () {
     }, _callee14, this);
   }));
 
-  return function diskUsage(_x25) {
+  return function writeFile(_x25, _x26) {
     return ref.apply(this, arguments);
   };
 }();
 
-var writeFile = exports.writeFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(filePath, data) {
-    var tmpFilePath, path, exists;
+var createFile = exports.createFile = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(dir, fileName) {
+    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var file = _ref.file;
+    var isDir = _ref.isDir;
+    var path;
     return regeneratorRuntime.wrap(function _callee15$(_context15) {
       while (1) {
         switch (_context15.prev = _context15.next) {
           case 0:
-            tmpFilePath = filePath + '.tmp';
-            path = filePath.split('/').slice(0, -1).join('/');
-            _context15.next = 4;
-            return _fs2.default.exists(path);
+            if (dir.slice(-1)[0] !== '/') {
+              dir += '/';
+            }
+            path = __dirname + '/../../' + dir + fileName;
 
-          case 4:
-            exists = _context15.sent;
+            if (!isDir) {
+              _context15.next = 5;
+              break;
+            }
 
-            if (exists) {
-              _context15.next = 8;
+            _context15.next = 5;
+            return _fs2.default.makeDirectory(path);
+
+          case 5:
+            if (!file) {
+              _context15.next = 10;
               break;
             }
 
             _context15.next = 8;
-            return _fs2.default.makeTree(path);
+            return _fs2.default.move(file.path, path);
 
           case 8:
-            _context15.next = 10;
-            return _fs2.default.write(tmpFilePath, data);
+            _context15.next = 12;
+            break;
 
           case 10:
             _context15.next = 12;
-            return _fs2.default.rename(tmpFilePath, filePath);
+            return writeFile(path, '');
 
           case 12:
           case 'end':
@@ -737,53 +770,21 @@ var writeFile = exports.writeFile = function () {
     }, _callee15, this);
   }));
 
-  return function writeFile(_x26, _x27) {
+  return function createFile(_x27, _x28, _x29) {
     return ref.apply(this, arguments);
   };
 }();
 
-var createFile = exports.createFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(dir, fileName) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var file = _ref.file;
-    var isDir = _ref.isDir;
-    var path;
+var editFile = exports.editFile = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(fileName, content) {
     return regeneratorRuntime.wrap(function _callee16$(_context16) {
       while (1) {
         switch (_context16.prev = _context16.next) {
           case 0:
-            if (dir.slice(-1)[0] !== '/') {
-              dir += '/';
-            }
-            path = __dirname + '/../../' + dir + fileName;
+            _context16.next = 2;
+            return writeFile(__dirname + '/../../' + fileName, content);
 
-            if (!isDir) {
-              _context16.next = 5;
-              break;
-            }
-
-            _context16.next = 5;
-            return _fs2.default.makeDirectory(path);
-
-          case 5:
-            if (!file) {
-              _context16.next = 10;
-              break;
-            }
-
-            _context16.next = 8;
-            return _fs2.default.move(file.path, path);
-
-          case 8:
-            _context16.next = 12;
-            break;
-
-          case 10:
-            _context16.next = 12;
-            return writeFile(path, '');
-
-          case 12:
+          case 2:
           case 'end':
             return _context16.stop();
         }
@@ -791,21 +792,23 @@ var createFile = exports.createFile = function () {
     }, _callee16, this);
   }));
 
-  return function createFile(_x28, _x29, _x30) {
+  return function editFile(_x31, _x32) {
     return ref.apply(this, arguments);
   };
 }();
 
-var editFile = exports.editFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(fileName, content) {
+var renameFile = exports.renameFile = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(oldFileName, fileName) {
+    var oldPath;
     return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
         switch (_context17.prev = _context17.next) {
           case 0:
-            _context17.next = 2;
-            return writeFile(__dirname + '/../../' + fileName, content);
+            oldPath = __dirname + '/../../' + oldFileName;
+            _context17.next = 3;
+            return _fs2.default.rename(oldPath, oldPath.split('/').slice(0, -1).join('/') + '/' + fileName);
 
-          case 2:
+          case 3:
           case 'end':
             return _context17.stop();
         }
@@ -813,23 +816,21 @@ var editFile = exports.editFile = function () {
     }, _callee17, this);
   }));
 
-  return function editFile(_x32, _x33) {
+  return function renameFile(_x33, _x34) {
     return ref.apply(this, arguments);
   };
 }();
 
-var renameFile = exports.renameFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(oldFileName, fileName) {
-    var oldPath;
+var deleteFile = exports.deleteFile = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(fileName) {
     return regeneratorRuntime.wrap(function _callee18$(_context18) {
       while (1) {
         switch (_context18.prev = _context18.next) {
           case 0:
-            oldPath = __dirname + '/../../' + oldFileName;
-            _context18.next = 3;
-            return _fs2.default.rename(oldPath, oldPath.split('/').slice(0, -1).join('/') + '/' + fileName);
+            _context18.next = 2;
+            return _fs2.default.removeTree(__dirname + '/../../' + fileName);
 
-          case 3:
+          case 2:
           case 'end':
             return _context18.stop();
         }
@@ -837,21 +838,40 @@ var renameFile = exports.renameFile = function () {
     }, _callee18, this);
   }));
 
-  return function renameFile(_x34, _x35) {
+  return function deleteFile(_x35) {
     return ref.apply(this, arguments);
   };
 }();
 
-var deleteFile = exports.deleteFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(fileName) {
+var generateRandomImage = exports.generateRandomImage = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(hash, mimeType, thumbPath) {
+    var canvas, ctx, data, img;
     return regeneratorRuntime.wrap(function _callee19$(_context19) {
       while (1) {
         switch (_context19.prev = _context19.next) {
           case 0:
-            _context19.next = 2;
-            return _fs2.default.removeTree(__dirname + '/../../' + fileName);
+            canvas = new _canvas2.default(200, 200);
+            ctx = canvas.getContext('2d');
 
-          case 2:
+            _jdenticon2.default.drawIcon(ctx, hash, 200);
+            _context19.next = 5;
+            return _fs2.default.read(__dirname + '/../../misc/thumbs/' + mimeType + '.png', 'b');
+
+          case 5:
+            data = _context19.sent;
+            img = new _canvas2.default.Image();
+
+            img.src = data;
+            ctx.drawImage(img, 0, 0, 200, 200);
+            _context19.next = 11;
+            return new Promise(function (resolve, reject) {
+              canvas.pngStream().pipe(_fs4.default.createWriteStream(thumbPath).on('error', reject).on('finish', resolve));
+            });
+
+          case 11:
+            return _context19.abrupt('return', _context19.sent);
+
+          case 12:
           case 'end':
             return _context19.stop();
         }
@@ -859,68 +879,27 @@ var deleteFile = exports.deleteFile = function () {
     }, _callee19, this);
   }));
 
-  return function deleteFile(_x36) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var generateRandomImage = exports.generateRandomImage = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(hash, mimeType, thumbPath) {
-    var canvas, ctx, data, img;
-    return regeneratorRuntime.wrap(function _callee20$(_context20) {
-      while (1) {
-        switch (_context20.prev = _context20.next) {
-          case 0:
-            canvas = new _canvas2.default(200, 200);
-            ctx = canvas.getContext('2d');
-
-            _jdenticon2.default.drawIcon(ctx, hash, 200);
-            _context20.next = 5;
-            return _fs2.default.read(__dirname + '/../../misc/thumbs/' + mimeType + '.png', 'b');
-
-          case 5:
-            data = _context20.sent;
-            img = new _canvas2.default.Image();
-
-            img.src = data;
-            ctx.drawImage(img, 0, 0, 200, 200);
-            _context20.next = 11;
-            return new Promise(function (resolve, reject) {
-              canvas.pngStream().pipe(_fs4.default.createWriteStream(thumbPath).on('error', reject).on('finish', resolve));
-            });
-
-          case 11:
-            return _context20.abrupt('return', _context20.sent);
-
-          case 12:
-          case 'end':
-            return _context20.stop();
-        }
-      }
-    }, _callee20, this);
-  }));
-
-  return function generateRandomImage(_x37, _x38, _x39) {
+  return function generateRandomImage(_x36, _x37, _x38) {
     return ref.apply(this, arguments);
   };
 }();
 
 var getMimeType = exports.getMimeType = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(fileName) {
-    return regeneratorRuntime.wrap(function _callee21$(_context21) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(fileName) {
+    return regeneratorRuntime.wrap(function _callee20$(_context20) {
       while (1) {
-        switch (_context21.prev = _context21.next) {
+        switch (_context20.prev = _context20.next) {
           case 0:
             if (!(!fileName || typeof fileName !== 'string')) {
-              _context21.next = 2;
+              _context20.next = 2;
               break;
             }
 
-            return _context21.abrupt('return', null);
+            return _context20.abrupt('return', null);
 
           case 2:
-            _context21.prev = 2;
-            _context21.next = 5;
+            _context20.prev = 2;
+            _context20.next = 5;
             return new Promise(function (resolve, reject) {
               _child_process2.default.exec('file --brief --mime-type ' + fileName, {
                 timeout: (0, _config2.default)('system.mimeTypeRetrievingTimeout'),
@@ -935,40 +914,68 @@ var getMimeType = exports.getMimeType = function () {
             });
 
           case 5:
-            return _context21.abrupt('return', _context21.sent);
+            return _context20.abrupt('return', _context20.sent);
 
           case 8:
-            _context21.prev = 8;
-            _context21.t0 = _context21['catch'](2);
+            _context20.prev = 8;
+            _context20.t0 = _context20['catch'](2);
 
-            _logger2.default.error(_context21.t0.stack || _context21.t0);
-            return _context21.abrupt('return', null);
+            _logger2.default.error(_context20.t0.stack || _context20.t0);
+            return _context20.abrupt('return', null);
 
           case 12:
           case 'end':
-            return _context21.stop();
+            return _context20.stop();
         }
       }
-    }, _callee21, this, [[2, 8]]);
+    }, _callee20, this, [[2, 8]]);
   }));
 
-  return function getMimeType(_x40) {
+  return function getMimeType(_x39) {
     return ref.apply(this, arguments);
   };
 }();
 
 var getImageSize = exports.getImageSize = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(fileName) {
-    return regeneratorRuntime.wrap(function _callee22$(_context22) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(fileName) {
+    return regeneratorRuntime.wrap(function _callee21$(_context21) {
       while (1) {
-        switch (_context22.prev = _context22.next) {
+        switch (_context21.prev = _context21.next) {
           case 0:
-            return _context22.abrupt('return', new Promise(function (resolve, reject) {
+            return _context21.abrupt('return', new Promise(function (resolve, reject) {
               (0, _gm2.default)(fileName).size(function (err, value) {
                 if (err) {
                   return reject(err);
                 }
                 resolve(value);
+              });
+            }));
+
+          case 1:
+          case 'end':
+            return _context21.stop();
+        }
+      }
+    }, _callee21, this);
+  }));
+
+  return function getImageSize(_x40) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var resizeImage = exports.resizeImage = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(fileName, width, height, options) {
+    return regeneratorRuntime.wrap(function _callee22$(_context22) {
+      while (1) {
+        switch (_context22.prev = _context22.next) {
+          case 0:
+            return _context22.abrupt('return', new Promise(function (resolve, reject) {
+              (0, _gm2.default)(fileName).resize(width, height, options).quality(100).write(fileName, function (err) {
+                if (err) {
+                  return reject(err);
+                }
+                resolve();
               });
             }));
 
@@ -980,35 +987,7 @@ var getImageSize = exports.getImageSize = function () {
     }, _callee22, this);
   }));
 
-  return function getImageSize(_x41) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var resizeImage = exports.resizeImage = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(fileName, width, height, options) {
-    return regeneratorRuntime.wrap(function _callee23$(_context23) {
-      while (1) {
-        switch (_context23.prev = _context23.next) {
-          case 0:
-            return _context23.abrupt('return', new Promise(function (resolve, reject) {
-              (0, _gm2.default)(fileName).resize(width, height, options).quality(100).write(fileName, function (err) {
-                if (err) {
-                  return reject(err);
-                }
-                resolve();
-              });
-            }));
-
-          case 1:
-          case 'end':
-            return _context23.stop();
-        }
-      }
-    }, _callee23, this);
-  }));
-
-  return function resizeImage(_x42, _x43, _x44, _x45) {
+  return function resizeImage(_x41, _x42, _x43, _x44) {
     return ref.apply(this, arguments);
   };
 }();

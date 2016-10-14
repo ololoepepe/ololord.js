@@ -303,7 +303,11 @@ var SQLiteDatabaseWrapper = function () {
                   },
                   rollback: function rollback() {
                     return new Promise(function (resolve, reject) {
-                      _this4._runRaw('ROLLBACK TRANSACTION').then(function () {
+                      Promise.resolve().then(function () {
+                        if (!_this4._client.manualTransaction) {
+                          return _this4._runRaw('ROLLBACK TRANSACTION');
+                        }
+                      }).then(function () {
                         state = false;
                         resolve();
                         _this4._checkTransactionQueue();

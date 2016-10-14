@@ -25,6 +25,7 @@ import * as Tools from './helpers/tools';
 import * as BoardsModel from './models/boards';
 import * as StatisticsModel from './models/statistics';
 import * as UsersModel from './models/users';
+import mongodbClient from './storage/mongodb-client-factory';
 
 function generateFileName() {
   let fileName = _.now().toString();
@@ -53,7 +54,13 @@ function onReady() {
       setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), interval);
     }
     if (config('server.rss.enabled')) {
-      setInterval(BoardController.renderRSS.bind(BoardController), config('server.rss.ttl') * Tools.MINUTE);
+      setInterval(async function() {
+        try {
+          await BoardController.renderRSS();
+        } catch (err) {
+          Logger.error(err.stack || err);
+        }
+      }, config('server.rss.ttl') * Tools.MINUTE);
     }
     commands();
   }
@@ -65,6 +72,7 @@ function initializeMaster() {
     try {
       await NodeCaptcha.removeOldCaptchImages();
       await NodeCaptchaNoscript.removeOldCaptchImages();
+      await mongodbClient().createIndexes();
       await Renderer.compileTemplates();
       await Renderer.reloadTemplates();
       await Renderer.generateTemplatingJavaScriptFile();
