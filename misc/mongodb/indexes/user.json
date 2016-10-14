@@ -1,0 +1,35 @@
+{
+  "collectionName": "user",
+  "indexes": {
+    "hashpass": {
+      "index": {
+        "hashpass": 1
+      },
+      "options": {
+        "unique": true
+      }
+    },
+    "ips_ip": {
+      "index": {
+        "ips.ip": 1
+      }
+    },
+    "ips_binary": {
+      "index": {
+        "ips.binary": 1
+      }
+    },
+    "hashpass__levels_boardName": {
+      "index": {
+        "hashpass": 1,
+        "levels.boardName": 1
+      }
+    },
+    "hashpass__superuser": {
+      "index": {
+        "hashpass": 1,
+        "superuser": 1
+      }
+    }
+  }
+}

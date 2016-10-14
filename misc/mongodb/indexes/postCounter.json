@@ -1,0 +1,10 @@
+{
+  "collectionName": "postCounter",
+  "indexes": {
+    "boardName": {
+      "index": {
+        "boardName": 1
+      }
+    }
+  }
+}

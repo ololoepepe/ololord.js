@@ -1,0 +1,29 @@
+{
+  "collectionName": "bannedUser",
+  "indexes": {
+    "ip": {
+      "index": {
+        "ip": 1
+      },
+      "options": {
+        "unique": true
+      }
+    },
+    "subnet_start__subnet_end": {
+      "index": {
+        "subnet.start": 1,
+        "subnet.end": 1
+      }
+    },
+    "ip__bans_boardName__bans_level": {
+      "index": {
+        "ip": 1,
+        "bans.boardName": 1,
+        "bans.level": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "collectionName": "thread",
+  "indexes": {
+    "boardName__number": {
+      "index": {
+        "boardName": 1,
+        "number": 1
+      },
+      "options": {
+        "unique": true
+      }
+    },
+    "boardName__archived": {
+      "index": {
+        "boardName": 1,
+        "archived": 1
+      }
+    },
+    "fixed": {
+      "index": {
+        "fixed": 1
+      }
+    },
+    "updatedAt": {
+      "index": {
+        "updatedAt": 1
+      }
+    }
+  }
+}

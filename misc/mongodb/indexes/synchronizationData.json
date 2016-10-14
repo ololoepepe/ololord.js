@@ -1,0 +1,13 @@
+{
+  "collectionName": "synchronizationData",
+  "indexes": {
+    "expireAt": {
+      "index": {
+        "expireAt": 1
+      },
+      "options": {
+        "expireAfterSeconds": 0
+      }
+    }
+  }
+}

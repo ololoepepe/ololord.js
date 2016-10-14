@@ -1,0 +1,94 @@
+{
+  "collectionName": "post",
+  "indexes": {
+    "number": {
+      "index": {
+        "number": 1
+      }
+    },
+    "boardName": {
+      "index": {
+        "boardName": 1
+      }
+    },
+    "boardName__number": {
+      "index": {
+        "boardName": 1,
+        "number": 1
+      },
+      "options": {
+        "unique": true
+      }
+    },
+    "boardName__threadNumber": {
+      "index": {
+        "boardName": 1,
+        "threadNumber": 1
+      }
+    },
+    "boardName__threadNumber__number": {
+      "index": {
+        "boardName": 1,
+        "threadNumber": 1,
+        "number": 1
+      }
+    },
+    "boardName__threadNumber__number__archived": {
+      "index": {
+        "boardName": 1,
+        "threadNumber": 1,
+        "number": 1,
+        "archived": 1
+      }
+    },
+    "fileInfos_name": {
+      "index": {
+        "fileInfos.name": 1
+      },
+      "options": {
+        "unique": true,
+        "sparse": true
+      }
+    },
+    "fileInfos_hash": {
+      "index": {
+        "fileInfos.hash": 1
+      }
+    },
+    "user_ip": {
+      "index": {
+        "user.ip": 1
+      }
+    },
+    "boardName__user_ip": {
+      "index": {
+        "boardName": 1,
+        "user.ip": 1
+      }
+    },
+    "createdAt": {
+      "index": {
+        "createdAt": 1
+      }
+    },
+    "rawText__subject": {
+      "index": {
+        "rawText": "text",
+        "subject": "text"
+      },
+      "options": {
+        "weights": {
+          "rawText": 1,
+          "subject": 10
+        },
+        "default_language": "none"
+      }
+    },
+    "referringPosts_boardName__referringPosts_postNumber": {
+      "index": {
+        "referringPosts.boardName": 1,
+        "referringPosts.postNumber": 1
+      }
+    }
+  }
+}

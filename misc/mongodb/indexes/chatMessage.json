@@ -1,0 +1,39 @@
+{
+  "collectionName": "chatMessage",
+  "indexes": {
+    "key": {
+      "index": {
+        "key": 1
+      }
+    },
+    "senderHash__date": {
+      "index": {
+        "senderHash": 1,
+        "date": 1
+      }
+    },
+    "receiverHash__date": {
+      "index": {
+        "receiverHash": 1,
+        "date": 1
+      }
+    },
+    "senderHash__key": {
+      "index": {
+        "senderHash": 1,
+        "key": 1
+      }
+    },
+    "receiverHash__key": {
+      "index": {
+        "receiverHash": 1,
+        "key": 1
+      }
+    },
+    "date": {
+      "index": {
+        "date": 1
+      }
+    }
+  }
+}
