@@ -9,7 +9,7 @@ import * as ThreadsModel from './threads';
 import * as UsersModel from './users';
 import Board from '../boards/board';
 import * as Renderer from '../core/renderer';
-import * as Search from '../core/search';
+import config from '../helpers/config';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
@@ -153,6 +153,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
     subject: subject || null,
     rawText: rawText,
     text: text || null,
+    plainText: (text ? Renderer.plainText(text, { brToNewline: true }) : null),
     markup: markupModes,
     options: createPostOptions(req, sage, tripcode, signAsOp),
     user: createPostUser(req, accessLevel, password),
@@ -226,6 +227,7 @@ export async function editPost(req, fields) {
       rawText: rawText,
       subject: subject || null,
       text: text || null,
+      plainText: (text ? Renderer.plainText(text, { brToNewline: true }) : null),
       referencedPosts: _(referencedPosts).toArray(),
       updatedAt: date
     }
@@ -370,6 +372,7 @@ export async function copyPosts({ sourceBoardName, sourceThreadNumber, targetBoa
           markupModes: post.markup,
           accessLevel: post.user.level
         });
+        post.plainText = Renderer.plainText(post.text, { brToNewline: true });
       }
     }
     post.extraData = await targetBoard.transformPostExtraData(post.extraData, sourceBoard);
@@ -428,4 +431,35 @@ export async function getThreadPosts(boardName, threadNumber, { limit, offset, s
     }
   }
   return posts;
+}
+
+export async function findPosts(query, boardName, page) {
+  let Post = await client.collection('post');
+  let q = {
+    $text: { $search: query }
+  };
+  if (boardName) {
+    q.boardName = boardName;
+  }
+  let limit = config('system.search.maxResultCount');
+  let score = { $meta: 'textScore' };
+  let posts = await Post.find(q, {
+    boardName: 1,
+    number: 1,
+    threadNumber: 1,
+    archived: 1,
+    subject: 1,
+    plainText: 1,
+    score: score
+  }).sort({
+    score: score,
+    boardName: 1,
+    number: 1
+  }).skip(page * limit).limit(limit).toArray();
+  let count = await Post.count(q);
+  return {
+    posts: posts,
+    max: limit,
+    total: count
+  };
 }

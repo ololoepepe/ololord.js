@@ -71,14 +71,14 @@
         "createdAt": 1
       }
     },
-    "rawText__subject": {
+    "plainText__subject": {
       "index": {
-        "rawText": "text",
+        "plainText": "text",
         "subject": "text"
       },
       "options": {
         "weights": {
-          "rawText": 1,
+          "plainText": 1,
           "subject": 10
         },
         "default_language": "none"

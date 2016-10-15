@@ -5,77 +5,13 @@ import Board from '../boards/board';
 import Captcha from '../captchas/captcha';
 import * as Files from '../core/files';
 import geolocation from '../core/geolocation';
-import * as Search from '../core/search';
 import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
 import * as ChatsModel from '../models/chats';
+import * as PostsModel from '../models/posts';
 import * as UsersModel from '../models/users';
 
 let router = express.Router();
-
-function splitCommand(cmd) {
-  let args = [];
-  let arg = '';
-  let quot = 0;
-  for (let i = 0; i < cmd.length; ++i) {
-    let c = cmd[i];
-    if (/\s/.test(c)) {
-      if (quot) {
-        arg += c;
-      } else if (arg.length > 0) {
-        args.push(arg);
-        arg = '';
-      }
-    } else {
-      if ('"' === c && (i < 1 || '\\' !== cmd[i - 1])) {
-        switch (quot) {
-        case 1:
-          quot = 0;
-          break;
-        case -1:
-          arg += c;
-          break;
-        case 0:
-        default:
-          quot = 1;
-          break;
-        }
-      } else if ("'" === c && (i < 1 || '\\' !== cmd[i - 1])) {
-        switch (quot) {
-        case 1:
-          arg += c;
-          break;
-        case -1:
-          quot = 0;
-          break;
-        case 0:
-        default:
-          quot = -1;
-          break;
-        }
-      } else {
-        if (('"' === c || "'" === c) && (i > 0 || '\\' == cmd[i - 1]) && arg.length > 0) {
-          arg = arg.substring(0, arg.length - 1);
-        }
-        arg += c;
-      }
-    }
-  }
-  if (arg.length > 0) {
-    if (quot) {
-      return null;
-    }
-    args.push(arg);
-  }
-  let command = null;
-  if (args.length > 0) {
-    command = args.shift();
-  }
-  return {
-    command: command,
-    arguments: args
-  };
-}
 
 router.post('/action/sendChatMessage', async function(req, res, next) {
   try {
@@ -194,43 +130,22 @@ router.post('/action/search', async function(req, res, next) {
       throw new Error(Tools.translate('Invalid board'));
     }
     page = Tools.option(page, 'number', 0, { test: (p) => { return p >= 0; } });
-    let phrases = splitCommand(query);
-    if (!phrases || !phrases.command) {
-      throw new Error(Tools.translate('Invalid search query'));
-    }
     req.geolocationInfo = await geolocation(req.ip);
     await UsersModel.checkUserBan(req.ip, boardName, {
       write: true,
       geolocationInfo: req.geolocationInfo
     });
+    let phrases = query.match(/\w+|"[^"]+"/g) || [];
     let model = {
       searchQuery: query,
+      phrases: phrases.map(phrase => phrase.replace(/(^\-|^"|"$)/g, '')),
       searchBoard: boardName
     };
-    query = {
-      requiredPhrases: [],
-      excludedPhrases: [],
-      possiblePhrases: []
-    };
-    [phrases.command].concat(phrases.arguments).forEach((phrase) => {
-      if (phrase.substr(0, 1) === '+') {
-        query.requiredPhrases.push(phrase.substr(1).toLowerCase());
-      } else if (phrase.substr(0, 1) === '-') {
-        query.excludedPhrases.push(phrase.substr(1).toLowerCase());
-      } else {
-        query.possiblePhrases.push(phrase.toLowerCase());
-      }
-    });
-    model.phrases = query.requiredPhrases.concat(query.excludedPhrases).concat(query.possiblePhrases);
-    model.phrases = _(model.phrases).uniq();
-    let result = await Search.findPosts(query, {
-      boardName: boardName,
-      page: page
-    });
+    let result = await PostsModel.findPosts(query, boardName, page);
     let maxSubjectLength = config('system.search.maxResultPostSubjectLengh');
     let maxTextLength = config('system.search.maxResultPostTextLengh');
     model.searchResults = result.posts.map((post) => {
-      let text = (post.rawText || '').replace(/\r*\n+/g, ' '); //TODO: plain text
+      let text = (post.plainText || '').replace(/\r*\n+/g, ' ');
       if (text.length > maxTextLength) {
         text = text.substr(0, maxTextLength - 1) + '…';
       }

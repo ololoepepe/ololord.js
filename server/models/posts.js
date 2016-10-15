@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getThreadPosts = exports.copyPosts = exports.markupPosts = exports.deletePost = exports.editPost = exports.createPost = exports.getPost = undefined;
+exports.findPosts = exports.getThreadPosts = exports.copyPosts = exports.markupPosts = exports.deletePost = exports.editPost = exports.createPost = exports.getPost = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
@@ -273,6 +273,7 @@ var createPost = exports.createPost = function () {
               subject: subject || null,
               rawText: rawText,
               text: text || null,
+              plainText: text ? Renderer.plainText(text, { brToNewline: true }) : null,
               markup: markupModes,
               options: createPostOptions(req, sage, tripcode, signAsOp),
               user: createPostUser(req, accessLevel, password),
@@ -444,6 +445,7 @@ var editPost = exports.editPost = function () {
                 rawText: rawText,
                 subject: subject || null,
                 text: text || null,
+                plainText: text ? Renderer.plainText(text, { brToNewline: true }) : null,
                 referencedPosts: (0, _underscore2.default)(referencedPosts).toArray(),
                 updatedAt: date
               }
@@ -809,14 +811,14 @@ var copyPosts = exports.copyPosts = function () {
                         post.threadNumber = initialPostNumber;
 
                         if (!post.rawText) {
-                          _context13.next = 10;
+                          _context13.next = 11;
                           break;
                         }
 
                         text = PostReferencesModel.replacePostLinks(post.rawText, sourceBoardName, post.referencedPosts, postNumberMap);
 
                         if (!(text !== post.rawText)) {
-                          _context13.next = 10;
+                          _context13.next = 11;
                           break;
                         }
 
@@ -830,11 +832,13 @@ var copyPosts = exports.copyPosts = function () {
                       case 9:
                         post.text = _context13.sent;
 
-                      case 10:
-                        _context13.next = 12;
+                        post.plainText = Renderer.plainText(post.text, { brToNewline: true });
+
+                      case 11:
+                        _context13.next = 13;
                         return targetBoard.transformPostExtraData(post.extraData, sourceBoard);
 
-                      case 12:
+                      case 13:
                         post.extraData = _context13.sent;
 
                         post.referencedPosts = PostReferencesModel.replacePostReferences(post.referencedPosts, {
@@ -845,25 +849,25 @@ var copyPosts = exports.copyPosts = function () {
                           threadNumber: initialPostNumber
                         }, postNumberMap);
                         posts.referringPosts = [];
-                        _context13.next = 17;
+                        _context13.next = 18;
                         return PostReferencesModel.addReferringPosts(post.referencedPosts, targetBoardName, post.number, post.threadNumber);
 
-                      case 17:
-                        _context13.next = 19;
+                      case 18:
+                        _context13.next = 20;
                         return FilesModel.copyFiles(post.fileInfos, sourceBoardName, targetBoardName, transaction);
 
-                      case 19:
+                      case 20:
                         newFileInfos = _context13.sent;
 
                         post.fileInfos = FilesModel.createFileInfos(newFileInfos, targetBoardName, post.number);
                         transaction.addPostNumber(post.number);
-                        _context13.next = 24;
+                        _context13.next = 25;
                         return Post.insertOne(post);
 
-                      case 24:
+                      case 25:
                         return _context13.abrupt('return', post);
 
-                      case 25:
+                      case 26:
                       case 'end':
                         return _context13.stop();
                     }
@@ -981,6 +985,68 @@ var getThreadPosts = exports.getThreadPosts = function () {
   };
 }();
 
+var findPosts = exports.findPosts = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(query, boardName, page) {
+    var Post, q, limit, score, posts, count;
+    return regeneratorRuntime.wrap(function _callee16$(_context16) {
+      while (1) {
+        switch (_context16.prev = _context16.next) {
+          case 0:
+            _context16.next = 2;
+            return client.collection('post');
+
+          case 2:
+            Post = _context16.sent;
+            q = {
+              $text: { $search: query }
+            };
+
+            if (boardName) {
+              q.boardName = boardName;
+            }
+            limit = (0, _config2.default)('system.search.maxResultCount');
+            score = { $meta: 'textScore' };
+            _context16.next = 9;
+            return Post.find(q, {
+              boardName: 1,
+              number: 1,
+              threadNumber: 1,
+              archived: 1,
+              subject: 1,
+              plainText: 1,
+              score: score
+            }).sort({
+              score: score,
+              boardName: 1,
+              number: 1
+            }).skip(page * limit).limit(limit).toArray();
+
+          case 9:
+            posts = _context16.sent;
+            _context16.next = 12;
+            return Post.count(q);
+
+          case 12:
+            count = _context16.sent;
+            return _context16.abrupt('return', {
+              posts: posts,
+              max: limit,
+              total: count
+            });
+
+          case 14:
+          case 'end':
+            return _context16.stop();
+        }
+      }
+    }, _callee16, this);
+  }));
+
+  return function findPosts(_x34, _x35, _x36) {
+    return ref.apply(this, arguments);
+  };
+}();
+
 exports.createPostUser = createPostUser;
 
 var _underscore = require('underscore');
@@ -1023,9 +1089,9 @@ var _renderer = require('../core/renderer');
 
 var Renderer = _interopRequireWildcard(_renderer);
 
-var _search = require('../core/search');
+var _config = require('../helpers/config');
 
-var Search = _interopRequireWildcard(_search);
+var _config2 = _interopRequireDefault(_config);
 
 var _ipc = require('../helpers/ipc');
 

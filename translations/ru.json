@@ -665,11 +665,6 @@
             "value": "Стиль:"
         }
     },
-    "Search: possible +required -excluded": {
-        "searchInputPlaceholder": {
-            "value": "Поиск: возможно +обязательно -исключается"
-        }
-    },
     "Captcha:": {
         "captchaLabelText": {
             "value": "Капча:"
@@ -1718,11 +1713,6 @@
     "No file specified": {
         "_default": {
             "value": "Не указан файл"
-        }
-    },
-    "Invalid search query": {
-        "_default": {
-            "value": "Недействительный поисковый запрос"
         }
     },
     "No such post": {
@@ -3268,6 +3258,11 @@
     "Rerender text of posts": {
         "_default": {
             "value": "Отрендерить заново текст постов"
+        }
+    },
+    "Search: icluded -excluded": {
+        "searchInputPlaceholder": {
+            "value": "Поиск: включительно -исключается"
         }
     }
 }

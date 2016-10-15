@@ -8,7 +8,6 @@ import * as PostReferencesModel from './post-references';
 import * as PostsModel from './posts';
 import Board from '../boards/board';
 import BoardController from '../controllers/board';
-import * as Search from '../core/search';
 import * as Cache from '../helpers/cache';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';

@@ -1167,10 +1167,6 @@ var _board3 = require('../controllers/board');
 
 var _board4 = _interopRequireDefault(_board3);
 
-var _search = require('../core/search');
-
-var Search = _interopRequireWildcard(_search);
-
 var _cache = require('../helpers/cache');
 
 var Cache = _interopRequireWildcard(_cache);

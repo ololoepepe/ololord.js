@@ -257,8 +257,8 @@ function migratePost(sources, key) {
     cc.post.referencedPosts = _(cc.referenced).toArray();
     cc.post.referringPosts = _(cc.referring).toArray();
     cc.post.fileInfos = _(fileInfos).toArray();
-    if (cc.post.hasOwnProperty('plainText')) {
-      delete cc.post.plainText;
+    if (!cc.post.hasOwnProperty('plainText')) {
+      cc.post.plainText = null;
     }
     return c.c.post.insertOne(cc.post);
   });
