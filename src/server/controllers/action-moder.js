@@ -3,9 +3,10 @@ import express from 'express';
 import moment from 'moment';
 
 import Board from '../boards/board';
+import config from '../helpers/config';
 import * as Files from '../core/files';
 import geolocation from '../core/geolocation';
-import config from '../helpers/config';
+import PostCreationTransaction from '../helpers/post-creation-transaction';
 import * as Tools from '../helpers/tools';
 import * as ThreadsModel from '../models/threads';
 import * as UsersModel from '../models/users';
@@ -147,6 +148,7 @@ router.post('/action/delall', async function(req, res, next) {
 });
 
 router.post('/action/moveThread', async function(req, res, next) {
+  let transaction;
   try {
     let { fields } = await Files.parseForm(req);
     let { boardName, threadNumber, targetBoardName, password } = fields;
@@ -169,9 +171,13 @@ router.post('/action/moveThread', async function(req, res, next) {
       geolocationInfo: geolocationInfo
     });
     await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'moveThread', Tools.sha1(password));
-    let result = await ThreadsModel.moveThread(boardName, threadNumber, targetBoardName);
+    transaction = new PostCreationTransaction(boardName);
+    let result = await ThreadsModel.moveThread(boardName, threadNumber, targetBoardName, transaction);
     res.json(result);
   } catch (err) {
+    if (transaction) {
+      transaction.rollback();
+    }
     next(err);
   }
 });

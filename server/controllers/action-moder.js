@@ -20,6 +20,10 @@ var _board = require('../boards/board');
 
 var _board2 = _interopRequireDefault(_board);
 
+var _config = require('../helpers/config');
+
+var _config2 = _interopRequireDefault(_config);
+
 var _files = require('../core/files');
 
 var Files = _interopRequireWildcard(_files);
@@ -28,9 +32,9 @@ var _geolocation = require('../core/geolocation');
 
 var _geolocation2 = _interopRequireDefault(_geolocation);
 
-var _config = require('../helpers/config');
+var _postCreationTransaction = require('../helpers/post-creation-transaction');
 
-var _config2 = _interopRequireDefault(_config);
+var _postCreationTransaction2 = _interopRequireDefault(_postCreationTransaction);
 
 var _tools = require('../helpers/tools');
 
@@ -333,17 +337,18 @@ router.post('/action/delall', function () {
 
 router.post('/action/moveThread', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(req, res, next) {
-    var _ref3, fields, boardName, threadNumber, targetBoardName, password, geolocationInfo, result;
+    var transaction, _ref3, fields, boardName, threadNumber, targetBoardName, password, geolocationInfo, result;
 
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            _context4.prev = 0;
-            _context4.next = 3;
+            transaction = void 0;
+            _context4.prev = 1;
+            _context4.next = 4;
             return Files.parseForm(req);
 
-          case 3:
+          case 4:
             _ref3 = _context4.sent;
             fields = _ref3.fields;
             boardName = fields.boardName;
@@ -352,77 +357,81 @@ router.post('/action/moveThread', function () {
             password = fields.password;
 
             if (!(!_board2.default.board(boardName) || !_board2.default.board(targetBoardName))) {
-              _context4.next = 11;
+              _context4.next = 12;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
-          case 11:
+          case 12:
             if (!(boardName === targetBoardName)) {
-              _context4.next = 13;
+              _context4.next = 14;
               break;
             }
 
             throw new Error(Tools.translate('Source and target boards are the same'));
 
-          case 13:
+          case 14:
             threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (threadNumber) {
-              _context4.next = 16;
+              _context4.next = 17;
               break;
             }
 
             throw new Error(Tools.translate('Invalid thread number'));
 
-          case 16:
+          case 17:
             if (!(!req.isModer(boardName) || !req.isModer(targetBoardName))) {
-              _context4.next = 18;
+              _context4.next = 19;
               break;
             }
 
             throw new Error(Tools.translate('Not enough rights'));
 
-          case 18:
-            _context4.next = 20;
+          case 19:
+            _context4.next = 21;
             return (0, _geolocation2.default)(req.ip);
 
-          case 20:
+          case 21:
             geolocationInfo = _context4.sent;
-            _context4.next = 23;
+            _context4.next = 24;
             return UsersModel.checkUserBan(req.ip, [boardName, targetBoardName], {
               write: true,
               geolocationInfo: geolocationInfo
             });
 
-          case 23:
-            _context4.next = 25;
+          case 24:
+            _context4.next = 26;
             return UsersModel.checkUserPermissions(req, boardName, threadNumber, 'moveThread', Tools.sha1(password));
 
-          case 25:
-            _context4.next = 27;
-            return ThreadsModel.moveThread(boardName, threadNumber, targetBoardName);
+          case 26:
+            transaction = new _postCreationTransaction2.default(boardName);
+            _context4.next = 29;
+            return ThreadsModel.moveThread(boardName, threadNumber, targetBoardName, transaction);
 
-          case 27:
+          case 29:
             result = _context4.sent;
 
             res.json(result);
-            _context4.next = 34;
+            _context4.next = 37;
             break;
 
-          case 31:
-            _context4.prev = 31;
-            _context4.t0 = _context4['catch'](0);
+          case 33:
+            _context4.prev = 33;
+            _context4.t0 = _context4['catch'](1);
 
+            if (transaction) {
+              transaction.rollback();
+            }
             next(_context4.t0);
 
-          case 34:
+          case 37:
           case 'end':
             return _context4.stop();
         }
       }
-    }, _callee4, this, [[0, 31]]);
+    }, _callee4, this, [[1, 33]]);
   }));
 
   return function (_x7, _x8, _x9) {

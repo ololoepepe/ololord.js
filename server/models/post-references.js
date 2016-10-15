@@ -181,14 +181,16 @@ var updatePostMarkup = function () {
 
 var updateReferringPosts = exports.updateReferringPosts = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(referringPosts, boardName, postNumber, threadNumber) {
-    var shouldAddReferringPosts, refs;
+    var pickNumber, pickFunction, refs;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            shouldAddReferringPosts = boardName && postNumber && threadNumber;
-            _context5.next = 3;
-            return Tools.series(referringPosts, function () {
+            pickNumber = postNumber || threadNumber;
+            pickFunction = postNumber ? pickPostsToRerender : pickThreadsToRerender;
+            refs = pickFunction(referringPosts, boardName, pickNumber);
+            _context5.next = 5;
+            return Tools.series(refs, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(ref) {
                 var _ref2, oldReferencedPosts, newReferencedPosts;
 
@@ -205,12 +207,12 @@ var updateReferringPosts = exports.updateReferringPosts = function () {
                         oldReferencedPosts = _ref2.oldReferencedPosts;
                         newReferencedPosts = _ref2.newReferencedPosts;
 
-                        oldReferencedPosts = pickPostsToRerender(oldReferencedPosts, boardName, postNumber);
+                        oldReferencedPosts = pickFunction(oldReferencedPosts, boardName, pickNumber);
                         _context4.next = 9;
                         return removeReferringPosts(ref.boardName, ref.postNumber);
 
                       case 9:
-                        newReferencedPosts = pickPostsToRerender(newReferencedPosts, boardName, postNumber);
+                        newReferencedPosts = pickFunction(newReferencedPosts, boardName, pickNumber);
                         _context4.next = 12;
                         return addReferringPosts(newReferencedPosts, ref.boardName, ref.postNumber, ref.threadNumber);
 
@@ -237,14 +239,14 @@ var updateReferringPosts = exports.updateReferringPosts = function () {
               };
             }(), true);
 
-          case 3:
+          case 5:
             refs = _context5.sent;
             return _context5.abrupt('return', (0, _underscore2.default)(_underscore2.default.extend.apply(_underscore2.default, [{}].concat(_toConsumableArray(refs)))).reduce(function (acc, ref) {
               acc[ref.boardName + ':' + ref.threadNumber] = ref;
               return acc;
             }, {}));
 
-          case 5:
+          case 7:
           case 'end':
             return _context5.stop();
         }
@@ -296,9 +298,7 @@ var rerenderReferencedPosts = exports.rerenderReferencedPosts = function () {
 }();
 
 exports.replacePostLinks = replacePostLinks;
-exports.replaceRelatedPostLinks = replaceRelatedPostLinks;
 exports.replacePostReferences = replacePostReferences;
-exports.replaceRelatedPostReferences = replaceRelatedPostReferences;
 
 var _underscore = require('underscore');
 
@@ -342,7 +342,7 @@ function pickPostsToRerender(referencedPosts, boardName, postNumber) {
   return (0, _underscore2.default)(referencedPosts).filter(function (ref) {
     return boardName !== ref.boardName || postNumber !== ref.postNumber;
   }).reduce(function (acc, ref) {
-    acc[ref.boardName + ':' + ref.postNumber] = ref;
+    acc[ref.boardName + ':' + ref.threadNumber] = ref;
     return acc;
   }, {});
 }
@@ -370,50 +370,7 @@ function replacePostLinks(text, sourceBoardName, referencedPosts, postNumberMap)
   return text;
 }
 
-function replaceRelatedPostLinks(_ref3) {
-  var text = _ref3.text;
-  var sourceBoardName = _ref3.sourceBoardName;
-  var targetBoardName = _ref3.targetBoardName;
-  var postBoardName = _ref3.postBoardName;
-  var referencedPosts = _ref3.referencedPosts;
-  var postNumberMap = _ref3.postNumberMap;
-
-  if (!text) {
-    return text;
-  }
-  referencedPosts.filter(function (ref) {
-    return postNumberMap.hasOwnProperty(ref.postNumber);
-  }).forEach(function (ref) {
-    var replacement = '>>/' + targetBoardName + '/' + postNumberMap[ref.postNumber];
-    if (postBoardName === sourceBoardName) {
-      text = text.replace(new RegExp('>>' + ref.postNumber, 'g'), replacement);
-    }
-    text = text.replace(new RegExp('>>/' + sourceBoardName + '/' + ref.postNumber, 'g'), replacement);
-  });
-  return text;
-}
-
-function replacePostReferences(references, source, target, postNumberMap, related) {
-  var sourceBoardName = source.boardName;
-  var sourceThreadNumber = source.threadNumber;
-  var targetBoardName = target.boardName;
-  var targetThreadNumber = target.threadNumber;
-  return references.map(function (ref) {
-    if (ref.boardName === sourceBoardName && ref.threadNumber === sourceThreadNumber) {
-      return {
-        boardName: targetBoardName,
-        threadNumber: targetThreadNumber,
-        postNumber: postNumberMap[ref.postNumber],
-        createdAt: ref.createdAt
-      };
-    } else {
-      related.push(ref);
-      return ref;
-    }
-  });
-}
-
-function replaceRelatedPostReferences(references, source, target, postNumberMap) {
+function replacePostReferences(references, source, target, postNumberMap) {
   var sourceBoardName = source.boardName;
   var sourceThreadNumber = source.threadNumber;
   var targetBoardName = target.boardName;

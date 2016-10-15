@@ -3,6 +3,7 @@ import FS from 'q-io/fs';
 import promisify from 'promisify-node';
 
 import * as BoardsModel from './boards';
+import * as FilesModel from './files';
 import * as PostReferencesModel from './post-references';
 import * as PostsModel from './posts';
 import Board from '../boards/board';
@@ -62,7 +63,7 @@ export async function getThreadNumbers(boardName, { archived } = {}) {
   return threads.map(({ number }) => number);
 }
 
-export async function getThread(boardName, threadNumber) {
+export async function getThread(boardName, threadNumber, projection) {
   let board = Board.board(boardName);
   if (!board) {
     throw new Error(Tools.translate('Invalid board'));
@@ -72,10 +73,13 @@ export async function getThread(boardName, threadNumber) {
     throw new Error(Tools.translate('Invalid thread number'));
   }
   let Thread = await client.collection('thread');
+  if (typeof projection !== 'object') {
+    projection = { _id: 0 };
+  }
   let thread = await Thread.findOne({
     boardName: boardName,
     number: threadNumber
-  }, { _id: 0 });
+  }, projection);
   if (!thread) {
     throw new Error(Tools.translate('No such thread'));
   }
@@ -306,7 +310,7 @@ export async function setThreadUnbumpable(boardName, threadNumber, unbumpable) {
   return await setThreadFlag(boardName, threadNumber, 'unbumpable', unbumpable);
 }
 
-export async function moveThread(sourceBoardName, threadNumber, targetBoardName) {
+export async function moveThread(sourceBoardName, threadNumber, targetBoardName, transaction) {
   let targetBoard = Board.board(targetBoardName);
   if (!targetBoard || !Board.board(sourceBoardName)) {
     throw new Error(Tools.translate('Invalid board'));
@@ -324,40 +328,18 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName)
   let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, postCount);
   let initialPostNumber = lastPostNumber - postCount + 1;
   thread.number = initialPostNumber;
-  let { toRerender, toMarkup, postNumberMap } = await PostsModel.copyPosts({
+  await PostsModel.copyPosts({
     sourceBoardName: sourceBoardName,
     sourceThreadNumber: threadNumber,
     targetBoardName: targetBoardName,
-    initialPostNumber: initialPostNumber
+    initialPostNumber: initialPostNumber,
+    transaction: transaction
   });
   let Thread = await client.collection('thread');
+  transaction.setThreadNumber(thread.number);
   await Thread.insertOne(thread);
   await IPC.render(targetBoardName, thread.number, thread.number, 'create');
-  toMarkup = toMarkup.reduce((acc, ref) => {
-    acc[`${ref.boardName}:${ref.postNumber}`] = ref;
-    return acc;
-  }, {});
-  toRerender = toRerender.reduce((acc, ref) => {
-    acc[`${ref.boardName}:${ref.threadNumber}`] = ref;
-    return acc;
-  }, {});
-  await PostsModel.markupMovedThreadRelatedPosts({
-    posts: toMarkup,
-    sourceBoardName: sourceBoardName,
-    targetBoardName: targetBoardName,
-    postNumberMap: postNumberMap
-  });
-  await PostsModel.updateMovedThreadRelatedPosts({
-    posts: toRerender,
-    sourceBoardName: sourceBoardName,
-    targetBoardName: targetBoardName,
-    sourceThreadNumber: threadNumber,
-    targetThreadNumber: initialPostNumber,
-    postNumberMap: postNumberMap
-  });
-  await Tools.series(_.extend(toRerender, toMarkup), async function(ref) {
-    return await IPC.render(ref.boardName, ref.threadNumber, ref.threadNumber, 'edit');
-  });
+  transaction.commit();
   await deleteThread(sourceBoardName, threadNumber);
   return {
     boardName: targetBoardName,
@@ -377,38 +359,29 @@ export async function deleteThread(boardName, threadNumber) {
   if (!thread) {
     throw new Error(Tools.translate('No such thread'));
   }
-  setTimeout(async function() {
-    try {
-      let Post = await client.collection('post');
-      let query = {
-        boardName: boardName,
-        threadNumber: threadNumber
-      };
-      let posts = await Post.find(query, {
-        number: 1,
-        referencedPosts: 1,
-        referringPosts: 1,
-        fileInfos: 1
-      }).toArray();
-      await Post.deleteMany(query);
-      await Tools.series(posts, async function(post) {
-        await PostReferencesModel.removeReferringPosts(post.boardName, post.postNumber);
-      }, true);
-      (async function() {
-        let refs = await Tools.series(posts, (post) => {
-          return PostReferencesModel.updateReferringPosts(post.referringPosts, post.boardName, post.number,
-            threadNumber);
-        }, true);
-        refs = _.extend(...refs);
-        let referencedPosts = _.extend(...posts.map(({ referencedPosts }) => referencedPosts));
-        await PostReferencesModel.rerenderReferencedPosts(boardName, threadNumber, refs, referencedPosts);
-        let fileInfos = posts.map(({ fileInfos }) => fileInfos);
-        await FilesModel.removeFiles(_(fileInfos).flatten());
-      })();
-    } catch (err) {
-      Logger.error(err.stack || err);
-    }
-  }, 5000); //TODO: This is not OK
+  let Post = await client.collection('post');
+  let query = {
+    boardName: boardName,
+    threadNumber: threadNumber
+  };
+  let posts = await Post.find(query, {
+    number: 1,
+    referencedPosts: 1,
+    referringPosts: 1,
+    fileInfos: 1
+  }).toArray();
+  await Post.deleteMany(query);
+  await Tools.series(posts, async function(post) {
+    await PostReferencesModel.removeReferringPosts(boardName, post.number);
+  }, true);
+  let refs = await Tools.series(posts, (post) => {
+    return PostReferencesModel.updateReferringPosts(post.referringPosts, boardName, undefined, threadNumber);
+  }, true);
+  refs = _.extend(...refs);
+  let referencedPosts = _(posts.map(({ referencedPosts }) => referencedPosts)).flatten();
+  await PostReferencesModel.rerenderReferencedPosts(boardName, threadNumber, refs, referencedPosts);
+  let fileInfos = posts.map(({ fileInfos }) => fileInfos);
+  await FilesModel.removeFiles(_(fileInfos).flatten());
   if (thread.archived) {
     await FilesModel.removeArchivedThreadFiles(boardName, threadNumber);
     await IPC.renderArchive(boardName);

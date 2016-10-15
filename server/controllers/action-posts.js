@@ -247,7 +247,7 @@ router.post('/action/markupText', function () {
 
 router.post('/action/createPost', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, res, next) {
-    var transaction, _ref3, fields, files, boardName, threadNumber, captchaEngine, post, hash, path;
+    var transaction, _ref3, fields, files, boardName, threadNumber, captchaEngine, thread, post, hash, path;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -312,16 +312,33 @@ router.post('/action/createPost', function () {
             });
 
           case 27:
+            _context3.next = 29;
+            return ThreadsModel.getThread(boardName, threadNumber, {
+              closed: 1,
+              unbumpable: 1
+            });
+
+          case 29:
+            thread = _context3.sent;
+
+            if (!thread.closed) {
+              _context3.next = 32;
+              break;
+            }
+
+            throw new Error(Tools.translate('Posting is disabled in this thread'));
+
+          case 32:
             transaction = new _postCreationTransaction2.default(boardName);
-            _context3.next = 30;
+            _context3.next = 35;
             return Files.processFiles(boardName, files, transaction);
 
-          case 30:
+          case 35:
             files = _context3.sent;
-            _context3.next = 33;
-            return PostsModel.createPost(req, fields, files, transaction);
+            _context3.next = 38;
+            return PostsModel.createPost(req, fields, files, transaction, { unbumpable: thread.unbumpable });
 
-          case 33:
+          case 38:
             post = _context3.sent;
 
             IPC.send('notifyAboutNewPosts', boardName + '/' + threadNumber);
@@ -336,11 +353,11 @@ router.post('/action/createPost', function () {
 
               res.redirect(303, path);
             }
-            _context3.next = 42;
+            _context3.next = 47;
             break;
 
-          case 38:
-            _context3.prev = 38;
+          case 43:
+            _context3.prev = 43;
             _context3.t0 = _context3['catch'](1);
 
             if (transaction) {
@@ -348,12 +365,12 @@ router.post('/action/createPost', function () {
             }
             next(_context3.t0);
 
-          case 42:
+          case 47:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[1, 38]]);
+    }, _callee3, this, [[1, 43]]);
   }));
 
   return function (_x9, _x10, _x11) {

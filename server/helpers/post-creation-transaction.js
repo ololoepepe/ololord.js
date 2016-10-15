@@ -38,6 +38,7 @@ var PostCreationTransaction = function () {
 
     this.boardName = boardName;
     this.files = [];
+    this.postNumbers = [];
   }
 
   _createClass(PostCreationTransaction, [{
@@ -51,9 +52,14 @@ var PostCreationTransaction = function () {
       this.threadNumber = threadNumber;
     }
   }, {
-    key: 'setPostNumber',
-    value: function setPostNumber(postNumber) {
-      this.postNumber = postNumber;
+    key: 'addPostNumber',
+    value: function addPostNumber(postNumber) {
+      this.postNumbers.push(postNumber);
+    }
+  }, {
+    key: 'commit',
+    value: function commit() {
+      this.committed = true;
     }
   }, {
     key: 'rollback',
@@ -63,44 +69,52 @@ var PostCreationTransaction = function () {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.prev = 0;
-                _context.next = 3;
+                if (!this.committed) {
+                  _context.next = 2;
+                  break;
+                }
+
+                return _context.abrupt('return');
+
+              case 2:
+                _context.prev = 2;
+                _context.next = 5;
                 return this._rollbackFiles();
 
-              case 3:
+              case 5:
                 if (!(this.threadNumber > 0)) {
-                  _context.next = 6;
+                  _context.next = 8;
                   break;
                 }
 
-                _context.next = 6;
+                _context.next = 8;
                 return this._rollbackThread();
 
-              case 6:
-                if (!(this.postNumber > 0)) {
-                  _context.next = 9;
+              case 8:
+                if (!(this.postNumbers.length > 0)) {
+                  _context.next = 11;
                   break;
                 }
 
-                _context.next = 9;
-                return this._rollbackPost();
-
-              case 9:
-                _context.next = 14;
-                break;
+                _context.next = 11;
+                return this._rollbackPosts();
 
               case 11:
-                _context.prev = 11;
-                _context.t0 = _context['catch'](0);
+                _context.next = 16;
+                break;
+
+              case 13:
+                _context.prev = 13;
+                _context.t0 = _context['catch'](2);
 
                 _logger2.default.error(_context.t0.stack || _context.t0);
 
-              case 14:
+              case 16:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, this, [[0, 11]]);
+        }, _callee, this, [[2, 13]]);
       }));
 
       function rollback() {
@@ -223,7 +237,7 @@ var PostCreationTransaction = function () {
       return _rollbackThread;
     }()
   }, {
-    key: '_rollbackPost',
+    key: '_rollbackPosts',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
         var Post;
@@ -238,9 +252,9 @@ var PostCreationTransaction = function () {
               case 3:
                 Post = _context5.sent;
                 _context5.next = 6;
-                return Post.deleteOne({
+                return Post.deleteMany({
                   boardName: this.boardName,
-                  number: this.postNumber
+                  number: { $in: this.postNumbers }
                 });
 
               case 6:
@@ -261,11 +275,11 @@ var PostCreationTransaction = function () {
         }, _callee5, this, [[0, 8]]);
       }));
 
-      function _rollbackPost() {
+      function _rollbackPosts() {
         return ref.apply(this, arguments);
       }
 
-      return _rollbackPost;
+      return _rollbackPosts;
     }()
   }]);
 

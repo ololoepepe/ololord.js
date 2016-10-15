@@ -60,24 +60,6 @@ function getPostBoard(boardName) {
   return board;
 }
 
-async function getPostThread(boardName, threadNumber) {
-  let Thread = await client.collection('thread');
-  let thread = await Thread.findOne({
-    boardName: boardName,
-    number: threadNumber
-  }, {
-    closed: 1,
-    unbumpable: 1
-  });
-  if (!thread) {
-    throw new Error(Tools.translate('No such thread'));
-  }
-  if (thread.closed) {
-    throw new Error(Tools.translate('Posting is disabled in this thread'));
-  }
-  return thread;
-}
-
 async function getPostCount(boardName, threadNumber, lastPostNumber) {
   let Post = await client.collection('post');
   let query = {
@@ -131,17 +113,16 @@ async function setThreadUpdateTime(boardName, threadNumber, dateTime) {
   }
 }
 
-export async function createPost(req, fields, files, transaction, { postNumber, date } = {}) {
+export async function createPost(req, fields, files, transaction, { postNumber, date, unbumpable } = {}) {
   let { boardName, threadNumber, text, markupMode, name, subject, sage, signAsOp, tripcode, password } = fields;
   threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
   date = date || Tools.now();
+  unbumpable = !!unbumpable;
   let board = getPostBoard(boardName);
   if (postNumber) {
     threadNumber = postNumber;
   }
-  let { unbumpable } = await getPostThread(boardName, threadNumber);
-  unbumpable = !!unbumpable;
   let Post = await client.collection('post');
   let postCount = await getPostCount(boardName, threadNumber);
   if (postCount >= board.postLimit) {
@@ -184,7 +165,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
     createdAt: date.toISOString(),
     updatedAt: null
   };
-  transaction.setPostNumber(postNumber);
+  transaction.addPostNumber(postNumber);
   await Post.insertOne(post);
   let postCountNew = await getPostCount(boardName, threadNumber, postNumber);
   if (postCountNew !== postCount) {
@@ -357,7 +338,8 @@ export async function markupPosts(targets) {
   await PostReferencesModel.rerenderReferencedPosts(undefined, undefined, refs);
 }
 
-export async function copyPosts({ sourceBoardName, sourceThreadNumber, targetBoardName, initialPostNumber }) {
+export async function copyPosts({ sourceBoardName, sourceThreadNumber, targetBoardName, initialPostNumber,
+  transaction }) {
   let sourceBoard = Board.board(sourceBoardName);
   if (!sourceBoard) {
     throw new Error(Tools.translate('Invalid board'));
@@ -375,8 +357,6 @@ export async function copyPosts({ sourceBoardName, sourceThreadNumber, targetBoa
     acc[post.number] = initialPostNumber + index;
     return acc;
   }, {});
-  let toRerender = [];
-  let toMarkup = [];
   posts = await Tools.series(posts, async function(post) {
     post.number = postNumberMap[post.number];
     post.boardName = targetBoardName;
@@ -385,6 +365,7 @@ export async function copyPosts({ sourceBoardName, sourceThreadNumber, targetBoa
       let text = PostReferencesModel.replacePostLinks(post.rawText, sourceBoardName, post.referencedPosts,
         postNumberMap);
       if (text !== post.rawText) {
+        post.rawText = text;
         post.text = await markup(targetBoardName, text, {
           markupModes: post.markup,
           accessLevel: post.user.level
@@ -398,88 +379,15 @@ export async function copyPosts({ sourceBoardName, sourceThreadNumber, targetBoa
     }, {
       boardName: targetBoardName,
       threadNumber: initialPostNumber
-    }, postNumberMap, toRerender);
-    post.referringPosts = PostReferencesModel.replacePostReferences(post.referringPosts, {
-      boardName: sourceBoardName,
-      threadNumber: post.threadNumber
-    }, {
-      boardName: targetBoardName,
-      threadNumber: initialPostNumber
-    }, postNumberMap, toMarkup);
-    let newFileInfos = await FilesModel.copyFiles(post.fileInfos, sourceBoardName, targetBoardName);
+    }, postNumberMap);
+    posts.referringPosts = [];
+    await PostReferencesModel.addReferringPosts(post.referencedPosts, targetBoardName, post.number, post.threadNumber);
+    let newFileInfos = await FilesModel.copyFiles(post.fileInfos, sourceBoardName, targetBoardName, transaction);
     post.fileInfos = FilesModel.createFileInfos(newFileInfos, targetBoardName, post.number);
+    transaction.addPostNumber(post.number);
+    await Post.insertOne(post);
     return post;
   }, true);
-  await Post.insertMany(posts);
-  return {
-    postNumberMap: postNumberMap,
-    toRerender: toRerender,
-    toMarkup: toMarkup
-  };
-}
-
-export async function markupMovedThreadRelatedPosts({ posts, sourceBoardName, targetBoardName, postNumberMap }) {
-  let Post = await client.collection('post');
-  await Tools.series(posts, async function(post) {
-    post = await getPost(post.boardName, post.postNumber, { withReferences: true });
-    if (!post || !post.rawText) {
-      return;
-    }
-    if (!post.rawText) {
-      return;
-    }
-    let text = PostReferencesModel.replaceRelatedPostLinks({
-      text: post.rawText,
-      sourceBoardName: sourceBoardName,
-      targetBoardName: targetBoardName,
-      postBoardName: post.boardName,
-      referencedPosts: post.referencedPosts,
-      postNumberMap: postNumberMap
-    });
-    if (text !== post.rawText) {
-      text = await markup(targetBoardName, text, {
-        markupModes: post.markup,
-        accessLevel: post.user.level
-      });
-    }
-    await Post.updateOne({
-      boardName: post.boardName,
-      number: post.number
-    }, {
-      $set: { text: text }
-    });
-  });
-}
-
-export async function updateMovedThreadRelatedPosts({ posts, sourceBoardName, targetBoardName, sourceThreadNumber,
-  targetThreadNumber, postNumberMap }) {
-  let Post = await client.collection('post');
-  await Tools.series(posts, async function(post) {
-    post = await getPost(post.boardName, post.postNumber, { withReferences: true });
-    if (!post) {
-      return;
-    }
-    let { referencedPosts, referringPosts } = post;
-    let source = {
-      boardName: sourceBoardName,
-      threadNumber: sourceThreadNumber
-    };
-    let target = {
-      boardName: targetBoardName,
-      threadNumber: targetThreadNumber
-    };
-    referencedPosts = PostReferencesModel.replaceRelatedPostReferences(referencedPosts, source, target, postNumberMap);
-    referringPosts = PostReferencesModel.replaceRelatedPostReferences(referringPosts, source, target, postNumberMap);
-    await Post.updateOne({
-      boardName: post.boardName,
-      number: post.number
-    }, {
-      $set: {
-        referencedPosts: referencedPosts,
-        referringPosts: referringPosts
-      }
-    });
-  });
 }
 
 export async function getThreadPosts(boardName, threadNumber, { limit, offset, sort } = {}) {

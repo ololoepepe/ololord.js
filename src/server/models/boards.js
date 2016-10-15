@@ -46,6 +46,9 @@ export async function getThread(boardName, threadNumber) {
   let thread = await ThreadsModel.getThread(boardName, threadNumber);
   let posts = await PostsModel.getThreadPosts(boardName, threadNumber);
   thread.postCount = posts.length;
+  if (thread.postCount <= 0) {
+    throw new Error(Tools.translate('No such thread'));
+  }
   thread.opPost = posts.splice(0, 1)[0];
   thread.lastPosts = posts;
   thread.title = postSubject(thread.opPost, 50) || null;
@@ -88,6 +91,7 @@ export async function getPage(boardName, pageNumber) {
       thread.omittedPosts = 0;
     }
   });
+  threads = threads.filter((thread) => { return (thread.opPost && (thread.postCount > 0)); });
   let lastPostNumber = await getLastPostNumber(boardName);
   return {
     threads: threads,
@@ -202,10 +206,10 @@ export async function nextPostNumber(boardName, incrementBy) {
   if (!board) {
     throw new Error(Tools.translate('Invalid board'));
   }
-  incrementBy = Tools.option(incrementBy, 'number', 1, { test: (i) => { i >= 1; } });
+  incrementBy = Tools.option(incrementBy, 'number', 1, { test: (i) => { return i >= 1; } });
   let PostCounter = await client.collection('postCounter');
   let result = await PostCounter.findOneAndUpdate({ _id: boardName }, {
-    $inc: { lastPostNumber: 1 }
+    $inc: { lastPostNumber: incrementBy }
   }, {
     projection: { lastPostNumber: 1 },
     upsert: true,

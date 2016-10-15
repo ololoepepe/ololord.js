@@ -680,7 +680,7 @@ var getPostFileCount = exports.getPostFileCount = function () {
 }();
 
 var copyFiles = exports.copyFiles = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(fileInfos, sourceBoardName, targetBoardName) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(fileInfos, sourceBoardName, targetBoardName, transaction) {
     var sourcePath, sourceThumbPath, targetPath, targetThumbPath;
     return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
@@ -701,7 +701,7 @@ var copyFiles = exports.copyFiles = function () {
             _context17.next = 10;
             return Tools.series(fileInfos, function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(fileInfo) {
-                var oldFileName, oldThumbName, baseName;
+                var oldFileName, oldThumbName, baseName, newFilePath, newThumbPath;
                 return regeneratorRuntime.wrap(function _callee16$(_context16) {
                   while (1) {
                     switch (_context16.prev = _context16.next) {
@@ -716,17 +716,22 @@ var copyFiles = exports.copyFiles = function () {
 
                         fileInfo.name = fileInfo.name.replace(/^\d+/, baseName);
                         fileInfo.thumb.name = fileInfo.thumb.name.replace(/^\d+/, baseName);
-                        _context16.next = 9;
-                        return _fs2.default.copy(sourcePath + '/' + oldFileName, targetPath + '/' + fileInfo.name);
+                        newFilePath = targetPath + '/' + fileInfo.name;
+                        newThumbPath = targetThumbPath + '/' + fileInfo.thumb.name;
 
-                      case 9:
-                        _context16.next = 11;
-                        return _fs2.default.copy(sourceThumbPath + '/' + oldThumbName, targetThumbPath + '/' + fileInfo.thumb.name);
-
-                      case 11:
-                        return _context16.abrupt('return', fileInfo);
+                        transaction.addFile(newFilePath);
+                        _context16.next = 12;
+                        return _fs2.default.copy(sourcePath + '/' + oldFileName, newFilePath);
 
                       case 12:
+                        transaction.addFile(newThumbPath);
+                        _context16.next = 15;
+                        return _fs2.default.copy(sourceThumbPath + '/' + oldThumbName, newThumbPath);
+
+                      case 15:
+                        return _context16.abrupt('return', fileInfo);
+
+                      case 16:
                       case 'end':
                         return _context16.stop();
                     }
@@ -734,7 +739,7 @@ var copyFiles = exports.copyFiles = function () {
                 }, _callee16, this);
               }));
 
-              return function (_x28) {
+              return function (_x29) {
                 return ref.apply(this, arguments);
               };
             }(), true);
@@ -750,7 +755,7 @@ var copyFiles = exports.copyFiles = function () {
     }, _callee17, this);
   }));
 
-  return function copyFiles(_x25, _x26, _x27) {
+  return function copyFiles(_x25, _x26, _x27, _x28) {
     return ref.apply(this, arguments);
   };
 }();

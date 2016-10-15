@@ -111,9 +111,16 @@ router.post('/action/createPost', async function(req, res, next) {
       fields: fields,
       files: files
     });
+    let thread = await ThreadsModel.getThread(boardName, threadNumber, {
+      closed: 1,
+      unbumpable: 1
+    });
+    if (thread.closed) {
+      throw new Error(Tools.translate('Posting is disabled in this thread'));
+    }
     transaction = new PostCreationTransaction(boardName);
     files = await Files.processFiles(boardName, files, transaction);
-    let post = await PostsModel.createPost(req, fields, files, transaction);
+    let post = await PostsModel.createPost(req, fields, files, transaction, { unbumpable: thread.unbumpable });
     IPC.send('notifyAboutNewPosts', `${boardName}/${threadNumber}`);
     if ('node-captcha-noscript' !== captchaEngine) {
       res.json({

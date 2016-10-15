@@ -51,7 +51,7 @@ function pickPostsToRerender(referencedPosts, boardName, postNumber) {
   return _(referencedPosts).filter((ref) => {
     return (boardName !== ref.boardName) || (postNumber !== ref.postNumber);
   }).reduce((acc, ref) => {
-    acc[`${ref.boardName}:${ref.postNumber}`] = ref;
+    acc[`${ref.boardName}:${ref.threadNumber}`] = ref;
     return acc;
   }, {});
 }
@@ -105,13 +105,15 @@ async function updatePostMarkup(boardName, postNumber) {
 }
 
 export async function updateReferringPosts(referringPosts, boardName, postNumber, threadNumber) {
-  let shouldAddReferringPosts = (boardName && postNumber && threadNumber);
-  let refs = await Tools.series(referringPosts, async function(ref) {
+  let pickNumber = postNumber || threadNumber;
+  let pickFunction = postNumber ? pickPostsToRerender : pickThreadsToRerender;
+  let refs = pickFunction(referringPosts, boardName, pickNumber);
+  refs = await Tools.series(refs, async function(ref) {
     try {
       let { oldReferencedPosts, newReferencedPosts } = await updatePostMarkup(ref.boardName, ref.postNumber);
-      oldReferencedPosts = pickPostsToRerender(oldReferencedPosts, boardName, postNumber);
+      oldReferencedPosts = pickFunction(oldReferencedPosts, boardName, pickNumber);
       await removeReferringPosts(ref.boardName, ref.postNumber);
-      newReferencedPosts = pickPostsToRerender(newReferencedPosts, boardName, postNumber);
+      newReferencedPosts = pickFunction(newReferencedPosts, boardName, pickNumber);
       await addReferringPosts(newReferencedPosts, ref.boardName, ref.postNumber, ref.threadNumber);
       return _.extend(oldReferencedPosts, newReferencedPosts);
     } catch (err) {
@@ -149,42 +151,7 @@ export function replacePostLinks(text, sourceBoardName, referencedPosts, postNum
   return text;
 }
 
-export function replaceRelatedPostLinks({ text, sourceBoardName, targetBoardName, postBoardName, referencedPosts,
-  postNumberMap }) {
-  if (!text) {
-    return text;
-  }
-  referencedPosts.filter(ref => postNumberMap.hasOwnProperty(ref.postNumber)).forEach((ref) => {
-    let replacement = `>>/${targetBoardName}/${postNumberMap[ref.postNumber]}`;
-    if (postBoardName === sourceBoardName) {
-      text = text.replace(new RegExp(`>>${ref.postNumber}`, 'g'), replacement);
-    }
-    text = text.replace(new RegExp(`>>/${sourceBoardName}/${ref.postNumber}`, 'g'), replacement);
-  });
-  return text;
-}
-
-export function replacePostReferences(references, source, target, postNumberMap, related) {
-  let sourceBoardName = source.boardName;
-  let sourceThreadNumber = source.threadNumber;
-  let targetBoardName = target.boardName;
-  let targetThreadNumber = target.threadNumber;
-  return references.map((ref) => {
-    if (ref.boardName === sourceBoardName && ref.threadNumber === sourceThreadNumber) {
-      return {
-        boardName: targetBoardName,
-        threadNumber: targetThreadNumber,
-        postNumber: postNumberMap[ref.postNumber],
-        createdAt: ref.createdAt
-      };
-    } else {
-      related.push(ref);
-      return ref;
-    }
-  });
-}
-
-export function replaceRelatedPostReferences(references, source, target, postNumberMap) {
+export function replacePostReferences(references, source, target, postNumberMap) {
   let sourceBoardName = source.boardName;
   let sourceThreadNumber = source.threadNumber;
   let targetBoardName = target.boardName;

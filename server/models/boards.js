@@ -34,13 +34,22 @@ var getThread = exports.getThread = function () {
             posts = _context.sent;
 
             thread.postCount = posts.length;
+
+            if (!(thread.postCount <= 0)) {
+              _context.next = 12;
+              break;
+            }
+
+            throw new Error(Tools.translate('No such thread'));
+
+          case 12:
             thread.opPost = posts.splice(0, 1)[0];
             thread.lastPosts = posts;
             thread.title = postSubject(thread.opPost, 50) || null;
             addDataToThread(thread, board);
             return _context.abrupt('return', thread);
 
-          case 15:
+          case 17:
           case 'end':
             return _context.stop();
         }
@@ -149,10 +158,13 @@ var getPage = exports.getPage = function () {
             }());
 
           case 15:
-            _context3.next = 17;
+            threads = threads.filter(function (thread) {
+              return thread.opPost && thread.postCount > 0;
+            });
+            _context3.next = 18;
             return getLastPostNumber(boardName);
 
-          case 17:
+          case 18:
             lastPostNumber = _context3.sent;
             return _context3.abrupt('return', {
               threads: threads,
@@ -162,7 +174,7 @@ var getPage = exports.getPage = function () {
               postingSpeed: Renderer.postingSpeedString(board.launchDate, lastPostNumber)
             });
 
-          case 19:
+          case 20:
           case 'end':
             return _context3.stop();
         }
@@ -539,7 +551,7 @@ var nextPostNumber = exports.nextPostNumber = function () {
 
           case 3:
             incrementBy = Tools.option(incrementBy, 'number', 1, { test: function test(i) {
-                i >= 1;
+                return i >= 1;
               } });
             _context11.next = 6;
             return client.collection('postCounter');
@@ -548,7 +560,7 @@ var nextPostNumber = exports.nextPostNumber = function () {
             PostCounter = _context11.sent;
             _context11.next = 9;
             return PostCounter.findOneAndUpdate({ _id: boardName }, {
-              $inc: { lastPostNumber: 1 }
+              $inc: { lastPostNumber: incrementBy }
             }, {
               projection: { lastPostNumber: 1 },
               upsert: true,

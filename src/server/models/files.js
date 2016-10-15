@@ -223,7 +223,7 @@ export async function getPostFileCount(boardName, postNumber, { archived } = {})
   return post.fileInfoCount;
 }
 
-export async function copyFiles(fileInfos, sourceBoardName, targetBoardName) {
+export async function copyFiles(fileInfos, sourceBoardName, targetBoardName, transaction) {
   let sourcePath = `${__dirname}/../../public/${sourceBoardName}/src`;
   let sourceThumbPath = `${__dirname}/../../public/${sourceBoardName}/thumb`;
   let targetPath = `${__dirname}/../../public/${targetBoardName}/src`;
@@ -236,8 +236,12 @@ export async function copyFiles(fileInfos, sourceBoardName, targetBoardName) {
     let baseName = await IPC.send('fileName');
     fileInfo.name = fileInfo.name.replace(/^\d+/, baseName);
     fileInfo.thumb.name = fileInfo.thumb.name.replace(/^\d+/, baseName);
-    await FS.copy(`${sourcePath}/${oldFileName}`, `${targetPath}/${fileInfo.name}`);
-    await FS.copy(`${sourceThumbPath}/${oldThumbName}`, `${targetThumbPath}/${fileInfo.thumb.name}`);
+    let newFilePath = `${targetPath}/${fileInfo.name}`;
+    let newThumbPath = `${targetThumbPath}/${fileInfo.thumb.name}`;
+    transaction.addFile(newFilePath);
+    await FS.copy(`${sourcePath}/${oldFileName}`, newFilePath);
+    transaction.addFile(newThumbPath);
+    await FS.copy(`${sourceThumbPath}/${oldThumbName}`, newThumbPath);
     return fileInfo;
   }, true);
 }

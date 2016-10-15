@@ -10,6 +10,7 @@ export default class PostCreationTransaction {
   constructor(boardName) {
     this.boardName = boardName;
     this.files = [];
+    this.postNumbers = [];
   }
 
   addFile(path) {
@@ -20,18 +21,25 @@ export default class PostCreationTransaction {
     this.threadNumber = threadNumber;
   }
 
-  setPostNumber(postNumber) {
-    this.postNumber = postNumber;
+  addPostNumber(postNumber) {
+    this.postNumbers.push(postNumber);
+  }
+
+  commit() {
+    this.committed = true;
   }
 
   async rollback() {
+    if (this.committed) {
+      return;
+    }
     try {
       await this._rollbackFiles();
       if (this.threadNumber > 0) {
         await this._rollbackThread();
       }
-      if (this.postNumber > 0) {
-        await this._rollbackPost();
+      if (this.postNumbers.length > 0) {
+        await this._rollbackPosts();
       }
     } catch (err) {
       Logger.error(err.stack || err);
@@ -63,12 +71,12 @@ export default class PostCreationTransaction {
     }
   }
 
-  async _rollbackPost() {
+  async _rollbackPosts() {
     try {
       let Post = await client.collection('post');
-      await Post.deleteOne({
+      await Post.deleteMany({
         boardName: this.boardName,
-        number: this.postNumber
+        number: { $in: this.postNumbers }
       });
     } catch (err) {
       Logger.error(err.stack || err);
