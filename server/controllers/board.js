@@ -600,7 +600,7 @@ router.paths = function () {
 
           case 4:
             arrays = _context10.sent;
-            return _context10.abrupt('return', (0, _underscore2.default)(arrays).flatten().concat('/rss'));
+            return _context10.abrupt('return', (0, _underscore2.default)(arrays).flatten());
 
           case 6:
           case 'end':

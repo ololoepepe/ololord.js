@@ -208,7 +208,7 @@ router.paths = async function(description) {
     paths = paths.concat(threadNumbers.map(threadNumber => `/${boardName}/res/${threadNumber}`));
     return paths.concat(archivedThreadNumbers.map(threadNumber => `/${boardName}/arch/${threadNumber}`));
   }, true);
-  return _(arrays).flatten().concat('/rss');
+  return _(arrays).flatten();
 };
 
 router.renderThread = async function(key, data) {
