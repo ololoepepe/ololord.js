@@ -216,7 +216,7 @@ function initializeMaster() {
                         case 0:
                           _context5.prev = 0;
 
-                          _logger2.default.error(Tools.translate('Task: $[1]', '', 'render'), job.data);
+                          _logger2.default.info(Tools.translate('Task: $[1]', '', 'render'), job.data);
                           _context5.next = 4;
                           return RenderScheduler.scheduleRender(job.data);
 
@@ -252,7 +252,7 @@ function initializeMaster() {
                         case 0:
                           _context6.prev = 0;
 
-                          _logger2.default.error(Tools.translate('Task: $[1]', '', 'renderArchive'), job.data);
+                          _logger2.default.info(Tools.translate('Task: $[1]', '', 'renderArchive'), job.data);
                           _context6.next = 4;
                           return RenderScheduler.scheduleRenderArchive(job.data);
 

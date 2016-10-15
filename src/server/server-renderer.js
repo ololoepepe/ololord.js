@@ -77,7 +77,7 @@ function initializeMaster() {
       });
       Queue.process('render', async function(job, done) {
         try {
-          Logger.error(Tools.translate('Task: $[1]', '', 'render'), job.data);
+          Logger.info(Tools.translate('Task: $[1]', '', 'render'), job.data);
           await RenderScheduler.scheduleRender(job.data);
           done();
         } catch (err) {
@@ -87,7 +87,7 @@ function initializeMaster() {
       });
       Queue.process('renderArchive', async function(job, done) {
         try {
-          Logger.error(Tools.translate('Task: $[1]', '', 'renderArchive'), job.data);
+          Logger.info(Tools.translate('Task: $[1]', '', 'renderArchive'), job.data);
           await RenderScheduler.scheduleRenderArchive(job.data);
           done();
         } catch (err) {
