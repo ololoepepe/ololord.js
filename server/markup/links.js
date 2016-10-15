@@ -551,7 +551,7 @@ function getVocarooEmbeddedHtml(href, defaultHTML) {
     }
     return html;
   } catch (err) {
-    _logger2.default.log(err.stack || err);
+    _logger2.default.error(err.stack || err);
     return defaultHTML;
   }
 }

@@ -42,7 +42,7 @@ function initializeMaster() {
     try {
       console.log(Tools.translate('Spawning renderer workers, please, wait…'));
       Cluster.on('exit', (worker) => {
-        Logger.log(Tools.translate('[$[1]] Renderer died, respawning…', '', worker.process.pid));
+        Logger.error(Tools.translate('[$[1]] Renderer died, respawning…', '', worker.process.pid));
         Cluster.fork();
       });
       for (let i = 0; i < config('system.rendererWorkerCount'); ++i) {
@@ -77,7 +77,7 @@ function initializeMaster() {
       });
       Queue.process('render', async function(job, done) {
         try {
-          Logger.log(Tools.translate('Task: $[1]', '', 'render'), job.data);
+          Logger.error(Tools.translate('Task: $[1]', '', 'render'), job.data);
           await RenderScheduler.scheduleRender(job.data);
           done();
         } catch (err) {
@@ -87,7 +87,7 @@ function initializeMaster() {
       });
       Queue.process('renderArchive', async function(job, done) {
         try {
-          Logger.log(Tools.translate('Task: $[1]', '', 'renderArchive'), job.data);
+          Logger.error(Tools.translate('Task: $[1]', '', 'renderArchive'), job.data);
           await RenderScheduler.scheduleRenderArchive(job.data);
           done();
         } catch (err) {
