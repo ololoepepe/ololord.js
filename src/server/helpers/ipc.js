@@ -131,17 +131,25 @@ export async function render(boardName, threadNumber, postNumber, action, timeou
   if (Cluster.isMaster) {
     throw new Error('Rendering requested from master process');
   }
-  return await enqueueTask('render', {
-    boardName: boardName,
-    threadNumber: threadNumber,
-    postNumber: postNumber,
-    action: action
-  }, timeout);
+  try {
+    await enqueueTask('render', {
+      boardName: boardName,
+      threadNumber: threadNumber,
+      postNumber: postNumber,
+      action: action
+    }, timeout);
+  } catch (err) {
+    Logger.error(err.stack || err);
+  }
 }
 
 export async function renderArchive(boardName, timeout) {
   if (Cluster.isMaster) {
     throw new Error('Rendering requested from master process');
   }
-  return await enqueueTask('renderArchive', boardName, timeout);
+  try {
+    await enqueueTask('renderArchive', boardName, timeout);
+  } catch (err) {
+    Logger.error(err.stack || err);
+  }
 }

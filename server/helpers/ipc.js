@@ -196,7 +196,8 @@ var render = exports.render = function () {
             throw new Error('Rendering requested from master process');
 
           case 2:
-            _context4.next = 4;
+            _context4.prev = 2;
+            _context4.next = 5;
             return enqueueTask('render', {
               boardName: boardName,
               threadNumber: threadNumber,
@@ -204,15 +205,22 @@ var render = exports.render = function () {
               action: action
             }, timeout);
 
-          case 4:
-            return _context4.abrupt('return', _context4.sent);
-
           case 5:
+            _context4.next = 10;
+            break;
+
+          case 7:
+            _context4.prev = 7;
+            _context4.t0 = _context4['catch'](2);
+
+            _logger2.default.error(_context4.t0.stack || _context4.t0);
+
+          case 10:
           case 'end':
             return _context4.stop();
         }
       }
-    }, _callee4, this);
+    }, _callee4, this, [[2, 7]]);
   }));
 
   return function render(_x10, _x11, _x12, _x13, _x14) {
@@ -234,18 +242,26 @@ var renderArchive = exports.renderArchive = function () {
             throw new Error('Rendering requested from master process');
 
           case 2:
-            _context5.next = 4;
+            _context5.prev = 2;
+            _context5.next = 5;
             return enqueueTask('renderArchive', boardName, timeout);
 
-          case 4:
-            return _context5.abrupt('return', _context5.sent);
-
           case 5:
+            _context5.next = 10;
+            break;
+
+          case 7:
+            _context5.prev = 7;
+            _context5.t0 = _context5['catch'](2);
+
+            _logger2.default.error(_context5.t0.stack || _context5.t0);
+
+          case 10:
           case 'end':
             return _context5.stop();
         }
       }
-    }, _callee5, this);
+    }, _callee5, this, [[2, 7]]);
   }));
 
   return function renderArchive(_x15, _x16) {
