@@ -46,6 +46,7 @@ function formatDate(seconds) {
 }
 
 exports.default = [{
+  basic: true,
   command: 'quit',
   handler: function handler() {
     process.exit(0);
@@ -56,6 +57,7 @@ exports.default = [{
     alias: ['exit', 'q']
   }
 }, {
+  basic: true,
   command: 'respawn [exitCode]',
   handler: function () {
     var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
@@ -385,6 +387,7 @@ exports.default = [{
     }]
   }
 }, {
+  basic: true,
   command: 'reload-boards',
   handler: function () {
     var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
@@ -415,6 +418,7 @@ exports.default = [{
   }(),
   options: { description: Tools.translate('Reloads the boards.') }
 }, {
+  basic: true,
   command: 'reload-templates',
   handler: function () {
     var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(args) {
@@ -452,6 +456,7 @@ exports.default = [{
   }(),
   options: { description: Tools.translate('Reloads the templates and the partials (including public ones).') }
 }, {
+  basic: true,
   command: 'uptime',
   handler: function handler() {
     return formatDate(process.uptime());

@@ -15,6 +15,7 @@ function formatDate(seconds) {
 }
 
 export default [{
+  basic: true,
   command: 'quit',
   handler: function() {
     process.exit(0);
@@ -25,6 +26,7 @@ export default [{
     alias: ['exit', 'q']
   }
 }, {
+  basic: true,
   command: 'respawn [exitCode]',
   handler: async function({ exitCode } = {}) {
     await IPC.send('exit', Tools.option(exitCode, 'number', 0), true);
@@ -122,6 +124,7 @@ export default [{
     }]
   }
 }, {
+  basic: true,
   command: 'reload-boards',
   handler: async function() {
     Board.initialize();
@@ -130,6 +133,7 @@ export default [{
   },
   options: { description: Tools.translate('Reloads the boards.') }
 }, {
+  basic: true,
   command: 'reload-templates',
   handler: async function(args) {
     await Renderer.compileTemplates();
@@ -139,6 +143,7 @@ export default [{
   },
   options: { description: Tools.translate('Reloads the templates and the partials (including public ones).') }
 }, {
+  basic: true,
   command: 'uptime',
   handler: function() {
     return formatDate(process.uptime());

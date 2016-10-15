@@ -3,7 +3,7 @@ import _ from 'underscore';
 import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
 
-let vorpal = require('vorpal')();
+const vorpal = require('vorpal')();
 
 function setupMethods(command) {
   let prompt = command.prompt;
@@ -81,14 +81,17 @@ vorpal.installHandler = function(command, handler, { description, alias, options
 
 vorpal.find('exit').remove();
 
-Tools.loadPlugins([__dirname, `${__dirname}/custom`], (fileName, _1, _2, path) => {
-  return ('index.js' !== fileName) || (path.split('/') === 'custom');
-}).filter(plugin => config(`system.commands.${plugin.command.split(/\s/)[0]}`, true)).forEach((plugin) => {
-  vorpal.installHandler(plugin.command, plugin.handler, plugin.options);
-});
-
-export default function commands() {
+export default function commands(basicOnly, prompt) {
+  let plugins = Tools.loadPlugins([__dirname, `${__dirname}/custom`], (fileName, _1, _2, path) => {
+    return ('index.js' !== fileName) || (path.split('/') === 'custom');
+  }).filter(plugin => config(`system.commands.${plugin.command.split(/\s/)[0]}`, true));
+  if (basicOnly) {
+    plugins = plugins.filter(plugin => plugin.basic);
+  }
+  plugins.forEach((plugin) => {
+    vorpal.installHandler(plugin.command, plugin.handler, plugin.options);
+  });
   console.log(Tools.translate("Type 'help' for commands"));
-  vorpal.delimiter('ololord.js>').show();
+  vorpal.delimiter(prompt || 'ololord.js>').show();
   return vorpal;
 }

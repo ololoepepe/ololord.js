@@ -188,17 +188,22 @@ vorpal.installHandler = function (command, handler) {
 
 vorpal.find('exit').remove();
 
-Tools.loadPlugins([__dirname, __dirname + '/custom'], function (fileName, _1, _2, path) {
-  return 'index.js' !== fileName || path.split('/') === 'custom';
-}).filter(function (plugin) {
-  return (0, _config2.default)('system.commands.' + plugin.command.split(/\s/)[0], true);
-}).forEach(function (plugin) {
-  vorpal.installHandler(plugin.command, plugin.handler, plugin.options);
-});
-
-function commands() {
+function commands(basicOnly, prompt) {
+  var plugins = Tools.loadPlugins([__dirname, __dirname + '/custom'], function (fileName, _1, _2, path) {
+    return 'index.js' !== fileName || path.split('/') === 'custom';
+  }).filter(function (plugin) {
+    return (0, _config2.default)('system.commands.' + plugin.command.split(/\s/)[0], true);
+  });
+  if (basicOnly) {
+    plugins = plugins.filter(function (plugin) {
+      return plugin.basic;
+    });
+  }
+  plugins.forEach(function (plugin) {
+    vorpal.installHandler(plugin.command, plugin.handler, plugin.options);
+  });
   console.log(Tools.translate("Type 'help' for commands"));
-  vorpal.delimiter('ololord.js>').show();
+  vorpal.delimiter(prompt || 'ololord.js>').show();
   return vorpal;
 }
 //# sourceMappingURL=index.js.map

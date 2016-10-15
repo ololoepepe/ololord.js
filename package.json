@@ -31,7 +31,8 @@
     "translate": "./node_modules/cute-localize/bin/clupdate.js -e js,jst,def -l ru -d \"TRANSLATE_ME\" -X \"$(pwd)/public\",\"$(pwd)/server\",\"$(pwd)/views\",\"$(pwd)/node_modules\"",
     "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "/usr/bin/env node server/server.js"
+    "start": "/usr/bin/env node server/server.js",
+    "start-renderer": "/usr/bin/env node server/server-renderer.js"
   },
   "repository": {
     "type": "git",

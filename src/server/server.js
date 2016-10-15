@@ -42,27 +42,36 @@ function generateFileName() {
 }
 
 function onReady() {
-  //TODO: May throw error
-  if (!onReady.ready) {
-    onReady.ready = 0;
-  }
-  ++onReady.ready;
-  if (config('system.workerCount') === onReady.ready) {
-    UsersModel.initializeUserBansMonitoring(); //NOTE: No "await" here, this is how it is meant to be.
-    if (config('server.statistics.enabled')) {
-      let interval = config('server.statistics.ttl') * Tools.MINUTE;
-      setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), interval);
+  try {
+    if (!onReady.ready) {
+      onReady.ready = 0;
     }
-    if (config('server.rss.enabled')) {
-      setInterval(async function() {
-        try {
-          await BoardController.renderRSS();
-        } catch (err) {
-          Logger.error(err.stack || err);
-        }
-      }, config('server.rss.ttl') * Tools.MINUTE);
+    ++onReady.ready;
+    if (config('system.workerCount') === onReady.ready) {
+      UsersModel.initializeUserBansMonitoring(); //NOTE: No "await" here, this is how it is meant to be.
+      if (config('server.statistics.enabled')) {
+        let interval = config('server.statistics.ttl') * Tools.MINUTE;
+        setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), interval);
+      }
+      if (config('server.rss.enabled')) {
+        setInterval(async function() {
+          try {
+            await BoardController.renderRSS();
+          } catch (err) {
+            Logger.error(err.stack || err);
+          }
+        }, config('server.rss.ttl') * Tools.MINUTE);
+      }
+      commands();
     }
-    commands();
+  } catch (err) {
+    console.error(err);
+    try {
+      Logger.error(err.stack || err);
+    } catch (err) {
+      console.error(err);
+    }
+    process.exit(1);
   }
 }
 
@@ -99,27 +108,23 @@ function initializeMaster() {
       IPC.on('sendChatMessage', (data) => {
         return IPC.send('sendChatMessage', data);
       });
-      IPC.on('render', (data) => {
-        return IPC.render(data.boardName, data.threadNumber, data.postNumber, data.action);
-      });
-      IPC.on('renderArchive', (data) => {
-        return IPC.renderArchive(data);
-      });
       IPC.on('stop', () => {
         return IPC.send('stop');
       });
       IPC.on('start', () => {
         return IPC.send('start');
       });
-      IPC.on('reloadBoards', () => {
+      IPC.on('reloadBoards', async function() {
         Board.initialize();
-        return IPC.send('reloadBoards');
+        await IPC.send('reloadBoards');
+        await IPC.enqueueTask('reloadBoards');
       });
       IPC.on('reloadTemplates', async function() {
         await Renderer.compileTemplates();
         await Renderer.reloadTemplates();
         await Renderer.generateTemplatingJavaScriptFile();
-        return IPC.send('reloadTemplates');
+        await IPC.send('reloadTemplates');
+        await IPC.enqueueTask('reloadTemplates');
       });
       let hasNewPosts = {};
       setInterval(() => {
@@ -133,13 +138,6 @@ function initializeMaster() {
       }, Tools.SECOND);
       IPC.on('notifyAboutNewPosts', (key) => {
         hasNewPosts[key] = 1;
-      });
-      IPC.on('rerenderCache', (rerenderArchive) => {
-        if (rerenderArchive) {
-          return Renderer.rerender();
-        } else {
-          return Renderer.rerender(['**', '!/*/arch/*']);
-        }
       });
     } catch (err) {
       Logger.error(err.stack || err);
@@ -160,7 +158,7 @@ function initializeWorker() {
       let server = HTTP.createServer(controllers);
       let ws = new WebSocketServer(server);
       server.listen(config('server.port'), () => {
-        console.log(Tools.translate('[$[1]] Listening on port $[2]…', '', process.pid, config('server.port')));
+        console.log(Tools.translate('[$[1]] Listening on port $[2]', '', process.pid, config('server.port')));
         IPC.on('exit', (status) => { process.exit(status); });
         IPC.on('stop', () => {
           return new Promise((resolve, reject) => {
@@ -186,13 +184,6 @@ function initializeWorker() {
         IPC.on('sendChatMessage', ({ type, message, ips, hashpasses } = {}) => {
           ws.sendMessage(type, message, ips, hashpasses);
         });
-        IPC.on('render', async function(data) {
-          let f = BoardController[`${data.type}`];
-          if (typeof f !== 'function') {
-            throw new Error(Tools.translate('Invalid render function'));
-          }
-          return await f.call(BoardController, data.key, data.data);
-        });
         IPC.on('reloadBoards', () => {
           Board.initialize();
         });
@@ -216,8 +207,13 @@ function initializeWorker() {
         });
       });
     } catch (err) {
-      console.log(err);
-      Logger.error(err.stack || err);
+      console.error(err);
+      try {
+        Logger.error(err.stack || err);
+      } catch (err) {
+        console.error(err);
+      }
+      process.exit(1);
     }
   })();
 }

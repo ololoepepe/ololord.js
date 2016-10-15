@@ -100,6 +100,7 @@ const DEFAULT_VALUES = new Map([
   ['system.redis.retryDelayOnFailover', 100],
   ['system.redis.retryDelayOnClusterDown', 100],
   ['system.redis.retryDelayOnTryAgain', 100],
+  ['system.rendererWorkerCount', OS.cpus().length],
   ['system.rerenderCacheOnStartup', true],
   ['system.rerenderArchive', false],
   ['system.search.maxResultCount', 100],

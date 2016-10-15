@@ -1,11 +1,12 @@
 import Kue from 'kue';
+import UUID from 'uuid';
 
 import redisClient from '../storage/redis-client-factory';
 
-let queue = kue.createQueue({
+let queue = Kue.createQueue({
   redis: {
     createClientFactory: () => {
-      return redisClient('queue');
+      return redisClient(UUID.v4());
     }
   }
 });

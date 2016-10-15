@@ -135,120 +135,129 @@ function generateFileName() {
 }
 
 function onReady() {
-  //TODO: May throw error
-  if (!onReady.ready) {
-    onReady.ready = 0;
-  }
-  ++onReady.ready;
-  if ((0, _config2.default)('system.workerCount') === onReady.ready) {
-    UsersModel.initializeUserBansMonitoring(); //NOTE: No "await" here, this is how it is meant to be.
-    if ((0, _config2.default)('server.statistics.enabled')) {
-      var interval = (0, _config2.default)('server.statistics.ttl') * Tools.MINUTE;
-      setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), interval);
+  try {
+    if (!onReady.ready) {
+      onReady.ready = 0;
     }
-    if ((0, _config2.default)('server.rss.enabled')) {
-      setInterval(_asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                _context2.prev = 0;
-                _context2.next = 3;
-                return _board4.default.renderRSS();
+    ++onReady.ready;
+    if ((0, _config2.default)('system.workerCount') === onReady.ready) {
+      UsersModel.initializeUserBansMonitoring(); //NOTE: No "await" here, this is how it is meant to be.
+      if ((0, _config2.default)('server.statistics.enabled')) {
+        var interval = (0, _config2.default)('server.statistics.ttl') * Tools.MINUTE;
+        setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), interval);
+      }
+      if ((0, _config2.default)('server.rss.enabled')) {
+        setInterval(_asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+          return regeneratorRuntime.wrap(function _callee2$(_context2) {
+            while (1) {
+              switch (_context2.prev = _context2.next) {
+                case 0:
+                  _context2.prev = 0;
+                  _context2.next = 3;
+                  return _board4.default.renderRSS();
 
-              case 3:
-                _context2.next = 8;
-                break;
+                case 3:
+                  _context2.next = 8;
+                  break;
 
-              case 5:
-                _context2.prev = 5;
-                _context2.t0 = _context2['catch'](0);
+                case 5:
+                  _context2.prev = 5;
+                  _context2.t0 = _context2['catch'](0);
 
-                _logger2.default.error(_context2.t0.stack || _context2.t0);
+                  _logger2.default.error(_context2.t0.stack || _context2.t0);
 
-              case 8:
-              case 'end':
-                return _context2.stop();
+                case 8:
+                case 'end':
+                  return _context2.stop();
+              }
             }
-          }
-        }, _callee2, this, [[0, 5]]);
-      })), (0, _config2.default)('server.rss.ttl') * Tools.MINUTE);
+          }, _callee2, this, [[0, 5]]);
+        })), (0, _config2.default)('server.rss.ttl') * Tools.MINUTE);
+      }
+      (0, _commands2.default)();
     }
-    (0, _commands2.default)();
+  } catch (err) {
+    console.error(err);
+    try {
+      _logger2.default.error(err.stack || err);
+    } catch (err) {
+      console.error(err);
+    }
+    process.exit(1);
   }
 }
 
 function initializeMaster() {
   //NOTE: Overcoming Babel bug
-  _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
+  _asyncToGenerator(regeneratorRuntime.mark(function _callee6() {
     var _this = this;
 
-    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+    return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
-        switch (_context5.prev = _context5.next) {
+        switch (_context6.prev = _context6.next) {
           case 0:
-            _context5.prev = 0;
-            return _context5.delegateYield(regeneratorRuntime.mark(function _callee4() {
+            _context6.prev = 0;
+            return _context6.delegateYield(regeneratorRuntime.mark(function _callee5() {
               var i, hasNewPosts;
-              return regeneratorRuntime.wrap(function _callee4$(_context4) {
+              return regeneratorRuntime.wrap(function _callee5$(_context5) {
                 while (1) {
-                  switch (_context4.prev = _context4.next) {
+                  switch (_context5.prev = _context5.next) {
                     case 0:
-                      _context4.next = 2;
+                      _context5.next = 2;
                       return _nodeCaptcha2.default.removeOldCaptchImages();
 
                     case 2:
-                      _context4.next = 4;
+                      _context5.next = 4;
                       return _nodeCaptchaNoscript2.default.removeOldCaptchImages();
 
                     case 4:
-                      _context4.next = 6;
+                      _context5.next = 6;
                       return (0, _mongodbClientFactory2.default)().createIndexes();
 
                     case 6:
-                      _context4.next = 8;
+                      _context5.next = 8;
                       return Renderer.compileTemplates();
 
                     case 8:
-                      _context4.next = 10;
+                      _context5.next = 10;
                       return Renderer.reloadTemplates();
 
                     case 10:
-                      _context4.next = 12;
+                      _context5.next = 12;
                       return Renderer.generateTemplatingJavaScriptFile();
 
                     case 12:
                       if (!(_program2.default.rerender || (0, _config2.default)('system.rerenderCacheOnStartup'))) {
-                        _context4.next = 20;
+                        _context5.next = 20;
                         break;
                       }
 
                       if (!(_program2.default.archive || (0, _config2.default)('system.rerenderArchive'))) {
-                        _context4.next = 18;
+                        _context5.next = 18;
                         break;
                       }
 
-                      _context4.next = 16;
+                      _context5.next = 16;
                       return Renderer.rerender();
 
                     case 16:
-                      _context4.next = 20;
+                      _context5.next = 20;
                       break;
 
                     case 18:
-                      _context4.next = 20;
+                      _context5.next = 20;
                       return Renderer.rerender(['**', '!/*/arch/*']);
 
                     case 20:
-                      _context4.next = 22;
+                      _context5.next = 22;
                       return StatisticsModel.generateStatistics();
 
                     case 22:
-                      _context4.next = 24;
+                      _context5.next = 24;
                       return Renderer.generateCustomJavaScriptFile();
 
                     case 24:
-                      _context4.next = 26;
+                      _context5.next = 26;
                       return Renderer.generateCustomCSSFiles();
 
                     case 26:
@@ -265,47 +274,62 @@ function initializeMaster() {
                       IPC.on('sendChatMessage', function (data) {
                         return IPC.send('sendChatMessage', data);
                       });
-                      IPC.on('render', function (data) {
-                        return IPC.render(data.boardName, data.threadNumber, data.postNumber, data.action);
-                      });
-                      IPC.on('renderArchive', function (data) {
-                        return IPC.renderArchive(data);
-                      });
                       IPC.on('stop', function () {
                         return IPC.send('stop');
                       });
                       IPC.on('start', function () {
                         return IPC.send('start');
                       });
-                      IPC.on('reloadBoards', function () {
-                        _board2.default.initialize();
-                        return IPC.send('reloadBoards');
-                      });
-                      IPC.on('reloadTemplates', _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+                      IPC.on('reloadBoards', _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
                         return regeneratorRuntime.wrap(function _callee3$(_context3) {
                           while (1) {
                             switch (_context3.prev = _context3.next) {
                               case 0:
-                                _context3.next = 2;
-                                return Renderer.compileTemplates();
+                                _board2.default.initialize();
+                                _context3.next = 3;
+                                return IPC.send('reloadBoards');
 
-                              case 2:
-                                _context3.next = 4;
-                                return Renderer.reloadTemplates();
+                              case 3:
+                                _context3.next = 5;
+                                return IPC.enqueueTask('reloadBoards');
 
-                              case 4:
-                                _context3.next = 6;
-                                return Renderer.generateTemplatingJavaScriptFile();
-
-                              case 6:
-                                return _context3.abrupt('return', IPC.send('reloadTemplates'));
-
-                              case 7:
+                              case 5:
                               case 'end':
                                 return _context3.stop();
                             }
                           }
                         }, _callee3, this);
+                      })));
+                      IPC.on('reloadTemplates', _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+                        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+                          while (1) {
+                            switch (_context4.prev = _context4.next) {
+                              case 0:
+                                _context4.next = 2;
+                                return Renderer.compileTemplates();
+
+                              case 2:
+                                _context4.next = 4;
+                                return Renderer.reloadTemplates();
+
+                              case 4:
+                                _context4.next = 6;
+                                return Renderer.generateTemplatingJavaScriptFile();
+
+                              case 6:
+                                _context4.next = 8;
+                                return IPC.send('reloadTemplates');
+
+                              case 8:
+                                _context4.next = 10;
+                                return IPC.enqueueTask('reloadTemplates');
+
+                              case 10:
+                              case 'end':
+                                return _context4.stop();
+                            }
+                          }
+                        }, _callee4, this);
                       })));
                       hasNewPosts = {};
 
@@ -321,39 +345,32 @@ function initializeMaster() {
                       IPC.on('notifyAboutNewPosts', function (key) {
                         hasNewPosts[key] = 1;
                       });
-                      IPC.on('rerenderCache', function (rerenderArchive) {
-                        if (rerenderArchive) {
-                          return Renderer.rerender();
-                        } else {
-                          return Renderer.rerender(['**', '!/*/arch/*']);
-                        }
-                      });
 
-                    case 42:
+                    case 39:
                     case 'end':
-                      return _context4.stop();
+                      return _context5.stop();
                   }
                 }
-              }, _callee4, _this);
+              }, _callee5, _this);
             })(), 't0', 2);
 
           case 2:
-            _context5.next = 8;
+            _context6.next = 8;
             break;
 
           case 4:
-            _context5.prev = 4;
-            _context5.t1 = _context5['catch'](0);
+            _context6.prev = 4;
+            _context6.t1 = _context6['catch'](0);
 
-            _logger2.default.error(_context5.t1.stack || _context5.t1);
+            _logger2.default.error(_context6.t1.stack || _context6.t1);
             process.exit(1);
 
           case 8:
           case 'end':
-            return _context5.stop();
+            return _context6.stop();
         }
       }
-    }, _callee5, this, [[0, 4]]);
+    }, _callee6, this, [[0, 4]]);
   }))();
 }
 
@@ -391,7 +408,7 @@ function initializeWorker() {
                       ws = new _websocketServer2.default(server);
 
                       server.listen((0, _config2.default)('server.port'), function () {
-                        console.log(Tools.translate('[$[1]] Listening on port $[2]…', '', process.pid, (0, _config2.default)('server.port')));
+                        console.log(Tools.translate('[$[1]] Listening on port $[2]', '', process.pid, (0, _config2.default)('server.port')));
                         IPC.on('exit', function (status) {
                           process.exit(status);
                         });
@@ -426,41 +443,6 @@ function initializeWorker() {
 
                           ws.sendMessage(type, message, ips, hashpasses);
                         });
-                        IPC.on('render', function () {
-                          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(data) {
-                            var f;
-                            return regeneratorRuntime.wrap(function _callee6$(_context6) {
-                              while (1) {
-                                switch (_context6.prev = _context6.next) {
-                                  case 0:
-                                    f = _board4.default['' + data.type];
-
-                                    if (!(typeof f !== 'function')) {
-                                      _context6.next = 3;
-                                      break;
-                                    }
-
-                                    throw new Error(Tools.translate('Invalid render function'));
-
-                                  case 3:
-                                    _context6.next = 5;
-                                    return f.call(_board4.default, data.key, data.data);
-
-                                  case 5:
-                                    return _context6.abrupt('return', _context6.sent);
-
-                                  case 6:
-                                  case 'end':
-                                    return _context6.stop();
-                                }
-                              }
-                            }, _callee6, this);
-                          }));
-
-                          return function (_x2) {
-                            return ref.apply(this, arguments);
-                          };
-                        }());
                         IPC.on('reloadBoards', function () {
                           _board2.default.initialize();
                         });
@@ -508,17 +490,22 @@ function initializeWorker() {
             })(), 't0', 3);
 
           case 3:
-            _context9.next = 9;
+            _context9.next = 10;
             break;
 
           case 5:
             _context9.prev = 5;
             _context9.t1 = _context9['catch'](1);
 
-            console.log(_context9.t1);
-            _logger2.default.error(_context9.t1.stack || _context9.t1);
+            console.error(_context9.t1);
+            try {
+              _logger2.default.error(_context9.t1.stack || _context9.t1);
+            } catch (err) {
+              console.error(err);
+            }
+            process.exit(1);
 
-          case 9:
+          case 10:
           case 'end':
             return _context9.stop();
         }

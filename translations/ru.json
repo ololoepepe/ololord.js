@@ -3160,9 +3160,9 @@
             "value": "[$[1]] Инициализируется…"
         }
     },
-    "[$[1]] Listening on port $[2]…": {
+    "[$[1]] Listening on port $[2]": {
         "_default": {
-            "value": "[$[1]] Слушает порт $[2]…"
+            "value": "[$[1]] Слушает порт $[2]"
         }
     },
     "[$[1]] Closed": {
@@ -3263,6 +3263,31 @@
     "Search: icluded -excluded": {
         "searchInputPlaceholder": {
             "value": "Поиск: включительно -исключается"
+        }
+    },
+    "Spawning renderer workers, please, wait…": {
+        "_default": {
+            "value": "Спавнятся рабочие процессы рендерера, подождите…"
+        }
+    },
+    "[$[1]] Renderer died, respawning…": {
+        "_default": {
+            "value": "[$[1]] Рендерер умер, респавнится…"
+        }
+    },
+    "Task: $[1]": {
+        "_default": {
+            "value": "Задача: $[1]"
+        }
+    },
+    "[$[1]] Initializing renderer…": {
+        "_default": {
+            "value": "[$[1]] Инициализируется рендерер…"
+        }
+    },
+    "[$[1]] Rendered initialized": {
+        "_default": {
+            "value": "[$[1]] Рендерер инициализирован"
         }
     }
 }
