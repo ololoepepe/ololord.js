@@ -83,12 +83,12 @@ function previousNextThreadPost(next, post) {
     return el;
   };
   if (post) {
-    let el = iterationLoop($('.opPost, .post'), Posts.currentPost(next));
+    let el = iterationLoop($('.opPost, .post'), currentPost(next));
     if (el) {
       DOM.hash(el.id);
     }
   } else {
-    let el = iterationLoop($('.js-thread'), Threads.currentThread(next));
+    let el = iterationLoop($('.js-thread'), currentThread(next));
     if (el) {
       DOM.hash(el.id.replace('thread', ''));
     }
