@@ -77,11 +77,11 @@ const DEFAULT_VALUES = new Map([
   ['system.detectRealIp', true],
   ['system.elasticsearch.host', 'localhost:9200'],
   ['system.httpRequestTimeout', 60 * 1000], //NOTE: 1 minute
-  ['system.log.backups', 100],
-  ['system.log.maxSize', 1048576], //NOTE: 1 MB
+  ['system.log.maxFiles', 100],
+  ['system.log.maxSize', 104857600], //NOTE: 100 MB
   ['system.log.middleware.before', 'all'],
   ['system.log.middleware.verbosity', 'ip'],
-  ['system.log.targets', ['console', 'file']],
+  ['system.log.transports', ['console', 'file']],
   ['system.maxFormFieldsSize', 5 * 1024 * 1024], //NOTE: 5 MB
   ['system.mimeTypeRetrievingTimeout', 5 * 1000], //NOTE: 5 seconds
   ['system.mongodb.uri_decode_auth', false],

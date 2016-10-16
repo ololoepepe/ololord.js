@@ -74,8 +74,8 @@ var DEFAULT_VALUES = new Map([['board.useDefaultBoards', true], ['server.chat.tt
 ['server.statistics.enabled', true], ['server.statistics.ttl', 60], //NOTE: 1 hour
 ['server.synchronizationData.ttl', 300], //NOTE: 5 minutes
 ['server.youtubeApiKey', ''], ['site.protocol', 'http'], ['site.domain', 'localhost:8080'], ['site.pathPrefix', ''], ['site.locale', 'en'], ['site.dateFormat', 'MM/DD/YYYY hh:mm:ss'], ['site.timeOffset', 0], ['site.tripcodeSalt', ''], ['site.vkontakte.accessToken', ''], ['site.vkontakte.appId', ''], ['site.vkontakte.integrationEnabled', false], ['site.twitter.integrationEnabled', true], ['site.ws.transports', ''], ['site.maxSearchQueryLength', 50], ['system.detectRealIp', true], ['system.elasticsearch.host', 'localhost:9200'], ['system.httpRequestTimeout', 60 * 1000], //NOTE: 1 minute
-['system.log.backups', 100], ['system.log.maxSize', 1048576], //NOTE: 1 MB
-['system.log.middleware.before', 'all'], ['system.log.middleware.verbosity', 'ip'], ['system.log.targets', ['console', 'file']], ['system.maxFormFieldsSize', 5 * 1024 * 1024], //NOTE: 5 MB
+['system.log.maxFiles', 100], ['system.log.maxSize', 104857600], //NOTE: 100 MB
+['system.log.middleware.before', 'all'], ['system.log.middleware.verbosity', 'ip'], ['system.log.transports', ['console', 'file']], ['system.maxFormFieldsSize', 5 * 1024 * 1024], //NOTE: 5 MB
 ['system.mimeTypeRetrievingTimeout', 5 * 1000], //NOTE: 5 seconds
 ['system.mongodb.uri_decode_auth', false], ['system.mongodb.url', 'mongodb://127.0.0.1:27017/ololordjs'], ['system.onlineCounter.interval', 60 * 1000], //NOTE: 1 minute
 ['system.onlineCounter.quota', 5 * 60 * 1000], //NOTE: 5 minutes

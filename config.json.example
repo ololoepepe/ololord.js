@@ -154,7 +154,7 @@ Example:
         "fileDownloadProxy": "",
         "fileDownloadProxyAuth": "",
         "log": {
-            "backups": 100,
+            "maxFiles": 100,
             "maxSize": 1048576,
             "middleware": {
                 "before": "ddos",
@@ -167,7 +167,7 @@ Example:
                 ],
                 "verbosity": "all"
             },
-            "targets": [
+            "transports": [
                 "console",
                 "file"
             ]

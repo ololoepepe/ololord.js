@@ -4,9 +4,17 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _log4js = require('log4js');
+var _underscore = require('underscore');
 
-var _log4js2 = _interopRequireDefault(_log4js);
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _winston = require('winston');
+
+var _winston2 = _interopRequireDefault(_winston);
+
+var _winstonDailyRotateFile = require('winston-daily-rotate-file');
+
+var _winstonDailyRotateFile2 = _interopRequireDefault(_winstonDailyRotateFile);
 
 var _config = require('./config');
 
@@ -14,23 +22,41 @@ var _config2 = _interopRequireDefault(_config);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var appenders = [];
-var logTargets = (0, _config2.default)('system.log.targets');
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-if (logTargets.indexOf('console') >= 0) {
-  appenders.push({ type: 'console' });
+var TRANSPORT_MAP = {
+  'console': {
+    ctor: _winston2.default.transports.Console,
+    args: [{
+      timestamp: true,
+      colorize: true
+    }]
+  },
+  'file': {
+    ctor: _winstonDailyRotateFile2.default,
+    args: [{
+      filename: __dirname + '/../../logs/ololord.log',
+      maxsize: (0, _config2.default)('system.log.maxSize'),
+      maxFiles: (0, _config2.default)('system.log.maxFiles')
+    }]
+  }
+};
+
+var transports = (0, _config2.default)('system.log.transports').map(function (name) {
+  return TRANSPORT_MAP[name];
+}).filter(function (transport) {
+  return !!transport;
+});
+
+if (transports.length <= 0) {
+  transports = (0, _underscore2.default)(TRANSPORT_MAP).toArray();
 }
 
-if (logTargets.indexOf('console') >= 0) {
-  appenders.push({
-    type: 'file',
-    filename: __dirname + '/../../logs/ololord.log',
-    maxLogSize: (0, _config2.default)('system.log.maxSize'),
-    backups: (0, _config2.default)('system.log.backups')
-  });
-}
+transports = transports.map(function (transport) {
+  return new (Function.prototype.bind.apply(transport.ctor, [null].concat(_toConsumableArray(transport.args))))();
+});
 
-_log4js2.default.configure({ appenders: appenders });
+var Logger = new _winston2.default.Logger({ transports: transports });
 
-exports.default = _log4js2.default.getLogger();
+exports.default = Logger;
 //# sourceMappingURL=logger.js.map

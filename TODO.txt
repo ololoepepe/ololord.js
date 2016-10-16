@@ -15,6 +15,7 @@
 [done] Use SQL storage for archived threads/posts/files
 [done] Implement subnet support
 [done] Use MongoDB
+[done] Use Winston for logging
 * Optimize HTML structure
 * Use WebSockets for tracking favorite threads
 * Add ability to reply to post previews (use floating post form)
@@ -26,4 +27,3 @@
 * Remove some boards and add them to the Wiki as an example of custom boards
 * Validate post form before submitting
 * Auto save post form
-* Use better logging lib

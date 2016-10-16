@@ -1,23 +1,37 @@
-import Log4JS from 'log4js';
+import _ from 'underscore';
+import Winston from 'winston';
+import WinstonDailyRotateFileTransport from 'winston-daily-rotate-file';
 
 import config from './config';
 
-let appenders = [];
-let logTargets = config('system.log.targets');
+const TRANSPORT_MAP = {
+  'console': {
+    ctor: Winston.transports.Console,
+    args: [{
+      timestamp: true,
+      colorize: true
+    }]
+  },
+  'file': {
+    ctor: WinstonDailyRotateFileTransport,
+    args: [{
+      filename: `${__dirname}/../../logs/ololord.log`,
+      maxsize: config('system.log.maxSize'),
+      maxFiles: config('system.log.maxFiles')
+    }]
+  }
+};
 
-if (logTargets.indexOf('console') >= 0) {
-  appenders.push({ type: 'console' });
+let transports = config('system.log.transports').map((name) => {
+  return TRANSPORT_MAP[name];
+}).filter(transport => !!transport);
+
+if (transports.length <= 0) {
+  transports = _(TRANSPORT_MAP).toArray();
 }
 
-if (logTargets.indexOf('console') >= 0) {
-  appenders.push({
-    type: 'file',
-    filename: `${__dirname}/../../logs/ololord.log`,
-    maxLogSize: config('system.log.maxSize'),
-    backups: config('system.log.backups')
-  });
-}
+transports = transports.map(transport => new transport.ctor(...transport.args));
 
-Log4JS.configure({ appenders: appenders });
+let Logger = new Winston.Logger({ transports: transports });
 
-export default Log4JS.getLogger();
+export default Logger;
