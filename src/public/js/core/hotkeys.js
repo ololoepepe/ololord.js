@@ -69,8 +69,9 @@ function previousNextPageImage(next) {
 }
 
 function previousNextThreadPost(next, post) {
-  var iterationLoop = function(container, el) {
-    container.forEach((curr, i) => {
+  let iterationLoop = (container, el) => {
+    for (let i = 0; i < container.length; ++i) {
+      let curr = container[i];
       if (curr == el) {
         if (next && (i + 1) < container.length) {
           return container[i + 1];
@@ -79,33 +80,33 @@ function previousNextThreadPost(next, post) {
         }
         return el;
       }
-    });
+    }
     return el;
   };
   if (post) {
-    let el = iterationLoop($('.opPost, .post'), currentPost(next));
+    let el = iterationLoop($('.js-post'), currentPost(next));
     if (el) {
       DOM.hash(el.id);
     }
   } else {
     let el = iterationLoop($('.js-thread'), currentThread(next));
     if (el) {
-      DOM.hash(el.id.replace('thread', ''));
+      DOM.hash(el.id.replace('thread', 'post'));
     }
   }
   return false;
 }
 
 function currentPost(selectLast) {
-  var hash = DOM.hash();
-  var post;
-  if (hash && !isNaN(+hash)) {
+  let hash = DOM.hash();
+  let post;
+  if (hash && !isNaN(+hash.replace('post-', ''))) {
     post = $(`#${hash}:in-viewport`);
   }
   if (post && post[0]) {
     return post[0];
   }
-  post = $(`.opPost:in-viewport, .post:in-viewport`);
+  post = $('.js-post:in-viewport');
   if (post[0]) {
     return selectLast ? post.last()[0] : post[0];
   }
@@ -113,16 +114,16 @@ function currentPost(selectLast) {
 }
 
 function currentThread(selectLast) {
-  if (Tools.isThreadPage()) {
+  if (Tools.isThreadPage() || Tools.isArchivedThreadPage()) {
     return null;
   }
-  var post = currentPost(selectLast);
+  let post = currentPost(selectLast);
   if (!post) {
     return null;
   }
-  var thread = $(post).closest('.js-thread');
+  let thread = $(post).closest('.js-thread');
   return thread[0] || null;
-};
+}
 
 function markupCommon(tag) {
   Markup.markup(tag);
@@ -166,11 +167,15 @@ export const ACTIONS = {
   },
   previousThreadPost: {
     title: () => { return Tools.translate('Previous thread/post'); },
-    handler: previousNextThreadPost.bind(null, false, false)
+    handler: () => {
+      return previousNextThreadPost(false, Tools.isThreadPage() || Tools.isArchivedThreadPage());
+    }
   },
   nextThreadPost: {
     title: () => { return Tools.translate('Next thread/post'); },
-    handler: previousNextThreadPost.bind(null, true, false)
+    handler: () => {
+      return previousNextThreadPost(true, Tools.isThreadPage() || Tools.isArchivedThreadPage());
+    }
   },
   previousPost: {
     title: () => { return Tools.translate('Previous post'); },
