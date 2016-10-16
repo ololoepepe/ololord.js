@@ -466,14 +466,17 @@ var getLastPostNumbers = exports.getLastPostNumbers = function () {
               _id: { $in: boardNames }
             };
             _context9.next = 9;
-            return PostCounter.find(query, { lastPostNumber: 1 }).toArray();
+            return PostCounter.find(query).toArray();
 
           case 9:
             result = _context9.sent;
-            return _context9.abrupt('return', result.map(function (_ref) {
+            return _context9.abrupt('return', result.reduce(function (acc, _ref) {
+              var _id = _ref._id;
               var lastPostNumber = _ref.lastPostNumber;
-              return lastPostNumber;
-            }));
+
+              acc[_id] = lastPostNumber;
+              return acc;
+            }, {}));
 
           case 11:
           case 'end':

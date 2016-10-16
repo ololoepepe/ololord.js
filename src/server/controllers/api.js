@@ -162,10 +162,7 @@ router.get('/api/lastPostNumbers.json', async function(req, res, next) {
   }
   try {
     let lastPostNumbers = await BoardsModel.getLastPostNumbers(boardNames);
-    res.json(_(lastPostNumbers).reduce((acc, lastPostNumber, index) => {
-      acc[boardNames[index]] = lastPostNumber;
-      return acc;
-    }, {}));
+    res.json(lastPostNumbers);
   } catch (err) {
     next(err);
   }

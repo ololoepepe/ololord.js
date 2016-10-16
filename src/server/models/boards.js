@@ -185,8 +185,11 @@ export async function getLastPostNumbers(boardNames) {
   let query = {
     _id: { $in: boardNames }
   };
-  let result = await PostCounter.find(query, { lastPostNumber: 1 }).toArray();
-  return result.map(({ lastPostNumber }) => lastPostNumber);
+  let result = await PostCounter.find(query).toArray();
+  return result.reduce((acc, { _id, lastPostNumber }) => {
+    acc[_id] = lastPostNumber;
+    return acc;
+  }, {});
 }
 
 export async function getPageCount(boardName) {

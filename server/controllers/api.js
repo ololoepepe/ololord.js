@@ -600,10 +600,7 @@ router.get('/api/lastPostNumbers.json', function () {
           case 5:
             lastPostNumbers = _context11.sent;
 
-            res.json((0, _underscore2.default)(lastPostNumbers).reduce(function (acc, lastPostNumber, index) {
-              acc[boardNames[index]] = lastPostNumber;
-              return acc;
-            }, {}));
+            res.json(lastPostNumbers);
             _context11.next = 12;
             break;
 
