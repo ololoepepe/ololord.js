@@ -170,7 +170,7 @@ export let checkExpander = function(post) {
   let wrapper = $(post).find('.js-post-text-wrapper');
   let text = wrapper.find('.js-post-text');
   //NOTE: innerHeight() needs to be rounded
-  if (Math.round(text.prop('scrollHeight')) <= Math.round(text.innerHeight())) {
+  if (Math.ceil(text.prop('scrollHeight')) <= Math.ceil(text.innerHeight())) {
     return;
   }
   let txt = Tools.translate('Show full text', 'expandPostTextText');
