@@ -48,6 +48,7 @@ function initializeMaster() {
       for (let i = 0; i < config('system.rendererWorkerCount'); ++i) {
         Cluster.fork();
       }
+      Logger.initialize('renderer');
       IPC.on('ready', onReady);
       IPC.on('reloadBoards', async function() {
         Board.initialize();

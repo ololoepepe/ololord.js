@@ -105,6 +105,7 @@ function initializeMaster() {
       for (let i = 0; i < config('system.workerCount'); ++i) {
         Cluster.fork();
       }
+      Logger.initialize('main');
       IPC.on('ready', onReady);
       IPC.on('fileName', generateFileName);
       IPC.on('sendChatMessage', (data) => {

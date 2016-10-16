@@ -96,6 +96,7 @@ function initializeMaster() {
               for (i = 0; i < (0, _config2.default)('system.rendererWorkerCount'); ++i) {
                 _cluster2.default.fork();
               }
+              _logger2.default.initialize('renderer');
               IPC.on('ready', onReady);
               IPC.on('reloadBoards', _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
                 return regeneratorRuntime.wrap(function _callee$(_context) {
