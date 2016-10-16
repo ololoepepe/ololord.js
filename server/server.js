@@ -296,6 +296,7 @@ function initializeMaster() {
                       for (i = 0; i < (0, _config2.default)('system.workerCount'); ++i) {
                         _cluster2.default.fork();
                       }
+                      _logger2.default.initialize();
                       IPC.on('ready', onReady);
                       IPC.on('fileName', generateFileName);
                       IPC.on('sendChatMessage', function (data) {
@@ -373,7 +374,7 @@ function initializeMaster() {
                         hasNewPosts[key] = 1;
                       });
 
-                    case 39:
+                    case 40:
                     case 'end':
                       return _context6.stop();
                   }
