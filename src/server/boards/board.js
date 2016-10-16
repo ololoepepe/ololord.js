@@ -37,7 +37,7 @@ function getRules(boardName) {
 
 function getBoards(includeHidden) {
   includeHidden = (includeHidden || (typeof includeHidden === 'undefined'));
-  return _(boards).toArray().sort((b1, b2) => { return b1.name.localeCompare(b2); }).filter((board) => {
+  return _(boards).toArray().sort((b1, b2) => { return b1.name.localeCompare(b2.name); }).filter((board) => {
     return board.enabled && (includeHidden || board.hidden);
   });
 }

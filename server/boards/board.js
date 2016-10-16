@@ -72,7 +72,7 @@ function getRules(boardName) {
 function getBoards(includeHidden) {
   includeHidden = includeHidden || typeof includeHidden === 'undefined';
   return (0, _underscore2.default)(boards).toArray().sort(function (b1, b2) {
-    return b1.name.localeCompare(b2);
+    return b1.name.localeCompare(b2.name);
   }).filter(function (board) {
     return board.enabled && (includeHidden || board.hidden);
   });
