@@ -56,10 +56,17 @@ export async function getFileInfosByHashes(hashes) {
   let posts = await Post.find({
     'fileInfos.hash': { $in: hashes }
   }, { 'fileInfos.$': 1 }).toArray();
-  if (hashes.length !== posts.length) {
-    throw new Error(Tools.translate('No such file'));
-  }
-  return posts.map(({ fileInfos }) => fileInfos[0]);
+  let fileInfosAll = _(posts.map(({ fileInfos }) => fileInfos[0]));
+  let fileInfos = [];
+  return hashes.map((hash) => {
+    let fileInfo = fileInfosAll.find((fileInfo) => {
+      return hash === fileInfo.hash;
+    });
+    if (!fileInfo) {
+      throw new Error(Tools.translate('No such file'));
+    }
+    return fileInfo;
+  });
 }
 
 function createFileInfo(file, boardName, postNumber) {

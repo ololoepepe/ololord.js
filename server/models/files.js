@@ -153,7 +153,7 @@ var fileInfoExistsByHash = exports.fileInfoExistsByHash = function () {
 
 var getFileInfosByHashes = exports.getFileInfosByHashes = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(hashes) {
-    var Post, posts;
+    var Post, posts, fileInfosAll, fileInfos;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
@@ -190,18 +190,19 @@ var getFileInfosByHashes = exports.getFileInfosByHashes = function () {
 
           case 10:
             posts = _context5.sent;
-
-            if (!(hashes.length !== posts.length)) {
-              _context5.next = 13;
-              break;
-            }
-
-            throw new Error(Tools.translate('No such file'));
-
-          case 13:
-            return _context5.abrupt('return', posts.map(function (_ref) {
+            fileInfosAll = (0, _underscore2.default)(posts.map(function (_ref) {
               var fileInfos = _ref.fileInfos;
               return fileInfos[0];
+            }));
+            fileInfos = [];
+            return _context5.abrupt('return', hashes.map(function (hash) {
+              var fileInfo = fileInfosAll.find(function (fileInfo) {
+                return hash === fileInfo.hash;
+              });
+              if (!fileInfo) {
+                throw new Error(Tools.translate('No such file'));
+              }
+              return fileInfo;
             }));
 
           case 14:
