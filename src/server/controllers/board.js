@@ -338,7 +338,7 @@ router.renderRSS = async function(boardName) {
     fileInfos: 1,
     createdAt: 1
   }).sort({ createdAt: -1 }).limit(rssPostCount).sort({ createdAt: 1 }).toArray();
-  if (!posts.length <= 0) {
+  if (posts.length <= 0) {
     return;
   }
   posts.forEach((post) => {

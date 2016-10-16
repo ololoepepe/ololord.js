@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.renderArchive = exports.render = exports.enqueueTask = exports.send = undefined;
+exports.renderRSS = exports.renderArchive = exports.render = exports.enqueueTask = exports.send = undefined;
 
 var handleMessage = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(message, workerID) {
@@ -188,16 +188,11 @@ var render = exports.render = function () {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            if (!_cluster2.default.isMaster) {
-              _context4.next = 2;
-              break;
+            if (_cluster2.default.isMaster) {
+              _logger2.default.warn('Rendering requested from master process');
             }
-
-            throw new Error('Rendering requested from master process');
-
-          case 2:
-            _context4.prev = 2;
-            _context4.next = 5;
+            _context4.prev = 1;
+            _context4.next = 4;
             return enqueueTask('render', {
               boardName: boardName,
               threadNumber: threadNumber,
@@ -205,22 +200,22 @@ var render = exports.render = function () {
               action: action
             }, timeout);
 
-          case 5:
-            _context4.next = 10;
+          case 4:
+            _context4.next = 9;
             break;
 
-          case 7:
-            _context4.prev = 7;
-            _context4.t0 = _context4['catch'](2);
+          case 6:
+            _context4.prev = 6;
+            _context4.t0 = _context4['catch'](1);
 
             _logger2.default.error(_context4.t0.stack || _context4.t0);
 
-          case 10:
+          case 9:
           case 'end':
             return _context4.stop();
         }
       }
-    }, _callee4, this, [[2, 7]]);
+    }, _callee4, this, [[1, 6]]);
   }));
 
   return function render(_x10, _x11, _x12, _x13, _x14) {
@@ -234,37 +229,65 @@ var renderArchive = exports.renderArchive = function () {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            if (!_cluster2.default.isMaster) {
-              _context5.next = 2;
-              break;
+            if (_cluster2.default.isMaster) {
+              _logger2.default.warn('Rendering requested from master process');
             }
-
-            throw new Error('Rendering requested from master process');
-
-          case 2:
-            _context5.prev = 2;
-            _context5.next = 5;
+            _context5.prev = 1;
+            _context5.next = 4;
             return enqueueTask('renderArchive', boardName, timeout);
 
-          case 5:
-            _context5.next = 10;
+          case 4:
+            _context5.next = 9;
             break;
 
-          case 7:
-            _context5.prev = 7;
-            _context5.t0 = _context5['catch'](2);
+          case 6:
+            _context5.prev = 6;
+            _context5.t0 = _context5['catch'](1);
 
             _logger2.default.error(_context5.t0.stack || _context5.t0);
 
-          case 10:
+          case 9:
           case 'end':
             return _context5.stop();
         }
       }
-    }, _callee5, this, [[2, 7]]);
+    }, _callee5, this, [[1, 6]]);
   }));
 
   return function renderArchive(_x15, _x16) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var renderRSS = exports.renderRSS = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(timeout) {
+    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            _context6.prev = 0;
+            _context6.next = 3;
+            return enqueueTask('renderRSS', null, timeout);
+
+          case 3:
+            _context6.next = 8;
+            break;
+
+          case 5:
+            _context6.prev = 5;
+            _context6.t0 = _context6['catch'](0);
+
+            _logger2.default.error(_context6.t0.stack || _context6.t0);
+
+          case 8:
+          case 'end':
+            return _context6.stop();
+        }
+      }
+    }, _callee6, this, [[0, 5]]);
+  }));
+
+  return function renderRSS(_x17) {
     return ref.apply(this, arguments);
   };
 }();

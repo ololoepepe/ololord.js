@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.scheduleRenderArchive = exports.scheduleRender = undefined;
+exports.scheduleRenderRSS = exports.scheduleRenderArchive = exports.scheduleRender = undefined;
 
 var performTask = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(type, key, data) {
@@ -459,6 +459,40 @@ var scheduleRenderArchive = exports.scheduleRenderArchive = function () {
   };
 }();
 
+var scheduleRenderRSS = exports.scheduleRenderRSS = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(boardName) {
+    return regeneratorRuntime.wrap(function _callee13$(_context13) {
+      while (1) {
+        switch (_context13.prev = _context13.next) {
+          case 0:
+            _context13.prev = 0;
+            _context13.next = 3;
+            return addTask('renderRSS', boardName);
+
+          case 3:
+            _context13.next = 9;
+            break;
+
+          case 5:
+            _context13.prev = 5;
+            _context13.t0 = _context13['catch'](0);
+
+            _logger2.default.error(_context13.t0.stack || _context13.t0);
+            throw _context13.t0;
+
+          case 9:
+          case 'end':
+            return _context13.stop();
+        }
+      }
+    }, _callee13, this, [[0, 5]]);
+  }));
+
+  return function scheduleRenderRSS(_x19) {
+    return ref.apply(this, arguments);
+  };
+}();
+
 var _cluster = require('cluster');
 
 var _cluster2 = _interopRequireDefault(_cluster);
@@ -481,10 +515,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var scheduledRenderPages = new Map();
-var scheduledRenderThread = new Map();
-var scheduledRenderCatalog = new Map();
-var scheduledRenderArchive = new Map();
-var scheduledMap = new Map([['renderPages', scheduledRenderPages], ['renderThread', scheduledRenderThread], ['renderCatalog', scheduledRenderCatalog], ['renderArchive', scheduledRenderArchive]]);
+var scheduledMap = new Map([['renderPages', new Map()], ['renderThread', new Map()], ['renderCatalog', new Map()], ['renderArchive', new Map()], ['renderRSS', new Map()]]);
 var workerLoads = new Map();
 //# sourceMappingURL=render-scheduler.js.map

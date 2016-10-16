@@ -81,11 +81,11 @@ function onReady() {
 
 function initializeMaster() {
   //NOTE: Overcoming Babel bug
-  _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
+  _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
     var i;
-    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context7.prev = _context7.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
             try {
               console.log(Tools.translate('Spawning renderer workers, please, wait…'));
@@ -280,6 +280,42 @@ function initializeMaster() {
                   return ref.apply(this, arguments);
                 };
               }());
+              _queue2.default.process('renderRSS', function () {
+                var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(job, done) {
+                  return regeneratorRuntime.wrap(function _callee7$(_context7) {
+                    while (1) {
+                      switch (_context7.prev = _context7.next) {
+                        case 0:
+                          _context7.prev = 0;
+
+                          _logger2.default.info(Tools.translate('Task: $[1]', '', 'renderRSS'));
+                          _context7.next = 4;
+                          return RenderScheduler.scheduleRenderRSS();
+
+                        case 4:
+                          done();
+                          _context7.next = 11;
+                          break;
+
+                        case 7:
+                          _context7.prev = 7;
+                          _context7.t0 = _context7['catch'](0);
+
+                          _logger2.default.error(_context7.t0.stack || _context7.t0);
+                          done(_context7.t0);
+
+                        case 11:
+                        case 'end':
+                          return _context7.stop();
+                      }
+                    }
+                  }, _callee7, this, [[0, 7]]);
+                }));
+
+                return function (_x9, _x10) {
+                  return ref.apply(this, arguments);
+                };
+              }());
             } catch (err) {
               _logger2.default.error(err.stack || err);
               process.exit(1);
@@ -287,27 +323,27 @@ function initializeMaster() {
 
           case 1:
           case 'end':
-            return _context7.stop();
+            return _context8.stop();
         }
       }
-    }, _callee7, this);
+    }, _callee8, this);
   }))();
 }
 
 function initializeWorker() {
   //NOTE: Overcoming Babel bug
-  _asyncToGenerator(regeneratorRuntime.mark(function _callee10() {
-    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+  _asyncToGenerator(regeneratorRuntime.mark(function _callee11() {
+    return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
-        switch (_context10.prev = _context10.next) {
+        switch (_context11.prev = _context11.next) {
           case 0:
             console.log(Tools.translate('[$[1]] Initializing renderer…', '', process.pid));
-            _context10.prev = 1;
-            _context10.next = 4;
+            _context11.prev = 1;
+            _context11.next = 4;
             return BoardsModel.initialize();
 
           case 4:
-            _context10.next = 6;
+            _context11.next = 6;
             return Renderer.reloadTemplates();
 
           case 6:
@@ -318,72 +354,72 @@ function initializeWorker() {
             IPC.on('reloadBoards', function () {
               _board2.default.initialize();
             });
-            IPC.on('reloadTemplates', _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
-              return regeneratorRuntime.wrap(function _callee8$(_context8) {
+            IPC.on('reloadTemplates', _asyncToGenerator(regeneratorRuntime.mark(function _callee9() {
+              return regeneratorRuntime.wrap(function _callee9$(_context9) {
                 while (1) {
-                  switch (_context8.prev = _context8.next) {
+                  switch (_context9.prev = _context9.next) {
                     case 0:
-                      _context8.next = 2;
+                      _context9.next = 2;
                       return Renderer.reloadTemplates();
 
                     case 2:
-                      return _context8.abrupt('return', _context8.sent);
+                      return _context9.abrupt('return', _context9.sent);
 
                     case 3:
                     case 'end':
-                      return _context8.stop();
+                      return _context9.stop();
                   }
                 }
-              }, _callee8, this);
+              }, _callee9, this);
             })));
             IPC.on('render', function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(data) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(data) {
                 var f;
-                return regeneratorRuntime.wrap(function _callee9$(_context9) {
+                return regeneratorRuntime.wrap(function _callee10$(_context10) {
                   while (1) {
-                    switch (_context9.prev = _context9.next) {
+                    switch (_context10.prev = _context10.next) {
                       case 0:
                         f = _board4.default['' + data.type];
 
                         if (!(typeof f !== 'function')) {
-                          _context9.next = 3;
+                          _context10.next = 3;
                           break;
                         }
 
                         throw new Error(Tools.translate('Invalid render function'));
 
                       case 3:
-                        _context9.next = 5;
+                        _context10.next = 5;
                         return f.call(_board4.default, data.key, data.data);
 
                       case 5:
-                        return _context9.abrupt('return', _context9.sent);
+                        return _context10.abrupt('return', _context10.sent);
 
                       case 6:
                       case 'end':
-                        return _context9.stop();
+                        return _context10.stop();
                     }
                   }
-                }, _callee9, this);
+                }, _callee10, this);
               }));
 
-              return function (_x9) {
+              return function (_x11) {
                 return ref.apply(this, arguments);
               };
             }());
             IPC.send('ready').catch(function (err) {
               _logger2.default.error(err);
             });
-            _context10.next = 19;
+            _context11.next = 19;
             break;
 
           case 14:
-            _context10.prev = 14;
-            _context10.t0 = _context10['catch'](1);
+            _context11.prev = 14;
+            _context11.t0 = _context11['catch'](1);
 
-            console.error(_context10.t0);
+            console.error(_context11.t0);
             try {
-              _logger2.default.error(_context10.t0.stack || _context10.t0);
+              _logger2.default.error(_context11.t0.stack || _context11.t0);
             } catch (err) {
               console.error(err);
             }
@@ -391,10 +427,10 @@ function initializeWorker() {
 
           case 19:
           case 'end':
-            return _context10.stop();
+            return _context11.stop();
         }
       }
-    }, _callee10, this, [[1, 14]]);
+    }, _callee11, this, [[1, 14]]);
   }))();
 }
 

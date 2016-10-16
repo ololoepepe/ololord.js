@@ -185,7 +185,7 @@ export async function getLastPostNumbers(boardNames) {
   let query = {
     _id: { $in: boardNames }
   };
-  let result = await PostCounter.find(query, { lastPostNumber: 1 });
+  let result = await PostCounter.find(query, { lastPostNumber: 1 }).toArray();
   return result.map(({ lastPostNumber }) => lastPostNumber);
 }
 

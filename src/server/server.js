@@ -12,7 +12,6 @@ import NodeCaptcha from './captchas/node-captcha';
 import NodeCaptchaNoscript from './captchas/node-captcha-noscript';
 import commands from './commands';
 import controllers from './controllers';
-import BoardController from './controllers/board';
 import geolocation from './core/geolocation';
 import * as Renderer from './core/renderer';
 import WebSocketServer from './core/websocket-server';
@@ -42,37 +41,40 @@ function generateFileName() {
 }
 
 function onReady() {
-  try {
-    if (!onReady.ready) {
-      onReady.ready = 0;
-    }
-    ++onReady.ready;
-    if (config('system.workerCount') === onReady.ready) {
-      UsersModel.initializeUserBansMonitoring(); //NOTE: No "await" here, this is how it is meant to be.
-      if (config('server.statistics.enabled')) {
-        let interval = config('server.statistics.ttl') * Tools.MINUTE;
-        setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), interval);
-      }
-      if (config('server.rss.enabled')) {
-        setInterval(async function() {
-          try {
-            await BoardController.renderRSS();
-          } catch (err) {
-            Logger.error(err.stack || err);
-          }
-        }, config('server.rss.ttl') * Tools.MINUTE);
-      }
-      commands();
-    }
-  } catch (err) {
-    console.error(err);
+  //NOTE: Overcoming Babel bug
+  (async function() {
     try {
-      Logger.error(err.stack || err);
+      if (!onReady.ready) {
+        onReady.ready = 0;
+      }
+      ++onReady.ready;
+      if (config('system.workerCount') === onReady.ready) {
+        await UsersModel.initializeUserBansMonitoring();
+        if (config('server.statistics.enabled')) {
+          let interval = config('server.statistics.ttl') * Tools.MINUTE;
+          setInterval(StatisticsModel.generateStatistics.bind(StatisticsModel), interval);
+        }
+        if (config('server.rss.enabled')) {
+          setInterval(async function() {
+            try {
+              await IPC.renderRSS();
+            } catch (err) {
+              Logger.error(err.stack || err);
+            }
+          }, config('server.rss.ttl') * Tools.MINUTE);
+        }
+        commands();
+      }
     } catch (err) {
       console.error(err);
+      try {
+        Logger.error(err.stack || err);
+      } catch (err) {
+        console.error(err);
+      }
+      process.exit(1);
     }
-    process.exit(1);
-  }
+  })();
 }
 
 function initializeMaster() {

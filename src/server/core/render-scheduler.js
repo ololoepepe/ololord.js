@@ -4,15 +4,12 @@ import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as ThreadsModel from '../models/threads';
 
-let scheduledRenderPages = new Map();
-let scheduledRenderThread = new Map();
-let scheduledRenderCatalog = new Map();
-let scheduledRenderArchive = new Map();
 let scheduledMap = new Map([
-  ['renderPages', scheduledRenderPages],
-  ['renderThread', scheduledRenderThread],
-  ['renderCatalog', scheduledRenderCatalog],
-  ['renderArchive', scheduledRenderArchive]
+  ['renderPages', new Map()],
+  ['renderThread', new Map()],
+  ['renderCatalog', new Map()],
+  ['renderArchive', new Map()],
+  ['renderRSS', new Map()]
 ]);
 let workerLoads = new Map();
 
@@ -148,6 +145,15 @@ export async function scheduleRender(data) {
 export async function scheduleRenderArchive(boardName) {
   try {
     await addTask('renderArchive', boardName);
+  } catch (err) {
+    Logger.error(err.stack || err);
+    throw err;
+  }
+}
+
+export async function scheduleRenderRSS(boardName) {
+  try {
+    await addTask('renderRSS', boardName);
   } catch (err) {
     Logger.error(err.stack || err);
     throw err;

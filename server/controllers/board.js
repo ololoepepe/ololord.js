@@ -1035,7 +1035,7 @@ router.renderRSS = function () {
           case 13:
             posts = _context19.sent;
 
-            if (!(!posts.length <= 0)) {
+            if (!(posts.length <= 0)) {
               _context19.next = 16;
               break;
             }

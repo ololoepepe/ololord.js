@@ -95,6 +95,16 @@ function initializeMaster() {
           done(err);
         }
       });
+      Queue.process('renderRSS', async function(job, done) {
+        try {
+          Logger.info(Tools.translate('Task: $[1]', '', 'renderRSS'));
+          await RenderScheduler.scheduleRenderRSS();
+          done();
+        } catch (err) {
+          Logger.error(err.stack || err);
+          done(err);
+        }
+      });
     } catch (err) {
       Logger.error(err.stack || err);
       process.exit(1);
