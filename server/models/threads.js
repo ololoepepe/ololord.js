@@ -251,8 +251,8 @@ var getThreads = exports.getThreads = function () {
 
             if (sort) {
               cursor = cursor.sort({
-                fixed: -1,
-                updatedAt: -1
+                fixed: sort,
+                updatedAt: sort
               });
             }
             if (offset) {
@@ -579,7 +579,7 @@ var pushOutOldThread = function () {
             Thread = _context12.sent;
             _context12.next = 17;
             return getThreads(boardName, {
-              sort: true,
+              sort: 1,
               limit: 1
             });
 
@@ -596,7 +596,7 @@ var pushOutOldThread = function () {
             _context12.next = 23;
             return getThreads(boardName, {
               archived: true,
-              sort: true,
+              sort: 1,
               limit: 1
             });
 

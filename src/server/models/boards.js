@@ -67,7 +67,7 @@ export async function getPage(boardName, pageNumber) {
     throw new Error(Tools.translate('Invalid page number'));
   }
   let threads = await ThreadsModel.getThreads(boardName, {
-    sort: true,
+    sort: -1,
     limit: board.threadsPerPage,
     offset: pageNumber * board.threadsPerPage
   });

@@ -114,8 +114,8 @@ export async function getThreads(boardName, { archived, limit, offset, sort } = 
   }, { _id: 0 });
   if (sort) {
     cursor = cursor.sort({
-      fixed: -1,
-      updatedAt: -1
+      fixed: sort,
+      updatedAt: sort
     });
   }
   if (offset) {
@@ -214,13 +214,13 @@ async function pushOutOldThread(boardName) {
   let removeLastArchivedThread = (board.archiveLimit > 0) && (archivedThreadCount >= board.archiveLimit);
   let Thread = await client.collection('thread');
   let [lastThread] = await getThreads(boardName, {
-    sort: true,
+    sort: 1,
     limit: 1
   });
   if (removeLastArchivedThread) {
     let [lastArchivedThread] = await getThreads(boardName, {
       archived: true,
-      sort: true,
+      sort: 1,
       limit: 1
     });
     if (lastArchivedThread) {

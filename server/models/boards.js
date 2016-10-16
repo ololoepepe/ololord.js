@@ -94,7 +94,7 @@ var getPage = exports.getPage = function () {
           case 7:
             _context3.next = 9;
             return ThreadsModel.getThreads(boardName, {
-              sort: true,
+              sort: -1,
               limit: board.threadsPerPage,
               offset: pageNumber * board.threadsPerPage
             });
