@@ -89,7 +89,7 @@ export async function addChatMessage({ user, boardName, postNumber, chatNumber, 
     number: postNumber
   }, {
     'user.ip': 1,
-    'user.hash': 1
+    'user.hashpass': 1
   });
   if (!post) {
     throw new Error(Tools.translate('No such post'));
