@@ -1,17 +1,10 @@
 import _ from 'underscore';
-import Crypto from 'crypto';
 
-import * as PostsModel from './posts';
 import Board from '../boards/board';
-import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
 import mongodbClient from '../storage/mongodb-client-factory';
 
 let client = mongodbClient();
-
-function createUserHash(user) {
-  return Tools.crypto('sha256', user.hashpass || user.ip);
-}
 
 function createMessagesQuery(user) {
   let query = [{ 'sender.ip': user.ip }, { 'receiver.ip': user.ip }];
