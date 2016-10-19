@@ -1,4 +1,5 @@
 import ProcessingContext from './processing-context';
+import * as Renderer from '../core/renderer';
 
 const RX_SYMBOL = /(\^H)+/gi;
 const RX_WORD = /(\^W)+/gi;
@@ -41,7 +42,7 @@ function processStrikedOutShittyWord(info) {
 
 function convertTooltipShitty(_1, _2, matchs, _3, options) {
   options.type = ProcessingContext.NO_SKIP;
-  let tooltip = matchs[2];
+  let tooltip = Renderer.toHTML(matchs[2]);
   options.op = `<span class='tooltip js-with-tooltip' title='${tooltip}'>`;
   options.cl = '</span>';
   return matchs[1];
