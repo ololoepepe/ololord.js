@@ -1,4 +1,5 @@
 import ProcessingContext from './processing-context';
+import * as Renderer from '../core/renderer';
 import * as Tools from '../helpers/tools';
 
 function convertHtml(_1, text, _2, _3, options) {
@@ -21,6 +22,7 @@ function convertCSpoiler(_1, text, matchs, _2, options) {
   if (!title) {
     title = Tools.translate('Spoiler');
   }
+  title = Renderer.toHTML(title);
   options.type = ProcessingContext.NO_SKIP;
   options.op = "<span class='collapsible-spoiler'><span class='collapsible-spoiler-title' "
     + `title='${Tools.translate('Spoiler')}' onclick='lord.expandCollapseSpoiler(this);'>${title}`
@@ -30,7 +32,7 @@ function convertCSpoiler(_1, text, matchs, _2, options) {
 }
 
 function convertTooltip(_1, text, matchs, _2, options) {
-  let tooltip = matchs[1];
+  let tooltip = Renderer.toHTML(matchs[1]);
   options.type = ProcessingContext.NO_SKIP;
   options.op = `<span class='tooltip js-with-tooltip' title='${tooltip}'>`;
   options.cl = '</span>';
