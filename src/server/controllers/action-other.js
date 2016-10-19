@@ -38,22 +38,20 @@ router.post('/action/sendChatMessage', async function(req, res, next) {
       chatNumber: chatNumber,
       text: text
     });
-    let { message, senderHash, receiverHash, receiver } = result;
-    if (senderHash !== receiverHash) {
-      message.type = 'in';
-      let ip = receiver.hashpass ? null : receiver.ip;
-      IPC.send('sendChatMessage', {
-        type: 'newChatMessage',
-        message: {
-          message: message,
-          boardName: boardName,
-          postNumber: postNumber,
-          chatNumber: result.chatNumber
-        },
-        ips: ip,
-        hashpasses: receiver.hashpass
-      });
-    }
+    let { message, receiver } = result;
+    message.type = 'in';
+    let ip = receiver.hashpass ? null : receiver.ip;
+    IPC.send('sendChatMessage', {
+      type: 'newChatMessage',
+      message: {
+        message: message,
+        boardName: boardName,
+        postNumber: postNumber,
+        chatNumber: result.chatNumber
+      },
+      ips: ip,
+      hashpasses: receiver.hashpass
+    });
     res.json({});
   } catch (err) {
     next(err);

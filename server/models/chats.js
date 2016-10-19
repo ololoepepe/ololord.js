@@ -73,7 +73,7 @@ var getChatNumber = function () {
 
 var getChatMessages = exports.getChatMessages = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(user, lastRequestDate) {
-    var ChatMessage, hash, date, messages, chats;
+    var ChatMessage, date, messages, chats;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -83,35 +83,48 @@ var getChatMessages = exports.getChatMessages = function () {
 
           case 2:
             ChatMessage = _context2.sent;
-            hash = createUserHash(user);
             date = Tools.now();
-            _context2.next = 7;
+            _context2.next = 6;
             return ChatMessage.find({
-              $or: [{
-                senderHash: hash,
-                date: { $gt: lastRequestDate }
+              $and: [{
+                $or: createMessagesQuery(user)
               }, {
-                receiverHash: hash,
                 date: { $gt: lastRequestDate }
               }]
             }, {
-              _id: 0,
-              receiverHash: 0
+              _id: 0
             }).sort({ date: 1 }).toArray();
 
-          case 7:
+          case 6:
             messages = _context2.sent;
             chats = messages.reduce(function (acc, message) {
-              message.type = hash === message.senderHash ? 'out' : 'in';
               var chat = acc[message.key];
               if (!chat) {
                 chat = [];
                 acc[message.key] = chat;
               }
               delete message.key;
-              delete message.senderHash;
+              var list = [{
+                messageUser: message.sender,
+                type: 'out'
+              }, {
+                messageUser: message.receiver,
+                type: 'in'
+              }];
+              delete message.sender;
+              delete message.receiver;
               message.date = message.date.toISOString();
-              chat.push(message);
+              list.filter(function (_ref) {
+                var messageUser = _ref.messageUser;
+                return usersEqual(user, messageUser);
+              }).forEach(function (_ref2) {
+                var messageUser = _ref2.messageUser;
+                var type = _ref2.type;
+
+                var msg = _underscore2.default.clone(message);
+                msg.type = type;
+                chat.push(msg);
+              });
               return acc;
             }, {});
             return _context2.abrupt('return', {
@@ -119,7 +132,7 @@ var getChatMessages = exports.getChatMessages = function () {
               chats: chats
             });
 
-          case 10:
+          case 9:
           case 'end':
             return _context2.stop();
         }
@@ -134,14 +147,14 @@ var getChatMessages = exports.getChatMessages = function () {
 
 var addChatMessage = exports.addChatMessage = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
-    var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    var _ref3 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-    var user = _ref.user;
-    var boardName = _ref.boardName;
-    var postNumber = _ref.postNumber;
-    var chatNumber = _ref.chatNumber;
-    var text = _ref.text;
-    var Post, post, receiver, receiverHash, senderHash, key, ChatMessage, message, date;
+    var user = _ref3.user;
+    var boardName = _ref3.boardName;
+    var postNumber = _ref3.postNumber;
+    var chatNumber = _ref3.chatNumber;
+    var text = _ref3.text;
+    var Post, post, key, ChatMessage, message, isSender, isReceiver, messageSender, messageReceiver, receiver, date;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -183,7 +196,7 @@ var addChatMessage = exports.addChatMessage = function () {
               number: postNumber
             }, {
               'user.ip': 1,
-              'user.hash': 1
+              'user.hashpass': 1
             });
 
           case 12:
@@ -197,64 +210,63 @@ var addChatMessage = exports.addChatMessage = function () {
             throw new Error(Tools.translate('No such post'));
 
           case 15:
-            receiver = post.user;
-            receiverHash = createUserHash(receiver);
-            senderHash = createUserHash(user);
-
             chatNumber = Tools.option(chatNumber, 'number', 0, { test: function test(n) {
                 return n > 0;
               } });
-            _context3.next = 21;
+            _context3.next = 18;
             return getChatNumber(boardName, postNumber, chatNumber);
 
-          case 21:
+          case 18:
             chatNumber = _context3.sent;
             key = boardName + ':' + postNumber + ':' + chatNumber;
-            _context3.next = 25;
+            _context3.next = 22;
             return client.collection('chatMessage');
 
-          case 25:
+          case 22:
             ChatMessage = _context3.sent;
-            _context3.next = 28;
+            _context3.next = 25;
             return ChatMessage.findOne({ key: key }, {
-              senderHash: 1,
-              receiverHash: 1
+              sender: 1,
+              receiver: 1
             });
 
-          case 28:
+          case 25:
             message = _context3.sent;
+            isSender = !message || usersEqual(message.sender, user);
+            isReceiver = message && usersEqual(message.receiver, user);
 
-            if (!(message && message.senderHash !== senderHash && message.receiverHash !== receiverHash)) {
-              _context3.next = 31;
+            if (!(!isSender && !isReceiver)) {
+              _context3.next = 30;
               break;
             }
 
             throw new Error(Tools.translate('Somebody is chatting here already'));
 
-          case 31:
+          case 30:
+            messageSender = message ? message.sender : post.user;
+            messageReceiver = message ? message.receiver : post.user;
+            receiver = selectUser(user, message ? message.receiver : post.user, isReceiver);
             date = Tools.now();
-            _context3.next = 34;
+            _context3.next = 36;
             return ChatMessage.insertOne({
               key: key,
               text: text,
               date: date,
-              senderHash: senderHash,
-              receiverHash: receiverHash
+              sender: selectUser(user, message ? message.sender : post.user, isSender),
+              receiver: receiver
             });
 
-          case 34:
+          case 36:
             return _context3.abrupt('return', {
               message: {
                 text: text,
                 date: date.toISOString()
               },
               chatNumber: chatNumber,
-              senderHash: senderHash,
-              receiverHash: receiverHash,
               receiver: receiver
             });
 
-          case 35:
+          case 37:
           case 'end':
             return _context3.stop();
         }
@@ -269,13 +281,13 @@ var addChatMessage = exports.addChatMessage = function () {
 
 var deleteChatMessages = exports.deleteChatMessages = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
-    var _ref2 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    var _ref4 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-    var user = _ref2.user;
-    var boardName = _ref2.boardName;
-    var postNumber = _ref2.postNumber;
-    var chatNumber = _ref2.chatNumber;
-    var ChatMessage, key, hash;
+    var user = _ref4.user;
+    var boardName = _ref4.boardName;
+    var postNumber = _ref4.postNumber;
+    var chatNumber = _ref4.chatNumber;
+    var ChatMessage;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
@@ -285,20 +297,12 @@ var deleteChatMessages = exports.deleteChatMessages = function () {
 
           case 2:
             ChatMessage = _context4.sent;
-            key = boardName + ':' + postNumber + ':' + chatNumber;
-            hash = createUserHash(user);
-            _context4.next = 7;
+            _context4.next = 5;
             return ChatMessage.deleteMany({
-              $or: [{
-                senderHash: hash,
-                key: key
-              }, {
-                receiverHash: hash,
-                key: key
-              }]
+              $and: [createMessagesQuery(user), { key: boardName + ':' + postNumber + ':' + chatNumber }]
             });
 
-          case 7:
+          case 5:
           case 'end':
             return _context4.stop();
         }
@@ -349,5 +353,33 @@ var client = (0, _mongodbClientFactory2.default)();
 
 function createUserHash(user) {
   return Tools.crypto('sha256', user.hashpass || user.ip);
+}
+
+function createMessagesQuery(user) {
+  var query = [{ 'sender.ip': user.ip }, { 'receiver.ip': user.ip }];
+  if (user.hashpass) {
+    query.push({ 'sender.hashpass': user.hashpass });
+    query.push({ 'receiver.hashpass': user.hashpass });
+  }
+  return query;
+}
+
+function usersEqual(user1, user2) {
+  return user1.ip === user2.ip || user1.hashpass && user1.hashpass === user2.hashpass;
+}
+
+function messageType(message, user) {
+  if (usersEqual(user, message.sender)) {
+    return 'out';
+  } else {
+    return 'in';
+  }
+}
+
+function selectUser(user1, user2, first) {
+  return {
+    ip: first ? user1.ip : user2.ip,
+    hashpass: first ? user1.hashpass : user2.hashpass
+  };
 }
 //# sourceMappingURL=chats.js.map

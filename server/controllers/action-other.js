@@ -54,7 +54,7 @@ var router = _express2.default.Router();
 
 router.post('/action/sendChatMessage', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(req, res, next) {
-    var _ref, _ref$fields, _boardName, postNumber, chatNumber, text, result, message, senderHash, receiverHash, receiver, ip;
+    var _ref, _ref$fields, _boardName, postNumber, chatNumber, text, result, message, receiver, ip;
 
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -122,26 +122,22 @@ router.post('/action/sendChatMessage', function () {
           case 23:
             result = _context.sent;
             message = result.message;
-            senderHash = result.senderHash;
-            receiverHash = result.receiverHash;
             receiver = result.receiver;
 
-            if (senderHash !== receiverHash) {
-              message.type = 'in';
-              ip = receiver.hashpass ? null : receiver.ip;
+            message.type = 'in';
+            ip = receiver.hashpass ? null : receiver.ip;
 
-              IPC.send('sendChatMessage', {
-                type: 'newChatMessage',
-                message: {
-                  message: message,
-                  boardName: _boardName,
-                  postNumber: postNumber,
-                  chatNumber: result.chatNumber
-                },
-                ips: ip,
-                hashpasses: receiver.hashpass
-              });
-            }
+            IPC.send('sendChatMessage', {
+              type: 'newChatMessage',
+              message: {
+                message: message,
+                boardName: _boardName,
+                postNumber: postNumber,
+                chatNumber: result.chatNumber
+              },
+              ips: ip,
+              hashpasses: receiver.hashpass
+            });
             res.json({});
             _context.next = 35;
             break;

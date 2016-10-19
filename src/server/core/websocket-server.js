@@ -234,28 +234,26 @@ export default class WebSocketServer {
   _initSendChatMessage() {
     this.on('sendChatMessage', async function(msg, conn) {
       let data = msg.data || {};
-      let { message, chatNumber, senderHash, receiverHash, receiver } = await ChatsModel.addChatMessage({
+      let { message, chatNumber, receiver } = await ChatsModel.addChatMessage({
         user: conn,
         boardName: data.boardName,
         postNumber: data.postNumber,
         chatNumber: data.chatNumber,
         text: data.text
       });
-      if (senderHash !== receiverHash) {
-        message.type = 'in';
-        let ip = receiver.hashpass ? null : receiver.ip;
-        IPC.send('sendChatMessage', {
-          type: 'newChatMessage',
-          message: {
-            message: message,
-            boardName: data.boardName,
-            postNumber: data.postNumber,
-            chatNumber: chatNumber
-          },
-          ips: ip,
-          hashpasses: receiver.hashpass
-        });
-      }
+      message.type = 'in';
+      let ip = receiver.hashpass ? null : receiver.ip;
+      IPC.send('sendChatMessage', {
+        type: 'newChatMessage',
+        message: {
+          message: message,
+          boardName: data.boardName,
+          postNumber: data.postNumber,
+          chatNumber: chatNumber
+        },
+        ips: ip,
+        hashpasses: receiver.hashpass
+      });
       message.type = 'out';
       return {
         message: message,

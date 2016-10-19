@@ -13,6 +13,34 @@ function createUserHash(user) {
   return Tools.crypto('sha256', user.hashpass || user.ip);
 }
 
+function createMessagesQuery(user) {
+  let query = [{ 'sender.ip': user.ip }, { 'receiver.ip': user.ip }];
+  if (user.hashpass) {
+    query.push({ 'sender.hashpass': user.hashpass });
+    query.push({ 'receiver.hashpass': user.hashpass });
+  }
+  return query;
+}
+
+function usersEqual(user1, user2) {
+  return ((user1.ip === user2.ip) || (user1.hashpass && (user1.hashpass === user2.hashpass)));
+}
+
+function messageType(message, user) {
+  if (usersEqual(user, message.sender)) {
+    return 'out';
+  } else {
+    return 'in';
+  }
+}
+
+function selectUser(user1, user2, first) {
+  return {
+    ip: (first ? user1.ip : user2.ip),
+    hashpass: (first ? user1.hashpass : user2.hashpass)
+  };
+}
+
 async function getChatNumber(boardName, postNumber, chatNumber) {
   let ChatNumberCounter = await client.collection('chatNumberCounter');
   let key = `${boardName}:${postNumber}`;
@@ -39,31 +67,38 @@ async function getChatNumber(boardName, postNumber, chatNumber) {
 
 export async function getChatMessages(user, lastRequestDate) {
   let ChatMessage = await client.collection('chatMessage');
-  let hash = createUserHash(user);
   let date = Tools.now();
   let messages = await ChatMessage.find({
-    $or: [{
-      senderHash: hash,
-      date: { $gt: lastRequestDate }
+    $and: [{
+      $or: createMessagesQuery(user)
     }, {
-      receiverHash: hash,
       date: { $gt: lastRequestDate }
     }]
   }, {
-    _id: 0,
-    receiverHash: 0
+    _id: 0
   }).sort({ date: 1 }).toArray();
   let chats = messages.reduce((acc, message) => {
-    message.type = (hash === message.senderHash) ? 'out' : 'in';
     let chat = acc[message.key];
     if (!chat) {
       chat = [];
       acc[message.key] = chat;
     }
     delete message.key;
-    delete message.senderHash;
+    let list = [{
+      messageUser: message.sender,
+      type: 'out'
+    }, {
+      messageUser: message.receiver,
+      type: 'in'
+    }];
+    delete message.sender;
+    delete message.receiver;
     message.date = message.date.toISOString();
-    chat.push(message);
+    list.filter(({ messageUser }) => usersEqual(user, messageUser)).forEach(({ messageUser, type }) => {
+      let msg = _.clone(message);
+      msg.type = type;
+      chat.push(msg);
+    });
     return acc;
   }, {});
   return {
@@ -94,27 +129,29 @@ export async function addChatMessage({ user, boardName, postNumber, chatNumber, 
   if (!post) {
     throw new Error(Tools.translate('No such post'));
   }
-  let receiver = post.user;
-  let receiverHash = createUserHash(receiver);
-  let senderHash = createUserHash(user);
   chatNumber = Tools.option(chatNumber, 'number', 0, { test: (n) => { return n > 0; } });
   chatNumber = await getChatNumber(boardName, postNumber, chatNumber);
   let key = `${boardName}:${postNumber}:${chatNumber}`;
   let ChatMessage = await client.collection('chatMessage');
   let message = await ChatMessage.findOne({ key: key }, {
-    senderHash: 1,
-    receiverHash: 1
+    sender: 1,
+    receiver: 1
   });
-  if (message && (message.senderHash !== senderHash && message.receiverHash !== receiverHash)) {
+  let isSender = !message || usersEqual(message.sender, user);
+  let isReceiver = message && usersEqual(message.receiver, user);
+  if (!isSender && !isReceiver) {
     throw new Error(Tools.translate('Somebody is chatting here already'));
   }
+  let messageSender = message ? message.sender : post.user;
+  let messageReceiver = message ? message.receiver : post.user;
+  let receiver = selectUser(user, message ? message.receiver : post.user, isReceiver);
   let date = Tools.now();
   await ChatMessage.insertOne({
     key: key,
     text: text,
     date: date,
-    senderHash: senderHash,
-    receiverHash: receiverHash
+    sender: selectUser(user, message ? message.sender : post.user, isSender),
+    receiver: receiver
   });
   return {
     message: {
@@ -122,23 +159,13 @@ export async function addChatMessage({ user, boardName, postNumber, chatNumber, 
       date: date.toISOString()
     },
     chatNumber: chatNumber,
-    senderHash: senderHash,
-    receiverHash: receiverHash,
     receiver: receiver
   };
 }
 
 export async function deleteChatMessages({ user, boardName, postNumber, chatNumber } = {}) {
   let ChatMessage = await client.collection('chatMessage');
-  let key = `${boardName}:${postNumber}:${chatNumber}`;
-  let hash = createUserHash(user);
   await ChatMessage.deleteMany({
-    $or: [{
-      senderHash: hash,
-      key: key
-    }, {
-      receiverHash: hash,
-      key: key
-    }]
+    $and: [createMessagesQuery(user), { key: `${boardName}:${postNumber}:${chatNumber}` }]
   });
 }

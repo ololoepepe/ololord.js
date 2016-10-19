@@ -8,6 +8,12 @@ var _processingContext = require('./processing-context');
 
 var _processingContext2 = _interopRequireDefault(_processingContext);
 
+var _renderer = require('../core/renderer');
+
+var Renderer = _interopRequireWildcard(_renderer);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var RX_SYMBOL = /(\^H)+/gi;
@@ -51,7 +57,7 @@ function processStrikedOutShittyWord(info) {
 
 function convertTooltipShitty(_1, _2, matchs, _3, options) {
   options.type = _processingContext2.default.NO_SKIP;
-  var tooltip = matchs[2];
+  var tooltip = Renderer.toHTML(matchs[2]);
   options.op = '<span class=\'tooltip js-with-tooltip\' title=\'' + tooltip + '\'>';
   options.cl = '</span>';
   return matchs[1];

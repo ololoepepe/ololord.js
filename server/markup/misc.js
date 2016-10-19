@@ -8,6 +8,10 @@ var _processingContext = require('./processing-context');
 
 var _processingContext2 = _interopRequireDefault(_processingContext);
 
+var _renderer = require('../core/renderer');
+
+var Renderer = _interopRequireWildcard(_renderer);
+
 var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
@@ -36,6 +40,7 @@ function convertCSpoiler(_1, text, matchs, _2, options) {
   if (!title) {
     title = Tools.translate('Spoiler');
   }
+  title = Renderer.toHTML(title);
   options.type = _processingContext2.default.NO_SKIP;
   options.op = "<span class='collapsible-spoiler'><span class='collapsible-spoiler-title' " + ('title=\'' + Tools.translate('Spoiler') + '\' onclick=\'lord.expandCollapseSpoiler(this);\'>' + title) + "</span><span class='collapsible-spoiler-body' style='display: none;'>";
   options.cl = '</span></span>';
@@ -43,7 +48,7 @@ function convertCSpoiler(_1, text, matchs, _2, options) {
 }
 
 function convertTooltip(_1, text, matchs, _2, options) {
-  var tooltip = matchs[1];
+  var tooltip = Renderer.toHTML(matchs[1]);
   options.type = _processingContext2.default.NO_SKIP;
   options.op = '<span class=\'tooltip js-with-tooltip\' title=\'' + tooltip + '\'>';
   options.cl = '</span>';
