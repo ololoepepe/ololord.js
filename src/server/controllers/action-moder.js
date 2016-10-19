@@ -16,6 +16,10 @@ let router = express.Router();
 const MIN_TIME_OFFSET = -720;
 const MAX_TIME_OFFSET = 840;
 const BAN_EXPIRES_FORMAT = 'YYYY/MM/DD HH:mm ZZ';
+const MIN_SUBNET_IP_V4 = 22;
+const MAX_SUBNET_IP_V4 = 32;
+const MIN_SUBNET_IP_V6 = 64;
+const MAX_SUBNET_IP_V6 = 128;
 
 function getBans(fields) {
   let { timeOffset } = fields;
@@ -57,9 +61,18 @@ router.post('/action/banUser', async function(req, res, next) {
     let { fields } = await Files.parseForm(req);
     let { userIp, subnet } = fields;
     userIp = Tools.correctAddress(userIp);
-    subnet = Tools.subnet(userIp, subnet);
     if (!userIp) {
       throw new Error(Tools.translate('Invalid IP address'));
+    }
+    subnet = Tools.subnet(userIp, subnet);
+    if (subnet) {
+      let isIPv4 = /^\:\:[0-9a-f]{1,4}\:[0-9a-f]{1,4}$/.test(userIp);
+      if ((isIPv4 && (subnet.subnet < MIN_SUBNET_IP_V4)) || (!isIPv4 && (subnet.subnet < MIN_SUBNET_IP_V6))) {
+        let r4 = `${MIN_SUBNET_IP_V4}-${MAX_SUBNET_IP_V4}`;
+        let r6 = `${MIN_SUBNET_IP_V6}-${MAX_SUBNET_IP_V6}`;
+        let t = Tools.translate('Subnet is too large. $[1] for IPv4 and $[2] for IPv6 are allowed', '', r4, r6);
+        throw new Error(t);
+      }
     }
     if (userIp === req.ip) {
       throw new Error(Tools.translate('Not enough rights'));

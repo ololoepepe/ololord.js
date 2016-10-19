@@ -3289,5 +3289,15 @@
         "_default": {
             "value": "[$[1]] Рендерер инициализирован"
         }
+    },
+    "Subnet is too large. $[1] for IPv4 and $[2] for IPv6 are allowed": {
+        "_default": {
+            "value": "Подсеть слишком большая. Разрешены $[1] для IPv4 и $[2] для IPv6"
+        }
+    },
+    "[$[1]] Listening on port $[2]…": {
+        "_default": {
+            "value": "[$[1]] Слушает порт $[2]…"
+        }
     }
 }

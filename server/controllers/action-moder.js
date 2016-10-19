@@ -59,6 +59,10 @@ var router = _express2.default.Router();
 var MIN_TIME_OFFSET = -720;
 var MAX_TIME_OFFSET = 840;
 var BAN_EXPIRES_FORMAT = 'YYYY/MM/DD HH:mm ZZ';
+var MIN_SUBNET_IP_V4 = 22;
+var MAX_SUBNET_IP_V4 = 32;
+var MIN_SUBNET_IP_V6 = 64;
+var MAX_SUBNET_IP_V6 = 128;
 
 function getBans(fields) {
   var timeOffset = fields.timeOffset;
@@ -106,7 +110,7 @@ router.post('/action/banUser', function () {
           case 0:
             _context2.prev = 0;
             return _context2.delegateYield(regeneratorRuntime.mark(function _callee() {
-              var _ref, fields, userIp, subnet, bans, banLevels, bannedUser, oldBans, date, modifiedBanBoards, newBans, levels;
+              var _ref, fields, userIp, subnet, isIPv4, r4, r6, t, bans, banLevels, bannedUser, oldBans, date, modifiedBanBoards, newBans, levels;
 
               return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
@@ -130,24 +134,43 @@ router.post('/action/banUser', function () {
                       subnet = fields.subnet;
 
                       userIp = Tools.correctAddress(userIp);
-                      subnet = Tools.subnet(userIp, subnet);
 
                       if (userIp) {
-                        _context.next = 12;
+                        _context.next = 11;
                         break;
                       }
 
                       throw new Error(Tools.translate('Invalid IP address'));
 
-                    case 12:
+                    case 11:
+                      subnet = Tools.subnet(userIp, subnet);
+
+                      if (!subnet) {
+                        _context.next = 19;
+                        break;
+                      }
+
+                      isIPv4 = /^\:\:[0-9a-f]{1,4}\:[0-9a-f]{1,4}$/.test(userIp);
+
+                      if (!(isIPv4 && subnet.subnet < MIN_SUBNET_IP_V4 || !isIPv4 && subnet.subnet < MIN_SUBNET_IP_V6)) {
+                        _context.next = 19;
+                        break;
+                      }
+
+                      r4 = MIN_SUBNET_IP_V4 + '-' + MAX_SUBNET_IP_V4;
+                      r6 = MIN_SUBNET_IP_V6 + '-' + MAX_SUBNET_IP_V6;
+                      t = Tools.translate('Subnet is too large. $[1] for IPv4 and $[2] for IPv6 are allowed', '', r4, r6);
+                      throw new Error(t);
+
+                    case 19:
                       if (!(userIp === req.ip)) {
-                        _context.next = 14;
+                        _context.next = 21;
                         break;
                       }
 
                       throw new Error(Tools.translate('Not enough rights'));
 
-                    case 14:
+                    case 21:
                       bans = getBans(fields);
                       banLevels = Tools.BAN_LEVELS.slice(1);
 
@@ -159,10 +182,10 @@ router.post('/action/banUser', function () {
                           throw new Error(Tools.translate('Invalid ban level: $[1]', '', ban.level));
                         }
                       });
-                      _context.next = 19;
+                      _context.next = 26;
                       return UsersModel.getBannedUser(userIp);
 
-                    case 19:
+                    case 26:
                       bannedUser = _context.sent;
                       oldBans = bannedUser ? bannedUser.bans : {};
                       date = Tools.now();
@@ -182,10 +205,10 @@ router.post('/action/banUser', function () {
                         }
                         return acc;
                       }, {});
-                      _context.next = 26;
+                      _context.next = 33;
                       return UsersModel.getRegisteredUserLevelsByIp(userIp, subnet);
 
-                    case 26:
+                    case 33:
                       levels = _context.sent;
 
                       modifiedBanBoards.forEach(function (boardName) {
@@ -194,13 +217,13 @@ router.post('/action/banUser', function () {
                           throw new Error(Tools.translate('Not enough rights'));
                         }
                       });
-                      _context.next = 30;
+                      _context.next = 37;
                       return UsersModel.banUser(userIp, newBans, subnet);
 
-                    case 30:
+                    case 37:
                       res.json({});
 
-                    case 31:
+                    case 38:
                     case 'end':
                       return _context.stop();
                   }

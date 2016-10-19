@@ -238,7 +238,7 @@ export async function fileAddedCommon(div) {
 }
 
 function fileDrop(div, dataTransfer) {
-  FileInputs.clearFileInput(div);
+  clearFileInput(div);
   if (_(dataTransfer.types).contains('text/uri-list')) {
     div.fileUrl = dataTransfer.getData('text/uri-list');
     fileAddedCommon(div);
