@@ -71,9 +71,9 @@ var getChatNumber = function () {
   };
 }();
 
-var getChatMessages = exports.getChatMessages = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(user, lastRequestDate) {
-    var ChatMessage, date, messages, chats;
+var selectReceiver = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(key, user, postUser) {
+    var ChatMessage, message;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -83,8 +83,60 @@ var getChatMessages = exports.getChatMessages = function () {
 
           case 2:
             ChatMessage = _context2.sent;
+            _context2.next = 5;
+            return ChatMessage.findOne({ key: key }, {
+              sender: 1,
+              receiver: 1
+            });
+
+          case 5:
+            message = _context2.sent;
+
+            if (!(message && !usersEqual(message.sender, user) && !usersEqual(message.receiver, user))) {
+              _context2.next = 8;
+              break;
+            }
+
+            throw new Error(Tools.translate('Somebody is chatting here already'));
+
+          case 8:
+            if (!(!message || !usersEqual(user, postUser))) {
+              _context2.next = 10;
+              break;
+            }
+
+            return _context2.abrupt('return', cloneUser(postUser));
+
+          case 10:
+            return _context2.abrupt('return', usersEqual(user, message.sender) ? message.receiver : message.sender);
+
+          case 11:
+          case 'end':
+            return _context2.stop();
+        }
+      }
+    }, _callee2, this);
+  }));
+
+  return function selectReceiver(_x4, _x5, _x6) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var getChatMessages = exports.getChatMessages = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(user, lastRequestDate) {
+    var ChatMessage, date, messages, chats;
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            _context3.next = 2;
+            return client.collection('chatMessage');
+
+          case 2:
+            ChatMessage = _context3.sent;
             date = Tools.now();
-            _context2.next = 6;
+            _context3.next = 6;
             return ChatMessage.find({
               $and: [{
                 $or: createMessagesQuery(user)
@@ -96,7 +148,7 @@ var getChatMessages = exports.getChatMessages = function () {
             }).sort({ date: 1 }).toArray();
 
           case 6:
-            messages = _context2.sent;
+            messages = _context3.sent;
             chats = messages.reduce(function (acc, message) {
               var chat = acc[message.key];
               if (!chat) {
@@ -127,26 +179,26 @@ var getChatMessages = exports.getChatMessages = function () {
               });
               return acc;
             }, {});
-            return _context2.abrupt('return', {
+            return _context3.abrupt('return', {
               lastRequestDate: date.toISOString(),
               chats: chats
             });
 
           case 9:
           case 'end':
-            return _context2.stop();
+            return _context3.stop();
         }
       }
-    }, _callee2, this);
+    }, _callee3, this);
   }));
 
-  return function getChatMessages(_x4, _x5) {
+  return function getChatMessages(_x7, _x8) {
     return ref.apply(this, arguments);
   };
 }();
 
 var addChatMessage = exports.addChatMessage = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
     var _ref3 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     var user = _ref3.user;
@@ -154,13 +206,13 @@ var addChatMessage = exports.addChatMessage = function () {
     var postNumber = _ref3.postNumber;
     var chatNumber = _ref3.chatNumber;
     var text = _ref3.text;
-    var Post, post, key, ChatMessage, message, isSender, isReceiver, messageSender, messageReceiver, receiver, date;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    var Post, post, key, receiver, ChatMessage, date;
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
             if (_board2.default.board(boardName)) {
-              _context3.next = 2;
+              _context4.next = 2;
               break;
             }
 
@@ -170,7 +222,7 @@ var addChatMessage = exports.addChatMessage = function () {
             postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
 
             if (postNumber) {
-              _context3.next = 5;
+              _context4.next = 5;
               break;
             }
 
@@ -178,19 +230,19 @@ var addChatMessage = exports.addChatMessage = function () {
 
           case 5:
             if (!(!text || typeof text !== 'string')) {
-              _context3.next = 7;
+              _context4.next = 7;
               break;
             }
 
             throw new Error(Tools.translate('Message is empty'));
 
           case 7:
-            _context3.next = 9;
+            _context4.next = 9;
             return client.collection('post');
 
           case 9:
-            Post = _context3.sent;
-            _context3.next = 12;
+            Post = _context4.sent;
+            _context4.next = 12;
             return Post.findOne({
               boardName: boardName,
               number: postNumber
@@ -200,10 +252,10 @@ var addChatMessage = exports.addChatMessage = function () {
             });
 
           case 12:
-            post = _context3.sent;
+            post = _context4.sent;
 
             if (post) {
-              _context3.next = 15;
+              _context4.next = 15;
               break;
             }
 
@@ -213,51 +265,34 @@ var addChatMessage = exports.addChatMessage = function () {
             chatNumber = Tools.option(chatNumber, 'number', 0, { test: function test(n) {
                 return n > 0;
               } });
-            _context3.next = 18;
+            _context4.next = 18;
             return getChatNumber(boardName, postNumber, chatNumber);
 
           case 18:
-            chatNumber = _context3.sent;
+            chatNumber = _context4.sent;
             key = boardName + ':' + postNumber + ':' + chatNumber;
-            _context3.next = 22;
-            return client.collection('chatMessage');
+            _context4.next = 22;
+            return selectReceiver(key, user, post.user);
 
           case 22:
-            ChatMessage = _context3.sent;
-            _context3.next = 25;
-            return ChatMessage.findOne({ key: key }, {
-              sender: 1,
-              receiver: 1
-            });
+            receiver = _context4.sent;
+            _context4.next = 25;
+            return client.collection('chatMessage');
 
           case 25:
-            message = _context3.sent;
-            isSender = !message || usersEqual(message.sender, user);
-            isReceiver = message && usersEqual(message.receiver, user);
-
-            if (!(!isSender && !isReceiver)) {
-              _context3.next = 30;
-              break;
-            }
-
-            throw new Error(Tools.translate('Somebody is chatting here already'));
-
-          case 30:
-            messageSender = message ? message.sender : post.user;
-            messageReceiver = message ? message.receiver : post.user;
-            receiver = selectUser(user, message ? message.receiver : post.user, isReceiver);
+            ChatMessage = _context4.sent;
             date = Tools.now();
-            _context3.next = 36;
+            _context4.next = 29;
             return ChatMessage.insertOne({
               key: key,
               text: text,
               date: date,
-              sender: selectUser(user, message ? message.sender : post.user, isSender),
+              sender: cloneUser(user),
               receiver: receiver
             });
 
-          case 36:
-            return _context3.abrupt('return', {
+          case 29:
+            return _context4.abrupt('return', {
               message: {
                 text: text,
                 date: date.toISOString()
@@ -266,43 +301,7 @@ var addChatMessage = exports.addChatMessage = function () {
               receiver: receiver
             });
 
-          case 37:
-          case 'end':
-            return _context3.stop();
-        }
-      }
-    }, _callee3, this);
-  }));
-
-  return function addChatMessage(_x6) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var deleteChatMessages = exports.deleteChatMessages = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
-    var _ref4 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-    var user = _ref4.user;
-    var boardName = _ref4.boardName;
-    var postNumber = _ref4.postNumber;
-    var chatNumber = _ref4.chatNumber;
-    var ChatMessage;
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            _context4.next = 2;
-            return client.collection('chatMessage');
-
-          case 2:
-            ChatMessage = _context4.sent;
-            _context4.next = 5;
-            return ChatMessage.deleteMany({
-              $and: [createMessagesQuery(user), { key: boardName + ':' + postNumber + ':' + chatNumber }]
-            });
-
-          case 5:
+          case 30:
           case 'end':
             return _context4.stop();
         }
@@ -310,7 +309,43 @@ var deleteChatMessages = exports.deleteChatMessages = function () {
     }, _callee4, this);
   }));
 
-  return function deleteChatMessages(_x8) {
+  return function addChatMessage(_x9) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var deleteChatMessages = exports.deleteChatMessages = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
+    var _ref4 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+    var user = _ref4.user;
+    var boardName = _ref4.boardName;
+    var postNumber = _ref4.postNumber;
+    var chatNumber = _ref4.chatNumber;
+    var ChatMessage;
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            _context5.next = 2;
+            return client.collection('chatMessage');
+
+          case 2:
+            ChatMessage = _context5.sent;
+            _context5.next = 5;
+            return ChatMessage.deleteMany({
+              $and: [{ $or: createMessagesQuery(user) }, { key: boardName + ':' + postNumber + ':' + chatNumber }]
+            });
+
+          case 5:
+          case 'end':
+            return _context5.stop();
+        }
+      }
+    }, _callee5, this);
+  }));
+
+  return function deleteChatMessages(_x11) {
     return ref.apply(this, arguments);
   };
 }();
@@ -360,10 +395,10 @@ function messageType(message, user) {
   }
 }
 
-function selectUser(user1, user2, first) {
+function cloneUser(user) {
   return {
-    ip: first ? user1.ip : user2.ip,
-    hashpass: first ? user1.hashpass : user2.hashpass
+    ip: user.ip,
+    hashpass: user.hashpass
   };
 }
 //# sourceMappingURL=chats.js.map

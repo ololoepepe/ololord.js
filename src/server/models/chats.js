@@ -27,10 +27,10 @@ function messageType(message, user) {
   }
 }
 
-function selectUser(user1, user2, first) {
+function cloneUser(user) {
   return {
-    ip: (first ? user1.ip : user2.ip),
-    hashpass: (first ? user1.hashpass : user2.hashpass)
+    ip: user.ip,
+    hashpass: user.hashpass
   };
 }
 
@@ -56,6 +56,21 @@ async function getChatNumber(boardName, postNumber, chatNumber) {
   }
   let { lastChatNumber } = result.value;
   return lastChatNumber;
+}
+
+async function selectReceiver(key, user, postUser) {
+  let ChatMessage = await client.collection('chatMessage');
+  let message = await ChatMessage.findOne({ key: key }, {
+    sender: 1,
+    receiver: 1
+  });
+  if (message && !usersEqual(message.sender, user) && !usersEqual(message.receiver, user)) {
+    throw new Error(Tools.translate('Somebody is chatting here already'));
+  }
+  if (!message || !usersEqual(user, postUser)) {
+    return cloneUser(postUser);
+  }
+  return usersEqual(user, message.sender) ? message.receiver : message.sender;
 }
 
 export async function getChatMessages(user, lastRequestDate) {
@@ -125,25 +140,14 @@ export async function addChatMessage({ user, boardName, postNumber, chatNumber, 
   chatNumber = Tools.option(chatNumber, 'number', 0, { test: (n) => { return n > 0; } });
   chatNumber = await getChatNumber(boardName, postNumber, chatNumber);
   let key = `${boardName}:${postNumber}:${chatNumber}`;
+  let receiver = await selectReceiver(key, user, post.user);
   let ChatMessage = await client.collection('chatMessage');
-  let message = await ChatMessage.findOne({ key: key }, {
-    sender: 1,
-    receiver: 1
-  });
-  let isSender = !message || usersEqual(message.sender, user);
-  let isReceiver = message && usersEqual(message.receiver, user);
-  if (!isSender && !isReceiver) {
-    throw new Error(Tools.translate('Somebody is chatting here already'));
-  }
-  let messageSender = message ? message.sender : post.user;
-  let messageReceiver = message ? message.receiver : post.user;
-  let receiver = selectUser(user, message ? message.receiver : post.user, isReceiver);
   let date = Tools.now();
   await ChatMessage.insertOne({
     key: key,
     text: text,
     date: date,
-    sender: selectUser(user, message ? message.sender : post.user, isSender),
+    sender: cloneUser(user),
     receiver: receiver
   });
   return {
@@ -159,6 +163,6 @@ export async function addChatMessage({ user, boardName, postNumber, chatNumber, 
 export async function deleteChatMessages({ user, boardName, postNumber, chatNumber } = {}) {
   let ChatMessage = await client.collection('chatMessage');
   await ChatMessage.deleteMany({
-    $and: [createMessagesQuery(user), { key: `${boardName}:${postNumber}:${chatNumber}` }]
+    $and: [{ $or: createMessagesQuery(user) }, { key: `${boardName}:${postNumber}:${chatNumber}` }]
   });
 }
