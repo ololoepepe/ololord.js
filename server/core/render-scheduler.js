@@ -308,7 +308,7 @@ var scheduleRender = exports.scheduleRender = function () {
                             switch (_context7.prev = _context7.next) {
                               case 0:
                                 _context7.next = 2;
-                                return renderPages(boardName);
+                                return renderPages(boardName, threadNumber);
 
                               case 2:
                                 _context7.next = 4;
@@ -352,7 +352,7 @@ var scheduleRender = exports.scheduleRender = function () {
 
                               case 2:
                                 _context8.next = 4;
-                                return renderPages(boardName);
+                                return renderPages(boardName, threadNumber);
 
                               case 4:
                                 renderCatalog(boardName);
@@ -379,7 +379,7 @@ var scheduleRender = exports.scheduleRender = function () {
 
                               case 2:
                                 _context9.next = 4;
-                                return renderPages(boardName);
+                                return renderPages(boardName, threadNumber);
 
                               case 4:
                                 renderCatalog(boardName);

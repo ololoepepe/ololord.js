@@ -110,7 +110,7 @@ export async function scheduleRender(data) {
     case 'create':
       await renderThread(boardName, threadNumber, postNumber, action);
       (async function() {
-        await renderPages(boardName);
+        await renderPages(boardName, threadNumber);
         await renderCatalog(boardName);
       })();
       break;
@@ -123,7 +123,7 @@ export async function scheduleRender(data) {
       } else {
         (async function() {
           await renderThread(boardName, threadNumber, postNumber, action);
-          await renderPages(boardName);
+          await renderPages(boardName, threadNumber);
           renderCatalog(boardName);
         })();
       }
@@ -131,7 +131,7 @@ export async function scheduleRender(data) {
     default:
       (async function() {
         await renderThread(boardName, threadNumber, postNumber, action);
-        await renderPages(boardName);
+        await renderPages(boardName, threadNumber);
         renderCatalog(boardName);
       });
       break;
