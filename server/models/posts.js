@@ -690,7 +690,7 @@ var markupPosts = exports.markupPosts = function () {
                         return Post.find({ boardName: boardName }, {
                           number: 1,
                           threadNumber: 1
-                        });
+                        }).toArray();
 
                       case 7:
                         posts = _context11.sent;
@@ -701,14 +701,14 @@ var markupPosts = exports.markupPosts = function () {
 
                           return {
                             boardName: boardName,
-                            postNumber: postNumber,
+                            postNumber: number,
                             threadNumber: threadNumber
                           };
                         });
                         if ('*' !== postNumbers) {
                           posts = posts.filter(function (_ref5) {
                             var postNumber = _ref5.postNumber;
-                            return postNumber.hasOwnProperty(postNumber);
+                            return postNumbers.indexOf(postNumber) >= 0;
                           });
                         }
                         return _context11.abrupt('return', posts);
@@ -729,7 +729,7 @@ var markupPosts = exports.markupPosts = function () {
           case 9:
             posts = _context12.sent;
             _context12.next = 12;
-            return PostReferencesModel.updateReferringPosts(posts);
+            return PostReferencesModel.updateReferringPosts((0, _underscore2.default)(posts).flatten());
 
           case 12:
             refs = _context12.sent;

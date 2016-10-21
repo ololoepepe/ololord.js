@@ -323,20 +323,20 @@ export async function markupPosts(targets) {
     let posts = await Post.find({ boardName: boardName }, {
       number: 1,
       threadNumber: 1
-    });
+    }).toArray();
     posts = posts.map(({ number, threadNumber }) => {
       return {
         boardName: boardName,
-        postNumber: postNumber,
+        postNumber: number,
         threadNumber: threadNumber
       };
     });
     if ('*' !== postNumbers) {
-      posts = posts.filter(({ postNumber }) => postNumber.hasOwnProperty(postNumber));
+      posts = posts.filter(({ postNumber }) => { return (postNumbers.indexOf(postNumber) >= 0); });
     }
     return posts;
   }, true);
-  let refs = await PostReferencesModel.updateReferringPosts(posts);
+  let refs = await PostReferencesModel.updateReferringPosts(_(posts).flatten());
   await PostReferencesModel.rerenderReferencedPosts(undefined, undefined, refs);
 }
 
