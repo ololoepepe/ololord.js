@@ -110,9 +110,11 @@ class Board {
           return rule.match(RX_SEVERAL)[1].split(',').map(n => +n).filter((n) => {
             return n >= 0 && n < common.length;
           }).map(n => common[n]);
+        } else {
+          return rule;
         }
       });
-      specific = _(specific).flatten();
+      specific = _(specific).flatten().reverse();
       acc[boardName] = (specific.length > 0) ? specific : common;
       return acc;
     }, {});

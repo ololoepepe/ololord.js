@@ -160,9 +160,11 @@ var Board = function () {
             }).map(function (n) {
               return common[n];
             });
+          } else {
+            return rule;
           }
         });
-        specific = (0, _underscore2.default)(specific).flatten();
+        specific = (0, _underscore2.default)(specific).flatten().reverse();
         acc[boardName] = specific.length > 0 ? specific : common;
         return acc;
       }, {});
