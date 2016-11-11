@@ -345,7 +345,7 @@ var convertLinkCommon = function () {
 
 var convertPostLink = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(info, _1, matchs, _2, options) {
-    var boardName, postNumber, escaped, post, key, result;
+    var boardName, postNumber, escaped, post, key, suffix, result;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
@@ -389,7 +389,8 @@ var convertPostLink = function () {
                 };
               }
             }
-            result = '<a href=\'/' + (0, _config2.default)('site.pathPrefix') + boardName + '/res/' + post.threadNumber + '.html';
+            suffix = post.archived ? 'arch' : 'res';
+            result = '<a href=\'/' + (0, _config2.default)('site.pathPrefix') + boardName + '/' + suffix + '/' + post.threadNumber + '.html';
 
             if (postNumber !== post.threadNumber) {
               result += '#post-' + postNumber;
@@ -402,7 +403,7 @@ var convertPostLink = function () {
             result += ' data-thread-number=\'' + post.threadNumber + '\'>' + escaped + '</a>';
             return _context6.abrupt('return', result);
 
-          case 19:
+          case 20:
           case 'end':
             return _context6.stop();
         }

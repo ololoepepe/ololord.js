@@ -255,7 +255,8 @@ async function convertPostLink(info, _1, matchs, _2, options) {
       };
     }
   }
-  let result = `<a href='/${config('site.pathPrefix')}${boardName}/res/${post.threadNumber}.html`;
+  let suffix = post.archived ? 'arch' : 'res';
+  let result = `<a href='/${config('site.pathPrefix')}${boardName}/${suffix}/${post.threadNumber}.html`;
   if (postNumber !== post.threadNumber) {
     result += `#post-${postNumber}`;
   }
