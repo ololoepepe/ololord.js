@@ -25,25 +25,31 @@ var handleMessage = function () {
             } else {
               task.reject(message.error);
             }
-            _context.next = 19;
+            _context.next = 21;
             break;
 
           case 6:
             handler = handlers.get(message.type);
             proc = workerID ? _cluster2.default.workers[workerID] : process;
 
-            if (typeof handler !== 'function') {
-              proc.send({
-                id: message.id,
-                type: message.type,
-                error: Tools.translate('Method not found: $[1]', '', message.type)
-              });
+            if (!(typeof handler !== 'function')) {
+              _context.next = 11;
+              break;
             }
-            _context.prev = 9;
-            _context.next = 12;
+
+            proc.send({
+              id: message.id,
+              type: message.type,
+              error: Tools.translate('Method not found: $[1]', '', message.type)
+            });
+            return _context.abrupt('return');
+
+          case 11:
+            _context.prev = 11;
+            _context.next = 14;
             return handler(message.data);
 
-          case 12:
+          case 14:
             data = _context.sent;
 
             proc.send({
@@ -51,12 +57,12 @@ var handleMessage = function () {
               type: message.type,
               data: data || null
             });
-            _context.next = 19;
+            _context.next = 21;
             break;
 
-          case 16:
-            _context.prev = 16;
-            _context.t0 = _context['catch'](9);
+          case 18:
+            _context.prev = 18;
+            _context.t0 = _context['catch'](11);
 
             proc.send({
               id: message.id,
@@ -64,12 +70,12 @@ var handleMessage = function () {
               error: _context.t0.stack || _context.t0.toString()
             });
 
-          case 19:
+          case 21:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, this, [[9, 16]]);
+    }, _callee, this, [[11, 18]]);
   }));
 
   return function handleMessage(_x, _x2) {

@@ -29,6 +29,7 @@ async function handleMessage(message, workerID) {
         type: message.type,
         error: Tools.translate('Method not found: $[1]', '', message.type)
       });
+      return;
     }
     try {
       let data = await handler(message.data);
