@@ -10,6 +10,7 @@ import * as Tools from '../helpers/tools';
 import * as Chat from '../core/chat';
 
 const SCROLL_ANIMATION_TIME = 100;
+const MAX_SCROLL_DY = 50;
 
 export default class ChatWidget extends MovableWidget {
   constructor(options) {
@@ -21,20 +22,23 @@ export default class ChatWidget extends MovableWidget {
       let chats = Storage.chats();
       return chats[selectedChatKey()] || [];
     });
-    let blockScroll = false;
+    let mustScroll = !!key;
+    selectedChatKey.subscribe((k) => {
+      mustScroll = !!k;
+    });
+    let messagesDiv = $(content).find('.js-chat-messages');
     let scroll = () => {
-      if (blockScroll) {
-        blockScroll = false;
-        return;
-      }
-      let div = $(content).find('.js-chat-messages');
-      div.animate({ scrollTop: div.prop('scrollHeight') }, SCROLL_ANIMATION_TIME);
+      messagesDiv.animate({ scrollTop: messagesDiv.prop('scrollHeight') }, SCROLL_ANIMATION_TIME);
     };
-    messages.subscribe(() => {
-      //NOTE: This is NOT OK.
-      setTimeout(() => {
-        setTimeout(scroll, 10);
-      }, 10);
+    function setMustScroll() {
+      let max = +messagesDiv.prop('scrollHeight') - messagesDiv.height();
+      let dy = max - messagesDiv.scrollTop();
+      mustScroll = (dy <= MAX_SCROLL_DY);
+    }
+    messagesDiv.scroll(function(e) {
+      if (!$(this).is(':animated')) {
+        setMustScroll();
+      }
     });
     let sendMessage = () => {
       let key = selectedChatKey();
@@ -70,8 +74,15 @@ export default class ChatWidget extends MovableWidget {
         selectedChatKey('');
         Chat.deleteChat(this.key);
       },
-      markAsRead: function(index) {
-        blockScroll = true;
+      afterRender: (elements, data) => {
+        if (Chat.messagesEqual(data, messages()[messages().length - 1])) {
+          if (mustScroll) {
+            scroll();
+          }
+        }
+      },
+      markAsRead: (index) => {
+        setMustScroll();
         let chats = Storage.chats();
         let message = chats[selectedChatKey()][index()];
         if (!message.hasOwnProperty('unread')) {
@@ -89,8 +100,5 @@ export default class ChatWidget extends MovableWidget {
       sendMessage: sendMessage
     }, content);
     super(content, options);
-    if (key) {
-      scroll();
-    }
   }
 }

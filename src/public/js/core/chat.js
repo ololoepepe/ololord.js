@@ -33,10 +33,12 @@ function notifyAboutNewMessage(keys) {
   }
 }
 
+export function messagesEqual(m1, m2) {
+  return (m1.type === m2.type && m1.date === m2.date && m1.text === m2.text);
+}
+
 function isDuplicate(message, messages) {
-  return messages.some((msg) => {
-    return (message.type === msg.type && message.date === msg.date && message.text === msg.text);
-  });
+  return messages.some(messagesEqual.bind(null, message));
 }
 
 function sortMessages(m1, m2) {

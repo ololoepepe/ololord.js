@@ -20,7 +20,10 @@
   </div>
   <div class='chat-messaging-area'>
     <div class='chat-messages js-chat-messages'
-         data-bind='foreach: messages'>
+         data-bind='foreach: {
+                      data: messages,
+                      afterRender: afterRender
+                    }'>
       <div class='chat-message'
            data-bind='css: { "chat-message-unread": $data.unread },
                       event: { mouseover: $root.markAsRead.bind($data, $index) }'>
