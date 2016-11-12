@@ -309,7 +309,7 @@ async function addFile(sourceId, isDir) {
   }
 }
 
-async function rerenderCache(archive) {
+async function rerenderCache() {
   let txt = Tools.translate('Connection with the server will be lost, '
     + 'and the server will become unavailable for some time.'
     + ' You will have to reload the page manually.');
@@ -323,8 +323,7 @@ async function rerenderCache(archive) {
       return;
     }
     await AJAX.post(`/${Tools.sitePathPrefix()}action/superuserRerender`, Tools.createFormData({
-      targets: result.value,
-      archive: (archive ? 'true' : '')
+      targets: result.value
     }), new OverlayProgressBar());
   } catch (err) {
     DOM.handleError(err);
@@ -755,7 +754,6 @@ export async function initializeManagement() {
       return Widgets.showMenu(e);
     },
     rerenderCache: rerenderCache,
-    rerenderCacheWithArchived: rerenderCache.bind(null, true),
     markupPosts: markupPosts,
     rebuildSearchIndex: rebuildSearchIndex,
     reloadBoards: reload.bind(null, 'boards'),

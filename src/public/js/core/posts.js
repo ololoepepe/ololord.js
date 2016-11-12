@@ -270,8 +270,7 @@ export function showPostActionsMenu(e, postNumber) {
       hidden: hidden && hidden.hidden
     },
     thread: threadOptions,
-    isThreadPage: Tools.isThreadPage(),
-    archived: Tools.isArchivedThreadPage()
+    isThreadPage: Tools.isThreadPage()
   };
   let menu = Templating.template('post/actionsMenu', model, { boardName: Tools.boardName() });
   KO.applyBindings({
@@ -292,9 +291,9 @@ export function showPostActionsMenu(e, postNumber) {
     setPostHidden: Hiding.setPostHidden.bind(null, Tools.boardName(), postNumber, threadNumber),
     hideSimilarPosts: Hiding.hideSimilarPosts.bind(null, Tools.boardName(), postNumber, threadNumber,
       DOM.data('plainText', post)),
-    deletePost: deletePost.bind(null, Tools.boardName(), postNumber, Tools.isArchivedThreadPage()),
+    deletePost: deletePost.bind(null, Tools.boardName(), postNumber),
     addToOrRemoveFromFavorites: Threads.addToOrRemoveFromFavorites.bind(null, Tools.boardName(), threadNumber),
-    downloadThreadFiles: Threads.downloadThreadFiles.bind(null, Tools.boardName(), threadNumber, model.archived),
+    downloadThreadFiles: Threads.downloadThreadFiles.bind(null, Tools.boardName(), threadNumber),
     expandCollapseThread: Threads.expandThread.bind(null, threadNumber),
     setThreadFixed: Threads.setThreadFixed.bind(null, Tools.boardName(), threadNumber, !model.thread.fixed),
     setThreadClosed: Threads.setThreadClosed.bind(null, Tools.boardName(), threadNumber, !model.thread.closed),
@@ -350,7 +349,7 @@ async function showPostSourceText(boardName, postNumber) {
   }
 }
 
-async function deletePost(boardName, postNumber, archived) {
+async function deletePost(boardName, postNumber) {
   boardName = Tools.option(boardName, 'string', '');
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!boardName || !postNumber) {
@@ -364,8 +363,7 @@ async function deletePost(boardName, postNumber, archived) {
     await AJAX.post(`/${Tools.sitePathPrefix()}action/deletePost`, Tools.createFormData({
       boardName: boardName,
       postNumber: postNumber,
-      password: password,
-      archived: archived
+      password: password
     }), new OverlayProgressBar());
     let ownPosts = Storage.ownPosts();
     let key = `${boardName}/${postNumber}`;
@@ -379,7 +377,7 @@ async function deletePost(boardName, postNumber, archived) {
     }
     if (DOM.data('isOp', post)) {
       if (Tools.isThreadPage()) {
-        await Navigation.setPage(`/${Tools.sitePathPrefix()}${boardName}${archived ? '/archive.html' : ''}`);
+        await Navigation.setPage(`/${Tools.sitePathPrefix()}${boardName}`);
       } else {
         Navigation.reloadPage();
       }
@@ -730,8 +728,7 @@ export let createPostNode = async function(post, permanent, threadInfo) {
     let node = Templating.template('post/post', {
       thread: threadInfo,
       post: post,
-      isThreadPage: Tools.isThreadPage(),
-      archived: Tools.isArchivedThreadPage()
+      isThreadPage: Tools.isThreadPage()
     }, { boardName: post.boardName });
     if (Tools.deviceType('mobile')) {
       DOM.queryAll('.js-with-tooltip', node).forEach((n) => { DOM.setTooltip(n); });

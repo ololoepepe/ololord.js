@@ -9,7 +9,7 @@
     </li>
   {{?}}
   {{#def['custom/postMenuAction/20'] || ''}}
-  {{? !it.archived && (it.user.isModer(it.board.name) || it.board.opModeration)}}
+  {{? (it.user.isModer(it.board.name) || it.board.opModeration)}}
     <li data-bind='click: editPost'>
       <span class='icon icon-pencil-16 sign-icon'></span>
       {{!it.translate('Edit', 'editPostText')}}
@@ -17,7 +17,7 @@
   {{?}}
   {{#def['custom/postMenuAction/30'] || ''}}
   {{? (it.user.isModer(it.board.name) || it.board.opModeration)
-    && (it.post.fileInfos.length < it.board.maxFileCount) && !it.archived}}
+    && (it.post.fileInfos.length < it.board.maxFileCount)}}
     <li data-bind='click: addFiles'>
       <span class='icon icon-plus-16 sign-icon'></span>
       {{!it.translate('Add files', 'addFilesText')}}
@@ -37,7 +37,7 @@
     </li>
   {{?}}
   {{#def['custom/postMenuAction/60'] || ''}}
-  {{? (!it.archived || it.post.isOp) && (it.user.hasPermission(it.board, 'deletePost') || it.board.opModeration)}}
+  {{? it.post.isOp && (it.user.hasPermission(it.board, 'deletePost') || it.board.opModeration)}}
     <li data-bind='click: deletePost'>
       <span class='icon icon-bin-16 sign-icon'></span>
       {{!it.translate('Delete', 'deletePostText')}}
@@ -66,7 +66,7 @@
       </li>
     {{?}}
     {{#def['custom/postMenuAction/110'] || ''}}
-    {{? !it.archived && it.user.isModer(it.board.name)}}
+    {{? it.user.isModer(it.board.name)}}
       <li data-bind='click: setThreadFixed.bind($data, {{=!it.thread.fixed}})'>
         <span data-bind='css: "icon sign-icon icon-{{? it.thread.fixed}}pin{{??}}unpin{{?}}-16"'></span>
         <span data-bind='text: {{? it.thread.fixed}}"{{!it.translate('Unfix', 'unfixThreadText')}}"

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.copyFiles = exports.getPostFileCount = exports.editAudioTags = exports.editFileRating = exports.deleteFile = exports.removeArchivedThreadFiles = exports.moveThreadFilesToArchive = exports.removeFiles = exports.addFilesToPost = exports.getFileInfosByHashes = exports.fileInfoExistsByHash = exports.fileInfoExistsByName = exports.getFileInfoByHash = exports.getFileInfoByName = undefined;
+exports.copyFiles = exports.getPostFileCount = exports.editAudioTags = exports.editFileRating = exports.deleteFile = exports.removeFiles = exports.addFilesToPost = exports.getFileInfosByHashes = exports.fileInfoExistsByHash = exports.fileInfoExistsByName = exports.getFileInfoByHash = exports.getFileInfoByName = undefined;
 
 var getFileInfoByName = exports.getFileInfoByName = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(name) {
@@ -346,124 +346,19 @@ var removeFiles = exports.removeFiles = function () {
   };
 }();
 
-var moveThreadFilesToArchive = exports.moveThreadFilesToArchive = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(boardName, threadNumber) {
-    var archivePath, sourceId, data, model;
+var deleteFile = exports.deleteFile = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(fileName) {
+    var Post, result, post;
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
           case 0:
-            archivePath = __dirname + '/../../public/' + boardName + '/arch';
-            _context9.next = 3;
-            return mkpath(archivePath);
-
-          case 3:
-            sourceId = boardName + '/res/' + threadNumber + '.json';
-            _context9.next = 6;
-            return Cache.readFile(sourceId);
-
-          case 6:
-            data = _context9.sent;
-            model = JSON.parse(data);
-
-            model.thread.archived = true;
-            _context9.next = 11;
-            return _fs2.default.write(archivePath + '/' + threadNumber + '.json', JSON.stringify(model));
-
-          case 11:
-            _context9.next = 13;
-            return BoardController.renderThreadHTML(model.thread, {
-              targetPath: archivePath + '/' + threadNumber + '.html',
-              archived: true
-            });
-
-          case 13:
-            _context9.next = 15;
-            return Cache.removeFile(sourceId);
-
-          case 15:
-            _context9.next = 17;
-            return Cache.removeFile(boardName + '/res/' + threadNumber + '.html');
-
-          case 17:
-          case 'end':
-            return _context9.stop();
-        }
-      }
-    }, _callee9, this);
-  }));
-
-  return function moveThreadFilesToArchive(_x11, _x12) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var removeArchivedThreadFiles = exports.removeArchivedThreadFiles = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName, threadNumber) {
-    return regeneratorRuntime.wrap(function _callee11$(_context11) {
-      while (1) {
-        switch (_context11.prev = _context11.next) {
-          case 0:
-            _context11.next = 2;
-            return Tools.series(['json', 'html'], function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(suffix) {
-                return regeneratorRuntime.wrap(function _callee10$(_context10) {
-                  while (1) {
-                    switch (_context10.prev = _context10.next) {
-                      case 0:
-                        _context10.prev = 0;
-                        _context10.next = 3;
-                        return _fs2.default.remove(__dirname + '/../../public/' + boardName + '/arch/' + threadNumber + '.' + suffix);
-
-                      case 3:
-                        _context10.next = 8;
-                        break;
-
-                      case 5:
-                        _context10.prev = 5;
-                        _context10.t0 = _context10['catch'](0);
-
-                        _logger2.default.error(_context10.t0.stack || _context10.t0);
-
-                      case 8:
-                      case 'end':
-                        return _context10.stop();
-                    }
-                  }
-                }, _callee10, this, [[0, 5]]);
-              }));
-
-              return function (_x15) {
-                return ref.apply(this, arguments);
-              };
-            }());
-
-          case 2:
-          case 'end':
-            return _context11.stop();
-        }
-      }
-    }, _callee11, this);
-  }));
-
-  return function removeArchivedThreadFiles(_x13, _x14) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-var deleteFile = exports.deleteFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(fileName) {
-    var Post, result, post;
-    return regeneratorRuntime.wrap(function _callee12$(_context12) {
-      while (1) {
-        switch (_context12.prev = _context12.next) {
-          case 0:
-            _context12.next = 2;
+            _context9.next = 2;
             return client.collection('post');
 
           case 2:
-            Post = _context12.sent;
-            _context12.next = 5;
+            Post = _context9.sent;
+            _context9.next = 5;
             return Post.findOneAndUpdate({ 'fileInfos.name': fileName }, {
               $pull: {
                 fileInfos: { name: fileName }
@@ -479,18 +374,18 @@ var deleteFile = exports.deleteFile = function () {
             });
 
           case 5:
-            result = _context12.sent;
+            result = _context9.sent;
             post = result.value;
 
             if (post) {
-              _context12.next = 9;
+              _context9.next = 9;
               break;
             }
 
             throw new Error(Tools.translate('No such file'));
 
           case 9:
-            _context12.next = 11;
+            _context9.next = 11;
             return IPC.render(post.boardName, post.threadNumber, post.number, 'edit');
 
           case 11:
@@ -498,34 +393,34 @@ var deleteFile = exports.deleteFile = function () {
 
           case 12:
           case 'end':
-            return _context12.stop();
+            return _context9.stop();
         }
       }
-    }, _callee12, this);
+    }, _callee9, this);
   }));
 
-  return function deleteFile(_x16) {
+  return function deleteFile(_x11) {
     return ref.apply(this, arguments);
   };
 }();
 
 var editFileRating = exports.editFileRating = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(fileName, rating) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(fileName, rating) {
     var Post, result, post;
-    return regeneratorRuntime.wrap(function _callee13$(_context13) {
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
-        switch (_context13.prev = _context13.next) {
+        switch (_context10.prev = _context10.next) {
           case 0:
-            _context13.next = 2;
+            _context10.next = 2;
             return client.collection('post');
 
           case 2:
-            Post = _context13.sent;
+            Post = _context10.sent;
 
             if (Tools.FILE_RATINGS.indexOf(rating) < 0) {
               rating = Tools.FILE_RATINGS[0];
             }
-            _context13.next = 6;
+            _context10.next = 6;
             return Post.findOneAndUpdate({ 'fileInfos.name': fileName }, {
               $set: { 'fileInfos.$.rating': rating }
             }, {
@@ -538,45 +433,45 @@ var editFileRating = exports.editFileRating = function () {
             });
 
           case 6:
-            result = _context13.sent;
+            result = _context10.sent;
             post = result.value;
 
             if (post) {
-              _context13.next = 10;
+              _context10.next = 10;
               break;
             }
 
             throw new Error(Tools.translate('No such file'));
 
           case 10:
-            _context13.next = 12;
+            _context10.next = 12;
             return IPC.render(post.boardName, post.threadNumber, post.number, 'edit');
 
           case 12:
           case 'end':
-            return _context13.stop();
+            return _context10.stop();
         }
       }
-    }, _callee13, this);
+    }, _callee10, this);
   }));
 
-  return function editFileRating(_x17, _x18) {
+  return function editFileRating(_x12, _x13) {
     return ref.apply(this, arguments);
   };
 }();
 
 var editAudioTags = exports.editAudioTags = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(fileName, fields) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(fileName, fields) {
     var Post, extraData, result, post;
-    return regeneratorRuntime.wrap(function _callee14$(_context14) {
+    return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
-        switch (_context14.prev = _context14.next) {
+        switch (_context11.prev = _context11.next) {
           case 0:
-            _context14.next = 2;
+            _context11.next = 2;
             return client.collection('post');
 
           case 2:
-            Post = _context14.sent;
+            Post = _context11.sent;
             extraData = _audio.AUDIO_TAGS.map(function (tagName) {
               return {
                 tagName: tagName,
@@ -593,7 +488,7 @@ var editAudioTags = exports.editAudioTags = function () {
               acc[tagName] = value;
               return acc;
             }, {});
-            _context14.next = 6;
+            _context11.next = 6;
             return Post.findOneAndUpdate({ 'fileInfos.name': fileName }, {
               $set: { 'fileInfos.$.extraData': extraData }
             }, {
@@ -606,114 +501,111 @@ var editAudioTags = exports.editAudioTags = function () {
             });
 
           case 6:
-            result = _context14.sent;
+            result = _context11.sent;
             post = result.value;
 
             if (post) {
-              _context14.next = 10;
+              _context11.next = 10;
               break;
             }
 
             throw new Error(Tools.translate('No such file'));
 
           case 10:
-            _context14.next = 12;
+            _context11.next = 12;
             return IPC.render(post.boardName, post.threadNumber, post.number, 'edit');
 
           case 12:
           case 'end':
-            return _context14.stop();
+            return _context11.stop();
         }
       }
-    }, _callee14, this);
+    }, _callee11, this);
   }));
 
-  return function editAudioTags(_x19, _x20) {
+  return function editAudioTags(_x14, _x15) {
     return ref.apply(this, arguments);
   };
 }();
 
 var getPostFileCount = exports.getPostFileCount = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(boardName, postNumber) {
-    var _ref5 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var archived = _ref5.archived;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, postNumber) {
     var Post, post;
-    return regeneratorRuntime.wrap(function _callee15$(_context15) {
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
-        switch (_context15.prev = _context15.next) {
+        switch (_context12.prev = _context12.next) {
           case 0:
-            _context15.next = 2;
+            _context12.next = 2;
             return client.collection('post');
 
           case 2:
-            Post = _context15.sent;
-            _context15.next = 5;
+            Post = _context12.sent;
+            _context12.next = 5;
             return Post.findOne({
               boardName: boardName,
               number: postNumber
             }, { fileInfoCount: 1 });
 
           case 5:
-            post = _context15.sent;
+            post = _context12.sent;
 
             if (post) {
-              _context15.next = 8;
+              _context12.next = 8;
               break;
             }
 
             throw new Error(Tools.translate('No such post'));
 
           case 8:
-            return _context15.abrupt('return', post.fileInfoCount);
+            return _context12.abrupt('return', post.fileInfoCount);
 
           case 9:
           case 'end':
-            return _context15.stop();
+            return _context12.stop();
         }
       }
-    }, _callee15, this);
+    }, _callee12, this);
   }));
 
-  return function getPostFileCount(_x21, _x22, _x23) {
+  return function getPostFileCount(_x16, _x17) {
     return ref.apply(this, arguments);
   };
 }();
 
 var copyFiles = exports.copyFiles = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(fileInfos, sourceBoardName, targetBoardName, transaction) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(fileInfos, sourceBoardName, targetBoardName, transaction) {
     var sourcePath, sourceThumbPath, targetPath, targetThumbPath;
-    return regeneratorRuntime.wrap(function _callee17$(_context17) {
+    return regeneratorRuntime.wrap(function _callee14$(_context14) {
       while (1) {
-        switch (_context17.prev = _context17.next) {
+        switch (_context14.prev = _context14.next) {
           case 0:
             sourcePath = __dirname + '/../../public/' + sourceBoardName + '/src';
             sourceThumbPath = __dirname + '/../../public/' + sourceBoardName + '/thumb';
             targetPath = __dirname + '/../../public/' + targetBoardName + '/src';
             targetThumbPath = __dirname + '/../../public/' + targetBoardName + '/thumb';
-            _context17.next = 6;
+            _context14.next = 6;
             return mkpath(targetPath);
 
           case 6:
-            _context17.next = 8;
+            _context14.next = 8;
             return mkpath(targetThumbPath);
 
           case 8:
-            _context17.next = 10;
+            _context14.next = 10;
             return Tools.series(fileInfos, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(fileInfo) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(fileInfo) {
                 var oldFileName, oldThumbName, baseName, newFilePath, newThumbPath;
-                return regeneratorRuntime.wrap(function _callee16$(_context16) {
+                return regeneratorRuntime.wrap(function _callee13$(_context13) {
                   while (1) {
-                    switch (_context16.prev = _context16.next) {
+                    switch (_context13.prev = _context13.next) {
                       case 0:
                         oldFileName = fileInfo.name;
                         oldThumbName = fileInfo.thumb.name;
-                        _context16.next = 4;
+                        _context13.next = 4;
                         return IPC.send('fileName');
 
                       case 4:
-                        baseName = _context16.sent;
+                        baseName = _context13.sent;
 
                         fileInfo.name = fileInfo.name.replace(/^\d+/, baseName);
                         fileInfo.thumb.name = fileInfo.thumb.name.replace(/^\d+/, baseName);
@@ -721,42 +613,42 @@ var copyFiles = exports.copyFiles = function () {
                         newThumbPath = targetThumbPath + '/' + fileInfo.thumb.name;
 
                         transaction.addFile(newFilePath);
-                        _context16.next = 12;
+                        _context13.next = 12;
                         return _fs2.default.copy(sourcePath + '/' + oldFileName, newFilePath);
 
                       case 12:
                         transaction.addFile(newThumbPath);
-                        _context16.next = 15;
+                        _context13.next = 15;
                         return _fs2.default.copy(sourceThumbPath + '/' + oldThumbName, newThumbPath);
 
                       case 15:
-                        return _context16.abrupt('return', fileInfo);
+                        return _context13.abrupt('return', fileInfo);
 
                       case 16:
                       case 'end':
-                        return _context16.stop();
+                        return _context13.stop();
                     }
                   }
-                }, _callee16, this);
+                }, _callee13, this);
               }));
 
-              return function (_x29) {
+              return function (_x22) {
                 return ref.apply(this, arguments);
               };
             }(), true);
 
           case 10:
-            return _context17.abrupt('return', _context17.sent);
+            return _context14.abrupt('return', _context14.sent);
 
           case 11:
           case 'end':
-            return _context17.stop();
+            return _context14.stop();
         }
       }
-    }, _callee17, this);
+    }, _callee14, this);
   }));
 
-  return function copyFiles(_x25, _x26, _x27, _x28) {
+  return function copyFiles(_x18, _x19, _x20, _x21) {
     return ref.apply(this, arguments);
   };
 }();

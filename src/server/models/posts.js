@@ -113,7 +113,7 @@ async function setThreadUpdateTime(boardName, threadNumber, dateTime) {
   }
 }
 
-export async function createPost(req, fields, files, transaction, { postNumber, date, unbumpable } = {}) {
+export async function createPost(req, fields, files, transaction, { postNumber, date, unbumpable, archived } = {}) {
   let { boardName, threadNumber, text, markupMode, name, subject, sage, signAsOp, tripcode, password } = fields;
   threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
   postNumber = Tools.option(postNumber, 'number', 0, { test: Tools.testPostNumber });
@@ -148,7 +148,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
     number: postNumber,
     threadNumber: threadNumber,
     sequenceNumber: postCount + 1,
-    archived: false,
+    archived: !!archived,
     name: name || null,
     subject: subject || null,
     rawText: rawText,

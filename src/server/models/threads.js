@@ -245,7 +245,7 @@ async function pushOutOldThread(boardName) {
   }, {
     $set: { archived: true }
   });
-  await FilesModel.moveThreadFilesToArchive(boardName, lastThread.number);
+  await IPC.render(boardName, lastThread.number, lastThread.number, 'edit');
   await IPC.renderArchive(boardName);
 }
 
@@ -381,10 +381,8 @@ export async function deleteThread(boardName, threadNumber) {
   await PostReferencesModel.rerenderReferencedPosts(boardName, threadNumber, refs, referencedPosts);
   let fileInfos = posts.map(({ fileInfos }) => fileInfos);
   await FilesModel.removeFiles(_(fileInfos).flatten());
+  await IPC.render(boardName, threadNumber, threadNumber, 'delete');
   if (thread.archived) {
-    await FilesModel.removeArchivedThreadFiles(boardName, threadNumber);
     await IPC.renderArchive(boardName);
-  } else {
-    await IPC.render(boardName, threadNumber, threadNumber, 'delete');
   }
 }

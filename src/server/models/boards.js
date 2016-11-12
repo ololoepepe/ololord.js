@@ -141,25 +141,16 @@ export async function getArchive(boardName) {
   if (!board) {
     throw new Error(Tools.translate('Invalid board'));
   }
-  let path = `${__dirname}/../../public/${boardName}/arch`;
-  let exists = await FS.exists(path);
-  if (exists) {
-    var fileNames = await FS.list(path);
-  } else {
-    var fileNames = [];
-  }
-  fileNames = fileNames.filter((fileName) => { return fileName.split('.').pop() === 'json'; });
-  let threads = await Tools.series(fileNames, async function(fileName) {
-    let stats = await FS.stat(`${path}/${fileName}`);
-    return {
-      boardName: boardName,
-      number: +fileName.split('.').shift(),
-      birthtime: stats.node.birthtime.valueOf()
-    };
-  }, true);
+  let threads = await ThreadsModel.getThreads(boardName, { archived: true });
+  threads.sort(ThreadsModel.sortThreadsByDate);
+  let Post = await client.collection('post');
+  await Tools.series(threads, async function(thread) {
+    thread.opPost = await PostsModel.getPost(boardName, thread.number);
+    thread.title = postSubject(thread.opPost, 50) || null;
+  });
   let lastPostNumber = await getLastPostNumber(boardName);
   return {
-    threads: threads.sort((t1, t2) => { return t2 - t1; }), //NOTE: The order is correct (t2 - t1).
+    threads: threads,
     lastPostNumber: lastPostNumber,
     postingSpeed: Renderer.postingSpeedString(board.launchDate, lastPostNumber)
   };

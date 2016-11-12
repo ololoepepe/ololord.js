@@ -75,7 +75,6 @@ const DEFAULT_VALUES = new Map([
   ['site.ws.transports', ''],
   ['site.maxSearchQueryLength', 50],
   ['system.detectRealIp', true],
-  ['system.elasticsearch.host', 'localhost:9200'],
   ['system.httpRequestTimeout', 60 * 1000], //NOTE: 1 minute
   ['system.log.maxFiles', 100],
   ['system.log.maxSize', 104857600], //NOTE: 100 MB
@@ -102,7 +101,6 @@ const DEFAULT_VALUES = new Map([
   ['system.redis.retryDelayOnTryAgain', 100],
   ['system.rendererWorkerCount', OS.cpus().length],
   ['system.rerenderCacheOnStartup', true],
-  ['system.rerenderArchive', false],
   ['system.search.maxResultCount', 100],
   ['system.search.maxResultPostSubjectLengh', 100],
   ['system.search.maxResultPostTextLengh', 300],

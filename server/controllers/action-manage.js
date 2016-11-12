@@ -549,7 +549,7 @@ router.post('/action/superuserDeleteFile', function () {
 
 router.post('/action/superuserRerender', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(req, res, next) {
-    var _ref10, _ref10$fields, _targets, archive;
+    var _ref10, _targets;
 
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
@@ -570,64 +570,49 @@ router.post('/action/superuserRerender', function () {
 
           case 5:
             _ref10 = _context9.sent;
-            _ref10$fields = _ref10.fields;
-            _targets = _ref10$fields.targets;
-            archive = _ref10$fields.archive;
+            _targets = _ref10.fields.targets;
 
             if (!(typeof _targets !== 'string')) {
-              _context9.next = 11;
+              _context9.next = 9;
               break;
             }
 
             throw new Error(Tools.translate('Invalid targets'));
 
-          case 11:
+          case 9:
             if (!_targets) {
-              _context9.next = 16;
+              _context9.next = 14;
               break;
             }
 
-            _context9.next = 14;
+            _context9.next = 12;
             return Renderer.rerender(_targets);
 
-          case 14:
-            _context9.next = 23;
+          case 12:
+            _context9.next = 16;
             break;
 
-          case 16:
-            if (!('true' === archive)) {
-              _context9.next = 21;
-              break;
-            }
-
-            _context9.next = 19;
+          case 14:
+            _context9.next = 16;
             return Renderer.rerender();
 
-          case 19:
-            _context9.next = 23;
-            break;
-
-          case 21:
-            _context9.next = 23;
-            return Renderer.rerender(['**', '!/*/arch/*']);
-
-          case 23:
+          case 16:
             res.json({});
-            _context9.next = 29;
+            _context9.next = 22;
             break;
 
-          case 26:
-            _context9.prev = 26;
+          case 19:
+            _context9.prev = 19;
             _context9.t0 = _context9['catch'](0);
 
             next(Tools.processError(_context9.t0));
 
-          case 29:
+          case 22:
           case 'end':
             return _context9.stop();
         }
       }
-    }, _callee9, this, [[0, 26]]);
+    }, _callee9, this, [[0, 19]]);
   }));
 
   return function (_x23, _x24, _x25) {

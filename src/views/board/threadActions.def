@@ -1,7 +1,7 @@
 <div id='thread-actions-{{!position}}' class='thread-actions'>
   [<a href='/{{!it.site.pathPrefix}}{{!it.board.name}}{{? it.thread.archived}}/archive.html{{?}}'
       class='icon icon-arrow-left-24 button-icon' title='{{!it.translate('Back', 'backText')}}'></a>]
-  {{? it.board.postingEnabled && it.thread.postingEnabled && !it.thread.archived && !it.thread.postLimitReached}}
+  {{? it.board.postingEnabled && it.thread.postingEnabled && !it.thread.postLimitReached}}
     <span class='js-only'>[<span class='icon icon-update-24 button-icon' 
            data-bind='attr: {
                         title: "{{!it.translate('Update thread', 'updateThreadText')}}" + shortcutSuffix("updateThread")

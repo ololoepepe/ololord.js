@@ -159,16 +159,14 @@ router.post('/action/superuserRerender', async function(req, res, next) {
     if (!req.isSuperuser()) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let { fields: { targets, archive } } = await Files.parseForm(req);
+    let { fields: { targets } } = await Files.parseForm(req);
     if (typeof targets !== 'string') {
       throw new Error(Tools.translate('Invalid targets'));
     }
     if (targets) {
       await Renderer.rerender(targets);
-    } else if ('true' === archive) {
-      await Renderer.rerender();
     } else {
-      await Renderer.rerender(['**', '!/*/arch/*']);
+      await Renderer.rerender();
     }
     res.json({});
   } catch (err) {

@@ -52,7 +52,7 @@ var testParameters = function () {
               fields.text = post.rawText;
             }
             _context.next = 15;
-            return FilesModel.getPostFileCount(boardName, postNumber, { archived: post.archived });
+            return FilesModel.getPostFileCount(boardName, postNumber);
 
           case 15:
             fileCount = _context.sent;
@@ -336,7 +336,10 @@ router.post('/action/createPost', function () {
           case 35:
             files = _context3.sent;
             _context3.next = 38;
-            return PostsModel.createPost(req, fields, files, transaction, { unbumpable: thread.unbumpable });
+            return PostsModel.createPost(req, fields, files, transaction, {
+              unbumpable: thread.unbumpable,
+              archived: thread.archived
+            });
 
           case 38:
             post = _context3.sent;
@@ -667,7 +670,7 @@ router.post('/action/addFiles', function () {
           case 36:
             files = _context6.sent;
             _context6.next = 39;
-            return FilesModel.addFilesToPost(boardName, postNumber, files, { archived: post.archived });
+            return FilesModel.addFilesToPost(boardName, postNumber, files);
 
           case 39:
             res.json({});

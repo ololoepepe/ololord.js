@@ -114,7 +114,7 @@ function currentPost(selectLast) {
 }
 
 function currentThread(selectLast) {
-  if (Tools.isThreadPage() || Tools.isArchivedThreadPage()) {
+  if (Tools.isThreadPage()) {
     return null;
   }
   let post = currentPost(selectLast);
@@ -168,13 +168,13 @@ export const ACTIONS = {
   previousThreadPost: {
     title: () => { return Tools.translate('Previous thread/post'); },
     handler: () => {
-      return previousNextThreadPost(false, Tools.isThreadPage() || Tools.isArchivedThreadPage());
+      return previousNextThreadPost(false, Tools.isThreadPage());
     }
   },
   nextThreadPost: {
     title: () => { return Tools.translate('Next thread/post'); },
     handler: () => {
-      return previousNextThreadPost(true, Tools.isThreadPage() || Tools.isArchivedThreadPage());
+      return previousNextThreadPost(true, Tools.isThreadPage());
     }
   },
   previousPost: {

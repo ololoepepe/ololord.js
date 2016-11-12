@@ -119,9 +119,7 @@ registerHandler('load', () => {
 
 registerHandler('load', async function() {
   try {
-    if (!Tools.isArchivedThreadPage()) {
-      Drafts.initializeDrafts();
-    }
+    Drafts.initializeDrafts();
     let posts = DOM.queryAll('#content .js-post');
     await PostProcessors.applyPreprocessors(posts);
     await PostProcessors.applyPostprocessors(posts);
@@ -132,7 +130,7 @@ registerHandler('load', async function() {
   }
 }, {
   priority: 20,
-  test: () => { return Tools.isBoardPage() || Tools.isThreadPage() || Tools.isArchivedThreadPage(); }
+  test: () => { return Tools.isBoardPage() || Tools.isThreadPage(); }
 });
 
 registerHandler('load', () => {

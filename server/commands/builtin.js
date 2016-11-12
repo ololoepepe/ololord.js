@@ -304,7 +304,7 @@ exports.default = [{
       var options = _ref6.options;
       var what = _ref6.what;
 
-      var timeStart, _ref7, list, archive, paths;
+      var timeStart, _ref7, list, paths;
 
       return regeneratorRuntime.wrap(function _callee7$(_context7) {
         while (1) {
@@ -313,56 +313,42 @@ exports.default = [{
               timeStart = new Date();
               _ref7 = options || {};
               list = _ref7.list;
-              archive = _ref7.archive;
 
               if (!list) {
-                _context7.next = 11;
+                _context7.next = 10;
                 break;
               }
 
-              _context7.next = 7;
+              _context7.next = 6;
               return Renderer.getRouterPaths(true);
 
-            case 7:
+            case 6:
               paths = _context7.sent;
               return _context7.abrupt('return', paths.map(function (path) {
                 return (typeof path === 'undefined' ? 'undefined' : _typeof(path)) === 'object' ? path.path + ' ' + path.description : path;
               }).join('\n'));
 
-            case 11:
+            case 10:
               if (!what) {
-                _context7.next = 16;
+                _context7.next = 15;
                 break;
               }
 
-              _context7.next = 14;
+              _context7.next = 13;
               return Renderer.rerender(what);
 
-            case 14:
-              _context7.next = 23;
+            case 13:
+              _context7.next = 17;
               break;
 
-            case 16:
-              if (!archive) {
-                _context7.next = 21;
-                break;
-              }
-
-              _context7.next = 19;
+            case 15:
+              _context7.next = 17;
               return Renderer.rerender();
 
-            case 19:
-              _context7.next = 23;
-              break;
-
-            case 21:
-              _context7.next = 23;
-              return Renderer.rerender(['**', '!/*/arch/*']);
-
-            case 23:
+            case 17:
               return _context7.abrupt('return', 'OK (' + (new Date() - timeStart) + 'ms)');
 
-            case 24:
+            case 18:
             case 'end':
               return _context7.stop();
           }
@@ -379,9 +365,6 @@ exports.default = [{
   options: {
     description: Tools.translate("Rerenders the cache."),
     options: [{
-      value: '-a, --archive',
-      description: Tools.translate('Rerender archived threads (if no pattern is specified).')
-    }, {
       value: '-l, --list',
       description: Tools.translate('Only list available router paths. No rerender.')
     }]

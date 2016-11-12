@@ -76,7 +76,7 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
     if (Settings.showNewPosts()) {
       Threads.showNewPosts();
     }
-    if (Tools.isBoardPage() || Tools.isThreadPage() || Tools.isArchivedThreadPage()) {
+    if (Tools.isBoardPage() || Tools.isThreadPage()) {
       Drafts.initializeDrafts();
       let posts = DOM.queryAll('.js-post', content[0]);
       await PostProcessors.applyPreprocessors(posts);

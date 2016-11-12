@@ -96,7 +96,7 @@ export default [{
   command: 'rerender [what...]',
   handler: async function({ options, what } = {}) {
     let timeStart = new Date();
-    let { list, archive } = options || {};
+    let { list } = options || {};
     if (list) {
       let paths = await Renderer.getRouterPaths(true);
       return paths.map((path) => {
@@ -105,10 +105,8 @@ export default [{
     } else {
       if (what) {
         await Renderer.rerender(what);
-      } else if (archive) {
-        await Renderer.rerender();
       } else {
-        await Renderer.rerender(['**', '!/*/arch/*']);
+        await Renderer.rerender();
       }
       return `OK (${new Date() - timeStart}ms)`;
     }
@@ -116,9 +114,6 @@ export default [{
   options: {
     description: Tools.translate("Rerenders the cache."),
     options: [{
-      value: '-a, --archive',
-      description: Tools.translate('Rerender archived threads (if no pattern is specified).')
-    }, {
       value: '-l, --list',
       description: Tools.translate('Only list available router paths. No rerender.')
     }]

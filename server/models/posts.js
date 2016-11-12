@@ -185,6 +185,7 @@ var createPost = exports.createPost = function () {
     var postNumber = _ref3.postNumber;
     var date = _ref3.date;
     var unbumpable = _ref3.unbumpable;
+    var archived = _ref3.archived;
     var boardName, threadNumber, text, markupMode, name, subject, sage, signAsOp, tripcode, password, board, Post, postCount, rawText, markupModes, referencedPosts, accessLevel, extraData, fileInfos, post, postCountNew;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -268,7 +269,7 @@ var createPost = exports.createPost = function () {
               number: postNumber,
               threadNumber: threadNumber,
               sequenceNumber: postCount + 1,
-              archived: false,
+              archived: !!archived,
               name: name || null,
               subject: subject || null,
               rawText: rawText,

@@ -294,7 +294,7 @@ var getCatalog = exports.getCatalog = function () {
 
 var getArchive = exports.getArchive = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(boardName) {
-    var board, path, exists, fileNames, threads, lastPostNumber;
+    var board, threads, Post, lastPostNumber;
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
@@ -309,51 +309,32 @@ var getArchive = exports.getArchive = function () {
             throw new Error(Tools.translate('Invalid board'));
 
           case 3:
-            path = __dirname + '/../../public/' + boardName + '/arch';
-            _context7.next = 6;
-            return _fs2.default.exists(path);
+            _context7.next = 5;
+            return ThreadsModel.getThreads(boardName, { archived: true });
 
-          case 6:
-            exists = _context7.sent;
+          case 5:
+            threads = _context7.sent;
 
-            if (!exists) {
-              _context7.next = 13;
-              break;
-            }
+            threads.sort(ThreadsModel.sortThreadsByDate);
+            _context7.next = 9;
+            return client.collection('post');
 
-            _context7.next = 10;
-            return _fs2.default.list(path);
-
-          case 10:
-            fileNames = _context7.sent;
-            _context7.next = 14;
-            break;
-
-          case 13:
-            fileNames = [];
-
-          case 14:
-            fileNames = fileNames.filter(function (fileName) {
-              return fileName.split('.').pop() === 'json';
-            });
-            _context7.next = 17;
-            return Tools.series(fileNames, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(fileName) {
-                var stats;
+          case 9:
+            Post = _context7.sent;
+            _context7.next = 12;
+            return Tools.series(threads, function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(thread) {
                 return regeneratorRuntime.wrap(function _callee6$(_context6) {
                   while (1) {
                     switch (_context6.prev = _context6.next) {
                       case 0:
                         _context6.next = 2;
-                        return _fs2.default.stat(path + '/' + fileName);
+                        return PostsModel.getPost(boardName, thread.number);
 
                       case 2:
-                        stats = _context6.sent;
-                        return _context6.abrupt('return', {
-                          boardName: boardName,
-                          number: +fileName.split('.').shift(),
-                          birthtime: stats.node.birthtime.valueOf()
-                        });
+                        thread.opPost = _context6.sent;
+
+                        thread.title = postSubject(thread.opPost, 50) || null;
 
                       case 4:
                       case 'end':
@@ -366,24 +347,21 @@ var getArchive = exports.getArchive = function () {
               return function (_x10) {
                 return ref.apply(this, arguments);
               };
-            }(), true);
+            }());
 
-          case 17:
-            threads = _context7.sent;
-            _context7.next = 20;
+          case 12:
+            _context7.next = 14;
             return getLastPostNumber(boardName);
 
-          case 20:
+          case 14:
             lastPostNumber = _context7.sent;
             return _context7.abrupt('return', {
-              threads: threads.sort(function (t1, t2) {
-                return t2 - t1;
-              }), //NOTE: The order is correct (t2 - t1).
+              threads: threads,
               lastPostNumber: lastPostNumber,
               postingSpeed: Renderer.postingSpeedString(board.launchDate, lastPostNumber)
             });
 
-          case 22:
+          case 16:
           case 'end':
             return _context7.stop();
         }

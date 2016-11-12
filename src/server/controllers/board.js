@@ -63,7 +63,7 @@ function pickPostsToRerender(oldPosts, posts) {
   });
 }
 
-async function renderThreadHTML(thread, { prerendered, targetPath } = {}) {
+async function renderThreadHTML(thread, { prerendered } = {}) {
   let board = Board.board(thread.boardName);
   if (!board) {
     throw new Error(Tools.translate('Invalid board'));
@@ -77,11 +77,7 @@ async function renderThreadHTML(thread, { prerendered, targetPath } = {}) {
     prerendered: prerendered
   };
   let data = Renderer.render('pages/thread', model);
-  if (targetPath) {
-    await FS.write(targetPath, data);
-  } else {
-    await Cache.writeFile(`${thread.boardName}/res/${thread.number}.html`, data);
-  }
+  await Cache.writeFile(`${thread.boardName}/res/${thread.number}.html`, data);
 }
 
 async function renderThread(boardName, threadNumber) {
@@ -89,18 +85,6 @@ async function renderThread(boardName, threadNumber) {
   await Renderer.renderThread(thread);
   await Cache.writeFile(`${boardName}/res/${threadNumber}.json`, JSON.stringify({ thread: thread }));
   await renderThreadHTML(thread);
-}
-
-async function renderArchivedThread(boardName, threadNumber) {
-  let thread = await BoardsModel.getThread(boardName, threadNumber);
-  if (!thread || !thread.archived) {
-    throw new Error(Tools.translate('No such thread: >>/$[1]/$[2]', '', boardName, threadNumber));
-  }
-  let archPath = `${__dirname}/../../public/${boardName}/arch`;
-  await mkpath(archPath);
-  await Renderer.renderThread(thread);
-  await FS.write(`${archPath}/${threadNumber}.json`, JSON.stringify({ thread: thread }));
-  await renderThreadHTML(thread, { targetPath: `${archPath}/${threadNumber}.html` });
 }
 
 function getPrerenderedPost(html, postNumber) {
@@ -196,17 +180,14 @@ router.paths = async function(description) {
     }, {
       path: '/<board name>/res/<thread number>',
       description: Tools.translate('A thread')
-    }, {
-      path: '/<board name>/arch/<thread number>',
-      description: Tools.translate('An archived thread')
     }];
   }
   let arrays = await Tools.series(Board.boardNames(), async function(boardName) {
     let threadNumbers = await ThreadsModel.getThreadNumbers(boardName);
     let archivedThreadNumbers = await ThreadsModel.getThreadNumbers(boardName, { archived: true });
+    threadNumbers = threadNumbers.concat(archivedThreadNumbers).sort();
     let paths = [`/${boardName}`, `/${boardName}/archive`, `/${boardName}/catalog`, `/${boardName}/rss`];
-    paths = paths.concat(threadNumbers.map(threadNumber => `/${boardName}/res/${threadNumber}`));
-    return paths.concat(archivedThreadNumbers.map(threadNumber => `/${boardName}/arch/${threadNumber}`));
+    return paths.concat(threadNumbers.map(threadNumber => `/${boardName}/res/${threadNumber}`));
   }, true);
   return _(arrays).flatten();
 };
@@ -376,10 +357,6 @@ router.render = async function(path) {
   match = path.match(/^\/([^\/]+)\/res\/(\d+)$/);
   if (match) {
     return await renderThread(match[1], +match[2]);
-  }
-  match = path.match(/^\/([^\/]+)\/arch\/(\d+)$/);
-  if (match) {
-    return await renderArchivedThread(match[1], +match[2]);
   }
 };
 

@@ -36,7 +36,7 @@ async function testParameters(req, boardName, mode, { fields, files, postNumber 
     if (typeof fields.text === 'undefined') {
       fields.text = post.rawText;
     }
-    fileCount = await FilesModel.getPostFileCount(boardName, postNumber, { archived: post.archived });
+    fileCount = await FilesModel.getPostFileCount(boardName, postNumber);
   }
   await board.testParameters({
     req: req,
@@ -120,7 +120,10 @@ router.post('/action/createPost', async function(req, res, next) {
     }
     transaction = new PostCreationTransaction(boardName);
     files = await Files.processFiles(boardName, files, transaction);
-    let post = await PostsModel.createPost(req, fields, files, transaction, { unbumpable: thread.unbumpable });
+    let post = await PostsModel.createPost(req, fields, files, transaction, {
+      unbumpable: thread.unbumpable,
+      archived: thread.archived
+    });
     IPC.send('notifyAboutNewPosts', `${boardName}/${threadNumber}`);
     if ('node-captcha-noscript' !== captchaEngine) {
       res.json({
@@ -243,7 +246,7 @@ router.post('/action/addFiles', async function(req, res, next) {
     });
     transaction = new PostCreationTransaction(boardName);
     files = await Files.processFiles(boardName, files, transaction);
-    await FilesModel.addFilesToPost(boardName, postNumber, files, { archived: post.archived });
+    await FilesModel.addFilesToPost(boardName, postNumber, files);
     res.json({});
   } catch (err) {
     if (transaction) {

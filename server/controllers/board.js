@@ -11,7 +11,6 @@ var renderThreadHTML = function () {
     var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     var prerendered = _ref.prerendered;
-    var targetPath = _ref.targetPath;
     var board, model, data;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -36,24 +35,10 @@ var renderThreadHTML = function () {
               prerendered: prerendered
             };
             data = Renderer.render('pages/thread', model);
-
-            if (!targetPath) {
-              _context.next = 10;
-              break;
-            }
-
-            _context.next = 8;
-            return _fs2.default.write(targetPath, data);
-
-          case 8:
-            _context.next = 12;
-            break;
-
-          case 10:
-            _context.next = 12;
+            _context.next = 7;
             return Cache.writeFile(thread.boardName + '/res/' + thread.number + '.html', data);
 
-          case 12:
+          case 7:
           case 'end':
             return _context.stop();
         }
@@ -102,58 +87,8 @@ var renderThread = function () {
   };
 }();
 
-var renderArchivedThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, threadNumber) {
-    var thread, archPath;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            _context3.next = 2;
-            return BoardsModel.getThread(boardName, threadNumber);
-
-          case 2:
-            thread = _context3.sent;
-
-            if (!(!thread || !thread.archived)) {
-              _context3.next = 5;
-              break;
-            }
-
-            throw new Error(Tools.translate('No such thread: >>/$[1]/$[2]', '', boardName, threadNumber));
-
-          case 5:
-            archPath = __dirname + '/../../public/' + boardName + '/arch';
-            _context3.next = 8;
-            return mkpath(archPath);
-
-          case 8:
-            _context3.next = 10;
-            return Renderer.renderThread(thread);
-
-          case 10:
-            _context3.next = 12;
-            return _fs2.default.write(archPath + '/' + threadNumber + '.json', JSON.stringify({ thread: thread }));
-
-          case 12:
-            _context3.next = 14;
-            return renderThreadHTML(thread, { targetPath: archPath + '/' + threadNumber + '.html' });
-
-          case 14:
-          case 'end':
-            return _context3.stop();
-        }
-      }
-    }, _callee3, this);
-  }));
-
-  return function renderArchivedThread(_x6, _x7) {
-    return ref.apply(this, arguments);
-  };
-}();
-
 var renderPage = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(boardName, pageNumber) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName, pageNumber) {
     var _this = this;
 
     var _ref2 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
@@ -162,47 +97,47 @@ var renderPage = function () {
 
     var board, page, pageID, _ret;
 
-    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
-        switch (_context6.prev = _context6.next) {
+        switch (_context5.prev = _context5.next) {
           case 0:
             board = _board2.default.board(boardName);
 
             if (board) {
-              _context6.next = 3;
+              _context5.next = 3;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
           case 3:
-            _context6.next = 5;
+            _context5.next = 5;
             return BoardsModel.getPage(boardName, pageNumber);
 
           case 5:
-            page = _context6.sent;
-            _context6.next = 8;
+            page = _context5.sent;
+            _context5.next = 8;
             return Tools.series(page.threads, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(thread) {
-                return regeneratorRuntime.wrap(function _callee4$(_context4) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(thread) {
+                return regeneratorRuntime.wrap(function _callee3$(_context3) {
                   while (1) {
-                    switch (_context4.prev = _context4.next) {
+                    switch (_context3.prev = _context3.next) {
                       case 0:
-                        _context4.next = 2;
+                        _context3.next = 2;
                         return Renderer.renderThread(thread);
 
                       case 2:
-                        return _context4.abrupt('return', _context4.sent);
+                        return _context3.abrupt('return', _context3.sent);
 
                       case 3:
                       case 'end':
-                        return _context4.stop();
+                        return _context3.stop();
                     }
                   }
-                }, _callee4, this);
+                }, _callee3, this);
               }));
 
-              return function (_x12) {
+              return function (_x10) {
                 return ref.apply(this, arguments);
               };
             }());
@@ -211,28 +146,28 @@ var renderPage = function () {
             pageID = pageNumber > 0 ? pageNumber : 'index';
 
             if (!allowPrerender) {
-              _context6.next = 16;
+              _context5.next = 16;
               break;
             }
 
-            return _context6.delegateYield(regeneratorRuntime.mark(function _callee5() {
+            return _context5.delegateYield(regeneratorRuntime.mark(function _callee4() {
               var pageJSON, pageHTML, mustRender, lastPosts, posts, postsToRerender, prerendered;
-              return regeneratorRuntime.wrap(function _callee5$(_context5) {
+              return regeneratorRuntime.wrap(function _callee4$(_context4) {
                 while (1) {
-                  switch (_context5.prev = _context5.next) {
+                  switch (_context4.prev = _context4.next) {
                     case 0:
-                      _context5.next = 2;
+                      _context4.next = 2;
                       return Cache.readFile(boardName + '/' + pageNumber + '.json');
 
                     case 2:
-                      pageJSON = _context5.sent;
+                      pageJSON = _context4.sent;
 
                       pageJSON = JSON.parse(pageJSON);
-                      _context5.next = 6;
+                      _context4.next = 6;
                       return Cache.readFile(boardName + '/' + pageID + '.html');
 
                     case 6:
-                      pageHTML = _context5.sent;
+                      pageHTML = _context4.sent;
                       mustRender = page.threads.some(function (thread) {
                         return allowPrerender === thread.number;
                       });
@@ -266,11 +201,11 @@ var renderPage = function () {
                       postsToRerender = pickPostsToRerender(lastPosts, posts);
 
                       if (!(!mustRender && (0, _underscore2.default)(postsToRerender).isEmpty())) {
-                        _context5.next = 16;
+                        _context4.next = 16;
                         break;
                       }
 
-                      return _context5.abrupt('return', {
+                      return _context4.abrupt('return', {
                         v: void 0
                       });
 
@@ -282,7 +217,7 @@ var renderPage = function () {
                       prerendered = (0, _underscore2.default)(prerendered).mapObject(function (_1, postNumber) {
                         return getPrerenderedPost(pageHTML, postNumber);
                       });
-                      _context5.next = 20;
+                      _context4.next = 20;
                       return Cache.writeFile(boardName + '/' + pageNumber + '.json', JSON.stringify(page));
 
                     case 20:
@@ -290,102 +225,102 @@ var renderPage = function () {
 
                     case 21:
                     case 'end':
-                      return _context5.stop();
+                      return _context4.stop();
                   }
                 }
-              }, _callee5, _this);
+              }, _callee4, _this);
             })(), 't0', 11);
 
           case 11:
-            _ret = _context6.t0;
+            _ret = _context5.t0;
 
             if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
-              _context6.next = 14;
+              _context5.next = 14;
               break;
             }
 
-            return _context6.abrupt('return', _ret.v);
+            return _context5.abrupt('return', _ret.v);
 
           case 14:
-            _context6.next = 18;
+            _context5.next = 18;
             break;
 
           case 16:
-            _context6.next = 18;
+            _context5.next = 18;
             return Cache.writeFile(boardName + '/' + pageNumber + '.json', JSON.stringify(page));
 
           case 18:
             page.title = board.title;
             page.board = MiscModel.board(board).board;
-            _context6.next = 22;
+            _context5.next = 22;
             return Cache.writeFile(boardName + '/' + pageID + '.html', Renderer.render('pages/board', page));
 
           case 22:
           case 'end':
-            return _context6.stop();
+            return _context5.stop();
         }
       }
-    }, _callee6, this);
+    }, _callee5, this);
   }));
 
-  return function renderPage(_x8, _x9, _x10) {
+  return function renderPage(_x6, _x7, _x8) {
     return ref.apply(this, arguments);
   };
 }();
 
 var renderPages = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(boardName) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(boardName) {
     var _ref3 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     var allowPrerender = _ref3.allowPrerender;
     var pageCount;
-    return regeneratorRuntime.wrap(function _callee8$(_context8) {
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
-        switch (_context8.prev = _context8.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
-            _context8.next = 2;
+            _context7.next = 2;
             return BoardsModel.getPageCount(boardName);
 
           case 2:
-            pageCount = _context8.sent;
-            _context8.next = 5;
+            pageCount = _context7.sent;
+            _context7.next = 5;
             return Tools.series(_underscore2.default.range(pageCount), function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(pageNumber) {
-                return regeneratorRuntime.wrap(function _callee7$(_context7) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(pageNumber) {
+                return regeneratorRuntime.wrap(function _callee6$(_context6) {
                   while (1) {
-                    switch (_context7.prev = _context7.next) {
+                    switch (_context6.prev = _context6.next) {
                       case 0:
-                        _context7.next = 2;
+                        _context6.next = 2;
                         return renderPage(boardName, pageNumber, { allowPrerender: allowPrerender });
 
                       case 2:
-                        return _context7.abrupt('return', _context7.sent);
+                        return _context6.abrupt('return', _context6.sent);
 
                       case 3:
                       case 'end':
-                        return _context7.stop();
+                        return _context6.stop();
                     }
                   }
-                }, _callee7, this);
+                }, _callee6, this);
               }));
 
-              return function (_x16) {
+              return function (_x14) {
                 return ref.apply(this, arguments);
               };
             }());
 
           case 5:
-            return _context8.abrupt('return', _context8.sent);
+            return _context7.abrupt('return', _context7.sent);
 
           case 6:
           case 'end':
-            return _context8.stop();
+            return _context7.stop();
         }
       }
-    }, _callee8, this);
+    }, _callee7, this);
   }));
 
-  return function renderPages(_x13, _x14) {
+  return function renderPages(_x11, _x12) {
     return ref.apply(this, arguments);
   };
 }();
@@ -526,18 +461,18 @@ function getPrerenderedPost(html, postNumber) {
 ;
 
 router.paths = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(description) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(description) {
     var arrays;
-    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
-        switch (_context10.prev = _context10.next) {
+        switch (_context9.prev = _context9.next) {
           case 0:
             if (!description) {
-              _context10.next = 2;
+              _context9.next = 2;
               break;
             }
 
-            return _context10.abrupt('return', [{
+            return _context9.abrupt('return', [{
               path: '/<board name>',
               description: Tools.translate('Board pages (from 0 to N)')
             }, {
@@ -552,78 +487,73 @@ router.paths = function () {
             }, {
               path: '/<board name>/res/<thread number>',
               description: Tools.translate('A thread')
-            }, {
-              path: '/<board name>/arch/<thread number>',
-              description: Tools.translate('An archived thread')
             }]);
 
           case 2:
-            _context10.next = 4;
+            _context9.next = 4;
             return Tools.series(_board2.default.boardNames(), function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(boardName) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(boardName) {
                 var threadNumbers, archivedThreadNumbers, paths;
-                return regeneratorRuntime.wrap(function _callee9$(_context9) {
+                return regeneratorRuntime.wrap(function _callee8$(_context8) {
                   while (1) {
-                    switch (_context9.prev = _context9.next) {
+                    switch (_context8.prev = _context8.next) {
                       case 0:
-                        _context9.next = 2;
+                        _context8.next = 2;
                         return ThreadsModel.getThreadNumbers(boardName);
 
                       case 2:
-                        threadNumbers = _context9.sent;
-                        _context9.next = 5;
+                        threadNumbers = _context8.sent;
+                        _context8.next = 5;
                         return ThreadsModel.getThreadNumbers(boardName, { archived: true });
 
                       case 5:
-                        archivedThreadNumbers = _context9.sent;
-                        paths = ['/' + boardName, '/' + boardName + '/archive', '/' + boardName + '/catalog', '/' + boardName + '/rss'];
+                        archivedThreadNumbers = _context8.sent;
 
-                        paths = paths.concat(threadNumbers.map(function (threadNumber) {
+                        threadNumbers = threadNumbers.concat(archivedThreadNumbers).sort();
+                        paths = ['/' + boardName, '/' + boardName + '/archive', '/' + boardName + '/catalog', '/' + boardName + '/rss'];
+                        return _context8.abrupt('return', paths.concat(threadNumbers.map(function (threadNumber) {
                           return '/' + boardName + '/res/' + threadNumber;
-                        }));
-                        return _context9.abrupt('return', paths.concat(archivedThreadNumbers.map(function (threadNumber) {
-                          return '/' + boardName + '/arch/' + threadNumber;
                         })));
 
                       case 9:
                       case 'end':
-                        return _context9.stop();
+                        return _context8.stop();
                     }
                   }
-                }, _callee9, this);
+                }, _callee8, this);
               }));
 
-              return function (_x18) {
+              return function (_x16) {
                 return ref.apply(this, arguments);
               };
             }(), true);
 
           case 4:
-            arrays = _context10.sent;
-            return _context10.abrupt('return', (0, _underscore2.default)(arrays).flatten());
+            arrays = _context9.sent;
+            return _context9.abrupt('return', (0, _underscore2.default)(arrays).flatten());
 
           case 6:
           case 'end':
-            return _context10.stop();
+            return _context9.stop();
         }
       }
-    }, _callee10, this);
+    }, _callee9, this);
   }));
 
-  return function (_x17) {
+  return function (_x15) {
     return ref.apply(this, arguments);
   };
 }();
 
 router.renderThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(key, data) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(key, data) {
     var _this2 = this;
 
     var mustCreate, mustDelete, board, _ret2;
 
-    return regeneratorRuntime.wrap(function _callee13$(_context13) {
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
-        switch (_context13.prev = _context13.next) {
+        switch (_context12.prev = _context12.next) {
           case 0:
             if (!(0, _underscore2.default)(data).isArray()) {
               data = [data];
@@ -636,11 +566,11 @@ router.renderThread = function () {
             });
 
             if (!(mustCreate && mustDelete)) {
-              _context13.next = 5;
+              _context12.next = 5;
               break;
             }
 
-            return _context13.abrupt('return');
+            return _context12.abrupt('return');
 
           case 5:
             //NOTE: This should actually never happen
@@ -657,48 +587,48 @@ router.renderThread = function () {
             board = _board2.default.board(data.boardName);
 
             if (board) {
-              _context13.next = 9;
+              _context12.next = 9;
               break;
             }
 
             throw new Error(Tools.translate('Invalid board'));
 
           case 9:
-            _context13.t0 = data.action;
-            _context13.next = _context13.t0 === 'create' ? 12 : _context13.t0 === 'edit' ? 15 : _context13.t0 === 'delete' ? 19 : 26;
+            _context12.t0 = data.action;
+            _context12.next = _context12.t0 === 'create' ? 12 : _context12.t0 === 'edit' ? 15 : _context12.t0 === 'delete' ? 19 : 26;
             break;
 
           case 12:
-            _context13.next = 14;
+            _context12.next = 14;
             return renderThread(data.boardName, data.threadNumber);
 
           case 14:
-            return _context13.abrupt('break', 27);
+            return _context12.abrupt('break', 27);
 
           case 15:
-            return _context13.delegateYield(regeneratorRuntime.mark(function _callee12() {
+            return _context12.delegateYield(regeneratorRuntime.mark(function _callee11() {
               var threadID, threadData, model, thread, lastPosts, posts, postsToRerender, threadHTML, prerendered;
-              return regeneratorRuntime.wrap(function _callee12$(_context12) {
+              return regeneratorRuntime.wrap(function _callee11$(_context11) {
                 while (1) {
-                  switch (_context12.prev = _context12.next) {
+                  switch (_context11.prev = _context11.next) {
                     case 0:
                       threadID = data.boardName + '/res/' + data.threadNumber;
-                      _context12.next = 3;
+                      _context11.next = 3;
                       return Cache.readFile(threadID + '.json');
 
                     case 3:
-                      threadData = _context12.sent;
+                      threadData = _context11.sent;
                       model = JSON.parse(threadData);
                       thread = model.thread;
                       lastPosts = thread.lastPosts.reduce(function (acc, post) {
                         acc[post.number] = post;
                         return acc;
                       }, {});
-                      _context12.next = 9;
+                      _context11.next = 9;
                       return BoardsModel.getThread(data.boardName, data.threadNumber);
 
                     case 9:
-                      thread = _context12.sent;
+                      thread = _context11.sent;
                       posts = thread.lastPosts.reduce(function (acc, post) {
                         acc[post.number] = post;
                         return acc;
@@ -708,11 +638,11 @@ router.renderThread = function () {
                         return posts.hasOwnProperty(postNumber);
                       });
                       postsToRerender = pickPostsToRerender(lastPosts, posts);
-                      _context12.next = 15;
+                      _context11.next = 15;
                       return Cache.readFile(threadID + '.html');
 
                     case 15:
-                      threadHTML = _context12.sent;
+                      threadHTML = _context11.sent;
                       prerendered = (0, _underscore2.default)(lastPosts).pick(function (_1, postNumber) {
                         return !postsToRerender.hasOwnProperty(postNumber);
                       });
@@ -720,44 +650,44 @@ router.renderThread = function () {
                       prerendered = (0, _underscore2.default)(prerendered).mapObject(function (_1, postNumber) {
                         return getPrerenderedPost(threadHTML, postNumber);
                       });
-                      _context12.next = 20;
+                      _context11.next = 20;
                       return Files.renderPostFileInfos(thread.opPost);
 
                     case 20:
-                      _context12.next = 22;
+                      _context11.next = 22;
                       return board.renderPost(thread.opPost);
 
                     case 22:
-                      thread.opPost = _context12.sent;
-                      _context12.next = 25;
+                      thread.opPost = _context11.sent;
+                      _context11.next = 25;
                       return Tools.series(postsToRerender, function () {
-                        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(post, postNumber) {
+                        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(post, postNumber) {
                           var renderedPost;
-                          return regeneratorRuntime.wrap(function _callee11$(_context11) {
+                          return regeneratorRuntime.wrap(function _callee10$(_context10) {
                             while (1) {
-                              switch (_context11.prev = _context11.next) {
+                              switch (_context10.prev = _context10.next) {
                                 case 0:
-                                  _context11.next = 2;
+                                  _context10.next = 2;
                                   return Files.renderPostFileInfos(post);
 
                                 case 2:
-                                  _context11.next = 4;
+                                  _context10.next = 4;
                                   return board.renderPost(post);
 
                                 case 4:
-                                  renderedPost = _context11.sent;
+                                  renderedPost = _context10.sent;
 
                                   lastPosts[postNumber] = renderedPost;
 
                                 case 6:
                                 case 'end':
-                                  return _context11.stop();
+                                  return _context10.stop();
                               }
                             }
-                          }, _callee11, this);
+                          }, _callee10, this);
                         }));
 
-                        return function (_x21, _x22) {
+                        return function (_x19, _x20) {
                           return ref.apply(this, arguments);
                         };
                       }());
@@ -765,53 +695,78 @@ router.renderThread = function () {
                     case 25:
                       thread.lastPosts = (0, _underscore2.default)(lastPosts).toArray();
                       model.thread = thread;
-                      _context12.next = 29;
+                      _context11.next = 29;
                       return Cache.writeFile(threadID + '.json', JSON.stringify(model));
 
                     case 29:
-                      _context12.next = 31;
+                      _context11.next = 31;
                       return renderThreadHTML(thread, { prerendered: prerendered });
 
                     case 31:
-                      return _context12.abrupt('return', 'break');
+                      return _context11.abrupt('return', 'break');
 
                     case 32:
                     case 'end':
-                      return _context12.stop();
+                      return _context11.stop();
                   }
                 }
-              }, _callee12, _this2);
+              }, _callee11, _this2);
             })(), 't1', 16);
 
           case 16:
-            _ret2 = _context13.t1;
+            _ret2 = _context12.t1;
 
             if (!(_ret2 === 'break')) {
-              _context13.next = 19;
+              _context12.next = 19;
               break;
             }
 
-            return _context13.abrupt('break', 27);
+            return _context12.abrupt('break', 27);
 
           case 19:
-            _context13.next = 21;
+            _context12.next = 21;
             return ThreadsModel.setThreadDeleted(data.boardName + ':' + data.threadNumber);
 
           case 21:
-            _context13.next = 23;
+            _context12.next = 23;
             return Cache.removeFile(data.boardName + '/res/' + data.threadNumber + '.json');
 
           case 23:
-            _context13.next = 25;
+            _context12.next = 25;
             return Cache.removeFile(data.boardName + '/res/' + data.threadNumber + '.html');
 
           case 25:
-            return _context13.abrupt('break', 27);
+            return _context12.abrupt('break', 27);
 
           case 26:
             throw new Error(Tools.translate('Invalid action'));
 
           case 27:
+          case 'end':
+            return _context12.stop();
+        }
+      }
+    }, _callee12, this);
+  }));
+
+  return function (_x17, _x18) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+router.renderPages = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(boardName, threadNumber) {
+    return regeneratorRuntime.wrap(function _callee13$(_context13) {
+      while (1) {
+        switch (_context13.prev = _context13.next) {
+          case 0:
+            _context13.next = 2;
+            return renderPages(boardName, { allowPrerender: threadNumber || true });
+
+          case 2:
+            return _context13.abrupt('return', _context13.sent);
+
+          case 3:
           case 'end':
             return _context13.stop();
         }
@@ -819,39 +774,107 @@ router.renderThread = function () {
     }, _callee13, this);
   }));
 
-  return function (_x19, _x20) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-router.renderPages = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(boardName, threadNumber) {
-    return regeneratorRuntime.wrap(function _callee14$(_context14) {
-      while (1) {
-        switch (_context14.prev = _context14.next) {
-          case 0:
-            _context14.next = 2;
-            return renderPages(boardName, { allowPrerender: threadNumber || true });
-
-          case 2:
-            return _context14.abrupt('return', _context14.sent);
-
-          case 3:
-          case 'end':
-            return _context14.stop();
-        }
-      }
-    }, _callee14, this);
-  }));
-
-  return function (_x23, _x24) {
+  return function (_x21, _x22) {
     return ref.apply(this, arguments);
   };
 }();
 
 router.renderCatalog = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(boardName) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(boardName) {
     var board;
+    return regeneratorRuntime.wrap(function _callee16$(_context16) {
+      while (1) {
+        switch (_context16.prev = _context16.next) {
+          case 0:
+            board = _board2.default.board(boardName);
+
+            if (board) {
+              _context16.next = 3;
+              break;
+            }
+
+            throw new Error(Tools.translate('Invalid board'));
+
+          case 3:
+            _context16.next = 5;
+            return Tools.series(['date', 'recent', 'bumps'], function () {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(sortMode) {
+                var catalog, suffix;
+                return regeneratorRuntime.wrap(function _callee15$(_context15) {
+                  while (1) {
+                    switch (_context15.prev = _context15.next) {
+                      case 0:
+                        _context15.next = 2;
+                        return BoardsModel.getCatalog(boardName, sortMode);
+
+                      case 2:
+                        catalog = _context15.sent;
+                        _context15.next = 5;
+                        return Tools.series(catalog.threads, function () {
+                          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(thread) {
+                            return regeneratorRuntime.wrap(function _callee14$(_context14) {
+                              while (1) {
+                                switch (_context14.prev = _context14.next) {
+                                  case 0:
+                                    _context14.next = 2;
+                                    return Renderer.renderThread(thread);
+
+                                  case 2:
+                                    return _context14.abrupt('return', _context14.sent);
+
+                                  case 3:
+                                  case 'end':
+                                    return _context14.stop();
+                                }
+                              }
+                            }, _callee14, this);
+                          }));
+
+                          return function (_x25) {
+                            return ref.apply(this, arguments);
+                          };
+                        }());
+
+                      case 5:
+                        suffix = 'date' !== sortMode ? '-' + sortMode : '';
+                        _context15.next = 8;
+                        return Cache.writeFile(boardName + '/catalog' + suffix + '.json', JSON.stringify(catalog));
+
+                      case 8:
+                        catalog.title = board.title;
+                        catalog.board = MiscModel.board(board).board;
+                        catalog.sortMode = sortMode;
+                        return _context15.abrupt('return', Cache.writeFile(boardName + '/catalog' + suffix + '.html', Renderer.render('pages/catalog', catalog)));
+
+                      case 12:
+                      case 'end':
+                        return _context15.stop();
+                    }
+                  }
+                }, _callee15, this);
+              }));
+
+              return function (_x24) {
+                return ref.apply(this, arguments);
+              };
+            }());
+
+          case 5:
+          case 'end':
+            return _context16.stop();
+        }
+      }
+    }, _callee16, this);
+  }));
+
+  return function (_x23) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+router.renderArchive = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(boardName) {
+    var board, archive;
     return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
         switch (_context17.prev = _context17.next) {
@@ -867,69 +890,20 @@ router.renderCatalog = function () {
 
           case 3:
             _context17.next = 5;
-            return Tools.series(['date', 'recent', 'bumps'], function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(sortMode) {
-                var catalog, suffix;
-                return regeneratorRuntime.wrap(function _callee16$(_context16) {
-                  while (1) {
-                    switch (_context16.prev = _context16.next) {
-                      case 0:
-                        _context16.next = 2;
-                        return BoardsModel.getCatalog(boardName, sortMode);
-
-                      case 2:
-                        catalog = _context16.sent;
-                        _context16.next = 5;
-                        return Tools.series(catalog.threads, function () {
-                          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(thread) {
-                            return regeneratorRuntime.wrap(function _callee15$(_context15) {
-                              while (1) {
-                                switch (_context15.prev = _context15.next) {
-                                  case 0:
-                                    _context15.next = 2;
-                                    return Renderer.renderThread(thread);
-
-                                  case 2:
-                                    return _context15.abrupt('return', _context15.sent);
-
-                                  case 3:
-                                  case 'end':
-                                    return _context15.stop();
-                                }
-                              }
-                            }, _callee15, this);
-                          }));
-
-                          return function (_x27) {
-                            return ref.apply(this, arguments);
-                          };
-                        }());
-
-                      case 5:
-                        suffix = 'date' !== sortMode ? '-' + sortMode : '';
-                        _context16.next = 8;
-                        return Cache.writeFile(boardName + '/catalog' + suffix + '.json', JSON.stringify(catalog));
-
-                      case 8:
-                        catalog.title = board.title;
-                        catalog.board = MiscModel.board(board).board;
-                        catalog.sortMode = sortMode;
-                        return _context16.abrupt('return', Cache.writeFile(boardName + '/catalog' + suffix + '.html', Renderer.render('pages/catalog', catalog)));
-
-                      case 12:
-                      case 'end':
-                        return _context16.stop();
-                    }
-                  }
-                }, _callee16, this);
-              }));
-
-              return function (_x26) {
-                return ref.apply(this, arguments);
-              };
-            }());
+            return BoardsModel.getArchive(boardName);
 
           case 5:
+            archive = _context17.sent;
+            _context17.next = 8;
+            return Cache.writeFile(boardName + '/archive.json', JSON.stringify(archive));
+
+          case 8:
+            archive.title = board.title;
+            archive.board = MiscModel.board(board).board;
+            _context17.next = 12;
+            return Cache.writeFile(boardName + '/archive.html', Renderer.render('pages/archive', archive));
+
+          case 12:
           case 'end':
             return _context17.stop();
         }
@@ -937,78 +911,34 @@ router.renderCatalog = function () {
     }, _callee17, this);
   }));
 
-  return function (_x25) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-router.renderArchive = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(boardName) {
-    var board, archive;
-    return regeneratorRuntime.wrap(function _callee18$(_context18) {
-      while (1) {
-        switch (_context18.prev = _context18.next) {
-          case 0:
-            board = _board2.default.board(boardName);
-
-            if (board) {
-              _context18.next = 3;
-              break;
-            }
-
-            throw new Error(Tools.translate('Invalid board'));
-
-          case 3:
-            _context18.next = 5;
-            return BoardsModel.getArchive(boardName);
-
-          case 5:
-            archive = _context18.sent;
-            _context18.next = 8;
-            return Cache.writeFile(boardName + '/archive.json', JSON.stringify(archive));
-
-          case 8:
-            archive.title = board.title;
-            archive.board = MiscModel.board(board).board;
-            _context18.next = 12;
-            return Cache.writeFile(boardName + '/archive.html', Renderer.render('pages/archive', archive));
-
-          case 12:
-          case 'end':
-            return _context18.stop();
-        }
-      }
-    }, _callee18, this);
-  }));
-
-  return function (_x28) {
+  return function (_x26) {
     return ref.apply(this, arguments);
   };
 }();
 
 router.renderRSS = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(boardName) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(boardName) {
     var board, rssPostCount, Post, posts, rss;
-    return regeneratorRuntime.wrap(function _callee19$(_context19) {
+    return regeneratorRuntime.wrap(function _callee18$(_context18) {
       while (1) {
-        switch (_context19.prev = _context19.next) {
+        switch (_context18.prev = _context18.next) {
           case 0:
             if (boardName) {
-              _context19.next = 4;
+              _context18.next = 4;
               break;
             }
 
-            _context19.next = 3;
+            _context18.next = 3;
             return Tools.series(_board2.default.boardNames(), router.renderRSS.bind(router));
 
           case 3:
-            return _context19.abrupt('return', _context19.sent);
+            return _context18.abrupt('return', _context18.sent);
 
           case 4:
             board = _board2.default.board(boardName);
 
             if (board) {
-              _context19.next = 7;
+              _context18.next = 7;
               break;
             }
 
@@ -1016,12 +946,12 @@ router.renderRSS = function () {
 
           case 7:
             rssPostCount = (0, _config2.default)('server.rss.postCount');
-            _context19.next = 10;
+            _context18.next = 10;
             return client.collection('post');
 
           case 10:
-            Post = _context19.sent;
-            _context19.next = 13;
+            Post = _context18.sent;
+            _context18.next = 13;
             return Post.find({ boardName: boardName }, {
               number: 1,
               threadNumber: 1,
@@ -1033,14 +963,14 @@ router.renderRSS = function () {
             }).sort({ createdAt: -1 }).limit(rssPostCount).sort({ createdAt: 1 }).toArray();
 
           case 13:
-            posts = _context19.sent;
+            posts = _context18.sent;
 
             if (!(posts.length <= 0)) {
-              _context19.next = 16;
+              _context18.next = 16;
               break;
             }
 
-            return _context19.abrupt('return');
+            return _context18.abrupt('return');
 
           case 16:
             posts.forEach(function (post) {
@@ -1055,13 +985,102 @@ router.renderRSS = function () {
                 return (0, _moment2.default)().utc().locale('en').format(RSS_DATE_TIME_FORMAT);
               }
             };
-            _context19.next = 20;
+            _context18.next = 20;
             return Cache.writeFile(boardName + '/rss.xml', Renderer.render('pages/rss', rss));
 
           case 20:
-            return _context19.abrupt('return', _context19.sent);
+            return _context18.abrupt('return', _context18.sent);
 
           case 21:
+          case 'end':
+            return _context18.stop();
+        }
+      }
+    }, _callee18, this);
+  }));
+
+  return function (_x27) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+router.render = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(path) {
+    var match;
+    return regeneratorRuntime.wrap(function _callee19$(_context19) {
+      while (1) {
+        switch (_context19.prev = _context19.next) {
+          case 0:
+            match = path.match(/^\/([^\/]+)\/rss$/);
+
+            if (!match) {
+              _context19.next = 5;
+              break;
+            }
+
+            _context19.next = 4;
+            return router.renderRSS(match[1]);
+
+          case 4:
+            return _context19.abrupt('return', _context19.sent);
+
+          case 5:
+            match = path.match(/^\/([^\/]+)$/);
+
+            if (!match) {
+              _context19.next = 10;
+              break;
+            }
+
+            _context19.next = 9;
+            return renderPages(match[1]);
+
+          case 9:
+            return _context19.abrupt('return', _context19.sent);
+
+          case 10:
+            match = path.match(/^\/([^\/]+)\/archive$/);
+
+            if (!match) {
+              _context19.next = 15;
+              break;
+            }
+
+            _context19.next = 14;
+            return router.renderArchive(match[1]);
+
+          case 14:
+            return _context19.abrupt('return', _context19.sent);
+
+          case 15:
+            match = path.match(/^\/([^\/]+)\/catalog$/);
+
+            if (!match) {
+              _context19.next = 20;
+              break;
+            }
+
+            _context19.next = 19;
+            return router.renderCatalog(match[1]);
+
+          case 19:
+            return _context19.abrupt('return', _context19.sent);
+
+          case 20:
+            match = path.match(/^\/([^\/]+)\/res\/(\d+)$/);
+
+            if (!match) {
+              _context19.next = 25;
+              break;
+            }
+
+            _context19.next = 24;
+            return renderThread(match[1], +match[2]);
+
+          case 24:
+            return _context19.abrupt('return', _context19.sent);
+
+          case 25:
           case 'end':
             return _context19.stop();
         }
@@ -1069,110 +1088,7 @@ router.renderRSS = function () {
     }, _callee19, this);
   }));
 
-  return function (_x29) {
-    return ref.apply(this, arguments);
-  };
-}();
-
-router.render = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(path) {
-    var match;
-    return regeneratorRuntime.wrap(function _callee20$(_context20) {
-      while (1) {
-        switch (_context20.prev = _context20.next) {
-          case 0:
-            match = path.match(/^\/([^\/]+)\/rss$/);
-
-            if (!match) {
-              _context20.next = 5;
-              break;
-            }
-
-            _context20.next = 4;
-            return router.renderRSS(match[1]);
-
-          case 4:
-            return _context20.abrupt('return', _context20.sent);
-
-          case 5:
-            match = path.match(/^\/([^\/]+)$/);
-
-            if (!match) {
-              _context20.next = 10;
-              break;
-            }
-
-            _context20.next = 9;
-            return renderPages(match[1]);
-
-          case 9:
-            return _context20.abrupt('return', _context20.sent);
-
-          case 10:
-            match = path.match(/^\/([^\/]+)\/archive$/);
-
-            if (!match) {
-              _context20.next = 15;
-              break;
-            }
-
-            _context20.next = 14;
-            return router.renderArchive(match[1]);
-
-          case 14:
-            return _context20.abrupt('return', _context20.sent);
-
-          case 15:
-            match = path.match(/^\/([^\/]+)\/catalog$/);
-
-            if (!match) {
-              _context20.next = 20;
-              break;
-            }
-
-            _context20.next = 19;
-            return router.renderCatalog(match[1]);
-
-          case 19:
-            return _context20.abrupt('return', _context20.sent);
-
-          case 20:
-            match = path.match(/^\/([^\/]+)\/res\/(\d+)$/);
-
-            if (!match) {
-              _context20.next = 25;
-              break;
-            }
-
-            _context20.next = 24;
-            return renderThread(match[1], +match[2]);
-
-          case 24:
-            return _context20.abrupt('return', _context20.sent);
-
-          case 25:
-            match = path.match(/^\/([^\/]+)\/arch\/(\d+)$/);
-
-            if (!match) {
-              _context20.next = 30;
-              break;
-            }
-
-            _context20.next = 29;
-            return renderArchivedThread(match[1], +match[2]);
-
-          case 29:
-            return _context20.abrupt('return', _context20.sent);
-
-          case 30:
-          case 'end':
-            return _context20.stop();
-        }
-      }
-    }, _callee20, this);
-  }));
-
-  return function (_x30) {
+  return function (_x28) {
     return ref.apply(this, arguments);
   };
 }();

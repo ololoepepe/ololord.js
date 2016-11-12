@@ -37,7 +37,7 @@ async function gatherBoardStatistics(board) {
       Logger.error(err.stack || err);
     }
   }
-  await Tools.series(['src', 'thumb', 'arch'], async function(subpath) {
+  await Tools.series(['src', 'thumb'], async function(subpath) {
     try {
       let size = await Files.diskUsage(`${BOARD_PUBLIC_PATH}/${subpath}`);
       statistics.diskUsage += size;

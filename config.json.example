@@ -145,9 +145,6 @@ Example:
         }
     },
     "system": {
-        "elasticsearch": {
-            "host": "localhost:9200"
-        },
         "embedScripts": true,
         "embedStylesheets": true,
         "fastIPRetrieving": false,

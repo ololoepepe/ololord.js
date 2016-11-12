@@ -15,8 +15,13 @@
         </h1>
         <div id='threads' class='archival-threads'>
           {{~it.threads :thread}}
-            <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/arch/{{!thread.number}}.html'
-               class='archival-thread-link'>{{!thread.number}}.html</a>
+            <div class='archival-thread-link-container'>
+              [<span class='js-date-time'
+                     data-date-time='{{!thread.updatedAt}}'>{{!it.formattedDate(thread.updatedAt)}}</span>]
+              <a href='/{{!it.site.pathPrefix}}{{!it.board.name}}/res/{{!thread.number}}.html'
+                 target='_blank'>&gt;&gt;{{!thread.number}}</a>
+              {{? thread.title}} [{{!thread.title}}]{{?}}
+            </div>
           {{~}}
         </div>
         <hr />

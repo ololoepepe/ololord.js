@@ -70,13 +70,13 @@
            data-board-name='{{!post.boardName}}'
            data-post-number='{{!post.number}}'
            data-thread-number='{{!post.threadNumber}}'
-           {{? thread.postingEnabled && !thread.archived}}data-bind='click: insertPostNumber.bind($data, {{!post.number}})'{{?}}>#{{!post.number}}</a>
+           {{? thread.postingEnabled}}data-bind='click: insertPostNumber.bind($data, {{!post.number}})'{{?}}>#{{!post.number}}</a>
         {{#def['custom/postHeaderPart/130'] || ''}}
         <span class='post-sequence-number'>{{!post.sequenceNumber}}</span>
         {{#def['custom/postHeaderPart/140'] || ''}}
         <span class='hiding-reason js-hiding-reason'></span>
         {{#def['custom/postHeaderPart/150'] || ''}}
-        {{? thread.postingEnabled && !thread.archived && !thread.postLimitReached}}
+        {{? thread.postingEnabled && !thread.postLimitReached}}
           <span class='js-only js-quick-reply-container'>
             <span class='icon icon-undo-16 button-icon'
                   data-bind='attr: { title: "{{!it.translate('Quick reply', 'quickReplyText')}}"

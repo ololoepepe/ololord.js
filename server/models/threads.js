@@ -654,7 +654,7 @@ var pushOutOldThread = function () {
 
           case 42:
             _context12.next = 44;
-            return FilesModel.moveThreadFilesToArchive(boardName, lastThread.number);
+            return IPC.render(boardName, lastThread.number, lastThread.number, 'edit');
 
           case 44:
             _context12.next = 46;
@@ -1094,27 +1094,19 @@ var deleteThread = exports.deleteThread = function () {
             return FilesModel.removeFiles((0, _underscore2.default)(fileInfos).flatten());
 
           case 30:
+            _context20.next = 32;
+            return IPC.render(boardName, threadNumber, threadNumber, 'delete');
+
+          case 32:
             if (!thread.archived) {
-              _context20.next = 37;
+              _context20.next = 35;
               break;
             }
 
-            _context20.next = 33;
-            return FilesModel.removeArchivedThreadFiles(boardName, threadNumber);
-
-          case 33:
             _context20.next = 35;
             return IPC.renderArchive(boardName);
 
           case 35:
-            _context20.next = 39;
-            break;
-
-          case 37:
-            _context20.next = 39;
-            return IPC.render(boardName, threadNumber, threadNumber, 'delete');
-
-          case 39:
           case 'end':
             return _context20.stop();
         }

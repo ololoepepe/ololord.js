@@ -11,11 +11,7 @@
         {{#def['custom/content/0'] || ''}}
         {{#def.banner}}
         <h1 class='page-title'>{{!it.title}}</h1>
-        {{? it.thread.archived}}
-          <h2 class='message-posting-disabled'>
-            {{!it.translate('This thread is archived. Posting is disabled', 'archivedThreadText')}}
-          </h2>
-        {{?? !it.thread.postingEnabled}}
+        {{? !it.thread.postingEnabled}}
           <h2 class='message-posting-disabled'>
             {{!it.translate('Posting is disabled in this thread', 'postingDisabledThreadText')}}
           </h2>
@@ -49,7 +45,7 @@
         {{~['bottom'] :position}}
           {{#def['board/threadActions']}}
         {{~}}
-        {{? it.board.postingEnabled && it.thread.postingEnabled && !it.thread.archived && !it.thread.postLimitReached}}
+        {{? it.board.postingEnabled && it.thread.postingEnabled && !it.thread.postLimitReached}}
           <hr />
           {{~['bottom'] :position}}
             {{#def['board/createAction']}}

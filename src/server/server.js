@@ -88,11 +88,7 @@ function initializeMaster() {
       await Renderer.reloadTemplates();
       await Renderer.generateTemplatingJavaScriptFile();
       if (Program.rerender || config('system.rerenderCacheOnStartup')) {
-        if (Program.archive || config('system.rerenderArchive')) {
-          await Renderer.rerender();
-        } else {
-          await Renderer.rerender(['**', '!/*/arch/*']);
-        }
+        await Renderer.rerender();
       }
       await StatisticsModel.generateStatistics();
       await Renderer.generateCustomJavaScriptFile();

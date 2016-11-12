@@ -59,7 +59,7 @@ var gatherBoardStatistics = function () {
 
           case 23:
             _context2.next = 25;
-            return Tools.series(['src', 'thumb', 'arch'], function () {
+            return Tools.series(['src', 'thumb'], function () {
               var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(subpath) {
                 var size;
                 return regeneratorRuntime.wrap(function _callee$(_context) {

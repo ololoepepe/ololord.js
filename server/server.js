@@ -255,39 +255,26 @@ function initializeMaster() {
 
                     case 12:
                       if (!(_program2.default.rerender || (0, _config2.default)('system.rerenderCacheOnStartup'))) {
-                        _context6.next = 20;
+                        _context6.next = 15;
                         break;
                       }
 
-                      if (!(_program2.default.archive || (0, _config2.default)('system.rerenderArchive'))) {
-                        _context6.next = 18;
-                        break;
-                      }
-
-                      _context6.next = 16;
+                      _context6.next = 15;
                       return Renderer.rerender();
 
-                    case 16:
-                      _context6.next = 20;
-                      break;
-
-                    case 18:
-                      _context6.next = 20;
-                      return Renderer.rerender(['**', '!/*/arch/*']);
-
-                    case 20:
-                      _context6.next = 22;
+                    case 15:
+                      _context6.next = 17;
                       return StatisticsModel.generateStatistics();
 
-                    case 22:
-                      _context6.next = 24;
+                    case 17:
+                      _context6.next = 19;
                       return Renderer.generateCustomJavaScriptFile();
 
-                    case 24:
-                      _context6.next = 26;
+                    case 19:
+                      _context6.next = 21;
                       return Renderer.generateCustomCSSFiles();
 
-                    case 26:
+                    case 21:
                       console.log(Tools.translate('Spawning workers, please, wait…'));
                       _cluster2.default.on('exit', function (worker) {
                         _logger2.default.error(Tools.translate('[$[1]] Died, respawning…', '', worker.process.pid));
@@ -374,7 +361,7 @@ function initializeMaster() {
                         hasNewPosts[key] = 1;
                       });
 
-                    case 40:
+                    case 35:
                     case 'end':
                       return _context6.stop();
                   }

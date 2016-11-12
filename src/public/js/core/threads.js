@@ -190,19 +190,18 @@ export let updateThread = async function(silent) {
   }
 };
 
-export async function downloadThreadFiles(boardName, threadNumber, archived) {
+export async function downloadThreadFiles(boardName, threadNumber) {
   boardName = Tools.option(boardName, 'string', '');
   threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
   if (!boardName || !threadNumber) {
     return;
   }
-  let suffix = archived ? 'arch' : 'res';
   try {
     if (Tools.isThreadPage()) {
       var fileNames = DOM.queryAll('.js-post-file[data-file-name]').map(div => DOM.data('fileName', div));
       var title = window.document.title;
     } else {
-      let thread = await AJAX.api(threadNumber, {}, { prefix: `${boardName}/${suffix}` });
+      let thread = await AJAX.api(threadNumber, {}, { prefix: `${boardName}/res` });
       thread = thread.thread;
       var fileNames = [thread.opPost].concat(thread.lastPosts).reduce((acc, post) => {
         return acc.concat(post.fileInfos.map(fileInfo => fileInfo.name));
