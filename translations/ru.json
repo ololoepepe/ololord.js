@@ -1102,11 +1102,6 @@
             "value": "В этом треде постинг запрещен"
         }
     },
-    "This thread is archived. Posting is disabled": {
-        "archivedThreadText": {
-            "value": "Это архивный тред. Постинг запрещен"
-        }
-    },
     "Post limit reached": {
         "postLimitReachedText": {
             "value": "Достигнут лимит постов"
@@ -1470,16 +1465,6 @@
     "Error 404": {
         "pageTitle": {
             "value": "Ошибка 404"
-        }
-    },
-    "Close voting": {
-        "closeVotingText": {
-            "value": "Закрыть голосование"
-        }
-    },
-    "Open voting": {
-        "openVotingText": {
-            "value": "Открыть голосование"
         }
     },
     "Google reCAPTCHA": {
@@ -2737,11 +2722,6 @@
             "value": "Отсутствует капча для этого IP-адреса"
         }
     },
-    "Rerender archived threads (if no pattern is specified).": {
-        "_default": {
-            "value": "Рендерить архивные треды (если не указаны шаблоны)."
-        }
-    },
     "Only list available router paths. No rerender.": {
         "_default": {
             "value": "Не рендерить. Только показать список путей роутеров."
@@ -2795,11 +2775,6 @@
     "A thread": {
         "_default": {
             "value": "Тред"
-        }
-    },
-    "An archived thread": {
-        "_default": {
-            "value": "Архивный тред"
         }
     },
     "Invalid action": {
@@ -2892,11 +2867,6 @@
             "value": "Недействительное имя доски: $[1]"
         }
     },
-    "No such thread: >>/$[1]/$[2]": {
-        "_default": {
-            "value": "Нет такого треда: >>/$[1]/$[2]"
-        }
-    },
     "Error: generateStatistics() called from worker process.": {
         "_default": {
             "value": "Ошибка: метод generateStatistics() вызван из рабочего процесса."
@@ -2943,11 +2913,6 @@
     "Rerender cache": {
         "_default": {
             "value": "Отрендерить кеш заново"
-        }
-    },
-    "Rerender cache (including archived threads)": {
-        "_default": {
-            "value": "Отрендерить кеш заново (включая архивные треды)"
         }
     },
     "Add tracks by clicking the \"Add to playlist\" button": {
