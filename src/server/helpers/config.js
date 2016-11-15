@@ -146,7 +146,7 @@ if (configFileName && FSSync.existsSync(configFileName)) {
     config = require(id);
     _(keys).each((_1, key) => {
       hooks[key].forEach((hook) => {
-        hook(c[key], oldConfig[key], key);
+        hook(c(key), oldConfig[key], key);
       });
     });
   }) || {};
