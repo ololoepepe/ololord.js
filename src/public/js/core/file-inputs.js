@@ -13,7 +13,7 @@ import * as Templating from '../helpers/templating';
 import * as Auth from './auth';
 import * as Drawing from './drawing';
 import * as Widgets from '../widgets';
-import * as PopupMessage from '../widgets/popup-message';
+import PopupMessage from '../widgets/popup-message';
 
 const TEXTAREA_DELTA_WIDTH = 6;
 const MAX_FILE_NAME_LENGTH = 30;
