@@ -168,7 +168,7 @@ class MongoDBClient {
       }
       return Tools.series(indexes, async function({ index, options = {} }, name) {
         if (dropExisting && !dropAll) {
-          await await collection.dropIndex(name);
+          await collection.dropIndex(name);
         }
         options.name = name;
         return await collection.createIndex(index, options);
