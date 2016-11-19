@@ -938,7 +938,7 @@ var MongoDBClient = function () {
                                     switch (_context22.prev = _context22.next) {
                                       case 0:
                                         if (!(dropExisting && !dropAll)) {
-                                          _context22.next = 5;
+                                          _context22.next = 3;
                                           break;
                                         }
 
@@ -946,18 +946,14 @@ var MongoDBClient = function () {
                                         return collection.dropIndex(name);
 
                                       case 3:
-                                        _context22.next = 5;
-                                        return _context22.sent;
-
-                                      case 5:
                                         options.name = name;
-                                        _context22.next = 8;
+                                        _context22.next = 6;
                                         return collection.createIndex(index, options);
 
-                                      case 8:
+                                      case 6:
                                         return _context22.abrupt('return', _context22.sent);
 
-                                      case 9:
+                                      case 7:
                                       case 'end':
                                         return _context22.stop();
                                     }

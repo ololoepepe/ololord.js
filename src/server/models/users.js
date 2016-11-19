@@ -528,7 +528,7 @@ export async function banUser(ip, newBans, subnet) {
       return ban.expiresAt && ban.postNumber;
     }), async function(ban) {
       let delay = Math.ceil((+ban.expiresAt - +Tools.now()) / Tools.SECOND);
-      await UserBans.setex(ban, delay, `${ip}:${boardName}`);
+      await UserBans.setex(ban, delay, `${ip}:${ban.boardName}`);
     });
   }
   let { postsBannedFor, postsNotBannedFor } = getPostsToUpdate(oldBans, newBans);

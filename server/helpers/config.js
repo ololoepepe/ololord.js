@@ -130,7 +130,7 @@ if (configFileName && _fs2.default.existsSync(configFileName)) {
               config = require(id);
               (0, _underscore2.default)(keys).each(function (_1, key) {
                 hooks[key].forEach(function (hook) {
-                  hook(c[key], oldConfig[key], key);
+                  hook(c(key), oldConfig[key], key);
                 });
               });
 

@@ -1180,7 +1180,7 @@ var banUser = exports.banUser = function () {
                       case 0:
                         delay = Math.ceil((+ban.expiresAt - +Tools.now()) / Tools.SECOND);
                         _context25.next = 3;
-                        return UserBans.setex(ban, delay, ip + ':' + boardName);
+                        return UserBans.setex(ban, delay, ip + ':' + ban.boardName);
 
                       case 3:
                       case 'end':
@@ -1231,8 +1231,7 @@ var banUser = exports.banUser = function () {
 
 var updateBanOnMessage = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(message) {
-    var ip, _boardName, postNumber, BannedUser;
-
+    var ip, boardName, postNumber, BannedUser;
     return regeneratorRuntime.wrap(function _callee27$(_context27) {
       while (1) {
         switch (_context27.prev = _context27.next) {
@@ -1248,9 +1247,9 @@ var updateBanOnMessage = function () {
             throw new Error(Tools.translate('Invalid IP address'));
 
           case 4:
-            _boardName = message.split(':').pop();
+            boardName = message.split(':').pop();
 
-            if (_board2.default.board(_boardName)) {
+            if (_board2.default.board(boardName)) {
               _context27.next = 7;
               break;
             }
@@ -1276,7 +1275,7 @@ var updateBanOnMessage = function () {
             _context27.next = 15;
             return BannedUser.updateOne({ ip: ip }, {
               $pull: {
-                bans: { boardName: _boardName }
+                bans: { boardName: boardName }
               }
             });
 
@@ -1289,7 +1288,7 @@ var updateBanOnMessage = function () {
 
           case 17:
             _context27.next = 19;
-            return updatePostBanInfo(_boardName, postNumber, false);
+            return updatePostBanInfo(boardName, postNumber, false);
 
           case 19:
             _context27.next = 24;
