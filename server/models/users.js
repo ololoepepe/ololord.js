@@ -1179,12 +1179,10 @@ var banUser = exports.banUser = function () {
                     switch (_context25.prev = _context25.next) {
                       case 0:
                         delay = Math.ceil((+ban.expiresAt - +Tools.now()) / Tools.SECOND);
-
-                        console.log('DEBUG', ban.boardName, ban.expiresAt, delay, _typeof(ban.expiresAt), typeof delay === 'undefined' ? 'undefined' : _typeof(delay));
-                        _context25.next = 4;
+                        _context25.next = 3;
                         return UserBans.setex(ban, delay, ip + ':' + ban.boardName);
 
-                      case 4:
+                      case 3:
                       case 'end':
                         return _context25.stop();
                     }

@@ -106,7 +106,7 @@ var Key = function (_CommonKey) {
             switch (_context3.prev = _context3.next) {
               case 0:
                 _context3.next = 2;
-                return this.client.setex(this.fullKey(subkey), this.stringify(data), seconds);
+                return this.client.setex(this.fullKey(subkey), seconds, this.stringify(data));
 
               case 2:
                 return _context3.abrupt('return', _context3.sent);

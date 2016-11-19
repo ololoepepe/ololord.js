@@ -17,7 +17,7 @@ export default class Key extends CommonKey {
   }
 
   async setex(data, seconds, subkey) {
-    return await this.client.setex(this.fullKey(subkey), this.stringify(data), seconds);
+    return await this.client.setex(this.fullKey(subkey), seconds, this.stringify(data));
   }
 
   async incrementBy(n, subkey) {
