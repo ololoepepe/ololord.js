@@ -528,6 +528,7 @@ export async function banUser(ip, newBans, subnet) {
       return ban.expiresAt && ban.postNumber;
     }), async function(ban) {
       let delay = Math.ceil((+ban.expiresAt - +Tools.now()) / Tools.SECOND);
+      console.log('DEBUG', ban.boardName, ban.expiresAt, delay, typeof ban.expiresAt, typeof delay);
       await UserBans.setex(ban, delay, `${ip}:${ban.boardName}`);
     });
   }
