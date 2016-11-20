@@ -187,6 +187,9 @@ export async function chatWithUser(boardName, postNumber) {
 }
 
 WebSocket.registerHandler('newChatMessage', (msg) => {
+  if (!Settings.chatEnabled()) {
+    return;
+  }
   let chats = Storage.chats();
   let { message, boardName, postNumber, chatNumber } = msg.data;
   let key = `${boardName}:${postNumber}:${chatNumber}`;

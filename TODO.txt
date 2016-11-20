@@ -16,6 +16,7 @@
 [done] Implement subnet support
 [done] Use MongoDB
 [done] Use Winston for logging
+[done] Restrict using empty hashpass (hash of an empty string)
 * Optimize HTML structure
 * Use WebSockets for tracking favorite threads
 * Add ability to reply to post previews (use floating post form)

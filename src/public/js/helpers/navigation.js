@@ -43,8 +43,8 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
     Posts.setPostPreviewsEnabled(false);
     $('#ajax-loading-overlay').show();
     if (Tools.isThreadPage() && Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber())) {
-      await Threads.setAutoUpdateEnabled(false);
-      Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber(), true);
+      await Threads.setAutoUpdateEnabled(0);
+      Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber(), 0);
     }
     let html = await $.ajax({
       url: href,

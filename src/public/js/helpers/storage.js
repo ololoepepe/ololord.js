@@ -315,11 +315,11 @@ export function autoUpdateEnabled(boardName, threadNumber, enabled) {
     if (enabled) {
       o[key] = 1;
     } else if (o.hasOwnProperty(key)) {
-      delete o[key];
+      o[key] = 0;
     }
     return setLocalObject('autoUpdate', o);
   } else {
-    return !!getLocalObject('autoUpdate', {})[key];
+    return getLocalObject('autoUpdate', {})[key];
   }
 }
 

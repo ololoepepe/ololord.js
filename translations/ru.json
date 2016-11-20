@@ -3264,5 +3264,10 @@
         "_default": {
             "value": "[$[1]] Слушает порт $[2]…"
         }
+    },
+    "Using an empty hashpass is not allowed": {
+        "_default": {
+            "value": "Использование пустого хешпасса запрещено"
+        }
     }
 }

@@ -7,6 +7,7 @@ import * as DOM from '../helpers/dom';
 import * as Navigation from '../helpers/navigation';
 import * as Storage from '../helpers/storage';
 import * as Tools from '../helpers/tools';
+import PopupMessage from '../widgets/popup-message';
 
 const DEFAULT_VK_LOGIN_TIMEOUT = 5 * Constants.SECOND;
 const DEFAULT_VK_LOGOUT_TIMEOUT = 5 * Constants.SECOND;
@@ -36,6 +37,10 @@ function vkLogout(timeout) {
 
 export async function login(hashpass, vk) {
   try {
+    if (!hashpass) {
+      PopupMessage.showPopup(Tools.translate('Using an empty hashpass is not allowed'), { type: 'warning' });
+      return;
+    }
     let vkSession = null;
     if (vk) {
       vkSession = await vkLogin();

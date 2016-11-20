@@ -135,8 +135,8 @@ registerHandler('load', async function() {
 
 registerHandler('load', () => {
   var enabled = Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber());
-  if (true === enabled || (false !== enabled && Settings.autoUpdateThreadsByDefault())) {
-    Threads.setAutoUpdateEnabled(true);
+  if (1 === enabled || (0 !== enabled && Settings.autoUpdateThreadsByDefault())) {
+    Threads.setAutoUpdateEnabled(1);
   }
 }, {
   priority: 30,
