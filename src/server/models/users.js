@@ -7,6 +7,7 @@ import Board from '../boards/board';
 import config from '../helpers/config';
 import FSWatcher from '../helpers/fs-watcher';
 import * as IPC from '../helpers/ipc';
+import Logger from '../helpers/logger';
 import * as Permissions from '../helpers/permissions';
 import * as Tools from '../helpers/tools';
 import Channel from '../storage/channel';
@@ -525,7 +526,7 @@ export async function banUser(ip, newBans, subnet) {
       }
     }, { upsert: true });
     await Tools.series(_(newBans).pick((ban) => {
-      return ban.expiresAt && ban.postNumber;
+      return ban.expiresAt;
     }), async function(ban) {
       let delay = Math.ceil((+ban.expiresAt - +Tools.now()) / Tools.SECOND);
       await UserBans.setex(ban, delay, `${ip}:${ban.boardName}`);
@@ -550,21 +551,30 @@ async function updateBanOnMessage(message) {
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
-    let postNumber = Tools.option(ban.postNumber, 'number', 0, { test: Tools.testPostNumber });
-    if (!postNumber) {
-      throw new Error(Tools.translate('Invalid post number'));
-    }
     let BannedUser = await client.collection('bannedUser');
-    await BannedUser.updateOne({ ip: ip }, {
+    let { value: bannedUser } = await BannedUser.findOneAndUpdate({ ip: ip }, {
       $pull: {
         bans: { boardName: boardName }
       }
+    }, {
+      projection: {
+        bans: {
+          $elemMatch: { boardName: boardName }
+        }
+      },
+      returnOriginal: true
     });
+    if (!bannedUser || (bannedUser.bans.length !== 1)) {
+      throw new Error(Tools.translate('Internal error: no user ban found'));
+    }
     await BannedUser.deleteOne({
       ip: ip,
       bans: { $size: 0 }
     });
-    await updatePostBanInfo(boardName, postNumber, false);
+    let postNumber = Tools.option(bannedUser.bans[0].postNumber, 'number', 0, { test: Tools.testPostNumber });
+    if (postNumber) {
+      await updatePostBanInfo(boardName, postNumber, false);
+    }
   } catch (err) {
     Logger.error(err.stack || err);
   }

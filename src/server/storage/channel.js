@@ -1,5 +1,6 @@
 import CommonKey from './common-key';
 import Logger from '../helpers/logger';
+import * as Tools from '../helpers/tools';
 
 export default class Channel {
   constructor(client, name, { parse, stringify } = {}) {
@@ -8,26 +9,7 @@ export default class Channel {
     this.parse = CommonKey.selectParser(parse);
     this.stringify = CommonKey.selectStringifier(stringify);
     this.handlers = [];
-    this.client.on('message', async function(channel, message) {
-      if (channel !== this.name) {
-        return;
-      }
-      message = this.parse(message);
-      try {
-        let skip = true;
-        await Tools.series(this.handlers, async function(handler) {
-          if (skip) {
-            return;
-          }
-          let result = await handler(message);
-          if (result) {
-            skip = false;
-          }
-        });
-      } catch (err) {
-        Logger.error(err.stack || err);
-      }
-    });
+    this.client.on('message', this._handleMessage.bind(this));
   }
 
   async publish(data) {
@@ -57,6 +39,20 @@ export default class Channel {
     }
     if (this.handlers.length <= 0) {
       return await this.client.unsubscribe(this.name);
+    }
+  }
+
+  async _handleMessage(channel, message) {
+    if (channel !== this.name) {
+      return;
+    }
+    message = this.parse(message);
+    try {
+      await Tools.series(this.handlers, async function(handler) {
+        await handler(message);
+      });
+    } catch (err) {
+      Logger.error(err.stack || err);
     }
   }
 }

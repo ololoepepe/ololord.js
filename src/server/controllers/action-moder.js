@@ -44,7 +44,7 @@ function getBans(fields) {
     }
     acc[value] = {
       boardName: value,
-      expiresAt: expiresAt,
+      expiresAt: (expiresAt ? new Date(expiresAt) : null),
       level: fields[`banLevel_${value}`],
       reason: fields[`banReason_${value}`],
       postNumber: Tools.option(fields[`banPostNumber_${value}`], 'number', null, { test: Tools.testPostNumber })
