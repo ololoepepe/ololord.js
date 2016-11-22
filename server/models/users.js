@@ -436,7 +436,10 @@ var getRegisteredUser = exports.getRegisteredUser = function () {
         switch (_context12.prev = _context12.next) {
           case 0:
             _context12.next = 2;
-            return getRegisteredUserInternal({ hashpass: hashpass }, { full: true });
+            return getRegisteredUserInternal({
+              hashpass: hashpass,
+              superuser: { $exists: false }
+            }, { full: true });
 
           case 2:
             user = _context12.sent;
@@ -477,7 +480,9 @@ var getRegisteredUsers = exports.getRegisteredUsers = function () {
           case 2:
             User = _context13.sent;
             _context13.next = 5;
-            return User.find({}, { _id: 0 }).toArray();
+            return User.find({
+              superuser: { $exists: false }
+            }, { _id: 0 }).toArray();
 
           case 5:
             users = _context13.sent;

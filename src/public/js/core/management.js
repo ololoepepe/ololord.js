@@ -114,7 +114,7 @@ function registeredUserFromViewModel(model) {
     return acc;
   }, {});
   return {
-    hashpass: model.hashpass(),
+    password: model.hashpass(),
     levels: levels,
     ips: model.ips()
   };
@@ -122,7 +122,7 @@ function registeredUserFromViewModel(model) {
 
 export function createRegisteredUserFormData(data) {
   let o = {
-    hashpass: data.hashpass,
+    password: data.password,
     ips: data.ips
   };
   _(data.levels).each((level, boardName) => {

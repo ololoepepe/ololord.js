@@ -30,6 +30,11 @@
         "hashpass": 1,
         "superuser": 1
       }
+    },
+    "superuser": {
+      "index": {
+        "superuser": 1
+      }
     }
   }
 }

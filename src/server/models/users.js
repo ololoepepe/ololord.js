@@ -231,7 +231,10 @@ export async function getRegisteredUserLevelsByIp(ip, subnet) {
 }
 
 export async function getRegisteredUser(hashpass) {
-  let user = await getRegisteredUserInternal({ hashpass: hashpass }, { full: true });
+  let user = await getRegisteredUserInternal({
+    hashpass: hashpass,
+    superuser: { $exists: false }
+  }, { full: true });
   if (!user) {
     throw new Error(Tools.translate('No user with this hashpass'));
   }
@@ -240,7 +243,9 @@ export async function getRegisteredUser(hashpass) {
 
 export async function getRegisteredUsers() {
   let User = await client.collection('user');
-  let users = await User.find({}, { _id: 0 }).toArray();
+  let users = await User.find({
+    superuser: { $exists: false }
+  }, { _id: 0 }).toArray();
   return users.map(processRegisteredUser);
 }
 
