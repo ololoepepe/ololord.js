@@ -26,6 +26,10 @@ var PERMISSIONS = exports.PERMISSIONS = {
   editAudioTags: null,
   editFileRating: null,
   editPost: 'MODER',
+  moveThread: 'MODER',
+  setThreadClosed: 'MODER',
+  setThreadFixed: 'MODER',
+  setThreadUnbumpable: 'MODER',
   useRawHTMLMarkup: 'MODER'
 };
 
