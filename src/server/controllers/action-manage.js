@@ -197,9 +197,6 @@ router.post('/action/superuserReload', async function(req, res, next) {
       throw new Error(Tools.translate('Not enough rights'));
     }
     let { fields: { boards, templates } } = await Files.parseForm(req);
-    if (typeof targets !== 'string') {
-      throw new Error(Tools.translate('Invalid targets'));
-    }
     if ('true' === boards) {
       await IPC.send('reloadBoards');
     }

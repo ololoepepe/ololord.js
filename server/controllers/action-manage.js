@@ -549,7 +549,7 @@ router.post('/action/superuserDeleteFile', function () {
 
 router.post('/action/superuserRerender', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(req, res, next) {
-    var _ref10, _targets;
+    var _ref10, targets;
 
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
@@ -570,9 +570,9 @@ router.post('/action/superuserRerender', function () {
 
           case 5:
             _ref10 = _context9.sent;
-            _targets = _ref10.fields.targets;
+            targets = _ref10.fields.targets;
 
-            if (!(typeof _targets !== 'string')) {
+            if (!(typeof targets !== 'string')) {
               _context9.next = 9;
               break;
             }
@@ -580,13 +580,13 @@ router.post('/action/superuserRerender', function () {
             throw new Error(Tools.translate('Invalid targets'));
 
           case 9:
-            if (!_targets) {
+            if (!targets) {
               _context9.next = 14;
               break;
             }
 
             _context9.next = 12;
-            return Renderer.rerender(_targets);
+            return Renderer.rerender(targets);
 
           case 12:
             _context9.next = 16;
@@ -622,7 +622,7 @@ router.post('/action/superuserRerender', function () {
 
 router.post('/action/superuserMarkupPosts', function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(req, res, next) {
-    var _ref11, _targets2;
+    var _ref11, targets;
 
     return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
@@ -643,9 +643,9 @@ router.post('/action/superuserMarkupPosts', function () {
 
           case 5:
             _ref11 = _context10.sent;
-            _targets2 = _ref11.fields.targets;
+            targets = _ref11.fields.targets;
 
-            if (!(typeof _targets2 !== 'string')) {
+            if (!(typeof targets !== 'string')) {
               _context10.next = 9;
               break;
             }
@@ -654,7 +654,7 @@ router.post('/action/superuserMarkupPosts', function () {
 
           case 9:
             _context10.next = 11;
-            return PostsModel.markupPosts(Renderer.targetsFromString(_targets2));
+            return PostsModel.markupPosts(Renderer.targetsFromString(targets));
 
           case 11:
             //TODO: Rerender corresponding pages?
@@ -708,48 +708,40 @@ router.post('/action/superuserReload', function () {
             boards = _ref12$fields.boards;
             templates = _ref12$fields.templates;
 
-            if (!(typeof targets !== 'string')) {
-              _context11.next = 11;
-              break;
-            }
-
-            throw new Error(Tools.translate('Invalid targets'));
-
-          case 11:
             if (!('true' === boards)) {
-              _context11.next = 14;
+              _context11.next = 12;
               break;
             }
 
-            _context11.next = 14;
+            _context11.next = 12;
             return IPC.send('reloadBoards');
 
-          case 14:
+          case 12:
             if (!('true' === templates)) {
-              _context11.next = 17;
+              _context11.next = 15;
               break;
             }
 
-            _context11.next = 17;
+            _context11.next = 15;
             return IPC.send('reloadTemplates');
 
-          case 17:
+          case 15:
             res.json({});
-            _context11.next = 23;
+            _context11.next = 21;
             break;
 
-          case 20:
-            _context11.prev = 20;
+          case 18:
+            _context11.prev = 18;
             _context11.t0 = _context11['catch'](0);
 
             next(Tools.processError(_context11.t0));
 
-          case 23:
+          case 21:
           case 'end':
             return _context11.stop();
         }
       }
-    }, _callee11, this, [[0, 20]]);
+    }, _callee11, this, [[0, 18]]);
   }));
 
   return function (_x29, _x30, _x31) {
