@@ -1056,9 +1056,7 @@ var updatePostBanInfo = exports.updatePostBanInfo = function () {
               boardName: boardName,
               number: postNumber
             }, {
-              $set: {
-                options: { bannedFor: !!bannedFor }
-              }
+              $set: { 'options.bannedFor': !!bannedFor }
             }, {
               projection: { threadNumber: 1 },
               returnOriginal: false

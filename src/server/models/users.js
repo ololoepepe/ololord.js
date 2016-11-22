@@ -463,9 +463,7 @@ export async function updatePostBanInfo(boardName, postNumber, bannedFor) {
     boardName: boardName,
     number: postNumber
   }, {
-    $set: {
-      options: { bannedFor: !!bannedFor }
-    }
+    $set: { 'options.bannedFor': !!bannedFor }
   }, {
     projection: { threadNumber: 1 },
     returnOriginal: false
