@@ -977,7 +977,9 @@ router.renderRSS = function () {
               return +p1.createdAt < +p2.createdAt;
             });
             posts.forEach(function (post) {
-              post.text = post.text.split('&nbsp', ' '); //NOTE: Required for the RSS to be valid
+              if (post.text) {
+                post.text = post.text.split('&nbsp', ' '); //NOTE: Required for the RSS to be valid
+              }
               post.subject = BoardsModel.postSubject(post, 150) || post.number; //TODO: Magic number
             });
             rss = {
