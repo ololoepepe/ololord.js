@@ -37,7 +37,7 @@
     </li>
   {{?}}
   {{#def['custom/postMenuAction/60'] || ''}}
-  {{? it.post.isOp && (it.user.hasPermission(it.board, 'deletePost') || it.board.opModeration)}}
+  {{? it.user.hasPermission(it.board, 'deletePost') || it.board.opModeration}}
     <li data-bind='click: deletePost'>
       <span class='icon icon-bin-16 sign-icon'></span>
       {{!it.translate('Delete', 'deletePostText')}}
