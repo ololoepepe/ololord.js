@@ -960,7 +960,7 @@ router.renderRSS = function () {
               text: 1,
               fileInfos: 1,
               createdAt: 1
-            }).sort({ createdAt: -1 }).limit(rssPostCount).sort({ createdAt: 1 }).toArray();
+            }).sort({ createdAt: -1 }).limit(rssPostCount).toArray();
 
           case 13:
             posts = _context18.sent;
@@ -973,6 +973,9 @@ router.renderRSS = function () {
             return _context18.abrupt('return');
 
           case 16:
+            posts.sort(function (p1, p2) {
+              return +p1.createdAt < +p2.createdAt;
+            });
             posts.forEach(function (post) {
               post.subject = BoardsModel.postSubject(post, 150) || post.number; //TODO: Magic number
             });
@@ -982,16 +985,16 @@ router.renderRSS = function () {
               board: MiscModel.board(board).board,
               posts: posts,
               formattedDate: function formattedDate(date) {
-                return (0, _moment2.default)().utc().locale('en').format(RSS_DATE_TIME_FORMAT);
+                return (0, _moment2.default)(date).utc().locale('en').format(RSS_DATE_TIME_FORMAT);
               }
             };
-            _context18.next = 20;
+            _context18.next = 21;
             return Cache.writeFile(boardName + '/rss.xml', Renderer.render('pages/rss', rss));
 
-          case 20:
+          case 21:
             return _context18.abrupt('return', _context18.sent);
 
-          case 21:
+          case 22:
           case 'end':
             return _context18.stop();
         }
