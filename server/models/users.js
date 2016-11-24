@@ -636,7 +636,7 @@ var unregisterUser = exports.unregisterUser = function () {
 
 var addSuperuser = exports.addSuperuser = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(hashpass, ips) {
-    var User;
+    var User, count;
     return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
         switch (_context17.prev = _context17.next) {
@@ -654,23 +654,28 @@ var addSuperuser = exports.addSuperuser = function () {
 
           case 4:
             User = _context17.sent;
+            _context17.next = 7;
+            return User.count({ hashpass: hashpass });
+
+          case 7:
+            count = _context17.sent;
 
             if (!(count > 0)) {
-              _context17.next = 7;
+              _context17.next = 10;
               break;
             }
 
             throw new Error(Tools.translate('A user with this hashpass is already registered'));
 
-          case 7:
-            _context17.next = 9;
+          case 10:
+            _context17.next = 12;
             return User.insertOne({
               hashpass: hashpass,
               superuser: true,
               ips: processUserIPs(ips)
             });
 
-          case 9:
+          case 12:
           case 'end':
             return _context17.stop();
         }

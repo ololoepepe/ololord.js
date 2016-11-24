@@ -11,7 +11,8 @@
                       href: "/{{!it.site.pathPrefix}}" + $data.boardName + "/res/" + $data.threadNumber + ".html",
                       title: $data.subject
                     },
-                    text: $root.truncatedText.bind($data)()'></a>
+                    text: $root.truncatedText.bind($data)(),
+                    click: function() { $root.markAsVisited.call(this); return true; }'></a>
     </span>
     <span class='icon icon-cross-16 button-icon' title='{{!it.translate('Remove thread from favorites')}}'
           data-bind='click: $root.removeFromFavorites'></span>

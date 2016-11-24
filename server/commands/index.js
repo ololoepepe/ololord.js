@@ -92,7 +92,10 @@ function setupMethods(command) {
               break;
             }
 
-            return _context2.abrupt('return');
+            return _context2.abrupt('return', {
+              password: password,
+              notHashpass: true
+            });
 
           case 8:
             _context2.next = 10;

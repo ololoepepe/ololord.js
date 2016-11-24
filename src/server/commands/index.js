@@ -34,7 +34,10 @@ function setupMethods(command) {
       throw new Error(Tools.translate('Invalid password'));
     }
     if (!Tools.mayBeHashpass(password)) {
-      return;
+      return {
+        password: password,
+        notHashpass: true
+      };
     }
     result = await command.prompt({
       type: 'confirm',
