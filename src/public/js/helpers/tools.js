@@ -329,7 +329,7 @@ export function stripEXIFData(data, fileName) {
     if (typeof window.File === 'function') {
       return new window.File(newPieces, fileName || '', { 'type': 'image/jpeg' });
     } else {
-      let blob = new window.Blob(pieces, { 'type': 'image/jpeg' });
+      let blob = new window.Blob(newPieces, { 'type': 'image/jpeg' });
       blob.name = fileName || '';
       return blob;
     }
