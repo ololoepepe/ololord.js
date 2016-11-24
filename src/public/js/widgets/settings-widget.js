@@ -37,7 +37,7 @@ async function exportSettings() {
 
 async function importSettings() {
   try {
-    let result = await prompt({
+    let result = await Widgets.prompt({
       title: Tools.translate('Paste settings string here'),
       type: 'textarea'
     });
