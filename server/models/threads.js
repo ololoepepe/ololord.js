@@ -729,7 +729,8 @@ var createThread = exports.createThread = function () {
               closed: false,
               unbumpable: false,
               user: PostsModel.createPostUser(req, req.level(boardName), password),
-              createdAt: date.toISOString()
+              createdAt: date.toISOString(),
+              updatedAt: date.toISOString()
             };
 
             transaction.setThreadNumber(threadNumber);
@@ -1007,7 +1008,7 @@ var deleteThread = exports.deleteThread = function () {
               boardName: boardName,
               number: threadNumber
             }, {
-              projection: { lastPostNumber: 1 }
+              projection: { archived: 1 }
             });
 
           case 5:

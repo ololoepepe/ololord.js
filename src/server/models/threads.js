@@ -273,7 +273,8 @@ export async function createThread(req, fields, transaction) {
     closed: false,
     unbumpable: false,
     user: PostsModel.createPostUser(req, req.level(boardName), password),
-    createdAt: date.toISOString()
+    createdAt: date.toISOString(),
+    updatedAt: date.toISOString()
   };
   transaction.setThreadNumber(threadNumber);
   let Thread = await client.collection('thread');
@@ -352,7 +353,7 @@ export async function deleteThread(boardName, threadNumber) {
     boardName: boardName,
     number: threadNumber,
   }, {
-    projection: { lastPostNumber: 1 }
+    projection: { archived: 1 }
   });
   let thread = result.value;
   if (!thread) {
