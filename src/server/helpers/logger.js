@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import Cluster from 'cluster';
+import Path from 'path';
 import Winston from 'winston';
 import WinstonDailyRotateFileTransport from 'winston-daily-rotate-file';
 
@@ -57,6 +58,7 @@ class WinstonClusterTransport extends Winston.Transport {
 
 Winston.transports.Cluster = WinstonClusterTransport;
 
+const MAIN_FILE_NAME = Path.basename(require.main.filename, '.js');
 const TRANSPORT_MAP = {
   'console': {
     ctor: Winston.transports.Console,
@@ -68,7 +70,7 @@ const TRANSPORT_MAP = {
   'file': {
     ctor: WinstonDailyRotateFileTransport,
     opts: {
-      filename: `${__dirname}/../../logs/ololord.log`,
+      filename: `${__dirname}/../../logs/${MAIN_FILE_NAME}/${MAIN_FILE_NAME}.log`,
       maxsize: config('system.log.maxSize'),
       maxFiles: config('system.log.maxFiles')
     }

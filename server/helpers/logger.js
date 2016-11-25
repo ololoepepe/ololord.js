@@ -14,6 +14,10 @@ var _cluster = require('cluster');
 
 var _cluster2 = _interopRequireDefault(_cluster);
 
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
 var _winston = require('winston');
 
 var _winston2 = _interopRequireDefault(_winston);
@@ -147,6 +151,7 @@ var WinstonClusterTransport = function (_Winston$Transport) {
 
 _winston2.default.transports.Cluster = WinstonClusterTransport;
 
+var MAIN_FILE_NAME = _path2.default.basename(require.main.filename, '.js');
 var TRANSPORT_MAP = {
   'console': {
     ctor: _winston2.default.transports.Console,
@@ -158,7 +163,7 @@ var TRANSPORT_MAP = {
   'file': {
     ctor: _winstonDailyRotateFile2.default,
     opts: {
-      filename: __dirname + '/../../logs/ololord.log',
+      filename: __dirname + '/../../logs/' + MAIN_FILE_NAME + '/' + MAIN_FILE_NAME + '.log',
       maxsize: (0, _config2.default)('system.log.maxSize'),
       maxFiles: (0, _config2.default)('system.log.maxFiles')
     }
