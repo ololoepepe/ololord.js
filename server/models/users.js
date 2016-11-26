@@ -123,7 +123,7 @@ var incrementUserCaptchaQuotaBy = exports.incrementUserCaptchaQuotaBy = function
 
           case 5:
             quota = Tools.option(quota, 'number', 1, { test: function test(q) {
-                return q >= 0;
+                return 0 !== q;
               } });
             _context5.next = 8;
             return UserCaptchaQuotas.incrementBy(key, quota);
