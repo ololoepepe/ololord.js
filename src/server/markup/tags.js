@@ -1,4 +1,13 @@
 import ProcessingContext from './processing-context';
+import * as Renderer from '../core/renderer';
+import * as Tools from '../helpers/tools';
+
+function getCSpoilerOP() {
+  let title = Renderer.toHTML(Tools.translate('Spoiler'));
+  return "<span class='collapsible-spoiler'><span class='collapsible-spoiler-title' "
+    + `title='${Tools.translate('Spoiler')}' onclick='lord.expandCollapseSpoiler(this);'>${title}`
+    + "</span><span class='collapsible-spoiler-body' style='display: none;'>";
+}
 
 const TAGS = {
   '---': {
@@ -32,6 +41,10 @@ const TAGS = {
   '///': {
     op: '<em>',
     cl: '</em>'
+  },
+  '%%%': {
+    op: getCSpoilerOP,
+    cl: '</span></span>'
   },
   '%%': {
     op: "<span class='spoiler'>",
@@ -73,7 +86,11 @@ function convertTags(_1, text, matchs, _2, options) {
   if (!tag) {
     return '';
   }
-  options.op = tag.op;
+  if (typeof tag.op === 'function') {
+    options.op = tag.op();
+  } else {
+    options.op = tag.op;
+  }
   options.cl = tag.cl;
   return text;
 }

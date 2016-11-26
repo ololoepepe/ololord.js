@@ -8,7 +8,22 @@ var _processingContext = require('./processing-context');
 
 var _processingContext2 = _interopRequireDefault(_processingContext);
 
+var _renderer = require('../core/renderer');
+
+var Renderer = _interopRequireWildcard(_renderer);
+
+var _tools = require('../helpers/tools');
+
+var Tools = _interopRequireWildcard(_tools);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function getCSpoilerOP() {
+  var title = Renderer.toHTML(Tools.translate('Spoiler'));
+  return "<span class='collapsible-spoiler'><span class='collapsible-spoiler-title' " + ('title=\'' + Tools.translate('Spoiler') + '\' onclick=\'lord.expandCollapseSpoiler(this);\'>' + title) + "</span><span class='collapsible-spoiler-body' style='display: none;'>";
+}
 
 var TAGS = {
   '---': {
@@ -42,6 +57,10 @@ var TAGS = {
   '///': {
     op: '<em>',
     cl: '</em>'
+  },
+  '%%%': {
+    op: getCSpoilerOP,
+    cl: '</span></span>'
   },
   '%%': {
     op: "<span class='spoiler'>",
@@ -83,7 +102,11 @@ function convertTags(_1, text, matchs, _2, options) {
   if (!tag) {
     return '';
   }
-  options.op = tag.op;
+  if (typeof tag.op === 'function') {
+    options.op = tag.op();
+  } else {
+    options.op = tag.op;
+  }
   options.cl = tag.cl;
   return text;
 }
