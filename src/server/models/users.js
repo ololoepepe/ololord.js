@@ -68,9 +68,8 @@ let geoBans = FSWatcher.createWatchedResource(`${__dirname}/../../misc/geo-bans.
 }) || new Map();
 
 export async function getUserCaptchaQuota(boardName, userID) {
-  let board = Board.board(boardName);
-  if (!board) {
-    return Promise.reject(new Error(Tools.translate('Invalid board')));
+  if (!Board.board(boardName)) {
+    throw new Error(Tools.translate('Invalid board'));
   }
   let quota = await UserCaptchaQuotas.getOne(userID);
   quota = Tools.option(quota, 'number', 0, { test: (q) => { return q >= 0; } });
@@ -81,8 +80,23 @@ export async function getUserCaptchaQuota(boardName, userID) {
 }
 
 export async function setUserCaptchaQuota(boardName, userID, quota) {
+  if (!Board.board(boardName)) {
+    throw new Error(Tools.translate('Invalid board'));
+  }
   quota = Tools.option(quota, 'number', 0, { test: (q) => { return q >= 0; } });
   return await UserCaptchaQuotas.setOne(`${boardName}:${userID}`, quota);
+}
+
+export async function incrementUserCaptchaQuotaBy(userID, quota, boardName) {
+  let key = userID;
+  if (boardName) {
+    if (!Board.board(boardName)) {
+      throw new Error(Tools.translate('Invalid board'));
+    }
+    key = `${boardName}:${userID}`;
+  }
+  quota = Tools.option(quota, 'number', 1, { test: (q) => { return q >= 0; } });
+  return await UserCaptchaQuotas.incrementBy(key, quota);
 }
 
 export async function useCaptcha(boardName, userID) {
