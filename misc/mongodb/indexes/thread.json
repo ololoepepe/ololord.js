@@ -10,6 +10,16 @@
         "unique": true
       }
     },
+    "originalBoardName__originalNumber": {
+      "index": {
+        "originalBoardName": 1,
+        "originalNumber": 1
+      },
+      "options": {
+        "unique": true,
+        "sparse": true
+      }
+    },
     "boardName__archived": {
       "index": {
         "boardName": 1,

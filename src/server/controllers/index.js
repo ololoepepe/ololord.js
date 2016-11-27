@@ -40,10 +40,7 @@ function initialize() {
   app.use(router);
 
   app.use('*', (req, res, next) => {
-    let err = new Error();
-    err.status = 404;
-    err.path = req.baseUrl;
-    next(err);
+    next(Tools.create404Error(req.baseUrl));
   });
 
   app.use((err, req, res, next) => {

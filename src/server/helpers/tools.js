@@ -362,3 +362,10 @@ export function escapeRegExp(text) {
   }
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
+
+export function create404Error(baseUrl) {
+  let err = new Error();
+  err.status = 404;
+  err.path = baseUrl;
+  return err;
+}

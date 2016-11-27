@@ -323,6 +323,7 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName,
   if (!thread) {
     throw new Error(Tools.translate('No such thread'));
   }
+  thread.originalBoardName = thread.boardName;
   thread.boardName = targetBoardName;
   let postCount = await getThreadPostCount(sourceBoardName, threadNumber);
   let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, postCount);
@@ -385,5 +386,24 @@ export async function deleteThread(boardName, threadNumber) {
   await IPC.render(boardName, threadNumber, threadNumber, 'delete');
   if (thread.archived) {
     await IPC.renderArchive(boardName);
+  }
+}
+
+export async function getThreadRedirect(boardName, threadNumber) {
+  let Thread = await client.collection('thread');
+  let thread = await Thread.findOne({
+    originalBoardName: boardName,
+    originalNumber: threadNumber
+  }, {
+    _id: 0,
+    boardName: 1,
+    number: 1
+  });
+  if (!thread) {
+    return null;
+  }
+  return {
+    boardName: thread.boardName,
+    threadNumber: thread.number
   }
 }

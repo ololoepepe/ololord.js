@@ -93,6 +93,7 @@ exports.processError = processError;
 exports.pad = pad;
 exports.chunk = chunk;
 exports.escapeRegExp = escapeRegExp;
+exports.create404Error = create404Error;
 
 var _underscore = require('underscore');
 
@@ -469,5 +470,12 @@ function escapeRegExp(text) {
     return text;
   }
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+function create404Error(baseUrl) {
+  var err = new Error();
+  err.status = 404;
+  err.path = baseUrl;
+  return err;
 }
 //# sourceMappingURL=tools.js.map

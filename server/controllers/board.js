@@ -1101,5 +1101,61 @@ router.render = function () {
 
 router.renderThreadHTML = renderThreadHTML;
 
+function installThreadHandler(type) {
+  router.get('/:boardName/res/:threadNumber.' + type, function () {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(req, res, next) {
+      var _req$params, boardName, threadNumber, redirect;
+
+      return regeneratorRuntime.wrap(function _callee20$(_context20) {
+        while (1) {
+          switch (_context20.prev = _context20.next) {
+            case 0:
+              _req$params = req.params;
+              boardName = _req$params.boardName;
+              threadNumber = _req$params.threadNumber;
+
+              threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+
+              if (threadNumber) {
+                _context20.next = 6;
+                break;
+              }
+
+              return _context20.abrupt('return', next(Tools.create404Error(req.baseUrl)));
+
+            case 6:
+              _context20.next = 8;
+              return ThreadsModel.getThreadRedirect(boardName, threadNumber);
+
+            case 8:
+              redirect = _context20.sent;
+
+              if (redirect) {
+                _context20.next = 11;
+                break;
+              }
+
+              return _context20.abrupt('return', next(Tools.create404Error(req.baseUrl)));
+
+            case 11:
+              res.redirect(301, '/' + (0, _config2.default)('site.pathPrefix') + redirect.boardName + '/res/' + redirect.threadNumber + '.' + type);
+
+            case 12:
+            case 'end':
+              return _context20.stop();
+          }
+        }
+      }, _callee20, this);
+    }));
+
+    return function (_x29, _x30, _x31) {
+      return ref.apply(this, arguments);
+    };
+  }());
+}
+
+installThreadHandler('html');
+installThreadHandler('json');
+
 exports.default = router;
 //# sourceMappingURL=board.js.map

@@ -368,4 +368,22 @@ router.render = async function(path) {
 
 router.renderThreadHTML = renderThreadHTML;
 
+function installThreadHandler(type) {
+  router.get(`/:boardName/res/:threadNumber.${type}`, async function(req, res, next) {
+    let { boardName, threadNumber } = req.params;
+    threadNumber = Tools.option(threadNumber, 'number', 0, { test: Tools.testPostNumber });
+    if (!threadNumber) {
+      return next(Tools.create404Error(req.baseUrl));
+    }
+    let redirect = await ThreadsModel.getThreadRedirect(boardName, threadNumber);
+    if (!redirect) {
+      return next(Tools.create404Error(req.baseUrl));
+    }
+    res.redirect(301, `/${config('site.pathPrefix')}${redirect.boardName}/res/${redirect.threadNumber}.${type}`);
+  });
+}
+
+installThreadHandler('html');
+installThreadHandler('json');
+
 export default router;

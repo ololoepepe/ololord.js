@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.deleteThread = exports.moveThread = exports.setThreadUnbumpable = exports.setThreadClosed = exports.setThreadFixed = exports.createThread = exports.clearDeletedThreads = exports.setThreadDeleted = exports.isThreadDeleted = exports.getThreadInfo = exports.getThreadLastPostNumber = exports.getThreadCount = exports.getThreads = exports.threadExists = exports.getThread = exports.getThreadNumbers = exports.getThreadPostCount = undefined;
+exports.getThreadRedirect = exports.deleteThread = exports.moveThread = exports.setThreadUnbumpable = exports.setThreadClosed = exports.setThreadFixed = exports.createThread = exports.clearDeletedThreads = exports.setThreadDeleted = exports.isThreadDeleted = exports.getThreadInfo = exports.getThreadLastPostNumber = exports.getThreadCount = exports.getThreads = exports.threadExists = exports.getThread = exports.getThreadNumbers = exports.getThreadPostCount = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -929,21 +929,22 @@ var moveThread = exports.moveThread = function () {
             throw new Error(Tools.translate('No such thread'));
 
           case 11:
+            thread.originalBoardName = thread.boardName;
             thread.boardName = targetBoardName;
-            _context18.next = 14;
+            _context18.next = 15;
             return getThreadPostCount(sourceBoardName, threadNumber);
 
-          case 14:
+          case 15:
             postCount = _context18.sent;
-            _context18.next = 17;
+            _context18.next = 18;
             return BoardsModel.nextPostNumber(targetBoardName, postCount);
 
-          case 17:
+          case 18:
             lastPostNumber = _context18.sent;
             initialPostNumber = lastPostNumber - postCount + 1;
 
             thread.number = initialPostNumber;
-            _context18.next = 22;
+            _context18.next = 23;
             return PostsModel.copyPosts({
               sourceBoardName: sourceBoardName,
               sourceThreadNumber: threadNumber,
@@ -952,33 +953,33 @@ var moveThread = exports.moveThread = function () {
               transaction: transaction
             });
 
-          case 22:
-            _context18.next = 24;
+          case 23:
+            _context18.next = 25;
             return client.collection('thread');
 
-          case 24:
+          case 25:
             Thread = _context18.sent;
 
             transaction.setThreadNumber(thread.number);
-            _context18.next = 28;
+            _context18.next = 29;
             return Thread.insertOne(thread);
 
-          case 28:
-            _context18.next = 30;
+          case 29:
+            _context18.next = 31;
             return IPC.render(targetBoardName, thread.number, thread.number, 'create');
 
-          case 30:
+          case 31:
             transaction.commit();
-            _context18.next = 33;
+            _context18.next = 34;
             return deleteThread(sourceBoardName, threadNumber);
 
-          case 33:
+          case 34:
             return _context18.abrupt('return', {
               boardName: targetBoardName,
               threadNumber: thread.number
             });
 
-          case 34:
+          case 35:
           case 'end':
             return _context18.stop();
         }
@@ -1116,6 +1117,57 @@ var deleteThread = exports.deleteThread = function () {
   }));
 
   return function deleteThread(_x49, _x50) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+var getThreadRedirect = exports.getThreadRedirect = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(boardName, threadNumber) {
+    var Thread, thread;
+    return regeneratorRuntime.wrap(function _callee21$(_context21) {
+      while (1) {
+        switch (_context21.prev = _context21.next) {
+          case 0:
+            _context21.next = 2;
+            return client.collection('thread');
+
+          case 2:
+            Thread = _context21.sent;
+            _context21.next = 5;
+            return Thread.findOne({
+              originalBoardName: boardName,
+              originalNumber: threadNumber
+            }, {
+              _id: 0,
+              boardName: 1,
+              number: 1
+            });
+
+          case 5:
+            thread = _context21.sent;
+
+            if (thread) {
+              _context21.next = 8;
+              break;
+            }
+
+            return _context21.abrupt('return', null);
+
+          case 8:
+            return _context21.abrupt('return', {
+              boardName: thread.boardName,
+              threadNumber: thread.number
+            });
+
+          case 9:
+          case 'end':
+            return _context21.stop();
+        }
+      }
+    }, _callee21, this);
+  }));
+
+  return function getThreadRedirect(_x52, _x53) {
     return ref.apply(this, arguments);
   };
 }();

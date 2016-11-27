@@ -74,10 +74,7 @@ function initialize() {
   app.use(router);
 
   app.use('*', function (req, res, next) {
-    var err = new Error();
-    err.status = 404;
-    err.path = req.baseUrl;
-    next(err);
+    next(Tools.create404Error(req.baseUrl));
   });
 
   app.use(function (err, req, res, next) {
