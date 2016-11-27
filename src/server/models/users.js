@@ -277,9 +277,11 @@ function processRegisteredUserData(levels, ips) {
   if (levels.length <= 0) {
     throw new Error(Tools.translate('Access level is not specified for any board'));
   }
-  if (levels.some(level => !Board.board(level.boardName))) {
-    throw new Error(Tools.translate('Invalid board'));
-  }
+  levels.forEach((level) => {
+    if (!Board.board(level.boardName)) {
+      throw new Error(Tools.translate('Invalid board: $[1]', '', level.boardName));
+    }
+  });
   let invalidLevel = _(levels).some((level) => {
     return (Tools.compareRegisteredUserLevels(level.level, 'USER') < 0)
       || (Tools.compareRegisteredUserLevels(level.level, 'SUPERUSER') >= 0);
