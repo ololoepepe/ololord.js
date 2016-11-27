@@ -25,7 +25,7 @@ function initialize() {
   });
 
   Tools.loadPlugins([__dirname, `${__dirname}/custom`], (fileName, _1, _2, path) => {
-    return !EXCLUDED_ROUTERS.has(fileName) || (path.split('/') === 'custom');
+    return !EXCLUDED_ROUTERS.has(fileName) || (path.split('/').slice(-2, -1)[0] === 'custom');
   }).forEach((plugin) => {
     router.use('/', plugin);
     app.routers.push(plugin);
