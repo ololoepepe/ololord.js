@@ -32,5 +32,5 @@ export default async function(method, params) {
   if (result.error) {
     throw new Error(result.error.error_msg);
   }
-  return result;
+  return result.response;
 }

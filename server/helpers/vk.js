@@ -86,7 +86,7 @@ exports.default = function () {
             throw new Error(result.error.error_msg);
 
           case 16:
-            return _context.abrupt('return', result);
+            return _context.abrupt('return', result.response);
 
           case 17:
           case 'end':
