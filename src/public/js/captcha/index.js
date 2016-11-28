@@ -62,6 +62,9 @@ export async function createCaptcha() {
       $('#captcha-quota').text(quota);
       container.hide();
     }
+    if (typeof window.lord.emit === 'function') {
+      window.lord.emit('captchaReset', quota);
+    }
   } catch (err) {
     DOM.handleError(err);
   }
@@ -81,6 +84,9 @@ export async function resetCaptcha() {
       if (selectedEngine && typeof selectedEngine.reload === 'function') {
         selectedEngine.reload(Tools.captchaEngine(selectedEngine.id));
       }
+    }
+    if (typeof window.lord.emit === 'function') {
+      window.lord.emit('captchaReset', quota);
     }
   } catch (err) {
     DOM.handleError(err);
