@@ -17,7 +17,7 @@ var downloadFile = function () {
             options = { timeout: (0, _config2.default)('system.httpRequestTimeout') };
 
             if (!/^vk\:\/\//.test(url)) {
-              _context.next = 10;
+              _context.next = 11;
               break;
             }
 
@@ -27,11 +27,12 @@ var downloadFile = function () {
           case 6:
             result = _context.sent;
 
+            console.log(result);
             options.url = result.response[0].url;
-            _context.next = 11;
+            _context.next = 12;
             break;
 
-          case 10:
+          case 11:
             if (proxy) {
               options = _merge2.default.recursive(options, {
                 host: proxy.host,
@@ -43,39 +44,39 @@ var downloadFile = function () {
               optons.url = url;
             }
 
-          case 11:
-            _context.next = 13;
+          case 12:
+            _context.next = 14;
             return _http2.default.request(options);
 
-          case 13:
+          case 14:
             response = _context.sent;
 
             if (!(200 !== response.status)) {
-              _context.next = 16;
+              _context.next = 17;
               break;
             }
 
             throw new Error(Tools.translate('Failed to download file'));
 
-          case 16:
-            _context.next = 18;
+          case 17:
+            _context.next = 19;
             return response.body.read();
 
-          case 18:
+          case 19:
             data = _context.sent;
 
             if (!(data.length < 1)) {
-              _context.next = 21;
+              _context.next = 22;
               break;
             }
 
             throw new Error(Tools.translate('File is empty'));
 
-          case 21:
-            _context.next = 23;
+          case 22:
+            _context.next = 24;
             return writeFile(path, data);
 
-          case 23:
+          case 24:
             file = {
               name: url.split('/').pop(),
               size: data.length,
@@ -83,16 +84,16 @@ var downloadFile = function () {
             };
 
             setFileRating(file, formFieldName.substr(9), fields);
-            _context.next = 27;
+            _context.next = 28;
             return getMimeType(path);
 
-          case 27:
+          case 28:
             mimeType = _context.sent;
 
             file.mimeType = mimeType;
             return _context.abrupt('return', file);
 
-          case 30:
+          case 31:
           case 'end':
             return _context.stop();
         }
