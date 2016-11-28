@@ -28,5 +28,9 @@ export default async function(method, params) {
     throw new Error(Tools.translate('Failed to call VK API method'));
   }
   let data = await response.body.read();
-  return JSON.parse(data.toString());
+  let result = JSON.parse(data.toString());
+  if (result.error) {
+    throw new Error(result.error.error_msg);
+  }
+  return result;
 }

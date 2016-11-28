@@ -45,7 +45,6 @@ async function downloadFile(url, formFieldName, fields) {
   let options = { timeout: config('system.httpRequestTimeout') };
   if (/^vk\:\/\//.test(url)) {
     let result = await vk('audio.getById', { audios: url.split('/')[2] });
-    console.log(result);
     options.url = result.response[0].url;
   } else if (proxy) {
     options = merge.recursive(options, {

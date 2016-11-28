@@ -30,7 +30,7 @@ var VK_API_CALL_TIMEOUT = Tools.MINUTE;
 
 exports.default = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(method, params) {
-    var response, data;
+    var response, data, result;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -76,9 +76,19 @@ exports.default = function () {
 
           case 12:
             data = _context.sent;
-            return _context.abrupt('return', JSON.parse(data.toString()));
+            result = JSON.parse(data.toString());
 
-          case 14:
+            if (!result.error) {
+              _context.next = 16;
+              break;
+            }
+
+            throw new Error(result.error.error_msg);
+
+          case 16:
+            return _context.abrupt('return', result);
+
+          case 17:
           case 'end':
             return _context.stop();
         }
