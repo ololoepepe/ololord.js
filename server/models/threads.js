@@ -930,21 +930,22 @@ var moveThread = exports.moveThread = function () {
 
           case 11:
             thread.originalBoardName = thread.boardName;
+            thread.originalNumber = thread.number;
             thread.boardName = targetBoardName;
-            _context18.next = 15;
+            _context18.next = 16;
             return getThreadPostCount(sourceBoardName, threadNumber);
 
-          case 15:
+          case 16:
             postCount = _context18.sent;
-            _context18.next = 18;
+            _context18.next = 19;
             return BoardsModel.nextPostNumber(targetBoardName, postCount);
 
-          case 18:
+          case 19:
             lastPostNumber = _context18.sent;
             initialPostNumber = lastPostNumber - postCount + 1;
 
             thread.number = initialPostNumber;
-            _context18.next = 23;
+            _context18.next = 24;
             return PostsModel.copyPosts({
               sourceBoardName: sourceBoardName,
               sourceThreadNumber: threadNumber,
@@ -953,33 +954,33 @@ var moveThread = exports.moveThread = function () {
               transaction: transaction
             });
 
-          case 23:
-            _context18.next = 25;
+          case 24:
+            _context18.next = 26;
             return client.collection('thread');
 
-          case 25:
+          case 26:
             Thread = _context18.sent;
 
             transaction.setThreadNumber(thread.number);
-            _context18.next = 29;
+            _context18.next = 30;
             return Thread.insertOne(thread);
 
-          case 29:
-            _context18.next = 31;
+          case 30:
+            _context18.next = 32;
             return IPC.render(targetBoardName, thread.number, thread.number, 'create');
 
-          case 31:
+          case 32:
             transaction.commit();
-            _context18.next = 34;
+            _context18.next = 35;
             return deleteThread(sourceBoardName, threadNumber);
 
-          case 34:
+          case 35:
             return _context18.abrupt('return', {
               boardName: targetBoardName,
               threadNumber: thread.number
             });
 
-          case 35:
+          case 36:
           case 'end':
             return _context18.stop();
         }

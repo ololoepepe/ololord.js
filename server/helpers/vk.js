@@ -12,7 +12,11 @@ var _http = require('q-io/http');
 
 var _http2 = _interopRequireDefault(_http);
 
-var _tools = require('../helpers/tools');
+var _config = require('./config');
+
+var _config2 = _interopRequireDefault(_config);
+
+var _tools = require('./tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
@@ -40,7 +44,7 @@ exports.default = function () {
 
           case 2:
             params = params || {};
-            params.access_token = (0, Tools.default)('site.vkontakte.accessToken');
+            params.access_token = (0, _config2.default)('site.vkontakte.accessToken');
             params = (0, _underscore2.default)(params).map(function (value, key) {
               if (!(0, _underscore2.default)(value).isArray()) {
                 value = [value];

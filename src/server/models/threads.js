@@ -324,6 +324,7 @@ export async function moveThread(sourceBoardName, threadNumber, targetBoardName,
     throw new Error(Tools.translate('No such thread'));
   }
   thread.originalBoardName = thread.boardName;
+  thread.originalNumber = thread.number;
   thread.boardName = targetBoardName;
   let postCount = await getThreadPostCount(sourceBoardName, threadNumber);
   let lastPostNumber = await BoardsModel.nextPostNumber(targetBoardName, postCount);

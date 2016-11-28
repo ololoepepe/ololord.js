@@ -1,8 +1,8 @@
 import _ from 'underscore';
 import HTTP from 'q-io/http';
 
-import config from '../helpers/tools';
-import * as Tools from '../helpers/tools';
+import config from './config';
+import * as Tools from './tools';
 
 
 const VK_API_CALL_TIMEOUT = Tools.MINUTE;
