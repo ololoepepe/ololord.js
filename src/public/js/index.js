@@ -415,7 +415,9 @@ export function initializeHead() {
   }
   if (Settings.userJavaScriptEnabled()) {
     try {
-      eval(Storage.userJavaScript());
+      (() => {
+        eval(Storage.userJavaScript());
+      })();
     } catch (err) {
       console.log(err);
     }

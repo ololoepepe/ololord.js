@@ -15,7 +15,6 @@ var sourcemaps = require('gulp-sourcemaps');
 var spritesmith = require('gulp.spritesmith');
 var Stream = require('stream');
 var uglify = require('gulp-uglify');
-var webworkify = require('webworkify');
 
 const CODEMIRROR_ADDONS = ['mode/simple'];
 const CODEMIRROR_MODES = ['javascript', 'css', 'xml', 'htmlmixed'];

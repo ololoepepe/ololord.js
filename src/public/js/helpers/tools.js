@@ -755,3 +755,8 @@ export function lcToFile(lc, fileName) {
   }
   return file;
 }
+
+export function getFunctionArgs(func) {
+  let args = func.toString().match(/function\s.*?\(([^)]*)\)/)[1];
+  return args.split(',').map(arg => arg.replace(/\/\*.*\*\//, '').trim()).filter(arg => !!arg);
+}

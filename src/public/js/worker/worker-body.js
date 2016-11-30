@@ -1,6 +1,7 @@
 import 'babel-polyfill';
 
 import * as Tasks from './tasks';
+import * as Tools from '../helpers/tools';
 
 export default function workerBody(self) {
   self.addEventListener('message', async function(message) {

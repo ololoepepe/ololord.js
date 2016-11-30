@@ -5,10 +5,13 @@ import work from 'webworkify';
 import * as Spells from './spells';
 import workerBody from './worker-body';
 import * as DOM from '../helpers/dom';
+import * as Tools from '../helpers/tools';
 
 let worker = null;
 let workerTasks = {};
 let first = true;
+let customSpellsRegistered = false;
+let customSpellsPromise = null;
 
 export function initialize() {
   CodeMirror.defineSimpleMode('spells', {
@@ -63,7 +66,7 @@ export function initialize() {
   });
 }
 
-export function doWork(type, data, transferable) {
+function doWorkInternal(type, data) {
   if (!worker) {
     return Promise.reject(Tools.translate('WebWorker is not initialzed'));
   }
@@ -73,10 +76,36 @@ export function doWork(type, data, transferable) {
       resolve: resolve,
       reject: reject
     };
-    worker.postMessage(JSON.stringify({
+    let msg = JSON.stringify({
       id: ID,
       type: type,
       data: data
-    }), transferable || []);
+    });
+    worker.postMessage(msg);
   });
+}
+
+function getCustomSpells() {
+  return Spells.getCustomSpells().map(({ name, spell, args }) => {
+    return {
+      name: name,
+      func: {
+        args: Tools.getFunctionArgs(spell),
+        body: spell.toString().replace(/^\s*function.+?\{\s*/, '').replace(/\s*\}\s*$/, '')
+      },
+      args: args
+    }
+  });
+}
+
+export async function doWork(type, data) {
+  if (!customSpellsRegistered) {
+    if (!customSpellsPromise) {
+      customSpellsPromise = doWorkInternal('registerCustomSpells', getCustomSpells());
+    }
+    await customSpellsPromise;
+    customSpellsPromise = null;
+    customSpellsRegistered = true;
+  }
+  return doWorkInternal(type, data);
 }

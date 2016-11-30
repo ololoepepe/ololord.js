@@ -108,6 +108,12 @@ async function applySpells(post, spells, options) {
   return npost;
 }
 
+export function registerCustomSpells(spells) {
+  spells.forEach(({ name, func, args }) => {
+    Spells.registerCustomSpell(name, new Function(...func.args.concat(func.body)), args);
+  });
+}
+
 export async function parseSpells(data) {
   try {
     return await Parser.parseSpells(data);

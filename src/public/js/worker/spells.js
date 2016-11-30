@@ -3,10 +3,14 @@ import _ from 'underscore';
 import * as Tools from '../helpers/tools';
 
 let spells = {};
+let customSpells = [];
 
 let register = Tools.createRegisterFunction(spells, 'spell', 'object');
 
-export function registerSpell(name, spell, args) {
+function registerSpell(name, spell, args) {
+  if (typeof window !== 'undefined') {
+    return;
+  }
   let r = (s) => {
     if (typeof s.name !== 'string' || !/^[a-z_]+[a-z0-9_]*$/.test(s.name)) {
       return;
@@ -25,6 +29,22 @@ export function registerSpell(name, spell, args) {
       args: args
     });
   }
+}
+
+export function registerCustomSpell(name, spell, args) {
+  if (typeof window === 'undefined') {
+    registerSpell(name, spell, args);
+  } else {
+    customSpells.push({
+      name: name,
+      spell: spell,
+      args: args
+    });
+  }
+}
+
+export function getCustomSpells() {
+  return customSpells;
 }
 
 export function spell(name) {
