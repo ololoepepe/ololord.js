@@ -269,8 +269,8 @@ registerSpell('num', function(post, args) {
   if (!post || !args) {
     return;
   }
-  if (Tools.inRanges(args, post.number)) {
-    return { hidden: `#num(${args}): ${post.number}` };
+  if (Tools.inRanges(args, post.postNumber)) {
+    return { hidden: `#num(${args}): ${post.postNumber}` };
   }
 }, true);
 
@@ -434,4 +434,4 @@ registerSpell('rep', function(post, args) {
     return;
   }
   return { replacements: [{ innerHTML: nih }] };
-}, 'rx');
+}, 'rxrep');

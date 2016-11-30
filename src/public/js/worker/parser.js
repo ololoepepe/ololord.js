@@ -170,10 +170,13 @@ function getTokens(text) {
         pattern += '\\(((\\\\\\)|[^\\)])*?)\\)';
         break;
       case 'rx':
-        pattern += '\\((\/.*\/(i|igm?|img?|g|gmi?|gim?|m|mig?|mgi?)?)?\\)';
+        pattern += '\\((\\/.*\\/(i|igm?|img?|g|gmi?|gim?|m|mig?|mgi?)?)\\)';
+        break;
+      case 'rxrep':
+        pattern += '\\((\\/.*\\/(i|igm?|img?|g|gmi?|gim?|m|mig?|mgi?)?\\,((\\\\\\)|[^\\)])+?))\\)';
         break;
       case 'optrx':
-        pattern += '\\(\/.*\/(i|igm?|img?|g|gmi?|gim?|m|mig?|mgi?)?\\)';
+        pattern += '\\((\\/.*\\/(i|igm?|img?|g|gmi?|gim?|m|mig?|mgi?)?)?\\)';
         break;
       case true:
         pattern += '\\(((\\\\\\)|[^\\)])+?)\\)';

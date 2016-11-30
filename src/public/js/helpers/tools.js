@@ -660,12 +660,12 @@ export function regexp(string, rep) {
     return null;
   }
   if (rep) {
-    return new RegExp(match[1], match[3]);
-  } else {
     return {
       regexp: new RegExp(match[1], match[3]),
       rep: _(match).last()
     };
+  } else {
+    return new RegExp(match[1], match[3]);
   }
 }
 
