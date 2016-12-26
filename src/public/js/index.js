@@ -244,7 +244,7 @@ function initializeNavbar(navbar) {
     }),
     showChat: Chat.showChat,
     showHiddenPostList: Hiding.showHiddenPostList,
-    editSpells: Widgets.editCode.bind(null, 'spells', { name: 'spells' }),
+    editSpells: Widgets.editCode.bind(null, '', { name: 'spells' }),
     showSettings: Widgets.showSettings,
     showSearch: Widgets.showSearch,
     showFavorites: Threads.showFavorites,

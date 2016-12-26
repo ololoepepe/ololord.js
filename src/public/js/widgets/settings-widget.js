@@ -134,7 +134,7 @@ export default class SettingsWidget extends MovableWidget {
       importSettings: importSettings,
       exportSettings: exportSettings,
       synchronizeSettings: synchronizeSettings,
-      editSpells: Widgets.editCode.bind(null, 'spells', { name: 'spells' }),
+      editSpells: Widgets.editCode.bind(null, '', { name: 'spells' }),
       showHiddenPostList: Hiding.showHiddenPostList,
       editUserCss: Widgets.editCode.bind(null, 'css', { name: 'userCSS' }),
       editUserJavaScript: Widgets.editCode.bind(null, 'javascript', { name: 'userJavaScript' }),
