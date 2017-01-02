@@ -132,7 +132,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
   let markupModes = markup.markupModes(markupMode);
   let referencedPosts = {};
   sage = ('true' === sage);
-  let accessLevel = req.level(boardName) || null;
+  let accessLevel = (name? req.level(boardName): null) || null;
   text = await markup(boardName, rawText, {
     markupModes: markupModes,
     accessLevel: accessLevel,
