@@ -56,8 +56,14 @@ export async function createThumbnail(file, thumbPath, path) {
       resolve(metadata);
     });
   });
-  let width = Tools.option(metadata.streams[0].width, 'number', 0, { test: (w) => { return w > 0; } });
-  let height = Tools.option(metadata.streams[0].height, 'number', 0, { test: (h) => { return h > 0; } });
+  let width, height;
+    for (let i = 0; i < metadata.streams.length; i++) {
+        if (!isNaN(+metadata.streams[i].width) && !isNaN(+metadata.streams[i].height)) {
+            width = Tools.option(metadata.streams[i].width, 'number', 0, { test: (w) => { return w > 0; } });
+            height = Tools.option(metadata.streams[i].height, 'number', 0, { test: (h) => { return h > 0; } });
+            break;
+        }
+    }
   let result = {};
   if (width && height) {
     result.dimensions = {
