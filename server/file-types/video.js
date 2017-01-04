@@ -9,7 +9,7 @@ var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(file, thumbPath, path) {
     var _this = this;
 
-    var metadata, width, height, i, result, duration, bitrate, thumbInfo, _thumbInfo;
+    var metadata, _getDimensions, width, height, result, duration, bitrate, thumbInfo, _thumbInfo;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -27,34 +27,9 @@ var createThumbnail = exports.createThumbnail = function () {
 
           case 2:
             metadata = _context2.sent;
-            width = void 0, height = void 0;
-            i = 0;
-
-          case 5:
-            if (!(i < metadata.streams.length)) {
-              _context2.next = 13;
-              break;
-            }
-
-            if (!(!isNaN(+metadata.streams[i].width) && !isNaN(+metadata.streams[i].height))) {
-              _context2.next = 10;
-              break;
-            }
-
-            width = Tools.option(metadata.streams[i].width, 'number', 0, { test: function test(w) {
-                return w > 0;
-              } });
-            height = Tools.option(metadata.streams[i].height, 'number', 0, { test: function test(h) {
-                return h > 0;
-              } });
-            return _context2.abrupt('break', 13);
-
-          case 10:
-            i++;
-            _context2.next = 5;
-            break;
-
-          case 13:
+            _getDimensions = getDimensions(metadata);
+            width = _getDimensions.width;
+            height = _getDimensions.height;
             result = {};
 
             if (width && height) {
@@ -70,7 +45,7 @@ var createThumbnail = exports.createThumbnail = function () {
               duration: +duration ? durationToString(duration) : duration,
               bitrate: bitrate ? Math.floor(bitrate / 1024) : 0
             };
-            _context2.prev = 18;
+            _context2.prev = 11;
             return _context2.delegateYield(regeneratorRuntime.mark(function _callee() {
               var pngThumbPath;
               return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -92,92 +67,92 @@ var createThumbnail = exports.createThumbnail = function () {
                   }
                 }
               }, _callee, _this);
-            })(), 't0', 20);
+            })(), 't0', 13);
 
-          case 20:
-            _context2.next = 25;
+          case 13:
+            _context2.next = 18;
             break;
 
-          case 22:
-            _context2.prev = 22;
-            _context2.t1 = _context2['catch'](18);
+          case 15:
+            _context2.prev = 15;
+            _context2.t1 = _context2['catch'](11);
 
             _logger2.default.error(_context2.t1.stack || _context2.t1);
 
-          case 25:
+          case 18:
             if (!(thumbPath === file.thumbPath)) {
-              _context2.next = 31;
+              _context2.next = 24;
               break;
             }
 
-            _context2.next = 28;
+            _context2.next = 21;
             return Files.generateRandomImage(file.hash, file.mimeType, thumbPath);
 
-          case 28:
+          case 21:
             result.thumbDimensions = {
               width: 200,
               height: 200
             };
-            _context2.next = 46;
+            _context2.next = 39;
             break;
 
-          case 31:
-            _context2.next = 33;
+          case 24:
+            _context2.next = 26;
             return Files.getImageSize(file.thumbPath);
 
-          case 33:
+          case 26:
             thumbInfo = _context2.sent;
 
             if (thumbInfo) {
-              _context2.next = 36;
+              _context2.next = 29;
               break;
             }
 
             throw new Error(Tools.translate('Failed to identify image file: $[1]', '', file.thumbPath));
 
-          case 36:
+          case 29:
             result.thumbDimensions = {
               width: thumbInfo.width,
               height: thumbInfo.height
             };
 
             if (!(result.thumbDimensions.width > 200 || result.thumbDimensions.height > 200)) {
-              _context2.next = 46;
+              _context2.next = 39;
               break;
             }
 
-            _context2.next = 40;
+            _context2.next = 33;
             return Files.resizeImage(file.thumbPath, 200, 200);
 
-          case 40:
-            _context2.next = 42;
+          case 33:
+            _context2.next = 35;
             return Files.getImageSize(file.thumbPath);
 
-          case 42:
+          case 35:
             _thumbInfo = _context2.sent;
 
             if (_thumbInfo) {
-              _context2.next = 45;
+              _context2.next = 38;
               break;
             }
 
             throw new Error(Tools.translate('Failed to identify image file: $[1]', '', file.thumbPath));
 
-          case 45:
+          case 38:
             result.thumbDimensions = {
               width: _thumbInfo.width,
               height: _thumbInfo.height
             };
 
-          case 46:
+          case 39:
             return _context2.abrupt('return', result);
 
-          case 47:
+          case 40:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, this, [[18, 22]]);
+    }, _callee2, this, [[11, 15]]);
   }));
 
   return function createThumbnail(_x, _x2, _x3) {
@@ -187,7 +162,7 @@ var createThumbnail = exports.createThumbnail = function () {
 
 var renderPostFileInfo = exports.renderPostFileInfo = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(fileInfo) {
-    var _ref, duration, bitrate;
+    var _ref2, duration, bitrate;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -196,9 +171,9 @@ var renderPostFileInfo = exports.renderPostFileInfo = function () {
             if (fileInfo.dimensions) {
               fileInfo.sizeText += ', ' + fileInfo.dimensions.width + 'x' + fileInfo.dimensions.height;
             }
-            _ref = fileInfo.extraData || {};
-            duration = _ref.duration;
-            bitrate = _ref.bitrate;
+            _ref2 = fileInfo.extraData || {};
+            duration = _ref2.duration;
+            bitrate = _ref2.bitrate;
 
             if (duration) {
               fileInfo.sizeText += ', ' + duration;
@@ -258,6 +233,26 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 var MIME_TYPES_FOR_SUFFIXES = new Map();
 var DEFAULT_SUFFIXES_FOR_MIME_TYPES = new Map();
 var THUMB_SUFFIXES_FOR_MIME_TYPE = new Map();
+
+function getDimensions(metadata) {
+  var stream = (0, _underscore2.default)(metadata.streams).find(function (_ref) {
+    var width = _ref.width;
+    var height = _ref.height;
+
+    return !isNaN(+width) && !isNaN(+height);
+  });
+  if (!stream) {
+    return {};
+  }
+  return {
+    width: Tools.option(stream.width, 'number', 0, { test: function test(w) {
+        return w > 0;
+      } }),
+    height: Tools.option(stream.height, 'number', 0, { test: function test(h) {
+        return h > 0;
+      } })
+  };
+}
 
 function durationToString(duration) {
   duration = Math.floor(+duration);

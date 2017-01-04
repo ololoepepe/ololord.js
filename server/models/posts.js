@@ -235,7 +235,7 @@ var createPost = exports.createPost = function () {
             referencedPosts = {};
 
             sage = 'true' === sage;
-            accessLevel = req.level(boardName) || null;
+            accessLevel = (name ? req.level(boardName) : null) || null;
             _context6.next = 31;
             return (0, _markup2.default)(boardName, rawText, {
               markupModes: markupModes,
