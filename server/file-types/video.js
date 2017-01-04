@@ -9,7 +9,7 @@ var createThumbnail = exports.createThumbnail = function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(file, thumbPath, path) {
     var _this = this;
 
-    var metadata, width, height, result, duration, bitrate, thumbInfo, _thumbInfo;
+    var metadata, width, height, i, result, duration, bitrate, thumbInfo, _thumbInfo;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -27,12 +27,34 @@ var createThumbnail = exports.createThumbnail = function () {
 
           case 2:
             metadata = _context2.sent;
-            width = Tools.option(metadata.streams[0].width, 'number', 0, { test: function test(w) {
+            width = void 0, height = void 0;
+            i = 0;
+
+          case 5:
+            if (!(i < metadata.streams.length)) {
+              _context2.next = 13;
+              break;
+            }
+
+            if (!(!isNaN(+metadata.streams[i].width) && !isNaN(+metadata.streams[i].height))) {
+              _context2.next = 10;
+              break;
+            }
+
+            width = Tools.option(metadata.streams[i].width, 'number', 0, { test: function test(w) {
                 return w > 0;
               } });
-            height = Tools.option(metadata.streams[0].height, 'number', 0, { test: function test(h) {
+            height = Tools.option(metadata.streams[i].height, 'number', 0, { test: function test(h) {
                 return h > 0;
               } });
+            return _context2.abrupt('break', 13);
+
+          case 10:
+            i++;
+            _context2.next = 5;
+            break;
+
+          case 13:
             result = {};
 
             if (width && height) {
@@ -48,7 +70,7 @@ var createThumbnail = exports.createThumbnail = function () {
               duration: +duration ? durationToString(duration) : duration,
               bitrate: bitrate ? Math.floor(bitrate / 1024) : 0
             };
-            _context2.prev = 10;
+            _context2.prev = 18;
             return _context2.delegateYield(regeneratorRuntime.mark(function _callee() {
               var pngThumbPath;
               return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -70,92 +92,92 @@ var createThumbnail = exports.createThumbnail = function () {
                   }
                 }
               }, _callee, _this);
-            })(), 't0', 12);
+            })(), 't0', 20);
 
-          case 12:
-            _context2.next = 17;
+          case 20:
+            _context2.next = 25;
             break;
 
-          case 14:
-            _context2.prev = 14;
-            _context2.t1 = _context2['catch'](10);
+          case 22:
+            _context2.prev = 22;
+            _context2.t1 = _context2['catch'](18);
 
             _logger2.default.error(_context2.t1.stack || _context2.t1);
 
-          case 17:
+          case 25:
             if (!(thumbPath === file.thumbPath)) {
-              _context2.next = 23;
+              _context2.next = 31;
               break;
             }
 
-            _context2.next = 20;
+            _context2.next = 28;
             return Files.generateRandomImage(file.hash, file.mimeType, thumbPath);
 
-          case 20:
+          case 28:
             result.thumbDimensions = {
               width: 200,
               height: 200
             };
-            _context2.next = 38;
+            _context2.next = 46;
             break;
 
-          case 23:
-            _context2.next = 25;
+          case 31:
+            _context2.next = 33;
             return Files.getImageSize(file.thumbPath);
 
-          case 25:
+          case 33:
             thumbInfo = _context2.sent;
 
             if (thumbInfo) {
-              _context2.next = 28;
+              _context2.next = 36;
               break;
             }
 
             throw new Error(Tools.translate('Failed to identify image file: $[1]', '', file.thumbPath));
 
-          case 28:
+          case 36:
             result.thumbDimensions = {
               width: thumbInfo.width,
               height: thumbInfo.height
             };
 
             if (!(result.thumbDimensions.width > 200 || result.thumbDimensions.height > 200)) {
-              _context2.next = 38;
+              _context2.next = 46;
               break;
             }
 
-            _context2.next = 32;
+            _context2.next = 40;
             return Files.resizeImage(file.thumbPath, 200, 200);
 
-          case 32:
-            _context2.next = 34;
+          case 40:
+            _context2.next = 42;
             return Files.getImageSize(file.thumbPath);
 
-          case 34:
+          case 42:
             _thumbInfo = _context2.sent;
 
             if (_thumbInfo) {
-              _context2.next = 37;
+              _context2.next = 45;
               break;
             }
 
             throw new Error(Tools.translate('Failed to identify image file: $[1]', '', file.thumbPath));
 
-          case 37:
+          case 45:
             result.thumbDimensions = {
               width: _thumbInfo.width,
               height: _thumbInfo.height
             };
 
-          case 38:
+          case 46:
             return _context2.abrupt('return', result);
 
-          case 39:
+          case 47:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, this, [[10, 14]]);
+    }, _callee2, this, [[18, 22]]);
   }));
 
   return function createThumbnail(_x, _x2, _x3) {
