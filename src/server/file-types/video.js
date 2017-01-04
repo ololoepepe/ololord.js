@@ -10,6 +10,19 @@ const MIME_TYPES_FOR_SUFFIXES = new Map();
 const DEFAULT_SUFFIXES_FOR_MIME_TYPES = new Map();
 const THUMB_SUFFIXES_FOR_MIME_TYPE = new Map();
 
+function getDimensions(metadata) {
+  let stream = _(metadata.streams).find(({ width, height }) => {
+    return (!isNaN(+width) && !isNaN(+height));
+  });
+  if (!stream) {
+    return {};
+  }
+  return {
+    width: Tools.option(stream.width, 'number', 0, { test: (w) => { return w > 0; } }),
+    height: Tools.option(stream.height, 'number', 0, { test: (h) => { return h > 0; } })
+  };
+}
+
 function durationToString(duration) {
   duration = Math.floor(+duration);
   let hours = Tools.pad(Math.floor(duration / 3600), 2, '0');
@@ -56,14 +69,7 @@ export async function createThumbnail(file, thumbPath, path) {
       resolve(metadata);
     });
   });
-  let width, height;
-    for (let i = 0; i < metadata.streams.length; i++) {
-        if (!isNaN(+metadata.streams[i].width) && !isNaN(+metadata.streams[i].height)) {
-            width = Tools.option(metadata.streams[i].width, 'number', 0, { test: (w) => { return w > 0; } });
-            height = Tools.option(metadata.streams[i].height, 'number', 0, { test: (h) => { return h > 0; } });
-            break;
-        }
-    }
+  let { width, height } = getDimensions(metadata);
   let result = {};
   if (width && height) {
     result.dimensions = {
