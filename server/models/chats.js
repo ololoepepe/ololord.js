@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.deleteChatMessages = exports.addChatMessage = exports.getChatMessages = undefined;
 
 var getChatNumber = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, postNumber, chatNumber) {
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, postNumber, chatNumber) {
     var ChatNumberCounter, key, counter, result, lastChatNumber;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -67,12 +67,12 @@ var getChatNumber = function () {
   }));
 
   return function getChatNumber(_x, _x2, _x3) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }();
 
 var selectReceiver = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(key, user, postUser) {
+  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(key, user, postUser) {
     var ChatMessage, message;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -119,12 +119,12 @@ var selectReceiver = function () {
   }));
 
   return function selectReceiver(_x4, _x5, _x6) {
-    return ref.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
 var getChatMessages = exports.getChatMessages = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(user, lastRequestDate) {
+  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(user, lastRequestDate) {
     var ChatMessage, date, messages, chats;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -166,12 +166,12 @@ var getChatMessages = exports.getChatMessages = function () {
               delete message.sender;
               delete message.receiver;
               message.date = message.date.toISOString();
-              list.filter(function (_ref) {
-                var messageUser = _ref.messageUser;
+              list.filter(function (_ref4) {
+                var messageUser = _ref4.messageUser;
                 return usersEqual(user, messageUser);
-              }).forEach(function (_ref2) {
-                var messageUser = _ref2.messageUser;
-                var type = _ref2.type;
+              }).forEach(function (_ref5) {
+                var messageUser = _ref5.messageUser,
+                    type = _ref5.type;
 
                 var msg = _underscore2.default.clone(message);
                 msg.type = type;
@@ -193,19 +193,19 @@ var getChatMessages = exports.getChatMessages = function () {
   }));
 
   return function getChatMessages(_x7, _x8) {
-    return ref.apply(this, arguments);
+    return _ref3.apply(this, arguments);
   };
 }();
 
 var addChatMessage = exports.addChatMessage = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
-    var _ref3 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+  var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+    var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        user = _ref7.user,
+        boardName = _ref7.boardName,
+        postNumber = _ref7.postNumber,
+        chatNumber = _ref7.chatNumber,
+        text = _ref7.text;
 
-    var user = _ref3.user;
-    var boardName = _ref3.boardName;
-    var postNumber = _ref3.postNumber;
-    var chatNumber = _ref3.chatNumber;
-    var text = _ref3.text;
     var Post, post, key, receiver, ChatMessage, date;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -309,19 +309,19 @@ var addChatMessage = exports.addChatMessage = function () {
     }, _callee4, this);
   }));
 
-  return function addChatMessage(_x9) {
-    return ref.apply(this, arguments);
+  return function addChatMessage() {
+    return _ref6.apply(this, arguments);
   };
 }();
 
 var deleteChatMessages = exports.deleteChatMessages = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
-    var _ref4 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+  var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
+    var _ref9 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        user = _ref9.user,
+        boardName = _ref9.boardName,
+        postNumber = _ref9.postNumber,
+        chatNumber = _ref9.chatNumber;
 
-    var user = _ref4.user;
-    var boardName = _ref4.boardName;
-    var postNumber = _ref4.postNumber;
-    var chatNumber = _ref4.chatNumber;
     var ChatMessage;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -345,8 +345,8 @@ var deleteChatMessages = exports.deleteChatMessages = function () {
     }, _callee5, this);
   }));
 
-  return function deleteChatMessages(_x11) {
-    return ref.apply(this, arguments);
+  return function deleteChatMessages() {
+    return _ref8.apply(this, arguments);
   };
 }();
 
@@ -370,7 +370,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var client = (0, _mongodbClientFactory2.default)();
 
@@ -385,14 +385,6 @@ function createMessagesQuery(user) {
 
 function usersEqual(user1, user2) {
   return user1.ip === user2.ip || user1.hashpass && user1.hashpass === user2.hashpass;
-}
-
-function messageType(message, user) {
-  if (usersEqual(user, message.sender)) {
-    return 'out';
-  } else {
-    return 'in';
-  }
 }
 
 function cloneUser(user) {

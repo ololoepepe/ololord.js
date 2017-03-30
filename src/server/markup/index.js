@@ -2,7 +2,6 @@ import _ from 'underscore';
 
 import codeElements from './code';
 import ProcessingContext from './processing-context';
-import config from '../helpers/config';
 import * as Permissions from '../helpers/permissions';
 import * as Tools from '../helpers/tools';
 

@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 exports.default = function (id) {
   if (id && ((typeof id === 'undefined' ? 'undefined' : _typeof(id)) === 'object' || typeof id === 'boolean')) {
@@ -74,7 +74,7 @@ function createOptions() {
     password: (0, _config2.default)('system.redis.password'),
     db: (0, _config2.default)('system.redis.db')
   };
-};
+}
 
 function createClient() {
   var redisNodes = (0, _config2.default)('system.redis.nodes');

@@ -1,6 +1,5 @@
 import _ from 'underscore';
 import ffmpeg from 'fluent-ffmpeg';
-import promisify from 'promisify-node';
 
 import * as Files from '../core/files';
 import Logger from '../helpers/logger';

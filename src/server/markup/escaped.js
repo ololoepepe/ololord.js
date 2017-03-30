@@ -1,5 +1,3 @@
-import _ from 'underscore';
-
 import ProcessingContext from './processing-context';
 import * as Renderer from '../core/renderer';
 

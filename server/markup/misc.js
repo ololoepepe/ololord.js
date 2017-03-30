@@ -27,12 +27,12 @@ function convertHtml(_1, text, _2, _3, options) {
 
 function convertEmDash(_1, _2, _3, _4, options) {
   options.type = _processingContext2.default.NO_SKIP;
-  return '—';
+  return '\u2014';
 }
 
 function convertEnDash(_1, _2, _3, _4, options) {
   options.type = _processingContext2.default.NO_SKIP;
-  return '–';
+  return '\u2013';
 }
 
 function convertCSpoiler(_1, text, matchs, _2, options) {

@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var getTwitterEmbeddedHtml = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(href, defaultHTML) {
+  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(href, defaultHTML) {
     var response, data;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -53,12 +53,12 @@ var getTwitterEmbeddedHtml = function () {
   }));
 
   return function getTwitterEmbeddedHtml(_x2, _x3) {
-    return ref.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
 var getYoutubeEmbeddedHtml = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(href, defaultHTML) {
+  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(href, defaultHTML) {
     var match, videoId, apiKey, response, data, info, html;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -149,12 +149,12 @@ var getYoutubeEmbeddedHtml = function () {
   }));
 
   return function getYoutubeEmbeddedHtml(_x4, _x5) {
-    return ref.apply(this, arguments);
+    return _ref3.apply(this, arguments);
   };
 }();
 
 var getCoubEmbeddedHtml = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(href, defaultHTML) {
+  var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(href, defaultHTML) {
     var match, videoId, response, data, info, html;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -245,12 +245,12 @@ var getCoubEmbeddedHtml = function () {
   }));
 
   return function getCoubEmbeddedHtml(_x6, _x7) {
-    return ref.apply(this, arguments);
+    return _ref4.apply(this, arguments);
   };
 }();
 
 var convertLinkCommon = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(hrefIsText, info, text, matchs, _1, options) {
+  var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(hrefIsText, info, text, matchs, _1, options) {
     var href, defaultHTML;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -339,12 +339,12 @@ var convertLinkCommon = function () {
   }));
 
   return function convertLinkCommon(_x8, _x9, _x10, _x11, _x12, _x13) {
-    return ref.apply(this, arguments);
+    return _ref5.apply(this, arguments);
   };
 }();
 
 var convertPostLink = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(info, _1, matchs, _2, options) {
+  var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(info, _1, matchs, _2, options) {
     var boardName, postNumber, escaped, post, key, suffix, result;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -412,7 +412,7 @@ var convertPostLink = function () {
   }));
 
   return function convertPostLink(_x14, _x15, _x16, _x17, _x18) {
-    return ref.apply(this, arguments);
+    return _ref6.apply(this, arguments);
   };
 }();
 
@@ -464,7 +464,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var EXTERNAL_LINK_REGEXP_PATTERN = function () {
   var schema = 'https?:\\/\\/|ftp:\\/\\/';
@@ -492,7 +492,7 @@ function transformRootZones(zones) {
 var rootZones = _fsWatcher2.default.createWatchedResource(__dirname + '/../../misc/root-zones.json', function (path) {
   return transformRootZones(require(path));
 }, function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(path) {
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(path) {
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -508,7 +508,7 @@ var rootZones = _fsWatcher2.default.createWatchedResource(__dirname + '/../../mi
   }));
 
   return function (_x) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }()) || {};
 

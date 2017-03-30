@@ -1,6 +1,5 @@
 import _ from 'underscore';
 import express from 'express';
-import FS from 'q-io/fs';
 import moment from 'moment';
 import promisify from 'promisify-node';
 
@@ -9,11 +8,9 @@ import * as Files from '../core/files';
 import * as Renderer from '../core/renderer';
 import * as Cache from '../helpers/cache';
 import config from '../helpers/config';
-import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 import * as BoardsModel from '../models/boards';
 import * as MiscModel from '../models/misc';
-import * as PostsModel from '../models/posts';
 import * as ThreadsModel from '../models/threads';
 import mongodbClient from '../storage/mongodb-client-factory';
 
@@ -161,7 +158,7 @@ async function renderPages(boardName, { allowPrerender } = {}) {
   return await Tools.series(_.range(pageCount), async function(pageNumber) {
     return await renderPage(boardName, pageNumber, { allowPrerender });
   });
-};
+}
 
 router.paths = async function(description) {
   if (description) {
@@ -263,7 +260,7 @@ router.renderThread = async function(key, data) {
     throw new Error(Tools.translate('Invalid action'));
   }
   }
-}
+};
 
 router.renderPages = async function(boardName, threadNumber) {
   return await renderPages(boardName, { allowPrerender: threadNumber || true });

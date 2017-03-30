@@ -1,14 +1,10 @@
 import _ from 'underscore';
-import Cluster from 'cluster';
-import FS from 'q-io/fs';
 
-import * as MiscModel from './misc';
 import * as PostsModel from './posts';
 import * as ThreadsModel from './threads';
 import Board from '../boards/board';
 import * as Renderer from '../core/renderer';
 import * as IPC from '../helpers/ipc';
-import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
 import mongodbClient from '../storage/mongodb-client-factory';
 
@@ -269,10 +265,11 @@ export async function delall(req, ip, boardNames) {
       boardName: post.boardName,
       number: post.number
     });
-    await PostsModel.removePostData(post.boardName, post.number, post.threadNumber);
+    // NOTE: What's this?!
+    //await PostsModel.removePostData(post.boardName, post.number, post.threadNumber);
   });
   await Tools.series(deletedThreads, async function(thread) {
-    await ThreadsModel.removeThread(thread.boardName, thread.number);
+    await ThreadsModel.deleteThread(thread.boardName, thread.number);
   });
   await Tools.series(updatedThreads, async function(thread) {
     await IPC.render(thread.boardName, thread.number, thread.number, 'edit');

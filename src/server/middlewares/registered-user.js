@@ -34,7 +34,7 @@ export default async function(req, res, next) {
     };
     Tools.REGISTERED_USER_LEVELS.forEach((lvl) => {
       let Level = lvl.toLowerCase();
-      Level = Level.charAt(0).toUpperCase() + Level.slice(1)
+      Level = Level.charAt(0).toUpperCase() + Level.slice(1);
       req[`is${Level}`] = test.bind(req, lvl);
     });
     next();

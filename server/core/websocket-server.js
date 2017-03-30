@@ -46,7 +46,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -211,7 +211,7 @@ var WebSocketServer = function () {
   }, {
     key: '_handleOtherMessage',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(conn, message) {
+      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(conn, message) {
         var handler, data;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -252,7 +252,7 @@ var WebSocketServer = function () {
                   conn.write(JSON.stringify({
                     id: message.id,
                     type: message.type,
-                    error: error
+                    error: _context.t0
                   }));
                 } catch (err) {
                   //Do nothing
@@ -267,7 +267,7 @@ var WebSocketServer = function () {
       }));
 
       function _handleOtherMessage(_x, _x2) {
-        return ref.apply(this, arguments);
+        return _ref.apply(this, arguments);
       }
 
       return _handleOtherMessage;
@@ -316,8 +316,8 @@ var WebSocketServer = function () {
     key: '_initSendChatMessage',
     value: function _initSendChatMessage() {
       this.on('sendChatMessage', function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(msg, conn) {
-          var data, _ref, message, chatNumber, receiver, ip;
+        var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(msg, conn) {
+          var data, _ref3, message, chatNumber, receiver, ip;
 
           return regeneratorRuntime.wrap(function _callee2$(_context2) {
             while (1) {
@@ -334,10 +334,10 @@ var WebSocketServer = function () {
                   });
 
                 case 3:
-                  _ref = _context2.sent;
-                  message = _ref.message;
-                  chatNumber = _ref.chatNumber;
-                  receiver = _ref.receiver;
+                  _ref3 = _context2.sent;
+                  message = _ref3.message;
+                  chatNumber = _ref3.chatNumber;
+                  receiver = _ref3.receiver;
 
                   message.type = 'in';
                   ip = receiver.hashpass ? null : receiver.ip;
@@ -368,7 +368,7 @@ var WebSocketServer = function () {
         }));
 
         return function (_x3, _x4) {
-          return ref.apply(this, arguments);
+          return _ref2.apply(this, arguments);
         };
       }());
     }
@@ -379,10 +379,9 @@ var WebSocketServer = function () {
 
       this._subscriptions = new Map();
       this.on('subscribeToThreadUpdates', function (msg, conn) {
-        var _ref2 = msg.data || {};
-
-        var boardName = _ref2.boardName;
-        var threadNumber = _ref2.threadNumber;
+        var _ref4 = msg.data || {},
+            boardName = _ref4.boardName,
+            threadNumber = _ref4.threadNumber;
 
         var key = boardName + '/' + threadNumber;
         if (_this2._subscriptions.has(key)) {
@@ -394,10 +393,9 @@ var WebSocketServer = function () {
         }
       });
       this.on('unsubscribeFromThreadUpdates', function (msg, conn) {
-        var _ref3 = msg.data || {};
-
-        var boardName = _ref3.boardName;
-        var threadNumber = _ref3.threadNumber;
+        var _ref5 = msg.data || {},
+            boardName = _ref5.boardName,
+            threadNumber = _ref5.threadNumber;
 
         var key = boardName + '/' + threadNumber;
         var s = _this2._subscriptions.get(key);

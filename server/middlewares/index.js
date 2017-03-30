@@ -90,9 +90,7 @@ if ('all' === BEFORE) {
   middlewares.push(_log2.default);
 }
 
-middlewares.push(_ipFix2.default);
-
-middlewares.push(_onlineCounter2.default);
+middlewares.push(_ipFix2.default, _onlineCounter2.default);
 
 if ((0, _config2.default)('server.ddosProtection.static')) {
   setupDdos();
@@ -106,11 +104,7 @@ if ('middleware' === BEFORE) {
   middlewares.push(_log2.default);
 }
 
-middlewares.push((0, _cookieParser2.default)());
-
-middlewares.push(_hashpass2.default);
-
-middlewares.push(_registeredUser2.default);
+middlewares.push((0, _cookieParser2.default)(), _hashpass2.default, _registeredUser2.default);
 
 if ('request' === BEFORE) {
   middlewares.push(_log2.default);

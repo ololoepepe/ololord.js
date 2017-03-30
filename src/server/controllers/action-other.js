@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import express from 'express';
 
 import Board from '../boards/board';
@@ -10,6 +9,7 @@ import * as Tools from '../helpers/tools';
 import * as ChatsModel from '../models/chats';
 import * as PostsModel from '../models/posts';
 import * as UsersModel from '../models/users';
+import * as IPC from '../helpers/ipc';
 
 let router = express.Router();
 

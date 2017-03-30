@@ -6,6 +6,7 @@ import promisify from 'promisify-node';
 
 import * as Files from '../core/files';
 import * as Tools from '../helpers/tools';
+import Logger from '../helpers/logger';
 
 const musicMetadata = promisify('musicmetadata');
 

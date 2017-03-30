@@ -45,9 +45,7 @@ if ('all' === BEFORE) {
   middlewares.push(log);
 }
 
-middlewares.push(ipFix);
-
-middlewares.push(onlineCounter);
+middlewares.push(ipFix, onlineCounter);
 
 if (config('server.ddosProtection.static')) {
   setupDdos();
@@ -61,11 +59,7 @@ if ('middleware' === BEFORE) {
   middlewares.push(log);
 }
 
-middlewares.push(cookieParser());
-
-middlewares.push(hashpass);
-
-middlewares.push(registeredUser);
+middlewares.push(cookieParser(), hashpass, registeredUser);
 
 if ('request' === BEFORE) {
   middlewares.push(log);

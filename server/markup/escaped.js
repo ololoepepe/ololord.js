@@ -4,10 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _underscore = require('underscore');
-
-var _underscore2 = _interopRequireDefault(_underscore);
-
 var _processingContext = require('./processing-context');
 
 var _processingContext2 = _interopRequireDefault(_processingContext);

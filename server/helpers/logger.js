@@ -38,7 +38,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -52,11 +52,11 @@ var WinstonClusterTransport = function (_Winston$Transport) {
   _inherits(WinstonClusterTransport, _Winston$Transport);
 
   function WinstonClusterTransport() {
-    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     _classCallCheck(this, WinstonClusterTransport);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(WinstonClusterTransport).call(this, options));
+    var _this = _possibleConstructorReturn(this, (WinstonClusterTransport.__proto__ || Object.getPrototypeOf(WinstonClusterTransport)).call(this, options));
 
     _this.name = 'cluster';
     return _this;
@@ -65,7 +65,7 @@ var WinstonClusterTransport = function (_Winston$Transport) {
   _createClass(WinstonClusterTransport, [{
     key: 'log',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(level, msg, meta, callback) {
+      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(level, msg, meta, callback) {
         var message;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -80,7 +80,7 @@ var WinstonClusterTransport = function (_Winston$Transport) {
 
               case 2:
                 if (this.stripColors) {
-                  msg = ('' + msg).replace(code, '');
+                  msg = ('' + msg).replace(CODE, '');
                 }
                 message = {
                   cmd: 'log',
@@ -119,7 +119,7 @@ var WinstonClusterTransport = function (_Winston$Transport) {
       }));
 
       function log(_x2, _x3, _x4, _x5) {
-        return ref.apply(this, arguments);
+        return _ref.apply(this, arguments);
       }
 
       return log;
@@ -183,9 +183,9 @@ if (transports.length <= 0) {
 var Logger = void 0;
 
 if (_cluster2.default.isMaster) {
-  Logger = new _winston2.default.Logger({ transports: transports.map(function (_ref) {
-      var ctor = _ref.ctor;
-      var opts = _ref.opts;
+  Logger = new _winston2.default.Logger({ transports: transports.map(function (_ref2) {
+      var ctor = _ref2.ctor,
+          opts = _ref2.opts;
       return new ctor(opts);
     }) });
 } else {

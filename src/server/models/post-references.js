@@ -3,7 +3,6 @@ import _ from 'underscore';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';
-import * as PostsModel from './posts';
 import markup from '../markup';
 import mongodbClient from '../storage/mongodb-client-factory';
 

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.reloadTemplates = exports.compileTemplates = exports.generateCustomCSSFiles = exports.generateCustomJavaScriptFile = exports.generateTemplatingJavaScriptFile = exports.renderThread = exports.rerender = exports.getRouterPaths = undefined;
 
 var getRouterPaths = exports.getRouterPaths = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(description) {
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(description) {
     var controllers, paths;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -15,7 +15,7 @@ var getRouterPaths = exports.getRouterPaths = function () {
             controllers = Tools.requireWrapper(require('../controllers'));
             _context2.next = 3;
             return Tools.series(controllers.routers, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(router) {
+              var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee(router) {
                 return regeneratorRuntime.wrap(function _callee$(_context) {
                   while (1) {
                     switch (_context.prev = _context.next) {
@@ -43,7 +43,7 @@ var getRouterPaths = exports.getRouterPaths = function () {
               }));
 
               return function (_x2) {
-                return ref.apply(this, arguments);
+                return _ref2.apply(this, arguments);
               };
             }(), true);
 
@@ -62,12 +62,12 @@ var getRouterPaths = exports.getRouterPaths = function () {
   }));
 
   return function getRouterPaths(_x) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }();
 
 var rerender = exports.rerender = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(what) {
+  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(what) {
     var controllers, routers;
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
@@ -76,7 +76,7 @@ var rerender = exports.rerender = function () {
             controllers = Tools.requireWrapper(require('../controllers'));
             _context7.next = 3;
             return Tools.series(controllers.routers, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(router) {
+              var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(router) {
                 var paths;
                 return regeneratorRuntime.wrap(function _callee3$(_context3) {
                   while (1) {
@@ -120,7 +120,7 @@ var rerender = exports.rerender = function () {
               }));
 
               return function (_x4) {
-                return ref.apply(this, arguments);
+                return _ref4.apply(this, arguments);
               };
             }(), true);
 
@@ -130,14 +130,14 @@ var rerender = exports.rerender = function () {
             return Tools.series(routers.filter(function (router) {
               return !!router;
             }), function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(router) {
+              var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(router) {
                 return regeneratorRuntime.wrap(function _callee6$(_context6) {
                   while (1) {
                     switch (_context6.prev = _context6.next) {
                       case 0:
                         _context6.next = 2;
                         return Tools.series(router.paths, function () {
-                          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(path) {
+                          var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(path) {
                             var result;
                             return regeneratorRuntime.wrap(function _callee5$(_context5) {
                               while (1) {
@@ -151,7 +151,7 @@ var rerender = exports.rerender = function () {
                                     result = _context5.sent;
                                     _context5.next = 6;
                                     return Tools.series(result, function () {
-                                      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(data, id) {
+                                      var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(data, id) {
                                         return regeneratorRuntime.wrap(function _callee4$(_context4) {
                                           while (1) {
                                             switch (_context4.prev = _context4.next) {
@@ -171,7 +171,7 @@ var rerender = exports.rerender = function () {
                                       }));
 
                                       return function (_x7, _x8) {
-                                        return ref.apply(this, arguments);
+                                        return _ref7.apply(this, arguments);
                                       };
                                     }());
 
@@ -187,7 +187,7 @@ var rerender = exports.rerender = function () {
                           }));
 
                           return function (_x6) {
-                            return ref.apply(this, arguments);
+                            return _ref6.apply(this, arguments);
                           };
                         }());
 
@@ -200,7 +200,7 @@ var rerender = exports.rerender = function () {
               }));
 
               return function (_x5) {
-                return ref.apply(this, arguments);
+                return _ref5.apply(this, arguments);
               };
             }());
 
@@ -216,12 +216,12 @@ var rerender = exports.rerender = function () {
   }));
 
   return function rerender(_x3) {
-    return ref.apply(this, arguments);
+    return _ref3.apply(this, arguments);
   };
 }();
 
 var renderThread = exports.renderThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(thread) {
+  var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(thread) {
     var board;
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
@@ -255,7 +255,7 @@ var renderThread = exports.renderThread = function () {
           case 9:
             _context9.next = 11;
             return Tools.series(thread.lastPosts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(post) {
+              var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(post) {
                 return regeneratorRuntime.wrap(function _callee8$(_context8) {
                   while (1) {
                     switch (_context8.prev = _context8.next) {
@@ -276,7 +276,7 @@ var renderThread = exports.renderThread = function () {
               }));
 
               return function (_x10) {
-                return ref.apply(this, arguments);
+                return _ref9.apply(this, arguments);
               };
             }());
 
@@ -289,12 +289,12 @@ var renderThread = exports.renderThread = function () {
   }));
 
   return function renderThread(_x9) {
-    return ref.apply(this, arguments);
+    return _ref8.apply(this, arguments);
   };
 }();
 
 var generateTemplatingJavaScriptFile = exports.generateTemplatingJavaScriptFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10() {
+  var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10() {
     var models, fileNames, templateNames, template, string, stream;
     return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
@@ -361,12 +361,12 @@ var generateTemplatingJavaScriptFile = exports.generateTemplatingJavaScriptFile 
   }));
 
   return function generateTemplatingJavaScriptFile() {
-    return ref.apply(this, arguments);
+    return _ref10.apply(this, arguments);
   };
 }();
 
 var generateCustomJavaScriptFile = exports.generateCustomJavaScriptFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11() {
+  var _ref11 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11() {
     var exists;
     return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
@@ -400,12 +400,12 @@ var generateCustomJavaScriptFile = exports.generateCustomJavaScriptFile = functi
   }));
 
   return function generateCustomJavaScriptFile() {
-    return ref.apply(this, arguments);
+    return _ref11.apply(this, arguments);
   };
 }();
 
 var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
+  var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
     var list, types;
     return regeneratorRuntime.wrap(function _callee14$(_context14) {
       while (1) {
@@ -414,7 +414,7 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
             console.log(Tools.translate('Checking custom CSS files existence…'));
             _context14.next = 3;
             return Tools.series(['combined', 'desktop', 'mobile'], function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(type) {
+              var _ref13 = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(type) {
                 var exists;
                 return regeneratorRuntime.wrap(function _callee12$(_context12) {
                   while (1) {
@@ -439,7 +439,7 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
               }));
 
               return function (_x11) {
-                return ref.apply(this, arguments);
+                return _ref13.apply(this, arguments);
               };
             }(), true);
 
@@ -459,7 +459,7 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
             console.log(Tools.translate('Creating dummy custom CSS file(s)…'));
             _context14.next = 9;
             return Tools.series(types, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(type) {
+              var _ref14 = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(type) {
                 return regeneratorRuntime.wrap(function _callee13$(_context13) {
                   while (1) {
                     switch (_context13.prev = _context13.next) {
@@ -476,7 +476,7 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
               }));
 
               return function (_x12) {
-                return ref.apply(this, arguments);
+                return _ref14.apply(this, arguments);
               };
             }());
 
@@ -489,12 +489,12 @@ var generateCustomCSSFiles = exports.generateCustomCSSFiles = function () {
   }));
 
   return function generateCustomCSSFiles() {
-    return ref.apply(this, arguments);
+    return _ref12.apply(this, arguments);
   };
 }();
 
 var compileTemplates = exports.compileTemplates = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18() {
+  var _ref15 = _asyncToGenerator(regeneratorRuntime.mark(function _callee18() {
     var list, fileNames, includes;
     return regeneratorRuntime.wrap(function _callee18$(_context18) {
       while (1) {
@@ -510,7 +510,7 @@ var compileTemplates = exports.compileTemplates = function () {
             return Tools.series(list.filter(function (entry) {
               return !EXCLUDED_SOURCE_TEMPLATE_FILES.has(entry);
             }), function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(entry) {
+              var _ref16 = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(entry) {
                 return regeneratorRuntime.wrap(function _callee15$(_context15) {
                   while (1) {
                     switch (_context15.prev = _context15.next) {
@@ -530,7 +530,7 @@ var compileTemplates = exports.compileTemplates = function () {
               }));
 
               return function (_x13) {
-                return ref.apply(this, arguments);
+                return _ref16.apply(this, arguments);
               };
             }());
 
@@ -548,7 +548,7 @@ var compileTemplates = exports.compileTemplates = function () {
             });
             _context18.next = 12;
             return Tools.series(fileNames, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(fileName) {
+              var _ref17 = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(fileName) {
                 var content;
                 return regeneratorRuntime.wrap(function _callee16$(_context16) {
                   while (1) {
@@ -581,7 +581,7 @@ var compileTemplates = exports.compileTemplates = function () {
               }));
 
               return function (_x14) {
-                return ref.apply(this, arguments);
+                return _ref17.apply(this, arguments);
               };
             }(), true);
 
@@ -596,7 +596,7 @@ var compileTemplates = exports.compileTemplates = function () {
             }, {});
             _context18.next = 16;
             return Tools.series(fileNames, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(fileName) {
+              var _ref18 = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(fileName) {
                 var compiled, string, moduleName;
                 return regeneratorRuntime.wrap(function _callee17$(_context17) {
                   while (1) {
@@ -643,7 +643,7 @@ var compileTemplates = exports.compileTemplates = function () {
               }));
 
               return function (_x15) {
-                return ref.apply(this, arguments);
+                return _ref18.apply(this, arguments);
               };
             }());
 
@@ -656,12 +656,12 @@ var compileTemplates = exports.compileTemplates = function () {
   }));
 
   return function compileTemplates() {
-    return ref.apply(this, arguments);
+    return _ref15.apply(this, arguments);
   };
 }();
 
 var reloadTemplates = exports.reloadTemplates = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19() {
+  var _ref19 = _asyncToGenerator(regeneratorRuntime.mark(function _callee19() {
     var fileNames;
     return regeneratorRuntime.wrap(function _callee19$(_context19) {
       while (1) {
@@ -706,7 +706,7 @@ var reloadTemplates = exports.reloadTemplates = function () {
   }));
 
   return function reloadTemplates() {
-    return ref.apply(this, arguments);
+    return _ref19.apply(this, arguments);
   };
 }();
 
@@ -794,7 +794,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var TEMPLATES_SOURCE_PATH = _path2.default.resolve(__dirname + '/../../src/views');
 var TEMPLATES_PATH = _path2.default.resolve(__dirname + '/../../views');
@@ -875,13 +875,10 @@ function targetsFromString(string) {
     return {};
   }
   return string.split(/\s+/).reduce(function (acc, part) {
-    var _part$split = part.split(':');
-
-    var _part$split2 = _toArray(_part$split);
-
-    var boardName = _part$split2[0];
-
-    var postNumbers = _part$split2.slice(1);
+    var _part$split = part.split(':'),
+        _part$split2 = _toArray(_part$split),
+        boardName = _part$split2[0],
+        postNumbers = _part$split2.slice(1);
 
     if (boardName) {
       if (postNumbers.length > 0) {
@@ -951,9 +948,8 @@ function postingSpeedString(launchDate, lastPostNumber) {
 }
 
 function plainText(text) {
-  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-  var brToNewline = _ref.brToNewline;
+  var _ref20 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      brToNewline = _ref20.brToNewline;
 
   if (!text) {
     return '';
