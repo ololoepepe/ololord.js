@@ -10,6 +10,7 @@ import PostCreationTransaction from '../helpers/post-creation-transaction';
 import * as Tools from '../helpers/tools';
 import * as ThreadsModel from '../models/threads';
 import * as UsersModel from '../models/users';
+import * as BoardsModel from '../models/boards';
 
 let router = express.Router();
 

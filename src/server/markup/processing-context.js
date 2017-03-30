@@ -94,7 +94,7 @@ export default class ProcessingContext {
       return false;
     }
     type = type || ProcessingContext.CODE_SKIP;
-    for (var i = 0; i < this.skipList.length; ++i) {
+    for (let i = 0; i < this.skipList.length; ++i) {
       let inf = this.skipList[i];
       if (inf.type !== type) {
         continue;
@@ -121,7 +121,7 @@ export default class ProcessingContext {
       type: type
     };
     let found = false;
-    for (var i = this.skipList.length - 1; i >= 0; --i) {
+    for (let i = this.skipList.length - 1; i >= 0; --i) {
       let inf = this.skipList[i];
       if (start > inf.start) {
         if (ProcessingContext.NO_SKIP !== type) {
@@ -150,7 +150,7 @@ export default class ProcessingContext {
     };
     let dlength = txt.length - length;
     let found = false;
-    for (var i = this.skipList.length - 1; i >= 0; --i) {
+    for (let i = this.skipList.length - 1; i >= 0; --i) {
       let inf = this.skipList[i];
       if (start >= inf.start) {
         if (ProcessingContext.NO_SKIP !== type) {

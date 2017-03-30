@@ -1,5 +1,4 @@
 import _ from 'underscore';
-import FS from 'q-io/fs';
 import promisify from 'promisify-node';
 
 import * as BoardsModel from './boards';
@@ -7,8 +6,6 @@ import * as FilesModel from './files';
 import * as PostReferencesModel from './post-references';
 import * as PostsModel from './posts';
 import Board from '../boards/board';
-import BoardController from '../controllers/board';
-import * as Cache from '../helpers/cache';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Tools from '../helpers/tools';

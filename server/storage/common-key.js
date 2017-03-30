@@ -12,7 +12,7 @@ var _sqlAdapter2 = _interopRequireDefault(_sqlAdapter);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -61,10 +61,9 @@ var CommonKey = function () {
   }]);
 
   function CommonKey(client, key) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var parse = _ref.parse;
-    var stringify = _ref.stringify;
+    var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+        parse = _ref.parse,
+        stringify = _ref.stringify;
 
     _classCallCheck(this, CommonKey);
 
@@ -82,7 +81,7 @@ var CommonKey = function () {
   }, {
     key: 'exists',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(subkey) {
+      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee(subkey) {
         var exists;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -104,7 +103,7 @@ var CommonKey = function () {
       }));
 
       function exists(_x2) {
-        return ref.apply(this, arguments);
+        return _ref2.apply(this, arguments);
       }
 
       return exists;
@@ -112,7 +111,7 @@ var CommonKey = function () {
   }, {
     key: 'find',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(query, subkey) {
+      var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(query, subkey) {
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -133,7 +132,7 @@ var CommonKey = function () {
       }));
 
       function find(_x3, _x4) {
-        return ref.apply(this, arguments);
+        return _ref3.apply(this, arguments);
       }
 
       return find;
@@ -141,7 +140,7 @@ var CommonKey = function () {
   }, {
     key: 'delete',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(subkey) {
+      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(subkey) {
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -161,7 +160,7 @@ var CommonKey = function () {
       }));
 
       function _delete(_x5) {
-        return ref.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       }
 
       return _delete;
@@ -169,7 +168,7 @@ var CommonKey = function () {
   }, {
     key: 'expire',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(ttl, subkey) {
+      var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(ttl, subkey) {
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -189,7 +188,7 @@ var CommonKey = function () {
       }));
 
       function expire(_x6, _x7) {
-        return ref.apply(this, arguments);
+        return _ref5.apply(this, arguments);
       }
 
       return expire;
@@ -197,7 +196,7 @@ var CommonKey = function () {
   }, {
     key: 'ttl',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(subkey) {
+      var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(subkey) {
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -217,7 +216,7 @@ var CommonKey = function () {
       }));
 
       function ttl(_x8) {
-        return ref.apply(this, arguments);
+        return _ref6.apply(this, arguments);
       }
 
       return ttl;

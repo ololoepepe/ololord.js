@@ -20,7 +20,7 @@ function convertUnorderedList(_1, text, matchs, _2, options) {
   var t = matchs[2];
   if (!t) {
     t = 'disc';
-  } else if (t.length == 1) {
+  } else if (t.length === 1) {
     t = LIST_TYPES[t];
   }
   if (!t) {
@@ -47,7 +47,7 @@ function convertListItem(_1, text, matchs, _2, options) {
   options.type = _processingContext2.default.NO_SKIP;
   options.op = '<li';
   if (matchs[2]) {
-    op += ' value=\'' + matchs[2] + '\'';
+    options.op += ' value=\'' + matchs[2] + '\'';
   }
   options.op += '>';
   options.cl = '</li>';

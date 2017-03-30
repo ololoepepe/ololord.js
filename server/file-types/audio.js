@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.renderPostFileInfo = exports.createThumbnail = exports.AUDIO_TAGS = undefined;
 
 var createThumbnail = exports.createThumbnail = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file, thumbPath, path) {
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file, thumbPath, path) {
     var metadata, duration, bitrate, extraData, thumbInfo;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -43,7 +43,7 @@ var createThumbnail = exports.createThumbnail = function () {
             _context.prev = 12;
             _context.t0 = _context['catch'](6);
 
-            Logger.error(_context.t0.stack || _context.t0);
+            _logger2.default.error(_context.t0.stack || _context.t0);
             metadata = {};
 
           case 16:
@@ -116,25 +116,19 @@ var createThumbnail = exports.createThumbnail = function () {
   }));
 
   return function createThumbnail(_x, _x2, _x3) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }();
 
 var renderPostFileInfo = exports.renderPostFileInfo = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileInfo) {
-    var _ref, duration, bitrate, album, artist, title, year;
+  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileInfo) {
+    var _ref3, duration, bitrate, album, artist, title, year;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            _ref = fileInfo.extraData || {};
-            duration = _ref.duration;
-            bitrate = _ref.bitrate;
-            album = _ref.album;
-            artist = _ref.artist;
-            title = _ref.title;
-            year = _ref.year;
+            _ref3 = fileInfo.extraData || {}, duration = _ref3.duration, bitrate = _ref3.bitrate, album = _ref3.album, artist = _ref3.artist, title = _ref3.title, year = _ref3.year;
 
             if (duration) {
               fileInfo.sizeText += ', ' + duration;
@@ -152,7 +146,7 @@ var renderPostFileInfo = exports.renderPostFileInfo = function () {
               fileInfo.sizeTooltip += ' (' + year + ')';
             }
 
-          case 16:
+          case 10:
           case 'end':
             return _context2.stop();
         }
@@ -161,7 +155,7 @@ var renderPostFileInfo = exports.renderPostFileInfo = function () {
   }));
 
   return function renderPostFileInfo(_x4) {
-    return ref.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
@@ -198,11 +192,15 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
+var _logger = require('../helpers/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var musicMetadata = (0, _promisifyNode2.default)('musicmetadata');
 

@@ -22,7 +22,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -36,7 +36,7 @@ var SQLAdapter = function () {
   _createClass(SQLAdapter, [{
     key: '_checkType',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(key, expectedType, create) {
+      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(key, expectedType, create) {
         var t;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -137,7 +137,7 @@ var SQLAdapter = function () {
       }));
 
       function _checkType(_x, _x2, _x3) {
-        return ref.apply(this, arguments);
+        return _ref.apply(this, arguments);
       }
 
       return _checkType;
@@ -145,7 +145,7 @@ var SQLAdapter = function () {
   }, {
     key: 'type',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(key) {
+      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(key) {
         var result;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
@@ -167,7 +167,7 @@ var SQLAdapter = function () {
       }));
 
       function type(_x4) {
-        return ref.apply(this, arguments);
+        return _ref2.apply(this, arguments);
       }
 
       return type;
@@ -175,7 +175,7 @@ var SQLAdapter = function () {
   }, {
     key: 'exists',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(key) {
+      var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(key) {
         var t;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -197,7 +197,7 @@ var SQLAdapter = function () {
       }));
 
       function exists(_x5) {
-        return ref.apply(this, arguments);
+        return _ref3.apply(this, arguments);
       }
 
       return exists;
@@ -205,7 +205,7 @@ var SQLAdapter = function () {
   }, {
     key: 'keys',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(query) {
+      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(query) {
         var results;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
@@ -231,7 +231,7 @@ var SQLAdapter = function () {
       }));
 
       function keys(_x6) {
-        return ref.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       }
 
       return keys;
@@ -239,14 +239,14 @@ var SQLAdapter = function () {
   }, {
     key: 'del',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(key) {
+      var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(key) {
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
                 _context6.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(commit, rollback) {
+                  var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(commit, rollback) {
                     var t;
                     return regeneratorRuntime.wrap(function _callee5$(_context5) {
                       while (1) {
@@ -300,7 +300,7 @@ var SQLAdapter = function () {
                   }));
 
                   return function (_x8, _x9) {
-                    return ref.apply(this, arguments);
+                    return _ref6.apply(this, arguments);
                   };
                 }());
 
@@ -313,7 +313,7 @@ var SQLAdapter = function () {
       }));
 
       function del(_x7) {
-        return ref.apply(this, arguments);
+        return _ref5.apply(this, arguments);
       }
 
       return del;
@@ -321,7 +321,7 @@ var SQLAdapter = function () {
   }, {
     key: 'expire',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(key) {
+      var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(key) {
         return regeneratorRuntime.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
@@ -337,7 +337,7 @@ var SQLAdapter = function () {
       }));
 
       function expire(_x10) {
-        return ref.apply(this, arguments);
+        return _ref7.apply(this, arguments);
       }
 
       return expire;
@@ -345,14 +345,14 @@ var SQLAdapter = function () {
   }, {
     key: 'get',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(key) {
+      var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(key) {
         return regeneratorRuntime.wrap(function _callee9$(_context9) {
           while (1) {
             switch (_context9.prev = _context9.next) {
               case 0:
                 _context9.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(commit, rollback) {
+                  var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(commit, rollback) {
                     var result;
                     return regeneratorRuntime.wrap(function _callee8$(_context8) {
                       while (1) {
@@ -390,7 +390,7 @@ var SQLAdapter = function () {
                   }));
 
                   return function (_x12, _x13) {
-                    return ref.apply(this, arguments);
+                    return _ref9.apply(this, arguments);
                   };
                 }());
 
@@ -406,7 +406,7 @@ var SQLAdapter = function () {
       }));
 
       function get(_x11) {
-        return ref.apply(this, arguments);
+        return _ref8.apply(this, arguments);
       }
 
       return get;
@@ -414,14 +414,14 @@ var SQLAdapter = function () {
   }, {
     key: 'set',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(key, data) {
+      var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(key, data) {
         return regeneratorRuntime.wrap(function _callee11$(_context11) {
           while (1) {
             switch (_context11.prev = _context11.next) {
               case 0:
                 _context11.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(commit, rollback) {
+                  var _ref11 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(commit, rollback) {
                     return regeneratorRuntime.wrap(function _callee10$(_context10) {
                       while (1) {
                         switch (_context10.prev = _context10.next) {
@@ -449,7 +449,7 @@ var SQLAdapter = function () {
                   }));
 
                   return function (_x16, _x17) {
-                    return ref.apply(this, arguments);
+                    return _ref11.apply(this, arguments);
                   };
                 }());
 
@@ -465,7 +465,7 @@ var SQLAdapter = function () {
       }));
 
       function set(_x14, _x15) {
-        return ref.apply(this, arguments);
+        return _ref10.apply(this, arguments);
       }
 
       return set;
@@ -473,14 +473,14 @@ var SQLAdapter = function () {
   }, {
     key: 'incrby',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(key, value) {
+      var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(key, value) {
         return regeneratorRuntime.wrap(function _callee13$(_context13) {
           while (1) {
             switch (_context13.prev = _context13.next) {
               case 0:
                 _context13.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(commit, rollback) {
+                  var _ref13 = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(commit, rollback) {
                     var result;
                     return regeneratorRuntime.wrap(function _callee12$(_context12) {
                       while (1) {
@@ -530,7 +530,7 @@ var SQLAdapter = function () {
                   }));
 
                   return function (_x20, _x21) {
-                    return ref.apply(this, arguments);
+                    return _ref13.apply(this, arguments);
                   };
                 }());
 
@@ -546,7 +546,7 @@ var SQLAdapter = function () {
       }));
 
       function incrby(_x18, _x19) {
-        return ref.apply(this, arguments);
+        return _ref12.apply(this, arguments);
       }
 
       return incrby;
@@ -554,14 +554,14 @@ var SQLAdapter = function () {
   }, {
     key: 'hget',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(key, id) {
+      var _ref14 = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(key, id) {
         return regeneratorRuntime.wrap(function _callee15$(_context15) {
           while (1) {
             switch (_context15.prev = _context15.next) {
               case 0:
                 _context15.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(commit, rollback) {
+                  var _ref15 = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(commit, rollback) {
                     var result;
                     return regeneratorRuntime.wrap(function _callee14$(_context14) {
                       while (1) {
@@ -599,7 +599,7 @@ var SQLAdapter = function () {
                   }));
 
                   return function (_x24, _x25) {
-                    return ref.apply(this, arguments);
+                    return _ref15.apply(this, arguments);
                   };
                 }());
 
@@ -615,7 +615,7 @@ var SQLAdapter = function () {
       }));
 
       function hget(_x22, _x23) {
-        return ref.apply(this, arguments);
+        return _ref14.apply(this, arguments);
       }
 
       return hget;
@@ -623,7 +623,7 @@ var SQLAdapter = function () {
   }, {
     key: 'hmget',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(key) {
+      var _ref16 = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(key) {
         for (var _len = arguments.length, ids = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
           ids[_key - 1] = arguments[_key];
         }
@@ -634,7 +634,7 @@ var SQLAdapter = function () {
               case 0:
                 _context17.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(commit, rollback) {
+                  var _ref17 = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(commit, rollback) {
                     var _wrapper;
 
                     var result, q, results;
@@ -682,8 +682,8 @@ var SQLAdapter = function () {
                     }, _callee16, this);
                   }));
 
-                  return function (_x28, _x29) {
-                    return ref.apply(this, arguments);
+                  return function (_x27, _x28) {
+                    return _ref17.apply(this, arguments);
                   };
                 }());
 
@@ -698,8 +698,8 @@ var SQLAdapter = function () {
         }, _callee17, this);
       }));
 
-      function hmget(_x26, _x27) {
-        return ref.apply(this, arguments);
+      function hmget(_x26) {
+        return _ref16.apply(this, arguments);
       }
 
       return hmget;
@@ -707,14 +707,14 @@ var SQLAdapter = function () {
   }, {
     key: 'hgetall',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(key) {
+      var _ref18 = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(key) {
         return regeneratorRuntime.wrap(function _callee19$(_context19) {
           while (1) {
             switch (_context19.prev = _context19.next) {
               case 0:
                 _context19.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(commit, rollback) {
+                  var _ref19 = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(commit, rollback) {
                     var result, results;
                     return regeneratorRuntime.wrap(function _callee18$(_context18) {
                       while (1) {
@@ -753,8 +753,8 @@ var SQLAdapter = function () {
                     }, _callee18, this);
                   }));
 
-                  return function (_x31, _x32) {
-                    return ref.apply(this, arguments);
+                  return function (_x30, _x31) {
+                    return _ref19.apply(this, arguments);
                   };
                 }());
 
@@ -769,8 +769,8 @@ var SQLAdapter = function () {
         }, _callee19, this);
       }));
 
-      function hgetall(_x30) {
-        return ref.apply(this, arguments);
+      function hgetall(_x29) {
+        return _ref18.apply(this, arguments);
       }
 
       return hgetall;
@@ -778,14 +778,14 @@ var SQLAdapter = function () {
   }, {
     key: 'hexists',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(key, id) {
+      var _ref20 = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(key, id) {
         return regeneratorRuntime.wrap(function _callee21$(_context21) {
           while (1) {
             switch (_context21.prev = _context21.next) {
               case 0:
                 _context21.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(commit, rollback) {
+                  var _ref21 = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(commit, rollback) {
                     var result;
                     return regeneratorRuntime.wrap(function _callee20$(_context20) {
                       while (1) {
@@ -822,8 +822,8 @@ var SQLAdapter = function () {
                     }, _callee20, this);
                   }));
 
-                  return function (_x35, _x36) {
-                    return ref.apply(this, arguments);
+                  return function (_x34, _x35) {
+                    return _ref21.apply(this, arguments);
                   };
                 }());
 
@@ -838,8 +838,8 @@ var SQLAdapter = function () {
         }, _callee21, this);
       }));
 
-      function hexists(_x33, _x34) {
-        return ref.apply(this, arguments);
+      function hexists(_x32, _x33) {
+        return _ref20.apply(this, arguments);
       }
 
       return hexists;
@@ -847,14 +847,14 @@ var SQLAdapter = function () {
   }, {
     key: 'hset',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(key, id, data) {
+      var _ref22 = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(key, id, data) {
         return regeneratorRuntime.wrap(function _callee23$(_context23) {
           while (1) {
             switch (_context23.prev = _context23.next) {
               case 0:
                 _context23.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(commit, rollback) {
+                  var _ref23 = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(commit, rollback) {
                     var result;
                     return regeneratorRuntime.wrap(function _callee22$(_context22) {
                       while (1) {
@@ -888,8 +888,8 @@ var SQLAdapter = function () {
                     }, _callee22, this);
                   }));
 
-                  return function (_x40, _x41) {
-                    return ref.apply(this, arguments);
+                  return function (_x39, _x40) {
+                    return _ref23.apply(this, arguments);
                   };
                 }());
 
@@ -904,8 +904,8 @@ var SQLAdapter = function () {
         }, _callee23, this);
       }));
 
-      function hset(_x37, _x38, _x39) {
-        return ref.apply(this, arguments);
+      function hset(_x36, _x37, _x38) {
+        return _ref22.apply(this, arguments);
       }
 
       return hset;
@@ -913,7 +913,7 @@ var SQLAdapter = function () {
   }, {
     key: 'hmset',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(key) {
+      var _ref24 = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(key) {
         for (var _len2 = arguments.length, items = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
           items[_key2 - 1] = arguments[_key2];
         }
@@ -924,7 +924,7 @@ var SQLAdapter = function () {
               case 0:
                 _context26.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(commit, rollback) {
+                  var _ref25 = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(commit, rollback) {
                     var self;
                     return regeneratorRuntime.wrap(function _callee25$(_context25) {
                       while (1) {
@@ -937,7 +937,7 @@ var SQLAdapter = function () {
                             self = this;
                             _context25.next = 5;
                             return Tools.series(Tools.chunk(items, 2), function () {
-                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(chunk) {
+                              var _ref26 = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(chunk) {
                                 return regeneratorRuntime.wrap(function _callee24$(_context24) {
                                   while (1) {
                                     switch (_context24.prev = _context24.next) {
@@ -957,8 +957,8 @@ var SQLAdapter = function () {
                                 }, _callee24, this);
                               }));
 
-                              return function (_x46) {
-                                return ref.apply(this, arguments);
+                              return function (_x44) {
+                                return _ref26.apply(this, arguments);
                               };
                             }());
 
@@ -973,8 +973,8 @@ var SQLAdapter = function () {
                     }, _callee25, this);
                   }));
 
-                  return function (_x44, _x45) {
-                    return ref.apply(this, arguments);
+                  return function (_x42, _x43) {
+                    return _ref25.apply(this, arguments);
                   };
                 }());
 
@@ -989,8 +989,8 @@ var SQLAdapter = function () {
         }, _callee26, this);
       }));
 
-      function hmset(_x42, _x43) {
-        return ref.apply(this, arguments);
+      function hmset(_x41) {
+        return _ref24.apply(this, arguments);
       }
 
       return hmset;
@@ -998,14 +998,14 @@ var SQLAdapter = function () {
   }, {
     key: 'hincrby',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(key, id, value) {
+      var _ref27 = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(key, id, value) {
         return regeneratorRuntime.wrap(function _callee28$(_context28) {
           while (1) {
             switch (_context28.prev = _context28.next) {
               case 0:
                 _context28.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(commit, rollback) {
+                  var _ref28 = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(commit, rollback) {
                     var result;
                     return regeneratorRuntime.wrap(function _callee27$(_context27) {
                       while (1) {
@@ -1054,8 +1054,8 @@ var SQLAdapter = function () {
                     }, _callee27, this);
                   }));
 
-                  return function (_x50, _x51) {
-                    return ref.apply(this, arguments);
+                  return function (_x48, _x49) {
+                    return _ref28.apply(this, arguments);
                   };
                 }());
 
@@ -1070,8 +1070,8 @@ var SQLAdapter = function () {
         }, _callee28, this);
       }));
 
-      function hincrby(_x47, _x48, _x49) {
-        return ref.apply(this, arguments);
+      function hincrby(_x45, _x46, _x47) {
+        return _ref27.apply(this, arguments);
       }
 
       return hincrby;
@@ -1079,7 +1079,7 @@ var SQLAdapter = function () {
   }, {
     key: 'hdel',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee31(key) {
+      var _ref29 = _asyncToGenerator(regeneratorRuntime.mark(function _callee31(key) {
         for (var _len3 = arguments.length, ids = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
           ids[_key3 - 1] = arguments[_key3];
         }
@@ -1090,7 +1090,7 @@ var SQLAdapter = function () {
               case 0:
                 _context31.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee30(commit, rollback) {
+                  var _ref30 = _asyncToGenerator(regeneratorRuntime.mark(function _callee30(commit, rollback) {
                     var result, self, count;
                     return regeneratorRuntime.wrap(function _callee30$(_context30) {
                       while (1) {
@@ -1114,7 +1114,7 @@ var SQLAdapter = function () {
                             count = 0;
                             _context30.next = 9;
                             return Tools.series(ids, function () {
-                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(id) {
+                              var _ref31 = _asyncToGenerator(regeneratorRuntime.mark(function _callee29(id) {
                                 var result;
                                 return regeneratorRuntime.wrap(function _callee29$(_context29) {
                                   while (1) {
@@ -1142,8 +1142,8 @@ var SQLAdapter = function () {
                                 }, _callee29, this);
                               }));
 
-                              return function (_x56) {
-                                return ref.apply(this, arguments);
+                              return function (_x53) {
+                                return _ref31.apply(this, arguments);
                               };
                             }());
 
@@ -1181,8 +1181,8 @@ var SQLAdapter = function () {
                     }, _callee30, this);
                   }));
 
-                  return function (_x54, _x55) {
-                    return ref.apply(this, arguments);
+                  return function (_x51, _x52) {
+                    return _ref30.apply(this, arguments);
                   };
                 }());
 
@@ -1197,8 +1197,8 @@ var SQLAdapter = function () {
         }, _callee31, this);
       }));
 
-      function hdel(_x52, _x53) {
-        return ref.apply(this, arguments);
+      function hdel(_x50) {
+        return _ref29.apply(this, arguments);
       }
 
       return hdel;
@@ -1206,14 +1206,14 @@ var SQLAdapter = function () {
   }, {
     key: 'hkeys',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee33(key) {
+      var _ref32 = _asyncToGenerator(regeneratorRuntime.mark(function _callee33(key) {
         return regeneratorRuntime.wrap(function _callee33$(_context33) {
           while (1) {
             switch (_context33.prev = _context33.next) {
               case 0:
                 _context33.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee32(commit, rollback) {
+                  var _ref33 = _asyncToGenerator(regeneratorRuntime.mark(function _callee32(commit, rollback) {
                     var result, results;
                     return regeneratorRuntime.wrap(function _callee32$(_context32) {
                       while (1) {
@@ -1251,8 +1251,8 @@ var SQLAdapter = function () {
                     }, _callee32, this);
                   }));
 
-                  return function (_x58, _x59) {
-                    return ref.apply(this, arguments);
+                  return function (_x55, _x56) {
+                    return _ref33.apply(this, arguments);
                   };
                 }());
 
@@ -1267,8 +1267,8 @@ var SQLAdapter = function () {
         }, _callee33, this);
       }));
 
-      function hkeys(_x57) {
-        return ref.apply(this, arguments);
+      function hkeys(_x54) {
+        return _ref32.apply(this, arguments);
       }
 
       return hkeys;
@@ -1276,14 +1276,14 @@ var SQLAdapter = function () {
   }, {
     key: 'hlen',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee35(key) {
+      var _ref34 = _asyncToGenerator(regeneratorRuntime.mark(function _callee35(key) {
         return regeneratorRuntime.wrap(function _callee35$(_context35) {
           while (1) {
             switch (_context35.prev = _context35.next) {
               case 0:
                 _context35.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee34(commit, rollback) {
+                  var _ref35 = _asyncToGenerator(regeneratorRuntime.mark(function _callee34(commit, rollback) {
                     var result;
                     return regeneratorRuntime.wrap(function _callee34$(_context34) {
                       while (1) {
@@ -1322,8 +1322,8 @@ var SQLAdapter = function () {
                     }, _callee34, this);
                   }));
 
-                  return function (_x61, _x62) {
-                    return ref.apply(this, arguments);
+                  return function (_x58, _x59) {
+                    return _ref35.apply(this, arguments);
                   };
                 }());
 
@@ -1338,8 +1338,8 @@ var SQLAdapter = function () {
         }, _callee35, this);
       }));
 
-      function hlen(_x60) {
-        return ref.apply(this, arguments);
+      function hlen(_x57) {
+        return _ref34.apply(this, arguments);
       }
 
       return hlen;
@@ -1347,14 +1347,14 @@ var SQLAdapter = function () {
   }, {
     key: 'srandmember',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee37(key) {
+      var _ref36 = _asyncToGenerator(regeneratorRuntime.mark(function _callee37(key) {
         return regeneratorRuntime.wrap(function _callee37$(_context37) {
           while (1) {
             switch (_context37.prev = _context37.next) {
               case 0:
                 _context37.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee36(commit, rollback) {
+                  var _ref37 = _asyncToGenerator(regeneratorRuntime.mark(function _callee36(commit, rollback) {
                     var result;
                     return regeneratorRuntime.wrap(function _callee36$(_context36) {
                       while (1) {
@@ -1391,8 +1391,8 @@ var SQLAdapter = function () {
                     }, _callee36, this);
                   }));
 
-                  return function (_x64, _x65) {
-                    return ref.apply(this, arguments);
+                  return function (_x61, _x62) {
+                    return _ref37.apply(this, arguments);
                   };
                 }());
 
@@ -1407,8 +1407,8 @@ var SQLAdapter = function () {
         }, _callee37, this);
       }));
 
-      function srandmember(_x63) {
-        return ref.apply(this, arguments);
+      function srandmember(_x60) {
+        return _ref36.apply(this, arguments);
       }
 
       return srandmember;
@@ -1416,14 +1416,14 @@ var SQLAdapter = function () {
   }, {
     key: 'smembers',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee39(key) {
+      var _ref38 = _asyncToGenerator(regeneratorRuntime.mark(function _callee39(key) {
         return regeneratorRuntime.wrap(function _callee39$(_context39) {
           while (1) {
             switch (_context39.prev = _context39.next) {
               case 0:
                 _context39.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee38(commit, rollback) {
+                  var _ref39 = _asyncToGenerator(regeneratorRuntime.mark(function _callee38(commit, rollback) {
                     var result, results;
                     return regeneratorRuntime.wrap(function _callee38$(_context38) {
                       while (1) {
@@ -1461,8 +1461,8 @@ var SQLAdapter = function () {
                     }, _callee38, this);
                   }));
 
-                  return function (_x67, _x68) {
-                    return ref.apply(this, arguments);
+                  return function (_x64, _x65) {
+                    return _ref39.apply(this, arguments);
                   };
                 }());
 
@@ -1477,8 +1477,8 @@ var SQLAdapter = function () {
         }, _callee39, this);
       }));
 
-      function smembers(_x66) {
-        return ref.apply(this, arguments);
+      function smembers(_x63) {
+        return _ref38.apply(this, arguments);
       }
 
       return smembers;
@@ -1486,14 +1486,14 @@ var SQLAdapter = function () {
   }, {
     key: 'sismember',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee41(key, data) {
+      var _ref40 = _asyncToGenerator(regeneratorRuntime.mark(function _callee41(key, data) {
         return regeneratorRuntime.wrap(function _callee41$(_context41) {
           while (1) {
             switch (_context41.prev = _context41.next) {
               case 0:
                 _context41.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee40(commit, rollback) {
+                  var _ref41 = _asyncToGenerator(regeneratorRuntime.mark(function _callee40(commit, rollback) {
                     var result, results;
                     return regeneratorRuntime.wrap(function _callee40$(_context40) {
                       while (1) {
@@ -1531,8 +1531,8 @@ var SQLAdapter = function () {
                     }, _callee40, this);
                   }));
 
-                  return function (_x71, _x72) {
-                    return ref.apply(this, arguments);
+                  return function (_x68, _x69) {
+                    return _ref41.apply(this, arguments);
                   };
                 }());
 
@@ -1547,8 +1547,8 @@ var SQLAdapter = function () {
         }, _callee41, this);
       }));
 
-      function sismember(_x69, _x70) {
-        return ref.apply(this, arguments);
+      function sismember(_x66, _x67) {
+        return _ref40.apply(this, arguments);
       }
 
       return sismember;
@@ -1556,7 +1556,7 @@ var SQLAdapter = function () {
   }, {
     key: 'sadd',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee44(key) {
+      var _ref42 = _asyncToGenerator(regeneratorRuntime.mark(function _callee44(key) {
         for (var _len4 = arguments.length, items = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
           items[_key4 - 1] = arguments[_key4];
         }
@@ -1567,7 +1567,7 @@ var SQLAdapter = function () {
               case 0:
                 _context44.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee43(commit, rollback) {
+                  var _ref43 = _asyncToGenerator(regeneratorRuntime.mark(function _callee43(commit, rollback) {
                     var self, count;
                     return regeneratorRuntime.wrap(function _callee43$(_context43) {
                       while (1) {
@@ -1581,7 +1581,7 @@ var SQLAdapter = function () {
                             count = 0;
                             _context43.next = 6;
                             return Tools.series(items, function () {
-                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee42(data) {
+                              var _ref44 = _asyncToGenerator(regeneratorRuntime.mark(function _callee42(data) {
                                 var result;
                                 return regeneratorRuntime.wrap(function _callee42$(_context42) {
                                   while (1) {
@@ -1616,8 +1616,8 @@ var SQLAdapter = function () {
                                 }, _callee42, this);
                               }));
 
-                              return function (_x77) {
-                                return ref.apply(this, arguments);
+                              return function (_x73) {
+                                return _ref44.apply(this, arguments);
                               };
                             }());
 
@@ -1632,8 +1632,8 @@ var SQLAdapter = function () {
                     }, _callee43, this);
                   }));
 
-                  return function (_x75, _x76) {
-                    return ref.apply(this, arguments);
+                  return function (_x71, _x72) {
+                    return _ref43.apply(this, arguments);
                   };
                 }());
 
@@ -1648,8 +1648,8 @@ var SQLAdapter = function () {
         }, _callee44, this);
       }));
 
-      function sadd(_x73, _x74) {
-        return ref.apply(this, arguments);
+      function sadd(_x70) {
+        return _ref42.apply(this, arguments);
       }
 
       return sadd;
@@ -1657,14 +1657,14 @@ var SQLAdapter = function () {
   }, {
     key: 'srem',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee47(key) {
+      var _ref45 = _asyncToGenerator(regeneratorRuntime.mark(function _callee47(key) {
         return regeneratorRuntime.wrap(function _callee47$(_context47) {
           while (1) {
             switch (_context47.prev = _context47.next) {
               case 0:
                 _context47.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee46(commit, rollback) {
+                  var _ref46 = _asyncToGenerator(regeneratorRuntime.mark(function _callee46(commit, rollback) {
                     var result, self, count;
                     return regeneratorRuntime.wrap(function _callee46$(_context46) {
                       while (1) {
@@ -1688,7 +1688,7 @@ var SQLAdapter = function () {
                             count = 0;
                             _context46.next = 9;
                             return Tools.series(ids, function () {
-                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee45(data) {
+                              var _ref47 = _asyncToGenerator(regeneratorRuntime.mark(function _callee45(data) {
                                 var result;
                                 return regeneratorRuntime.wrap(function _callee45$(_context45) {
                                   while (1) {
@@ -1718,8 +1718,8 @@ var SQLAdapter = function () {
                                 }, _callee45, this);
                               }));
 
-                              return function (_x82) {
-                                return ref.apply(this, arguments);
+                              return function (_x77) {
+                                return _ref47.apply(this, arguments);
                               };
                             }());
 
@@ -1757,8 +1757,8 @@ var SQLAdapter = function () {
                     }, _callee46, this);
                   }));
 
-                  return function (_x80, _x81) {
-                    return ref.apply(this, arguments);
+                  return function (_x75, _x76) {
+                    return _ref46.apply(this, arguments);
                   };
                 }());
 
@@ -1773,8 +1773,8 @@ var SQLAdapter = function () {
         }, _callee47, this);
       }));
 
-      function srem(_x78, _x79) {
-        return ref.apply(this, arguments);
+      function srem(_x74) {
+        return _ref45.apply(this, arguments);
       }
 
       return srem;
@@ -1782,14 +1782,14 @@ var SQLAdapter = function () {
   }, {
     key: 'scard',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee49(key) {
+      var _ref48 = _asyncToGenerator(regeneratorRuntime.mark(function _callee49(key) {
         return regeneratorRuntime.wrap(function _callee49$(_context49) {
           while (1) {
             switch (_context49.prev = _context49.next) {
               case 0:
                 _context49.next = 2;
                 return this._wrapper.transaction(function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee48(commit, rollback) {
+                  var _ref49 = _asyncToGenerator(regeneratorRuntime.mark(function _callee48(commit, rollback) {
                     var result;
                     return regeneratorRuntime.wrap(function _callee48$(_context48) {
                       while (1) {
@@ -1828,8 +1828,8 @@ var SQLAdapter = function () {
                     }, _callee48, this);
                   }));
 
-                  return function (_x84, _x85) {
-                    return ref.apply(this, arguments);
+                  return function (_x79, _x80) {
+                    return _ref49.apply(this, arguments);
                   };
                 }());
 
@@ -1844,8 +1844,8 @@ var SQLAdapter = function () {
         }, _callee49, this);
       }));
 
-      function scard(_x83) {
-        return ref.apply(this, arguments);
+      function scard(_x78) {
+        return _ref48.apply(this, arguments);
       }
 
       return scard;
@@ -1853,7 +1853,7 @@ var SQLAdapter = function () {
   }, {
     key: 'zrange',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee50(key, lb, ub) {
+      var _ref50 = _asyncToGenerator(regeneratorRuntime.mark(function _callee50(key, lb, ub) {
         return regeneratorRuntime.wrap(function _callee50$(_context50) {
           while (1) {
             switch (_context50.prev = _context50.next) {
@@ -1868,8 +1868,8 @@ var SQLAdapter = function () {
         }, _callee50, this);
       }));
 
-      function zrange(_x86, _x87, _x88) {
-        return ref.apply(this, arguments);
+      function zrange(_x81, _x82, _x83) {
+        return _ref50.apply(this, arguments);
       }
 
       return zrange;
@@ -1877,7 +1877,7 @@ var SQLAdapter = function () {
   }, {
     key: 'zrangebyscroe',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee51(key, lb, ub) {
+      var _ref51 = _asyncToGenerator(regeneratorRuntime.mark(function _callee51(key, lb, ub) {
         return regeneratorRuntime.wrap(function _callee51$(_context51) {
           while (1) {
             switch (_context51.prev = _context51.next) {
@@ -1892,8 +1892,8 @@ var SQLAdapter = function () {
         }, _callee51, this);
       }));
 
-      function zrangebyscroe(_x89, _x90, _x91) {
-        return ref.apply(this, arguments);
+      function zrangebyscroe(_x84, _x85, _x86) {
+        return _ref51.apply(this, arguments);
       }
 
       return zrangebyscroe;
@@ -1901,7 +1901,7 @@ var SQLAdapter = function () {
   }, {
     key: 'zadd',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee52(key) {
+      var _ref52 = _asyncToGenerator(regeneratorRuntime.mark(function _callee52(key) {
         return regeneratorRuntime.wrap(function _callee52$(_context52) {
           while (1) {
             switch (_context52.prev = _context52.next) {
@@ -1916,8 +1916,8 @@ var SQLAdapter = function () {
         }, _callee52, this);
       }));
 
-      function zadd(_x92, _x93) {
-        return ref.apply(this, arguments);
+      function zadd(_x87) {
+        return _ref52.apply(this, arguments);
       }
 
       return zadd;
@@ -1925,7 +1925,7 @@ var SQLAdapter = function () {
   }, {
     key: 'zrem',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee53(key) {
+      var _ref53 = _asyncToGenerator(regeneratorRuntime.mark(function _callee53(key) {
         return regeneratorRuntime.wrap(function _callee53$(_context53) {
           while (1) {
             switch (_context53.prev = _context53.next) {
@@ -1940,8 +1940,8 @@ var SQLAdapter = function () {
         }, _callee53, this);
       }));
 
-      function zrem(_x94, _x95) {
-        return ref.apply(this, arguments);
+      function zrem(_x88) {
+        return _ref53.apply(this, arguments);
       }
 
       return zrem;
@@ -1949,7 +1949,7 @@ var SQLAdapter = function () {
   }, {
     key: 'zcard',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee54(key) {
+      var _ref54 = _asyncToGenerator(regeneratorRuntime.mark(function _callee54(key) {
         return regeneratorRuntime.wrap(function _callee54$(_context54) {
           while (1) {
             switch (_context54.prev = _context54.next) {
@@ -1964,8 +1964,8 @@ var SQLAdapter = function () {
         }, _callee54, this);
       }));
 
-      function zcard(_x96) {
-        return ref.apply(this, arguments);
+      function zcard(_x89) {
+        return _ref54.apply(this, arguments);
       }
 
       return zcard;

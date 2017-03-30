@@ -100,7 +100,7 @@ const DEFAULT_VALUES = new Map([
   ['system.redis.retryDelayOnClusterDown', 100],
   ['system.redis.retryDelayOnTryAgain', 100],
   ['system.rendererWorkerCount', OS.cpus().length],
-  ['system.rerenderCacheOnStartup', true],
+  ['system.rerenderCacheOnStartup', false],
   ['system.search.maxResultCount', 100],
   ['system.search.maxResultPostSubjectLengh', 100],
   ['system.search.maxResultPostTextLengh', 300],
@@ -194,6 +194,6 @@ c.proxy = function() {
     port: (parts[1] ? +parts[1] : null),
     auth: (auth ? `Basic ${new Buffer(auth).toString('base64')}` : null)
   };
-}
+};
 
 export default c;

@@ -19,14 +19,6 @@ function usersEqual(user1, user2) {
   return ((user1.ip === user2.ip) || (user1.hashpass && (user1.hashpass === user2.hashpass)));
 }
 
-function messageType(message, user) {
-  if (usersEqual(user, message.sender)) {
-    return 'out';
-  } else {
-    return 'in';
-  }
-}
-
 function cloneUser(user) {
   return {
     ip: user.ip,

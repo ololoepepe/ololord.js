@@ -343,7 +343,7 @@ export function pad(what, length, ch) {
   if (length - what.length <= 0) {
     return what;
   }
-  return Array(length - what.length + 1).join((ch || '0').toString()[0]) + what;
+  return new Array(length - what.length + 1).join((ch || '0').toString()[0]) + what;
 }
 
 export function chunk(array, size) {

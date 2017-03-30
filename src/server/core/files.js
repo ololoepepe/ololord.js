@@ -14,7 +14,6 @@ import Path from 'path';
 import promisify from 'promisify-node';
 import UUID from 'uuid';
 
-import Board from '../boards/board';
 import * as FilesModel from '../models/files';
 import config from '../helpers/config';
 import * as IPC from '../helpers/ipc';
@@ -54,7 +53,7 @@ async function downloadFile(url, formFieldName, fields) {
       path: url,
     });
   } else {
-    optons.url = url;
+    options.url = url;
   }
   let response = await HTTP.request(options);
   if (200 !== response.status) {
@@ -228,7 +227,7 @@ async function processFile(boardName, file, transaction) {
   }
   let fn = await generateFileName(file, plugin);
   let targetFilePath = `${__dirname}/../../public/${boardName}/src/${fn.name}`;
-  var targetThumbPath = `${__dirname}/../../public/${boardName}/thumb/${fn.thumbName}`;
+  let targetThumbPath = `${__dirname}/../../public/${boardName}/thumb/${fn.thumbName}`;
   transaction.addFile(targetFilePath);
   transaction.addFile(targetThumbPath);
   if (file.copy) {

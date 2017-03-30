@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.renderPostFileInfo = exports.createThumbnail = undefined;
 
 var createThumbnail = exports.createThumbnail = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file, thumbPath) {
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(file, thumbPath) {
     var isGIF, suffix, info, thumbInfo, result, hash;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -84,12 +84,12 @@ var createThumbnail = exports.createThumbnail = function () {
   }));
 
   return function createThumbnail(_x, _x2) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }();
 
 var renderPostFileInfo = exports.renderPostFileInfo = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileInfo) {
+  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileInfo) {
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -108,7 +108,7 @@ var renderPostFileInfo = exports.renderPostFileInfo = function () {
   }));
 
   return function renderPostFileInfo(_x3) {
-    return ref.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
@@ -145,7 +145,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var MIME_TYPES_FOR_SUFFIXES = new Map();
 var DEFAULT_SUFFIXES_FOR_MIME_TYPES = new Map();

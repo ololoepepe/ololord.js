@@ -1,7 +1,6 @@
 import _ from 'underscore';
 import express from 'express';
 import FS from 'q-io/fs';
-import FSSync from 'fs';
 
 import config from '../helpers/config';
 import Logger from '../helpers/logger';
@@ -63,7 +62,6 @@ function initialize() {
     default: {
       Logger.error(Tools.preferIPv4(req.ip), req.path, err.stack || err);
       if (err.hasOwnProperty('ban')) {
-        var model = { ban: err.ban };
       } else {
         if (_(err).isError()) {
           var message = err.message;
@@ -76,7 +74,7 @@ function initialize() {
     }
     }
   });
-};
+}
 
 app.initialize = initialize;
 

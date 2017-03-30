@@ -1,12 +1,8 @@
 import _ from 'underscore';
-import FS from 'q-io/fs';
-import promisify from 'promisify-node';
 
 import * as BoardsModel from './boards';
 import * as FilesModel from './files';
 import * as PostReferencesModel from './post-references';
-import * as ThreadsModel from './threads';
-import * as UsersModel from './users';
 import Board from '../boards/board';
 import * as Renderer from '../core/renderer';
 import config from '../helpers/config';
@@ -213,7 +209,7 @@ export async function editPost(req, fields) {
   let rawText = text || null;
   let markupModes = markup.markupModes(markupMode);
   let referencedPosts = {};
-  sage = ('true' === sage);
+  //sage = ('true' === sage);
   text = await markup(boardName, rawText, {
     markupModes: markupModes,
     accessLevel: req.level(boardName),

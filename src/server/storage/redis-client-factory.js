@@ -36,7 +36,7 @@ function createOptions() {
     password: config('system.redis.password'),
     db: config('system.redis.db')
   }
-};
+}
 
 function createClient() {
   let redisNodes = config('system.redis.nodes');

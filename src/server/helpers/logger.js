@@ -20,7 +20,7 @@ class WinstonClusterTransport extends Winston.Transport {
       return callback(null, true);
     }
     if (this.stripColors) {
-      msg = ('' + msg).replace(code, '');
+      msg = ('' + msg).replace(CODE, '');
     }
     let message = {
       cmd: 'log',

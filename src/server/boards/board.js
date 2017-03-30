@@ -277,7 +277,7 @@ class Board {
     if (subject.length > this.maxSubjectLength) {
       throw new Error(Tools.translate('Subject is too long'));
     }
-    if (text.length > this.maxTextFieldLength) {
+    if (text.length > this.maxTextLength) {
       throw new Error(Tools.translate('Comment is too long'));
     }
     if (password.length > this.maxPasswordLength) {

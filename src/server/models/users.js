@@ -1,8 +1,6 @@
 import _ from 'underscore';
 import FS from 'q-io/fs';
 
-import * as PostsModel from './posts';
-import * as ThreadsModel from './threads';
 import Board from '../boards/board';
 import config from '../helpers/config';
 import FSWatcher from '../helpers/fs-watcher';
@@ -446,7 +444,7 @@ export async function checkUserPermissions(req, boardName, postNumber, permissio
     throw new Error(Tools.translate('Not enough rights'));
   }
   let Thread = await client.collection('thread');
-  let thread = await Thread.fineOne({
+  let thread = await Thread.findOne({
     boardName: boardName,
     number: threadNumber
   });

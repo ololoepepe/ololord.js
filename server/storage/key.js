@@ -16,7 +16,7 @@ var _commonKey2 = _interopRequireDefault(_commonKey);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -28,7 +28,7 @@ var Key = function (_CommonKey) {
   _inherits(Key, _CommonKey);
 
   function Key() {
-    var _Object$getPrototypeO;
+    var _ref;
 
     _classCallCheck(this, Key);
 
@@ -36,13 +36,13 @@ var Key = function (_CommonKey) {
       args[_key] = arguments[_key];
     }
 
-    return _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Key)).call.apply(_Object$getPrototypeO, [this].concat(args)));
+    return _possibleConstructorReturn(this, (_ref = Key.__proto__ || Object.getPrototypeOf(Key)).call.apply(_ref, [this].concat(args)));
   }
 
   _createClass(Key, [{
     key: 'get',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(subkey) {
+      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee(subkey) {
         var data;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -64,7 +64,7 @@ var Key = function (_CommonKey) {
       }));
 
       function get(_x) {
-        return ref.apply(this, arguments);
+        return _ref2.apply(this, arguments);
       }
 
       return get;
@@ -72,7 +72,7 @@ var Key = function (_CommonKey) {
   }, {
     key: 'set',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(data, subkey) {
+      var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(data, subkey) {
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -92,7 +92,7 @@ var Key = function (_CommonKey) {
       }));
 
       function set(_x2, _x3) {
-        return ref.apply(this, arguments);
+        return _ref3.apply(this, arguments);
       }
 
       return set;
@@ -100,7 +100,7 @@ var Key = function (_CommonKey) {
   }, {
     key: 'setex',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(data, seconds, subkey) {
+      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(data, seconds, subkey) {
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -120,7 +120,7 @@ var Key = function (_CommonKey) {
       }));
 
       function setex(_x4, _x5, _x6) {
-        return ref.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       }
 
       return setex;
@@ -128,7 +128,7 @@ var Key = function (_CommonKey) {
   }, {
     key: 'incrementBy',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(n, subkey) {
+      var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(n, subkey) {
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -148,7 +148,7 @@ var Key = function (_CommonKey) {
       }));
 
       function incrementBy(_x7, _x8) {
-        return ref.apply(this, arguments);
+        return _ref5.apply(this, arguments);
       }
 
       return incrementBy;

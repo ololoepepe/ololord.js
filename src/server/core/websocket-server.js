@@ -185,7 +185,7 @@ export default class WebSocketServer {
         conn.write(JSON.stringify({
           id: message.id,
           type: message.type,
-          error: error
+          error: err
         }));
       } catch (err) {
         //Do nothing

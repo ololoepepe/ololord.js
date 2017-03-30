@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.rerenderReferencedPosts = exports.updateReferringPosts = exports.addReferringPosts = exports.removeReferringPosts = undefined;
 
 var removeReferringPosts = exports.removeReferringPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, postNumber) {
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, postNumber) {
     var Post;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -46,12 +46,12 @@ var removeReferringPosts = exports.removeReferringPosts = function () {
   }));
 
   return function removeReferringPosts(_x, _x2) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }();
 
 var addReferringPosts = exports.addReferringPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(referencedPosts, boardName, postNumber, threadNumber) {
+  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(referencedPosts, boardName, postNumber, threadNumber) {
     var Post;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -88,13 +88,13 @@ var addReferringPosts = exports.addReferringPosts = function () {
   }));
 
   return function addReferringPosts(_x3, _x4, _x5, _x6) {
-    return ref.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
 var updatePostMarkup = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, postNumber) {
-    var Post, query, post, oldReferencedPosts, referencedPosts, text, _ref, matchedCount;
+  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, postNumber) {
+    var Post, query, post, oldReferencedPosts, referencedPosts, text, _ref4, matchedCount;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -150,8 +150,8 @@ var updatePostMarkup = function () {
             });
 
           case 17:
-            _ref = _context3.sent;
-            matchedCount = _ref.matchedCount;
+            _ref4 = _context3.sent;
+            matchedCount = _ref4.matchedCount;
 
             if (!(matchedCount <= 0)) {
               _context3.next = 21;
@@ -175,12 +175,12 @@ var updatePostMarkup = function () {
   }));
 
   return function updatePostMarkup(_x7, _x8) {
-    return ref.apply(this, arguments);
+    return _ref3.apply(this, arguments);
   };
 }();
 
 var updateReferringPosts = exports.updateReferringPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(referringPosts, boardName, postNumber, threadNumber) {
+  var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(referringPosts, boardName, postNumber, threadNumber) {
     var pickNumber, pickFunction, refs;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -191,8 +191,8 @@ var updateReferringPosts = exports.updateReferringPosts = function () {
             refs = pickFunction(referringPosts, boardName, pickNumber);
             _context5.next = 5;
             return Tools.series(refs, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(ref) {
-                var _ref2, oldReferencedPosts, newReferencedPosts;
+              var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(ref) {
+                var _ref7, oldReferencedPosts, newReferencedPosts;
 
                 return regeneratorRuntime.wrap(function _callee4$(_context4) {
                   while (1) {
@@ -203,9 +203,9 @@ var updateReferringPosts = exports.updateReferringPosts = function () {
                         return updatePostMarkup(ref.boardName, ref.postNumber);
 
                       case 3:
-                        _ref2 = _context4.sent;
-                        oldReferencedPosts = _ref2.oldReferencedPosts;
-                        newReferencedPosts = _ref2.newReferencedPosts;
+                        _ref7 = _context4.sent;
+                        oldReferencedPosts = _ref7.oldReferencedPosts;
+                        newReferencedPosts = _ref7.newReferencedPosts;
 
                         oldReferencedPosts = pickFunction(oldReferencedPosts, boardName, pickNumber);
                         _context4.next = 9;
@@ -235,7 +235,7 @@ var updateReferringPosts = exports.updateReferringPosts = function () {
               }));
 
               return function (_x13) {
-                return ref.apply(this, arguments);
+                return _ref6.apply(this, arguments);
               };
             }(), true);
 
@@ -255,12 +255,12 @@ var updateReferringPosts = exports.updateReferringPosts = function () {
   }));
 
   return function updateReferringPosts(_x9, _x10, _x11, _x12) {
-    return ref.apply(this, arguments);
+    return _ref5.apply(this, arguments);
   };
 }();
 
 var rerenderReferencedPosts = exports.rerenderReferencedPosts = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(boardName, threadNumber, newReferencedPosts, oldReferencedPosts) {
+  var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(boardName, threadNumber, newReferencedPosts, oldReferencedPosts) {
     var newRefs, oldRefs;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -293,7 +293,7 @@ var rerenderReferencedPosts = exports.rerenderReferencedPosts = function () {
   }));
 
   return function rerenderReferencedPosts(_x14, _x15, _x16, _x17) {
-    return ref.apply(this, arguments);
+    return _ref8.apply(this, arguments);
   };
 }();
 
@@ -316,10 +316,6 @@ var _tools = require('../helpers/tools');
 
 var Tools = _interopRequireWildcard(_tools);
 
-var _posts = require('./posts');
-
-var PostsModel = _interopRequireWildcard(_posts);
-
 var _markup = require('../markup');
 
 var _markup2 = _interopRequireDefault(_markup);
@@ -334,7 +330,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var client = (0, _mongodbClientFactory2.default)();
 
