@@ -1,5 +1,4 @@
 import * as DOM from '../helpers/dom';
-import * as Tools from '../helpers/tools';
 
 const ID = 'google-recaptcha-v1';
 const WIDGET_TEMPLATE = 'captcha/googleRecaptchaV1Widget';

@@ -2,8 +2,6 @@ import $ from 'jquery';
 import { EventEmitter } from 'events';
 
 import * as Constants from '../helpers/constants';
-import * as DOM from '../helpers/dom';
-import * as Templating from '../helpers/templating';
 import * as Tools from '../helpers/tools';
 
 const DEFAULT_SHOW_DELAY = Constants.SECOND / 2;

@@ -4,13 +4,9 @@ import $ from 'jquery';
 import * as Constants from '../helpers/constants';
 import * as DOM from '../helpers/dom';
 import * as Settings from '../helpers/settings';
-import * as Storage from '../helpers/storage';
-import * as Templating from '../helpers/templating';
 import * as Tools from '../helpers/tools';
 import * as FileInputs from './file-inputs';
 import * as Widgets from '../widgets';
-import MovableWidget from '../widgets/movable-widget';
-import PopupMessage from '../widgets/popup-message';
 
 const IMAGE_LOAD_TIMEOUT = 15 * Constants.SECOND;
 const DRAWING_WIDGET_WIDTH = 600;

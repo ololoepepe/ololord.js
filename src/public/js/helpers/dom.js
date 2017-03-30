@@ -1,18 +1,14 @@
 import _ from 'underscore';
 import $ from 'jquery';
-import merge from 'merge';
-import moment from 'moment/min/moment-with-locales';
 
 import * as AJAX from './ajax';
 import * as Constants from './constants';
 import * as Settings from './settings';
-import * as Storage from './storage';
 import * as Tools from './tools';
 import PopupMessage from '../widgets/popup-message';
 
-const NOTIFICATION_QUEUE_CHECK_INTERVAL = 10 * Constants.SECOND;
+const NOTIFICATION_QUEUE_CHECK_INTERVAL = 5 * Constants.SECOND;
 
-let dialogs = [];
 let sounds = {};
 let unloading = false;
 let errorPopups = new Map();
@@ -26,7 +22,7 @@ export let handleError = function(error) {
   if (unloading) {
     return;
   }
-  var text;
+  let text;
   if (error) {
     if (error.hasOwnProperty('message')) {
       text = `${Tools.translate('Error')}: ${error.message}`;
@@ -124,8 +120,6 @@ export let node = function(type, text) {
 export let id = function(id) {
   return (typeof id === 'string' || typeof id === 'number') ? document.getElementById(id) : null;
 };
-
-let xxx = 1;
 
 export let queryAll = function(query, parent) {
   if (typeof query !== 'string') {

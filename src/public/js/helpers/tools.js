@@ -1,6 +1,5 @@
 import _ from 'underscore';
 import $ from 'jquery';
-import BigInteger from 'big-integer';
 import Crypto from 'crypto';
 import cuteLocalize from 'cute-localize';
 import MobileDetect from 'mobile-detect';
@@ -25,7 +24,7 @@ export let translate = cuteLocalize({
 
 export let now = function() {
   return new Date();
-}
+};
 
 let _requireModel = () => null;
 
@@ -584,7 +583,7 @@ export let pad = function(s, c, n) {
   n = option(n, 'number', 2, { test: (n) => { return n >= 2; } });
   c = option(c, 'string', '0');
   return `${s.length < n ? c : ''}${s}`;
-}
+};
 
 export function formatTime(duration) {
   duration = Math.floor(option(duration, 'number', 0, { test: (d) => { return d > 0; } }));

@@ -1,6 +1,5 @@
 import _ from 'underscore';
 import $ from 'jquery';
-import merge from 'merge';
 import URI from 'urijs';
 import VK from 'vk-openapi';
 
@@ -15,9 +14,7 @@ import * as Tools from '../helpers/tools';
 import * as Chat from '../core/chat';
 import * as Drafts from '../core/drafts';
 import * as Files from '../core/files';
-import * as Hotkeys from '../core/hotkeys';
 import * as Management from '../core/management';
-import * as Player from '../core/player';
 import * as Posts from '../core/posts';
 import * as Threads from '../core/threads';
 import * as WebSocket from '../core/websocket';
@@ -29,8 +26,6 @@ import * as ResizeHandlers from './resize-handlers';
 let handlers = {};
 
 export let registerHandler = Tools.createRegisterFunction(handlers, 'handler');
-
-const TOOLTIP_COUNT_BOARD_SELECT = 5;
 
 function initializeInfiniteScroll() {
   let w = $(window);

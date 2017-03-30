@@ -2,7 +2,6 @@ import _ from 'underscore';
 import $ from 'jquery';
 import URI from 'urijs';
 
-import * as AJAX from './ajax';
 import * as DOM from './dom';
 import * as Settings from './settings';
 import * as Storage from './storage';
@@ -13,7 +12,6 @@ import * as Files from '../core/files';
 import * as Management from '../core/management';
 import * as Posts from '../core/posts';
 import * as Threads from '../core/threads';
-import * as WebSocket from '../core/websocket';
 import * as Widgets from '../widgets';
 import * as PageProcessors from '../handlers/page-processors';
 import * as PostProcessors from '../handlers/post-processors';
@@ -83,7 +81,7 @@ export async function setPage(href, { ajax, title, fromHistory } = {}) {
       await PostProcessors.applyPostprocessors(posts);
       Files.initializeFiles();
       if (Tools.isThreadPage()) {
-        var enabled = Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber());
+        let enabled = Storage.autoUpdateEnabled(Tools.boardName(), Tools.threadNumber());
         if (true === enabled || (false !== enabled && Settings.autoUpdateThreadsByDefault())) {
           Threads.setAutoUpdateEnabled(true);
         }

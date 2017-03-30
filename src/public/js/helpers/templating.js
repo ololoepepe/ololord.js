@@ -1,8 +1,6 @@
 import _ from 'underscore';
 import $ from 'jquery';
-import dot from 'dot';
 import merge from 'merge';
-import moment from 'moment/min/moment-with-locales';
 
 import * as Constants from './constants';
 import * as DOM from './dom';
@@ -42,11 +40,11 @@ export let scriptWorkaround = function(parent) {
 
 export let boards = function() {
   return _requireModel('boards').boards;
-}
+};
 
 export let board = function(boardName) {
   return boards().find(b => boardName === b.name) || null;
-}
+};
 
 export function notFoundImageFileNames() {
   return _requireModel('notFoundImageFileNames') || [];
@@ -94,7 +92,7 @@ export let createUser = function() {
     return Tools.compareRegisteredUserLevels(user.levels[brd.name], brd.permissions[permission]) >= 0;
   };
   return user;
-}
+};
 
 export function template(templateName, modelData, { noparse, boardName } = {}) {
   let tmpl = _requireTemplate(templateName);

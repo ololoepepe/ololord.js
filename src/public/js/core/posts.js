@@ -1,7 +1,6 @@
 import _ from 'underscore';
 import $ from 'jquery';
 import KO from 'knockout';
-import merge from 'merge';
 
 import * as AJAX from '../helpers/ajax';
 import * as Constants from '../helpers/constants';
@@ -185,7 +184,7 @@ export let checkExpander = function(post) {
     wrapper[expanded ? 'prepend' : 'append'](div);
   });
   wrapper.append(div);
-}
+};
 
 export function resetOwnPostLinksCSS() {
   let posts = _(Storage.ownPosts()).map((_, key) => {

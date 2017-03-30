@@ -1,14 +1,11 @@
 import _ from 'underscore';
 import $ from 'jquery';
-import bigInt from 'big-integer';
 
 import * as DOM from '../helpers/dom';
 import * as Settings from '../helpers/settings';
 import * as Storage from '../helpers/storage';
-import * as Templating from '../helpers/templating';
 import * as Tools from '../helpers/tools';
 import * as Worker from '../worker';
-import * as PostProcessors from '../handlers/post-processors';
 import * as Widgets from '../widgets';
 
 const HIDDEN_POST_LIST_MIN_WIDTH = 400;

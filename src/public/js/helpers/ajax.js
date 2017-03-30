@@ -1,7 +1,6 @@
 import _ from 'underscore';
 import $ from 'jquery';
 
-import * as Storage from './storage';
 import * as Tools from './tools';
 
 function createXHRFactory(indicator) {
