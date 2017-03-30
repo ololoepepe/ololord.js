@@ -3,7 +3,6 @@ import _ from 'underscore';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
 import KO from 'knockout';
-import Mousetrap from 'mousetrap';
 
 import * as Constants from './helpers/constants';
 import * as DOM from './helpers/dom';
@@ -16,7 +15,6 @@ import * as Actions from './core/actions';
 import * as Auth from './core/auth';
 import * as Captcha from './captcha';
 import * as Chat from './core/chat';
-import * as Drafts from './core/drafts';
 import * as Files from './core/files';
 import * as Hiding from './core/hiding';
 import * as Hotkeys from './core/hotkeys';
@@ -125,7 +123,7 @@ $.fn.position = function(pos) {
   ['of', 'within'].forEach((prop) => {
     if (!pos[prop] || pos[prop] == window || pos[prop] == window.document) {
       pos[prop] = '#jQueryUIpositionFix';
-    };
+    }
   });
   return tmpPosition.call(this, pos);
 };

@@ -3,7 +3,6 @@ import $ from 'jquery';
 import KO from 'knockout';
 import Mousetrap from 'mousetrap';
 
-import * as Constants from '../helpers/constants';
 import * as DOM from '../helpers/dom';
 import * as Navigation from '../helpers/navigation';
 import * as Settings from '../helpers/settings';
@@ -40,7 +39,7 @@ Mousetrap.prototype.stopCallback = (e, element, combo) => {
   }
   e.preventDefault();
   return false;
-}
+};
 
 function previousNextPageImage(next) {
   if (Widgets.MovablePayer.hasActivePlayers()) {
@@ -312,8 +311,6 @@ export function shortcutSuffix(action, noSpace) {
   let s = shortcut(action);
   return s ? `${!noSpace ? ' ' : ''}(${s})` : '';
 }
-
-const SKIPPED_NODES = new Set(['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON']);
 
 function rebind() {
   Mousetrap.reset();

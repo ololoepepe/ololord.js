@@ -1,13 +1,8 @@
 import _ from 'underscore';
 import $ from 'jquery';
 
-import * as Constants from '../helpers/constants';
 import * as DOM from '../helpers/dom';
-import * as Storage from '../helpers/storage';
 import * as Tools from '../helpers/tools';
-import * as Hotkeys from '../core/hotkeys';
-import * as Widgets from '../widgets';
-import PopupMessage from '../widgets/popup-message';
 
 const VIDEO_THUMB_OFFSET_X = 30;
 const VIDEO_THUMB_OFFSET_Y = -10;

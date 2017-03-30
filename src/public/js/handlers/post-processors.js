@@ -1,9 +1,6 @@
 import _ from 'underscore';
-import $ from 'jquery';
 
-import * as DOM from '../helpers/dom';
 import * as Settings from '../helpers/settings';
-import * as Storage from '../helpers/storage';
 import * as Tools from '../helpers/tools';
 
 let preprocessors = [];

@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import UUID from 'uuid';
 
 export const SECOND = 1000;

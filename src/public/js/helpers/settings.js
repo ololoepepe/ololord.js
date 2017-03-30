@@ -60,15 +60,15 @@ export const DEFAULT_SETTINGS = {
   drawingBackgroundHeight: 0,
   resetFileScaleOnOpening: true,
   closeFilesByClickingOnly: false,
-  viewPostPreviewDelay: 200,
-  hidePostPreviewDelay: 1000,
+  viewPostPreviewDelay: 100,
+  hidePostPreviewDelay: 500,
   infiniteScroll: () => { return Tools.deviceType('mobile'); },
   bannerMode: 'random',
   captchaEngine: 'node-captcha',
   style: 'photon',
   codeStyle: 'default',
   mumWatching: false,
-  ajaxNavigation: false
+  ajaxNavigation: true
 };
 
 function getDefaultValue(key) {
@@ -131,7 +131,7 @@ export const SYNCHRONIZABLE_DATA = {
       if (!src.hasOwnProperty(key)) {
         return src[key] = value;
       }
-      var newMessages = [];
+      let newMessages = [];
       src[key].forEach((message) => {
         value.some((msg) => {
           if (message.type === msg.type && message.date === msg.date && message.text === msg.text) {
@@ -164,7 +164,7 @@ export function localData({ includeSettings, includeCustom, includePassword } = 
   if (includeSettings) {
     o.settings = getAll();
   }
-  var f = function(key, def) {
+  let f = function(key, def) {
     if (typeof def === 'undefined') {
       def = {};
     }
@@ -186,13 +186,13 @@ export function setLocalData(o, { includeSettings, includeCustom, includePasswor
   if (includeSettings && o.settings) {
     setAll(o.settings);
   }
-  var f = function(key, doMerge) {
-    var val = o[key];
+  let f = function(key, doMerge) {
+    let val = o[key];
     if (typeof val === 'undefined')
       return;
     if (!doMerge)
       return Storage.setLocalObject(key, val);
-    var src = Storage.getLocalObject(key, {});
+    let src = Storage.getLocalObject(key, {});
     _(val).each(function(v, k) {
       if (typeof doMerge === 'function')
         doMerge(src, k, v);

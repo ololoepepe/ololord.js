@@ -3,7 +3,6 @@ import { EventEmitter } from 'events';
 
 import * as Constants from '../helpers/constants';
 import * as Settings from '../helpers/settings';
-import * as Storage from '../helpers/storage';
 
 const COLOR_1 = '#2F2F2F';
 const COLOR_2 = '#5E5E5E';

@@ -6,7 +6,6 @@ import * as Constants from '../helpers/constants';
 import * as DOM from '../helpers/dom';
 import * as Settings from '../helpers/settings';
 import * as Storage from '../helpers/storage';
-import * as Templating from '../helpers/templating';
 import * as Tools from '../helpers/tools';
 import * as WebSocket from '../core/websocket';
 import * as Widgets from '../widgets';

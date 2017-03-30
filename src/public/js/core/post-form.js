@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import $ from 'jquery';
 import KO from 'knockout';
 
@@ -20,9 +19,6 @@ import * as Captcha from '../captcha';
 import * as PostProcessors from '../handlers/post-processors';
 import * as Widgets from '../widgets';
 import OverlayProgressBar from '../widgets/overlay-progress-bar';
-import PopupMessage from '../widgets/popup-message';
-
-const MARKUP_DELTA_WIDTH = 8;
 
 let floatingPostForm = false;
 let visiblePostFormContainerPosition = KO.observable('');

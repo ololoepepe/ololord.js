@@ -7,7 +7,6 @@ import VK from 'vk-openapi';
 import * as AJAX from '../helpers/ajax';
 import * as DOM from '../helpers/dom';
 import * as Settings from '../helpers/settings';
-import * as Storage from '../helpers/storage';
 import * as Tools from '../helpers/tools';
 import * as Templating from '../helpers/templating';
 import * as Auth from './auth';
@@ -15,9 +14,7 @@ import * as Drawing from './drawing';
 import * as Widgets from '../widgets';
 import PopupMessage from '../widgets/popup-message';
 
-const TEXTAREA_DELTA_WIDTH = 6;
 const MAX_FILE_NAME_LENGTH = 30;
-export const TEXTAREA_MIN_WIDTH = 400;
 const SELECT_VK_TRACK_MIN_WIDTH = 400;
 const SELECT_VK_TRACK_MIN_HEIGHT = 500;
 

@@ -74,7 +74,7 @@ export async function addFiles(boardName, postNumber, fileCount) {
   } catch (err) {
     return Promise.reject(err);
   }
-};
+}
 
 export async function deleteFile(fileName) {
   if (!fileName) {
@@ -93,7 +93,7 @@ export async function deleteFile(fileName) {
   } catch (err) {
     return Promise.reject(err);
   }
-};
+}
 
 export async function editFileRating(fileName, rating) {
   if (!fileName || !rating) {

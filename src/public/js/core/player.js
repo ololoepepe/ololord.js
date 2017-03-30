@@ -3,7 +3,6 @@ import $ from 'jquery';
 import KO from 'knockout';
 
 import * as AJAX from '../helpers/ajax';
-import * as Constants from '../helpers/constants';
 import * as DOM from '../helpers/dom';
 import * as Settings from '../helpers/settings';
 import * as Storage from '../helpers/storage';
@@ -346,7 +345,7 @@ function resetSource(track) {
   }
   playerElement.addEventListener('play', () => {
     tracksViewModel.playing(true);
-    Storage.playerPlaying(true);
+    Storage.setSessionObject('playerPlaying', true);
   });
   playerElement.addEventListener('pause', () => {
     tracksViewModel.playing(false);

@@ -1,8 +1,6 @@
-import _ from 'underscore';
 import $ from 'jquery';
 import CodeMirror from 'codemirror';
 import KO from 'knockout';
-import merge from 'merge';
 
 import AutoUpdateTimer from './auto-update-timer';
 import ChatWidget from './chat-widget';
@@ -17,8 +15,6 @@ import OverlayProgressBar from './overlay-progress-bar';
 import PopupMessage from './popup-message';
 import SearchWidget from './search-widget';
 import SettingsWidget from './settings-widget';
-import * as AJAX from '../helpers/ajax';
-import * as Constants from '../helpers/constants';
 import * as DOM from '../helpers/dom';
 import * as Storage from '../helpers/storage';
 import * as Templating from '../helpers/templating';
@@ -45,7 +41,6 @@ const CONFIRM_MIN_HEIGHT = 120;
 let dialogs = [];
 let currentMenu = null;
 let widgets = {};
-let w = $(window);
 
 export function hasActiveDialogs() {
   return dialogs.length > 0;

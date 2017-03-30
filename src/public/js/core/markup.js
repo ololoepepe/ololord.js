@@ -1,9 +1,6 @@
-import _ from 'underscore';
 import $ from 'jquery';
 
 import * as DOM from '../helpers/dom';
-import * as Storage from '../helpers/storage';
-import * as Tools from '../helpers/tools';
 
 export let quoteSelectedText = function(selection) {
   try {

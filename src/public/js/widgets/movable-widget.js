@@ -2,7 +2,6 @@ import _ from 'underscore';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
 import KO from 'knockout';
-import merge from 'merge';
 
 import * as DOM from '../helpers/dom';
 import * as Templating from '../helpers/templating';

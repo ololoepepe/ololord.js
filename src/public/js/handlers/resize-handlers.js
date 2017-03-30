@@ -1,6 +1,3 @@
-import $ from 'jquery';
-
-import * as DOM from '../helpers/dom';
 import * as Tools from '../helpers/tools';
 
 let handlers = [];
