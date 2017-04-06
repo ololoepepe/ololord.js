@@ -36,7 +36,7 @@ function convertEnDash(_1, _2, _3, _4, options) {
 }
 
 function convertCSpoiler(_1, text, matchs, _2, options) {
-  var title = matchs[1];
+  var title = matchs[2];
   if (!title) {
     title = Tools.translate('Spoiler');
   }
@@ -48,7 +48,7 @@ function convertCSpoiler(_1, text, matchs, _2, options) {
 }
 
 function convertTooltip(_1, text, matchs, _2, options) {
-  var tooltip = Renderer.toHTML(matchs[1]);
+  var tooltip = Renderer.toHTML(matchs[2]);
   options.type = _processingContext2.default.NO_SKIP;
   options.op = '<span class=\'tooltip js-with-tooltip\' title=\'' + tooltip + '\'>';
   options.cl = '</span>';
@@ -111,14 +111,14 @@ exports.default = [{
   priority: 4400,
   markupModes: ['BB_CODE'],
   convert: convertCSpoiler,
-  op: /\[cspoiler\s+title=['"]([^"]*)['"]\s*\]/gi,
+  op: /\[cspoiler\s+title=(['"])([^"]*)\1\s*\]/gi,
   cl: '[/cspoiler]',
   nestable: true
 }, {
   priority: 4500,
   markupModes: ['BB_CODE'],
   convert: convertTooltip,
-  op: /\[tooltip\s+value=['"]([^"]*)['"]\s*\]/gi,
+  op: /\[tooltip\s+value=(['"])([^"]*)\1\s*\]/gi,
   cl: '[/tooltip]',
   nestable: true
 }, {
