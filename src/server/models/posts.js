@@ -181,7 +181,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
 }
 
 export async function editPost(req, fields) {
-  let { boardName, postNumber, text, name, subject, sage, markupMode } = fields;
+  let { boardName, postNumber, text, name, subject, markupMode } = fields;
   let board = Board.board(boardName);
   if (!board) {
     throw new Error(Tools.translate('Invalid board'));
@@ -209,7 +209,6 @@ export async function editPost(req, fields) {
   let rawText = text || null;
   let markupModes = markup.markupModes(markupMode);
   let referencedPosts = {};
-  //sage = ('true' === sage);
   text = await markup(boardName, rawText, {
     markupModes: markupModes,
     accessLevel: req.level(boardName),
