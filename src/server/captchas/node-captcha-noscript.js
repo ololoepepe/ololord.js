@@ -89,7 +89,7 @@ export default class NodeCaptchaNoscript extends Captcha {
     let challenge = this.challenges.get(ip);
     let response = nodeCaptchaResponse;
     if (!challenge) {
-      return Tools.translate('No captcha for this IP');
+      throw new Error(Tools.translate('No captcha for this IP'));
     }
     if (!response) {
       throw new Error(Tools.translate('Captcha is empty'));
