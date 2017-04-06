@@ -96,14 +96,14 @@ export default [{
   priority: 4400,
   markupModes: ['BB_CODE'],
   convert: convertCSpoiler,
-  op: /\[cspoiler\s+title\="([^"]*)"\s*\]/gi,
+  op: /\[cspoiler\s+title=['"]([^"]*)['"]\s*\]/gi,
   cl: '[/cspoiler]',
   nestable: true
 }, {
   priority: 4500,
   markupModes: ['BB_CODE'],
   convert: convertTooltip,
-  op: /\[tooltip\s+value\="([^"]*)"\s*\]/gi,
+  op: /\[tooltip\s+value=['"]([^"]*)['"]\s*\]/gi,
   cl: '[/tooltip]',
   nestable: true
 }, {

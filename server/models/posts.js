@@ -348,12 +348,12 @@ var createPost = exports.createPost = function () {
 
 var editPost = exports.editPost = function () {
   var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(req, fields) {
-    var boardName, postNumber, text, name, subject, sage, markupMode, board, Post, query, post, threadNumber, oldReferencedPosts, date, rawText, markupModes, referencedPosts, extraData, result;
+    var boardName, postNumber, text, name, subject, markupMode, board, Post, query, post, threadNumber, oldReferencedPosts, date, rawText, markupModes, referencedPosts, extraData, result;
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
-            boardName = fields.boardName, postNumber = fields.postNumber, text = fields.text, name = fields.name, subject = fields.subject, sage = fields.sage, markupMode = fields.markupMode;
+            boardName = fields.boardName, postNumber = fields.postNumber, text = fields.text, name = fields.name, subject = fields.subject, markupMode = fields.markupMode;
             board = _board2.default.board(boardName);
 
             if (board) {
@@ -407,8 +407,6 @@ var editPost = exports.editPost = function () {
             rawText = text || null;
             markupModes = _markup2.default.markupModes(markupMode);
             referencedPosts = {};
-            //sage = ('true' === sage);
-
             _context8.next = 24;
             return (0, _markup2.default)(boardName, rawText, {
               markupModes: markupModes,

@@ -265,8 +265,6 @@ export async function delall(req, ip, boardNames) {
       boardName: post.boardName,
       number: post.number
     });
-    // NOTE: What's this?!
-    //await PostsModel.removePostData(post.boardName, post.number, post.threadNumber);
   });
   await Tools.series(deletedThreads, async function(thread) {
     await ThreadsModel.deleteThread(thread.boardName, thread.number);
